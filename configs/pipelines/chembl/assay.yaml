@@ -1,0 +1,93 @@
+entity_name: assay
+endpoint: /assay
+primary_key: assay_chembl_id
+
+fields:
+  - name: assay_chembl_id
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: ChEMBL ID ассая
+
+  - name: assay_category
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Категория ассая (primary, confirmatory, screening и т.п.)
+
+  - name: assay_cell_type
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Тип клетки, если ассай клеточный
+
+  - name: assay_test_type
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Тип теста (in vitro / in vivo / ex vivo и т.п.)
+
+  - name: assay_tissue
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Описание ткани
+
+  - name: assay_type
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: Тип ассая (B – binding, F – functional и т.д.)
+
+  - name: assay_type_description
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Текстовое описание assay_type
+
+  - name: cell_chembl_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Ссылка на клеточную линию
+
+  - name: confidence_score
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: Уверенность маппинга ассая к таргету (0–9)
+
+  - name: description
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Описание теста
+
+  - name: document_chembl_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Документ, описывающий ассай
+
+  - name: target_chembl_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: ChEMBL ID таргета
+
+  - name: tissue_chembl_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: ChEMBL ID ткани
+
+  - name: variant_sequence
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Последовательность варианта белка
+
+pagination:
+  limit: 1000
+  offset: 0
+
