@@ -1,0 +1,27 @@
+# 19 Retry Policy ABC
+
+## Описание
+
+RetryPolicyABC определяет интерфейс стратегии повторных попыток при ошибках транспорта. Он предоставляет методы для определения необходимости повтора и вычисления задержки перед следующей попыткой. Стратегия может учитывать тип ошибки, номер попытки, историю ошибок для принятия решения. Интерфейс не навязывает конкретный алгоритм backoff, но гарантирует, что политика может быть применена к любому типу ошибок транспорта.
+
+## Interface
+
+```python
+from typing import Protocol
+
+class RetryPolicyABC(Protocol):
+    def should_retry(self, attempt: int, error: Exception) -> bool:
+        """Определить, нужно ли повторить попытку."""
+        ...
+
+    def get_backoff_seconds(self, attempt: int) -> float:
+        """Вычислить задержку перед следующей попыткой в секундах."""
+        ...
+```
+
+## Related Components
+
+- **SourceClientABC**: использует retry policy при ошибках запросов
+- **ErrorPolicyABC**: может использовать retry policy для принятия решений
+- **RateLimiterABC**: может работать совместно с retry policy
+

@@ -1,0 +1,267 @@
+entity_name: activity
+endpoint: /activity
+primary_key: activity_id
+
+fields:
+  - name: activity_comment
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Комментарий к активности
+
+  - name: activity_id
+    data_type: integer
+    is_nullable: false
+    is_filterable: false
+    description: Внутренний ID активности
+
+  - name: activity_properties
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Список дополнительных свойств активности
+
+  - name: assay_chembl_id
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: ChEMBL ID ассая
+
+  - name: assay_description
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Текстовое описание ассая
+
+  - name: assay_type
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: Тип ассая (B, F, A, P и т.п.)
+
+  - name: bao_endpoint
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: BAO endpoint term
+
+  - name: bao_format
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: BAO format term
+
+  - name: bao_label
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Человекочитаемый label для BAO endpoint/format
+
+  - name: canonical_smiles
+    data_type: string
+    is_nullable: false
+    is_filterable: false
+    description: Канонический SMILES молекулы
+
+  - name: data_validity_comment
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Комментарий о качестве/валидности
+
+  - name: data_validity_description
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Нормализованное описание проблем с данными
+
+  - name: document_chembl_id
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: Документ ChEMBL, откуда пришла активность
+
+  - name: document_journal
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Название журнала
+
+  - name: document_year
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: Год публикации
+
+  - name: ligand_efficiency
+    data_type: object
+    is_nullable: true
+    is_filterable: false
+    description: Объект с метриками LE/BEI/LLE/SEI
+
+  - name: molecule_chembl_id
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: ChEMBL ID молекулы
+
+  - name: molecule_pref_name
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Название молекулы
+
+  - name: parent_molecule_chembl_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: ChEMBL ID родительской молекулы (без соли/формы)
+
+  - name: pchembl_value
+    data_type: number
+    is_nullable: true
+    is_filterable: true
+    description: Нормализованная активность (−log10(M) для стандартных типов)
+
+  - name: potential_duplicate
+    data_type: boolean
+    is_nullable: true
+    is_filterable: false
+    description: Флаг потенциального дубликата записи
+
+  - name: qudt_units
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: URI единиц в QUDT
+
+  - name: record_id
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: FK на запись compound_record (соединение × документ)
+
+  - name: relation
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Исходное отношение (=, >, <, >=, <=, ~)
+
+  - name: src_id
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: Источник данных (PubChem, журнал, депозиты и т.п.)
+
+  - name: standard_flag
+    data_type: boolean
+    is_nullable: false
+    is_filterable: false
+    description: Признак, что тип/значение/единицы нормализованы
+
+  - name: standard_relation
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Нормализованное отношение
+
+  - name: standard_text_value
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Нормализованный текст для качественных readout'ов
+
+  - name: standard_type
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Нормализованный тип активности
+
+  - name: standard_units
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Нормализованные единицы
+
+  - name: standard_upper_value
+    data_type: number
+    is_nullable: true
+    is_filterable: false
+    description: Верхняя граница интервала в нормализованных единицах
+
+  - name: standard_value
+    data_type: number
+    is_nullable: true
+    is_filterable: true
+    description: Числовое нормализованное значение
+
+  - name: target_chembl_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: ChEMBL ID таргета
+
+  - name: target_organism
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Организм таргета
+
+  - name: target_pref_name
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Название таргета
+
+  - name: target_tax_id
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: NCBI TaxID таргета
+
+  - name: text_value
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Исходное текстовое значение
+
+  - name: toid
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: ID из Target Ontology
+
+  - name: type
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Исходный тип активности (как в источнике)
+
+  - name: units
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Исходные единицы измерения
+
+  - name: uo_units
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: ID из Unit Ontology (UO)
+
+  - name: upper_value
+    data_type: number
+    is_nullable: true
+    is_filterable: false
+    description: Верхняя граница исходного интервала
+
+  - name: value
+    data_type: number
+    is_nullable: true
+    is_filterable: true
+    description: Исходное числовое значение
+
+pagination:
+  limit: 1000
+  offset: 0
+

@@ -1,0 +1,57 @@
+entity_name: target
+endpoint: /target
+primary_key: target_chembl_id
+
+fields:
+  - name: target_chembl_id
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: ChEMBL ID таргета
+
+  - name: pref_name
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Название таргета
+
+  - name: organism
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Организм
+
+  - name: target_type
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: Тип таргета (SINGLE PROTEIN, PROTEIN FAMILY, ORGANISM и т.п.)
+
+  - name: tax_id
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: NCBI TaxID
+
+  - name: species_group_flag
+    data_type: boolean
+    is_nullable: true
+    is_filterable: false
+    description: Флаг «группового» таргета по видам
+
+  - name: target_components
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Компоненты таргета (UniProt-последовательности и др.)
+
+  - name: cross_references
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Внешние кросс-референсы
+
+pagination:
+  limit: 1000
+  offset: 0
+
