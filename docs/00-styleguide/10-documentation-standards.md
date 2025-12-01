@@ -25,7 +25,7 @@ All documentation files **MUST** follow `00-naming-conventions.md`:
 **MUST**s:
 
 - When adding a **new entity** (contract / pipeline / client), the PR **MUST** include:
-  1. New or updated documentation under `docs/pipelines/<provider>/<entity>/` using the filename pattern `NN-<entity>-<provider>-<topic>.md`.
+  1. New or updated documentation under `docs/02-pipelines/<provider>/<entity>/` using the filename pattern `NN-<entity>-<provider>-<topic>.md`.
   2. An entry/update in the human-readable registry (`docs/ABC_INDEX.md`) if the ABC/contract is added.
   3. Updates to machine registries: `src/bioetl/clients/base/abc_registry.yaml` and `src/bioetl/clients/base/abc_impls.yaml` when creating ABC/Default/Impl (see `01-new-entity-implementation-policy.md`).
 - Documentation sections that explain implementation-specific details **MUST** be updated when implementation changes (e.g. new Default factory, new Impl class, changes in factory signature).
@@ -53,7 +53,7 @@ All documentation files **MUST** follow `00-naming-conventions.md`:
 
 ## Examples and Cross-references
 
-- Pipeline base: `docs/pipelines/00-pipeline-base.md`
+- Pipeline base: `docs/02-pipelines/00-pipeline-base.md`
 - ABC index: `docs/ABC_INDEX.md`
 - Naming conventions: `00-naming-conventions.md`
 - Entity naming: `02-new-entity-naming-policy.md` and `01-new-entity-implementation-policy.md`

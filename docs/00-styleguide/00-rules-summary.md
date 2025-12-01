@@ -88,7 +88,7 @@
 
 - **Синхронизация**: документация **обязательно** синхронизируется с кодом и схемами
 - **Автогенерация**: секции помечаются `<!-- generated -->`, не редактируются вручную
-- **При добавлении сущности**: обновлять `docs/pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/ABC_INDEX.md`, реестры
+- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/ABC_INDEX.md`, реестры
 - **Breaking changes**: фиксируются в `CHANGELOG.md`
 
 ## 5. CI и enforcement
