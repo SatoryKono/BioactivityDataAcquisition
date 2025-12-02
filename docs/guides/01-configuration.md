@@ -1,64 +1,36 @@
-# Configuration Guide
+# 01 Configuration
 
-Система конфигурации BioETL гибка и иерархична.
+## Структура YAML
+- `configs/pipelines/<provider>/<entity>.yaml` — параметры пайплайна (пагинация, лимиты, детерминизм, qc, output_dir).
+- Секции: `pagination`, `client` (базовый URL, таймауты, лимиты), `determinism` (column_order, сортировка), `qc`, `sources`/`targets`.
 
-## Структура файлов
+## Профили и extends
+- Базовый файл может содержать блоки `profiles: {base, dev, prod}` с наследованием.
+- dev расширяет base уменьшенными лимитами и включённым кэшем; prod усиливает ретраи и строгие политики.
+- Поддерживается `extends` для переиспользования общих настроек.
 
-```text
-configs/
-├── profiles/               # Профили окружений
-│   ├── chembl_default.yaml    # Базовые настройки ChEMBL
-│   ├── development.yaml       # Настройки для разработки (быстро, дебаг)
-│   └── production.yaml        # Настройки для продакшена (надежно, QC)
-│
-└── pipelines/             # Конфигурации конкретных сущностей
-    └── chembl/
-        ├── activity.yaml
-        ├── assay.yaml
-        └── ...
-```
-
-## Основные секции
-
-### `pagination`
-Управление размером выборки.
+## Пример
 ```yaml
-pagination:
-  limit: 1000       # Записей на страницу
-  offset: 0         # Смещение
-  max_pages: null   # Максимум страниц (null = все)
+profiles:
+  base:
+    pagination:
+      page_size: 1000
+    client:
+      base_url: https://www.ebi.ac.uk/chembl/api/data
+      rate_limit_rps: 5
+    determinism:
+      column_order: activity
+    qc:
+      enable: true
+  dev:
+    extends: base
+    pagination:
+      max_pages: 2
+  prod:
+    extends: base
+    client:
+      rate_limit_rps: 2
 ```
 
-### `client`
-Настройки HTTP-клиента.
-```yaml
-client:
-  timeout: 30.0
-  max_retries: 3
-  rate_limit: 10    # Запросов в секунду
-  backoff_factor: 2.0
-```
-
-### `determinism`
-Настройки воспроизводимости.
-```yaml
-determinism:
-  stable_sort: true
-  utc_timestamps: true
-  atomic_writes: true
-```
-
-### `qc`
-Контроль качества.
-```yaml
-qc:
-  enable_quality_report: true
-  min_coverage: 0.8
-```
-
-## Наследование (extends)
-
-Ключевое слово `extends` указывает на родительский конфиг. Параметры объединяются (merge), при этом дочерний конфиг имеет приоритет.
-
-**Пример:** `activity.yaml` наследует `chembl_default.yaml` (или профиль, переданный через CLI, который сам наследует `chembl_default.yaml`).
-
+## Использование в пайплайнах
+ConfigResolver читает YAML, применяет профиль и подставляет секреты из EnvSecretProvider. Пайплайн получает готовые параметры для клиента, валидаторов и вывода. Подробнее — `docs/reference/infrastructure/config/00-index.md`.
