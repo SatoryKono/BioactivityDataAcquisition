@@ -1,0 +1,4 @@
+"""
+ChEMBL specific schemas.
+"""
+
