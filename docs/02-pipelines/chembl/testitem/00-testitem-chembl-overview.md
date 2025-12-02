@@ -10,7 +10,7 @@
 
 ## Наследование
 
-Пайплайн наследуется от `ChemblCommonPipeline` и использует общую инфраструктуру ChEMBL-пайплайнов. Реализует ETL конвейер с кастомной трансформацией (обогащение через PubChem).
+Пайплайн наследуется от `ChemblBasePipeline` и использует общую инфраструктуру ChEMBL-пайплайнов. Реализует ETL конвейер с кастомной трансформацией (обогащение через PubChem).
 
 ## Основные методы
 
@@ -48,7 +48,7 @@
 
 ## Related Components
 
-- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 - **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)
 - **PubChemClient**: клиент для PubChem (см. `docs/02-pipelines/clients/02-pubchem-client.md`)
 - **TestItemSchema**: схема валидации (см. `docs/02-pipelines/schemas/01-testitem-schema.md`)

@@ -1,4 +1,4 @@
-# 19 Clients Diagrams
+# 08 Clients Diagrams
 
 ## Быстрый старт
 
@@ -202,6 +202,6 @@ classDiagram
 
 ## Связанная документация
 
-- **00-clients-overview.md** — обзор архитектуры клиентов
+- **06-clients-overview.md** — обзор архитектуры клиентов
 - **tools/generate_diagrams.py** — скрипт генерации диаграмм
 

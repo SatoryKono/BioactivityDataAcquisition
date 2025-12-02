@@ -1,3 +1,8 @@
+# Activity Pipeline Configuration
+# Наследует общие параметры из chembl_default profile
+
+extends: chembl_default
+
 entity_name: activity
 endpoint: /activity
 primary_key: activity_id
@@ -261,7 +266,10 @@ fields:
     is_filterable: true
     description: Исходное числовое значение
 
-pagination:
-  limit: 1000
-  offset: 0
+# Специфичные параметры пайплайна (общие параметры наследуются из профиля)
+pipeline:
+  batch_size: 10000
+  enable_denormalization: false
+  
+# pagination наследуется из chembl_default profile
 

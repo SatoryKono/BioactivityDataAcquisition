@@ -45,6 +45,6 @@ delay = min(base_delay * (2 ** (attempt - 1)) + jitter, max_delay)
 
 ## Related Components
 
-- **RetryPolicyABC**: интерфейс политики повторных попыток (см. `docs/01-ABC/19-retry-policy-abc.md`)
+- **RetryPolicyABC**: интерфейс политики повторных попыток (см. `docs/reference/abc/19-retry-policy-abc.md`)
 - **RequestsBackend**: использует политику для обработки ошибок (см. `docs/02-pipelines/chembl/common/03-chembl-requests-backend.md`)
 

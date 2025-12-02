@@ -1,0 +1,45 @@
+# ChEMBL Default Profile
+# Общие параметры для всех ChEMBL-пайплайнов
+
+provider: chembl
+api_base_url: https://www.ebi.ac.uk/chembl/api/data
+
+# Общие настройки пагинации
+pagination:
+  limit: 1000
+  offset: 0
+  max_pages: null  # без ограничений
+
+# Общие настройки клиента
+client:
+  timeout: 30.0
+  max_retries: 3
+  rate_limit: 10  # запросов в секунду
+  backoff_factor: 2.0
+  circuit_breaker_threshold: 5
+
+# Общие пути хранения
+storage:
+  output_path: ./data/output/chembl
+  cache_path: ./data/cache/chembl
+  temp_path: ./data/temp
+
+# Параметры логирования
+logging:
+  level: INFO
+  structured: true
+  redact_secrets: true
+
+# Параметры детерминизма
+determinism:
+  stable_sort: true
+  utc_timestamps: true
+  canonical_json: true
+  atomic_writes: true
+
+# QC настройки
+qc:
+  enable_quality_report: true
+  enable_correlation_report: true
+  min_coverage: 0.85
+

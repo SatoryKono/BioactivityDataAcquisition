@@ -118,5 +118,5 @@
 ## Related Components
 
 - **ChemblExtractionServiceDescriptor**: дескриптор извлечения (см. `docs/02-pipelines/chembl/common/08-chembl-extraction-service-descriptor.md`)
-- **ChemblCommonPipeline**: использует сервис для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: использует сервис для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

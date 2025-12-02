@@ -110,6 +110,6 @@ class ChemblActivityPipeline:
 ## Related Components
 
 - **ChEMBLActivitySchema**: Pandera-схема для данных активности ChEMBL (см. `docs/02-pipelines/chembl/activity/06-activity-chembl-schema.md`)
-- **UnifiedOutputWriter**: использует реестр для валидации данных перед записью (см. `docs/02-pipelines/04-unified-output-writer.md`)
-- **DefaultValidationService**: использует схемы из реестра для валидации (см. `docs/02-pipelines/06-validation-service.md`)
+- **UnifiedOutputWriter**: использует реестр для валидации данных перед записью (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
+- **DefaultValidationService**: использует схемы из реестра для валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
 

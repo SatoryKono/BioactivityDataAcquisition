@@ -1,3 +1,8 @@
+# Document Pipeline Configuration
+# Наследует общие параметры из chembl_default profile
+
+extends: chembl_default
+
 entity_name: document
 endpoint: /document
 primary_key: document_chembl_id
@@ -111,7 +116,4 @@ fields:
     is_filterable: false
     description: ID релиза ChEMBL, в котором документ появился
 
-pagination:
-  limit: 1000
-  offset: 0
-
+# pagination наследуется из chembl_default profile

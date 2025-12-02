@@ -48,6 +48,6 @@ This ensures that the configuration being validated matches what will be used du
 
 ## Related Components
 
-- **FileConfigResolver**: резолвер конфигурации (см. `docs/02-pipelines/config/00-config-resolver.md`)
+- **FileConfigResolver**: резолвер конфигурации (см. `docs/reference/infrastructure/config/00-config-resolver.md`)
 - **ConfigValidationError**: исключение валидации (см. `docs/02-pipelines/chembl/common/13-config-validation-error.md`)
 

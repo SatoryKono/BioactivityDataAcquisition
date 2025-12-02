@@ -50,7 +50,7 @@
 
 ## Related Components
 
-- **UnifiedOutputWriter**: использует сервис для валидации данных (см. `docs/02-pipelines/04-unified-output-writer.md`)
-- **SchemaRegistry**: предоставляет схемы для валидации (см. `docs/02-pipelines/05-schema-registry.md`)
+- **UnifiedOutputWriter**: использует сервис для валидации данных (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
+- **SchemaRegistry**: предоставляет схемы для валидации (см. `docs/02-pipelines/core/05-schema-registry.md`)
 - **ChEMBLActivitySchema**: Pandera-схема для валидации данных активности (см. `docs/02-pipelines/chembl/activity/12-activity-chembl-schema.md`)
 

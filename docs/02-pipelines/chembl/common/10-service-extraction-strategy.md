@@ -19,7 +19,7 @@
 
 **Возвращает:** `True` если стратегия поддерживает тип, иначе `False`.
 
-### `run(self, pipeline: ChemblCommonPipeline, descriptor: ChemblExtractionServiceDescriptor | ChemblExtractionDescriptor | None, options: StageExecutionOptions) -> pd.DataFrame`
+### `run(self, pipeline: ChemblBasePipeline, descriptor: ChemblExtractionServiceDescriptor | ChemblExtractionDescriptor | None, options: StageExecutionOptions) -> pd.DataFrame`
 
 Выполняет извлечение: строит дескриптор (если не задан) и вызывает у пайплайна `run_descriptor_extraction` с необходимыми параметрами (IDs, batch_size и пр.).
 
@@ -39,5 +39,5 @@
 ## Related Components
 
 - **ExtractionStrategyFactory**: фабрика стратегий (см. `docs/02-pipelines/chembl/common/09-extraction-strategy-factory.md`)
-- **ChemblCommonPipeline**: использует стратегию для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: использует стратегию для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

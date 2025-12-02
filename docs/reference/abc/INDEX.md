@@ -2,6 +2,8 @@
 
 Каталог абстрактно-базовых классов (ABC) проекта BioETL.
 
+This directory contains documentation for all abstract base classes (ABC) and protocols in the project. Each ABC defines a contract for a specific area of responsibility in the data processing pipeline.
+
 <!-- generated -->
 
 ## Overview

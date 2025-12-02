@@ -2,7 +2,7 @@
 description: Правила проекта BioETL — именование, архитектура, документация, детерминизм, тестирование
 alwaysApply: true
 tags: [naming, architecture, documentation, styleguide, determinism, testing]
-version: "2.0.0"
+version: "2.1.0"
 ---
 
 # Правила проекта BioETL
@@ -32,7 +32,7 @@ version: "2.0.0"
 ### Обязательные реестры
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC
 - `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default/Impl
-- `docs/ABC_INDEX.md` — человекочитаемый каталог
+- `docs/reference/abc/index.md` — человекочитаемый каталог
 
 ### Правила создания
 - При создании ABC **обязательно** создать Default (может быть stub)
@@ -94,7 +94,7 @@ version: "2.0.0"
 
 - **Синхронизация**: документация **обязательно** синхронизируется с кодом и схемами
 - **Автогенерация**: секции помечаются `<!-- generated -->`, не редактируются вручную
-- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/ABC_INDEX.md`, реестры
+- **При добавлении сущности**: обновлять `docs/reference/pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/reference/abc/index.md`, реестры
 - **Breaking changes**: фиксируются в `CHANGELOG.md`
 
 ## 5. Python Code Style
@@ -186,9 +186,35 @@ os.replace(tmp, path)
 
 ## Источники истины
 
-- `docs/00-styleguide/00-naming-conventions.md` — именование документации
-- `docs/00-styleguide/01-new-entity-implementation-policy.md` — политика ABC/Default/Impl
-- `docs/00-styleguide/02-new-entity-naming-policy.md` — полная политика именования
-- `docs/00-styleguide/03-python-code-style.md` — стиль Python кода
-- `docs/00-styleguide/10-documentation-standards.md` — стандарты документации
+- `docs/project/00-rules-summary.md` — сводка всех правил проекта (включая именование, ABC/Default/Impl, стиль кода, стандарты документации)
+
+## 16. Доступные команды (Cursor Commands)
+
+Эти команды доступны через контекстное меню или чат (файлы в `.cursor/commands/`):
+
+- `/benchmark-pagination` — Бенчмарк пагинации API
+- `/check-cli-contract` — Проверка соответствия CLI контракту
+- `/ci-matrix` — Генерация матрицы CI для GitHub Actions
+- `/data-dictionary-sync` — Синхронизация словаря данных с кодом
+- `/diff-artifacts` — Сравнение артефактов между запусками
+- `/enforce-io-determinism` — Проверка и исправление детерминизма I/O
+- `/gen-pandera-for-artifact` — Генерация схемы Pandera для артефакта
+- `/golden-regenerate` — Регенерация Golden-тестов
+- `/migrate-cursorrules-to-mdc` — Миграция правил `.cursorrules` в формат MDC
+- `/pipeline-skeleton` — Создание скелета нового пайплайна
+- `/profile-pipeline` — Профилирование производительности пайплайна
+- `/review-pipeline` — Автоматическое ревью кода пайплайна
+- `/run-activity-chembl` — Запуск пайплайна Activity ChEMBL
+- `/run-assay-chembl` — Запуск пайплайна Assay ChEMBL
+- `/run-chembl-all` — Запуск всех пайплайнов ChEMBL
+- `/run-document-chembl` — Запуск пайплайна Document ChEMBL
+- `/run-target-chembl` — Запуск пайплайна Target ChEMBL
+- `/run-testitem-chembl` — Запуск пайплайна TestItem ChEMBL
+- `/schema-lint` — Линтинг схем данных
+- `/secrets-audit` — Аудит безопасности и поиск секретов
+- `/smoke-run` — Быстрый smoke-тест пайплайна
+- `/update-docs-from-code` — Обновление документации на основе кода
+- `/validate-config` — Валидация конфигурационных файлов
+- `/verify-determinism` — Проверка детерминизма выполнения
+- `/write-tests-for-pipeline` — Генерация тестов для пайплайна
 

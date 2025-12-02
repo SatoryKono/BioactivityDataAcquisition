@@ -75,7 +75,7 @@
 
 ## Related Components
 
-- **PipelineBase**: абстрактный базовый пайплайн (см. `docs/02-pipelines/00-pipeline-base.md`)
+- **PipelineBase**: абстрактный базовый пайплайн (см. `docs/02-pipelines/core/00-pipeline-base.md`)
 - **ChemblExtractionService**: сервис извлечения данных (см. `docs/02-pipelines/chembl/common/06-chembl-extraction-service.md`)
 - **ChemblDescriptorFactory**: фабрика дескрипторов (см. `docs/02-pipelines/chembl/common/07-chembl-descriptor-factory.md`)
 

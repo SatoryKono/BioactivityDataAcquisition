@@ -60,6 +60,6 @@
 
 ## Related Components
 
-- **UnifiedOutputWriter**: унифицированный writer для записи (см. `docs/02-pipelines/04-unified-output-writer.md`)
+- **UnifiedOutputWriter**: унифицированный writer для записи (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
 - **ChemblDocumentPipeline**: может использовать сервис для сохранения результатов (см. `docs/02-pipelines/chembl/document/00-document-chembl-overview.md`)
 

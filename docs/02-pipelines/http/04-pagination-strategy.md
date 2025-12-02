@@ -47,6 +47,6 @@
 
 ## Related Components
 
-- **PaginatorABC**: интерфейс стратегии пагинации (см. `docs/01-ABC/12-paginator-abc.md`)
-- **UnifiedAPIClient**: использует стратегию для пагинации (см. `docs/02-pipelines/03-unified-api-client.md`)
+- **PaginatorABC**: интерфейс стратегии пагинации (см. `docs/reference/abc/12-paginator-abc.md`)
+- **UnifiedAPIClient**: использует стратегию для пагинации (см. `docs/02-pipelines/core/03-unified-api-client.md`)
 

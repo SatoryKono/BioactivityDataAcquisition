@@ -39,7 +39,7 @@
 
 ## Related Components
 
-- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/00-pipeline-base.md`)
+- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/core/00-pipeline-base.md`)
 - **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)
 - **PubMedClient**: клиент для API PubMed (см. `docs/02-pipelines/clients/00-pubmed-client.md`)
 - **CrossrefClient**: клиент для API CrossRef (см. `docs/02-pipelines/clients/01-crossref-client.md`)

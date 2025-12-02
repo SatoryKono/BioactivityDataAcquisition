@@ -48,7 +48,7 @@ request = client.request_activity(ids=["CHEMBL123"], filters={"assay_type": "B"}
 ## Related Components
 
 - **ConfiguredHttpClient**: базовый класс унифицированного HTTP-клиента
-- **ChemblRequestBuilder**: построитель запросов для ChEMBL (см. `docs/02-pipelines/chembl/common/15-chembl-request-builder.md`)
-- **RequestsBackend**: HTTP-бэкенд на основе requests (см. `docs/02-pipelines/chembl/common/16-chembl-requests-backend.md`)
+- **ChemblRequestBuilder**: построитель запросов для ChEMBL (см. `docs/02-pipelines/chembl/common/02-chembl-request-builder.md`)
+- **RequestsBackend**: HTTP-бэкенд на основе requests (см. `docs/02-pipelines/chembl/common/03-chembl-requests-backend.md`)
 - **ActivityExtractor**: использует клиент для извлечения данных (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extraction.md`)
 

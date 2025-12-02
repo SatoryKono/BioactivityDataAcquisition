@@ -70,5 +70,5 @@ When `--golden` is used, any deviation from the golden artifacts should result i
 ## Related Components
 
 - **ChemblActivityPipeline**: пайплайн активности (см. `docs/02-pipelines/chembl/activity/00-activity-chembl-overview.md`)
-- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/00-pipeline-base.md`)
+- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/core/00-pipeline-base.md`)
 

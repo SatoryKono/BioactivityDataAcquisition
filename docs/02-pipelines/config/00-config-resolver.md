@@ -49,6 +49,6 @@
 
 ## Related Components
 
-- **ConfigResolverABC**: интерфейс резолвера конфигурации (см. `docs/01-ABC/03-config-resolver-abc.md`)
-- **EnvSecretProvider**: провайдер секретов из переменных окружения (см. `docs/02-pipelines/config/01-secret-provider.md`)
+- **ConfigResolverABC**: интерфейс резолвера конфигурации (см. `docs/reference/abc/03-config-resolver-abc.md`)
+- **EnvSecretProvider**: провайдер секретов из переменных окружения (см. `docs/reference/infrastructure/config/01-secret-provider.md`)
 

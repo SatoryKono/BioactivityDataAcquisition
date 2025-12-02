@@ -134,5 +134,5 @@ bioetl list
 - **cli_app.py**: инициализация приложения и базовые команды
 - **cli_command.py**: создание команд для пайплайнов
 - **cli_registry.py**: реестр доступных пайплайнов
-- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/00-pipeline-base.md`)
+- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/core/00-pipeline-base.md`)
 

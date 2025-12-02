@@ -10,7 +10,7 @@
 
 ## Наследование
 
-Пайплайн наследуется от `ChemblCommonPipeline` и использует общую инфраструктуру ChEMBL-пайплайнов. Переопределяет точки расширения для специфики assay.
+Пайплайн наследуется от `ChemblBasePipeline` и использует общую инфраструктуру ChEMBL-пайплайнов. Переопределяет точки расширения для специфики assay.
 
 ## Основные методы
 
@@ -94,7 +94,7 @@
 
 ## Related Components
 
-- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 - **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/04-assay-schema.md`)
 - **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)
 - **PipelineOutputService**: сервис вывода результатов (см. `docs/02-pipelines/core/00-pipeline-output-service.md`)

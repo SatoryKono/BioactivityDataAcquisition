@@ -105,5 +105,5 @@ JSON-файл с путями к артефактам и метаданными:
 - **RunArtifacts**: объект с путями к артефактам
 - **WriteResult**: результат операции записи
 - **ActivityWriter**: использует UnifiedOutputWriter для записи результатов (см. `docs/02-pipelines/chembl/activity/03-activity-chembl-io.md`)
-- **SchemaRegistry**: используется для валидации данных перед записью (см. `docs/02-pipelines/05-schema-registry.md`)
+- **SchemaRegistry**: используется для валидации данных перед записью (см. `docs/02-pipelines/core/05-schema-registry.md`)
 
