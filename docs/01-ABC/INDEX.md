@@ -50,5 +50,5 @@
 2. Обновите этот индексный файл
 3. Обновите `src/bioetl/clients/base/abc_registry.yaml`
 4. Обновите `src/bioetl/clients/base/abc_impls.yaml`
-5. Обновите `docs/ABC_INDEX.md` (если существует)
+5. Обновите `docs/01-ABC/INDEX.md` (если существует)
 
