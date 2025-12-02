@@ -72,33 +72,38 @@ class TestIdentifierNormalizers:
             normalize_chembl_id("CHEMBL12X")
 
     def test_normalize_pmid(self):
-        assert normalize_pmid("12345") == "12345"
+        assert normalize_pmid("12345") == 12345
         with pytest.raises(ValueError):
             normalize_pmid("pmid123")
 
     def test_normalize_pcid(self):
-        assert normalize_pcid("CID987") == "987"
+        assert normalize_pcid("CID987") == 987
         with pytest.raises(ValueError):
             normalize_pcid("CID98X")
 
     def test_normalize_uniprot(self):
         assert normalize_uniprot("p12345") == "P12345"
+        assert normalize_uniprot("A0A0B4J2D5") == "A0A0B4J2D5"
         with pytest.raises(ValueError):
             normalize_uniprot("invalid")
 
 
 class TestCollectionNormalizers:
+    def test_normalize_array_from_scalar(self):
+        result = normalize_array(" 10.1234/XYZ ", item_normalizer=normalize_doi)
+        assert result == ["10.1234/xyz"]
+
     def test_normalize_array_with_scalar(self):
         result = normalize_array([" 10.1234/XYZ "], item_normalizer=normalize_doi)
         assert result == ["10.1234/xyz"]
 
-    def test_normalize_array_error(self):
+    def test_normalize_array_keeps_invalid_item_errors(self):
         with pytest.raises(ValueError):
-            normalize_array("not-a-list", item_normalizer=str)
+            normalize_array(["10.1234/XYZ", "bad"], item_normalizer=normalize_doi)
 
     def test_normalize_record(self):
         result = normalize_record({"pmid": "123"}, value_normalizer=normalize_pmid)
-        assert result == {"pmid": "123"}
+        assert result == {"pmid": 123}
 
     def test_normalize_record_error(self):
         with pytest.raises(ValueError):

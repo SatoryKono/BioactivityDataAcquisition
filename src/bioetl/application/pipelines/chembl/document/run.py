@@ -56,10 +56,10 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
 
-        # Convert pubmed_id to string (nullable)
+        # Convert pubmed_id to nullable integer
         if "pubmed_id" in df.columns:
             df["pubmed_id"] = df["pubmed_id"].apply(normalize_pmid)
-            df["pubmed_id"] = df["pubmed_id"].astype("string")
+            df["pubmed_id"] = df["pubmed_id"].astype("Int64")
 
         # Schema enforcement
         schema_columns = list(DocumentSchema.to_schema().columns.keys())

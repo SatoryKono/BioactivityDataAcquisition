@@ -47,11 +47,11 @@ def normalize_chembl_id(value: Any) -> str | None:
     return f"CHEMBL{match.group(1)}"
 
 
-def normalize_pmid(value: Any) -> str | None:
-    """Normalize PubMed ID as numeric string."""
+def normalize_pmid(value: Any) -> int | None:
+    """Normalize PubMed ID as positive integer."""
     if _is_missing(value):
         return None
-    
+
     if isinstance(value, float):
         if value.is_integer():
             value = int(value)
@@ -59,22 +59,25 @@ def normalize_pmid(value: Any) -> str | None:
     if isinstance(value, int):
         if value <= 0:
             raise ValueError("PubMed ID должен быть положительным числом")
-        return str(value)
+        return value
 
     text = str(value).strip()
     if not text:
         return None
-    
+
     if text.endswith(".0") and text[:-2].isdigit():
         text = text[:-2]
 
     if not text.isdigit():
         raise ValueError(f"Неверный PubMed ID: '{value}'")
-    return text
+    parsed = int(text)
+    if parsed <= 0:
+        raise ValueError("PubMed ID должен быть положительным числом")
+    return parsed
 
 
-def normalize_pcid(value: Any) -> str | None:
-    """Normalize PubChem CID as numeric string."""
+def normalize_pcid(value: Any) -> int | None:
+    """Normalize PubChem CID as positive integer."""
     if _is_missing(value):
         return None
     text = str(value).strip().upper()
@@ -86,7 +89,10 @@ def normalize_pcid(value: Any) -> str | None:
         text = text[4:]
     if not text.isdigit():
         raise ValueError(f"Неверный PubChem CID: '{value}'")
-    return text
+    parsed = int(text)
+    if parsed <= 0:
+        raise ValueError("PubChem CID должен быть положительным числом")
+    return parsed
 
 
 def normalize_uniprot(value: Any) -> str | None:
@@ -101,7 +107,7 @@ def normalize_uniprot(value: Any) -> str | None:
 
     pattern_short = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]"
     pattern_pq = r"[OPQ][0-9][A-Z0-9]{3}[0-9]"
-    pattern_long = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{5}[0-9]"
+    pattern_long = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9][A-Z0-9]{3}[0-9]"
     if not re.fullmatch(f"(?:{pattern_pq}|{pattern_short}|{pattern_long})", accession):
         raise ValueError(f"Неверный UniProt ID: '{value}'")
     return accession
@@ -113,13 +119,14 @@ def normalize_array(
     """Normalize array-like value and its elements."""
     if _is_missing(value):
         return None
-    if not isinstance(value, (list, tuple)):
-        raise ValueError(
-            f"Ожидался список или кортеж для массива, получено {type(value).__name__}"
-        )
+
+    if isinstance(value, (list, tuple)):
+        items: Iterable[Any] = value
+    else:
+        items = [value]
 
     normalized: list[Any] = []
-    for idx, item in enumerate(value):
+    for idx, item in enumerate(items):
         if _is_missing(item):
             continue
         if isinstance(item, dict):
@@ -139,7 +146,14 @@ def normalize_array(
         if not _is_missing(normalized_item):
             normalized.append(normalized_item)
 
-    return normalized or None
+    if normalized:
+        return normalized
+
+    if isinstance(value, (list, tuple)):
+        return []
+    if _is_missing(value):
+        return None
+    return []
 
 
 def normalize_record(
