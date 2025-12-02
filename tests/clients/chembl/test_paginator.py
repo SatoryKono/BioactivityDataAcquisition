@@ -1,15 +1,20 @@
-import pytest
-from unittest.mock import MagicMock, patch
+"""
+Tests for ChemblPaginator.
+"""
 from bioetl.clients.chembl.paginator import ChemblPaginator
 
+
 def test_get_items():
+    """Test extracting items from response."""
     paginator = ChemblPaginator()
     response = {"activities": [{"id": 1}, {"id": 2}], "page_meta": {}}
     items = paginator.get_items(response)
     assert len(items) == 2
     assert items[0]["id"] == 1
 
+
 def test_get_next_marker_has_next():
+    """Test getting next marker when pages exist."""
     paginator = ChemblPaginator()
     response = {
         "page_meta": {
@@ -20,10 +25,12 @@ def test_get_next_marker_has_next():
         }
     }
     marker = paginator.get_next_marker(response)
-    assert marker == 20 # offset + limit
+    assert marker == 20  # offset + limit
     assert paginator.has_more(response) is True
 
+
 def test_get_next_marker_no_next():
+    """Test getting next marker when no more pages."""
     paginator = ChemblPaginator()
     response = {
         "page_meta": {
