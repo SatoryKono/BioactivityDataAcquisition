@@ -56,20 +56,26 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 Документация по компонентам клиента ChEMBL находится в `docs/02-pipelines/chembl/`:
 
-- `14-chembl-client.md` — REST-клиент для ChEMBL API
-- `15-chembl-request-builder.md` — построитель запросов ChEMBL
-- `16-requests-backend.md` — HTTP-бэкенд на основе requests
-- `17-chembl-write-service.md` — сервис записи для ChEMBL-пайплайнов
+- `01-chembl-client.md` — REST-клиент для ChEMBL API
+- `02-chembl-request-builder.md` — построитель запросов ChEMBL
+- `03-chembl-requests-backend.md` — HTTP-бэкенд на основе requests
+- `04-chembl-write-service.md` — сервис записи для ChEMBL-пайплайнов
 
 #### ChEMBL Common Components
 
 Документация по общим компонентам ChEMBL находится в `docs/02-pipelines/chembl/common/`:
 
-- `08-base-chembl-normalizer.md` — базовый нормализатор для ChEMBL
-- `18-chembl-common-pipeline.md` — базовый класс для ChEMBL-пайплайнов
-- `19-chembl-pipeline-base.md` — базовый пайплайн для ChEMBL
-- `20-chembl-extraction-service.md` — сервис извлечения данных ChEMBL
-- `21-chembl-descriptor-factory.md` — фабрика дескрипторов ChEMBL
+- `00-base-chembl-normalizer.md` — базовый нормализатор для ChEMBL
+- `05-chembl-base-pipeline.md` — базовый пайплайн для ChEMBL
+- `06-chembl-extraction-service.md` — сервис извлечения данных ChEMBL
+- `07-chembl-descriptor-factory.md` — фабрика дескрипторов ChEMBL
+- `08-chembl-extraction-service-descriptor.md` — дескриптор сервиса извлечения ChEMBL
+- `09-extraction-strategy-factory.md` — фабрика стратегий извлечения данных
+- `10-service-extraction-strategy.md` — стратегия извлечения с сервисом
+- `11-dataclass-extraction-strategy.md` — стратегия извлечения с dataclass-описанием
+- `12-chembl-extraction-descriptor.md` — дескриптор параметров извлечения ChEMBL
+- `13-config-validation-error.md` — описание ошибок валидации конфигурации
+- `14-chembl-context-facade.md` — фасад контекста ChEMBL
 
 Полный индекс: `docs/02-pipelines/chembl/INDEX.md`
 
@@ -84,12 +90,12 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 Документация по клиентам внешних API находится в `docs/02-pipelines/clients/`:
 
-- `18-pubmed-client.md` — клиент для API PubMed
-- `19-crossref-client.md` — клиент для API CrossRef
-- `20-pubchem-client.md` — клиент для PubChem
-- `21-configured-http-client.md` — базовая реализация настроенного HTTP-клиента
-- `22-semantic-scholar-client.md` — клиент для API Semantic Scholar
-- `23-uniprot-client.md` — клиент для REST API UniProt
+- `00-pubmed-client.md` — клиент для API PubMed
+- `01-crossref-client.md` — клиент для API CrossRef
+- `02-pubchem-client.md` — клиент для PubChem
+- `03-configured-http-client.md` — базовая реализация настроенного HTTP-клиента
+- `04-semantic-scholar-client.md` — клиент для API Semantic Scholar
+- `05-uniprot-client.md` — клиент для REST API UniProt
 
 Обзор клиентского слоя: `docs/clients/INDEX.md`
 
