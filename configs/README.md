@@ -163,5 +163,5 @@ bioetl run new_entity_chembl --profile development --dry-run
 
 - `docs/cli/03-config-precedence-and-profiles.md` — детальное описание приоритетов
 - `docs/00-styleguide/04-architecture-and-duplication-reduction.md` — архитектура снижения дублирования
-- `docs/02-pipelines/config/00-config-resolver.md` — ConfigResolver
+- `docs/infrastructure/config/00-config-resolver.md` — ConfigResolver
 

@@ -6,11 +6,12 @@ ETL-фреймворк для извлечения, нормализации и 
 
 Полная документация доступна в директории `docs/`:
 
-- **[Overview](docs/overview/00-index.md)**: Введение, быстрый старт, глоссарий.
+- **[Map](docs/MAP.md)**: Навигатор по проекту (Docs ↔ Src ↔ Configs).
 - **[Architecture](docs/architecture/00-index.md)**: Принципы архитектуры, слои, поток данных.
-- **[ABC Reference](docs/reference/abc/00-index.md)**: Каталог интерфейсов.
-- **[Pipelines](docs/02-pipelines/chembl/00-index.md)**: Описание ETL-пайплайнов ChEMBL.
-- **[Guides](docs/guides/00-running-pipelines.md)**: Руководства по запуску и конфигурации.
+- **[Domain](docs/domain/glossary.md)**: Глоссарий и схемы данных.
+- **[Pipelines](docs/application/pipelines/chembl/00-index.md)**: Описание ETL-пайплайнов ChEMBL.
+- **[Infrastructure](docs/infrastructure/00-index.md)**: Клиенты, конфигурация, логирование.
+- **[Guides](docs/guides/00-running-pipelines.md)**: Руководства по запуску.
 
 ## Быстрый старт
 
@@ -25,4 +26,3 @@ bioetl run activity_chembl --profile development --dry-run
 ## Лицензия
 
 MIT
-

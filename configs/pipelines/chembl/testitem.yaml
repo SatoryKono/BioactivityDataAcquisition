@@ -8,6 +8,9 @@ entity_name: testitem
 endpoint: /molecule
 primary_key: molecule_chembl_id
 
+cli:
+  input_file: data/input/testitem.csv
+
 fields:
   - name: molecule_chembl_id
     data_type: string
@@ -45,6 +48,30 @@ fields:
     is_filterable: false
     description: Физико-химические свойства молекулы
 
+  - name: molecule_hierarchy
+    data_type: object
+    is_nullable: true
+    is_filterable: false
+    description: Иерархия молекулы
+
+  - name: atc_classifications
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Классификации ATC
+
+  - name: structure_type
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Тип структуры (MOL, SMILES)
+
+  - name: helm_notation
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Нотация HELM
+
   - name: molecule_synonyms
     data_type: array
     is_nullable: true
@@ -57,5 +84,8 @@ fields:
     is_filterable: false
     description: Внешние кросс-референсы
 
+hashing:
+    business_key_fields:
+      - molecule_chembl_id
 # pagination наследуется из chembl_default profile
 

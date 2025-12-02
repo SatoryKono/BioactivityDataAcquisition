@@ -1,6 +1,9 @@
 import pandas as pd
+from typing import Any
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.application.pipelines.chembl.document.extract import extract_document
+from bioetl.domain.schemas.chembl.document import DocumentSchema
 
 
 class ChemblDocumentPipeline(ChemblPipelineBase):
@@ -9,19 +12,31 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
     
     Handles extraction of document/publication data from ChEMBL API.
     """
+    
+    def extract(self, **kwargs: Any) -> pd.DataFrame:
+        """
+        Extract document data, supporting CSV input.
+        """
+        return extract_document(self._config, self._extraction_service, **kwargs)
 
     def _do_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform document data with proper type conversions.
-        
-        - Extracts chembl_release string from nested object
-        - Converts nullable integer columns to pandas Int64 dtype
-        - Converts pubmed_id to string (for consistency with other IDs)
         """
         df = df.copy()
         
+        # Map columns
+        if "DOI" in df.columns and "doi" not in df.columns:
+            df["doi"] = df["DOI"]
+            
+        if "doc_type" not in df.columns:
+            df["doc_type"] = "PUBLICATION"
+        
         # Extract chembl_release value from nested dict
         if "chembl_release" in df.columns:
+            # Check if it's dict or string (CSV is string usually, API is dict)
+            # If CSV, it might be null or string.
+            # API returns dict usually.
             df["chembl_release"] = df["chembl_release"].apply(
                 lambda x: x.get("chembl_release") if isinstance(x, dict) else x
             )
@@ -30,10 +45,18 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
         int_columns = ["year", "src_id"]
         for col in int_columns:
             if col in df.columns:
-                df[col] = df[col].astype("Int64")
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
         
         # Convert pubmed_id to string (nullable)
         if "pubmed_id" in df.columns:
-            df["pubmed_id"] = df["pubmed_id"].astype("Int64").astype("string")
+            df["pubmed_id"] = pd.to_numeric(df["pubmed_id"], errors="coerce").astype("Int64").astype("string")
+        
+        # Schema enforcement
+        allowed_columns = set(DocumentSchema.to_schema().columns.keys())
+        for col in allowed_columns:
+            if col not in df.columns:
+                df[col] = None
+                
+        df = df[[c for c in df.columns if c in allowed_columns]]
         
         return df

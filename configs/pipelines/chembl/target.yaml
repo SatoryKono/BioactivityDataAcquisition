@@ -7,6 +7,9 @@ entity_name: target
 endpoint: /target
 primary_key: target_chembl_id
 
+cli:
+  input_file: data/input/target.csv
+
 fields:
   - name: target_chembl_id
     data_type: string
@@ -56,5 +59,8 @@ fields:
     is_filterable: false
     description: Внешние кросс-референсы
 
+  hashing:
+    business_key_fields:
+      - target_chembl_id
 # pagination наследуется из chembl_default profile
 

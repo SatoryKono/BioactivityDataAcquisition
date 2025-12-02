@@ -14,7 +14,7 @@
 
 ## Client
 Ответственность: получение данных из внешних API через унифицированные контракты.
-Ключевые ABC: UnifiedAPIClient, BaseClient, RequestBuilder/Parser/Paginator ABC из reference/clients.
+Ключевые ABC: UnifiedAPIClient, BaseClient, RequestBuilder/Parser/Paginator ABC из infrastructure/clients.
 Взаимодействие: Orchestration передает конфиг, Client возвращает поток записей для Transform.
 Примеры: ChemblClient с ChemblRequestBuilder, ChemblResponseParser, TokenBucketRateLimiter.
 
@@ -35,3 +35,6 @@
 Ключевые ABC: UnifiedOutputWriter, WriterABC, MetadataWriterABC.
 Взаимодействие: принимает валидированные таблицы и контекст запуска, пишет в `tables/`, `qc/`, `meta.yaml`, `checksums/`.
 Примеры: запись CSV/Parquet с фиксированным порядком колонок, генерация checksum-файлов.
+
+## Физическая структура
+См. [05 Physical Layout](05-physical-layout.md) для маппинга этих слоев на директории проекта.

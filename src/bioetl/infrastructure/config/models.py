@@ -58,6 +58,7 @@ class PipelineConfig(BaseModel):
     
     # Additional pipeline specific fields
     pipeline: dict[str, Any] = Field(default_factory=dict)
+    cli: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
     
     # Business key definition

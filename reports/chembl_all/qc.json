@@ -1,0 +1,23 @@
+[
+  {
+    "name": "assay_chembl",
+    "success": true,
+    "duration_sec": 22.149279,
+    "error": null,
+    "timestamp": "2025-12-02T14:58:08.683433+00:00"
+  },
+  {
+    "name": "activity_chembl",
+    "success": true,
+    "duration_sec": 24.886798,
+    "error": null,
+    "timestamp": "2025-12-02T14:58:33.570247+00:00"
+  },
+  {
+    "name": "target_chembl",
+    "success": false,
+    "duration_sec": 0.005691,
+    "error": "Exit code 1",
+    "timestamp": "2025-12-02T14:58:33.575951+00:00"
+  }
+]
