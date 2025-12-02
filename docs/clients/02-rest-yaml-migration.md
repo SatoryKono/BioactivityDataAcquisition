@@ -161,5 +161,5 @@ resources:
 
 ## Related Components
 
-- **ConfiguredHttpClient**: базовая реализация клиента (см. `docs/02-pipelines/clients/21-configured-http-client.md`)
+- **ConfiguredHttpClient**: базовая реализация клиента (см. `docs/02-pipelines/clients/03-configured-http-client.md`)
 - **ClientFactory**: фабрика клиентов (см. `docs/clients/00-clients-overview.md`)

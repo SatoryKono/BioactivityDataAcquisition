@@ -94,7 +94,7 @@
 
 ## Related Components
 
-- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/18-chembl-common-pipeline.md`)
-- **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/30-assay-schema.md`)
-- **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/17-chembl-write-service.md`)
-- **PipelineOutputService**: сервис вывода результатов (см. `docs/02-pipelines/core/25-pipeline-output-service.md`)
+- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/04-assay-schema.md`)
+- **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)
+- **PipelineOutputService**: сервис вывода результатов (см. `docs/02-pipelines/core/00-pipeline-output-service.md`)

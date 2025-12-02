@@ -25,11 +25,11 @@
 
 ## Схемы данных
 
-- **TestItemSchema**: схема для отдельного элемента (см. `docs/02-pipelines/schemas/27-testitem-schema.md`)
-- **TestitemsSchema**: схема для полного набора (см. `docs/02-pipelines/schemas/28-testitems-schema.md`)
+- **TestItemSchema**: схема для отдельного элемента (см. `docs/02-pipelines/schemas/01-testitem-schema.md`)
+- **TestitemsSchema**: схема для полного набора (см. `docs/02-pipelines/schemas/02-testitems-schema.md`)
 
 ## Related Components
 
-- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/18-chembl-common-pipeline.md`)
-- **PubChemClient**: клиент для PubChem (см. `docs/02-pipelines/clients/20-pubchem-client.md`)
+- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **PubChemClient**: клиент для PubChem (см. `docs/02-pipelines/clients/02-pubchem-client.md`)
 

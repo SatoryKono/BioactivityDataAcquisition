@@ -331,5 +331,5 @@ class MyCustomClient(ConfiguredHttpClient):
 
 - **02-rest-yaml-migration.md** — Детали миграции на YAML-конфигурации
 - **19-clients-diagrams.md** — Инструкция по генерации диаграмм
-- **ConfiguredHttpClient**: базовая реализация (см. `docs/02-pipelines/clients/21-configured-http-client.md`)
+- **ConfiguredHttpClient**: базовая реализация (см. `docs/02-pipelines/clients/03-configured-http-client.md`)
 

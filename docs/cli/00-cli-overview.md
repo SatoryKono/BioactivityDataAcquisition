@@ -59,7 +59,7 @@ This ensures that pipeline runs are observable and can be audited in production 
 ## Related Components
 
 - **UnifiedLogger**: структурированное логирование (см. `docs/02-pipelines/02-logging-and-configuration.md`)
-- **FileConfigResolver**: резолвер конфигурации (см. `docs/02-pipelines/config/28-config-resolver.md`)
+- **FileConfigResolver**: резолвер конфигурации (см. `docs/02-pipelines/config/00-config-resolver.md`)
 - **PipelineBase**: базовый класс пайплайнов, выполняемых через CLI
 - **ConfigResolverABC**: разрешение конфигураций для пайплайнов
 - **CLICommandABC**: интерфейс для плагинных команд CLI (см. `docs/01-ABC/02-cli-command-abc.md`)
