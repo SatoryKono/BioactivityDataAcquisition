@@ -93,14 +93,14 @@ def main():
         json.dump(results, f, indent=2)
         
     # Write Summary MD
-    with open(summary_path, "w") as f:
+    with open(summary_path, "w", encoding="utf-8") as f:
         f.write(f"# ChEMBL Pipelines Execution Report\n\n")
         f.write(f"**Date:** {datetime.now(timezone.utc).isoformat()}\n")
         f.write(f"**Limit:** {limit}\n\n")
         f.write("| Pipeline | Status | Duration (s) | Error |\n")
         f.write("|----------|--------|--------------|-------|\n")
         for r in results:
-            status = "✅" if r["success"] else "❌"
+            status = "OK" if r["success"] else "FAIL"
             err = r["error"] if r["error"] else "-"
             f.write(f"| {r['name']} | {status} | {r['duration_sec']:.2f} | {err} |\n")
             
