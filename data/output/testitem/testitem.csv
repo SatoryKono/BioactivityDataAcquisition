@@ -1,11 +1,11 @@
-atc_classifications,hash_business_key,hash_row,helm_notation,max_phase,molecule_chembl_id,molecule_hierarchy,molecule_properties,molecule_structures,molecule_type,pref_name,structure_type
-,,bfeed89e861f8a0062d185a6e847e5f2eaa1af74f64f28ae2c550544c3458460,,,CHEMBL129530,,,{'canonical_smiles': 'O[C@@H]1CCN(Cc2ccc(F)cc2)C[C@H]1N1CCC(c2ccccc2)CC1'},Small molecule,(+)-4-Fluorobenzyltrozamicol,MOL
-,,c9f4371d2e39beebe7798eaa9dcce4ba436209b790185f2f1c1e6f1a9cccb306,,,CHEMBL81421,,,{'canonical_smiles': 'Cc1c(C)c2c(c(C)c1OC(=O)CCC(=O)O)CC[C@@](C)(CCC[C@H](C)CCC[C@H](C)CCCC(C)C)O2'},Small molecule,(+)-ALPHA-TOCOPHERYL SUCCINATE,MOL
-,,6dc80940ed16a9ffab02d4b94162a11c1b7670d84c361c05de655ede5d5a4a31,,,CHEMBL283509,,,{'canonical_smiles': 'COc1ccc(-c2cc3c(c(=O)o2)C[C@]2(O)[C@@]4(C)C(=O)C=CC(C)(C)[C@]4(O)CC[C@@]2(C)O3)cc1OC'},Small molecule,(+)-Arisugacin A,MOL
-,,c3999eb0e3ec9bdc24fa452f868a9df0e73cd795908ae4f7d998891890930e69,,,CHEMBL508781,,,{'canonical_smiles': 'COc1cc2c3cc1Oc1c(O)c(OC)cc4c1[C@H](Cc1ccc(cc1)Oc1cc(ccc1O)C[C@H]3N(C)CC2)N(C)CC4'},Small molecule,(+)-Aromoline,MOL
-,,7e36e156c4752265a069a0959576bccbae203d71af3551f03bf566ee7cc86b3d,,,CHEMBL1255588,,,{'canonical_smiles': 'CC(C)(C)[C@@]1(O)CCN2C[C@@H]3c4ccccc4CCc4cccc(c43)[C@H]2C1'},Small molecule,(+)-Butaclamol,MOL
-,,af74a865228674f93d0820a730572d41323538b8d5f693b6b2850913f7c582f0,,,CHEMBL267447,,,{'canonical_smiles': 'CCCc1cc(=O)oc2c3c(c4c(c12)OC(C)(C)C=C4)O[C@H](C)[C@@H](C)[C@@H]3O'},Small molecule,(+)-CALANOLIDE A,MOL
-,,1f57dca1a6394c1f9fd7ed3186a60f4b44ce783a71be1a99a34ba521d2bc50d8,,,CHEMBL105457,,,{'canonical_smiles': 'C[C@H]1OC[C@@H](C[N+](C)(C)C)O1.[I-]'},Small molecule,(+)-Cis-Dioxolane Iodide,MOL
-,,1521a113022c865e9463080e4497da7b1b899a4dbb818deaccdbde0d3b4001e3,,,CHEMBL296435,,,{'canonical_smiles': 'CCCCCC[C@H]([C@H](C)O)n1cnc2c(N)ncnc21'},Small molecule,(+)-EHNA,MOL
-,,561557aaea54bc6d1ceb156bddbaa4ae2437b0615a7b5a88a9997920ec78848e,,,CHEMBL129482,,,{'canonical_smiles': 'Oc1cc(O)c2c(c1)O[C@@H](c1ccc(O)c(O)c1)[C@@H](O)C2'},Small molecule,(+)-EPICATECHIN,MOL
-,,db49c45a8c36d8a4e8a47d9423e89d30ff1f7bf0c52d352f6ed89ea6e4e20549,,,CHEMBL2021616,,,{'canonical_smiles': 'CC1=C[C@H]2Cc3nc4cc(Cl)ccc4c(N)c3[C@@H](C1)C2.Cl'},Small molecule,(+)-Huprine Y,MOL
+atc_classifications,cross_references,hash_business_key,hash_row,helm_notation,max_phase,molecule_chembl_id,molecule_hierarchy,molecule_properties,molecule_structures,molecule_synonyms,molecule_type,pref_name,pubchem_cid,structure_type
+,,,acf44e55037c365219209d91f9936e11bfc64b76fb670614b7a9f25166e7b9cb,,,CHEMBL129530,,,canonical_smiles:O[C@@H]1CCN(Cc2ccc(F)cc2)C[C@H]1N1CCC(c2ccccc2)CC1,,small molecule,(+)-4-fluorobenzyltrozamicol,,mol
+,,,9340de9af35ef63e691cff935213709d092143a3f3e50f9e5ac20a7a0ea1cc11,,,CHEMBL81421,,,canonical_smiles:Cc1c(C)c2c(c(C)c1OC(=O)CCC(=O)O)CC[C@@](C)(CCC[C@H](C)CCC[C@H](C)CCCC(C)C)O2,,small molecule,(+)-alpha-tocopheryl succinate,,mol
+,,,0585faec2ca6e48dcc04d241ebf47c6c39c93b74625e4f4a93f1879ac03a6588,,,CHEMBL283509,,,canonical_smiles:COc1ccc(-c2cc3c(c(=O)o2)C[C@]2(O)[C@@]4(C)C(=O)C=CC(C)(C)[C@]4(O)CC[C@@]2(C)O3)cc1OC,,small molecule,(+)-arisugacin a,,mol
+,,,fa68f069cf1140e01e866749b08b3a7241c461d0b607b7df9f76a2ea316fa262,,,CHEMBL508781,,,canonical_smiles:COc1cc2c3cc1Oc1c(O)c(OC)cc4c1[C@H](Cc1ccc(cc1)Oc1cc(ccc1O)C[C@H]3N(C)CC2)N(C)CC4,,small molecule,(+)-aromoline,,mol
+,,,2665cbfaf6bbc1a68a1f34f880a91296f8b39ea8ad1d990ccd1998152dad9082,,,CHEMBL1255588,,,canonical_smiles:CC(C)(C)[C@@]1(O)CCN2C[C@@H]3c4ccccc4CCc4cccc(c43)[C@H]2C1,,small molecule,(+)-butaclamol,,mol
+,,,a05ee76482eb03140e55cc83ff5c0814bd09f2d4d137b90d172ee45d397a4ad8,,,CHEMBL267447,,,canonical_smiles:CCCc1cc(=O)oc2c3c(c4c(c12)OC(C)(C)C=C4)O[C@H](C)[C@@H](C)[C@@H]3O,,small molecule,(+)-calanolide a,,mol
+,,,3af848e62cb740e1c2a9b0e26b14437e8a04ad91d6264f893ca6c89c8588a4eb,,,CHEMBL105457,,,canonical_smiles:C[C@H]1OC[C@@H](C[N+](C)(C)C)O1.[I-],,small molecule,(+)-cis-dioxolane iodide,,mol
+,,,65cf0e8f9593628c99c799d3ea89f7f6e69eb20354fb7fc6b03cc24b9fd4c2cd,,,CHEMBL296435,,,canonical_smiles:CCCCCC[C@H]([C@H](C)O)n1cnc2c(N)ncnc21,,small molecule,(+)-ehna,,mol
+,,,b1680874487ae6d08c49a2d06c7e92d68fa6b0c6d301978bbe8f91ff06c25ff9,,,CHEMBL129482,,,canonical_smiles:Oc1cc(O)c2c(c1)O[C@@H](c1ccc(O)c(O)c1)[C@@H](O)C2,,small molecule,(+)-epicatechin,,mol
+,,,d13f566136336cd338eea4ca367df47df1a2e92bd00243943645338ddfc0204f,,,CHEMBL2021616,,,canonical_smiles:CC1=C[C@H]2Cc3nc4cc(Cl)ccc4c(N)c3[C@@H](C1)C2.Cl,,small molecule,(+)-huprine y,,mol
