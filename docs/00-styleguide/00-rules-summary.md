@@ -1,11 +1,7 @@
-<!-- SUMMARY: Краткая сводка правил для быстрого доступа. Полные документы см. в docs/00-styleguide/ -->
-# Свод правил из политик (для memory и правил проекта)
+<!-- SUMMARY: Краткая сводка правил для быстрого доступа. Полные документы консолидированы сюда. -->
+# Свод правил проекта BioETL
 
-> **Примечание**: Это краткая сводка. Полные документы см.:
-> - Именование документации: [`00-naming-conventions.md`](./00-naming-conventions.md)
-> - Политика именования: [`02-new-entity-naming-policy.md`](./02-new-entity-naming-policy.md)
-> - Политика создания ABC/Default/Impl: [`01-new-entity-implementation-policy.md`](./01-new-entity-implementation-policy.md)
-> - Стандарты документации: [`10-documentation-standards.md`](./10-documentation-standards.md)
+> **Авторитетный источник**: Этот файл объединяет все действующие правила. Прежние документы в каталоге `docs/00-styleguide/` заменены ссылками на эту сводку.
 
 ## 1. Именование документации (из 00-naming-conventions.md)
 
