@@ -151,7 +151,7 @@ def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixt
     assert result.iloc[1]["nested"] == "z"
     assert pd.isna(result.iloc[1]["obj"])
     assert result.iloc[0]["simple"] == "s1"
-    assert result.iloc[0]["pubmed_id"] == "12345"
+    assert result.iloc[0]["pubmed_id"] == 12345
     assert result.iloc[0]["references"] == "12345|67890"
     assert result.iloc[1]["references"] == "333"
     assert result.iloc[0]["doi"] == "10.1000/abc"

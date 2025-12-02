@@ -74,7 +74,9 @@ def default_chembl_extraction_service(
     Uses default client and configured batch size.
     """
     client = default_chembl_client(source_config, **client_options)
-    batch_size = source_config.resolve_effective_batch_size()
+    # ChEMBL API typically supports up to 1000 items per page. 
+    # We raise the default hard_cap (25) to 1000 to allow efficient extraction.
+    batch_size = source_config.resolve_effective_batch_size(hard_cap=1000)
     
     return ChemblExtractionService(
         client=client,

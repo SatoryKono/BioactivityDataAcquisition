@@ -89,6 +89,14 @@ def normalize_chembl_id(value: Any) -> str | None:
     text = str(value).strip().upper()
     if not text:
         return None
+
+    # Auto-fix if digits only
+    if text.isdigit():
+        text = f"CHEMBL{text}"
+    
+    # Auto-fix if digits only
+    if text.isdigit():
+        text = f"CHEMBL{text}"
     
     match = re.fullmatch(r"CHEMBL(\d+)", text)
     if not match:
@@ -260,15 +268,14 @@ def normalize_array(
     for idx, item in enumerate(items):
         if _is_missing(item):
             continue
-            
+        
+        norm_item = None
         try:
-            # If item is dict and we don't have specific normalizer, 
-            # we might want to normalize it as a record? 
-            # But item_normalizer is preferred if provided.
-            if item_normalizer:
+            if isinstance(item, dict):
+                # Treat as record, use item_normalizer for values if available
+                norm_item = normalize_record(item, value_normalizer=item_normalizer)
+            elif item_normalizer:
                 norm_item = item_normalizer(item)
-            elif isinstance(item, dict):
-                norm_item = normalize_record(item)
             else:
                 # Default: stringify? Task: "привести каждый к строковому типу (например, str(element))"
                 norm_item = str(item)

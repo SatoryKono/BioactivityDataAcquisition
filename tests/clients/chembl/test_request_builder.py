@@ -7,7 +7,7 @@ def test_build_url():
     assert url == "http://api/test.json?a=1"
 
 def test_pagination():
-    builder = ChemblRequestBuilder()
+    builder = ChemblRequestBuilder("http://api")
     builder.with_pagination(0, 10)
     assert builder._params["offset"] == 0
     assert builder._params["limit"] == 10
@@ -17,6 +17,6 @@ def test_base_url_trim():
     assert builder.base_url == "http://api"
 
 def test_endpoint_trim():
-    builder = ChemblRequestBuilder()
+    builder = ChemblRequestBuilder("http://api")
     builder.for_endpoint("/test/")
     assert builder._endpoint == "test"

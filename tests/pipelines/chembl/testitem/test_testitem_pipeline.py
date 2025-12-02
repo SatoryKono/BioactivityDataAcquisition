@@ -21,7 +21,7 @@ def pipeline():
 
 def test_transform_columns_selection(pipeline):
     df = pd.DataFrame({
-        "molecule_chembl_id": ["M1", "M2"],
+        "molecule_chembl_id": ["CHEMBL1", "CHEMBL2"],
         "extra_col": [1, 2],
         "max_phase": [4, None]
     })
@@ -34,7 +34,8 @@ def test_transform_columns_selection(pipeline):
 
 def test_transform_max_phase(pipeline):
     df = pd.DataFrame({
-        "max_phase": [4, "3", None, "invalid"]
+        "max_phase": [4, "3", None, "invalid"],
+        "molecule_chembl_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"]
     })
     
     result = pipeline._do_transform(df)
@@ -54,7 +55,7 @@ def test_transform_nested_fields(pipeline):
     ]
     
     df = pd.DataFrame({
-        "molecule_chembl_id": ["M1"],
+        "molecule_chembl_id": ["CHEMBL1"],
         "atc_classifications": [["L01", "A02"]],
         "molecule_properties": [{"alogp": 2.5}]
     })
