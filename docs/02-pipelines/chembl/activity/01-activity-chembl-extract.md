@@ -2,11 +2,15 @@
 
 ## Описание
 
-`ActivityExtractor` — стадия Extract для пайплайна ChEMBL Activity. Отвечает за извлечение сырых данных из ChEMBL API и преобразование их в pandas DataFrame. Стадия использует `ChemblClient` для выполнения запросов к API, обрабатывает ответы и собирает данные в структурированный DataFrame.
+`ActivityExtractor` — класс этапа извлечения данных активности из API ChEMBL. Вызывает клиент ChEMBL батчами и формирует результирующий DataFrame с метаданными. Наследуется от `StageABC` и реализует интерфейс стадии извлечения.
 
 ## Модуль
 
-`bioetl/pipelines/chembl/activity/stages.py`
+`src/bioetl/pipelines/chembl/activity/stages.py`
+
+## Наследование
+
+Класс наследуется от `StageABC` и реализует интерфейс стадии извлечения данных.
 
 ## Основной метод
 

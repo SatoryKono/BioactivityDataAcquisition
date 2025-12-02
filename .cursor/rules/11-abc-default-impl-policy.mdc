@@ -1,0 +1,58 @@
+---
+trigger: model_decision
+description: USE WHEN creating or modifying ABC/Protocol, Default factories, or Impl classes; enforce three-layer pattern and registries
+globs: ["src/bioetl/clients/**/contracts.py", "src/bioetl/clients/**/factories.py", "src/bioetl/clients/**/impl/*.py"]
+---
+
+# ABC/Default/Impl Policy
+
+## Three-Layer Pattern (Mandatory)
+
+1. **Contract/Protocol/ABC**: `src/bioetl/clients/<domain>/contracts.py` or `base/contracts.py`
+2. **Default factory**: `src/bioetl/clients/<domain>/factories.py`, function `default_<domain>_<entity>()`
+3. **Impl**: `src/bioetl/clients/<domain>/impl/`, classes with suffix `Impl`
+
+## Rules
+
+- **Creating ABC**: MUST create Default factory (can be stub with `NotImplementedError`)
+- **Default factory naming**: `default_<domain>_<entity>()` (canonical form)
+- **Impl naming**: `^[A-Z][A-Za-z0-9]+Impl$` (e.g., `ChemblDataClientHTTPImpl`)
+- **ABC docstring**: MUST have structured block (brief description, public interface, file path, Default/Impl pointers)
+- **Registries**: MUST update `abc_registry.yaml`, `abc_impls.yaml`, and `docs/ABC_INDEX.md`
+
+## Registries (Sources of Truth)
+
+- `src/bioetl/clients/base/abc_registry.yaml` — machine-readable ABC registry
+- `src/bioetl/clients/base/abc_impls.yaml` — Default/Impl mapping
+- `docs/ABC_INDEX.md` — human-readable catalog
+
+## Examples
+
+```python
+# contracts.py
+class DataClientProtocol(Protocol):
+    """Brief description.
+    
+    Public interface:
+    - fetch_one(self, request: ClientRequest) -> dict
+    - iter_pages(self, params: PaginationParams) -> Iterator[Page]
+    
+    Location: src/bioetl/clients/base/contracts.py
+    Default: src/bioetl/clients/chembl/factories.py::default_chembl_data_client
+    """
+    ...
+
+# factories.py
+def default_chembl_data_client(api_key: str, *, timeout: float = 30.0) -> DataClientProtocol:
+    """Return ready-to-use ChemblDataClient."""
+    return ChemblDataClientHTTPImpl(api_key=api_key, timeout=timeout)
+
+# impl/http_impl.py
+class ChemblDataClientHTTPImpl:
+    def fetch_one(self, request): ...
+    def iter_pages(self, params): ...
+```
+
+## Reference
+
+See `docs/00-styleguide/01-new-entity-implementation-policy.md` for detailed policy.

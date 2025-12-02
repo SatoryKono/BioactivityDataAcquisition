@@ -8,23 +8,74 @@ PipelineBase — абстрактный базовый класс табличн
 
 ## Модуль
 
-`src/bioetl/core/pipeline_base.py`
+`src/bioetl/core/pipeline/unified.py`
 
 ## Основные методы
 
-### `run(output: Path) -> RunResult`
+### `extract(self, descriptor: Any, options: StageExecutionOptions) -> pd.DataFrame`
 
-Запускает пайплайн и записывает результат в указанный путь. Выполняет последовательность стадий:
-1. **extract**: извлечение сырых данных из API, файлов и преобразование в DataFrame
-2. **transform**: трансформация, обогащение, валидация данных
-3. **validate**: проверка структуры данных по Pandera-схеме, добавление хэш-строк при необходимости
-4. **write**: запись результата в Parquet с атомарной операцией
+**Абстрактный** метод извлечения данных (реализуется в подклассах).
 
-Возвращает `RunResult` с информацией о количестве обработанных записей, времени выполнения и метаданных.
+**Параметры:**
+- `descriptor` — дескриптор извлечения данных
+- `options` — опции выполнения стадии
 
-### `dry_run() -> RunResult`
+**Возвращает:** DataFrame с извлечёнными данными.
 
-Выполняет пайплайн без записи результатов. Полезен для проверки конфигурации, валидации данных и оценки производительности без фактической записи файлов.
+### `transform(self, df: pd.DataFrame, options: StageExecutionOptions) -> pd.DataFrame`
+
+**Абстрактный** метод трансформации данных (реализуется в подклассах).
+
+**Параметры:**
+- `df` — DataFrame для трансформации
+- `options` — опции выполнения стадии
+
+**Возвращает:** трансформированный DataFrame.
+
+### `validate(self, df: pd.DataFrame, options: StageExecutionOptions) -> pd.DataFrame`
+
+Выполняет валидацию DataFrame, если включена (вызывает Pandera-валидатор через ValidationService).
+
+**Параметры:**
+- `df` — DataFrame для валидации
+- `options` — опции выполнения стадии
+
+**Возвращает:** валидированный DataFrame.
+
+### `save_results(self, df: pd.DataFrame, artifacts: WriteArtifacts, options: StageExecutionOptions) -> WriteResult`
+
+Сохраняет DataFrame, используя `write_service` (если не настроен, бросает исключение).
+
+**Параметры:**
+- `df` — DataFrame для сохранения
+- `artifacts` — объект `WriteArtifacts` с путями к артефактам
+- `options` — опции выполнения стадии
+
+**Возвращает:** `WriteResult` с информацией о записанных файлах.
+
+### `prepare_run(self, options: StageExecutionOptions) -> None`
+
+Опциональный хук, вызывается перед началом стадии extract (умолчание – ничего не делает).
+
+**Параметры:**
+- `options` — опции выполнения стадии
+
+### `finalize_run(self, run_result: RunResult) -> None`
+
+Опциональный хук, вызывается после завершения стадии записи (умолчание – ничего не делает).
+
+**Параметры:**
+- `run_result` — результат выполнения пайплайна
+
+### `build_stage_plan(self, context: StageContext, options: StageExecutionOptions) -> tuple[StageDescriptor, ...]`
+
+Формирует план выполнения стадий по умолчанию (extract→transform→validate→save), учитывая настройки (dry_run, наличие валидатора и пр.).
+
+**Параметры:**
+- `context` — контекст выполнения стадий
+- `options` — опции выполнения стадии
+
+**Возвращает:** кортеж дескрипторов стадий.
 
 ## Функциональность
 

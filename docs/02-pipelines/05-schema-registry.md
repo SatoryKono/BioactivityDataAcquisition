@@ -8,7 +8,7 @@
 
 ## Модуль
 
-`bioetl/core/io/artifacts.py`
+`src/bioetl/core/io/artifacts.py`
 
 ## Основные возможности
 

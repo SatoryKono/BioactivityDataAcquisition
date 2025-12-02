@@ -10,19 +10,23 @@
 
 ## Инициализация
 
-### `__init__(self, backend: HttpBackend, *, config: SourceConfig | None = None) -> None`
+### `__init__(self, backend: HttpBackend, *, config: SourceConfig | None = None)`
 
-Инициализирует клиент с конфигурацией источника и HTTP-бэкендом.
+Инициализирует клиент ChEMBL; загружает конфиг источника (если не предоставлен) и вызывает `ConfiguredHttpClient.__init__`, привязывая backend.
 
 **Параметры:**
 - `backend` — HTTP-бэкенд для выполнения запросов
 - `config` — конфигурация источника данных (опционально)
 
+**Процесс:**
+1. Загрузка конфигурации источника ChEMBL (если не предоставлена)
+2. Вызов базового конструктора `ConfiguredHttpClient` с backend
+
 ## Основные методы
 
 ### `request_activity(self, *, ids: Sequence[str] | None = None, filters: Mapping[str, object] | None = None, pagination: PaginationParams | None = None, context: RequestContext | None = None) -> ClientRequest`
 
-Конструирует `ClientRequest` для маршрута `"activity"` с заданными идентификаторами/фильтрами.
+Формирует запрос для получения *activity*: возвращает объект *ClientRequest* с установленным маршрутом `"activity"`, списком ID, фильтрами и параметрами пагинации (фактическое выполнение запроса происходит при вызове методов backend через `iter_records`).
 
 **Параметры:**
 - `ids` — последовательность ChEMBL IDs для запроса (опционально)
