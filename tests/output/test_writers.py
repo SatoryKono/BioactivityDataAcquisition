@@ -1,9 +1,13 @@
 """
 Tests for specific writer implementations.
 """
+import hashlib
+from pathlib import Path
+
 import pandas as pd
 import yaml
 
+import bioetl.infrastructure.output.impl.csv_writer as csv_writer
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 
@@ -20,6 +24,8 @@ def test_csv_writer_write(tmp_path):
     assert result.row_count == 2
     assert result.path == output_path
     assert result.duration_sec >= 0
+    assert result.checksum
+    assert result.checksum == hashlib.sha256(output_path.read_bytes()).hexdigest()
 
     # Verify content
     read_df = pd.read_csv(output_path)
@@ -38,6 +44,31 @@ def test_csv_writer_atomic_property():
     """Test CSV writer atomic property."""
     writer = CsvWriterImpl()
     assert writer.atomic is True
+
+
+def test_csv_writer_atomic_write(tmp_path, monkeypatch):
+    """Test CSV writer writes via temp file and replaces atomically."""
+    writer = CsvWriterImpl()
+    df = pd.DataFrame({"a": [1], "b": ["x"]})
+    output_path = tmp_path / "data.csv"
+    temp_path = output_path.with_suffix(".tmp")
+
+    replace_calls: list[tuple[Path, Path]] = []
+    real_replace = csv_writer.os.replace
+
+    def recording_replace(src: Path, dst: Path) -> None:
+        replace_calls.append((Path(src), Path(dst)))
+        real_replace(src, dst)
+
+    monkeypatch.setattr(csv_writer.os, "replace", recording_replace)
+
+    result = writer.write(df, output_path)
+
+    assert replace_calls == [(temp_path, output_path)]
+    assert output_path.exists()
+    assert not temp_path.exists()
+    pd.testing.assert_frame_equal(df, pd.read_csv(output_path))
+    assert result.checksum == hashlib.sha256(output_path.read_bytes()).hexdigest()
 
 
 def test_metadata_writer_write_meta(tmp_path):
