@@ -159,11 +159,16 @@ class PipelineBase(ABC):
         df["hash_row"] = hasher.hash_columns(df, df.columns.tolist())
         
         business_key_cols = self._config.business_key
+        # Always create hash_business_key as nullable (all None if not configured)
         if business_key_cols:
             # Ensure columns exist before hashing
             cols_to_hash = [c for c in business_key_cols if c in df.columns]
             if cols_to_hash:
                 df["hash_business_key"] = hasher.hash_columns(df, cols_to_hash)
+            else:
+                df["hash_business_key"] = None
+        else:
+            df["hash_business_key"] = None
         
         return df
     
@@ -193,7 +198,7 @@ class PipelineBase(ABC):
         )
 
     def _calculate_duration(self, context: RunContext) -> float:
-        return (datetime.now(timezone.utc).replace(tzinfo=None) - context.started_at).total_seconds()
+        return (datetime.now(timezone.utc) - context.started_at).total_seconds()
 
     def _build_meta(self, context: RunContext, df: pd.DataFrame) -> dict[str, Any]:
         return {
@@ -202,4 +207,3 @@ class PipelineBase(ABC):
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "row_count": len(df),
         }
-
