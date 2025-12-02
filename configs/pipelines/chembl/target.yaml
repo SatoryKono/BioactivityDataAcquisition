@@ -59,8 +59,8 @@ fields:
     is_filterable: false
     description: Внешние кросс-референсы
 
-  hashing:
-    business_key_fields:
-      - target_chembl_id
+hashing:
+  business_key_fields:
+    - target_chembl_id
 # pagination наследуется из chembl_default profile
 
