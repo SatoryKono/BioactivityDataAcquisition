@@ -19,6 +19,7 @@
 ### Assay
 
 - [00 Assay ChEMBL Overview](assay/00-assay-chembl-overview.md) — пайплайн для выгрузки данных об биоактивности типа "assay"
+- [INDEX](assay/INDEX.md) — полный индекс документации по Assay
 
 ### Target
 
