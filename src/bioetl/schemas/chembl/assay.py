@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandera as pa
 from pandera.typing import Series
 
@@ -20,7 +22,7 @@ class AssaySchema(pa.DataFrameModel):
 
     # Category/classification
     assay_category: Series[str] = pa.Field(nullable=True)
-    assay_classifications: Series[object] = pa.Field(nullable=True)
+    assay_classifications: Series[Any] = pa.Field(nullable=True)  # type: ignore[type-arg]
     assay_group: Series[str] = pa.Field(nullable=True)
     assay_test_type: Series[str] = pa.Field(nullable=True)
 
@@ -36,7 +38,7 @@ class AssaySchema(pa.DataFrameModel):
     )
 
     # Parameters
-    assay_parameters: Series[object] = pa.Field(nullable=True)
+    assay_parameters: Series[Any] = pa.Field(nullable=True)  # type: ignore[type-arg]
 
     # BAO ontology
     bao_format: Series[str] = pa.Field(nullable=True)
@@ -58,8 +60,8 @@ class AssaySchema(pa.DataFrameModel):
     variant_sequence: Series[str] = pa.Field(nullable=True)
 
     # Source
-    src_id: Series[object] = pa.Field(nullable=True)
-    src_assay_id: Series[object] = pa.Field(nullable=True)
+    src_id: Series[Any] = pa.Field(nullable=True)  # type: ignore[type-arg]
+    src_assay_id: Series[Any] = pa.Field(nullable=True)  # type: ignore[type-arg]
 
     # Index (from API)
     aidx: Series[str] = pa.Field(nullable=True)

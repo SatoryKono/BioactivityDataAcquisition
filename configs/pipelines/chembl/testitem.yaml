@@ -1,0 +1,61 @@
+# TestItem Pipeline Configuration
+# Наследует общие параметры из chembl_default profile
+# TestItem извлекает данные молекул из ChEMBL API (/molecule endpoint)
+
+extends: chembl_default
+
+entity_name: testitem
+endpoint: /molecule
+primary_key: molecule_chembl_id
+
+fields:
+  - name: molecule_chembl_id
+    data_type: string
+    is_nullable: false
+    is_filterable: true
+    description: ChEMBL ID молекулы
+
+  - name: molecule_type
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Тип молекулы (Small molecule, Protein, Antibody и т.п.)
+
+  - name: pref_name
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Предпочтительное название молекулы
+
+  - name: max_phase
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: Максимальная фаза клинических исследований (0-4)
+
+  - name: molecule_structures
+    data_type: object
+    is_nullable: true
+    is_filterable: false
+    description: Структурные представления молекулы (SMILES, InChI и т.п.)
+
+  - name: molecule_properties
+    data_type: object
+    is_nullable: true
+    is_filterable: false
+    description: Физико-химические свойства молекулы
+
+  - name: molecule_synonyms
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Синонимы молекулы
+
+  - name: cross_references
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Внешние кросс-референсы
+
+# pagination наследуется из chembl_default profile
+
