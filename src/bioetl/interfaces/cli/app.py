@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bioetl.infrastructure.config.resolver import ConfigResolver
-from bioetl.core.container import build_pipeline_dependencies
+from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY, get_pipeline_class
 
 app = typer.Typer(
