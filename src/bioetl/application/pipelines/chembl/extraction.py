@@ -1,9 +1,13 @@
 import pandas as pd
-from typing import Any
+from typing import Any, Type
 
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
 from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
+from bioetl.domain.schemas.chembl.models import (
+    ActivityModel,
+    ChemblRecordModel,
+)
 
 
 class ChemblExtractionService:
@@ -27,12 +31,20 @@ class ChemblExtractionService:
         # Assuming structure: {"chembl_release": "chembl_34", ...}
         return meta.get("chembl_release", "unknown")
 
+    def _get_model_cls(self, entity: str) -> Type[ChemblRecordModel]:
+        if entity == "activity":
+            return ActivityModel
+        if entity in {"assay", "target", "document", "testitem"}:
+            return ChemblRecordModel
+        raise ValueError(f"Unknown entity: {entity}")
+
     def extract_all(self, entity: str, **filters: Any) -> pd.DataFrame:
         """
         Extract all records for an entity.
         """
         records = []
         offset = 0
+        model_cls = self._get_model_cls(entity)
         
         # Check for explicit limit in filters
         total_limit = filters.pop("limit", None)
@@ -60,14 +72,16 @@ class ChemblExtractionService:
                 response = self.client.request_document(**filters)
             elif entity == "testitem":
                 response = self.client.request_molecule(**filters)
-            else:
-                raise ValueError(f"Unknown entity: {entity}")
-            
+
             batch_records = self.parser.parse(response)
             if not batch_records:
                 break
-                
-            records.extend(batch_records)
+
+            serialized_records = [
+                model_cls(**batch_record).model_dump()
+                for batch_record in batch_records
+            ]
+            records.extend(serialized_records)
             
             # Check for total limit reach
             if total_limit is not None and len(records) >= total_limit:
