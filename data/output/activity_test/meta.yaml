@@ -1,7 +1,0 @@
-checksum: 35ccbf237f552a0086ece3fe1cccc21f60dea6387dfa95b0f621ead2f7dad928
-entity: activity
-files:
-- activity.csv
-row_count: 10
-run_id: 340089f0-a83b-4e0f-99e5-d16ec9fa0acd
-timestamp: '2025-12-02T17:13:24.523335+00:00'
