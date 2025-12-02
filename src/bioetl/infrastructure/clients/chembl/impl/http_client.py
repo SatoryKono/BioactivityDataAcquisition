@@ -109,3 +109,7 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
                 time.sleep(self.retry_policy.get_delay(attempt))
                 attempt += 1
 
+
+# NOTE: iter_pages реализован частично (возвращает только первую страницу без перехода по next).
+# Планируется доработать построение next-URL для полноценной пагинации.
+
