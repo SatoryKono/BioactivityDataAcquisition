@@ -45,6 +45,7 @@
 
 ## Common компоненты
 
+- [08 Base ChEMBL Normalizer](common/08-base-chembl-normalizer.md) — базовый нормализатор, общий для всех ChEMBL-пайплайнов
 - [18 ChEMBL Common Pipeline](common/18-chembl-common-pipeline.md) — базовый класс для ChEMBL-пайплайнов
 - [19 ChEMBL Pipeline Base](common/19-chembl-pipeline-base.md) — базовый пайплайн для ChEMBL
 - [20 ChEMBL Extraction Service](common/20-chembl-extraction-service.md) — сервис извлечения данных ChEMBL
