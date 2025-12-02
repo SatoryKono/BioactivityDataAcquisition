@@ -4,6 +4,7 @@ pyproject.toml
 src/bioetl/__init__.py
 src/bioetl/__main__.py
 src/bioetl/cli.py
+src/bioetl/py.typed
 src/bioetl.egg-info/PKG-INFO
 src/bioetl.egg-info/SOURCES.txt
 src/bioetl.egg-info/dependency_links.txt

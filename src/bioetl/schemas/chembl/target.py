@@ -12,5 +12,6 @@ class TargetSchema(pa.DataFrameModel):
     hash_row: Series[str] = pa.Field(str_matches=r"^[a-f0-9]{64}$")
 
     class Config:
-        strict = True
+        strict = False
+        coerce = True
 
