@@ -166,3 +166,8 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 - `INDEX.md` — индекс документации схем
 - `00-schemas-registry-overview.md` — обзор реестра схем Pandera
+
+### Архитектурные планы
+
+- `docs/30-project-architecture-plan.docx` / `docs/30-project-architecture-plan.pdf` — общий архитектурный план проекта
+- `docs/31-etl-integration-architecture-plan.docx` / `docs/31-etl-integration-architecture-plan.pdf` — архитектурный план ETL-интеграции научных REST API
