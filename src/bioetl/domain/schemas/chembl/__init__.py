@@ -6,6 +6,10 @@ from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+from bioetl.domain.schemas.chembl.models import (
+    ActivityModel,
+    ChemblRecordModel,
+)
 
 __all__ = [
     "ActivitySchema",
@@ -13,4 +17,6 @@ __all__ = [
     "DocumentSchema",
     "TargetSchema",
     "TestitemSchema",
+    "ActivityModel",
+    "ChemblRecordModel",
 ]
