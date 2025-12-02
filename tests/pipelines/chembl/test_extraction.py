@@ -87,6 +87,30 @@ def test_extract_all_pagination(service, mock_client):
     assert calls[1].kwargs["offset"] == 10
 
 
+def test_extract_all_serializes_nested_fields(service, mock_client):
+    """Nested payloads are flattened before being returned."""
+    mock_parser = MagicMock()
+    mock_paginator = MagicMock()
+
+    service.parser = mock_parser
+    service.paginator = mock_paginator
+
+    mock_client.request_activity.return_value = {"data": "page"}
+    mock_parser.parse.return_value = [
+        {
+            "id": 1,
+            "activity_properties": [{"k1": "v1"}, {"k2": "v2"}],
+            "ligand_efficiency": {"le": 1.1},
+        }
+    ]
+    mock_paginator.has_more.return_value = False
+
+    df = service.extract_all("activity")
+
+    assert df.iloc[0]["activity_properties"] == "k1:v1|k2:v2"
+    assert df.iloc[0]["ligand_efficiency"] == "le:1.1"
+
+
 def test_extract_all_limit(service, mock_client):
     """Test extraction with limit."""
     # Mock parser
