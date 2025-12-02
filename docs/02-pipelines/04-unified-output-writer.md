@@ -8,7 +8,7 @@
 
 ## Модуль
 
-`bioetl/core/io/output.py`
+`src/bioetl/core/io/output.py`
 
 ## Основные возможности
 

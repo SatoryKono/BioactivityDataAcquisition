@@ -1,0 +1,27 @@
+---
+trigger: model_decision
+description: USE WHEN adding logging; require UnifiedLogger, structured events, redaction, run context
+globs: ["src/**/*.py"]
+---
+
+# Logging Rules
+
+## Mandatory
+
+- Use `UnifiedLogger` only; no `print()` or stdlib `logging` in production code.
+- Set run context at process/pipeline start; mandatory fields auto-injected (run_id, pipeline, stage, timestamp_utc).
+- Redact secrets and sensitive identifiers.
+
+## Levels
+
+DEBUG, INFO (default), WARNING, ERROR, CRITICAL; include counts, durations, IDs.
+
+## Example
+
+```python
+log.info("Extraction completed", source="chembl", rows=len(df), duration_ms=elapsed)
+```
+
+## Reference
+
+See `docs/02-pipelines/02-logging-and-configuration.md` for detailed documentation.

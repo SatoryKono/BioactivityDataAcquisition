@@ -1,0 +1,25 @@
+---
+trigger: model_decision
+description: USE WHEN accessing external HTTP APIs; require UnifiedAPIClient, retry/backoff, rate limit, circuit breaker, timeouts
+globs: ["src/**/*client*.py", "src/**/api_*.py", "src/**/api*.py"]
+---
+
+# API Clients Contract
+
+## Contract
+
+- All HTTP calls via `UnifiedAPIClient`.
+- Retries: exponential backoff with jitter; give up on non-retryable 4xx.
+- Throttling: token bucket with jitter; respect Retry-After.
+- Circuit breaker to prevent cascades.
+- TTL cache for expensive reads.
+- Strict timeouts; include proper User-Agent and required headers.
+- Handle pagination consistently.
+
+## Error Handling
+
+- Log status_code, retry_after, url; re-raise as domain errors where appropriate.
+
+## Reference
+
+See `docs/02-pipelines/03-unified-api-client.md` for detailed documentation.

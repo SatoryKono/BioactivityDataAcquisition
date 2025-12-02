@@ -4,11 +4,15 @@
 
 `ChemblActivityPipeline` — основной ETL-пайплайн для обработки данных биоактивности из ChEMBL. Пайплайн имеет код `activity_chembl` и реализует полный цикл извлечения данных из API ChEMBL, их трансформации, валидации и сохранения результатов.
 
-Пайплайн наследуется от `ChemblCommonPipeline` и реализует контракт `ChemblPipelineContract`, обеспечивая единообразный интерфейс для работы с данными ChEMBL.
+Пайплайн наследуется от `PipelineBase` и использует дескриптор для извлечения данных, реализуя полный цикл ETL для сущности "activity".
 
 ## Модуль
 
-`bioetl/pipelines/chembl/activity/run.py`
+`src/bioetl/pipelines/chembl/activity/run.py`
+
+## Наследование
+
+Пайплайн наследуется от `PipelineBase` и использует общую инфраструктуру ChEMBL-пайплайнов.
 
 ## Архитектура
 

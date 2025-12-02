@@ -25,16 +25,19 @@ version: "2.0.0"
 ## 2. Политика создания ABC/Default/Impl
 
 ### Трёхслойный паттерн (обязателен)
+
 - **Contract/Protocol/ABC**: `src/bioetl/clients/<domain>/contracts.py` или `base/contracts.py`
 - **Default factory**: `src/bioetl/clients/<domain>/factories.py`, функция `default_<domain>_<entity>()`
 - **Impl**: `src/bioetl/clients/<domain>/impl/`, классы с суффиксом `Impl`
 
 ### Обязательные реестры
+
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC
 - `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default/Impl
 - `docs/ABC_INDEX.md` — человекочитаемый каталог
 
 ### Правила создания
+
 - При создании ABC **обязательно** создать Default (может быть stub)
 - Default может быть stub с `NotImplementedError` если нет реальных Impl
 - Добавление Impl не требует нового Default
@@ -43,6 +46,7 @@ version: "2.0.0"
 ## 3. Именование сущностей
 
 ### Базовые правила
+
 - **Модули**: `^[a-z0-9_]+$` (snake_case)
 - **Классы**: PascalCase, `^[A-Z][A-Za-z0-9]+$`
 - **Функции**: snake_case, `^[a-z_][a-z0-9_]*$`
@@ -50,6 +54,7 @@ version: "2.0.0"
 - **Приватные**: ведущий `_`
 
 ### Суффиксы классов (роли)
+
 - `Factory` — общие фабрики
 - `ClientFactory` — фабрики клиентов
 - `DataClient` — реализации контрактов
@@ -63,6 +68,7 @@ version: "2.0.0"
 - `Impl` — реализации (например, `ChemblDataClientHTTPImpl`)
 
 ### Префиксы функций
+
 - `get_` — дешёвые локальные чтения
 - `fetch_` — сетевые/IO операции
 - `iter_` — ленивые генераторы/итераторы
@@ -74,18 +80,21 @@ version: "2.0.0"
 - `is_`/`has_`/`can_` — булевы проверки
 
 ### Pipelines
+
 - Путь: `src/bioetl/pipelines/<provider>/<entity>/<stage>.py`
 - Provider: `^[a-z0-9_]+$`
 - Entity: `^[a-z0-9_]+$`
 - Stage: `extract`, `transform`, `validate`, `normalize`, `write`, `run`, `errors`, `descriptor`, `metrics`, `backfill`, `cleanup`
 
 ### Тесты
+
 - Unit: `tests/bioetl/.../test_<module>.py`
 - Pipeline: `tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py`
 - Integration: `tests/integration/` или суффикс `_integration.py`
 - Golden: `tests/golden/test_<area>_golden.py`
 
 ### Конфиги
+
 - Файлы: `^[a-z0-9_]+.ya?ml$` в `configs/`
 - Pipelines: `configs/pipelines/<provider>/<entity>.yaml`
 - Ключи внутри YAML: lower_snake_case
@@ -128,6 +137,7 @@ version: "2.0.0"
 - Идемпотентность шагов и воспроизводимость артефактов, включая метаданные (`meta.yaml`)
 
 ### Пример атомарной записи
+
 ```python
 tmp = path.with_suffix(".tmp")
 tmp.write_text(payload, encoding="utf-8")
@@ -191,4 +201,3 @@ os.replace(tmp, path)
 - `docs/00-styleguide/02-new-entity-naming-policy.md` — полная политика именования
 - `docs/00-styleguide/03-python-code-style.md` — стиль Python кода
 - `docs/00-styleguide/10-documentation-standards.md` — стандарты документации
-

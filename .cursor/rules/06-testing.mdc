@@ -1,0 +1,26 @@
+---
+trigger: model_decision
+description: USE WHEN writing tests or changing code paths; enforce categories, golden tests, property tests, coverage >=85%
+globs: ["tests/**/*.py", "src/**/*.py"]
+---
+
+# Testing Rules
+
+## Categories (pytest markers)
+
+unit, integration, golden, determinism, property, schema, qc, slow, api, benchmark.
+
+## Rules
+
+- Unit tests do NOT hit network; mock external calls.
+- Golden tests protect critical outputs and schemas.
+- Use Hypothesis for transformation properties.
+- CI blocks merge if coverage < 85% for `src/bioetl`.
+
+## Structure
+
+- Files `test_*.py`; functions `test_*`; classes `Test*`.
+
+## Reference
+
+See project testing standards in `docs/00-styleguide/` for detailed documentation.

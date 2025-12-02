@@ -1,0 +1,21 @@
+---
+trigger: model_decision
+description: USE WHEN creating or modifying CLI; use Typer, explicit flags, input validation, clear exit codes and help
+globs: ["src/**/cli.py", "src/scripts/**/*.py"]
+---
+
+# CLI Contracts
+
+## Interface
+
+- Typer-based commands; prefer named options over ambiguous positionals.
+- Validate inputs (paths exist, dirs writable) before execution.
+- Standard exit codes: 0 success; 1 general error; 2 config error; 3 external dependency.
+
+## UX
+
+- Helpful error messages with remediation; progress indication for long tasks.
+
+## Reference
+
+See `docs/cli/00-cli-overview.md` for detailed documentation.
