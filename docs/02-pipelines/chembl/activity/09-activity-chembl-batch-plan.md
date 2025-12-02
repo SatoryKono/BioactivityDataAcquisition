@@ -35,5 +35,5 @@ batch_plan = BatchPlan(
 ## Related Components
 
 - **ChemblExtractionDescriptor**: содержит BatchPlan для управления извлечением (см. `docs/02-pipelines/chembl/activity/07-activity-chembl-descriptor.md`)
-- **ActivityExtractor**: использует BatchPlan для разбиения запросов на батчи (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extract.md`)
+- **ActivityExtractor**: использует BatchPlan для разбиения запросов на батчи (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extraction.md`)
 
