@@ -1,4 +1,4 @@
-# Memories для проекта BioETL
+# 00 Memories для проекта BioETL
 
 Этот файл содержит ключевые правила и паттерны, которые должны быть запомнены при работе с проектом.
 
@@ -203,7 +203,7 @@ def write_atomic(path: Path, content: str) -> None:
 - `docs/00-styleguide/02-new-entity-naming-policy.md` — полная политика именования (regex, таблицы правил)
 - `docs/00-styleguide/03-python-code-style.md` — стиль Python кода (PEP 8, типы, mypy)
 - `docs/00-styleguide/10-documentation-standards.md` — стандарты документации (синхронизация, автогенерация)
-- `docs/00-styleguide/RULES_QUICK_REFERENCE.md` — краткая сводка для быстрого доступа
+- `docs/00-styleguide/00-rules-quick-reference.md` — краткая сводка для быстрого доступа
 
 ### Реестры и конфигурации
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC (source of truth)

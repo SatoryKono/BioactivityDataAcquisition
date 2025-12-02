@@ -7,8 +7,8 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 Проект следует строгим правилам именования, архитектуры и документации:
 
 - **Основные правила**: `.cursorrules` — правила для AI-ассистента и разработчиков
-- **Краткая сводка**: `docs/00-styleguide/RULES_QUICK_REFERENCE.md` — быстрый справочник
-- **Memories**: `docs/00-styleguide/MEMORIES.md` — ключевые правила для запоминания
+- **Краткая сводка**: `docs/00-styleguide/00-rules-quick-reference.md` — быстрый справочник
+- **Memories**: `docs/00-styleguide/00-memories.md` — ключевые правила для запоминания
 
 ## Документация
 
