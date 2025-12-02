@@ -107,7 +107,7 @@ def normalize_uniprot(value: Any) -> str | None:
 
     pattern_short = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]"
     pattern_pq = r"[OPQ][0-9][A-Z0-9]{3}[0-9]"
-    pattern_long = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{5}[0-9]"
+    pattern_long = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9][A-Z0-9]{3}[0-9]"
     if not re.fullmatch(f"(?:{pattern_pq}|{pattern_short}|{pattern_long})", accession):
         raise ValueError(f"Неверный UniProt ID: '{value}'")
     return accession

@@ -156,6 +156,7 @@ class TestNormalizeUniprot:
             ("p12345", "P12345"),
             ("q9h0h5", "Q9H0H5"),
             ("B7ZC07", "B7ZC07"),
+            ("a0a023gpi8", "A0A023GPI8"),
             (None, None),
             (pd.NA, None),
         ],
