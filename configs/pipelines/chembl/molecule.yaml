@@ -7,7 +7,10 @@ entity_name: molecule
 endpoint: /molecule
 primary_key: molecule_chembl_id
 
-ffields:
+cli:
+  input_file: data/input/testitem.csv
+
+fields:
   - name: molecule_chembl_id
     data_type: string
     is_nullable: false

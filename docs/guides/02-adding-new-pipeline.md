@@ -6,10 +6,10 @@
 3. **Пайплайн-класс**: унаследуйте PipelineBase или соответствующий базовый класс провайдера (например, ChemblPipelineBase), определите extract/transform/validate/write.
 4. **Конфигурация**: добавьте YAML в `configs/pipelines/<provider>/<entity>.yaml` с профилями base/dev/prod.
 5. **CLI-команда**: зарегистрируйте новую команду через CLICommandABC для запуска пайплайна.
-6. **Документация**: обновите соответствующие файлы в `docs/02-pipelines/<provider>/<entity>/` и справочники ABC.
+6. **Документация**: обновите соответствующие файлы в `docs/application/pipelines/<provider>/<entity>/` и справочники ABC.
 
 ## Использование паттерна ABC/Default/Impl
 Следуйте политике: новый ABC → Default (может быть stub) → Impl. Обновите `abc_registry.yaml` и `abc_impls.yaml` для привязки реализаций. Докстринги ABC должны описывать интерфейс и ссылки на Default/Impl.
 
 ## Примеры
-Ориентируйтесь на ChEMBL пайплайны в `docs/02-pipelines/chembl/*` и кодовые реализации в `src/bioetl/pipelines/chembl`. Переиспользуйте общие сервисы (UnifiedAPIClient, ValidationService, UnifiedOutputWriter).
+Ориентируйтесь на ChEMBL пайплайны в `docs/application/pipelines/chembl/*` и кодовые реализации в `src/bioetl/pipelines/chembl`. Переиспользуйте общие сервисы (UnifiedAPIClient, ValidationService, UnifiedOutputWriter).

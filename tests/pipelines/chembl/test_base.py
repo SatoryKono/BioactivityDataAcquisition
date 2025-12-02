@@ -117,3 +117,31 @@ def test_build_meta(pipeline_fixture, mock_dependencies_fixture):
     # Assert
     assert meta["chembl_release"] == "chembl_99"
     assert meta["entity"] == "test"
+
+
+def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixture):
+    """Test that transform applies nested normalization."""
+    # Arrange
+    # Configure fields to trigger normalization
+    mock_dependencies_fixture["config"].fields = [
+        {"name": "nested", "data_type": "array"},
+        {"name": "obj", "data_type": "object"},
+        {"name": "simple", "data_type": "string"}
+    ]
+    
+    df = pd.DataFrame({
+        "nested": [["x", "y"], ["z"]],
+        "obj": [{"k": "v"}, None],
+        "simple": ["s1", "s2"]
+    })
+    
+    # Act
+    result = pipeline_fixture.transform(df)
+    
+    # Assert
+    assert "transformed" in result.columns
+    assert result.iloc[0]["nested"] == "x|y"
+    assert result.iloc[0]["obj"] == "k:v"
+    assert result.iloc[1]["nested"] == "z"
+    assert pd.isna(result.iloc[1]["obj"])
+    assert result.iloc[0]["simple"] == "s1"

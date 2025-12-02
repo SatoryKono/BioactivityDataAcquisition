@@ -1,7 +1,7 @@
-checksum: ed0526d6bd01d3ada4961c8d913a8bd7d0927b72f689c0c5cac3e4040a1c225d
+checksum: 4d0ca0bcae12fd5bb1ae2d7a9e2fa462edab6d887eba35b210abf7c8bff399ee
 entity: testitem
 files:
 - testitem.csv
 row_count: 10
-run_id: 56830ef4-323a-4ff8-8565-38b5799f6229
-timestamp: '2025-12-02T10:46:02.616174+00:00'
+run_id: cdf3d7b6-1d60-4b3f-8e18-49dba8fddd78
+timestamp: '2025-12-02T13:02:49.374698+00:00'

@@ -7,6 +7,9 @@ entity_name: assay
 endpoint: /assay
 primary_key: assay_chembl_id
 
+cli:
+  input_file: data/input/assay.csv
+
 fields:
   - name: assay_chembl_id
     data_type: string
@@ -92,5 +95,10 @@ fields:
     is_filterable: false
     description: Последовательность варианта белка
 
+hashing:
+    business_key_fields:
+      - assay_chembl_id
+      - document_chembl_id
+      - target_chembl_id
 # pagination наследуется из chembl_default profile
 

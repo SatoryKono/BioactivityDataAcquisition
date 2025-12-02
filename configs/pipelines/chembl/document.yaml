@@ -7,6 +7,9 @@ entity_name: document
 endpoint: /document
 primary_key: document_chembl_id
 
+cli:
+  input_file: data/input/document.csv
+
 fields:
   - name: abstract
     data_type: string
@@ -116,4 +119,7 @@ fields:
     is_filterable: false
     description: ID релиза ChEMBL, в котором документ появился
 
+hashing:
+    business_key_fields:
+      - document_chembl_id
 # pagination наследуется из chembl_default profile

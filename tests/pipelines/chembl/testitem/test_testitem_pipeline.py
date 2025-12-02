@@ -8,6 +8,8 @@ def pipeline():
     config = MagicMock()
     config.entity_name = "testitem"
     config.model_dump.return_value = {}
+    config.pipeline = {} # extract использует это
+    config.fields = [] # по умолчанию пусто
     
     return ChemblTestitemPipeline(
         config=config,
@@ -42,3 +44,23 @@ def test_transform_max_phase(pipeline):
     assert result.iloc[1]["max_phase"] == 3
     assert result.iloc[2]["max_phase"] is pd.NA
     assert result.iloc[3]["max_phase"] is pd.NA
+
+def test_transform_nested_fields(pipeline):
+    # Setup config fields for normalization
+    pipeline._config.fields = [
+        {"name": "atc_classifications", "data_type": "array"},
+        {"name": "molecule_properties", "data_type": "object"},
+        {"name": "molecule_chembl_id", "data_type": "string"},
+    ]
+    
+    df = pd.DataFrame({
+        "molecule_chembl_id": ["M1"],
+        "atc_classifications": [["L01", "A02"]],
+        "molecule_properties": [{"alogp": 2.5}]
+    })
+    
+    # Вызываем полный transform, который включает _do_transform и normalize_nested_fields
+    result = pipeline.transform(df)
+    
+    assert result.iloc[0]["atc_classifications"] == "L01|A02"
+    assert result.iloc[0]["molecule_properties"] == "alogp:2.5"

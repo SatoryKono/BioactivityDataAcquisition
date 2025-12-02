@@ -10,9 +10,10 @@ from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 from bioetl.application.pipelines.chembl.extraction import ChemblExtractionService
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
+from bioetl.domain.transform.impl.normalize import NormalizerMixin
 
 
-class ChemblPipelineBase(PipelineBase):
+class ChemblPipelineBase(PipelineBase, NormalizerMixin):
     """
     Базовый класс для ChEMBL-пайплайнов.
     
@@ -21,6 +22,7 @@ class ChemblPipelineBase(PipelineBase):
     - Интеграция с ChemblExtractionService
     - Хуки pre_transform
     - Общая логика extraction
+    - Нормализация полей (NormalizerMixin)
     """
     
     def __init__(
@@ -59,10 +61,14 @@ class ChemblPipelineBase(PipelineBase):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Цепочка трансформаций для ChEMBL:
-        pre_transform → base transform
+        pre_transform → base transform → normalize_fields
         """
         df = self.pre_transform(df)
         df = self._do_transform(df)
+        
+        # Выполняем нормализацию (строки, числа, вложенные структуры)
+        df = self.normalize_fields(df)
+            
         return df
     
     def pre_transform(self, df: pd.DataFrame) -> pd.DataFrame:

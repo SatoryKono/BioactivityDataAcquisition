@@ -1,7 +1,7 @@
-checksum: 5ba7eba86d351867e7672aca80feaabc1ba0f1ebf86635f53c73a7a1cabeee24
+checksum: 862288a5b8a6bac1b4cf146f09d3f5826499b24efa6f0f99f474b8ef500b10b6
 entity: assay
 files:
 - assay.csv
-row_count: 10
-run_id: 215b94e3-89d3-4895-bfbb-06be05ebce0a
-timestamp: '2025-12-02T10:36:06.068801+00:00'
+row_count: 100
+run_id: 9d9eb51b-e103-4ffb-bbab-2a55777947fa
+timestamp: '2025-12-02T14:57:46.545456+00:00'

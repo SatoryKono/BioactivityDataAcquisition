@@ -7,6 +7,9 @@ entity_name: activity
 endpoint: /activity
 primary_key: activity_id
 
+cli:
+  input_file: data/input/activity.csv
+
 fields:
   - name: activity_comment
     data_type: string
@@ -265,6 +268,12 @@ fields:
     is_nullable: true
     is_filterable: true
     description: Исходное числовое значение
+
+hashing:
+  business_key_fields:
+   - activity_id
+   - molecule_chembl_id
+   - target_chembl_id
 
 # Специфичные параметры пайплайна (общие параметры наследуются из профиля)
 pipeline:

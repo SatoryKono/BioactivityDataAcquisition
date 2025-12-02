@@ -33,4 +33,4 @@ profiles:
 ```
 
 ## Использование в пайплайнах
-ConfigResolver читает YAML, применяет профиль и подставляет секреты из EnvSecretProvider. Пайплайн получает готовые параметры для клиента, валидаторов и вывода. Подробнее — `docs/reference/infrastructure/config/00-index.md`.
+ConfigResolver читает YAML, применяет профиль и подставляет секреты из EnvSecretProvider. Пайплайн получает готовые параметры для клиента, валидаторов и вывода. Подробнее — `docs/infrastructure/config/00-index.md`.

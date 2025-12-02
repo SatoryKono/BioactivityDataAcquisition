@@ -9,5 +9,11 @@
     ],
     "python.autoComplete.extraPaths": [
         "./src"
+    ],
+    "python.analysis.exclude": [
+        "**/tests/services/**"
+    ],
+    "python.linting.pylintArgs": [
+        "--ignore=tests/services"
     ]
 }
