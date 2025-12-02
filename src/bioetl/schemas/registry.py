@@ -1,5 +1,8 @@
+"""
+Registry implementation for Pandera schemas.
+"""
 from typing import Type
-import pandera as pa
+import pandera.pandas as pa
 
 from bioetl.validation.contracts import SchemaProviderABC
 
@@ -26,4 +29,3 @@ class SchemaRegistry(SchemaProviderABC):
 
 # Global singleton instance
 registry = SchemaRegistry()
-

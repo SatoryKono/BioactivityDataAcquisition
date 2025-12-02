@@ -38,7 +38,7 @@ def mock_validation_service():
     """Create a mock validation service."""
     service = MagicMock(spec=ValidationService)
     # Default behavior: return df as is
-    service.validate.side_effect = lambda df, entity: df
+    service.validate.side_effect = lambda df, **kwargs: df
     return service
 
 

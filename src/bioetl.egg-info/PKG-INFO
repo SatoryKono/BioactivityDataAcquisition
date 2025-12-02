@@ -15,6 +15,11 @@ Requires-Dist: rich>=13.0.0
 Requires-Dist: requests>=2.31.0
 Requires-Dist: PyYAML>=6.0
 Requires-Dist: pydantic>=2.0.0
+Provides-Extra: dev
+Requires-Dist: types-PyYAML>=6.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
 Dynamic: license-file
 
 # Bioactivity Data Acquisition (BioETL)

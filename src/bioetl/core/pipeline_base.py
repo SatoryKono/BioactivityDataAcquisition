@@ -1,3 +1,6 @@
+"""
+Базовый класс пайплайна.
+"""
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,11 +21,11 @@ from bioetl.validation.service import ValidationService
 class PipelineBase(ABC):
     """
     Абстрактный базовый класс для всех ETL-пайплайнов.
-    
+
     Реализует паттерн Template Method для стадий:
     extract → transform → validate → write
     """
-    
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -39,9 +42,10 @@ class PipelineBase(ABC):
         self._output_writer = output_writer
         self._clients: dict[str, Any] = {}
         self._hooks: list[PipelineHookABC] = []
-    
+        self._stage_starts: dict[str, datetime] = {}
+
     # === Public API ===
-    
+
     def run(
         self,
         output_path: Path,
@@ -58,37 +62,49 @@ class PipelineBase(ABC):
             config=self._config.model_dump(),
             dry_run=dry_run,
         )
-        
+
         self._logger.info("Pipeline started", run_id=context.run_id)
         stages_results: list[StageResult] = []
-        
+
         try:
             # 1. Extract
             self._notify_stage_start("extract", context)
             df_raw = self.extract(**kwargs)
-            stages_results.append(self._make_stage_result("extract", len(df_raw)))
+            stages_results.append(
+                self._make_stage_result("extract", len(df_raw))
+            )
             self._notify_stage_end("extract", stages_results[-1])
-            
+
             # 2. Transform
             self._notify_stage_start("transform", context)
             df_transformed = self.transform(df_raw)
             df_transformed = self._add_hash_columns(df_transformed)
-            stages_results.append(self._make_stage_result("transform", len(df_transformed)))
+            stages_results.append(
+                self._make_stage_result("transform", len(df_transformed))
+            )
             self._notify_stage_end("transform", stages_results[-1])
-            
+
             # 3. Validate
             self._notify_stage_start("validate", context)
             df_validated = self.validate(df_transformed)
-            stages_results.append(self._make_stage_result("validate", len(df_validated)))
+            stages_results.append(
+                self._make_stage_result("validate", len(df_validated))
+            )
             self._notify_stage_end("validate", stages_results[-1])
-            
+
             # 4. Write (skip on dry_run)
             if not dry_run:
                 self._notify_stage_start("write", context)
-                write_result = self.write(df_validated, output_path, context)
-                stages_results.append(self._make_stage_result("write", write_result.row_count))
+                write_result = self.write(
+                    df_validated,
+                    output_path,
+                    context
+                )
+                stages_results.append(
+                    self._make_stage_result("write", write_result.row_count)
+                )
                 self._notify_stage_end("write", stages_results[-1])
-            
+
             return RunResult(
                 run_id=context.run_id,
                 success=True,
@@ -100,32 +116,35 @@ class PipelineBase(ABC):
                 errors=[],
                 meta=self._build_meta(context, df_validated),
             )
-        
+
         except Exception as e:
             self._logger.error("Pipeline failed", error=str(e))
             for hook in self._hooks:
                 hook.on_error("pipeline", e)
             raise
-        
+
         finally:
             self._close_clients()
-    
+
     # === Abstract Methods ===
-    
+
     @abstractmethod
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """Извлекает данные из источника."""
-    
+
     @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Преобразует сырые данные."""
-    
+
     # === Concrete Methods ===
-    
+
     def validate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Валидирует DataFrame по Pandera-схеме."""
-        return self._validation_service.validate(df, self._config.entity_name)
-    
+        return self._validation_service.validate(
+            df=df,
+            entity_name=self._config.entity_name
+        )
+
     def write(
         self,
         df: pd.DataFrame,
@@ -139,39 +158,49 @@ class PipelineBase(ABC):
             entity_name=self._config.entity_name,
             run_context=context,
         )
-    
+
     # === Client Management ===
-    
+
     def register_client(self, name: str, client: Any) -> None:
+        """Регистрирует клиент API."""
         self._clients[name] = client
-    
+
     def add_hook(self, hook: PipelineHookABC) -> None:
+        """Добавляет хук выполнения."""
         self._hooks.append(hook)
-    
+
     # === Internal Methods ===
-    
+
     def _get_hasher(self) -> HasherABC:
+        """Возвращает реализацию хешера."""
         return HasherImpl()
-        
+
     def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Добавляет столбцы с хешами строк и бизнес-ключей."""
         hasher = self._get_hasher()
         df = df.copy()
         df["hash_row"] = hasher.hash_columns(df, df.columns.tolist())
-        
+
         business_key_cols = self._config.business_key
-        # Always create hash_business_key as nullable (all None if not configured)
+        # Always create hash_business_key as nullable
+        # (all None if not configured)
         if business_key_cols:
             # Ensure columns exist before hashing
-            cols_to_hash = [c for c in business_key_cols if c in df.columns]
+            cols_to_hash = [
+                c for c in business_key_cols if c in df.columns
+            ]
             if cols_to_hash:
-                df["hash_business_key"] = hasher.hash_columns(df, cols_to_hash)
+                df["hash_business_key"] = hasher.hash_columns(
+                    df,
+                    cols_to_hash
+                )
             else:
                 df["hash_business_key"] = None
         else:
             df["hash_business_key"] = None
-        
+
         return df
-    
+
     def _close_clients(self) -> None:
         for name, client in self._clients.items():
             if hasattr(client, "close"):
@@ -179,28 +208,45 @@ class PipelineBase(ABC):
                 self._logger.debug("Client closed", client=name)
 
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
+        self._stage_starts[stage] = datetime.now(timezone.utc)
         self._logger.info(f"Stage started: {stage}")
         for hook in self._hooks:
             hook.on_stage_start(stage, context)
 
     def _notify_stage_end(self, stage: str, result: StageResult) -> None:
-        self._logger.info(f"Stage finished: {stage}", records=result.records_processed)
+        self._logger.info(
+            f"Stage finished: {stage}",
+            records=result.records_processed
+        )
         for hook in self._hooks:
             hook.on_stage_end(stage, result)
 
     def _make_stage_result(self, stage: str, count: int) -> StageResult:
+        start_time = self._stage_starts.get(stage)
+        duration = 0.0
+        if start_time:
+            duration = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds()
+
         return StageResult(
             stage_name=stage,
             success=True,
             records_processed=count,
-            duration_sec=0.0, # TODO: measure duration
+            duration_sec=duration,
             errors=[],
         )
 
     def _calculate_duration(self, context: RunContext) -> float:
-        return (datetime.now(timezone.utc) - context.started_at).total_seconds()
+        return (
+            datetime.now(timezone.utc) - context.started_at
+        ).total_seconds()
 
-    def _build_meta(self, context: RunContext, df: pd.DataFrame) -> dict[str, Any]:
+    def _build_meta(
+        self,
+        context: RunContext,
+        df: pd.DataFrame
+    ) -> dict[str, Any]:
         return {
             "run_id": context.run_id,
             "entity": self._config.entity_name,

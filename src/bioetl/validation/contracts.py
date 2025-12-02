@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 import pandas as pd
-import pandera as pa
+import pandera.pandas as pa
 
 
 @dataclass
@@ -33,7 +33,7 @@ class SchemaProviderABC(ABC):
     """
 
     @abstractmethod
-    def get_schema(self, name: str) -> pa.DataFrameModel:
+    def get_schema(self, name: str) -> type[pa.DataFrameModel]:
         """Возвращает класс схемы по имени."""
 
     @abstractmethod
@@ -43,4 +43,3 @@ class SchemaProviderABC(ABC):
     @abstractmethod
     def register(self, name: str, schema: type[pa.DataFrameModel]) -> None:
         """Регистрирует новую схему."""
-
