@@ -24,7 +24,7 @@
 ### 3. Обязательные реестры
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC
 - `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default/Impl
-- `docs/ABC_INDEX.md` — человекочитаемый каталог
+- `docs/01-ABC/INDEX.md` — человекочитаемый каталог
 - При создании/изменении ABC/Default/Impl **обязательно** обновлять все три реестра
 
 ### 4. Именование в коде
@@ -89,7 +89,7 @@
 ### 11. Документация
 - **Синхронизация**: документация **обязательно** синхронизируется с кодом и схемами
 - **Автогенерация**: секции помечаются `<!-- generated -->`, не редактируются вручную
-- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/ABC_INDEX.md`, реестры
+- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/01-ABC/INDEX.md`, реестры
 - **Breaking changes**: фиксируются в `CHANGELOG.md`
 
 ### 12. CI и enforcement
@@ -110,7 +110,7 @@
 3. Создать Default factory в `src/bioetl/clients/<domain>/factories.py` (может быть stub с `NotImplementedError`)
 4. Обновить `src/bioetl/clients/base/abc_registry.yaml` (машинный реестр)
 5. Обновить `src/bioetl/clients/base/abc_impls.yaml` (мэппинг Default/Impl)
-6. Обновить `docs/ABC_INDEX.md` (человекочитаемый каталог)
+6. Обновить `docs/01-ABC/INDEX.md` (человекочитаемый каталог)
 7. Создать Impl в `src/bioetl/clients/<domain>/impl/` при необходимости
 8. Добавить тесты и документацию
 
@@ -187,7 +187,7 @@ def write_atomic(path: Path, content: str) -> None:
 - [ ] Имена публичных классов и файлов соответствуют паттернам
 - [ ] Публичный API экспортирован через `__all__` в `__init__.py`
 - [ ] Для нового ABC присутствует Default factory (может быть stub)
-- [ ] Обновлены реестры: `abc_registry.yaml`, `abc_impls.yaml`, `docs/ABC_INDEX.md`
+- [ ] Обновлены реестры: `abc_registry.yaml`, `abc_impls.yaml`, `docs/01-ABC/INDEX.md`
 - [ ] Добавлены unit-тесты и при необходимости integration tests
 - [ ] Документация обновлена (pipeline docs, ABC_INDEX)
 - [ ] При исключениях заполнена запись в `configs/naming_exceptions.yaml`
@@ -208,7 +208,7 @@ def write_atomic(path: Path, content: str) -> None:
 ### Реестры и конфигурации
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC (source of truth)
 - `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default/Impl (source of truth)
-- `docs/ABC_INDEX.md` — человекочитаемый каталог ABC
+- `docs/01-ABC/INDEX.md` — человекочитаемый каталог ABC
 - `configs/providers.yaml` — канонический список провайдеров
 - `configs/pipelines/<provider>/<entity>.yaml` — конфигурации пайплайнов
 - `configs/naming_exceptions.yaml` — исключения из правил именования (path, rule_id, reason, owner, expiry)

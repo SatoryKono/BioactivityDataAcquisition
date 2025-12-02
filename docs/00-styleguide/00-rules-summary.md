@@ -1,4 +1,4 @@
-<!-- SUMMARY: Краткая сводка правил для быстрого доступа. Полные документы см. в _docs/styleguide/ -->
+<!-- SUMMARY: Краткая сводка правил для быстрого доступа. Полные документы см. в docs/00-styleguide/ -->
 # Свод правил из политик (для memory и правил проекта)
 
 > **Примечание**: Это краткая сводка. Полные документы см.:
@@ -26,7 +26,7 @@
 ### Обязательные реестры
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC
 - `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default/Impl
-- `docs/ABC_INDEX.md` — человекочитаемый каталог
+- `docs/01-ABC/INDEX.md` — человекочитаемый каталог
 
 ### Правила создания
 - При создании ABC **обязательно** создать Default (может быть stub)
@@ -88,7 +88,7 @@
 
 - **Синхронизация**: документация **обязательно** синхронизируется с кодом и схемами
 - **Автогенерация**: секции помечаются `<!-- generated -->`, не редактируются вручную
-- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/ABC_INDEX.md`, реестры
+- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/01-ABC/INDEX.md`, реестры
 - **Breaking changes**: фиксируются в `CHANGELOG.md`
 
 ## 5. CI и enforcement
