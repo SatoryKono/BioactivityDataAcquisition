@@ -126,13 +126,19 @@ def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixt
     mock_dependencies_fixture["config"].fields = [
         {"name": "nested", "data_type": "array"},
         {"name": "obj", "data_type": "object"},
-        {"name": "simple", "data_type": "string"}
+        {"name": "simple", "data_type": "string"},
+        {"name": "pubmed_id", "data_type": "string"},
+        {"name": "references", "data_type": "array"},
+        {"name": "doi", "data_type": "string"}
     ]
     
     df = pd.DataFrame({
         "nested": [["x", "y"], ["z"]],
         "obj": [{"k": "v"}, None],
-        "simple": ["s1", "s2"]
+        "simple": ["s1", "s2"],
+        "pubmed_id": [" 12345 ", "67890"],
+        "references": [["12345", 67890], [None, " 333 "]],
+        "doi": ["https://doi.org/10.1000/ABC", "10.2345/xyz"]
     })
     
     # Act
@@ -145,3 +151,7 @@ def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixt
     assert result.iloc[1]["nested"] == "z"
     assert pd.isna(result.iloc[1]["obj"])
     assert result.iloc[0]["simple"] == "s1"
+    assert result.iloc[0]["pubmed_id"] == "12345"
+    assert result.iloc[0]["references"] == "12345|67890"
+    assert result.iloc[1]["references"] == "333"
+    assert result.iloc[0]["doi"] == "10.1000/abc"
