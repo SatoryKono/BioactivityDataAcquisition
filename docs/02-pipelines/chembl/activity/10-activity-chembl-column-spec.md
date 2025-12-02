@@ -39,6 +39,6 @@ spec = ColumnNormalizationSpec(
 
 ## Related Components
 
-- **BaseChemblNormalizer**: использует спецификации для нормализации колонок (см. `docs/02-pipelines/chembl/activity/08-base-chembl-normalizer.md`)
+- **BaseChemblNormalizer**: использует спецификации для нормализации колонок (см. `../common/08-base-chembl-normalizer.md`)
 - **ActivityNormalizer**: создаёт спецификации для колонок активности (см. `docs/02-pipelines/chembl/activity/05-activity-chembl-normalizer.md`)
 

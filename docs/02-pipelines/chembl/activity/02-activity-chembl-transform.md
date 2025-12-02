@@ -43,5 +43,5 @@
 ## Related Components
 
 - **ActivityNormalizer**: нормализатор данных активности (см. `docs/02-pipelines/chembl/activity/05-activity-chembl-normalizer.md`)
-- **BaseChemblNormalizer**: базовый нормализатор для ChEMBL (см. `docs/02-pipelines/chembl/activity/08-base-chembl-normalizer.md`)
+- **BaseChemblNormalizer**: базовый нормализатор для всех ChEMBL-пайплайнов (см. `../common/08-base-chembl-normalizer.md`)
 
