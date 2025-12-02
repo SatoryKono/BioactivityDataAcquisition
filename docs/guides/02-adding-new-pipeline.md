@@ -1,65 +1,15 @@
-# Adding New Pipeline
+# 02 Adding New Pipeline
 
-Пошаговое руководство по добавлению нового ETL-пайплайна.
+## Шаги
+1. **Клиент источника**: реализуйте ABC/Default/Impl для нового API (contracts.py, factories.py, impl/*), добавьте в abc реестры.
+2. **Схема**: создайте Pandera-схему для целевой сущности и зарегистрируйте её в SchemaRegistry.
+3. **Пайплайн-класс**: унаследуйте PipelineBase или соответствующий базовый класс провайдера (например, ChemblPipelineBase), определите extract/transform/validate/write.
+4. **Конфигурация**: добавьте YAML в `configs/pipelines/<provider>/<entity>.yaml` с профилями base/dev/prod.
+5. **CLI-команда**: зарегистрируйте новую команду через CLICommandABC для запуска пайплайна.
+6. **Документация**: обновите соответствующие файлы в `docs/02-pipelines/<provider>/<entity>/` и справочники ABC.
 
-## Шаг 1. Клиент (если новый источник)
-Если источник данных еще не поддерживается, реализуйте наследника `BaseClient`.
+## Использование паттерна ABC/Default/Impl
+Следуйте политике: новый ABC → Default (может быть stub) → Impl. Обновите `abc_registry.yaml` и `abc_impls.yaml` для привязки реализаций. Докстринги ABC должны описывать интерфейс и ссылки на Default/Impl.
 
-```python
-# src/bioetl/clients/newsource/client.py
-class NewSourceClient(BaseClient):
-    def request_entity(self, **filters):
-        ...
-```
-
-## Шаг 2. Схема данных
-Опишите структуру данных с помощью Pandera.
-
-```python
-# src/bioetl/schemas/newsource/entity_schema.py
-class EntitySchema(pa.DataFrameModel):
-    id: Series[int] = pa.Field(ge=1)
-    name: Series[str]
-```
-
-## Шаг 3. Класс Пайплайна
-Создайте класс пайплайна, унаследованный от `PipelineBase`.
-
-```python
-# src/bioetl/pipelines/newsource/entity/run.py
-class NewSourceEntityPipeline(PipelineBase):
-    def extract(self) -> pd.DataFrame:
-        return self.client.fetch_all()
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Логика нормализации
-        return df
-```
-
-## Шаг 4. Конфигурация
-Создайте YAML-файл.
-
-```yaml
-# configs/pipelines/newsource/entity.yaml
-extends: base_default
-entity_name: entity
-endpoint: /entity
-```
-
-## Шаг 5. Регистрация в CLI
-Добавьте команду в CLI.
-
-```python
-# src/bioetl/cli/commands/newsource.py
-@app.command()
-def entity_newsource(...):
-    # Запуск пайплайна
-```
-
-## Шаг 6. Тестирование
-Запустите smoke-тест.
-
-```bash
-bioetl run entity_newsource --profile development --dry-run
-```
-
+## Примеры
+Ориентируйтесь на ChEMBL пайплайны в `docs/02-pipelines/chembl/*` и кодовые реализации в `src/bioetl/pipelines/chembl`. Переиспользуйте общие сервисы (UnifiedAPIClient, ValidationService, UnifiedOutputWriter).
