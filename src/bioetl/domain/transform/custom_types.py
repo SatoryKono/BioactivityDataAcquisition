@@ -51,13 +51,23 @@ def normalize_pmid(value: Any) -> str | None:
     """Normalize PubMed ID as numeric string."""
     if _is_missing(value):
         return None
+    
+    if isinstance(value, float):
+        if value.is_integer():
+            value = int(value)
+
     if isinstance(value, int):
         if value <= 0:
             raise ValueError("PubMed ID должен быть положительным числом")
         return str(value)
+
     text = str(value).strip()
     if not text:
         return None
+    
+    if text.endswith(".0") and text[:-2].isdigit():
+        text = text[:-2]
+
     if not text.isdigit():
         raise ValueError(f"Неверный PubMed ID: '{value}'")
     return text

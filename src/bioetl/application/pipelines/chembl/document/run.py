@@ -5,7 +5,8 @@ import pandas as pd
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.document.extract import extract_document
 from bioetl.domain.schemas.chembl.document import DocumentSchema
-from bioetl.domain.transform.impl.normalize import normalize_doi, normalize_pubmed_id
+from bioetl.domain.transform.custom_types import normalize_pmid
+from bioetl.domain.transform.impl.normalize import normalize_doi
 
 
 class ChemblDocumentPipeline(ChemblPipelineBase):
@@ -57,8 +58,8 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
 
         # Convert pubmed_id to string (nullable)
         if "pubmed_id" in df.columns:
-            df["pubmed_id"] = df["pubmed_id"].apply(normalize_pubmed_id)
-            df["pubmed_id"] = pd.Series(df["pubmed_id"], dtype="Int64")
+            df["pubmed_id"] = df["pubmed_id"].apply(normalize_pmid)
+            df["pubmed_id"] = df["pubmed_id"].astype("string")
 
         # Schema enforcement
         schema_columns = list(DocumentSchema.to_schema().columns.keys())

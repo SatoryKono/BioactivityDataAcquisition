@@ -27,7 +27,7 @@ def test_transform_nested_fields(pipeline):
     ]
     
     df = pd.DataFrame({
-        "assay_chembl_id": ["A1", "A2"],
+        "assay_chembl_id": ["CHEMBL1", "CHEMBL2"],
         "activity_properties": [
             [{"relation": "=", "text_value": "active"}], 
             None
