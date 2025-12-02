@@ -269,7 +269,7 @@ def normalize_array(
         if _is_missing(item):
             continue
         
-        norm_item = None
+        norm_item: Any = None
         try:
             if isinstance(item, dict):
                 # Treat as record, use item_normalizer for values if available
