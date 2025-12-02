@@ -47,7 +47,7 @@ if "tqdm" not in sys.modules:
     tqdm_module.tqdm = _noop_tqdm
     sys.modules["tqdm"] = tqdm_module
 
-from bioetl.core.custom_types import (
+from bioetl.domain.transform.custom_types import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
     normalize_chembl_id,

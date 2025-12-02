@@ -2,7 +2,7 @@ import re
 from typing import Any, Callable, Optional, TYPE_CHECKING
 
 import pandas as pd
-from bioetl.core.custom_types import (
+from bioetl.domain.transform.custom_types import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
     normalize_record,
