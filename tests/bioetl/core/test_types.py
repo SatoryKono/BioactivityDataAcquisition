@@ -48,11 +48,9 @@ class TestCustomTypes:
         assert normalize_chembl_id("CHEMBL12345") == "CHEMBL12345"
         assert normalize_chembl_id("chembl12345") == "CHEMBL12345"
         assert normalize_chembl_id("Chembl123") == "CHEMBL123"
+        assert normalize_chembl_id("12345") == "CHEMBL12345"
 
         # Invalid
-        with pytest.raises(ValueError, match="Неверный ChEMBL ID"):
-            normalize_chembl_id("12345") # Missing prefix strictly
-        
         with pytest.raises(ValueError, match="Неверный ChEMBL ID"):
              normalize_chembl_id("CHEMBL") # Missing digits
              

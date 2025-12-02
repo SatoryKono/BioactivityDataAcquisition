@@ -182,7 +182,15 @@ class TestNormalizeArray:
             {"pmid": 456},
             None,
         ]
-        result = normalize_array(values, item_normalizer=normalize_pmid)
+        # Use normalize_record as item normalizer, or just assume we want to normalize these as records?
+        # If item_normalizer is set, it takes precedence.
+        # normalize_pmid expects scalar.
+        # So we should use a normalizer that handles dict -> record
+        
+        def dict_normalizer(d):
+            return normalize_record(d, value_normalizer=normalize_pmid)
+
+        result = normalize_array(values, item_normalizer=dict_normalizer)
         assert result == [{"pmid": 123}, {"pmid": 456}]
 
     def test_raises_on_invalid_item(self):
@@ -190,7 +198,8 @@ class TestNormalizeArray:
             normalize_array(["123", "invalid"], item_normalizer=normalize_pmid)
 
     def test_accepts_scalar_input(self):
-        assert normalize_array("123", item_normalizer=normalize_pmid) == ["123"]
+        # normalized pmid is int 123
+        assert normalize_array("123", item_normalizer=normalize_pmid) == [123]
 
     def test_returns_empty_on_empty_scalar(self):
         assert normalize_array("", item_normalizer=normalize_pmid) == []

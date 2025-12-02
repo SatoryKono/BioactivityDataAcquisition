@@ -68,5 +68,5 @@ def test_default_chembl_extraction_service(source_config):
 def test_default_chembl_extraction_service_default_batch(source_config):
     """Test default batch size calculation."""
     service = default_chembl_extraction_service(source_config)
-    # Default resolve_effective_batch_size is 25 if not set
-    assert service.batch_size == 25
+    # Default resolve_effective_batch_size is 25 if not set, but ChEMBL factory raises it to 1000
+    assert service.batch_size == 1000

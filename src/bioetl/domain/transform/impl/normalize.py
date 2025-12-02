@@ -81,12 +81,10 @@ def normalize_scalar(value: Any, mode: str = "default") -> Any:
     # Safety check for lists/arrays to avoid "truth value of an array is ambiguous" in pd.isna
     if isinstance(value, (list, tuple, dict)):
         # Scalar normalizer should not receive collections, but if it does (wrong schema type),
-        # we shouldn't crash.
+        # we shouldn't crash, but raising ValueError allows recursive fallback in normalize_array
         if not value:
             return None
-        # Fallback: convert to string to process as scalar string
-        # This handles cases where a field is defined as string but API returns a list
-        return str(value)
+        raise ValueError(f"Expected scalar, got {type(value).__name__}")
 
     try:
         if pd.isna(value):
@@ -135,6 +133,8 @@ def serialize_dict(
     norm_func = value_normalizer if value_normalizer else (lambda x: x)
 
     # Sort keys for determinism
+    # Note: For proper serialization of dict in list, we should sort keys there too.
+    # serialize_list handles dict items by calling serialize_dict, which does sort keys.
     for k in sorted(value.keys()):
         v = value[k]
         if v is None:
@@ -253,8 +253,19 @@ class NormalizerMixin:
 
                     if isinstance(val, (list, tuple)):
                         try:
+                            # If base_normalizer is scalar (default), but items are dicts,
+                            # we want normalize_array to treat them as records.
+                            # We can't easily detect what base_normalizer expects.
+                            # However, we can wrap it to handle dicts properly if it doesn't already.
+                            
+                            def _smart_normalizer(item: Any) -> Any:
+                                if isinstance(item, dict):
+                                    # Recursively normalize record values
+                                    return normalize_record(item, value_normalizer=base_normalizer)
+                                return base_normalizer(item)
+
                             normalized_list = normalize_array(
-                                list(val), item_normalizer=base_normalizer
+                                list(val), item_normalizer=_smart_normalizer
                             )
                         except ValueError as exc:
                             raise ValueError(

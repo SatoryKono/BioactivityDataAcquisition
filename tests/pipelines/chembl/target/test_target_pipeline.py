@@ -27,7 +27,7 @@ def test_transform_nested_fields(pipeline):
     ]
     
     df = pd.DataFrame({
-        "target_chembl_id": ["T1"],
+        "target_chembl_id": ["CHEMBL1"],
         "target_components": [
             [
                 {"component_id": 1, "accession": "P12345"},
@@ -42,10 +42,10 @@ def test_transform_nested_fields(pipeline):
     result = pipeline.transform(df)
     
     comps = result.iloc[0]["target_components"]
-    # Expect: component_id:1|accession:P12345|component_id:2|accession:Q67890
-    assert "component_id:1" in comps
-    assert "accession:P12345" in comps
-    assert "accession:Q67890" in comps
+    # The dictionary keys are sorted by default in serialization
+    # {"component_id": 1, "accession": "P12345"} -> "accession:P12345|component_id:1"
+    assert "accession:P12345|component_id:1" in comps
+    assert "accession:Q67890|component_id:2" in comps
     assert "|" in comps
     
     xrefs = result.iloc[0]["cross_references"]
