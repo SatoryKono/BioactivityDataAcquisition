@@ -3,7 +3,6 @@ Tests for the UnifiedOutputWriter.
 """
 # pylint: disable=redefined-outer-name, protected-access
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pandas as pd

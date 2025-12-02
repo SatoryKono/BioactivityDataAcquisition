@@ -7,108 +7,53 @@ entity_name: molecule
 endpoint: /molecule
 primary_key: molecule_chembl_id
 
-fields:
+ffields:
   - name: molecule_chembl_id
     data_type: string
     is_nullable: false
     is_filterable: true
     description: ChEMBL ID молекулы
 
-  - name: pref_name
-    data_type: string
-    is_nullable: true
-    is_filterable: true
-    description: Название молекулы
-
   - name: molecule_type
     data_type: string
     is_nullable: true
     is_filterable: true
-    description: Тип (Small molecule, Antibody, Oligonucleotide и т.п.)
+    description: Тип молекулы (Small molecule, Protein, Antibody и т.п.)
+
+  - name: pref_name
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Предпочтительное название молекулы
 
   - name: max_phase
     data_type: integer
     is_nullable: true
     is_filterable: true
-    description: Максимальная клиническая фаза
-
-  - name: structure_type
-    data_type: string
-    is_nullable: true
-    is_filterable: false
-    description: Формат структуры (MOL, SMILES и т.п.)
-
-  - name: molecule_properties
-    data_type: object
-    is_nullable: true
-    is_filterable: true
-    description: Вложенный объект со свойствами (логP, формула, масса и т.п.)
-    nested_fields:
-      - name: alogp
-        data_type: number
-        is_nullable: true
-        is_filterable: true
-        description: Липофильность (ALOGP)
-      - name: aromatic_rings
-        data_type: integer
-        is_nullable: true
-        is_filterable: true
-        description: Количество ароматических колец
-      - name: full_molformula
-        data_type: string
-        is_nullable: true
-        is_filterable: true
-        description: Полная молекулярная формула
-      - name: full_mwt
-        data_type: number
-        is_nullable: true
-        is_filterable: true
-        description: Молекулярная масса
+    description: Максимальная фаза клинических исследований (0-4)
 
   - name: molecule_structures
     data_type: object
     is_nullable: true
-    is_filterable: true
-    description: Вложенный объект с SMILES, InChI, molfile
-    nested_fields:
-      - name: canonical_smiles
-        data_type: string
-        is_nullable: false
-        is_filterable: true
-        description: Канонический SMILES
-      - name: molfile
-        data_type: string
-        is_nullable: true
-        is_filterable: false
-        description: MOLFILE-представление структуры
-      - name: standard_inchi
-        data_type: string
-        is_nullable: true
-        is_filterable: true
-        description: Стандартный InChI
-      - name: standard_inchi_key
-        data_type: string
-        is_nullable: true
-        is_filterable: true
-        description: InChIKey
+    is_filterable: false
+    description: Структурные представления молекулы (SMILES, InChI и т.п.)
 
-  - name: molecule_hierarchy
+  - name: molecule_properties
     data_type: object
     is_nullable: true
     is_filterable: false
-    description: Родитель/дозируемая форма и др.
+    description: Физико-химические свойства молекулы
 
-  - name: atc_classifications
+  - name: molecule_synonyms
     data_type: array
     is_nullable: true
-    is_filterable: true
-    description: Список ATC-классификаций
+    is_filterable: false
+    description: Синонимы молекулы
 
-  - name: helm_notation
-    data_type: string
+  - name: cross_references
+    data_type: array
     is_nullable: true
     is_filterable: false
-    description: HELM-нотация для биотерапевтических молекул
+    description: Внешние кросс-референсы
 
 # pagination наследуется из chembl_default profile
-
