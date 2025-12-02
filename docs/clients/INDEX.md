@@ -8,14 +8,22 @@
 - **02-rest-yaml-migration.md** — Детали миграции REST-клиентов на YAML-конфигурации
 - **19-clients-diagrams.md** — Инструкция по генерации диаграмм объектов для пакета clients
 
-## Подразделы
+## Клиенты конкретных источников
 
-- **styleguide/** — Стайлгайд для разработки клиентов:
-  - `00-naming-conventions.md` — Правила именования
-  - `03-python-code-style.md` — Стиль кода Python
-  - `10-documentation-standards.md` — Стандарты документации
+Документация по клиентам внешних API находится в `docs/02-pipelines/clients/`:
+
+- `18-pubmed-client.md` — клиент для API PubMed
+- `19-crossref-client.md` — клиент для API CrossRef
+- `20-pubchem-client.md` — клиент для PubChem
+- `21-configured-http-client.md` — базовая реализация настроенного HTTP-клиента
+- `22-semantic-scholar-client.md` — клиент для API Semantic Scholar
+- `23-uniprot-client.md` — клиент для REST API UniProt
+
+## Связанная документация
+
+- **Styleguide**: `docs/00-styleguide/00-rules-summary.md` — правила именования и стиля кода
+- **ABC Index**: `docs/01-ABC/INDEX.md` — каталог абстрактных базовых классов
 
 ## Быстрый старт
 
 Начните с **00-clients-overview.md** для понимания архитектуры и основных компонентов клиентского слоя.
-
