@@ -2,10 +2,16 @@
 
 ## Запуск через CLI
 
-- Один пайплайн: `bioetl run --pipeline chembl_activity --config configs/pipelines/chembl/activity.yaml`.
-- Несколько пайплайнов: указать несколько `--pipeline` или использовать групповой конфиг.
+- Одиночный запуск: `bioetl run --pipeline chembl_activity --config configs/pipelines/chembl/activity.yaml`.
 - Профили: `--profile dev` для ограниченных выборок, `--profile prod` для полноты и усиленных лимитов.
-- Доп. параметры: `--output-dir <path>`, `--dry-run` для проверки без записи, `--limit` для smoke-run.
+- Управление выводом: `--output-dir <path>` для смены директории артефактов.
+- Без записи: `--dry-run` для проверки конфигов и зависимостей без сохранения данных.
+- Ограничения выборки: `--limit <n>` для небольших прогонов и раннего обнаружения ошибок.
+
+### Smoke-test
+
+- Быстрый прогон: `bioetl run --pipeline chembl_activity --config configs/pipelines/chembl/activity.yaml --profile dev --limit 100`.
+- Комбинируйте с `--dry-run`, чтобы проверить доступность источников и целостность конфигурации без записи.
 
 ## Профили окружений
 
