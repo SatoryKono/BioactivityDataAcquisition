@@ -1,5 +1,7 @@
-import pandas as pd
+import re
 from typing import Any, Callable, Optional, TYPE_CHECKING
+
+import pandas as pd
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.models import PipelineConfig
@@ -16,6 +18,13 @@ CASE_SENSITIVE_FIELDS = {
     "helm_notation",
     "variant_sequence",
 }
+
+# Identifier patterns
+DOI_REGEX = re.compile(r"^10\.\d{4,9}/\S+$", flags=re.IGNORECASE)
+PUBMED_ID_REGEX = re.compile(r"^\d{1,9}$")
+PUBCHEM_CID_REGEX = re.compile(r"^\d{1,9}$")
+CHEMBL_ID_REGEX = re.compile(r"^CHEMBL\d+$", flags=re.IGNORECASE)
+UNIPROT_ID_REGEX = re.compile(r"^[A-Z][0-9][A-Z0-9]{3}[0-9](?:-[0-9]+)?$")
 
 # Fields that are IDs (should be UPPER case)
 # Heuristic: ends with _id, or specific known ID fields
@@ -40,6 +49,81 @@ def is_id_field(name: str) -> bool:
     if name.endswith("_id") or name.endswith("_chembl_id"):
         return True
     return False
+
+
+def normalize_doi(value: Any) -> str | None:
+    """Normalize DOI value to canonical lowercase form without URL prefix."""
+    if value is None:
+        return None
+    if isinstance(value, (dict, list, tuple)):
+        return None
+
+    val = str(value).strip().lower()
+    if not val:
+        return None
+
+    # Drop URL prefixes and leading labels
+    for prefix in ("https://doi.org/", "http://doi.org/", "doi:"):
+        if val.startswith(prefix):
+            val = val[len(prefix) :].strip()
+
+    if len(val) > 255:
+        return None
+
+    return val if DOI_REGEX.match(val) else None
+
+
+def _normalize_numeric_identifier(value: Any, pattern: re.Pattern[str]) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, (list, dict, tuple)):
+        return None
+
+    val = str(value).strip()
+    if not pattern.match(val):
+        return None
+
+    try:
+        parsed = int(val)
+    except ValueError:
+        return None
+
+    return parsed if parsed > 0 else None
+
+
+def normalize_pubmed_id(value: Any) -> int | None:
+    """Normalize PubMed identifier to positive integer."""
+    return _normalize_numeric_identifier(value, PUBMED_ID_REGEX)
+
+
+def normalize_pubchem_cid(value: Any) -> int | None:
+    """Normalize PubChem CID to positive integer."""
+    return _normalize_numeric_identifier(value, PUBCHEM_CID_REGEX)
+
+
+def normalize_chembl_id(value: Any) -> str | None:
+    """Normalize ChEMBL identifiers to uppercase form (CHEMBL123)."""
+    if value is None:
+        return None
+    if isinstance(value, (list, dict, tuple)):
+        return None
+
+    val = str(value).strip().upper()
+    return val if CHEMBL_ID_REGEX.match(val) else None
+
+
+def normalize_uniprot_id(value: Any) -> str | None:
+    """Normalize UniProt accession with optional isoform suffix."""
+    if value is None:
+        return None
+    if isinstance(value, (list, dict, tuple)):
+        return None
+
+    val = str(value).strip().upper()
+    if len(val) > 20:
+        return None
+
+    return val if UNIPROT_ID_REGEX.match(val) else None
 
 
 def normalize_scalar(value: Any, mode: str = "default") -> Any:
