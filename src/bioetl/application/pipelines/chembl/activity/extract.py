@@ -22,12 +22,21 @@ def _chunk_list(data: list[Any], size: int):
 
 
 def extract_activity(
-    config: PipelineConfig, 
-    service: ChemblExtractionService, 
+    config: PipelineConfig,
+    service: ChemblExtractionService,
     **kwargs: Any
 ) -> pd.DataFrame:
-    """
-    Extract activity data.
+    """Extract activity data with optional CSV input handling.
+
+    When ``config.cli['input_file']`` is provided, the file must contain an
+    ``activity_id`` column or a :class:`ValueError` is raised. If the CSV only
+    contains IDs (``activity_id`` plus at most one more column), the function
+    fetches full records from the ChEMBL API for those IDs; if the CSV already
+    includes full data, the dataframe is returned as-is. The optional
+    ``limit`` keyword truncates either the loaded dataframe (full CSV) or the
+    list of IDs (ID-only CSV) before further processing. Without ``input_file``
+    the function delegates to :meth:`ChemblExtractionService.extract_all` for
+    the ``activity`` entity.
     """
     # Resolve source config for batch sizing
     source_raw = config.sources.get("chembl", {})

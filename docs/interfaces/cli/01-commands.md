@@ -1,9 +1,22 @@
 # 01 Commands
 
 ## run
-- Назначение: запуск одного или нескольких пайплайнов.
-- Основные опции: `--pipeline <name>`, `--config <path>`, `--profile dev|prod`, `--output-dir <path>`, `--dry-run`.
-- Пример: `bioetl run --pipeline chembl_activity --config configs/pipelines/chembl/activity.yaml --profile dev`.
+- Назначение: запуск указанного пайплайна по имени.
+- Синтаксис:
+  ```bash
+  bioetl run --pipeline-name <pipeline_name> [--config <path>] [--profile dev|prod] [--output-dir <path>] [--dry-run]
+  ```
+- Опции:
+  - `--pipeline-name <pipeline_name>` (обязательно) — целевой пайплайн, запускаемый в текущем вызове.
+  - `--config <path>` — путь к YAML-конфигурации пайплайна.
+  - `--profile dev|prod` — профиль исполнения с предустановленными параметрами.
+  - `--output-dir <path>` — каталог для выгрузки артефактов и отчётов.
+  - `--dry-run` — проверка конфигураций и доступности источников без фактического выполнения шагов.
+- Пример:
+  ```bash
+  bioetl run --pipeline-name chembl_activity --config configs/pipelines/chembl/activity.yaml --profile dev
+  ```
+- Примечание: команда принимает только одно значение `pipeline_name` за запуск; параллельный старт нескольких пайплайнов не поддерживается.
 
 ## validate-config
 - Назначение: проверка YAML-конфигураций и профилей на полноту и корректность.
