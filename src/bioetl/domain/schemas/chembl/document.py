@@ -1,7 +1,7 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.impl.normalize import DOI_REGEX
+from bioetl.domain.transform.custom_types import DOI_REGEX
 
 
 class DocumentSchema(pa.DataFrameModel):

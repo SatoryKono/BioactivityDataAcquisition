@@ -5,10 +5,11 @@ import pandas as pd
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.testitem.extract import extract_testitem
 from bioetl.domain.schemas.chembl.testitem import TestitemSchema
-from bioetl.domain.transform.impl.normalize import (
+from bioetl.domain.transform.custom_types import (
     normalize_chembl_id,
-    normalize_pubchem_cid,
+    normalize_pcid,
 )
+from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
 
 
 def _normalize_cross_references(value: Any) -> Any:
@@ -27,7 +28,7 @@ def _normalize_cross_references(value: Any) -> Any:
         updated["xref_src"] = src if src else None
 
         if src.lower() == "pubchem":
-            cid = normalize_pubchem_cid(updated.get("xref_id"))
+            cid = normalize_pcid(updated.get("xref_id"))
             if cid:
                 updated["xref_id"] = cid
 
@@ -37,7 +38,7 @@ def _normalize_cross_references(value: Any) -> Any:
 
 
 def _extract_pubchem_cid(row: pd.Series) -> int | None:
-    cid_direct = normalize_pubchem_cid(row.get("pubchem_cid"))
+    cid_direct = normalize_pcid(row.get("pubchem_cid"))
     if cid_direct:
         return cid_direct
 
@@ -47,7 +48,7 @@ def _extract_pubchem_cid(row: pd.Series) -> int | None:
             if not isinstance(ref, dict):
                 continue
             if str(ref.get("xref_src", "")).lower() == "pubchem":
-                cid = normalize_pubchem_cid(ref.get("xref_id"))
+                cid = normalize_pcid(ref.get("xref_id"))
                 if cid:
                     return cid
 
@@ -62,12 +63,34 @@ class ChemblTestitemPipeline(ChemblPipelineBase):
 
     # Колонки для выходного датасета (from old code, but schema is authority)
     # We should use schema fields.
+
+    def _resolve_source_config(self, source_name: str) -> ChemblSourceConfig:
+        """
+        Resolves and validates source configuration.
+        """
+        source_data = self._config.sources.get(source_name)
+        
+        if isinstance(source_data, ChemblSourceConfig):
+            return source_data
+            
+        if isinstance(source_data, dict):
+            return ChemblSourceConfig(**source_data)
+            
+        raise ValueError(f"Configuration for source '{source_name}' is missing or invalid.")
     
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """
         Extract testitem data, supporting CSV input.
         """
-        return extract_testitem(self._config, self._extraction_service, **kwargs)
+        source_config = self._resolve_source_config("chembl")
+        batch_size = source_config.resolve_effective_batch_size()
+
+        return extract_testitem(
+            self._config, 
+            self._extraction_service,
+            batch_size=batch_size,
+            **kwargs
+        )
 
     def _do_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """

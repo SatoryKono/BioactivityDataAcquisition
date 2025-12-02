@@ -8,6 +8,13 @@ entity_name: testitem
 endpoint: /molecule
 primary_key: molecule_chembl_id
 
+sources:
+  chembl:
+    batch_size: 25
+    parameters:
+      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+      max_url_length: 2000
+
 cli:
   input_file: data/input/testitem.csv
 
@@ -88,4 +95,3 @@ hashing:
     business_key_fields:
       - molecule_chembl_id
 # pagination наследуется из chembl_default profile
-

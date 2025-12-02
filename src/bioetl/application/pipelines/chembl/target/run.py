@@ -5,9 +5,9 @@ import pandas as pd
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.target.extract import extract_target
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.transform.impl.normalize import (
+from bioetl.domain.transform.custom_types import (
     normalize_chembl_id,
-    normalize_uniprot_id,
+    normalize_uniprot,
 )
 
 
@@ -23,7 +23,7 @@ def _normalize_target_components(value: Any) -> Any:
             continue
 
         updated = component.copy()
-        updated_accession = normalize_uniprot_id(updated.get("accession"))
+        updated_accession = normalize_uniprot(updated.get("accession"))
         if updated_accession:
             updated["accession"] = updated_accession
         normalized.append(updated)
@@ -48,7 +48,7 @@ def _normalize_cross_references(value: Any) -> Any:
 
         xref_id = updated.get("xref_id")
         if src.lower() == "uniprot":
-            normalized_id = normalize_uniprot_id(xref_id)
+            normalized_id = normalize_uniprot(xref_id)
             updated["xref_id"] = normalized_id if normalized_id else updated.get("xref_id")
 
         normalized.append(updated)
@@ -60,7 +60,7 @@ def _extract_uniprot_id(components: Any, cross_references: Any) -> str | None:
     if isinstance(components, list):
         for component in components:
             if isinstance(component, dict):
-                acc = normalize_uniprot_id(component.get("accession"))
+                acc = normalize_uniprot(component.get("accession"))
                 if acc:
                     return acc
 
@@ -69,7 +69,7 @@ def _extract_uniprot_id(components: Any, cross_references: Any) -> str | None:
             if not isinstance(ref, dict):
                 continue
             if str(ref.get("xref_src", "")).lower() == "uniprot":
-                acc = normalize_uniprot_id(ref.get("xref_id"))
+                acc = normalize_uniprot(ref.get("xref_id"))
                 if acc:
                     return acc
 
