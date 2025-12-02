@@ -77,6 +77,7 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 #### Другие ChEMBL пайплайны
 
 - `docs/02-pipelines/chembl/assay/00-assay-chembl-overview.md` — пайплайн для assay
+- `docs/02-pipelines/chembl/assay/INDEX.md` — полный индекс документации по Assay
 - `docs/02-pipelines/chembl/target/00-target-chembl-overview.md` — пайплайн для target
 - `docs/02-pipelines/chembl/target/01-target-normalizer.md` — нормализатор данных target
 - `docs/02-pipelines/chembl/document/00-document-chembl-overview.md` — пайплайн для document

@@ -10,7 +10,16 @@
 
 ## Наследование
 
-Класс является dataclass.
+Класс является dataclass и наследуется от `object`.
+
+## Структура
+
+Фабрика содержит следующие поля:
+
+- `context_facade: ChemblContextFacade` — фасад контекста ChEMBL
+- `fetcher_strategies: dict[str, FetcherStrategy]` — набор стратегий получения данных по типам сущностей
+- `fallback_rows: Callable[[Any, Exception], list[dict[str, Any]]] | None` — функция для генерации фолбэк-значений при ошибках (опционально)
+- `sort_fields: Mapping[str, Sequence[str]] | None` — поля сортировки для детерминизма (опционально)
 
 ## Основной метод
 
@@ -40,6 +49,7 @@ descriptor = factory.build("activity")
 
 ## Related Components
 
+- **ChemblContextFacade**: фасад контекста ChEMBL (см. `docs/02-pipelines/chembl/common/28-chembl-context-facade.md`)
 - **ChemblExtractionServiceDescriptor**: дескриптор извлечения (см. `docs/02-pipelines/chembl/common/22-chembl-extraction-service-descriptor.md`)
 - **ChemblCommonPipeline**: использует фабрику для создания дескрипторов (см. `docs/02-pipelines/chembl/common/18-chembl-common-pipeline.md`)
 

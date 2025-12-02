@@ -18,7 +18,7 @@ ChemblRequestBuilder является dataclass и содержит:
 
 ### `build(self, *, route: str, ids: Sequence[str] | None = None, filters: Mapping[str, object] | None = None, pagination: PaginationParams | None = None, context: RequestContext | None = None) -> ClientRequest`
 
-Формирует экземпляр `ClientRequest` с указанным маршрутом и параметрами.
+Создаёт и возвращает объект *ClientRequest* с заданным маршрутом и параметрами (списком идентификаторов, фильтрами, информацией о пагинации и контексте).
 
 **Параметры:**
 - `route` — маршрут API (например, `"activity"`)
