@@ -48,9 +48,9 @@
 
 ## Related Components
 
-- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/18-chembl-common-pipeline.md`)
-- **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/17-chembl-write-service.md`)
-- **PubChemClient**: клиент для PubChem (см. `docs/02-pipelines/clients/20-pubchem-client.md`)
-- **TestItemSchema**: схема валидации (см. `docs/02-pipelines/schemas/27-testitem-schema.md`)
+- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)
+- **PubChemClient**: клиент для PubChem (см. `docs/02-pipelines/clients/02-pubchem-client.md`)
+- **TestItemSchema**: схема валидации (см. `docs/02-pipelines/schemas/01-testitem-schema.md`)
 - **TestitemPipelineOptions**: параметры CLI (см. `docs/02-pipelines/chembl/testitem/03-testitem-pipeline-options.md`)
 

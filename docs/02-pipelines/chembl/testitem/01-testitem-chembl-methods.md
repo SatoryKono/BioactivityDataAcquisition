@@ -52,5 +52,5 @@
 ## Related Components
 
 - **TestItemChemblPipeline**: основной пайплайн для testitem (см. `docs/02-pipelines/chembl/testitem/00-testitem-chembl-overview.md`)
-- **PubChemClient**: клиент для PubChem API (см. `docs/02-pipelines/clients/20-pubchem-client.md`)
+- **PubChemClient**: клиент для PubChem API (см. `docs/02-pipelines/clients/02-pubchem-client.md`)
 

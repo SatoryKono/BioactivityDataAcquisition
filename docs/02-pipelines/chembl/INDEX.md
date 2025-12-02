@@ -36,20 +36,18 @@
 - [00 TestItem ChEMBL Overview](testitem/00-testitem-chembl-overview.md) — пайплайн для тестовых веществ с обогащением данными PubChem
 - [INDEX](testitem/INDEX.md) — полный индекс документации по TestItem
 
-## Общие компоненты
+## Common компоненты (Shared)
 
-- [14 ChEMBL Client](14-chembl-client.md) — REST-клиент для ChEMBL API
-- [15 ChEMBL Request Builder](15-chembl-request-builder.md) — построитель запросов ChEMBL
-- [16 Requests Backend](16-requests-backend.md) — HTTP-бэкенд на основе requests
-- [17 ChEMBL Write Service](17-chembl-write-service.md) — сервис записи для ChEMBL-пайплайнов
+Документация по общим компонентам находится в `docs/02-pipelines/chembl/common/`:
 
-## Common компоненты
-
-- [08 Base ChEMBL Normalizer](common/08-base-chembl-normalizer.md) — базовый нормализатор, общий для всех ChEMBL-пайплайнов
-- [18 ChEMBL Common Pipeline](common/18-chembl-common-pipeline.md) — базовый класс для ChEMBL-пайплайнов
-- [19 ChEMBL Pipeline Base](common/19-chembl-pipeline-base.md) — базовый пайплайн для ChEMBL
-- [20 ChEMBL Extraction Service](common/20-chembl-extraction-service.md) — сервис извлечения данных ChEMBL
-- [21 ChEMBL Descriptor Factory](common/21-chembl-descriptor-factory.md) — фабрика дескрипторов ChEMBL
+- [08 Base ChEMBL Normalizer](common/08-base-chembl-normalizer.md) — базовый нормализатор
+- [14 ChEMBL Client](common/14-chembl-client.md) — REST-клиент
+- [15 ChEMBL Request Builder](common/15-chembl-request-builder.md) — построитель запросов
+- [16 ChEMBL Requests Backend](common/16-chembl-requests-backend.md) — транспортный бэкенд
+- [17 ChEMBL Write Service](common/17-chembl-write-service.md) — сервис записи
+- [18 ChEMBL Base Pipeline](common/18-chembl-base-pipeline.md) — базовый класс пайплайнов
+- [20 ChEMBL Extraction Service](common/20-chembl-extraction-service.md) — сервис извлечения
+- [21 ChEMBL Descriptor Factory](common/21-chembl-descriptor-factory.md) — фабрика дескрипторов
 - [22 ChEMBL Extraction Service Descriptor](common/22-chembl-extraction-service-descriptor.md) — дескриптор извлечения через сервис
 - [23 Extraction Strategy Factory](common/23-extraction-strategy-factory.md) — фабрика стратегий извлечения
 - [24 Service Extraction Strategy](common/24-service-extraction-strategy.md) — стратегия извлечения через сервис
@@ -63,4 +61,3 @@
 - [Base External Data Client](../../01-base-external-data-client.md) — базовый клиент внешних API
 - [Unified Output Writer](../../04-unified-output-writer.md) — унифицированный writer для записи
 - [Schema Registry](../../05-schema-registry.md) — реестр схем для валидации
-

@@ -14,10 +14,10 @@
 
 ## Схемы данных
 
-- **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/30-assay-schema.md`)
+- **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/04-assay-schema.md`)
 
 ## Related Components
 
-- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/18-chembl-common-pipeline.md`)
-- **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/17-chembl-write-service.md`)
+- **ChemblCommonPipeline**: базовый класс для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)
 

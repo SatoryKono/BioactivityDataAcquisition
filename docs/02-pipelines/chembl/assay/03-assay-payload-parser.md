@@ -38,5 +38,5 @@ structured_data = parser.parse(json_payload)
 ## Related Components
 
 - **ChemblAssayPipeline**: использует парсер для обработки ответов API (см. `docs/02-pipelines/chembl/assay/00-assay-chembl-overview.md`)
-- **ChemblClient**: клиент ChEMBL API (см. `docs/02-pipelines/chembl/14-chembl-client.md`)
+- **ChemblClient**: клиент ChEMBL API (см. `docs/02-pipelines/chembl/common/01-chembl-client.md`)
 
