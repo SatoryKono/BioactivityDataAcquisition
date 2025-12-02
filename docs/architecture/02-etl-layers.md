@@ -1,77 +1,37 @@
-# ETL Layers
+# 02 Etl Layers
 
-Архитектура BioETL разделена на 6 функциональных слоев. Каждый слой имеет свои обязанности и набор ABC-интерфейсов.
+## Orchestration
+Ответственность: управление жизненным циклом запуска (prepare_run/finalize_run), выбор профилей конфигураций, планирование пайплайнов.
+Ключевые ABC: PipelineHookABC, ErrorPolicyABC.
+Взаимодействие: вызывает Client/Transform/Validation/Output стадии, передаёт run_id и контекст.
+Примеры: базовые хуки для dry-run, сбор метрик, переопределяемые политики ошибок.
 
-## 1. Orchestration Layer (Оркестрация)
+## Monitoring
+Ответственность: логирование, метрики, прогресс и трассировка.
+Ключевые ABC: UnifiedLogger, LoggerAdapterABC, ProgressReporterABC, TracerABC.
+Взаимодействие: интегрируется в PipelineBase и клиенты, записывает события и метрики стадий.
+Примеры: структурированное логирование с контекстом pipeline_name/run_id, прогресс выгрузки страниц из API.
 
-Этот слой отвечает за управление жизненным циклом пайплайна, последовательностью выполнения стадий и обработку команд CLI.
+## Client
+Ответственность: получение данных из внешних API через унифицированные контракты.
+Ключевые ABC: UnifiedAPIClient, BaseClient, RequestBuilder/Parser/Paginator ABC из reference/clients.
+Взаимодействие: Orchestration передает конфиг, Client возвращает поток записей для Transform.
+Примеры: ChemblClient с ChemblRequestBuilder, ChemblResponseParser, TokenBucketRateLimiter.
 
-### Компоненты
-- **`PipelineBase`**: Базовый абстрактный класс. Определяет скелет алгоритма: `extract` → `transform` → `validate` → `write`.
-- **`PipelineRuntimeBase`**: Обеспечивает runtime-выполнение через `StageDescriptor`, управляет контекстом выполнения.
-- **`ChemblPipelineBase`**: Специализация для ChEMBL, внедряет `ChemblExtractionService`.
+## Transform
+Ответственность: нормализация и подготовка данных к валидации (очистка, маппинг, вычисление хешей).
+Ключевые ABC: TransformerABC, NormalizerABC, DescriptorFactory.
+Взаимодействие: получает сырые записи от Client, выдаёт таблицу с детерминированным порядком колонок.
+Примеры: ActivityTransformer, ChemblDescriptorFactory, TestitemNormalizer.
 
-### Ответственность
-- Инициализация конфигурации и ресурсов.
-- Запуск стадий в правильном порядке.
-- Управление режимом `dry_run`.
-- Обработка глобальных ошибок.
+## Validation
+Ответственность: проверка данных по Pandera-схемам и политикам ошибок.
+Ключевые ABC: ValidationService, ValidatorABC, SchemaRegistry, ErrorPolicyABC.
+Взаимодействие: получает таблицу из Transform, применяет схемы, формирует ValidationResult.
+Примеры: валидация колонок по SchemaRegistry, сбор QC-отчётов, fallback-политика пропуска строк.
 
-## 2. Monitoring Layer (Мониторинг)
-
-Обеспечивает наблюдаемость (observability) работы системы.
-
-### Компоненты
-- **`PipelineHookABC`**: Интерфейс для хуков (`on_stage_start`, `on_stage_end`, `on_error`).
-- **`LoggerAdapterABC`** (`UnifiedLogger`): Структурированное логирование событий.
-- **`ProgressReporterABC`**: Отображение прогресса выполнения (tqdm или аналоги).
-- **`TracerABC`**: Инструментарий для распределенной трассировки (OpenTelemetry).
-- **`ErrorPolicyABC`**: Политики реакции на ошибки (fail-fast, skip, retry).
-
-## 3. Data Access Layer (Доступ к данным)
-
-Слой абстрагирует работу с внешними источниками данных (REST API).
-
-### Компоненты
-- **`SourceClientABC`**: Контракт клиента (`fetch_one`, `fetch_many`, `iter_pages`).
-- **`RequestBuilderABC`**: Паттерн Builder для создания HTTP-запросов из бизнес-параметров.
-- **`ResponseParserABC`**: Преобразование сырых ответов (JSON/XML) в список записей (`Record`).
-- **`PaginatorABC`**: Стратегии пагинации (offset/limit, cursor, page/size).
-- **`RateLimiterABC`**: Ограничение частоты запросов (Token Bucket).
-- **`RetryPolicyABC`**: Стратегии повторных попыток с exponential backoff.
-- **`CacheABC`**: Кэширование ответов API.
-
-## 4. Transformation Layer (Трансформация)
-
-Слой бизнес-логики, отвечающий за приведение данных к целевому виду.
-
-### Компоненты
-- **`TransformerABC`**: Интерфейс чистых функций трансформации DataFrame.
-- **`LookupEnricherABC`**: Обогащение данных с использованием внешних справочников (join).
-- **`BusinessKeyDeriverABC`**: Вычисление суррогатных и бизнес-ключей.
-- **`DeduplicatorABC`**: Логика поиска и устранения дубликатов.
-- **`MergeStrategyABC`**: Правила слияния конфликтующих записей.
-- **`HasherABC`**: Детерминированное хеширование строк (`hash_row`).
-
-## 5. Schema & Validation Layer (Схемы и валидация)
-
-Обеспечивает качество данных и соответствие контрактам перед записью.
-
-### Компоненты
-- **Pandera Schemas**: Декларативное описание схем таблиц (`ActivitySchema`, `AssaySchema`).
-- **`ValidatorABC`**: Интерфейс валидатора, запускающего проверки.
-- **`SchemaProviderABC`**: Провайдер, предоставляющий схемы по имени сущности.
-- **`SchemaRegistry`**: Реестр, хранящий метаданные схем (порядок колонок, ключи).
-
-## 6. Output Layer (Вывод данных)
-
-Отвечает за сохранение результатов на диск.
-
-### Компоненты
-- **`WriterABC`**: Интерфейс записи DataFrame в файл (CSV, Parquet).
-- **`MetadataWriterABC`**: Запись метаданных прогона (`meta.yaml`) и QC-отчетов.
-- **`UnifiedOutputWriter`**: Фасад, координирующий запись данных и артефактов.
-
-### Особенности
-- **Атомарная запись**: Использование паттерна `write-temp-and-rename` для предотвращения повреждения данных.
-
+## Output
+Ответственность: атомарная запись таблиц, метаданных и QC-отчётов.
+Ключевые ABC: UnifiedOutputWriter, WriterABC, MetadataWriterABC.
+Взаимодействие: принимает валидированные таблицы и контекст запуска, пишет в `tables/`, `qc/`, `meta.yaml`, `checksums/`.
+Примеры: запись CSV/Parquet с фиксированным порядком колонок, генерация checksum-файлов.

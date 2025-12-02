@@ -1,48 +1,19 @@
-# CLI Commands
+# 01 Commands
 
-Список доступных команд утилиты `bioetl`.
+## run
+- Назначение: запуск одного или нескольких пайплайнов.
+- Основные опции: `--pipeline <name>`, `--config <path>`, `--profile dev|prod`, `--output-dir <path>`, `--dry-run`.
+- Пример: `bioetl run --pipeline chembl_activity --config configs/pipelines/chembl/activity.yaml --profile dev`.
 
-## `run`
+## validate-config
+- Назначение: проверка YAML-конфигураций и профилей на полноту и корректность.
+- Опции: `--config <path>`, `--profile <name>`.
+- Пример: `bioetl validate-config --config configs/pipelines/chembl/activity.yaml --profile prod`.
 
-Запуск ETL-пайплайна.
+## smoke-run
+- Назначение: быстрый запуск с малыми лимитами для проверки доступности источников и схем.
+- Опции: `--pipeline <name>`, `--config <path>`, `--limit <n>`.
+- Пример: `bioetl smoke-run --pipeline chembl_assay --config configs/pipelines/chembl/assay.yaml --limit 100`.
 
-```bash
-bioetl run [PIPELINE_NAME] [OPTIONS]
-```
-
-**Аргументы:**
-- `PIPELINE_NAME`: Имя пайплайна (например, `activity_chembl`).
-
-**Опции:**
-- `--profile TEXT`: Профиль конфигурации (`development`, `production`). По умолчанию `default`.
-- `--dry-run / --no-dry-run`: Запуск без записи результатов. По умолчанию `False`.
-- `-o, --output PATH`: Путь к директории вывода.
-- `--set KEY=VALUE`: Переопределение параметров конфига (можно указывать несколько раз).
-
-## `validate-config`
-
-Проверка валидности конфигурационного файла.
-
-```bash
-bioetl validate-config [CONFIG_PATH]
-```
-
-**Аргументы:**
-- `CONFIG_PATH`: Путь к YAML-файлу конфигурации.
-
-## `list-pipelines`
-
-Вывод списка доступных пайплайнов.
-
-```bash
-bioetl list-pipelines
-```
-
-## `smoke-run`
-
-Запуск быстрого дымового тестирования для указанного пайплайна (аналог `--profile development --dry-run`).
-
-```bash
-bioetl smoke-run [PIPELINE_NAME]
-```
-
+## Дополнительные команды
+Проект допускает регистрацию пользовательских команд (например, `list-pipelines`, `dump-schema`) через `CLICommandABC`. За подробностями см. `docs/guides/00-running-pipelines.md`.

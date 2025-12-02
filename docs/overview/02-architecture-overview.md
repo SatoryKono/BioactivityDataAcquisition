@@ -1,69 +1,26 @@
-# Architecture Overview
+# 02 Architecture Overview
 
-## Диаграмма уровней
+## Шестислойная модель
+- **Orchestration** — управление запуском пайплайнов, профили конфигурации, хуки жизненного цикла.
+- **Monitoring** — логирование, метрики, прогресс, трассировка ошибок.
+- **Client** — единый доступ к внешним API через UnifiedAPIClient и специализированные клиенты.
+- **Transform** — нормализация, очистка, вычисление хешей, подготовка к валидации.
+- **Validation** — проверка данных через SchemaRegistry и ValidationService, политики обработки ошибок.
+- **Output** — атомарная запись таблиц и артефактов через UnifiedOutputWriter.
 
-Архитектура BioETL построена по слоистому принципу (Layered Architecture) с четким разделением ответственности.
+## Центральные абстракции
+- `PipelineBase` — каркас пайплайна с методами extract/transform/validate/write.
+- ABC-интерфейсы слоёв (клиенты, трансформеры, валидаторы, писатели) для единообразия контрактов.
+- `UnifiedAPIClient`, `UnifiedOutputWriter`, `SchemaRegistry`, `ValidationService` — общие сервисы, доступные всем пайплайнам.
 
-```text
-┌─────────────────────────────────────────────────┐
-│           CLI / Orchestration Layer             │
-│  CLICommandABC, PipelineBase, StageDescriptor   │
-│  (Управление запуском, стадиями, ресурсами)     │
-├─────────────────────────────────────────────────┤
-│              Monitoring Layer                   │
-│  PipelineHookABC, LoggerAdapterABC, TracerABC   │
-│  (Логирование, метрики, трассировка, прогресс)  │
-├─────────────────────────────────────────────────┤
-│             Data Access Layer                   │
-│  SourceClientABC, RequestBuilderABC, CacheABC   │
-│  (HTTP-запросы, пагинация, ретраи, лимиты)      │
-├─────────────────────────────────────────────────┤
-│           Transformation Layer                  │
-│  TransformerABC, LookupEnricherABC, HasherABC   │
-│  (Нормализация, очистка, дедупликация, ключи)   │
-├─────────────────────────────────────────────────┤
-│          Schema & Validation Layer              │
-│  Pandera schemas, ValidatorABC, SchemaRegistry  │
-│  (Проверка типов, форматов, обязательных полей) │
-├─────────────────────────────────────────────────┤
-│               Output Layer                      │
-│  WriterABC, MetadataWriterABC, QC artifacts     │
-│  (Атомарная запись, метаданные, отчеты качества)│
-└─────────────────────────────────────────────────┘
-```
+## Поток данных
+1. **extract**: клиент получает данные из внешнего API.
+2. **transform**: данные нормализуются и дополняются служебными колонками.
+3. **validate**: применяется схема, ошибки обрабатываются политиками.
+4. **write**: таблицы и метаданные пишутся атомарно.
 
-## Ключевые принципы
-
-### 1. Детерминизм
-Идентичные входные данные и конфигурация должны давать **битово-идентичный** результат.
-- Стабильная сортировка строк и колонок.
-- UTC-время для всех timestamp.
-- Каноническая сериализация JSON.
-
-### 2. Validate-before-write
-Никакие данные не записываются в итоговое хранилище без успешной валидации через Pandera-схему.
-- Строгая типизация.
-- Проверка форматов (Regex для ID).
-- Фиксированный порядок колонок (`column_order`).
-
-### 3. Structured Logging
-Использование только `UnifiedLogger` для генерации структурированных логов (JSON/Key-Value). `print()` запрещен.
-
-### 4. Unified API Access
-Все внешние запросы идут через `UnifiedAPIClient`, который обеспечивает:
-- Automatic Retries (exponential backoff).
-- Rate Limiting (token bucket).
-- Circuit Breaker (предотвращение каскадных сбоев).
-
-## Поток данных (Data Flow)
-
-Стандартный цикл выполнения пайплайна:
-
-`extract` (извлечение сырых данных) → `transform` (нормализация и обогащение) → `validate` (проверка схемы) → `write` (сохранение).
-
-Подробнее см. [Data Flow](../architecture/03-data-flow.md).
-
-## Ссылки
-- [Детальное описание слоев (ETL Layers)](../architecture/02-etl-layers.md)
-- [ABC-объекты домена](../architecture/01-domain-objects.md)
-
+## Навигация
+- Детали архитектуры: `docs/architecture/*`.
+- Справочники ABC и ядра: `docs/reference/abc/00-index.md`, `docs/reference/core/*`.
+- Описание пайплайнов: `docs/02-pipelines/chembl/00-index.md`.
+- Практические гайды: `docs/guides/00-running-pipelines.md`.
