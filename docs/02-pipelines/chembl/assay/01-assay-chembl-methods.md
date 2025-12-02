@@ -51,5 +51,5 @@
 ## Related Components
 
 - **ChemblAssayPipeline**: основной пайплайн для assay (см. `docs/02-pipelines/chembl/assay/00-assay-chembl-overview.md`)
-- **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/30-assay-schema.md`)
+- **AssaySchema**: схема валидации данных assay (см. `docs/02-pipelines/schemas/04-assay-schema.md`)
 
