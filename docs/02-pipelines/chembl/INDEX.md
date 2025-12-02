@@ -11,9 +11,9 @@
 ### Activity
 
 - [00 Activity ChEMBL Overview](../activity/00-activity-chembl-overview.md) — основной пайплайн для обработки данных биоактивности
-- [01 Activity ChEMBL Extract](../activity/01-activity-chembl-extract.md) — стадия извлечения данных
-- [02 Activity ChEMBL Transform](../activity/02-activity-chembl-transform.md) — стадия трансформации данных
-- [03 Activity ChEMBL Write](../activity/03-activity-chembl-write.md) — стадия записи результатов
+- [01 Activity ChEMBL Extraction](../activity/01-activity-chembl-extraction.md) — стадия извлечения данных
+- [02 Activity ChEMBL Transformation](../activity/02-activity-chembl-transformation.md) — стадия трансформации данных
+- [03 Activity ChEMBL IO](../activity/03-activity-chembl-io.md) — стадия записи результатов
 - [INDEX](../activity/INDEX.md) — полный индекс документации по Activity
 
 ### Assay
