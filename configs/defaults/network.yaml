@@ -1,0 +1,17 @@
+# Network Default Configuration
+# This file defines system-wide default settings for HTTP network interactions.
+
+http:
+  default:
+    # Maximum allowed length for the request URL.
+    # This limit is used to prevent "414 URI Too Long" errors across the system.
+    #
+    # Priority hierarchy for max_url_length:
+    # 1. Pipeline-specific config (e.g., configs/pipelines/chembl/activity.yaml)
+    # 2. Source-specific config (e.g., sources.chembl.parameters.max_url_length in configs/defaults/chembl.yaml)
+    # 3. Default HTTP config (this file: http.default.max_url_length)
+    #
+    # Note: ChEMBL explicitly overrides this in configs/defaults/chembl.yaml (value: 2000),
+    # but we keep it synchronized here as a sensible default for other clients.
+    max_url_length: 2000
+

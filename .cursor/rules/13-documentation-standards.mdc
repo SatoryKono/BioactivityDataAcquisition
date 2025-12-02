@@ -29,7 +29,7 @@ globs: ["docs/**/*.md", "**/INDEX.md", "**/README.md"]
 
 When adding a new entity (contract/pipeline/client), PR MUST include:
 1. Documentation under `docs/02-pipelines/<provider>/<entity>/` using `NN-<entity>-<provider>-<topic>.md`
-2. Entry/update in `docs/ABC_INDEX.md` if ABC/contract is added
+2. Entry/update in `docs/reference/abc/INDEX.md` if ABC/contract is added
 3. Updates to `abc_registry.yaml` and `abc_impls.yaml` when creating ABC/Default/Impl
 
 ## Examples
@@ -46,4 +46,4 @@ Invalid:
 
 ## Reference
 
-See `docs/00-styleguide/10-documentation-standards.md` and `docs/00-styleguide/00-naming-conventions.md` for detailed standards.
+See `docs/project/00-rules-summary.md` (раздел 1 — именование документации, раздел 4 — стандарты документации) for detailed standards.

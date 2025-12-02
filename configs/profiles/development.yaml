@@ -1,0 +1,25 @@
+# Development Profile
+# Настройки для локальной разработки
+
+extends: chembl_default
+
+# Ограничения для быстрых прогонов
+pagination:
+  limit: 100
+  max_pages: 5
+
+client:
+  timeout: 10.0
+  rate_limit: 5
+
+storage:
+  output_path: ./data/dev/output
+  cache_path: ./data/dev/cache
+
+logging:
+  level: DEBUG
+
+qc:
+  enable_quality_report: false
+  enable_correlation_report: false
+

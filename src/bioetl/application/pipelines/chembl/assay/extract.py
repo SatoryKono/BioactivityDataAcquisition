@@ -1,0 +1,81 @@
+"""
+Extraction logic for Assay pipeline.
+"""
+import logging
+from typing import Any
+
+import pandas as pd
+
+from bioetl.application.pipelines.chembl.common.inputs import read_input_dataframe, read_input_ids
+from bioetl.application.pipelines.chembl.extraction import ChemblExtractionService
+from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
+from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
+
+logger = logging.getLogger(__name__)
+
+
+def _chunk_list(data: list[Any], size: int):
+    """Yield successive chunks from data."""
+    for i in range(0, len(data), size):
+        yield data[i:i + size]
+
+
+def extract_assay(
+    config: PipelineConfig, 
+    service: ChemblExtractionService, 
+    **kwargs: Any
+) -> pd.DataFrame:
+    """
+    Extract assay data.
+    """
+    # Resolve source config
+    source_raw = config.sources.get("chembl", {})
+    if isinstance(source_raw, ChemblSourceConfig):
+        source_config = source_raw
+    else:
+        source_config = ChemblSourceConfig.model_validate(source_raw)
+
+    limit = kwargs.get("limit")
+
+    path = config.cli.get("input_file")
+    if path:
+        header = pd.read_csv(path, nrows=0)
+        if "assay_chembl_id" not in header.columns:
+             raise ValueError(f"Input file {path} must contain 'assay_chembl_id'")
+             
+        is_id_only = len(header.columns) <= 2 and "assay_chembl_id" in header.columns
+        
+        if not is_id_only:
+            logger.info("Detected full data in input CSV.")
+            df = read_input_dataframe(config, id_col="assay_chembl_id")
+            if df is None:
+                return pd.DataFrame()
+
+            if limit:
+                df = df.head(limit)
+            return df
+        
+        logger.info("Detected ID-only input CSV. Fetching data from API...")
+        ids = read_input_ids(config, id_col="assay_chembl_id")
+        if not ids:
+            return pd.DataFrame()
+            
+        if limit:
+            ids = ids[:limit]
+
+        records = []
+        # Calculate batch size dynamically based on config and limit
+        batch_size = source_config.resolve_effective_batch_size(limit=limit, hard_cap=25)
+        
+        parser = ChemblResponseParser()
+        
+        for batch_ids in _chunk_list(ids, batch_size):
+            str_ids = ",".join(map(str, batch_ids))
+            response = service.client.request_assay(assay_chembl_id__in=str_ids)
+            batch_records = parser.parse(response)
+            records.extend(batch_records)
+            
+        return pd.DataFrame(records)
+
+    return service.extract_all("assay", **kwargs)

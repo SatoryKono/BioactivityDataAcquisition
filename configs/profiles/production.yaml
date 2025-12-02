@@ -1,0 +1,30 @@
+# Production Profile
+# Настройки для production окружения
+
+extends: chembl_default
+
+client:
+  timeout: 60.0
+  max_retries: 5
+  rate_limit: 20
+
+storage:
+  output_path: /data/production/output/chembl
+  cache_path: /data/production/cache/chembl
+
+logging:
+  level: WARNING
+  
+determinism:
+  stable_sort: true
+  utc_timestamps: true
+  canonical_json: true
+  atomic_writes: true
+  validate_checksums: true
+
+qc:
+  enable_quality_report: true
+  enable_correlation_report: true
+  min_coverage: 0.90
+  fail_on_low_coverage: true
+
