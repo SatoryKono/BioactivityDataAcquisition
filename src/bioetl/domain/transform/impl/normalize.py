@@ -1,6 +1,12 @@
 import pandas as pd
 from typing import Any, Callable, Optional, TYPE_CHECKING
 
+from bioetl.core.custom_types import (
+    CUSTOM_FIELD_NORMALIZERS,
+    normalize_array,
+    normalize_record,
+)
+
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.models import PipelineConfig
 
@@ -37,7 +43,7 @@ ID_FIELDS_EXACT = {
 def is_id_field(name: str) -> bool:
     if name in ID_FIELDS_EXACT:
         return True
-    if name.endswith("_id") or name.endswith("_chembl_id"):
+    if name.endswith("_id") or name.endswith("_chembl_id") or name.startswith("id_"):
         return True
     return False
 
@@ -200,35 +206,69 @@ class NormalizerMixin:
                 mode = "id"
 
             # Create bound normalizer function for this field
-            def _field_normalizer(val: Any) -> Any:
-                return normalize_scalar(val, mode=mode)
+            base_normalizer: Callable[[Any], Any]
+            if name in CUSTOM_FIELD_NORMALIZERS:
+                base_normalizer = CUSTOM_FIELD_NORMALIZERS[name]
+            else:
+                def _default_normalizer(val: Any) -> Any:
+                    return normalize_scalar(val, mode=mode)
+
+                base_normalizer = _default_normalizer
+
+            def _apply_value(val: Any) -> Any:
+                try:
+                    return base_normalizer(val)
+                except ValueError as exc:
+                    raise ValueError(
+                        f"Ошибка нормализации поля '{name}': {exc}"
+                    ) from exc
 
             if dtype in ("array", "object"):
                 # For nested structures, we pass the normalizer down
                 def _serialize_wrapper(val: Any) -> Any:
-                    if val is None:
-                        return pd.NA
-                    
-                    # Safety: check for collections before pd.isna to avoid ValueError on arrays
-                    if isinstance(val, (list, dict, tuple)):
-                        pass # Proceed to serialization
-                    elif pd.isna(val):
-                        return pd.NA
+                    try:
+                        if val is None:
+                            return pd.NA
+                        if not isinstance(val, (list, dict, tuple)) and pd.isna(val):
+                            return pd.NA
+                    except ValueError:
+                        pass
 
-                    if isinstance(val, list):
-                        return serialize_list(val, value_normalizer=_field_normalizer)
+                    if isinstance(val, (list, tuple)):
+                        try:
+                            normalized_list = normalize_array(
+                                list(val), item_normalizer=base_normalizer
+                            )
+                        except ValueError as exc:
+                            raise ValueError(
+                                f"Ошибка нормализации списка в поле '{name}': {exc}"
+                            ) from exc
+                        if normalized_list is None:
+                            return pd.NA
+                        return serialize_list(normalized_list)
+
                     if isinstance(val, dict):
-                        return serialize_dict(val, value_normalizer=_field_normalizer)
-                    # Fallback for scalar values in array/object column
-                    res = _field_normalizer(val)
+                        try:
+                            normalized_dict = normalize_record(
+                                val, value_normalizer=base_normalizer
+                            )
+                        except ValueError as exc:
+                            raise ValueError(
+                                f"Ошибка нормализации записи в поле '{name}': {exc}"
+                            ) from exc
+                        if normalized_dict is None:
+                            return pd.NA
+                        return serialize_dict(normalized_dict)
+
+                    res = _apply_value(val)
                     return str(res) if res is not pd.NA and res is not None else pd.NA
-                
+
                 df[name] = df[name].apply(_serialize_wrapper)
                 df[name] = df[name].astype("string").replace({pd.NA: None})
-            
+
             elif dtype in ("string", "integer", "number", "float", "boolean"):
-                 # For scalars, apply directly
-                 df[name] = df[name].apply(_field_normalizer)
+                # For scalars, apply directly
+                df[name] = df[name].apply(_apply_value)
             
         return df
 
