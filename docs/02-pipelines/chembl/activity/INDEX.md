@@ -8,9 +8,9 @@
 
 ## Стадии пайплайна
 
-- [01 Activity ChEMBL Extract](01-activity-chembl-extract.md) — стадия извлечения данных из ChEMBL API
-- [02 Activity ChEMBL Transform](02-activity-chembl-transform.md) — стадия трансформации и нормализации данных
-- [03 Activity ChEMBL Write](03-activity-chembl-write.md) — стадия записи результатов и генерации артефактов
+- [01 Activity ChEMBL Extraction](01-activity-chembl-extraction.md) — стадия извлечения данных из ChEMBL API
+- [02 Activity ChEMBL Transformation](02-activity-chembl-transformation.md) — стадия трансформации и нормализации данных
+- [03 Activity ChEMBL IO](03-activity-chembl-io.md) — стадия записи результатов и генерации артефактов
 
 ## Компоненты обработки данных
 

@@ -104,9 +104,9 @@
 
 ## Related Components
 
-- **ActivityExtractor**: стадия извлечения данных (см. `01-activity-chembl-extract.md`)
-- **ActivityTransformer**: стадия трансформации данных (см. `02-activity-chembl-transform.md`)
-- **ActivityWriter**: стадия записи результатов (см. `03-activity-chembl-write.md`)
+- **ActivityExtractor**: стадия извлечения данных (см. `01-activity-chembl-extraction.md`)
+- **ActivityTransformer**: стадия трансформации данных (см. `02-activity-chembl-transformation.md`)
+- **ActivityWriter**: стадия записи результатов (см. `03-activity-chembl-io.md`)
 - **ActivityParser**: парсер ответов ChEMBL API (см. `04-activity-chembl-parser.md`)
 - **ActivityNormalizer**: нормализатор данных активности (см. `05-activity-chembl-normalizer.md`)
 - **ChemblClient**: REST-клиент для ChEMBL API (см. `docs/02-pipelines/01-base-external-data-client.md`)
