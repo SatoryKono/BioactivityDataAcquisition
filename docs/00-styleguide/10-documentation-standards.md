@@ -26,7 +26,7 @@ All documentation files **MUST** follow `00-naming-conventions.md`:
 
 - When adding a **new entity** (contract / pipeline / client), the PR **MUST** include:
   1. New or updated documentation under `docs/02-pipelines/<provider>/<entity>/` using the filename pattern `NN-<entity>-<provider>-<topic>.md`.
-  2. An entry/update in the human-readable registry (`docs/ABC_INDEX.md`) if the ABC/contract is added.
+  2. An entry/update in the human-readable registry (`docs/01-ABC/INDEX.md`) if the ABC/contract is added.
   3. Updates to machine registries: `src/bioetl/clients/base/abc_registry.yaml` and `src/bioetl/clients/base/abc_impls.yaml` when creating ABC/Default/Impl (see `01-new-entity-implementation-policy.md`).
 - Documentation sections that explain implementation-specific details **MUST** be updated when implementation changes (e.g. new Default factory, new Impl class, changes in factory signature).
 
@@ -48,13 +48,13 @@ All documentation files **MUST** follow `00-naming-conventions.md`:
 - Changes to ABCs (Protocol/ABC) **MUST** be accompanied with:
   - Updated docstring on the ABC (structured block: brief description, public interface, file path, default pointer).
   - Updated `abc_impls.yaml` and `abc_registry.yaml`.
-  - Documentation updates in `docs/ABC_INDEX.md` and pipeline docs referencing the ABC.
+  - Documentation updates in `docs/01-ABC/INDEX.md` and pipeline docs referencing the ABC.
 - CI **MUST** enforce that PRs changing ABCs/Defaults/Impls update the documentation checklist.
 
 ## Examples and Cross-references
 
 - Pipeline base: `docs/02-pipelines/00-pipeline-base.md`
-- ABC index: `docs/ABC_INDEX.md`
+- ABC index: `docs/01-ABC/INDEX.md`
 - Naming conventions: `00-naming-conventions.md`
 - Entity naming: `02-new-entity-naming-policy.md` and `01-new-entity-implementation-policy.md`
 
