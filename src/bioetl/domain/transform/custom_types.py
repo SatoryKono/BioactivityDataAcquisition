@@ -113,13 +113,14 @@ def normalize_array(
     """Normalize array-like value and its elements."""
     if _is_missing(value):
         return None
-    if not isinstance(value, (list, tuple)):
-        raise ValueError(
-            f"Ожидался список или кортеж для массива, получено {type(value).__name__}"
-        )
+
+    if isinstance(value, (list, tuple)):
+        items: Iterable[Any] = value
+    else:
+        items = [value]
 
     normalized: list[Any] = []
-    for idx, item in enumerate(value):
+    for idx, item in enumerate(items):
         if _is_missing(item):
             continue
         if isinstance(item, dict):
@@ -139,7 +140,14 @@ def normalize_array(
         if not _is_missing(normalized_item):
             normalized.append(normalized_item)
 
-    return normalized or None
+    if normalized:
+        return normalized
+
+    if isinstance(value, (list, tuple)):
+        return []
+    if _is_missing(value):
+        return None
+    return []
 
 
 def normalize_record(
