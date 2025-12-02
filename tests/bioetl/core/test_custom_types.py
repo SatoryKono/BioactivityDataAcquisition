@@ -48,7 +48,7 @@ if "tqdm" not in sys.modules:
     tqdm_module.tqdm = _noop_tqdm
     sys.modules["tqdm"] = tqdm_module
 
-from bioetl.core.custom_types import (
+from bioetl.domain.transform.custom_types import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
     normalize_chembl_id,
@@ -188,12 +188,14 @@ class TestNormalizeArray:
         with pytest.raises(ValueError):
             normalize_array(["123", "invalid"], item_normalizer=normalize_pmid)
 
-    def test_raises_on_non_iterable(self):
-        with pytest.raises(ValueError):
-            normalize_array("not-a-list", item_normalizer=str)
+    def test_accepts_scalar_input(self):
+        assert normalize_array("123", item_normalizer=normalize_pmid) == ["123"]
+
+    def test_returns_empty_on_empty_scalar(self):
+        assert normalize_array("", item_normalizer=normalize_pmid) == []
 
     def test_returns_none_for_empty(self):
-        assert normalize_array([], item_normalizer=normalize_pmid) is None
+        assert normalize_array([], item_normalizer=normalize_pmid) == []
 
 
 class TestNormalizeRecord:
