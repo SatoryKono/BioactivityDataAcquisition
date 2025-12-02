@@ -8,6 +8,16 @@ from bioetl.domain.models import RunContext, RunResult
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.stages import StageABC, StageResult
 from bioetl.core.container import PipelineContainer, build_pipeline_dependencies
+from bioetl.core.custom_types import (
+    CUSTOM_FIELD_NORMALIZERS,
+    normalize_array,
+    normalize_chembl_id,
+    normalize_doi,
+    normalize_pcid,
+    normalize_pmid,
+    normalize_record,
+    normalize_uniprot,
+)
 
 __all__ = [
     "ErrorAction",
@@ -20,4 +30,12 @@ __all__ = [
     "StageResult",
     "PipelineContainer",
     "build_pipeline_dependencies",
+    "CUSTOM_FIELD_NORMALIZERS",
+    "normalize_array",
+    "normalize_chembl_id",
+    "normalize_doi",
+    "normalize_pcid",
+    "normalize_pmid",
+    "normalize_record",
+    "normalize_uniprot",
 ]
