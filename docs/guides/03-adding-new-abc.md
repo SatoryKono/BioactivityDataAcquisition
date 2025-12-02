@@ -1,56 +1,16 @@
-# Adding New ABC
+# 03 Adding New Abc
 
-Руководство по расширению системы контрактов. Используйте **Трёхслойный паттерн** (ABC / Default / Impl).
+## Процесс
+1. Определите контракт в `src/bioetl/clients/<domain>/contracts.py` (или base/contracts.py) с подробным докстрингом.
+2. Создайте Default-фабрику в `src/bioetl/clients/<domain>/factories.py` с функцией `default_<domain>_<entity>()`.
+3. Реализацию разместите в `src/bioetl/clients/<domain>/impl/` с суффиксом `Impl`.
+4. Обновите реестры `abc_registry.yaml` и `abc_impls.yaml` для нового контракта и его связей.
+5. Добавьте описание в `docs/ABC_INDEX.md` и соответствующие reference-файлы.
 
-## Шаг 1. Определение контракта (ABC)
-Создайте абстрактный класс в файле `contracts.py`. Обязательно добавьте docstring со структурой.
+## Требования к ABC
+- Чёткий докстринг: назначение, публичные методы, ссылка на Default/Impl.
+- Именование по политике проекта (PascalCase, суффикс ABC/Protocol где нужно).
+- Контракт должен покрывать ответственность слоя и избегать пересечения с существующими ABC.
 
-```python
-# src/bioetl/clients/base/contracts.py
-class NewFeatureABC(ABC):
-    """
-    Краткое описание функциональности.
-
-    Public Interface:
-        do_work(param: str) -> Result
-
-    Localization:
-        - Contract: src/bioetl/clients/base/contracts.py
-        - Default: src/bioetl/clients/base/factories.py::default_new_feature()
-        - Impl: src/bioetl/clients/base/impl/new_feature_impl.py
-    """
-
-    @abstractmethod
-    def do_work(self, param: str) -> Result:
-        ...
-```
-
-## Шаг 2. Фабрика по умолчанию (Default)
-Создайте функцию-фабрику в `factories.py`. Она может возвращать заглушку или `NotImplementedError`, пока нет реализации.
-
-```python
-# src/bioetl/clients/base/factories.py
-def default_new_feature() -> NewFeatureABC:
-    raise NotImplementedError("No default implementation yet")
-```
-
-## Шаг 3. Регистрация
-Обновите реестры.
-
-**src/bioetl/clients/base/abc_registry.yaml**:
-```yaml
-NewFeatureABC:
-  module: bioetl.clients.base.contracts
-  default_factory: bioetl.clients.base.factories.default_new_feature
-```
-
-**src/bioetl/clients/base/abc_impls.yaml**:
-```yaml
-NewFeatureABC:
-  default: default_new_feature
-  impls: []
-```
-
-## Шаг 4. Документация
-Добавьте новый ABC в таблицу каталога `docs/reference/abc/00-index.md`.
-
+## Избежание дублирования
+Проверьте существующие контракты в `docs/reference/abc/00-index.md`. Если новый функционал дополняет существующий ABC, расширьте его вместо создания дубликата. Поддерживайте трёхслойный паттерн и обновляйте документацию синхронно с кодом.

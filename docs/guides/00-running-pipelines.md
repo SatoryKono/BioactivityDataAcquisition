@@ -1,59 +1,17 @@
-# Running Pipelines
+# 00 Running Pipelines
 
-Руководство по запуску ETL-пайплайнов с использованием интерфейса командной строки (CLI).
+## Запуск через CLI
+- Один пайплайн: `bioetl run --pipeline chembl_activity --config configs/pipelines/chembl/activity.yaml`.
+- Несколько пайплайнов: указать несколько `--pipeline` или использовать групповой конфиг.
+- Профили: `--profile dev` для ограниченных выборок, `--profile prod` для полноты и усиленных лимитов.
+- Доп. параметры: `--output-dir <path>`, `--dry-run` для проверки без записи, `--limit` для smoke-run.
 
-## Основной синтаксис
-
-```bash
-bioetl run [PIPELINE_NAME] [OPTIONS]
-```
-
-## Примеры использования
-
-### 1. Разработка (Smoke Test)
-Быстрый запуск для проверки логики. Используется профиль `development` (маленькие лимиты) и флаг `--dry-run` (без записи).
-
-```bash
-bioetl run activity_chembl --profile development --dry-run
-```
-
-### 2. Продакшн (Full Run)
-Полный сбор данных. Используется профиль `production` (стандартные лимиты, включенный QC).
-
-```bash
-bioetl run activity_chembl --profile production -o output/activity_2024/
-```
-
-### 3. Переопределение параметров
-Можно точечно менять настройки "на лету" без правки YAML-файлов.
-
-```bash
-# Увеличить таймаут и лимит страниц
-bioetl run activity_chembl \
-  --set client.timeout=60 \
-  --set pagination.limit=500 \
-  --set pagination.max_pages=20
-```
+## Профили окружений
+- **development**: уменьшенные лимиты, расширенное логирование, возможен кэш ответов.
+- **production**: полные лимиты, строгие политики ошибок, детерминизм и контроль checksums.
 
 ## Программный запуск
+При необходимости можно вызвать пайплайн из Python, создав экземпляр PipelineBase и передав ему конфиг через соответствующий конструктор клиента/сервисов. CLI остаётся рекомендуемым способом, но API симметрично: `pipeline.run(context)` с заранее подготовленным контекстом.
 
-Пайплайны можно запускать из Python-кода (например, из Airflow или Jupyter).
-
-```python
-from pathlib import Path
-from bioetl.config import load_config
-from bioetl.pipelines.chembl.activity.run import ChemblActivityPipeline
-
-# 1. Загрузка конфигурации
-config = load_config("configs/pipelines/chembl/activity.yaml", profile="production")
-
-# 2. Инициализация пайплайна
-pipeline = ChemblActivityPipeline(config, run_id="manual_run_001")
-
-# 3. Запуск
-result = pipeline.run(output_dir=Path("output/activity"))
-
-print(f"Pipeline finished: {result.status}")
-print(f"Rows processed: {result.row_count}")
-```
-
+## Ссылки
+Подробности по командам — `docs/reference/cli/01-commands.md`. Настройка конфигураций — `docs/guides/01-configuration.md`.
