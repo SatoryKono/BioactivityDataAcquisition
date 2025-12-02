@@ -83,6 +83,7 @@ class TestIdentifierNormalizers:
 
     def test_normalize_uniprot(self):
         assert normalize_uniprot("p12345") == "P12345"
+        assert normalize_uniprot("A0A0B4J2D5") == "A0A0B4J2D5"
         with pytest.raises(ValueError):
             normalize_uniprot("invalid")
 
