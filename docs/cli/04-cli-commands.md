@@ -1,4 +1,4 @@
-# 01 CLI Commands
+# 04 CLI Commands
 
 ## Описание
 

@@ -12,12 +12,34 @@ Depending on your installation, you may invoke the CLI via a console script (for
 
 In the examples below, `bioetl` is used as a placeholder for whatever entry point is configured in your environment.
 
+## Architecture
+
+CLI состоит из трёх основных компонентов:
+
+1. **cli_app.py** — инициализация приложения Typer, определение базовых команд и генерация команд для зарегистрированных пайплайнов
+2. **cli_command.py** — создание Typer-команд для конкретных пайплайнов с обработкой конфигураций и исключений
+3. **cli_registry.py** — централизованный реестр доступных пайплайнов для динамического создания команд
+
+**Модули:**
+
+- `src/bioetl/cli/cli_app.py` — главное приложение CLI
+- `src/bioetl/cli/cli_command.py` — создание команд для пайплайнов
+- `src/bioetl/cli/cli_registry.py` — реестр пайплайнов
+
 ## Design Principles
 
 - **Explicit commands and flags**: Prefer explicit named options over ambiguous positional arguments
 - **Deterministic behavior**: Identical inputs and configuration should lead to byte-identical outputs
 - **Idempotent commands**: Running the same command twice with the same inputs should not produce conflicting or inconsistent artifacts
 - **Clear exit codes**: Successful commands exit with code `0`. Validation or runtime errors result in non-zero exit codes that can be checked in CI
+
+## Key Features
+
+- **Динамическая регистрация пайплайнов**: автоматическое создание команд для всех зарегистрированных пайплайнов
+- **Унифицированные опции**: общие параметры для выгрузки, валидации и конфигурации
+- **Обработка ошибок**: корректные коды выхода и структурированные сообщения об ошибках
+- **Профили конфигураций**: поддержка различных профилей конфигурации через CLI-переопределения
+- **Групповой запуск**: команда для запуска всех пайплайнов определённого провайдера
 
 ## Relationship to IDE Commands
 
@@ -38,3 +60,6 @@ This ensures that pipeline runs are observable and can be audited in production 
 
 - **UnifiedLogger**: структурированное логирование (см. `docs/02-pipelines/02-logging-and-configuration.md`)
 - **FileConfigResolver**: резолвер конфигурации (см. `docs/02-pipelines/config/28-config-resolver.md`)
+- **PipelineBase**: базовый класс пайплайнов, выполняемых через CLI
+- **ConfigResolverABC**: разрешение конфигураций для пайплайнов
+- **CLICommandABC**: интерфейс для плагинных команд CLI (см. `docs/01-ABC/02-cli-command-abc.md`)
