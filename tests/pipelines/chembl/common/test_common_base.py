@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from unittest.mock import MagicMock
-from bioetl.pipelines.chembl.common.base import ChemblCommonPipeline
+from bioetl.application.pipelines.chembl.common.base import ChemblCommonPipeline
 
 class ConcreteCommonPipeline(ChemblCommonPipeline):
     pass

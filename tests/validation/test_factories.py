@@ -1,7 +1,7 @@
 import pytest
-from bioetl.validation.factories import default_validator, default_schema_provider
-from bioetl.validation.impl.pandera_validator import PanderaValidatorImpl
-from bioetl.schemas.registry import SchemaRegistry
+from bioetl.domain.validation.factories import default_validator, default_schema_provider
+from bioetl.domain.validation.impl.pandera_validator import PanderaValidatorImpl
+from bioetl.domain.schemas.registry import SchemaRegistry
 
 def test_default_validator():
     schema = "dummy"

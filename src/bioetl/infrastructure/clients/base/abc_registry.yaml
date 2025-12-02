@@ -1,0 +1,35 @@
+# Machine-readable registry of Abstract Base Classes
+# This file maps abstract component roles to their interface definitions
+# Format: Role: Module.ClassName
+
+SourceClientABC: bioetl.infrastructure.clients.base.contracts.SourceClientABC
+RequestBuilderABC: bioetl.infrastructure.clients.base.contracts.RequestBuilderABC
+ResponseParserABC: bioetl.infrastructure.clients.base.contracts.ResponseParserABC
+PaginatorABC: bioetl.infrastructure.clients.base.contracts.PaginatorABC
+RateLimiterABC: bioetl.infrastructure.clients.base.contracts.RateLimiterABC
+RetryPolicyABC: bioetl.infrastructure.clients.base.contracts.RetryPolicyABC
+CacheABC: bioetl.infrastructure.clients.base.contracts.CacheABC
+SecretProviderABC: bioetl.infrastructure.clients.base.contracts.SecretProviderABC
+SideInputProviderABC: bioetl.infrastructure.clients.base.contracts.SideInputProviderABC
+
+StageABC: bioetl.application.pipelines.stages.StageABC
+PipelineHookABC: bioetl.application.pipelines.hooks.PipelineHookABC
+ErrorPolicyABC: bioetl.application.pipelines.hooks.ErrorPolicyABC
+CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
+
+LoggerAdapterABC: bioetl.infrastructure.logging.contracts.LoggerAdapterABC
+ProgressReporterABC: bioetl.infrastructure.logging.contracts.ProgressReporterABC
+TracerABC: bioetl.infrastructure.logging.contracts.TracerABC
+
+TransformerABC: bioetl.domain.transform.contracts.TransformerABC
+LookupEnricherABC: bioetl.domain.transform.contracts.LookupEnricherABC
+BusinessKeyDeriverABC: bioetl.domain.transform.contracts.BusinessKeyDeriverABC
+DeduplicatorABC: bioetl.domain.transform.contracts.DeduplicatorABC
+MergeStrategyABC: bioetl.domain.transform.contracts.MergeStrategyABC
+HasherABC: bioetl.domain.transform.contracts.HasherABC
+
+ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
+SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC
+
+WriterABC: bioetl.infrastructure.output.contracts.WriterABC
+MetadataWriterABC: bioetl.infrastructure.output.contracts.MetadataWriterABC

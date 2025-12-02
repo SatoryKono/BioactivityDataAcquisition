@@ -5,10 +5,10 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from bioetl.clients.base.contracts import RateLimiterABC, RetryPolicyABC
-from bioetl.clients.chembl.impl.http_client import ChemblDataClientHTTPImpl
-from bioetl.clients.chembl.request_builder import ChemblRequestBuilder
-from bioetl.clients.chembl.response_parser import ChemblResponseParser
+from bioetl.infrastructure.clients.base.contracts import RateLimiterABC, RetryPolicyABC
+from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblDataClientHTTPImpl
+from bioetl.infrastructure.clients.chembl.request_builder import ChemblRequestBuilder
+from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
 
 
 @pytest.fixture

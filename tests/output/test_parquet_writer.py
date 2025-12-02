@@ -2,7 +2,7 @@ import pandas as pd
 from unittest.mock import patch
 from pathlib import Path
 
-from bioetl.output.impl.parquet_writer import ParquetWriterImpl
+from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
 
 
 def test_parquet_writer_properties():

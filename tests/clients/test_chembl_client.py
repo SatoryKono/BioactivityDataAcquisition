@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from bioetl.clients.chembl.impl.http_client import ChemblDataClientHTTPImpl
-from bioetl.clients.chembl.request_builder import ChemblRequestBuilder
-from bioetl.clients.chembl.response_parser import ChemblResponseParser
-from bioetl.clients.base.contracts import RateLimiterABC, RetryPolicyABC
+from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblDataClientHTTPImpl
+from bioetl.infrastructure.clients.chembl.request_builder import ChemblRequestBuilder
+from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
+from bioetl.infrastructure.clients.base.contracts import RateLimiterABC, RetryPolicyABC
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def mock_components():
 @pytest.fixture
 def client(mock_components):
     with patch(
-        "bioetl.clients.chembl.impl.http_client.requests.Session"
+        "bioetl.infrastructure.clients.chembl.impl.http_client.requests.Session"
     ) as mock_session_cls:
         mock_session = mock_session_cls.return_value
         client = ChemblDataClientHTTPImpl(

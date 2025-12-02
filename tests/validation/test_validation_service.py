@@ -2,53 +2,53 @@ import pandas as pd
 import pandera.pandas as pa
 import pytest
 from unittest.mock import patch, MagicMock
-from bioetl.validation.service import ValidationService
-from bioetl.validation.impl.pandera_validator import PanderaValidatorImpl
+from bioetl.domain.validation.service import ValidationService
+from bioetl.domain.validation.impl.pandera_validator import PanderaValidatorImpl
+from bioetl.domain.validation.contracts import SchemaProviderABC
 
 
 # Define a dummy schema for testing
-class TestSchema(pa.DataFrameModel):
+class DummySchema(pa.DataFrameModel):
     id: int = pa.Field(ge=0)
     name: str = pa.Field()
 
 
 def test_validation_service_success():
     # Arrange
-    service = ValidationService()
+    mock_registry = MagicMock(spec=SchemaProviderABC)
+    mock_registry.get_schema.return_value = DummySchema
+    
+    service = ValidationService(schema_provider=mock_registry)
     df = pd.DataFrame({"id": [1, 2], "name": ["a", "b"]})
 
-    # Mock registry to return TestSchema
-    with patch("bioetl.validation.service.registry") as mock_registry:
-        mock_registry.get_schema.return_value = TestSchema
+    # Act
+    result = service.validate(df, "test_entity")
 
-        # Act
-        result = service.validate(df, "test_entity")
-
-        # Assert
-        assert isinstance(result, pd.DataFrame)
-        assert len(result) == 2
-        mock_registry.get_schema.assert_called_with("test_entity")
+    # Assert
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == 2
+    mock_registry.get_schema.assert_called_with("test_entity")
 
 
 def test_validation_service_failure():
     # Arrange
-    service = ValidationService()
+    mock_registry = MagicMock(spec=SchemaProviderABC)
+    mock_registry.get_schema.return_value = DummySchema
+    
+    service = ValidationService(schema_provider=mock_registry)
     df = pd.DataFrame({"id": [-1], "name": ["a"]})  # Invalid id
 
-    with patch("bioetl.validation.service.registry") as mock_registry:
-        mock_registry.get_schema.return_value = TestSchema
-
-        # Act & Assert
-        with pytest.raises(
-            ValueError,
-            match="Validation failed for test_entity"
-        ):
-            service.validate(df, "test_entity")
+    # Act & Assert
+    with pytest.raises(
+        ValueError,
+        match="Validation failed for test_entity"
+    ):
+        service.validate(df, "test_entity")
 
 
 def test_pandera_validator_impl():
     # Arrange
-    validator = PanderaValidatorImpl(TestSchema)
+    validator = PanderaValidatorImpl(DummySchema)
     df_valid = pd.DataFrame({"id": [1], "name": ["test"]})
     df_invalid = pd.DataFrame({"id": [-1], "name": ["test"]})
 

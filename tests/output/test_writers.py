@@ -4,8 +4,8 @@ Tests for specific writer implementations.
 import pandas as pd
 import yaml
 
-from bioetl.output.impl.csv_writer import CsvWriterImpl
-from bioetl.output.impl.metadata_writer import MetadataWriterImpl
+from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
+from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 
 
 def test_csv_writer_write(tmp_path):
