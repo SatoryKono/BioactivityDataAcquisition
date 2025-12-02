@@ -1,14 +1,15 @@
 """
 Tests for the PipelineBase class.
 """
+# pylint: disable=redefined-outer-name, protected-access
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest
 
-from bioetl.core.contracts import PipelineHookABC
-from bioetl.core.pipeline_base import PipelineBase
+from bioetl.application.pipelines.hooks import PipelineHookABC
+from bioetl.application.pipelines.base import PipelineBase
 
 
 class ConcretePipeline(PipelineBase):
@@ -24,6 +25,7 @@ class ConcretePipeline(PipelineBase):
         return df
 
 
+@pytest.mark.unit
 def test_pipeline_run_success(
     mock_config,
     mock_logger,
@@ -31,7 +33,7 @@ def test_pipeline_run_success(
     mock_output_writer,
     tmp_path
 ):
-    """Test a successful pipeline run."""
+    """Test a successful pipeline run with client lifecycle."""
     # Arrange
     pipeline = ConcretePipeline(
         config=mock_config,
@@ -39,6 +41,10 @@ def test_pipeline_run_success(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer
     )
+
+    # Test client registration
+    mock_client = Mock()
+    pipeline.register_client("test_client", mock_client)
 
     output_path = tmp_path / "output.parquet"
 
@@ -59,7 +65,11 @@ def test_pipeline_run_success(
     # Verify write called
     mock_output_writer.write_result.assert_called_once()
 
+    # Verify client closed
+    mock_client.close.assert_called_once()
 
+
+@pytest.mark.unit
 def test_pipeline_dry_run(
     mock_config,
     mock_logger,
@@ -91,6 +101,37 @@ def test_pipeline_dry_run(
     mock_output_writer.write_result.assert_not_called()
 
 
+@pytest.mark.unit
+def test_pipeline_hooks(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer
+):
+    """Test that hooks are called correctly."""
+    # Arrange
+    pipeline = ConcretePipeline(
+        mock_config,
+        mock_logger,
+        mock_validation_service,
+        mock_output_writer
+    )
+    mock_hook = MagicMock(spec=PipelineHookABC)
+    pipeline.add_hook(mock_hook)
+
+    # Act
+    pipeline.run(Path("dummy"), dry_run=True)
+
+    # Assert lifecycle hooks (extract, transform, validate)
+    assert mock_hook.on_stage_start.call_count >= 3
+    assert mock_hook.on_stage_end.call_count >= 3
+
+    # Check arguments for one call
+    args, _ = mock_hook.on_stage_start.call_args_list[0]
+    assert args[0] == "extract"
+
+
+@pytest.mark.unit
 def test_pipeline_error_hooks(
     mock_config,
     mock_logger,
@@ -120,3 +161,38 @@ def test_pipeline_error_hooks(
     args, _ = mock_hook.on_error.call_args
     assert args[0] == "pipeline"
     assert isinstance(args[1], ValueError)
+
+
+@pytest.mark.unit
+def test_hashing_logic(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer
+):
+    """Test different scenarios for business key hashing."""
+    # Scenario 1: Default config (business_key=["id"]) and present column
+    pipeline = ConcretePipeline(
+        mock_config, mock_logger, mock_validation_service, mock_output_writer
+    )
+    df = pd.DataFrame({"id": [1], "val": ["x"]})
+    res = pipeline._add_hash_columns(df)
+    assert "hash_row" in res.columns
+    assert "hash_business_key" in res.columns
+    assert res["hash_business_key"].iloc[0] is not None
+
+    # Scenario 2: Configured key missing in DF
+    mock_config.business_key = ["missing_col"]
+    pipeline = ConcretePipeline(
+        mock_config, mock_logger, mock_validation_service, mock_output_writer
+    )
+    res = pipeline._add_hash_columns(df)
+    assert res["hash_business_key"].iloc[0] is None
+
+    # Scenario 3: No keys configured
+    mock_config.business_key = []
+    pipeline = ConcretePipeline(
+        mock_config, mock_logger, mock_validation_service, mock_output_writer
+    )
+    res = pipeline._add_hash_columns(df)
+    assert res["hash_business_key"].iloc[0] is None

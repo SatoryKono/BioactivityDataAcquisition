@@ -2,11 +2,11 @@ import pytest
 import pandas as pd
 from unittest.mock import MagicMock
 
-from bioetl.pipelines.chembl.activity.run import ChemblActivityPipeline
-from bioetl.pipelines.chembl.assay.run import ChemblAssayPipeline
-from bioetl.pipelines.chembl.document.run import ChemblDocumentPipeline
-from bioetl.pipelines.chembl.target.run import ChemblTargetPipeline
-from bioetl.pipelines.chembl.testitem.run import ChemblTestitemPipeline
+from bioetl.application.pipelines.chembl.activity.run import ChemblActivityPipeline
+from bioetl.application.pipelines.chembl.assay.run import ChemblAssayPipeline
+from bioetl.application.pipelines.chembl.document.run import ChemblDocumentPipeline
+from bioetl.application.pipelines.chembl.target.run import ChemblTargetPipeline
+from bioetl.application.pipelines.chembl.testitem.run import ChemblTestitemPipeline
 
 
 @pytest.fixture
@@ -44,3 +44,11 @@ def test_pipeline_instantiation(pipeline_cls, common_dependencies):
 
     # Assert
     assert isinstance(pipeline, pipeline_cls)
+
+    # Test transform (coverage for _do_transform)
+    df = pd.DataFrame({
+        "id": [1],
+        "chembl_release": [{"chembl_release": "34"}]
+    })
+    result = pipeline.transform(df)
+    assert isinstance(result, pd.DataFrame)

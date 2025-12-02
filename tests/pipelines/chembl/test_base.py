@@ -1,20 +1,22 @@
 """
 Tests for ChemblPipelineBase.
 """
+# pylint: disable=redefined-outer-name, unused-argument
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
-from bioetl.core.models import RunContext
-from bioetl.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.models import RunContext
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 
 
 class ConcreteChemblPipeline(ChemblPipelineBase):
     """Concrete implementation for testing."""
 
-    def extract(self, **kwargs):
+    def extract(self, **_):
+        """Mock extract implementation."""
         return pd.DataFrame()
 
     def _do_transform(self, df: pd.DataFrame) -> pd.DataFrame:

@@ -1,0 +1,43 @@
+from typing import Any
+from bioetl.infrastructure.clients.base.contracts import RequestBuilderABC
+
+
+class ChemblRequestBuilder(RequestBuilderABC):
+    """
+    Builder для запросов к ChEMBL API.
+    """
+    
+    def __init__(self, base_url: str = "https://www.ebi.ac.uk/chembl/api/data") -> None:
+        self.base_url = base_url.rstrip("/")
+        self._endpoint: str = ""
+        self._params: dict[str, Any] = {}
+    
+    def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilder":
+        self._endpoint = endpoint.strip("/")
+        return self
+
+    def build(self, params: dict[str, Any]) -> str:
+        """
+        Строит URL с параметрами.
+        Возвращает полный URL (как строку для простоты, в реальности может быть Request object).
+        """
+        self._params.update(params)
+        
+        # Construct query string
+        query_parts = []
+        for k, v in self._params.items():
+            if v is not None:
+                query_parts.append(f"{k}={v}")
+        
+        query_string = "&".join(query_parts)
+        url = f"{self.base_url}/{self._endpoint}.json"
+        if query_string:
+            url += f"?{query_string}"
+            
+        return url
+
+    def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilder":
+        self._params["offset"] = offset
+        self._params["limit"] = limit
+        return self
+

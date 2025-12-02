@@ -1,15 +1,20 @@
 """
 Pytest configuration and shared fixtures.
 """
+import socket
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest
 
-from bioetl.config.models import LoggingConfig, PipelineConfig, StorageConfig
-from bioetl.logging.contracts import LoggerAdapterABC
-from bioetl.output.unified_writer import UnifiedOutputWriter
-from bioetl.validation.service import ValidationService
+from bioetl.infrastructure.config.models import (
+    LoggingConfig,
+    PipelineConfig,
+    StorageConfig
+)
+from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.domain.validation.service import ValidationService
 
 
 @pytest.fixture
@@ -57,3 +62,31 @@ def sample_df():
         "id": [1, 2, 3],
         "value": ["a", "b", "c"]
     })
+
+
+@pytest.fixture(autouse=True)
+def disable_network_calls(monkeypatch, request):
+    """Block network access unless marked with 'network' or 'integration'."""
+    if (
+        request.node.get_closest_marker("network") or
+        request.node.get_closest_marker("integration")
+    ):
+        return
+
+    def guard(*_args, **_kwargs):
+        raise RuntimeError(
+            "Network access disabled. Use @pytest.mark.network or "
+            "@pytest.mark.integration to enable. "
+            f"Test: {request.node.name}"
+        )
+
+    class GuardedSocket:
+        """Mock socket that raises error on instantiation."""
+
+        def __init__(self, *_args, **_kwargs):
+            guard()
+
+    monkeypatch.setattr(socket, "socket", GuardedSocket)
+    monkeypatch.setattr(socket, "create_connection", guard)
+
+# End of conftest

@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from bioetl.core.models import RunContext
-from bioetl.output.contracts import WriteResult
-from bioetl.output.unified_writer import UnifiedOutputWriter
+from bioetl.domain.models import RunContext
+from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def test_write_result_success(
     output_dir = tmp_path / "out"
 
     # Mock writer side effect to create the file
-    def create_file(df, path, **kwargs):
+    def create_file(df, path):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
         return WriteResult(

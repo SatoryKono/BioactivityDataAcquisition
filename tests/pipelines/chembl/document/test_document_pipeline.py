@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from unittest.mock import MagicMock
-from bioetl.pipelines.chembl.document.run import ChemblDocumentPipeline
+from bioetl.application.pipelines.chembl.document.run import ChemblDocumentPipeline
 
 @pytest.fixture
 def pipeline():

@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from pandera.errors import SchemaError
 
-from bioetl.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.chembl.activity import ActivitySchema
 
 
 def test_activity_schema_valid():

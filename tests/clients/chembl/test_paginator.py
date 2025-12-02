@@ -1,7 +1,7 @@
 """
 Tests for ChemblPaginator.
 """
-from bioetl.clients.chembl.paginator import ChemblPaginator
+from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
 
 
 def test_get_items():
