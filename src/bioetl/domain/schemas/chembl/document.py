@@ -41,9 +41,8 @@ class DocumentSchema(pa.DataFrameModel):
     patent_id: Series[str] = pa.Field(
         nullable=True, description="Идентификатор патента"
     )
-    pubmed_id: Series[str] = pa.Field(
+    pubmed_id: Series[int] = pa.Field(
         nullable=True,
-        str_matches=r"^\d+$",
         description="PubMed ID",
     )
     src_id: Series[float] = pa.Field(
