@@ -19,6 +19,11 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 - `02-new-entity-naming-policy.md` — полная политика именования
 - `10-documentation-standards.md` — стандарты документации
 
+### Архитектурные планы (бинарные вложения)
+
+- `docs/30-architecture-plan-project.{docx,pdf}` — high-level architecture plan for the BioETL project.
+- `docs/31-architecture-plan-etl-scientific-rest-apis.{docx,pdf}` — architecture plan for the ETL project integrating data from scientific REST APIs.
+
 ### Пайплайны и core компоненты
 
 Документация по пайплайнам и базовым компонентам находится в `docs/02-pipelines/`:
