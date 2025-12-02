@@ -36,7 +36,7 @@ class TestitemSchema(pa.DataFrameModel):
     cross_references: Series[str] = pa.Field(
         nullable=True, description="Внешние кросс-референсы"
     )
-    pubchem_cid: Series[int] = pa.Field(
+    pubchem_cid: Series[float] = pa.Field(
         nullable=True,
         ge=1,
         le=999_999_999,
