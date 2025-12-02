@@ -1,0 +1,26 @@
+ ласс / »нтерфейс,ћодуль,Ќазначение,ѕубличные методы,ѕриватные методы,—войства
+PipelineBase,core/pipeline_base.py,Ѕазовый класс ETL-пайплайна: orchestrate extract?transform?validate?write,"run(...) -> RunResult, extract(...) -> DataFrame, transform(df) -> DataFrame, validate(df) -> DataFrame, write(df, output_path) -> WriteResult, register_client(name, client), close_resources()",_add_hash_columns(df) -> DataFrame,"config: PipelineConfig, run_id: str, pipeline_name: str, _clients: dict, _logger"
+StageABC,core/pipeline/base.py,»нтерфейс дл€ стадии пайплайна,"run(context) -> Any, close()",Ч,Ч
+PipelineHookABC,core/pipeline/hook.py,»нтеграци€ хуков дл€ логировани€ стадий,"on_stage_start(stage), on_stage_complete(stage), on_stage_error(stage, error)",Ч,Ч
+CLICommandABC,core/pipeline/cli_command.py,Ѕазовый интерфейс CLI-команд,"register_cli(cli_app), run_pipeline(config) -> RunResult",Ч,Ч
+SourceClientABC,core/pipeline/source/client.py,Unified API клиента внешнего источника,"fetch_one(request) -> Record, fetch_many(request) -> Iterator, iter_pages(request) -> Iterator, metadata() -> Mapping, close()",Ч,Ч
+BaseExternalDataClient,core/pipeline/source/client.py,–еализаци€ SourceClientABC с поддержкой пагинации,см. SourceClientABC + metadata(),"_build_url(...), _extract_items(...), _extract_next_cursor(...), _resolve_path(...)","_base_url, _routes, _default_params, _pagination, _transport"
+RateLimiterABC,core/pipeline/source/client.py,»нтерфейс ограничени€ скорости запросов,"acquire(), reset()",Ч,"max_calls, period_sec"
+RetryPolicyABC,core/pipeline/source/client.py,»нтерфейс логики повторных попыток,"should_retry(error, attempt) -> bool, get_delay(attempt) -> float",Ч,"max_attempts, base_delay"
+RequestBuilderABC,core/pipeline/source/request_builder.py,ѕостроитель запросов к API,"build_request(params, page_token=None) -> ClientRequest",Ч,Ч
+ResponseParserABC,core/pipeline/source/parser.py,ѕарсер API-ответа,parse(raw_data) -> Iterator[Record],Ч,Ч
+PaginatorABC,core/pipeline/source/parser.py,»звлечение страниц из ответа,"extract_items(raw) -> list[Record], `get_next_token(raw) -> str",None`,Ч
+TransformerABC,core/pipeline/processing/transform.py,ѕреобразование DataFrame,transform(df) -> DataFrame,Ч,Ч
+LookupEnricherABC,core/pipeline/processing/enrich.py,ќбогащение с помощью справочников,"enrich(df, provider) -> DataFrame",Ч,Ч
+SideInputProviderABC,core/pipeline/processing/enrich.py,ƒоступ к справочным данным,get_data(key: str) -> Any,Ч,Ч
+DeduplicatorABC,core/pipeline/processing/dedup.py,”даление дубликатов,deduplicate(df) -> DataFrame,Ч,"key_deriver, hasher, merge_strategy"
+BusinessKeyDeriverABC,core/pipeline/processing/dedup.py,»звлечение бизнес-ключа,derive_key(record) -> str,Ч,key_fields: list[str]
+HasherABC,core/pipeline/processing/dedup.py,¬ычисление хэша записи,hash(record) -> str,Ч,algorithm: str
+MergeStrategyABC,core/pipeline/processing/dedup.py,—ли€ние дубликатов,merge(records: list[Record]) -> Record,Ч,Ч
+SchemaProviderABC,core/pipeline/validation/schema.py,ƒоступ к схемам,get_schema() -> Any,Ч,Ч
+ValidatorABC,core/pipeline/validation/validator.py,ѕроверка DataFrame на ошибки,validate(df) -> ValidationResult,Ч,"schema_provider, rules"
+DQRuleABC,core/pipeline/validation/dq_rules.py,Ѕизнес-правило проверки качества,check(df) -> list[DQIssue],Ч,"name, description"
+PathStrategyABC,core/pipeline/output/path_strategy.py,ѕостроение пути вывода,"make_path(pipeline_name, run_id, base_dir) -> Path",Ч,Ч
+WriterABC,core/pipeline/output/writer.py,«апись DataFrame на диск,"write(df, path: Path)",Ч,Ч
+MetadataWriterABC,core/pipeline/output/writer.py,«апись метаданных запуска,"write_metadata(run_result, meta_path)",Ч,Ч
+ConfigResolverABC,core/pipeline/utils/config.py,«агрузка и разрешение конфигов,resolve(config_name) -> PipelineConfig,Ч,Ч
