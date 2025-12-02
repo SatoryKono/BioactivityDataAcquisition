@@ -125,4 +125,7 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 ### Схемы данных
 
-Перечень схем и их описания поддерживается в `docs/schemas/INDEX.md`.
+Документация по схемам данных находится в `docs/schemas/`:
+
+- `INDEX.md` — индекс документации схем
+- `00-schemas-registry-overview.md` — обзор реестра схем Pandera
