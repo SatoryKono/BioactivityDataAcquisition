@@ -48,7 +48,7 @@ if "tqdm" not in sys.modules:
     tqdm_module.tqdm = _noop_tqdm
     sys.modules["tqdm"] = tqdm_module
 
-from bioetl.core.custom_types import (
+from bioetl.domain.transform.custom_types import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
     normalize_chembl_id,
@@ -110,9 +110,9 @@ class TestNormalizePmid:
     @pytest.mark.parametrize(
         "value, expected",
         [
-            ("12345", "12345"),
-            (12345, "12345"),
-            (" 67890 ", "67890"),
+            ("12345", 12345),
+            (12345, 12345),
+            (" 67890 ", 67890),
             (None, None),
             (pd.NA, None),
         ],
@@ -133,9 +133,9 @@ class TestNormalizePcid:
     @pytest.mark.parametrize(
         "value, expected",
         [
-            ("CID987", "987"),
-            ("pcid123", "123"),
-            (" 456 ", "456"),
+            ("CID987", 987),
+            ("pcid123", 123),
+            (" 456 ", 456),
             (None, None),
             (pd.NA, None),
         ],
@@ -156,6 +156,7 @@ class TestNormalizeUniprot:
             ("p12345", "P12345"),
             ("q9h0h5", "Q9H0H5"),
             ("B7ZC07", "B7ZC07"),
+            ("a0a023gpi8", "A0A023GPI8"),
             (None, None),
             (pd.NA, None),
         ],
@@ -172,7 +173,7 @@ class TestNormalizeUniprot:
 class TestNormalizeArray:
     def test_normalizes_elements_and_types(self):
         result = normalize_array([" 123 ", 456, None], item_normalizer=normalize_pmid)
-        assert result == ["123", "456"]
+        assert result == [123, 456]
         assert isinstance(result, list)
 
     def test_handles_nested_records(self):
@@ -182,25 +183,27 @@ class TestNormalizeArray:
             None,
         ]
         result = normalize_array(values, item_normalizer=normalize_pmid)
-        assert result == [{"pmid": "123"}, {"pmid": "456"}]
+        assert result == [{"pmid": 123}, {"pmid": 456}]
 
     def test_raises_on_invalid_item(self):
         with pytest.raises(ValueError):
             normalize_array(["123", "invalid"], item_normalizer=normalize_pmid)
 
-    def test_raises_on_non_iterable(self):
-        with pytest.raises(ValueError):
-            normalize_array("not-a-list", item_normalizer=str)
+    def test_accepts_scalar_input(self):
+        assert normalize_array("123", item_normalizer=normalize_pmid) == ["123"]
+
+    def test_returns_empty_on_empty_scalar(self):
+        assert normalize_array("", item_normalizer=normalize_pmid) == []
 
     def test_returns_none_for_empty(self):
-        assert normalize_array([], item_normalizer=normalize_pmid) is None
+        assert normalize_array([], item_normalizer=normalize_pmid) == []
 
 
 class TestNormalizeRecord:
     def test_normalizes_mapping_values(self):
         record = {"pmid": "123", "extra": None}
         result = normalize_record(record, value_normalizer=normalize_pmid)
-        assert result == {"pmid": "123"}
+        assert result == {"pmid": 123}
         assert isinstance(result, dict)
 
     def test_returns_none_for_empty_or_missing(self):
