@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.python-version
+
+# Environments
+.venv/
+.env
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors and tooling
+.vscode/
+
+# Project data and temp artifacts
+/data/
+/var/
+*.tmp
+*.log

@@ -6,10 +6,10 @@ from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.output.contracts import OutputServiceABC
 from bioetl.application.pipelines.chembl.extraction import ChemblExtractionService
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.validation.contracts import ValidationServiceABC
 
 
 class ChemblPipelineBase(PipelineBase):
@@ -27,12 +27,12 @@ class ChemblPipelineBase(PipelineBase):
         self,
         config: PipelineConfig,
         logger: LoggerAdapterABC,
-        validation_service: ValidationService,
-        output_writer: UnifiedOutputWriter,
+        validation_service: ValidationServiceABC,
+        output_service: OutputServiceABC,
         extraction_service: ChemblExtractionService,
         hash_service: HashService | None = None,
     ) -> None:
-        super().__init__(config, logger, validation_service, output_writer, hash_service)
+        super().__init__(config, logger, validation_service, output_service, hash_service)
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
     

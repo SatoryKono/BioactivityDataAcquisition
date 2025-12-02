@@ -13,8 +13,8 @@ from bioetl.infrastructure.config.models import (
     StorageConfig
 )
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
-from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.output.contracts import OutputServiceABC
+from bioetl.infrastructure.validation.contracts import ValidationServiceABC
 
 
 @pytest.fixture
@@ -41,16 +41,16 @@ def mock_logger():
 @pytest.fixture
 def mock_validation_service():
     """Create a mock validation service."""
-    service = MagicMock(spec=ValidationService)
+    service = MagicMock(spec=ValidationServiceABC)
     # Default behavior: return df as is
     service.validate.side_effect = lambda df, **kwargs: df
     return service
 
 
 @pytest.fixture
-def mock_output_writer():
+def mock_output_service():
     """Create a mock output writer."""
-    writer = MagicMock(spec=UnifiedOutputWriter)
+    writer = MagicMock(spec=OutputServiceABC)
     writer.write_result.return_value = Mock(row_count=10)
     return writer
 

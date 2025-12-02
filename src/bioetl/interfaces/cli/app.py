@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bioetl.infrastructure.config.resolver import ConfigResolver
-from bioetl.core.container import build_pipeline_dependencies
+from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY, get_pipeline_class
 
 app = typer.Typer(
@@ -104,7 +104,7 @@ def run(
         
         logger = container.get_logger()
         validation_service = container.get_validation_service()
-        output_writer = container.get_output_writer()
+        output_service = container.get_output_service()
         extraction_service = container.get_extraction_service()
         hash_service = container.get_hash_service()
 
@@ -113,7 +113,7 @@ def run(
             config=config,
             logger=logger,
             validation_service=validation_service,
-            output_writer=output_writer,
+            output_service=output_service,
             extraction_service=extraction_service,
             hash_service=hash_service
         )

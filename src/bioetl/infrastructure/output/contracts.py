@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import pandas as pd
 
+from bioetl.domain.models import RunContext
+
 
 @dataclass
 class WriteResult:
@@ -48,4 +50,18 @@ class MetadataWriterABC(ABC):
     @abstractmethod
     def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
         """Генерирует контрольные суммы файлов."""
+
+
+class OutputServiceABC(ABC):
+    """Фасад записи результатов пайплайна."""
+
+    @abstractmethod
+    def write_result(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        entity_name: str,
+        run_context: RunContext,
+    ) -> WriteResult:
+        """Записывает результат пайплайна и возвращает мета."""
 

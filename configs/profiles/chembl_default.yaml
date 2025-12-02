@@ -20,9 +20,9 @@ client:
 
 # Общие пути хранения
 storage:
-  output_path: ./data/output/chembl
-  cache_path: ./data/cache/chembl
-  temp_path: ./data/temp
+  output_path: ./var/output/chembl
+  cache_path: ./var/cache/chembl
+  temp_path: ./var/temp
 
 # Параметры логирования
 logging:

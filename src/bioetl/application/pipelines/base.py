@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any
 import pandas as pd
 
 from bioetl.infrastructure.config.models import PipelineConfig
@@ -12,12 +12,9 @@ from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.domain.models import RunContext, RunResult
 from bioetl.application.pipelines.stages import StageResult
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.infrastructure.output.contracts import OutputServiceABC, WriteResult
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.validation.service import ValidationService
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.validation.contracts import ValidationServiceABC
 
 
 class PipelineBase(ABC):
@@ -32,8 +29,8 @@ class PipelineBase(ABC):
         self,
         config: PipelineConfig,
         logger: LoggerAdapterABC,
-        validation_service: ValidationService,
-        output_writer: "UnifiedOutputWriter",
+        validation_service: ValidationServiceABC,
+        output_service: OutputServiceABC,
         hash_service: HashService | None = None,
     ) -> None:
         self._config = config
@@ -42,7 +39,7 @@ class PipelineBase(ABC):
             provider=config.provider,
         )
         self._validation_service = validation_service
-        self._output_writer = output_writer
+        self._output_service = output_service
         self._hash_service = hash_service or HashService()
         self._clients: dict[str, Any] = {}
         self._hooks: list[PipelineHookABC] = []
@@ -156,7 +153,7 @@ class PipelineBase(ABC):
         context: RunContext,
     ) -> WriteResult:
         """Записывает валидированный DataFrame."""
-        return self._output_writer.write_result(
+        return self._output_service.write_result(
             df=df,
             output_path=output_path,
             entity_name=self._config.entity_name,

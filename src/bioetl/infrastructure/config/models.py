@@ -17,9 +17,9 @@ class ClientConfig(BaseModel):
 
 
 class StorageConfig(BaseModel):
-    output_path: str = "./data/output"
-    cache_path: str = "./data/cache"
-    temp_path: str = "./data/temp"
+    output_path: str = "./var/output"
+    cache_path: str = "./var/cache"
+    temp_path: str = "./var/temp"
 
 
 class LoggingConfig(BaseModel):

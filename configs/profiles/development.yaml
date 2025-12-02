@@ -13,8 +13,8 @@ client:
   rate_limit: 5
 
 storage:
-  output_path: ./data/dev/output
-  cache_path: ./data/dev/cache
+  output_path: ./var/dev/output
+  cache_path: ./var/dev/cache
 
 logging:
   level: DEBUG
