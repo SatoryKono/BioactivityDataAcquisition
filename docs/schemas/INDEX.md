@@ -10,11 +10,12 @@ Start with the overview document for the schema registry and then follow links t
 
 ## Entity Schemas
 
-- **26-document-schema.md** — схема данных документов ChEMBL (см. `docs/02-pipelines/schemas/26-document-schema.md`)
-- **27-testitem-schema.md** — схема для отдельного тестового элемента
-- **28-testitems-schema.md** — схема для полного набора тестовых элементов
-- **29-target-schema.md** — схема для сущности target (см. `docs/02-pipelines/schemas/29-target-schema.md`)
-- **30-assay-schema.md** — схема для сущности assay (см. `docs/02-pipelines/schemas/30-assay-schema.md`)
+Документация по схемам находится в `docs/02-pipelines/schemas/`:
+
+- **00-document-schema.md** — схема данных документов ChEMBL
+- **01-testitem-schema.md** — схема для отдельного тестового элемента
+- **02-testitems-schema.md** — схема для полного набора тестовых элементов
+- **03-target-schema.md** — схема для сущности target
+- **04-assay-schema.md** — схема для сущности assay
 
 Additional documents for concrete entities such as activity, assay, and target can be added under this directory as the project evolves.
-

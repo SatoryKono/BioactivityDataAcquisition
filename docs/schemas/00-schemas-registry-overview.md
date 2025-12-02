@@ -36,5 +36,5 @@ Both views are complementary: datatype documentation explains the business meani
 
 - **SchemaRegistry**: реестр схем (см. `docs/02-pipelines/05-schema-registry.md`)
 - **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/06-validation-service.md`)
-- **DocumentSchema**: схема документов (см. `docs/02-pipelines/schemas/26-document-schema.md`)
+- **DocumentSchema**: схема документов (см. `docs/02-pipelines/schemas/00-document-schema.md`)
 
