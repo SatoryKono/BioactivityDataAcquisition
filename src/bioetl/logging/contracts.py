@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any, Self
+from contextlib import contextmanager
+from typing import Any, Iterator, Self
 
 
 class LoggerAdapterABC(ABC):
@@ -44,6 +45,18 @@ class ProgressReporterABC(ABC):
     @abstractmethod
     def finish(self) -> None:
         """Завершает отслеживание."""
+
+    @contextmanager
+    def create_bar(self, total: int, desc: str = "") -> Iterator[Any]:
+        """
+        Context manager for progress bar.
+        Default implementation delegates to start/finish.
+        """
+        self.start(total, description=desc)
+        try:
+            yield self
+        finally:
+            self.finish()
 
 
 class TracerABC(ABC):

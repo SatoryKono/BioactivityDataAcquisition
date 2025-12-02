@@ -1,13 +1,17 @@
-import pytest
-import pandas as pd
+"""
+Tests for ChemblPipelineBase.
+"""
+from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
-from bioetl.pipelines.chembl.base import ChemblPipelineBase
+import pandas as pd
+import pytest
+
 from bioetl.core.models import RunContext
-from datetime import datetime, timezone
+from bioetl.pipelines.chembl.base import ChemblPipelineBase
 
 
-class TestChemblPipeline(ChemblPipelineBase):
+class ConcreteChemblPipeline(ChemblPipelineBase):
     """Concrete implementation for testing."""
 
     def extract(self, **kwargs):
@@ -19,7 +23,8 @@ class TestChemblPipeline(ChemblPipelineBase):
 
 
 @pytest.fixture
-def mock_dependencies():
+def mock_dependencies_fixture():
+    """Fixture for pipeline dependencies."""
     return {
         "config": MagicMock(
             entity_name="test",
@@ -34,63 +39,68 @@ def mock_dependencies():
 
 
 @pytest.fixture
-def pipeline(mock_dependencies):
+def pipeline_fixture(mock_dependencies_fixture):
+    """Fixture for pipeline instance."""
     # Mock config.model_dump()
-    mock_dependencies["config"].model_dump.return_value = {}
+    mock_dependencies_fixture["config"].model_dump.return_value = {}
 
-    return TestChemblPipeline(
-        config=mock_dependencies["config"],
-        logger=mock_dependencies["logger"],
-        validation_service=mock_dependencies["validation_service"],
-        output_writer=mock_dependencies["output_writer"],
-        extraction_service=mock_dependencies["extraction_service"],
+    return ConcreteChemblPipeline(
+        config=mock_dependencies_fixture["config"],
+        logger=mock_dependencies_fixture["logger"],
+        validation_service=mock_dependencies_fixture["validation_service"],
+        output_writer=mock_dependencies_fixture["output_writer"],
+        extraction_service=mock_dependencies_fixture["extraction_service"],
     )
 
 
-def test_get_chembl_release(pipeline, mock_dependencies):
+def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
+    """Test ChEMBL release version retrieval."""
     # Arrange
-    mock_dependencies["extraction_service"].get_release_version.return_value = (
-        "chembl_34"
-    )
+    mock_dependencies_fixture[
+        "extraction_service"
+    ].get_release_version.return_value = "chembl_34"
 
     # Act
-    release1 = pipeline.get_chembl_release()
-    release2 = pipeline.get_chembl_release()
+    release1 = pipeline_fixture.get_chembl_release()
+    release2 = pipeline_fixture.get_chembl_release()
 
     # Assert
     assert release1 == "chembl_34"
     assert release2 == "chembl_34"
     # Should be called only once due to caching
     (
-        mock_dependencies["extraction_service"]
+        mock_dependencies_fixture["extraction_service"]
         .get_release_version.assert_called_once()
     )
 
 
-def test_transform_flow(pipeline):
+def test_transform_flow(pipeline_fixture):
+    """Test transform flow."""
     # Arrange
     df = pd.DataFrame({"a": [1]})
 
     # Act
-    result = pipeline.transform(df)
+    result = pipeline_fixture.transform(df)
 
     # Assert
     assert "transformed" in result.columns
-    assert result.iloc[0]["transformed"] == True
+    assert result.iloc[0]["transformed"]
 
 
-def test_pre_transform_hook(pipeline):
+def test_pre_transform_hook(pipeline_fixture):
+    """Test pre-transform hook."""
     # Test default implementation (returns df as is)
     df = pd.DataFrame({"a": [1]})
-    result = pipeline.pre_transform(df)
+    result = pipeline_fixture.pre_transform(df)
     pd.testing.assert_frame_equal(df, result)
 
 
-def test_build_meta(pipeline, mock_dependencies):
+def test_build_meta(pipeline_fixture, mock_dependencies_fixture):
+    """Test metadata building."""
     # Arrange
-    mock_dependencies["extraction_service"].get_release_version.return_value = (
-        "chembl_99"
-    )
+    mock_dependencies_fixture[
+        "extraction_service"
+    ].get_release_version.return_value = "chembl_99"
     context = RunContext(
         entity_name="test",
         provider="chembl",
@@ -99,7 +109,8 @@ def test_build_meta(pipeline, mock_dependencies):
     df = pd.DataFrame()
 
     # Act
-    meta = pipeline._build_meta(context, df)
+    # pylint: disable=protected-access
+    meta = pipeline_fixture._build_meta(context, df)
 
     # Assert
     assert meta["chembl_release"] == "chembl_99"

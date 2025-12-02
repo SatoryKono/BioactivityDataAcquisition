@@ -1,0 +1,7 @@
+checksum: ed0526d6bd01d3ada4961c8d913a8bd7d0927b72f689c0c5cac3e4040a1c225d
+entity: testitem
+files:
+- testitem.csv
+row_count: 10
+run_id: 80097132-3a41-4ac7-a6f6-b5011b967410
+timestamp: '2025-12-02T10:43:12.880456+00:00'
