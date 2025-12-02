@@ -7,6 +7,14 @@ entity_name: assay
 endpoint: /assay
 primary_key: assay_chembl_id
 
+sources:
+  chembl:
+    # Дефолтный batch_size, можно переопределить
+    batch_size: 25
+    parameters:
+      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+      max_url_length: 2000
+
 cli:
   input_file: data/input/assay.csv
 
@@ -101,4 +109,3 @@ hashing:
       - document_chembl_id
       - target_chembl_id
 # pagination наследуется из chembl_default profile
-

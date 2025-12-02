@@ -1,16 +1,26 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import pandas as pd
 from pathlib import Path
 
 from bioetl.application.pipelines.chembl.activity.extract import extract_activity
 from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig, ChemblSourceParameters
 
 @pytest.fixture
-def mock_config():
+def source_config():
+    return ChemblSourceConfig(
+        parameters=ChemblSourceParameters(base_url="https://test.com"),
+        batch_size=100
+    )
+
+@pytest.fixture
+def mock_config(source_config):
     config = MagicMock(spec=PipelineConfig)
     config.cli = {}
     config.pipeline = {}
+    # Inject source config
+    config.sources = {"chembl": source_config}
     return config
 
 @pytest.fixture
@@ -74,6 +84,33 @@ def test_extract_ids_only_csv(mock_config, mock_service, tmp_path):
         assert "activity_id__in" in call_kwargs
         assert "100" in call_kwargs["activity_id__in"]
 
+def test_extract_batch_size_from_config(mock_config, mock_service, tmp_path):
+    """
+    Test that batch_size from config controls chunking.
+    We set batch_size=2 and provide 5 IDs, expecting 3 batches (2, 2, 1).
+    """
+    csv_path = tmp_path / "activity_batch_test.csv"
+    ids = [1, 2, 3, 4, 5]
+    pd.DataFrame({"activity_id": ids}).to_csv(csv_path, index=False)
+    
+    mock_config.cli = {"input_file": str(csv_path)}
+    # Override batch size in source config
+    mock_config.sources["chembl"].batch_size = 2
+    
+    with patch("bioetl.application.pipelines.chembl.activity.extract.ChemblResponseParser") as MockParser:
+        parser_instance = MockParser.return_value
+        parser_instance.parse.return_value = [] # Return empty for simplicity
+        
+        extract_activity(mock_config, mock_service)
+        
+        # Expect 3 calls: [1,2], [3,4], [5]
+        assert mock_service.client.request_activity.call_count == 3
+        
+        calls = mock_service.client.request_activity.call_args_list
+        assert calls[0][1]["activity_id__in"] == "1,2"
+        assert calls[1][1]["activity_id__in"] == "3,4"
+        assert calls[2][1]["activity_id__in"] == "5"
+
 def test_extract_missing_column(mock_config, mock_service, tmp_path):
     """Test validation error when ID column is missing."""
     csv_path = tmp_path / "bad.csv"
@@ -83,4 +120,3 @@ def test_extract_missing_column(mock_config, mock_service, tmp_path):
     
     with pytest.raises(ValueError, match="must contain 'activity_id'"):
         extract_activity(mock_config, mock_service)
-

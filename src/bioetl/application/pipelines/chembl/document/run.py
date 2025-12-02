@@ -5,8 +5,8 @@ import pandas as pd
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.document.extract import extract_document
 from bioetl.domain.schemas.chembl.document import DocumentSchema
-from bioetl.domain.transform.custom_types import normalize_pmid
-from bioetl.domain.transform.impl.normalize import normalize_doi
+from bioetl.domain.transform.custom_types import normalize_doi, normalize_pmid
+from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
 
 
 class ChemblDocumentPipeline(ChemblPipelineBase):
@@ -15,12 +15,34 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
     
     Handles extraction of document/publication data from ChEMBL API.
     """
+
+    def _resolve_source_config(self, source_name: str) -> ChemblSourceConfig:
+        """
+        Resolves and validates source configuration.
+        """
+        source_data = self._config.sources.get(source_name)
+        
+        if isinstance(source_data, ChemblSourceConfig):
+            return source_data
+            
+        if isinstance(source_data, dict):
+            return ChemblSourceConfig(**source_data)
+            
+        raise ValueError(f"Configuration for source '{source_name}' is missing or invalid.")
     
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """
         Extract document data, supporting CSV input.
         """
-        return extract_document(self._config, self._extraction_service, **kwargs)
+        source_config = self._resolve_source_config("chembl")
+        batch_size = source_config.resolve_effective_batch_size()
+
+        return extract_document(
+            self._config, 
+            self._extraction_service, 
+            batch_size=batch_size, 
+            **kwargs
+        )
 
     def _do_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """

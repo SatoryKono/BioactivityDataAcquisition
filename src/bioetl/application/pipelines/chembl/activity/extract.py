@@ -9,6 +9,7 @@ import pandas as pd
 from bioetl.application.pipelines.chembl.common.inputs import read_input_dataframe, read_input_ids
 from bioetl.application.pipelines.chembl.extraction import ChemblExtractionService
 from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
 from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,16 @@ def extract_activity(
     """
     Extract activity data.
     """
+    # Resolve source config for batch sizing
+    source_raw = config.sources.get("chembl", {})
+    # If it's already an object (e.g. resolver did it), use it, otherwise parse dict
+    if isinstance(source_raw, ChemblSourceConfig):
+        source_config = source_raw
+    else:
+        source_config = ChemblSourceConfig.model_validate(source_raw)
+
+    limit = kwargs.get("limit")
+    
     path = config.cli.get("input_file")
     if path:
         header = pd.read_csv(path, nrows=0)
@@ -35,9 +46,6 @@ def extract_activity(
              raise ValueError(f"Input file {path} must contain 'activity_id'")
              
         is_id_only = len(header.columns) <= 2 and "activity_id" in header.columns
-        
-        # Check limit
-        limit = kwargs.get("limit")
         
         if not is_id_only:
             logger.info("Detected full data in input CSV.")
@@ -60,7 +68,9 @@ def extract_activity(
             ids = ids[:limit]
 
         records = []
-        batch_size = 100
+        # Calculate batch size dynamically based on config and limit
+        batch_size = source_config.resolve_effective_batch_size(limit=limit, hard_cap=25)
+        
         parser = ChemblResponseParser()
         
         for batch_ids in _chunk_list(ids, batch_size):

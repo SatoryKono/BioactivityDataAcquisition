@@ -22,7 +22,8 @@ def _chunk_list(data: list[Any], size: int):
 
 def extract_document(
     config: PipelineConfig, 
-    service: ChemblExtractionService, 
+    service: ChemblExtractionService,
+    batch_size: int | None = None,
     **kwargs: Any
 ) -> pd.DataFrame:
     """
@@ -56,10 +57,10 @@ def extract_document(
             ids = ids[:limit]
 
         records = []
-        batch_size = 100
+        effective_batch_size = batch_size or service.batch_size
         parser = ChemblResponseParser()
         
-        for batch_ids in _chunk_list(ids, batch_size):
+        for batch_ids in _chunk_list(ids, effective_batch_size):
             str_ids = ",".join(map(str, batch_ids))
             response = service.client.request_document(document_chembl_id__in=str_ids)
             batch_records = parser.parse(response)

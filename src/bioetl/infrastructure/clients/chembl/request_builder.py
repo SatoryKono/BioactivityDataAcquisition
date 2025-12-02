@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from bioetl.infrastructure.clients.base.contracts import RequestBuilderABC
 
 
@@ -7,8 +7,11 @@ class ChemblRequestBuilder(RequestBuilderABC):
     Builder для запросов к ChEMBL API.
     """
     
-    def __init__(self, base_url: str = "https://www.ebi.ac.uk/chembl/api/data") -> None:
+    def __init__(self, base_url: str, max_url_length: Optional[int] = None) -> None:
+        if not base_url:
+            raise ValueError("base_url is required")
         self.base_url = base_url.rstrip("/")
+        self.max_url_length = max_url_length
         self._endpoint: str = ""
         self._params: dict[str, Any] = {}
     
@@ -34,10 +37,12 @@ class ChemblRequestBuilder(RequestBuilderABC):
         if query_string:
             url += f"?{query_string}"
             
+        if self.max_url_length and len(url) > self.max_url_length:
+             raise ValueError(f"URL length {len(url)} exceeds max_url_length {self.max_url_length}")
+
         return url
 
     def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilder":
         self._params["offset"] = offset
         self._params["limit"] = limit
         return self
-

@@ -7,6 +7,13 @@ entity_name: document
 endpoint: /document
 primary_key: document_chembl_id
 
+sources:
+  chembl:
+    batch_size: 25
+    parameters:
+      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+      max_url_length: 2000
+
 cli:
   input_file: data/input/document.csv
 

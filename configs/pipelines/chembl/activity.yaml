@@ -7,6 +7,19 @@ entity_name: activity
 endpoint: /activity
 primary_key: activity_id
 
+sources:
+  chembl:
+    # Изначальное значение batch_size для пайплайна
+    batch_size: 100
+    parameters:
+      # base_url наследуется или переопределяется здесь
+      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+      max_url_length: 2000
+      # Параметры, ранее захардкоженные или неявные
+      data_validity:
+        enabled: false # По умолчанию, или true если используется
+        page_limit: 100 # Если есть лимит страниц для sub-запросов
+
 cli:
   input_file: data/input/activity.csv
 
@@ -277,8 +290,6 @@ hashing:
 
 # Специфичные параметры пайплайна (общие параметры наследуются из профиля)
 pipeline:
-  batch_size: 100
   enable_denormalization: false
   
 # pagination наследуется из chembl_default profile
-
