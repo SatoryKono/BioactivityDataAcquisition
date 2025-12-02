@@ -110,9 +110,9 @@ class TestNormalizePmid:
     @pytest.mark.parametrize(
         "value, expected",
         [
-            ("12345", "12345"),
-            (12345, "12345"),
-            (" 67890 ", "67890"),
+            ("12345", 12345),
+            (12345, 12345),
+            (" 67890 ", 67890),
             (None, None),
             (pd.NA, None),
         ],
@@ -133,9 +133,9 @@ class TestNormalizePcid:
     @pytest.mark.parametrize(
         "value, expected",
         [
-            ("CID987", "987"),
-            ("pcid123", "123"),
-            (" 456 ", "456"),
+            ("CID987", 987),
+            ("pcid123", 123),
+            (" 456 ", 456),
             (None, None),
             (pd.NA, None),
         ],
@@ -172,7 +172,7 @@ class TestNormalizeUniprot:
 class TestNormalizeArray:
     def test_normalizes_elements_and_types(self):
         result = normalize_array([" 123 ", 456, None], item_normalizer=normalize_pmid)
-        assert result == ["123", "456"]
+        assert result == [123, 456]
         assert isinstance(result, list)
 
     def test_handles_nested_records(self):
@@ -182,7 +182,7 @@ class TestNormalizeArray:
             None,
         ]
         result = normalize_array(values, item_normalizer=normalize_pmid)
-        assert result == [{"pmid": "123"}, {"pmid": "456"}]
+        assert result == [{"pmid": 123}, {"pmid": 456}]
 
     def test_raises_on_invalid_item(self):
         with pytest.raises(ValueError):
@@ -200,7 +200,7 @@ class TestNormalizeRecord:
     def test_normalizes_mapping_values(self):
         record = {"pmid": "123", "extra": None}
         result = normalize_record(record, value_normalizer=normalize_pmid)
-        assert result == {"pmid": "123"}
+        assert result == {"pmid": 123}
         assert isinstance(result, dict)
 
     def test_returns_none_for_empty_or_missing(self):

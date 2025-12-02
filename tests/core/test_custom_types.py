@@ -72,12 +72,12 @@ class TestIdentifierNormalizers:
             normalize_chembl_id("CHEMBL12X")
 
     def test_normalize_pmid(self):
-        assert normalize_pmid("12345") == "12345"
+        assert normalize_pmid("12345") == 12345
         with pytest.raises(ValueError):
             normalize_pmid("pmid123")
 
     def test_normalize_pcid(self):
-        assert normalize_pcid("CID987") == "987"
+        assert normalize_pcid("CID987") == 987
         with pytest.raises(ValueError):
             normalize_pcid("CID98X")
 
@@ -98,7 +98,7 @@ class TestCollectionNormalizers:
 
     def test_normalize_record(self):
         result = normalize_record({"pmid": "123"}, value_normalizer=normalize_pmid)
-        assert result == {"pmid": "123"}
+        assert result == {"pmid": 123}
 
     def test_normalize_record_error(self):
         with pytest.raises(ValueError):
