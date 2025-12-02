@@ -67,5 +67,7 @@ class PipelineConfig(BaseModel):
     fields: list[dict[str, Any]] = Field(default_factory=list)
     
     # Business key definition
-    business_key: list[str] = Field(default_factory=list)
+    # DEPRECATED: Use hashing.business_key_fields instead.
+    # This field is kept for backward compatibility but will be removed in future versions.
+    business_key: list[str] = Field(default_factory=list, description="Deprecated: Use hashing.business_key_fields")
 
