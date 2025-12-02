@@ -1,0 +1,7 @@
+checksum: 6a9d295cdf79a29d8dad151c2d9dd86842fb915dfc04d88c30a2b60c2cc6b12a
+entity: document
+files:
+- document.csv
+row_count: 10
+run_id: 933b3629-d5ec-428a-92e1-a617e63a0389
+timestamp: '2025-12-02T13:03:19.106607+00:00'

@@ -1,6 +1,21 @@
+# Target Pipeline Configuration
+# Наследует общие параметры из chembl_default profile
+
+extends: chembl_default
+
 entity_name: target
 endpoint: /target
 primary_key: target_chembl_id
+
+sources:
+  chembl:
+    batch_size: 25
+    parameters:
+      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+      max_url_length: 2000
+
+cli:
+  input_file: data/input/target.csv
 
 fields:
   - name: target_chembl_id
@@ -51,7 +66,7 @@ fields:
     is_filterable: false
     description: Внешние кросс-референсы
 
-pagination:
-  limit: 1000
-  offset: 0
-
+hashing:
+  business_key_fields:
+    - target_chembl_id
+# pagination наследуется из chembl_default profile

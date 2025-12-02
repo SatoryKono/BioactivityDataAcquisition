@@ -1,6 +1,27 @@
+# Activity Pipeline Configuration
+# Наследует общие параметры из chembl_default profile
+
+extends: chembl_default
+
 entity_name: activity
 endpoint: /activity
 primary_key: activity_id
+
+sources:
+  chembl:
+    # Изначальное значение batch_size для пайплайна
+    batch_size: 100
+    parameters:
+      # base_url наследуется или переопределяется здесь
+      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+      max_url_length: 2000
+      # Параметры, ранее захардкоженные или неявные
+      data_validity:
+        enabled: false # По умолчанию, или true если используется
+        page_limit: 100 # Если есть лимит страниц для sub-запросов
+
+cli:
+  input_file: data/input/activity.csv
 
 fields:
   - name: activity_comment
@@ -261,7 +282,14 @@ fields:
     is_filterable: true
     description: Исходное числовое значение
 
-pagination:
-  limit: 1000
-  offset: 0
+hashing:
+  business_key_fields:
+   - activity_id
+   - molecule_chembl_id
+   - target_chembl_id
 
+# Специфичные параметры пайплайна (общие параметры наследуются из профиля)
+pipeline:
+  enable_denormalization: false
+  
+# pagination наследуется из chembl_default profile
