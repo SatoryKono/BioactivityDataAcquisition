@@ -36,7 +36,7 @@
 
 ## Related Components
 
-- **BaseChemblNormalizer**: базовый нормализатор для ChEMBL (см. `docs/02-pipelines/chembl/activity/08-base-chembl-normalizer.md`)
+- **BaseChemblNormalizer**: базовый нормализатор для всех ChEMBL-пайплайнов (см. `../common/08-base-chembl-normalizer.md`)
 - **ColumnNormalizationSpec**: спецификация нормализации колонки (см. `docs/02-pipelines/chembl/activity/10-activity-chembl-column-spec.md`)
 - **ActivityTransformer**: использует нормализатор для трансформации данных (см. `docs/02-pipelines/chembl/activity/02-activity-chembl-transformation.md`)
 
