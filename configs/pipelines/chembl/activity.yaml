@@ -277,7 +277,7 @@ hashing:
 
 # Специфичные параметры пайплайна (общие параметры наследуются из профиля)
 pipeline:
-  batch_size: 10000
+  batch_size: 100
   enable_denormalization: false
   
 # pagination наследуется из chembl_default profile
