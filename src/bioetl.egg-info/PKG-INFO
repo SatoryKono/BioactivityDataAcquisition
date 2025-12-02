@@ -1,0 +1,47 @@
+Metadata-Version: 2.4
+Name: bioetl
+Version: 0.1.0
+Summary: Bioactivity Data Acquisition ETL
+Author-email: BioETL Team <team@example.com>
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: pandera>=0.18.0
+Requires-Dist: typer>=0.9.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: requests>=2.31.0
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: pydantic>=2.0.0
+Dynamic: license-file
+
+# Bioactivity Data Acquisition (BioETL)
+
+ETL-фреймворк для извлечения, нормализации и интеграции данных биологической активности из научных REST API (ChEMBL, PubMed, PubChem и др.).
+
+## Документация
+
+Полная документация доступна в директории `docs/`:
+
+- **[Overview](docs/overview/00-index.md)**: Введение, быстрый старт, глоссарий.
+- **[Architecture](docs/architecture/00-index.md)**: Принципы архитектуры, слои, поток данных.
+- **[ABC Reference](docs/reference/abc/00-index.md)**: Каталог интерфейсов.
+- **[Pipelines](docs/02-pipelines/chembl/00-index.md)**: Описание ETL-пайплайнов ChEMBL.
+- **[Guides](docs/guides/00-running-pipelines.md)**: Руководства по запуску и конфигурации.
+
+## Быстрый старт
+
+```bash
+# Установка
+pip install -e .
+
+# Запуск smoke-теста
+bioetl run activity_chembl --profile development --dry-run
+```
+
+## Лицензия
+
+MIT
+

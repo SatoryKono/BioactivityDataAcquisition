@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 import uuid
@@ -16,7 +16,9 @@ class RunContext:
     run_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     entity_name: str = ""
     provider: str = ""
-    started_at: datetime = field(default_factory=datetime.utcnow)
+    started_at: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
     config: dict[str, Any] = field(default_factory=dict)
     dry_run: bool = False
 
@@ -47,4 +49,3 @@ class StageDescriptor:
     callable: Callable[..., Any]
     skip_on_dry_run: bool = False
     required: bool = True
-

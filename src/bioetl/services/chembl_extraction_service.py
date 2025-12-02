@@ -40,12 +40,21 @@ class ChemblExtractionService:
         records = []
         offset = 0
         
-        # Get request builder from client? No, client abstracts it.
-        # We need to modify filters for pagination.
+        # Check for explicit limit in filters
+        total_limit = filters.pop("limit", None)
         
         while True:
             filters["offset"] = offset
-            filters["limit"] = self.batch_size
+            
+            # Determine current batch size
+            current_batch_size = self.batch_size
+            if total_limit is not None:
+                remaining = total_limit - len(records)
+                if remaining <= 0:
+                    break
+                current_batch_size = min(self.batch_size, remaining)
+            
+            filters["limit"] = current_batch_size
             
             if entity == "activity":
                 response = self.client.request_activity(**filters)
@@ -66,6 +75,12 @@ class ChemblExtractionService:
                 
             records.extend(batch_records)
             
+            # Check for total limit reach
+            if total_limit is not None and len(records) >= total_limit:
+                # Trim if we got slightly more (unlikely with correct batch size but safe)
+                records = records[:total_limit]
+                break
+
             # Check for next
             if not self.paginator.has_more(response):
                 break
@@ -73,7 +88,7 @@ class ChemblExtractionService:
             # Simple offset increment if has_more is true but paginator logic says next_marker is complicated
             # If ChemblPaginator.has_more returns true, we assume there are more items.
             # We increment offset.
-            offset += self.batch_size
+            offset += current_batch_size
             
             # Safety break for large datasets if needed or check total count
             # meta = self.parser.extract_metadata(response)
@@ -81,4 +96,3 @@ class ChemblExtractionService:
             # if offset >= total: break
             
         return pd.DataFrame(records)
-
