@@ -177,9 +177,10 @@ class PipelineBase(ABC):
 
     def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Добавляет столбцы с хешами строк и бизнес-ключей."""
+        keys = self._config.hashing.business_key_fields or self._config.business_key
         return self._hash_service.add_hash_columns(
             df,
-            business_key_cols=self._config.business_key
+            business_key_cols=keys
         )
 
     def _close_clients(self) -> None:

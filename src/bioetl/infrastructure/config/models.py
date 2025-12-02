@@ -41,6 +41,10 @@ class QcConfig(BaseModel):
     min_coverage: float = 0.85
 
 
+class HashingConfig(BaseModel):
+    business_key_fields: list[str] = Field(default_factory=list)
+
+
 class PipelineConfig(BaseModel):
     """
     Полная конфигурация пайплайна.
@@ -55,6 +59,7 @@ class PipelineConfig(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
     qc: QcConfig = Field(default_factory=QcConfig)
+    hashing: HashingConfig = Field(default_factory=HashingConfig)
     
     # Additional pipeline specific fields
     pipeline: dict[str, Any] = Field(default_factory=dict)

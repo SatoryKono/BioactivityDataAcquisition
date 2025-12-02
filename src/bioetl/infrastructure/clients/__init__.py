@@ -1,4 +1,0 @@
-"""
-Base clients and contracts.
-"""
-
