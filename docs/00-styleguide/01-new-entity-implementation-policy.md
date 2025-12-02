@@ -32,9 +32,11 @@
 
 | #таблицы-01.01 | Rule / Subject      | Responsible                             | Exception process                                                                                                             | Актуальность | Description                                                                                       |
 | -------------: | ------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | :----------: | ------------------------------------------------------------------------------------------------- |
-|          01.01 | Enforcement Owner   | Architecture team (or designated owner) | Exceptions require documented PR, approval by architecture owner, and a time-limited waiver recorded in `docs/exceptions.md`. |     true     | Архитектурная команда отвечает за исполнение политики, рассмотрение исключений и соответствие CI. |
-|          01.02 | Exception Recording | PR author & approver                    | Все исключения документируются с rationale, expiry date и reviewer в `docs/exceptions.md` и привязываются к PR.               |     true     | Исключения не допускаются устно.                                                                  |
+|          01.01 | Enforcement Owner   | Architecture team (or designated owner) | Exceptions require documented PR, approval by architecture owner, and a time-limited waiver recorded in `configs/naming_exceptions.yaml`. |     true     | Архитектурная команда отвечает за исполнение политики, рассмотрение исключений и соответствие CI. |
+|          01.02 | Exception Recording | PR author & approver                    | Все исключения документируются с rationale, expiry date и reviewer в `configs/naming_exceptions.yaml` и привязываются к PR.               |     true     | Исключения не допускаются устно.                                                                  |
 |          01.03 | Audit & Revocation  | Security/Architecture                   | Периодический аудит (quarterly). Стаpые исключения отзываются; нарушения требуют remediation план.                            |     true     | Аудит фиксируется и доводится до владельцев.                                                      |
+
+**Единый источник исключений:** `configs/naming_exceptions.yaml`. Для любых отступлений используйте только эту YAML-структуру; отдельного `docs/exceptions.md` не требуется.
 
 ---
 
@@ -236,8 +238,8 @@
 
 | #таблицы-13.01 | Exception Type              |       Who approves | Validity period |                               How recorded | Актуальность | Description                                                     |
 | -------------: | --------------------------- | -----------------: | --------------: | -----------------------------------------: | :----------: | --------------------------------------------------------------- |
-|          13.01 | Naming exception            | Architecture owner |   up to 90 days |   Record in `docs/exceptions.md` + PR note |     true     | Временное отступление по именованию с фиксацией и сроком.       |
-|          13.02 | No-default-on-ABC exception | Architecture board |   up to 30 days |      PR rationale and `docs/exceptions.md` |     true     | Разрешение не создавать Default для нового ABC при обосновании. |
+|          13.01 | Naming exception            | Architecture owner |   up to 90 days | Record in `configs/naming_exceptions.yaml` + PR note |     true     | Временное отступление по именованию с фиксацией и сроком.       |
+|          13.02 | No-default-on-ABC exception | Architecture board |   up to 30 days |    PR rationale and `configs/naming_exceptions.yaml` |     true     | Разрешение не создавать Default для нового ABC при обосновании. |
 |          13.03 | Registry-sync delay         |    Repo maintainer |          7 days | Issue linked to PR and `abc_registry.yaml` |     true     | Если реестр не обновлён, создаётся issue с 7-дневным сроком.    |
 
 ---
