@@ -4,34 +4,19 @@
 
 **ChemblActivityPipeline** (`src/bioetl/application/pipelines/chembl/activity/run.py`) наследует `ChemblPipelineBase` и реализует поток ETL для сущности Activity.
 
-## Архитектура и Компоненты
+## Компоненты
 
-Пайплайн следует стандартной архитектуре, где логические роли распределены между методами и миксинами:
-
-- **Extract**: Реализован в функции `extract_activity` (`src/bioetl/application/pipelines/chembl/activity/extract.py`).
-  - Поддерживает два режима: чтение полного CSV (из `cli.input_file`) или дозагрузка данных из API по ID из CSV.
-  - Использует `ChemblExtractionService` для взаимодействия с API.
-  
-- **Transform**: 
-  - Базовая нормализация выполняется в методе `_do_transform`.
-  - Финальная нормализация типов (строки, числа, даты) и очистка обеспечивается миксином `NormalizerMixin` (метод `normalize_fields`), который используется в `ChemblPipelineBase`.
-  
-- **Hash & Deduplicate**: 
-  - Вычисление `hash_business_key` и `hash_row` выполняется сервисом `HashService`, который вызывается в базовом классе `PipelineBase` после стадии трансформации.
-  - Поля для бизнес-ключа задаются в конфигурации (`hashing.business_key_fields`).
-
-- **Validate**: 
-  - Выполняется `ValidationService` с использованием Pandera-схемы `ActivitySchema` (`src/bioetl/domain/schemas/chembl/activity.py`).
-  - Проверяет типы данных, форматы (regex для ChEMBL ID) и допустимые значения.
-
-- **Load (Write)**:
-  - `UnifiedOutputWriter` сохраняет данные в CSV/Parquet, обеспечивает атомарную запись и генерирует метаданные (`meta.yaml`) и отчеты качества.
+- `extract_activity` (`src/bioetl/application/pipelines/chembl/activity/extract.py`) — orchestration точки входа extract-стадии.
+- `ChemblExtractionService` (`src/bioetl/domain/services/chembl/extraction_service.py`) — загрузка сырых активностей из API или CSV.
+- `ChemblResponseParser` (`src/bioetl/domain/services/chembl/response_parser.py`) — разбор и стандартизация ответов ChEMBL перед нормализацией.
+- `normalize_fields` (`NormalizerMixin` в `src/bioetl/application/pipelines/chembl/base.py`) — финальное приведение типов и очистка строковых/числовых полей.
+- `HashService` (`src/bioetl/domain/services/hashing.py`) — расчет `hash_business_key` и `hash_row` для детерминированной дедупликации.
+- `UnifiedOutputWriter` (`src/bioetl/infrastructure/writers/unified_output_writer.py`) — атомарная запись итоговых таблиц и побочных артефактов.
 
 ## Особенности
 
-- **Гибридный Extract**: Пайплайн умеет работать как "чистый" ETL из API, так и как обогатитель списка ID из локального файла.
-- **Нормализация**: Автоматическое приведение пустых строк к NULL, тримминг пробелов и унификация форматов чисел через `NormalizerMixin`.
-- **Контекст**: В метаданные автоматически добавляется версия релиза ChEMBL (`chembl_release`).
+- **CSV input**: поддерживаются два сценария — загрузка полного CSV через `cli.input_file` и догрузка активностей из API по списку ID, прочитанному из CSV.
+- **Хеширование**: хеши рассчитываются после нормализации; набор полей для бизнес-ключа задается в `hashing.business_key_fields`, что обеспечивает воспроизводимое устранение дублей.
 
 ## Конфигурация
 
