@@ -89,13 +89,17 @@ class TestIdentifierNormalizers:
 
 
 class TestCollectionNormalizers:
+    def test_normalize_array_from_scalar(self):
+        result = normalize_array(" 10.1234/XYZ ", item_normalizer=normalize_doi)
+        assert result == ["10.1234/xyz"]
+
     def test_normalize_array_with_scalar(self):
         result = normalize_array([" 10.1234/XYZ "], item_normalizer=normalize_doi)
         assert result == ["10.1234/xyz"]
 
-    def test_normalize_array_error(self):
+    def test_normalize_array_keeps_invalid_item_errors(self):
         with pytest.raises(ValueError):
-            normalize_array("not-a-list", item_normalizer=str)
+            normalize_array(["10.1234/XYZ", "bad"], item_normalizer=normalize_doi)
 
     def test_normalize_record(self):
         result = normalize_record({"pmid": "123"}, value_normalizer=normalize_pmid)
