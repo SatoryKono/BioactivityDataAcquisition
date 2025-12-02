@@ -17,7 +17,7 @@
 - [04 Activity ChEMBL Parser](04-activity-chembl-parser.md) — парсер ответов ChEMBL API
 - [05 Activity ChEMBL Normalizer](05-activity-chembl-normalizer.md) — нормализатор данных активности
 - [07 Activity ChEMBL Descriptor](07-activity-chembl-descriptor.md) — дескриптор параметров извлечения
-- [08 Base ChEMBL Normalizer](08-base-chembl-normalizer.md) — базовый нормализатор для ChEMBL
+- [08 Base ChEMBL Normalizer](../common/08-base-chembl-normalizer.md) — общий нормализатор для всех ChEMBL-пайплайнов
 - [09 Activity ChEMBL Batch Plan](09-activity-chembl-batch-plan.md) — план батчирования запросов
 - [10 Activity ChEMBL Column Spec](10-activity-chembl-column-spec.md) — спецификация нормализации колонок
 - [11 Activity ChEMBL Column Mapping](11-activity-chembl-column-mapping.md) — маппинг полей JSON на колонки
