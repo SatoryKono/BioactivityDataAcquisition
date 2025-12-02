@@ -8,7 +8,7 @@
 - **Document** — агрегирует публикации и метаданные для ссылок на эксперименты.
 
 ## Общие принципы
-Все пайплайны наследуют `ChemblCommonPipeline`, используют единый `ChemblExtractionService` и общую конфигурацию (release, пагинация, лимиты). Доступны dry-run и QC-артефакты по умолчанию.
+Все пайплайны наследуют `ChemblPipelineBase` ([`src/bioetl/application/pipelines/chembl/base.py`](../../../../src/bioetl/application/pipelines/chembl/base.py)), используют единый `ChemblExtractionService` и общую конфигурацию (release, пагинация, лимиты). Доступны dry-run и QC-артефакты по умолчанию.
 
 ## Навигация по пайплайнам
 - Activity: `activity/00-activity-chembl-overview.md`
