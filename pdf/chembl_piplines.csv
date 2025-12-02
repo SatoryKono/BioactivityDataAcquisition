@@ -1,8 +1,0 @@
-Пайплайн,"Extract (источник, ключи)",Transform (очистка и нормализация),Validate (Pandera schema),Особенности Write (если есть)
-Activity,"GET /activity из ChEMBL. Ключи: activity_id, molecule_chembl_id, assay_chembl_id, target_chembl_id, document_chembl_id",- Приведение типов- Парсинг ligand_efficiency- Удаление записей без activity_id,ActivitySchema,Стандартная запись через базовый класс
-Assay,"GET /assay из ChEMBL. Ключи: assay_chembl_id, target_chembl_id, document_chembl_id",- Приведение типов (confidence_score и др.)- Очистка строк- Обработка вложенных структур (если есть)- Исключение пустых assay_type или assay_chembl_id,AssaySchema,"Общий writer, порядок колонок по схеме"
-TestItem,"GET /molecule из ChEMBL. Ключи: molecule_chembl_id, parent_molecule_chembl_id",- Приведение типов- Обработка molecule_properties и molecule_structures- Удаление пустых molecule_chembl_id- Без enrichment из PubChem,TestItemSchema,Обычная запись без доп. обработки
-Target,"GET /target из ChEMBL. Ключи: target_chembl_id, target_type, pref_name, organism, target_components, cross_references","- Приведение типов (tax_id, species_group_flag)- Очистка строк- Без развертки вложенных списков- Удаление строк без target_type или ID",TargetSchema,Унаследовано от PipelineBase
-Document,"GET /document из ChEMBL. Ключи: document_chembl_id, doi, pubmed_id, patent_id, title, doc_type, authors, journal, year","- Приведение типов- Объединение списка авторов в строку- Проверка соответствия doc_type ? patent_id- Удаление строк без ID, title, doc_type",DocumentSchema + кастомные проверки PATENT,Унифицированная запись с сортировкой
-,,,,
-"Если нужно, могу экспортировать эту таблицу в формат Markdown, CSV или Pandas DataFrame.",,,,
