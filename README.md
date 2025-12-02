@@ -19,6 +19,11 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 - `02-new-entity-naming-policy.md` — полная политика именования
 - `10-documentation-standards.md` — стандарты документации
 
+### Архитектурные планы (бинарные вложения)
+
+- `docs/30-architecture-plan-project.{docx,pdf}` — high-level architecture plan for the BioETL project.
+- `docs/31-architecture-plan-etl-scientific-rest-apis.{docx,pdf}` — architecture plan for the ETL project integrating data from scientific REST APIs.
+
 ### Пайплайны и core компоненты
 
 Документация по пайплайнам и базовым компонентам находится в `docs/02-pipelines/`:
@@ -95,70 +100,28 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 - `22-semantic-scholar-client.md` — клиент для API Semantic Scholar
 - `23-uniprot-client.md` — клиент для REST API UniProt
 
-#### HTTP компоненты
+- `docs/01-ABC/INDEX.md` — человекочитаемый каталог ABC, Default и Impl
+- `docs/02-pipelines/` — пайплайны и core-компоненты; индекс ChEMBL-компонентов: `docs/02-pipelines/chembl/INDEX.md` (отдельные пайплайны activity, assay, target, document, testitem используют собственные `INDEX.md` в подкаталогах)
+- `docs/clients/INDEX.md` — клиентский слой и вспомогательные утилиты
+- `docs/cli/INDEX.md` — CLI и запуск пайплайнов
+- `docs/qc/INDEX.md` — артефакты контроля качества
+- `docs/schemas/INDEX.md` — реестр схем данных
 
-Документация по HTTP компонентам находится в `docs/02-pipelines/http/`:
+### Пайплайны и core компоненты
 
-- `23-http-cache.md` — кэш HTTP-ответов с TTL
-- `24-rate-limiter.md` — лимитер частоты запросов
-- `25-retry-policy.md` — политика повторных попыток
-- `26-circuit-breaker.md` — Circuit Breaker для устойчивости
-- `27-pagination-strategy.md` — стратегия пагинации
-
-#### Конфигурация
-
-Документация по компонентам конфигурации находится в `docs/02-pipelines/config/`:
-
-- `28-config-resolver.md` — резолвер конфигурации из YAML
-- `29-secret-provider.md` — провайдер секретов из переменных окружения
-
-#### Core компоненты
-
-Документация по core компонентам находится в `docs/02-pipelines/core/`:
-
-- `25-pipeline-output-service.md` — сервис вывода результатов пайплайна
-
-#### Схемы данных
-
-Документация по схемам данных находится в `docs/schemas/` и `docs/02-pipelines/schemas/`:
-
-- `00-schemas-registry-overview.md` — обзор реестра схем Pandera
-- `27-testitem-schema.md` — схема для отдельного тестового элемента
-- `28-testitems-schema.md` — схема для полного набора тестовых элементов
-- `26-document-schema.md` — схема данных документов ChEMBL (см. `docs/02-pipelines/schemas/26-document-schema.md`)
-
-#### ChEMBL Document Pipeline
-
-Документация по пайплайну ChEMBL Document находится в `docs/02-pipelines/chembl/document/`:
-
-- `00-document-chembl-overview.md` — обзор пайплайна ChEMBL Document
-- `01-document-chembl-methods.md` — приватные методы пайплайна
+Документация по пайплайнам и базовым компонентам находится в `docs/02-pipelines/`. Общие принципы описаны в базовых гайдах (например, `00-pipeline-base.md`, `01-base-external-data-client.md`, `02-logging-and-configuration.md`, `03-unified-api-client.md`, `04-unified-output-writer.md`, `05-schema-registry.md`). Полный список ChEMBL-пайплайнов и общих компонентов поддерживается в `docs/02-pipelines/chembl/INDEX.md`; отдельные пайплайны (activity, assay, target, document, testitem) используют собственные `INDEX.md` в соответствующих подкаталогах.
 
 ### CLI и запуск пайплайнов
 
-Документация по использованию CLI находится в `docs/cli/`:
-
-- `INDEX.md` — индекс документации CLI
-- `00-cli-overview.md` — обзор CLI и архитектуры
-- `01-run-chembl-pipelines.md` — запуск ChEMBL-пайплайнов
-- `02-validate-config.md` — валидация конфигурации
-- `03-config-precedence-and-profiles.md` — приоритеты конфигурации и профили
+Полное содержание документации по CLI доступно в `docs/cli/INDEX.md`.
 
 ### Клиенты внешних источников
 
-Документация по клиентскому слою находится в `docs/clients/`:
-
-- `INDEX.md` — индекс документации клиентов
-- `00-clients-overview.md` — обзор архитектуры клиентского слоя
-- `02-rest-yaml-migration.md` — миграция REST-клиентов на YAML-конфигурации
-- `19-clients-diagrams.md` — генерация диаграмм объектов
+Полный перечень клиентских материалов поддерживается в `docs/clients/INDEX.md`.
 
 ### Quality Control (QC)
 
-Документация по артефактам контроля качества находится в `docs/qc/`:
-
-- `INDEX.md` — индекс документации QC
-- `00-qc-artifacts-overview.md` — обзор QC-артефактов (meta.yaml, quality reports, JSON QC files)
+Список QC-артефактов и описаний поддерживается в `docs/qc/INDEX.md`.
 
 ### Схемы данных
 
