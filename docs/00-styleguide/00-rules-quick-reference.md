@@ -1,4 +1,4 @@
-# Краткая сводка правил проекта (Quick Reference)
+# 00 Rules Quick Reference
 
 > **Примечание**: Это краткая сводка. Полные документы см. в `docs/styleguide/`
 
