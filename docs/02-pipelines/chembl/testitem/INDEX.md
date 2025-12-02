@@ -9,19 +9,19 @@
 ## Компоненты пайплайна
 
 - [01 TestItem ChEMBL Methods](01-testitem-chembl-methods.md) — приватные методы пайплайна
-- [02 ChEMBL TestItem Thin Pipeline](02-chembl-testitem-thin-pipeline.md) — "тонкий" вариант пайплайна без PubChem
-- [03 TestItem Pipeline Options](03-testitem-pipeline-options.md) — параметры командной строки
+- [02 TestItem ChEMBL Thin Pipeline](02-testitem-chembl-thin-pipeline.md) — "тонкий" вариант пайплайна без PubChem
+- [03 TestItem ChEMBL Pipeline Options](03-testitem-chembl-pipeline-options.md) — параметры командной строки
 
 ## Обогащение данными
 
-- [04 Parent Enrichment Preparation](04-parent-enrichment-preparation.md) — подготовка данных для обогащения родительских ID
-- [05 Parent Enrichment Result](05-parent-enrichment-result.md) — результат обогащения родительских ID
-- [06 Parent Lookup Prepared Data](06-parent-lookup-prepared-data.md) — подготовленные данные для поиска
-- [07 Parent Lookup Stats](07-parent-lookup-stats.md) — статистика обогащения родительских ID
+- [04 TestItem ChEMBL Parent Enrichment Preparation](04-testitem-chembl-parent-enrichment-preparation.md) — подготовка данных для обогащения родительских ID
+- [05 TestItem ChEMBL Parent Enrichment Result](05-testitem-chembl-parent-enrichment-result.md) — результат обогащения родительских ID
+- [06 TestItem ChEMBL Parent Lookup Prepared Data](06-testitem-chembl-parent-lookup-prepared-data.md) — подготовленные данные для поиска
+- [07 TestItem ChEMBL Parent Lookup Stats](07-testitem-chembl-parent-lookup-stats.md) — статистика обогащения родительских ID
 
 ## Утилиты
 
-- [08 Requested IDs Snapshot](08-requested-ids-snapshot.md) — накопление идентификаторов без перегрузки памяти
+- [08 TestItem ChEMBL Requested IDs Snapshot](08-testitem-chembl-requested-ids-snapshot.md) — накопление идентификаторов без перегрузки памяти
 
 ## Схемы данных
 

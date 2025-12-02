@@ -37,17 +37,12 @@ This contract allows CI jobs to treat configuration validation as a strict gate.
 
 ## Integration with Profiles and Precedence
 
-Configuration validation should respect the same precedence rules as runtime execution:
-
-1. Environment variables
-2. CLI overrides (such as `--set`)
-3. Pipeline configuration files
-4. Profiles
+Configuration validation should respect the same precedence rules as runtime execution. See [Configuration Guide](../../guides/configuration.md) for detailed precedence rules.
 
 This ensures that the configuration being validated matches what will be used during an actual pipeline run.
 
 ## Related Components
 
 - **FileConfigResolver**: резолвер конфигурации (см. `docs/reference/infrastructure/config/00-config-resolver.md`)
-- **ConfigValidationError**: исключение валидации (см. `docs/02-pipelines/chembl/common/13-config-validation-error.md`)
+- **ConfigValidationError**: исключение валидации (см. `docs/02-pipelines/chembl/common/13-chembl-config-validation-error.md`)
 

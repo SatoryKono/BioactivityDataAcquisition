@@ -24,7 +24,7 @@
 ### Target
 
 - [00 Target ChEMBL Overview](target/00-target-chembl-overview.md) — пайплайн для сущности "target" с обогащением данными UniProt/IUPHAR
-- [01 Target Normalizer](target/01-target-normalizer.md) — нормализатор данных target
+- [01 Target ChEMBL Normalizer](target/01-target-chembl-normalizer.md) — нормализатор данных target
 
 ### Document
 
@@ -49,11 +49,11 @@
 - [06 ChEMBL Extraction Service](common/06-chembl-extraction-service.md) — сервис извлечения
 - [07 ChEMBL Descriptor Factory](common/07-chembl-descriptor-factory.md) — фабрика дескрипторов
 - [08 ChEMBL Extraction Service Descriptor](common/08-chembl-extraction-service-descriptor.md) — дескриптор извлечения через сервис
-- [09 Extraction Strategy Factory](common/09-extraction-strategy-factory.md) — фабрика стратегий извлечения
-- [10 Service Extraction Strategy](common/10-service-extraction-strategy.md) — стратегия извлечения через сервис
-- [11 Dataclass Extraction Strategy](common/11-dataclass-extraction-strategy.md) — стратегия извлечения через dataclass
+- [09 ChEMBL Extraction Strategy Factory](common/09-chembl-extraction-strategy-factory.md) — фабрика стратегий извлечения
+- [10 ChEMBL Service Extraction Strategy](common/10-chembl-service-extraction-strategy.md) — стратегия извлечения через сервис
+- [11 ChEMBL Dataclass Extraction Strategy](common/11-chembl-dataclass-extraction-strategy.md) — стратегия извлечения через dataclass
 - [12 ChEMBL Extraction Descriptor](common/12-chembl-extraction-descriptor.md) — dataclass-дескриптор извлечения
-- [13 Config Validation Error](common/13-config-validation-error.md) — исключение валидации конфигурации
+- [13 ChEMBL Config Validation Error](common/13-chembl-config-validation-error.md) — исключение валидации конфигурации
 - [14 ChEMBL Context Facade](common/14-chembl-context-facade.md) — фасад контекста ChEMBL
 
 ## Связанная документация
@@ -62,3 +62,4 @@
 - [Base External Data Client](../../01-base-external-data-client.md) — базовый клиент внешних API
 - [Unified Output Writer](../../04-unified-output-writer.md) — унифицированный writer для записи
 - [Schema Registry](../../05-schema-registry.md) — реестр схем для валидации
+- [Data Flow](../../../architecture/data-flow.md) — E2E описание потока данных

@@ -269,6 +269,23 @@ class BaseChemblSchema(pa.DataFrameModel):
 
 - `docs/project/00-rules-summary.md` — сводка правил
 - `docs/architecture/00-duplication-reduction-roadmap.md` — roadmap снижения дублирования
+- `docs/architecture/data-flow.md` — E2E описание потока данных
 - `.cursor/rules/` — детальные правила проекта
 - `configs/pipelines/chembl/` — конфигурации пайплайнов
+
+---
+
+## 7. Дополнительные исправления (выполнены)
+
+### 7.1. Файл `docs/architecture/data-flow.md`
+
+**Проблема:** Ссылки в разделе "Related Documentation" указывали на несуществующие пути `../reference/core/` и `../reference/pipelines/`.
+
+**Исправлено:** Обновлены ссылки на актуальные пути `../02-pipelines/`.
+
+### 7.2. Файл `docs/architecture/INDEX.md`
+
+**Проблема:** Ссылки на компоненты указывали на несуществующие пути `docs/reference/core/` и `docs/reference/pipelines/`.
+
+**Исправлено:** Обновлены ссылки на актуальные пути `docs/02-pipelines/`. Добавлен раздел для нового документа `data-flow.md`.
 

@@ -1,4 +1,4 @@
-# 02 ChEMBL TestItem Thin Pipeline
+# 02 TestItem ChEMBL Thin Pipeline
 
 ## Описание
 

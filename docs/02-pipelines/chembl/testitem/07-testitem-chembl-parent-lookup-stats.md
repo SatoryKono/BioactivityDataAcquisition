@@ -1,4 +1,4 @@
-# 07 Parent Lookup Stats
+# 07 TestItem ChEMBL Parent Lookup Stats
 
 ## Описание
 
@@ -42,6 +42,6 @@ stats = ParentLookupStats(
 
 ## Related Components
 
-- **ParentEnrichmentResult**: результат обогащения (см. `docs/02-pipelines/chembl/testitem/05-parent-enrichment-result.md`)
-- **ParentLookupPreparedData**: подготовленные данные (см. `docs/02-pipelines/chembl/testitem/06-parent-lookup-prepared-data.md`)
+- **ParentEnrichmentResult**: результат обогащения (см. `docs/02-pipelines/chembl/testitem/05-testitem-chembl-parent-enrichment-result.md`)
+- **ParentLookupPreparedData**: подготовленные данные (см. `docs/02-pipelines/chembl/testitem/06-testitem-chembl-parent-lookup-prepared-data.md`)
 

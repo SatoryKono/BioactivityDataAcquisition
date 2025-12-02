@@ -1,4 +1,4 @@
-# 09 Extraction Strategy Factory
+# 09 ChEMBL Extraction Strategy Factory
 
 ## Описание
 
@@ -50,6 +50,6 @@ df = strategy.run(pipeline, descriptor, options)
 
 ## Related Components
 
-- **ServiceExtractionStrategy**: стратегия извлечения через сервис (см. `docs/02-pipelines/chembl/common/10-service-extraction-strategy.md`)
+- **ServiceExtractionStrategy**: стратегия извлечения через сервис (см. `docs/02-pipelines/chembl/common/10-chembl-service-extraction-strategy.md`)
 - **ChemblBasePipeline**: использует фабрику для выбора стратегии (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

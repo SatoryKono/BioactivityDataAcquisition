@@ -1,4 +1,4 @@
-# 06 Parent Lookup Prepared Data
+# 06 TestItem ChEMBL Parent Lookup Prepared Data
 
 ## Описание
 
@@ -36,6 +36,6 @@ prepared = ParentLookupPreparedData(
 
 ## Related Components
 
-- **ParentEnrichmentPreparation**: подготовительные данные (см. `docs/02-pipelines/chembl/testitem/04-parent-enrichment-preparation.md`)
-- **ParentLookupStats**: статистика обогащения (см. `docs/02-pipelines/chembl/testitem/07-parent-lookup-stats.md`)
+- **ParentEnrichmentPreparation**: подготовительные данные (см. `docs/02-pipelines/chembl/testitem/04-testitem-chembl-parent-enrichment-preparation.md`)
+- **ParentLookupStats**: статистика обогащения (см. `docs/02-pipelines/chembl/testitem/07-testitem-chembl-parent-lookup-stats.md`)
 

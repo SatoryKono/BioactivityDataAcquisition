@@ -1,4 +1,4 @@
-# 02 Assay Normalizer
+# 02 Assay ChEMBL Normalizer
 
 ## Описание
 

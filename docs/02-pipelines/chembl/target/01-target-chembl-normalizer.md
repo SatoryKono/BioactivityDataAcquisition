@@ -1,4 +1,4 @@
-# 01 Target Normalizer
+# 01 Target ChEMBL Normalizer
 
 ## Описание
 

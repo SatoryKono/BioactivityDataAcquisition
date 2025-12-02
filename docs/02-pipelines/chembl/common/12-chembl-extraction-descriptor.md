@@ -42,7 +42,7 @@
 
 ## Related Components
 
-- **DataclassExtractionStrategy**: стратегия извлечения через dataclass (см. `docs/02-pipelines/chembl/common/11-dataclass-extraction-strategy.md`)
+- **DataclassExtractionStrategy**: стратегия извлечения через dataclass (см. `docs/02-pipelines/chembl/common/11-chembl-dataclass-extraction-strategy.md`)
 - **BatchPlan**: план батчирования запросов
 - **ChemblBasePipeline**: использует дескриптор для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

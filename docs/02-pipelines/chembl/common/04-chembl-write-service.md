@@ -62,5 +62,5 @@
 
 - **WriteService**: базовый класс сервиса записи
 - **UnifiedOutputWriter**: унифицированный writer для записи (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
-- **ActivityWriteService**: специализированный сервис для activity (см. `docs/02-pipelines/chembl/activity/13-activity-chembl-artifacts.md`)
+- **ActivityWriteService**: специализированный сервис для activity (см. `docs/02-pipelines/chembl/activity/03-activity-chembl-io.md` - раздел ActivityWriteService)
 
