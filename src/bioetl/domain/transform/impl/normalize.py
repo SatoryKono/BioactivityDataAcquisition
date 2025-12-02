@@ -22,6 +22,8 @@ CASE_SENSITIVE_FIELDS = {
     "molecule_structures", # Serialized dict containing smiles
     "helm_notation",
     "variant_sequence",
+    "target_components",
+    "cross_references",
 }
 
 # Identifier patterns
@@ -43,7 +45,6 @@ ID_FIELDS_EXACT = {
     "bao_endpoint",
     "bao_format",
     "atc_classifications", # List of IDs
-    "cross_references", # List of IDs/refs
     "ligand_efficiency", # Keys are metrics, values are numbers.
     "assay_type", # B, F, A, etc.
 }
