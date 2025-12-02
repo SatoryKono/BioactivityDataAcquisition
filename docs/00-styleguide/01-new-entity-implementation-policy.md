@@ -13,14 +13,14 @@
 * `src/bioetl/clients/<domain>/impl/` — реализационные модули (Impl).
 * `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC (source of truth).
 * `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default / Impl (source of truth).
-* `docs/ABC_INDEX.md` — человекочитаемый каталог ABC (source of truth для людей).
+* `docs/01-ABC/INDEX.md` — человекочитаемый каталог ABC (source of truth для людей).
 * CI configuration (`.github/workflows/*`) — правила проверки и исполнения политики.
 
 ---
 
 ## Quick cheat-sheet (1 page)
 
-* **Новый ABC?** Создать Default (может быть stub), обновить `abc_registry.yaml`, `docs/ABC_INDEX.md`, и добавить Default в `abc_impls.yaml`.
+* **Новый ABC?** Создать Default (может быть stub), обновить `abc_registry.yaml`, `docs/01-ABC/INDEX.md`, и добавить Default в `abc_impls.yaml`.
 * **Новый Impl?** Разместить в `impl/`, добавить запись в `abc_impls.yaml`, добавить тесты и документацию. Не требуется новый Default.
 * **Нейминг:** Классы PascalCase; функции snake_case; файлы snake_case.py. Суффиксы: `Factory`, `ClientFactory`, `DataClient`, `Client`, `Facade`, `Registry`, `Adapter`, `Transport`, `Protocol`/`ABC`, `Config`/`Model`/`Params`, `Error`.
 * **Докстринг ABC:** Обязательный структурированный блок (см. раздел «Докстринг у ABC»). CI проверяет его наличие.
@@ -124,7 +124,7 @@
 2. В докстринге ABC добавить обязательный структурированный блок (см. раздел «Докстринг у ABC»).
 3. Создать Default factory в `src/bioetl/clients/<domain>/factories.py` (может быть stub с `NotImplementedError`).
 4. Обновить `abc_impls.yaml` → добавить `default` для нового ABC.
-5. Обновить `abc_registry.yaml` и `docs/ABC_INDEX.md`.
+5. Обновить `abc_registry.yaml` и `docs/01-ABC/INDEX.md`.
 6. Добавить PR-тесты/юнит-тесты и следовать PR-чеклисту.
 
 **Таблица правил и процесса**
@@ -165,9 +165,9 @@
 | -------------: | ----------------- | -------------------------------------------------------------------------------------------------------------------: | :----------: | ---------------------------------------- |
 |          09.01 | abc_registry.yaml | YAML list of ABC objects with name, description, public_interface, file_path, exported_name, default_factory, domain |     true     | Машинный реестр ABC.                     |
 |          09.02 | abc_impls.yaml    |                                                                            Mapping ABC -> { default: [], impls: [] } |     true     | Содержит Default и Impl для каждого ABC. |
-|          09.03 | docs/ABC_INDEX.md |                                                                                Human-readable table with same fields |     true     | Человекочитаемый индекс контрактов.      |
+|          09.03 | docs/01-ABC/INDEX.md |                                                                                Human-readable table with same fields |     true     | Человекочитаемый индекс контрактов.      |
 
-**Практика.** CI проверяет, что: каждый ABC в коде есть в `abc_registry.yaml`; default/impl перечислены в `abc_impls.yaml`; `docs/ABC_INDEX.md` отражает реестр.
+**Практика.** CI проверяет, что: каждый ABC в коде есть в `abc_registry.yaml`; default/impl перечислены в `abc_impls.yaml`; `docs/01-ABC/INDEX.md` отражает реестр.
 
 ---
 
@@ -202,7 +202,7 @@
 |          11.01 | Correct class name & file |             All PRs adding classes |     true     | Имя класса и файл должны соответствовать неймингу и суффиксам.        |
 |          11.02 | Default for new ABC       |            PR that creates new ABC |     true     | Новый ABC — с Default (или stub) и записью в `abc_impls.yaml`.        |
 |          11.03 | Impl registration         |                     PR adding Impl |     true     | Новая имплементация — запись в `abc_impls.yaml`, тесты, документация. |
-|          11.04 | Docs & registry update    | PR adding/modifying ABC or Default |     true     | Обновить `docs/ABC_INDEX.md` и `abc_registry.yaml`.                   |
+|          11.04 | Docs & registry update    | PR adding/modifying ABC or Default |     true     | Обновить `docs/01-ABC/INDEX.md` и `abc_registry.yaml`.                   |
 |          11.05 | Tests                     |   All changes that affect behavior |     true     | Unit/integration тесты там, где нужно.                                |
 
 **Набор действий для автора PR (последовательность):**
@@ -210,7 +210,7 @@
 1. Локально проверить нейминг и формат докстринга.
 2. Добавить/обновить Default/Impl и соответствующие файлы.
 3. Обновить `abc_impls.yaml` и `abc_registry.yaml`.
-4. Обновить `docs/ABC_INDEX.md`.
+4. Обновить `docs/01-ABC/INDEX.md`.
 5. Добавить тесты.
 6. Убедиться, что CI проходит локально/в PR.
 
