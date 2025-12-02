@@ -9,8 +9,8 @@
 ## Компоненты пайплайна
 
 - [01 Assay ChEMBL Methods](01-assay-chembl-methods.md) — приватные методы пайплайна
-- [02 Assay Normalizer](02-assay-normalizer.md) — нормализатор данных assay
-- [03 Assay Payload Parser](03-assay-payload-parser.md) — парсер payload'ов ассая
+- [02 Assay ChEMBL Normalizer](02-assay-chembl-normalizer.md) — нормализатор данных assay
+- [03 Assay ChEMBL Payload Parser](03-assay-chembl-payload-parser.md) — парсер payload'ов ассая
 
 ## Схемы данных
 

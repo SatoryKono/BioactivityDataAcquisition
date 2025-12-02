@@ -25,6 +25,15 @@
 - Рекомендации по реализации
 - Метрики успеха
 
+### [Data Flow](./data-flow.md)
+End-to-end описание потока данных в BioETL от внешнего API до финальных артефактов. Использует Activity ChEMBL pipeline как пример.
+
+**Ключевые разделы:**
+- High-level flow: Extract → Transform → Validate → Write
+- Детальное описание каждой стадии
+- Взаимодействие компонентов (HTTP infrastructure, Configuration, Logging)
+- Гарантии детерминизма
+
 ## Related Documents
 
 ### Styleguide
@@ -33,10 +42,13 @@
 
 ### Configuration
 - `configs/README.md` — архитектура конфигураций и профилей
-- `docs/guides/configuration.md` — приоритеты конфигураций
+- `docs/guides/configuration.md` — приоритеты конфигураций и работа с профилями
 
 ### Components
 - `docs/02-pipelines/00-pipeline-base.md` — базовый пайплайн
 - `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md` — ChEMBL-базовый пайплайн
 - `docs/02-pipelines/03-unified-api-client.md` — унифицированный API клиент
+
+### Data Flow
+- `docs/architecture/data-flow.md` — E2E описание потока данных от API до артефактов
 

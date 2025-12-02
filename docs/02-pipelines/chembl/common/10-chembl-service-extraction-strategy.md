@@ -1,4 +1,4 @@
-# 10 Service Extraction Strategy
+# 10 ChEMBL Service Extraction Strategy
 
 ## Описание
 
@@ -38,6 +38,6 @@
 
 ## Related Components
 
-- **ExtractionStrategyFactory**: фабрика стратегий (см. `docs/02-pipelines/chembl/common/09-extraction-strategy-factory.md`)
+- **ExtractionStrategyFactory**: фабрика стратегий (см. `docs/02-pipelines/chembl/common/09-chembl-extraction-strategy-factory.md`)
 - **ChemblBasePipeline**: использует стратегию для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

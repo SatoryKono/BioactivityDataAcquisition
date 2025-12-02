@@ -1,4 +1,4 @@
-# 11 Dataclass Extraction Strategy
+# 11 ChEMBL Dataclass Extraction Strategy
 
 ## Описание
 
@@ -48,7 +48,7 @@ df = strategy.run(pipeline, descriptor, options)
 
 ## Related Components
 
-- **ExtractionStrategyFactory**: фабрика стратегий (см. `docs/02-pipelines/chembl/common/09-extraction-strategy-factory.md`)
+- **ExtractionStrategyFactory**: фабрика стратегий (см. `docs/02-pipelines/chembl/common/09-chembl-extraction-strategy-factory.md`)
 - **ChemblExtractionDescriptor**: dataclass-дескриптор извлечения (см. `docs/02-pipelines/chembl/common/12-chembl-extraction-descriptor.md`)
 - **ChemblBasePipeline**: использует стратегию для извлечения данных (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

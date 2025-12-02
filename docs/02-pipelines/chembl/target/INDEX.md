@@ -8,7 +8,7 @@
 
 ## Компоненты
 
-- [01 Target Normalizer](01-target-normalizer.md) — нормализатор данных target
+- [01 Target ChEMBL Normalizer](01-target-chembl-normalizer.md) — нормализатор данных target
 
 ## Связанная документация
 

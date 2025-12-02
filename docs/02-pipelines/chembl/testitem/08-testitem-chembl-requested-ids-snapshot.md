@@ -1,4 +1,4 @@
-# 08 Requested IDs Snapshot
+# 08 TestItem ChEMBL Requested IDs Snapshot
 
 ## Описание
 
@@ -81,6 +81,6 @@ for item_id in snapshot.iter_for_fetch():
 
 ## Related Components
 
-- **TestitemPipelineOptions**: параметры пайплайна (см. `docs/02-pipelines/chembl/testitem/03-testitem-pipeline-options.md`)
+- **TestitemPipelineOptions**: параметры пайплайна (см. `docs/02-pipelines/chembl/testitem/03-testitem-chembl-pipeline-options.md`)
 - **TestItemChemblPipeline**: основной пайплайн (см. `docs/02-pipelines/chembl/testitem/00-testitem-chembl-overview.md`)
 

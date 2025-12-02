@@ -1,4 +1,4 @@
-# 04 Parent Enrichment Preparation
+# 04 TestItem ChEMBL Parent Enrichment Preparation
 
 ## Описание
 
@@ -37,6 +37,6 @@ preparation = ParentEnrichmentPreparation(
 
 ## Related Components
 
-- **ParentEnrichmentResult**: результат обогащения (см. `docs/02-pipelines/chembl/testitem/05-parent-enrichment-result.md`)
-- **ParentLookupStats**: статистика обогащения (см. `docs/02-pipelines/chembl/testitem/07-parent-lookup-stats.md`)
+- **ParentEnrichmentResult**: результат обогащения (см. `docs/02-pipelines/chembl/testitem/05-testitem-chembl-parent-enrichment-result.md`)
+- **ParentLookupStats**: статистика обогащения (см. `docs/02-pipelines/chembl/testitem/07-testitem-chembl-parent-lookup-stats.md`)
 

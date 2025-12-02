@@ -1,4 +1,4 @@
-# 05 Parent Enrichment Result
+# 05 TestItem ChEMBL Parent Enrichment Result
 
 ## Описание
 
@@ -33,6 +33,6 @@ print(f"Added {result.stats.added_count} parent IDs")
 
 ## Related Components
 
-- **ParentEnrichmentPreparation**: подготовительные данные (см. `docs/02-pipelines/chembl/testitem/04-parent-enrichment-preparation.md`)
-- **ParentLookupStats**: статистика обогащения (см. `docs/02-pipelines/chembl/testitem/07-parent-lookup-stats.md`)
+- **ParentEnrichmentPreparation**: подготовительные данные (см. `docs/02-pipelines/chembl/testitem/04-testitem-chembl-parent-enrichment-preparation.md`)
+- **ParentLookupStats**: статистика обогащения (см. `docs/02-pipelines/chembl/testitem/07-testitem-chembl-parent-lookup-stats.md`)
 

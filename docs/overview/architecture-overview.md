@@ -36,9 +36,13 @@ Cross-cutting concerns:
 
 ## Data Flow
 
+High-level data flow:
+
 ```
 External API → SourceClient → Transformer → Validator → Writer → Artifacts
 ```
+
+For detailed end-to-end description of data flow with examples, see [Data Flow](../architecture/data-flow.md).
 
 ## Component Contracts
 
@@ -52,8 +56,9 @@ See [ABC Reference](../reference/abc/index.md) for all contracts.
 
 ## Related Documentation
 
-- **[Pipeline Base](../reference/core/pipeline-base.md)** — Base pipeline architecture
-- **[Unified API Client](../reference/core/unified-api-client.md)** — HTTP client infrastructure
-- **[Schema Registry](../reference/core/schema-registry.md)** — Data validation
+- **[Data Flow](../architecture/data-flow.md)** — End-to-end data flow description
+- **[Pipeline Base](../reference/core/00-pipeline-base.md)** — Base pipeline architecture
+- **[Unified API Client](../reference/core/03-unified-api-client.md)** — HTTP client infrastructure
+- **[Schema Registry](../reference/core/05-schema-registry.md)** — Data validation
 - **[Architecture Decisions](../architecture/)** — Detailed design decisions
 

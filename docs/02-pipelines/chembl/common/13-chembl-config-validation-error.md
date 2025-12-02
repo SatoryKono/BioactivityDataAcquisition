@@ -1,4 +1,4 @@
-# 13 Config Validation Error
+# 13 ChEMBL Config Validation Error
 
 ## Описание
 
@@ -31,5 +31,5 @@ if mode not in ("chembl", "all"):
 ## Related Components
 
 - **ChemblBasePipeline**: использует исключение для валидации конфигурации (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
-- **ChemblExtractionDescriptor**: использует исключение при валидации дескриптора (см. `docs/02-pipelines/chembl/activity/07-activity-chembl-descriptor.md`)
+- **ChemblExtractionDescriptor**: использует исключение при валидации дескриптора (см. `docs/02-pipelines/chembl/activity/00-activity-chembl-overview.md` - раздел Extraction Descriptor)
 

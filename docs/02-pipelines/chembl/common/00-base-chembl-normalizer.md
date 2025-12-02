@@ -32,5 +32,5 @@
 
 ## Related Components
 
-- **ColumnNormalizationSpec**: спецификация нормализации колонки (см. `../activity/10-activity-chembl-column-spec.md`)
-- **ActivityNormalizer**: использует базовый нормализатор для нормализации данных активности (см. `../activity/05-activity-chembl-normalizer.md`)
+- **ColumnNormalizationSpec**: спецификация нормализации колонки (см. `../activity/02-activity-chembl-transformation.md` - раздел Column Normalization Specification)
+- **ActivityNormalizer**: использует базовый нормализатор для нормализации данных активности (см. `../activity/02-activity-chembl-transformation.md` - раздел ActivityNormalizer)
