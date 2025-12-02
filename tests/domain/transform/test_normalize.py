@@ -74,6 +74,7 @@ def test_normalizer_mixin_full():
         {"name": "num", "data_type": "float"},
         {"name": "nested_list", "data_type": "array"},
         {"name": "nested_obj", "data_type": "object"},
+        {"name": "doi", "data_type": "string"},
     ]
     config = MockConfig(fields)
     normalizer = MockNormalizer(config)
@@ -88,6 +89,7 @@ def test_normalizer_mixin_full():
             "num": [1.23456, 2.0],
             "nested_list": [["A", "B"], ["C"]],
             "nested_obj": [{"K": "V"}, {"X": "Y"}],
+            "doi": ["https://doi.org/10.1000/ABC", None],
         }
     )
 
@@ -106,3 +108,16 @@ def test_normalizer_mixin_full():
     # "A" -> "a", "K" -> "k", "V" -> "v"
     assert res["nested_list"].iloc[0] == "a|b"
     assert res["nested_obj"].iloc[0] == "K:v" # Keys preserve case, values normalized
+
+    # DOI normalized via custom normalizer
+    assert res["doi"].iloc[0] == "10.1000/abc"
+
+
+def test_normalizer_mixin_raises_on_invalid_custom_value():
+    config = MockConfig([{"name": "doi", "data_type": "string"}])
+    normalizer = MockNormalizer(config)
+
+    df = pd.DataFrame({"doi": ["invalid-doi"]})
+
+    with pytest.raises(ValueError):
+        normalizer.normalize_fields(df)
