@@ -49,6 +49,6 @@ In this example, the `pipeline.run_id` field is overridden at runtime without ch
 
 ## Related Components
 
-- **FileConfigResolver**: резолвер конфигурации (см. `docs/02-pipelines/config/28-config-resolver.md`)
-- **EnvSecretProvider**: провайдер секретов (см. `docs/02-pipelines/config/29-secret-provider.md`)
+- **FileConfigResolver**: резолвер конфигурации (см. `docs/reference/infrastructure/config/28-config-resolver.md`)
+- **EnvSecretProvider**: провайдер секретов (см. `docs/reference/infrastructure/config/29-secret-provider.md`)
 

@@ -40,7 +40,7 @@
 
 ## Использование
 
-Фабрика используется в `ChemblCommonPipeline` для создания дескрипторов извлечения:
+Фабрика используется в `ChemblBasePipeline` для создания дескрипторов извлечения:
 
 ```python
 factory = ChemblDescriptorFactory(...)
@@ -51,5 +51,5 @@ descriptor = factory.build("activity")
 
 - **ChemblContextFacade**: фасад контекста ChEMBL (см. `docs/02-pipelines/chembl/common/14-chembl-context-facade.md`)
 - **ChemblExtractionServiceDescriptor**: дескриптор извлечения (см. `docs/02-pipelines/chembl/common/08-chembl-extraction-service-descriptor.md`)
-- **ChemblCommonPipeline**: использует фабрику для создания дескрипторов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: использует фабрику для создания дескрипторов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

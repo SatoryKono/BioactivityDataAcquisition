@@ -35,5 +35,5 @@ validated_df = TestItemSchema.validate(df)
 ## Related Components
 
 - **TestItemChemblPipeline**: использует схему для валидации данных (см. `docs/02-pipelines/chembl/testitem/00-testitem-chembl-overview.md`)
-- **DefaultValidationService**: использует схему для валидации (см. `docs/02-pipelines/06-validation-service.md`)
+- **DefaultValidationService**: использует схему для валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
 

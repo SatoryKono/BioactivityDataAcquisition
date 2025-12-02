@@ -51,6 +51,6 @@ else:
 
 ## Related Components
 
-- **RateLimiterABC**: интерфейс лимитера частоты (см. `docs/01-ABC/16-rate-limiter-abc.md`)
+- **RateLimiterABC**: интерфейс лимитера частоты (см. `docs/reference/abc/16-rate-limiter-abc.md`)
 - **RequestsBackend**: использует лимитер для контроля частоты запросов (см. `docs/02-pipelines/chembl/common/03-chembl-requests-backend.md`)
 

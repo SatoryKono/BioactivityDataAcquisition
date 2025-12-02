@@ -65,6 +65,6 @@ This mechanism ensures that schema, data quality, and determinism invariants rem
 
 ## Related Components
 
-- **UnifiedOutputWriter**: унифицированный writer для записи (см. `docs/02-pipelines/04-unified-output-writer.md`)
-- **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/06-validation-service.md`)
+- **UnifiedOutputWriter**: унифицированный writer для записи (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
+- **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
 

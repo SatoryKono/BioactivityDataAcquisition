@@ -41,5 +41,5 @@ options = TestitemPipelineOptions(
 ## Related Components
 
 - **TestItemChemblPipeline**: использует опции для настройки выполнения (см. `docs/02-pipelines/chembl/testitem/00-testitem-chembl-overview.md`)
-- **CLI**: интерфейс командной строки (см. `docs/cli/00-cli-overview.md`)
+- **CLI**: интерфейс командной строки (см. `docs/reference/cli/cli-overview.md`)
 

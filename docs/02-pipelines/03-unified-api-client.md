@@ -217,11 +217,11 @@ class CachedHTTPAdapter:
 
 ## Related Components
 
-- **RequestBuilderABC**: построение запросов к API (см. `docs/01-ABC/17-request-builder-abc.md`)
-- **PaginatorABC**: стратегия пагинации (см. `docs/01-ABC/12-paginator-abc.md`)
-- **ResponseParserABC**: разбор ответов API (см. `docs/01-ABC/18-response-parser-abc.md`)
-- **SourceClientABC**: высокоуровневый интерфейс клиента источника данных (см. `docs/01-ABC/23-source-client-abc.md`)
-- **BaseExternalDataClient**: базовый класс для клиентов внешних API (см. `docs/02-pipelines/01-base-external-data-client.md`)
+- **RequestBuilderABC**: построение запросов к API (см. `docs/reference/abc/17-request-builder-abc.md`)
+- **PaginatorABC**: стратегия пагинации (см. `docs/reference/abc/12-paginator-abc.md`)
+- **ResponseParserABC**: разбор ответов API (см. `docs/reference/abc/18-response-parser-abc.md`)
+- **SourceClientABC**: высокоуровневый интерфейс клиента источника данных (см. `docs/reference/abc/23-source-client-abc.md`)
+- **BaseExternalDataClient**: базовый класс для клиентов внешних API (см. `docs/02-pipelines/core/01-base-external-data-client.md`)
 - **RetryPolicyABC**: политика повторных попыток
 - **RateLimiterABC**: ограничение частоты запросов
 - **CacheABC**: кэширование ответов

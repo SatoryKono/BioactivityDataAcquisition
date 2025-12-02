@@ -36,5 +36,5 @@ validated_df = AssaySchema.validate(df)
 ## Related Components
 
 - **ChemblAssayPipeline**: использует схему для валидации данных (см. `docs/02-pipelines/chembl/assay/00-assay-chembl-overview.md`)
-- **DefaultValidationService**: использует схему для валидации (см. `docs/02-pipelines/06-validation-service.md`)
+- **DefaultValidationService**: использует схему для валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
 

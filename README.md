@@ -4,106 +4,81 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 ## Правила проекта
 
-Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/00-styleguide/00-rules-summary.md`.
+Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: [`docs/project/rules-summary.md`](docs/project/00-rules-summary.md).
 
 ## Документация
 
-### Архитектурные планы
+### Начало работы
 
-- `docs/30-project-architecture-plan.{docx,pdf}` — общий архитектурный план проекта
-- `docs/31-etl-integration-architecture-plan.{docx,pdf}` — архитектурный план ETL-интеграции научных REST API
+- **[Overview](docs/overview/index.md)** — Введение в проект, ключевые концепции
+- **[Getting Started](docs/overview/getting-started.md)** — Быстрый старт: установка и первый запуск
+- **[Architecture Overview](docs/overview/architecture-overview.md)** — Высокоуровневая архитектура системы
+- **[Glossary](docs/overview/glossary.md)** — Словарь терминов
 
-### Индексы документации
+### Практические руководства
 
-- `docs/01-ABC/INDEX.md` — каталог ABC (абстрактных базовых классов)
-- `docs/02-pipelines/chembl/INDEX.md` — индекс ChEMBL-пайплайнов и компонентов
-- `docs/clients/INDEX.md` — клиентский слой и вспомогательные утилиты
-- `docs/cli/INDEX.md` — CLI и запуск пайплайнов
-- `docs/qc/INDEX.md` — артефакты контроля качества
-- `docs/schemas/INDEX.md` — реестр схем данных
+- **[Running Pipelines](docs/guides/running-pipelines.md)** — Как запустить пайплайн
+- **[Configuration](docs/guides/configuration.md)** — Работа с конфигурациями и профилями
+- **[Adding a New Pipeline](docs/guides/adding-new-pipeline.md)** — Создание нового пайплайна
+- **[Adding a New ABC](docs/guides/adding-new-abc.md)** — Добавление нового ABC/Default/Impl
+- **[Troubleshooting](docs/guides/troubleshooting.md)** — Решение проблем
 
-### Пайплайны и core компоненты
+### Референсная документация
 
-Документация по пайплайнам и базовым компонентам находится в `docs/02-pipelines/`:
+#### ABC (Abstract Base Classes)
 
-- `00-pipeline-base.md` — базовая архитектура пайплайнов
-- `01-base-external-data-client.md` — базовый клиент внешних API
-- `02-logging-and-configuration.md` — логирование и конфигурация
-- `03-unified-api-client.md` — унифицированный API-клиент и HTTP-адаптеры
-- `04-unified-output-writer.md` — унифицированный writer для записи результатов
-- `05-schema-registry.md` — реестр схем для валидации данных
+- **[ABC Index](docs/reference/abc/index.md)** — Каталог всех абстрактных базовых классов
 
-#### ChEMBL Activity Pipeline
+#### Core Components
 
-Документация по пайплайну ChEMBL Activity находится в `docs/02-pipelines/chembl/activity/`:
+- **[Pipeline Base](docs/reference/core/00-pipeline-base.md)** — Базовая архитектура пайплайнов
+- **[Unified API Client](docs/reference/core/03-unified-api-client.md)** — Унифицированный API-клиент
+- **[Unified Output Writer](docs/reference/core/04-unified-output-writer.md)** — Унифицированный writer
+- **[Schema Registry](docs/reference/core/05-schema-registry.md)** — Реестр схем для валидации
+- **[Validation Service](docs/reference/core/06-validation-service.md)** — Сервис валидации данных
 
-- `00-activity-chembl-overview.md` — обзор пайплайна ChEMBL Activity
-- `01-activity-chembl-extraction.md` — стадия извлечения данных
-- `02-activity-chembl-transformation.md` — стадия трансформации данных
-- `03-activity-chembl-io.md` — стадия записи результатов
-- `04-activity-chembl-parser.md` — парсер ответов ChEMBL API
-- `05-activity-chembl-normalizer.md` — нормализатор данных активности
-- `07-activity-chembl-descriptor.md` — дескриптор параметров извлечения
-- `09-activity-chembl-batch-plan.md` — план батчирования запросов
-- `10-activity-chembl-column-spec.md` — спецификация нормализации колонок
-- `11-activity-chembl-column-mapping.md` — маппинг полей JSON на колонки
-- `12-activity-chembl-schema.md` — Pandera-схема для валидации данных
-- `13-activity-chembl-artifacts.md` — планировщик и сервис артефактов
+#### Infrastructure
 
-Полный индекс: `docs/02-pipelines/chembl/activity/INDEX.md`
+- **[HTTP Infrastructure](docs/reference/infrastructure/http/)** — HTTP cache, rate limiter, retry policy, circuit breaker, pagination
+- **[Configuration](docs/reference/infrastructure/config/)** — Config resolver, secret provider
+- **[Logging](docs/reference/infrastructure/logging/)** — Структурированное логирование
 
-#### ChEMBL Client Components
+#### Pipelines
 
-Документация по компонентам клиента ChEMBL находится в `docs/02-pipelines/chembl/`:
+- **[ChEMBL Pipelines](docs/02-pipelines/chembl/)** — Пайплайны для ChEMBL
+  - Activity, Assay, Document, Target, TestItem
+  - Common components
 
-- `14-chembl-client.md` — REST-клиент для ChEMBL API
-- `15-chembl-request-builder.md` — построитель запросов ChEMBL
-- `16-requests-backend.md` — HTTP-бэкенд на основе requests
-- `17-chembl-write-service.md` — сервис записи для ChEMBL-пайплайнов
+#### Clients
 
-#### ChEMBL Common Components
+- **[Clients Overview](docs/reference/clients/06-clients-overview.md)** — Обзор клиентского слоя
+- PubMed, CrossRef, PubChem, Semantic Scholar, UniProt clients
 
-Документация по общим компонентам ChEMBL находится в `docs/02-pipelines/chembl/common/`:
+#### Schemas
 
-- `08-base-chembl-normalizer.md` — базовый нормализатор для ChEMBL
-- `18-chembl-common-pipeline.md` — базовый класс для ChEMBL-пайплайнов
-- `19-chembl-pipeline-base.md` — базовый пайплайн для ChEMBL
-- `20-chembl-extraction-service.md` — сервис извлечения данных ChEMBL
-- `21-chembl-descriptor-factory.md` — фабрика дескрипторов ChEMBL
+- **[Schemas Registry](docs/reference/schemas/05-schemas-registry-overview.md)** — Обзор реестра схем Pandera
+- Document, TestItem, Target, Assay schemas
 
-Полный индекс: `docs/02-pipelines/chembl/INDEX.md`
+#### Quality Control
 
-#### Другие ChEMBL пайплайны
+- **[QC Artifacts](docs/reference/qc/00-qc-artifacts-overview.md)** — Артефакты контроля качества
 
-- `docs/02-pipelines/chembl/assay/` — пайплайн для assay (INDEX.md)
-- `docs/02-pipelines/chembl/target/` — пайплайн для target
-- `docs/02-pipelines/chembl/document/` — пайплайн для document
-- `docs/02-pipelines/chembl/testitem/` — пайплайн для testitem (INDEX.md)
+#### CLI
 
-#### Клиенты внешних API
+- **[CLI Overview](docs/reference/cli/cli-overview.md)** — Архитектура CLI
+- **[CLI Commands](docs/reference/cli/commands.md)** — Список команд
+- **[Validate Config](docs/reference/cli/validate-config.md)** — Валидация конфигураций
 
-Документация по клиентам внешних API находится в `docs/02-pipelines/clients/`:
+### Архитектура
 
-- `18-pubmed-client.md` — клиент для API PubMed
-- `19-crossref-client.md` — клиент для API CrossRef
-- `20-pubchem-client.md` — клиент для PubChem
-- `21-configured-http-client.md` — базовая реализация настроенного HTTP-клиента
-- `22-semantic-scholar-client.md` — клиент для API Semantic Scholar
-- `23-uniprot-client.md` — клиент для REST API UniProt
+- **[Architecture Decisions](docs/architecture/)** — Архитектурные решения и дорожные карты
+- **[Duplication Reduction](docs/architecture/00-duplication-reduction-roadmap.md)** — Снижение дублирования
 
-Обзор клиентского слоя: `docs/clients/INDEX.md`
+### Правила проекта
 
-### CLI и запуск пайплайнов
+- **[Rules Summary](docs/project/00-rules-summary.md)** — Краткая сводка всех правил
+- **[Architecture Patterns](docs/project/04-architecture-and-duplication-reduction.md)** — Принципы снижения дублирования
 
-Документация по CLI доступна в `docs/cli/INDEX.md`.
+### Конфигурация
 
-### Схемы данных
-
-Документация по схемам данных находится в `docs/schemas/`:
-
-- `INDEX.md` — индекс документации схем
-- `00-schemas-registry-overview.md` — обзор реестра схем Pandera
-
-### Quality Control (QC)
-
-Документация по QC-артефактам: `docs/qc/INDEX.md`.
+- **[Configuration Architecture](configs/README.md)** — Архитектура конфигураций и профилей

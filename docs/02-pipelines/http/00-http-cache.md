@@ -56,6 +56,6 @@
 
 ## Related Components
 
-- **CacheABC**: интерфейс кэша (см. `docs/01-ABC/01-cache-abc.md`)
+- **CacheABC**: интерфейс кэша (см. `docs/reference/abc/01-cache-abc.md`)
 - **RequestsBackend**: может использовать кэш для кэширования ответов (см. `docs/02-pipelines/chembl/common/03-chembl-requests-backend.md`)
 

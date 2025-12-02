@@ -1,7 +1,7 @@
 <!-- SUMMARY: Краткая сводка правил для быстрого доступа. Полные документы консолидированы сюда. -->
-# Свод правил проекта BioETL
+# 00 Rules Summary
 
-> **Авторитетный источник**: Этот файл объединяет все действующие правила. Прежние документы в каталоге `docs/00-styleguide/` заменены ссылками на эту сводку.
+> **Авторитетный источник**: Этот файл объединяет все действующие правила. Прежние документы в каталоге `docs/project/` заменены ссылками на эту сводку.
 
 ## 1. Именование документации
 
@@ -22,7 +22,7 @@
 ### Обязательные реестры
 - `src/bioetl/clients/base/abc_registry.yaml` — машинный реестр ABC
 - `src/bioetl/clients/base/abc_impls.yaml` — мэппинг Default/Impl
-- `docs/01-ABC/INDEX.md` — человекочитаемый каталог
+- `docs/reference/abc/index.md` — человекочитаемый каталог
 
 ### Правила создания
 - При создании ABC **обязательно** создать Default (может быть stub)
@@ -84,7 +84,7 @@
 
 - **Синхронизация**: документация **обязательно** синхронизируется с кодом и схемами
 - **Автогенерация**: секции помечаются `<!-- generated -->`, не редактируются вручную
-- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/01-ABC/INDEX.md`, реестры
+- **При добавлении сущности**: обновлять `docs/02-pipelines/<provider>/<entity>/NN-<entity>-<provider>-<topic>.md`, `docs/reference/abc/INDEX.md`, реестры
 - **Breaking changes**: фиксируются в `CHANGELOG.md`
 
 ## 5. CI и enforcement
@@ -93,4 +93,13 @@
 - CI блокирует PR при MUST-нарушениях
 - Исключения регистрируются в `configs/naming_exceptions.yaml` с полями: `path`, `rule_id`, `reason`, `owner`, `expiry`
 - Pre-commit hook рекомендуется для локальной проверки
+
+## 6. Снижение дублирования
+
+- **Конфигурации:** Используйте профили (`configs/profiles/`) вместо дублирования параметров
+- **Пайплайны:** Наследуйте от `PipelineBase` → `ChemblBasePipeline`
+- **Нормализация:** Используйте `BaseChemblNormalizer` для типовых операций
+- **API клиенты:** Используйте `UnifiedAPIClient` вместо прямого `requests`
+- **Схемы:** Наследуйте от базовых схем (`BaseChemblSchema`) для общих полей
+- **См. детали:** `docs/project/04-architecture-and-duplication-reduction.md`
 

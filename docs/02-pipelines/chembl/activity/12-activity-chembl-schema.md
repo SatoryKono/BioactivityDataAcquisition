@@ -51,7 +51,7 @@ registry.register(SchemaRegistryEntry(
 
 ## Related Components
 
-- **SchemaRegistry**: реестр схем для валидации (см. `docs/02-pipelines/05-schema-registry.md`)
-- **UnifiedOutputWriter**: использует схему для валидации перед записью (см. `docs/02-pipelines/04-unified-output-writer.md`)
-- **DefaultValidationService**: использует схему для валидации данных (см. `docs/02-pipelines/06-validation-service.md`)
+- **SchemaRegistry**: реестр схем для валидации (см. `docs/02-pipelines/core/05-schema-registry.md`)
+- **UnifiedOutputWriter**: использует схему для валидации перед записью (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
+- **DefaultValidationService**: использует схему для валидации данных (см. `docs/02-pipelines/core/06-validation-service.md`)
 

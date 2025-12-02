@@ -10,7 +10,7 @@
 
 ## Наследование
 
-Пайплайн наследуется от `ChemblCommonPipeline` и использует общую инфраструктуру ChEMBL-пайплайнов. При инициализации устанавливает схему валидации *TargetSchema* и сервис валидации.
+Пайплайн наследуется от `ChemblBasePipeline` и использует общую инфраструктуру ChEMBL-пайплайнов. При инициализации устанавливает схему валидации *TargetSchema* и сервис валидации.
 
 ## Основные методы
 
@@ -67,5 +67,5 @@
 
 ## Related Components
 
-- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/00-pipeline-base.md`)
+- **PipelineBase**: базовый класс пайплайнов (см. `docs/02-pipelines/core/00-pipeline-base.md`)
 - **ChemblWriteService**: сервис записи для ChEMBL-пайплайнов (см. `docs/02-pipelines/chembl/common/04-chembl-write-service.md`)

@@ -40,4 +40,5 @@ class SourceClientABC(Generic[RequestT, ResponseT], ABC):
 - **RateLimiterABC**: используется для контроля частоты
 - **RetryPolicyABC**: используется для обработки ошибок
 - **SecretProviderABC**: может использоваться для аутентификации
+- **BaseClient**: альтернативный ABC для клиентов, использующих YAML-конфигурации (см. `docs/02-pipelines/clients/06-clients-overview.md`)
 

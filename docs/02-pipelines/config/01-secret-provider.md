@@ -59,6 +59,6 @@
 
 ## Related Components
 
-- **SecretProviderABC**: интерфейс провайдера секретов (см. `docs/01-ABC/21-secret-provider-abc.md`)
-- **FileConfigResolver**: использует провайдер для получения секретов (см. `docs/02-pipelines/config/00-config-resolver.md`)
+- **SecretProviderABC**: интерфейс провайдера секретов (см. `docs/reference/abc/21-secret-provider-abc.md`)
+- **FileConfigResolver**: использует провайдер для получения секретов (см. `docs/reference/infrastructure/config/00-config-resolver.md`)
 

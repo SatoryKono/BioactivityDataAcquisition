@@ -1,20 +1,20 @@
 # 00 Activity ChEMBL Overview
 
-## Описание
+## Description
 
 `ChemblActivityPipeline` — основной ETL-пайплайн для обработки данных биоактивности из ChEMBL. Пайплайн имеет код `activity_chembl` и реализует полный цикл извлечения данных из API ChEMBL, их трансформации, валидации и сохранения результатов.
 
-Пайплайн наследуется от `PipelineBase` и использует дескриптор для извлечения данных, реализуя полный цикл ETL для сущности "activity".
+Пайплайн наследуется от `ChemblBasePipeline`, который в свою очередь наследуется от `PipelineBase`. Использует дескриптор для извлечения данных, реализуя полный цикл ETL для сущности "activity".
 
-## Модуль
+## Module
 
 `src/bioetl/pipelines/chembl/activity/run.py`
 
-## Наследование
+## Inheritance
 
-Пайплайн наследуется от `PipelineBase` и использует общую инфраструктуру ChEMBL-пайплайнов.
+Пайплайн наследуется от `ChemblBasePipeline`, который в свою очередь наследуется от `PipelineBase`. Использует общую инфраструктуру ChEMBL-пайплайнов через базовый класс `ChemblBasePipeline`.
 
-## Архитектура
+## Architecture
 
 Пайплайн состоит из следующих стадий:
 
@@ -23,7 +23,7 @@
 3. **Validate** — валидация данных по Pandera-схеме
 4. **Write** (`ActivityWriter`) — сохранение результатов в файлы
 
-## Основные методы
+## Key Methods
 
 ### `__init__(self, config, run_id, *, client_factory=None)`
 
@@ -76,25 +76,67 @@
 
 Создаёт метаданные пайплайна, включая информацию о конфигурации, релизе ChEMBL и параметрах выполнения.
 
-## Внутренние методы
+## Extraction Descriptor
 
-### `_get_config_metadata(self, config=None) -> ChemblPipelineMetadata`
+### ChemblExtractionDescriptor
 
-Извлекает метаданные конфигурации из конфигурации пайплайна.
+`ChemblExtractionDescriptor` — описание задачи извлечения данных из ChEMBL. Хранит параметры, определяющие, *что* извлекать: список идентификаторов `ids` (ChEMBL IDs интересующих объектов) либо параметры фильтрации, настройки пагинации (`limit/offset`), режим выгрузки и т.д.
 
-### `_extract_with_dataclass_descriptor(self, descriptor, options) -> pd.DataFrame`
+**Module:** `bioetl/pipelines/chembl/common/descriptor.py`
 
-Выполняет извлечение данных, используя дескриптор типа dataclass, и возвращает нормализованный DataFrame.
+**Structure:**
 
-### `run_descriptor_extraction(self, descriptor, *, batch_size=None) -> tuple[pd.DataFrame, dict]`
+Дескриптор является dataclass и содержит следующие поля:
 
-Запускает извлечение через `extractor.extract`, возвращает DataFrame и метаданные извлечения.
+- `ids: Sequence[str] | None` — список ChEMBL IDs для извлечения (опционально)
+- `filters: Mapping[str, object] | None` — параметры фильтрации (опционально)
+- `pagination: PaginationParams | None` — настройки пагинации (limit/offset)
+- `mode: str` — режим выгрузки (`"chembl"` или `"all"`)
+- `batch_plan: BatchPlan | None` — план батчирования запросов
 
-### `_build_schema_registry(self) -> SchemaRegistry`
+**Validation:**
 
-Создаёт реестр схем, регистрируя `ChEMBLActivitySchema` и связанные схемы для валидации данных.
+`__post_init__(self)` проверяет корректность поля `mode` при инициализации. Разрешены только значения `"chembl"` или `"all"`, иначе выбрасывается `ConfigValidationError`.
 
-## Конфигурация
+**Usage:**
+
+Дескриптор используется пайплайном для:
+- Разбиения работы на части (батчи)
+- Логирования целей выгрузки
+- Передачи параметров извлечения в `ActivityExtractor`
+
+## Batch Plan
+
+### BatchPlan
+
+`BatchPlan` — простая структура для параметров пакетирования запросов. Содержит размер батча (`batch_size`) – число идентификаторов в одном запросе к API – и размер чанка (`chunk_size`) – количество батчей, объединяемых в одну запись результатов. Эти параметры влияют на стратегию извлечения данных из API (ограничение в 25 ID на запрос у ChEMBL).
+
+**Module:** `bioetl/clients/chembl/descriptor_factory.py`
+
+**Structure:**
+
+BatchPlan является dataclass и содержит следующие поля:
+
+- `batch_size: int` — размер батча (количество ID в одном запросе к API)
+- `chunk_size: int` — размер чанка (количество батчей, объединяемых в одну запись)
+
+**Usage:**
+
+План батчирования используется для:
+- Оптимизации запросов к ChEMBL API (ограничение в 25 ID на запрос)
+- Управления размером обрабатываемых данных
+- Контроля использования памяти при извлечении больших объёмов данных
+
+**Example:**
+
+```python
+batch_plan = BatchPlan(
+    batch_size=25,  # 25 ID на запрос (ограничение ChEMBL)
+    chunk_size=10   # 10 батчей в одном чанке
+)
+```
+
+## Configuration
 
 Конфигурация пайплайна находится в `configs/pipelines/chembl/activity.yaml` и определяет:
 - Поля данных и их типы
@@ -107,9 +149,6 @@
 - **ActivityExtractor**: стадия извлечения данных (см. `01-activity-chembl-extraction.md`)
 - **ActivityTransformer**: стадия трансформации данных (см. `02-activity-chembl-transformation.md`)
 - **ActivityWriter**: стадия записи результатов (см. `03-activity-chembl-io.md`)
-- **ActivityParser**: парсер ответов ChEMBL API (см. `04-activity-chembl-parser.md`)
-- **ActivityNormalizer**: нормализатор данных активности (см. `05-activity-chembl-normalizer.md`)
-- **ChemblClient**: REST-клиент для ChEMBL API (см. `docs/02-pipelines/01-base-external-data-client.md`)
-- **UnifiedOutputWriter**: унифицированный writer для сохранения результатов (см. `docs/02-pipelines/04-unified-output-writer.md`)
-- **SchemaRegistry**: реестр схем для валидации (см. `docs/02-pipelines/05-schema-registry.md`)
-
+- **ChemblClient**: REST-клиент для ChEMBL API (см. `docs/02-pipelines/core/01-base-external-data-client.md`)
+- **UnifiedOutputWriter**: унифицированный writer для сохранения результатов (см. `docs/02-pipelines/core/04-unified-output-writer.md`)
+- **SchemaRegistry**: реестр схем для валидации (см. `docs/02-pipelines/core/05-schema-registry.md`)

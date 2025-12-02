@@ -147,9 +147,9 @@ bioetl run-chembl-activity --profile production --override client.timeout=60
 
 ## Related Components
 
-- **LoggerAdapterABC**: интерфейс адаптера логирования (см. `docs/01-ABC/08-logger-adapter-abc.md`)
-- **ConfigResolverABC**: интерфейс разрешения конфигурации (см. `docs/01-ABC/03-config-resolver-abc.md`)
-- **PipelineBase**: базовый класс пайплайнов, использующий логирование и конфигурацию (см. `docs/02-pipelines/00-pipeline-base.md`)
+- **LoggerAdapterABC**: интерфейс адаптера логирования (см. `docs/reference/abc/08-logger-adapter-abc.md`)
+- **ConfigResolverABC**: интерфейс разрешения конфигурации (см. `docs/reference/abc/03-config-resolver-abc.md`)
+- **PipelineBase**: базовый класс пайплайнов, использующий логирование и конфигурацию (см. `docs/02-pipelines/core/00-pipeline-base.md`)
 
 ## Модули
 

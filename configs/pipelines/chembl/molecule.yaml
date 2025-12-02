@@ -1,3 +1,8 @@
+# Molecule Pipeline Configuration
+# Наследует общие параметры из chembl_default profile
+
+extends: chembl_default
+
 entity_name: molecule
 endpoint: /molecule
 primary_key: molecule_chembl_id
@@ -105,7 +110,5 @@ fields:
     is_filterable: false
     description: HELM-нотация для биотерапевтических молекул
 
-pagination:
-  limit: 1000
-  offset: 0
+# pagination наследуется из chembl_default profile
 

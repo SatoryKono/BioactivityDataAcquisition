@@ -34,6 +34,6 @@ client = chembl_factory.create_client(...)
 
 ## Related Components
 
-- **ChemblCommonPipeline**: использует реестр для получения фабрик клиентов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: использует реестр для получения фабрик клиентов (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 - **ChemblDescriptorFactory**: использует реестр для создания дескрипторов (см. `docs/02-pipelines/chembl/common/07-chembl-descriptor-factory.md`)
 

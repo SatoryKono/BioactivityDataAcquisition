@@ -40,7 +40,7 @@
 
 ## Использование
 
-Фабрика используется в `ChemblCommonPipeline` для выбора стратегии извлечения:
+Фабрика используется в `ChemblBasePipeline` для выбора стратегии извлечения:
 
 ```python
 factory = ExtractionStrategyFactory()
@@ -51,5 +51,5 @@ df = strategy.run(pipeline, descriptor, options)
 ## Related Components
 
 - **ServiceExtractionStrategy**: стратегия извлечения через сервис (см. `docs/02-pipelines/chembl/common/10-service-extraction-strategy.md`)
-- **ChemblCommonPipeline**: использует фабрику для выбора стратегии (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: использует фабрику для выбора стратегии (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 

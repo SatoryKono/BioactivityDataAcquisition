@@ -30,6 +30,6 @@ if mode not in ("chembl", "all"):
 
 ## Related Components
 
-- **ChemblCommonPipeline**: использует исключение для валидации конфигурации (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
+- **ChemblBasePipeline**: использует исключение для валидации конфигурации (см. `docs/02-pipelines/chembl/common/05-chembl-base-pipeline.md`)
 - **ChemblExtractionDescriptor**: использует исключение при валидации дескриптора (см. `docs/02-pipelines/chembl/activity/07-activity-chembl-descriptor.md`)
 

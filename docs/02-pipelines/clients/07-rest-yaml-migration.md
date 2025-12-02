@@ -1,4 +1,4 @@
-# 02 REST YAML Migration
+# 07 REST YAML Migration
 
 ## Сводка
 
@@ -161,5 +161,6 @@ resources:
 
 ## Related Components
 
-- **ConfiguredHttpClient**: базовая реализация клиента (см. `docs/02-pipelines/clients/03-configured-http-client.md`)
-- **ClientFactory**: фабрика клиентов (см. `docs/clients/00-clients-overview.md`)
+- **ConfiguredHttpClient**: базовая реализация клиента (см. `03-configured-http-client.md`)
+- **ClientFactory**: фабрика клиентов (см. `06-clients-overview.md`)
+

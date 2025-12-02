@@ -1,4 +1,4 @@
-# 00 Clients Overview
+# 06 Clients Overview
 
 Обзор архитектуры клиентского слоя BioETL для работы с внешними источниками данных.
 
@@ -34,6 +34,38 @@ src/bioetl/clients/
     ├── semantic_scholar/
     └── uniprot/
 ```
+
+## Иерархия клиентов
+
+Клиентский слой использует многоуровневую архитектуру абстракций:
+
+**Целевая архитектура (рекомендуется для новых клиентов):**
+```
+BaseClient (ABC)
+    └── ConfiguredHttpClient (YAML-driven)
+            └── ChemblClient, PubchemClient, ...
+```
+
+**Устаревшая архитектура (только для поддержки старых пайплайнов):**
+```
+SourceClientABC (ABC контракт)
+    └── BaseExternalDataClient (deprecated)
+            └── старые клиенты
+```
+
+**Уровни абстракции:**
+
+1. **SourceClientABC** (`docs/reference/abc/23-source-client-abc.md`) — базовый ABC-контракт для всех клиентов источников данных. Определяет методы `send()`, `fetch_one()`, `fetch_many()`, `dispose()`.
+
+2. **BaseExternalDataClient** (`docs/02-pipelines/core/01-base-external-data-client.md`) — **deprecated** — базовая реализация для REST API, реализует SourceClientABC. Используется только в старых пайплайнах. Для новых клиентов используйте `BaseClient`/`ConfiguredHttpClient`.
+
+3. **BaseClient** (`base/client_abc.py`) — ABC для клиентов, использующих YAML-конфигурации. Определяет методы `fetch_one()`, `iter_records()`, `iter_pages()`, `metadata()`, `close()`. Используется в целевой архитектуре с ConfiguredHttpClient.
+
+4. **ConfiguredHttpClient** — реализация BaseClient на основе YAML-конфигураций. Автоматически загружает конфигурацию и делегирует выполнение HttpBackend.
+
+5. **Конкретные клиенты** (ChemblClient, PubchemClient и т.д.) — наследуются от ConfiguredHttpClient и могут добавлять специфичную логику.
+
+**Рекомендация:** Для новых клиентов используйте архитектуру на основе `BaseClient`/`ConfiguredHttpClient`. См. раздел "Migration Guide" ниже.
 
 ## Основные компоненты
 
@@ -327,9 +359,61 @@ class MyCustomClient(ConfiguredHttpClient):
         return super().fetch_one(request)
 ```
 
+## Migration Guide
+
+### Выбор архитектуры для новых клиентов
+
+Для новых клиентов рекомендуется использовать архитектуру на основе `BaseClient` и `ConfiguredHttpClient` с YAML-конфигурациями:
+
+**Преимущества новой архитектуры:**
+- Декларативная конфигурация через YAML
+- Единообразный интерфейс для всех источников
+- Автоматическая обработка пагинации через `HttpBackend`
+- Лучшая тестируемость через подмену `HttpBackend`
+- Централизованное управление конфигурациями
+
+**Когда использовать старую архитектуру (`BaseExternalDataClient`):**
+- Только для поддержки существующих пайплайнов
+- При необходимости прямой реализации `SourceClientABC` без YAML-конфигураций
+- Для миграции существующих клиентов постепенно
+
+### Миграция с BaseExternalDataClient на ConfiguredHttpClient
+
+1. **Создайте YAML-конфигурацию** в `src/bioetl/clients/config/yaml/<source>.yml`:
+   - Определите базовый URL и ресурсы
+   - Настройте параметры пагинации
+   - Укажите схемы ответов
+
+2. **Создайте класс клиента**, наследующийся от `ConfiguredHttpClient`:
+   ```python
+   from bioetl.clients.factory import ConfiguredHttpClient
+   from bioetl.clients.base import ClientRequest
+   
+   class MySourceClient(ConfiguredHttpClient):
+       def request_resource(self, **kwargs) -> ClientRequest:
+           # Специфичная логика построения запросов
+           return ClientRequest(route="resource", ...)
+   ```
+
+3. **Зарегистрируйте клиент** в реестре или используйте `ClientFactory`
+
+4. **Обновите код использования**:
+   - Замените вызовы `send()` на `fetch_one()` / `iter_records()`
+   - Используйте `ClientRequest` вместо прямых HTTP-запросов
+   - Убедитесь, что `HttpBackend` правильно настроен
+
+Подробнее см. `07-rest-yaml-migration.md`.
+
 ## Связанная документация
 
-- **02-rest-yaml-migration.md** — Детали миграции на YAML-конфигурации
-- **19-clients-diagrams.md** — Инструкция по генерации диаграмм
-- **ConfiguredHttpClient**: базовая реализация (см. `docs/02-pipelines/clients/03-configured-http-client.md`)
+- **07-rest-yaml-migration.md** — Детали миграции на YAML-конфигурации
+- **08-clients-diagrams.md** — Инструкция по генерации диаграмм
+- **03-configured-http-client.md** — базовая реализация ConfiguredHttpClient
+- **00-pubmed-client.md** — клиент для API PubMed
+- **01-crossref-client.md** — клиент для API CrossRef
+- **02-pubchem-client.md** — клиент для PubChem
+- **04-semantic-scholar-client.md** — клиент для API Semantic Scholar
+- **05-uniprot-client.md** — клиент для REST API UniProt
+- **SourceClientABC**: `docs/reference/abc/23-source-client-abc.md` — ABC-контракт для клиентов источников данных
+- **BaseExternalDataClient**: `docs/02-pipelines/core/01-base-external-data-client.md` — базовая реализация для REST API (deprecated)
 

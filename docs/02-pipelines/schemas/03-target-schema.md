@@ -43,6 +43,6 @@ validated_df = schema.validate(df)
 
 ## Related Components
 
-- **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/06-validation-service.md`)
+- **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
 - **ChemblTargetPipeline**: использует схему для валидации данных (см. `docs/02-pipelines/chembl/target/00-target-chembl-overview.md`)
 

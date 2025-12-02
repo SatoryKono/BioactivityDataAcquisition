@@ -35,5 +35,5 @@ validated_df = DocumentSchema.validate(df)
 ## Related Components
 
 - **ChemblDocumentPipeline**: использует схему для валидации данных (см. `docs/02-pipelines/chembl/document/00-document-chembl-overview.md`)
-- **DefaultValidationService**: использует схему для валидации (см. `docs/02-pipelines/06-validation-service.md`)
+- **DefaultValidationService**: использует схему для валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
 

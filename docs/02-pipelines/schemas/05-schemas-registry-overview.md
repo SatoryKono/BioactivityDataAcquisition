@@ -1,4 +1,4 @@
-# 00 Schemas Registry Overview
+# 05 Schemas Registry Overview
 
 BioETL uses Pandera schemas as a central mechanism to validate all datasets before they are written.
 
@@ -34,7 +34,7 @@ Both views are complementary: datatype documentation explains the business meani
 
 ## Related Components
 
-- **SchemaRegistry**: реестр схем (см. `docs/02-pipelines/05-schema-registry.md`)
-- **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/06-validation-service.md`)
-- **DocumentSchema**: схема документов (см. `docs/02-pipelines/schemas/26-document-schema.md`)
+- **SchemaRegistry**: реестр схем (см. `docs/02-pipelines/core/05-schema-registry.md`)
+- **DefaultValidationService**: сервис валидации (см. `docs/02-pipelines/core/06-validation-service.md`)
+- **DocumentSchema**: схема документов (см. `docs/02-pipelines/schemas/00-document-schema.md`)
 
