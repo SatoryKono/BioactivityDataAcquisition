@@ -36,5 +36,5 @@
 ## Related Components
 
 - **ColumnMapping**: структура сопоставления колонок (см. `docs/02-pipelines/chembl/activity/11-activity-chembl-column-mapping.md`)
-- **ActivityExtractor**: использует парсер для преобразования ответов API (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extract.md`)
+- **ActivityExtractor**: использует парсер для преобразования ответов API (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extraction.md`)
 

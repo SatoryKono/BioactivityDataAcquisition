@@ -35,6 +35,6 @@
 ## Related Components
 
 - **BatchPlan**: план батчирования запросов (см. `docs/02-pipelines/chembl/activity/09-activity-chembl-batch-plan.md`)
-- **ActivityExtractor**: использует дескриптор для извлечения данных (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extract.md`)
+- **ActivityExtractor**: использует дескриптор для извлечения данных (см. `docs/02-pipelines/chembl/activity/01-activity-chembl-extraction.md`)
 - **ChemblActivityPipeline**: создаёт дескриптор через `build_descriptor()` (см. `docs/02-pipelines/chembl/activity/00-activity-chembl-overview.md`)
 

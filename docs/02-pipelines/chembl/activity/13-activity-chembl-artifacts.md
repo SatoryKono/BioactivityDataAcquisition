@@ -72,6 +72,6 @@
 
 ## Related Components
 
-- **ActivityWriter**: стадия записи результатов (см. `docs/02-pipelines/chembl/activity/03-activity-chembl-write.md`)
+- **ActivityWriter**: стадия записи результатов (см. `docs/02-pipelines/chembl/activity/03-activity-chembl-io.md`)
 - **UnifiedOutputWriter**: унифицированный writer для записи (см. `docs/02-pipelines/04-unified-output-writer.md`)
 
