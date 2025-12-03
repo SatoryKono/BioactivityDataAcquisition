@@ -1,0 +1,14 @@
+id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: auto_detect
+input_path: null
+output_path: /tmp/out
+batch_size: 20
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+unexpected_field: true

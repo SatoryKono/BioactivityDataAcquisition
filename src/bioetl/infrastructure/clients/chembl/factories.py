@@ -30,7 +30,7 @@ def default_chembl_client(
     Uses conservative rate limiting and exponential backoff retry.
     Config fields are now top-level (no nested 'parameters').
     """
-    base_url = options.get("base_url") or source_config.base_url
+    base_url = str(options.get("base_url") or source_config.base_url)
     max_len = options.get("max_url_length") or source_config.max_url_length
 
     middleware = HttpClientMiddleware(

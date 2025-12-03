@@ -5,16 +5,16 @@ import socket
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
+import socket
+from unittest.mock import MagicMock, Mock
+
+import pandas as pd
 import pytest
 
-from bioetl.infrastructure.config.models import (
-    HashingConfig,
-    LoggingConfig,
-    PipelineConfig,
-    StorageConfig,
-)
+from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.schemas.provider_config_schema import ChemblSourceConfig
 from bioetl.domain.validation.service import ValidationService
 
 
@@ -22,12 +22,19 @@ from bioetl.domain.validation.service import ValidationService
 def mock_config():
     """Create a mock pipeline configuration."""
     return PipelineConfig(
-        provider="test_provider",
-        entity_name="test_entity",
-        logging=LoggingConfig(level="DEBUG"),
-        storage=StorageConfig(output_path="./test_out"),
-        hashing=HashingConfig(business_key_fields=["id"]),
-        pipeline={}
+        id="chembl.activity",
+        provider="chembl",
+        entity="activity",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path="./test_out",
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
     )
 
 
@@ -70,12 +77,19 @@ def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineCo
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
-        provider="test_provider",
-        entity_name="test_entity",
-        logging=LoggingConfig(level="DEBUG"),
-        storage=StorageConfig(output_path=str(output_dir)),
-        hashing=HashingConfig(business_key_fields=["id"]),
-        pipeline={},
+        id="chembl.activity",
+        provider="chembl",
+        entity="activity",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path=str(output_dir),
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
     )
 
 

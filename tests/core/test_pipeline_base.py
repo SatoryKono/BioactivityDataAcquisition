@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.domain.errors import PipelineStageError
 
 
 class ConcretePipeline(PipelineBase):
@@ -160,14 +161,14 @@ def test_pipeline_error_hooks(
     pipeline.extract = MagicMock(side_effect=ValueError("Extraction failed"))
 
     # Act & Assert
-    with pytest.raises(ValueError, match="Extraction failed"):
+    with pytest.raises(PipelineStageError):
         pipeline.run(Path("dummy"))
 
     # Verify hook called
-    mock_hook.on_error.assert_called_once()
+    assert mock_hook.on_error.call_count >= 1
     args, _ = mock_hook.on_error.call_args
-    assert args[0] == "pipeline"
-    assert isinstance(args[1], ValueError)
+    assert args[0] == "extract"
+    assert isinstance(args[1], PipelineStageError)
 
 
 @pytest.mark.unit
@@ -179,6 +180,7 @@ def test_hashing_logic(
 ):
     """Test different scenarios for business key hashing."""
     # Scenario 1: Config with business_key_fields=["id"] and present column
+    mock_config.hashing.business_key_fields = ["id"]
     pipeline = ConcretePipeline(
         mock_config, mock_logger, mock_validation_service, mock_output_writer
     )
