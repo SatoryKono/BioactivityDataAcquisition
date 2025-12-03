@@ -1,6 +1,7 @@
 """
 Base pipeline implementation for ChEMBL data extraction.
 """
+from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from typing import Any
 
@@ -14,6 +15,7 @@ from bioetl.domain.transform.impl.normalize import NormalizationService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
+    CsvInputOptions,
     PipelineConfig,
 )
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -24,6 +26,127 @@ def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
     """Yield successive chunks from data."""
     for i in range(0, len(data), size):
         yield data[i:i + size]
+
+
+class RecordSource(ABC):
+    """Абстракция источника записей."""
+
+    @abstractmethod
+    def load(self) -> pd.DataFrame:
+        """Загружает DataFrame из источника."""
+
+
+class ApiRecordSource(RecordSource):
+    def __init__(
+        self,
+        extraction_service: ExtractionServiceABC,
+        entity: str,
+        filters: dict[str, Any],
+        logger: LoggerAdapterABC,
+    ) -> None:
+        self._extraction_service = extraction_service
+        self._entity = entity
+        self._filters = filters
+        self._logger = logger
+
+    def load(self) -> pd.DataFrame:
+        self._logger.info(f"Extracting {self._entity} from API...")
+        return self._extraction_service.extract_all(
+            self._entity, **self._filters
+        )
+
+
+class CsvDatasetRecordSource(RecordSource):
+    def __init__(
+        self,
+        path: str,
+        csv_options: CsvInputOptions,
+        limit: int | None,
+        logger: LoggerAdapterABC,
+    ) -> None:
+        self._path = path
+        self._csv_options = csv_options
+        self._limit = limit
+        self._logger = logger
+
+    def load(self) -> pd.DataFrame:
+        self._logger.info(f"Extracting records from CSV dataset: {self._path}")
+        header = 0 if self._csv_options.header else None
+        df = pd.read_csv(
+            self._path,
+            delimiter=self._csv_options.delimiter,
+            header=header,
+        )
+        if self._limit is not None:
+            df = df.head(self._limit)
+        return df
+
+
+class CsvIdOnlyRecordSource(RecordSource):
+    def __init__(
+        self,
+        path: str,
+        id_column: str,
+        csv_options: CsvInputOptions,
+        limit: int | None,
+        extraction_service: ExtractionServiceABC,
+        source_config: ChemblSourceConfig,
+        entity: str,
+        filter_key: str,
+        logger: LoggerAdapterABC,
+    ) -> None:
+        self._path = path
+        self._id_column = id_column
+        self._csv_options = csv_options
+        self._limit = limit
+        self._extraction_service = extraction_service
+        self._source_config = source_config
+        self._entity = entity
+        self._filter_key = filter_key
+        self._logger = logger
+
+    def load(self) -> pd.DataFrame:
+        if not self._id_column:
+            raise ValueError("ID_COLUMN must be defined for ID-only mode")
+        if not self._filter_key:
+            raise ValueError("API_FILTER_KEY must be defined for ID-only mode")
+
+        header = 0 if self._csv_options.header else None
+        usecols = [self._id_column] if self._csv_options.header else [0]
+        names = [self._id_column] if not self._csv_options.header else None
+
+        df_ids = pd.read_csv(
+            self._path,
+            delimiter=self._csv_options.delimiter,
+            usecols=usecols,
+            header=header,
+            names=names,
+        )
+
+        ids = df_ids[self._id_column].dropna().astype(str).tolist()
+        if self._limit is not None:
+            ids = ids[: self._limit]
+
+        if not ids:
+            return pd.DataFrame()
+
+        batch_size = self._source_config.resolve_effective_batch_size(
+            limit=self._limit, hard_cap=25
+        )
+
+        records: list[dict[str, Any]] = []
+
+        for batch_ids in _chunk_list(ids, batch_size):
+            response = self._extraction_service.request_batch(
+                self._entity, batch_ids, self._filter_key
+            )
+            batch_records = self._extraction_service.parse_response(response)
+            serialized_records = self._extraction_service.serialize_records(
+                self._entity, batch_records
+            )
+            records.extend(serialized_records)
+
+        return pd.DataFrame(records)
 
 
 class ChemblPipelineBase(PipelineBase):
@@ -85,100 +208,63 @@ class ChemblPipelineBase(PipelineBase):
 
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """
-        Generic extract with CSV input support.
+        Generic extract with explicit record source selection.
 
-        If config.cli['input_file'] is provided:
-        - Full CSV data → returned as-is (with optional limit)
-        - ID-only CSV → fetches full records from API
-
-        Otherwise delegates to ChemblExtractionService.extract_all().
+        Record source resolution:
+        - input_mode=csv: read rows from CSV using csv_options
+        - input_mode=id_only: read IDs from CSV and fetch records from API
+        - input_mode=auto_detect: API if no input_path, CSV dataset otherwise
         """
-        entity = self._config.entity_name
-        limit = kwargs.get("limit")
-        path = self._config.cli.get("input_file")
-
-        if path:
-            self._logger.info(f"Extracting {entity} from CSV: {path}")
-            return self._extract_from_csv(path, limit)
-
-        self._logger.info(f"Extracting {entity} from API...")
-        filters = self._config.pipeline.copy()
-        filters.update(kwargs)
-        return self._extraction_service.extract_all(entity, **filters)
-
-    def _extract_from_csv(
-        self, path: str, limit: int | None
-    ) -> pd.DataFrame:
-        """Handle CSV input (full data or ID-only)."""
-        id_col = self.ID_COLUMN
-        if not id_col:
-            raise ValueError(
-                f"{self.__class__.__name__} must define ID_COLUMN"
-            )
-
-        header = pd.read_csv(path, nrows=0)
-        if id_col not in header.columns:
-            raise ValueError(f"Input file {path} must contain '{id_col}'")
-
-        # Check for explicit config override
-        is_full_dataset = self._config.cli.get("input_full_dataset")
-
-        if is_full_dataset is None:
-            # Heuristic: <= 2 columns means it's likely just IDs
-            is_id_only = len(header.columns) <= 2
-            is_full_dataset = not is_id_only
-
-        if is_full_dataset:
-            self._logger.info("Using input CSV as full dataset")
-            df = pd.read_csv(path)
-            if limit:
-                df = df.head(limit)
-            return df
-
-        self._logger.info("Detected ID-only CSV, fetching from API...")
-        return self._fetch_by_ids(path, id_col, limit)
-
-    def _fetch_by_ids(
-        self, path: str, id_col: str, limit: int | None
-    ) -> pd.DataFrame:
-        """Fetch full records from API for IDs in CSV."""
-        df_ids = pd.read_csv(path, usecols=[id_col])
-        ids = df_ids[id_col].dropna().astype(str).tolist()
-
-        if limit:
-            ids = ids[:limit]
-
-        if not ids:
-            return pd.DataFrame()
-
-        source_config = self._resolve_source_config()
-        batch_size = source_config.resolve_effective_batch_size(
-            limit=limit, hard_cap=25
+        limit = kwargs.pop("limit", None)
+        record_source = self._build_record_source(
+            limit=limit, extract_kwargs=kwargs
         )
+        return record_source.load()
 
-        records: list[dict[str, Any]] = []
-        entity = self._config.entity_name
+    def _build_record_source(
+        self, *, limit: int | None, extract_kwargs: dict[str, Any]
+    ) -> RecordSource:
+        filters = self._config.pipeline.copy()
+        filters.update(extract_kwargs)
+        if limit is not None:
+            filters["limit"] = limit
 
-        for batch_ids in _chunk_list(ids, batch_size):
-            response = self._request_batch(entity, batch_ids)
-            batch_records = self._extraction_service.parse_response(response)
-            # Serialize records using model to ensure format consistency (flattening, etc)
-            serialized_records = self._extraction_service.serialize_records(entity, batch_records)
-            records.extend(serialized_records)
+        mode = self._config.input_mode
+        path = self._config.input_path
+        if mode == "auto_detect" and path:
+            mode = "csv"
 
-        return pd.DataFrame(records)
-
-    def _request_batch(
-        self, entity: str, batch_ids: list[str]
-    ) -> dict[str, Any]:
-        """Request a batch of records by IDs from the API."""
-        filter_key = self.API_FILTER_KEY
-        if not filter_key:
-            raise ValueError(
-                f"{self.__class__.__name__} must define API_FILTER_KEY"
+        if mode == "csv":
+            if path is None:
+                raise ValueError("input_path is required for CSV mode")
+            return CsvDatasetRecordSource(
+                path=path,
+                csv_options=self._config.csv_options,
+                limit=limit,
+                logger=self._logger,
             )
-        return self._extraction_service.request_batch(
-            entity, batch_ids, filter_key
+
+        if mode == "id_only":
+            if path is None:
+                raise ValueError("input_path is required for ID-only mode")
+            source_config = self._resolve_source_config()
+            return CsvIdOnlyRecordSource(
+                path=path,
+                id_column=self.ID_COLUMN,
+                csv_options=self._config.csv_options,
+                limit=limit,
+                extraction_service=self._extraction_service,
+                source_config=source_config,
+                entity=self._config.entity_name,
+                filter_key=self.API_FILTER_KEY,
+                logger=self._logger,
+            )
+
+        return ApiRecordSource(
+            extraction_service=self._extraction_service,
+            entity=self._config.entity_name,
+            filters=filters,
+            logger=self._logger,
         )
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:

@@ -15,7 +15,7 @@
 
 ## Особенности
 
-- **CSV input**: поддерживаются два сценария — загрузка полного CSV через `cli.input_file` и догрузка активностей из API по списку ID, прочитанному из CSV.
+- **CSV input**: explicit control via `input_mode` (`csv` for full dataset, `id_only` for ID lists) and `input_path`; `csv_options` configures delimiter/header without column heuristics.
 - **Хеширование**: хеши рассчитываются после нормализации; набор полей для бизнес-ключа задается в `hashing.business_key_fields`, что обеспечивает воспроизводимое устранение дублей.
 
 ## Конфигурация

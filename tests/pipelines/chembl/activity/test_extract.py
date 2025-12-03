@@ -10,6 +10,7 @@ from bioetl.application.pipelines.chembl.pipeline import (
 )
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
+    CsvInputOptions,
     PipelineConfig,
 )
 
@@ -27,7 +28,6 @@ def source_config():
 def mock_config(source_config):
     """Create mock PipelineConfig with get_source_config method."""
     config = MagicMock(spec=PipelineConfig)
-    config.cli = {}
     config.pipeline = {}
     config.entity_name = "activity"
     config.provider = "chembl"
@@ -38,6 +38,9 @@ def mock_config(source_config):
     config.hashing = MagicMock()
     config.hashing.business_key_fields = ["activity_id"]
     config.primary_key = "activity_id"
+    config.input_mode = "auto_detect"
+    config.input_path = None
+    config.csv_options = CsvInputOptions()
     return config
 
 
@@ -67,7 +70,8 @@ def pipeline(mock_config, mock_extraction_service):
 
 def test_extract_no_input_file(pipeline, mock_extraction_service):
     """Test extraction falls back to service when no input file."""
-    pipeline._config.cli = {}
+    pipeline._config.input_mode = "auto_detect"
+    pipeline._config.input_path = None
 
     df = pipeline.extract()
 
@@ -85,7 +89,8 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
         "standard_type": ["IC50", "Ki"],
     }).to_csv(csv_path, index=False)
 
-    pipeline._config.cli = {"input_file": str(csv_path)}
+    pipeline._config.input_mode = "csv"
+    pipeline._config.input_path = str(csv_path)
 
     df = pipeline.extract()
 
@@ -101,7 +106,8 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
     ids_df = pd.DataFrame({"activity_id": [100, 101, 102]})
     ids_df.to_csv(csv_path, index=False)
 
-    pipeline._config.cli = {"input_file": str(csv_path)}
+    pipeline._config.input_mode = "id_only"
+    pipeline._config.input_path = str(csv_path)
 
     # Mock parse_response on extraction_service
     mock_extraction_service.parse_response.return_value = [
@@ -130,7 +136,8 @@ def test_extract_batch_size_from_config(
     ids = [1, 2, 3, 4, 5]
     pd.DataFrame({"activity_id": ids}).to_csv(csv_path, index=False)
 
-    pipeline._config.cli = {"input_file": str(csv_path)}
+    pipeline._config.input_mode = "id_only"
+    pipeline._config.input_path = str(csv_path)
     pipeline._config.sources["chembl"].batch_size = 2
 
     # Mock parse_response to return empty list
@@ -156,7 +163,8 @@ def test_extract_missing_column(pipeline, tmp_path):
     csv_path = tmp_path / "bad.csv"
     pd.DataFrame({"wrong_col": [1]}).to_csv(csv_path, index=False)
 
-    pipeline._config.cli = {"input_file": str(csv_path)}
+    pipeline._config.input_mode = "id_only"
+    pipeline._config.input_path = str(csv_path)
 
-    with pytest.raises(ValueError, match="must contain 'activity_id'"):
+    with pytest.raises(ValueError):
         pipeline.extract()

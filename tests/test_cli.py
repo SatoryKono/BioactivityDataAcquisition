@@ -14,6 +14,7 @@ sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.interfaces.cli import app
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.infrastructure.config.models import PipelineConfig
 
 runner = CliRunner()
 
@@ -38,10 +39,9 @@ def test_validate_config_missing():
 @patch("bioetl.interfaces.cli.app.ConfigResolver")
 def test_validate_config_success(mock_resolver):
     """Test validate-config success."""
-    mock_config = MagicMock()
-    mock_config.entity_name = "test"
-    mock_config.provider = "chembl"
-    mock_resolver.return_value.resolve.return_value = mock_config
+    mock_resolver.return_value.resolve.return_value = PipelineConfig(
+        provider="chembl", entity_name="test", sources={}
+    )
 
     # Create a dummy file so Path exists check passes if any
     with runner.isolated_filesystem():
@@ -66,8 +66,7 @@ def test_run_command(mock_build_deps, mock_resolver, mock_get_cls):
     )
     mock_get_cls.return_value = mock_pipeline_cls
 
-    mock_config = MagicMock()
-    mock_config.provider = "chembl"
+    mock_config = PipelineConfig(provider="chembl", entity_name="activity", sources={})
     mock_config.storage.output_path = "out"
     mock_resolver.return_value.resolve.return_value = mock_config
 
@@ -134,8 +133,7 @@ def test_run_with_limit_and_dry_run(
     )
     mock_get_cls.return_value = mock_pipeline_cls
 
-    mock_config = MagicMock()
-    mock_config.provider = "chembl"
+    mock_config = PipelineConfig(provider="chembl", entity_name="activity", sources={})
     mock_config.storage.output_path = "out"
     mock_resolver.return_value.resolve.return_value = mock_config
     mock_build_deps.return_value = MagicMock()
@@ -163,7 +161,9 @@ def test_run_pipeline_failure(mock_build_deps, mock_resolver, mock_get_cls):
     mock_pipeline_instance.run.return_value = MagicMock(success=False)
     mock_get_cls.return_value = mock_pipeline_cls
 
-    mock_resolver.return_value.resolve.return_value = MagicMock()
+    mock_resolver.return_value.resolve.return_value = PipelineConfig(
+        provider="chembl", entity_name="activity", sources={}
+    )
     mock_build_deps.return_value = MagicMock()
 
     with patch("pathlib.Path.exists", return_value=True):
