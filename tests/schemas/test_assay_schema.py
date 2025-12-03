@@ -2,6 +2,7 @@
 Tests for the AssaySchema (Pandera).
 """
 import pytest
+# pylint: disable=redefined-outer-name
 import pandas as pd
 import pandera as pa
 from bioetl.domain.schemas.chembl.assay import AssaySchema

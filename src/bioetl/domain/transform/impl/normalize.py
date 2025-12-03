@@ -87,9 +87,11 @@ class NormalizationService(NormalizationServiceABC):
         self._config = config
 
     def is_case_sensitive(self, field_name: str) -> bool:
+        """Check if field should be case-sensitive."""
         return field_name in self._config.normalization.case_sensitive_fields
 
     def is_id_field(self, field_name: str) -> bool:
+        """Check if field is an ID field (should be uppercased)."""
         if field_name in self._config.normalization.id_fields:
             return True
         if field_name.endswith("_id") or field_name.endswith("_chembl_id"):
@@ -197,7 +199,14 @@ class NormalizationService(NormalizationServiceABC):
                 raise ValueError(
                     f"Ошибка нормализации поля '{field_name}': {exc}"
                 ) from exc
-            return str(res) if res is not pd.NA and res is not None else pd.NA
+
+            if res is not None and res is not pd.NA:
+                if isinstance(res, (list, tuple)):
+                    return serialize_list(list(res))
+                if isinstance(res, dict):
+                    return serialize_dict(res)
+                return str(res)
+            return pd.NA
 
         df[name] = df[name].apply(_serialize_wrapper)
         df[name] = df[name].astype("string").replace({pd.NA: None})
