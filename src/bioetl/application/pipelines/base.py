@@ -13,6 +13,7 @@ from bioetl.domain.models import RunContext, RunResult
 from bioetl.application.pipelines.stages import StageResult
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.infrastructure.output.services.metadata_builder import MetadataBuilder
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
 
@@ -35,6 +36,7 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         output_writer: "UnifiedOutputWriter",
         hash_service: HashService | None = None,
+        metadata_builder: MetadataBuilder | None = None,
     ) -> None:
         self._config = config
         self._logger = logger.bind(
@@ -44,6 +46,7 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
+        self._metadata_builder = metadata_builder or MetadataBuilder()
         self._clients: dict[str, Any] = {}
         self._hooks: list[PipelineHookABC] = []
         self._stage_starts: dict[str, datetime] = {}
@@ -67,6 +70,7 @@ class PipelineBase(ABC):
             dry_run=dry_run,
         )
 
+        self._enrich_context(context)
         self._logger.info("Pipeline started", run_id=context.run_id)
         stages_results: list[StageResult] = []
 
@@ -97,6 +101,7 @@ class PipelineBase(ABC):
             self._notify_stage_end("validate", stages_results[-1])
 
             # 4. Write (skip on dry_run)
+            write_result: WriteResult | None = None
             if not dry_run:
                 self._notify_stage_start("write", context)
                 write_result = self.write(
@@ -109,6 +114,14 @@ class PipelineBase(ABC):
                 )
                 self._notify_stage_end("write", stages_results[-1])
 
+            # Build metadata
+            if write_result:
+                meta = self._metadata_builder.build(context, write_result)
+            else:
+                meta = self._metadata_builder.build_dry_run(
+                    context, len(df_validated)
+                )
+
             return RunResult(
                 run_id=context.run_id,
                 success=True,
@@ -118,7 +131,7 @@ class PipelineBase(ABC):
                 duration_sec=self._calculate_duration(context),
                 stages=stages_results,
                 errors=[],
-                meta=self._build_meta(context, df_validated),
+                meta=meta,
             )
 
         except Exception as e:
@@ -224,14 +237,8 @@ class PipelineBase(ABC):
             datetime.now(timezone.utc) - context.started_at
         ).total_seconds()
 
-    def _build_meta(
-        self,
-        context: RunContext,
-        df: pd.DataFrame
-    ) -> dict[str, Any]:
-        return {
-            "run_id": context.run_id,
-            "entity": self._config.entity_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "row_count": len(df),
-        }
+    def _enrich_context(self, context: RunContext) -> None:
+        """
+        Хук для обогащения контекста (например, добавления версии релиза).
+        """
+        pass

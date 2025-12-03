@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\application\pipelines\chembl\document\run.py
+# hypothesis_version: 6.140.3
+
+['DOI', 'Int64', 'PUBLICATION', 'chembl_release', 'coerce', 'doc_type', 'document_chembl_id', 'doi', 'doi_clean', 'pubmed_id', 'src_id', 'year']

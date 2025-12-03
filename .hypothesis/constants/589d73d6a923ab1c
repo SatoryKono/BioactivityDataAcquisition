@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\transform\impl\hasher.py
+# hypothesis_version: 6.140.3
+
+['iso', 'sha256', 'utf-8']

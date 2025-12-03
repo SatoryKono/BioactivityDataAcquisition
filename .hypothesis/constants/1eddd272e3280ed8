@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\schemas\chembl\activity.py
+# hypothesis_version: 6.140.3
+
+['<', '<=', '=', '>', '>=', 'A', 'B', 'BAO endpoint term', 'BAO format term', 'ChEMBL ID ассая', 'ChEMBL ID молекулы', 'ChEMBL ID таргета', 'F', 'NCBI TaxID таргета', 'P', 'T', 'U', 'URI единиц (QUDT)', '^CHEMBL\\d+$', '^[a-f0-9]{64}$', '~', 'Год публикации', 'Источник данных (ID)', 'Название журнала', 'Название молекулы', 'Название таргета', 'Организм таргета']

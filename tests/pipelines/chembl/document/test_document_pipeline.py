@@ -1,18 +1,26 @@
 import pytest
 import pandas as pd
 from unittest.mock import MagicMock
-from bioetl.application.pipelines.chembl.document.run import ChemblDocumentPipeline
+
+from bioetl.application.pipelines.chembl.document.run import (
+    ChemblDocumentPipeline,
+)
+from bioetl.domain.schemas.chembl.document import DocumentSchema
+
 
 @pytest.fixture
 def pipeline():
     config = MagicMock()
     config.entity_name = "document"
     config.model_dump.return_value = {}
-    
+
+    validation_service = MagicMock()
+    validation_service._schema_provider.get_schema.return_value = DocumentSchema
+
     return ChemblDocumentPipeline(
         config=config,
         logger=MagicMock(),
-        validation_service=MagicMock(),
+        validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
     )

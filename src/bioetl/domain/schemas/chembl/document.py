@@ -1,12 +1,18 @@
+"""Pandera schema for ChEMBL document data."""
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.custom_types import DOI_REGEX
+from bioetl.domain.transform.normalizers import DOI_REGEX
 
 
 class DocumentSchema(pa.DataFrameModel):
-    abstract: Series[str] = pa.Field(nullable=True, description="Аннотация документа")
-    authors: Series[str] = pa.Field(nullable=True, description="Список авторов")
+    """Schema for document/publication data."""
+    abstract: Series[str] = pa.Field(
+        nullable=True, description="Аннотация документа"
+    )
+    authors: Series[str] = pa.Field(
+        nullable=True, description="Список авторов"
+    )
     doc_type: Series[str] = pa.Field(
         isin=["PUBLICATION", "DATASET", "PATENT", "OTHER"],
         description="Тип документа",
@@ -27,8 +33,12 @@ class DocumentSchema(pa.DataFrameModel):
     doi_chembl: Series[str] = pa.Field(
         nullable=True, description="Внутренний DOI ChEMBL (для датасетов)"
     )
-    first_page: Series[str] = pa.Field(nullable=True, description="Первая страница")
-    issue: Series[str] = pa.Field(nullable=True, description="Номер выпуска журнала")
+    first_page: Series[str] = pa.Field(
+        nullable=True, description="Первая страница"
+    )
+    issue: Series[str] = pa.Field(
+        nullable=True, description="Номер выпуска журнала"
+    )
     journal: Series[str] = pa.Field(
         nullable=True, description="Сокращенное название журнала"
     )
@@ -49,7 +59,9 @@ class DocumentSchema(pa.DataFrameModel):
         nullable=True,
         description="ID источника данных",
     )
-    title: Series[str] = pa.Field(nullable=True, description="Заголовок документа")
+    title: Series[str] = pa.Field(
+        nullable=True, description="Заголовок документа"
+    )
     volume: Series[str] = pa.Field(nullable=True, description="Том выпуска")
     year: Series[float] = pa.Field(nullable=True, description="Год публикации")
     chembl_release: Series[str] = pa.Field(
@@ -68,5 +80,7 @@ class DocumentSchema(pa.DataFrameModel):
     )
 
     class Config:
+        """Pandera configuration."""
+
         strict = True
         coerce = True

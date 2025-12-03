@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\application\pipelines\chembl\target\run.py
+# hypothesis_version: 6.140.3
+
+['Int64', 'SINGLE PROTEIN', 'accession', 'coerce', 'cross_references', 'pref_name', 'primaryAccession', 'target_chembl_id', 'target_chembl_id__in', 'target_components', 'target_names', 'target_type', 'tax_id', 'uniprot', 'uniprot_id', 'xref_id', 'xref_src']

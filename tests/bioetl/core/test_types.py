@@ -1,19 +1,19 @@
 import pytest
 import pandas as pd
-from bioetl.domain.transform.custom_types import (
-    normalize_doi,
-    normalize_chembl_id,
-    normalize_pmid,
-    normalize_pcid,
-    normalize_uniprot,
+from bioetl.domain.transform.normalizers import (
+    BAO_ID_REGEX,
+    CHEMBL_ID_REGEX,
+    DOI_REGEX,
+    UNIPROT_ID_REGEX,
+    normalize_array,
     normalize_bao_id,
     normalize_bao_label,
-    normalize_array,
+    normalize_chembl_id,
+    normalize_doi,
+    normalize_pcid,
+    normalize_pmid,
     normalize_record,
-    DOI_REGEX,
-    CHEMBL_ID_REGEX,
-    UNIPROT_ID_REGEX,
-    BAO_ID_REGEX
+    normalize_uniprot,
 )
 
 

@@ -51,3 +51,28 @@ def test_circuit_breaker_half_open_fail():
 
     cb.record_failure()
     assert cb._state == CircuitState.OPEN
+
+
+def test_circuit_breaker_half_open_allow_request():
+    """Test allow_request logic when already in HALF_OPEN state."""
+    cb = CircuitBreakerImpl(failure_threshold=1, recovery_timeout=0.1)
+    cb.record_failure()
+    # pylint: disable=protected-access
+    assert cb._state == CircuitState.OPEN
+
+    time.sleep(0.15)
+    # First call transitions to HALF_OPEN
+    assert cb.allow_request() is True
+    assert cb._state == CircuitState.HALF_OPEN
+
+    # Second call while HALF_OPEN
+    assert cb.allow_request() is True
+
+
+def test_circuit_breaker_unknown_state():
+    """Test allow_request with unknown state (coverage fallback)."""
+    cb = CircuitBreakerImpl()
+    # Force unknown state
+    # pylint: disable=protected-access
+    cb._state = "UNKNOWN"
+    assert cb.allow_request() is True

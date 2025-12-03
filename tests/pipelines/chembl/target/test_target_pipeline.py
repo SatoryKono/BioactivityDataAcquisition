@@ -1,7 +1,10 @@
 import pytest
 import pandas as pd
 from unittest.mock import MagicMock
+
 from bioetl.application.pipelines.chembl.target.run import ChemblTargetPipeline
+from bioetl.domain.schemas.chembl.target import TargetSchema
+
 
 @pytest.fixture
 def pipeline():
@@ -10,11 +13,14 @@ def pipeline():
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []
-    
+
+    validation_service = MagicMock()
+    validation_service._schema_provider.get_schema.return_value = TargetSchema
+
     return ChemblTargetPipeline(
         config=config,
         logger=MagicMock(),
-        validation_service=MagicMock(),
+        validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
     )

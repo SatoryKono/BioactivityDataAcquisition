@@ -1,46 +1,11 @@
 import pandas as pd
 import pytest
 from bioetl.domain.transform.impl.normalize import (
-    NormalizerMixin,
-    serialize_dict,
-    serialize_list,
+    NormalizationService,
     normalize_scalar,
 )
-
-
-def test_serialize_list_primitives():
-    assert serialize_list(["a", "b"]) == "a|b"
-    assert serialize_list([1, 2]) == "1|2"
-    assert serialize_list([]) is pd.NA
-    assert serialize_list(None) is pd.NA
-
-
-def test_serialize_list_dicts():
-    val = [{"k1": "v1"}, {"k2": "v2"}]
-    # serialize_dict: "k1:v1" and "k2:v2"
-    assert serialize_list(val) == "k1:v1|k2:v2"
-
-
-def test_serialize_list_mixed_skip_nested():
-    # List of lists -> skipped/omitted logic check
-    val = ["a", ["b"]]
-    # serialize_list checks if element is list/dict and skips it
-    assert serialize_list(val) == "a"
-
-
-def test_serialize_dict_simple():
-    val = {"a": 1, "b": "2"}
-    assert serialize_dict(val) == "a:1|b:2"
-
-
-def test_serialize_dict_determinism():
-    val = {"b": 2, "a": 1}
-    assert serialize_dict(val) == "a:1|b:2"
-
-
-def test_serialize_dict_nested_skip():
-    val = {"a": 1, "nested": {"x": 1}}
-    assert serialize_dict(val) == "a:1"
+from bioetl.domain.transform.impl.registry import NormalizerRegistry
+from bioetl.domain.transform.normalizers import normalize_doi
 
 
 def test_normalize_scalar():
@@ -62,12 +27,7 @@ class MockConfig:
         self.fields = fields
 
 
-class MockNormalizer(NormalizerMixin):
-    def __init__(self, config):
-        self._config = config
-
-
-def test_normalizer_mixin_full():
+def test_normalization_service_full():
     fields = [
         {"name": "simple", "data_type": "string"},
         {"name": "id_col", "data_type": "string"},
@@ -77,11 +37,13 @@ def test_normalizer_mixin_full():
         {"name": "doi", "data_type": "string"},
     ]
     config = MockConfig(fields)
-    normalizer = MockNormalizer(config)
-
-    # Mock ID detection by manually patching if needed, 
-    # but "id_col" ends with _id so is_id_field should catch it.
     
+    registry = NormalizerRegistry()
+    registry.register("doi", normalize_doi)
+    registry.set_id_fields(["id_col"])
+    
+    service = NormalizationService(registry, config)
+
     df = pd.DataFrame(
         {
             "simple": ["  Value  ", "TEST"],
@@ -93,7 +55,7 @@ def test_normalizer_mixin_full():
         }
     )
 
-    res = normalizer.normalize_fields(df)
+    res = service.normalize_fields(df)
 
     # Simple: lower + trim
     assert res["simple"].iloc[0] == "value"
@@ -113,11 +75,14 @@ def test_normalizer_mixin_full():
     assert res["doi"].iloc[0] == "10.1000/abc"
 
 
-def test_normalizer_mixin_raises_on_invalid_custom_value():
+def test_normalization_service_raises_on_invalid_custom_value():
     config = MockConfig([{"name": "doi", "data_type": "string"}])
-    normalizer = MockNormalizer(config)
+    registry = NormalizerRegistry()
+    registry.register("doi", normalize_doi)
+    
+    service = NormalizationService(registry, config)
 
     df = pd.DataFrame({"doi": ["invalid-doi"]})
 
     with pytest.raises(ValueError):
-        normalizer.normalize_fields(df)
+        service.normalize_fields(df)

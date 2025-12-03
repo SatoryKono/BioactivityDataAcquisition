@@ -1,20 +1,28 @@
 import pytest
 import pandas as pd
 from unittest.mock import MagicMock
-from bioetl.application.pipelines.chembl.testitem.run import ChemblTestitemPipeline
+
+from bioetl.application.pipelines.chembl.testitem.run import (
+    ChemblTestitemPipeline,
+)
+from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+
 
 @pytest.fixture
 def pipeline():
     config = MagicMock()
     config.entity_name = "testitem"
     config.model_dump.return_value = {}
-    config.pipeline = {} # extract использует это
-    config.fields = [] # по умолчанию пусто
-    
+    config.pipeline = {}
+    config.fields = []
+
+    validation_service = MagicMock()
+    validation_service._schema_provider.get_schema.return_value = TestitemSchema
+
     return ChemblTestitemPipeline(
         config=config,
         logger=MagicMock(),
-        validation_service=MagicMock(),
+        validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
     )
@@ -48,6 +56,9 @@ def test_transform_max_phase(pipeline):
 
 def test_transform_nested_fields(pipeline):
     # Setup config fields for normalization
+    # Treat atc_classifications as ID field to preserve/enforce uppercase
+    pipeline._normalization_service._registry.set_id_fields(["atc_classifications"])
+    
     pipeline._config.fields = [
         {"name": "atc_classifications", "data_type": "array"},
         {"name": "molecule_properties", "data_type": "object"},

@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\transform\custom_types.py
+# hypothesis_version: 6.140.3
+
+[',', '10.', ';', 'BAO_ID_REGEX', 'CHEMBL(\\d+)', 'CHEMBL_ID_REGEX', 'CID', 'DOI_REGEX', 'PCID', 'PUBCHEM_CID_REGEX', 'PUBMED_ID_REGEX', 'UNIPROT_ID_REGEX', '[', ']', '^10\\.\\d{4,9}/\\S+$', '^BAO_\\d+$', '^CHEMBL\\d+$', '^\\d{1,10}$', 'accession', 'assay_chembl_id', 'bao_endpoint', 'bao_format', 'bao_label', 'cross_references', 'document_chembl_id', 'doi', 'doi:', 'doi_chembl', 'doi_clean', 'molecule_chembl_id', 'normalize_array', 'normalize_bao_id', 'normalize_bao_label', 'normalize_chembl_id', 'normalize_doi', 'normalize_pcid', 'normalize_pmid', 'normalize_record', 'normalize_uniprot', 'pcid', 'pmid', 'pubchem', 'pubchem_cid', 'pubmed_id', 'target_chembl_id', 'target_components', 'uniprot', 'uniprot_accession', 'uniprot_id', 'xref_id', 'xref_src', '{', '}']

@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\constants.py
+# hypothesis_version: 6.140.3
+
+[0.5, 8192]
