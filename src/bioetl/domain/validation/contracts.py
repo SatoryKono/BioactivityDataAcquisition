@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
+
 import pandas as pd
 import pandera.pandas as pa
 
@@ -41,5 +42,15 @@ class SchemaProviderABC(ABC):
         """Возвращает список доступных схем."""
 
     @abstractmethod
-    def register(self, name: str, schema: type[pa.DataFrameModel]) -> None:
+    def get_schema_columns(self, name: str) -> list[str]:
+        """Возвращает порядок колонок для схемы."""
+
+    @abstractmethod
+    def register(
+        self,
+        name: str,
+        schema: type[pa.DataFrameModel],
+        *,
+        column_order: list[str] | None = None,
+    ) -> None:
         """Регистрирует новую схему."""
