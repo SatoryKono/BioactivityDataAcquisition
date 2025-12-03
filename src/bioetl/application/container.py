@@ -52,6 +52,11 @@ class PipelineContainer:
         if self.config.provider == "chembl":
             # Extract chembl config from generic sources dict
             raw_source_config = self.config.sources.get("chembl", {})
+            
+            # If SourceConfig (pydantic model), convert to dict for kwargs unpacking
+            if hasattr(raw_source_config, "model_dump"):
+                raw_source_config = raw_source_config.model_dump()
+
             # Validate/Parse it into ChemblSourceConfig
             source_config = ChemblSourceConfig(**raw_source_config)
             return default_chembl_extraction_service(

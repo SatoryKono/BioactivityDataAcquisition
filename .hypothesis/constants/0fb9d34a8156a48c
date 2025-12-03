@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\domain\transform\normalizers\registry.py
+# hypothesis_version: 6.140.3
+
+['accession', 'assay_chembl_id', 'bao_endpoint', 'bao_format', 'bao_label', 'cross_references', 'document_chembl_id', 'doi', 'doi_chembl', 'get_normalizer', 'molecule_chembl_id', 'pcid', 'pmid', 'pubchem_cid', 'pubmed_id', 'register_normalizer', 'target_chembl_id', 'target_components', 'uniprot_accession', 'uniprot_id']

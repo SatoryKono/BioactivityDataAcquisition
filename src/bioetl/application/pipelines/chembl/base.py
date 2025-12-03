@@ -75,6 +75,11 @@ class ChemblPipelineBase(PipelineBase):
         source_data = self._config.sources.get("chembl", {})
         if isinstance(source_data, ChemblSourceConfig):
             return source_data
+
+        # If generic SourceConfig, convert to dict first
+        if hasattr(source_data, "model_dump"):
+            source_data = source_data.model_dump()
+
         return ChemblSourceConfig.model_validate(source_data)
 
     def extract(self, **kwargs: Any) -> pd.DataFrame:
@@ -114,10 +119,16 @@ class ChemblPipelineBase(PipelineBase):
         if id_col not in header.columns:
             raise ValueError(f"Input file {path} must contain '{id_col}'")
 
-        is_id_only = len(header.columns) <= 2 and id_col in header.columns
+        # Check for explicit config override
+        is_full_dataset = self._config.cli.get("input_full_dataset")
 
-        if not is_id_only:
-            self._logger.info("Detected full data in input CSV")
+        if is_full_dataset is None:
+            # Heuristic: <= 2 columns means it's likely just IDs
+            is_id_only = len(header.columns) <= 2
+            is_full_dataset = not is_id_only
+
+        if is_full_dataset:
+            self._logger.info("Using input CSV as full dataset")
             df = pd.read_csv(path)
             if limit:
                 df = df.head(limit)
@@ -170,13 +181,16 @@ class ChemblPipelineBase(PipelineBase):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Цепочка трансформаций для ChEMBL:
-        pre_transform → base transform → normalize_fields
+        pre_transform → _do_transform → normalize_fields → enforce_schema
         """
         df = self.pre_transform(df)
         df = self._do_transform(df)
 
         # Выполняем нормализацию (строки, числа, вложенные структуры)
         df = self._normalization_service.normalize_fields(df)
+
+        # Приводим к схеме (добавляем отсутствующие колонки, упорядочиваем)
+        df = self._enforce_schema(df)
 
         return df
 

@@ -3,7 +3,7 @@ Tests for the PipelineBase class.
 """
 # pylint: disable=redefined-outer-name, protected-access
 from pathlib import Path
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -33,7 +33,7 @@ def test_pipeline_run_success(
     mock_output_writer,
     tmp_path
 ):
-    """Test a successful pipeline run with client lifecycle."""
+    """Test a successful pipeline run."""
     # Arrange
     pipeline = ConcretePipeline(
         config=mock_config,
@@ -41,10 +41,6 @@ def test_pipeline_run_success(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer
     )
-
-    # Test client registration
-    mock_client = Mock()
-    pipeline.register_client("test_client", mock_client)
 
     output_path = tmp_path / "output.parquet"
 
@@ -64,9 +60,6 @@ def test_pipeline_run_success(
 
     # Verify write called
     mock_output_writer.write_result.assert_called_once()
-
-    # Verify client closed
-    mock_client.close.assert_called_once()
 
 
 @pytest.mark.unit

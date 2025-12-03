@@ -35,4 +35,4 @@ class ChemblTestitemPipeline(ChemblPipelineBase):
                 df["max_phase"], errors="coerce"
             ).astype("Int64")
 
-        return self._enforce_schema(df)
+        return df

@@ -1,7 +1,0 @@
-checksum: 28bfe9cc57d0cccdf98f2a33fd308f9ee83693fd0b7dd88fd2c1d5c21e8b14ce
-entity: assay
-files:
-- assay.csv
-row_count: 10
-run_id: 3a73b718-2c53-453f-ad65-fbd0f2cc25ea
-timestamp: '2025-12-02T18:12:39.060793+00:00'

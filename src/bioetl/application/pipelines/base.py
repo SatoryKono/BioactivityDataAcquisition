@@ -47,7 +47,6 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
-        self._clients: dict[str, Any] = {}
         self._hooks: list[PipelineHookABC] = []
         self._stage_starts: dict[str, datetime] = {}
 
@@ -140,9 +139,6 @@ class PipelineBase(ABC):
                 hook.on_error("pipeline", e)
             raise
 
-        finally:
-            self._close_clients()
-
     # === Abstract Methods ===
 
     @abstractmethod
@@ -176,11 +172,7 @@ class PipelineBase(ABC):
             run_context=context,
         )
 
-    # === Client Management ===
-
-    def register_client(self, name: str, client: Any) -> None:
-        """Регистрирует клиент API."""
-        self._clients[name] = client
+    # === Hooks ===
 
     def add_hook(self, hook: PipelineHookABC) -> None:
         """Добавляет хук выполнения."""
@@ -195,12 +187,6 @@ class PipelineBase(ABC):
             df,
             business_key_cols=keys
         )
-
-    def _close_clients(self) -> None:
-        for name, client in self._clients.items():
-            if hasattr(client, "close"):
-                client.close()
-                self._logger.debug("Client closed", client=name)
 
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
         self._stage_starts[stage] = datetime.now(timezone.utc)

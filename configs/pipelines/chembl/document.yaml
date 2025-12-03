@@ -16,7 +16,8 @@ sources:
 
 cli:
   input_file: data/input/document.csv
-
+  input_full_dataset: false
+  
 fields:
   - name: abstract
     data_type: string

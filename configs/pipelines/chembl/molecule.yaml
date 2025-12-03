@@ -9,7 +9,8 @@ primary_key: molecule_chembl_id
 
 cli:
   input_file: data/input/testitem.csv
-
+  input_full_dataset: false
+  
 fields:
   - name: molecule_chembl_id
     data_type: string

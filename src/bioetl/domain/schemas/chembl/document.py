@@ -23,12 +23,7 @@ class DocumentSchema(pa.DataFrameModel):
     doi: Series[str] = pa.Field(
         nullable=True,
         str_matches=DOI_REGEX.pattern,
-        description="DOI публикации",
-    )
-    doi_clean: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=DOI_REGEX.pattern,
-        description="Нормализованный DOI",
+        description="DOI публикации (нормализован)",
     )
     doi_chembl: Series[str] = pa.Field(
         nullable=True, description="Внутренний DOI ChEMBL (для датасетов)"

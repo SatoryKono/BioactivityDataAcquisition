@@ -140,7 +140,7 @@ def run(
             sys.exit(1)
 
     except Exception as e:
-        console.print(f"[bold red]Error:[/bold red] {e}")
+        console.print_exception()
         sys.exit(1)
 
 
