@@ -65,6 +65,31 @@ def sample_df():
     })
 
 
+@pytest.fixture
+def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineConfig:
+    """Pipeline config for integration-style unit tests."""
+    output_dir = tmp_path_factory.mktemp("pipeline_output")
+    return PipelineConfig(
+        provider="test_provider",
+        entity_name="test_entity",
+        logging=LoggingConfig(level="DEBUG"),
+        storage=StorageConfig(output_path=str(output_dir)),
+        hashing=HashingConfig(business_key_fields=["id"]),
+        pipeline={},
+    )
+
+
+@pytest.fixture
+def small_pipeline_df() -> pd.DataFrame:
+    """Tiny dataset used for pipeline dry-run tests."""
+    return pd.DataFrame(
+        {
+            "id": [101, 202],
+            "value": ["alpha", "beta"],
+        }
+    )
+
+
 @pytest.fixture(autouse=True)
 def disable_network_calls(monkeypatch, request):
     """Block network access unless marked with 'network' or 'integration'."""
