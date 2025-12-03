@@ -101,12 +101,17 @@ def run(
 
         # 3. Instantiate Dependencies using Container
         container = build_pipeline_dependencies(config)
-        
+
         logger = container.get_logger()
         validation_service = container.get_validation_service()
         output_writer = container.get_output_writer()
         extraction_service = container.get_extraction_service()
         hash_service = container.get_hash_service()
+
+        record_source = container.get_record_source(
+            extraction_service, limit=limit
+        )
+        normalization_service = container.get_normalization_service()
 
         # 4. Run Pipeline
         pipeline = pipeline_cls(
@@ -114,7 +119,8 @@ def run(
             logger=logger,
             validation_service=validation_service,
             output_writer=output_writer,
-            extraction_service=extraction_service,
+            record_source=record_source,
+            normalization_service=normalization_service,
             hash_service=hash_service
         )
         

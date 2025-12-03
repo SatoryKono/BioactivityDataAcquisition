@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING
 import pandas as pd
 
 from bioetl.infrastructure.config.models import PipelineConfig
@@ -76,15 +76,16 @@ class PipelineBase(ABC):
         try:
             # 1. Extract
             self._notify_stage_start("extract", context)
-            df_raw = self.extract(**kwargs)
+            raw_data = self._materialize_records(self.extract(**kwargs))
             stages_results.append(
-                self._make_stage_result("extract", len(df_raw))
+                self._make_stage_result("extract", self._count_records(raw_data))
             )
             self._notify_stage_end("extract", stages_results[-1])
 
             # 2. Transform
             self._notify_stage_start("transform", context)
-            df_transformed = self.transform(df_raw)
+            transformed_data = self.transform(raw_data)
+            df_transformed = self._to_dataframe(transformed_data)
             df_transformed = self._add_hash_columns(df_transformed)
             df_transformed = self._add_index_column(df_transformed)
             df_transformed = self._add_database_version_column(df_transformed, self.get_version())
@@ -152,11 +153,13 @@ class PipelineBase(ABC):
         return None
 
     @abstractmethod
-    def extract(self, **kwargs: Any) -> pd.DataFrame:
+    def extract(self, **kwargs: Any) -> pd.DataFrame | Iterable[dict[str, Any]]:
         """Извлекает данные из источника."""
 
     @abstractmethod
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+    def transform(
+        self, data: pd.DataFrame | Iterable[dict[str, Any]]
+    ) -> pd.DataFrame | Iterable[dict[str, Any]]:
         """Преобразует сырые данные."""
 
     # === Concrete Methods ===
@@ -193,6 +196,23 @@ class PipelineBase(ABC):
         self._hooks.append(hook)
 
     # === Internal Methods ===
+
+    def _materialize_records(
+        self, data: pd.DataFrame | Iterable[dict[str, Any]]
+    ) -> pd.DataFrame | list[dict[str, Any]]:
+        if isinstance(data, pd.DataFrame):
+            return data
+        if isinstance(data, list):
+            return data
+        return list(data)
+
+    def _count_records(self, data: pd.DataFrame | list[dict[str, Any]]) -> int:
+        return len(data)
+
+    def _to_dataframe(self, data: pd.DataFrame | Iterable[dict[str, Any]]) -> pd.DataFrame:
+        if isinstance(data, pd.DataFrame):
+            return data
+        return pd.DataFrame(list(data))
 
     def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """

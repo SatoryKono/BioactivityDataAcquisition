@@ -7,6 +7,10 @@ from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
+from bioetl.clients.records.factories import (
+    default_normalization_service,
+    default_record_source,
+)
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_extraction_service,
 )
@@ -62,6 +66,18 @@ class PipelineContainer:
     def get_hash_service(self) -> HashService:
         """Get the hash service."""
         return HashService()
+
+    def get_record_source(self, extraction_service: Any, *, limit: int | None = None) -> Any:
+        """Get record source based on configuration."""
+        return default_record_source(
+            config=self.config,
+            extraction_service=extraction_service,
+            limit=limit,
+        )
+
+    def get_normalization_service(self) -> Any:
+        """Get record-level normalization service."""
+        return default_normalization_service(self.config)
 
 
 def build_pipeline_dependencies(config: PipelineConfig) -> PipelineContainer:

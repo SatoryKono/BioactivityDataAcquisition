@@ -23,6 +23,8 @@ TracerABC: bioetl.infrastructure.logging.contracts.TracerABC
 
 HasherABC: bioetl.domain.transform.contracts.HasherABC
 NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceABC
+RecordSourceABC: bioetl.clients.records.contracts.RecordSourceABC
+RecordNormalizationServiceABC: bioetl.clients.records.contracts.RecordNormalizationServiceABC
 
 ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
 SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC

@@ -43,3 +43,15 @@ MetadataWriterABC:
   implementations:
     Standard: bioetl.infrastructure.output.impl.metadata_writer.MetadataWriterImpl
 
+RecordSourceABC:
+  default_factory: bioetl.clients.records.factories.default_record_source
+  implementations:
+    Csv: bioetl.clients.records.impl.csv_record_source.CsvRecordSourceImpl
+    IdOnlyCsv: bioetl.clients.records.impl.id_only_record_source.IdOnlyRecordSourceImpl
+    ChemblApi: bioetl.clients.records.impl.api_record_source.ChemblApiRecordSourceImpl
+
+RecordNormalizationServiceABC:
+  default_factory: bioetl.clients.records.factories.default_normalization_service
+  implementations:
+    Chembl: bioetl.clients.chembl.impl.chembl_normalization_service.ChemblNormalizationServiceImpl
+
