@@ -1,19 +1,14 @@
-"""
-Dependency Injection Container for the application.
-"""
+"""Dependency Injection Container for the application."""
 from typing import Any
 
+import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
+from bioetl.core.provider_registry import get_provider
+from bioetl.core.providers import ProviderId
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.clients.chembl.factories import (
-    default_chembl_extraction_service,
-)
-from bioetl.infrastructure.config.models import (
-    ChemblSourceConfig,
-    PipelineConfig,
-)
+from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (
@@ -51,13 +46,17 @@ class PipelineContainer:
 
     def get_extraction_service(self) -> Any:
         """Get the extraction service based on provider configuration."""
-        if self.config.provider == "chembl":
-            source_config = self.config.get_source_config("chembl")
-            if not isinstance(source_config, ChemblSourceConfig):
-                raise TypeError("Expected ChemblSourceConfig")
-            return default_chembl_extraction_service(source_config)
+        provider_id = ProviderId(self.config.provider)
+        definition = get_provider(provider_id)
+        source_config = self.config.get_source_config(provider_id)
+        if not isinstance(source_config, definition.config_type):
+            raise TypeError(
+                f"Expected config type {definition.config_type.__name__} for "
+                f"provider '{provider_id.value}'"
+            )
 
-        raise ValueError(f"Unknown provider: {self.config.provider}")
+        client = definition.components.create_client(source_config)
+        return definition.components.create_extraction_service(client, source_config)
 
     def get_hash_service(self) -> HashService:
         """Get the hash service."""
