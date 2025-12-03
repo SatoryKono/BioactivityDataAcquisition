@@ -1,11 +1,10 @@
-checksum: 207ed5b7050bcea656dd5bfba9e5500d67e3b7b81255bc210e14a6db048b2a2b
+checksum: 3557953a91c610cfee6c7499d4763d1ca6ef388d496adf1be3ef88715c4f5723
 chembl_release: ChEMBL_36
 entity: target
 files:
 - target.csv
 hash_version: v1_blake2b_256
-provider: !!python/object/apply:bioetl.domain.providers.ProviderId
-- chembl
+provider: chembl
 row_count: 100
-run_id: 3ac8a4dd-d223-4d88-9506-db96da7739c3
-timestamp: '2025-12-03T18:27:41.878082+00:00'
+run_id: 2e9fbcde-da6d-4e83-98c7-b8f5b2659c30
+timestamp: '2025-12-03T18:56:06.100276+00:00'

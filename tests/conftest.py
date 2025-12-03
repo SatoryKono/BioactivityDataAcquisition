@@ -13,7 +13,6 @@ from bioetl.infrastructure.config.models import (
     PipelineConfig,
     StorageConfig,
 )
-from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 from bioetl.schemas.provider_config_schema import ChemblSourceConfig
@@ -32,6 +31,7 @@ def mock_config():
         output_path="./test_out",
         batch_size=10,
         provider_config=ChemblSourceConfig(
+            # type: ignore[arg-type]
             base_url="https://www.ebi.ac.uk/chembl/api/data",
             timeout_sec=30,
             max_retries=3,
@@ -93,6 +93,7 @@ def pipeline_test_config(
         output_path=str(output_dir),
         batch_size=10,
         provider_config=ChemblSourceConfig(
+            # type: ignore[arg-type]
             base_url="https://www.ebi.ac.uk/chembl/api/data",
             timeout_sec=30,
             max_retries=3,
