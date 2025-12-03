@@ -19,8 +19,8 @@ from pydantic import (
     model_validator,
 )
 
-from bioetl.core.provider_registry import get_provider
-from bioetl.core.providers import BaseProviderConfig, ProviderId
+from bioetl.domain.provider_registry import get_provider
+from bioetl.domain.providers import BaseProviderConfig, ProviderId
 
 
 class PaginationConfig(BaseModel):
