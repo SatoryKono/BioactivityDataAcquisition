@@ -1,9 +1,10 @@
-checksum: 858412ea127a4d3daaa58bc8e224494bf0f91f55f8fa450936fcb4ad58ceb4a2
-chembl_release: chembl_test_v1
+checksum: 07c268fb0b8b6cc44c851b62bcf62afd742ab9b767ec4208950ee653cc59c596
+chembl_release: ChEMBL_36
 entity: assay
 files:
 - assay.csv
+hash_version: v1_blake2b_256
 provider: chembl
-row_count: 10
-run_id: 772beb46-44c1-457b-86e7-894d6e35676c
-timestamp: '2025-12-03T09:03:50.460159+00:00'
+row_count: 100
+run_id: adebc0d6-4e67-4219-ab4a-6b027cbcb773
+timestamp: '2025-12-03T15:55:13.029404+00:00'
