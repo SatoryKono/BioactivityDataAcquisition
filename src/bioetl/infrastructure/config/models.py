@@ -1,5 +1,7 @@
+from pathlib import Path
 from typing import Annotated, Any, Literal, Optional
-from pydantic import BaseModel, Field, PositiveInt, field_validator
+
+from pydantic import BaseModel, Field, PositiveInt, field_validator, model_validator
 
 
 class PaginationConfig(BaseModel):
@@ -113,6 +115,20 @@ SourceConfig = Annotated[
 ]
 
 
+class CsvInputOptions(BaseModel):
+    """Опции CSV-ввода."""
+
+    delimiter: str = ","
+    header: bool = True
+
+    @field_validator("delimiter")
+    @classmethod
+    def validate_delimiter(cls, value: str) -> str:
+        if not value:
+            raise ValueError("CSV delimiter must be a non-empty string")
+        return value
+
+
 class PipelineConfig(BaseModel):
     """
     Полная конфигурация пайплайна.
@@ -120,6 +136,9 @@ class PipelineConfig(BaseModel):
     provider: str
     entity_name: str
     primary_key: Optional[str] = None  # Added to support custom PKs like assay_chembl_id
+    input_mode: Literal["csv", "id_only", "auto_detect"] = "auto_detect"
+    input_path: str | None = None
+    csv_options: CsvInputOptions = Field(default_factory=CsvInputOptions)
 
     # Sections
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
@@ -155,5 +174,66 @@ class PipelineConfig(BaseModel):
 
     # Additional pipeline specific fields
     pipeline: dict[str, Any] = Field(default_factory=dict)
-    cli: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
+    migration_messages: list[str] = Field(
+        default_factory=list, repr=False, exclude=True
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_cli_section(cls, values: dict[str, Any]) -> dict[str, Any]:
+        cli_config = values.pop("cli", None) or {}
+        if not cli_config:
+            return values
+
+        values.setdefault("input_path", cli_config.get("input_file"))
+
+        if "input_mode" not in values:
+            full_dataset_flag = cli_config.get("input_full_dataset")
+            if full_dataset_flag is True:
+                values["input_mode"] = "csv"
+            elif full_dataset_flag is False:
+                values["input_mode"] = "id_only"
+
+        migration_hint = (
+            "Deprecated 'cli' section detected. "
+            "Use top-level input_mode/input_path/csv_options instead."
+        )
+        notes = values.setdefault("migration_messages", [])
+        if migration_hint not in notes:
+            notes.append(migration_hint)
+
+        return values
+
+    @field_validator("input_path")
+    @classmethod
+    def validate_input_path(cls, value: str | None) -> str | None:
+        if value is None or value == "":
+            return None
+        path = Path(value)
+        if not path.exists():
+            raise ValueError(f"Input path does not exist: {value}")
+        return str(path)
+
+    @model_validator(mode="after")
+    def validate_input_mode(self) -> "PipelineConfig":
+        if self.input_mode in {"csv", "id_only"} and not self.input_path:
+            raise ValueError(
+                "input_path must be provided when input_mode is 'csv' or 'id_only'"
+            )
+
+        if self.input_mode == "csv" and not self.csv_options.header:
+            raise ValueError(
+                "csv_options.header must be true when input_mode is 'csv'"
+            )
+
+        if (
+            self.input_mode == "auto_detect"
+            and self.input_path
+            and not self.csv_options.header
+        ):
+            raise ValueError(
+                "csv_options.header must be true when input_mode is 'auto_detect' and input_path is set"
+            )
+
+        return self
