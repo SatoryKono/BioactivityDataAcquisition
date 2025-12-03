@@ -10,7 +10,7 @@ primary_key: document_chembl_id
 sources:
   chembl:
     provider: chembl
-    batch_size: 25
+    batch_size: 5
     base_url: "https://www.ebi.ac.uk/chembl/api/data"
     max_url_length: 2000
 

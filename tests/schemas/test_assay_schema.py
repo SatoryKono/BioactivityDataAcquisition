@@ -59,7 +59,7 @@ def test_assay_schema_invalid_type(valid_assay_data):
     data = valid_assay_data.copy()
     data["assay_type"] = ["INVALID"]
     df = pd.DataFrame(data)
-    
+
     with pytest.raises(pa.errors.SchemaError) as exc:
         AssaySchema.validate(df)
     assert "isin" in str(exc.value)
@@ -70,7 +70,7 @@ def test_assay_schema_invalid_confidence(valid_assay_data):
     data = valid_assay_data.copy()
     data["confidence_score"] = [10]  # max 9
     df = pd.DataFrame(data)
-    
+
     with pytest.raises(pa.errors.SchemaError) as exc:
         AssaySchema.validate(df)
     assert "less_than_or_equal_to" in str(exc.value)
@@ -85,4 +85,3 @@ def test_assay_schema_invalid_chembl_id(valid_assay_data):
     with pytest.raises(pa.errors.SchemaError) as exc:
         AssaySchema.validate(df)
     assert "str_matches" in str(exc.value)
-
