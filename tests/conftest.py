@@ -58,6 +58,7 @@ def mock_validation_service():
     service = MagicMock(spec=ValidationService)
     # Default behavior: return df as is
     service.validate.side_effect = lambda df, **kwargs: df
+    service.get_schema_columns.return_value = []
     return service
 
 

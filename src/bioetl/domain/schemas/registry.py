@@ -1,10 +1,18 @@
 """
 Registry implementation for Pandera schemas.
 """
+from dataclasses import dataclass
 from typing import Type
+
 import pandera.pandas as pa
 
 from bioetl.domain.validation import SchemaProviderABC
+
+
+@dataclass
+class _SchemaEntry:
+    schema: Type[pa.DataFrameModel]
+    column_order: list[str] | None = None
 
 
 class SchemaRegistry(SchemaProviderABC):
@@ -13,17 +21,34 @@ class SchemaRegistry(SchemaProviderABC):
     """
 
     def __init__(self) -> None:
-        self._schemas: dict[str, Type[pa.DataFrameModel]] = {}
+        self._schemas: dict[str, _SchemaEntry] = {}
 
-    def register(self, name: str, schema: Type[pa.DataFrameModel]) -> None:
+    def register(
+        self,
+        name: str,
+        schema: Type[pa.DataFrameModel],
+        *,
+        column_order: list[str] | None = None,
+    ) -> None:
         """Register a schema by name."""
-        self._schemas[name] = schema
+        self._schemas[name] = _SchemaEntry(
+            schema=schema, column_order=column_order
+        )
 
     def get_schema(self, name: str) -> Type[pa.DataFrameModel]:
         """Get schema by name, raises ValueError if not found."""
         if name not in self._schemas:
             raise ValueError(f"Schema for '{name}' not found in registry.")
-        return self._schemas[name]
+        return self._schemas[name].schema
+
+    def get_schema_columns(self, name: str) -> list[str]:
+        """Return column order for schema."""
+        if name not in self._schemas:
+            raise ValueError(f"Schema for '{name}' not found in registry.")
+        entry = self._schemas[name]
+        if entry.column_order:
+            return list(entry.column_order)
+        return list(entry.schema.to_schema().columns.keys())
 
     def list_schemas(self) -> list[str]:
         """Return list of registered schema names."""
