@@ -1,290 +1,36 @@
-"""
-Configuration models for the BioETL application.
-
-This module defines the Pydantic models for various configuration sections,
-including pagination, client settings, storage, logging, and source-specific
-configs.
-"""
+"""Совместимая прослойка для конфигурационных моделей."""
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Annotated, Any, Literal, Optional
-
-from pydantic import (
-    BaseModel,
-    Field,
-    PositiveInt,
-    ValidationError,
-    field_validator,
-    model_validator,
+from bioetl.schemas.pipeline_config_schema import (
+    ClientConfig,
+    CsvInputOptions,
+    DeterminismConfig,
+    HashingConfig,
+    LoggingConfig,
+    NormalizationConfig,
+    PaginationConfig,
+    PipelineConfig,
+    QcConfig,
+    StorageConfig,
+)
+from bioetl.schemas.provider_config_schema import (
+    BaseProviderConfig,
+    ChemblSourceConfig,
+    ProviderConfigUnion,
 )
 
-from bioetl.domain.provider_registry import get_provider
-from bioetl.domain.providers import BaseProviderConfig, ProviderId
-
-
-class PaginationConfig(BaseModel):
-    """
-    Configuration for pagination strategy.
-    """
-    limit: int = 1000
-    offset: int = 0
-    max_pages: Optional[int] = None
-
-
-class ClientConfig(BaseModel):
-    """
-    Configuration for HTTP client behavior.
-    """
-    timeout: float = 30.0
-    max_retries: int = 3
-    rate_limit: float = 10.0
-    backoff_factor: float = 2.0
-    circuit_breaker_threshold: int = 5
-
-
-class StorageConfig(BaseModel):
-    """
-    Configuration for file storage paths.
-    """
-    output_path: str = "./data/output"
-    cache_path: str = "./data/cache"
-    temp_path: str = "./data/temp"
-
-
-class LoggingConfig(BaseModel):
-    """
-    Configuration for logging behavior.
-    """
-    level: str = "INFO"
-    structured: bool = True
-    redact_secrets: bool = True
-
-
-class DeterminismConfig(BaseModel):
-    """
-    Configuration for deterministic output generation.
-    """
-    stable_sort: bool = True
-    utc_timestamps: bool = True
-    canonical_json: bool = True
-    atomic_writes: bool = True
-
-
-class QcConfig(BaseModel):
-    """
-    Configuration for quality control and reporting.
-    """
-    enable_quality_report: bool = True
-    enable_correlation_report: bool = True
-    min_coverage: float = 0.85
-
-
-class HashingConfig(BaseModel):
-    """
-    Configuration for content hashing and deduplication.
-    """
-    business_key_fields: list[str] = Field(default_factory=list)
-
-
-class NormalizationConfig(BaseModel):
-    """
-    Конфигурация нормализации данных.
-    """
-    case_sensitive_fields: list[str] = Field(default_factory=list)
-    id_fields: list[str] = Field(default_factory=list)
-    custom_normalizers: dict[str, str] = Field(default_factory=dict)
-
-
-# =============================================================================
-# Source Configurations (Provider-specific)
-# =============================================================================
-
-
-class SourceConfigBase(BaseProviderConfig):
-    """
-    Базовая конфигурация источника данных.
-    Все провайдер-специфичные конфиги наследуют от неё.
-    """
-    batch_size: Optional[PositiveInt] = None
-
-    def resolve_effective_batch_size(
-        self, limit: int | None = None, hard_cap: int | None = 25
-    ) -> int:
-        """
-        Вычисляет эффективный размер батча.
-
-        Приоритет:
-        1. limit (если задан и меньше hard_cap)
-        2. hard_cap (если задан и limit > hard_cap)
-        3. self.batch_size (если задан)
-        4. hard_cap (как дефолт)
-        """
-        effective_batch = self.batch_size or hard_cap or 25
-
-        if hard_cap is not None:
-            effective_batch = min(effective_batch, hard_cap)
-
-        if limit is not None:
-            effective_batch = min(effective_batch, limit)
-
-        return effective_batch
-
-
-class ChemblSourceConfig(SourceConfigBase):
-    """
-    Конфигурация источника ChEMBL.
-    Все параметры подключения на верхнем уровне (без вложенного 'parameters').
-    """
-    provider: ProviderId = ProviderId.CHEMBL
-    base_url: str = "https://www.ebi.ac.uk/chembl/api/data"
-    max_url_length: PositiveInt = 2000
-
-    @field_validator("base_url")
-    @classmethod
-    def validate_base_url(cls, v: str) -> str:
-        """Ensure base_url doesn't have trailing slash."""
-        return v.rstrip("/")
-
-
-# Union type for discriminated source configs
-# Add more providers here: ChemblSourceConfig | PubChemSourceConfig
-SourceConfig = Annotated[
-    ChemblSourceConfig,
-    Field(discriminator="provider")
+__all__ = [
+    "ClientConfig",
+    "CsvInputOptions",
+    "DeterminismConfig",
+    "HashingConfig",
+    "LoggingConfig",
+    "NormalizationConfig",
+    "PaginationConfig",
+    "PipelineConfig",
+    "QcConfig",
+    "StorageConfig",
+    "BaseProviderConfig",
+    "ChemblSourceConfig",
+    "ProviderConfigUnion",
 ]
-
-
-class CsvInputOptions(BaseModel):
-    """Опции CSV-ввода."""
-
-    delimiter: str = ","
-    header: bool = True
-
-    @field_validator("delimiter")
-    @classmethod
-    def validate_delimiter(cls, value: str) -> str:
-        if not value:
-            raise ValueError("CSV delimiter must be a non-empty string")
-        return value
-
-
-class PipelineConfig(BaseModel):
-    """
-    Полная конфигурация пайплайна.
-    """
-    provider: ProviderId
-    entity_name: str
-    # Added to support custom PKs like assay_chembl_id
-    primary_key: Optional[str] = None
-    input_mode: Literal["csv", "id_only", "auto_detect"] = "auto_detect"
-    input_path: str | None = None
-    csv_options: CsvInputOptions = Field(default_factory=CsvInputOptions)
-
-    # Sections
-    pagination: PaginationConfig = Field(default_factory=PaginationConfig)
-    client: ClientConfig = Field(default_factory=ClientConfig)
-    storage: StorageConfig = Field(default_factory=StorageConfig)
-    logging: LoggingConfig = Field(default_factory=LoggingConfig)
-    determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
-    qc: QcConfig = Field(default_factory=QcConfig)
-    hashing: HashingConfig = Field(default_factory=HashingConfig)
-    normalization: NormalizationConfig = Field(
-        default_factory=NormalizationConfig
-    )
-
-    # Sources configuration - keyed by provider name
-    sources: dict[str, BaseProviderConfig | dict[str, Any]] = Field(
-        default_factory=dict
-    )
-
-    def get_source_config(
-        self, provider: ProviderId | str
-    ) -> BaseProviderConfig:
-        """
-        Get typed source config for provider.
-        Handles both dict and typed config objects.
-        """
-        provider_id = ProviderId(provider)
-        definition = get_provider(provider_id)
-        raw = self.sources.get(provider_id.value, {})
-        if isinstance(raw, BaseProviderConfig):
-            if isinstance(raw, definition.config_type):
-                return raw
-            return definition.config_type.model_validate(raw.model_dump())
-
-        if not isinstance(raw, dict):
-            raise TypeError("Source configuration must be a mapping")
-
-        try:
-            return definition.config_type.model_validate(raw)
-        except ValidationError:
-            # Re-raise to keep pydantic trace for callers
-            raise
-
-    # Additional pipeline specific fields
-    pipeline: dict[str, Any] = Field(default_factory=dict)
-    fields: list[dict[str, Any]] = Field(default_factory=list)
-    migration_messages: list[str] = Field(
-        default_factory=list, repr=False, exclude=True
-    )
-
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_cli_section(cls, values: dict[str, Any]) -> dict[str, Any]:
-        cli_config = values.pop("cli", None) or {}
-        if not cli_config:
-            return values
-
-        values.setdefault("input_path", cli_config.get("input_file"))
-
-        if "input_mode" not in values:
-            full_dataset_flag = cli_config.get("input_full_dataset")
-            if full_dataset_flag is True:
-                values["input_mode"] = "csv"
-            elif full_dataset_flag is False:
-                values["input_mode"] = "id_only"
-
-        migration_hint = (
-            "Deprecated 'cli' section detected. "
-            "Use top-level input_mode/input_path/csv_options instead."
-        )
-        notes = values.setdefault("migration_messages", [])
-        if migration_hint not in notes:
-            notes.append(migration_hint)
-
-        return values
-
-    @field_validator("input_path")
-    @classmethod
-    def validate_input_path(cls, value: str | None) -> str | None:
-        if value is None or value == "":
-            return None
-        path = Path(value)
-        if not path.exists():
-            raise ValueError(f"Input path does not exist: {value}")
-        return str(path)
-
-    @model_validator(mode="after")
-    def validate_input_mode(self) -> "PipelineConfig":
-        # pylint: disable=no-member
-        if self.input_mode in {"csv", "id_only"} and not self.input_path:
-            raise ValueError(
-                "input_path must be provided when input_mode is 'csv' or 'id_only'"
-            )
-
-        if self.input_mode == "csv" and not self.csv_options.header:
-            raise ValueError(
-                "csv_options.header must be true when input_mode is 'csv'"
-            )
-
-        if (
-            self.input_mode == "auto_detect"
-            and self.input_path
-            and not self.csv_options.header
-        ):
-            raise ValueError(
-                "csv_options.header must be true when input_mode is 'auto_detect' and input_path is set"
-            )
-
-        return self

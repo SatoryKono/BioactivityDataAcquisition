@@ -5,11 +5,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
-from bioetl.domain.providers import ProviderId
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
+from bioetl.schemas.provider_config_schema import ChemblSourceConfig
 
 
 class _LoggerStub:
@@ -38,9 +38,19 @@ def test_extract_stage_wraps_client_error(caplog: pytest.LogCaptureFixture, tmp_
     register_chembl_provider()
 
     config = PipelineConfig(
-        provider=ProviderId.CHEMBL,
-        entity_name="activity",
-        sources={"chembl": {}},
+        id="chembl.activity",
+        provider="chembl",
+        entity="activity",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path=str(tmp_path / "out"),
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
     )
 
     extraction_service = MagicMock(spec=ExtractionServiceABC)

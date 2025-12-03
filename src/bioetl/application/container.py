@@ -48,7 +48,7 @@ class PipelineContainer:
         """Get the extraction service based on provider configuration."""
         provider_id = ProviderId(self.config.provider)
         definition = get_provider(provider_id)
-        source_config = self.config.get_source_config(provider_id)
+        source_config = self.config.provider_config
         if not isinstance(source_config, definition.config_type):
             raise TypeError(
                 f"Expected config type {definition.config_type.__name__} for "

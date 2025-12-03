@@ -6,8 +6,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from bioetl.domain.config_loader import load_pipeline_config, load_pipeline_config_from_path
 from bioetl.infrastructure.config.models import PipelineConfig
-from bioetl.infrastructure.config.resolver import ConfigResolver
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY, get_pipeline_class
 
@@ -56,9 +56,8 @@ def validate_config(config_path: Path):
     """
     Validates a configuration file.
     """
-    resolver = ConfigResolver()
     try:
-        config = resolver.resolve(str(config_path))
+        config = load_pipeline_config_from_path(config_path)
         console.print(f"[green]Config {config_path} is valid![/green]")
         console.print(f"Entity: {config.entity_name}")
         console.print(f"Provider: {config.provider}")
@@ -109,17 +108,18 @@ def run(
                 console.print("Please provide --config explicitly.")
                 sys.exit(1)
                 
-        resolver = ConfigResolver()
-        config = resolver.resolve(str(config_path), profile=profile)
-
-        if config.migration_messages:
-            for message in config.migration_messages:
-                console.print(f"[yellow]{message}[/yellow]")
+        try:
+            entity, provider = pipeline_name.rsplit("_", 1)
+        except ValueError:
+            entity = pipeline_name
+            provider = "chembl"
+        pipeline_id = f"{provider}.{entity}"
+        config = load_pipeline_config(pipeline_id, profile=profile)
 
         config_payload = config.model_dump()
 
         if output:
-            config_payload["storage"]["output_path"] = str(output)
+            config_payload["output_path"] = str(output)
 
         if input_path:
             config_payload["input_path"] = str(input_path)
@@ -163,7 +163,7 @@ def run(
             run_kwargs["limit"] = limit
             
         result = pipeline.run(
-            output_path=Path(config.storage.output_path),
+            output_path=Path(config.output_path),
             dry_run=dry_run,
             **run_kwargs
         )
