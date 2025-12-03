@@ -19,34 +19,49 @@ Provides-Extra: dev
 Requires-Dist: types-PyYAML>=6.0; extra == "dev"
 Requires-Dist: mypy>=1.0.0; extra == "dev"
 Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
 Requires-Dist: ruff>=0.1.0; extra == "dev"
 Dynamic: license-file
 
-# Bioactivity Data Acquisition (BioETL)
+# BioactivityDataAcquisition
 
-ETL-фреймворк для извлечения, нормализации и интеграции данных биологической активности из научных REST API (ChEMBL, PubMed, PubChem и др.).
+BioETL is a data processing framework for acquiring, normalizing, and validating bioactivity-related datasets from multiple external sources.
+
+## Правила проекта
+
+Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/00-styleguide/00-rules-summary.md`.
 
 ## Документация
 
-Полная документация доступна в директории `docs/`:
+### Структура документации
 
-- **[Overview](docs/overview/00-index.md)**: Введение, быстрый старт, глоссарий.
-- **[Architecture](docs/architecture/00-index.md)**: Принципы архитектуры, слои, поток данных.
-- **[ABC Reference](docs/reference/abc/00-index.md)**: Каталог интерфейсов.
-- **[Pipelines](docs/02-pipelines/chembl/00-index.md)**: Описание ETL-пайплайнов ChEMBL.
-- **[Guides](docs/guides/00-running-pipelines.md)**: Руководства по запуску и конфигурации.
+| Раздел | Путь | Описание |
+|--------|------|----------|
+| Styleguide | [docs/00-styleguide/](docs/00-styleguide/) | Правила и стайлгайды |
+| ABC Index | [docs/01-ABC/INDEX.md](docs/01-ABC/INDEX.md) | Каталог абстрактных базовых классов |
+| Pipelines | [docs/02-pipelines/INDEX.md](docs/02-pipelines/INDEX.md) | Пайплайны и core-компоненты |
+| CLI | [docs/cli/INDEX.md](docs/cli/INDEX.md) | Командная строка и запуск пайплайнов |
+| Schemas | [docs/schemas/INDEX.md](docs/schemas/INDEX.md) | Реестр схем данных |
+| QC | [docs/qc/INDEX.md](docs/qc/INDEX.md) | Артефакты контроля качества |
+| Clients | [docs/clients/INDEX.md](docs/clients/INDEX.md) | Клиентский слой |
 
-## Быстрый старт
+### Core компоненты
 
-```bash
-# Установка
-pip install -e .
+Документация по базовым компонентам находится в `docs/02-pipelines/`:
 
-# Запуск smoke-теста
-bioetl run activity_chembl --profile development --dry-run
-```
+| # | Документ | Описание |
+|---|----------|----------|
+| 00 | [pipeline-base](docs/02-pipelines/00-pipeline-base.md) | Базовая архитектура пайплайнов |
+| 01 | [base-external-data-client](docs/02-pipelines/01-base-external-data-client.md) | Базовый клиент внешних API (Legacy) |
+| 02 | [logging-and-configuration](docs/02-pipelines/02-logging-and-configuration.md) | Логирование и конфигурация |
+| 03 | [unified-api-client](docs/02-pipelines/03-unified-api-client.md) | Унифицированный API-клиент |
+| 04 | [unified-output-writer](docs/02-pipelines/04-unified-output-writer.md) | Унифицированный writer для записи |
+| 05 | [schema-registry](docs/02-pipelines/05-schema-registry.md) | Реестр схем для валидации |
+| 06 | [validation-service](docs/02-pipelines/06-validation-service.md) | Сервис валидации данных |
+| 07 | [client-architecture](docs/02-pipelines/07-client-architecture.md) | Архитектура клиентского слоя |
 
-## Лицензия
+### Пайплайны по провайдерам
 
-MIT
+- [ChEMBL Pipelines](docs/02-pipelines/chembl/INDEX.md) — Activity, Assay, Target, Document, TestItem
 
+Детальная документация по конкретным пайплайнам и компонентам доступна через соответствующие INDEX.md файлы.

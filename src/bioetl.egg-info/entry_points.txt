@@ -1,2 +1,2 @@
 [console_scripts]
-bioetl = bioetl.cli:app
+bioetl = bioetl.interfaces.cli:app
