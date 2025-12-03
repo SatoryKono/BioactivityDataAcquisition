@@ -157,8 +157,7 @@ class PipelineBase(ABC):
                 run_id=error.run_id,
                 error=str(error.cause) if error.cause else str(error),
             )
-            for hook in self._hooks:
-                hook.on_error(error.stage, error)
+            # Hooks are already notified in _run_stage
             raise
 
     # === Abstract Methods ===

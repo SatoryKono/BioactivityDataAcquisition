@@ -39,7 +39,7 @@ class ChemblEntityPipeline(ChemblPipelineBase):
 
         # Configure entity-specific constants from config
         # pylint: disable=invalid-name
-        
+
         # Priority 1: Explicit field in PipelineConfig
         pk = config.primary_key
 
@@ -53,8 +53,9 @@ class ChemblEntityPipeline(ChemblPipelineBase):
 
         if not pk:
             raise ValueError(
-                f"Could not resolve ID_COLUMN for entity '{config.entity_name}'. "
-                "Please set 'primary_key' in config or pipeline options."
+                f"Could not resolve ID_COLUMN for entity "
+                f"'{config.entity_name}'. Please set 'primary_key' "
+                "in config or pipeline options."
             )
 
         self.ID_COLUMN = pk

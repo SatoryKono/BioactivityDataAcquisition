@@ -22,7 +22,7 @@ from bioetl.domain.validation.service import ValidationService
 def mock_config():
     """Create a mock pipeline configuration."""
     return PipelineConfig(
-        provider="test_provider",
+        provider="chembl",
         entity_name="test_entity",
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path="./test_out"),
@@ -66,11 +66,13 @@ def sample_df():
 
 
 @pytest.fixture
-def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineConfig:
+def pipeline_test_config(
+    tmp_path_factory: pytest.TempPathFactory
+) -> PipelineConfig:
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
-        provider="test_provider",
+        provider="chembl",
         entity_name="test_entity",
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path=str(output_dir)),

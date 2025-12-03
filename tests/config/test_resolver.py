@@ -28,7 +28,7 @@ def test_resolver_extends(tmp_path):
 
     base_profile = profiles_dir / "base.yaml"
     base_profile.write_text(
-        "qc:\n  min_coverage: 0.5\nentity_name: base\nprovider: test_provider",
+        "qc:\n  min_coverage: 0.5\nentity_name: base\nprovider: chembl",
         encoding="utf-8"
     )
 
@@ -72,7 +72,7 @@ def test_resolver_cli_override(tmp_path):
     # Config file
     config_file = tmp_path / "config.yaml"
     config_file.write_text(
-        "entity_name: config_entity\nprovider: test",
+        "entity_name: config_entity\nprovider: chembl",
         encoding="utf-8"
     )
 
@@ -81,7 +81,7 @@ def test_resolver_cli_override(tmp_path):
 
     # CLI profile wins over config file for entity_name
     assert config.entity_name == "prod_entity"
-    assert config.provider == "test"
+    assert config.provider == "chembl"
 
 
 def test_profile_inheritance_recursive(tmp_path):
@@ -94,7 +94,7 @@ def test_profile_inheritance_recursive(tmp_path):
         encoding="utf-8"
     )
     (profiles_dir / "parent.yaml").write_text(
-        "extends: root\nentity_name: parent\nprovider: p",
+        "extends: root\nentity_name: parent\nprovider: chembl",
         encoding="utf-8"
     )
     config_file = tmp_path / "config.yaml"
@@ -104,7 +104,7 @@ def test_profile_inheritance_recursive(tmp_path):
     config = resolver.resolve(str(config_file))
 
     assert config.entity_name == "parent"
-    assert config.provider == "p"
+    assert config.provider == "chembl"
 
 
 def test_circular_dependency(tmp_path):

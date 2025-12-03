@@ -1,3 +1,6 @@
+"""
+Pipeline lifecycle hooks.
+"""
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -36,4 +39,3 @@ class ErrorPolicyABC(ABC):
     @abstractmethod
     def should_retry(self, error: PipelineStageError) -> bool:
         """Проверяет, стоит ли повторять операцию."""
-
