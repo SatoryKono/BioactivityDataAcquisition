@@ -17,7 +17,10 @@ def pipeline():
     config.fields = []
 
     validation_service = MagicMock()
-    validation_service._schema_provider.get_schema.return_value = TestitemSchema
+    validation_service.get_schema.return_value = TestitemSchema
+    validation_service.get_schema_columns.return_value = list(
+        TestitemSchema.to_schema().columns.keys()
+    )
 
     return ChemblTestitemPipeline(
         config=config,
@@ -57,7 +60,7 @@ def test_transform_max_phase(pipeline):
 def test_transform_nested_fields(pipeline):
     # Setup config fields for normalization
     # Treat atc_classifications as ID field to preserve/enforce uppercase
-    pipeline._normalization_service._registry.set_id_fields(["atc_classifications"])
+    pipeline._config.normalization.id_fields = ["atc_classifications"]
     
     pipeline._config.fields = [
         {"name": "atc_classifications", "data_type": "array"},

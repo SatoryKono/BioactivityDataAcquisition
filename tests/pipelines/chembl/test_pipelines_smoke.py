@@ -14,7 +14,8 @@ def common_dependencies():
     config = MagicMock()
     config.entity_name = "test"
     config.provider = "chembl"
-    config.business_key = []
+    config.hashing = MagicMock()
+    config.hashing.business_key_fields = []
 
     return {
         "config": config,

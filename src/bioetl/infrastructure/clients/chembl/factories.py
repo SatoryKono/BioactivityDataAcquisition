@@ -1,12 +1,23 @@
-from typing import Any, Optional
+from typing import Any
 
-from bioetl.infrastructure.clients.base.factories import default_rate_limiter, default_retry_policy
+from bioetl.infrastructure.clients.base.factories import (
+    default_rate_limiter,
+    default_retry_policy,
+)
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblDataClientHTTPImpl
-from bioetl.infrastructure.clients.chembl.request_builder import ChemblRequestBuilder
-from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
-from bioetl.application.pipelines.chembl.extraction import ChemblExtractionService
-from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig, ChemblSourceParameters
+from bioetl.infrastructure.clients.chembl.impl.http_client import (
+    ChemblDataClientHTTPImpl,
+)
+from bioetl.infrastructure.clients.chembl.request_builder import (
+    ChemblRequestBuilder,
+)
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblResponseParser,
+)
+from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
+from bioetl.infrastructure.services.chembl_extraction import (
+    ChemblExtractionService,
+)
 
 
 def _resolve_base_url(options: dict[str, Any], source_config: ChemblSourceConfig) -> str:

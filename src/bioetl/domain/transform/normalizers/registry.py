@@ -46,4 +46,18 @@ CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
 }
 
 
-__all__ = ["CUSTOM_FIELD_NORMALIZERS"]
+def register_normalizer(field_name: str, func: Callable[[Any], Any]) -> None:
+    """Register a custom normalizer for a field."""
+    CUSTOM_FIELD_NORMALIZERS[field_name] = func
+
+
+def get_normalizer(field_name: str) -> Callable[[Any], Any] | None:
+    """Get a custom normalizer for a field if one exists."""
+    return CUSTOM_FIELD_NORMALIZERS.get(field_name)
+
+
+__all__ = [
+    "CUSTOM_FIELD_NORMALIZERS",
+    "register_normalizer",
+    "get_normalizer",
+]

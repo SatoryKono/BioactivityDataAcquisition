@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from pydantic import BaseModel, Field, PositiveInt
 
 
@@ -90,7 +90,7 @@ class PipelineConfig(BaseModel):
     """
     provider: str
     entity_name: str
-    
+
     # Sections
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
     client: ClientConfig = Field(default_factory=ClientConfig)
@@ -99,26 +99,16 @@ class PipelineConfig(BaseModel):
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
     qc: QcConfig = Field(default_factory=QcConfig)
     hashing: HashingConfig = Field(default_factory=HashingConfig)
-    normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
-    
-    # Sources configuration
-    # Use ForwardRef or check resolver logic if circular imports occur.
-    # Here we accept dict or specialized config.
-    # The resolver or post-init logic should handle specific instantiation if needed,
-    # or we use a Union if we can import subclasses without cycles.
-    # Given constraints, we will allow generic access here and specialized validation in resolver.
-    # However, to support Pydantic validation, we'd ideally include types here.
-    # We will assume dynamic loading or generic dict structure at this base level
-    # UNLESS we import source_chembl here. But source_chembl imports models.py (SourceConfig).
-    # So we avoid importing ChemblSourceConfig here to prevent circular import.
-    sources: dict[str, Any] = Field(default_factory=dict)
-    
+    normalization: NormalizationConfig = Field(
+        default_factory=NormalizationConfig
+    )
+
+    # Sources configuration (dict to avoid circular import with ChemblSourceConfig)
+    sources: dict[str, SourceConfig | dict[str, Any]] = Field(
+        default_factory=dict
+    )
+
     # Additional pipeline specific fields
     pipeline: dict[str, Any] = Field(default_factory=dict)
     cli: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
-    
-    # Business key definition
-    # DEPRECATED: Use hashing.business_key_fields instead.
-    # This field is kept for backward compatibility but will be removed in future versions.
-    business_key: list[str] = Field(default_factory=list, description="Deprecated: Use hashing.business_key_fields")

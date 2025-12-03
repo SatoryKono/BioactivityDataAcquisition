@@ -34,8 +34,7 @@ def mock_config(source_config):
     config.normalization = MagicMock()
     config.normalization.rules = {}
     config.hashing = MagicMock()
-    config.hashing.business_key_fields = None
-    config.business_key = ["activity_id"]
+    config.hashing.business_key_fields = ["activity_id"]
     return config
 
 
@@ -43,9 +42,7 @@ def mock_config(source_config):
 def mock_extraction_service():
     service = MagicMock()
     service.extract_all.return_value = pd.DataFrame({"activity_id": [1, 2, 3]})
-    service.client.request_activity.return_value = {
-        "activities": [{"activity_id": 1}]
-    }
+    service.request_batch.return_value = {"activities": [{"activity_id": 1}]}
     return service
 
 
@@ -92,7 +89,7 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     assert len(df) == 2
     assert "standard_value" in df.columns
     mock_extraction_service.extract_all.assert_not_called()
-    mock_extraction_service.client.request_activity.assert_not_called()
+    mock_extraction_service.request_batch.assert_not_called()
 
 
 def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
@@ -115,11 +112,11 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
         df = pipeline.extract()
 
         assert len(df) == 3
-        mock_extraction_service.client.request_activity.assert_called()
-        call_args = mock_extraction_service.client.request_activity.call_args
-        call_kwargs = call_args[1]
-        assert "activity_id__in" in call_kwargs
-        assert "100" in call_kwargs["activity_id__in"]
+        mock_extraction_service.request_batch.assert_called()
+        call_args = mock_extraction_service.request_batch.call_args
+        # request_batch(entity, batch_ids, filter_key)
+        assert call_args[0][0] == "activity"
+        assert "100" in call_args[0][1]
 
 
 def test_extract_batch_size_from_config(
@@ -143,12 +140,13 @@ def test_extract_batch_size_from_config(
         pipeline.extract()
 
         # Expect 3 calls: [1,2], [3,4], [5]
-        assert mock_extraction_service.client.request_activity.call_count == 3
+        assert mock_extraction_service.request_batch.call_count == 3
 
-        calls = mock_extraction_service.client.request_activity.call_args_list
-        assert calls[0][1]["activity_id__in"] == "1,2"
-        assert calls[1][1]["activity_id__in"] == "3,4"
-        assert calls[2][1]["activity_id__in"] == "5"
+        calls = mock_extraction_service.request_batch.call_args_list
+        # request_batch(entity, batch_ids, filter_key)
+        assert calls[0][0][1] == ["1", "2"]
+        assert calls[1][0][1] == ["3", "4"]
+        assert calls[2][0][1] == ["5"]
 
 
 def test_extract_missing_column(pipeline, tmp_path):

@@ -8,15 +8,13 @@ import pandas as pd
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.config.models import DeterminismConfig
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
+from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.contracts import (
     MetadataWriterABC,
     WriterABC,
     WriteResult,
 )
-from bioetl.infrastructure.output.services.metadata_builder import (
-    MetadataBuilder,
-)
-from bioetl.infrastructure.services.checksum import ChecksumService
+from bioetl.infrastructure.output.metadata import build_run_metadata
 
 
 class UnifiedOutputWriter:
@@ -34,16 +32,12 @@ class UnifiedOutputWriter:
         writer: WriterABC,
         metadata_writer: MetadataWriterABC,
         config: DeterminismConfig,
-        checksum_service: ChecksumService | None = None,
         atomic_op: AtomicFileOperation | None = None,
-        metadata_builder: MetadataBuilder | None = None,
     ) -> None:
         self._writer = writer
         self._metadata_writer = metadata_writer
         self._config = config
-        self._checksum_service = checksum_service or ChecksumService()
         self._atomic_op = atomic_op or AtomicFileOperation()
-        self._metadata_builder = metadata_builder or MetadataBuilder()
 
     def write_result(
         self,
@@ -74,7 +68,7 @@ class UnifiedOutputWriter:
             raise RuntimeError("Inner writer did not return result")
 
         # 3. Вычисление checksum (после записи)
-        checksum = self._checksum_service.compute_sha256(data_path)
+        checksum = compute_file_sha256(data_path)
 
         final_result = WriteResult(
             path=data_path,
@@ -84,7 +78,7 @@ class UnifiedOutputWriter:
         )
 
         # 4. Запись метаданных
-        meta = self._metadata_builder.build(run_context, final_result)
+        meta = build_run_metadata(run_context, final_result)
         self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
 
         # 5. QC-отчеты (placeholder for future implementation)
@@ -109,10 +103,6 @@ class UnifiedOutputWriter:
         else:
             # Should be dict if model_dump() was used, but being safe
             keys = getattr(hashing_config, "business_key_fields", None)
-
-        # Fallback to legacy business_key
-        if not keys:
-            keys = context.config.get("business_key")
 
         if keys:
             # Only sort by keys that exist in dataframe

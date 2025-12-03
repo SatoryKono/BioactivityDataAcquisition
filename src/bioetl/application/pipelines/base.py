@@ -9,11 +9,13 @@ import pandas as pd
 
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.application.pipelines.hooks import PipelineHookABC
-from bioetl.domain.models import RunContext, RunResult
-from bioetl.application.pipelines.stages import StageResult
+from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.contracts import WriteResult
-from bioetl.infrastructure.output.services.metadata_builder import MetadataBuilder
+from bioetl.infrastructure.output.metadata import (
+    build_dry_run_metadata,
+    build_run_metadata,
+)
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
 
@@ -36,7 +38,6 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         output_writer: "UnifiedOutputWriter",
         hash_service: HashService | None = None,
-        metadata_builder: MetadataBuilder | None = None,
     ) -> None:
         self._config = config
         self._logger = logger.bind(
@@ -46,7 +47,6 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
-        self._metadata_builder = metadata_builder or MetadataBuilder()
         self._clients: dict[str, Any] = {}
         self._hooks: list[PipelineHookABC] = []
         self._stage_starts: dict[str, datetime] = {}
@@ -116,9 +116,9 @@ class PipelineBase(ABC):
 
             # Build metadata
             if write_result:
-                meta = self._metadata_builder.build(context, write_result)
+                meta = build_run_metadata(context, write_result)
             else:
-                meta = self._metadata_builder.build_dry_run(
+                meta = build_dry_run_metadata(
                     context, len(df_validated)
                 )
 
@@ -190,7 +190,7 @@ class PipelineBase(ABC):
 
     def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Добавляет столбцы с хешами строк и бизнес-ключей."""
-        keys = self._config.hashing.business_key_fields or self._config.business_key
+        keys = self._config.hashing.business_key_fields
         return self._hash_service.add_hash_columns(
             df,
             business_key_cols=keys

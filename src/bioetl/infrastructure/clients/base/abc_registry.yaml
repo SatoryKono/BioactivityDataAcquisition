@@ -21,12 +21,8 @@ LoggerAdapterABC: bioetl.infrastructure.logging.contracts.LoggerAdapterABC
 ProgressReporterABC: bioetl.infrastructure.logging.contracts.ProgressReporterABC
 TracerABC: bioetl.infrastructure.logging.contracts.TracerABC
 
-TransformerABC: bioetl.domain.transform.contracts.TransformerABC
-LookupEnricherABC: bioetl.domain.transform.contracts.LookupEnricherABC
-BusinessKeyDeriverABC: bioetl.domain.transform.contracts.BusinessKeyDeriverABC
-DeduplicatorABC: bioetl.domain.transform.contracts.DeduplicatorABC
-MergeStrategyABC: bioetl.domain.transform.contracts.MergeStrategyABC
 HasherABC: bioetl.domain.transform.contracts.HasherABC
+NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceABC
 
 ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
 SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC

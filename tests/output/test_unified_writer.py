@@ -3,7 +3,7 @@ Tests for the UnifiedOutputWriter.
 """
 # pylint: disable=redefined-outer-name, protected-access
 from datetime import datetime, timezone
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
@@ -34,12 +34,6 @@ def mock_config_fixture():
 
 
 @pytest.fixture
-def mock_checksum_service():
-    """Fixture for mock checksum service."""
-    return MagicMock()
-
-
-@pytest.fixture
 def mock_atomic_op():
     """Fixture for mock atomic operation."""
     op = MagicMock()
@@ -56,7 +50,6 @@ def unified_writer(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
     mock_config_fixture,
-    mock_checksum_service,
     mock_atomic_op,
 ):
     """Fixture for unified writer."""
@@ -64,7 +57,6 @@ def unified_writer(
         mock_writer_fixture,
         mock_metadata_writer_fixture,
         mock_config_fixture,
-        checksum_service=mock_checksum_service,
         atomic_op=mock_atomic_op,
     )
 
@@ -75,6 +67,7 @@ def run_context():
     return RunContext(
         run_id="test-run",
         entity_name="test_entity",
+        provider="chembl",
         started_at=datetime.now(timezone.utc)
     )
 
@@ -84,8 +77,7 @@ def test_write_result_success(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
     run_context,
-    tmp_path,
-    mock_checksum_service
+    tmp_path
 ):
     """Test successful write result handling."""
     # Arrange
@@ -104,24 +96,27 @@ def test_write_result_success(
         )
 
     mock_writer_fixture.write.side_effect = create_file
-    mock_checksum_service.compute_sha256.return_value = "real_checksum"
+    
+    # Patch checksum function
+    with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256") as mock_checksum:
+        mock_checksum.return_value = "real_checksum"
 
-    # Act
-    result = unified_writer.write_result(
-        df,
-        output_dir,
-        "test_entity",
-        run_context
-    )
+        # Act
+        result = unified_writer.write_result(
+            df,
+            output_dir,
+            "test_entity",
+            run_context
+        )
 
-    # Assert
-    assert result.row_count == 2
-    assert result.checksum == "real_checksum"
+        # Assert
+        assert result.row_count == 2
+        assert result.checksum == "real_checksum"
 
-    # Verify calls
-    mock_writer_fixture.write.assert_called_once()
-    mock_metadata_writer_fixture.write_meta.assert_called_once()
-    mock_checksum_service.compute_sha256.assert_called_once()
+        # Verify calls
+        mock_writer_fixture.write.assert_called_once()
+        mock_metadata_writer_fixture.write_meta.assert_called_once()
+        mock_checksum.assert_called_once()
 
 
 def test_unified_writer_delegates_atomicity(
@@ -142,20 +137,23 @@ def test_unified_writer_delegates_atomicity(
         checksum="abc",
         duration_sec=0.1
     )
+    
+    with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256") as mock_checksum:
+        mock_checksum.return_value = "abc"
 
-    # Act
-    unified_writer.write_result(
-        df,
-        output_dir,
-        "test_entity",
-        run_context
-    )
+        # Act
+        unified_writer.write_result(
+            df,
+            output_dir,
+            "test_entity",
+            run_context
+        )
 
-    # Assert
-    mock_atomic_op.write_atomic.assert_called_once()
-    # Verify that the first argument to write_atomic is the correct path
-    args, _ = mock_atomic_op.write_atomic.call_args
-    assert args[0] == output_dir / "test_entity.csv"
+        # Assert
+        mock_atomic_op.write_atomic.assert_called_once()
+        # Verify that the first argument to write_atomic is the correct path
+        args, _ = mock_atomic_op.write_atomic.call_args
+        assert args[0] == output_dir / "test_entity.csv"
 
 
 def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):

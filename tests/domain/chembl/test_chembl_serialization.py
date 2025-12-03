@@ -36,3 +36,4 @@ def test_activity_model_keeps_none_for_empty_nested():
 
     assert payload["activity_properties"] is None
     assert payload["ligand_efficiency"] is None
+

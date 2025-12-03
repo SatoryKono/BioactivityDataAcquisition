@@ -17,7 +17,10 @@ def pipeline():
     config.fields = []
 
     validation_service = MagicMock()
-    validation_service._schema_provider.get_schema.return_value = ActivitySchema
+    validation_service.get_schema.return_value = ActivitySchema
+    validation_service.get_schema_columns.return_value = list(
+        ActivitySchema.to_schema().columns.keys()
+    )
 
     return ChemblActivityPipeline(
         config=config,

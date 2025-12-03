@@ -27,12 +27,13 @@ class ConcreteChemblPipeline(ChemblPipelineBase):
 @pytest.fixture
 def mock_dependencies_fixture():
     """Fixture for pipeline dependencies."""
+    config = MagicMock()
+    config.entity_name = "test"
+    config.provider = "chembl"
+    config.hashing = MagicMock()
+    config.hashing.business_key_fields = []
     return {
-        "config": MagicMock(
-            entity_name="test",
-            provider="chembl",
-            business_key=[]
-        ),
+        "config": config,
         "logger": MagicMock(),
         "validation_service": MagicMock(),
         "output_writer": MagicMock(),

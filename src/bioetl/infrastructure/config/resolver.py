@@ -3,7 +3,7 @@ from typing import Any
 
 import yaml
 
-from bioetl.core.utils.merge import deep_merge
+from bioetl.domain.transform.merge import deep_merge
 from bioetl.infrastructure.config.models import PipelineConfig
 
 

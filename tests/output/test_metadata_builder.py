@@ -8,15 +8,10 @@ import pytest
 
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.output.contracts import WriteResult
-from bioetl.infrastructure.output.services.metadata_builder import (
-    MetadataBuilder,
+from bioetl.infrastructure.output.metadata import (
+    build_dry_run_metadata,
+    build_run_metadata,
 )
-
-
-@pytest.fixture
-def metadata_builder():
-    """Fixture for MetadataBuilder."""
-    return MetadataBuilder()
 
 
 @pytest.fixture
@@ -31,7 +26,7 @@ def run_context():
     )
 
 
-def test_build_metadata(metadata_builder, run_context):
+def test_build_metadata(run_context):
     """Test building metadata from WriteResult."""
     write_result = WriteResult(
         path=Path("/tmp/out/test.csv"),
@@ -40,7 +35,7 @@ def test_build_metadata(metadata_builder, run_context):
         checksum="abc123hash"
     )
 
-    meta = metadata_builder.build(run_context, write_result)
+    meta = build_run_metadata(run_context, write_result)
 
     assert meta["run_id"] == "test-run-123"
     assert meta["entity"] == "test_entity"
@@ -52,9 +47,9 @@ def test_build_metadata(metadata_builder, run_context):
     assert meta["extra_key"] == "extra_value"
 
 
-def test_build_dry_run_metadata(metadata_builder, run_context):
+def test_build_dry_run_metadata(run_context):
     """Test building metadata for dry run."""
-    meta = metadata_builder.build_dry_run(run_context, row_count=50)
+    meta = build_dry_run_metadata(run_context, row_count=50)
 
     assert meta["run_id"] == "test-run-123"
     assert meta["entity"] == "test_entity"
