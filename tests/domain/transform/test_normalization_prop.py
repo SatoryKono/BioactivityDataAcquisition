@@ -1,6 +1,9 @@
 """
 Property-based tests for normalization.
 """
+import pytest
+
+pytest.importorskip("hypothesis")
 from hypothesis import given, strategies as st
 import pandas as pd
 
