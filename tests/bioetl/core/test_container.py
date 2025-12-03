@@ -8,11 +8,17 @@ from pydantic import ValidationError
 
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args: None))
 
-from bioetl.application.container import PipelineContainer
-from bioetl.core.provider_registry import ProviderNotRegisteredError, list_providers, restore_provider_registry
-from bioetl.core.providers import ProviderId
-from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.application.container import PipelineContainer  # noqa: E402
+from bioetl.core.provider_registry import (  # noqa: E402
+    ProviderNotRegisteredError,
+    list_providers,
+    restore_provider_registry,
+)
+from bioetl.core.providers import ProviderId  # noqa: E402
+from bioetl.infrastructure.clients.chembl.provider import (  # noqa: E402
+    register_chembl_provider,
+)
+from bioetl.infrastructure.config.models import PipelineConfig  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
@@ -25,19 +31,29 @@ def _restore_registry() -> None:
 def test_get_extraction_service_for_chembl() -> None:
     register_chembl_provider()
     container = PipelineContainer(
-        PipelineConfig(provider=ProviderId.CHEMBL, entity_name="activity", sources={})
+        PipelineConfig(
+            provider=ProviderId.CHEMBL,
+            entity_name="activity",
+            sources={},
+        )
     )
 
     service = container.get_extraction_service()
 
-    from bioetl.application.services.chembl_extraction import ChemblExtractionService
+    from bioetl.application.services.chembl_extraction import (
+        ChemblExtractionService,
+    )
 
     assert isinstance(service, ChemblExtractionService)
 
 
 def test_unknown_provider_raises() -> None:
     container = PipelineContainer(
-        PipelineConfig(provider=ProviderId.PUBCHEM, entity_name="compound", sources={})
+        PipelineConfig(
+            provider=ProviderId.PUBCHEM,
+            entity_name="compound",
+            sources={},
+        )
     )
 
     with pytest.raises(ProviderNotRegisteredError):
