@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\config\models.py
+# hypothesis_version: 6.140.3
+
+[0.85, 2.0, 10.0, 30.0, 1000, 2000, ',', './data/cache', './data/output', './data/temp', '/', 'INFO', 'PipelineConfig', 'after', 'auto_detect', 'base_url', 'before', 'cli', 'csv', 'delimiter', 'id_only', 'input_file', 'input_full_dataset', 'input_mode', 'input_path', 'migration_messages', 'provider']
