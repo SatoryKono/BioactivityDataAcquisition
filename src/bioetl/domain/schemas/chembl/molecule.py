@@ -3,6 +3,7 @@ import pandera as pa
 from pandera.typing import Series
 
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
+from bioetl.domain.validation import OutputSchemaDescriptor
 
 
 class MoleculeSchema(pa.DataFrameModel):
@@ -127,4 +128,52 @@ class MoleculeSchema(pa.DataFrameModel):
         """Pandera configuration."""
         strict = True
         coerce = True
+
+
+OUTPUT_COLUMN_ORDER = [
+    "atc_classifications",
+    "availability_type",
+    "black_box_warning",
+    "chemical_probe",
+    "chirality",
+    "cross_references",
+    "dosed_ingredient",
+    "first_approval",
+    "first_in_class",
+    "helm_notation",
+    "inorganic_flag",
+    "max_phase",
+    "molecule_chembl_id",
+    "molecule_hierarchy",
+    "molecule_properties",
+    "molecule_structures",
+    "molecule_synonyms",
+    "molecule_type",
+    "natural_product",
+    "oral",
+    "orphan",
+    "parenteral",
+    "polymer_flag",
+    "pref_name",
+    "prodrug",
+    "structure_type",
+    "therapeutic_flag",
+    "topical",
+    "usan_stem",
+    "usan_stem_definition",
+    "usan_substem",
+    "usan_year",
+    "veterinary",
+    "withdrawn_flag",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
+]
+
+MoleculeOutputSchema = OutputSchemaDescriptor(
+    schema=MoleculeSchema,
+    column_order=OUTPUT_COLUMN_ORDER,
+)
 

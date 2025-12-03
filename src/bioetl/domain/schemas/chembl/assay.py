@@ -1,6 +1,8 @@
 import pandera as pa
 from pandera.typing import Series
 
+from bioetl.domain.validation import OutputSchemaDescriptor
+
 
 class AssaySchema(pa.DataFrameModel):
     aidx: Series[str] = pa.Field(nullable=True, description="Внутренний индекс ассая/ID депозитора")
@@ -44,3 +46,47 @@ class AssaySchema(pa.DataFrameModel):
     class Config:
         strict = True
         coerce = True
+
+
+OUTPUT_COLUMN_ORDER = [
+    "aidx",
+    "assay_category",
+    "assay_cell_type",
+    "assay_chembl_id",
+    "assay_classifications",
+    "assay_group",
+    "assay_organism",
+    "assay_parameters",
+    "assay_strain",
+    "assay_subcellular_fraction",
+    "assay_tax_id",
+    "assay_test_type",
+    "assay_tissue",
+    "assay_type",
+    "assay_type_description",
+    "bao_format",
+    "bao_label",
+    "cell_chembl_id",
+    "confidence_description",
+    "confidence_score",
+    "description",
+    "document_chembl_id",
+    "relationship_description",
+    "relationship_type",
+    "score",
+    "src_assay_id",
+    "src_id",
+    "target_chembl_id",
+    "tissue_chembl_id",
+    "variant_sequence",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
+]
+
+AssayOutputSchema = OutputSchemaDescriptor(
+    schema=AssaySchema,
+    column_order=OUTPUT_COLUMN_ORDER,
+)

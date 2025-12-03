@@ -6,6 +6,7 @@ from bioetl.domain.transform.normalizers import (
     CHEMBL_ID_REGEX,
     UNIPROT_ID_REGEX,
 )
+from bioetl.domain.validation import OutputSchemaDescriptor
 
 
 class TargetSchema(pa.DataFrameModel):
@@ -59,3 +60,27 @@ class TargetSchema(pa.DataFrameModel):
 
         strict = True
         coerce = True
+
+
+OUTPUT_COLUMN_ORDER = [
+    "target_chembl_id",
+    "pref_name",
+    "score",
+    "organism",
+    "target_type",
+    "tax_id",
+    "species_group_flag",
+    "target_components",
+    "cross_references",
+    "uniprot_id",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
+]
+
+TargetOutputSchema = OutputSchemaDescriptor(
+    schema=TargetSchema,
+    column_order=OUTPUT_COLUMN_ORDER,
+)

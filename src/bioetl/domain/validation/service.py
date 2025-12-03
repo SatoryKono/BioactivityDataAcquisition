@@ -3,7 +3,10 @@ from typing import Type
 import pandas as pd
 import pandera.pandas as pa
 
-from bioetl.domain.validation.contracts import SchemaProviderABC
+from bioetl.domain.validation.contracts import (
+    OutputSchemaDescriptor,
+    SchemaProviderABC,
+)
 
 
 class ValidationService:
@@ -22,6 +25,12 @@ class ValidationService:
         """Get ordered list of column names for entity schema."""
         schema_cls = self._schema_provider.get_schema(entity_name)
         return list(schema_cls.to_schema().columns.keys())
+
+    def get_output_descriptor(
+        self, entity_name: str
+    ) -> OutputSchemaDescriptor | None:
+        """Возвращает дескриптор выходной схемы, если он зарегистрирован."""
+        return self._schema_provider.get_output_descriptor(entity_name)
 
     def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
         """

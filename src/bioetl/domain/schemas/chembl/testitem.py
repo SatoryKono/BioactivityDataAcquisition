@@ -3,6 +3,7 @@ import pandera as pa
 from pandera.typing import Series
 
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
+from bioetl.domain.validation import OutputSchemaDescriptor
 
 
 class TestitemSchema(pa.DataFrameModel):
@@ -71,3 +72,30 @@ class TestitemSchema(pa.DataFrameModel):
 
         strict = True
         coerce = True
+
+
+OUTPUT_COLUMN_ORDER = [
+    "molecule_chembl_id",
+    "pref_name",
+    "molecule_type",
+    "max_phase",
+    "structure_type",
+    "molecule_properties",
+    "molecule_structures",
+    "molecule_hierarchy",
+    "atc_classifications",
+    "molecule_synonyms",
+    "cross_references",
+    "pubchem_cid",
+    "helm_notation",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
+]
+
+TestitemOutputSchema = OutputSchemaDescriptor(
+    schema=TestitemSchema,
+    column_order=OUTPUT_COLUMN_ORDER,
+)

@@ -4,6 +4,8 @@ Activity Schema (Pandera).
 import pandera as pa
 from pandera.typing import Series
 
+from bioetl.domain.validation import OutputSchemaDescriptor
+
 
 class ActivitySchema(pa.DataFrameModel):
     """Схема данных для таблицы Activity."""
@@ -65,3 +67,63 @@ class ActivitySchema(pa.DataFrameModel):
     class Config:
         strict = True
         coerce = True
+
+
+OUTPUT_COLUMN_ORDER = [
+    "action_type",
+    "activity_comment",
+    "activity_id",
+    "activity_properties",
+    "assay_chembl_id",
+    "assay_description",
+    "assay_type",
+    "assay_variant_accession",
+    "assay_variant_mutation",
+    "bao_endpoint",
+    "bao_format",
+    "bao_label",
+    "canonical_smiles",
+    "data_validity_comment",
+    "data_validity_description",
+    "document_chembl_id",
+    "document_journal",
+    "document_year",
+    "ligand_efficiency",
+    "molecule_chembl_id",
+    "molecule_pref_name",
+    "parent_molecule_chembl_id",
+    "pchembl_value",
+    "potential_duplicate",
+    "qudt_units",
+    "record_id",
+    "relation",
+    "src_id",
+    "standard_flag",
+    "standard_relation",
+    "standard_text_value",
+    "standard_type",
+    "standard_units",
+    "standard_upper_value",
+    "standard_value",
+    "target_chembl_id",
+    "target_organism",
+    "target_pref_name",
+    "target_tax_id",
+    "text_value",
+    "toid",
+    "type",
+    "units",
+    "uo_units",
+    "upper_value",
+    "value",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
+]
+
+ActivityOutputSchema = OutputSchemaDescriptor(
+    schema=ActivitySchema,
+    column_order=OUTPUT_COLUMN_ORDER,
+)

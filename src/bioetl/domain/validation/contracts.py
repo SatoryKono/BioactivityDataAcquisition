@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
@@ -43,3 +45,23 @@ class SchemaProviderABC(ABC):
     @abstractmethod
     def register(self, name: str, schema: type[pa.DataFrameModel]) -> None:
         """Регистрирует новую схему."""
+
+    @abstractmethod
+    def register_output_descriptor(
+        self, name: str, descriptor: "OutputSchemaDescriptor"
+    ) -> None:
+        """Регистрирует дескриптор выходной схемы."""
+
+    @abstractmethod
+    def get_output_descriptor(
+        self, name: str
+    ) -> "OutputSchemaDescriptor" | None:
+        """Возвращает дескриптор выходной схемы, если он зарегистрирован."""
+
+
+@dataclass
+class OutputSchemaDescriptor:
+    """Описывает выходной порядок и подмножество колонок."""
+
+    schema: type[pa.DataFrameModel]
+    column_order: list[str]

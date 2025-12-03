@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from bioetl.domain.models import RunContext
+from bioetl.domain.validation import SchemaProviderABC
 from bioetl.infrastructure.config.models import DeterminismConfig
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_file_sha256
@@ -32,11 +33,13 @@ class UnifiedOutputWriter:
         writer: WriterABC,
         metadata_writer: MetadataWriterABC,
         config: DeterminismConfig,
+        schema_provider: SchemaProviderABC | None = None,
         atomic_op: AtomicFileOperation | None = None,
     ) -> None:
         self._writer = writer
         self._metadata_writer = metadata_writer
         self._config = config
+        self._schema_provider = schema_provider
         self._atomic_op = atomic_op or AtomicFileOperation()
 
     def write_result(
@@ -92,10 +95,11 @@ class UnifiedOutputWriter:
         if not self._config.stable_sort:
             return df
 
-        # 1. Sort columns
-        df = df.reindex(sorted(df.columns), axis=1)
+        df, schema_applied = self._apply_output_schema(df, context)
+        if not schema_applied:
+            df = df.reindex(sorted(df.columns), axis=1)
 
-        # 2. Sort rows by business key if configured
+        # Sort rows by business key if configured
         hashing_config = context.config.get("hashing", {})
         # Handle Pydantic model dump or dict
         if isinstance(hashing_config, dict):
@@ -111,3 +115,28 @@ class UnifiedOutputWriter:
                 df = df.sort_values(by=valid_keys, ignore_index=True)
 
         return df
+
+    def _apply_output_schema(
+        self, df: pd.DataFrame, context: RunContext
+    ) -> tuple[pd.DataFrame, bool]:
+        descriptor = None
+        if self._schema_provider:
+            descriptor = self._schema_provider.get_output_descriptor(
+                context.entity_name
+            )
+
+        if descriptor is None:
+            return df, False
+
+        missing_columns = [
+            column for column in descriptor.column_order if column not in df.columns
+        ]
+        if missing_columns:
+            missing_str = ", ".join(sorted(missing_columns))
+            raise ValueError(
+                "Missing required columns for output schema "
+                f"'{context.entity_name}': {missing_str}"
+            )
+
+        ordered_df = df.loc[:, descriptor.column_order]
+        return ordered_df, True

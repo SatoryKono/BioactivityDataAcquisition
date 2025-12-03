@@ -46,6 +46,7 @@ class PipelineContainer:
             writer=default_writer(),
             metadata_writer=default_metadata_writer(),
             config=self.config.determinism,
+            schema_provider=self._schema_registry,
         )
 
     def get_normalization_service(self) -> NormalizationService:
