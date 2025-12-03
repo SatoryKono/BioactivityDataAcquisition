@@ -85,6 +85,9 @@ def load_pipeline_config_from_path(
         merged_config = deep_merge(merged_config, profile_overrides)
 
     _validate_provider(merged_config, path)
+    
+    # Transform legacy config format to new format
+    merged_config = _transform_legacy_config(merged_config, path)
 
     try:
         return PipelineConfig.model_validate(merged_config)
@@ -98,6 +101,76 @@ def _validate_provider(config: dict[str, Any], path: Path) -> None:
         raise ConfigValidationError(path, "'provider' field is required")
     if provider not in SUPPORTED_PROVIDERS:
         raise UnknownProviderError(str(provider))
+
+
+def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, Any]:
+    """Преобразует старый формат конфигурации в новый."""
+    transformed = config.copy()
+    
+    provider = transformed.get("provider", "chembl")
+    
+    # Transform entity_name -> entity
+    if "entity_name" in transformed and "entity" not in transformed:
+        transformed["entity"] = transformed.pop("entity_name")
+    
+    # Generate id if missing
+    if "id" not in transformed:
+        entity = transformed.get("entity", transformed.get("entity_name", "unknown"))
+        transformed["id"] = f"{provider}.{entity}"
+    
+    # Transform sources.chembl -> provider_config
+    if "sources" in transformed and "provider_config" not in transformed:
+        sources = transformed.pop("sources", {})
+        chembl_source = sources.get("chembl", {})
+        
+        # Get api_base_url from config or profile
+        api_base_url = chembl_source.get("base_url") or transformed.pop("api_base_url", None)
+        if not api_base_url:
+            # Try to get from profile defaults
+            api_base_url = "https://www.ebi.ac.uk/chembl/api/data"
+        
+        # Build provider_config
+        provider_config = {
+            "provider": provider,
+            "base_url": api_base_url,
+            "timeout_sec": transformed.get("client", {}).get("timeout", 30.0),
+            "max_retries": transformed.get("client", {}).get("max_retries", 3),
+            "rate_limit_per_sec": transformed.get("client", {}).get("rate_limit", 10.0),
+        }
+        
+        # Add ChEMBL-specific fields
+        if "max_url_length" in chembl_source:
+            provider_config["max_url_length"] = chembl_source["max_url_length"]
+        if "batch_size" in chembl_source:
+            provider_config["batch_size"] = chembl_source["batch_size"]
+        
+        transformed["provider_config"] = provider_config
+    
+    # Extract batch_size to top level if in provider_config
+    if "provider_config" in transformed and "batch_size" not in transformed:
+        provider_cfg = transformed["provider_config"]
+        if isinstance(provider_cfg, dict) and "batch_size" in provider_cfg:
+            transformed["batch_size"] = provider_cfg["batch_size"]
+    
+    # Set default batch_size if missing
+    if "batch_size" not in transformed:
+        transformed["batch_size"] = 20
+    
+    # Extract output_path from storage if missing
+    if "output_path" not in transformed:
+        storage = transformed.get("storage", {})
+        if isinstance(storage, dict) and "output_path" in storage:
+            transformed["output_path"] = storage["output_path"]
+        else:
+            entity = transformed.get("entity", "unknown")
+            transformed["output_path"] = f"./data/output/{entity}"
+    
+    # Remove legacy fields that are not in schema
+    legacy_fields = ["endpoint", "api_base_url", "sources"]
+    for field in legacy_fields:
+        transformed.pop(field, None)
+    
+    return transformed
 
 
 _def_profile_cache: dict[str, dict[str, Any]] = {}
