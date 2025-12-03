@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 from typing import Literal, Optional
@@ -19,6 +20,10 @@ app = typer.Typer(
 console = Console()
 
 
+def _get_config_base_dir() -> Path:
+    return Path(os.environ.get("BIOETL_CONFIG_DIR", "configs"))
+
+
 def _resolve_config_path(pipeline_name: str) -> Path:
     """
     Resolves the default configuration path for a pipeline.
@@ -32,7 +37,7 @@ def _resolve_config_path(pipeline_name: str) -> Path:
         provider = "chembl"
     
     # Standard path: configs/pipelines/{provider}/{entity}.yaml
-    path = Path("configs/pipelines") / provider / f"{entity}.yaml"
+    path = _get_config_base_dir() / "pipelines" / provider / f"{entity}.yaml"
     return path
 
 
