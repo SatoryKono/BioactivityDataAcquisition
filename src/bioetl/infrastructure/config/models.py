@@ -1,14 +1,27 @@
+"""
+Configuration models for the BioETL application.
+
+This module defines the Pydantic models for various configuration sections,
+including pagination, client settings, storage, logging, and source-specific
+configs.
+"""
 from typing import Annotated, Any, Literal, Optional
 from pydantic import BaseModel, Field, PositiveInt, field_validator
 
 
 class PaginationConfig(BaseModel):
+    """
+    Configuration for pagination strategy.
+    """
     limit: int = 1000
     offset: int = 0
     max_pages: Optional[int] = None
 
 
 class ClientConfig(BaseModel):
+    """
+    Configuration for HTTP client behavior.
+    """
     timeout: float = 30.0
     max_retries: int = 3
     rate_limit: float = 10.0
@@ -17,18 +30,27 @@ class ClientConfig(BaseModel):
 
 
 class StorageConfig(BaseModel):
+    """
+    Configuration for file storage paths.
+    """
     output_path: str = "./data/output"
     cache_path: str = "./data/cache"
     temp_path: str = "./data/temp"
 
 
 class LoggingConfig(BaseModel):
+    """
+    Configuration for logging behavior.
+    """
     level: str = "INFO"
     structured: bool = True
     redact_secrets: bool = True
 
 
 class DeterminismConfig(BaseModel):
+    """
+    Configuration for deterministic output generation.
+    """
     stable_sort: bool = True
     utc_timestamps: bool = True
     canonical_json: bool = True
@@ -36,12 +58,18 @@ class DeterminismConfig(BaseModel):
 
 
 class QcConfig(BaseModel):
+    """
+    Configuration for quality control and reporting.
+    """
     enable_quality_report: bool = True
     enable_correlation_report: bool = True
     min_coverage: float = 0.85
 
 
 class HashingConfig(BaseModel):
+    """
+    Configuration for content hashing and deduplication.
+    """
     business_key_fields: list[str] = Field(default_factory=list)
 
 
@@ -119,7 +147,8 @@ class PipelineConfig(BaseModel):
     """
     provider: str
     entity_name: str
-    primary_key: Optional[str] = None  # Added to support custom PKs like assay_chembl_id
+    # Added to support custom PKs like assay_chembl_id
+    primary_key: Optional[str] = None
 
     # Sections
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
@@ -143,6 +172,7 @@ class PipelineConfig(BaseModel):
         Get typed source config for provider.
         Handles both dict and typed config objects.
         """
+        # pylint: disable=no-member
         raw = self.sources.get(provider, {})
         if isinstance(raw, SourceConfigBase):
             return raw

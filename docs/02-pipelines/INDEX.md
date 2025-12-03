@@ -80,4 +80,3 @@
 - [CLI](../cli/INDEX.md) — командная строка
 - [QC](../qc/INDEX.md) — контроль качества
 - [Clients Overview](../clients/INDEX.md) — обзор клиентского слоя
-

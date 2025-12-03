@@ -4,7 +4,7 @@ Registry implementation for Pandera schemas.
 from typing import Type
 import pandera.pandas as pa
 
-from bioetl.domain.validation.contracts import SchemaProviderABC
+from bioetl.domain.validation import SchemaProviderABC
 
 
 class SchemaRegistry(SchemaProviderABC):

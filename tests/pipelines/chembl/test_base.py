@@ -1,5 +1,5 @@
 ﻿"""Tests for ChemblPipelineBase."""
-# pylint: disable=redefined-outer-name, unused-argument
+# pylint: disable=redefined-outer-name, unused-argument, protected-access
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
