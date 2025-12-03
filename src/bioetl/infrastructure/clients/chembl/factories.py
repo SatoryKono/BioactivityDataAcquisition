@@ -1,9 +1,8 @@
 from typing import Any
 
-from bioetl.infrastructure.clients.base.factories import (
-    default_rate_limiter,
-    default_retry_policy,
-)
+import requests
+
+from bioetl.infrastructure.clients.base.factories import default_rate_limiter
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
@@ -14,6 +13,7 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParser,
 )
+from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.application.services.chembl_extraction import (
     ChemblExtractionService,
 )
@@ -33,6 +33,16 @@ def default_chembl_client(
     base_url = options.get("base_url") or source_config.base_url
     max_len = options.get("max_url_length") or source_config.max_url_length
 
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=requests.Session(),
+        max_attempts=options.get("max_attempts", 3),
+        base_delay=options.get("base_delay", 1.0),
+        max_delay=options.get("max_delay", 30.0),
+        backoff_factor=options.get("backoff_factor", 2.0),
+        timeout=options.get("timeout", 30.0),
+    )
+
     return ChemblDataClientHTTPImpl(
         request_builder=ChemblRequestBuilder(
             base_url=base_url,
@@ -40,7 +50,8 @@ def default_chembl_client(
         ),
         response_parser=ChemblResponseParser(),
         rate_limiter=default_rate_limiter(rate=5.0, capacity=10.0),
-        retry_policy=default_retry_policy(),
+        http_middleware=middleware,
+        provider="chembl",
     )
 
 
