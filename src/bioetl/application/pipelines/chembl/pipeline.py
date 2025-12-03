@@ -5,6 +5,8 @@ Replaces specific pipeline implementations (Activity, Assay, etc.)
 with a configurable generic implementation.
 """
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.normalization_service import NormalizationService
+from bioetl.domain.record_source import RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
@@ -26,6 +28,8 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         validation_service: ValidationService,
         output_writer: UnifiedOutputWriter,
         extraction_service: ExtractionServiceABC,
+        record_source: RecordSource | None = None,
+        normalization_service: NormalizationService | None = None,
         hash_service: HashService | None = None,
     ) -> None:
         super().__init__(
@@ -34,6 +38,8 @@ class ChemblEntityPipeline(ChemblPipelineBase):
             validation_service,
             output_writer,
             extraction_service,
+            record_source,
+            normalization_service,
             hash_service,
         )
 

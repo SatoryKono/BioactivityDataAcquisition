@@ -65,7 +65,7 @@ def test_resolver_cli_override(tmp_path):
 
     # CLI profile
     (profiles_dir / "prod.yaml").write_text(
-        "entity_name: prod_entity",
+        "entity_name: prod_entity\nprovider: chembl",
         encoding="utf-8"
     )
 

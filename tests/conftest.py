@@ -7,7 +7,13 @@ from unittest.mock import MagicMock, Mock
 import pandas as pd
 import pytest
 
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config.models import (
+    HashingConfig,
+    LoggingConfig,
+    PipelineConfig,
+    StorageConfig,
+)
+from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 from bioetl.schemas.provider_config_schema import ChemblSourceConfig
@@ -18,9 +24,9 @@ from bioetl.domain.validation.service import ValidationService
 def mock_config():
     """Create a mock pipeline configuration."""
     return PipelineConfig(
-        id="chembl.activity",
+        id="chembl.test_entity",
         provider="chembl",
-        entity="activity",
+        entity="test_entity",
         input_mode="auto_detect",
         input_path=None,
         output_path="./test_out",
@@ -31,6 +37,10 @@ def mock_config():
             max_retries=3,
             rate_limit_per_sec=10.0,
         ),
+        logging=LoggingConfig(level="DEBUG"),
+        storage=StorageConfig(output_path="./test_out"),
+        hashing=HashingConfig(business_key_fields=["id"]),
+        pipeline={},
     )
 
 
@@ -75,9 +85,9 @@ def pipeline_test_config(
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
-        id="chembl.activity",
+        id="chembl.test_entity",
         provider="chembl",
-        entity="activity",
+        entity="test_entity",
         input_mode="auto_detect",
         input_path=None,
         output_path=str(output_dir),
@@ -88,6 +98,10 @@ def pipeline_test_config(
             max_retries=3,
             rate_limit_per_sec=10.0,
         ),
+        logging=LoggingConfig(level="DEBUG"),
+        storage=StorageConfig(output_path=str(output_dir)),
+        hashing=HashingConfig(business_key_fields=["id"]),
+        pipeline={},
     )
 
 
