@@ -25,6 +25,20 @@ class ConcretePipeline(PipelineBase):
         return df
 
 
+class DatasetPipeline(PipelineBase):
+    """Pipeline that operates on a provided in-memory dataset."""
+
+    def __init__(self, *args, dataset: pd.DataFrame, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._dataset = dataset
+
+    def extract(self, **_):
+        return self._dataset.copy()
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df.assign(processed=True)
+
+
 @pytest.mark.unit
 def test_pipeline_run_success(
     mock_config,
@@ -189,3 +203,44 @@ def test_hashing_logic(
     )
     res = pipeline._add_hash_columns(df)
     assert res["hash_business_key"].iloc[0] is None
+
+
+@pytest.mark.unit
+def test_pipeline_dry_run_metadata_and_stages(
+    pipeline_test_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    small_pipeline_df,
+    tmp_path,
+):
+    """Dry-run returns accurate stage info and metadata."""
+    pipeline = DatasetPipeline(
+        config=pipeline_test_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        dataset=small_pipeline_df,
+    )
+
+    result = pipeline.run(output_path=tmp_path, dry_run=True)
+
+    assert result.success
+    assert result.output_path is None
+    assert result.errors == []
+    assert [stage.stage_name for stage in result.stages] == [
+        "extract",
+        "transform",
+        "validate",
+    ]
+    assert [stage.records_processed for stage in result.stages] == [
+        len(small_pipeline_df),
+        len(small_pipeline_df),
+        len(small_pipeline_df),
+    ]
+    assert all(stage.errors == [] for stage in result.stages)
+    assert result.meta["dry_run"] is True
+    assert result.meta["row_count"] == len(small_pipeline_df)
+    assert result.meta["provider"] == pipeline_test_config.provider
+    assert result.meta["entity"] == pipeline_test_config.entity_name
+    assert all(stage.duration_sec >= 0 for stage in result.stages)
