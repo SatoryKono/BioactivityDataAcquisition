@@ -1,22 +1,24 @@
-# Document fields
+# Document (`document`)
 
-| field_name           | data_type | is_nullable | is_filterable | description                                                       | example_value                 | notes |
-|----------------------|----------|------------|--------------|-------------------------------------------------------------------|-------------------------------|-------|
-| abstract             | string   | yes        | yes?         | Аннотация документа                                               | null                          | Может быть большой текст. |
-| authors              | string   | yes        | yes?         | Строка с авторами                                                 | Clader JW.                    | |
-| doc_type             | string   | no         | yes          | Тип документа: PUBLICATION, DATASET, PATENT и т.п.                | PUBLICATION                   | |
-| document_chembl_id   | string   | no         | yes          | ChEMBL ID документа                                               | CHEMBL1139451                 | Основной ID в API. |
-| doi                  | string   | yes        | yes          | DOI публикации                                                    | 10.1021/jm030283g             | |
-| doi_chembl           | string   | yes        | ?            | Внутренний DOI ChEMBL для датасетов                               | null                          | Используется для deposited datasets. |
-| first_page           | string   | yes        | ?            | Первая страница                                                   | 1                             | Строка, не число. |
-| issue                | string   | yes        | ?            | Номер выпуска                                                     | 1                             | |
-| journal              | string   | yes        | yes          | Сокращённое название журнала                                     | J. Med. Chem.                 | |
-| journal_full_title   | string   | yes        | ?            | Полное название журнала                                          | Journal of medicinal chemistry. | |
-| last_page            | string   | yes        | ?            | Последняя страница                                                | 9                             | |
-| patent_id            | string   | yes        | yes          | Идентификатор патента                                             | null                          | Для doc_type=PATENT. |
-| pubmed_id            | string   | yes        | yes          | PubMed ID                                                         | 14695813                      | Строка. |
-| src_id               | integer  | yes        | yes          | ID источника (журнал, WDI, deposited и т.п.)                      | 1                             | Связь с `/source`. |
-| title                | string   | no         | yes          | Заголовок статьи/документа                                       | The discovery of ezetimibe: ... | |
-| volume               | string   | yes        | ?            | Том                                                               | 47                            | |
-| year                 | integer  | yes        | yes          | Год публикации                                                    | 2004                          | |
-| chembl_release_id    | integer  | yes        | ?            | ID релиза ChEMBL, в котором документ появился                     | 36                            | Требует проверки по `/schema`. |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| document_chembl_id | строка | — | ChEMBL ID документа. |
+| doc_type | строка | — | Тип документа (PUBLICATION, DEPOSITED_DATASET и др.). |
+| title | строка | — | Заголовок статьи/документа. |
+| abstract | строка | — | Аннотация / краткое описание. |
+| authors | строка | — | Список авторов. |
+| journal | строка | — | Сокращённое название журнала. |
+| journal_full_title | строка | — | Полное название журнала. |
+| year | целое (int) | — | Год публикации. |
+| volume | строка | — | Том журнала. |
+| issue | строка | — | Номер выпуска. |
+| first_page | строка | — | Первая страница. |
+| last_page | строка | — | Последняя страница. |
+| doi | строка | — | DOI публикации. |
+| doi_chembl | строка | — | Внутренний DOI/ID в ChEMBL. |
+| pubmed_id | целое (int) | — | PubMed ID. |
+| patent_id | строка | — | Номер патента (если применимо). |
+| src_id | целое (int) | — | ID источника данных. |
+| chembl_release | объект | — | Информация о релизе ChEMBL (версия, дата). |
+| contact | строка | — | Контакт для deposited datasets. |
+| score | число (float) | — | Score для поискового ранжирования. |

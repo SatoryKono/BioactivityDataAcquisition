@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 from unittest.mock import MagicMock
 
-from bioetl.application.pipelines.chembl.target.run import ChemblTargetPipeline
+from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 from bioetl.domain.schemas.chembl.target import TargetSchema
 
 
@@ -10,6 +10,7 @@ from bioetl.domain.schemas.chembl.target import TargetSchema
 def pipeline():
     config = MagicMock()
     config.entity_name = "target"
+    config.primary_key = "target_chembl_id"
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []
@@ -20,7 +21,7 @@ def pipeline():
         TargetSchema.to_schema().columns.keys()
     )
 
-    return ChemblTargetPipeline(
+    return ChemblEntityPipeline(
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,
@@ -28,15 +29,17 @@ def pipeline():
         extraction_service=MagicMock(),
     )
 
+
 def test_transform_nested_fields(pipeline):
     pipeline._config.fields = [
         {"name": "target_components", "data_type": "array"},
         {"name": "cross_references", "data_type": "array"},
         {"name": "target_chembl_id", "data_type": "string"},
     ]
-    
+
     df = pd.DataFrame({
         "target_chembl_id": ["CHEMBL1"],
+        "target_type": ["SINGLE PROTEIN"],  # Required field
         "target_components": [
             [
                 {"component_id": 1, "accession": "P12345"},
@@ -47,16 +50,16 @@ def test_transform_nested_fields(pipeline):
             [{"xref_src": "PubMed", "xref_id": "123"}]
         ]
     })
-    
+
     result = pipeline.transform(df)
-    
+
     comps = result.iloc[0]["target_components"]
-    # The dictionary keys are sorted by default in serialization
     # {"component_id": 1, "accession": "P12345"} -> "accession:P12345|component_id:1"
+    # Serialization order ensures deterministic string output
     assert "accession:P12345|component_id:1" in comps
     assert "accession:Q67890|component_id:2" in comps
     assert "|" in comps
-    
+
     xrefs = result.iloc[0]["cross_references"]
     assert "xref_src:PubMed" in xrefs
     assert "xref_id:123" in xrefs

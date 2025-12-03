@@ -42,3 +42,16 @@ class ActivityModel(ChemblRecordModel):
     activity_properties: list[Any] | dict[str, Any] | None = None
     ligand_efficiency: dict[str, Any] | None = None
 
+
+class AssayModel(ChemblRecordModel):
+    assay_classifications: list[Any] | None = None
+    assay_parameters: list[Any] | None = None
+
+
+class MoleculeModel(ChemblRecordModel):
+    atc_classifications: list[Any] | None = None
+    cross_references: list[Any] | None = None
+    molecule_hierarchy: dict[str, Any] | None = None
+    molecule_properties: dict[str, Any] | None = None
+    molecule_structures: dict[str, Any] | None = None
+    molecule_synonyms: list[Any] | None = None

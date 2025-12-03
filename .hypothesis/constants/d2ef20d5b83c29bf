@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\clients\chembl\impl\http_client.py
+# hypothesis_version: 6.140.3
+
+['activity', 'assay', 'document', 'molecule', 'status', 'target']

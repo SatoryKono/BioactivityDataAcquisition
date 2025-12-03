@@ -3,16 +3,14 @@
 
 sources:
   chembl:
+    provider: chembl
+
     # Default batch size for ChEMBL pipelines.
-    # This value is used when no specific batch_size is configured in the pipeline config.
-    batch_size: 25
+    batch_size: 20
 
-    parameters:
-      # Base URL for the ChEMBL REST API.
-      # Serves as the root endpoint for all ChEMBL data access.
-      base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    # Base URL for the ChEMBL REST API.
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
 
-      # Maximum allowed length for the request URL.
-      # Used to ensure generated GET requests do not exceed server limits (e.g. 414 URI Too Long).
-      max_url_length: 2000
+    # Maximum allowed URL length (414 URI Too Long prevention).
+    max_url_length: 2000
 

@@ -12,8 +12,10 @@ from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.impl.normalize import NormalizationService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.config.models import PipelineConfig
-from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
+from bioetl.infrastructure.config.models import (
+    ChemblSourceConfig,
+    PipelineConfig,
+)
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
@@ -72,15 +74,10 @@ class ChemblPipelineBase(PipelineBase):
 
     def _resolve_source_config(self) -> ChemblSourceConfig:
         """Resolve and validate ChEMBL source configuration."""
-        source_data = self._config.sources.get("chembl", {})
-        if isinstance(source_data, ChemblSourceConfig):
-            return source_data
-
-        # If generic SourceConfig, convert to dict first
-        if hasattr(source_data, "model_dump"):
-            source_data = source_data.model_dump()
-
-        return ChemblSourceConfig.model_validate(source_data)
+        config = self._config.get_source_config("chembl")
+        if not isinstance(config, ChemblSourceConfig):
+            raise TypeError("Expected ChemblSourceConfig")
+        return config
 
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """
@@ -161,7 +158,9 @@ class ChemblPipelineBase(PipelineBase):
         for batch_ids in _chunk_list(ids, batch_size):
             response = self._request_batch(entity, batch_ids)
             batch_records = self._extraction_service.parse_response(response)
-            records.extend(batch_records)
+            # Serialize records using model to ensure format consistency (flattening, etc)
+            serialized_records = self._extraction_service.serialize_records(entity, batch_records)
+            records.extend(serialized_records)
 
         return pd.DataFrame(records)
 
@@ -192,7 +191,45 @@ class ChemblPipelineBase(PipelineBase):
         # Приводим к схеме (добавляем отсутствующие колонки, упорядочиваем)
         df = self._enforce_schema(df)
 
+        # Удаляем строки с NULL в обязательных колонках
+        df = self._drop_nulls_in_required_columns(df)
+
         return df
+
+    def _drop_nulls_in_required_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Удаляет строки, где обязательные (non-nullable) колонки содержат NULL.
+        Игнорирует генерируемые колонки (hash_row, hash_business_key),
+        так как они вычисляются позже.
+        """
+        entity = self._config.entity_name
+        schema_cls = self._validation_service.get_schema(entity)
+        schema = schema_cls.to_schema()
+
+        # Columns to ignore during this check because they are generated later
+        ignored_cols = {"hash_row", "hash_business_key"}
+
+        required_cols = [
+            name
+            for name, col in schema.columns.items()
+            if not col.nullable
+            and name in df.columns
+            and name not in ignored_cols
+        ]
+
+        if not required_cols:
+            return df
+
+        initial_count = len(df)
+        df_clean = df.dropna(subset=required_cols)
+        dropped_count = initial_count - len(df_clean)
+
+        if dropped_count > 0:
+            self._logger.warning(
+                f"Dropped {dropped_count} rows with nulls in required columns: {required_cols}"
+            )
+
+        return df_clean
 
     def pre_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Хук для предварительной обработки (можно переопределить)."""

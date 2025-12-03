@@ -10,10 +10,10 @@ primary_key: molecule_chembl_id
 
 sources:
   chembl:
+    provider: chembl
     batch_size: 25
-    parameters:
-      base_url: "https://www.ebi.ac.uk/chembl/api/data"
-      max_url_length: 2000
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    max_url_length: 2000
 
 cli:
   input_file: data/input/testitem.csv

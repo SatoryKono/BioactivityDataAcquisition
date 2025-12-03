@@ -9,15 +9,15 @@ primary_key: target_chembl_id
 
 sources:
   chembl:
+    provider: chembl
     batch_size: 25
-    parameters:
-      base_url: "https://www.ebi.ac.uk/chembl/api/data"
-      max_url_length: 2000
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    max_url_length: 2000
 
 cli:
   input_file: data/input/target.csv
   input_full_dataset: false
-  
+
 fields:
   - name: target_chembl_id
     data_type: string
@@ -30,6 +30,12 @@ fields:
     is_nullable: true
     is_filterable: true
     description: Название таргета
+
+  - name: score
+    data_type: number
+    is_nullable: true
+    is_filterable: false
+    description: Score, используемый при поиске
 
   - name: organism
     data_type: string

@@ -100,7 +100,8 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         attempt = 1
         while True:
             try:
-                response = self.session.get(url)
+                # Add explicit timeout to prevent hanging indefinitely
+                response = self.session.get(url, timeout=30)
                 response.raise_for_status()
                 return response.json()
             except Exception as e:

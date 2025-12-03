@@ -1,12 +1,13 @@
-# Target fields
+# Target (`target`)
 
-| field_name         | data_type | is_nullable | is_filterable | description                                                        | example_value                     | notes |
-|--------------------|----------|------------|--------------|--------------------------------------------------------------------|-----------------------------------|-------|
-| target_chembl_id   | string   | no         | yes          | ChEMBL ID таргета                                                  | CHEMBL2074                        | Основной внешний ID. |
-| pref_name          | string   | yes        | yes          | Название таргета                                                   | Maltase-glucoamylase             | |
-| organism           | string   | yes        | yes          | Организм                                                           | Homo sapiens                      | |
-| target_type        | string   | no         | yes          | Тип таргета: SINGLE PROTEIN, PROTEIN FAMILY, ORGANISM и т.п.      | SINGLE PROTEIN                    | |
-| tax_id             | integer  | yes        | yes          | NCBI TaxID                                                         | 9606                              | |
-| species_group_flag | boolean  | yes        | ?            | Флаг «группового» таргета по видам                                | False                             | |
-| target_components  | array    | yes        | no           | Компоненты таргета (UniProt-последовательности и др.)             | [{"accession": "O43451", ...}]| Вложенные объекты. |
-| cross_references   | array    | yes        | ?            | Внешние кросс-референсы                                           | [{"xref_id": "O43451", ...}] | UniProt, canSAR и т.п. |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| target_chembl_id | строка | — | ChEMBL ID таргета. |
+| pref_name | строка | — | Курируемое имя таргета. |
+| organism | строка | — | Организм, к которому относится таргет. |
+| tax_id | целое (int) | — | NCBI Taxonomy ID организма. |
+| target_type | строка | — | Тип таргета (SINGLE PROTEIN, PROTEIN FAMILY и т.д.). |
+| species_group_flag | логическое | true/false | Является ли таргет группой видов. |
+| score | число (float) | — | Score, используемый при поиске. |
+| target_components | список объектов | — | Компоненты таргета (белки, ДНК и др.). |
+| cross_references | список объектов | — | Внешние ссылки (UniProt, GO, Reactome и др.). |

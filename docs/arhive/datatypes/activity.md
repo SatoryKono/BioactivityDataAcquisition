@@ -1,47 +1,50 @@
-# Activity fields
+# Activity (`activity`)
 
-| field_name               | data_type | is_nullable | is_filterable | description                                                                 | example_value                                   | notes |
-|--------------------------|----------|------------|--------------|-----------------------------------------------------------------------------|-------------------------------------------------|-------|
-| activity_comment         | string   | yes        | ?            | Комментарий к активности                                                    | null                                            | В примере всегда None. |
-| activity_id              | integer  | no         | ?            | Внутренний ID активности                                                    | 1480935                                         | PK в REST/SQL; фильтрацию по нему обычно не делают. |
-| activity_properties      | array    | yes        | no           | Список дополнительных свойств активности                                    | []                                              | В примере пустой список. Структуру элементов см. `/activity/schema`. |
-| assay_chembl_id          | string   | no         | yes          | ChEMBL ID ассая                                                             | CHEMBL829584                                    | Часто используется в фильтрах и join’ах. |
-| assay_description        | string   | yes        | ?            | Текстовое описание ассая                                                    | In vitro inhibitory concentration against SARS... | Дублирует `assay.description`. |
-| assay_type               | string   | no         | yes          | Тип ассая (`B`, `F`, `A`, `P` и т.п.)                                       | B                                               | Используется в фильтрах `assay_type=B`. |
-| bao_endpoint             | string   | yes        | ?            | BAO endpoint term                                                           | BAO_0000190                                     | Ссылка на тип endpoint в BioAssay Ontology. |
-| bao_format               | string   | yes        | ?            | BAO format term                                                             | BAO_0000357                                     | Тип формата эксперимента. |
-| bao_label                | string   | yes        | ?            | Человекочитаемый label для BAO endpoint/format                              | single protein format                           | Косвенно из примера. |
-| canonical_smiles         | string   | no         | ?            | Канонический SMILES молекулы                                               | Cc1noc(C)c1CN1C(=O)C(=O)c2cc(C#N)ccc21          | Для структурного поиска обычно используют отдельные ресурсы. |
-| data_validity_comment    | string   | yes        | ?            | Комментарий о качестве/валидности                                           | null                                            | В примере пусто. |
-| data_validity_description| string   | yes        | ?            | Нормализованное описание проблем с данными                                  | null                                            | Требует проверки схемой. |
-| document_chembl_id       | string   | no         | yes          | Документ ChEMBL, откуда пришла активность                                   | CHEMBL1139624                                   | Линкуется на `/document`. |
-| document_journal         | string   | yes        | ?            | Название журнала                                                            | Bioorg. Med. Chem. Lett.                        | Дублирует поле из `document`. |
-| document_year            | integer  | yes        | yes          | Год публикации                                                              | 2005                                            | Используется в фильтрации. |
-| ligand_efficiency        | object   | yes        | no           | Объект с метриками LE/BEI/LLE/SEI                                           | {'bei': '18.28', 'le': '0.33', ...}             | Содержимое лучше снимать из `/activity/schema`. |
-| molecule_chembl_id       | string   | no         | yes          | ChEMBL ID молекулы                                                          | CHEMBL187579                                    | Стандартный фильтр `molecule_chembl_id=...`. |
-| molecule_pref_name       | string   | yes        | ?            | Название молекулы                                                           | null                                            | Может быть null. |
-| parent_molecule_chembl_id| string   | yes        | yes          | ChEMBL ID родительской молекулы (без соли/формы)                            | CHEMBL187579                                    | Линкуется на иерархию молекул. |
-| pchembl_value            | number   | yes        | yes          | Нормализованная активность (−log10(M) для стандартных типов)               | 5.14                                            | Часто используют фильтр `pchembl_value__gte`. |
-| potential_duplicate      | boolean  | yes        | ?            | Флаг потенциального дубликата записи                                        | False                                           | Контроль качества. |
-| qudt_units               | string   | yes        | ?            | URI единиц в QUDT                                                           | http://www.openphacts.org/units/Nanomolar       | Содержит URL. |
-| record_id                | integer  | yes        | yes          | FK на запись `compound_record` (соединение × документ)                      | 384103                                          | Связь на ресурс `/compound_record`. |
-| relation                 | string   | yes        | yes          | Исходное отношение (`=`, `>`, `<`, `>=`, `<=`, `~`)                         | =                                               | Из источника. |
-| src_id                   | integer  | yes        | yes          | Источник данных (PubChem, журнал, депозиты и т.п.)                          | 1                                               | Линкуется на `/source`. |
-| standard_flag            | boolean  | no         | ?            | Признак, что тип/значение/единицы нормализованы                             | True                                            | |
-| standard_relation        | string   | yes        | yes          | Нормализованное отношение                                                   | =                                               | |
-| standard_text_value      | string   | yes        | ?            | Нормализованный текст для качественных readout’ов                           | null                                            | Для количественных IC50 обычно null. |
-| standard_type            | string   | yes        | yes          | Нормализованный тип активности                                              | IC50                                            | Основной фильтр по типу. |
-| standard_units           | string   | yes        | yes          | Нормализованные единицы                                                     | nM                                              | |
-| standard_upper_value     | number   | yes        | ?            | Верхняя граница интервала в нормализованных единицах                        | null                                            | |
-| standard_value           | number   | yes        | yes          | Числовое нормализованное значение                                           | 7200.0                                          | В нМ. |
-| target_chembl_id         | string   | yes        | yes          | ChEMBL ID таргета                                                           | CHEMBL3927                                      | Связь на `/target`. |
-| target_organism          | string   | yes        | yes          | Организм таргета                                                            | SARS coronavirus                                | |
-| target_pref_name         | string   | yes        | ?            | Название таргета                                                            | SARS coronavirus 3C-like proteinase             | |
-| target_tax_id            | integer  | yes        | yes          | NCBI TaxID таргета                                                          | 227859                                          | |
-| text_value               | string   | yes        | ?            | Исходное текстовое значение                                                 | null                                            | Для числовых измерений обычно пусто. |
-| toid                     | string   | yes        | ?            | ID из Target Ontology                                                       | null                                            | Требует проверки в схеме. |
-| type                     | string   | yes        | ?            | Исходный тип активности (как в источнике)                                   | IC50                                            | Может отличаться от `standard_type`. |
-| units                    | string   | yes        | ?            | Исходные единицы измерения                                                  | uM                                              | |
-| uo_units                 | string   | yes        | ?            | ID из Unit Ontology (UO)                                                    | UO_0000065                                      | |
-| upper_value              | number   | yes        | ?            | Верхняя граница исходного интервала                                         | null                                            | |
-| value                    | number   | yes        | yes          | Исходное числовое значение                                                  | 7.2                                             | |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| activity_id | целое (int) | — | Внутренний ID активности (PK). |
+| assay_chembl_id | строка | — | ChEMBL ID теста, в котором измерена активность. |
+| molecule_chembl_id | строка | — | ChEMBL ID молекулы. |
+| parent_molecule_chembl_id | строка | — | ID родительской (parent) молекулы. |
+| target_chembl_id | строка | — | ID таргета, для которого измерена активность. |
+| target_pref_name | строка | — | Префиксное имя таргета. |
+| target_organism | строка | — | Организм таргета. |
+| target_tax_id | строка | — | NCBI Taxonomy ID таргета. |
+| document_chembl_id | строка | — | Документ‑источник измерения. |
+| document_journal | строка | — | Название журнала. |
+| document_year | целое (int) | — | Год публикации документа. |
+| assay_description | строка | — | Описание биологического теста. |
+| assay_type | строка | — | Тип теста (binding, functional и т.п., кодируется буквой). |
+| assay_variant_accession | строка | — | Accession варианта белка, использованного в тесте. |
+| assay_variant_mutation | строка | — | Описание мутаций варианта белка. |
+| bao_endpoint | строка | — | BAO‑ID типа endpoint’а. |
+| bao_format | строка | — | BAO‑формат теста. |
+| bao_label | строка | — | Читабельная метка BAO‑формата. |
+| canonical_smiles | строка | — | Канонический SMILES молекулы. |
+| type | строка | — | Тип исходного значения (IC50, Ki и т.п.). |
+| value | десятичное | — | Исходное численное значение активности. |
+| units | строка | — | Единицы исходного значения (nM, µM и т.п.). |
+| relation | строка | — | Оператор отношения (`=`, `>`, `<`, `>=`, `<=`). |
+| text_value | строка | — | Нечисловое значение (если указано текстом). |
+| upper_value | десятичное | — | Верхняя граница диапазона (если значение задано интервалом). |
+| standard_type | строка | — | Нормализованный тип (например, IC50, pIC50). |
+| standard_value | десятичное | — | Нормализованное числовое значение. |
+| standard_units | строка | — | Единицы нормализованного значения. |
+| standard_relation | строка | — | Оператор отношения для нормализованного значения. |
+| standard_text_value | строка | — | Нормализованное текстовое значение. |
+| standard_upper_value | десятичное | — | Верхняя граница нормализованного диапазона. |
+| standard_flag | целое (int) | 0, 1 | 1 — есть нормализованные `standard_*` поля, 0 — только исходные. |
+| pchembl_value | десятичное | — | pChEMBL (−log10 от стандартного значения в М). |
+| qudt_units | строка | — | URI единиц в онтологии QUDT. |
+| uo_units | строка | — | URI единиц в онтологии UO. |
+| action_type | объект | — | Связанный объект с типом действия (agonist, antagonist и т.п.). |
+| activity_comment | строка | — | Комментарий к измерению (например, “Not determined”). |
+| activity_properties | список объектов | — | Дополнительные параметры активности (type, value, units, standard_* и др.). |
+| data_validity_comment | строка | — | Краткий комментарий к качеству данных. |
+| data_validity_description | строка | — | Подробное описание валидности / проблем с данными. |
+| ligand_efficiency | объект | — | Набор показателей эффективности (LE, LLE, BEI, SEI). |
+| molecule_pref_name | строка | — | Префиксное имя молекулы. |
+| potential_duplicate | целое (int) | 0, 1 | Флаг возможного дубликата измерения (1 — вероятный дубль). |
+| record_id | целое (int) | — | ID записи в `compound_record`. |
+| src_id | целое (int) | — | ID источника данных. |
+| toid | целое (int) | — | Внутренний ID таргета (target ID). | 

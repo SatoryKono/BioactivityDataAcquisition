@@ -9,17 +9,22 @@ primary_key: assay_chembl_id
 
 sources:
   chembl:
-    # Дефолтный batch_size, можно переопределить
+    provider: chembl
     batch_size: 25
-    parameters:
-      base_url: "https://www.ebi.ac.uk/chembl/api/data"
-      max_url_length: 2000
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    max_url_length: 2000
 
 cli:
   input_file: data/input/assay.csv
   input_full_dataset: false
 
 fields:
+  - name: aidx
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Внутренний индекс ассая/ID депозитора
+
   - name: assay_chembl_id
     data_type: string
     is_nullable: false
@@ -37,6 +42,48 @@ fields:
     is_nullable: true
     is_filterable: true
     description: Тип клетки, если ассай клеточный
+
+  - name: assay_classifications
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Классификации ассая
+
+  - name: assay_group
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Группа/серия ассая
+
+  - name: assay_organism
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Организм системы тестирования
+
+  - name: assay_parameters
+    data_type: array
+    is_nullable: true
+    is_filterable: false
+    description: Параметры теста
+
+  - name: assay_strain
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Штамм организма
+
+  - name: assay_subcellular_fraction
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Субклеточная фракция
+
+  - name: assay_tax_id
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: NCBI Taxonomy ID организма
 
   - name: assay_test_type
     data_type: string
@@ -62,11 +109,29 @@ fields:
     is_filterable: false
     description: Текстовое описание assay_type
 
+  - name: bao_format
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: BAO формат ассая
+
+  - name: bao_label
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Читабельная метка BAO-формата
+
   - name: cell_chembl_id
     data_type: string
     is_nullable: true
     is_filterable: true
     description: Ссылка на клеточную линию
+
+  - name: confidence_description
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Текстовое описание уровня уверенности
 
   - name: confidence_score
     data_type: integer
@@ -85,6 +150,36 @@ fields:
     is_nullable: true
     is_filterable: true
     description: Документ, описывающий ассай
+
+  - name: relationship_description
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Расшифровка relationship_type
+
+  - name: relationship_type
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Тип связи ассая с таргетом
+
+  - name: score
+    data_type: number
+    is_nullable: true
+    is_filterable: false
+    description: Score для ранжирования ассая при поиске
+
+  - name: src_assay_id
+    data_type: string
+    is_nullable: true
+    is_filterable: true
+    description: Идентификатор ассая в исходной БД
+
+  - name: src_id
+    data_type: integer
+    is_nullable: true
+    is_filterable: true
+    description: ID источника данных
 
   - name: target_chembl_id
     data_type: string

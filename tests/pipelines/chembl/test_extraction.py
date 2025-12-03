@@ -1,14 +1,15 @@
 """
 Tests for ChemblExtractionService.
 """
+# pylint: disable=redefined-outer-name
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.services.chembl_extraction import (
+from bioetl.application.services.chembl_extraction import (
     ChemblExtractionService,
 )
+from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 
 
 @pytest.fixture
@@ -148,11 +149,10 @@ def test_extract_entities_dispatch(service, mock_client, entity, method):
     # Mock parser - paginator not strictly needed as we return empty list
     mock_parser = MagicMock()
     service.parser = mock_parser
-    
+
     mock_parser.parse.return_value = []
 
     service.extract_all(entity)
 
     # Check corresponding method called
     getattr(mock_client, method).assert_called_once()
-

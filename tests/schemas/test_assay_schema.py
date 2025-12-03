@@ -27,6 +27,23 @@ def valid_assay_data():
         "variant_sequence": [None],
         "hash_row": ["d" * 64],
         "hash_business_key": ["e" * 64],
+        # Missing columns required by schema
+        "aidx": [None],
+        "assay_classifications": [None],
+        "assay_group": [None],
+        "assay_organism": [None],
+        "assay_parameters": [None],
+        "assay_strain": [None],
+        "assay_subcellular_fraction": [None],
+        "assay_tax_id": [None],
+        "bao_format": [None],
+        "bao_label": [None],
+        "confidence_description": [None],
+        "relationship_description": [None],
+        "relationship_type": [None],
+        "score": [None],
+        "src_assay_id": [None],
+        "src_id": [None],
     }
 
 
@@ -64,7 +81,7 @@ def test_assay_schema_invalid_chembl_id(valid_assay_data):
     data = valid_assay_data.copy()
     data["target_chembl_id"] = ["bad_id"]
     df = pd.DataFrame(data)
-    
+
     with pytest.raises(pa.errors.SchemaError) as exc:
         AssaySchema.validate(df)
     assert "str_matches" in str(exc.value)

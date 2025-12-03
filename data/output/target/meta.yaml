@@ -1,0 +1,9 @@
+checksum: 01316cc8ad25f3cde5ef1a533a7870d7de8541bf0067517f589956c022d04494
+chembl_release: chembl_mock
+entity: target
+files:
+- target.csv
+provider: chembl
+row_count: 10
+run_id: 15421f3d-f817-407c-b19b-66b0ef9b67eb
+timestamp: '2025-12-03T07:33:45.505285+00:00'

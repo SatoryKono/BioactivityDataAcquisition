@@ -8,12 +8,15 @@ from pandera.typing import Series
 class ActivitySchema(pa.DataFrameModel):
     """Схема данных для таблицы Activity."""
 
+    action_type: Series[str] = pa.Field(nullable=True, description="Тип действия (agonist, antagonist)")
     activity_comment: Series[str] = pa.Field(nullable=True, description="Комментарий к активности")
     activity_id: Series[int] = pa.Field(ge=1, description="Внутренний ID активности")
     activity_properties: Series[str] = pa.Field(nullable=True, description="Список дополнительных свойств активности")
     assay_chembl_id: Series[str] = pa.Field(str_matches=r"^CHEMBL\d+$", description="ChEMBL ID ассая")
     assay_description: Series[str] = pa.Field(nullable=True, description="Текстовое описание ассая")
     assay_type: Series[str] = pa.Field(isin=["B", "F", "A", "T", "P", "U"], description="Тип ассая (B/F/A/T/P/U)")
+    assay_variant_accession: Series[str] = pa.Field(nullable=True, description="Accession варианта белка")
+    assay_variant_mutation: Series[str] = pa.Field(nullable=True, description="Описание мутаций варианта белка")
     bao_endpoint: Series[str] = pa.Field(nullable=True, description="BAO endpoint term")
     bao_format: Series[str] = pa.Field(nullable=True, description="BAO format term")
     bao_label: Series[str] = pa.Field(nullable=True, description="Label для BAO endpoint/format")

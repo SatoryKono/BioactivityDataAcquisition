@@ -16,6 +16,9 @@ class TargetSchema(pa.DataFrameModel):
     pref_name: Series[str] = pa.Field(
         nullable=True, description="Название таргета"
     )
+    score: Series[float] = pa.Field(
+        nullable=True, description="Score, используемый при поиске"
+    )
     organism: Series[str] = pa.Field(nullable=True, description="Организм")
     target_type: Series[str] = pa.Field(
         description="Тип таргета (напр. SINGLE PROTEIN, FAMILY)"

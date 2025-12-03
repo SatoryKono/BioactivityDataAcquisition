@@ -24,11 +24,13 @@ class ChemblRequestBuilder(RequestBuilderABC):
         Строит URL с параметрами.
         Возвращает полный URL (как строку для простоты, в реальности может быть Request object).
         """
-        self._params.update(params)
+        # Merge base params with call-specific params (without mutating state)
+        current_params = self._params.copy()
+        current_params.update(params)
         
         # Construct query string
         query_parts = []
-        for k, v in self._params.items():
+        for k, v in current_params.items():
             if v is not None:
                 query_parts.append(f"{k}={v}")
         

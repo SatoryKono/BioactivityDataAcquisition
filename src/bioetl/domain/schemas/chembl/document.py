@@ -13,6 +13,13 @@ class DocumentSchema(pa.DataFrameModel):
     authors: Series[str] = pa.Field(
         nullable=True, description="Список авторов"
     )
+    chembl_release: Series[str] = pa.Field(
+        nullable=True,
+        description="ID релиза ChEMBL появления документа",
+    )
+    contact: Series[str] = pa.Field(
+        nullable=True, description="Контакт для deposited datasets"
+    )
     doc_type: Series[str] = pa.Field(
         isin=["PUBLICATION", "DATASET", "PATENT", "OTHER"],
         description="Тип документа",
@@ -50,6 +57,9 @@ class DocumentSchema(pa.DataFrameModel):
         nullable=True,
         description="PubMed ID",
     )
+    score: Series[float] = pa.Field(
+        nullable=True, description="Score для поискового ранжирования"
+    )
     src_id: Series[float] = pa.Field(
         nullable=True,
         description="ID источника данных",
@@ -59,10 +69,6 @@ class DocumentSchema(pa.DataFrameModel):
     )
     volume: Series[str] = pa.Field(nullable=True, description="Том выпуска")
     year: Series[float] = pa.Field(nullable=True, description="Год публикации")
-    chembl_release: Series[str] = pa.Field(
-        nullable=True,
-        description="ID релиза ChEMBL появления документа",
-    )
 
     # Generated columns
     hash_row: Series[str] = pa.Field(

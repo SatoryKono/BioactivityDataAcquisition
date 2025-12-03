@@ -9,22 +9,25 @@ primary_key: activity_id
 
 sources:
   chembl:
-    # Изначальное значение batch_size для пайплайна
+    provider: chembl
     batch_size: 100
-    parameters:
-      # base_url наследуется или переопределяется здесь
-      base_url: "https://www.ebi.ac.uk/chembl/api/data"
-      max_url_length: 2000
-      # Параметры, ранее захардкоженные или неявные
-      data_validity:
-        enabled: false # По умолчанию, или true если используется
-        page_limit: 100 # Если есть лимит страниц для sub-запросов
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    max_url_length: 2000
+    data_validity:
+      enabled: false
+      page_limit: 100
 
 cli:
   input_file: data/input/activity.csv
   input_full_dataset: false
-  
+
 fields:
+  - name: action_type
+    data_type: object
+    is_nullable: true
+    is_filterable: false
+    description: Тип действия (agonist, antagonist и т.п.)
+
   - name: activity_comment
     data_type: string
     is_nullable: true
@@ -60,6 +63,18 @@ fields:
     is_nullable: false
     is_filterable: true
     description: Тип ассая (B, F, A, P и т.п.)
+
+  - name: assay_variant_accession
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Accession варианта белка
+
+  - name: assay_variant_mutation
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Описание мутаций варианта белка
 
   - name: bao_endpoint
     data_type: string

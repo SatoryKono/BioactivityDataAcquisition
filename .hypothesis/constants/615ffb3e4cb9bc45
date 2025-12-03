@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\clients\chembl\request_builder.py
+# hypothesis_version: 6.140.3
+
+['&', '/', 'ChemblRequestBuilder', 'base_url is required', 'limit', 'offset']
