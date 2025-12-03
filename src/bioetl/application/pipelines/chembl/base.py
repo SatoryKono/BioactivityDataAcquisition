@@ -1,13 +1,13 @@
 """Base pipeline implementation for ChEMBL data extraction."""
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
-from bioetl.domain.record_source import ApiRecordSource, InMemoryRecordSource, RecordSource
+from bioetl.domain.record_source import ApiRecordSource, RawRecord, RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
@@ -56,17 +56,6 @@ class ChemblPipelineBase(PipelineBase):
                 self._extraction_service.get_release_version()
             )
         return self._chembl_release
-    
-    # Alias for compatibility if needed elsewhere, but we use get_version now.
-    def get_chembl_release(self) -> str:
-        return self.get_version()
-
-    def _resolve_source_config(self) -> ChemblSourceConfig:
-        """Resolve and validate ChEMBL source configuration."""
-        config = self._config.provider_config
-        if not isinstance(config, ChemblSourceConfig):
-            raise TypeError("Expected ChemblSourceConfig")
-        return config
 
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """Извлекает данные через RecordSource и нормализует записи."""
@@ -90,7 +79,7 @@ class ChemblPipelineBase(PipelineBase):
         df = self._do_transform(df)
 
         records = [
-            self._normalization_service.normalize(record)
+            self._normalization_service.normalize(cast(RawRecord, record))
             for record in df.to_dict(orient="records")
         ]
 

@@ -1,0 +1,3 @@
+activity_id,assay_chembl_id,assay_type,document_chembl_id,molecule_chembl_id,standard_flag,potential_duplicate,standard_relation,standard_units,standard_value
+1,CHEMBL123,B,CHEMBL999,CHEMBL1,True,False,=,nM,12.5
+2,CHEMBL456,F,CHEMBL998,CHEMBL2,True,False,=,nM,8.0
