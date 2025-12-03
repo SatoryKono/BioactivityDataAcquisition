@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.core.provider_registry import (
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
     get_provider,
@@ -14,7 +14,7 @@ from bioetl.core.provider_registry import (
     reset_provider_registry,
     restore_provider_registry,
 )
-from bioetl.core.providers import (
+from bioetl.domain.providers import (
     BaseProviderConfig,
     ProviderComponents,
     ProviderDefinition,
