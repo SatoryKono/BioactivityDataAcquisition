@@ -1,9 +1,10 @@
-checksum: 01316cc8ad25f3cde5ef1a533a7870d7de8541bf0067517f589956c022d04494
-chembl_release: chembl_mock
+checksum: dd122285923715af80cf823f3f93bd705599bd5bbd2d919328942eab6b843e7f
+chembl_release: ChEMBL_36
 entity: target
 files:
 - target.csv
+hash_version: v1_blake2b_256
 provider: chembl
-row_count: 10
-run_id: 15421f3d-f817-407c-b19b-66b0ef9b67eb
-timestamp: '2025-12-03T07:33:45.505285+00:00'
+row_count: 80
+run_id: 60d9aec2-3012-4975-9960-bbd1fcd6d438
+timestamp: '2025-12-03T16:21:38.202022+00:00'
