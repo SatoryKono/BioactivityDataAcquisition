@@ -4,6 +4,43 @@ from pandera.typing import Series
 
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
 
+OUTPUT_COLUMN_ORDER: list[str] = [
+    "atc_classifications",
+    "availability_type",
+    "black_box_warning",
+    "chemical_probe",
+    "chirality",
+    "cross_references",
+    "dosed_ingredient",
+    "first_approval",
+    "first_in_class",
+    "helm_notation",
+    "inorganic_flag",
+    "max_phase",
+    "molecule_chembl_id",
+    "molecule_hierarchy",
+    "molecule_properties",
+    "molecule_structures",
+    "molecule_synonyms",
+    "molecule_type",
+    "natural_product",
+    "oral",
+    "orphan",
+    "parenteral",
+    "polymer_flag",
+    "pref_name",
+    "prodrug",
+    "structure_type",
+    "therapeutic_flag",
+    "topical",
+    "usan_stem",
+    "usan_stem_definition",
+    "usan_substem",
+    "usan_year",
+    "veterinary",
+    "withdrawn_flag",
+]
+
 
 class MoleculeSchema(pa.DataFrameModel):
     """Schema for molecule data."""
