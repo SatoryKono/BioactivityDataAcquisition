@@ -41,6 +41,9 @@ def test_request_activity(client, mock_components):
     mock_response = MagicMock()
     mock_response.json.return_value = {"data": "test"}
     client.session.get.return_value = mock_response
+
+    # Configure response parser to return the data pass-through or processed
+    mock_components["response_parser"].parse.return_value = {"data": "test"}
     
     # Act
     result = client.request_activity(molecule_chembl_id="CHEMBL123")
@@ -48,7 +51,7 @@ def test_request_activity(client, mock_components):
     # Assert
     mock_builder.for_endpoint.assert_called_with("activity")
     mock_builder.build.assert_called_with({"molecule_chembl_id": "CHEMBL123"})
-    client.session.get.assert_called_with("http://chembl/activity")
+    client.session.get.assert_called_with("http://chembl/activity", timeout=30)
     assert result == {"data": "test"}
 
 

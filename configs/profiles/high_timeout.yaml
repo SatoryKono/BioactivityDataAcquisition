@@ -1,0 +1,4 @@
+extends: development
+client:
+  timeout: 120.0
+

@@ -1,5 +1,6 @@
 atc_classifications,cross_references,hash_business_key,hash_row,helm_notation,max_phase,molecule_chembl_id,molecule_hierarchy,molecule_properties,molecule_structures,molecule_synonyms,molecule_type,pref_name,pubchem_cid,structure_type
-,,c4a77059b68418831262c6a482eb8b4365992f82f236c241aac4c974cff11ca0,e6e0f95151c7930ece153985d15852e984a0dcfb68b8415d882650cea92e3ee9,,,CHEMBL105457,active_chembl_id:chembl105457|molecule_chembl_id:chembl105457|parent_chembl_id:chembl105457,alogp:0.45|aromatic_rings:0|full_molformula:c8h18no2+|full_mwt:160.24|hba:2|hbd:0|heavy_atoms:11|mw_freebase:160.24|np_likeness_score:1.21|num_ro5_violations:0|psa:18.46|qed_weighted:0.55|ro3_pass:y|rtb:2,"canonical_smiles:C[C@H]1OC[C@@H](C[N+](C)(C)C)O1|molfile:RDKit          2D
+,,c4a77059b68418831262c6a482eb8b4365992f82f236c241aac4c974cff11ca0,5ae63f291b69ae019e8cdbb5d8db49e72c397482b8f2296e530bddca493c840b,,,CHEMBL105457,active_chembl_id:chembl105457|molecule_chembl_id:chembl105457|parent_chembl_id:chembl105457,alogp:0.45|aromatic_rings:0|full_molformula:c8h18no2+|full_mwt:160.24|hba:2|hbd:0|heavy_atoms:11|mw_freebase:160.24|np_likeness_score:1.21|num_ro5_violations:0|psa:18.46|qed_weighted:0.55|ro3_pass:y|rtb:2,"canonical_smiles:C[C@H]1OC[C@@H](C[N+](C)(C)C)O1|molfile:
+     RDKit          2D
 
  11 11  0  0  1  0  0  0  0  0999 V2000
    -2.5382    0.9127    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -31,7 +32,8 @@ CHEMBL105457
 
 > <chembl_pref_name>
 None|standard_inchi:InChI=1S/C8H18NO2/c1-7-10-6-8(11-7)5-9(2,3)4/h7-8H,5-6H2,1-4H3/q+1/t7-,8+/m0/s1|standard_inchi_key:COSSAOQSSXDIQW-JGVFFNPUSA-N",,small molecule,,,mol
-,,15ce840dbc9cadb24261fa447ca500e21d2bf61e83c4561d546f76841c882d01,1ce6ffe01f98b9b280312dd786206339187aec9305e8c26bbdc1f2eae3566934,,,CHEMBL1255588,active_chembl_id:chembl1255588|molecule_chembl_id:chembl1255588|parent_chembl_id:chembl1255588,alogp:4.84|aromatic_rings:2|full_molformula:c25h31no|full_mwt:361.53|hba:2|hbd:1|heavy_atoms:27|mw_freebase:361.53|np_likeness_score:0.95|num_ro5_violations:0|psa:23.47|qed_weighted:0.73|ro3_pass:n|rtb:0,"canonical_smiles:CC(C)(C)[C@@]1(O)CCN2C[C@@H]3c4ccccc4CCc4cccc(c43)[C@H]2C1|molfile:RDKit          2D
+,,15ce840dbc9cadb24261fa447ca500e21d2bf61e83c4561d546f76841c882d01,19f2739c13974188b2117fe5102a551dffa79e27135a3e2ecfb3f5210099adf4,,,CHEMBL1255588,active_chembl_id:chembl1255588|molecule_chembl_id:chembl1255588|parent_chembl_id:chembl1255588,alogp:4.84|aromatic_rings:2|full_molformula:c25h31no|full_mwt:361.53|hba:2|hbd:1|heavy_atoms:27|mw_freebase:361.53|np_likeness_score:0.95|num_ro5_violations:0|psa:23.47|qed_weighted:0.73|ro3_pass:n|rtb:0,"canonical_smiles:CC(C)(C)[C@@]1(O)CCN2C[C@@H]3c4ccccc4CCc4cccc(c43)[C@H]2C1|molfile:
+     RDKit          2D
 
  29 33  0  0  0  0  0  0  0  0999 V2000
     1.9048   -1.1826    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -102,7 +104,8 @@ CHEMBL1255588
 
 > <chembl_pref_name>
 None|standard_inchi:InChI=1S/C25H31NO/c1-24(2,3)25(27)13-14-26-16-21-19-9-5-4-7-17(19)11-12-18-8-6-10-20(23(18)21)22(26)15-25/h4-10,21-22,27H,11-16H2,1-3H3/t21-,22-,25-/m1/s1|standard_inchi_key:ZZJYIKPMDIWRSN-TZBSWOFLSA-N",,small molecule,,,mol
-,,610d649f0f4422001a630b9dd035f00f796202128cf4f8aff8f7e412535c7e6d,1bcab366bf6f98731fa099426437bfb0a551f3517e49d2afd73864508da4e98c,,2.0,CHEMBL129482,active_chembl_id:chembl129482|molecule_chembl_id:chembl129482|parent_chembl_id:chembl129482,alogp:1.55|aromatic_rings:2|full_molformula:c15h14o6|full_mwt:290.27|hba:6|hbd:5|heavy_atoms:21|mw_freebase:290.27|np_likeness_score:2.30|num_ro5_violations:0|psa:110.38|qed_weighted:0.51|ro3_pass:n|rtb:1,"canonical_smiles:Oc1cc(O)c2c(c1)O[C@@H](c1ccc(O)c(O)c1)[C@@H](O)C2|molfile:RDKit          2D
+,,610d649f0f4422001a630b9dd035f00f796202128cf4f8aff8f7e412535c7e6d,aa4c0b820885ef5402dfa2655ecb10db1b15da42fc531ab19a9b18a68e410207,,2.0,CHEMBL129482,active_chembl_id:chembl129482|molecule_chembl_id:chembl129482|parent_chembl_id:chembl129482,alogp:1.55|aromatic_rings:2|full_molformula:c15h14o6|full_mwt:290.27|hba:6|hbd:5|heavy_atoms:21|mw_freebase:290.27|np_likeness_score:2.30|num_ro5_violations:0|psa:110.38|qed_weighted:0.51|ro3_pass:n|rtb:1,"canonical_smiles:Oc1cc(O)c2c(c1)O[C@@H](c1ccc(O)c(O)c1)[C@@H](O)C2|molfile:
+     RDKit          2D
 
  21 23  0  0  0  0  0  0  0  0999 V2000
     8.4685   -7.2476    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -155,7 +158,8 @@ CHEMBL129482
 
 > <chembl_pref_name>
 (+)-EPICATECHIN|standard_inchi:InChI=1S/C15H14O6/c16-8-4-11(18)9-6-13(20)15(21-14(9)5-8)7-1-2-10(17)12(19)3-7/h1-5,13,15-20H,6H2/t13-,15-/m0/s1|standard_inchi_key:PFTAWBLQPZVEMU-ZFWWWQNUSA-N",molecule_synonym:dexepicatechin|syn_type:inn|synonyms:dexepicatechin|molecule_synonym:(+)-epicatechin|syn_type:other|synonyms:(+)-epicatechin,small molecule,(+)-epicatechin,,mol
-,,842ed7db09ebb1999df874a8234bda96a0b29cb807dbdb5b993e35505a04f5bb,bcc625e8b7169ee9a3ec6354ddf3571674678514c54d8ac756b570ece5205bbb,,,CHEMBL129530,active_chembl_id:chembl129530|molecule_chembl_id:chembl129530|parent_chembl_id:chembl129530,alogp:3.64|aromatic_rings:2|full_molformula:c23h29fn2o|full_mwt:368.50|hba:3|hbd:1|heavy_atoms:27|mw_freebase:368.50|np_likeness_score:-0.70|num_ro5_violations:0|psa:26.71|qed_weighted:0.89|ro3_pass:n|rtb:4,"canonical_smiles:O[C@@H]1CCN(Cc2ccc(F)cc2)C[C@H]1N1CCC(c2ccccc2)CC1|molfile:RDKit          2D
+,,842ed7db09ebb1999df874a8234bda96a0b29cb807dbdb5b993e35505a04f5bb,fc0a6758f95a8a8d11a47fe002f701d0808dcf34a9ba1426a64e4b68da2b09b8,,,CHEMBL129530,active_chembl_id:chembl129530|molecule_chembl_id:chembl129530|parent_chembl_id:chembl129530,alogp:3.64|aromatic_rings:2|full_molformula:c23h29fn2o|full_mwt:368.50|hba:3|hbd:1|heavy_atoms:27|mw_freebase:368.50|np_likeness_score:-0.70|num_ro5_violations:0|psa:26.71|qed_weighted:0.89|ro3_pass:n|rtb:4,"canonical_smiles:O[C@@H]1CCN(Cc2ccc(F)cc2)C[C@H]1N1CCC(c2ccccc2)CC1|molfile:
+     RDKit          2D
 
  27 30  0  0  0  0  0  0  0  0999 V2000
    20.7875    0.1583    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -221,7 +225,8 @@ CHEMBL129530
 
 > <chembl_pref_name>
 None|standard_inchi:InChI=1S/C23H29FN2O/c24-21-8-6-18(7-9-21)16-25-13-12-23(27)22(17-25)26-14-10-20(11-15-26)19-4-2-1-3-5-19/h1-9,20,22-23,27H,10-17H2/t22-,23-/m1/s1|standard_inchi_key:HPZHSYBCGLDRCT-DHIUTWEWSA-N",,small molecule,,,mol
-,,7de19abf5ad69beddb14881bc9ca67f46b4dc5aa5d834c09a8db91c57463e057,14c5d2e2aa2d29c1df37342e96bc8179cf1efcfdb120aed563c73b55ff8555ee,,,CHEMBL2021616,active_chembl_id:chembl2021616|molecule_chembl_id:chembl2021616|parent_chembl_id:chembl2021616,alogp:4.47|aromatic_rings:2|full_molformula:c17h17cln2|full_mwt:284.79|hba:2|hbd:1|heavy_atoms:20|mw_freebase:284.79|np_likeness_score:0.03|num_ro5_violations:0|psa:38.91|qed_weighted:0.73|ro3_pass:n|rtb:0,"canonical_smiles:CC1=C[C@H]2Cc3nc4cc(Cl)ccc4c(N)c3[C@@H](C1)C2|molfile:RDKit          2D
+,,7de19abf5ad69beddb14881bc9ca67f46b4dc5aa5d834c09a8db91c57463e057,486ed2c12f385030029faac537e8b2db5e80667f533ad19ff5c1e3603a86cb47,,,CHEMBL2021616,active_chembl_id:chembl2021616|molecule_chembl_id:chembl2021616|parent_chembl_id:chembl2021616,alogp:4.47|aromatic_rings:2|full_molformula:c17h17cln2|full_mwt:284.79|hba:2|hbd:1|heavy_atoms:20|mw_freebase:284.79|np_likeness_score:0.03|num_ro5_violations:0|psa:38.91|qed_weighted:0.73|ro3_pass:n|rtb:0,"canonical_smiles:CC1=C[C@H]2Cc3nc4cc(Cl)ccc4c(N)c3[C@@H](C1)C2|molfile:
+     RDKit          2D
 
  22 25  0  0  0  0  0  0  0  0999 V2000
    -0.9824  -15.7957    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0
@@ -277,7 +282,8 @@ CHEMBL2021616
 
 > <chembl_pref_name>
 None|standard_inchi:InChI=1S/C17H17ClN2/c1-9-4-10-6-11(5-9)16-15(7-10)20-14-8-12(18)2-3-13(14)17(16)19/h2-4,8,10-11H,5-7H2,1H3,(H2,19,20)/t10-,11+/m1/s1|standard_inchi_key:UKCBMHDZLYYTMI-MNOVXSKESA-N",,small molecule,,,mol
-,,4aa38eddf79a92c8982e775d24efe191b8e951ee8478c7dc2e37eaa0057000f1,a447f786ff121fa0367f6d9650dd264876e7f41d38ad52292b258e09ea1b90e0,,1.0,CHEMBL267447,active_chembl_id:chembl267447|molecule_chembl_id:chembl267447|parent_chembl_id:chembl267447,alogp:4.38|aromatic_rings:2|full_molformula:c22h26o5|full_mwt:370.45|hba:5|hbd:1|heavy_atoms:27|mw_freebase:370.45|np_likeness_score:2.40|num_ro5_violations:0|psa:68.90|qed_weighted:0.79|ro3_pass:n|rtb:2,"canonical_smiles:CCCc1cc(=O)oc2c3c(c4c(c12)OC(C)(C)C=C4)O[C@H](C)[C@@H](C)[C@@H]3O|molfile:RDKit          2D
+,,4aa38eddf79a92c8982e775d24efe191b8e951ee8478c7dc2e37eaa0057000f1,e908c188ff4eaca6571a02789aab50c736903fd54b6db089adf60bffdd654cc1,,1.0,CHEMBL267447,active_chembl_id:chembl267447|molecule_chembl_id:chembl267447|parent_chembl_id:chembl267447,alogp:4.38|aromatic_rings:2|full_molformula:c22h26o5|full_mwt:370.45|hba:5|hbd:1|heavy_atoms:27|mw_freebase:370.45|np_likeness_score:2.40|num_ro5_violations:0|psa:68.90|qed_weighted:0.79|ro3_pass:n|rtb:2,"canonical_smiles:CCCc1cc(=O)oc2c3c(c4c(c12)OC(C)(C)C=C4)O[C@H](C)[C@@H](C)[C@@H]3O|molfile:
+     RDKit          2D
 
  27 30  0  0  0  0  0  0  0  0999 V2000
    -0.6068   -0.0297    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -343,7 +349,8 @@ CHEMBL267447
 
 > <chembl_pref_name>
 CALANOLIDE A|standard_inchi:InChI=1S/C22H26O5/c1-6-7-13-10-15(23)26-21-16(13)20-14(8-9-22(4,5)27-20)19-17(21)18(24)11(2)12(3)25-19/h8-12,18,24H,6-7H2,1-5H3/t11-,12-,18+/m1/s1|standard_inchi_key:NIDRYBLTWYFCFV-FMTVUPSXSA-N",molecule_synonym:calanolide a|syn_type:other|synonyms:calanolide a|molecule_synonym:nsc-650886|syn_type:research_code|synonyms:nsc-650886,small molecule,calanolide a,,mol
-,,17d2544ff3d0ca34273ef175154d7b3be2c28d35edc5d3cf899e46bfbbcc745f,55cf8712ec3166f731a22e26882dd50facbe81ae83fd1606f02d6ea5e8f75d34,,,CHEMBL283509,active_chembl_id:chembl283509|molecule_chembl_id:chembl283509|parent_chembl_id:chembl283509,alogp:3.45|aromatic_rings:2|full_molformula:c28h32o8|full_mwt:496.56|hba:8|hbd:2|heavy_atoms:36|mw_freebase:496.56|np_likeness_score:1.88|num_ro5_violations:0|psa:115.43|qed_weighted:0.66|ro3_pass:n|rtb:3,"canonical_smiles:COc1ccc(-c2cc3c(c(=O)o2)C[C@]2(O)[C@@]4(C)C(=O)C=CC(C)(C)[C@]4(O)CC[C@@]2(C)O3)cc1OC|molfile:RDKit          2D
+,,17d2544ff3d0ca34273ef175154d7b3be2c28d35edc5d3cf899e46bfbbcc745f,97e6ac63ec0ad02925c9353f972fa14e652c1a39ade5f3b970caff9db94ab4cf,,,CHEMBL283509,active_chembl_id:chembl283509|molecule_chembl_id:chembl283509|parent_chembl_id:chembl283509,alogp:3.45|aromatic_rings:2|full_molformula:c28h32o8|full_mwt:496.56|hba:8|hbd:2|heavy_atoms:36|mw_freebase:496.56|np_likeness_score:1.88|num_ro5_violations:0|psa:115.43|qed_weighted:0.66|ro3_pass:n|rtb:3,"canonical_smiles:COc1ccc(-c2cc3c(c(=O)o2)C[C@]2(O)[C@@]4(C)C(=O)C=CC(C)(C)[C@]4(O)CC[C@@]2(C)O3)cc1OC|molfile:
+     RDKit          2D
 
  36 40  0  0  1  0  0  0  0  0999 V2000
    -0.7083   -2.3667    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -428,7 +435,8 @@ CHEMBL283509
 
 > <chembl_pref_name>
 None|standard_inchi:InChI=1S/C28H32O8/c1-24(2)10-9-22(29)26(4)27(24,31)12-11-25(3)28(26,32)15-17-20(36-25)14-19(35-23(17)30)16-7-8-18(33-5)21(13-16)34-6/h7-10,13-14,31-32H,11-12,15H2,1-6H3/t25-,26+,27-,28-/m1/s1|standard_inchi_key:MIHBCQWIBJDVPX-JUDWXZBOSA-N",,small molecule,,,mol
-,,87eca854554d7fbdf1034f0bf25e45e678c4903d4d4558cefde938eff9b3c5dd,1c92e67dd73e91f8d28525b3d157174e0123b9140101c93e127766836bea02ad,,,CHEMBL296435,active_chembl_id:chembl296435|molecule_chembl_id:chembl296435|parent_chembl_id:chembl296435,alogp:2.30|aromatic_rings:2|full_molformula:c14h23n5o|full_mwt:277.37|hba:6|hbd:2|heavy_atoms:20|mw_freebase:277.37|np_likeness_score:0.00|num_ro5_violations:0|psa:89.85|qed_weighted:0.76|ro3_pass:n|rtb:7,"canonical_smiles:CCCCCC[C@H]([C@H](C)O)n1cnc2c(N)ncnc21|molfile:RDKit          2D
+,,87eca854554d7fbdf1034f0bf25e45e678c4903d4d4558cefde938eff9b3c5dd,75aa26db0c51174ebe1fd94a09713f2642f41d08ec71bf7d9a07710720e3a283,,,CHEMBL296435,active_chembl_id:chembl296435|molecule_chembl_id:chembl296435|parent_chembl_id:chembl296435,alogp:2.30|aromatic_rings:2|full_molformula:c14h23n5o|full_mwt:277.37|hba:6|hbd:2|heavy_atoms:20|mw_freebase:277.37|np_likeness_score:0.00|num_ro5_violations:0|psa:89.85|qed_weighted:0.76|ro3_pass:n|rtb:7,"canonical_smiles:CCCCCC[C@H]([C@H](C)O)n1cnc2c(N)ncnc21|molfile:
+     RDKit          2D
 
  22 23  0  0  1  0  0  0  0  0999 V2000
     3.9817    1.0425    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
@@ -482,7 +490,8 @@ CHEMBL296435
 
 > <chembl_pref_name>
 (+)-EHNA|standard_inchi:InChI=1S/C14H23N5O/c1-3-4-5-6-7-11(10(2)20)19-9-18-12-13(15)16-8-17-14(12)19/h8-11,20H,3-7H2,1-2H3,(H2,15,16,17)/t10-,11+/m0/s1|standard_inchi_key:IOSAAWHGJUZBOG-WDEREUQCSA-N",,small molecule,(+)-ehna,,mol
-,,28bc0ed29b91d0ea04f66a0f1bc7b21a1c2e3053a8c07bc8b74d8a9eb8a0b72d,da5552966d3c9df9d519fc11373839cdca34ee898b13342604205ae2ee8d939c,,,CHEMBL508781,active_chembl_id:chembl508781|molecule_chembl_id:chembl508781|parent_chembl_id:chembl508781,alogp:6.56|aromatic_rings:4|full_molformula:c36h38n2o6|full_mwt:594.71|hba:8|hbd:2|heavy_atoms:44|mw_freebase:594.71|np_likeness_score:1.95|num_ro5_violations:2|psa:83.86|qed_weighted:0.27|ro3_pass:n|rtb:2,"canonical_smiles:COc1cc2c3cc1Oc1c(O)c(OC)cc4c1[C@H](Cc1ccc(cc1)Oc1cc(ccc1O)C[C@H]3N(C)CC2)N(C)CC4|molfile:RDKit          2D
+,,28bc0ed29b91d0ea04f66a0f1bc7b21a1c2e3053a8c07bc8b74d8a9eb8a0b72d,ca724e4351c83dd74cd5f63968b0477643cd97a508f1515be2a4f2ae61b3b0e3,,,CHEMBL508781,active_chembl_id:chembl508781|molecule_chembl_id:chembl508781|parent_chembl_id:chembl508781,alogp:6.56|aromatic_rings:4|full_molformula:c36h38n2o6|full_mwt:594.71|hba:8|hbd:2|heavy_atoms:44|mw_freebase:594.71|np_likeness_score:1.95|num_ro5_violations:2|psa:83.86|qed_weighted:0.27|ro3_pass:n|rtb:2,"canonical_smiles:COc1cc2c3cc1Oc1c(O)c(OC)cc4c1[C@H](Cc1ccc(cc1)Oc1cc(ccc1O)C[C@H]3N(C)CC2)N(C)CC4|molfile:
+     RDKit          2D
 
  46 52  0  0  0  0  0  0  0  0999 V2000
    16.1209  -24.4598    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
@@ -589,7 +598,8 @@ CHEMBL508781
 
 > <chembl_pref_name>
 None|standard_inchi:InChI=1S/C36H38N2O6/c1-37-13-11-23-18-31(41-3)32-20-26(23)27(37)16-22-7-10-29(39)30(17-22)43-25-8-5-21(6-9-25)15-28-34-24(12-14-38(28)2)19-33(42-4)35(40)36(34)44-32/h5-10,17-20,27-28,39-40H,11-16H2,1-4H3/t27-,28+/m1/s1|standard_inchi_key:LFFQVHXIFJLJSP-IZLXSDGUSA-N",,small molecule,,,mol
-,,954b2e8764b7be6355ea226bf470949181df30dc31e115ebaa9d8948537865f4,a91ae9e75530f60b9fe327e3199f2ba2c470d653a2d887b61ab5a4b95230a0e8,,,CHEMBL81421,active_chembl_id:chembl81421|molecule_chembl_id:chembl81421|parent_chembl_id:chembl81421,alogp:8.90|aromatic_rings:1|full_molformula:c33h54o5|full_mwt:530.79|hba:4|hbd:1|heavy_atoms:38|mw_freebase:530.79|np_likeness_score:1.20|num_ro5_violations:2|psa:72.83|qed_weighted:0.17|ro3_pass:n|rtb:16,"canonical_smiles:Cc1c(C)c2c(c(C)c1OC(=O)CCC(=O)O)CC[C@@](C)(CCC[C@H](C)CCC[C@H](C)CCCC(C)C)O2|molfile:RDKit          2D
+,,954b2e8764b7be6355ea226bf470949181df30dc31e115ebaa9d8948537865f4,b0204123af1b106784f3208a690fecca4639afb06c05229b2a3f9f59e7510791,,,CHEMBL81421,active_chembl_id:chembl81421|molecule_chembl_id:chembl81421|parent_chembl_id:chembl81421,alogp:8.90|aromatic_rings:1|full_molformula:c33h54o5|full_mwt:530.79|hba:4|hbd:1|heavy_atoms:38|mw_freebase:530.79|np_likeness_score:1.20|num_ro5_violations:2|psa:72.83|qed_weighted:0.17|ro3_pass:n|rtb:16,"canonical_smiles:Cc1c(C)c2c(c(C)c1OC(=O)CCC(=O)O)CC[C@@](C)(CCC[C@H](C)CCC[C@H](C)CCCC(C)C)O2|molfile:
+     RDKit          2D
 
  38 39  0  0  0  0  0  0  0  0999 V2000
     0.0611    1.4542    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
