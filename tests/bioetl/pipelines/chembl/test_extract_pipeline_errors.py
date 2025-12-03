@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
-from bioetl.core.providers import ProviderId
+from bioetl.domain.providers import ProviderId
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.infrastructure.config.models import PipelineConfig
