@@ -8,7 +8,10 @@ configs.
 from pathlib import Path
 from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, Field, PositiveInt, field_validator, model_validator
+from pydantic import BaseModel, Field, PositiveInt, ValidationError, field_validator, model_validator
+
+from bioetl.core.provider_registry import get_provider
+from bioetl.core.providers import BaseProviderConfig, ProviderId
 
 
 class PaginationConfig(BaseModel):
@@ -89,7 +92,7 @@ class NormalizationConfig(BaseModel):
 # =============================================================================
 
 
-class SourceConfigBase(BaseModel):
+class SourceConfigBase(BaseProviderConfig):
     """
     Базовая конфигурация источника данных.
     Все провайдер-специфичные конфиги наследуют от неё.
@@ -124,7 +127,7 @@ class ChemblSourceConfig(SourceConfigBase):
     Конфигурация источника ChEMBL.
     Все параметры подключения на верхнем уровне (без вложенного 'parameters').
     """
-    provider: Literal["chembl"] = "chembl"
+    provider: ProviderId = ProviderId.CHEMBL
     base_url: str = "https://www.ebi.ac.uk/chembl/api/data"
     max_url_length: PositiveInt = 2000
 
@@ -161,7 +164,7 @@ class PipelineConfig(BaseModel):
     """
     Полная конфигурация пайплайна.
     """
-    provider: str
+    provider: ProviderId
     entity_name: str
     # Added to support custom PKs like assay_chembl_id
     primary_key: Optional[str] = None
@@ -182,25 +185,33 @@ class PipelineConfig(BaseModel):
     )
 
     # Sources configuration - keyed by provider name
-    sources: dict[str, ChemblSourceConfig | dict[str, Any]] = Field(
+    sources: dict[str, BaseProviderConfig | dict[str, Any]] = Field(
         default_factory=dict
     )
 
-    def get_source_config(self, provider: str) -> SourceConfigBase:
+    def get_source_config(
+        self, provider: ProviderId | str
+    ) -> BaseProviderConfig:
         """
         Get typed source config for provider.
         Handles both dict and typed config objects.
         """
-        # pylint: disable=no-member
-        raw = self.sources.get(provider, {})
-        if isinstance(raw, SourceConfigBase):
-            return raw
+        provider_id = ProviderId(provider)
+        definition = get_provider(provider_id)
+        raw = self.sources.get(provider_id.value, {})
+        if isinstance(raw, BaseProviderConfig):
+            if isinstance(raw, definition.config_type):
+                return raw
+            return definition.config_type.model_validate(raw.model_dump())
 
-        # Parse dict into typed config
-        if provider == "chembl":
-            return ChemblSourceConfig(**raw)
+        if not isinstance(raw, dict):
+            raise TypeError("Source configuration must be a mapping")
 
-        raise ValueError(f"Unknown provider: {provider}")
+        try:
+            return definition.config_type.model_validate(raw)
+        except ValidationError:
+            # Re-raise to keep pydantic trace for callers
+            raise
 
     # Additional pipeline specific fields
     pipeline: dict[str, Any] = Field(default_factory=dict)
