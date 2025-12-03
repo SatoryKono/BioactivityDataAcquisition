@@ -122,6 +122,9 @@ class PipelineBase(ABC):
                         context,
                     ),
                 )
+                if write_result is None:
+                    raise RuntimeError("Write stage returned None")
+
                 stages_results.append(
                     self._make_stage_result("write", write_result.row_count)
                 )
