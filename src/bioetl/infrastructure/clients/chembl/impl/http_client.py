@@ -5,15 +5,23 @@ import requests
 from requests import exceptions as requests_exceptions
 
 from bioetl.domain.errors import (
+    ClientError,
     ClientNetworkError,
     ClientRateLimitError,
     ClientResponseError,
 )
-from bioetl.infrastructure.clients.base.contracts import RateLimiterABC, RetryPolicyABC
+from bioetl.infrastructure.clients.base.contracts import (
+    RateLimiterABC,
+    RetryPolicyABC,
+)
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
-from bioetl.infrastructure.clients.chembl.request_builder import ChemblRequestBuilder
-from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
+from bioetl.infrastructure.clients.chembl.request_builder import (
+    ChemblRequestBuilder,
+)
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblResponseParser,
+)
 
 
 class ChemblDataClientHTTPImpl(ChemblDataClientABC):
@@ -37,7 +45,8 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         self.provider = "chembl"
 
     def fetch_one(self, id: str) -> dict[str, Any]:
-        # Generic fetch not fully supported by ChEMBL generic endpoint unless we know entity
+        # Generic fetch not fully supported by ChEMBL generic endpoint
+        # unless we know entity
         raise NotImplementedError("Use specific request methods")
 
     def fetch_many(self, ids: list[str]) -> list[dict[str, Any]]:
@@ -47,30 +56,31 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         # In this impl, request is the URL string
         url = str(request)
         paginator = ChemblPaginator()
-        
+
         while url:
             self.rate_limiter.wait_if_needed()
             self.rate_limiter.acquire()
-            
+
             response_data = self._execute_request(url)
-            
+
             yield response_data
-            
+
             # Check for next page
             next_marker = paginator.get_next_marker(response_data)
             if next_marker:
-                # Update offset in params. 
+                # Update offset in params.
                 # Complex logic if URL already has params.
-                # For simplicity, assume get_next_marker logic handles it or we rebuild URL.
+                # For simplicity, assume get_next_marker logic handles it
+                # or we rebuild URL.
                 # Current Paginator implementation returns next offset (int).
                 # We need to update the URL with new offset.
                 # This requires parsing the URL.
                 # Alternative: Paginator returns next URL.
-                # Let's assume Paginator logic in client is better handled by ExtractionService loop
-                # or we handle it here.
+                # Let's assume Paginator logic in client is better handled
+                # by ExtractionService loop or we handle it here.
                 # To strictly follow iter_pages contract which yields pages:
                 pass
-            
+
             # For now, simple break to avoid infinite loop in this stub
             break
 
@@ -107,6 +117,7 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         attempt = 1
         endpoint = url
         while True:
+            error: ClientError
             try:
                 response = self.session.get(url, timeout=30)
             except requests_exceptions.RequestException as exc:
@@ -155,6 +166,6 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
             attempt += 1
 
 
-# NOTE: iter_pages реализован частично (возвращает только первую страницу без перехода по next).
+# NOTE: iter_pages реализован частично (возвращает только первую страницу
+# без перехода по next).
 # Планируется доработать построение next-URL для полноценной пагинации.
-

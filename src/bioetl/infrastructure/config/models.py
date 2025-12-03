@@ -5,10 +5,19 @@ This module defines the Pydantic models for various configuration sections,
 including pagination, client settings, storage, logging, and source-specific
 configs.
 """
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, Field, PositiveInt, ValidationError, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PositiveInt,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from bioetl.core.provider_registry import get_provider
 from bioetl.core.providers import BaseProviderConfig, ProviderId
@@ -258,6 +267,7 @@ class PipelineConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_input_mode(self) -> "PipelineConfig":
+        # pylint: disable=no-member
         if self.input_mode in {"csv", "id_only"} and not self.input_path:
             raise ValueError(
                 "input_path must be provided when input_mode is 'csv' or 'id_only'"

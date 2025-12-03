@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.domain.errors import PipelineStageError
 
 
 class ConcretePipeline(PipelineBase):
@@ -160,14 +161,19 @@ def test_pipeline_error_hooks(
     pipeline.extract = MagicMock(side_effect=ValueError("Extraction failed"))
 
     # Act & Assert
-    with pytest.raises(ValueError, match="Extraction failed"):
+    with pytest.raises(PipelineStageError) as exc_info:
         pipeline.run(Path("dummy"))
+
+    assert isinstance(exc_info.value.cause, ValueError)
+    assert str(exc_info.value.cause) == "Extraction failed"
+    assert exc_info.value.stage == "extract"
 
     # Verify hook called
     mock_hook.on_error.assert_called_once()
     args, _ = mock_hook.on_error.call_args
-    assert args[0] == "pipeline"
-    assert isinstance(args[1], ValueError)
+    assert args[0] == "extract"  # stage name
+    assert isinstance(args[1], PipelineStageError)
+    assert args[1].stage == "extract"
 
 
 @pytest.mark.unit
