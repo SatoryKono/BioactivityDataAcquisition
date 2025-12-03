@@ -24,6 +24,7 @@ class RunContext:
     )
     config: dict[str, Any] = field(default_factory=dict)
     dry_run: bool = False
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

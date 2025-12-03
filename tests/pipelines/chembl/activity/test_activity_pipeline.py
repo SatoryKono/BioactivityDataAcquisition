@@ -1,7 +1,12 @@
 import pytest
 import pandas as pd
 from unittest.mock import MagicMock
-from bioetl.application.pipelines.chembl.activity.run import ChemblActivityPipeline
+
+from bioetl.application.pipelines.chembl.activity.run import (
+    ChemblActivityPipeline,
+)
+from bioetl.domain.schemas.chembl.activity import ActivitySchema
+
 
 @pytest.fixture
 def pipeline():
@@ -10,11 +15,14 @@ def pipeline():
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []
-    
+
+    validation_service = MagicMock()
+    validation_service._schema_provider.get_schema.return_value = ActivitySchema
+
     return ChemblActivityPipeline(
         config=config,
         logger=MagicMock(),
-        validation_service=MagicMock(),
+        validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
     )

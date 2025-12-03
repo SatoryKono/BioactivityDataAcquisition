@@ -3,7 +3,7 @@ Tests for the UnifiedOutputWriter.
 """
 # pylint: disable=redefined-outer-name, protected-access
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -34,16 +34,38 @@ def mock_config_fixture():
 
 
 @pytest.fixture
+def mock_checksum_service():
+    """Fixture for mock checksum service."""
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_atomic_op():
+    """Fixture for mock atomic operation."""
+    op = MagicMock()
+
+    # Default implementation calls the callback
+    def side_effect(path, write_fn):
+        write_fn(path)
+    op.write_atomic.side_effect = side_effect
+    return op
+
+
+@pytest.fixture
 def unified_writer(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
-    mock_config_fixture
+    mock_config_fixture,
+    mock_checksum_service,
+    mock_atomic_op,
 ):
     """Fixture for unified writer."""
     return UnifiedOutputWriter(
         mock_writer_fixture,
         mock_metadata_writer_fixture,
-        mock_config_fixture
+        mock_config_fixture,
+        checksum_service=mock_checksum_service,
+        atomic_op=mock_atomic_op,
     )
 
 
@@ -62,7 +84,8 @@ def test_write_result_success(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
     run_context,
-    tmp_path
+    tmp_path,
+    mock_checksum_service
 ):
     """Test successful write result handling."""
     # Arrange
@@ -81,20 +104,15 @@ def test_write_result_success(
         )
 
     mock_writer_fixture.write.side_effect = create_file
+    mock_checksum_service.compute_sha256.return_value = "real_checksum"
 
-    # Mock checksum computation to avoid reading non-existent file
-    with patch.object(
-        unified_writer,
-        "_compute_checksum",
-        return_value="real_checksum"
-    ):
-        # Act
-        result = unified_writer.write_result(
-            df,
-            output_dir,
-            "test_entity",
-            run_context
-        )
+    # Act
+    result = unified_writer.write_result(
+        df,
+        output_dir,
+        "test_entity",
+        run_context
+    )
 
     # Assert
     assert result.row_count == 2
@@ -103,53 +121,105 @@ def test_write_result_success(
     # Verify calls
     mock_writer_fixture.write.assert_called_once()
     mock_metadata_writer_fixture.write_meta.assert_called_once()
+    mock_checksum_service.compute_sha256.assert_called_once()
 
 
-def test_atomic_write_retry(unified_writer, mock_writer_fixture, tmp_path):
-    """Test atomic write retry logic."""
+def test_unified_writer_delegates_atomicity(
+    unified_writer,
+    mock_writer_fixture,
+    mock_atomic_op,
+    run_context,
+    tmp_path
+):
+    """Test that UnifiedOutputWriter delegates to AtomicFileOperation."""
     # Arrange
     df = pd.DataFrame({"a": [1]})
-    output_path = tmp_path / "target.csv"
-    tmp_file = output_path.with_suffix(".tmp")
-
-    # Create dummy tmp file so move works
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir = tmp_path / "out"
 
     mock_writer_fixture.write.return_value = WriteResult(
-        path=tmp_file,
+        path=output_dir / "test.csv",
         row_count=1,
-        checksum="xyz",
+        checksum="abc",
         duration_sec=0.1
     )
 
-    # Mock shutil.move to fail then succeed
-    with patch("shutil.move") as mock_move, \
-         patch("os.remove"), \
-         patch.object(
-             unified_writer,
-             "_compute_checksum",
-             return_value="hash"
-         ):
-
-        # Side effect: Raise OSError twice, then succeed
-        mock_move.side_effect = [OSError("Locked"), OSError("Locked"), None]
-
-        # Act
-        unified_writer._atomic_write(df, output_path)
-
-        # Assert
-        assert mock_move.call_count == 3
-
-
-def test_compute_checksum(unified_writer, tmp_path):
-    """Test checksum computation."""
-    # Arrange
-    file_path = tmp_path / "test.txt"
-    file_path.write_text("content", encoding="utf-8")
-
     # Act
-    checksum = unified_writer._compute_checksum(file_path)
+    unified_writer.write_result(
+        df,
+        output_dir,
+        "test_entity",
+        run_context
+    )
 
     # Assert
-    assert isinstance(checksum, str)
-    assert len(checksum) == 64  # SHA256 hex
+    mock_atomic_op.write_atomic.assert_called_once()
+    # Verify that the first argument to write_atomic is the correct path
+    args, _ = mock_atomic_op.write_atomic.call_args
+    assert args[0] == output_dir / "test_entity.csv"
+
+
+def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):
+    """Test behavior when stable_sort is False."""
+    mock_config_fixture.stable_sort = False
+    df = pd.DataFrame({"b": [2], "a": [1]})
+
+    result_df = unified_writer._stable_sort(df, run_context)
+
+    # Should preserve order
+    assert list(result_df.columns) == ["b", "a"]
+    assert result_df.iloc[0]["b"] == 2
+
+
+def test_stable_sort_columns_and_rows(
+    unified_writer, mock_config_fixture, run_context
+):
+    """Test stable sort of columns and rows."""
+    mock_config_fixture.stable_sort = True
+
+    # Setup config with business keys
+    run_context.config = {
+        "hashing": {
+            "business_key_fields": ["id"]
+        }
+    }
+
+    df = pd.DataFrame({
+        "id": [2, 1, 3],
+        "b": [20, 10, 30],
+        "a": [200, 100, 300]
+    })
+
+    result_df = unified_writer._stable_sort(df, run_context)
+
+    # Columns sorted alphabetically
+    assert list(result_df.columns) == ["a", "b", "id"]
+
+    # Rows sorted by 'id'
+    assert result_df["id"].tolist() == [1, 2, 3]
+    assert result_df["a"].tolist() == [100, 200, 300]
+
+
+def test_write_result_raises_on_no_inner_result(
+    unified_writer,
+    mock_writer_fixture,
+    run_context,
+    tmp_path
+):
+    """Test error raised when inner writer returns nothing."""
+    # Arrange
+    df = pd.DataFrame({"a": [1]})
+    output_dir = tmp_path / "out"
+
+    # inner writer returns None (mock default)
+    mock_writer_fixture.write.return_value = None
+
+    # Act & Assert
+    with pytest.raises(
+        RuntimeError, match="Inner writer did not return result"
+    ):
+        unified_writer.write_result(
+            df,
+            output_dir,
+            "test_entity",
+            run_context
+        )

@@ -1,5 +1,7 @@
+"""
+CSV Writer implementation.
+"""
 import hashlib
-import os
 import time
 from pathlib import Path
 import pandas as pd
@@ -10,38 +12,31 @@ from bioetl.infrastructure.output.contracts import WriterABC, WriteResult
 class CsvWriterImpl(WriterABC):
     """
     Запись CSV.
+    Делегирует атомарность и хеширование внешнему фасаду.
     """
 
     @property
     def atomic(self) -> bool:
-        return True
+        return False
 
     def write(self, df: pd.DataFrame, path: Path) -> WriteResult:
         start_time = time.monotonic()
 
-        tmp_path = path.with_suffix(".tmp")
-
-        df.to_csv(tmp_path, index=False, encoding="utf-8")
-        os.replace(tmp_path, path)
-
-        checksum = self._compute_checksum(path)
+        df.to_csv(path, index=False, encoding="utf-8")
 
         duration = time.monotonic() - start_time
+
+        # Calculate checksum
+        sha256 = hashlib.sha256()
+        sha256.update(path.read_bytes())
+        checksum = sha256.hexdigest()
 
         return WriteResult(
             path=path,
             row_count=len(df),
-            checksum=checksum,
             duration_sec=duration,
+            checksum=checksum
         )
 
     def supports_format(self, fmt: str) -> bool:
         return fmt.lower() == "csv"
-
-    def _compute_checksum(self, path: Path) -> str:
-        sha256 = hashlib.sha256()
-        with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(8192), b""):
-                sha256.update(chunk)
-        return sha256.hexdigest()
-

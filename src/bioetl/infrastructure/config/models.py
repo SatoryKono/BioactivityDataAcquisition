@@ -45,6 +45,15 @@ class HashingConfig(BaseModel):
     business_key_fields: list[str] = Field(default_factory=list)
 
 
+class NormalizationConfig(BaseModel):
+    """
+    Конфигурация нормализации данных.
+    """
+    case_sensitive_fields: list[str] = Field(default_factory=list)
+    id_fields: list[str] = Field(default_factory=list)
+    custom_normalizers: dict[str, str] = Field(default_factory=dict)
+
+
 class SourceConfig(BaseModel):
     """
     Базовая конфигурация источника данных.
@@ -90,6 +99,7 @@ class PipelineConfig(BaseModel):
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
     qc: QcConfig = Field(default_factory=QcConfig)
     hashing: HashingConfig = Field(default_factory=HashingConfig)
+    normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
     
     # Sources configuration
     # Use ForwardRef or check resolver logic if circular imports occur.

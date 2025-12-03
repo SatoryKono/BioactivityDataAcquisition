@@ -97,8 +97,8 @@ def test_pre_transform_hook(pipeline_fixture):
     pd.testing.assert_frame_equal(df, result)
 
 
-def test_build_meta(pipeline_fixture, mock_dependencies_fixture):
-    """Test metadata building."""
+def test_enrich_context(pipeline_fixture, mock_dependencies_fixture):
+    """Test context enrichment with ChEMBL release."""
     # Arrange
     mock_dependencies_fixture[
         "extraction_service"
@@ -108,15 +108,13 @@ def test_build_meta(pipeline_fixture, mock_dependencies_fixture):
         provider="chembl",
         started_at=datetime.now(timezone.utc)
     )
-    df = pd.DataFrame()
 
     # Act
     # pylint: disable=protected-access
-    meta = pipeline_fixture._build_meta(context, df)
+    pipeline_fixture._enrich_context(context)
 
     # Assert
-    assert meta["chembl_release"] == "chembl_99"
-    assert meta["entity"] == "test"
+    assert context.metadata["chembl_release"] == "chembl_99"
 
 
 def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixture):

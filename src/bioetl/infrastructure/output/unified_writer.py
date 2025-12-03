@@ -1,35 +1,50 @@
-import hashlib
-import os
-import shutil
-import time
+"""
+Unified output writer implementation.
+"""
 from pathlib import Path
+
 import pandas as pd
 
-from bioetl.infrastructure.config.models import DeterminismConfig
 from bioetl.domain.models import RunContext
-from bioetl.infrastructure.output.contracts import MetadataWriterABC, WriterABC, WriteResult
+from bioetl.infrastructure.config.models import DeterminismConfig
+from bioetl.infrastructure.files.atomic import AtomicFileOperation
+from bioetl.infrastructure.output.contracts import (
+    MetadataWriterABC,
+    WriterABC,
+    WriteResult,
+)
+from bioetl.infrastructure.output.services.metadata_builder import (
+    MetadataBuilder,
+)
+from bioetl.infrastructure.services.checksum import ChecksumService
 
 
 class UnifiedOutputWriter:
     """
     Фасад для записи результатов пайплайна.
-    
+
     Обеспечивает:
     - Атомарную запись (write-temp-and-rename)
     - Генерацию meta.yaml
     - QC-отчеты (quality_report, correlation_report)
     """
-    
+
     def __init__(
         self,
         writer: WriterABC,
         metadata_writer: MetadataWriterABC,
         config: DeterminismConfig,
+        checksum_service: ChecksumService | None = None,
+        atomic_op: AtomicFileOperation | None = None,
+        metadata_builder: MetadataBuilder | None = None,
     ) -> None:
         self._writer = writer
         self._metadata_writer = metadata_writer
         self._config = config
-    
+        self._checksum_service = checksum_service or ChecksumService()
+        self._atomic_op = atomic_op or AtomicFileOperation()
+        self._metadata_builder = metadata_builder or MetadataBuilder()
+
     def write_result(
         self,
         df: pd.DataFrame,
@@ -39,71 +54,70 @@ class UnifiedOutputWriter:
     ) -> WriteResult:
         """Основной метод записи."""
         output_path.mkdir(parents=True, exist_ok=True)
-        
-        # 1. Сортировка по ключам (детерминизм)
-        df = self._stable_sort(df, entity_name)
-        
-        # 2. Атомарная запись данных
+
+        # 1. Сортировка
+        df = self._stable_sort(df, run_context)
+
+        # 2. Атомарная запись
         data_path = output_path / f"{entity_name}.csv"
-        write_result = self._atomic_write(df, data_path)
-        
-        # 3. Запись meta.yaml
-        meta = self._build_meta(run_context, write_result)
-        self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
-        
-        # 4. QC-отчеты
-        # QC generation omitted for brevity/scope of current fix
-        
-        return write_result
-        
-    def _stable_sort(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
-        if self._config.stable_sort:
-            # Sort by columns to ensure column order at least.
-            df = df.sort_index(axis=1) 
-            pass
-        return df
 
-    def _atomic_write(self, df: pd.DataFrame, path: Path) -> WriteResult:
-        """Атомарная запись через временный файл."""
-        tmp_path = path.with_suffix(".tmp")
-        
-        # Запись во временный файл
-        result = self._writer.write(df, tmp_path)
-        
-        # Атомарная замена with retry for Windows
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                if path.exists():
-                    os.remove(path)
-                shutil.move(str(tmp_path), str(path))
-                break
-            except OSError:
-                if attempt == max_retries - 1:
-                    raise
-                time.sleep(0.5)
-        
-        return WriteResult(
-            path=path,
-            row_count=result.row_count,
-            checksum=self._compute_checksum(path),
-            duration_sec=result.duration_sec,
+        # Wrapper to capture inner write result
+        inner_result: WriteResult | None = None
+
+        def write_wrapper(path: Path) -> None:
+            nonlocal inner_result
+            inner_result = self._writer.write(df, path)
+
+        self._atomic_op.write_atomic(data_path, write_wrapper)
+
+        if inner_result is None:
+            raise RuntimeError("Inner writer did not return result")
+
+        # 3. Вычисление checksum (после записи)
+        checksum = self._checksum_service.compute_sha256(data_path)
+
+        final_result = WriteResult(
+            path=data_path,
+            row_count=inner_result.row_count,
+            duration_sec=inner_result.duration_sec,
+            checksum=checksum,
         )
-    
-    def _compute_checksum(self, path: Path) -> str:
-        """Вычисляет SHA256 файла."""
-        sha256 = hashlib.sha256()
-        with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(8192), b""):
-                sha256.update(chunk)
-        return sha256.hexdigest()
 
-    def _build_meta(self, context: RunContext, result: WriteResult) -> dict:
-        return {
-            "run_id": context.run_id,
-            "entity": context.entity_name,
-            "timestamp": context.started_at.isoformat(),
-            "row_count": result.row_count,
-            "checksum": result.checksum,
-            "files": [str(result.path.name)]
-        }
+        # 4. Запись метаданных
+        meta = self._metadata_builder.build(run_context, final_result)
+        self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
+
+        # 5. QC-отчеты (placeholder for future implementation)
+        # Previous code had omitted QC generation comment.
+
+        return final_result
+
+    def _stable_sort(
+        self, df: pd.DataFrame, context: RunContext
+    ) -> pd.DataFrame:
+        if not self._config.stable_sort:
+            return df
+
+        # 1. Sort columns
+        df = df.reindex(sorted(df.columns), axis=1)
+
+        # 2. Sort rows by business key if configured
+        hashing_config = context.config.get("hashing", {})
+        # Handle Pydantic model dump or dict
+        if isinstance(hashing_config, dict):
+            keys = hashing_config.get("business_key_fields")
+        else:
+            # Should be dict if model_dump() was used, but being safe
+            keys = getattr(hashing_config, "business_key_fields", None)
+
+        # Fallback to legacy business_key
+        if not keys:
+            keys = context.config.get("business_key")
+
+        if keys:
+            # Only sort by keys that exist in dataframe
+            valid_keys = [k for k in keys if k in df.columns]
+            if valid_keys:
+                df = df.sort_values(by=valid_keys, ignore_index=True)
+
+        return df

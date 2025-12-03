@@ -3,6 +3,7 @@ Tests for ConfigResolver.
 """
 import pytest
 from bioetl.infrastructure.config.resolver import ConfigResolver
+from bioetl.core.utils.merge import deep_merge
 
 
 def test_resolver_simple(tmp_path):
@@ -42,18 +43,16 @@ entity_name: override""",
     config = resolver.resolve(str(config_file))
 
     assert config.entity_name == "override"  # Overridden
+    # pylint: disable=no-member
     assert config.qc.min_coverage == 0.5  # Inherited
 
 
-def test_deep_merge(tmp_path):
+def test_deep_merge():
     """Test deep dictionary merge."""
-    # Using private method via public resolve to verify behavior
-    resolver = ConfigResolver(profiles_dir=str(tmp_path))
     base = {"a": {"x": 1}}
     update = {"a": {"y": 2}, "b": 3}
 
-    # pylint: disable=protected-access
-    result = resolver._deep_merge(base, update)
+    result = deep_merge(base, update)
     assert result["a"]["x"] == 1
     assert result["a"]["y"] == 2
     assert result["b"] == 3
@@ -106,6 +105,19 @@ def test_profile_inheritance_recursive(tmp_path):
 
     assert config.entity_name == "parent"
     assert config.provider == "p"
+
+
+def test_circular_dependency(tmp_path):
+    """Test detection of circular dependencies in profiles."""
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    (profiles_dir / "a.yaml").write_text("extends: b", encoding="utf-8")
+    (profiles_dir / "b.yaml").write_text("extends: a", encoding="utf-8")
+
+    resolver = ConfigResolver(profiles_dir=str(profiles_dir))
+    # pylint: disable=protected-access
+    with pytest.raises(ValueError, match="Circular extends"):
+        resolver._resolve_profile("a")
 
 
 def test_profile_not_found(tmp_path):

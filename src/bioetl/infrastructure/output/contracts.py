@@ -9,8 +9,8 @@ class WriteResult:
     """Результат записи."""
     path: Path
     row_count: int
-    checksum: str
     duration_sec: float
+    checksum: str | None = None
 
 
 class WriterABC(ABC):

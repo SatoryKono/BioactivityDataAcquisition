@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\application\pipelines\chembl\testitem\run.py
+# hypothesis_version: 6.140.3
+
+[',', 'Int64', 'MOL', 'all_names', 'canonical_smiles', 'chembl', 'coerce', 'cross_references', 'max_phase', 'molecule_structures', 'pref_name', 'pubchem', 'pubchem_cid', 'structure_type', 'xref_id', 'xref_src']

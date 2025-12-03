@@ -1,0 +1,26 @@
+case_sensitive_fields:
+  - canonical_smiles
+  - smiles
+  - inchi
+  - inchi_key
+  - standard_inchi
+  - standard_inchi_key
+  - molecule_structures
+  - helm_notation
+  - variant_sequence
+  - target_components
+  - cross_references
+
+id_fields:
+  - doi
+  - doi_chembl
+  - accession
+  - uo_units
+  - qudt_units
+  - toid
+  - bao_endpoint
+  - bao_format
+  - atc_classifications
+  - ligand_efficiency
+  - assay_type
+

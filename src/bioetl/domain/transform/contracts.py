@@ -104,3 +104,22 @@ class HasherABC(ABC):
     def hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
         """Хеширует выбранные колонки DataFrame."""
 
+
+class FieldNormalizerABC(ABC):
+    """
+    Интерфейс для нормализации отдельного поля.
+    """
+
+    @abstractmethod
+    def normalize(self, value: Any) -> Any:
+        """Нормализует значение."""
+
+
+class NormalizationServiceABC(ABC):
+    """
+    Сервис нормализации данных в DataFrame.
+    """
+
+    @abstractmethod
+    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Нормализует поля DataFrame согласно конфигурации."""
