@@ -22,7 +22,8 @@ sources:
 
 cli:
   input_file: data/input/activity.csv
-
+  input_full_dataset: false
+  
 fields:
   - name: activity_comment
     data_type: string

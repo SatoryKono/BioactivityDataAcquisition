@@ -20,7 +20,6 @@ CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
     # DOI variants
     "doi": normalize_doi,
     "doi_chembl": normalize_doi,
-    "doi_clean": normalize_doi,
     # ChEMBL IDs
     "document_chembl_id": normalize_chembl_id,
     "assay_chembl_id": normalize_chembl_id,

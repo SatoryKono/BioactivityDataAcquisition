@@ -21,4 +21,7 @@ class ChemblAssayPipeline(ChemblPipelineBase):
         if "confidence_score" not in df.columns:
             df["confidence_score"] = 0
 
+        if "assay_type" in df.columns:
+            df["assay_type"] = df["assay_type"].str.upper()
+
         return self._enforce_schema(df)

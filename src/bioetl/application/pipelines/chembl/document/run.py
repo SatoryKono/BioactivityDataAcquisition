@@ -1,7 +1,6 @@
 import pandas as pd
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.transform.normalizers import normalize_doi, normalize_pmid
 
 
 class ChemblDocumentPipeline(ChemblPipelineBase):
@@ -14,16 +13,11 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
         """Transform document data with proper type conversions."""
         df = df.copy()
 
-        # Map columns
+        # Map columns if CSV names differ
         if "DOI" in df.columns and "doi" not in df.columns:
             df["doi"] = df["DOI"]
 
-        if "doi" in df.columns:
-            df["doi_clean"] = df["doi"].apply(normalize_doi)
-            df["doi"] = df["doi_clean"]
-        else:
-            df["doi_clean"] = None
-
+        # Default for required field
         if "doc_type" not in df.columns:
             df["doc_type"] = "PUBLICATION"
 
@@ -33,15 +27,11 @@ class ChemblDocumentPipeline(ChemblPipelineBase):
                 lambda x: x.get("chembl_release") if isinstance(x, dict) else x
             )
 
-        # Convert nullable integer columns
-        for col in ["year", "src_id"]:
+        # Convert nullable integer columns (Pandera coerce handles basic types,
+        # but nullable Int64 needs explicit conversion)
+        for col in ["year", "src_id", "pubmed_id"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
                 df[col] = df[col].astype("Int64")
 
-        # Convert pubmed_id to nullable integer
-        if "pubmed_id" in df.columns:
-            df["pubmed_id"] = df["pubmed_id"].apply(normalize_pmid)
-            df["pubmed_id"] = df["pubmed_id"].astype("Int64")
-
-        return self._enforce_schema(df)
+        return df

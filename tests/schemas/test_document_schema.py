@@ -17,7 +17,6 @@ def valid_document_data():
         "doc_type": "PUBLICATION",
         "document_chembl_id": "CHEMBL999",
         "doi": "10.1021/jm00000",
-        "doi_clean": "10.1021/jm00000",
         "doi_chembl": None,
         "first_page": "100",
         "issue": "2",

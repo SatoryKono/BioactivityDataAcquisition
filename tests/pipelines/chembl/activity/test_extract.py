@@ -2,7 +2,7 @@
 Tests for ChemblPipelineBase generic extract (via ChemblActivityPipeline).
 """
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import pandas as pd
 
 from bioetl.application.pipelines.chembl.activity.run import (
@@ -100,23 +100,19 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
 
     pipeline._config.cli = {"input_file": str(csv_path)}
 
-    patch_path = (
-        "bioetl.application.pipelines.chembl.base.ChemblResponseParser"
-    )
-    with patch(patch_path) as MockParser:
-        parser_instance = MockParser.return_value
-        parser_instance.parse.side_effect = [
-            [{"activity_id": 100}, {"activity_id": 101}, {"activity_id": 102}]
-        ]
+    # Mock parse_response on extraction_service
+    mock_extraction_service.parse_response.return_value = [
+        {"activity_id": 100}, {"activity_id": 101}, {"activity_id": 102}
+    ]
 
-        df = pipeline.extract()
+    df = pipeline.extract()
 
-        assert len(df) == 3
-        mock_extraction_service.request_batch.assert_called()
-        call_args = mock_extraction_service.request_batch.call_args
-        # request_batch(entity, batch_ids, filter_key)
-        assert call_args[0][0] == "activity"
-        assert "100" in call_args[0][1]
+    assert len(df) == 3
+    mock_extraction_service.request_batch.assert_called()
+    call_args = mock_extraction_service.request_batch.call_args
+    # request_batch(entity, batch_ids, filter_key)
+    assert call_args[0][0] == "activity"
+    assert "100" in call_args[0][1]
 
 
 def test_extract_batch_size_from_config(
@@ -130,23 +126,19 @@ def test_extract_batch_size_from_config(
     pipeline._config.cli = {"input_file": str(csv_path)}
     pipeline._config.sources["chembl"].batch_size = 2
 
-    patch_path = (
-        "bioetl.application.pipelines.chembl.base.ChemblResponseParser"
-    )
-    with patch(patch_path) as MockParser:
-        parser_instance = MockParser.return_value
-        parser_instance.parse.return_value = []
+    # Mock parse_response to return empty list
+    mock_extraction_service.parse_response.return_value = []
 
-        pipeline.extract()
+    pipeline.extract()
 
-        # Expect 3 calls: [1,2], [3,4], [5]
-        assert mock_extraction_service.request_batch.call_count == 3
+    # Expect 3 calls: [1,2], [3,4], [5]
+    assert mock_extraction_service.request_batch.call_count == 3
 
-        calls = mock_extraction_service.request_batch.call_args_list
-        # request_batch(entity, batch_ids, filter_key)
-        assert calls[0][0][1] == ["1", "2"]
-        assert calls[1][0][1] == ["3", "4"]
-        assert calls[2][0][1] == ["5"]
+    calls = mock_extraction_service.request_batch.call_args_list
+    # request_batch(entity, batch_ids, filter_key)
+    assert calls[0][0][1] == ["1", "2"]
+    assert calls[1][0][1] == ["3", "4"]
+    assert calls[2][0][1] == ["5"]
 
 
 def test_extract_missing_column(pipeline, tmp_path):

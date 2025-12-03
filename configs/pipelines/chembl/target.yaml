@@ -16,7 +16,8 @@ sources:
 
 cli:
   input_file: data/input/target.csv
-
+  input_full_dataset: false
+  
 fields:
   - name: target_chembl_id
     data_type: string

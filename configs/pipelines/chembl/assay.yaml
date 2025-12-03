@@ -17,6 +17,7 @@ sources:
 
 cli:
   input_file: data/input/assay.csv
+  input_full_dataset: false
 
 fields:
   - name: assay_chembl_id
@@ -108,4 +109,9 @@ hashing:
       - assay_chembl_id
       - document_chembl_id
       - target_chembl_id
+
+normalization:
+  id_fields:
+    - assay_type
+
 # pagination наследуется из chembl_default profile

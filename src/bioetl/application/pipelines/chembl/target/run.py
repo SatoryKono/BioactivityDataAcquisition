@@ -30,4 +30,4 @@ class ChemblTargetPipeline(ChemblPipelineBase):
                 df["tax_id"], errors="coerce"
             ).astype("Int64")
 
-        return self._enforce_schema(df)
+        return df
