@@ -12,6 +12,7 @@ from bioetl.domain.schemas.chembl.activity import ActivitySchema
 @pytest.fixture
 def pipeline():
     config = MagicMock()
+    config.id = "activity_chembl"
     config.entity_name = "activity"
     config.primary_key = "activity_id"
     config.model_dump.return_value = {}
@@ -93,9 +94,10 @@ def test_transform_drops_invalid_rows(pipeline):
         
     pipeline._validation_service.get_schema.return_value = MockSchema
     pipeline._validation_service.get_schema_columns.return_value = list(MockSchema.to_schema().columns.keys())
-    
+
     pipeline._normalization_service = MagicMock()
     pipeline._normalization_service.normalize_fields.side_effect = lambda x: x
+    pipeline._normalization_service.normalize.side_effect = lambda record: record
     
     df = pd.DataFrame({
         "required_col": ["A", None, "C"],

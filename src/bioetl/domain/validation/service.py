@@ -20,8 +20,7 @@ class ValidationService:
 
     def get_schema_columns(self, entity_name: str) -> list[str]:
         """Get ordered list of column names for entity schema."""
-        schema_cls = self._schema_provider.get_schema(entity_name)
-        return list(schema_cls.to_schema().columns.keys())
+        return self._schema_provider.get_schema_columns(entity_name)
 
     def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
         """
