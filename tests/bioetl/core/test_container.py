@@ -9,12 +9,12 @@ from pydantic import ValidationError
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args: None))
 
 from bioetl.application.container import PipelineContainer  # noqa: E402
-from bioetl.core.provider_registry import (  # noqa: E402
+from bioetl.domain.provider_registry import (  # noqa: E402
     ProviderNotRegisteredError,
     list_providers,
     restore_provider_registry,
 )
-from bioetl.core.providers import ProviderId  # noqa: E402
+from bioetl.domain.providers import ProviderId  # noqa: E402
 from bioetl.infrastructure.clients.chembl.provider import (  # noqa: E402
     register_chembl_provider,
 )

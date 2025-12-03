@@ -2,8 +2,8 @@
 from typing import Any
 
 import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
-from bioetl.core.provider_registry import get_provider
-from bioetl.core.providers import ProviderId
+from bioetl.domain.provider_registry import get_provider
+from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
