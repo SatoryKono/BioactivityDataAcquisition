@@ -20,9 +20,11 @@ sources:
     base_url: "https://www.ebi.ac.uk/chembl/api/data"
     max_url_length: 2000
 
-cli:
-  input_file: data/input/assay.csv
-  input_full_dataset: false
+input_mode: id_only
+input_path: data/input/assay.csv
+csv_options:
+  delimiter: ","
+  header: true
 
 fields:
   - name: aidx

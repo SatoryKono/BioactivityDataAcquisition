@@ -24,9 +24,11 @@ sources:
       enabled: false
       page_limit: 100
 
-cli:
-  input_file: data/input/activity.csv
-  input_full_dataset: false
+input_mode: id_only
+input_path: data/input/activity.csv
+csv_options:
+  delimiter: ","
+  header: true
 
 fields:
   - name: action_type
