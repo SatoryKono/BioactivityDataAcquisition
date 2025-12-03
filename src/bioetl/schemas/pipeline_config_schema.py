@@ -203,6 +203,4 @@ __all__ = [
     "PipelineConfig",
     "QcConfig",
     "StorageConfig",
-    "ChemblSourceConfig",
-    "ProviderConfigUnion",
 ]
