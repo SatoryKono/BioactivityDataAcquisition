@@ -31,7 +31,13 @@ class ConfigValidationError(ConfigError):
 class ProviderError(BioetlError):
     """Ошибки провайдера данных."""
 
-    def __init__(self, provider: str, message: str, *, cause: Exception | None = None) -> None:
+    def __init__(
+        self,
+        provider: str,
+        message: str,
+        *,
+        cause: Exception | None = None
+    ) -> None:
         super().__init__(message)
         self.provider = provider
         self.cause = cause
@@ -90,8 +96,8 @@ class PipelineStageError(BioetlError):
         cause: Exception | None = None,
     ) -> None:
         message = (
-            f"Stage '{stage}' failed for entity '{entity}' provider '{provider}' "
-            f"on attempt {attempt} (run_id={run_id})"
+            f"Stage '{stage}' failed for entity '{entity}' provider "
+            f"'{provider}' on attempt {attempt} (run_id={run_id})"
         )
         super().__init__(message)
         self.provider = provider
@@ -103,7 +109,8 @@ class PipelineStageError(BioetlError):
 
     def __str__(self) -> str:  # pragma: no cover - представление исключения
         base = (
-            f"PipelineStageError(provider='{self.provider}', entity='{self.entity}', "
-            f"stage='{self.stage}', attempt={self.attempt}, run_id='{self.run_id}')"
+            f"PipelineStageError(provider='{self.provider}', "
+            f"entity='{self.entity}', stage='{self.stage}', "
+            f"attempt={self.attempt}, run_id='{self.run_id}')"
         )
         return base + f": {self.args[0]}"
