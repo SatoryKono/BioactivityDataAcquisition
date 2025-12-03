@@ -1,6 +1,8 @@
-import pytest
-import pandas as pd
+"""Tests for ChemblEntityPipeline (Target context)."""
 from unittest.mock import MagicMock
+
+import pandas as pd
+import pytest
 
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 from bioetl.domain.schemas.chembl.target import TargetSchema
@@ -8,6 +10,7 @@ from bioetl.domain.schemas.chembl.target import TargetSchema
 
 @pytest.fixture
 def pipeline():
+    """Create pipeline fixture with mocked dependencies."""
     config = MagicMock()
     config.entity_name = "target"
     config.primary_key = "target_chembl_id"
@@ -31,6 +34,7 @@ def pipeline():
 
 
 def test_transform_nested_fields(pipeline):
+    """Test transformation of nested fields (serialization)."""
     pipeline._config.fields = [
         {"name": "target_components", "data_type": "array"},
         {"name": "cross_references", "data_type": "array"},
@@ -54,7 +58,8 @@ def test_transform_nested_fields(pipeline):
     result = pipeline.transform(df)
 
     comps = result.iloc[0]["target_components"]
-    # {"component_id": 1, "accession": "P12345"} -> "accession:P12345|component_id:1"
+    # {"component_id": 1, "accession": "P12345"} ->
+    # "accession:P12345|component_id:1"
     # Serialization order ensures deterministic string output
     assert "accession:P12345|component_id:1" in comps
     assert "accession:Q67890|component_id:2" in comps
@@ -63,4 +68,3 @@ def test_transform_nested_fields(pipeline):
     xrefs = result.iloc[0]["cross_references"]
     assert "xref_src:PubMed" in xrefs
     assert "xref_id:123" in xrefs
-

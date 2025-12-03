@@ -78,7 +78,8 @@ def test_activity_schema_invalid_id(valid_activity_df):
 
     with pytest.raises(SchemaError) as exc:
         ActivitySchema.validate(df)
-    assert "greater_than_or_equal_to" in str(exc.value) or "ge" in str(exc.value)
+    assert ("greater_than_or_equal_to" in str(exc.value) or
+            "ge" in str(exc.value))
 
 
 def test_activity_schema_invalid_chembl_id_format(
