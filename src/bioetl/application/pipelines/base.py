@@ -10,6 +10,7 @@ import pandas as pd
 from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
+from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import PipelineConfig
@@ -50,6 +51,9 @@ class PipelineBase(ABC):
         self._hash_service = hash_service or HashService()
         self._hooks: list[PipelineHookABC] = []
         self._stage_starts: dict[str, datetime] = {}
+        self._schema_contract = get_pipeline_contract(
+            config.id, default_entity=config.entity_name
+        )
 
     # === Public API ===
 
@@ -187,7 +191,7 @@ class PipelineBase(ABC):
         """Валидирует DataFrame по Pandera-схеме."""
         return self._validation_service.validate(
             df=df,
-            entity_name=self._config.entity_name
+            entity_name=self._schema_contract.schema_out,
         )
 
     def write(
@@ -197,6 +201,12 @@ class PipelineBase(ABC):
         context: RunContext,
     ) -> WriteResult:
         """Записывает валидированный DataFrame."""
+        output_schema_name = self._schema_contract.get_output_schema()
+        output_columns = self._validation_service.get_schema_columns(
+            output_schema_name
+        )
+        df = self._reindex_columns(df, output_columns)
+
         return self._output_writer.write_result(
             df=df,
             output_path=output_path,
@@ -247,6 +257,18 @@ class PipelineBase(ABC):
         Использует HashService.
         """
         return self._hash_service.add_fulldate_column(df)
+
+    def _reindex_columns(self, df: pd.DataFrame, column_order: list[str]) -> pd.DataFrame:
+        """Добавляет отсутствующие колонки и упорядочивает DataFrame."""
+
+        if not column_order:
+            return df
+
+        for col in column_order:
+            if col not in df.columns:
+                df[col] = None
+
+        return df[column_order]
 
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
         self._stage_starts[stage] = datetime.now(timezone.utc)
