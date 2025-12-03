@@ -1,5 +1,8 @@
+"""Integration-style tests for ChemblDataClientHTTPImpl wiring."""
+
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
@@ -9,10 +12,8 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParser,
 )
-from bioetl.infrastructure.clients.base.contracts import (
-    RateLimiterABC,
-    RetryPolicyABC,
-)
+from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
+from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 @pytest.fixture
@@ -21,25 +22,19 @@ def mock_components():
         "request_builder": MagicMock(spec=ChemblRequestBuilder),
         "response_parser": MagicMock(spec=ChemblResponseParser),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
-        "retry_policy": MagicMock(spec=RetryPolicyABC),
+        "http_middleware": MagicMock(spec=HttpClientMiddleware),
     }
 
 
 @pytest.fixture
 def client(mock_components):
-    with patch(
-        "bioetl.infrastructure.clients.chembl.impl.http_client.requests."
-        "Session"
-    ) as mock_session_cls:
-        mock_session = mock_session_cls.return_value
-        client = ChemblDataClientHTTPImpl(
-            request_builder=mock_components["request_builder"],
-            response_parser=mock_components["response_parser"],
-            rate_limiter=mock_components["rate_limiter"],
-            retry_policy=mock_components["retry_policy"]
-        )
-        client.session = mock_session  # Ensure we use the mock
-        yield client
+    client = ChemblDataClientHTTPImpl(
+        request_builder=mock_components["request_builder"],
+        response_parser=mock_components["response_parser"],
+        rate_limiter=mock_components["rate_limiter"],
+        http_middleware=mock_components["http_middleware"],
+    )
+    yield client
 
 
 def test_request_activity(client, mock_components):
@@ -50,7 +45,7 @@ def test_request_activity(client, mock_components):
 
     mock_response = MagicMock()
     mock_response.json.return_value = {"data": "test"}
-    client.session.get.return_value = mock_response
+    mock_components["http_middleware"].request.return_value = mock_response
 
     # Configure response parser to return the data pass-through or processed
     mock_components["response_parser"].parse.return_value = {"data": "test"}
@@ -61,36 +56,16 @@ def test_request_activity(client, mock_components):
     # Assert
     mock_builder.for_endpoint.assert_called_with("activity")
     mock_builder.build.assert_called_with({"molecule_chembl_id": "CHEMBL123"})
-    client.session.get.assert_called_with("http://chembl/activity", timeout=30)
+    mock_components["http_middleware"].request.assert_called_with(
+        "GET", "http://chembl/activity"
+    )
     assert result == {"data": "test"}
-
-
-def test_retry_logic_success_after_retry(client, mock_components):
-    # Arrange
-    mock_policy = mock_components["retry_policy"]
-    mock_policy.should_retry.side_effect = [True, False]  # Retry once
-    mock_policy.get_delay.return_value = 0.01
-
-    client.session.get.side_effect = [
-        Exception("Network Error"),
-        MagicMock(
-            json=lambda: {"success": True},
-            raise_for_status=lambda: None
-        )
-    ]
-
-    # Act
-    result = client._execute_request("http://test")
-
-    # Assert
-    assert client.session.get.call_count == 2
-    assert result == {"success": True}
 
 
 def test_rate_limiter_usage(client, mock_components):
     # Arrange
     mock_limiter = mock_components["rate_limiter"]
-    client.session.get.return_value = MagicMock(
+    mock_components["http_middleware"].request.return_value = MagicMock(
         json=lambda: {},
         raise_for_status=lambda: None
     )

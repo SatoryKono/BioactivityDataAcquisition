@@ -1,19 +1,10 @@
-import time
+from __future__ import annotations
 from typing import Any, Iterator
 
 import requests
-from requests import exceptions as requests_exceptions
 
-from bioetl.domain.errors import (
-    ClientError,
-    ClientNetworkError,
-    ClientRateLimitError,
-    ClientResponseError,
-)
-from bioetl.infrastructure.clients.base.contracts import (
-    RateLimiterABC,
-    RetryPolicyABC,
-)
+from bioetl.domain.errors import ClientResponseError
+from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
 from bioetl.infrastructure.clients.chembl.request_builder import (
@@ -22,12 +13,13 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParser,
 )
+from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 class ChemblDataClientHTTPImpl(ChemblDataClientABC):
     """
     HTTP implementation of ChEMBL client.
-    Uses requests, TokenBucket rate limiter, and ExponentialBackoff retry.
+    Uses rate limiter and middleware with retry/backoff.
     """
 
     def __init__(
@@ -35,16 +27,30 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         request_builder: ChemblRequestBuilder,
         response_parser: ChemblResponseParser,
         rate_limiter: RateLimiterABC,
-        retry_policy: RetryPolicyABC,
+        http_middleware: HttpClientMiddleware | None = None,
+        *,
+        provider: str = "chembl",
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
-        self.retry_policy = retry_policy
-        self.session = requests.Session()
-        self.provider = "chembl"
+        self.provider = provider
 
-    def fetch_one(self, id: str) -> dict[str, Any]:
+        if http_middleware is None:
+            self.session = requests.Session()
+            self.http = HttpClientMiddleware(
+                provider=provider,
+                base_client=self.session,
+            )
+        else:
+            self.http = http_middleware
+            base_client = getattr(http_middleware, "base_client", None)
+            if base_client is not None:
+                self.session = base_client
+            else:
+                self.session = requests.Session()
+
+    def fetch_one(self, entity_id: str) -> dict[str, Any]:
         # Generic fetch not fully supported by ChEMBL generic endpoint
         # unless we know entity
         raise NotImplementedError("Use specific request methods")
@@ -53,7 +59,6 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         raise NotImplementedError("Use specific request methods")
 
     def iter_pages(self, request: Any) -> Iterator[Any]:
-        # In this impl, request is the URL string
         url = str(request)
         paginator = ChemblPaginator()
 
@@ -65,33 +70,20 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
             yield response_data
 
-            # Check for next page
             next_marker = paginator.get_next_marker(response_data)
             if next_marker:
-                # Update offset in params.
-                # Complex logic if URL already has params.
-                # For simplicity, assume get_next_marker logic handles it
-                # or we rebuild URL.
-                # Current Paginator implementation returns next offset (int).
-                # We need to update the URL with new offset.
-                # This requires parsing the URL.
-                # Alternative: Paginator returns next URL.
-                # Let's assume Paginator logic in client is better handled
-                # by ExtractionService loop or we handle it here.
-                # To strictly follow iter_pages contract which yields pages:
                 pass
-
-            # For now, simple break to avoid infinite loop in this stub
             break
 
     def metadata(self) -> dict[str, Any]:
-        # Fetch status to get version
         url = self.request_builder.for_endpoint("status").build({})
         data = self._execute_request(url)
         return data
 
     def close(self) -> None:
-        self.session.close()
+        close_method = getattr(self.session, "close", None)
+        if callable(close_method):
+            close_method()
 
     def request_activity(self, **filters: Any) -> Any:
         url = self.request_builder.for_endpoint("activity").build(filters)
@@ -114,56 +106,17 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
-        attempt = 1
-        endpoint = url
-        while True:
-            error: ClientError
-            try:
-                response = self.session.get(url, timeout=30)
-            except requests_exceptions.RequestException as exc:
-                error = ClientNetworkError(
-                    provider=self.provider,
-                    endpoint=endpoint,
-                    message=str(exc),
-                    cause=exc,
-                )
-            else:
-                try:
-                    response.raise_for_status()
-                except requests_exceptions.HTTPError as exc:
-                    status = response.status_code
-                    if status == 429:
-                        error = ClientRateLimitError(
-                            provider=self.provider,
-                            endpoint=endpoint,
-                            status_code=status,
-                            message="Rate limit exceeded",
-                            cause=exc,
-                        )
-                    else:
-                        error = ClientResponseError(
-                            provider=self.provider,
-                            endpoint=endpoint,
-                            status_code=status,
-                            message=str(exc),
-                            cause=exc,
-                        )
-                else:
-                    try:
-                        return response.json()
-                    except ValueError as exc:
-                        error = ClientResponseError(
-                            provider=self.provider,
-                            endpoint=endpoint,
-                            status_code=response.status_code,
-                            message="Failed to parse response JSON",
-                            cause=exc,
-                        )
-
-            if not self.retry_policy.should_retry(error, attempt):
-                raise error from error.cause
-            time.sleep(self.retry_policy.get_delay(attempt))
-            attempt += 1
+        response = self.http.request("GET", url)
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise ClientResponseError(
+                provider=self.provider,
+                endpoint=url,
+                status_code=getattr(response, "status_code", None),
+                message="Failed to parse response JSON",
+                cause=exc,
+            ) from exc
 
 
 # NOTE: iter_pages реализован частично (возвращает только первую страницу
