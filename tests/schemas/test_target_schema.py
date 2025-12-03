@@ -23,6 +23,7 @@ def valid_target_data():
         "uniprot_id": "P12345",
         "hash_row": "0" * 64,
         "hash_business_key": None,
+        "score": None,
     }
 
 

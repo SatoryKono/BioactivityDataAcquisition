@@ -1,0 +1,9 @@
+checksum: 858412ea127a4d3daaa58bc8e224494bf0f91f55f8fa450936fcb4ad58ceb4a2
+chembl_release: chembl_test_v1
+entity: assay
+files:
+- assay.csv
+provider: chembl
+row_count: 10
+run_id: 772beb46-44c1-457b-86e7-894d6e35676c
+timestamp: '2025-12-03T09:03:50.460159+00:00'

@@ -1,13 +1,15 @@
-# Cell Line fields
+# Cell Line (`cell_line`)
 
-| field_name          | data_type | is_nullable | is_filterable | description                                                  | example_value        | notes |
-|---------------------|----------|------------|--------------|--------------------------------------------------------------|----------------------|-------|
-| cell_chembl_id      | string   | no         | yes          | ChEMBL ID клеточной линии                                   | CHEMBL3307241        | Основной внешний ID. |
-| cell_name           | string   | yes        | yes?         | Название клеточной линии                                    | HepG2                | Имя поля по аналогии; проверить `/schema`. |
-| cell_source_organism| string   | yes        | yes          | Организм-источник                                           | Homo sapiens         | |
-| cell_source_tax_id  | integer  | yes        | yes          | NCBI TaxID организма                                        | 9606                 | |
-| cell_source_tissue  | string   | yes        | yes          | Ткань-источник                                              | lung carcinoma       | Используется в фильтрации `__iendswith`. |
-| cellosaurus_id      | string   | yes        | yes          | ID в Cellosaurus                                            | CVCL_4704            | |
-| cl_lincs_id         | string   | yes        | ?            | Идентификатор LINCS                                         | null                 | Часто пустой. |
-| clo_id              | string   | yes        | ?            | ID в Cell Line Ontology (CLO)                               | CLO_0001234          | Имя поля видно в XML. |
-| efo_id              | string   | yes        | ?            | ID в Experimental Factor Ontology                           | EFO:0001187          | |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| cell_chembl_id | строка | — | ChEMBL ID клеточной линии. |
+| cell_id | целое (int) | — | Внутренний ID (PK). |
+| cell_name | строка | — | Имя линии (например, RBL-1). |
+| cell_description | строка | — | Описание линии. |
+| cell_source_organism | строка | — | Организм‑источник. |
+| cell_source_tax_id | целое (int) | — | NCBI Taxonomy ID. |
+| cell_source_tissue | строка | — | Ткань происхождения. |
+| cellosaurus_id | строка | — | ID в Cellosaurus. |
+| cl_lincs_id | строка | — | ID в LINCS (если есть). |
+| clo_id | строка | — | ID в Cell Line Ontology (CLO). |
+| efo_id | строка | — | ID в Experimental Factor Ontology (EFO). |

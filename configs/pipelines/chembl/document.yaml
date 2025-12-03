@@ -9,15 +9,15 @@ primary_key: document_chembl_id
 
 sources:
   chembl:
+    provider: chembl
     batch_size: 25
-    parameters:
-      base_url: "https://www.ebi.ac.uk/chembl/api/data"
-      max_url_length: 2000
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    max_url_length: 2000
 
 cli:
   input_file: data/input/document.csv
   input_full_dataset: false
-  
+
 fields:
   - name: abstract
     data_type: string
@@ -30,6 +30,12 @@ fields:
     is_nullable: true
     is_filterable: true
     description: Строка с авторами
+
+  - name: contact
+    data_type: string
+    is_nullable: true
+    is_filterable: false
+    description: Контакт для deposited datasets
 
   - name: doc_type
     data_type: string
@@ -96,6 +102,12 @@ fields:
     is_nullable: true
     is_filterable: true
     description: PubMed ID
+
+  - name: score
+    data_type: number
+    is_nullable: true
+    is_filterable: false
+    description: Score для поискового ранжирования
 
   - name: src_id
     data_type: integer

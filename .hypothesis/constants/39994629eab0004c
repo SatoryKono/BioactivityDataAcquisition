@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\application\pipelines\chembl\base.py
+# hypothesis_version: 6.140.3
+
+['chembl', 'chembl_release', 'input_file', 'input_full_dataset', 'limit']

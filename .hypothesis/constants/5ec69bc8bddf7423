@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\application\pipelines\registry.py
+# hypothesis_version: 6.140.3
+
+['activity_chembl', 'assay_chembl', 'document_chembl', 'molecule_chembl', 'target_chembl', 'testitem_chembl']

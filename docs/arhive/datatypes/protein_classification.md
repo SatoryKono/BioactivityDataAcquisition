@@ -1,13 +1,13 @@
-# Protein Classification fields
+# Protein Classification (`protein_classification`)
 
-| field_name               | data_type | is_nullable | is_filterable | description                                                       | example_value                   | notes |
-|--------------------------|----------|------------|--------------|-------------------------------------------------------------------|---------------------------------|-------|
-| protein_classification_id| integer  | no         | yes          | Внутренний ID класса                                             | 2673                            | |
-| pref_name                | string   | no         | yes          | Название белкового класса                                       | Receptor tyrosine kinases       | |
-| parent_id                | integer  | yes        | yes          | ID родительского класса                                         | 123                             | |
-| class_level              | integer  | yes        | yes          | Уровень в иерархии (1–4)                                        | 3                               | |
-| l1                       | string   | yes        | yes          | Название класса верхнего уровня                                 | Enzymes                         | |
-| l2                       | string   | yes        | yes          | Второй уровень классификации                                    | Kinases                         | |
-| l3                       | string   | yes        | yes          | Третий уровень                                                   | Tyrosine kinases                | |
-| l4                       | string   | yes        | yes          | Четвертый уровень                                                | EGFR family                     | |
-| replaced_by              | integer  | yes        | ?            | Если класс устарел, ID класса, который его заменил              | 2810                            | |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| protein_class_id | целое (int) | — | ID записи в иерархии (PK). |
+| pref_name | строка | — | Полное/основное имя класса. |
+| short_name | строка | — | Короткое имя. |
+| class_level | целое (int) | — | Уровень в иерархии (1 — верхний). |
+| parent_id | целое (int) | — | ID родительского класса. |
+| protein_class_desc | строка | — | Описание классификации (по уровням). |
+| definition | строка | — | Текстовое определение класса. |
+| replaced_by | целое (int) | — | ID класса, который заменяет текущий. |
+| sort_order | целое (int) | — | Порядок сортировки. |

@@ -2,12 +2,7 @@ import pytest
 import pandas as pd
 from unittest.mock import MagicMock
 
-from bioetl.application.pipelines.chembl.activity.run import ChemblActivityPipeline
-from bioetl.application.pipelines.chembl.assay.run import ChemblAssayPipeline
-from bioetl.application.pipelines.chembl.document.run import ChemblDocumentPipeline
-from bioetl.application.pipelines.chembl.target.run import ChemblTargetPipeline
-from bioetl.application.pipelines.chembl.testitem.run import ChemblTestitemPipeline
-
+from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 
 @pytest.fixture
 def common_dependencies():
@@ -26,25 +21,32 @@ def common_dependencies():
     }
 
 
-@pytest.mark.parametrize("pipeline_cls", [
-    ChemblActivityPipeline,
-    ChemblAssayPipeline,
-    ChemblDocumentPipeline,
-    ChemblTargetPipeline,
-    ChemblTestitemPipeline,
+@pytest.mark.parametrize("pipeline_info", [
+    ("activity", "activity_id"),
+    ("assay", "assay_chembl_id"),
+    ("document", "document_chembl_id"),
+    ("target", "target_chembl_id"),
+    ("testitem", "molecule_chembl_id"),
 ])
-def test_pipeline_instantiation(pipeline_cls, common_dependencies):
-    # Act
-    pipeline = pipeline_cls(
-        config=common_dependencies["config"],
+def test_pipeline_instantiation(pipeline_info, common_dependencies):
+    """Smoke test: pipelines can be instantiated and config works."""
+    entity_name, id_col = pipeline_info
+    
+    config = MagicMock()
+    config.entity_name = entity_name
+    config.provider = "chembl"
+    config.primary_key = id_col
+    
+    pipeline = ChemblEntityPipeline(
+        config=config,
         logger=common_dependencies["logger"],
         validation_service=common_dependencies["validation_service"],
         output_writer=common_dependencies["output_writer"],
         extraction_service=common_dependencies["extraction_service"],
     )
-
-    # Assert
-    assert isinstance(pipeline, pipeline_cls)
+    
+    assert pipeline.ID_COLUMN == id_col
+    assert pipeline.API_FILTER_KEY == f"{id_col}__in"
 
     # Test transform (coverage for _do_transform)
     df = pd.DataFrame({

@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\domain\schemas\chembl\document.py
+# hypothesis_version: 6.140.3
+
+['ChEMBL ID документа', 'DATASET', 'ID источника данных', 'OTHER', 'PATENT', 'PUBLICATION', 'PubMed ID', '^CHEMBL\\d+$', '^[a-f0-9]{64}$', 'Аннотация документа', 'Год публикации', 'Заголовок документа', 'Первая страница', 'Последняя страница', 'Список авторов', 'Тип документа', 'Том выпуска', 'Хэш бизнес-ключа']

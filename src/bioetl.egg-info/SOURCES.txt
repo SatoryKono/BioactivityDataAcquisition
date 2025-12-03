@@ -17,16 +17,9 @@ src/bioetl/application/pipelines/registry.py
 src/bioetl/application/pipelines/stages.py
 src/bioetl/application/pipelines/chembl/__init__.py
 src/bioetl/application/pipelines/chembl/base.py
-src/bioetl/application/pipelines/chembl/activity/__init__.py
-src/bioetl/application/pipelines/chembl/activity/run.py
-src/bioetl/application/pipelines/chembl/assay/__init__.py
-src/bioetl/application/pipelines/chembl/assay/run.py
-src/bioetl/application/pipelines/chembl/document/__init__.py
-src/bioetl/application/pipelines/chembl/document/run.py
-src/bioetl/application/pipelines/chembl/target/__init__.py
-src/bioetl/application/pipelines/chembl/target/run.py
-src/bioetl/application/pipelines/chembl/testitem/__init__.py
-src/bioetl/application/pipelines/chembl/testitem/run.py
+src/bioetl/application/pipelines/chembl/pipeline.py
+src/bioetl/application/services/__init__.py
+src/bioetl/application/services/chembl_extraction.py
 src/bioetl/domain/contracts.py
 src/bioetl/domain/enums.py
 src/bioetl/domain/models.py
@@ -37,6 +30,7 @@ src/bioetl/domain/schemas/chembl/activity.py
 src/bioetl/domain/schemas/chembl/assay.py
 src/bioetl/domain/schemas/chembl/document.py
 src/bioetl/domain/schemas/chembl/models.py
+src/bioetl/domain/schemas/chembl/molecule.py
 src/bioetl/domain/schemas/chembl/target.py
 src/bioetl/domain/schemas/chembl/testitem.py
 src/bioetl/domain/transform/__init__.py
@@ -78,7 +72,6 @@ src/bioetl/infrastructure/clients/chembl/impl/http_client.py
 src/bioetl/infrastructure/config/__init__.py
 src/bioetl/infrastructure/config/models.py
 src/bioetl/infrastructure/config/resolver.py
-src/bioetl/infrastructure/config/source_chembl.py
 src/bioetl/infrastructure/files/atomic.py
 src/bioetl/infrastructure/files/checksum.py
 src/bioetl/infrastructure/logging/__init__.py
@@ -96,8 +89,6 @@ src/bioetl/infrastructure/output/impl/__init__.py
 src/bioetl/infrastructure/output/impl/csv_writer.py
 src/bioetl/infrastructure/output/impl/metadata_writer.py
 src/bioetl/infrastructure/output/impl/parquet_writer.py
-src/bioetl/infrastructure/services/__init__.py
-src/bioetl/infrastructure/services/chembl_extraction.py
 src/bioetl/interfaces/__init__.py
 src/bioetl/interfaces/cli/__init__.py
 src/bioetl/interfaces/cli/app.py

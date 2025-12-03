@@ -32,6 +32,8 @@ def valid_document_data():
         "chembl_release": "chembl_33",
         "hash_row": "f" * 64,
         "hash_business_key": None,
+        "contact": None,
+        "score": None,
     }
 
 

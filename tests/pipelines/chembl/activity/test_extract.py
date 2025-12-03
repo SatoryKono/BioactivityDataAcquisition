@@ -5,36 +5,39 @@ import pytest
 from unittest.mock import MagicMock
 import pandas as pd
 
-from bioetl.application.pipelines.chembl.activity.run import (
-    ChemblActivityPipeline,
+from bioetl.application.pipelines.chembl.pipeline import (
+    ChemblEntityPipeline,
 )
-from bioetl.infrastructure.config.models import PipelineConfig
-from bioetl.infrastructure.config.source_chembl import (
+from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
-    ChemblSourceParameters,
+    PipelineConfig,
 )
 
 
 @pytest.fixture
 def source_config():
+    """Create test ChemblSourceConfig with flat structure."""
     return ChemblSourceConfig(
-        parameters=ChemblSourceParameters(base_url="https://test.com"),
+        base_url="https://test.com",
         batch_size=100,
     )
 
 
 @pytest.fixture
 def mock_config(source_config):
+    """Create mock PipelineConfig with get_source_config method."""
     config = MagicMock(spec=PipelineConfig)
     config.cli = {}
     config.pipeline = {}
     config.entity_name = "activity"
     config.provider = "chembl"
     config.sources = {"chembl": source_config}
+    config.get_source_config = MagicMock(return_value=source_config)
     config.normalization = MagicMock()
     config.normalization.rules = {}
     config.hashing = MagicMock()
     config.hashing.business_key_fields = ["activity_id"]
+    config.primary_key = "activity_id"
     return config
 
 
@@ -53,7 +56,7 @@ def pipeline(mock_config, mock_extraction_service):
     validation_service = MagicMock()
     output_writer = MagicMock()
 
-    return ChemblActivityPipeline(
+    return ChemblEntityPipeline(
         config=mock_config,
         logger=logger,
         validation_service=validation_service,
@@ -104,6 +107,10 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
     mock_extraction_service.parse_response.return_value = [
         {"activity_id": 100}, {"activity_id": 101}, {"activity_id": 102}
     ]
+    # Mock serialize_records to return input
+    mock_extraction_service.serialize_records.side_effect = (
+        lambda entity, recs: recs
+    )
 
     df = pipeline.extract()
 
@@ -128,6 +135,9 @@ def test_extract_batch_size_from_config(
 
     # Mock parse_response to return empty list
     mock_extraction_service.parse_response.return_value = []
+    mock_extraction_service.serialize_records.side_effect = (
+        lambda entity, recs: recs
+    )
 
     pipeline.extract()
 

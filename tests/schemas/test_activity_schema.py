@@ -13,6 +13,7 @@ def valid_activity_df():
     """Return a valid activity DataFrame with all required columns."""
     return pd.DataFrame({
         "activity_id": [100],
+        "action_type": ["agonist"],
         "assay_chembl_id": ["CHEMBL1"],
         "molecule_chembl_id": ["CHEMBL10"],
         "document_chembl_id": ["CHEMBL20"],
@@ -22,6 +23,8 @@ def valid_activity_df():
         "hash_row": ["a" * 64],
         "hash_business_key": ["c" * 64],
         # Optional fields
+        "assay_variant_accession": [None],
+        "assay_variant_mutation": [None],
         "pchembl_value": [7.5],
         "standard_value": [10.5],
         "standard_units": ["nM"],
@@ -72,17 +75,19 @@ def test_activity_schema_invalid_id(valid_activity_df):
     """Test that invalid activity_id fails validation."""
     df = valid_activity_df.copy()
     df["activity_id"] = [-1]
-    
+
     with pytest.raises(SchemaError) as exc:
         ActivitySchema.validate(df)
     assert "greater_than_or_equal_to" in str(exc.value) or "ge" in str(exc.value)
 
 
-def test_activity_schema_invalid_chembl_id_format(valid_activity_df):
+def test_activity_schema_invalid_chembl_id_format(
+    valid_activity_df
+):
     """Test that invalid ChEMBL ID format fails validation."""
     df = valid_activity_df.copy()
     df["assay_chembl_id"] = ["INVALID_ID"]
-    
+
     with pytest.raises(SchemaError) as exc:
         ActivitySchema.validate(df)
     assert "str_matches" in str(exc.value)
@@ -92,7 +97,7 @@ def test_activity_schema_invalid_assay_type(valid_activity_df):
     """Test that invalid assay_type fails validation."""
     df = valid_activity_df.copy()
     df["assay_type"] = ["X"]  # Invalid enum
-    
+
     with pytest.raises(SchemaError) as exc:
         ActivitySchema.validate(df)
     assert "isin" in str(exc.value)
@@ -102,7 +107,7 @@ def test_activity_schema_invalid_pchembl_range(valid_activity_df):
     """Test that invalid pchembl_value range fails validation."""
     df = valid_activity_df.copy()
     df["pchembl_value"] = [16.0]
-    
+
     with pytest.raises(SchemaError) as exc:
         ActivitySchema.validate(df)
     assert "less_than_or_equal_to" in str(exc.value) or "le" in str(exc.value)
@@ -112,7 +117,7 @@ def test_activity_schema_extra_column(valid_activity_df):
     """Test that extra columns are not allowed (strict)."""
     df = valid_activity_df.copy()
     df["extra_column"] = ["unexpected"]
-    
+
     with pytest.raises(SchemaError) as exc:
         ActivitySchema.validate(df)
     assert "column 'extra_column' not in DataFrameSchema" in str(exc.value)

@@ -1,12 +1,16 @@
-# Target Component fields
+# Target Component (`target_component`)
 
-| field_name               | data_type | is_nullable | is_filterable | description                                                       | example_value       | notes |
-|--------------------------|----------|------------|--------------|-------------------------------------------------------------------|---------------------|-------|
-| component_id             | integer  | no         | yes          | Внутренний ID белкового компонента                               | 4879                | Используется в `target_component/{id}`. |
-| accession                | string   | no         | yes          | UniProt accession                                                 | Q13936              | |
-| component_type           | string   | yes        | yes?         | Тип компонента (PROTEIN, NUCLEIC_ACID и т.п.)                     | PROTEIN             | |
-| organism                 | string   | yes        | yes          | Организм, которому принадлежит последовательность                | Homo sapiens        | |
-| sequence                 | string   | yes        | no           | Аминокислотная последовательность                                | MENSDS...           | Большое текстовое поле. |
-| protein_classification_id| integer  | yes        | yes          | FK на protein_classification                                     | 1173                | |
-| go_slims                 | array    | yes        | ?            | Связанные GO slim термины                                        | [GO:0005886, ...]   | Список идентификаторов. |
-| target_component_synonyms| array    | yes        | ?            | Синонимы компонента (генные символы и т.п.)                      | [{"component_synonym": "CYP3A4"}] | Структура элементов нужно проверить по `/schema`. |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| component_id | целое (int) | — | Внутренний ID компоненты (PK). |
+| accession | строка | — | Accession последовательности (UniProt и др.). |
+| component_type | строка | — | Тип компоненты (PROTEIN, DNA, RNA и т.п.). |
+| description | строка | — | Описание/имя компоненты. |
+| organism | строка | — | Организм, откуда взята последовательность. |
+| tax_id | целое (int) | — | NCBI Taxonomy ID. |
+| sequence | строка | — | Представительная последовательность. |
+| go_slims | список объектов | — | Связанные GO Slim термины. |
+| protein_classifications | список объектов | — | Идентификаторы protein_classification. |
+| target_component_synonyms | список объектов | — | Синонимы компоненты. |
+| target_component_xrefs | список объектов | — | Внешние ссылки (xref_id, xref_name, xref_src_db). |
+| targets | список объектов | — | Таргеты, содержащие эту компоненту. |

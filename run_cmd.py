@@ -1,38 +1,46 @@
 import sys
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 # Add src to path
 src_path = os.path.abspath("src")
-print(f"Adding to path: {src_path}")
 sys.path.insert(0, src_path)
 
-print(f"sys.path: {sys.path}")
+# Ensure output dir exists
+Path("data/output/target").mkdir(parents=True, exist_ok=True)
 
 try:
-    import bioetl
-    print(f"bioetl found at: {bioetl.__file__}")
+    import bioetl.application.container
+    # print(f"Container module: {bioetl.application.container.__file__}")
+    from bioetl.interfaces.cli.app import app
+    from bioetl.infrastructure.services.chembl_extraction import ChemblExtractionService
 except ImportError as e:
     print(f"ImportError: {e}")
-    print(f"sys.path: {sys.path}")
     sys.exit(1)
 
-# Create output dir
-output_dir = Path("data/output/document")
-output_dir.mkdir(parents=True, exist_ok=True)
+def main():
+    # Simulate CLI arguments
+    # python -m bioetl run target_chembl --config ... --output ... --limit 10
+    sys.argv = [
+        "bioetl", "run", "target_chembl",
+        "--config", "configs/pipelines/chembl/target.yaml",
+        "--output", "data/output/target",
+        "--limit", "10"
+    ]
+    
+    print("Running CLI app via wrapper...")
+    
+    # Patch get_release_version to avoid /status call
+    with patch.object(ChemblExtractionService, 'get_release_version', return_value="chembl_mock"):
+        try:
+            app()
+        except SystemExit as e:
+            print(f"SystemExit: {e}")
+        except Exception as e:
+            print(f"Exception: {e}")
+        finally:
+            print("Wrapper finished.")
 
-# Import and run app
-from bioetl.interfaces.cli.app import app
-
-# Simulate arguments
-sys.argv = [
-    "bioetl", "run", "document_chembl",
-    "--config", "configs/pipelines/chembl/document.yaml",
-    "--output", "data/output/document",
-    "--limit", "10"
-]
-
-# Run
 if __name__ == "__main__":
-    app()
-
+    main()

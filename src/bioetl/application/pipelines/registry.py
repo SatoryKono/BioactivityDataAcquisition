@@ -1,19 +1,16 @@
 from typing import Type
 
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.pipelines.chembl.activity.run import ChemblActivityPipeline
-from bioetl.application.pipelines.chembl.assay.run import ChemblAssayPipeline
-from bioetl.application.pipelines.chembl.document.run import ChemblDocumentPipeline
-from bioetl.application.pipelines.chembl.target.run import ChemblTargetPipeline
-from bioetl.application.pipelines.chembl.testitem.run import ChemblTestitemPipeline
+from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 
 # Registry mapping pipeline names to their implementation classes
 PIPELINE_REGISTRY: dict[str, Type[PipelineBase]] = {
-    "activity_chembl": ChemblActivityPipeline,
-    "assay_chembl": ChemblAssayPipeline,
-    "document_chembl": ChemblDocumentPipeline,
-    "target_chembl": ChemblTargetPipeline,
-    "testitem_chembl": ChemblTestitemPipeline,
+    "activity_chembl": ChemblEntityPipeline,
+    "assay_chembl": ChemblEntityPipeline,
+    "document_chembl": ChemblEntityPipeline,
+    "target_chembl": ChemblEntityPipeline,
+    "testitem_chembl": ChemblEntityPipeline,
+    "molecule_chembl": ChemblEntityPipeline,  # Alias for testitem
 }
 
 def get_pipeline_class(name: str) -> Type[PipelineBase]:

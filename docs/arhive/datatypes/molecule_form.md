@@ -1,7 +1,9 @@
-# Molecule Form fields
+# Molecule Form (`molecule_form`)
 
-| field_name           | data_type | is_nullable | is_filterable | description                                                  | example_value        | notes |
-|----------------------|----------|------------|--------------|--------------------------------------------------------------|----------------------|-------|
-| molecule_chembl_id   | string   | no         | yes          | ChEMBL ID конкретной формы (соль, сольват, изомер и т.п.)   | CHEMBL278020         | Используется в URL `molecule_form/{id}`. |
-| parent_chembl_id     | string   | no         | yes          | ChEMBL ID родительской молекулы                             | CHEMBL660            | Фильтр `parent_chembl_id=...`. |
-| relationship_type    | string   | yes        | yes?         | Тип отношения (SALT_OF, PARENT, HYDRATE_OF и т.п.)           | SALT_OF              | Имя и набор значений нужно подтвердить в `/schema`. |
+(полезно для связей parent ↔ соли/формы)
+
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| molecule_chembl_id | строка | — | ID конкретной формы (соль, сольват и т.п.). |
+| parent_chembl_id | строка | — | ID родительской (parent) молекулы. |
+| is_parent | логическое | true/false | Является ли данная запись родительской формой. |

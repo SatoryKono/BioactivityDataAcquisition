@@ -10,8 +10,10 @@ from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_extraction_service,
 )
-from bioetl.infrastructure.config.models import PipelineConfig
-from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
+from bioetl.infrastructure.config.models import (
+    ChemblSourceConfig,
+    PipelineConfig,
+)
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (
@@ -50,20 +52,12 @@ class PipelineContainer:
     def get_extraction_service(self) -> Any:
         """Get the extraction service based on provider configuration."""
         if self.config.provider == "chembl":
-            # Extract chembl config from generic sources dict
-            raw_source_config = self.config.sources.get("chembl", {})
-            
-            # If SourceConfig (pydantic model), convert to dict for kwargs unpacking
-            if hasattr(raw_source_config, "model_dump"):
-                raw_source_config = raw_source_config.model_dump()
+            source_config = self.config.get_source_config("chembl")
+            if not isinstance(source_config, ChemblSourceConfig):
+                raise TypeError("Expected ChemblSourceConfig")
+            return default_chembl_extraction_service(source_config)
 
-            # Validate/Parse it into ChemblSourceConfig
-            source_config = ChemblSourceConfig(**raw_source_config)
-            return default_chembl_extraction_service(
-                source_config=source_config
-            )
-        else:
-            raise ValueError(f"Unknown provider: {self.config.provider}")
+        raise ValueError(f"Unknown provider: {self.config.provider}")
 
     def get_hash_service(self) -> HashService:
         """Get the hash service."""

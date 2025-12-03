@@ -1,9 +1,10 @@
-# Compound Record fields
+# Compound Record (`compound_record`)
 
-| field_name          | data_type | is_nullable | is_filterable | description                                                               | example_value     | notes |
-|---------------------|----------|------------|--------------|---------------------------------------------------------------------------|-------------------|-------|
-| record_id           | integer  | no         | yes          | Внутренний ID записи COMPOUND_RECORD (RIDX/CIDX, нормализованный)        | 206172            | Используется как FK из `activity`. |
-| molecule_chembl_id  | string   | no         | yes          | ChEMBL ID молекулы                                                       | CHEMBL113081      | |
-| document_chembl_id  | string   | no         | yes          | ChEMBL ID документа                                                      | CHEMBL1137930     | |
-| src_id              | integer  | yes        | yes          | Источник записи (депозитор / происхождение)                              | 1                 | |
-| compound_name       | string   | yes        | yes?         | Название соединения в рамках документа                                   | Compound 12a      | Имя поля по стилю REST; сверить по `/schema`. |
+| Поле | Тип данных | Допустимые значения | Описание |
+|------|------------|----------------------|----------|
+| record_id | целое (int) | — | ID записи «соединение в документе» (PK). |
+| molecule_chembl_id | строка | — | ChEMBL ID молекулы. |
+| document_chembl_id | строка | — | Документ, в котором фигурирует соединение. |
+| compound_name | строка | — | Имя соединения в документе. |
+| compound_key | строка | — | Текстовый ключ/номер соединения у автора. |
+| src_id | целое (int) | — | ID источника данных. |

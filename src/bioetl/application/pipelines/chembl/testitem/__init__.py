@@ -1,4 +1,0 @@
-"""
-TestItem (Molecule) pipeline.
-"""
-

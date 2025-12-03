@@ -9,22 +9,18 @@ from bioetl.infrastructure.clients.chembl.factories import (
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
-from bioetl.infrastructure.config.source_chembl import (
-    ChemblSourceConfig,
-    ChemblSourceParameters,
-)
-from bioetl.infrastructure.services.chembl_extraction import (
+from bioetl.application.services.chembl_extraction import (
     ChemblExtractionService,
 )
+from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 @pytest.fixture
 def source_config():
+    """Create test ChemblSourceConfig with flat structure."""
     return ChemblSourceConfig(
-        parameters=ChemblSourceParameters(
-            base_url="https://example.com",
-            max_url_length=1000
-        )
+        base_url="https://example.com",
+        max_url_length=1000,
     )
 
 
@@ -41,7 +37,7 @@ def test_default_chembl_client_success(source_config):
 def test_default_chembl_client_overrides(source_config):
     """Test overriding config parameters via kwargs."""
     client = default_chembl_client(
-        source_config, 
+        source_config,
         base_url="https://override.com",
         max_url_length=500
     )
@@ -49,18 +45,11 @@ def test_default_chembl_client_overrides(source_config):
     assert client.request_builder.max_url_length == 500
 
 
+@pytest.mark.skip(reason="Pydantic validation prevents invalid configs")
 def test_default_chembl_client_missing_base_url():
     """Test factory raises ValueError if base_url is missing."""
-    # Mock a config with no base_url logic? 
-    # Pydantic model enforces base_url presence in ChemblSourceParameters.
-    # But if we somehow pass None to factory logic or use empty options...
-    # The factory checks `options` then `source_config.parameters`.
-    # We can try to pass a config that somehow has empty url if model allows?
-    # Actually, strict Pydantic validation prevents this at Model level.
-    # So we test if we pass a source config but parameters are somehow None (if optional).
-    # In our definition: parameters: ChemblSourceParameters (required).
-    # So validation happens before factory.
-    pass
+    # Pydantic validation prevents this at model level.
+    # ChemblSourceConfig.base_url has a default value.
 
 
 def test_default_chembl_extraction_service(source_config):
@@ -75,5 +64,5 @@ def test_default_chembl_extraction_service(source_config):
 def test_default_chembl_extraction_service_default_batch(source_config):
     """Test default batch size calculation."""
     service = default_chembl_extraction_service(source_config)
-    # Default resolve_effective_batch_size is 25 if not set, but ChEMBL factory raises it to 1000
+    # ChEMBL factory uses hard_cap=1000 for batch_size
     assert service.batch_size == 1000
