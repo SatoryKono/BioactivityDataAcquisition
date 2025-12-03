@@ -143,6 +143,10 @@ def run(
         validation_service = container.get_validation_service()
         output_writer = container.get_output_writer()
         extraction_service = container.get_extraction_service()
+        normalization_service = container.get_normalization_service()
+        record_source = container.get_record_source(
+            extraction_service, limit=limit, logger=logger
+        )
         hash_service = container.get_hash_service()
 
         # 4. Run Pipeline
@@ -152,6 +156,8 @@ def run(
             validation_service=validation_service,
             output_writer=output_writer,
             extraction_service=extraction_service,
+            record_source=record_source,
+            normalization_service=normalization_service,
             hash_service=hash_service
         )
         

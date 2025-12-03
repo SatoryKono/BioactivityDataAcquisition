@@ -13,6 +13,7 @@ from bioetl.infrastructure.config.models import (
     PipelineConfig,
     StorageConfig,
 )
+from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 from bioetl.domain.validation.service import ValidationService
@@ -22,7 +23,7 @@ from bioetl.domain.validation.service import ValidationService
 def mock_config():
     """Create a mock pipeline configuration."""
     return PipelineConfig(
-        provider="test_provider",
+        provider=ProviderId.CHEMBL,
         entity_name="test_entity",
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path="./test_out"),
@@ -70,7 +71,7 @@ def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineCo
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
-        provider="test_provider",
+        provider=ProviderId.CHEMBL,
         entity_name="test_entity",
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path=str(output_dir)),
