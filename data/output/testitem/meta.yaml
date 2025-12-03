@@ -1,9 +1,9 @@
-checksum: 977f50dc474636dc19d87c038d15e68515f47880db95f04b040d26ee92d3f481
-chembl_release: chembl_mock
+checksum: 3f16c93cfe8faee4cd27691069776f5fe9f0c00716e39eadc3e4ca46a7b7dd12
+chembl_release: unknown
 entity: testitem
 files:
 - testitem.csv
 provider: chembl
 row_count: 10
-run_id: 965f3f49-cb0a-4dfc-b588-25840e444b6f
-timestamp: '2025-12-03T07:30:40.340231+00:00'
+run_id: 581d59ff-bd12-4772-880b-4de6e30e7a62
+timestamp: '2025-12-03T09:13:25.586715+00:00'
