@@ -20,7 +20,7 @@ class ActivitySchema(pa.DataFrameModel):
     bao_endpoint: Series[str] = pa.Field(nullable=True, description="BAO endpoint term")
     bao_format: Series[str] = pa.Field(nullable=True, description="BAO format term")
     bao_label: Series[str] = pa.Field(nullable=True, description="Label для BAO endpoint/format")
-    canonical_smiles: Series[str] = pa.Field(description="Канонический SMILES молекулы")
+    canonical_smiles: Series[str] = pa.Field(nullable=True, description="Канонический SMILES молекулы")
     data_validity_comment: Series[str] = pa.Field(nullable=True, description="Комментарий о качестве/валидности")
     data_validity_description: Series[str] = pa.Field(nullable=True, description="Описание проблем с данными")
     document_chembl_id: Series[str] = pa.Field(str_matches=r"^CHEMBL\d+$", description="ChEMBL ID документа-источника")
@@ -58,6 +58,9 @@ class ActivitySchema(pa.DataFrameModel):
     # Generated columns
     hash_row: Series[str] = pa.Field(str_matches=r"^[a-f0-9]{64}$", description="Хэш всей строки (64 hex символа)")
     hash_business_key: Series[str] = pa.Field(nullable=True, str_matches=r"^[a-f0-9]{64}$", description="Хэш бизнес-ключа (для идентификации дубликатов)")
+    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
+    database_version: Series[str] = pa.Field(nullable=True, description="Версия базы данных")
+    extracted_at: Series[str] = pa.Field(nullable=True, description="Дата и время извлечения")
 
     class Config:
         strict = True

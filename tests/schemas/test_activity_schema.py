@@ -60,7 +60,11 @@ def valid_activity_df():
         "uo_units": ["UO_0000065"],
         "upper_value": [None],
         "value": [10.5],
-        "activity_properties": [None]
+        "activity_properties": [None],
+        # Generated columns
+        "index": [0],
+        "database_version": ["chembl_34"],
+        "extracted_at": ["2023-10-26T12:00:00+00:00"]
     })
 
 

@@ -44,12 +44,18 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         pk = config.primary_key
 
         # Priority 2: Legacy location in pipeline dictionary
-        if not pk and config.pipeline:
-            pk = config.pipeline.get("primary_key")
+        if not pk and config.pipeline and "primary_key" in config.pipeline:
+            pk = config.pipeline["primary_key"]
 
         # Priority 3: Default based on entity name
         if not pk:
             pk = f"{config.entity_name}_id"
+
+        if not pk:
+            raise ValueError(
+                f"Could not resolve ID_COLUMN for entity '{config.entity_name}'. "
+                "Please set 'primary_key' in config or pipeline options."
+            )
 
         self.ID_COLUMN = pk
         self.API_FILTER_KEY = f"{self.ID_COLUMN}__in"

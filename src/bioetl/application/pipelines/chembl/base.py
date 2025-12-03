@@ -56,6 +56,7 @@ class ChemblPipelineBase(PipelineBase):
             logger,
             validation_service,
             output_writer,
+            hash_service,
         )
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
@@ -63,13 +64,17 @@ class ChemblPipelineBase(PipelineBase):
         # Initialize normalization service
         self._normalization_service = NormalizationService(config)
 
-    def get_chembl_release(self) -> str:
+    def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
         if self._chembl_release is None:
             self._chembl_release = (
                 self._extraction_service.get_release_version()
             )
         return self._chembl_release
+    
+    # Alias for compatibility if needed elsewhere, but we use get_version now.
+    def get_chembl_release(self) -> str:
+        return self.get_version()
 
     def _resolve_source_config(self) -> ChemblSourceConfig:
         """Resolve and validate ChEMBL source configuration."""
@@ -206,7 +211,7 @@ class ChemblPipelineBase(PipelineBase):
         schema = schema_cls.to_schema()
 
         # Columns to ignore during this check because they are generated later
-        ignored_cols = {"hash_row", "hash_business_key"}
+        ignored_cols = {"hash_row", "hash_business_key", "index", "database_version", "extracted_at"}
 
         required_cols = [
             name
@@ -258,4 +263,4 @@ class ChemblPipelineBase(PipelineBase):
 
     def _enrich_context(self, context: RunContext) -> None:
         """Добавляет chembl_release в метаданные контекста."""
-        context.metadata["chembl_release"] = self.get_chembl_release()
+        context.metadata["chembl_release"] = self.get_version()

@@ -73,3 +73,18 @@ class ExtractionServiceABC(ABC):
         Returns:
             List of record dictionaries
         """
+
+    @abstractmethod
+    def serialize_records(
+        self, entity: str, records: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """
+        Serialize records (flattening, type conversion) before DataFrame creation.
+
+        Args:
+            entity: Entity name
+            records: List of raw records
+
+        Returns:
+            List of serialized records
+        """

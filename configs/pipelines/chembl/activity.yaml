@@ -17,7 +17,7 @@ pipeline:
 sources:
   chembl:
     provider: chembl
-    batch_size: 100
+    batch_size: 20
     base_url: "https://www.ebi.ac.uk/chembl/api/data"
     max_url_length: 2000
     data_validity:
@@ -103,7 +103,7 @@ fields:
 
   - name: canonical_smiles
     data_type: string
-    is_nullable: false
+    is_nullable: true
     is_filterable: false
     description: Канонический SMILES молекулы
 
