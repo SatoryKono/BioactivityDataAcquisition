@@ -4,20 +4,21 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
 import pandas as pd
 
-from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.application.pipelines.hooks import PipelineHookABC
+from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
+from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
 )
-from bioetl.domain.validation.service import ValidationService
-from bioetl.domain.transform.hash_service import HashService
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
@@ -74,17 +75,21 @@ class PipelineBase(ABC):
         stages_results: list[StageResult] = []
 
         try:
-            # 1. Extract
-            self._notify_stage_start("extract", context)
-            df_raw = self.extract(**kwargs)
+            df_raw = self._run_stage(
+                stage="extract",
+                context=context,
+                action=lambda: self.extract(**kwargs),
+            )
             stages_results.append(
                 self._make_stage_result("extract", len(df_raw))
             )
             self._notify_stage_end("extract", stages_results[-1])
 
-            # 2. Transform
-            self._notify_stage_start("transform", context)
-            df_transformed = self.transform(df_raw)
+            df_transformed = self._run_stage(
+                stage="transform",
+                context=context,
+                action=lambda: self.transform(df_raw),
+            )
             df_transformed = self._add_hash_columns(df_transformed)
             df_transformed = self._add_index_column(df_transformed)
             df_transformed = self._add_database_version_column(df_transformed, self.get_version())
@@ -94,29 +99,32 @@ class PipelineBase(ABC):
             )
             self._notify_stage_end("transform", stages_results[-1])
 
-            # 3. Validate
-            self._notify_stage_start("validate", context)
-            df_validated = self.validate(df_transformed)
+            df_validated = self._run_stage(
+                stage="validate",
+                context=context,
+                action=lambda: self.validate(df_transformed),
+            )
             stages_results.append(
                 self._make_stage_result("validate", len(df_validated))
             )
             self._notify_stage_end("validate", stages_results[-1])
 
-            # 4. Write (skip on dry_run)
             write_result: WriteResult | None = None
             if not dry_run:
-                self._notify_stage_start("write", context)
-                write_result = self.write(
-                    df_validated,
-                    output_path,
-                    context
+                write_result = self._run_stage(
+                    stage="write",
+                    context=context,
+                    action=lambda: self.write(
+                        df_validated,
+                        output_path,
+                        context,
+                    ),
                 )
                 stages_results.append(
                     self._make_stage_result("write", write_result.row_count)
                 )
                 self._notify_stage_end("write", stages_results[-1])
 
-            # Build metadata
             if write_result:
                 meta = build_run_metadata(context, write_result)
             else:
@@ -135,11 +143,17 @@ class PipelineBase(ABC):
                 errors=[],
                 meta=meta,
             )
-
-        except Exception as e:
-            self._logger.error("Pipeline failed", error=str(e))
+        except PipelineStageError as error:
+            self._logger.error(
+                "Pipeline failed",
+                stage=error.stage,
+                provider=error.provider,
+                entity=error.entity,
+                run_id=error.run_id,
+                error=str(error.cause) if error.cause else str(error),
+            )
             for hook in self._hooks:
-                hook.on_error("pipeline", e)
+                hook.on_error(error.stage, error)
             raise
 
     # === Abstract Methods ===
@@ -228,14 +242,21 @@ class PipelineBase(ABC):
 
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
         self._stage_starts[stage] = datetime.now(timezone.utc)
-        self._logger.info(f"Stage started: {stage}")
+        self._logger.info(
+            f"Stage started: {stage}",
+            provider=context.provider,
+            entity=context.entity_name,
+            run_id=context.run_id,
+        )
         for hook in self._hooks:
             hook.on_stage_start(stage, context)
 
     def _notify_stage_end(self, stage: str, result: StageResult) -> None:
         self._logger.info(
             f"Stage finished: {stage}",
-            records=result.records_processed
+            records=result.records_processed,
+            provider=self._config.provider,
+            entity=self._config.entity_name,
         )
         for hook in self._hooks:
             hook.on_stage_end(stage, result)
@@ -260,6 +281,38 @@ class PipelineBase(ABC):
         return (
             datetime.now(timezone.utc) - context.started_at
         ).total_seconds()
+
+    def _run_stage(
+        self,
+        stage: str,
+        context: RunContext,
+        action: Callable[[], Any],
+        *,
+        attempt: int = 1,
+    ) -> Any:
+        self._notify_stage_start(stage, context)
+        try:
+            return action()
+        except Exception as exc:
+            error = PipelineStageError(
+                provider=self._config.provider,
+                entity=self._config.entity_name,
+                stage=stage,
+                attempt=attempt,
+                run_id=context.run_id,
+                cause=exc,
+            )
+            self._logger.error(
+                "Stage failed",
+                stage=stage,
+                provider=self._config.provider,
+                entity=self._config.entity_name,
+                run_id=context.run_id,
+                error=str(exc),
+            )
+            for hook in self._hooks:
+                hook.on_error(stage, error)
+            raise error from exc
 
     def _enrich_context(self, context: RunContext) -> None:
         """
