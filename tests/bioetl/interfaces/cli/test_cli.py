@@ -15,6 +15,7 @@ sys.modules.setdefault("tqdm", MagicMock())
 from bioetl.interfaces.cli import app
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.schemas.provider_config_schema import ChemblSourceConfig
 
 runner = CliRunner()
 
@@ -36,11 +37,23 @@ def test_validate_config_missing():
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.ConfigResolver")
-def test_validate_config_success(mock_resolver):
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+def test_validate_config_success(mock_loader):
     """Test validate-config success."""
-    mock_resolver.return_value.resolve.return_value = PipelineConfig(
-        provider="chembl", entity_name="test", sources={}
+    mock_loader.return_value = PipelineConfig(
+        id="chembl.test",
+        provider="chembl",
+        entity="test",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path="./out",
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
     )
 
     # Create a dummy file so Path exists check passes if any
@@ -55,9 +68,9 @@ def test_validate_config_success(mock_resolver):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.ConfigResolver")
 @patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
-def test_run_command(mock_build_deps, mock_resolver, mock_get_cls):
+@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+def test_run_command(mock_loader, mock_build_deps, mock_get_cls):
     """Test the run command."""
     mock_pipeline_cls = MagicMock()
     mock_pipeline_instance = mock_pipeline_cls.return_value
@@ -66,9 +79,22 @@ def test_run_command(mock_build_deps, mock_resolver, mock_get_cls):
     )
     mock_get_cls.return_value = mock_pipeline_cls
 
-    mock_config = PipelineConfig(provider="chembl", entity_name="activity", sources={})
-    mock_config.storage.output_path = "out"
-    mock_resolver.return_value.resolve.return_value = mock_config
+    mock_config = PipelineConfig(
+        id="chembl.activity",
+        provider="chembl",
+        entity="activity",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path="out",
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
+    )
+    mock_loader.return_value = mock_config
 
     # Mock container
     mock_container = MagicMock()
@@ -100,13 +126,11 @@ def test_smoke_run(mock_run):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.ConfigResolver")
-def test_run_config_not_found_explicit(mock_resolver, mock_get_cls):
+@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+def test_run_config_not_found_explicit(mock_loader, mock_get_cls):
     """Test run command with explicit config that doesn't exist."""
     mock_get_cls.return_value = MagicMock()
-    mock_resolver.return_value.resolve.side_effect = FileNotFoundError(
-        "No such file or directory"
-    )
+    mock_loader.side_effect = FileNotFoundError("No such file or directory")
 
     result = runner.invoke(
         app, ["run", "test_pipeline", "--config", "nonexistent.yaml"]
@@ -120,10 +144,10 @@ def test_run_config_not_found_explicit(mock_resolver, mock_get_cls):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.ConfigResolver")
 @patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config")
 def test_run_with_limit_and_dry_run(
-    mock_build_deps, mock_resolver, mock_get_cls
+    mock_loader, mock_build_deps, mock_get_cls
 ):
     """Test run command with limit and dry-run options."""
     mock_pipeline_cls = MagicMock()
@@ -133,9 +157,22 @@ def test_run_with_limit_and_dry_run(
     )
     mock_get_cls.return_value = mock_pipeline_cls
 
-    mock_config = PipelineConfig(provider="chembl", entity_name="activity", sources={})
-    mock_config.storage.output_path = "out"
-    mock_resolver.return_value.resolve.return_value = mock_config
+    mock_config = PipelineConfig(
+        id="chembl.activity",
+        provider="chembl",
+        entity="activity",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path="out",
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
+    )
+    mock_loader.return_value = mock_config
     mock_build_deps.return_value = MagicMock()
 
     with patch("pathlib.Path.exists", return_value=True):
@@ -152,17 +189,29 @@ def test_run_with_limit_and_dry_run(
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.ConfigResolver")
 @patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
-def test_run_pipeline_failure(mock_build_deps, mock_resolver, mock_get_cls):
+@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+def test_run_pipeline_failure(mock_loader, mock_build_deps, mock_get_cls):
     """Test run command when pipeline fails."""
     mock_pipeline_cls = MagicMock()
     mock_pipeline_instance = mock_pipeline_cls.return_value
     mock_pipeline_instance.run.return_value = MagicMock(success=False)
     mock_get_cls.return_value = mock_pipeline_cls
 
-    mock_resolver.return_value.resolve.return_value = PipelineConfig(
-        provider="chembl", entity_name="activity", sources={}
+    mock_loader.return_value = PipelineConfig(
+        id="chembl.activity",
+        provider="chembl",
+        entity="activity",
+        input_mode="auto_detect",
+        input_path=None,
+        output_path="out",
+        batch_size=10,
+        provider_config=ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=10.0,
+        ),
     )
     mock_build_deps.return_value = MagicMock()
 
@@ -188,11 +237,11 @@ def test_run_exception(mock_get_cls):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.ConfigResolver")
 @patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config")
 def test_run_dry_run_pipeline_metadata(
+    mock_loader,
     mock_build_deps,
-    mock_resolver,
     mock_get_cls,
     pipeline_test_config,
     small_pipeline_df,
@@ -249,7 +298,7 @@ def test_run_dry_run_pipeline_metadata(
     container.get_extraction_service.return_value = MagicMock()
     container.get_hash_service.return_value = None
 
-    mock_resolver.return_value.resolve.return_value = pipeline_test_config
+    mock_loader.return_value = pipeline_test_config
     mock_build_deps.return_value = container
     mock_get_cls.return_value = DryRunPipeline
 
