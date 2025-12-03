@@ -1,0 +1,28 @@
+[
+  {
+    "description": "Simple record with float and string",
+    "input_record": {
+      "id": 1,
+      "name": "Test Name",
+      "score": 123.45678901234567,
+      "active": true
+    },
+    "business_key_fields": ["id", "name"],
+    "expected_canonical_json_keys": ["active", "id", "name", "score"],
+    "expected_hash_business_key": "NOTE: TO BE FILLED AFTER FIRST RUN OR CALCULATED",
+    "expected_hash_row": "NOTE: TO BE FILLED AFTER FIRST RUN OR CALCULATED"
+  },
+  {
+    "description": "Nested object and array",
+    "input_record": {
+      "id": 2,
+      "tags": ["b", "a", "c"],
+      "meta": {"z": 1, "y": 2}
+    },
+    "business_key_fields": ["id"],
+    "expected_canonical_json_keys": ["id", "meta", "tags"],
+    "expected_hash_business_key": "",
+    "expected_hash_row": ""
+  }
+]
+

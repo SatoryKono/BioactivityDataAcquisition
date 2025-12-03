@@ -35,12 +35,9 @@
 
 Документация: [clients/](clients/)
 
-- [00 PubMed Client](clients/00-pubmed-client.md)
-- [01 Crossref Client](clients/01-crossref-client.md)
-- [02 PubChem Client](clients/02-pubchem-client.md)
+> **Removed:** Enrichment через внешние API (PubChem, PubMed, Crossref, UniProt, SemanticScholar) полностью удалён из пайплайнов. Используйте отдельный процесс для обогащения данных (offline enrichment).
+
 - [03 Configured HTTP Client](clients/03-configured-http-client.md)
-- [04 Semantic Scholar Client](clients/04-semantic-scholar-client.md)
-- [05 UniProt Client](clients/05-uniprot-client.md)
 
 ## HTTP-инфраструктура
 

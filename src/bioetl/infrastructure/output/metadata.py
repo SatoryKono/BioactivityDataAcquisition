@@ -22,6 +22,7 @@ def build_run_metadata(
         "entity": context.entity_name,
         "provider": context.provider,
         "timestamp": context.started_at.isoformat(),
+        "hash_version": "v1_blake2b_256",
         "row_count": result.row_count,
         "checksum": result.checksum,
         "files": [result.path.name],
@@ -41,6 +42,7 @@ def build_dry_run_metadata(
         "entity": context.entity_name,
         "provider": context.provider,
         "timestamp": context.started_at.isoformat(),
+        "hash_version": "v1_blake2b_256",
         "row_count": row_count,
         "dry_run": True,
     }

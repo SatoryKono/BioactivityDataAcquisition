@@ -1,9 +1,10 @@
-checksum: e5ab2e5f657af9c10a2c382e68b7c8a8327b6f37e41b26d45a3ad66ba3e1e3ea
+checksum: 794da3fc332a375d15d00a4b394f96b9a868895f062a9e738bea6029ee0b05ab
 chembl_release: ChEMBL_36
 entity: activity
 files:
 - activity.csv
+hash_version: v1_blake2b_256
 provider: chembl
-row_count: 7999
-run_id: 9d4e7e43-d161-4b98-8edb-bc77029317b3
-timestamp: '2025-12-03T08:53:07.252436+00:00'
+row_count: 10
+run_id: e0082d2d-54ec-4cc1-b7cd-128853b67ff9
+timestamp: '2025-12-03T12:45:42.145541+00:00'

@@ -7,6 +7,12 @@ entity_name: molecule
 endpoint: /molecule
 primary_key: molecule_chembl_id
 
+pipeline:
+  name: testitem_chembl
+  version: "0.1.0"
+  owner: bioetl-team
+  description: "ChEMBL Molecules (/molecule) → normalized test items"
+
 sources:
   chembl:
     provider: chembl

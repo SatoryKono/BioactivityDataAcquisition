@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\application\pipelines\base.py
+# hypothesis_version: 6.140.3
+
+[0.0, 'Pipeline failed', 'Pipeline started', 'UnifiedOutputWriter', 'extract', 'hash_business_key', 'hash_row', 'pipeline', 'transform', 'validate', 'write']

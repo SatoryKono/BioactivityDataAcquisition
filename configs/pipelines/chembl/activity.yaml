@@ -7,6 +7,13 @@ entity_name: activity
 endpoint: /activity
 primary_key: activity_id
 
+
+pipeline:
+  name: activity_chembl
+  version: "1.0.0"
+  owner: "Data Acquisition Team"
+  description: "Extract biological activity records from ChEMBL API"
+
 sources:
   chembl:
     provider: chembl

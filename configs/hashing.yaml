@@ -1,0 +1,21 @@
+hashing:
+  algorithm: "blake2b"
+  digest_size_bytes: 32
+  output_encoding: "hex_lower"
+  salt: null
+  hash_version: "v1_blake2b_256"
+
+  canonicalization:
+    format: "canonical_json"
+    utf8: true
+    ensure_ascii: false
+    sort_keys_recursive: true
+    arrays_preserve_order: true
+    float_format: "%.15g"
+    unicode_normalization: "NFC"
+    missing_field_representation: null
+
+  business_key:
+    serialization: "json_array"  # or json_object
+    use_concatenation: false
+
