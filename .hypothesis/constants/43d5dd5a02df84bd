@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\clients\middleware.py
+# hypothesis_version: 6.140.3
+
+[0.0, 1.0, 2.0, 30.0, 429, 500, 600, 'Connection error', 'HTTP request failed', 'HttpClientMiddleware', 'Rate limit exceeded', 'Request timed out', 'Server error', 'elapsed', 'error_type', 'method', 'provider', 'response', 'retry_count', 'status_code', 'timeout', 'url']
