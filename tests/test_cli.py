@@ -1,12 +1,19 @@
 """
 Tests for the CLI entry point.
 """
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 from typer.testing import CliRunner
 
+import sys
+
+# Avoid optional dependency import errors during tests
+sys.modules.setdefault("tqdm", MagicMock())
+
 from bioetl.interfaces.cli import app
+from bioetl.application.pipelines.base import PipelineBase
 
 runner = CliRunner()
 
@@ -177,3 +184,88 @@ def test_run_exception(mock_get_cls):
     assert result.exit_code == 1
     assert "Error:" in result.stdout
     assert "Unexpected error" in result.stdout
+
+
+@pytest.mark.unit
+@patch("bioetl.interfaces.cli.app.get_pipeline_class")
+@patch("bioetl.interfaces.cli.app.ConfigResolver")
+@patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+def test_run_dry_run_pipeline_metadata(
+    mock_build_deps,
+    mock_resolver,
+    mock_get_cls,
+    pipeline_test_config,
+    small_pipeline_df,
+):
+    """Dry-run via CLI preserves stage info and metadata."""
+
+    created_instances: list[PipelineBase] = []
+
+    class DryRunPipeline(PipelineBase):
+        def __init__(
+            self,
+            config,
+            logger,
+            validation_service,
+            output_writer,
+            extraction_service=None,
+            hash_service=None,
+        ):
+            super().__init__(
+                config,
+                logger,
+                validation_service,
+                output_writer,
+                hash_service,
+            )
+            self._dataset = small_pipeline_df
+            self.last_result = None
+            created_instances.append(self)
+
+        def extract(self, **_):
+            return self._dataset.copy()
+
+        def transform(self, df):
+            return df.assign(cli_processed=True)
+
+        def run(self, *args, **kwargs):  # type: ignore[override]
+            result = super().run(*args, **kwargs)
+            self.last_result = result
+            return result
+
+    logger = MagicMock()
+    logger.bind.return_value = logger
+    validation_service = MagicMock()
+    validation_service.validate.side_effect = lambda df, **__: df
+    output_writer = MagicMock()
+    output_writer.write_result.return_value = MagicMock(
+        row_count=len(small_pipeline_df), checksum="checksum", path=MagicMock(name="dummy.parquet")
+    )
+
+    container = MagicMock()
+    container.get_logger.return_value = logger
+    container.get_validation_service.return_value = validation_service
+    container.get_output_writer.return_value = output_writer
+    container.get_extraction_service.return_value = MagicMock()
+    container.get_hash_service.return_value = None
+
+    mock_resolver.return_value.resolve.return_value = pipeline_test_config
+    mock_build_deps.return_value = container
+    mock_get_cls.return_value = DryRunPipeline
+
+    with runner.isolated_filesystem():
+        Path("config.yaml").write_text("dummy", encoding="utf-8")
+        result = runner.invoke(
+            app,
+            ["run", "test_pipeline", "--config", "config.yaml", "--dry-run"],
+        )
+
+    assert result.exit_code == 0
+    assert "Pipeline finished successfully" in result.stdout
+
+    created_pipeline = created_instances[0]
+    assert created_pipeline.last_result is not None
+    stage_names = [stage.stage_name for stage in created_pipeline.last_result.stages]
+    assert stage_names == ["extract", "transform", "validate"]
+    assert created_pipeline.last_result.meta["dry_run"] is True
+    assert created_pipeline.last_result.errors == []
