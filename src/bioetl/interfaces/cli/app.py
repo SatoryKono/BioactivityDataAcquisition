@@ -107,6 +107,9 @@ def run(
         output_writer = container.get_output_writer()
         extraction_service = container.get_extraction_service()
         hash_service = container.get_hash_service()
+        ingestion_service = container.get_ingestion_service(
+            logger, validation_service
+        )
 
         # 4. Run Pipeline
         pipeline = pipeline_cls(
@@ -115,6 +118,7 @@ def run(
             validation_service=validation_service,
             output_writer=output_writer,
             extraction_service=extraction_service,
+            ingestion_service=ingestion_service,
             hash_service=hash_service
         )
         

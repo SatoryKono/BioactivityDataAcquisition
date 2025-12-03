@@ -8,6 +8,8 @@ import pytest
 
 from bioetl.domain.models import RunContext
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.transform.impl.normalize import NormalizationService
+from bioetl.infrastructure.ingestion import NormalizationIngestionService
 
 
 class ConcreteChemblPipeline(ChemblPipelineBase):
@@ -34,12 +36,20 @@ def mock_dependencies_fixture():
     validation_service = MagicMock()
     validation_service.get_schema_columns.return_value = ["a", "transformed"]
 
+    normalization_service = NormalizationService(config)
+    ingestion_service = NormalizationIngestionService(
+        normalization_service=normalization_service,
+        validation_service=validation_service,
+        logger=MagicMock(),
+    )
+
     return {
         "config": config,
         "logger": MagicMock(),
         "validation_service": validation_service,
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
+        "ingestion_service": ingestion_service,
     }
 
 
@@ -54,6 +64,7 @@ def pipeline_fixture(mock_dependencies_fixture):
         validation_service=mock_dependencies_fixture["validation_service"],
         output_writer=mock_dependencies_fixture["output_writer"],
         extraction_service=mock_dependencies_fixture["extraction_service"],
+        ingestion_service=mock_dependencies_fixture["ingestion_service"],
     )
 
 

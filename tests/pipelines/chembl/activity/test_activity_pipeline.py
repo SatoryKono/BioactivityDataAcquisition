@@ -7,6 +7,8 @@ from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.transform.impl.normalize import NormalizationService
+from bioetl.infrastructure.ingestion import NormalizationIngestionService
 
 
 @pytest.fixture
@@ -24,12 +26,20 @@ def pipeline():
         ActivitySchema.to_schema().columns.keys()
     )
 
+    normalization_service = NormalizationService(config)
+    ingestion_service = NormalizationIngestionService(
+        normalization_service=normalization_service,
+        validation_service=validation_service,
+        logger=MagicMock(),
+    )
+
     return ChemblEntityPipeline(
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
+        ingestion_service=ingestion_service,
     )
 
 def test_transform_nested_fields(pipeline):
@@ -94,8 +104,8 @@ def test_transform_drops_invalid_rows(pipeline):
     pipeline._validation_service.get_schema.return_value = MockSchema
     pipeline._validation_service.get_schema_columns.return_value = list(MockSchema.to_schema().columns.keys())
     
-    pipeline._normalization_service = MagicMock()
-    pipeline._normalization_service.normalize_fields.side_effect = lambda x: x
+    pipeline._ingestion_service._normalization_service = MagicMock()
+    pipeline._ingestion_service._normalization_service.normalize_fields.side_effect = lambda x: x
     
     df = pd.DataFrame({
         "required_col": ["A", None, "C"],

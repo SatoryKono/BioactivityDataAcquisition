@@ -6,6 +6,7 @@ with a configurable generic implementation.
 """
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ingestion.contracts import IngestionServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import PipelineConfig
@@ -26,6 +27,7 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         validation_service: ValidationService,
         output_writer: UnifiedOutputWriter,
         extraction_service: ExtractionServiceABC,
+        ingestion_service: IngestionServiceABC,
         hash_service: HashService | None = None,
     ) -> None:
         super().__init__(
@@ -34,6 +36,7 @@ class ChemblEntityPipeline(ChemblPipelineBase):
             validation_service,
             output_writer,
             extraction_service,
+            ingestion_service,
             hash_service,
         )
 

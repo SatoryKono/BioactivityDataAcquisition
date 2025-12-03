@@ -8,6 +8,8 @@ from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
 from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+from bioetl.domain.transform.impl.normalize import NormalizationService
+from bioetl.infrastructure.ingestion import NormalizationIngestionService
 
 
 @pytest.fixture
@@ -29,12 +31,20 @@ def pipeline():  # pylint: disable=redefined-outer-name
         TestitemSchema.to_schema().columns.keys()
     )
 
+    normalization_service = NormalizationService(config)
+    ingestion_service = NormalizationIngestionService(
+        normalization_service=normalization_service,
+        validation_service=validation_service,
+        logger=MagicMock(),
+    )
+
     return ChemblEntityPipeline(
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
+        ingestion_service=ingestion_service,
     )
 
 
