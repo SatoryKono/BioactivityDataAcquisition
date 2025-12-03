@@ -1,4 +1,4 @@
-checksum: 3557953a91c610cfee6c7499d4763d1ca6ef388d496adf1be3ef88715c4f5723
+checksum: 21949379d9cf0fd9e0b6a4256c4c3727eff681e01eb8ba114ffe8567a4f5ee4f
 chembl_release: ChEMBL_36
 entity: target
 files:
@@ -6,5 +6,5 @@ files:
 hash_version: v1_blake2b_256
 provider: chembl
 row_count: 100
-run_id: 2e9fbcde-da6d-4e83-98c7-b8f5b2659c30
-timestamp: '2025-12-03T18:56:06.100276+00:00'
+run_id: 7b612d77-83eb-454b-8813-96c9eaf3bb8c
+timestamp: '2025-12-03T19:03:37.462733+00:00'
