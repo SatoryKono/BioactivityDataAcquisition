@@ -1,0 +1,27 @@
+# Core
+pydantic>=2.0
+pandera
+pandas
+numpy
+pyyaml
+
+# CLI
+typer
+rich
+
+# Networking & API
+httpx
+tenacity
+
+# Logging
+structlog
+
+# Testing & Quality
+pytest
+pytest-cov
+ruff
+mypy
+
+# Typing
+types-PyYAML
+
