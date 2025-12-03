@@ -6,10 +6,12 @@ from typing import Any
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.impl.normalize import NormalizationService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_extraction_service,
 )
+from bioetl.infrastructure.ingestion import NormalizationIngestionService
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     PipelineConfig,
@@ -58,6 +60,20 @@ class PipelineContainer:
             return default_chembl_extraction_service(source_config)
 
         raise ValueError(f"Unknown provider: {self.config.provider}")
+
+    def get_ingestion_service(
+        self,
+        logger: LoggerAdapterABC,
+        validation_service: ValidationService | None = None,
+    ) -> NormalizationIngestionService:
+        """Get normalization-based ingestion service."""
+        normalization_service = NormalizationService(self.config)
+        validation_service = validation_service or self.get_validation_service()
+        return NormalizationIngestionService(
+            normalization_service=normalization_service,
+            validation_service=validation_service,
+            logger=logger,
+        )
 
     def get_hash_service(self) -> HashService:
         """Get the hash service."""

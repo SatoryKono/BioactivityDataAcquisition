@@ -9,9 +9,9 @@ import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ingestion.contracts import IngestionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.transform.impl.normalize import NormalizationService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
@@ -172,6 +172,7 @@ class ChemblPipelineBase(PipelineBase):
         validation_service: ValidationService,
         output_writer: UnifiedOutputWriter,
         extraction_service: ExtractionServiceABC,
+        ingestion_service: IngestionServiceABC,
         hash_service: HashService | None = None,
     ) -> None:
         super().__init__(
@@ -183,9 +184,7 @@ class ChemblPipelineBase(PipelineBase):
         )
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
-
-        # Initialize normalization service
-        self._normalization_service = NormalizationService(config)
+        self._ingestion_service = ingestion_service
 
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
@@ -275,51 +274,10 @@ class ChemblPipelineBase(PipelineBase):
         df = self.pre_transform(df)
         df = self._do_transform(df)
 
-        # Выполняем нормализацию (строки, числа, вложенные структуры)
-        df = self._normalization_service.normalize_fields(df)
-
-        # Приводим к схеме (добавляем отсутствующие колонки, упорядочиваем)
-        df = self._enforce_schema(df)
-
-        # Удаляем строки с NULL в обязательных колонках
-        df = self._drop_nulls_in_required_columns(df)
-
-        return df
-
-    def _drop_nulls_in_required_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Удаляет строки, где обязательные (non-nullable) колонки содержат NULL.
-        Игнорирует генерируемые колонки (hash_row, hash_business_key),
-        так как они вычисляются позже.
-        """
-        entity = self._config.entity_name
-        schema_cls = self._validation_service.get_schema(entity)
-        schema = schema_cls.to_schema()
-
-        # Columns to ignore during this check because they are generated later
-        ignored_cols = {"hash_row", "hash_business_key", "index", "database_version", "extracted_at"}
-
-        required_cols = [
-            name
-            for name, col in schema.columns.items()
-            if not col.nullable
-            and name in df.columns
-            and name not in ignored_cols
-        ]
-
-        if not required_cols:
-            return df
-
-        initial_count = len(df)
-        df_clean = df.dropna(subset=required_cols)
-        dropped_count = initial_count - len(df_clean)
-
-        if dropped_count > 0:
-            self._logger.warning(
-                f"Dropped {dropped_count} rows with nulls in required columns: {required_cols}"
-            )
-
-        return df_clean
+        return self._ingestion_service.ingest(
+            df,
+            entity_name=self._config.entity_name,
+        )
 
     def pre_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Хук для предварительной обработки (можно переопределить)."""
@@ -332,20 +290,6 @@ class ChemblPipelineBase(PipelineBase):
         Наследники могут переопределить или расширить.
         """
         return df
-
-    def _enforce_schema(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Приводит DataFrame к схеме: заполняет отсутствующие колонки None,
-        оставляет только колонки из схемы в правильном порядке.
-        """
-        entity = self._config.entity_name
-        schema_columns = self._validation_service.get_schema_columns(entity)
-
-        for col in schema_columns:
-            if col not in df.columns:
-                df[col] = None
-
-        return df[schema_columns]
 
     def _enrich_context(self, context: RunContext) -> None:
         """Добавляет chembl_release в метаданные контекста."""

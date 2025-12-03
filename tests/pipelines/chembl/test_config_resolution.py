@@ -10,6 +10,7 @@ def dependencies():
         "validation_service": MagicMock(),
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
+        "ingestion_service": MagicMock(),
         "hash_service": MagicMock(),
     }
 

@@ -9,6 +9,8 @@ from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
 from bioetl.domain.schemas.chembl.document import DocumentSchema
+from bioetl.domain.transform.impl.normalize import NormalizationService
+from bioetl.infrastructure.ingestion import NormalizationIngestionService
 
 
 @pytest.fixture
@@ -36,6 +38,13 @@ def pipeline():
         DocumentSchema.to_schema().columns.keys()
     )
 
+    normalization_service = NormalizationService(config)
+    ingestion_service = NormalizationIngestionService(
+        normalization_service=normalization_service,
+        validation_service=validation_service,
+        logger=MagicMock(),
+    )
+
     # We need real normalization service logic or mocked?
     # ChemblPipelineBase initializes NormalizationService(config).
     # So we rely on that service working with our mock config.
@@ -46,6 +55,7 @@ def pipeline():
         validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
+        ingestion_service=ingestion_service,
     )
 
 

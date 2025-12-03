@@ -58,6 +58,7 @@ def pipeline(mock_config, mock_extraction_service):
     logger = MagicMock()
     validation_service = MagicMock()
     output_writer = MagicMock()
+    ingestion_service = MagicMock()
 
     return ChemblEntityPipeline(
         config=mock_config,
@@ -65,6 +66,7 @@ def pipeline(mock_config, mock_extraction_service):
         validation_service=validation_service,
         output_writer=output_writer,
         extraction_service=mock_extraction_service,
+        ingestion_service=ingestion_service,
     )
 
 
