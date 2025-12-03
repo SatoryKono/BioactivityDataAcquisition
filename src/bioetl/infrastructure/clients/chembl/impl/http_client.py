@@ -2,7 +2,13 @@ import time
 from typing import Any, Iterator
 
 import requests
+from requests import exceptions as requests_exceptions
 
+from bioetl.domain.errors import (
+    ClientNetworkError,
+    ClientRateLimitError,
+    ClientResponseError,
+)
 from bioetl.infrastructure.clients.base.contracts import RateLimiterABC, RetryPolicyABC
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
@@ -28,6 +34,7 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         self.rate_limiter = rate_limiter
         self.retry_policy = retry_policy
         self.session = requests.Session()
+        self.provider = "chembl"
 
     def fetch_one(self, id: str) -> dict[str, Any]:
         # Generic fetch not fully supported by ChEMBL generic endpoint unless we know entity
@@ -98,17 +105,54 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
     def _execute_request(self, url: str) -> dict[str, Any]:
         attempt = 1
+        endpoint = url
         while True:
             try:
-                # Add explicit timeout to prevent hanging indefinitely
                 response = self.session.get(url, timeout=30)
-                response.raise_for_status()
-                return response.json()
-            except Exception as e:
-                if not self.retry_policy.should_retry(e, attempt):
-                    raise
-                time.sleep(self.retry_policy.get_delay(attempt))
-                attempt += 1
+            except requests_exceptions.RequestException as exc:
+                error = ClientNetworkError(
+                    provider=self.provider,
+                    endpoint=endpoint,
+                    message=str(exc),
+                    cause=exc,
+                )
+            else:
+                try:
+                    response.raise_for_status()
+                except requests_exceptions.HTTPError as exc:
+                    status = response.status_code
+                    if status == 429:
+                        error = ClientRateLimitError(
+                            provider=self.provider,
+                            endpoint=endpoint,
+                            status_code=status,
+                            message="Rate limit exceeded",
+                            cause=exc,
+                        )
+                    else:
+                        error = ClientResponseError(
+                            provider=self.provider,
+                            endpoint=endpoint,
+                            status_code=status,
+                            message=str(exc),
+                            cause=exc,
+                        )
+                else:
+                    try:
+                        return response.json()
+                    except ValueError as exc:
+                        error = ClientResponseError(
+                            provider=self.provider,
+                            endpoint=endpoint,
+                            status_code=response.status_code,
+                            message="Failed to parse response JSON",
+                            cause=exc,
+                        )
+
+            if not self.retry_policy.should_retry(error, attempt):
+                raise error from error.cause
+            time.sleep(self.retry_policy.get_delay(attempt))
+            attempt += 1
 
 
 # NOTE: iter_pages реализован частично (возвращает только первую страницу без перехода по next).

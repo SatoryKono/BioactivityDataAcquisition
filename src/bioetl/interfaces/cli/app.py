@@ -1,11 +1,12 @@
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
+from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.config.resolver import ConfigResolver
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY, get_pipeline_class
@@ -74,6 +75,22 @@ def run(
     dry_run: bool = typer.Option(False, "--dry-run", help="Run without writing output"),
     config_path: Optional[Path] = typer.Option(None, "--config", help="Path to config file"),
     limit: Optional[int] = typer.Option(None, "--limit", help="Limit number of records to process"),
+    input_path: Optional[Path] = typer.Option(
+        None, "--input-path", help="Path to CSV input file"
+    ),
+    input_mode: Optional[Literal["csv", "id_only", "auto_detect"]] = typer.Option(
+        None,
+        "--input-mode",
+        help="Record source: csv (full dataset) | id_only (ID list) | auto_detect",
+    ),
+    csv_delimiter: Optional[str] = typer.Option(
+        None, "--csv-delimiter", help="Delimiter for CSV input"
+    ),
+    csv_header: Optional[bool] = typer.Option(
+        None,
+        "--csv-header/--no-csv-header",
+        help="Indicate whether CSV input contains a header row",
+    ),
 ):
     """
     Runs an ETL pipeline.
@@ -94,10 +111,30 @@ def run(
                 
         resolver = ConfigResolver()
         config = resolver.resolve(str(config_path), profile=profile)
-        
-        # Override output path if provided
+
+        if config.migration_messages:
+            for message in config.migration_messages:
+                console.print(f"[yellow]{message}[/yellow]")
+
+        config_payload = config.model_dump()
+
         if output:
-             config.storage.output_path = str(output)
+            config_payload["storage"]["output_path"] = str(output)
+
+        if input_path:
+            config_payload["input_path"] = str(input_path)
+
+        if input_mode:
+            config_payload["input_mode"] = input_mode
+
+        csv_options = config_payload.get("csv_options", {})
+        if csv_delimiter:
+            csv_options["delimiter"] = csv_delimiter
+        if csv_header is not None:
+            csv_options["header"] = csv_header
+        config_payload["csv_options"] = csv_options
+
+        config = PipelineConfig(**config_payload)
 
         # 3. Instantiate Dependencies using Container
         container = build_pipeline_dependencies(config)
