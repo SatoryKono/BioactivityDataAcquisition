@@ -12,6 +12,7 @@ from bioetl.application.container import PipelineContainer  # noqa: E402
 from bioetl.domain.provider_registry import (  # noqa: E402
     ProviderNotRegisteredError,
     list_providers,
+    reset_provider_registry,
     restore_provider_registry,
 )
 from bioetl.domain.providers import ProviderId  # noqa: E402
@@ -19,6 +20,7 @@ from bioetl.infrastructure.clients.chembl.provider import (  # noqa: E402
     register_chembl_provider,
 )
 from bioetl.infrastructure.config.models import PipelineConfig  # noqa: E402
+from bioetl.schemas.provider_config_schema import ChemblSourceConfig
 
 
 @pytest.fixture(autouse=True)
@@ -32,9 +34,19 @@ def test_get_extraction_service_for_chembl() -> None:
     register_chembl_provider()
     container = PipelineContainer(
         PipelineConfig(
-            provider=ProviderId.CHEMBL,
-            entity_name="activity",
-            sources={},
+            id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+            input_mode="auto_detect",
+            input_path=None,
+            output_path="/tmp/out",
+            batch_size=10,
+            provider_config=ChemblSourceConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         )
     )
 
@@ -48,11 +60,22 @@ def test_get_extraction_service_for_chembl() -> None:
 
 
 def test_unknown_provider_raises() -> None:
+    reset_provider_registry()
     container = PipelineContainer(
         PipelineConfig(
-            provider=ProviderId.PUBCHEM,
-            entity_name="compound",
-            sources={},
+            id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+            input_mode="auto_detect",
+            input_path=None,
+            output_path="/tmp/out",
+            batch_size=10,
+            provider_config=ChemblSourceConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         )
     )
 
@@ -61,14 +84,20 @@ def test_unknown_provider_raises() -> None:
 
 
 def test_config_validation_error_is_propagated() -> None:
-    register_chembl_provider()
-    container = PipelineContainer(
-        PipelineConfig(
-            provider=ProviderId.CHEMBL,
-            entity_name="activity",
-            sources={"chembl": {"max_url_length": 0}},
-        )
-    )
-
     with pytest.raises(ValidationError):
-        container.get_extraction_service()
+        PipelineConfig(
+            id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+            input_mode="auto_detect",
+            input_path=None,
+            output_path="/tmp/out",
+            batch_size=10,
+            provider_config=ChemblSourceConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+                max_url_length=0,
+            ),
+        )

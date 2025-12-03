@@ -21,6 +21,9 @@ def source_config():
     return ChemblSourceConfig(
         base_url="https://example.com",
         max_url_length=1000,
+        timeout_sec=30,
+        max_retries=3,
+        rate_limit_per_sec=5.0,
     )
 
 

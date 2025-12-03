@@ -4,6 +4,8 @@ Tests for ChemblPipelineBase generic extract (via ChemblActivityPipeline).
 import pytest
 from unittest.mock import MagicMock
 import pandas as pd
+import pytest
+from unittest.mock import MagicMock
 
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
@@ -21,6 +23,9 @@ def source_config():
     return ChemblSourceConfig(
         base_url="https://test.com",
         batch_size=100,
+        timeout_sec=30,
+        max_retries=3,
+        rate_limit_per_sec=5.0,
     )
 
 
@@ -31,8 +36,7 @@ def mock_config(source_config):
     config.pipeline = {}
     config.entity_name = "activity"
     config.provider = "chembl"
-    config.sources = {"chembl": source_config}
-    config.get_source_config = MagicMock(return_value=source_config)
+    config.provider_config = source_config
     config.normalization = MagicMock()
     config.normalization.rules = {}
     config.hashing = MagicMock()
@@ -138,7 +142,7 @@ def test_extract_batch_size_from_config(
 
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
-    pipeline._config.sources["chembl"].batch_size = 2
+    pipeline._config.provider_config.batch_size = 2
 
     # Mock parse_response to return empty list
     mock_extraction_service.parse_response.return_value = []

@@ -201,7 +201,7 @@ class ChemblPipelineBase(PipelineBase):
 
     def _resolve_source_config(self) -> ChemblSourceConfig:
         """Resolve and validate ChEMBL source configuration."""
-        config = self._config.get_source_config("chembl")
+        config = self._config.provider_config
         if not isinstance(config, ChemblSourceConfig):
             raise TypeError("Expected ChemblSourceConfig")
         return config
