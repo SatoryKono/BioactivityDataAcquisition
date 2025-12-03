@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from bioetl.application.services.chembl_extraction import ChemblExtractionService
-from bioetl.core.provider_registry import (
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     get_provider,
     register_provider,
 )
-from bioetl.core.providers import (
+from bioetl.domain.providers import (
     ProviderComponents,
     ProviderDefinition,
     ProviderId,
