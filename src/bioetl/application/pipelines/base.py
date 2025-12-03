@@ -92,7 +92,9 @@ class PipelineBase(ABC):
             )
             df_transformed = self._add_hash_columns(df_transformed)
             df_transformed = self._add_index_column(df_transformed)
-            df_transformed = self._add_database_version_column(df_transformed, self.get_version())
+            df_transformed = self._add_database_version_column(
+                df_transformed, self.get_version()
+            )
             df_transformed = self._add_fulldate_column(df_transformed)
             stages_results.append(
                 self._make_stage_result("transform", len(df_transformed))
@@ -174,7 +176,7 @@ class PipelineBase(ABC):
         """Преобразует сырые данные."""
 
     # === Concrete Methods ===
-    
+
     def get_version(self) -> str:
         """Возвращает версию источника данных. По умолчанию 'unknown'."""
         return "unknown"
@@ -223,21 +225,25 @@ class PipelineBase(ABC):
         """
         Добавляет столбцы с индексами строк.
         Использует HashService.
-        """    
+        """
         return self._hash_service.add_index_column(df)
 
-    def _add_database_version_column(self, df: pd.DataFrame, database_version: str) -> pd.DataFrame:
+    def _add_database_version_column(
+        self, df: pd.DataFrame, database_version: str
+    ) -> pd.DataFrame:
         """
         Добавляет столбцы с версией базы данных.
         Использует HashService.
-        """    
-        return self._hash_service.add_database_version_column(df, database_version)
+        """
+        return self._hash_service.add_database_version_column(
+            df, database_version
+        )
 
     def _add_fulldate_column(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Добавляет столбцы с датой и временем извлечения.
         Использует HashService.
-        """    
+        """
         return self._hash_service.add_fulldate_column(df)
 
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
@@ -318,4 +324,3 @@ class PipelineBase(ABC):
         """
         Хук для обогащения контекста (например, добавления версии релиза).
         """
-        pass
