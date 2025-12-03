@@ -22,8 +22,9 @@ class ConfigResolver:
             base_dir: Базовая директория конфигов. Если не указана, используется
                      BIOETL_CONFIG_DIR или "configs" по умолчанию.
         """
-        self.base_dir = Path(base_dir or os.environ.get("BIOETL_CONFIG_DIR", "configs"))
-        self.profiles_dir = Path(profiles_dir) if profiles_dir else None
+        base_dir_value = base_dir or os.environ.get("BIOETL_CONFIG_DIR", "configs")
+        self.base_dir = Path(base_dir_value)
+        self.profiles_dir = Path(profiles_dir) if profiles_dir is not None else None
 
     def resolve(self, config_path: str, profile: str = "default") -> PipelineConfig:
         """
