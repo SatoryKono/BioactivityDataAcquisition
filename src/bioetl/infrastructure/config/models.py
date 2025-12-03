@@ -59,20 +59,6 @@ class NormalizationConfig(BaseModel):
 # =============================================================================
 
 
-class NestedLookupConfig(BaseModel):
-    """
-    Конфигурация для вложенных запросов.
-
-    Используется для data_validity, assay_enrichment и подобных.
-    """
-    enabled: bool = True
-    fields: list[str] = Field(default_factory=list)
-    page_limit: PositiveInt = 10
-    request_timeout: float = 10.0
-    max_retries: int = 3
-    retry_backoff: float = 1.0
-
-
 class SourceConfigBase(BaseModel):
     """
     Базовая конфигурация источника данных.
@@ -111,8 +97,6 @@ class ChemblSourceConfig(SourceConfigBase):
     provider: Literal["chembl"] = "chembl"
     base_url: str = "https://www.ebi.ac.uk/chembl/api/data"
     max_url_length: PositiveInt = 2000
-    data_validity: Optional[NestedLookupConfig] = None
-    assay_enrichment: Optional[NestedLookupConfig] = None
 
     @field_validator("base_url")
     @classmethod

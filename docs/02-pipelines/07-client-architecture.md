@@ -12,11 +12,11 @@ SourceClientABC (ABC)
     │       └── ConfiguredHttpClient
     │               │
     │               ├── ChemblClient
-    │               ├── PubChemClient
-    │               ├── PubMedClient
-    │               ├── CrossrefClient
-    │               ├── UniProtClient
-    │               └── SemanticScholarClient
+    │               ├── PubChemClient (deprecated, не реализован)
+    │               ├── PubMedClient (deprecated, не реализован)
+    │               ├── CrossrefClient (deprecated, не реализован)
+    │               ├── UniProtClient (deprecated, не реализован)
+    │               └── SemanticScholarClient (deprecated, не реализован)
     │
     └── BaseExternalDataClient (Legacy)
             │
@@ -113,11 +113,11 @@ def close(self) -> None
 | Клиент | Источник | Документация |
 |--------|----------|--------------|
 | ChemblClient | ChEMBL API | `docs/02-pipelines/chembl/common/01-chembl-client.md` |
-| PubChemClient | PubChem API | `docs/02-pipelines/clients/02-pubchem-client.md` |
-| PubMedClient | PubMed API | `docs/02-pipelines/clients/00-pubmed-client.md` |
-| CrossrefClient | Crossref API | `docs/02-pipelines/clients/01-crossref-client.md` |
-| UniProtClient | UniProt API | `docs/02-pipelines/clients/05-uniprot-client.md` |
-| SemanticScholarClient | Semantic Scholar API | `docs/02-pipelines/clients/04-semantic-scholar-client.md` |
+| PubChemClient (deprecated) | PubChem API | `docs/02-pipelines/clients/02-pubchem-client.md` |
+| PubMedClient (deprecated) | PubMed API | `docs/02-pipelines/clients/00-pubmed-client.md` |
+| CrossrefClient (deprecated) | Crossref API | `docs/02-pipelines/clients/01-crossref-client.md` |
+| UniProtClient (deprecated) | UniProt API | `docs/02-pipelines/clients/05-uniprot-client.md` |
+| SemanticScholarClient (deprecated) | Semantic Scholar API | `docs/02-pipelines/clients/04-semantic-scholar-client.md` |
 
 ### 5. BaseExternalDataClient (Legacy)
 

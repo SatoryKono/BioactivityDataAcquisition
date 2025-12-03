@@ -16,8 +16,11 @@ from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
 )
-from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
+from bioetl.domain.hashing.hash_calculator import (
+    compute_hash_business_key,
+    compute_hash_row,
+)
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
@@ -37,7 +40,6 @@ class PipelineBase(ABC):
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
         output_writer: "UnifiedOutputWriter",
-        hash_service: HashService | None = None,
     ) -> None:
         self._config = config
         self._logger = logger.bind(
@@ -46,7 +48,6 @@ class PipelineBase(ABC):
         )
         self._validation_service = validation_service
         self._output_writer = output_writer
-        self._hash_service = hash_service or HashService()
         self._hooks: list[PipelineHookABC] = []
         self._stage_starts: dict[str, datetime] = {}
 
@@ -181,12 +182,50 @@ class PipelineBase(ABC):
     # === Internal Methods ===
 
     def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Добавляет столбцы с хешами строк и бизнес-ключей."""
+        """
+        Добавляет столбцы с хешами строк и бизнес-ключей.
+        Использует domain logic: compute_hash_business_key, compute_hash_row.
+        """
+        if df.empty:
+            return df.assign(hash_business_key=None, hash_row=None)
+
         keys = self._config.hashing.business_key_fields
-        return self._hash_service.add_hash_columns(
-            df,
-            business_key_cols=keys
-        )
+        
+        # Note: This is a row-wise operation which might be slow for very large datasets.
+        # Optimization (vectorization) can be done later as permitted by requirements.
+        
+        def _apply_hashes(row: pd.Series) -> pd.Series:
+            # Convert to dict. Note: Timestamps/NaTs need careful handling if not handled by calculator.
+            # hash_calculator handles basic types. Pandas NaT/NaN should be handled.
+            # We rely on implicit conversion or the calculator's robustness.
+            # But `to_dict()` converts NaT to NaTType, NaN to float('nan').
+            # `canonical_json_from_record` in calculator handles NaN validation.
+            # For safety, we might need to replace NaN with None before dict conversion if that's the policy,
+            # but calculator expects 'NaN/Inf' to fail or be handled.
+            # The spec says: "Исключить/отлавливать NaN/Inf... если содержат — валидировать/фейлить"
+            
+            record = row.to_dict()
+            
+            # 1. Compute Business Key Hash
+            bk_hash = compute_hash_business_key(record, keys)
+            
+            # 2. Insert into record for Row Hash
+            record["hash_business_key"] = bk_hash
+            
+            # 3. Compute Row Hash
+            row_hash = compute_hash_row(record)
+            
+            return pd.Series({"hash_business_key": bk_hash, "hash_row": row_hash})
+
+        hashes = df.apply(_apply_hashes, axis=1)
+        
+        # Update dataframe with calculated hashes
+        # We use assignment to overwrite existing columns (if added by schema enforcement)
+        # or append new ones, ensuring no duplicates and preserving order if already present.
+        for col in hashes.columns:
+            df[col] = hashes[col]
+            
+        return df
 
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
         self._stage_starts[stage] = datetime.now(timezone.utc)

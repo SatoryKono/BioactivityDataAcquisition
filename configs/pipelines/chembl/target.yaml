@@ -7,6 +7,12 @@ entity_name: target
 endpoint: /target
 primary_key: target_chembl_id
 
+pipeline:
+  name: target_chembl
+  version: "1.0.0"
+  owner: "Data Acquisition Team"
+  description: "Extract target records from ChEMBL API"
+
 sources:
   chembl:
     provider: chembl

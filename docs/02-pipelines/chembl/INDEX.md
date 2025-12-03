@@ -23,17 +23,17 @@
 
 ### Target
 
-- [00 Target ChEMBL Overview](target/00-target-chembl-overview.md) — пайплайн для сущности "target" с обогащением данными UniProt/IUPHAR
+- [00 Target ChEMBL Overview](target/00-target-chembl-overview.md) — пайплайн для сущности "target"
 - [01 Target Normalizer](target/01-target-normalizer.md) — нормализатор данных target
 
 ### Document
 
-- [00 Document ChEMBL Overview](document/00-document-chembl-overview.md) — пайплайн для сущности "document" с обогащением из внешних источников
+- [00 Document ChEMBL Overview](document/00-document-chembl-overview.md) — пайплайн для сущности "document"
 - [01 Document ChEMBL Methods](document/01-document-chembl-methods.md) — приватные методы пайплайна
 
 ### TestItem
 
-- [00 TestItem ChEMBL Overview](testitem/00-testitem-chembl-overview.md) — пайплайн для тестовых веществ с обогащением данными PubChem
+- [00 TestItem ChEMBL Overview](testitem/00-testitem-chembl-overview.md) — пайплайн для тестовых веществ
 - [INDEX](testitem/INDEX.md) — полный индекс документации по TestItem
 
 ## Common компоненты (Shared)

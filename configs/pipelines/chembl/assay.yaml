@@ -7,6 +7,12 @@ entity_name: assay
 endpoint: /assay
 primary_key: assay_chembl_id
 
+pipeline:
+  name: assay_chembl
+  version: "1.0.0"
+  owner: "Data Acquisition Team"
+  description: "Extract assay records from ChEMBL API"
+
 sources:
   chembl:
     provider: chembl

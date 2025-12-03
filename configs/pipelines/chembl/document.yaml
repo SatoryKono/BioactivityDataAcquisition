@@ -7,6 +7,13 @@ entity_name: document
 endpoint: /document
 primary_key: document_chembl_id
 
+
+pipeline:
+  name: document_chembl
+  version: "1.0.0"
+  owner: "Data Acquisition Team"
+  description: "Extract document records from ChEMBL API"
+
 sources:
   chembl:
     provider: chembl

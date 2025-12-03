@@ -56,7 +56,6 @@ class ChemblPipelineBase(PipelineBase):
             logger,
             validation_service,
             output_writer,
-            hash_service,
         )
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
