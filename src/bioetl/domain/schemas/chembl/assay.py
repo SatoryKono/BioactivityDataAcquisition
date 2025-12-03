@@ -37,6 +37,9 @@ class AssaySchema(pa.DataFrameModel):
     # Generated columns
     hash_row: Series[str] = pa.Field(str_matches=r"^[a-f0-9]{64}$", description="Хэш всей строки (64 hex)")
     hash_business_key: Series[str] = pa.Field(nullable=True, str_matches=r"^[a-f0-9]{64}$", description="Хэш бизнес-идентификатора ассая")
+    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
+    database_version: Series[str] = pa.Field(nullable=True, description="Версия базы данных")
+    extracted_at: Series[str] = pa.Field(nullable=True, description="Дата и время извлечения")
 
     class Config:
         strict = True

@@ -32,6 +32,9 @@ def valid_document_data():
         "chembl_release": "chembl_33",
         "hash_row": "f" * 64,
         "hash_business_key": None,
+        "index": 0,
+        "database_version": "chembl_34",
+        "extracted_at": "2023-10-26T12:00:00+00:00",
         "contact": None,
         "score": None,
     }

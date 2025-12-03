@@ -16,7 +16,7 @@ pipeline:
 sources:
   chembl:
     provider: chembl
-    batch_size: 25
+    batch_size: 20
     base_url: "https://www.ebi.ac.uk/chembl/api/data"
     max_url_length: 2000
 

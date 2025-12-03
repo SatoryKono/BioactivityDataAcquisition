@@ -62,6 +62,9 @@ class TestitemSchema(pa.DataFrameModel):
         str_matches=r"^[a-f0-9]{64}$",
         description="Хэш бизнес-ключа",
     )
+    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
+    database_version: Series[str] = pa.Field(nullable=True, description="Версия базы данных")
+    extracted_at: Series[str] = pa.Field(nullable=True, description="Дата и время извлечения")
 
     class Config:
         """Pandera configuration."""

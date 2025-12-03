@@ -27,6 +27,9 @@ def valid_assay_data():
         "variant_sequence": [None],
         "hash_row": ["d" * 64],
         "hash_business_key": ["e" * 64],
+        "index": [0],
+        "database_version": ["chembl_34"],
+        "extracted_at": ["2023-10-26T12:00:00+00:00"],
         # Missing columns required by schema
         "aidx": [None],
         "assay_classifications": [None],

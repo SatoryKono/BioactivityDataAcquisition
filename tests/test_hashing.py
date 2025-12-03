@@ -1,13 +1,16 @@
 import json
 import pytest
 from pathlib import Path
-from decimal import Decimal
-from bioetl.domain.hashing.hash_calculator import (
-    canonical_json_from_record,
-    compute_hash_business_key,
-    compute_hash_row,
-    blake2b_hash_hex
+import pandas as pd
+from bioetl.domain.transform.impl.hasher import (
+    _serialize_canonical,
+    blake2b_hash_hex,
+    HasherImpl
 )
+
+def canonical_json_from_record(data):
+    """Helper to access internal serialization for testing."""
+    return _serialize_canonical(data)
 
 def test_canonical_json_sorting():
     """Test that keys are sorted recursively."""
@@ -53,29 +56,55 @@ def test_canonical_json_arrays():
     data = {"arr": [2, 1, 3]}
     canonical = canonical_json_from_record(data)
     assert canonical == '{"arr":[2,1,3]}'
-    # remove space in assertion if my implementation doesn't add space
-    # My impl: "[" + ",".join(items) + "]" -> no spaces
-    assert canonical == '{"arr":[2,1,3]}'
 
-def test_compute_hash_business_key():
-    """Test business key hashing."""
+def test_hasher_impl_business_key():
+    """Test business key hashing via HasherImpl."""
     record = {"id": 100, "type": "assay", "ignored": "val"}
     fields = ["id", "type"]
     
-    # Serialized: [100,"assay"]
-    # BLAKE2b([100,"assay"])
+    df = pd.DataFrame([record])
+    hasher = HasherImpl()
     
-    h = compute_hash_business_key(record, fields)
+    # Hash columns
+    # Should produce hash of canonical json of [100, "assay"]
+    hashes = hasher.hash_columns(df, fields)
+    h = hashes.iloc[0]
+    
     assert len(h) == 64
     
-    # Order matters in definition
-    h_rev = compute_hash_business_key(record, ["type", "id"])
+    # Verify against manual
+    manual_serialized = canonical_json_from_record([100, "assay"])
+    manual_hash = blake2b_hash_hex(manual_serialized.encode("utf-8"))
+    assert h == manual_hash
+    
+    # Order matters
+    h_rev_series = hasher.hash_columns(df, ["type", "id"])
+    h_rev = h_rev_series.iloc[0]
     assert h != h_rev
+
+def test_hasher_impl_row_hash():
+    """Test row hashing via HasherImpl."""
+    record = {"a": 1, "b": 2}
+    df = pd.DataFrame([record])
+    hasher = HasherImpl()
+    
+    # Hash row
+    # We have to apply it manually or check logic
+    # HashService uses: df.apply(hasher.hash_row, axis=1)
+    h = hasher.hash_row(df.iloc[0])
+    
+    assert len(h) == 64
+    
+    # Manual check
+    # Note: HasherImpl.hash_row does .to_dict() on the series.
+    # pd.Series({"a":1}).to_dict() -> {"a": 1} (types preserved mostly)
+    manual_serialized = canonical_json_from_record(record)
+    manual_hash = blake2b_hash_hex(manual_serialized.encode("utf-8"))
+    assert h == manual_hash
 
 def test_blake2b_algorithm_sanity():
     """Sanity check for BLAKE2b."""
     # Empty string blake2b-256 hex
-    # b'' -> 
     import hashlib
     expected = hashlib.blake2b(b'', digest_size=32).hexdigest()
     assert blake2b_hash_hex(b'') == expected
@@ -83,8 +112,6 @@ def test_blake2b_algorithm_sanity():
 def test_golden_examples():
     """
     Run golden examples. 
-    Currently just checks that we can run without error, 
-    and if expected hashes are present (non-empty), checks them.
     """
     golden_path = Path(__file__).parent / "golden_examples.json"
     if not golden_path.exists():
@@ -93,18 +120,31 @@ def test_golden_examples():
     with open(golden_path, "r", encoding="utf-8") as f:
         examples = json.load(f)
         
+    hasher = HasherImpl()
+        
     for ex in examples:
         record = ex["input_record"]
         bk_fields = ex["business_key_fields"]
         
-        # Calculate
-        bk_hash = compute_hash_business_key(record, bk_fields)
+        # Calculate BK Hash manually to match old logic (list of values)
+        # Simulate what hash_columns does for a single row
+        bk_values = []
+        # Note: compute_hash_business_key returns None if field missing.
+        # HasherImpl.hash_columns behavior: if we use df, we get columns.
+        # If record is missing key, and we make DF, we get NaN?
+        # Golden examples are well formed.
+        bk_values = [record.get(f) for f in bk_fields]
+        bk_serialized = canonical_json_from_record(bk_values)
+        bk_hash = blake2b_hash_hex(bk_serialized.encode("utf-8"))
         
         # Inject bk hash for row hash calculation
         record_with_hash = record.copy()
         record_with_hash["hash_business_key"] = bk_hash
         
-        row_hash = compute_hash_row(record_with_hash)
+        # Calculate Row Hash
+        # Use HasherImpl.hash_row
+        row_series = pd.Series(record_with_hash)
+        row_hash = hasher.hash_row(row_series)
         
         # Assertions if expected provided
         expected_bk = ex.get("expected_hash_business_key")
@@ -114,4 +154,3 @@ def test_golden_examples():
         expected_row = ex.get("expected_hash_row")
         if expected_row and "TO BE FILLED" not in expected_row:
             assert row_hash == expected_row, f"Row Hash mismatch for {ex['description']}"
-
