@@ -18,9 +18,6 @@ from bioetl.infrastructure.output.factories import (
     default_metadata_writer,
     default_writer,
 )
-from bioetl.infrastructure.output.services.metadata_builder import (
-    MetadataBuilder,
-)
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
@@ -42,17 +39,12 @@ class PipelineContainer:
         """Get the validation service with registered schemas."""
         return ValidationService(schema_provider=self._schema_registry)
 
-    def get_metadata_builder(self) -> MetadataBuilder:
-        """Get the metadata builder service."""
-        return MetadataBuilder()
-
     def get_output_writer(self) -> UnifiedOutputWriter:
         """Get the unified output writer."""
         return UnifiedOutputWriter(
             writer=default_writer(),
             metadata_writer=default_metadata_writer(),
             config=self.config.determinism,
-            metadata_builder=self.get_metadata_builder()
         )
 
     def get_extraction_service(self) -> Any:

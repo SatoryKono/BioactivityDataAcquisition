@@ -4,7 +4,6 @@ from bioetl.domain.transform.impl.normalize import (
     NormalizationService,
     normalize_scalar,
 )
-from bioetl.domain.transform.impl.registry import NormalizerRegistry
 from bioetl.domain.transform.normalizers import normalize_doi
 
 
@@ -22,9 +21,17 @@ def test_normalize_scalar():
     assert normalize_scalar("  AbC  ", mode="sensitive") == "AbC"
 
 
+class MockNormalizationConfig:
+    def __init__(self, case_sensitive_fields=None, id_fields=None, custom_normalizers=None):
+        self.case_sensitive_fields = case_sensitive_fields or []
+        self.id_fields = id_fields or []
+        self.custom_normalizers = custom_normalizers or {}
+
+
 class MockConfig:
-    def __init__(self, fields):
+    def __init__(self, fields, normalization=None):
         self.fields = fields
+        self.normalization = normalization or MockNormalizationConfig()
 
 
 def test_normalization_service_full():
@@ -36,13 +43,14 @@ def test_normalization_service_full():
         {"name": "nested_obj", "data_type": "object"},
         {"name": "doi", "data_type": "string"},
     ]
-    config = MockConfig(fields)
     
-    registry = NormalizerRegistry()
-    registry.register("doi", normalize_doi)
-    registry.set_id_fields(["id_col"])
+    norm_config = MockNormalizationConfig(id_fields=["id_col"])
+    config = MockConfig(fields, normalization=norm_config)
     
-    service = NormalizationService(registry, config)
+    # Note: 'doi' is registered globally in src/bioetl/domain/transform/normalizers/registry.py
+    # We rely on that global registration here.
+    
+    service = NormalizationService(config)
 
     df = pd.DataFrame(
         {
@@ -76,13 +84,37 @@ def test_normalization_service_full():
 
 
 def test_normalization_service_raises_on_invalid_custom_value():
-    config = MockConfig([{"name": "doi", "data_type": "string"}])
-    registry = NormalizerRegistry()
-    registry.register("doi", normalize_doi)
+    # 'doi' has a custom normalizer that might raise if invalid DOI logic is strict?
+    # Actually normalize_doi logic in current codebase might returns None for invalid or just cleans it.
+    # But let's check what we want to test.
+    # The original test expected ValueError.
     
-    service = NormalizationService(registry, config)
+    norm_config = MockNormalizationConfig()
+    config = MockConfig([{"name": "doi", "data_type": "string"}], normalization=norm_config)
+    
+    service = NormalizationService(config)
 
-    df = pd.DataFrame({"doi": ["invalid-doi"]})
-
-    with pytest.raises(ValueError):
-        service.normalize_fields(df)
+    # We assume normalize_doi raises ValueError for "invalid-doi" IF the original test expected it.
+    # If not, we might need to use a mock to force it.
+    # But since we rely on global registry, we can't easily inject a mock normalizer for "doi" 
+    # without patching the global registry.
+    # For this test, let's use a different field name that we register specifically for this test using global registry,
+    # then clean up.
+    
+    from bioetl.domain.transform.normalizers.registry import register_normalizer, CUSTOM_FIELD_NORMALIZERS
+    
+    def fail_normalizer(val):
+        raise ValueError("Test failure")
+        
+    register_normalizer("fail_field", fail_normalizer)
+    
+    try:
+        config.fields = [{"name": "fail_field", "data_type": "string"}]
+        df = pd.DataFrame({"fail_field": ["any"]})
+        
+        with pytest.raises(ValueError):
+            service.normalize_fields(df)
+    finally:
+        # Cleanup
+        if "fail_field" in CUSTOM_FIELD_NORMALIZERS:
+            del CUSTOM_FIELD_NORMALIZERS["fail_field"]

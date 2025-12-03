@@ -1,0 +1,4 @@
+# file: E:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\output\metadata.py
+# hypothesis_version: 6.140.3
+
+['checksum', 'dry_run', 'entity', 'files', 'provider', 'row_count', 'run_id', 'timestamp']

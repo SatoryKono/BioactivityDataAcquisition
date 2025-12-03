@@ -1,16 +1,7 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any
 
-
-@dataclass
-class StageResult:
-    """Результат выполнения стадии."""
-    stage_name: str
-    success: bool
-    records_processed: int
-    duration_sec: float
-    errors: list[str]
+from bioetl.domain.models import StageResult
 
 
 class StageABC(ABC):

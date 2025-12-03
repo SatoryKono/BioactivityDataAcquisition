@@ -4,11 +4,18 @@ Tests for ChEMBL factories.
 import pytest
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
-    default_chembl_extraction_service
+    default_chembl_extraction_service,
 )
-from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblDataClientHTTPImpl
-from bioetl.application.pipelines.chembl.extraction import ChemblExtractionService
-from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig, ChemblSourceParameters
+from bioetl.infrastructure.clients.chembl.impl.http_client import (
+    ChemblDataClientHTTPImpl,
+)
+from bioetl.infrastructure.config.source_chembl import (
+    ChemblSourceConfig,
+    ChemblSourceParameters,
+)
+from bioetl.infrastructure.services.chembl_extraction import (
+    ChemblExtractionService,
+)
 
 
 @pytest.fixture

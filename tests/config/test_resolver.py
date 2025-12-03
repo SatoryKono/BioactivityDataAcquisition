@@ -3,7 +3,7 @@ Tests for ConfigResolver.
 """
 import pytest
 from bioetl.infrastructure.config.resolver import ConfigResolver
-from bioetl.core.utils.merge import deep_merge
+from bioetl.domain.transform.merge import deep_merge
 
 
 def test_resolver_simple(tmp_path):

@@ -171,7 +171,7 @@ def test_hashing_logic(
     mock_output_writer
 ):
     """Test different scenarios for business key hashing."""
-    # Scenario 1: Default config (business_key=["id"]) and present column
+    # Scenario 1: Config with business_key_fields=["id"] and present column
     pipeline = ConcretePipeline(
         mock_config, mock_logger, mock_validation_service, mock_output_writer
     )
@@ -182,7 +182,7 @@ def test_hashing_logic(
     assert res["hash_business_key"].iloc[0] is not None
 
     # Scenario 2: Configured key missing in DF
-    mock_config.business_key = ["missing_col"]
+    mock_config.hashing.business_key_fields = ["missing_col"]
     pipeline = ConcretePipeline(
         mock_config, mock_logger, mock_validation_service, mock_output_writer
     )
@@ -190,7 +190,7 @@ def test_hashing_logic(
     assert res["hash_business_key"].iloc[0] is None
 
     # Scenario 3: No keys configured
-    mock_config.business_key = []
+    mock_config.hashing.business_key_fields = []
     pipeline = ConcretePipeline(
         mock_config, mock_logger, mock_validation_service, mock_output_writer
     )

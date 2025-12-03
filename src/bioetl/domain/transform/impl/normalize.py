@@ -1,11 +1,14 @@
 """
 Normalization implementation for domain entities.
 """
-from typing import Any, Callable, TYPE_CHECKING, cast
+from typing import Any, Callable, cast
 
 import pandas as pd
 
-from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.domain.transform.contracts import (
+    NormalizationConfigProvider,
+    NormalizationServiceABC,
+)
 from bioetl.domain.transform.normalizers import (
     normalize_array,
     normalize_pcid,
@@ -13,14 +16,11 @@ from bioetl.domain.transform.normalizers import (
     normalize_record,
     normalize_uniprot,
 )
-from bioetl.domain.transform.impl.registry import NormalizerRegistry
+from bioetl.domain.transform.normalizers.registry import get_normalizer
 from bioetl.domain.transform.impl.serializer import (
     serialize_dict,
     serialize_list,
 )
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.config.models import PipelineConfig
 
 
 # Aliases for backward compatibility or convenience
@@ -83,9 +83,20 @@ class NormalizationService(NormalizationServiceABC):
     - Нормализацию скалярных типов (float->round, str->trim/lower/upper)
     """
 
-    def __init__(self, registry: NormalizerRegistry, config: "PipelineConfig"):
-        self._registry = registry
+    def __init__(self, config: NormalizationConfigProvider):
         self._config = config
+
+    def is_case_sensitive(self, field_name: str) -> bool:
+        return field_name in self._config.normalization.case_sensitive_fields
+
+    def is_id_field(self, field_name: str) -> bool:
+        if field_name in self._config.normalization.id_fields:
+            return True
+        if field_name.endswith("_id") or field_name.endswith("_chembl_id"):
+            return True
+        if field_name.startswith("id_"):
+            return True
+        return False
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -100,18 +111,16 @@ class NormalizationService(NormalizationServiceABC):
 
             # Determine normalization mode
             mode = "default"
-            if self._registry.is_case_sensitive(name):
+            if self.is_case_sensitive(name):
                 mode = "sensitive"
-            elif self._registry.is_id_field(name):
+            elif self.is_id_field(name):
                 mode = "id"
 
             # Resolve normalizer
-            registry_normalizer = self._registry.get(name)
+            custom_normalizer = get_normalizer(name)
 
-            if registry_normalizer:
-                base_normalizer: Callable[[Any], Any] = (
-                    registry_normalizer.normalize
-                )
+            if custom_normalizer:
+                base_normalizer: Callable[[Any], Any] = custom_normalizer
             else:
                 # Create default scalar normalizer
                 def _default_normalizer(val: Any, m=mode) -> Any:

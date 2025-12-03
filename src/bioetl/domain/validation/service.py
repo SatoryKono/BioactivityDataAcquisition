@@ -1,4 +1,7 @@
+from typing import Type
+
 import pandas as pd
+import pandera.pandas as pa
 
 from bioetl.domain.validation.contracts import SchemaProviderABC
 
@@ -10,6 +13,15 @@ class ValidationService:
 
     def __init__(self, schema_provider: SchemaProviderABC) -> None:
         self._schema_provider = schema_provider
+
+    def get_schema(self, entity_name: str) -> Type[pa.DataFrameModel]:
+        """Get schema class for entity."""
+        return self._schema_provider.get_schema(entity_name)
+
+    def get_schema_columns(self, entity_name: str) -> list[str]:
+        """Get ordered list of column names for entity schema."""
+        schema_cls = self._schema_provider.get_schema(entity_name)
+        return list(schema_cls.to_schema().columns.keys())
 
     def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
         """

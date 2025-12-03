@@ -7,24 +7,15 @@ from typing import Any
 import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.pipelines.chembl.extraction import (
-    ChemblExtractionService,
-)
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.impl.normalize import NormalizationService
-from bioetl.domain.transform.factories import create_normalizer_registry
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
-)
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.config.source_chembl import ChemblSourceConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
-from bioetl.infrastructure.output.services.metadata_builder import (
-    MetadataBuilder,
-)
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
@@ -55,9 +46,8 @@ class ChemblPipelineBase(PipelineBase):
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
         output_writer: UnifiedOutputWriter,
-        extraction_service: ChemblExtractionService,
+        extraction_service: ExtractionServiceABC,
         hash_service: HashService | None = None,
-        metadata_builder: MetadataBuilder | None = None,
     ) -> None:
         super().__init__(
             config,
@@ -65,14 +55,12 @@ class ChemblPipelineBase(PipelineBase):
             validation_service,
             output_writer,
             hash_service,
-            metadata_builder,
         )
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
 
         # Initialize normalization service
-        registry = create_normalizer_registry(config.normalization)
-        self._normalization_service = NormalizationService(registry, config)
+        self._normalization_service = NormalizationService(config)
 
     def get_chembl_release(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
@@ -157,12 +145,11 @@ class ChemblPipelineBase(PipelineBase):
         )
 
         records: list[dict[str, Any]] = []
-        parser = ChemblResponseParser()
         entity = self._config.entity_name
 
         for batch_ids in _chunk_list(ids, batch_size):
             response = self._request_batch(entity, batch_ids)
-            batch_records = parser.parse(response)
+            batch_records = self._extraction_service.parse_response(response)
             records.extend(batch_records)
 
         return pd.DataFrame(records)
@@ -176,24 +163,9 @@ class ChemblPipelineBase(PipelineBase):
             raise ValueError(
                 f"{self.__class__.__name__} must define API_FILTER_KEY"
             )
-
-        # Build filter kwargs
-        str_ids = ",".join(batch_ids)
-        filter_kwargs = {filter_key: str_ids}
-
-        client = self._extraction_service.client
-        if entity == "activity":
-            return client.request_activity(**filter_kwargs)
-        if entity == "assay":
-            return client.request_assay(**filter_kwargs)
-        if entity == "target":
-            return client.request_target(**filter_kwargs)
-        if entity == "document":
-            return client.request_document(**filter_kwargs)
-        if entity == "testitem":
-            return client.request_molecule(**filter_kwargs)
-
-        raise ValueError(f"Unknown entity: {entity}")
+        return self._extraction_service.request_batch(
+            entity, batch_ids, filter_key
+        )
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -226,9 +198,7 @@ class ChemblPipelineBase(PipelineBase):
         оставляет только колонки из схемы в правильном порядке.
         """
         entity = self._config.entity_name
-        provider = self._validation_service._schema_provider
-        schema_cls = provider.get_schema(entity)
-        schema_columns = list(schema_cls.to_schema().columns.keys())
+        schema_columns = self._validation_service.get_schema_columns(entity)
 
         for col in schema_columns:
             if col not in df.columns:

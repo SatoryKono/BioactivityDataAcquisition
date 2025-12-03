@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from bioetl.domain.enums import ErrorAction
-from bioetl.application.pipelines.stages import StageResult
+from bioetl.domain.models import StageResult
 
 
 class PipelineHookABC(ABC):

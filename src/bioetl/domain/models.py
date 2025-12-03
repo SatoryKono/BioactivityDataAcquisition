@@ -7,7 +7,16 @@ from pathlib import Path
 from typing import Any, Callable
 import uuid
 
-from bioetl.application.pipelines.stages import StageResult
+
+@dataclass
+class StageResult:
+    """Результат выполнения стадии."""
+
+    stage_name: str
+    success: bool
+    records_processed: int
+    duration_sec: float
+    errors: list[str]
 
 
 @dataclass

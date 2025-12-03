@@ -8,9 +8,10 @@ import pandas as pd
 import pytest
 
 from bioetl.infrastructure.config.models import (
+    HashingConfig,
     LoggingConfig,
     PipelineConfig,
-    StorageConfig
+    StorageConfig,
 )
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
@@ -25,7 +26,7 @@ def mock_config():
         entity_name="test_entity",
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path="./test_out"),
-        business_key=["id"],
+        hashing=HashingConfig(business_key_fields=["id"]),
         pipeline={}
     )
 
