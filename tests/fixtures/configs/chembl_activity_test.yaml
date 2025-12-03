@@ -1,0 +1,23 @@
+provider: chembl
+entity_name: activity
+primary_key: activity_id
+input_mode: csv
+input_path: tests/fixtures/input/chembl_activity_small.csv
+csv_options:
+  delimiter: ","
+  header: true
+storage:
+  output_path: ./data/output
+determinism:
+  stable_sort: true
+hashing:
+  business_key_fields:
+    - activity_id
+sources:
+  chembl:
+    provider: chembl
+    base_url: "https://www.ebi.ac.uk/chembl/api/data"
+    batch_size: 5
+pipeline:
+  name: activity_chembl
+  version: "1.0.0"

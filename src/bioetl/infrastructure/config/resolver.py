@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any
 
@@ -13,8 +14,20 @@ class ConfigResolver:
     Поддерживает наследование профилей через 'extends' и переопределение.
     """
 
-    def __init__(self, profiles_dir: str = "configs/profiles") -> None:
-        self.profiles_dir = Path(profiles_dir)
+    def __init__(
+        self, profiles_dir: str | Path = "configs/profiles", base_dir: str | Path | None = None
+    ) -> None:
+        base_config_dir = Path(base_dir or os.environ.get("BIOETL_CONFIG_DIR", "configs"))
+
+        profiles_path = Path(profiles_dir)
+        if not profiles_path.is_absolute():
+            if profiles_path.parts and profiles_path.parts[0] == base_config_dir.name:
+                profiles_path = base_config_dir / Path(*profiles_path.parts[1:])
+            else:
+                profiles_path = base_config_dir / profiles_path
+
+        self.base_dir = base_config_dir
+        self.profiles_dir = profiles_path
         self._profile_cache: dict[str, dict[str, Any]] = {}
 
     def resolve(
@@ -27,7 +40,11 @@ class ConfigResolver:
         3. CLI profile overrides (if provided)
         """
         # 1. Load the main config file
-        config_dict = self._load_yaml(Path(config_path))
+        config_path_obj = Path(config_path)
+        if not config_path_obj.is_absolute() and not config_path_obj.exists():
+            config_path_obj = self.base_dir / config_path_obj
+
+        config_dict = self._load_yaml(config_path_obj)
 
         # 2. Resolve base profile if 'extends' is present in config
         base_profile_name = config_dict.get("extends")
