@@ -3,26 +3,23 @@
 from __future__ import annotations
 
 from bioetl.application.services.chembl_extraction import ChemblExtractionService
-from bioetl.core.provider_registry import (
+from bioetl.domain.normalization_service import ChemblNormalizationService
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     get_provider,
     register_provider,
 )
-from bioetl.core.providers import (
-    ProviderComponents,
-    ProviderDefinition,
-    ProviderId,
-)
+from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.config.models import ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
 
 
 class ChemblProviderComponents(
-    ProviderComponents[ChemblSourceConfig, ChemblDataClientABC, ChemblExtractionService]
+    ProviderComponents
 ):
     """Factory set for building ChEMBL provider components."""
 
@@ -33,6 +30,19 @@ class ChemblProviderComponents(
         self, client: ChemblDataClientABC, config: ChemblSourceConfig
     ) -> ChemblExtractionService:
         return create_extraction_service(config, client=client)
+
+    def create_normalization_service(
+        self,
+        config: ChemblSourceConfig,
+        *,
+        pipeline_config: PipelineConfig | None = None,
+        client: ChemblDataClientABC | None = None,
+    ) -> ChemblNormalizationService:
+        _ = config  # keep signature explicit
+        effective_config = pipeline_config
+        if effective_config is None:
+            raise ValueError("PipelineConfig is required to build normalization service")
+        return ChemblNormalizationService(effective_config)
 
 
 def register_chembl_provider() -> ProviderDefinition:

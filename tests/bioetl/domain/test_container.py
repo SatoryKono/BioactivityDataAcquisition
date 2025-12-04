@@ -15,7 +15,7 @@ from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.core.provider_registry import (
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
     list_providers,
@@ -23,15 +23,13 @@ from bioetl.core.provider_registry import (
     reset_provider_registry,
     restore_provider_registry,
 )
-from bioetl.core.providers import ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.schemas.provider_config_schema import ChemblSourceConfig, DummyProviderConfig
 
 
-class DummyComponents(
-    ProviderComponents[DummyProviderConfig, dict[str, str], tuple[str, str]]
-):
+class DummyComponents(ProviderComponents):
     def create_client(self, config: DummyProviderConfig) -> dict[str, str]:
         return {"provider": config.provider, "base_url": str(config.base_url)}
 
