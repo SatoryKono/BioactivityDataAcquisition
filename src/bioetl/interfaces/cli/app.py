@@ -7,10 +7,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.config_loader import load_pipeline_config, load_pipeline_config_from_path
 from bioetl.infrastructure.config.models import PipelineConfig
-from bioetl.application.container import build_pipeline_dependencies
-from bioetl.application.pipelines.registry import PIPELINE_REGISTRY, get_pipeline_class
+from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 
 app = typer.Typer(
     name="bioetl",
@@ -95,17 +95,16 @@ def run(
         "--csv-header/--no-csv-header",
         help="Indicate whether CSV input contains a header row",
     ),
+    background: bool = typer.Option(
+        False,
+        "--background",
+        help="Run pipeline in a background process",
+    ),
 ):
     """
     Runs an ETL pipeline.
     """
-    # Note: Schemas are registered by the container.
-
     try:
-        # 1. Resolve Pipeline Class
-        pipeline_cls = get_pipeline_class(pipeline_name)
-        
-        # 2. Resolve Config
         if config_path is None:
             config_path = _resolve_config_path(pipeline_name)
             if not config_path.exists():
@@ -140,45 +139,20 @@ def run(
         config_payload["csv_options"] = csv_options
 
         config = PipelineConfig(**config_payload)
-
-        # 3. Instantiate Dependencies using Container
-        container = build_pipeline_dependencies(config)
-        
-        logger = container.get_logger()
-        validation_service = container.get_validation_service()
-        output_writer = container.get_output_writer()
-        extraction_service = container.get_extraction_service()
-        normalization_service = container.get_normalization_service()
-        record_source = container.get_record_source(
-            extraction_service, limit=limit, logger=logger
-        )
-        hash_service = container.get_hash_service()
-
-        # 4. Run Pipeline
-        pipeline = pipeline_cls(
+        orchestrator = PipelineOrchestrator(
+            pipeline_name=pipeline_name,
             config=config,
-            logger=logger,
-            validation_service=validation_service,
-            output_writer=output_writer,
-            extraction_service=extraction_service,
-            record_source=record_source,
-            normalization_service=normalization_service,
-            hash_service=hash_service
         )
-        
+
         console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")
-        
-        # Prepare kwargs for run -> extract
-        run_kwargs = {}
-        if limit is not None:
-            run_kwargs["limit"] = limit
-            
-        result = pipeline.run(
-            output_path=Path(config.output_path),
-            dry_run=dry_run,
-            **run_kwargs
-        )
-        
+
+        if background:
+            future = orchestrator.run_in_background(dry_run=dry_run, limit=limit)
+            console.print("[yellow]Pipeline submitted to background executor[/yellow]")
+            result = future.result()
+        else:
+            result = orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
+
         if result.success:
             console.print(f"[bold green]Pipeline finished successfully![/bold green]")
             console.print(f"Rows processed: {result.row_count}")
