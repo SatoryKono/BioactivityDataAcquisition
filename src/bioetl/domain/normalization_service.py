@@ -27,6 +27,9 @@ class NormalizationService(Protocol):
     def normalize(self, raw: RawRecord) -> NormalizedRecord:
         """Normalize a single raw record."""
 
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize an entire DataFrame chunk."""
+
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize a DataFrame with ChEMBL field rules."""
 
@@ -72,6 +75,9 @@ class ChemblNormalizationService(NormalizationService):
                 normalized[key] = value
 
         return normalized
+
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.normalize_dataframe(df)
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         normalized_df = df.copy()

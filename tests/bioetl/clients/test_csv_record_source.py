@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from pathlib import Path
+
 import pandas as pd
 
 from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
@@ -53,7 +55,9 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
 
     records = list(source.iter_records())
 
-    assert records == [{"id": 1, "name": "alpha"}]
+    assert len(records) == 1
+    expected = pd.DataFrame([{"id": 1, "name": "alpha"}])
+    pd.testing.assert_frame_equal(records[0], expected)
 
 
 def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
@@ -69,7 +73,13 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
         csv_options=CsvInputOptions(),
         limit=3,
         extraction_service=extraction,
-        source_config=ChemblSourceConfig(batch_size=2),
+        source_config=ChemblSourceConfig(
+            base_url="https://example.org",
+            batch_size=2,
+            timeout_sec=1,
+            max_retries=1,
+            rate_limit_per_sec=1.0,
+        ),
         entity="activity",
         filter_key="activity_id__in",
         logger=_DummyLogger(),
@@ -78,4 +88,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     records = list(source.iter_records())
 
     assert extraction.batches == [["A1", "A2"], ["A3"]]
-    assert records == [{"id": "A1"}, {"id": "A2"}, {"id": "A3"}]
+    assert len(records) == 2
+    combined = pd.concat(records, ignore_index=True)
+    expected = pd.DataFrame({"id": ["A1", "A2", "A3"]})
+    pd.testing.assert_frame_equal(combined, expected)

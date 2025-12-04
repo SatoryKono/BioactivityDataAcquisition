@@ -37,8 +37,9 @@ def test_in_memory_record_source_iterates_stably() -> None:
     first_pass = list(source.iter_records())
     second_pass = list(source.iter_records())
 
-    assert first_pass == records
-    assert second_pass == records
+    assert len(first_pass) == len(second_pass) == 1
+    pd.testing.assert_frame_equal(first_pass[0], pd.DataFrame(records))
+    pd.testing.assert_frame_equal(second_pass[0], pd.DataFrame(records))
 
 
 def test_api_record_source_returns_serialized_records() -> None:
@@ -52,7 +53,11 @@ def test_api_record_source_returns_serialized_records() -> None:
     records = list(source.iter_records())
 
     assert extraction.called_with == {"entity": "activity", "limit": 1}
-    assert records == [
-        {"id": "1", "name": "alpha"},
-        {"id": "2", "name": "beta"},
-    ]
+    assert len(records) == 1
+    expected_df = pd.DataFrame(
+        [
+            {"id": "1", "name": "alpha"},
+            {"id": "2", "name": "beta"},
+        ]
+    )
+    pd.testing.assert_frame_equal(records[0], expected_df)

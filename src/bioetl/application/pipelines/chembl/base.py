@@ -60,15 +60,32 @@ class ChemblPipelineBase(PipelineBase):
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """Извлекает данные через RecordSource и нормализует записи."""
         limit = kwargs.pop("limit", None)
-        records = []
+        remaining = limit
+        normalized_chunks: list[pd.DataFrame] = []
 
-        for idx, raw_record in enumerate(self._record_source.iter_records()):
-            if limit is not None and idx >= limit:
+        for raw_chunk in self._record_source.iter_records():
+            if raw_chunk.empty:
+                continue
+
+            working_chunk = raw_chunk
+            if remaining is not None:
+                if remaining <= 0:
+                    break
+                working_chunk = raw_chunk.head(remaining)
+                remaining -= len(working_chunk)
+
+            normalized_chunk = self._normalization_service.normalize_batch(
+                working_chunk
+            )
+            normalized_chunks.append(normalized_chunk)
+
+            if remaining is not None and remaining <= 0:
                 break
-            normalized = self._normalization_service.normalize(raw_record)
-            records.append(normalized)
 
-        return pd.DataFrame(records)
+        if not normalized_chunks:
+            return pd.DataFrame()
+
+        return pd.concat(normalized_chunks, ignore_index=True)
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """

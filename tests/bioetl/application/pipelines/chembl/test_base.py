@@ -173,3 +173,41 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
     pd.testing.assert_frame_equal(
         result, normalization_service.normalize_dataframe.return_value
     )
+
+
+def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
+    """Проверяет, что extract обрабатывает DataFrame чанками без построчной итерации."""
+    record_source = MagicMock()
+    raw_chunks = [
+        pd.DataFrame([{"id": 1}, {"id": 2}]),
+        pd.DataFrame([{"id": 3}]),
+    ]
+    record_source.iter_records.return_value = raw_chunks
+
+    normalization_service = MagicMock()
+    normalization_service.normalize.side_effect = AssertionError(
+        "normalize should not be used for batch flow"
+    )
+    normalization_service.normalize_batch.side_effect = (
+        lambda df: df.assign(processed=True)
+    )
+
+    pipeline = ChemblPipelineBase(
+        config=mock_dependencies_fixture["config"],
+        logger=mock_dependencies_fixture["logger"],
+        validation_service=mock_dependencies_fixture["validation_service"],
+        output_writer=mock_dependencies_fixture["output_writer"],
+        extraction_service=mock_dependencies_fixture["extraction_service"],
+        record_source=record_source,
+        normalization_service=normalization_service,
+    )
+
+    result = pipeline.extract()
+
+    assert normalization_service.normalize_batch.call_count == 2
+    normalization_service.normalize.assert_not_called()
+
+    expected = pd.concat(
+        [chunk.assign(processed=True) for chunk in raw_chunks], ignore_index=True
+    )
+    pd.testing.assert_frame_equal(result, expected)
