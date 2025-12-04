@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\schemas\chembl\target.py
+# hypothesis_version: 6.140.3
+
+['ChEMBL ID таргета', 'NCBI Taxonomy ID', '^[a-f0-9]{64}$', 'cross_references', 'organism', 'pref_name', 'score', 'species_group_flag', 'target_chembl_id', 'target_components', 'target_type', 'tax_id', 'uniprot_id', 'Версия базы данных', 'Название таргета', 'Организм', 'Основной UniProt ID', 'Хэш бизнес-ключа']

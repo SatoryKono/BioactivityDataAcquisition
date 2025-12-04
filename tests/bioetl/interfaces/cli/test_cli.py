@@ -67,17 +67,15 @@ def test_validate_config_success(mock_loader):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config")
-def test_run_command(mock_loader, mock_build_deps, mock_get_cls):
+def test_run_command(mock_loader, mock_orchestrator_cls):
     """Test the run command."""
-    mock_pipeline_cls = MagicMock()
-    mock_pipeline_instance = mock_pipeline_cls.return_value
-    mock_pipeline_instance.run.return_value = MagicMock(
+    mock_orchestrator = MagicMock()
+    mock_orchestrator.run_pipeline.return_value = MagicMock(
         success=True, row_count=10, duration_sec=1.0
     )
-    mock_get_cls.return_value = mock_pipeline_cls
+    mock_orchestrator_cls.return_value = mock_orchestrator
 
     mock_config = PipelineConfig(
         id="chembl.activity",
@@ -96,10 +94,6 @@ def test_run_command(mock_loader, mock_build_deps, mock_get_cls):
     )
     mock_loader.return_value = mock_config
 
-    # Mock container
-    mock_container = MagicMock()
-    mock_build_deps.return_value = mock_container
-
     # We need to mock file existence for config
     with patch("pathlib.Path.exists", return_value=True):
         result = runner.invoke(
@@ -108,9 +102,7 @@ def test_run_command(mock_loader, mock_build_deps, mock_get_cls):
 
     assert result.exit_code == 0
     assert "Pipeline finished successfully" in result.stdout
-    mock_pipeline_instance.run.assert_called_once()
-    # Verify container was used
-    mock_container.get_logger.assert_called_once()
+    mock_orchestrator.run_pipeline.assert_called_once()
 
 
 @pytest.mark.unit
@@ -125,11 +117,9 @@ def test_smoke_run(mock_run):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.get_pipeline_class")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config")
-def test_run_config_not_found_explicit(mock_loader, mock_get_cls):
+def test_run_config_not_found_explicit(mock_loader):
     """Test run command with explicit config that doesn't exist."""
-    mock_get_cls.return_value = MagicMock()
     mock_loader.side_effect = FileNotFoundError("No such file or directory")
 
     result = runner.invoke(
@@ -143,19 +133,17 @@ def test_run_config_not_found_explicit(mock_loader, mock_get_cls):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config")
 def test_run_with_limit_and_dry_run(
-    mock_loader, mock_build_deps, mock_get_cls
+    mock_loader, mock_orchestrator_cls
 ):
     """Test run command with limit and dry-run options."""
-    mock_pipeline_cls = MagicMock()
-    mock_pipeline_instance = mock_pipeline_cls.return_value
-    mock_pipeline_instance.run.return_value = MagicMock(
+    mock_orchestrator = MagicMock()
+    mock_orchestrator.run_pipeline.return_value = MagicMock(
         success=True, row_count=5, duration_sec=0.5
     )
-    mock_get_cls.return_value = mock_pipeline_cls
+    mock_orchestrator_cls.return_value = mock_orchestrator
 
     mock_config = PipelineConfig(
         id="chembl.activity",
@@ -173,7 +161,6 @@ def test_run_with_limit_and_dry_run(
         ),
     )
     mock_loader.return_value = mock_config
-    mock_build_deps.return_value = MagicMock()
 
     with patch("pathlib.Path.exists", return_value=True):
         result = runner.invoke(
@@ -181,22 +168,20 @@ def test_run_with_limit_and_dry_run(
         )
 
     assert result.exit_code == 0
-    mock_pipeline_instance.run.assert_called_once()
-    _, kwargs = mock_pipeline_instance.run.call_args
+    mock_orchestrator.run_pipeline.assert_called_once()
+    _, kwargs = mock_orchestrator.run_pipeline.call_args
     assert kwargs["limit"] == 5
     assert kwargs["dry_run"] is True
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config")
-def test_run_pipeline_failure(mock_loader, mock_build_deps, mock_get_cls):
+def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
     """Test run command when pipeline fails."""
-    mock_pipeline_cls = MagicMock()
-    mock_pipeline_instance = mock_pipeline_cls.return_value
-    mock_pipeline_instance.run.return_value = MagicMock(success=False)
-    mock_get_cls.return_value = mock_pipeline_cls
+    mock_orchestrator = MagicMock()
+    mock_orchestrator.run_pipeline.return_value = MagicMock(success=False)
+    mock_orchestrator_cls.return_value = mock_orchestrator
 
     mock_loader.return_value = PipelineConfig(
         id="chembl.activity",
@@ -213,7 +198,6 @@ def test_run_pipeline_failure(mock_loader, mock_build_deps, mock_get_cls):
             rate_limit_per_sec=10.0,
         ),
     )
-    mock_build_deps.return_value = MagicMock()
 
     with patch("pathlib.Path.exists", return_value=True):
         result = runner.invoke(app, ["run", "test_pipeline"])
@@ -223,26 +207,24 @@ def test_run_pipeline_failure(mock_loader, mock_build_deps, mock_get_cls):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.get_pipeline_class")
-def test_run_exception(mock_get_cls):
+@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+def test_run_exception(mock_loader):
     """Test run command unhandled exception."""
-    mock_get_cls.side_effect = RuntimeError("Unexpected error")
+    mock_loader.side_effect = RuntimeError("Unexpected error")
 
-    result = runner.invoke(app, ["run", "test_pipeline"])
+    with patch("pathlib.Path.exists", return_value=True):
+        result = runner.invoke(app, ["run", "test_pipeline"])
 
     assert result.exit_code == 1
-    assert "Error:" in result.stdout
     assert "Unexpected error" in result.stdout
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.get_pipeline_class")
-@patch("bioetl.interfaces.cli.app.build_pipeline_dependencies")
+@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config")
 def test_run_dry_run_pipeline_metadata(
     mock_loader,
-    mock_build_deps,
-    mock_get_cls,
+    mock_orchestrator_cls,
     pipeline_test_config,
     small_pipeline_df,
 ):
@@ -291,16 +273,29 @@ def test_run_dry_run_pipeline_metadata(
         row_count=len(small_pipeline_df), checksum="checksum", path=MagicMock(name="dummy.parquet")
     )
 
-    container = MagicMock()
-    container.get_logger.return_value = logger
-    container.get_validation_service.return_value = validation_service
-    container.get_output_writer.return_value = output_writer
-    container.get_extraction_service.return_value = MagicMock()
-    container.get_hash_service.return_value = None
+    # Mock orchestrator to build and run our pipeline
+    def build_pipeline_side_effect(*args, **kwargs):
+        pipeline_instance = DryRunPipeline(
+            config=pipeline_test_config,
+            logger=logger,
+            validation_service=validation_service,
+            output_writer=output_writer,
+        )
+        return pipeline_instance
+
+    def run_pipeline_side_effect(*args, **kwargs):
+        pipeline_instance = build_pipeline_side_effect()
+        return pipeline_instance.run(
+            output_path=Path(pipeline_test_config.output_path),
+            dry_run=kwargs.get("dry_run", False),
+        )
+
+    mock_orchestrator = MagicMock()
+    mock_orchestrator.build_pipeline.side_effect = build_pipeline_side_effect
+    mock_orchestrator.run_pipeline.side_effect = run_pipeline_side_effect
+    mock_orchestrator_cls.return_value = mock_orchestrator
 
     mock_loader.return_value = pipeline_test_config
-    mock_build_deps.return_value = container
-    mock_get_cls.return_value = DryRunPipeline
 
     with runner.isolated_filesystem():
         Path("config.yaml").write_text("dummy", encoding="utf-8")

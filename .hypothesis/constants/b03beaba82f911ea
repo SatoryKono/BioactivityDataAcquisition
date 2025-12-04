@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\clients\chembl\factories.py
+# hypothesis_version: 6.140.3
+
+[1.0, 2.0, 5.0, 30.0, 60.0, 1000, 'backoff_factor', 'base_delay', 'base_url', 'chembl', 'client', 'max_attempts', 'max_delay', 'max_url_length', 'rate_limit_per_sec', 'timeout']

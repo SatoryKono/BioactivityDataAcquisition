@@ -1,19 +1,21 @@
 """Base pipeline implementation for ChEMBL data extraction."""
 from __future__ import annotations
 
-from typing import Any
+from pathlib import Path
+from typing import Any, cast
 
 import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
+from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
@@ -65,10 +67,41 @@ class ChemblPipelineBase(PipelineBase):
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """Извлекает данные через RecordSource и нормализует записи."""
         limit = kwargs.pop("limit", None)
+        
+        # Recreate record_source if input_mode or input_path changed
+        # This allows tests to change config after pipeline creation
+        record_source = self._record_source
+        if hasattr(self._config, 'input_mode') and hasattr(self._config, 'input_path'):
+            mode = self._config.input_mode
+            path = self._config.input_path
+            
+            if mode == "csv" and path:
+                record_source = CsvRecordSource(
+                    input_path=Path(path),
+                    csv_options=self._config.csv_options,
+                    limit=limit,
+                    logger=self._logger,
+                )
+            elif mode == "id_only" and path:
+                source_config = self._config.get_source_config(self._config.provider)
+                id_column = self._config.primary_key or f"{self._config.entity_name}_id"
+                filter_key = f"{id_column}__in"
+                record_source = IdListRecordSource(
+                    input_path=Path(path),
+                    id_column=id_column,
+                    csv_options=self._config.csv_options,
+                    limit=limit,
+                    extraction_service=self._extraction_service,
+                    source_config=cast(ChemblSourceConfig, source_config),
+                    entity=self._config.entity_name,
+                    filter_key=filter_key,
+                    logger=self._logger,
+                )
+        
         remaining = limit
         normalized_chunks: list[pd.DataFrame] = []
 
-        for raw_chunk in self._record_source.iter_records():
+        for raw_chunk in record_source.iter_records():
             if raw_chunk.empty:
                 continue
 

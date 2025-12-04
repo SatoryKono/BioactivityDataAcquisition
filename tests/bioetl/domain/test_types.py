@@ -157,7 +157,8 @@ class TestCustomTypes:
         
         # Empty
         assert normalize_array([]) == []
-        assert normalize_array(None) is None
+        # normalize_array now returns [] for None (changed to always return list)
+        assert normalize_array(None) == []
 
         # With item normalizer
         assert normalize_array(["P12345", "Q12345"], item_normalizer=normalize_uniprot) == ["P12345", "Q12345"]

@@ -1,5 +1,8 @@
+from typing import cast
+
 import pandas as pd
 
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, InMemoryRecordSource, RawRecord
 
 
@@ -29,8 +32,8 @@ class _DummyExtractionService:
 
 def test_in_memory_record_source_iterates_stably() -> None:
     records: list[RawRecord] = [
-        {"id": "1", "value": "a"},
-        {"id": "2", "value": "b"},
+        cast(RawRecord, {"id": "1", "value": "a"}),
+        cast(RawRecord, {"id": "2", "value": "b"}),
     ]
     source = InMemoryRecordSource(records)
 
@@ -45,7 +48,7 @@ def test_in_memory_record_source_iterates_stably() -> None:
 def test_api_record_source_returns_serialized_records() -> None:
     extraction = _DummyExtractionService()
     source = ApiRecordSource(
-        extraction_service=extraction,
+        extraction_service=cast(ExtractionServiceABC, extraction),
         entity="activity",
         filters={"limit": 1},
     )

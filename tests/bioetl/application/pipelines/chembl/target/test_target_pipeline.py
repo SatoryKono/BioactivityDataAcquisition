@@ -12,11 +12,15 @@ from bioetl.domain.schemas.chembl.target import TargetSchema
 def pipeline():
     """Create pipeline fixture with mocked dependencies."""
     config = MagicMock()
+    config.provider = "chembl"
     config.entity_name = "target"
     config.primary_key = "target_chembl_id"
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []
+    config.normalization = MagicMock()
+    config.normalization.case_sensitive_fields = []
+    config.normalization.id_fields = []
 
     validation_service = MagicMock()
     validation_service.get_schema.return_value = TargetSchema
@@ -39,6 +43,7 @@ def test_transform_nested_fields(pipeline):
         {"name": "target_components", "data_type": "array"},
         {"name": "cross_references", "data_type": "array"},
         {"name": "target_chembl_id", "data_type": "string"},
+        {"name": "target_type", "data_type": "string"},  # Required field
     ]
 
     df = pd.DataFrame({
@@ -59,8 +64,9 @@ def test_transform_nested_fields(pipeline):
 
     comps = result.iloc[0]["target_components"]
     # {"component_id": 1, "accession": "P12345"} ->
-    # "accession:P12345|component_id:1"
+    # "accession:P12345|component_id:1" (keys sorted: accession first)
     # Serialization order ensures deterministic string output
+    # Note: accession is normalized to uppercase by normalize_uniprot
     assert "accession:P12345|component_id:1" in comps
     assert "accession:Q67890|component_id:2" in comps
     assert "|" in comps

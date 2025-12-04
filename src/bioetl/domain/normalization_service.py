@@ -110,6 +110,15 @@ class ChemblNormalizationService(NormalizationService):
             base_normalizer = _default_normalizer
 
         def _normalize_value_from_series(val: Any) -> Any:
+            # If custom normalizer exists and dtype is array, apply it to the whole list
+            if custom_normalizer and dtype == "array" and isinstance(val, (list, tuple)):
+                normalized = custom_normalizer(val)
+                if normalized is None or not normalized:
+                    return None
+                # Don't re-normalize values inside dicts - they're already normalized
+                # by the custom normalizer (e.g., normalize_target_components)
+                # Serialize the normalized list without additional normalization
+                return serialize_list(normalized, value_normalizer=None)
             return self._normalize_value(val, dtype, base_normalizer, name)
 
         return series.apply(_normalize_value_from_series)
@@ -183,9 +192,12 @@ class ChemblNormalizationService(NormalizationService):
                 f"Ошибка нормализации списка в поле '{field_name}': {exc}"
             ) from exc
 
-        if normalized_list is None:
+        if not normalized_list:
             return None
-        return serialize_list(normalized_list)
+        # normalized_list contains already normalized dicts/items
+        # serialize_list will serialize them, and for dicts it will use value_normalizer
+        # to normalize scalar values inside dicts
+        return serialize_list(normalized_list, value_normalizer=normalizer)
 
     def _process_dict(self, value: Any, normalizer: Any, field_name: str) -> Any:
         try:
@@ -204,8 +216,11 @@ class ChemblNormalizationService(NormalizationService):
 
     def _normalize_container_item(self, item: Any, normalizer: Any) -> Any:
         if isinstance(item, dict):
-            return normalize_record(
+            normalized_dict = normalize_record(
                 cast(dict[str, Any], item),
                 value_normalizer=normalizer,
             )
+            # normalize_record returns None for empty dicts, but we need the dict for serialization
+            # Return empty dict instead of None to preserve structure
+            return normalized_dict if normalized_dict is not None else {}
         return normalizer(item)

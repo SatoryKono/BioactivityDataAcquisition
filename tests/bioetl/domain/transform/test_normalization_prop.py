@@ -4,13 +4,14 @@ Property-based tests for normalization.
 import pytest
 
 pytest.importorskip("hypothesis")
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 import pandas as pd
 
 from bioetl.domain.transform.impl.normalize import normalize_scalar
 from bioetl.domain.transform.impl.serializer import serialize_list, serialize_dict
 
 
+@settings(suppress_health_check=[], database=None)
 @given(st.text())
 def test_normalize_scalar_idempotent_default(s):
     """Normalizing twice gives same result (idempotency)."""
@@ -21,6 +22,7 @@ def test_normalize_scalar_idempotent_default(s):
     assert n1 == n2
 
 
+@settings(suppress_health_check=[], database=None)
 @given(st.text())
 def test_normalize_scalar_idempotent_id(s):
     """Normalizing ID twice gives same result."""
@@ -29,6 +31,7 @@ def test_normalize_scalar_idempotent_id(s):
     assert n1 == n2
 
 
+@settings(suppress_health_check=[], database=None)
 @given(st.lists(st.text()))
 def test_serialize_list_determinism(lst):
     """Serialization should be deterministic for same input."""
@@ -37,6 +40,7 @@ def test_serialize_list_determinism(lst):
     assert s1 is s2 or s1 == s2
 
 
+@settings(suppress_health_check=[], database=None)
 @given(st.dictionaries(st.text(), st.text()))
 def test_serialize_dict_determinism(d):
     """Dictionary serialization sorts keys, so must be deterministic."""

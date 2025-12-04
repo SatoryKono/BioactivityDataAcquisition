@@ -106,6 +106,7 @@ def test_normalization_service_raises_on_invalid_custom_value():
     def fail_normalizer(val):
         raise ValueError("Test failure")
 
+    # Use the imported CUSTOM_FIELD_NORMALIZERS directly
     with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"fail_field": fail_normalizer}):
         config.fields = [{"name": "fail_field", "data_type": "string"}]
         df = pd.DataFrame({"fail_field": ["any"]})
@@ -162,7 +163,9 @@ def test_normalization_service_id_detection():
 def test_normalization_service_case_sensitive():
     """Test case sensitive field normalization."""
     fields = [{"name": "secret_code", "data_type": "string"}]
-    norm_config = MockNormalizationConfig(case_sensitive_fields=["secret_code"])
+    norm_config = MockNormalizationConfig(
+        case_sensitive_fields=["secret_code"]
+    )
     config = MockConfig(fields, normalization=norm_config)
 
     service = NormalizationService(config)
@@ -286,7 +289,9 @@ def test_normalization_service_custom_container_normalizer():
     def list_producer(val):
         return ["a", "b"]
 
-    with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"custom_container": list_producer}):
+    with patch.dict(
+        CUSTOM_FIELD_NORMALIZERS, {"custom_container": list_producer}
+    ):
         df = pd.DataFrame({"custom_container": ["input"]})
         res = service.normalize_fields(df)
         # Should be serialized list "a|b"

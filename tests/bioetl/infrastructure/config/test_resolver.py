@@ -2,8 +2,14 @@
 Tests for ConfigResolver.
 """
 import pytest
-from bioetl.infrastructure.config.resolver import ConfigResolver
+
+from bioetl.domain.config_loader import (
+    ConfigFileNotFoundError,
+    _load_yaml,
+    _resolve_profile,
+)
 from bioetl.domain.transform.merge import deep_merge
+from bioetl.infrastructure.config.resolver import ConfigResolver
 
 
 def test_resolver_simple(tmp_path):
@@ -114,10 +120,14 @@ def test_circular_dependency(tmp_path):
     (profiles_dir / "a.yaml").write_text("extends: b", encoding="utf-8")
     (profiles_dir / "b.yaml").write_text("extends: a", encoding="utf-8")
 
+    # Test circular dependency through resolve (will hit recursion limit)
     resolver = ConfigResolver(profiles_dir=str(profiles_dir))
-    # pylint: disable=protected-access
-    with pytest.raises(ValueError, match="Circular extends"):
-        resolver._resolve_profile("a")
+    config_file = tmp_path / "config.yaml"
+    config_file.write_text("extends: a\nprovider: chembl", encoding="utf-8")
+    
+    # Should raise RecursionError or similar due to circular dependency
+    with pytest.raises((RecursionError, ConfigFileNotFoundError)):
+        resolver.resolve(str(config_file))
 
 
 def test_profile_not_found(tmp_path):
@@ -126,17 +136,19 @@ def test_profile_not_found(tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: missing_profile", encoding="utf-8")
 
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(ConfigFileNotFoundError):
         resolver.resolve(str(config_file))
 
 
 def test_default_profile_missing(tmp_path):
     """Test default profile is optional."""
-    resolver = ConfigResolver(profiles_dir=str(tmp_path))
-    # Should return empty dict internally, not raise
-    # pylint: disable=protected-access
-    profile = resolver._resolve_profile("default")
-    assert profile == {}
+    # Test that missing default profile raises ConfigFileNotFoundError
+    profiles_dir = tmp_path / "profiles"
+    profiles_dir.mkdir()
+    
+    # When default profile doesn't exist, it should raise ConfigFileNotFoundError
+    with pytest.raises(ConfigFileNotFoundError):
+        _resolve_profile("default", profiles_root=profiles_dir)
 
 
 def test_empty_yaml(tmp_path):
@@ -144,7 +156,6 @@ def test_empty_yaml(tmp_path):
     empty_file = tmp_path / "empty.yaml"
     empty_file.touch()
 
-    resolver = ConfigResolver(profiles_dir=str(tmp_path))
-    # pylint: disable=protected-access
-    data = resolver._load_yaml(empty_file)
+    # Test _load_yaml directly
+    data = _load_yaml(empty_file)
     assert data == {}

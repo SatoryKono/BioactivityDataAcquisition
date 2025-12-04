@@ -9,7 +9,6 @@ from pydantic import ValidationError
 
 from bioetl.domain.transform.merge import deep_merge
 from bioetl.schemas.pipeline_config_schema import PipelineConfig
-from bioetl.schemas.provider_config_schema import ProviderConfigUnion
 
 CONFIGS_ROOT = Path("configs")
 PIPELINES_ROOT = CONFIGS_ROOT / "pipelines"
@@ -62,7 +61,9 @@ def load_pipeline_config(pipeline_id: str, profile: str | None = None) -> Pipeli
 
 
 def load_pipeline_config_from_path(
-    config_path: str | Path, profile: str | None = None
+    config_path: str | Path,
+    profile: str | None = None,
+    profiles_root: Path | None = None,
 ) -> PipelineConfig:
     """Загружает и валидирует конфигурацию из файла."""
 
@@ -75,13 +76,15 @@ def load_pipeline_config_from_path(
 
     merged_config: dict[str, Any] = {}
     if extends_profile:
-        base_profile = _resolve_profile(extends_profile)
+        base_profile = _resolve_profile(extends_profile, profiles_root=profiles_root)
         merged_config = deep_merge(merged_config, base_profile)
 
     merged_config = deep_merge(merged_config, raw_config)
+    # Remove 'extends' field as it's not part of the schema
+    merged_config.pop("extends", None)
 
     if profile and profile != "default":
-        profile_overrides = _resolve_profile(profile)
+        profile_overrides = _resolve_profile(profile, profiles_root=profiles_root)
         merged_config = deep_merge(merged_config, profile_overrides)
 
     _validate_provider(merged_config, path)
@@ -165,6 +168,26 @@ def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, An
             entity = transformed.get("entity", "unknown")
             transformed["output_path"] = f"./data/output/{entity}"
     
+    # Set default input_mode if missing
+    if "input_mode" not in transformed:
+        transformed["input_mode"] = "auto_detect"
+    
+    # Set default input_path if missing (None is valid)
+    if "input_path" not in transformed:
+        transformed["input_path"] = None
+    
+    # Ensure provider_config exists (should be set by transform above)
+    if "provider_config" not in transformed:
+        # This should not happen if transform worked correctly, but add fallback
+        provider = transformed.get("provider", "chembl")
+        transformed["provider_config"] = {
+            "provider": provider,
+            "base_url": "https://www.ebi.ac.uk/chembl/api/data",
+            "timeout_sec": 30.0,
+            "max_retries": 3,
+            "rate_limit_per_sec": 10.0,
+        }
+    
     # Remove legacy fields that are not in schema
     legacy_fields = ["endpoint", "api_base_url", "sources"]
     for field in legacy_fields:
@@ -176,21 +199,26 @@ def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, An
 _def_profile_cache: dict[str, dict[str, Any]] = {}
 
 
-def _resolve_profile(profile_name: str) -> dict[str, Any]:
-    if profile_name in _def_profile_cache:
-        return _def_profile_cache[profile_name]
+def _resolve_profile(
+    profile_name: str, profiles_root: Path | None = None
+) -> dict[str, Any]:
+    profiles_dir = profiles_root or PROFILES_ROOT
+    cache_key = f"{profiles_dir}:{profile_name}"
+    
+    if cache_key in _def_profile_cache:
+        return _def_profile_cache[cache_key]
 
-    profile_path = PROFILES_ROOT / f"{profile_name}.yaml"
+    profile_path = profiles_dir / f"{profile_name}.yaml"
     if not profile_path.exists():
         raise ConfigFileNotFoundError(profile_path)
 
     profile_data = _load_yaml(profile_path)
     parent = profile_data.get("extends")
     if parent:
-        parent_data = _resolve_profile(parent)
+        parent_data = _resolve_profile(parent, profiles_root=profiles_root)
         profile_data = deep_merge(parent_data, profile_data)
 
-    _def_profile_cache[profile_name] = profile_data
+    _def_profile_cache[cache_key] = profile_data
     return profile_data
 
 

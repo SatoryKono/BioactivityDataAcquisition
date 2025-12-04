@@ -101,16 +101,29 @@ class IdListRecordSource(RecordSource):
 
     def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
-        usecols = [self._id_column] if self._csv_options.header else [0]
-        names = [self._id_column] if not self._csv_options.header else None
+        usecols: list[Any] = [self._id_column] if self._csv_options.header else [0]
+        names: list[str] | None = [self._id_column] if not self._csv_options.header else None
 
-        df_ids = pd.read_csv(
-            self._input_path,
-            delimiter=self._csv_options.delimiter,
-            usecols=usecols,
-            header=header,
-            names=names,
-        )
+        try:
+            df_ids = pd.read_csv(
+                self._input_path,
+                delimiter=self._csv_options.delimiter,
+                usecols=usecols,
+                header=header,
+                names=names,
+            )
+        except (KeyError, ValueError) as exc:
+            # KeyError when usecols specifies a column that doesn't exist
+            # ValueError when pandas can't parse the column
+            raise ValueError(
+                f"Required ID column '{self._id_column}' not found in CSV file: {self._input_path}"
+            ) from exc
+
+        # Additional validation: ensure the column exists after reading
+        if self._csv_options.header and self._id_column not in df_ids.columns:
+            raise ValueError(
+                f"Required ID column '{self._id_column}' not found in CSV file: {self._input_path}"
+            )
 
         ids = df_ids[self._id_column].dropna().astype(str).tolist()
         if self._limit is not None:

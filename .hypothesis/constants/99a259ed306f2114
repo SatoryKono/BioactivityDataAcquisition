@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\interfaces\cli\app.py
+# hypothesis_version: 6.140.3
+
+['--background', '--config', '--csv-delimiter', '--dry-run', '--input-mode', '--input-path', '--limit', '--output', '-o', 'Available Pipelines', 'BIOETL_CONFIG_DIR', 'Class', 'Name', 'Output directory', 'Path to config file', '_', '__main__', 'auto_detect', 'bioetl', 'chembl', 'configs', 'csv', 'csv_options', 'cyan', 'default', 'delimiter', 'development', 'green', 'header', 'id_only', 'input_mode', 'input_path', 'output_path', 'pipelines']

@@ -2,10 +2,60 @@
 Pytest configuration and shared fixtures.
 """
 import socket
+from typing import cast
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
+from pydantic import AnyHttpUrl
 import pytest
+
+# Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
+# Hypothesis tries to create a set from sys.modules.values(), but some modules
+# are SimpleNamespace objects which are not hashable.
+# This patch is applied early via pytest_configure hook.
+
+
+def pytest_configure(config):
+    """Apply Hypothesis compatibility patch for Python 3.13."""
+    try:
+        # Import and patch before Hypothesis is used
+        from hypothesis.internal.conjecture import providers as hypothesis_providers
+        
+        _original_get_local_constants = hypothesis_providers._get_local_constants
+        
+        def _patched_get_local_constants():
+            """Patched version that filters out unhashable modules."""
+            try:
+                return _original_get_local_constants()
+            except TypeError as e:
+                if "unhashable type" in str(e):
+                    # Filter out SimpleNamespace modules before creating set
+                    # This is a workaround for Python 3.13 compatibility
+                    import sys
+                    from types import SimpleNamespace
+                    
+                    # Create filtered modules dict
+                    filtered_modules = {
+                        k: v for k, v in sys.modules.items()
+                        if not isinstance(v, SimpleNamespace)
+                    }
+                    
+                    # Temporarily replace sys.modules
+                    original_modules = dict(sys.modules)
+                    try:
+                        sys.modules.clear()
+                        sys.modules.update(filtered_modules)
+                        return _original_get_local_constants()
+                    finally:
+                        # Restore original
+                        sys.modules.clear()
+                        sys.modules.update(original_modules)
+                raise
+        
+        hypothesis_providers._get_local_constants = _patched_get_local_constants
+    except (ImportError, AttributeError):
+        # Hypothesis not available or structure changed, skip patch
+        pass
 
 from bioetl.infrastructure.config.models import (
     HashingConfig,
@@ -31,8 +81,7 @@ def mock_config():
         output_path="./test_out",
         batch_size=10,
         provider_config=ChemblSourceConfig(
-            # type: ignore[arg-type]
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            base_url=cast(AnyHttpUrl, "https://www.ebi.ac.uk/chembl/api/data"),
             timeout_sec=30,
             max_retries=3,
             rate_limit_per_sec=10.0,
@@ -94,8 +143,7 @@ def pipeline_test_config(
         output_path=str(output_dir),
         batch_size=10,
         provider_config=ChemblSourceConfig(
-            # type: ignore[arg-type]
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            base_url=cast(AnyHttpUrl, "https://www.ebi.ac.uk/chembl/api/data"),
             timeout_sec=30,
             max_retries=3,
             rate_limit_per_sec=10.0,

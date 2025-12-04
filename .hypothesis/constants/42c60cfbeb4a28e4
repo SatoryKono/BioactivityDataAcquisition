@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\schemas\__init__.py
+# hypothesis_version: 6.140.3
+
+['activity', 'activity_input', 'activity_output', 'assay', 'assay_input', 'assay_output', 'document', 'document_input', 'document_output', 'target', 'target_input', 'target_output', 'testitem', 'testitem_input', 'testitem_output']
