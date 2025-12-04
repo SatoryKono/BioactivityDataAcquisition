@@ -1,10 +1,10 @@
-checksum: 07c268fb0b8b6cc44c851b62bcf62afd742ab9b767ec4208950ee653cc59c596
+checksum: 2b13c29db427502f3e232f0f24217c7209adfa979da0052d3c251c2a508b8384
 chembl_release: ChEMBL_36
 entity: assay
 files:
 - assay.csv
 hash_version: v1_blake2b_256
 provider: chembl
-row_count: 100
-run_id: adebc0d6-4e67-4219-ab4a-6b027cbcb773
-timestamp: '2025-12-03T15:55:13.029404+00:00'
+row_count: 10
+run_id: 359e4a24-be92-4b7c-a818-f30855bd1410
+timestamp: '2025-12-04T07:20:39.314843+00:00'

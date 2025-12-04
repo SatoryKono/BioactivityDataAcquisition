@@ -1,11 +1,12 @@
 import pandas as pd
 import pytest
+from unittest.mock import patch
+
 from bioetl.domain.transform.impl.normalize import (
     NormalizationService,
     normalize_scalar,
 )
 from bioetl.domain.transform.normalizers.registry import (
-    register_normalizer,
     CUSTOM_FIELD_NORMALIZERS,
 )
 
@@ -19,7 +20,7 @@ def test_normalize_scalar():
 
     # ID: upper + trim
     assert normalize_scalar(" chembl123 ", mode="id") == "CHEMBL123"
-    
+
     # Sensitive: trim only
     assert normalize_scalar("  AbC  ", mode="sensitive") == "AbC"
 
@@ -51,13 +52,14 @@ def test_normalization_service_full():
         {"name": "nested_obj", "data_type": "object"},
         {"name": "doi", "data_type": "string"},
     ]
-    
+
     norm_config = MockNormalizationConfig(id_fields=["id_col"])
     config = MockConfig(fields, normalization=norm_config)
-    
-    # Note: 'doi' is registered globally in src/bioetl/domain/transform/normalizers/registry.py
+
+    # Note: 'doi' is registered globally in
+    # src/bioetl/domain/transform/normalizers/registry.py
     # We rely on that global registration here.
-    
+
     service = NormalizationService(config)
 
     df = pd.DataFrame(
@@ -75,58 +77,42 @@ def test_normalization_service_full():
 
     # Simple: lower + trim
     assert res["simple"].iloc[0] == "value"
-    
+
     # ID: upper + trim
     assert res["id_col"].iloc[0] == "CHEMBL_1"
-    
+
     # Num: round 3
     assert res["num"].iloc[0] == 1.235
-    
+
     # Nested: serialized with normalization (default lower for strings)
     # "A" -> "a", "K" -> "k", "V" -> "v"
     assert res["nested_list"].iloc[0] == "a|b"
-    assert res["nested_obj"].iloc[0] == "K:v"  # Keys preserve case, values normalized
+    assert res["nested_obj"].iloc[0] == "K:v"
+    # Keys preserve case, values normalized
 
     # DOI normalized via custom normalizer
     assert res["doi"].iloc[0] == "10.1000/abc"
 
 
 def test_normalization_service_raises_on_invalid_custom_value():
-    # 'doi' has a custom normalizer that might raise if invalid DOI logic is strict?
-    # Actually normalize_doi logic in current codebase might returns None for invalid or just cleans it.
-    # But let's check what we want to test.
-    # The original test expected ValueError.
-    
     norm_config = MockNormalizationConfig()
-    config = MockConfig([{"name": "doi", "data_type": "string"}], normalization=norm_config)
-    
+    config = MockConfig(
+        [{"name": "fail_field", "data_type": "string"}],
+        normalization=norm_config
+    )
+
     service = NormalizationService(config)
 
-    # We assume normalize_doi raises ValueError for "invalid-doi" IF the original test expected it.
-    # If not, we might need to use a mock to force it.
-    # But since we rely on global registry, we can't easily inject a mock normalizer for "doi" 
-    # without patching the global registry.
-    # For this test, let's use a different field name that we register specifically for this test using global registry,
-    # then clean up.
-    
-    from bioetl.domain.transform.normalizers.registry import register_normalizer, CUSTOM_FIELD_NORMALIZERS
-    
     def fail_normalizer(val):
         raise ValueError("Test failure")
-        
-    register_normalizer("fail_field", fail_normalizer)
-    
-    try:
+
+    with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"fail_field": fail_normalizer}):
         config.fields = [{"name": "fail_field", "data_type": "string"}]
         df = pd.DataFrame({"fail_field": ["any"]})
-        
+
         with pytest.raises(ValueError) as excinfo:
             service.normalize_fields(df)
         assert "fail_field" in str(excinfo.value)
-    finally:
-        # Cleanup
-        if "fail_field" in CUSTOM_FIELD_NORMALIZERS:
-            del CUSTOM_FIELD_NORMALIZERS["fail_field"]
 
 
 def test_normalize_scalar_edge_cases():
@@ -156,15 +142,15 @@ def test_normalization_service_id_detection():
     ]
     config = MockConfig(fields)
     service = NormalizationService(config)
-    
+
     df = pd.DataFrame({
         "some_chembl_id": [" lower "],
         "id_prefix": [" lower "],
         "normal_col": [" UPPER "],
     })
-    
+
     res = service.normalize_fields(df)
-    
+
     # _chembl_id -> ID mode (upper)
     assert res["some_chembl_id"].iloc[0] == "LOWER"
     # id_ prefix -> ID mode (upper)
@@ -178,22 +164,25 @@ def test_normalization_service_case_sensitive():
     fields = [{"name": "secret_code", "data_type": "string"}]
     norm_config = MockNormalizationConfig(case_sensitive_fields=["secret_code"])
     config = MockConfig(fields, normalization=norm_config)
-    
+
     service = NormalizationService(config)
-    
+
     df = pd.DataFrame({"secret_code": ["  MixEd  "]})
     res = service.normalize_fields(df)
-    
+
     # Sensitive -> trim only, preserve case
     assert res["secret_code"].iloc[0] == "MixEd"
 
 
 def test_normalization_service_missing_field():
     """Test graceful handling of configured fields missing from DataFrame."""
-    fields = [{"name": "exists", "data_type": "string"}, {"name": "missing", "data_type": "string"}]
+    fields = [
+        {"name": "exists", "data_type": "string"},
+        {"name": "missing", "data_type": "string"}
+    ]
     config = MockConfig(fields)
     service = NormalizationService(config)
-    
+
     df = pd.DataFrame({"exists": ["A"]})
     # Should not raise error
     res = service.normalize_fields(df)
@@ -203,34 +192,21 @@ def test_normalization_service_missing_field():
 
 def test_normalization_service_nested_fallback_error():
     """Test error handling when nested normalizer fails on scalar fallback."""
-    # We need a case where _normalize_nested is called (array/object)
-    # but the value is a scalar that causes the normalizer to fail?
-    # Actually, _normalize_nested handles lists/dicts.
-    # If we pass a scalar to a nested field, it tries `norm(val)`.
-    # If that fails, it wraps the error.
-    
     fields = [{"name": "bad_nested", "data_type": "array"}]
     config = MockConfig(fields)
     service = NormalizationService(config)
-    
-    # Register a failing normalizer
-    from bioetl.domain.transform.normalizers.registry import register_normalizer, CUSTOM_FIELD_NORMALIZERS
+
     def fail_norm(val):
         raise ValueError("Scalar fail")
-    
-    register_normalizer("bad_nested", fail_norm)
-    
-    try:
+
+    with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"bad_nested": fail_norm}):
         # Pass a scalar so it hits the fallback at end of _serialize_wrapper
         df = pd.DataFrame({"bad_nested": ["scalar_val"]})
-        
+
         with pytest.raises(ValueError) as excinfo:
             service.normalize_fields(df)
         assert "bad_nested" in str(excinfo.value)
         assert "Scalar fail" in str(excinfo.value)
-    finally:
-        if "bad_nested" in CUSTOM_FIELD_NORMALIZERS:
-            del CUSTOM_FIELD_NORMALIZERS["bad_nested"]
 
 
 def test_normalization_service_nested_na():
@@ -238,10 +214,10 @@ def test_normalization_service_nested_na():
     fields = [{"name": "list_col", "data_type": "array"}]
     config = MockConfig(fields)
     service = NormalizationService(config)
-    
+
     df = pd.DataFrame({"list_col": [pd.NA, None]})
     res = service.normalize_fields(df)
-    
+
     assert pd.isna(res["list_col"].iloc[0])
     assert pd.isna(res["list_col"].iloc[1])
 
@@ -293,17 +269,12 @@ def test_normalization_service_nested_errors_list():
             raise ValueError("Cannot process X")
         return val.lower()
 
-    register_normalizer("err_list", fail_on_x)
-
-    try:
+    with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"err_list": fail_on_x}):
         df = pd.DataFrame({"err_list": [["A", "X"]]})
         with pytest.raises(ValueError) as excinfo:
             service.normalize_fields(df)
         assert "err_list" in str(excinfo.value)
         assert "Cannot process X" in str(excinfo.value)
-    finally:
-        if "err_list" in CUSTOM_FIELD_NORMALIZERS:
-            del CUSTOM_FIELD_NORMALIZERS["err_list"]
 
 
 def test_normalization_service_custom_container_normalizer():
@@ -315,13 +286,8 @@ def test_normalization_service_custom_container_normalizer():
     def list_producer(val):
         return ["a", "b"]
 
-    register_normalizer("custom_container", list_producer)
-
-    try:
+    with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"custom_container": list_producer}):
         df = pd.DataFrame({"custom_container": ["input"]})
         res = service.normalize_fields(df)
         # Should be serialized list "a|b"
         assert res["custom_container"].iloc[0] == "a|b"
-    finally:
-        if "custom_container" in CUSTOM_FIELD_NORMALIZERS:
-            del CUSTOM_FIELD_NORMALIZERS["custom_container"]
