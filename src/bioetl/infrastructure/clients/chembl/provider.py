@@ -14,7 +14,10 @@ from bioetl.core.providers import (
     ProviderId,
 )
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.clients.chembl.factories import default_chembl_client
+from bioetl.infrastructure.clients.chembl.factories import (
+    default_chembl_client,
+    default_chembl_extraction_service,
+)
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
@@ -29,8 +32,7 @@ class ChemblProviderComponents(
     def create_extraction_service(
         self, client: ChemblDataClientABC, config: ChemblSourceConfig
     ) -> ChemblExtractionService:
-        batch_size = config.resolve_effective_batch_size(hard_cap=1000)
-        return ChemblExtractionService(client=client, batch_size=batch_size)
+        return default_chembl_extraction_service(config, client=client)
 
 
 def register_chembl_provider() -> ProviderDefinition:
