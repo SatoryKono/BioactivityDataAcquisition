@@ -38,8 +38,10 @@ class PipelineOrchestrator:
             extraction_service, limit=limit, logger=logger
         )
         hash_service = container.get_hash_service()
+        hooks = container.get_hooks()
+        error_policy = container.get_error_policy()
 
-        return pipeline_cls(
+        pipeline = pipeline_cls(
             config=self._config,
             logger=logger,
             validation_service=validation_service,
@@ -49,6 +51,11 @@ class PipelineOrchestrator:
             normalization_service=normalization_service,
             hash_service=hash_service,
         )
+
+        pipeline.add_hooks(hooks)
+        pipeline.set_error_policy(error_policy)
+
+        return pipeline
 
     def run_pipeline(self, *, dry_run: bool = False, limit: int | None = None) -> RunResult:
         """Запускает пайплайн в текущем процессе."""

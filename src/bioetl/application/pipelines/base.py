@@ -8,7 +8,8 @@ from typing import Any, Callable, TYPE_CHECKING
 import pandas as pd
 
 from bioetl.core.providers import ProviderId
-from bioetl.application.pipelines.hooks import PipelineHookABC
+from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
@@ -52,6 +53,8 @@ class PipelineBase(ABC):
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
         self._hooks: list[PipelineHookABC] = []
+        self._error_policy: ErrorPolicyABC | None = None
+        self._last_error: PipelineStageError | None = None
         self._stage_starts: dict[str, datetime] = {}
         self._schema_contract = get_pipeline_contract(
             config.id, default_entity=config.entity_name
@@ -86,6 +89,8 @@ class PipelineBase(ABC):
                 context=context,
                 action=lambda: self.extract(**kwargs),
             )
+            if df_raw is None:
+                return self._handle_stage_failure("extract", stages_results, context)
             stages_results.append(
                 self._make_stage_result("extract", len(df_raw))
             )
@@ -96,6 +101,10 @@ class PipelineBase(ABC):
                 context=context,
                 action=lambda: self.transform(df_raw),
             )
+            if df_transformed is None:
+                return self._handle_stage_failure(
+                    "transform", stages_results, context
+                )
             df_transformed = self._add_hash_columns(df_transformed)
             df_transformed = self._add_index_column(df_transformed)
             df_transformed = self._add_database_version_column(
@@ -112,6 +121,8 @@ class PipelineBase(ABC):
                 context=context,
                 action=lambda: self.validate(df_transformed),
             )
+            if df_validated is None:
+                return self._handle_stage_failure("validate", stages_results, context)
             stages_results.append(
                 self._make_stage_result("validate", len(df_validated))
             )
@@ -129,7 +140,7 @@ class PipelineBase(ABC):
                     ),
                 )
                 if write_result is None:
-                    raise RuntimeError("Write stage returned None")
+                    return self._handle_stage_failure("write", stages_results, context)
 
                 stages_results.append(
                     self._make_stage_result("write", write_result.row_count)
@@ -222,6 +233,15 @@ class PipelineBase(ABC):
         """Добавляет хук выполнения."""
         self._hooks.append(hook)
 
+    def add_hooks(self, hooks: list[PipelineHookABC]) -> None:
+        """Добавляет список хуков выполнения."""
+        for hook in hooks:
+            self.add_hook(hook)
+
+    def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
+        """Устанавливает политику обработки ошибок."""
+        self._error_policy = error_policy
+
     # === Internal Methods ===
 
     def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -293,7 +313,14 @@ class PipelineBase(ABC):
         for hook in self._hooks:
             hook.on_stage_end(stage, result)
 
-    def _make_stage_result(self, stage: str, count: int) -> StageResult:
+    def _make_stage_result(
+        self,
+        stage: str,
+        count: int,
+        *,
+        success: bool = True,
+        errors: list[str] | None = None,
+    ) -> StageResult:
         start_time = self._stage_starts.get(stage)
         duration = 0.0
         if start_time:
@@ -303,16 +330,51 @@ class PipelineBase(ABC):
 
         return StageResult(
             stage_name=stage,
-            success=True,
-            records_processed=count,
+            success=success,
+            records_processed=count if success else 0,
             duration_sec=duration,
-            errors=[],
+            errors=errors or [],
         )
 
     def _calculate_duration(self, context: RunContext) -> float:
         return (
             datetime.now(timezone.utc) - context.started_at
         ).total_seconds()
+
+    def _handle_stage_failure(
+        self,
+        stage: str,
+        stages_results: list[StageResult],
+        context: RunContext,
+    ) -> RunResult:
+        errors = self._get_last_error_messages()
+        stage_result = self._make_stage_result(
+            stage,
+            0,
+            success=False,
+            errors=errors,
+        )
+        stages_results.append(stage_result)
+        self._notify_stage_end(stage, stage_result)
+        return RunResult(
+            run_id=context.run_id,
+            success=False,
+            entity_name=self._config.entity_name,
+            row_count=0,
+            output_path=None,
+            duration_sec=self._calculate_duration(context),
+            stages=stages_results,
+            errors=errors,
+            meta={},
+        )
+
+    def _get_last_error_messages(self) -> list[str]:
+        if self._last_error is None:
+            return []
+        messages = [str(self._last_error)]
+        if self._last_error.cause:
+            messages.append(str(self._last_error.cause))
+        return messages
 
     def _run_stage(
         self,
@@ -322,29 +384,60 @@ class PipelineBase(ABC):
         *,
         attempt: int = 1,
     ) -> Any:
-        self._notify_stage_start(stage, context)
-        try:
-            return action()
-        except Exception as exc:
-            error = PipelineStageError(
-                provider=self._provider_id.value,
-                entity=self._config.entity_name,
-                stage=stage,
-                attempt=attempt,
-                run_id=context.run_id,
-                cause=exc,
-            )
-            self._logger.error(
-                "Stage failed",
-                stage=stage,
-                provider=self._provider_id.value,
-                entity=self._config.entity_name,
-                run_id=context.run_id,
-                error=str(exc),
-            )
-            for hook in self._hooks:
-                hook.on_error(stage, error)
-            raise error from exc
+        current_attempt = attempt
+        while True:
+            self._notify_stage_start(stage, context)
+            try:
+                result = action()
+                self._last_error = None
+                return result
+            except Exception as exc:
+                error = PipelineStageError(
+                    provider=self._provider_id.value,
+                    entity=self._config.entity_name,
+                    stage=stage,
+                    attempt=current_attempt,
+                    run_id=context.run_id,
+                    cause=exc,
+                )
+                self._last_error = error
+                self._logger.error(
+                    "Stage failed",
+                    stage=stage,
+                    provider=self._provider_id.value,
+                    entity=self._config.entity_name,
+                    run_id=context.run_id,
+                    error=str(exc),
+                )
+                for hook in self._hooks:
+                    hook.on_error(stage, error)
+
+                policy_action = (
+                    self._error_policy.handle(error, context)
+                    if self._error_policy
+                    else ErrorAction.FAIL
+                )
+
+                if (
+                    policy_action == ErrorAction.RETRY
+                    and self._error_policy
+                    and self._error_policy.should_retry(error)
+                ):
+                    current_attempt += 1
+                    continue
+
+                if policy_action == ErrorAction.SKIP:
+                    self._logger.warning(
+                        "Stage skipped due to error policy",
+                        stage=stage,
+                        provider=self._provider_id.value,
+                        entity=self._config.entity_name,
+                        run_id=context.run_id,
+                        error=str(exc),
+                    )
+                    return None
+
+                raise error from exc
 
     def _enrich_context(self, context: RunContext) -> None:
         """
