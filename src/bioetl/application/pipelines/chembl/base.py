@@ -96,8 +96,8 @@ class ChemblPipelineBase(PipelineBase):
         Игнорирует генерируемые колонки (hash_row, hash_business_key),
         так как они вычисляются позже.
         """
-        entity = self._config.entity_name
-        schema_cls = self._validation_service.get_schema(entity)
+        schema_name = self._schema_contract.schema_out
+        schema_cls = self._validation_service.get_schema(schema_name)
         schema = schema_cls.to_schema()
 
         ignored_cols = {
@@ -147,8 +147,8 @@ class ChemblPipelineBase(PipelineBase):
         Приводит DataFrame к схеме: заполняет отсутствующие колонки None,
         оставляет только колонки из схемы в правильном порядке.
         """
-        entity = self._config.entity_name
-        schema_columns = self._validation_service.get_schema_columns(entity)
+        schema_name = self._schema_contract.schema_out
+        schema_columns = self._validation_service.get_schema_columns(schema_name)
 
         for col in schema_columns:
             if col not in df.columns:

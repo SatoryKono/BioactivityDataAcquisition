@@ -4,6 +4,29 @@ from pandera.typing import Series
 
 from bioetl.domain.transform.normalizers import DOI_REGEX
 
+OUTPUT_COLUMN_ORDER: list[str] = [
+    "abstract",
+    "authors",
+    "chembl_release",
+    "contact",
+    "doc_type",
+    "document_chembl_id",
+    "doi",
+    "doi_chembl",
+    "first_page",
+    "issue",
+    "journal",
+    "journal_full_title",
+    "last_page",
+    "patent_id",
+    "pubmed_id",
+    "score",
+    "src_id",
+    "title",
+    "volume",
+    "year",
+]
+
 
 class DocumentSchema(pa.DataFrameModel):
     """Schema for document/publication data."""
