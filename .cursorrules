@@ -187,6 +187,8 @@ os.replace(tmp, path)
 ## Источники истины
 
 - `docs/project/00-rules-summary.md` — сводка всех правил проекта (включая именование, ABC/Default/Impl, стиль кода, стандарты документации)
+- `.cursor/rules/06-testing.mdc` — детализированные стандарты тестирования
+- `docs/FILE_POLICY.md` — структура проекта и файловая политика
 
 ## 16. Доступные команды (Cursor Commands)
 

@@ -117,13 +117,13 @@ class IdListRecordSource(RecordSource):
             ids = ids[: self._limit]
 
         if not ids:
-            return []
+            return
 
         batch_size = self._source_config.resolve_effective_batch_size(
             limit=self._limit, hard_cap=25
         )
 
-        return self._fetch_records(ids, batch_size)
+        yield from self._fetch_records(ids, batch_size)
 
     def _fetch_records(
         self, ids: list[str], batch_size: int
