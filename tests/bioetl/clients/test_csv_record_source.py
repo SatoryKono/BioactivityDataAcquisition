@@ -51,9 +51,11 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
         logger=_DummyLogger(),
     )
 
-    records = list(source.iter_records())
+    chunks = list(source.iter_records())
 
-    assert records == [{"id": 1, "name": "alpha"}]
+    assert len(chunks) == 1
+    expected = pd.DataFrame([{"id": 1, "name": "alpha"}])
+    pd.testing.assert_frame_equal(chunks[0].reset_index(drop=True), expected)
 
 
 def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
@@ -63,13 +65,21 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     )
 
     extraction = _StubExtractionService()
+    source_config = ChemblSourceConfig(
+        provider="chembl",
+        base_url="https://example.org",
+        timeout_sec=1,
+        max_retries=0,
+        rate_limit_per_sec=1.0,
+        batch_size=2,
+    )
     source = IdListRecordSource(
         input_path=csv_path,
         id_column="activity_id",
         csv_options=CsvInputOptions(),
         limit=3,
         extraction_service=extraction,
-        source_config=ChemblSourceConfig(batch_size=2),
+        source_config=source_config,
         entity="activity",
         filter_key="activity_id__in",
         logger=_DummyLogger(),
@@ -78,4 +88,12 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     records = list(source.iter_records())
 
     assert extraction.batches == [["A1", "A2"], ["A3"]]
-    assert records == [{"id": "A1"}, {"id": "A2"}, {"id": "A3"}]
+    assert len(records) == 1
+    expected_df = pd.DataFrame(
+        [
+            {"id": "A1"},
+            {"id": "A2"},
+            {"id": "A3"},
+        ]
+    )
+    pd.testing.assert_frame_equal(records[0].reset_index(drop=True), expected_df)
