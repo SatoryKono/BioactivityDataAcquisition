@@ -32,15 +32,22 @@ def default_chembl_client(
     """
     base_url = str(options.get("base_url") or source_config.base_url)
     max_len = options.get("max_url_length") or source_config.max_url_length
+    timeout = options.get("timeout", float(source_config.timeout_sec))
+    max_attempts = options.get("max_attempts", int(source_config.max_retries))
+    base_delay = options.get("base_delay", 1.0)
+    max_delay = options.get("max_delay", 30.0)
+    backoff_factor = options.get("backoff_factor", 2.0)
+    rate_limit = options.get("rate_limit_per_sec") or source_config.rate_limit_per_sec
+    rate_limit_value = float(rate_limit) if rate_limit is not None else 5.0
 
     middleware = HttpClientMiddleware(
         provider="chembl",
         base_client=requests.Session(),
-        max_attempts=options.get("max_attempts", 3),
-        base_delay=options.get("base_delay", 1.0),
-        max_delay=options.get("max_delay", 30.0),
-        backoff_factor=options.get("backoff_factor", 2.0),
-        timeout=options.get("timeout", 30.0),
+        max_attempts=max_attempts,
+        base_delay=base_delay,
+        max_delay=max_delay,
+        backoff_factor=backoff_factor,
+        timeout=timeout,
     )
 
     return ChemblDataClientHTTPImpl(
@@ -49,7 +56,10 @@ def default_chembl_client(
             max_url_length=max_len
         ),
         response_parser=ChemblResponseParser(),
-        rate_limiter=default_rate_limiter(rate=5.0, capacity=10.0),
+        rate_limiter=default_rate_limiter(
+            rate=rate_limit_value,
+            capacity=rate_limit_value,
+        ),
         http_middleware=middleware,
         provider="chembl",
     )
@@ -64,9 +74,12 @@ def default_chembl_extraction_service(
 
     Uses default client and configured batch size.
     """
-    client = default_chembl_client(source_config, **client_options)
+    client = client_options.pop("client", None) or default_chembl_client(
+        source_config, **client_options
+    )
     # ChEMBL API supports up to 1000 items per page.
-    batch_size = source_config.resolve_effective_batch_size(hard_cap=1000)
+    hard_cap = source_config.page_size or 1000
+    batch_size = source_config.resolve_effective_batch_size(hard_cap=hard_cap)
 
     return ChemblExtractionService(
         client=client,

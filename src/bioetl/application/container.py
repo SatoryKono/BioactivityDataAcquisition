@@ -2,7 +2,6 @@
 from pathlib import Path
 from typing import Any
 
-import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
 from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
 from bioetl.core.provider_registry import get_provider
 from bioetl.core.providers import ProviderDefinition, ProviderId
@@ -12,6 +11,7 @@ from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
@@ -32,6 +32,7 @@ class PipelineContainer:
         self._provider_id = ProviderId(self.config.provider)
         self._schema_registry = SchemaRegistry()
         register_schemas(self._schema_registry)
+        self._register_providers()
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
@@ -135,6 +136,9 @@ class PipelineContainer:
                 f"Could not resolve primary key for entity '{self.config.entity_name}'"
             )
         return pk
+
+    def _register_providers(self) -> None:
+        register_chembl_provider()
 
     def _get_provider_definition(self) -> ProviderDefinition:
         return get_provider(self._provider_id)
