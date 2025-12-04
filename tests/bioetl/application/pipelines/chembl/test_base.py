@@ -8,6 +8,7 @@ import pytest
 
 from bioetl.domain.models import RunContext
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.transform.hash_service import HashService
 
 
 class ConcreteChemblPipeline(ChemblPipelineBase):
@@ -40,6 +41,7 @@ def mock_dependencies_fixture():
         "validation_service": validation_service,
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
+        "hash_service": HashService(),
     }
 
 
@@ -54,6 +56,7 @@ def pipeline_fixture(mock_dependencies_fixture):
         validation_service=mock_dependencies_fixture["validation_service"],
         output_writer=mock_dependencies_fixture["output_writer"],
         extraction_service=mock_dependencies_fixture["extraction_service"],
+        hash_service=mock_dependencies_fixture["hash_service"],
     )
 
 
@@ -160,6 +163,7 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         output_writer=mock_dependencies_fixture["output_writer"],
         extraction_service=mock_dependencies_fixture["extraction_service"],
         normalization_service=normalization_service,
+        hash_service=mock_dependencies_fixture["hash_service"],
     )
 
     df = pd.DataFrame({"a": [1, 2]})
@@ -200,6 +204,7 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         extraction_service=mock_dependencies_fixture["extraction_service"],
         record_source=record_source,
         normalization_service=normalization_service,
+        hash_service=mock_dependencies_fixture["hash_service"],
     )
 
     result = pipeline.extract()
