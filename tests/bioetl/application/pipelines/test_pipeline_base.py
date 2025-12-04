@@ -12,6 +12,8 @@ from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.errors import PipelineStageError
+from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.transformers import HashColumnsTransformer
 
 
 class ConcretePipeline(PipelineBase):
@@ -239,32 +241,20 @@ def test_hashing_logic(
     mock_output_writer
 ):
     """Test different scenarios for business key hashing."""
-    # Scenario 1: Config with business_key_fields=["id"] and present column
-    mock_config.hashing.business_key_fields = ["id"]
-    pipeline = ConcretePipeline(
-        mock_config, mock_logger, mock_validation_service, mock_output_writer
-    )
+    transformer = HashColumnsTransformer(HashService(), ["id"])
     df = pd.DataFrame({"id": [1], "val": ["x"]})
-    res = pipeline._add_hash_columns(df)
+    res = transformer.apply(df)
     assert "hash_row" in res.columns
     assert "hash_business_key" in res.columns
     assert res["hash_business_key"].iloc[0] is not None
 
-    # Scenario 2: Configured key missing in DF
-    mock_config.hashing.business_key_fields = ["missing_col"]
-    pipeline = ConcretePipeline(
-        mock_config, mock_logger, mock_validation_service, mock_output_writer
-    )
-    res = pipeline._add_hash_columns(df)
-    assert res["hash_business_key"].iloc[0] is None
+    transformer_missing = HashColumnsTransformer(HashService(), ["missing_col"])
+    res_missing = transformer_missing.apply(df)
+    assert res_missing["hash_business_key"].iloc[0] is None
 
-    # Scenario 3: No keys configured
-    mock_config.hashing.business_key_fields = []
-    pipeline = ConcretePipeline(
-        mock_config, mock_logger, mock_validation_service, mock_output_writer
-    )
-    res = pipeline._add_hash_columns(df)
-    assert res["hash_business_key"].iloc[0] is None
+    transformer_empty = HashColumnsTransformer(HashService(), [])
+    res_empty = transformer_empty.apply(df)
+    assert res_empty["hash_business_key"].iloc[0] is None
 
 
 @pytest.mark.unit
