@@ -49,7 +49,7 @@ class PipelineBase(ABC):
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
         output_writer: "UnifiedOutputWriter",
-        hash_service: HashService | None = None,
+        hash_service: HashService,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         post_transformer: TransformerABC | None = None,
@@ -62,7 +62,7 @@ class PipelineBase(ABC):
         )
         self._validation_service = validation_service
         self._output_writer = output_writer
-        self._hash_service = hash_service or HashService()
+        self._hash_service = hash_service
         self._post_transformer = post_transformer or self._build_default_transformer()
         self._hooks: list[PipelineHookABC] = list(hooks or [])
         self._last_error: PipelineStageError | None = None

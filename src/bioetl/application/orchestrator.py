@@ -8,13 +8,6 @@ from bioetl.application.container import PipelineContainer, build_pipeline_depen
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.models import RunResult
-from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
-    FulldateTransformer,
-    HashColumnsTransformer,
-    IndexColumnTransformer,
-    TransformerChain,
-)
 from bioetl.infrastructure.config.models import PipelineConfig
 
 
@@ -61,17 +54,11 @@ class PipelineOrchestrator:
             error_policy=error_policy,
         )
 
-        post_transformer = TransformerChain(
-            [
-                HashColumnsTransformer(
-                    hash_service, self._config.hashing.business_key_fields
-                ),
-                IndexColumnTransformer(hash_service),
-                DatabaseVersionTransformer(hash_service, pipeline.get_version),
-                FulldateTransformer(hash_service),
-            ]
+        pipeline.set_post_transformer(
+            container.get_post_transformer(
+                version_provider=pipeline.get_version
+            )
         )
-        pipeline.set_post_transformer(post_transformer)
 
         pipeline.add_hooks(hooks)
         pipeline.set_error_policy(error_policy)

@@ -43,13 +43,19 @@ class DatasetPipeline(PipelineBase):
         return df.assign(processed=True)
 
 
+@pytest.fixture
+def hash_service():
+    return HashService()
+
+
 @pytest.mark.unit
 def test_pipeline_run_success(
     mock_config,
     mock_logger,
     mock_validation_service,
     mock_output_writer,
-    tmp_path
+    tmp_path,
+    hash_service,
 ):
     """Test a successful pipeline run."""
     # Arrange
@@ -57,7 +63,8 @@ def test_pipeline_run_success(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer
+        output_writer=mock_output_writer,
+        hash_service=hash_service,
     )
 
     output_path = tmp_path / "output.parquet"
@@ -86,7 +93,8 @@ def test_pipeline_dry_run(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
-    tmp_path
+    tmp_path,
+    hash_service,
 ):
     """Test a dry run of the pipeline."""
     # Arrange
@@ -94,7 +102,8 @@ def test_pipeline_dry_run(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer
+        mock_output_writer,
+        hash_service,
     )
 
     # Act
@@ -117,7 +126,8 @@ def test_pipeline_hooks(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer
+    mock_output_writer,
+    hash_service,
 ):
     """Test that hooks are called correctly."""
     # Arrange
@@ -125,7 +135,8 @@ def test_pipeline_hooks(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer
+        mock_output_writer,
+        hash_service,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.add_hook(mock_hook)
@@ -147,7 +158,8 @@ def test_pipeline_error_hooks(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer
+    mock_output_writer,
+    hash_service,
 ):
     """Test that error hooks are called on failure."""
     # Arrange
@@ -155,7 +167,8 @@ def test_pipeline_error_hooks(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer
+        mock_output_writer,
+        hash_service,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.add_hook(mock_hook)
@@ -186,6 +199,7 @@ def test_error_policy_skip_stage(
     mock_validation_service,
     mock_output_writer,
     tmp_path,
+    hash_service,
 ):
     """Пайплайн продолжает работу при политике SKIP."""
 
@@ -195,6 +209,7 @@ def test_error_policy_skip_stage(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(),
+        hash_service=hash_service,
     )
     pipeline.extract = MagicMock(side_effect=ValueError("boom"))
 
@@ -211,6 +226,7 @@ def test_error_policy_retry(
     mock_validation_service,
     mock_output_writer,
     tmp_path,
+    hash_service,
 ):
     """Пайплайн повторяет стадию при политике RETRY."""
 
@@ -220,6 +236,7 @@ def test_error_policy_retry(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
+        hash_service=hash_service,
     )
 
     pipeline.extract = MagicMock(
@@ -238,21 +255,22 @@ def test_hashing_logic(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer
+    mock_output_writer,
+    hash_service,
 ):
     """Test different scenarios for business key hashing."""
-    transformer = HashColumnsTransformer(HashService(), ["id"])
+    transformer = HashColumnsTransformer(hash_service, ["id"])
     df = pd.DataFrame({"id": [1], "val": ["x"]})
     res = transformer.apply(df)
     assert "hash_row" in res.columns
     assert "hash_business_key" in res.columns
     assert res["hash_business_key"].iloc[0] is not None
 
-    transformer_missing = HashColumnsTransformer(HashService(), ["missing_col"])
+    transformer_missing = HashColumnsTransformer(hash_service, ["missing_col"])
     res_missing = transformer_missing.apply(df)
     assert res_missing["hash_business_key"].iloc[0] is None
 
-    transformer_empty = HashColumnsTransformer(HashService(), [])
+    transformer_empty = HashColumnsTransformer(hash_service, [])
     res_empty = transformer_empty.apply(df)
     assert res_empty["hash_business_key"].iloc[0] is None
 
@@ -265,6 +283,7 @@ def test_pipeline_dry_run_metadata_and_stages(
     mock_output_writer,
     small_pipeline_df,
     tmp_path,
+    hash_service,
 ):
     """Dry-run returns accurate stage info and metadata."""
     pipeline = DatasetPipeline(
@@ -272,6 +291,7 @@ def test_pipeline_dry_run_metadata_and_stages(
         logger=mock_logger,
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
+        hash_service=hash_service,
         dataset=small_pipeline_df,
     )
 
