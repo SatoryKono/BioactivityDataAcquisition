@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable, TYPE_CHECKING
 import pandas as pd
 
+from bioetl.core.providers import ProviderId
 from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
@@ -42,9 +43,10 @@ class PipelineBase(ABC):
         hash_service: HashService | None = None,
     ) -> None:
         self._config = config
+        self._provider_id = ProviderId(config.provider)
         self._logger = logger.bind(
             entity=config.entity_name,
-            provider=config.provider,
+            provider=self._provider_id.value,
         )
         self._validation_service = validation_service
         self._output_writer = output_writer
@@ -69,7 +71,7 @@ class PipelineBase(ABC):
         """
         context = RunContext(
             entity_name=self._config.entity_name,
-            provider=self._config.provider,
+            provider=self._provider_id.value,
             config=self._config.model_dump(),
             dry_run=dry_run,
         )
@@ -285,7 +287,7 @@ class PipelineBase(ABC):
         self._logger.info(
             f"Stage finished: {stage}",
             records=result.records_processed,
-            provider=self._config.provider,
+            provider=self._provider_id.value,
             entity=self._config.entity_name,
         )
         for hook in self._hooks:
@@ -325,7 +327,7 @@ class PipelineBase(ABC):
             return action()
         except Exception as exc:
             error = PipelineStageError(
-                provider=self._config.provider,
+                provider=self._provider_id.value,
                 entity=self._config.entity_name,
                 stage=stage,
                 attempt=attempt,
@@ -335,7 +337,7 @@ class PipelineBase(ABC):
             self._logger.error(
                 "Stage failed",
                 stage=stage,
-                provider=self._config.provider,
+                provider=self._provider_id.value,
                 entity=self._config.entity_name,
                 run_id=context.run_id,
                 error=str(exc),
