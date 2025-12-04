@@ -69,27 +69,56 @@ class ChemblPipelineBase(PipelineBase):
 
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """Извлекает данные через RecordSource и нормализует записи."""
+        chunks = list(self.iter_chunks(**kwargs))
+        if not chunks:
+            return pd.DataFrame()
+        return pd.concat(chunks, ignore_index=True)
+
+    def iter_chunks(self, **kwargs: Any):  # type: ignore[override]
+        """Возвращает чанки нормализованных данных."""
         limit = kwargs.pop("limit", None)
-        
-        # Recreate record_source if input_mode or input_path changed
-        # This allows tests to change config after pipeline creation
-        record_source = self._record_source
-        if hasattr(self._config, 'input_mode') and hasattr(self._config, 'input_path'):
+
+        record_source = self._resolve_record_source(limit)
+
+        remaining = limit
+        for raw_chunk in record_source.iter_records():
+            working_chunk = raw_chunk
+            if remaining is not None:
+                if remaining <= 0:
+                    break
+                working_chunk = raw_chunk.head(remaining)
+
+            normalized_chunk = self._normalization_service.normalize_batch(
+                working_chunk
+            )
+
+            if not normalized_chunk.empty:
+                yield normalized_chunk
+
+            if remaining is not None:
+                remaining -= len(working_chunk)
+                if remaining <= 0:
+                    break
+
+    def _resolve_record_source(self, limit: int | None) -> RecordSource:
+        """Возвращает источник записей с учетом конфигурации input_mode."""
+
+        if hasattr(self._config, "input_mode") and hasattr(self._config, "input_path"):
             mode = self._config.input_mode
             path = self._config.input_path
-            
+
             if mode == "csv" and path:
-                record_source = CsvRecordSource(
+                return CsvRecordSource(
                     input_path=Path(path),
                     csv_options=self._config.csv_options,
                     limit=limit,
                     logger=self._logger,
                 )
-            elif mode == "id_only" and path:
+            if mode == "id_only" and path:
                 source_config = self._config.get_source_config(self._config.provider)
                 id_column = self._config.primary_key or f"{self._config.entity_name}_id"
                 filter_key = f"{id_column}__in"
-                record_source = IdListRecordSource(
+                return IdListRecordSource(
                     input_path=Path(path),
                     id_column=id_column,
                     csv_options=self._config.csv_options,
@@ -100,33 +129,8 @@ class ChemblPipelineBase(PipelineBase):
                     filter_key=filter_key,
                     logger=self._logger,
                 )
-        
-        remaining = limit
-        normalized_chunks: list[pd.DataFrame] = []
 
-        for raw_chunk in record_source.iter_records():
-            if raw_chunk.empty:
-                continue
-
-            working_chunk = raw_chunk
-            if remaining is not None:
-                if remaining <= 0:
-                    break
-                working_chunk = raw_chunk.head(remaining)
-                remaining -= len(working_chunk)
-
-            normalized_chunk = self._normalization_service.normalize_batch(
-                working_chunk
-            )
-            normalized_chunks.append(normalized_chunk)
-
-            if remaining is not None and remaining <= 0:
-                break
-
-        if not normalized_chunks:
-            return pd.DataFrame()
-
-        return pd.concat(normalized_chunks, ignore_index=True)
+        return self._record_source
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
