@@ -6,6 +6,7 @@ from typing import Any
 import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
@@ -30,6 +31,8 @@ class ChemblPipelineBase(PipelineBase):
         record_source: RecordSource | None = None,
         normalization_service: NormalizationService | None = None,
         hash_service: HashService | None = None,
+        hooks: list[PipelineHookABC] | None = None,
+        error_policy: ErrorPolicyABC | None = None,
     ) -> None:
         super().__init__(
             config,
@@ -37,6 +40,8 @@ class ChemblPipelineBase(PipelineBase):
             validation_service,
             output_writer,
             hash_service,
+            hooks,
+            error_policy,
         )
         self._extraction_service = extraction_service
         self._record_source = record_source or ApiRecordSource(

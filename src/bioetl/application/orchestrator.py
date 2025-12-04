@@ -38,6 +38,8 @@ class PipelineOrchestrator:
             extraction_service, limit=limit, logger=logger
         )
         hash_service = container.get_hash_service()
+        hooks = container.get_hooks()
+        error_policy = container.get_error_policy()
 
         return pipeline_cls(
             config=self._config,
@@ -48,6 +50,8 @@ class PipelineOrchestrator:
             record_source=record_source,
             normalization_service=normalization_service,
             hash_service=hash_service,
+            hooks=hooks,
+            error_policy=error_policy,
         )
 
     def run_pipeline(self, *, dry_run: bool = False, limit: int | None = None) -> RunResult:
