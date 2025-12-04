@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.hooks import PipelineHookABC
+from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.errors import PipelineStageError
 
@@ -174,6 +175,60 @@ def test_pipeline_error_hooks(
     assert args[0] == "extract"  # stage name
     assert isinstance(args[1], PipelineStageError)
     assert args[1].stage == "extract"
+
+
+@pytest.mark.unit
+def test_error_policy_skip_stage(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    tmp_path,
+):
+    """Пайплайн продолжает работу при политике SKIP."""
+
+    pipeline = ConcretePipeline(
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        error_policy=ContinueOnErrorPolicyImpl(),
+    )
+    pipeline.extract = MagicMock(side_effect=ValueError("boom"))
+
+    result = pipeline.run(output_path=tmp_path, dry_run=True)
+
+    assert result.success
+    assert result.row_count == 0
+
+
+@pytest.mark.unit
+def test_error_policy_retry(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    tmp_path,
+):
+    """Пайплайн повторяет стадию при политике RETRY."""
+
+    pipeline = ConcretePipeline(
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
+    )
+
+    pipeline.extract = MagicMock(
+        side_effect=[ValueError("temporary"), pd.DataFrame({"id": [1]})]
+    )
+
+    result = pipeline.run(output_path=tmp_path, dry_run=True)
+
+    assert result.success
+    assert result.row_count == 1
+    assert pipeline.extract.call_count == 2
 
 
 @pytest.mark.unit

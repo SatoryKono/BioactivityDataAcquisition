@@ -8,7 +8,8 @@ from typing import Any, Callable, TYPE_CHECKING
 import pandas as pd
 
 from bioetl.core.providers import ProviderId
-from bioetl.application.pipelines.hooks import PipelineHookABC
+from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
@@ -41,6 +42,8 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         output_writer: "UnifiedOutputWriter",
         hash_service: HashService | None = None,
+        hooks: list[PipelineHookABC] | None = None,
+        error_policy: ErrorPolicyABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(config.provider)
@@ -51,11 +54,16 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
-        self._hooks: list[PipelineHookABC] = []
+        self._hooks: list[PipelineHookABC] = list(hooks or [])
         self._stage_starts: dict[str, datetime] = {}
         self._schema_contract = get_pipeline_contract(
             config.id, default_entity=config.entity_name
         )
+        from bioetl.application.pipelines.hooks_impl import (  # pylint: disable=import-outside-toplevel
+            FailFastErrorPolicyImpl,
+        )
+
+        self._error_policy = error_policy or FailFastErrorPolicyImpl()
 
     # === Public API ===
 
@@ -344,7 +352,34 @@ class PipelineBase(ABC):
             )
             for hook in self._hooks:
                 hook.on_error(stage, error)
+            action_on_error = self._error_policy.handle(error, context)
+            if action_on_error == ErrorAction.RETRY and self._error_policy.should_retry(
+                error
+            ):
+                return self._run_stage(
+                    stage,
+                    context,
+                    action,
+                    attempt=attempt + 1,
+                )
+            if action_on_error == ErrorAction.SKIP:
+                self._logger.warning(
+                    "Stage skipped due to error policy",
+                    stage=stage,
+                    run_id=context.run_id,
+                )
+                return self._default_on_skip(stage)
+
             raise error from exc
+
+    def _default_on_skip(self, stage: str) -> Any:
+        """Возвращает безопасное значение по умолчанию при пропуске стадии."""
+
+        import pandas as pd  # pylint: disable=import-outside-toplevel
+
+        if stage in {"extract", "transform", "validate"}:
+            return pd.DataFrame()
+        return None
 
     def _enrich_context(self, context: RunContext) -> None:
         """
