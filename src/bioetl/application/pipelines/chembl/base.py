@@ -14,6 +14,7 @@ from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -35,6 +36,7 @@ class ChemblPipelineBase(PipelineBase):
         hash_service: HashService | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
+        post_transformer: TransformerABC | None = None,
     ) -> None:
         super().__init__(
             config,
@@ -44,6 +46,7 @@ class ChemblPipelineBase(PipelineBase):
             hash_service,
             hooks,
             error_policy,
+            post_transformer,
         )
         self._extraction_service = extraction_service
         self._record_source = record_source or ApiRecordSource(
