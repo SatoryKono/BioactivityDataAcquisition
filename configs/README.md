@@ -140,6 +140,7 @@ bioetl run new_entity_chembl --profile development --dry-run
 - `rate_limit`: ограничение запросов в секунду
 - `backoff_factor`: множитель для exponential backoff
 - `circuit_breaker_threshold`: порог срабатывания circuit breaker
+- `circuit_breaker_recovery_time`: время (секунды) удержания открытого circuit breaker перед повторной попыткой
 
 ### Секция `storage`
 - `output_path`: путь для финальных артефактов
@@ -158,6 +159,10 @@ bioetl run new_entity_chembl --profile development --dry-run
 - `enable_correlation_report`: генерация correlation_report_table.csv
 - `min_coverage`: минимальный порог покрытия данных
 - `fail_on_low_coverage`: fail пайплайна при низком покрытии
+
+### Секция `features`
+- `rest_interface_enabled`: включает REST-сервер на FastAPI (по умолчанию `false`)
+- `mq_interface_enabled`: разрешает запуск через MQ-слушатель (по умолчанию `false`)
 
 ## Related Documents
 

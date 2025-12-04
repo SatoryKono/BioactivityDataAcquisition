@@ -1,58 +1,7 @@
-"""Domain abstractions for provider metadata and factories."""
+"""Compatibility wrapper for provider domain types."""
 
-from __future__ import annotations
-
-from dataclasses import dataclass
-from enum import Enum
-from typing import Protocol, TypeVar, runtime_checkable
-
-from pydantic import BaseModel
-
-ProviderConfigT = TypeVar("ProviderConfigT", bound="BaseProviderConfig")
-ProviderClientT = TypeVar("ProviderClientT")
-ExtractionServiceT = TypeVar("ExtractionServiceT")
-
-
-class ProviderId(str, Enum):
-    """Canonical provider identifiers following PIPE-002."""
-
-    CHEMBL = "chembl"
-    PUBCHEM = "pubchem"
-    UNIPROT = "uniprot"
-    PUBMED = "pubmed"
-    DUMMY = "dummy"
-
-
-class BaseProviderConfig(BaseModel):
-    """Base class for provider-specific configuration models."""
-
-    model_config = {
-        "extra": "forbid",
-    }
-
-
-@runtime_checkable
-class ProviderComponents(Protocol[ProviderConfigT, ProviderClientT, ExtractionServiceT]):
-    """Protocol describing provider component factories."""
-
-    def create_client(self, config: ProviderConfigT) -> ProviderClientT:
-        """Create provider client instance."""
-
-    def create_extraction_service(
-        self, client: ProviderClientT, config: ProviderConfigT
-    ) -> ExtractionServiceT:
-        """Create provider-specific extraction service."""
-
-
-@dataclass(frozen=True)
-class ProviderDefinition:
-    """Provider metadata and factory entry points."""
-
-    id: ProviderId
-    config_type: type[ProviderConfigT]
-    components: ProviderComponents[ProviderConfigT, ProviderClientT, ExtractionServiceT]
-    description: str | None = None
-
+from bioetl.core.providers import ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.schemas.provider_config_schema import BaseProviderConfig
 
 __all__ = [
     "BaseProviderConfig",
