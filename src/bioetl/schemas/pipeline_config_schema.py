@@ -94,6 +94,15 @@ class NormalizationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class InterfaceFeaturesConfig(BaseModel):
+    """Фиче-флаги интерфейсов."""
+
+    rest_interface_enabled: bool = False
+    mq_interface_enabled: bool = False
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class CsvInputOptions(BaseModel):
     """Опции CSV-ввода."""
 
@@ -133,6 +142,7 @@ class PipelineConfig(BaseModel):
     qc: QcConfig = Field(default_factory=QcConfig)
     hashing: HashingConfig = Field(default_factory=HashingConfig)
     normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
+    features: InterfaceFeaturesConfig = Field(default_factory=InterfaceFeaturesConfig)
 
     pipeline: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
@@ -197,6 +207,7 @@ __all__ = [
     "CsvInputOptions",
     "DeterminismConfig",
     "HashingConfig",
+    "InterfaceFeaturesConfig",
     "LoggingConfig",
     "NormalizationConfig",
     "PaginationConfig",

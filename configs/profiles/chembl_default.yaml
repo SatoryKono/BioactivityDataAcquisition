@@ -30,6 +30,11 @@ logging:
   structured: true
   redact_secrets: true
 
+# Фиче-флаги интерфейсов
+features:
+  rest_interface_enabled: false
+  mq_interface_enabled: false
+
 # Параметры детерминизма
 determinism:
   stable_sort: true
