@@ -1,21 +1,21 @@
 """
 Tests for the CLI entry point.
 """
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 from typer.testing import CliRunner
 
-import sys
-
 # Avoid optional dependency import errors during tests
+# Must be before importing bioetl modules that may use tqdm
 sys.modules.setdefault("tqdm", MagicMock())
 
-from bioetl.interfaces.cli import app
-from bioetl.application.pipelines.base import PipelineBase
-from bioetl.infrastructure.config.models import PipelineConfig
-from bioetl.schemas.provider_config_schema import ChemblSourceConfig
+from bioetl.interfaces.cli import app  # noqa: E402
+from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
+from bioetl.infrastructure.config.models import PipelineConfig  # noqa: E402
+from bioetl.schemas.provider_config_schema import ChemblSourceConfig  # noqa: E402
 
 runner = CliRunner()
 

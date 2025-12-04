@@ -1,3 +1,6 @@
+"""
+Implementation of ChEMBL HTTP client.
+"""
 from __future__ import annotations
 from typing import Any, Iterator
 
@@ -50,7 +53,8 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
             else:
                 self.session = requests.Session()
 
-    def fetch_one(self, entity_id: str) -> dict[str, Any]:
+    # pylint: disable=redefined-builtin
+    def fetch_one(self, id: str) -> dict[str, Any]:
         # Generic fetch not fully supported by ChEMBL generic endpoint
         # unless we know entity
         raise NotImplementedError("Use specific request methods")

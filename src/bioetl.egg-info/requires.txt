@@ -5,6 +5,7 @@ rich>=13.0.0
 requests>=2.31.0
 PyYAML>=6.0
 pydantic>=2.0.0
+fastapi>=0.110.0
 
 [dev]
 types-PyYAML>=6.0
