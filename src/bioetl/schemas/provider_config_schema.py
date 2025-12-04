@@ -46,13 +46,20 @@ class ChemblSourceConfig(BaseProviderConfig):
         return effective_batch
 
 
+class DummyProviderConfig(BaseProviderConfig):
+    """Конфигурация фиктивного провайдера для тестов и шаблонов."""
+
+    provider: Literal["dummy"] = "dummy"
+
+
 ProviderConfigUnion = Annotated[
-    ChemblSourceConfig,
+    ChemblSourceConfig | DummyProviderConfig,
     Field(discriminator="provider"),
 ]
 
 __all__ = [
     "BaseProviderConfig",
     "ChemblSourceConfig",
+    "DummyProviderConfig",
     "ProviderConfigUnion",
 ]

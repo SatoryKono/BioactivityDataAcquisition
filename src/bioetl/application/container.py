@@ -3,16 +3,16 @@ from pathlib import Path
 from typing import Any
 
 import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
+from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
+from bioetl.core.provider_registry import get_provider
+from bioetl.core.providers import ProviderDefinition, ProviderId
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
-from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
-from bioetl.domain.provider_registry import get_provider
-from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (
@@ -29,6 +29,7 @@ class PipelineContainer:
 
     def __init__(self, config: PipelineConfig) -> None:
         self.config = config
+        self._provider_id = ProviderId(self.config.provider)
         self._schema_registry = SchemaRegistry()
         register_schemas(self._schema_registry)
 
@@ -50,10 +51,11 @@ class PipelineContainer:
 
     def get_normalization_service(self) -> NormalizationService:
         """Create normalization service for the configured provider."""
-        provider_id = ProviderId(self.config.provider)
-        if provider_id == ProviderId.CHEMBL:
+        if self._provider_id == ProviderId.CHEMBL:
             return ChemblNormalizationService(self.config)
-        raise ValueError(f"Unsupported provider for normalization: {provider_id.value}")
+        raise ValueError(
+            f"Unsupported provider for normalization: {self._provider_id.value}"
+        )
 
     def get_record_source(
         self,
@@ -84,7 +86,8 @@ class PipelineContainer:
         if mode == "id_only":
             if path is None:
                 raise ValueError("input_path is required for ID-only mode")
-            source_config = self._resolve_source_config()
+            definition = self._get_provider_definition()
+            source_config = self._resolve_provider_config(definition)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
             return IdListRecordSource(
@@ -111,14 +114,8 @@ class PipelineContainer:
 
     def get_extraction_service(self) -> Any:
         """Get the extraction service based on provider configuration."""
-        provider_id = ProviderId(self.config.provider)
-        definition = get_provider(provider_id)
-        source_config = self.config.provider_config
-        if not isinstance(source_config, definition.config_type):
-            raise TypeError(
-                f"Expected config type {definition.config_type.__name__} for "
-                f"provider '{provider_id.value}'"
-            )
+        definition = self._get_provider_definition()
+        source_config = self._resolve_provider_config(definition)
 
         client = definition.components.create_client(source_config)
         return definition.components.create_extraction_service(client, source_config)
@@ -126,12 +123,6 @@ class PipelineContainer:
     def get_hash_service(self) -> HashService:
         """Get the hash service."""
         return HashService()
-
-    def _resolve_source_config(self) -> ChemblSourceConfig:
-        source_config = self.config.get_source_config(ProviderId.CHEMBL)
-        if not isinstance(source_config, ChemblSourceConfig):
-            raise TypeError("Expected ChemblSourceConfig")
-        return source_config
 
     def _resolve_primary_key(self) -> str:
         pk = self.config.primary_key
@@ -144,6 +135,18 @@ class PipelineContainer:
                 f"Could not resolve primary key for entity '{self.config.entity_name}'"
             )
         return pk
+
+    def _get_provider_definition(self) -> ProviderDefinition:
+        return get_provider(self._provider_id)
+
+    def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
+        source_config = self.config.get_source_config(self._provider_id.value)
+        if not isinstance(source_config, definition.config_type):
+            raise TypeError(
+                f"Expected config type {definition.config_type.__name__} for "
+                f"provider '{self._provider_id.value}'"
+            )
+        return source_config
 
 
 def build_pipeline_dependencies(config: PipelineConfig) -> PipelineContainer:
