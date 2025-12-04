@@ -69,7 +69,7 @@ def test_validate_config_success(mock_loader):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_command(mock_loader, mock_orchestrator_cls):
     """Test the run command."""
     mock_orchestrator = MagicMock()
@@ -118,7 +118,7 @@ def test_smoke_run(mock_run):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_config_not_found_explicit(mock_loader):
     """Test run command with explicit config that doesn't exist."""
     mock_loader.side_effect = FileNotFoundError("No such file or directory")
@@ -128,14 +128,12 @@ def test_run_config_not_found_explicit(mock_loader):
     )
 
     assert result.exit_code == 1
-    # The app catches exception and prints "Error: ..."
-    assert "Error:" in result.stdout
-    assert "No such file or directory" in result.stdout
+    assert "Config file not found" in result.stdout
 
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_with_limit_and_dry_run(
     mock_loader, mock_orchestrator_cls
 ):
@@ -177,7 +175,7 @@ def test_run_with_limit_and_dry_run(
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
     """Test run command when pipeline fails."""
     mock_orchestrator = MagicMock()
@@ -208,7 +206,7 @@ def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_exception(mock_loader):
     """Test run command unhandled exception."""
     mock_loader.side_effect = RuntimeError("Unexpected error")
@@ -222,7 +220,7 @@ def test_run_exception(mock_loader):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config")
+@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_dry_run_pipeline_metadata(
     mock_loader,
     mock_orchestrator_cls,

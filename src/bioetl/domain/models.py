@@ -15,6 +15,7 @@ class StageResult:
     stage_name: str
     success: bool
     records_processed: int
+    chunks_processed: int
     duration_sec: float
     errors: list[str]
 
