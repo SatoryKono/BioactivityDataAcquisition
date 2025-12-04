@@ -159,6 +159,10 @@ bioetl run new_entity_chembl --profile development --dry-run
 - `min_coverage`: минимальный порог покрытия данных
 - `fail_on_low_coverage`: fail пайплайна при низком покрытии
 
+### Секция `features`
+- `rest_interface_enabled`: включает REST-сервер на FastAPI (по умолчанию `false`)
+- `mq_interface_enabled`: разрешает запуск через MQ-слушатель (по умолчанию `false`)
+
 ## Related Documents
 
 - `docs/cli/03-config-precedence-and-profiles.md` — детальное описание приоритетов
