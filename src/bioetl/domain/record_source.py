@@ -51,8 +51,10 @@ class ApiRecordSource(RecordSource):
         self._chunk_size = chunk_size
 
     def iter_records(self) -> Iterable[pd.DataFrame]:
-        df = self._extraction_service.extract_all(self._entity, **self._filters)
-        yield from _chunk_dataframe(df, self._chunk_size)
+        filters = dict(self._filters)
+        yield from self._extraction_service.iter_extract(
+            self._entity, chunk_size=self._chunk_size, **filters
+        )
 
 
 def _chunk_dataframe(df: pd.DataFrame, chunk_size: int | None) -> Iterator[pd.DataFrame]:

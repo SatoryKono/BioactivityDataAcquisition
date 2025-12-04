@@ -141,6 +141,7 @@ class PipelineContainer:
             extraction_service=extraction_service,
             entity=self.config.entity_name,
             filters=filters,
+            chunk_size=self.config.batch_size,
         )
 
     def get_extraction_service(self) -> Any:
