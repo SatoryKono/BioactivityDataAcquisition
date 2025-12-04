@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -8,137 +9,119 @@ from bioetl.domain.errors import (
     ClientRateLimitError,
     ClientResponseError,
 )
-from bioetl.infrastructure.clients.base.middleware import HttpClientMiddleware
+from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 @dataclass
 class _FakeResponse:
     status_code: int
-    payload: dict
+    payload: dict[str, Any]
 
-    def json(self) -> dict:
+    def raise_for_status(self) -> None:  # pragma: no cover - simple stub
+        return None
+
+    def json(self) -> dict[str, Any]:  # pragma: no cover - compatibility
         return self.payload
 
 
-class _RetryPolicyStub:
-    def __init__(self, max_attempts: int = 3) -> None:
-        self.max_attempts = max_attempts
-        self.calls: list[tuple[Exception, int]] = []
+class _BaseClientStub:
+    def __init__(self, responses: list[_FakeResponse] | None = None) -> None:
+        self.responses = responses or []
+        self.calls: list[tuple[str, str]] = []
 
-    def should_retry(self, error: Exception, attempt: int) -> bool:
-        self.calls.append((error, attempt))
-        return attempt < self.max_attempts
+    def request(self, method: str, url: str, **_: Any) -> _FakeResponse:
+        self.calls.append((method, url))
+        if not self.responses:
+            raise TimeoutError("timeout")
+        return self.responses.pop(0)
 
-    def get_delay(self, attempt: int) -> float:
-        return 0.0
 
-
-def test_success_request(caplog: pytest.LogCaptureFixture) -> None:
+def test_success_request_returns_response(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.INFO)
     response = _FakeResponse(status_code=200, payload={"ok": True})
-
-    class _Client:
-        def get(self, url: str) -> _FakeResponse:  # pragma: no cover - simple stub
-            return response
+    client = _BaseClientStub(responses=[response])
 
     middleware = HttpClientMiddleware(
         provider="chembl",
-        http_client=_Client(),
-        retry_policy=_RetryPolicyStub(),
-        logger=logging.getLogger("test_success"),
+        base_client=client,
+        max_attempts=1,
+        base_delay=0.0,
+        max_delay=0.0,
     )
 
-    result = middleware.request("http://example.com")
+    result = middleware.request("GET", "http://example.com")
 
-    assert result == {"ok": True}
-    assert "HTTP request failed" not in caplog.text
+    assert result is response
+    assert client.calls == [("GET", "http://example.com")]
+    assert "HTTP request succeeded" in caplog.text
 
 
 def test_timeout_raises_network_error(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.WARNING)
-
-    class _Client:
-        def get(self, url: str) -> _FakeResponse:  # pragma: no cover - simple stub
-            raise TimeoutError("timeout")
+    client = _BaseClientStub(responses=[])
 
     middleware = HttpClientMiddleware(
         provider="chembl",
-        http_client=_Client(),
-        retry_policy=_RetryPolicyStub(max_attempts=1),
-        logger=logging.getLogger("test_timeout"),
+        base_client=client,
+        max_attempts=1,
+        base_delay=0.0,
+        max_delay=0.0,
     )
 
     with pytest.raises(ClientNetworkError):
-        middleware.request("http://example.com")
+        middleware.request("GET", "http://example.com")
 
+    assert client.calls == [("GET", "http://example.com")]
     assert "HTTP request failed" in caplog.text
 
 
-def test_rate_limit_error(caplog: pytest.LogCaptureFixture) -> None:
-    caplog.set_level(logging.WARNING)
-    response = _FakeResponse(status_code=429, payload={})
-
-    class _Client:
-        def get(self, url: str) -> _FakeResponse:  # pragma: no cover - simple stub
-            return response
+def test_rate_limit_retries_and_returns_success(  # noqa: D103 - test
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    caplog.set_level(logging.INFO)
+    retry = _FakeResponse(status_code=429, payload={})
+    success = _FakeResponse(status_code=200, payload={"ok": True})
+    client = _BaseClientStub(responses=[retry, success])
 
     middleware = HttpClientMiddleware(
         provider="chembl",
-        http_client=_Client(),
-        retry_policy=_RetryPolicyStub(max_attempts=1),
-        logger=logging.getLogger("test_rate_limit"),
+        base_client=client,
+        max_attempts=3,
+        base_delay=0.0,
+        max_delay=0.0,
+        backoff_factor=1.0,
     )
 
-    with pytest.raises(ClientRateLimitError):
-        middleware.request("http://example.com")
+    result = middleware.request("GET", "http://example.com")
 
+    assert result is success
+    assert client.calls == [
+        ("GET", "http://example.com"),
+        ("GET", "http://example.com"),
+    ]
     assert "HTTP request failed" in caplog.text
+    assert "HTTP request succeeded" in caplog.text
 
 
-def test_server_error(caplog: pytest.LogCaptureFixture) -> None:
+def test_server_error_exhausts_retries(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.WARNING)
-    response = _FakeResponse(status_code=503, payload={})
-
-    class _Client:
-        def get(self, url: str) -> _FakeResponse:  # pragma: no cover - simple stub
-            return response
+    responses = [_FakeResponse(status_code=503, payload={}) for _ in range(2)]
+    client = _BaseClientStub(responses=responses)
 
     middleware = HttpClientMiddleware(
         provider="chembl",
-        http_client=_Client(),
-        retry_policy=_RetryPolicyStub(max_attempts=1),
-        logger=logging.getLogger("test_server_error"),
+        base_client=client,
+        max_attempts=2,
+        base_delay=0.0,
+        max_delay=0.0,
+        backoff_factor=1.0,
     )
 
     with pytest.raises(ClientResponseError):
-        middleware.request("http://example.com")
+        middleware.request("GET", "http://example.com")
 
-    assert "HTTP request failed" in caplog.text
-
-
-def test_retry_limit(caplog: pytest.LogCaptureFixture) -> None:
-    caplog.set_level(logging.INFO)
-    policy = _RetryPolicyStub(max_attempts=2)
-
-    class _Client:
-        def __init__(self) -> None:
-            self.calls = 0
-
-        def get(self, url: str) -> _FakeResponse:  # pragma: no cover - simple stub
-            self.calls += 1
-            raise TimeoutError("timeout")
-
-    client = _Client()
-    middleware = HttpClientMiddleware(
-        provider="chembl",
-        http_client=client,
-        retry_policy=policy,
-        logger=logging.getLogger("test_retry"),
-    )
-
-    with pytest.raises(ClientNetworkError):
-        middleware.request("http://example.com")
-
-    assert client.calls == policy.max_attempts
-    assert len(policy.calls) == policy.max_attempts
-    assert "Retrying request" in caplog.text
+    assert client.calls == [
+        ("GET", "http://example.com"),
+        ("GET", "http://example.com"),
+    ]
+    assert caplog.text.count("HTTP request failed") >= 2
