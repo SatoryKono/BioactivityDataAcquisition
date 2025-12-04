@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from types import SimpleNamespace
 from typing import Any
+from unittest.mock import MagicMock
 
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
 
@@ -193,3 +194,41 @@ def test_container_provides_hooks_and_error_policy() -> None:
         if isinstance(hook, LoggingPipelineHookImpl)
     )
     assert hook_logger is logger
+
+
+def test_hash_service_singleton_scope() -> None:
+    dummy_config = DummyProviderConfig(
+        base_url="https://example.com",  # type: ignore[arg-type]
+        timeout_sec=1,
+        max_retries=0,
+        rate_limit_per_sec=1.0,
+    )
+    container = PipelineContainer(_build_dummy_pipeline_config(dummy_config))
+
+    first_instance = container.get_hash_service()
+    second_instance = container.get_hash_service()
+
+    assert first_instance is second_instance
+
+
+def test_hash_service_override_propagates_to_transformers() -> None:
+    dummy_config = DummyProviderConfig(
+        base_url="https://example.com",  # type: ignore[arg-type]
+        timeout_sec=1,
+        max_retries=0,
+        rate_limit_per_sec=1.0,
+    )
+    custom_hash_service = MagicMock()
+    container = PipelineContainer(
+        _build_dummy_pipeline_config(dummy_config),
+        hash_service=custom_hash_service,
+    )
+
+    post_transformer = container.get_post_transformer(version_provider=lambda: "v1")
+    transformer_hashes = {
+        transformer.__class__.__name__: getattr(transformer, "_hash_service", None)
+        for transformer in post_transformer._transformers  # type: ignore[attr-defined]
+    }
+
+    assert transformer_hashes
+    assert all(service is custom_hash_service for service in transformer_hashes.values())

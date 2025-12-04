@@ -12,8 +12,9 @@ from typer.testing import CliRunner
 # Must be before importing bioetl modules that may use tqdm
 sys.modules.setdefault("tqdm", MagicMock())
 
-from bioetl.interfaces.cli import app  # noqa: E402
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
+from bioetl.domain.transform.hash_service import HashService  # noqa: E402
+from bioetl.interfaces.cli import app  # noqa: E402
 from bioetl.infrastructure.config.models import PipelineConfig  # noqa: E402
 from bioetl.schemas.provider_config_schema import ChemblSourceConfig  # noqa: E402
 
@@ -239,8 +240,8 @@ def test_run_dry_run_pipeline_metadata(
             logger,
             validation_service,
             output_writer,
+            hash_service: HashService,
             extraction_service=None,
-            hash_service=None,
         ):
             super().__init__(
                 config,
@@ -274,12 +275,15 @@ def test_run_dry_run_pipeline_metadata(
     )
 
     # Mock orchestrator to build and run our pipeline
+    hash_service = HashService()
+
     def build_pipeline_side_effect(*args, **kwargs):
         pipeline_instance = DryRunPipeline(
             config=pipeline_test_config,
             logger=logger,
             validation_service=validation_service,
             output_writer=output_writer,
+            hash_service=hash_service,
         )
         return pipeline_instance
 

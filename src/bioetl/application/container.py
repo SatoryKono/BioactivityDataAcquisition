@@ -1,6 +1,6 @@
 """Dependency Injection Container for the application."""
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
@@ -48,6 +48,8 @@ class PipelineContainer:
         logger: LoggerAdapterABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
+        hash_service: HashService | None = None,
+        post_transformer: TransformerABC | None = None,
     ) -> None:
         self.config = config
         self._provider_id = ProviderId(self.config.provider)
@@ -57,7 +59,8 @@ class PipelineContainer:
         self._logger: LoggerAdapterABC | None = logger
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy: ErrorPolicyABC | None = error_policy
-        self._post_transformer: TransformerABC | None = None
+        self._hash_service: HashService | None = hash_service
+        self._post_transformer: TransformerABC | None = post_transformer
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
@@ -150,12 +153,17 @@ class PipelineContainer:
 
     def get_hash_service(self) -> HashService:
         """Get the hash service."""
-        return HashService()
+        if self._hash_service is None:
+            self._hash_service = HashService()
+        return self._hash_service
 
-    def get_post_transformer(self) -> TransformerABC:
+    def get_post_transformer(
+        self, *, version_provider: Callable[[], str] | None = None
+    ) -> TransformerABC:
         """Собирает цепочку стандартных трансформеров."""
         if self._post_transformer is None:
             hash_service = self.get_hash_service()
+            provider = version_provider or (lambda: "unknown")
             self._post_transformer = TransformerChain(
                 [
                     HashColumnsTransformer(
@@ -163,7 +171,7 @@ class PipelineContainer:
                     ),
                     IndexColumnTransformer(hash_service),
                     DatabaseVersionTransformer(
-                        hash_service, lambda: "unknown"
+                        hash_service, provider
                     ),
                     FulldateTransformer(hash_service),
                 ]
@@ -216,6 +224,8 @@ def build_pipeline_dependencies(
     logger: LoggerAdapterABC | None = None,
     hooks: list[PipelineHookABC] | None = None,
     error_policy: ErrorPolicyABC | None = None,
+    hash_service: HashService | None = None,
+    post_transformer: TransformerABC | None = None,
 ) -> PipelineContainer:
     """Factory for the container."""
     return PipelineContainer(
@@ -223,4 +233,6 @@ def build_pipeline_dependencies(
         logger=logger,
         hooks=hooks,
         error_policy=error_policy,
+        hash_service=hash_service,
+        post_transformer=post_transformer,
     )

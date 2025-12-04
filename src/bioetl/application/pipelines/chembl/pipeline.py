@@ -29,9 +29,9 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         validation_service: ValidationService,
         output_writer: UnifiedOutputWriter,
         extraction_service: ExtractionServiceABC,
+        hash_service: HashService,
         record_source: RecordSource | None = None,
         normalization_service: NormalizationService | None = None,
-        hash_service: HashService | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
     ) -> None:
@@ -41,9 +41,9 @@ class ChemblEntityPipeline(ChemblPipelineBase):
             validation_service,
             output_writer,
             extraction_service,
+            hash_service,
             record_source,
             normalization_service,
-            hash_service,
             hooks,
             error_policy,
         )
