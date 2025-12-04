@@ -10,6 +10,10 @@ import pytest
 from pydantic import ValidationError
 
 from bioetl.application.container import PipelineContainer
+from bioetl.application.pipelines.hooks_impl import (
+    LoggingPipelineHook,
+    StopOnErrorPolicyImpl,
+)
 from bioetl.core.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
@@ -165,3 +169,27 @@ def test_type_mismatch_raises_type_error() -> None:
 
     with pytest.raises(TypeError):
         container.get_extraction_service()
+
+
+def test_container_provides_hooks_and_error_policy() -> None:
+    dummy_config = DummyProviderConfig(
+        base_url="https://example.com",  # type: ignore[arg-type]
+        timeout_sec=1,
+        max_retries=0,
+        rate_limit_per_sec=1.0,
+    )
+    container = PipelineContainer(_build_dummy_pipeline_config(dummy_config))
+
+    logger = container.get_logger()
+    hooks = container.get_hooks()
+    policy = container.get_error_policy()
+
+    assert hooks
+    assert any(isinstance(hook, LoggingPipelineHook) for hook in hooks)
+    assert isinstance(policy, StopOnErrorPolicyImpl)
+    hook_logger = next(
+        hook._logger  # type: ignore[attr-defined]
+        for hook in hooks
+        if isinstance(hook, LoggingPipelineHook)
+    )
+    assert hook_logger is logger
