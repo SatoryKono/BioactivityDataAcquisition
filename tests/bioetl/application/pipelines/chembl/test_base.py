@@ -134,6 +134,7 @@ def test_transform_nested_normalization(
     result = pipeline_fixture.transform(df)
 
     assert "transformed" in result.columns
+    assert list(result.columns) == schema_cols
     assert result.iloc[0]["nested"] == "x|y"
     assert result.iloc[0]["obj"] == "k:v"
     assert result.iloc[1]["nested"] == "z"
@@ -143,3 +144,32 @@ def test_transform_nested_normalization(
     assert result.iloc[0]["references"] == "12345|67890"
     assert result.iloc[1]["references"] == "333"
     assert result.iloc[0]["doi"] == "10.1000/abc"
+
+
+def test_transform_uses_batch_normalization(mock_dependencies_fixture):
+    """Ensure transform delegates batch normalization to the service."""
+    normalization_service = MagicMock()
+    normalization_service.normalize_dataframe.return_value = pd.DataFrame(
+        {"a": [1, 2], "transformed": [True, True]}
+    )
+
+    pipeline = ConcreteChemblPipeline(
+        config=mock_dependencies_fixture["config"],
+        logger=mock_dependencies_fixture["logger"],
+        validation_service=mock_dependencies_fixture["validation_service"],
+        output_writer=mock_dependencies_fixture["output_writer"],
+        extraction_service=mock_dependencies_fixture["extraction_service"],
+        normalization_service=normalization_service,
+    )
+
+    df = pd.DataFrame({"a": [1, 2]})
+
+    result = pipeline.transform(df)
+
+    normalization_service.normalize_dataframe.assert_called_once()
+    normalized_input = normalization_service.normalize_dataframe.call_args[0][0]
+    assert "transformed" in normalized_input.columns
+    assert normalized_input["transformed"].tolist() == [True, True]
+    pd.testing.assert_frame_equal(
+        result, normalization_service.normalize_dataframe.return_value
+    )
