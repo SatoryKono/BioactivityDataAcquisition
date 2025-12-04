@@ -14,6 +14,14 @@ from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.transformers import (
+    DatabaseVersionTransformer,
+    FulldateTransformer,
+    HashColumnsTransformer,
+    IndexColumnTransformer,
+    TransformerABC,
+    TransformerChain,
+)
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -44,6 +52,7 @@ class PipelineBase(ABC):
         hash_service: HashService | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
+        post_transformer: TransformerABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(config.provider)
@@ -54,6 +63,7 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
+        self._post_transformer = post_transformer or self._build_default_transformer()
         self._hooks: list[PipelineHookABC] = list(hooks or [])
         self._last_error: PipelineStageError | None = None
         self._stage_starts: dict[str, datetime] = {}
@@ -105,18 +115,15 @@ class PipelineBase(ABC):
             df_transformed = self._run_stage(
                 stage="transform",
                 context=context,
-                action=lambda: self.transform(df_raw),
+                action=lambda: self._apply_transformers(
+                    self.transform(df_raw),
+                    context,
+                ),
             )
             if df_transformed is None:
                 return self._handle_stage_failure(
                     "transform", stages_results, context
                 )
-            df_transformed = self._add_hash_columns(df_transformed)
-            df_transformed = self._add_index_column(df_transformed)
-            df_transformed = self._add_database_version_column(
-                df_transformed, self.get_version()
-            )
-            df_transformed = self._add_fulldate_column(df_transformed)
             stages_results.append(
                 self._make_stage_result("transform", len(df_transformed))
             )
@@ -248,44 +255,11 @@ class PipelineBase(ABC):
         """Устанавливает политику обработки ошибок."""
         self._error_policy = error_policy
 
+    def set_post_transformer(self, transformer: TransformerABC) -> None:
+        """Позволяет заменить пост-обработчик трансформации."""
+        self._post_transformer = transformer
+
     # === Internal Methods ===
-
-    def _add_hash_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Добавляет столбцы с хешами строк и бизнес-ключей.
-        Использует HashService.
-        """
-        if df.empty:
-            return df.assign(hash_business_key=None, hash_row=None)
-
-        keys = self._config.hashing.business_key_fields
-        return self._hash_service.add_hash_columns(df, business_key_cols=keys)
-
-    def _add_index_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Добавляет столбцы с индексами строк.
-        Использует HashService.
-        """
-        return self._hash_service.add_index_column(df)
-
-    def _add_database_version_column(
-        self, df: pd.DataFrame, database_version: str
-    ) -> pd.DataFrame:
-        """
-        Добавляет столбцы с версией базы данных.
-        Использует HashService.
-        """
-        return self._hash_service.add_database_version_column(
-            df, database_version
-        )
-
-    def _add_fulldate_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Добавляет столбцы с датой и временем извлечения.
-        Использует HashService.
-        """
-        return self._hash_service.add_fulldate_column(df)
-
     def _reindex_columns(self, df: pd.DataFrame, column_order: list[str]) -> pd.DataFrame:
         """Добавляет отсутствующие колонки и упорядочивает DataFrame."""
 
@@ -381,6 +355,29 @@ class PipelineBase(ABC):
         if self._last_error.cause:
             messages.append(str(self._last_error.cause))
         return messages
+
+    def _build_default_transformer(self) -> TransformerABC:
+        return TransformerChain(
+            [
+                HashColumnsTransformer(
+                    hash_service=self._hash_service,
+                    business_key_fields=self._config.hashing.business_key_fields,
+                ),
+                IndexColumnTransformer(hash_service=self._hash_service),
+                DatabaseVersionTransformer(
+                    hash_service=self._hash_service,
+                    database_version_provider=self.get_version,
+                ),
+                FulldateTransformer(hash_service=self._hash_service),
+            ]
+        )
+
+    def _apply_transformers(
+        self, df: pd.DataFrame, context: RunContext
+    ) -> pd.DataFrame:
+        if not self._post_transformer:
+            return df
+        return self._post_transformer.apply(df, context)
 
     def _run_stage(
         self,
