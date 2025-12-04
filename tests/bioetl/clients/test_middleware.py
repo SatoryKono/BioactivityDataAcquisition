@@ -1,4 +1,5 @@
 import logging
+import time
 from dataclasses import dataclass
 from typing import Any
 
@@ -125,3 +126,42 @@ def test_server_error_exhausts_retries(caplog: pytest.LogCaptureFixture) -> None
         ("GET", "http://example.com"),
     ]
     assert caplog.text.count("HTTP request failed") >= 2
+
+
+def test_circuit_breaker_blocks_and_recovers(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.INFO)
+    client = _BaseClientStub(responses=[])
+
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=client,
+        max_attempts=1,
+        base_delay=0.0,
+        max_delay=0.0,
+        circuit_breaker_threshold=1,
+        circuit_breaker_recovery_time=0.05,
+    )
+
+    with pytest.raises(ClientNetworkError):
+        middleware.request("GET", "http://example.com")
+
+    assert client.calls == [("GET", "http://example.com")]
+    assert "Circuit breaker opened" in caplog.text
+
+    with pytest.raises(ClientNetworkError) as circuit_error:
+        middleware.request("GET", "http://example.com")
+
+    assert "Circuit breaker is open" in str(circuit_error.value)
+    assert client.calls == [("GET", "http://example.com")]
+
+    time.sleep(0.06)
+    client.responses = [_FakeResponse(status_code=200, payload={"ok": True})]
+
+    result = middleware.request("GET", "http://example.com")
+
+    assert result.payload == {"ok": True}
+    assert client.calls == [
+        ("GET", "http://example.com"),
+        ("GET", "http://example.com"),
+    ]
+    assert "Circuit breaker closed" in caplog.text

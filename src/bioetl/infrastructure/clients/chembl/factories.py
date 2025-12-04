@@ -41,6 +41,8 @@ def default_chembl_client(
         max_delay=options.get("max_delay", 30.0),
         backoff_factor=options.get("backoff_factor", 2.0),
         timeout=options.get("timeout", 30.0),
+        circuit_breaker_threshold=options.get("circuit_breaker_threshold", 5),
+        circuit_breaker_recovery_time=options.get("circuit_breaker_recovery_time", 60.0),
     )
 
     return ChemblDataClientHTTPImpl(

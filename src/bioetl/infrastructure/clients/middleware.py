@@ -49,6 +49,8 @@ class HttpClientMiddleware:
         max_delay: float = 30.0,
         backoff_factor: float = 2.0,
         timeout: float = 30.0,
+        circuit_breaker_threshold: int = 5,
+        circuit_breaker_recovery_time: float = 60.0,
     ) -> None:
         self.provider = provider
         self.base_client = base_client
@@ -57,11 +59,17 @@ class HttpClientMiddleware:
         self.max_delay = max_delay
         self.backoff_factor = backoff_factor
         self.timeout = timeout
+        self.circuit_breaker_threshold = circuit_breaker_threshold
+        self.circuit_breaker_recovery_time = circuit_breaker_recovery_time
         self.logger = logging.getLogger(f"bioetl.clients.{provider}")
+        self._failure_count = 0
+        self._circuit_opened_at: float | None = None
+        self._last_error_type: type[Exception] | None = None
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         attempt = 1
         while attempt <= self.max_attempts:
+            self._ensure_circuit_allows_request(method, url)
             start = time.perf_counter()
             try:
                 response = self.base_client.request(
@@ -97,6 +105,7 @@ class HttpClientMiddleware:
                 raise error from error.cause
             except Exception as exc:  # pragma: no cover - unexpected errors
                 elapsed = time.perf_counter() - start
+                self._record_failure(exc)
                 self._log_failure(
                     method,
                     url,
@@ -124,6 +133,7 @@ class HttpClientMiddleware:
                     if self._handle_retry(error, method, url, elapsed, attempt, status_code):
                         attempt += 1
                         continue
+                self._record_failure(error)
                 self._log_failure(
                     method,
                     url,
@@ -135,6 +145,7 @@ class HttpClientMiddleware:
                 raise error from error.cause
 
             self._log_success(method, url, elapsed, attempt - 1, status_code)
+            self._reset_circuit(log_circuit_closure=True)
             return response
 
         raise RuntimeError("Exceeded maximum retry attempts without returning a response")
@@ -148,6 +159,7 @@ class HttpClientMiddleware:
         attempt: int,
         status_code: int | None = None,
     ) -> bool:
+        self._record_failure(error)
         self._log_failure(
             method,
             url,
@@ -166,6 +178,28 @@ class HttpClientMiddleware:
         delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
         jitter = random.uniform(0.0, delay)
         return min(delay + jitter, self.max_delay)
+
+    def _ensure_circuit_allows_request(self, method: str, url: str) -> None:
+        if self._circuit_opened_at is None:
+            return
+
+        elapsed = time.perf_counter() - self._circuit_opened_at
+        if elapsed >= self.circuit_breaker_recovery_time:
+            self._reset_circuit(log_circuit_closure=True)
+            return
+
+        error = self._circuit_breaker_error(url)
+        self.logger.warning(
+            "Circuit breaker blocking request",
+            extra={
+                "provider": self.provider,
+                "method": method.upper(),
+                "url": url,
+                "circuit_state": "open",
+                "elapsed_since_open": elapsed,
+            },
+        )
+        raise error
 
     @property
     def _timeout_exceptions(self) -> tuple[type[Exception], ...]:
@@ -222,6 +256,47 @@ class HttpClientMiddleware:
     def _extract_status_code(self, exc: Exception) -> int | None:
         response = getattr(exc, "response", None)
         return getattr(response, "status_code", None)
+
+    def _record_failure(self, error: Exception) -> None:
+        self._failure_count += 1
+        self._last_error_type = error.__class__
+        if (
+            self._failure_count >= self.circuit_breaker_threshold
+            and self._circuit_opened_at is None
+        ):
+            self._circuit_opened_at = time.perf_counter()
+            self.logger.warning(
+                "Circuit breaker opened",
+                extra={
+                    "provider": self.provider,
+                    "failure_count": self._failure_count,
+                    "threshold": self.circuit_breaker_threshold,
+                },
+            )
+
+    def _reset_circuit(self, log_circuit_closure: bool = False) -> None:
+        if log_circuit_closure and self._circuit_opened_at is not None:
+            self.logger.info(
+                "Circuit breaker closed",
+                extra={
+                    "provider": self.provider,
+                },
+            )
+        self._failure_count = 0
+        self._circuit_opened_at = None
+        self._last_error_type = None
+
+    def _circuit_breaker_error(self, url: str) -> ClientNetworkError | ClientResponseError:
+        base_kwargs = {
+            "provider": self.provider,
+            "endpoint": url,
+            "message": "Circuit breaker is open",
+        }
+        if self._last_error_type and issubclass(
+            self._last_error_type, (ClientResponseError, ClientRateLimitError)
+        ):
+            return ClientResponseError(**base_kwargs)
+        return ClientNetworkError(**base_kwargs)
 
     def _log_success(
         self,
