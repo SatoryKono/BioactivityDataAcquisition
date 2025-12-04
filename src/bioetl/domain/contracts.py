@@ -6,6 +6,7 @@ allowing application layer to depend on abstractions rather than concrete
 implementations.
 """
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from typing import Any
 
 import pandas as pd
@@ -39,6 +40,22 @@ class ExtractionServiceABC(ABC):
 
         Returns:
             DataFrame containing extracted records
+        """
+
+    @abstractmethod
+    def iter_extract(
+        self, entity: str, *, chunk_size: int | None = None, **filters: Any
+    ) -> Iterable[pd.DataFrame]:
+        """
+        Stream records for an entity in DataFrame chunks.
+
+        Args:
+            entity: Entity name to extract (e.g., 'activity', 'assay')
+            chunk_size: Preferred chunk size for each page/batch
+            **filters: Provider-specific filters (e.g., limit, offset)
+
+        Returns:
+            Iterable of DataFrames with extracted records
         """
 
     @abstractmethod

@@ -53,6 +53,7 @@ class ChemblPipelineBase(PipelineBase):
             extraction_service=extraction_service,
             entity=config.entity_name,
             filters=config.pipeline,
+            chunk_size=config.batch_size,
         )
         self._normalization_service = normalization_service or ChemblNormalizationService(
             config
