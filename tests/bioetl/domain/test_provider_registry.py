@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.core.provider_registry import (
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
     get_provider,
@@ -14,14 +14,12 @@ from bioetl.core.provider_registry import (
     reset_provider_registry,
     restore_provider_registry,
 )
-from bioetl.core.providers import ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.schemas.provider_config_schema import DummyProviderConfig
 
 
 @dataclass(frozen=True)
-class DummyComponents(
-    ProviderComponents[DummyProviderConfig, dict[str, str], tuple[dict[str, str], str]]
-):
+class DummyComponents(ProviderComponents):
     def create_client(self, config: DummyProviderConfig) -> dict[str, str]:
         return {"base_url": str(config.base_url)}
 

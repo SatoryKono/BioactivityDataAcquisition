@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, TYPE_CHECKING
 import pandas as pd
 
-from bioetl.core.providers import ProviderId
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
+from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import (
