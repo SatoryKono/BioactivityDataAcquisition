@@ -231,13 +231,13 @@ class PipelineBase(ABC):
         output_columns = self._validation_service.get_schema_columns(
             output_schema_name
         )
-        df = self._reindex_columns(df, output_columns)
 
         return self._output_writer.write_result(
             df=df,
             output_path=output_path,
             entity_name=self._config.entity_name,
             run_context=context,
+            column_order=output_columns,
         )
 
     # === Hooks ===
@@ -260,18 +260,6 @@ class PipelineBase(ABC):
         self._post_transformer = transformer
 
     # === Internal Methods ===
-    def _reindex_columns(self, df: pd.DataFrame, column_order: list[str]) -> pd.DataFrame:
-        """Добавляет отсутствующие колонки и упорядочивает DataFrame."""
-
-        if not column_order:
-            return df
-
-        for col in column_order:
-            if col not in df.columns:
-                df[col] = None
-
-        return df[column_order]
-
     def _notify_stage_start(self, stage: str, context: RunContext) -> None:
         self._stage_starts[stage] = datetime.now(timezone.utc)
         self._logger.info(

@@ -24,8 +24,14 @@ class WriterABC(ABC):
         """Поддерживает ли атомарную запись."""
 
     @abstractmethod
-    def write(self, df: pd.DataFrame, path: Path) -> WriteResult:
-        """Записывает DataFrame."""
+    def write(
+        self,
+        df: pd.DataFrame,
+        path: Path,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        """Записывает DataFrame с учетом порядка колонок."""
 
     @abstractmethod
     def supports_format(self, fmt: str) -> bool:
