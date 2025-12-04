@@ -18,6 +18,15 @@ def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
         yield data[i : i + size]
 
 
+def _chunk_dataframe(df: pd.DataFrame, chunk_size: int | None) -> Iterator[pd.DataFrame]:
+    if chunk_size is None or chunk_size <= 0:
+        yield df
+        return
+
+    for start in range(0, len(df), chunk_size):
+        yield df.iloc[start : start + chunk_size].reset_index(drop=True)
+
+
 class CsvRecordSource(RecordSource):
     """Record source that reads full datasets from CSV."""
 
@@ -27,13 +36,15 @@ class CsvRecordSource(RecordSource):
         csv_options: dict[str, Any] | CsvInputOptions,
         limit: int | None,
         logger: LoggerAdapterABC,
+        chunk_size: int | None = None,
     ) -> None:
         self._input_path = input_path
         self._csv_options = self._ensure_csv_options(csv_options)
         self._limit = limit
         self._logger = logger
+        self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[RawRecord]:
+    def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
         self._logger.info(
             f"Extracting records from CSV dataset: {self._input_path}"
@@ -45,7 +56,7 @@ class CsvRecordSource(RecordSource):
         )
         if self._limit is not None:
             df = df.head(self._limit)
-        return df.to_dict(orient="records")
+        yield from _chunk_dataframe(df, self._chunk_size)
 
     @staticmethod
     def _ensure_csv_options(
@@ -70,6 +81,7 @@ class IdListRecordSource(RecordSource):
         entity: str,
         filter_key: str,
         logger: LoggerAdapterABC,
+        chunk_size: int | None = None,
     ) -> None:
         if not id_column:
             raise ValueError("ID column must be provided for ID-only mode")
@@ -85,8 +97,9 @@ class IdListRecordSource(RecordSource):
         self._entity = entity
         self._filter_key = filter_key
         self._logger = logger
+        self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[RawRecord]:
+    def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
         usecols = [self._id_column] if self._csv_options.header else [0]
         names = [self._id_column] if not self._csv_options.header else None
@@ -114,7 +127,7 @@ class IdListRecordSource(RecordSource):
 
     def _fetch_records(
         self, ids: list[str], batch_size: int
-    ) -> Iterable[RawRecord]:
+    ) -> Iterable[pd.DataFrame]:
         all_records: list[RawRecord] = []
 
         for batch_ids in _chunk_list(ids, batch_size):
@@ -130,7 +143,8 @@ class IdListRecordSource(RecordSource):
             )
             all_records.extend(serialized_records)
 
-        return all_records
+        records_df = pd.DataFrame(all_records)
+        yield from _chunk_dataframe(records_df, self._chunk_size)
 
     @staticmethod
     def _ensure_csv_options(
@@ -139,3 +153,4 @@ class IdListRecordSource(RecordSource):
         if isinstance(options, CsvInputOptions):
             return options
         return CsvInputOptions(**options)
+
