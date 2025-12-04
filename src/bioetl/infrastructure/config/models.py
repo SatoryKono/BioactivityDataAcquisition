@@ -5,6 +5,7 @@ from bioetl.schemas.pipeline_config_schema import (
     ClientConfig,
     CsvInputOptions,
     DeterminismConfig,
+    InterfaceFeaturesConfig,
     HashingConfig,
     LoggingConfig,
     NormalizationConfig,
@@ -16,6 +17,7 @@ from bioetl.schemas.pipeline_config_schema import (
 from bioetl.schemas.provider_config_schema import (
     BaseProviderConfig,
     ChemblSourceConfig,
+    DummyProviderConfig,
     ProviderConfigUnion,
 )
 
@@ -23,6 +25,7 @@ __all__ = [
     "ClientConfig",
     "CsvInputOptions",
     "DeterminismConfig",
+    "InterfaceFeaturesConfig",
     "HashingConfig",
     "LoggingConfig",
     "NormalizationConfig",
@@ -32,5 +35,6 @@ __all__ = [
     "StorageConfig",
     "BaseProviderConfig",
     "ChemblSourceConfig",
+    "DummyProviderConfig",
     "ProviderConfigUnion",
 ]

@@ -17,6 +17,7 @@ client:
   rate_limit: 10  # запросов в секунду
   backoff_factor: 2.0
   circuit_breaker_threshold: 5
+  circuit_breaker_recovery_time: 60.0
 
 # Общие пути хранения
 storage:
@@ -29,6 +30,11 @@ logging:
   level: INFO
   structured: true
   redact_secrets: true
+
+# Фиче-флаги интерфейсов
+features:
+  rest_interface_enabled: false
+  mq_interface_enabled: false
 
 # Параметры детерминизма
 determinism:

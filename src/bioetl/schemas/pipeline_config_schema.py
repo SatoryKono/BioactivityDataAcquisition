@@ -31,6 +31,7 @@ class ClientConfig(BaseModel):
     rate_limit: float = 10.0
     backoff_factor: float = 2.0
     circuit_breaker_threshold: int = 5
+    circuit_breaker_recovery_time: float = 60.0
 
     model_config = ConfigDict(extra="forbid")
 
@@ -94,6 +95,15 @@ class NormalizationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class InterfaceFeaturesConfig(BaseModel):
+    """Фиче-флаги интерфейсов."""
+
+    rest_interface_enabled: bool = False
+    mq_interface_enabled: bool = False
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class CsvInputOptions(BaseModel):
     """Опции CSV-ввода."""
 
@@ -133,6 +143,7 @@ class PipelineConfig(BaseModel):
     qc: QcConfig = Field(default_factory=QcConfig)
     hashing: HashingConfig = Field(default_factory=HashingConfig)
     normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
+    features: InterfaceFeaturesConfig = Field(default_factory=InterfaceFeaturesConfig)
 
     pipeline: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
@@ -197,6 +208,7 @@ __all__ = [
     "CsvInputOptions",
     "DeterminismConfig",
     "HashingConfig",
+    "InterfaceFeaturesConfig",
     "LoggingConfig",
     "NormalizationConfig",
     "PaginationConfig",
