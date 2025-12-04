@@ -3,6 +3,11 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
+from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
+from bioetl.application.pipelines.hooks_impl import (
+    FailFastErrorPolicyImpl,
+    LoggingPipelineHookImpl,
+)
 from bioetl.core.provider_registry import get_provider
 from bioetl.core.providers import ProviderDefinition, ProviderId
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
@@ -37,6 +42,14 @@ class PipelineContainer:
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
         return default_logger()
+
+    def get_hooks(self) -> list[PipelineHookABC]:
+        """Возвращает список хуков пайплайна."""
+        return [LoggingPipelineHookImpl(self.get_logger())]
+
+    def get_error_policy(self) -> ErrorPolicyABC:
+        """Возвращает политику обработки ошибок пайплайна."""
+        return FailFastErrorPolicyImpl()
 
     def get_validation_service(self) -> ValidationService:
         """Get the validation service with registered schemas."""
