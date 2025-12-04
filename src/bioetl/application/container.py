@@ -5,15 +5,10 @@ from typing import Any
 import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
-    LoggingPipelineHook,
-    StopOnErrorPolicyImpl,
-)
-from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
-from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
-from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
+from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
 from bioetl.core.provider_registry import get_provider
 from bioetl.core.providers import ProviderDefinition, ProviderId
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
@@ -148,18 +143,6 @@ class PipelineContainer:
     def get_hash_service(self) -> HashService:
         """Get the hash service."""
         return HashService()
-
-    def get_hooks(self) -> list[PipelineHookABC]:
-        """Возвращает список хуков выполнения пайплайна."""
-        if self._hooks is None:
-            self._hooks = [LoggingPipelineHook(self.get_logger())]
-        return list(self._hooks)
-
-    def get_error_policy(self) -> ErrorPolicyABC:
-        """Возвращает политику обработки ошибок пайплайна."""
-        if self._error_policy is None:
-            self._error_policy = StopOnErrorPolicyImpl()
-        return self._error_policy
 
     def _resolve_primary_key(self) -> str:
         pk = self.config.primary_key

@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from pathlib import Path
-
 import pandas as pd
 
 from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
