@@ -13,11 +13,11 @@ from bioetl.core.providers import (
     ProviderDefinition,
     ProviderId,
 )
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.clients.chembl.factories import (
-    default_chembl_client,
-    default_chembl_extraction_service,
+from bioetl.infrastructure.chembl_client import (
+    create_client,
+    create_extraction_service,
 )
+from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
@@ -27,12 +27,12 @@ class ChemblProviderComponents(
     """Factory set for building ChEMBL provider components."""
 
     def create_client(self, config: ChemblSourceConfig) -> ChemblDataClientABC:
-        return default_chembl_client(config)
+        return create_client(config)
 
     def create_extraction_service(
         self, client: ChemblDataClientABC, config: ChemblSourceConfig
     ) -> ChemblExtractionService:
-        return default_chembl_extraction_service(config, client=client)
+        return create_extraction_service(config, client=client)
 
 
 def register_chembl_provider() -> ProviderDefinition:
@@ -50,8 +50,6 @@ def register_chembl_provider() -> ProviderDefinition:
         return get_provider(ProviderId.CHEMBL)
     return definition
 
-
-register_chembl_provider()
 
 __all__ = [
     "ChemblProviderComponents",
