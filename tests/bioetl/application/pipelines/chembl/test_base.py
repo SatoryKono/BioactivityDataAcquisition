@@ -175,48 +175,22 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
     )
 
 
-def test_extract_uses_dataframe_batches(mock_dependencies_fixture):
-    """Ensure extract works with dataframe chunks and batch normalization."""
+def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
+    """Проверяет, что extract обрабатывает DataFrame чанками без построчной итерации."""
+    record_source = MagicMock()
+    raw_chunks = [
+        pd.DataFrame([{"id": 1}, {"id": 2}]),
+        pd.DataFrame([{"id": 3}]),
+    ]
+    record_source.iter_records.return_value = raw_chunks
 
-    class _ChunkRecordSource:
-        def __init__(self, df: pd.DataFrame):
-            self.df = df
-            self.calls = 0
-
-        def iter_records(self):
-            self.calls += 1
-            yield self.df
-
-    class _NormalizationStub:
-        def __init__(self) -> None:
-            self.batch_calls = 0
-            self.single_calls = 0
-
-        def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
-            self.batch_calls += 1
-            return df.assign(value=df["value"].str.upper())
-
-        def normalize(self, raw):  # pragma: no cover
-            self.single_calls += 1
-            return raw
-
-        def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:  # pragma: no cover
-            return df
-
-        def normalize_series(self, series, field_cfg):  # pragma: no cover
-            return series
-
-    raw_df = pd.DataFrame(
-        [
-            {"id": 1, "value": "a"},
-            {"id": 2, "value": "b"},
-        ]
+    normalization_service = MagicMock()
+    normalization_service.normalize.side_effect = AssertionError(
+        "normalize should not be used for batch flow"
     )
-
-    record_source = _ChunkRecordSource(raw_df)
-    normalization_service = _NormalizationStub()
-    mock_dependencies_fixture["config"].pipeline = {}
-    mock_dependencies_fixture["config"].model_dump.return_value = {}
+    normalization_service.normalize_batch.side_effect = (
+        lambda df: df.assign(processed=True)
+    )
 
     pipeline = ChemblPipelineBase(
         config=mock_dependencies_fixture["config"],
@@ -230,10 +204,10 @@ def test_extract_uses_dataframe_batches(mock_dependencies_fixture):
 
     result = pipeline.extract()
 
-    assert record_source.calls == 1
-    assert normalization_service.batch_calls == 1
-    assert normalization_service.single_calls == 0
-    pd.testing.assert_frame_equal(
-        result.reset_index(drop=True),
-        raw_df.assign(value=["A", "B"]),
+    assert normalization_service.normalize_batch.call_count == 2
+    normalization_service.normalize.assert_not_called()
+
+    expected = pd.concat(
+        [chunk.assign(processed=True) for chunk in raw_chunks], ignore_index=True
     )
+    pd.testing.assert_frame_equal(result, expected)

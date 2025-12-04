@@ -7,7 +7,7 @@ from typing import Any
 
 import pandas as pd
 
-from bioetl.domain.record_source import RawRecord, RecordSource
+from bioetl.domain.record_source import RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -128,8 +128,6 @@ class IdListRecordSource(RecordSource):
     def _fetch_records(
         self, ids: list[str], batch_size: int
     ) -> Iterable[pd.DataFrame]:
-        all_records: list[RawRecord] = []
-
         for batch_ids in _chunk_list(ids, batch_size):
             self._logger.info(
                 "Fetching batch from API", batch_size=len(batch_ids)
@@ -141,10 +139,8 @@ class IdListRecordSource(RecordSource):
             serialized_records = self._extraction_service.serialize_records(
                 self._entity, batch_records
             )
-            all_records.extend(serialized_records)
-
-        records_df = pd.DataFrame(all_records)
-        yield from _chunk_dataframe(records_df, self._chunk_size)
+            batch_df = pd.DataFrame(serialized_records)
+            yield from _chunk_dataframe(batch_df, self._chunk_size)
 
     @staticmethod
     def _ensure_csv_options(

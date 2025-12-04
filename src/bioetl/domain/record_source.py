@@ -17,7 +17,7 @@ class RawRecord(TypedDict, total=False):
 
 
 class RecordSource(Protocol):
-    """Protocol for record sources."""
+    """Protocol for record sources returning DataFrame chunks."""
 
     def iter_records(self) -> Iterable[pd.DataFrame]:
         """Return iterable over raw record DataFrame chunks."""

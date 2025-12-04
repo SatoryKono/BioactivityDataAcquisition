@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from pathlib import Path
+
 import pandas as pd
 
 from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
@@ -88,12 +90,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     records = list(source.iter_records())
 
     assert extraction.batches == [["A1", "A2"], ["A3"]]
-    assert len(records) == 1
-    expected_df = pd.DataFrame(
-        [
-            {"id": "A1"},
-            {"id": "A2"},
-            {"id": "A3"},
-        ]
-    )
-    pd.testing.assert_frame_equal(records[0].reset_index(drop=True), expected_df)
+    assert len(records) == 2
+    combined = pd.concat(records, ignore_index=True)
+    expected = pd.DataFrame({"id": ["A1", "A2", "A3"]})
+    pd.testing.assert_frame_equal(combined, expected)

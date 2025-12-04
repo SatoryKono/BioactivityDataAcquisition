@@ -37,8 +37,7 @@ def test_in_memory_record_source_iterates_stably() -> None:
     first_pass = list(source.iter_records())
     second_pass = list(source.iter_records())
 
-    assert len(first_pass) == 1
-    assert len(second_pass) == 1
+    assert len(first_pass) == len(second_pass) == 1
     pd.testing.assert_frame_equal(first_pass[0], pd.DataFrame(records))
     pd.testing.assert_frame_equal(second_pass[0], pd.DataFrame(records))
 
