@@ -5,15 +5,10 @@ from typing import Any
 import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
-    LoggingPipelineHook,
-    StopOnErrorPolicyImpl,
-)
-from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
-from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
-from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
+from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
 from bioetl.core.provider_registry import get_provider
 from bioetl.core.providers import ProviderDefinition, ProviderId
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
@@ -38,29 +33,28 @@ class PipelineContainer:
     DI Container for pipeline dependencies.
     """
 
-    def __init__(self, config: PipelineConfig) -> None:
+    def __init__(
+        self,
+        config: PipelineConfig,
+        *,
+        logger: LoggerAdapterABC | None = None,
+        hooks: list[PipelineHookABC] | None = None,
+        error_policy: ErrorPolicyABC | None = None,
+    ) -> None:
         self.config = config
         self._provider_id = ProviderId(self.config.provider)
         self._schema_registry = SchemaRegistry()
         register_schemas(self._schema_registry)
         self._register_providers()
-        self._logger: LoggerAdapterABC | None = None
-        self._hooks: list[PipelineHookABC] | None = None
-        self._error_policy: ErrorPolicyABC | None = None
+        self._logger: LoggerAdapterABC | None = logger
+        self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
+        self._error_policy: ErrorPolicyABC | None = error_policy
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
         if self._logger is None:
             self._logger = default_logger()
         return self._logger
-
-    def get_hooks(self) -> list[PipelineHookABC]:
-        """Возвращает список хуков пайплайна."""
-        return [LoggingPipelineHookImpl(self.get_logger())]
-
-    def get_error_policy(self) -> ErrorPolicyABC:
-        """Возвращает политику обработки ошибок пайплайна."""
-        return FailFastErrorPolicyImpl()
 
     def get_validation_service(self) -> ValidationService:
         """Get the validation service with registered schemas."""
@@ -152,13 +146,13 @@ class PipelineContainer:
     def get_hooks(self) -> list[PipelineHookABC]:
         """Возвращает список хуков выполнения пайплайна."""
         if self._hooks is None:
-            self._hooks = [LoggingPipelineHook(self.get_logger())]
+            self._hooks = [LoggingPipelineHookImpl(self.get_logger())]
         return list(self._hooks)
 
     def get_error_policy(self) -> ErrorPolicyABC:
         """Возвращает политику обработки ошибок пайплайна."""
         if self._error_policy is None:
-            self._error_policy = StopOnErrorPolicyImpl()
+            self._error_policy = FailFastErrorPolicyImpl()
         return self._error_policy
 
     def _resolve_primary_key(self) -> str:
@@ -189,6 +183,17 @@ class PipelineContainer:
         return source_config
 
 
-def build_pipeline_dependencies(config: PipelineConfig) -> PipelineContainer:
+def build_pipeline_dependencies(
+    config: PipelineConfig,
+    *,
+    logger: LoggerAdapterABC | None = None,
+    hooks: list[PipelineHookABC] | None = None,
+    error_policy: ErrorPolicyABC | None = None,
+) -> PipelineContainer:
     """Factory for the container."""
-    return PipelineContainer(config)
+    return PipelineContainer(
+        config,
+        logger=logger,
+        hooks=hooks,
+        error_policy=error_policy,
+    )
