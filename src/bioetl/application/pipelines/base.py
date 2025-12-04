@@ -42,6 +42,8 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         output_writer: "UnifiedOutputWriter",
         hash_service: HashService | None = None,
+        hooks: list[PipelineHookABC] | None = None,
+        error_policy: ErrorPolicyABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(config.provider)
@@ -52,13 +54,17 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service or HashService()
-        self._hooks: list[PipelineHookABC] = []
-        self._error_policy: ErrorPolicyABC | None = None
+        self._hooks: list[PipelineHookABC] = list(hooks or [])
         self._last_error: PipelineStageError | None = None
         self._stage_starts: dict[str, datetime] = {}
         self._schema_contract = get_pipeline_contract(
             config.id, default_entity=config.entity_name
         )
+        from bioetl.application.pipelines.hooks_impl import (  # pylint: disable=import-outside-toplevel
+            FailFastErrorPolicyImpl,
+        )
+
+        self._error_policy = error_policy or FailFastErrorPolicyImpl()
 
     # === Public API ===
 
@@ -384,60 +390,62 @@ class PipelineBase(ABC):
         *,
         attempt: int = 1,
     ) -> Any:
-        current_attempt = attempt
-        while True:
-            self._notify_stage_start(stage, context)
-            try:
-                result = action()
-                self._last_error = None
-                return result
-            except Exception as exc:
-                error = PipelineStageError(
-                    provider=self._provider_id.value,
-                    entity=self._config.entity_name,
-                    stage=stage,
-                    attempt=current_attempt,
-                    run_id=context.run_id,
-                    cause=exc,
+        self._notify_stage_start(stage, context)
+        try:
+            result = action()
+            self._last_error = None
+            return result
+        except Exception as exc:
+            error = PipelineStageError(
+                provider=self._provider_id.value,
+                entity=self._config.entity_name,
+                stage=stage,
+                attempt=attempt,
+                run_id=context.run_id,
+                cause=exc,
+            )
+            self._last_error = error
+            self._logger.error(
+                "Stage failed",
+                stage=stage,
+                provider=self._provider_id.value,
+                entity=self._config.entity_name,
+                run_id=context.run_id,
+                error=str(exc),
+            )
+            for hook in self._hooks:
+                hook.on_error(stage, error)
+            action_on_error = self._error_policy.handle(error, context)
+            if action_on_error == ErrorAction.RETRY and self._error_policy.should_retry(
+                error
+            ):
+                return self._run_stage(
+                    stage,
+                    context,
+                    action,
+                    attempt=attempt + 1,
                 )
-                self._last_error = error
-                self._logger.error(
-                    "Stage failed",
+            if action_on_error == ErrorAction.SKIP:
+                self._logger.warning(
+                    "Stage skipped due to error policy",
                     stage=stage,
                     provider=self._provider_id.value,
                     entity=self._config.entity_name,
                     run_id=context.run_id,
                     error=str(exc),
                 )
-                for hook in self._hooks:
-                    hook.on_error(stage, error)
+                return self._default_on_skip(stage)
 
-                policy_action = (
-                    self._error_policy.handle(error, context)
-                    if self._error_policy
-                    else ErrorAction.FAIL
-                )
+            raise error from exc
 
-                if (
-                    policy_action == ErrorAction.RETRY
-                    and self._error_policy
-                    and self._error_policy.should_retry(error)
-                ):
-                    current_attempt += 1
-                    continue
+    def _default_on_skip(self, stage: str) -> Any:
+        """Возвращает безопасное значение по умолчанию при пропуске стадии."""
 
-                if policy_action == ErrorAction.SKIP:
-                    self._logger.warning(
-                        "Stage skipped due to error policy",
-                        stage=stage,
-                        provider=self._provider_id.value,
-                        entity=self._config.entity_name,
-                        run_id=context.run_id,
-                        error=str(exc),
-                    )
-                    return None
+        import pandas as pd  # pylint: disable=import-outside-toplevel
 
-                raise error from exc
+        if stage in {"extract", "transform", "validate"}:
+            return pd.DataFrame()
+        return None
 
     def _enrich_context(self, context: RunContext) -> None:
         """

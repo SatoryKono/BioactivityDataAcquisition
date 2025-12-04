@@ -50,6 +50,8 @@ class PipelineOrchestrator:
             record_source=record_source,
             normalization_service=normalization_service,
             hash_service=hash_service,
+            hooks=hooks,
+            error_policy=error_policy,
         )
 
         pipeline.add_hooks(hooks)
