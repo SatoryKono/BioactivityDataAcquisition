@@ -31,6 +31,7 @@ class ClientConfig(BaseModel):
     rate_limit: float = 10.0
     backoff_factor: float = 2.0
     circuit_breaker_threshold: int = 5
+    circuit_breaker_recovery_time: float = 60.0
 
     model_config = ConfigDict(extra="forbid")
 

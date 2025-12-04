@@ -140,6 +140,7 @@ bioetl run new_entity_chembl --profile development --dry-run
 - `rate_limit`: ограничение запросов в секунду
 - `backoff_factor`: множитель для exponential backoff
 - `circuit_breaker_threshold`: порог срабатывания circuit breaker
+- `circuit_breaker_recovery_time`: время (секунды) удержания открытого circuit breaker перед повторной попыткой
 
 ### Секция `storage`
 - `output_path`: путь для финальных артефактов
