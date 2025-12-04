@@ -33,7 +33,7 @@ class CsvRecordSource(RecordSource):
         self._limit = limit
         self._logger = logger
 
-    def iter_records(self) -> Iterable[RawRecord]:
+    def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
         self._logger.info(
             f"Extracting records from CSV dataset: {self._input_path}"
@@ -45,7 +45,7 @@ class CsvRecordSource(RecordSource):
         )
         if self._limit is not None:
             df = df.head(self._limit)
-        return df.to_dict(orient="records")
+        return [df]
 
     @staticmethod
     def _ensure_csv_options(
@@ -86,7 +86,7 @@ class IdListRecordSource(RecordSource):
         self._filter_key = filter_key
         self._logger = logger
 
-    def iter_records(self) -> Iterable[RawRecord]:
+    def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
         usecols = [self._id_column] if self._csv_options.header else [0]
         names = [self._id_column] if not self._csv_options.header else None
@@ -114,9 +114,7 @@ class IdListRecordSource(RecordSource):
 
     def _fetch_records(
         self, ids: list[str], batch_size: int
-    ) -> Iterable[RawRecord]:
-        all_records: list[RawRecord] = []
-
+    ) -> Iterable[pd.DataFrame]:
         for batch_ids in _chunk_list(ids, batch_size):
             self._logger.info(
                 "Fetching batch from API", batch_size=len(batch_ids)
@@ -128,9 +126,7 @@ class IdListRecordSource(RecordSource):
             serialized_records = self._extraction_service.serialize_records(
                 self._entity, batch_records
             )
-            all_records.extend(serialized_records)
-
-        return all_records
+            yield pd.DataFrame(serialized_records)
 
     @staticmethod
     def _ensure_csv_options(
