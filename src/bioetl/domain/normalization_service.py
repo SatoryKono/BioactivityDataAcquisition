@@ -27,6 +27,17 @@ class NormalizationService(Protocol):
     def normalize(self, raw: RawRecord) -> NormalizedRecord:
         """Normalize a single raw record."""
 
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize a batch of raw records represented as a DataFrame."""
+
+    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize a DataFrame with ChEMBL field rules."""
+
+    def normalize_series(
+        self, series: pd.Series, field_cfg: dict[str, Any]
+    ) -> pd.Series:
+        """Normalize a Series using field configuration."""
+
 
 class ChemblNormalizationService(NormalizationService):
     """Normalization service for ChEMBL records."""
@@ -64,6 +75,44 @@ class ChemblNormalizationService(NormalizationService):
                 normalized[key] = value
 
         return normalized
+
+    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        normalized_df = df.copy()
+
+        for field_cfg in self._config.fields:
+            name = field_cfg.get("name")
+            if not name or name not in normalized_df.columns:
+                continue
+
+            normalized_df[name] = self.normalize_series(
+                normalized_df[name], field_cfg
+            )
+
+        return normalized_df
+
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.normalize_dataframe(df)
+
+    def normalize_series(
+        self, series: pd.Series, field_cfg: dict[str, Any]
+    ) -> pd.Series:
+        name = cast(str, field_cfg.get("name"))
+        dtype = field_cfg.get("data_type")
+        mode = self._resolve_mode(name)
+        custom_normalizer = normalize_impl.get_normalizer(name)
+
+        if custom_normalizer:
+            base_normalizer = custom_normalizer
+        else:
+            def _default_normalizer(val: Any, m=mode) -> Any:
+                return normalize_impl.normalize_scalar(val, mode=m)
+
+            base_normalizer = _default_normalizer
+
+        def _normalize_value_from_series(val: Any) -> Any:
+            return self._normalize_value(val, dtype, base_normalizer, name)
+
+        return series.apply(_normalize_value_from_series)
 
     def _resolve_mode(self, field_name: str) -> str:
         if field_name in self._config.normalization.case_sensitive_fields:

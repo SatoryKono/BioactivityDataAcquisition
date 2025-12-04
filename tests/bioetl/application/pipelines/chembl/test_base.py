@@ -134,6 +134,7 @@ def test_transform_nested_normalization(
     result = pipeline_fixture.transform(df)
 
     assert "transformed" in result.columns
+    assert list(result.columns) == schema_cols
     assert result.iloc[0]["nested"] == "x|y"
     assert result.iloc[0]["obj"] == "k:v"
     assert result.iloc[1]["nested"] == "z"
@@ -143,3 +144,96 @@ def test_transform_nested_normalization(
     assert result.iloc[0]["references"] == "12345|67890"
     assert result.iloc[1]["references"] == "333"
     assert result.iloc[0]["doi"] == "10.1000/abc"
+
+
+def test_transform_uses_batch_normalization(mock_dependencies_fixture):
+    """Ensure transform delegates batch normalization to the service."""
+    normalization_service = MagicMock()
+    normalization_service.normalize_dataframe.return_value = pd.DataFrame(
+        {"a": [1, 2], "transformed": [True, True]}
+    )
+
+    pipeline = ConcreteChemblPipeline(
+        config=mock_dependencies_fixture["config"],
+        logger=mock_dependencies_fixture["logger"],
+        validation_service=mock_dependencies_fixture["validation_service"],
+        output_writer=mock_dependencies_fixture["output_writer"],
+        extraction_service=mock_dependencies_fixture["extraction_service"],
+        normalization_service=normalization_service,
+    )
+
+    df = pd.DataFrame({"a": [1, 2]})
+
+    result = pipeline.transform(df)
+
+    normalization_service.normalize_dataframe.assert_called_once()
+    normalized_input = normalization_service.normalize_dataframe.call_args[0][0]
+    assert "transformed" in normalized_input.columns
+    assert normalized_input["transformed"].tolist() == [True, True]
+    pd.testing.assert_frame_equal(
+        result, normalization_service.normalize_dataframe.return_value
+    )
+
+
+def test_extract_uses_dataframe_batches(mock_dependencies_fixture):
+    """Ensure extract works with dataframe chunks and batch normalization."""
+
+    class _ChunkRecordSource:
+        def __init__(self, df: pd.DataFrame):
+            self.df = df
+            self.calls = 0
+
+        def iter_records(self):
+            self.calls += 1
+            yield self.df
+
+    class _NormalizationStub:
+        def __init__(self) -> None:
+            self.batch_calls = 0
+            self.single_calls = 0
+
+        def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+            self.batch_calls += 1
+            return df.assign(value=df["value"].str.upper())
+
+        def normalize(self, raw):  # pragma: no cover
+            self.single_calls += 1
+            return raw
+
+        def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:  # pragma: no cover
+            return df
+
+        def normalize_series(self, series, field_cfg):  # pragma: no cover
+            return series
+
+    raw_df = pd.DataFrame(
+        [
+            {"id": 1, "value": "a"},
+            {"id": 2, "value": "b"},
+        ]
+    )
+
+    record_source = _ChunkRecordSource(raw_df)
+    normalization_service = _NormalizationStub()
+    mock_dependencies_fixture["config"].pipeline = {}
+    mock_dependencies_fixture["config"].model_dump.return_value = {}
+
+    pipeline = ChemblPipelineBase(
+        config=mock_dependencies_fixture["config"],
+        logger=mock_dependencies_fixture["logger"],
+        validation_service=mock_dependencies_fixture["validation_service"],
+        output_writer=mock_dependencies_fixture["output_writer"],
+        extraction_service=mock_dependencies_fixture["extraction_service"],
+        record_source=record_source,
+        normalization_service=normalization_service,
+    )
+
+    result = pipeline.extract()
+
+    assert record_source.calls == 1
+    assert normalization_service.batch_calls == 1
+    assert normalization_service.single_calls == 0
+    pd.testing.assert_frame_equal(
+        result.reset_index(drop=True),
+        raw_df.assign(value=["A", "B"]),
+    )

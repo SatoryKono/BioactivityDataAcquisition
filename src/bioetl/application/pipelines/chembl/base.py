@@ -1,13 +1,13 @@
 """Base pipeline implementation for ChEMBL data extraction."""
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
-from bioetl.domain.record_source import ApiRecordSource, RawRecord, RecordSource
+from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
@@ -60,15 +60,29 @@ class ChemblPipelineBase(PipelineBase):
     def extract(self, **kwargs: Any) -> pd.DataFrame:
         """Извлекает данные через RecordSource и нормализует записи."""
         limit = kwargs.pop("limit", None)
-        records = []
+        normalized_chunks: list[pd.DataFrame] = []
+        remaining = limit
 
-        for idx, raw_record in enumerate(self._record_source.iter_records()):
-            if limit is not None and idx >= limit:
+        for df_chunk in self._record_source.iter_records():
+            if remaining is not None and remaining <= 0:
                 break
-            normalized = self._normalization_service.normalize(raw_record)
-            records.append(normalized)
 
-        return pd.DataFrame(records)
+            normalized_chunk = self._normalization_service.normalize_batch(df_chunk)
+
+            if remaining is not None:
+                normalized_chunk = normalized_chunk.head(remaining)
+                remaining -= len(normalized_chunk)
+
+            if not normalized_chunk.empty:
+                normalized_chunks.append(normalized_chunk)
+
+            if remaining is not None and remaining <= 0:
+                break
+
+        if not normalized_chunks:
+            return pd.DataFrame()
+
+        return pd.concat(normalized_chunks, ignore_index=True)
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -77,13 +91,7 @@ class ChemblPipelineBase(PipelineBase):
         """
         df = self.pre_transform(df)
         df = self._do_transform(df)
-
-        records = [
-            self._normalization_service.normalize(cast(RawRecord, record))
-            for record in df.to_dict(orient="records")
-        ]
-
-        df = pd.DataFrame(records)
+        df = self._normalization_service.normalize_dataframe(df)
 
         df = self._enforce_schema(df)
         df = self._drop_nulls_in_required_columns(df)
