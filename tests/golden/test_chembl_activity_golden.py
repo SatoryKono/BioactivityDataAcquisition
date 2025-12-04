@@ -48,6 +48,10 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         validation_service=container.get_validation_service(),
         output_writer=container.get_output_writer(),
         extraction_service=container.get_extraction_service(),
+        record_source=container.get_record_source(
+            extraction_service=container.get_extraction_service(),
+            logger=container.get_logger(),
+        ),
         hash_service=container.get_hash_service(),
     )
 

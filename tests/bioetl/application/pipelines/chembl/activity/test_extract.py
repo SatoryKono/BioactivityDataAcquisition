@@ -4,8 +4,6 @@ Tests for ChemblPipelineBase generic extract (via ChemblActivityPipeline).
 import pytest
 from unittest.mock import MagicMock
 import pandas as pd
-import pytest
-from unittest.mock import MagicMock
 
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
@@ -13,7 +11,6 @@ from bioetl.application.pipelines.chembl.pipeline import (
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputOptions,
-    PipelineConfig,
 )
 
 
@@ -32,11 +29,13 @@ def source_config():
 @pytest.fixture
 def mock_config(source_config):
     """Create mock PipelineConfig with get_source_config method."""
-    config = MagicMock(spec=PipelineConfig)
+    config = MagicMock()
+    config.id = "chembl.activity"
     config.pipeline = {}
     config.entity_name = "activity"
     config.provider = "chembl"
     config.provider_config = source_config
+    config.get_source_config = lambda provider: config.provider_config
     config.normalization = MagicMock()
     config.normalization.rules = {}
     config.hashing = MagicMock()
@@ -45,6 +44,7 @@ def mock_config(source_config):
     config.input_mode = "auto_detect"
     config.input_path = None
     config.csv_options = CsvInputOptions()
+    config.model_dump.return_value = {}
     return config
 
 
@@ -113,10 +113,12 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
 
-    # Mock parse_response on extraction_service
+    # Mock parse_response to return records only once
+    # Since all 3 ids are in one batch (batch_size=25 > 3), parse_response is called once
     mock_extraction_service.parse_response.return_value = [
         {"activity_id": 100}, {"activity_id": 101}, {"activity_id": 102}
     ]
+    
     # Mock serialize_records to return input
     mock_extraction_service.serialize_records.side_effect = (
         lambda entity, recs: recs
@@ -133,7 +135,7 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
 
 
 def test_extract_batch_size_from_config(
-    pipeline, mock_extraction_service, tmp_path
+    pipeline, mock_extraction_service, tmp_path, source_config
 ):
     """Test that batch_size from config controls chunking."""
     csv_path = tmp_path / "activity_batch_test.csv"
@@ -142,7 +144,18 @@ def test_extract_batch_size_from_config(
 
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
-    pipeline._config.provider_config.batch_size = 2
+    # Create new source_config with batch_size=2
+    from bioetl.schemas.provider_config_schema import ChemblSourceConfig
+    new_source_config = ChemblSourceConfig(
+        base_url=source_config.base_url,
+        batch_size=2,
+        timeout_sec=source_config.timeout_sec,
+        max_retries=source_config.max_retries,
+        rate_limit_per_sec=source_config.rate_limit_per_sec,
+    )
+    pipeline._config.provider_config = new_source_config
+    # Ensure get_source_config returns the updated object
+    pipeline._config.get_source_config = lambda provider: new_source_config
 
     # Mock parse_response to return empty list
     mock_extraction_service.parse_response.return_value = []

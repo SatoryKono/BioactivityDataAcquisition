@@ -53,7 +53,10 @@ class ConfigResolver:
             config_path_obj = self.base_dir / config_path_obj
 
         profile_name = None if profile == "default" else profile
-        return load_pipeline_config_from_path(config_path_obj, profile=profile_name)
+        profiles_root = self.profiles_dir if self.profiles_dir else None
+        return load_pipeline_config_from_path(
+            config_path_obj, profile=profile_name, profiles_root=profiles_root
+        )
 
 
 __all__ = ["ConfigResolver"]

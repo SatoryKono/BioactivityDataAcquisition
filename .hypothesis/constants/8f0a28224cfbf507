@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\transform\normalizers\collections.py
+# hypothesis_version: 6.140.3
+
+[';', '[', ']', 'accession', 'normalize_array', 'normalize_record', 'pubchem', 'uniprot', 'xref_id', 'xref_src', '{', '}']

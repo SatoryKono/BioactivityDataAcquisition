@@ -1,9 +1,13 @@
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
+from pydantic import AnyHttpUrl
 
 from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
+from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 
 
 class _StubExtractionService:
@@ -48,7 +52,7 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
         input_path=csv_path,
         csv_options=CsvInputOptions(),
         limit=1,
-        logger=_DummyLogger(),
+        logger=cast(LoggerAdapterABC, _DummyLogger()),
     )
 
     chunks = list(source.iter_records())
@@ -67,7 +71,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     extraction = _StubExtractionService()
     source_config = ChemblSourceConfig(
         provider="chembl",
-        base_url="https://example.org",
+        base_url=cast(AnyHttpUrl, "https://example.org"),
         timeout_sec=1,
         max_retries=0,
         rate_limit_per_sec=1.0,
@@ -78,11 +82,11 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
         id_column="activity_id",
         csv_options=CsvInputOptions(),
         limit=3,
-        extraction_service=extraction,
+        extraction_service=cast(ExtractionServiceABC, extraction),
         source_config=source_config,
         entity="activity",
         filter_key="activity_id__in",
-        logger=_DummyLogger(),
+        logger=cast(LoggerAdapterABC, _DummyLogger()),
     )
 
     records = list(source.iter_records())

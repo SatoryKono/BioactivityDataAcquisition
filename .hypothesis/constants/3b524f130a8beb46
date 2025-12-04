@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\config\resolver.py
+# hypothesis_version: 6.140.3
+
+['BIOETL_CONFIG_DIR', 'ConfigResolver', 'configs', 'default']

@@ -13,6 +13,7 @@ from bioetl.domain.schemas.chembl.activity import ActivitySchema
 def pipeline():
     config = MagicMock()
     config.id = "activity_chembl"
+    config.provider = "chembl"
     config.entity_name = "activity"
     config.primary_key = "activity_id"
     config.model_dump.return_value = {}
@@ -36,8 +37,8 @@ def pipeline():
 def test_transform_nested_fields(pipeline):
     # Mock schema to avoid dropping rows due to missing required fields
     class MockSchema(pa.DataFrameModel):
-        activity_properties: pa.typing.Series[object] = pa.Field(nullable=True)
-        ligand_efficiency: pa.typing.Series[object] = pa.Field(nullable=True)
+        activity_properties: pa.typing.Series[str] = pa.Field(nullable=True)
+        ligand_efficiency: pa.typing.Series[str] = pa.Field(nullable=True)
         assay_chembl_id: pa.typing.Series[str] = pa.Field(nullable=True)
         hash_row: pa.typing.Series[str] = pa.Field(nullable=False) # Simulate required hash_row
 
@@ -98,6 +99,7 @@ def test_transform_drops_invalid_rows(pipeline):
     pipeline._normalization_service = MagicMock()
     pipeline._normalization_service.normalize_fields.side_effect = lambda x: x
     pipeline._normalization_service.normalize.side_effect = lambda record: record
+    pipeline._normalization_service.normalize_dataframe.side_effect = lambda df: df.copy()
     
     df = pd.DataFrame({
         "required_col": ["A", None, "C"],

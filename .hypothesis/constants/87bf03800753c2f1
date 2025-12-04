@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\schemas\chembl\assay.py
+# hypothesis_version: 6.140.3
+
+['A', 'B', 'BAO формат ассая', 'ChEMBL ID ассая', 'ChEMBL ID ткани', 'F', 'ID источника данных', 'P', 'T', 'U', '^CHEMBL\\d+$', '^[a-f0-9]{64}$', 'aidx', 'assay_category', 'assay_cell_type', 'assay_chembl_id', 'assay_group', 'assay_organism', 'assay_parameters', 'assay_strain', 'assay_tax_id', 'assay_test_type', 'assay_tissue', 'assay_type', 'bao_format', 'bao_label', 'cell_chembl_id', 'confidence_score', 'description', 'document_chembl_id', 'relationship_type', 'score', 'src_assay_id', 'src_id', 'target_chembl_id', 'tissue_chembl_id', 'variant_sequence', 'Версия базы данных', 'Описание теста', 'Параметры теста', 'Субклеточная фракция', 'Штамм организма']

@@ -14,6 +14,7 @@ from bioetl.domain.schemas.chembl.document import DocumentSchema
 @pytest.fixture
 def pipeline():
     config = MagicMock()
+    config.provider = "chembl"
     config.entity_name = "document"
     config.primary_key = "document_chembl_id"
     config.model_dump.return_value = {}

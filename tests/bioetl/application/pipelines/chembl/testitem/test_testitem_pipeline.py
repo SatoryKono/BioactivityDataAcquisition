@@ -14,6 +14,7 @@ from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 def pipeline():  # pylint: disable=redefined-outer-name
     """Create pipeline fixture with mocked dependencies."""
     config = MagicMock()
+    config.provider = "chembl"
     config.entity_name = "testitem"
     config.primary_key = "molecule_chembl_id"
     config.model_dump.return_value = {}

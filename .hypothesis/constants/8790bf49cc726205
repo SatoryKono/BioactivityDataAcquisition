@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\schemas\pipeline_contracts.py
+# hypothesis_version: 6.140.3
+
+['activity', 'activity_chembl', 'activity_input', 'activity_output', 'assay', 'assay_chembl', 'assay_input', 'assay_output', 'document', 'document_chembl', 'document_input', 'document_output', 'molecule_chembl', 'target', 'target_chembl', 'target_input', 'target_output', 'testitem', 'testitem_chembl', 'testitem_input', 'testitem_output']

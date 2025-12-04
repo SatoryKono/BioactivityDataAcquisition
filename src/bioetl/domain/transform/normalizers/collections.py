@@ -13,10 +13,10 @@ from bioetl.domain.transform.normalizers.identifiers import (
 
 def normalize_array(
     value: Any, *, item_normalizer: Callable[[Any], Any] | None = None
-) -> list[Any] | None:
+) -> list[Any]:
     """Normalize array-like value and its elements."""
     if is_missing(value):
-        return None
+        return []
 
     if isinstance(value, str):
         value = value.strip()
@@ -54,7 +54,7 @@ def normalize_array(
         if not is_missing(norm_item):
             normalized.append(norm_item)
 
-    return normalized if normalized else []
+    return normalized
 
 
 def normalize_record(

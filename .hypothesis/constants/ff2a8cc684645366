@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\application\container.py
+# hypothesis_version: 6.140.3
+
+['auto_detect', 'csv', 'id_only', 'limit', 'primary_key']

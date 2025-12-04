@@ -226,7 +226,7 @@ class NormalizationService(NormalizationServiceABC):
             raise ValueError(
                 f"Ошибка нормализации списка в поле '{field_name}': {exc}"
             ) from exc
-        if normalized_list is None:
+        if not normalized_list:
             return pd.NA
         return serialize_list(normalized_list)
 
