@@ -17,6 +17,7 @@ class StageResult:
     stage_name: str
     success: bool
     records_processed: int = 0
+    chunks_processed: int = 0
     duration_sec: float = 0.0
     errors: list[str] = field(default_factory=list)
 

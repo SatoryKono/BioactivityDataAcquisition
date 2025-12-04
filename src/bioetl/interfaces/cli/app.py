@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.domain.config_loader import load_pipeline_config, load_pipeline_config_from_path
+from bioetl.domain.config_loader import load_pipeline_config_from_path
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 
@@ -105,20 +105,29 @@ def run(
     Runs an ETL pipeline.
     """
     try:
+        base_dir = _get_config_base_dir()
+
         if config_path is None:
             config_path = _resolve_config_path(pipeline_name)
-            if not config_path.exists():
-                console.print(f"[red]Config file not found at {config_path}[/red]")
-                console.print("Please provide --config explicitly.")
-                sys.exit(1)
-                
-        try:
-            entity, provider = pipeline_name.rsplit("_", 1)
-        except ValueError:
-            entity = pipeline_name
-            provider = "chembl"
-        pipeline_id = f"{provider}.{entity}"
-        config = load_pipeline_config(pipeline_id, profile=profile)
+
+        config_path = Path(config_path)
+        if config_path.is_absolute():
+            resolved_config_path = config_path
+        elif config_path.exists():
+            resolved_config_path = config_path
+        else:
+            resolved_config_path = base_dir / config_path
+
+        if not resolved_config_path.exists():
+            console.print(f"[red]Config file not found at {resolved_config_path}[/red]")
+            console.print("Please provide --config explicitly.")
+            sys.exit(1)
+
+        config = load_pipeline_config_from_path(
+            resolved_config_path,
+            profile=profile,
+            profiles_root=base_dir / "profiles",
+        )
 
         config_payload = config.model_dump()
 
