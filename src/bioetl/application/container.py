@@ -16,6 +16,14 @@ from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.transformers import (
+    DatabaseVersionTransformer,
+    FulldateTransformer,
+    HashColumnsTransformer,
+    IndexColumnTransformer,
+    TransformerABC,
+    TransformerChain,
+)
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.config.models import PipelineConfig
@@ -42,6 +50,7 @@ class PipelineContainer:
         self._logger: LoggerAdapterABC | None = None
         self._hooks: list[PipelineHookABC] | None = None
         self._error_policy: ErrorPolicyABC | None = None
+        self._post_transformer: TransformerABC | None = None
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
@@ -143,6 +152,24 @@ class PipelineContainer:
     def get_hash_service(self) -> HashService:
         """Get the hash service."""
         return HashService()
+
+    def get_post_transformer(self) -> TransformerABC:
+        """Собирает цепочку стандартных трансформеров."""
+        if self._post_transformer is None:
+            hash_service = self.get_hash_service()
+            self._post_transformer = TransformerChain(
+                [
+                    HashColumnsTransformer(
+                        hash_service, self.config.hashing.business_key_fields
+                    ),
+                    IndexColumnTransformer(hash_service),
+                    DatabaseVersionTransformer(
+                        hash_service, lambda: "unknown"
+                    ),
+                    FulldateTransformer(hash_service),
+                ]
+            )
+        return self._post_transformer
 
     def _resolve_primary_key(self) -> str:
         pk = self.config.primary_key
