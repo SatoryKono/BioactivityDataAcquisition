@@ -45,12 +45,15 @@ class UnifiedOutputWriter:
         output_path: Path,
         entity_name: str,
         run_context: RunContext,
+        *,
+        column_order: list[str] | None = None,
     ) -> WriteResult:
         """Основной метод записи."""
         output_path.mkdir(parents=True, exist_ok=True)
 
         # 1. Сортировка
-        df = self._stable_sort(df, run_context)
+        df_prepared = self._apply_column_order(df, column_order)
+        df_prepared = self._stable_sort(df_prepared, run_context, column_order)
 
         # 2. Атомарная запись
         data_path = output_path / f"{entity_name}.csv"
@@ -60,7 +63,9 @@ class UnifiedOutputWriter:
 
         def write_wrapper(path: Path) -> None:
             nonlocal inner_result
-            inner_result = self._writer.write(df, path)
+            inner_result = self._writer.write(
+                df_prepared, path, column_order=column_order
+            )
 
         self._atomic_op.write_atomic(data_path, write_wrapper)
 
@@ -87,13 +92,17 @@ class UnifiedOutputWriter:
         return final_result
 
     def _stable_sort(
-        self, df: pd.DataFrame, context: RunContext
+        self,
+        df: pd.DataFrame,
+        context: RunContext,
+        column_order: list[str] | None = None,
     ) -> pd.DataFrame:
         if not self._config.stable_sort:
             return df
 
         # 1. Sort columns
-        df = df.reindex(sorted(df.columns), axis=1)
+        if not column_order:
+            df = df.reindex(sorted(df.columns), axis=1)
 
         # 2. Sort rows by business key if configured
         hashing_config = context.config.get("hashing", {})
@@ -111,3 +120,16 @@ class UnifiedOutputWriter:
                 df = df.sort_values(by=valid_keys, ignore_index=True)
 
         return df
+
+    def _apply_column_order(
+        self, df: pd.DataFrame, column_order: list[str] | None
+    ) -> pd.DataFrame:
+        if not column_order:
+            return df
+
+        df_prepared = df.copy()
+        for col in column_order:
+            if col not in df_prepared.columns:
+                df_prepared[col] = None
+
+        return df_prepared[column_order]
