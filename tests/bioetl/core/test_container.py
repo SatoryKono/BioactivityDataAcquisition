@@ -11,8 +11,8 @@ from pydantic import ValidationError
 
 from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.hooks_impl import (
-    LoggingPipelineHook,
-    StopOnErrorPolicyImpl,
+    FailFastErrorPolicyImpl,
+    LoggingPipelineHookImpl,
 )
 from bioetl.core.provider_registry import (
     ProviderAlreadyRegisteredError,
@@ -185,11 +185,11 @@ def test_container_provides_hooks_and_error_policy() -> None:
     policy = container.get_error_policy()
 
     assert hooks
-    assert any(isinstance(hook, LoggingPipelineHook) for hook in hooks)
-    assert isinstance(policy, StopOnErrorPolicyImpl)
+    assert any(isinstance(hook, LoggingPipelineHookImpl) for hook in hooks)
+    assert isinstance(policy, FailFastErrorPolicyImpl)
     hook_logger = next(
         hook._logger  # type: ignore[attr-defined]
         for hook in hooks
-        if isinstance(hook, LoggingPipelineHook)
+        if isinstance(hook, LoggingPipelineHookImpl)
     )
     assert hook_logger is logger
