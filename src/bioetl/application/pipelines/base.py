@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Any, Callable, Iterable, TYPE_CHECKING
 import pandas as pd
 
 from bioetl.core.providers import ProviderId
@@ -88,6 +88,11 @@ class PipelineBase(ABC):
         """
         Запускает полный цикл ETL-пайплайна.
         """
+        self._stage_starts.clear()
+        if hasattr(self._hash_service, "reset_state"):
+            self._hash_service.reset_state()
+        self._last_error = None
+
         context = RunContext(
             entity_name=self._config.entity_name,
             provider=self._provider_id.value,
@@ -99,79 +104,159 @@ class PipelineBase(ABC):
         self._logger.info("Pipeline started", run_id=context.run_id)
         stages_results: list[StageResult] = []
 
+        extract_count = 0
+        extract_chunks = 0
+        transform_count = 0
+        transform_chunks = 0
+        validate_count = 0
+        validate_chunks = 0
+        write_count = 0
+        write_chunks = 0
+        validated_chunks: list[pd.DataFrame] = []
+        transform_started = False
+        validate_started = False
+
         try:
-            df_raw = self._run_stage(
-                stage="extract",
-                context=context,
-                action=lambda: self.extract(**kwargs),
-            )
-            if df_raw is None:
-                return self._handle_stage_failure("extract", stages_results, context)
+            self._notify_stage_start("extract", context)
+            chunk_iterator: Iterable[pd.DataFrame] | None = None
+
+            def reset_iterator() -> None:
+                nonlocal chunk_iterator
+                chunk_iterator = iter(self.iter_chunks(**kwargs))
+
+            reset_iterator()
+            while True:
+                try:
+                    raw_chunk = self._execute_with_error_policy(
+                        "extract",
+                        context,
+                        lambda: next(chunk_iterator),
+                        on_retry=reset_iterator,
+                    )
+                except StopIteration:
+                    break
+
+                extract_chunks += 1
+                raw_chunk = raw_chunk if raw_chunk is not None else pd.DataFrame()
+                extract_count += len(raw_chunk)
+
+                (
+                    transform_started,
+                    transform_chunks,
+                    transform_count,
+                    validate_started,
+                    validate_chunks,
+                    validate_count,
+                ) = self._process_chunk(
+                    raw_chunk,
+                    context,
+                    transform_started,
+                    transform_chunks,
+                    transform_count,
+                    validate_started,
+                    validate_chunks,
+                    validate_count,
+                    validated_chunks,
+                    dry_run,
+                )
+
+            if not transform_started:
+                (
+                    transform_started,
+                    transform_chunks,
+                    transform_count,
+                    validate_started,
+                    validate_chunks,
+                    validate_count,
+                ) = self._process_chunk(
+                    pd.DataFrame(),
+                    context,
+                    transform_started,
+                    transform_chunks,
+                    transform_count,
+                    validate_started,
+                    validate_chunks,
+                    validate_count,
+                    validated_chunks,
+                    dry_run,
+                )
+
             stages_results.append(
-                self._make_stage_result("extract", len(df_raw))
+                self._make_stage_result(
+                    "extract",
+                    extract_count,
+                    chunks=extract_chunks,
+                )
             )
             self._notify_stage_end("extract", stages_results[-1])
 
-            df_transformed = self._run_stage(
-                stage="transform",
-                context=context,
-                action=lambda: self._apply_transformers(
-                    self.transform(df_raw),
-                    context,
-                ),
-            )
-            if df_transformed is None:
-                return self._handle_stage_failure(
-                    "transform", stages_results, context
-                )
             stages_results.append(
-                self._make_stage_result("transform", len(df_transformed))
+                self._make_stage_result(
+                    "transform",
+                    transform_count,
+                    chunks=transform_chunks,
+                )
             )
             self._notify_stage_end("transform", stages_results[-1])
 
-            df_validated = self._run_stage(
-                stage="validate",
-                context=context,
-                action=lambda: self.validate(df_transformed),
-            )
-            if df_validated is None:
-                return self._handle_stage_failure("validate", stages_results, context)
             stages_results.append(
-                self._make_stage_result("validate", len(df_validated))
+                self._make_stage_result(
+                    "validate",
+                    validate_count,
+                    chunks=validate_chunks,
+                )
             )
             self._notify_stage_end("validate", stages_results[-1])
 
             write_result: WriteResult | None = None
             if not dry_run:
-                write_result = self._run_stage(
-                    stage="write",
-                    context=context,
-                    action=lambda: self.write(
-                        df_validated,
+                if not self._stage_starts.get("write"):
+                    self._notify_stage_start("write", context)
+
+                df_to_write = (
+                    pd.concat(validated_chunks, ignore_index=True)
+                    if validated_chunks
+                    else pd.DataFrame()
+                )
+
+                write_result = self._execute_with_error_policy(
+                    "write",
+                    context,
+                    lambda: self.write(
+                        df_to_write,
                         output_path,
                         context,
                     ),
                 )
                 if write_result is None:
-                    return self._handle_stage_failure("write", stages_results, context)
+                    return self._handle_stage_failure(
+                        "write", stages_results, context
+                    )
+
+                write_count = write_result.row_count
+                write_chunks = max(validate_chunks, 1)
 
                 stages_results.append(
-                    self._make_stage_result("write", write_result.row_count)
+                    self._make_stage_result(
+                        "write",
+                        write_result.row_count,
+                        chunks=write_chunks,
+                    )
                 )
                 self._notify_stage_end("write", stages_results[-1])
 
-            if write_result:
-                meta = build_run_metadata(context, write_result)
-            else:
-                meta = build_dry_run_metadata(
-                    context, len(df_validated)
-                )
+            total_row_count = validate_count
+            meta = (
+                build_run_metadata(context, write_result)
+                if write_result
+                else build_dry_run_metadata(context, validate_count)
+            )
 
             return RunResult(
                 run_id=context.run_id,
                 success=True,
                 entity_name=self._config.entity_name,
-                row_count=len(df_validated),
+                row_count=total_row_count,
                 output_path=output_path if not dry_run else None,
                 duration_sec=self._calculate_duration(context),
                 stages=stages_results,
@@ -187,7 +272,6 @@ class PipelineBase(ABC):
                 run_id=error.run_id,
                 error=str(error.cause) if error.cause else str(error),
             )
-            # Hooks are already notified in _run_stage
             raise
 
     # === Abstract Methods ===
@@ -240,6 +324,10 @@ class PipelineBase(ABC):
             run_context=context,
         )
 
+    def iter_chunks(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
+        """Возвращает итератор по чанкам данных после extract."""
+        yield self.extract(**kwargs)
+
     # === Hooks ===
 
     def add_hook(self, hook: PipelineHookABC) -> None:
@@ -287,6 +375,7 @@ class PipelineBase(ABC):
         self._logger.info(
             f"Stage finished: {stage}",
             records=result.records_processed,
+            chunks=result.chunks_processed,
             provider=self._provider_id.value,
             entity=self._config.entity_name,
         )
@@ -300,6 +389,7 @@ class PipelineBase(ABC):
         *,
         success: bool = True,
         errors: list[str] | None = None,
+        chunks: int = 0,
     ) -> StageResult:
         start_time = self._stage_starts.get(stage)
         duration = 0.0
@@ -312,6 +402,7 @@ class PipelineBase(ABC):
             stage_name=stage,
             success=success,
             records_processed=count if success else 0,
+            chunks_processed=chunks if success else 0,
             duration_sec=duration,
             errors=errors or [],
         )
@@ -326,13 +417,17 @@ class PipelineBase(ABC):
         stage: str,
         stages_results: list[StageResult],
         context: RunContext,
+        *,
+        count: int = 0,
+        chunks: int = 0,
     ) -> RunResult:
         errors = self._get_last_error_messages()
         stage_result = self._make_stage_result(
             stage,
-            0,
+            count,
             success=False,
             errors=errors,
+            chunks=chunks,
         )
         stages_results.append(stage_result)
         self._notify_stage_end(stage, stage_result)
@@ -379,6 +474,74 @@ class PipelineBase(ABC):
             return df
         return self._post_transformer.apply(df, context)
 
+    def _process_chunk(
+        self,
+        raw_chunk: pd.DataFrame,
+        context: RunContext,
+        transform_started: bool,
+        transform_chunks: int,
+        transform_count: int,
+        validate_started: bool,
+        validate_chunks: int,
+        validate_count: int,
+        validated_chunks: list[pd.DataFrame],
+        dry_run: bool,
+    ) -> tuple[bool, int, int, bool, int, int]:
+        if not transform_started:
+            self._notify_stage_start("transform", context)
+            transform_started = True
+
+        df_transformed = self._execute_with_error_policy(
+            "transform",
+            context,
+            lambda: self._apply_transformers(
+                self.transform(raw_chunk),
+                context,
+            ),
+        )
+        if df_transformed is None:
+            raise PipelineStageError(
+                provider=self._provider_id.value,
+                entity=self._config.entity_name,
+                stage="transform",
+                attempt=1,
+                run_id=context.run_id,
+            )
+
+        transform_chunks += 1
+        transform_count += len(df_transformed)
+
+        if not validate_started:
+            self._notify_stage_start("validate", context)
+            validate_started = True
+
+        df_validated = self._execute_with_error_policy(
+            "validate", context, lambda: self.validate(df_transformed)
+        )
+        if df_validated is None:
+            raise PipelineStageError(
+                provider=self._provider_id.value,
+                entity=self._config.entity_name,
+                stage="validate",
+                attempt=1,
+                run_id=context.run_id,
+            )
+
+        validate_chunks += 1
+        validate_count += len(df_validated)
+
+        if not dry_run:
+            validated_chunks.append(df_validated)
+
+        return (
+            transform_started,
+            transform_chunks,
+            transform_count,
+            validate_started,
+            validate_chunks,
+            validate_count,
+        )
+
     def _run_stage(
         self,
         stage: str,
@@ -388,10 +551,28 @@ class PipelineBase(ABC):
         attempt: int = 1,
     ) -> Any:
         self._notify_stage_start(stage, context)
+        return self._execute_with_error_policy(
+            stage,
+            context,
+            action,
+            attempt=attempt,
+        )
+
+    def _execute_with_error_policy(
+        self,
+        stage: str,
+        context: RunContext,
+        action: Callable[[], Any],
+        *,
+        attempt: int = 1,
+        on_retry: Callable[[], None] | None = None,
+    ) -> Any:
         try:
             result = action()
             self._last_error = None
             return result
+        except StopIteration:
+            raise
         except Exception as exc:
             error = PipelineStageError(
                 provider=self._provider_id.value,
@@ -416,11 +597,14 @@ class PipelineBase(ABC):
             if action_on_error == ErrorAction.RETRY and self._error_policy.should_retry(
                 error
             ):
-                return self._run_stage(
+                if on_retry:
+                    on_retry()
+                return self._execute_with_error_policy(
                     stage,
                     context,
                     action,
                     attempt=attempt + 1,
+                    on_retry=on_retry,
                 )
             if action_on_error == ErrorAction.SKIP:
                 self._logger.warning(

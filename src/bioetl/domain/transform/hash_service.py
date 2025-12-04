@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, timezone
+from typing import Callable
 
 from bioetl.domain.transform.contracts import HasherABC
 from bioetl.domain.transform.impl.hasher import HasherImpl
@@ -10,8 +11,15 @@ class HashService:
     Сервис для вычисления и добавления хеш-сумм.
     """
 
-    def __init__(self, hasher: HasherABC | None = None) -> None:
+    def __init__(
+        self,
+        hasher: HasherABC | None = None,
+        now_provider: Callable[[], datetime] | None = None,
+    ) -> None:
         self._hasher = hasher or HasherImpl()
+        self._index_counter = 0
+        self._now_provider = now_provider or (lambda: datetime.now(timezone.utc))
+        self._extracted_at: str | None = None
 
     def add_hash_columns(self, df: pd.DataFrame, business_key_cols: list[str] | None = None) -> pd.DataFrame:
         """
@@ -54,7 +62,10 @@ class HashService:
         Возвращает копию df.
         """
         df = df.copy()
-        df["index"] = list(range(len(df)))
+        start_index = self._index_counter
+        end_index = start_index + len(df)
+        df["index"] = list(range(start_index, end_index))
+        self._index_counter = end_index
         return df
 
     def add_database_version_column(self, df: pd.DataFrame, database_version: str) -> pd.DataFrame:
@@ -73,6 +84,13 @@ class HashService:
         Возвращает копию df.
         """
         df = df.copy()
-        now_iso = datetime.now(timezone.utc).isoformat()
-        df["extracted_at"] = now_iso
+        if self._extracted_at is None:
+            self._extracted_at = self._now_provider().isoformat()
+        df["extracted_at"] = self._extracted_at
         return df
+
+    def reset_state(self) -> None:
+        """Сбрасывает внутреннее состояние между запусками."""
+
+        self._index_counter = 0
+        self._extracted_at = None
