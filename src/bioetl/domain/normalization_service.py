@@ -46,7 +46,7 @@ class ChemblNormalizationService(NormalizationService):
         self._config = config
 
     def normalize(self, raw: RawRecord) -> NormalizedRecord:
-        normalized: NormalizedRecord = {}
+        normalized: dict[str, Any] = {}
 
         for field_cfg in self._config.fields:
             name = field_cfg.get("name")
@@ -74,7 +74,7 @@ class ChemblNormalizationService(NormalizationService):
             if key not in normalized:
                 normalized[key] = value
 
-        return normalized
+        return cast(NormalizedRecord, normalized)
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         normalized_df = df.copy()

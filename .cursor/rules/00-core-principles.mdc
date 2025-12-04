@@ -18,6 +18,7 @@ Enforce non-negotiable invariants across the whole repo so the agent does not gu
 - **Tests**: no network in unit tests; golden tests for critical outputs; property-based tests for transformations; coverage ≥ 85% in CI.
 - **API access only through UnifiedAPIClient**: with retry/backoff, rate limiting, circuit breaker and strict timeouts.
 - **One source → one public pipeline**: use unified components (Logger, Writer, Client, Schema); follow extract→transform→validate→export.
+- **Zero-sum class count**: ANY new class (non-ABC) must replace/remove an existing one. Total class count is fixed unless explicitly overridden by user.
 - **Secrets in env/secret manager only**: typed configs via Pydantic; profiles for shared defaults; CI secret scanning enabled.
 - **Python style**: ruff/black, isort, mypy --strict; no wildcard imports, no global mutable state, no magic numbers.
 
