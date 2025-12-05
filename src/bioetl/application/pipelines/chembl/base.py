@@ -10,6 +10,7 @@ from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.models import RunContext
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
