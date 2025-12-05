@@ -132,6 +132,51 @@ def test_extract_all_limit(service, mock_client):
     mock_client.request_activity.assert_called_with(offset=0, limit=5)
 
 
+def test_iter_extract_stops_on_empty_page(service, mock_client):
+    """Streaming stops when API returns no data."""
+    mock_parser = MagicMock()
+    mock_paginator = MagicMock()
+
+    service.parser = mock_parser
+    service.paginator = mock_paginator
+
+    mock_client.request_activity.return_value = {"data": []}
+    mock_parser.parse.return_value = []
+    mock_paginator.has_more.return_value = False
+
+    chunks = list(service.iter_extract("activity", chunk_size=5))
+
+    assert chunks == []
+    mock_client.request_activity.assert_called_once_with(offset=0, limit=5)
+
+
+def test_iter_extract_respects_limit_with_pagination(service, mock_client):
+    """Streaming honors limit across multiple pages."""
+    mock_parser = MagicMock()
+    mock_paginator = MagicMock()
+
+    service.parser = mock_parser
+    service.paginator = mock_paginator
+
+    mock_client.request_activity.side_effect = [
+        {"data": "page1"},
+        {"data": "page2"},
+    ]
+    mock_parser.parse.side_effect = [
+        [{"id": 1}, {"id": 2}],
+        [{"id": 3}],
+    ]
+    mock_paginator.has_more.side_effect = [True, False]
+
+    chunks = list(service.iter_extract("activity", chunk_size=2, limit=3))
+
+    assert len(chunks) == 2
+    assert sum(len(chunk) for chunk in chunks) == 3
+    calls = mock_client.request_activity.call_args_list
+    assert calls[0].kwargs == {"offset": 0, "limit": 2}
+    assert calls[1].kwargs == {"offset": 2, "limit": 1}
+
+
 def test_extract_unknown_entity(service):
     """Test extraction of unknown entity raises ValueError."""
     with pytest.raises(ValueError, match="Unknown entity"):

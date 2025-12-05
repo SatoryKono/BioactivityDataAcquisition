@@ -19,9 +19,7 @@ from bioetl.infrastructure.config.models import DummyProviderConfig
 
 
 @dataclass(frozen=True)
-class DummyComponents(
-    ProviderComponents[DummyProviderConfig, dict[str, str], tuple[dict[str, str], str]]
-):
+class DummyComponents(ProviderComponents):
     def create_client(self, config: DummyProviderConfig) -> dict[str, str]:
         return {"base_url": str(config.base_url)}
 
