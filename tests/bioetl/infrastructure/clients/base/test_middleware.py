@@ -1,5 +1,6 @@
 """Юнит-тесты для HttpClientMiddleware: retry, rate-limit, circuit breaker."""
 from __future__ import annotations
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -35,9 +36,10 @@ def base_client():
     return client
 
 
-def _response(status_code: int = 200) -> MagicMock:
+def _response(status_code: int = 200, headers: dict[str, str] | None = None) -> MagicMock:
     resp = MagicMock()
     resp.status_code = status_code
+    resp.headers = headers or {}
     resp.raise_for_status = MagicMock()
     return resp
 
@@ -83,6 +85,86 @@ def test_retry_on_rate_limit_then_success(monkeypatch, base_client):
 
     assert result.status_code == 200
     assert base_client.request.call_count == 2
+
+
+def test_retry_after_header_seconds(monkeypatch, base_client):
+    """Retry-After в секундах задает минимальную задержку перед ретраем."""
+    fake_time = _FakeTime()
+    monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
+    monkeypatch.setattr("time.sleep", fake_time.sleep)
+
+    base_client.request.side_effect = [
+        _response(429, headers={"Retry-After": "5"}),
+        _response(200),
+    ]
+
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=base_client,
+        max_attempts=2,
+        base_delay=0.1,
+    )
+
+    result = middleware.request("GET", "http://example.com/rate")
+
+    assert result.status_code == 200
+    assert base_client.request.call_count == 2
+    assert fake_time.value >= 5
+
+
+def test_retry_after_http_date(monkeypatch, base_client):
+    """Retry-After в формате даты учитывается для задержки."""
+    fake_time = _FakeTime()
+    monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
+    monkeypatch.setattr("time.sleep", fake_time.sleep)
+
+    retry_at = datetime.now(timezone.utc) + timedelta(seconds=7)
+    retry_response = _response(
+        503, headers={"Retry-After": retry_at.strftime("%a, %d %b %Y %H:%M:%S GMT")}
+    )
+    base_client.request.side_effect = [retry_response, _response(200)]
+
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=base_client,
+        max_attempts=2,
+        base_delay=0.5,
+    )
+
+    expected_delay = middleware._retry_after_seconds(  # noqa: SLF001
+        retry_response,
+        ClientResponseError(
+            provider="chembl", endpoint="http://example.com/service", message="", status_code=503
+        ),
+    )
+
+    result = middleware.request("GET", "http://example.com/service")
+
+    assert result.status_code == 200
+    assert base_client.request.call_count == 2
+    assert fake_time.value >= expected_delay - 0.1
+
+
+def test_retry_without_retry_after_header(monkeypatch, base_client):
+    """При отсутствии Retry-After используется обычный backoff."""
+    fake_time = _FakeTime()
+    monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
+    monkeypatch.setattr("time.sleep", fake_time.sleep)
+
+    base_client.request.side_effect = [_response(503), _response(200)]
+
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=base_client,
+        max_attempts=2,
+        base_delay=0.25,
+    )
+
+    result = middleware.request("GET", "http://example.com/service")
+
+    assert result.status_code == 200
+    assert base_client.request.call_count == 2
+    assert fake_time.value == pytest.approx(0.28, abs=0.05)
 
 
 def test_server_error_retries_until_give_up(monkeypatch, base_client):
