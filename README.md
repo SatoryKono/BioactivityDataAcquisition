@@ -6,6 +6,13 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/project/00-rules-summary.md`.
 
+## Локальные проверки качества
+
+- Установить хуки: `pre-commit install`
+- Прогнать форматирование и линтеры: `pre-commit run --all-files` (ruff, black, isort, mypy, import-linter)
+- Запустить архитектурный тест: `pytest tests/architecture/test_layer_dependencies.py`
+- Полный цикл lint/type-check в CI: ruff → black --check → isort --check-only → mypy → архитектурные тесты → import-linter
+
 ## Документация
 
 ### Структура документации
