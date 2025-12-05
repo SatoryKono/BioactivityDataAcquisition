@@ -69,6 +69,7 @@ def pipeline(mock_config, mock_extraction_service):
         validation_service=validation_service,
         output_writer=output_writer,
         extraction_service=mock_extraction_service,
+        hash_service=MagicMock(),
     )
 
 
@@ -145,7 +146,7 @@ def test_extract_batch_size_from_config(
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
     # Create new source_config with batch_size=2
-    from bioetl.schemas.provider_config_schema import ChemblSourceConfig
+    from bioetl.infrastructure.config.models import ChemblSourceConfig
     new_source_config = ChemblSourceConfig(
         base_url=source_config.base_url,
         batch_size=2,

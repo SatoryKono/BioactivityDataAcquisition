@@ -2,19 +2,19 @@
 Implementation of ChEMBL HTTP client.
 """
 from __future__ import annotations
-from typing import Any, Iterator
 
-import requests
+from typing import Any, Iterator
 
 from bioetl.domain.errors import ClientResponseError
 from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
+from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
+from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
-    ChemblRequestBuilder,
+    ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
+    ChemblResponseParserImpl,
 )
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
@@ -22,36 +22,35 @@ from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 class ChemblDataClientHTTPImpl(ChemblDataClientABC):
     """
     HTTP implementation of ChEMBL client.
-    Uses rate limiter and middleware with retry/backoff.
+    Uses UnifiedAPIClient for requests and RateLimiter for proactive throttling.
     """
 
     def __init__(
         self,
-        request_builder: ChemblRequestBuilder,
-        response_parser: ChemblResponseParser,
+        request_builder: ChemblRequestBuilderImpl,
+        response_parser: ChemblResponseParserImpl,
         rate_limiter: RateLimiterABC,
-        http_middleware: HttpClientMiddleware | None = None,
+        client: UnifiedAPIClient | None = None,
         *,
+        http_middleware: HttpClientMiddleware | None = None,
         provider: str = "chembl",
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
-        self.provider = provider
-
-        if http_middleware is None:
-            self.session = requests.Session()
-            self.http = HttpClientMiddleware(
-                provider=provider,
-                base_client=self.session,
-            )
-        else:
+        self.client = client
+        if http_middleware is not None:
             self.http = http_middleware
-            base_client = getattr(http_middleware, "base_client", None)
-            if base_client is not None:
-                self.session = base_client
-            else:
-                self.session = requests.Session()
+        elif client is not None:
+            self.http = client.middleware
+        else:
+            # Fallback stub to keep attribute accessible in tests; real runs must inject middleware
+            class _NullHttpMiddleware:
+                def request(self, method: str, url: str, **_: Any) -> Any:  # pragma: no cover
+                    raise RuntimeError("HTTP middleware is not configured")
+
+            self.http = _NullHttpMiddleware()
+        self.provider = provider
 
     # pylint: disable=redefined-builtin
     def fetch_one(self, id: str) -> dict[str, Any]:
@@ -64,7 +63,7 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
     def iter_pages(self, request: Any) -> Iterator[Any]:
         url = str(request)
-        paginator = ChemblPaginator()
+        paginator = ChemblPaginatorImpl()
 
         while url:
             self.rate_limiter.wait_if_needed()
@@ -74,8 +73,11 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
             yield response_data
 
+            # Пагинация: сейчас реализована упрощенно, возвращает только данные текущей страницы
+            # В будущем здесь должна быть логика извлечения next_url
             next_marker = paginator.get_next_marker(response_data)
             if next_marker:
+                # TODO: Реализовать переход к следующей странице
                 pass
             break
 
@@ -85,9 +87,12 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         return data
 
     def close(self) -> None:
-        close_method = getattr(self.session, "close", None)
-        if callable(close_method):
-            close_method()
+        if self.client is not None:
+            self.client.close()
+        elif hasattr(self.http, "base_client") and hasattr(
+            self.http.base_client, "close"
+        ):
+            self.http.base_client.close()
 
     def request_activity(self, **filters: Any) -> Any:
         url = self.request_builder.for_endpoint("activity").build(filters)
@@ -121,8 +126,3 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
                 message="Failed to parse response JSON",
                 cause=exc,
             ) from exc
-
-
-# NOTE: iter_pages реализован частично (возвращает только первую страницу
-# без перехода по next).
-# Планируется доработать построение next-URL для полноценной пагинации.

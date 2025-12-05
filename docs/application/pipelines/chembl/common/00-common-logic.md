@@ -1,18 +1,19 @@
 # 00 Common Logic
 
-## Роль ChemblCommonPipeline
-Общий базовый класс для ChEMBL-пайплайнов, расширяющий ChemblPipelineBase и инкапсулирующий типовой жизненный цикл: подготовка дескриптора, извлечение данных через ChemblExtractionService, трансформация, валидация и запись.
+## Текущая реализация
+- Базовый класс: `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`) — собирает `ChemblExtractorImpl`, `ChemblTransformerImpl`, `HashService`, `ValidationService`, `UnifiedOutputWriter`.
+- Универсальный пайплайн: `ChemblEntityPipeline` (`pipeline.py`) — использует тот же стек для любой сущности; `primary_key` берётся из `PipelineConfig` (`primary_key` или `pipeline.primary_key`, иначе `<entity>_id`).
+- Экстрактор: `ChemblExtractorImpl` (`extractor.py`) — режимы `input_mode`: `api` (по умолчанию), `csv`, `id_only`; использует `CsvRecordSourceImpl`/`IdListRecordSourceImpl` без эвристик колонок.
+- Трансформер: `ChemblTransformerImpl` (`transformer.py`) — последовательность `pre_transform -> do_transform -> normalize -> enforce_schema -> drop_nulls(required)`; обязательные столбцы подтягиваются из `PipelineSchemaContract`.
 
-## ChemblDescriptorFactory
-Фабрика дескрипторов формирует параметры извлечения (endpoint, фильтры, release, размер страниц) для каждой сущности. Это позволяет переиспользовать конфигурацию и минимизировать дублирование кода в конкретных пайплайнах.
+## Жизненный цикл (run)
+1) `iter_chunks` вызывает `ChemblExtractorImpl` (API/CSV/ID list).  
+2) `transform` применяет `ChemblTransformerImpl` + post-transform цепочку по умолчанию (`HashColumnsTransformer`, `IndexColumnTransformer`, `DatabaseVersionTransformer`, `FulldateTransformer`).  
+3) `validate` использует `ValidationService` + Pandera-схемы (`domain/schemas/chembl/*`).  
+4) `write` — `UnifiedOutputWriter`: стабильная сортировка по `hashing.business_key_fields`, атомарная запись `<entity>.csv`, checksum, `meta.yaml`.  
+5) Error handling — `ErrorPolicyABC` (по умолчанию fail-fast; retry/skip через хуки). Все события проходят через `PipelineHookABC`.
 
-## Жизненный цикл
-1. Подготовка дескриптора и клиента в `prepare_run`.
-2. Запуск extract с пагинацией и лимитами.
-3. Transform с нормализацией, привязкой идентификаторов и расчётом хешей.
-4. Validate по схемам из SchemaRegistry.
-5. Write с атомарной записью таблиц, meta.yaml, QC и checksums.
-6. finalize_run закрывает клиент и сохраняет метрики.
-
-## Конфигурация и переопределения
-Общие параметры (release, pagination, rate limits, output_dir) задаются в YAML-конфиге. Конкретные пайплайны переопределяют трансформеры, нормализаторы и схемы, но наследуют общие хуки и настройки извлечения.
+## Конфигурация
+- Файл пайплайна: `configs/pipelines/chembl/<entity>.yaml`.
+- Ключевые поля: `input_mode`, `input_path`, `csv_options`, `primary_key`, `hashing.business_key_fields`, `provider`, `entity_name`.
+- Для сухого прогона использовать `--dry-run`; для уменьшения выборки — `--limit`.

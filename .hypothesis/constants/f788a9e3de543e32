@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\clients\chembl\factories.py
+# hypothesis_version: 6.140.3
+
+[1.0, 10.0, 'chembl']

@@ -1,0 +1,25 @@
+> Scope:
+> - USE WHEN creating or editing Python; enforce ruff/black, isort, mypy --strict, type-safe public APIs
+> - Use when editing files matching: `src/**/*.py`, `tests/**/*.py`
+# FORMAT
+- Format with ruff format (or black with identical settings); line length 100; Python 3.10+.
+- isort ordering: stdlib, third-party, first-party; no wildcard imports.
+- Pre-commit and CI enforce formatting and lint.
+
+# TYPES
+- Public APIs fully annotated; `mypy --strict` passes without `Any` unless justified.
+- Prefer composition over inheritance.
+
+# PROHIBITED
+- Wildcard imports; magic numbers; global mutable state; function calls in defaults.
+
+# SNIPPETS
+```python
+DEFAULT_BATCH_SIZE = 1000
+
+def process_batch(items: list[str], batch_size: int = DEFAULT_BATCH_SIZE) -> list[str]:
+    return items[:batch_size]
+```
+
+# REFERENCE
+See [docs/styleguide/01-python-code-style.md](../../docs/styleguide/01-python-code-style.md) for detailed documentation.

@@ -8,9 +8,9 @@ from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
-from bioetl.core.provider_registry import get_provider
-from bioetl.core.providers import ProviderDefinition, ProviderId
+from bioetl.infrastructure.files.csv_record_source import CsvRecordSourceImpl, IdListRecordSourceImpl
+from bioetl.domain.provider_registry import get_provider
+from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
@@ -107,7 +107,7 @@ class PipelineContainer:
         if mode == "csv":
             if path is None:
                 raise ValueError("input_path is required for CSV mode")
-            return CsvRecordSource(
+            return CsvRecordSourceImpl(
                 input_path=Path(path),
                 csv_options=self.config.csv_options,
                 limit=limit,
@@ -121,7 +121,7 @@ class PipelineContainer:
             source_config = self._resolve_provider_config(definition)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
-            return IdListRecordSource(
+            return IdListRecordSourceImpl(
                 input_path=Path(path),
                 id_column=id_column,
                 csv_options=self.config.csv_options,

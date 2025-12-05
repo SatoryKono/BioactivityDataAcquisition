@@ -1,31 +1,18 @@
 ---
-trigger: model_decision
 description: USE WHEN writing files or serializing data; require stable sorting, UTC, canonical JSON, atomic writes, meta.yaml
 globs: ["src/**/*.py", "data/**/*.csv", "data/**/*.json", "docs/**/*.md"]
+alwaysApply: false
 ---
 
-# Deterministic I/O
-
-## Determinism
-
+# DETERMINISM
 - Sort rows by business keys with stable sort; preserve schema-defined column order.
 - Timestamps in UTC ISO-8601 only.
 - JSON with sorted keys; CSV preserves schema order.
 - All writes use temp → fsync → atomic rename.
 
-## QC Sidecar
-
+# QC SIDECAR
 - For each output, write `*.meta.yaml` with checksums, row_count, pipeline_version, git_commit, generated_at_utc.
 - Business keys explicit; use BLAKE2 for composite key/hash derivations.
 
-## Example
-
-```python
-tmp = path.with_suffix(".tmp")
-tmp.write_text(payload, encoding="utf-8")
-os.replace(tmp, path)
-```
-
-## Reference
-
-See `docs/qc/00-qc-artifacts-overview.md` for detailed documentation.
+# REFERENCE
+See [docs/styleguide/04-deterministic-io.md](../../docs/styleguide/04-deterministic-io.md) for detailed documentation.

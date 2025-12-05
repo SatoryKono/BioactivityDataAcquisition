@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionService
-from bioetl.core.provider_registry import (
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     get_provider,
     register_provider,
 )
-from bioetl.core.providers import (
+from bioetl.domain.providers import (
     ProviderComponents,
     ProviderDefinition,
     ProviderId,
@@ -22,7 +22,7 @@ from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 class ChemblProviderComponents(
-    ProviderComponents[ChemblSourceConfig, ChemblDataClientABC, ChemblExtractionService]
+    ProviderComponents[ChemblSourceConfig, ChemblDataClientABC, ChemblExtractionServiceImpl]
 ):
     """Factory set for building ChEMBL provider components."""
 
@@ -31,7 +31,7 @@ class ChemblProviderComponents(
 
     def create_extraction_service(
         self, client: ChemblDataClientABC, config: ChemblSourceConfig
-    ) -> ChemblExtractionService:
+    ) -> ChemblExtractionServiceImpl:
         return create_extraction_service(config, client=client)
 
 

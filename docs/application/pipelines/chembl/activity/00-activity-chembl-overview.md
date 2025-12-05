@@ -1,28 +1,21 @@
 # 00 Activity Chembl Overview
 
 ## Pipeline
-
-**ChemblActivityPipeline** (`src/bioetl/application/pipelines/chembl/activity/run.py`) наследует `ChemblPipelineBase` и реализует поток ETL для сущности Activity.
+- Используется универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) с базой `ChemblPipelineBase`.
+- Схема и контракт: `domain/schemas/chembl/activity.py`.
 
 ## Компоненты
-
-- `extract_activity` (`src/bioetl/application/pipelines/chembl/activity/extract.py`) — orchestration точки входа extract-стадии.
-- `ChemblExtractionService` (`src/bioetl/domain/services/chembl/extraction_service.py`) — загрузка сырых активностей из API или CSV.
-- `ChemblResponseParser` (`src/bioetl/domain/services/chembl/response_parser.py`) — разбор и стандартизация ответов ChEMBL перед нормализацией.
-- `normalize_fields` (`NormalizerMixin` в `src/bioetl/application/pipelines/chembl/base.py`) — финальное приведение типов и очистка строковых/числовых полей.
-- `HashService` (`src/bioetl/domain/services/hashing.py`) — расчет `hash_business_key` и `hash_row` для детерминированной дедупликации.
-- `UnifiedOutputWriter` (`src/bioetl/infrastructure/writers/unified_output_writer.py`) — атомарная запись итоговых таблиц и побочных артефактов.
+- `ChemblExtractorImpl` — API/CSV/ID-list режимы через `input_mode`.
+- `ChemblTransformerImpl` — приводит к `activity`-схеме, убирает строки с null в обязательных столбцах.
+- Post-transform: `HashColumnsTransformer`, `IndexColumnTransformer`, `DatabaseVersionTransformer`, `FulldateTransformer`.
+- `ValidationService` + Pandera-схема `chembl.activity`.
+- `UnifiedOutputWriter` — стабильная сортировка, атомарная запись `<output>/activity.csv`, `meta.yaml`.
 
 ## Особенности
-
-- **CSV input**: explicit control via `input_mode` (`csv` for full dataset, `id_only` for ID lists) and `input_path`; `csv_options` configures delimiter/header without column heuristics.
-- **Хеширование**: хеши рассчитываются после нормализации; набор полей для бизнес-ключа задается в `hashing.business_key_fields`, что обеспечивает воспроизводимое устранение дублей.
+- `primary_key`: берётся из `PipelineConfig.primary_key` или `pipeline.primary_key`, по умолчанию `activity_id`.
+- `input_mode`: `api` (ChEMBL), `csv` (полный датасет), `id_only` (список ID → дозагрузка через API) с `csv_options`.
+- Хеши рассчитываются на нормализованных данных; ключи — `hashing.business_key_fields`.
 
 ## Конфигурация
-
-Файл: `configs/pipelines/chembl/activity.yaml`
-Наследует: `configs/profiles/chembl_default.yaml`
-
-## Зависимости
-
-Опирается на базовые компоненты инфраструктуры: `UnifiedAPIClient`, `ConfigResolver`, `UnifiedLogger`.
+- `configs/pipelines/chembl/activity.yaml` (совместно с `configs/profiles/chembl_default.yaml`).
+- Рекомендация: для smoke → `--profile dev --limit 100 --dry-run`; для прод — полный запуск без `--dry-run`.

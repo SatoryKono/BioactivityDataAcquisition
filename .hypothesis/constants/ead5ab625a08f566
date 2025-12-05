@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\config_loader.py
+# hypothesis_version: 6.140.3
+
+[10.0, 30.0, '.', 'ConfigError', 'UnknownProviderError', 'api_base_url', 'auto_detect', 'base_url', 'batch_size', 'chembl', 'client', 'configs', 'default', 'endpoint', 'entity', 'entity_name', 'extends', 'id', 'input_mode', 'input_path', 'load_pipeline_config', 'max_retries', 'max_url_length', 'output_path', 'pipelines', 'profiles', 'provider', 'provider_config', 'r', 'rate_limit', 'rate_limit_per_sec', 'sources', 'storage', 'timeout', 'timeout_sec', 'unknown', 'utf-8']

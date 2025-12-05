@@ -1,8 +1,8 @@
-from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParser
+from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParserImpl
 
 
 def test_parse_activities():
-    parser = ChemblResponseParser()
+    parser = ChemblResponseParserImpl()
     response = {
         "activities": [{"id": 1}, {"id": 2}],
         "page_meta": {"limit": 20}
@@ -13,14 +13,14 @@ def test_parse_activities():
 
 
 def test_parse_empty():
-    parser = ChemblResponseParser()
+    parser = ChemblResponseParserImpl()
     response = {"page_meta": {}}
     records = parser.parse(response)
     assert records == []
 
 
 def test_extract_metadata():
-    parser = ChemblResponseParser()
+    parser = ChemblResponseParserImpl()
     response = {"page_meta": {"offset": 10}}
     meta = parser.extract_metadata(response)
     assert meta["offset"] == 10

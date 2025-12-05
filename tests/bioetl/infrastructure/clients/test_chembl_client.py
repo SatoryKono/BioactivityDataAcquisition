@@ -7,10 +7,10 @@ from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
 from bioetl.infrastructure.clients.chembl.request_builder import (
-    ChemblRequestBuilder,
+    ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
+    ChemblResponseParserImpl,
 )
 from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
@@ -19,8 +19,8 @@ from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 @pytest.fixture
 def mock_components():
     return {
-        "request_builder": MagicMock(spec=ChemblRequestBuilder),
-        "response_parser": MagicMock(spec=ChemblResponseParser),
+        "request_builder": MagicMock(spec=ChemblRequestBuilderImpl),
+        "response_parser": MagicMock(spec=ChemblResponseParserImpl),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
         "http_middleware": MagicMock(spec=HttpClientMiddleware),
     }

@@ -12,17 +12,17 @@ from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
 from bioetl.infrastructure.clients.chembl.request_builder import (
-    ChemblRequestBuilder,
+    ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
+    ChemblResponseParserImpl,
 )
 
 
 @pytest.fixture(name="mock_request_builder")
 def fixture_request_builder():
-    """Mock ChemblRequestBuilder."""
-    builder = Mock(spec=ChemblRequestBuilder)
+    """Mock ChemblRequestBuilderImpl."""
+    builder = Mock(spec=ChemblRequestBuilderImpl)
     builder.for_endpoint.return_value = builder
     builder.build.return_value = "http://test-url"
     return builder
@@ -30,8 +30,8 @@ def fixture_request_builder():
 
 @pytest.fixture(name="mock_response_parser")
 def fixture_response_parser():
-    """Mock ChemblResponseParser."""
-    return Mock(spec=ChemblResponseParser)
+    """Mock ChemblResponseParserImpl."""
+    return Mock(spec=ChemblResponseParserImpl)
 
 
 @pytest.fixture(name="mock_rate_limiter")

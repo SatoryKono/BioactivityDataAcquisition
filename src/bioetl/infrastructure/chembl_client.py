@@ -1,7 +1,7 @@
 """Factories for constructing ChEMBL client stack."""
 from __future__ import annotations
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionService
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
@@ -20,7 +20,7 @@ def create_client(config: ChemblSourceConfig) -> ChemblDataClientABC:
 
 def create_extraction_service(
     config: ChemblSourceConfig, *, client: ChemblDataClientABC | None = None
-) -> ChemblExtractionService:
+) -> ChemblExtractionServiceImpl:
     """Create extraction service using provided or default ChEMBL client."""
 
     resolved_client = client or create_client(config)

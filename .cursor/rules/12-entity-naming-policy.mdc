@@ -42,16 +42,16 @@ globs: ["src/**/*.py", "tests/**/*.py", "configs/**/*.yaml"]
 
 ## Pipelines
 
-- Path: `src/bioetl/pipelines/<provider>/<entity>/<stage>.py`
+- Path: `src/bioetl/application/pipelines/<provider>/<entity>/<stage>.py`
 - Provider: `^[a-z0-9_]+$`
 - Entity: `^[a-z0-9_]+$`
-- Stage: `extract`, `transform`, `validate`, `normalize`, `write`, `run`, `errors`, `descriptor`, `metrics`, `backfill`, `cleanup`
+- Stage: `extract`, `transform`, `validate`, `normalize`, `export`, `write`, `run`, `errors`, `descriptor`, `metrics`, `backfill`, `cleanup`
 - Pipeline identifiers: `{entity}_{source}` (lowercase)
 
 ## Tests
 
 - Unit: `tests/bioetl/.../test_<module>.py`
-- Pipeline: `tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py`
+- Pipeline: `tests/bioetl/application/pipelines/<provider>/<entity>/test_<stage>.py`
 - Integration: `tests/integration/` or suffix `_integration.py`
 - Golden: `tests/golden/test_<area>_golden.py`
 
@@ -67,8 +67,8 @@ Valid:
 - Class: `ChemblDataClient`, `DataClientProtocol`, `ChemblDataClientHTTPImpl`
 - Function: `fetch_one()`, `iter_pages()`, `default_chembl_data_client()`
 - Module: `data_client.py`, `factories.py`
-- Pipeline: `src/bioetl/pipelines/chembl/activity/extract.py`
-- Test: `tests/bioetl/pipelines/chembl/activity/test_extract.py`
+- Pipeline: `src/bioetl/application/pipelines/chembl/activity/extract.py`
+- Test: `tests/bioetl/application/pipelines/chembl/activity/test_extract.py`
 
 Invalid:
 - Class: `chemblDataClient`, `Data_Client`

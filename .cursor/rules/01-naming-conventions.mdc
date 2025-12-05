@@ -1,39 +1,32 @@
 ---
-trigger: model_decision
 description: USE WHEN writing or modifying documentation files or file names; enforce lowercase-hyphen names and NN- sequencing
 globs: ["docs/**/*.md", "**/INDEX.md", "**/README.md"]
+alwaysApply: false
 ---
 
-# Naming Conventions
-
-## Goal
+# GOAL
 
 Keep doc navigation predictable.
 
-## Rules
+# RULES
 
-- Filenames in English, lowercase, words separated by hyphens (`-`). **Underscores (`_`) MUST NOT be used** in documentation filenames.
+- Filenames in English, lowercase, words separated by hyphens.
 - Sequenced docs use two-digit prefix `NN-` (e.g., `01-overview.md`).
-- Pipeline docs format: `NN-<entity>-<provider>-<topic>.md` (e.g., `09-document-chembl-extraction.md`).
-- H1 heading MUST duplicate filename in Title Case.
-- Internal anchors from `##` headings in kebab-case.
-- Auto-generated sections MUST be marked: `<!-- generated -->`.
-- Landing-page naming: `INDEX.md` for sections, `README.md` for subdirs.
+- Pipeline docs format: `NN-<entity>-<provider>-<topic>.md`.
+- Landing-page naming details live in `docs-landing-pages-index-readme.mdc`.
 - Canonical identifiers: code/configs use `snake_case`, docs filenames use `kebab-case`.
 
-## Examples
+# EXAMPLES
 
 Valid:
-- `docs/02-pipelines/00-pipeline-base.md`
-- `docs/02-pipelines/chembl/activity/01-activity-chembl-extract.md`
-- `docs/INDEX.md`
+- `docs/application/pipelines/00-pipeline-base.md`
+- `docs/application/pipelines/chembl/activity/01-activity-chembl-extract.md`
 
 Invalid:
-- `Docs/Overview.MD` (uppercase)
-- `etlOverview.md` (camelCase)
-- `01_overview.md` (underscores instead of hyphens)
-- `docs/pipelines/chembl/activity/extraction.md` (missing NN- prefix)
+- `Docs/Overview.MD`
+- `etlOverview.md`
+- `01_overview.md`
 
-## Reference
+# REFERENCE
 
-See `docs/00-styleguide/00-naming-conventions.md` for detailed documentation.
+See `docs/FILE_POLICY.md` and `docs/project/00-rules-summary.md`.

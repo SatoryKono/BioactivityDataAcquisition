@@ -8,7 +8,7 @@ import yaml
 from pydantic import ValidationError
 
 from bioetl.domain.transform.merge import deep_merge
-from bioetl.schemas.pipeline_config_schema import PipelineConfig
+from bioetl.infrastructure.config.pipeline_config_schema import PipelineConfig
 
 CONFIGS_ROOT = Path("configs")
 PIPELINES_ROOT = CONFIGS_ROOT / "pipelines"

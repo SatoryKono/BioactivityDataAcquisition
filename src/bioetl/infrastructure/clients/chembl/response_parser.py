@@ -2,7 +2,7 @@ from typing import Any
 from bioetl.infrastructure.clients.base.contracts import ResponseParserABC
 
 
-class ChemblResponseParser(ResponseParserABC):
+class ChemblResponseParserImpl(ResponseParserABC):
     """
     Парсер ответов ChEMBL API.
     """

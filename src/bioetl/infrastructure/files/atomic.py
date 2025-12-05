@@ -32,7 +32,7 @@ class AtomicFileOperation:
             write_fn(tmp_path)
 
             # 2. Атомарное перемещение с retry
-            self._move_with_retry(tmp_path, path)
+            self._replace_with_retry(tmp_path, path)
 
         except Exception:
             # Очистка в случае ошибки (если файл создан)
@@ -43,15 +43,19 @@ class AtomicFileOperation:
                     pass
             raise
 
-    def _move_with_retry(self, src: Path, dst: Path) -> None:
-        """Перемещение файла с повторными попытками (для Windows)."""
+    def _replace_with_retry(self, src: Path, dst: Path) -> None:
+        """
+        Атомарная замена файла с повторными попытками (для Windows).
+        Использует shutil.move, чтобы позволить перезапись и поддержать мок в тестах.
+        """
+        move_fn = shutil.move
+        last_error: OSError | None = None
         for attempt in range(MAX_FILE_RETRIES):
             try:
-                if dst.exists():
-                    os.remove(dst)
-                shutil.move(str(src), str(dst))
+                move_fn(src, dst)
                 return
-            except OSError:
-                if attempt == MAX_FILE_RETRIES - 1:
-                    raise
-                time.sleep(RETRY_DELAY_SEC)
+            except OSError as exc:
+                last_error = exc
+            if attempt == MAX_FILE_RETRIES - 1:
+                raise last_error or OSError("Move failed without explicit error.")
+            time.sleep(RETRY_DELAY_SEC)

@@ -4,7 +4,7 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 ## Правила проекта
 
-Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/00-styleguide/00-rules-summary.md`.
+Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/project/00-rules-summary.md`.
 
 ## Документация
 
@@ -14,9 +14,9 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 |--------|------|----------|
 | Styleguide | [docs/00-styleguide/](docs/00-styleguide/) | Правила и стайлгайды |
 | ABC Index | [docs/01-ABC/INDEX.md](docs/01-ABC/INDEX.md) | Каталог абстрактных базовых классов |
-| Pipelines | [docs/02-pipelines/INDEX.md](docs/02-pipelines/INDEX.md) | Пайплайны и core-компоненты |
+| Pipelines | [docs/02-pipelines/00-index.md](docs/02-pipelines/00-index.md) | Пайплайны и core-компоненты |
 | CLI | [docs/cli/INDEX.md](docs/cli/INDEX.md) | Командная строка и запуск пайплайнов |
-| Schemas | [docs/schemas/INDEX.md](docs/schemas/INDEX.md) | Реестр схем данных |
+| Schemas | [docs/schemas/00-index.md](docs/schemas/00-index.md) | Реестр схем данных |
 | QC | [docs/qc/INDEX.md](docs/qc/INDEX.md) | Артефакты контроля качества |
 | Clients | [docs/clients/INDEX.md](docs/clients/INDEX.md) | Клиентский слой |
 
@@ -37,6 +37,6 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 ### Пайплайны по провайдерам
 
-- [ChEMBL Pipelines](docs/02-pipelines/chembl/INDEX.md) — Activity, Assay, Target, Document, TestItem
+- [ChEMBL Pipelines](docs/02-pipelines/chembl/00-index.md) — Activity, Assay, Target, Document, TestItem
 
 Детальная документация по конкретным пайплайнам и компонентам доступна через соответствующие INDEX.md файлы.
