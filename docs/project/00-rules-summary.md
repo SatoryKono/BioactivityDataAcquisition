@@ -4,6 +4,7 @@
 - Hexagonal (Ports & Adapters) + DDD.
 - Слои: domain, application, infrastructure, interfaces.
 - Пайплайны: `src/bioetl/application/pipelines/<provider>/<entity>/`.
+- Документация: kebab-case с NN- префиксом, синхронизирована с кодом; пайплайны описываются в `docs/application/pipelines/<provider>/<entity>/`.
 
 ## 2. Именование
 - Классы: `PascalCase` + суффикс (Factory, Client, Impl, ABC, etc.).
@@ -16,6 +17,7 @@
 - Pydantic для конфигов и JSON.
 - Валидация перед записью.
 - Детерминизм: сортировка, атомарная запись, чек-суммы.
+- `input_mode`/`input_path`/`csv_options` в конфиге ChEMBL выбирают источник данных (api|csv|id_only).
 
 ## 4. Код и Качество
 - PEP8, Black, Ruff, Mypy (strict).
