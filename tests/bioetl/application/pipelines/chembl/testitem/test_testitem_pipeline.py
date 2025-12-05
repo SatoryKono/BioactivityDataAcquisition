@@ -36,6 +36,7 @@ def pipeline():  # pylint: disable=redefined-outer-name
         validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
+        hash_service=MagicMock(),
     )
 
 

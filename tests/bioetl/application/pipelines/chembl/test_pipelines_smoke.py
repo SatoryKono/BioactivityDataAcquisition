@@ -43,6 +43,7 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         validation_service=common_dependencies["validation_service"],
         output_writer=common_dependencies["output_writer"],
         extraction_service=common_dependencies["extraction_service"],
+        hash_service=MagicMock(),
     )
     
     assert pipeline.ID_COLUMN == id_col
