@@ -11,7 +11,7 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.infrastructure.files.csv_record_source import CsvRecordSourceImpl, IdListRecordSourceImpl
 from bioetl.domain.provider_registry import get_provider
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
+from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
@@ -82,11 +82,17 @@ class PipelineContainer:
 
     def get_normalization_service(self) -> NormalizationService:
         """Create normalization service for the configured provider."""
-        if self._provider_id == ProviderId.CHEMBL:
-            return ChemblNormalizationService(self.config)
-        raise ValueError(
-            f"Unsupported provider for normalization: {self._provider_id.value}"
-        )
+
+        definition = self._get_provider_definition()
+        source_config = self._resolve_provider_config(definition)
+        components = definition.components
+
+        factory = getattr(components, "create_normalization_service", None)
+        if factory is None:
+            raise ValueError(
+                f"Unsupported provider for normalization: {self._provider_id.value}"
+            )
+        return factory(source_config, pipeline_config=self.config)
 
     def get_record_source(
         self,
@@ -141,6 +147,7 @@ class PipelineContainer:
             extraction_service=extraction_service,
             entity=self.config.entity_name,
             filters=filters,
+            chunk_size=self.config.batch_size,
         )
 
     def get_extraction_service(self) -> Any:

@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import cast
 
 import pandas as pd
@@ -11,11 +12,25 @@ class _DummyExtractionService:
         self.called_with: dict[str, str] | None = None
 
     def extract_all(self, entity: str, **filters: str) -> pd.DataFrame:  # type: ignore[override]
-        self.called_with = {"entity": entity, **filters}
-        return pd.DataFrame([
+        df_chunks = list(self.iter_extract(entity, **filters))
+        if not df_chunks:
+            return pd.DataFrame()
+        return pd.concat(df_chunks, ignore_index=True)
+
+    def iter_extract(
+        self, entity: str, *, chunk_size: int | None = None, **filters: str
+    ) -> Iterable[pd.DataFrame]:  # type: ignore[override]
+        self.called_with = {"entity": entity, **filters, "chunk_size": chunk_size}
+        records = [
             {"id": "1", "name": "alpha"},
             {"id": "2", "name": "beta"},
-        ])
+        ]
+        if chunk_size is None or chunk_size <= 0:
+            yield pd.DataFrame(records)
+            return
+
+        for start in range(0, len(records), chunk_size):
+            yield pd.DataFrame(records[start : start + chunk_size])
 
     def get_release_version(self) -> str:  # pragma: no cover
         return "v1"
@@ -55,7 +70,11 @@ def test_api_record_source_returns_serialized_records() -> None:
 
     records = list(source.iter_records())
 
-    assert extraction.called_with == {"entity": "activity", "limit": 1}
+    assert extraction.called_with == {
+        "entity": "activity",
+        "limit": 1,
+        "chunk_size": None,
+    }
     assert len(records) == 1
     expected_df = pd.DataFrame(
         [

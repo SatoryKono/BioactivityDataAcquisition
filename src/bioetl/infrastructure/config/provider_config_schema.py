@@ -3,11 +3,13 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, PositiveFloat, PositiveInt
+from pydantic import AnyHttpUrl, ConfigDict, Field, PositiveFloat, PositiveInt
 from pydantic.types import NonNegativeInt
 
+from bioetl.domain.providers import BaseProviderConfig as ProviderConfigBase
 
-class BaseProviderConfig(BaseModel):
+
+class BaseProviderConfig(ProviderConfigBase):
     """Базовая строгая конфигурация провайдера."""
 
     provider: Literal["chembl", "pubchem", "uniprot", "dummy"]

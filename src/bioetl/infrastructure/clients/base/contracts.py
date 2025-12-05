@@ -101,11 +101,11 @@ class CacheABC(ABC, Generic[T]):
 
     @abstractmethod
     def get(self, key: str) -> T | None:
-        """Получает значение из кэша."""
+        """Получает значение из кэша или ``None``, если его нет или оно истекло."""
 
     @abstractmethod
     def set(self, key: str, value: T, ttl: int | None = None) -> None:
-        """Сохраняет значение в кэш."""
+        """Сохраняет значение в кэш с опциональным TTL в секундах."""
 
     @abstractmethod
     def invalidate(self, key: str) -> None:

@@ -4,6 +4,7 @@ ChEMBL Extraction Service.
 Orchestrates data extraction from ChEMBL API.
 Application-layer service that coordinates infrastructure components.
 """
+from collections.abc import Iterable
 from typing import Any, Type
 
 import pandas as pd
@@ -107,29 +108,34 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         Returns:
             DataFrame with extracted records
         """
-        records: list[dict[str, Any]] = []
-        offset = 0
-        model_cls = self._get_model_cls(entity)
+        chunks = list(self.iter_extract(entity, **filters))
+        if not chunks:
+            return pd.DataFrame()
+        return pd.concat(chunks, ignore_index=True)
 
-        # Check for explicit limit in filters
-        total_limit = filters.pop("limit", None)
+    def iter_extract(
+        self, entity: str, *, chunk_size: int | None = None, **filters: Any
+    ) -> Iterable[pd.DataFrame]:
+        """Stream records for an entity respecting pagination and limits."""
+        offset = int(filters.pop("offset", 0))
+        remaining = filters.pop("limit", None)
+        model_cls = self._get_model_cls(entity)
+        page_size = chunk_size or self.batch_size
 
         while True:
-            filters["offset"] = offset
+            if remaining is not None and remaining <= 0:
+                break
 
-            # Determine current batch size
-            current_batch_size = self.batch_size
-            if total_limit is not None:
-                remaining = total_limit - len(records)
-                if remaining <= 0:
-                    break
-                current_batch_size = min(self.batch_size, remaining)
+            current_limit = page_size if remaining is None else min(page_size, remaining)
+            request_filters = {
+                **filters,
+                "offset": offset,
+                "limit": current_limit,
+            }
 
-            filters["limit"] = current_batch_size
-
-            response = self._request_entity(entity, **filters)
-
+            response = self._request_entity(entity, **request_filters)
             batch_records = self.parser.parse(response)
+
             if not batch_records:
                 break
 
@@ -137,17 +143,17 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
                 model_cls(**batch_record).model_dump()
                 for batch_record in batch_records
             ]
-            records.extend(serialized_records)
+            if remaining is not None and len(serialized_records) > remaining:
+                serialized_records = serialized_records[:remaining]
+            if serialized_records:
+                yield pd.DataFrame(serialized_records)
 
-            # Check for total limit reach
-            if total_limit is not None and len(records) >= total_limit:
-                records = records[:total_limit]
-                break
+            if remaining is not None:
+                remaining -= len(serialized_records)
+                if remaining <= 0:
+                    break
 
-            # Check for next page
             if not self.paginator.has_more(response):
                 break
 
-            offset += current_batch_size
-
-        return pd.DataFrame(records)
+            offset += current_limit

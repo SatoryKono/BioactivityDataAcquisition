@@ -53,7 +53,7 @@ def test_extract_stage_wraps_client_error(caplog: pytest.LogCaptureFixture, tmp_
     )
 
     extraction_service = MagicMock(spec=ExtractionServiceABC)
-    extraction_service.extract_all.side_effect = ClientNetworkError(
+    extraction_service.iter_extract.side_effect = ClientNetworkError(
         provider="chembl", endpoint="/status", message="timeout"
     )
 

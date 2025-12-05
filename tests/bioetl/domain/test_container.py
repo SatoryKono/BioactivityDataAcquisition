@@ -17,7 +17,11 @@ from bioetl.application.pipelines.hooks_impl import (  # noqa: E402
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
+<<<<<<<< HEAD:tests/bioetl/application/test_container.py
 from bioetl.domain.provider_registry import (  # noqa: E402
+========
+from bioetl.domain.provider_registry import (
+>>>>>>>> ea01481662bedd3b088a017171e4ca1d9aa4a38d:tests/bioetl/domain/test_container.py
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
     list_providers,
@@ -25,11 +29,15 @@ from bioetl.domain.provider_registry import (  # noqa: E402
     reset_provider_registry,
     restore_provider_registry,
 )
+<<<<<<<< HEAD:tests/bioetl/application/test_container.py
 from bioetl.domain.providers import (
     ProviderComponents,
     ProviderDefinition,
     ProviderId,
 )
+========
+from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
+>>>>>>>> ea01481662bedd3b088a017171e4ca1d9aa4a38d:tests/bioetl/domain/test_container.py
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.config.models import (
