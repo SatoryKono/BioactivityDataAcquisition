@@ -7,7 +7,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.domain.errors import ClientNetworkError, ClientRateLimitError, ClientResponseError
+from bioetl.domain.errors import (
+    ClientNetworkError,
+    ClientRateLimitError,
+    ClientResponseError,
+)
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.infrastructure.config.models import ClientConfig
@@ -40,7 +44,9 @@ def base_client():
     return client
 
 
-def _response(status_code: int = 200, headers: dict[str, str] | None = None) -> MagicMock:
+def _response(
+    status_code: int = 200, headers: dict[str, str] | None = None
+) -> MagicMock:
     resp = MagicMock()
     resp.status_code = status_code
     resp.headers = headers or {}
@@ -54,7 +60,11 @@ def test_retry_on_timeout_then_success(monkeypatch, base_client):
     monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
     monkeypatch.setattr("time.sleep", fake_time.sleep)
 
-    base_client.request.side_effect = [TimeoutError("t1"), TimeoutError("t2"), _response(200)]
+    base_client.request.side_effect = [
+        TimeoutError("t1"),
+        TimeoutError("t2"),
+        _response(200),
+    ]
 
     middleware = HttpClientMiddleware(
         provider="chembl",
@@ -115,8 +125,12 @@ def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
     result = middleware.request("GET", "http://example.com")
 
     assert result.status_code == 200
-    retry_record = next(rec for rec in caplog.records if rec.message == "Retrying HTTP request")
-    success_record = next(rec for rec in caplog.records if rec.message == "HTTP request succeeded")
+    retry_record = next(
+        rec for rec in caplog.records if rec.message == "Retrying HTTP request"
+    )
+    success_record = next(
+        rec for rec in caplog.records if rec.message == "HTTP request succeeded"
+    )
 
     assert retry_record.delay == pytest.approx(0.1)
     assert retry_record.total_retry_delay == pytest.approx(0.1)
@@ -160,7 +174,8 @@ def test_retry_after_http_date(monkeypatch, base_client):
 
     retry_at = datetime.now(timezone.utc) + timedelta(seconds=7)
     retry_response = _response(
-        503, headers={"Retry-After": retry_at.strftime("%a, %d %b %Y %H:%M:%S GMT")}
+        503,
+        headers={"Retry-After": retry_at.strftime("%a, %d %b %Y %H:%M:%S GMT")},
     )
     base_client.request.side_effect = [retry_response, _response(200)]
 
@@ -174,7 +189,10 @@ def test_retry_after_http_date(monkeypatch, base_client):
     expected_delay = middleware._retry_after_seconds(  # noqa: SLF001
         retry_response,
         ClientResponseError(
-            provider="chembl", endpoint="http://example.com/service", message="", status_code=503
+            provider="chembl",
+            endpoint="http://example.com/service",
+            message="",
+            status_code=503,
         ),
     )
 
