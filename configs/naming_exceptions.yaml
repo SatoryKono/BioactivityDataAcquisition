@@ -182,7 +182,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/config/pipeline_config_schema.py
+  - path: src/bioetl/application/config/pipeline_config_schema.py
     rule_id: CLASS_SUFFIX
     reason: "Options/Config object"
     owner: infra
@@ -381,7 +381,7 @@ exceptions:
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/base/contracts.py
+  - path: src/bioetl/domain/clients/base/contracts.py
     rule_id: FUNC_PREFIX
     reason: "Client contract methods (metadata, with_pagination, extract_metadata, acquire, wait_if_needed, max_attempts, should_retry, set, invalidate, clear, refresh)"
     owner: infra
@@ -417,7 +417,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/chembl/contracts.py
+  - path: src/bioetl/domain/clients/chembl/contracts.py
     rule_id: FUNC_PREFIX
     reason: "ChEMBL specific requests (request_activity, etc)"
     owner: chembl
@@ -447,7 +447,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/config/pipeline_config_schema.py
+  - path: src/bioetl/application/config/pipeline_config_schema.py
     rule_id: FUNC_PREFIX
     reason: "Config property (entity_name)"
     owner: infra

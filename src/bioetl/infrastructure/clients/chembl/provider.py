@@ -10,12 +10,13 @@ from bioetl.domain.provider_registry import (
     register_provider,
 )
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 class ChemblProviderComponents(

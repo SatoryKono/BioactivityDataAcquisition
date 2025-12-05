@@ -9,7 +9,7 @@ import pytest
 from bioetl.application.services.chembl_extraction import (
     ChemblExtractionServiceImpl,
 )
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 
 
 @pytest.fixture

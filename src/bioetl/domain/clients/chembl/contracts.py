@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any
 
-from bioetl.infrastructure.clients.base.contracts import SourceClientABC
+from bioetl.domain.clients.base.contracts import SourceClientABC
 
 
 class ChemblDataClientABC(SourceClientABC):

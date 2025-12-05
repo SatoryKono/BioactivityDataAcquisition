@@ -1,7 +1,7 @@
 import time
 from enum import Enum
 
-from bioetl.infrastructure.clients.base.contracts import RetryPolicyABC
+from bioetl.domain.clients.base.contracts import RetryPolicyABC
 
 
 class CircuitState(Enum):

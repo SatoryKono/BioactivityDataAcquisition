@@ -24,7 +24,7 @@ from bioetl.domain.transform.transformers import (
 )
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (

@@ -5,8 +5,8 @@ from unittest.mock import Mock
 
 import pytest
 
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,

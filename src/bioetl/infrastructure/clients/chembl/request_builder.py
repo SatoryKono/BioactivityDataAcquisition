@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from bioetl.infrastructure.clients.base.contracts import RequestBuilderABC
+from bioetl.domain.clients.base.contracts import RequestBuilderABC
 
 
 class ChemblRequestBuilderImpl(RequestBuilderABC):

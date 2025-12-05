@@ -1,10 +1,10 @@
 # 00 Clients Overview
 
 ## Архитектурный паттерн
-Текущие клиенты строятся по схеме ABC → Default Factory → Impl и используют `UnifiedAPIClient` как транспорт с middleware (retry/backoff, rate limit, circuit breaker). Регистры ABC находятся в `src/bioetl/infrastructure/clients/base/abc_registry.yaml` и `abc_impls.yaml`.
+Текущие клиенты строятся по схеме ABC → Default Factory → Impl и используют `UnifiedAPIClient` как транспорт с middleware (retry/backoff, rate limit, circuit breaker). Регистры ABC находятся в `src/bioetl/infrastructure/clients/base/abc_registry.yaml` и `abc_impls.yaml`, сами контракты клиентов — в `src/bioetl/domain/clients/...`.
 
 ## ChEMBL стек (актуальный)
-- **ChemblDataClientABC** — контракт (`src/bioetl/infrastructure/clients/chembl/contracts.py`).
+- **ChemblDataClientABC** — контракт (`src/bioetl/domain/clients/chembl/contracts.py`).
 - **ChemblDataClientHTTPImpl** — реализация на HTTP (`impl/http_client.py`), использует `UnifiedAPIClient` + `RateLimiterABC`.
 - **ChemblRequestBuilderImpl** — сборка URL/фильтров (`request_builder.py`).
 - **ChemblResponseParserImpl** — нормализация ответа (`response_parser.py`).

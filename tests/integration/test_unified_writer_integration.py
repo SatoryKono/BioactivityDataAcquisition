@@ -9,7 +9,7 @@ import pytest
 import yaml
 
 from bioetl.domain.models import RunContext
-from bioetl.infrastructure.config.pipeline_config_schema import DeterminismConfig
+from bioetl.application.config.pipeline_config_schema import DeterminismConfig
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
