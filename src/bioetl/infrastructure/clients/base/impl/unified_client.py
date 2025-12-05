@@ -4,6 +4,7 @@ Unified HTTP Client implementation.
 from __future__ import annotations
 
 from typing import Any
+from uuid import uuid4
 
 import requests
 
@@ -42,6 +43,12 @@ class UnifiedAPIClient:
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         """Выполнить HTTP-запрос с учетом политик."""
+        method_upper = method.upper()
+        if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
+            headers = dict(kwargs.get("headers") or {})
+            headers.setdefault("Idempotency-Key", str(uuid4()))
+            kwargs["headers"] = headers
+
         return self.middleware.request(method, url, **kwargs)
 
     def get(self, url: str, **kwargs: Any) -> Any:

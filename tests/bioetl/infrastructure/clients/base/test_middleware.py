@@ -6,7 +6,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.errors import ClientNetworkError, ClientRateLimitError, ClientResponseError
+from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
+from bioetl.infrastructure.config.models import ClientConfig
 
 
 class _FakeTime:
@@ -187,6 +189,55 @@ def test_server_error_retries_until_give_up(monkeypatch, base_client):
         middleware.request("GET", "http://example.com/500")
 
     assert base_client.request.call_count == 2
+
+
+def test_idempotency_key_reused_across_retries(monkeypatch, base_client):
+    """Idempotency-Key генерируется один раз и повторно используется при ретраях."""
+    fake_time = _FakeTime()
+    monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
+    monkeypatch.setattr("time.sleep", fake_time.sleep)
+
+    base_client.request.side_effect = [
+        TimeoutError("t1"),
+        _response(503),
+        _response(200),
+    ]
+
+    client = UnifiedAPIClient(
+        provider="chembl",
+        config=ClientConfig(max_retries=3, backoff_factor=1.0, timeout=0.1),
+        base_client=base_client,
+    )
+
+    result = client.request("POST", "http://example.com/resource")
+
+    assert result.status_code == 200
+    assert base_client.request.call_count == 3
+
+    sent_keys = [
+        call.kwargs.get("headers", {}).get("Idempotency-Key")
+        for call in base_client.request.call_args_list
+    ]
+    assert all(sent_keys)
+    assert len(set(sent_keys)) == 1
+
+
+def test_get_requests_do_not_add_idempotency_key(base_client):
+    """GET/HEAD запросы не получают автоматический Idempotency-Key."""
+    base_client.request.return_value = _response(200)
+
+    client = UnifiedAPIClient(
+        provider="chembl",
+        config=ClientConfig(),
+        base_client=base_client,
+    )
+
+    client.request("GET", "http://example.com/resource")
+    client.request("HEAD", "http://example.com/resource")
+
+    for call in base_client.request.call_args_list:
+        headers = call.kwargs.get("headers")
+        assert headers is None or "Idempotency-Key" not in headers
 
 
 def test_circuit_breaker_blocks_and_recovers(monkeypatch, base_client):
