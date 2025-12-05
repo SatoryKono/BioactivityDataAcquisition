@@ -4,8 +4,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.config_loader import load_pipeline_config_from_path
-from bioetl.infrastructure.config.models import PipelineConfig
 
 
 class ConfigResolver:

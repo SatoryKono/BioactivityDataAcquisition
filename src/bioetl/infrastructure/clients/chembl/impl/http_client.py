@@ -5,10 +5,10 @@ from __future__ import annotations
 
 from typing import Any, Iterator
 
+from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,

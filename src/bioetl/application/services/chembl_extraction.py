@@ -14,7 +14,7 @@ from bioetl.domain.schemas.chembl.models import (
     ActivityModel,
     ChemblRecordModel,
 )
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,

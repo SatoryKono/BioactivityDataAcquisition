@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
@@ -12,7 +13,6 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
-from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 

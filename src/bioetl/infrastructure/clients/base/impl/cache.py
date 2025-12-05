@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Generic, TypeVar
 
-from bioetl.infrastructure.clients.base.contracts import CacheABC
+from bioetl.domain.clients.base.contracts import CacheABC
 
 T = TypeVar("T")
 

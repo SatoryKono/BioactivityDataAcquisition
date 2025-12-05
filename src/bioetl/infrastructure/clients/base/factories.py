@@ -1,7 +1,7 @@
 import os
 from typing import Any
 
-from bioetl.infrastructure.clients.base.contracts import (
+from bioetl.domain.clients.base.contracts import (
     CacheABC,
     RateLimiterABC,
     RetryPolicyABC,
