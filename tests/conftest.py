@@ -57,13 +57,13 @@ def pytest_configure(config):
         # Hypothesis not available or structure changed, skip patch
         pass
 
-from bioetl.infrastructure.config.models import (
+from bioetl.application.config.pipeline_config_schema import (
     HashingConfig,
     LoggingConfig,
     PipelineConfig,
     StorageConfig,
-    ChemblSourceConfig,
 )
+from bioetl.infrastructure.config.models import ChemblSourceConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 from bioetl.domain.validation.service import ValidationService
