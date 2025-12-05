@@ -10,7 +10,7 @@ import pytest
 
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.application.services.chembl_extraction import ChemblExtractionService
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.infrastructure.config.resolver import ConfigResolver
 
 
@@ -19,7 +19,7 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     """TS-001: full pipeline run writes data and metadata."""
     monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
     monkeypatch.setattr(
-        ChemblExtractionService,
+        ChemblExtractionServiceImpl,
         "get_release_version",
         lambda self: "chembl_integration",
     )

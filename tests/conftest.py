@@ -62,10 +62,10 @@ from bioetl.infrastructure.config.models import (
     LoggingConfig,
     PipelineConfig,
     StorageConfig,
+    ChemblSourceConfig,
 )
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
-from bioetl.schemas.provider_config_schema import ChemblSourceConfig
 from bioetl.domain.validation.service import ValidationService
 
 

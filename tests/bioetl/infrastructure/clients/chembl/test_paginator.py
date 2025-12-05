@@ -1,12 +1,12 @@
 """
-Tests for ChemblPaginator.
+Tests for ChemblPaginatorImpl.
 """
-from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
+from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 
 
 def test_get_items():
     """Test extracting items from response."""
-    paginator = ChemblPaginator()
+    paginator = ChemblPaginatorImpl()
     response = {"activities": [{"id": 1}, {"id": 2}], "page_meta": {}}
     items = paginator.get_items(response)
     assert len(items) == 2
@@ -15,7 +15,7 @@ def test_get_items():
 
 def test_get_next_marker_has_next():
     """Test getting next marker when pages exist."""
-    paginator = ChemblPaginator()
+    paginator = ChemblPaginatorImpl()
     response = {
         "page_meta": {
             "next": "/url?offset=20&limit=20",
@@ -31,7 +31,7 @@ def test_get_next_marker_has_next():
 
 def test_get_next_marker_no_next():
     """Test getting next marker when no more pages."""
-    paginator = ChemblPaginator()
+    paginator = ChemblPaginatorImpl()
     response = {
         "page_meta": {
             "next": None,

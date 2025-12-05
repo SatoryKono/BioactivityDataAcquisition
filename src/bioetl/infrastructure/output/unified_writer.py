@@ -51,11 +51,15 @@ class UnifiedOutputWriter:
         """Основной метод записи."""
         output_path.mkdir(parents=True, exist_ok=True)
 
-        # 1. Сортировка
+        # 1. Валидация колонок (Check if strictly matches order if provided)
+        # Note: Actual schema validation happens in PipelineBase.validate()
+        # Here we ensure output structure and determinism.
         df_prepared = self._apply_column_order(df, column_order)
+        
+        # 2. Сортировка (Determinism)
         df_prepared = self._stable_sort(df_prepared, run_context, column_order)
 
-        # 2. Атомарная запись
+        # 3. Атомарная запись
         data_path = output_path / f"{entity_name}.csv"
 
         # Wrapper to capture inner write result
@@ -72,7 +76,7 @@ class UnifiedOutputWriter:
         if inner_result is None:
             raise RuntimeError("Inner writer did not return result")
 
-        # 3. Вычисление checksum (после записи)
+        # 4. Вычисление checksum (после записи)
         checksum = compute_file_sha256(data_path)
 
         final_result = WriteResult(
@@ -82,11 +86,11 @@ class UnifiedOutputWriter:
             checksum=checksum,
         )
 
-        # 4. Запись метаданных
+        # 5. Запись метаданных
         meta = build_run_metadata(run_context, final_result)
         self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
 
-        # 5. QC-отчеты (placeholder for future implementation)
+        # 6. QC-отчеты (placeholder for future implementation)
         # Previous code had omitted QC generation comment.
 
         return final_result
@@ -128,8 +132,17 @@ class UnifiedOutputWriter:
             return df
 
         df_prepared = df.copy()
-        for col in column_order:
-            if col not in df_prepared.columns:
+        
+        # Check for missing columns that are expected
+        missing = [c for c in column_order if c not in df_prepared.columns]
+        if missing:
+            # We fill missing columns with None, as schema validation should have caught
+            # mandatory ones if they were critical.
+            # If schema has them as Optional, they might be missing in DF if source didn't provide.
+            # However, PipelineBase._enforce_schema ensures columns exist.
+            # This is double safety.
+            for col in missing:
                 df_prepared[col] = None
-
+        
+        # Enforce exact order and content
         return df_prepared[column_order]

@@ -1,15 +1,21 @@
 # 00 Clients Overview
 
-## Паттерн
-Клиенты строятся по схеме: RequestBuilder + HttpBackend + Parser + Paginator, объединённые в доменный сервис извлечения.
+## Архитектурный паттерн
+Текущие клиенты строятся по схеме ABC → Default Factory → Impl и используют `UnifiedAPIClient` как транспорт с middleware (retry/backoff, rate limit, circuit breaker). Регистры ABC находятся в `src/bioetl/infrastructure/clients/base/abc_registry.yaml` и `abc_impls.yaml`.
 
-## Компоненты Chembl
-- **ChemblClient** — реализует BaseClient для ChEMBL, использует UnifiedAPIClient.
-- **ChemblRequestBuilder** — формирует запросы к ChEMBL API с учётом фильтров и релиза.
-- **ChemblResponseParser** — переводит ответы API в структурированные записи.
-- **ChemblPaginator** — управляет постраничной навигацией и лимитами.
-- **RequestsBackend** — HTTP-бэкенд на основе requests или аналога.
-- **ChemblExtractionService** — оборачивает клиента и дескрипторы для пайплайнов.
+## ChEMBL стек (актуальный)
+- **ChemblDataClientABC** — контракт (`src/bioetl/infrastructure/clients/chembl/contracts.py`).
+- **ChemblDataClientHTTPImpl** — реализация на HTTP (`impl/http_client.py`), использует `UnifiedAPIClient` + `RateLimiterABC`.
+- **ChemblRequestBuilderImpl** — сборка URL/фильтров (`request_builder.py`).
+- **ChemblResponseParserImpl** — нормализация ответа (`response_parser.py`).
+- **ChemblPaginatorImpl** — извлечение маркеров пагинации (`paginator.py`).
+- **ChemblClientFactory** — создание клиента (`factories.py`) с привязкой middleware и лимитов.
 
-## Связь с UnifiedAPIClient
-UnifiedAPIClient конфигурирует ретраи, лимиты и кэш и делегирует доменные детали ChemblClient. Такой паттерн применяется и к другим источникам (Semantic Scholar, PubMed и др.).
+## Политики
+- Таймауты/ретраи/лимиты настраиваются через `UnifiedAPIClient` middleware; все обращения проходят через rate limiter.
+- JSON парсится с валидацией; ошибки оборачиваются в `ClientResponseError`.
+- Пагинация реализована через `ChemblPaginatorImpl` (next marker) с заготовкой под расширение.
+
+## Использование в пайплайнах
+- Пайплайны `ChemblEntityPipeline` получают `ExtractionServiceABC`, который внутри использует ChEMBL-клиент и нормализацию.
+- Источник данных выбирается конфигом (`input_mode=api|csv|id_only`), при API-запросах применяется клиентский стек выше.

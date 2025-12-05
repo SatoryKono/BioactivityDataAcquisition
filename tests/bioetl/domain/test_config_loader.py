@@ -10,7 +10,7 @@ from bioetl.domain.config_loader import (
     load_pipeline_config,
     load_pipeline_config_from_path,
 )
-from bioetl.schemas.provider_config_schema import ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 def test_load_pipeline_config_from_path_valid():

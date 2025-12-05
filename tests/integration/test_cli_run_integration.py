@@ -8,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from bioetl.interfaces.cli import app
-from bioetl.application.services.chembl_extraction import ChemblExtractionService
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 
 runner = CliRunner()
 
@@ -18,7 +18,7 @@ def test_cli_run_dry_run_success(tmp_path, monkeypatch):
     """TS-002: bioetl run executes dry-run without writing outputs."""
     monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
     monkeypatch.setattr(
-        ChemblExtractionService,
+        ChemblExtractionServiceImpl,
         "get_release_version",
         lambda self: "chembl_cli_integration",
     )

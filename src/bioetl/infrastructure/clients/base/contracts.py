@@ -1,38 +1,18 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Iterator, TypeVar
 
+from bioetl.domain.clients.contracts import DataClientABC
+
 T = TypeVar("T")
 Record = dict[str, Any]
 
 
-class SourceClientABC(ABC):
+class SourceClientABC(DataClientABC):
     """
     Основной контракт клиента источника данных.
-    Определяет методы для извлечения данных и метаданных.
+    Наследует доменный контракт DataClientABC.
     """
-
-    @abstractmethod
-    def fetch_one(self, id: str) -> Record:
-        """Получить одну запись по ID."""
-
-    @abstractmethod
-    def fetch_many(self, ids: list[str]) -> list[Record]:
-        """Получить несколько записей по списку ID."""
-
-    @abstractmethod
-    def iter_pages(self, request: Any) -> Iterator[Any]:
-        """
-        Итератор по страницам результатов.
-        request: Объект запроса (зависит от реализации).
-        """
-
-    @abstractmethod
-    def metadata(self) -> dict[str, Any]:
-        """Метаданные источника (версия, release)."""
-
-    @abstractmethod
-    def close(self) -> None:
-        """Освободить ресурсы (сессии, соединения)."""
+    pass
 
 
 class RequestBuilderABC(ABC):
@@ -158,4 +138,3 @@ class SideInputProviderABC(ABC):
     @abstractmethod
     def refresh(self, name: str) -> None:
         """Обновляет справочник."""
-

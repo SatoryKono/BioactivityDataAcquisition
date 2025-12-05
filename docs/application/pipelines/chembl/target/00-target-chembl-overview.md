@@ -1,15 +1,19 @@
 # 00 Target Chembl Overview
 
 ## Pipeline
-**ChemblTargetPipeline** наследует ChemblCommonPipeline и фокусируется на нормализации таргетов.
+- Универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) поверх `ChemblPipelineBase`.
+- Схема: `domain/schemas/chembl/target.py`.
 
 ## Компоненты
-- **TargetTransformer** — приводит идентификаторы таргетов, типы (single protein, complex) и аннотации к целевому виду.
-- **TargetSchema** — фиксирует порядок колонок, обязательные идентификаторы и ссылки на внешние базы (UniProt/IUPHAR).
+- `ChemblExtractorImpl` — API/CSV/ID-list, управляется `input_mode`.
+- `ChemblTransformerImpl` — выравнивание под Pandera-схему, очистка обязательных полей.
+- Post-transform: хеши, индекс, версия ChEMBL, дата извлечения.
+- Валидация через `ValidationService`.
 
 ## Особенности
-- Возможное обогащение таргетов данными UniProt/IUPHAR (если включено конфигом) для добавления классификаций и организмов.
-- Сопоставление таргетов с активностями и ассеями для консистентных ссылок.
+- `primary_key`: из конфига или `target_id` по умолчанию.
+- `input_mode`: `api|csv|id_only`; `id_only` формирует фильтр `<primary_key>__in`.
+- Стабильная сортировка и хеши по бизнес-ключам перед записью.
 
 ## Связи
-Target-данные используются Activity и Assay пайплайнами. Общие сервисы (ValidationService, UnifiedOutputWriter) обеспечивают единый стандарт QC и вывода.
+- Target-данные потребляются Activity/Assay. Итог: `target.csv` + `meta.yaml`, атомарная запись.

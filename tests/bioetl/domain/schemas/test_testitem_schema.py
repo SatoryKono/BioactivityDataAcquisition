@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from pandera.errors import SchemaError
 
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+from bioetl.domain.schemas.chembl.testitem import TestitemSchema as SchemaTestitem
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def valid_testitem_data():
 def test_testitem_schema_valid(valid_testitem_data):
     """Test that valid data passes validation."""
     df = pd.DataFrame([valid_testitem_data])
-    item = TestitemSchema.validate(df)
+    item = SchemaTestitem.validate(df)
     assert item.loc[0, "molecule_chembl_id"] == "CHEMBL500"
     assert item.loc[0, "max_phase"] == 4
 
@@ -47,7 +47,7 @@ def test_testitem_schema_invalid_chembl_id(valid_testitem_data):
     data["molecule_chembl_id"] = "bad_id"
 
     with pytest.raises(SchemaError):
-        TestitemSchema.validate(pd.DataFrame([data]))
+        SchemaTestitem.validate(pd.DataFrame([data]))
 
 
 def test_testitem_schema_extra_field(valid_testitem_data):
@@ -56,5 +56,5 @@ def test_testitem_schema_extra_field(valid_testitem_data):
     data["unknown_prop"] = 123
 
     with pytest.raises(SchemaError):
-        TestitemSchema.validate(pd.DataFrame([data]))
+        SchemaTestitem.validate(pd.DataFrame([data]))
 

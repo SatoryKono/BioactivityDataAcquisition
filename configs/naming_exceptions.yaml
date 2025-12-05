@@ -1,0 +1,866 @@
+# Naming Policy Exceptions
+# Format:
+# - path: relative/path/to/file.py
+#   rule_id: RULE_ID (e.g. CLASS_SUFFIX, FUNC_PREFIX, MODULE_NAME, CLASS_FORMAT, FUNC_FORMAT, CONST_FORMAT, TEST_NAME)
+#   reason: Explanation for the exception
+#   owner: Owner of the code
+#   expiry: YYYY-MM-DD or 'permanent'
+
+exceptions:
+  # Core Domain and Application Exceptions
+  - path: src/bioetl/application/container.py
+    rule_id: CLASS_SUFFIX
+    reason: "Standard container pattern name, does not fit current role suffixes"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/orchestrator.py
+    rule_id: CLASS_SUFFIX
+    reason: "Orchestrator pattern name"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/base.py
+    rule_id: CLASS_SUFFIX
+    reason: "Base class for pipelines, suffix Base is standard"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/chembl/base.py
+    rule_id: CLASS_SUFFIX
+    reason: "Base class for ChEMBL pipelines"
+    owner: chembl
+    expiry: permanent
+  
+  - path: src/bioetl/application/pipelines/chembl/pipeline.py
+    rule_id: CLASS_SUFFIX
+    reason: "Specific pipeline implementation class"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/enums.py
+    rule_id: CLASS_SUFFIX
+    reason: "Enums do not require role suffixes"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/models.py
+    rule_id: CLASS_SUFFIX
+    reason: "Domain models like StageResult, RunContext do not fit strict role suffixes"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/normalization_service.py
+    rule_id: CLASS_SUFFIX
+    reason: "Service suffix is widely used but not in strict list"
+    owner: domain
+    expiry: 2025-06-01
+
+  - path: src/bioetl/domain/providers.py
+    rule_id: CLASS_SUFFIX
+    reason: "Provider components and definitions are domain models"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/record_source.py
+    rule_id: CLASS_SUFFIX
+    reason: "RecordSource pattern"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/activity.py
+    rule_id: CLASS_SUFFIX
+    reason: "Schema classes end with Schema, not in strict list (Config/Model?)"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/assay.py
+    rule_id: CLASS_SUFFIX
+    reason: "Schema classes end with Schema"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/document.py
+    rule_id: CLASS_SUFFIX
+    reason: "Schema classes end with Schema"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/molecule.py
+    rule_id: CLASS_SUFFIX
+    reason: "Schema classes end with Schema"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/target.py
+    rule_id: CLASS_SUFFIX
+    reason: "Schema classes end with Schema"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/testitem.py
+    rule_id: CLASS_SUFFIX
+    reason: "Schema classes end with Schema"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/pipeline_contracts.py
+    rule_id: CLASS_SUFFIX
+    reason: "Contract classes"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/registry.py
+    rule_id: CLASS_FORMAT
+    reason: "Private inner class _SchemaEntry"
+    owner: domain
+    expiry: permanent
+  
+  - path: src/bioetl/domain/schemas/registry.py
+    rule_id: CLASS_SUFFIX
+    reason: "Private inner class"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/hash_service.py
+    rule_id: CLASS_SUFFIX
+    reason: "Service suffix"
+    owner: domain
+    expiry: 2025-06-01
+
+  - path: src/bioetl/domain/validation/contracts.py
+    rule_id: CLASS_SUFFIX
+    reason: "Result object"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/validation/service.py
+    rule_id: CLASS_SUFFIX
+    reason: "Service suffix"
+    owner: domain
+    expiry: 2025-06-01
+
+  - path: src/bioetl/infrastructure/clients/base/factories.py
+    rule_id: CLASS_SUFFIX
+    reason: "Provider suffix for dependency injection"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/impl/circuit_breaker.py
+    rule_id: CLASS_SUFFIX
+    reason: "State object"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/paginator.py
+    rule_id: CLASS_SUFFIX
+    reason: "Paginator utility"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/provider.py
+    rule_id: CLASS_SUFFIX
+    reason: "Provider components"
+    owner: chembl
+    expiry: permanent
+  
+  - path: src/bioetl/infrastructure/clients/chembl/request_builder.py
+    rule_id: CLASS_SUFFIX
+    reason: "Builder pattern"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/response_parser.py
+    rule_id: CLASS_SUFFIX
+    reason: "Parser utility"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/middleware.py
+    rule_id: CLASS_SUFFIX
+    reason: "Middleware pattern"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/config/pipeline_config_schema.py
+    rule_id: CLASS_SUFFIX
+    reason: "Options/Config object"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/config/resolver.py
+    rule_id: CLASS_SUFFIX
+    reason: "Resolver utility"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/files/atomic.py
+    rule_id: CLASS_SUFFIX
+    reason: "Operation helper"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/files/csv_record_source.py
+    rule_id: CLASS_SUFFIX
+    reason: "RecordSource implementation"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/contracts.py
+    rule_id: CLASS_SUFFIX
+    reason: "Result object"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/unified_writer.py
+    rule_id: CLASS_SUFFIX
+    reason: "Writer pattern"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/mq/handler.py
+    rule_id: CLASS_SUFFIX
+    reason: "MQ Job/Handler objects"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/mq/listener.py
+    rule_id: CLASS_SUFFIX
+    reason: "Listener pattern"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/rest/server.py
+    rule_id: CLASS_SUFFIX
+    reason: "Request/Response objects"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/tools/check_naming_policy.py
+    rule_id: CLASS_SUFFIX
+    reason: "Tool utility class"
+    owner: tools
+    expiry: permanent
+
+  # Function Prefix Exceptions - Common Domain Verbs
+  - path: src/bioetl/application/pipelines/base.py
+    rule_id: FUNC_PREFIX
+    reason: "Pipeline lifecycle methods (extract, transform, validate, write...)"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/chembl/base.py
+    rule_id: FUNC_PREFIX
+    reason: "Pipeline lifecycle methods"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Contract methods (load, extract)"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/hooks.py
+    rule_id: FUNC_PREFIX
+    reason: "Hook methods (handle, should_retry)"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/hooks_impl.py
+    rule_id: FUNC_PREFIX
+    reason: "Hook implementations"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/services/chembl_extraction.py
+    rule_id: FUNC_PREFIX
+    reason: "Service methods (request_batch, extract_all)"
+    owner: chembl
+    expiry: 2025-06-01
+
+  - path: src/bioetl/domain/clients/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Contract property (metadata)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/config_loader.py
+    rule_id: FUNC_PREFIX
+    reason: "Loader methods (load_...)"
+    owner: domain
+    expiry: 2025-06-01
+
+  - path: src/bioetl/domain/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Contract methods (extract_all, request_batch)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/normalization_service.py
+    rule_id: FUNC_PREFIX
+    reason: "Normalization methods (normalize, normalize_batch...)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/provider_registry.py
+    rule_id: FUNC_PREFIX
+    reason: "Registry methods (list_, reset_, restore_)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/record_source.py
+    rule_id: FUNC_PREFIX
+    reason: "Source methods (extract_all, request_batch)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/chembl/models.py
+    rule_id: FUNC_PREFIX
+    reason: "Serialize method (allowed by policy in list but maybe missed? serialize_ vs serialize)"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/domain/schemas/registry.py
+    rule_id: FUNC_PREFIX
+    reason: "Registry methods (list_schemas, register)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Contract properties (fields, algorithm, normalization)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/hash_service.py
+    rule_id: FUNC_PREFIX
+    reason: "Hash service methods (add_...)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/impl/hasher.py
+    rule_id: FUNC_PREFIX
+    reason: "Hasher methods (normalize_unicode, format_float...)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/impl/normalize.py
+    rule_id: FUNC_PREFIX
+    reason: "Normalize methods"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/merge.py
+    rule_id: FUNC_PREFIX
+    reason: "Utility function (deep_merge)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/normalizers/collections.py
+    rule_id: FUNC_PREFIX
+    reason: "Normalize methods"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/normalizers/identifiers.py
+    rule_id: FUNC_PREFIX
+    reason: "Normalize methods"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/validation/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Validation contract methods (list_schemas, register)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/validation/service.py
+    rule_id: FUNC_PREFIX
+    reason: "Service method (validate)"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Client contract methods (metadata, with_pagination, extract_metadata, acquire, wait_if_needed, max_attempts, should_retry, set, invalidate, clear, refresh)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/impl/cache.py
+    rule_id: FUNC_PREFIX
+    reason: "Cache methods (set, invalidate, clear)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/impl/circuit_breaker.py
+    rule_id: FUNC_PREFIX
+    reason: "CB methods (allow_request, record_success...)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/impl/rate_limiter.py
+    rule_id: FUNC_PREFIX
+    reason: "Rate limiter methods (rate, acquire, wait_if_needed)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/impl/retry_policy.py
+    rule_id: FUNC_PREFIX
+    reason: "Retry methods (max_attempts, should_retry)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/base/impl/unified_client.py
+    rule_id: FUNC_PREFIX
+    reason: "Client methods (request, post)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "ChEMBL specific requests (request_activity, etc)"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/impl/http_client.py
+    rule_id: FUNC_PREFIX
+    reason: "ChEMBL client methods"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/request_builder.py
+    rule_id: FUNC_PREFIX
+    reason: "Builder methods (for_endpoint, with_pagination)"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/response_parser.py
+    rule_id: FUNC_PREFIX
+    reason: "Parser methods (extract_metadata)"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/middleware.py
+    rule_id: FUNC_PREFIX
+    reason: "Middleware request method"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/config/pipeline_config_schema.py
+    rule_id: FUNC_PREFIX
+    reason: "Config property (entity_name)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/files/atomic.py
+    rule_id: FUNC_PREFIX
+    reason: "Atomic file op (write_atomic)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/files/checksum.py
+    rule_id: FUNC_PREFIX
+    reason: "Checksum util (compute_file_sha256)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/logging/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Logging methods (bind, update, finish, end_span, inject_context)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/logging/impl/progress_reporter.py
+    rule_id: FUNC_PREFIX
+    reason: "Progress methods (update, finish)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/logging/impl/unified_logger.py
+    rule_id: FUNC_PREFIX
+    reason: "Logger methods (bind)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Output contract methods (atomic, write, supports_format, write_meta...)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/impl/csv_writer.py
+    rule_id: FUNC_PREFIX
+    reason: "Writer implementation methods"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/impl/metadata_writer.py
+    rule_id: FUNC_PREFIX
+    reason: "Metadata writer methods"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/impl/parquet_writer.py
+    rule_id: FUNC_PREFIX
+    reason: "Writer implementation methods"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/unified_writer.py
+    rule_id: FUNC_PREFIX
+    reason: "Unified writer methods"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/cli/app.py
+    rule_id: FUNC_PREFIX
+    reason: "CLI methods (list_pipelines, smoke_run)"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/cli/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "CLI contracts (register)"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/mq/handler.py
+    rule_id: FUNC_PREFIX
+    reason: "MQ handler (handle)"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/bioetl/interfaces/mq/listener.py
+    rule_id: FUNC_PREFIX
+    reason: "MQ listener (process_job)"
+    owner: interfaces
+    expiry: permanent
+
+  - path: src/tools/check_naming_policy.py
+    rule_id: FUNC_PREFIX
+    reason: "Tool internal methods (load_exceptions, check_file_...)"
+    owner: tools
+    expiry: permanent
+
+  - path: src/tools/check_net.py
+    rule_id: FUNC_PREFIX
+    reason: "Tool method (check)"
+    owner: tools
+    expiry: permanent
+
+  # Test Classes and Helpers Exceptions
+  - path: tests/bioetl/application/pipelines/chembl/activity/test_activity_pipeline.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test helper class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/test_extract_pipeline_errors.py
+    rule_id: CLASS_FORMAT
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+  - path: tests/bioetl/application/pipelines/chembl/test_extract_pipeline_errors.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/test_pipeline_base.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub classes (ConcretePipeline, DatasetPipeline)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/test_container.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/test_normalization_service.py
+    rule_id: CLASS_FORMAT
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+  - path: tests/bioetl/domain/test_normalization_service.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/test_provider_registry.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/test_record_source.py
+    rule_id: CLASS_FORMAT
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+  - path: tests/bioetl/domain/test_record_source.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/test_types.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test helper class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/transform/test_field_normalizers.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test grouping classes"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/validation/test_validation_service.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/files/test_csv_record_source.py
+    rule_id: CLASS_FORMAT
+    reason: "Test stub classes"
+    owner: tests
+    expiry: permanent
+  - path: tests/bioetl/infrastructure/files/test_csv_record_source.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub classes"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/interfaces/cli/test_cli.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/interfaces/cli/test_contracts.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test helper class"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/golden/test_chembl_activity_golden.py
+    rule_id: CLASS_FORMAT
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+  - path: tests/golden/test_chembl_activity_golden.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test stub class"
+    owner: tests
+    expiry: permanent
+  
+  - path: tests/conftest.py
+    rule_id: CLASS_SUFFIX
+    reason: "Test helper class"
+    owner: tests
+    expiry: permanent
+
+  # Test Helper Functions (that don't match test_*, fixture_*, mock_*, etc)
+  - path: tests/bioetl/application/pipelines/chembl/activity/test_activity_pipeline.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (pipeline)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/activity/test_extract.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helpers (source_config, pipeline)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/document/test_document_pipeline.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helpers (pipeline, extract_release)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/target/test_target_pipeline.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (pipeline)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/test_config_resolution.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (dependencies)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/test_extraction.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (service)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/test_pipelines_smoke.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (common_dependencies)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/test_pk_resolution.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (dependencies)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/chembl/testitem/test_testitem_pipeline.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (pipeline)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/test_pipeline_base.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub methods"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/schemas/test_activity_schema.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (valid_activity_df)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/schemas/test_assay_schema.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (valid_assay_data)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/schemas/test_document_schema.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (valid_document_data)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/schemas/test_target_schema.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (valid_target_data)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/schemas/test_testitem_schema.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (valid_testitem_data)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/test_errors.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (network_cause)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/test_record_source.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub methods"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/transform/test_field_normalizers.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (dict_normalizer)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/transform/test_hashing.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (canonical_json_from_record)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/transform/test_normalize.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helpers (fail_...)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/clients/chembl/test_factories.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (source_config)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/clients/test_chembl_client.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helper (client)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/files/test_atomic.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helpers (atomic_op, write_fn)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/files/test_csv_record_source.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub methods"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/output/test_unified_writer.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helpers (side_effect, unified_writer)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/output/test_writers.py
+    rule_id: FUNC_PREFIX
+    reason: "Test helpers (csv_writer, metadata_writer)"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/interfaces/cli/test_cli.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub methods"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/interfaces/cli/test_contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub methods"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/pipelines/chembl/test_extract_pipeline_errors.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub methods"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/conftest.py
+    rule_id: FUNC_PREFIX
+    reason: "Pytest hook (pytest_configure) and helpers"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/golden/test_chembl_activity_golden.py
+    rule_id: FUNC_PREFIX
+    reason: "Test stub method"
+    owner: tests
+    expiry: permanent
+
+  # Constant Format Exceptions
+  - path: src/bioetl/domain/transform/normalizers/base.py
+    rule_id: CONST_FORMAT
+    reason: "Leading underscore for private constant allowed by convention but regex is strict"
+    owner: domain
+    expiry: permanent
+  
+  - path: src/bioetl/domain/schemas/chembl/output_views.py
+    rule_id: CONST_FORMAT
+    reason: "Leading underscore for private constant"
+    owner: chembl
+    expiry: permanent

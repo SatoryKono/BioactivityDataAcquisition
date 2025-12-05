@@ -14,13 +14,13 @@ from bioetl.domain.schemas.chembl.models import (
     ChemblRecordModel,
 )
 from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginator
+from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
+    ChemblResponseParserImpl,
 )
 
 
-class ChemblExtractionService(ExtractionServiceABC):
+class ChemblExtractionServiceImpl(ExtractionServiceABC):
     """
     Service to orchestrate data extraction from ChEMBL.
 
@@ -34,8 +34,8 @@ class ChemblExtractionService(ExtractionServiceABC):
     ) -> None:
         self.client = client
         self.batch_size = batch_size
-        self.paginator = ChemblPaginator()
-        self.parser = ChemblResponseParser()
+        self.paginator = ChemblPaginatorImpl()
+        self.parser = ChemblResponseParserImpl()
 
     def get_release_version(self) -> str:
         """Get ChEMBL release version from API metadata."""

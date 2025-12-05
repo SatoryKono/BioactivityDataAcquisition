@@ -54,19 +54,19 @@ def test_write_atomic_cleanup_failure_ignored(atomic_op, tmp_path):
             atomic_op.write_atomic(target_file, write_fn)
 
 
-def test_move_with_retry_success(atomic_op, tmp_path):
+def test_replace_with_retry_success(atomic_op, tmp_path):
     src = tmp_path / "src.txt"
     dst = tmp_path / "dst.txt"
     src.write_text("content")
 
-    atomic_op._move_with_retry(src, dst)
+    atomic_op._replace_with_retry(src, dst)
 
     assert dst.read_text() == "content"
     assert not src.exists()
 
 
 @patch("time.sleep")
-def test_move_with_retry_retries(mock_sleep, atomic_op, tmp_path):
+def test_replace_with_retry_retries(mock_sleep, atomic_op, tmp_path):
     src = tmp_path / "src_retry.txt"
     dst = tmp_path / "dst_retry.txt"
     src.write_text("content")
@@ -75,21 +75,21 @@ def test_move_with_retry_retries(mock_sleep, atomic_op, tmp_path):
     # Note: Since we mock shutil.move, the file won't actually move.
     # We only verify the retry logic here.
     with patch("shutil.move", side_effect=[OSError("Busy"), OSError("Busy"), None]) as mock_move:
-        atomic_op._move_with_retry(src, dst)
+        atomic_op._replace_with_retry(src, dst)
 
     assert mock_move.call_count == 3
     assert mock_sleep.call_count == 2
 
 
 @patch("time.sleep")
-def test_move_with_retry_max_retries_exceeded(mock_sleep, atomic_op, tmp_path):
+def test_replace_with_retry_max_retries_exceeded(mock_sleep, atomic_op, tmp_path):
     src = tmp_path / "src_max.txt"
     dst = tmp_path / "dst_max.txt"
     src.write_text("content")
 
     with patch("shutil.move", side_effect=OSError("Locked")):
         with pytest.raises(OSError, match="Locked"):
-            atomic_op._move_with_retry(src, dst)
+            atomic_op._replace_with_retry(src, dst)
 
     assert mock_sleep.call_count == MAX_FILE_RETRIES - 1
 
@@ -100,7 +100,7 @@ def test_move_overwrites_existing(atomic_op, tmp_path):
     src.write_text("new")
     dst.write_text("old")
 
-    atomic_op._move_with_retry(src, dst)
+    atomic_op._replace_with_retry(src, dst)
 
     assert dst.read_text() == "new"
     assert not src.exists()

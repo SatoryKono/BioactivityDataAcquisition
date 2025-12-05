@@ -2,7 +2,7 @@ from typing import Any
 from bioetl.infrastructure.clients.base.contracts import PaginatorABC
 
 
-class ChemblPaginator(PaginatorABC):
+class ChemblPaginatorImpl(PaginatorABC):
     """
     Стратегия пагинации ChEMBL (offset/limit).
     """

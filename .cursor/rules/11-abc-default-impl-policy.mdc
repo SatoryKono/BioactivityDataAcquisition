@@ -1,16 +1,16 @@
 ---
 trigger: model_decision
 description: USE WHEN creating or modifying ABC/Protocol, Default factories, or Impl classes; enforce three-layer pattern and registries
-globs: ["src/bioetl/clients/**/contracts.py", "src/bioetl/clients/**/factories.py", "src/bioetl/clients/**/impl/*.py"]
+globs: ["src/bioetl/infrastructure/clients/**/contracts.py", "src/bioetl/infrastructure/clients/**/factories.py", "src/bioetl/infrastructure/clients/**/impl/*.py"]
 ---
 
 # ABC/Default/Impl Policy
 
 ## Three-Layer Pattern (Mandatory)
 
-1. **Contract/Protocol/ABC**: `src/bioetl/clients/<domain>/contracts.py` or `base/contracts.py`
-2. **Default factory**: `src/bioetl/clients/<domain>/factories.py`, function `default_<domain>_<entity>()`
-3. **Impl**: `src/bioetl/clients/<domain>/impl/`, classes with suffix `Impl`
+1. **Contract/Protocol/ABC**: `src/bioetl/infrastructure/clients/<domain>/contracts.py` or `base/contracts.py`
+2. **Default factory**: `src/bioetl/infrastructure/clients/<domain>/factories.py`, function `default_<domain>_<entity>()`
+3. **Impl**: `src/bioetl/infrastructure/clients/<domain>/impl/`, classes with suffix `Impl`
 
 ## Rules
 
@@ -18,13 +18,13 @@ globs: ["src/bioetl/clients/**/contracts.py", "src/bioetl/clients/**/factories.p
 - **Default factory naming**: `default_<domain>_<entity>()` (canonical form)
 - **Impl naming**: `^[A-Z][A-Za-z0-9]+Impl$` (e.g., `ChemblDataClientHTTPImpl`)
 - **ABC docstring**: MUST have structured block (brief description, public interface, file path, Default/Impl pointers)
-- **Registries**: MUST update `abc_registry.yaml`, `abc_impls.yaml`, and `docs/reference/abc/INDEX.md`
+- **Registries**: MUST update `abc_registry.yaml`, `abc_impls.yaml`, and `docs/domain/abc/00-index.md`
 
 ## Registries (Sources of Truth)
 
-- `src/bioetl/clients/base/abc_registry.yaml` — machine-readable ABC registry
-- `src/bioetl/clients/base/abc_impls.yaml` — Default/Impl mapping
-- `docs/reference/abc/INDEX.md` — human-readable catalog
+- `src/bioetl/infrastructure/clients/base/abc_registry.yaml` — machine-readable ABC registry
+- `src/bioetl/infrastructure/clients/base/abc_impls.yaml` — Default/Impl mapping
+- `docs/domain/abc/00-index.md` — human-readable catalog
 
 ## Examples
 
@@ -37,8 +37,8 @@ class DataClientProtocol(Protocol):
     - fetch_one(self, request: ClientRequest) -> dict
     - iter_pages(self, params: PaginationParams) -> Iterator[Page]
     
-    Location: src/bioetl/clients/base/contracts.py
-    Default: src/bioetl/clients/chembl/factories.py::default_chembl_data_client
+    Location: src/bioetl/infrastructure/clients/base/contracts.py
+    Default: src/bioetl/infrastructure/clients/chembl/factories.py::default_chembl_data_client
     """
     ...
 
@@ -55,4 +55,4 @@ class ChemblDataClientHTTPImpl:
 
 ## Reference
 
-See `docs/project/00-rules-summary.md` (раздел 2 — политика создания ABC/Default/Impl) for detailed policy.
+See `docs/FILE_POLICY.md` and `docs/project/00-rules-summary.md` for detailed policy.

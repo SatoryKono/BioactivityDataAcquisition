@@ -20,7 +20,7 @@ globs: ["docs/**/*.md", "**/INDEX.md", "**/README.md"]
 
 ## Pipeline Docs
 
-- Format: `NN-<entity>-<provider>-<topic>.md` in `docs/02-pipelines/<provider>/<entity>/`
+- Format: `NN-<entity>-<provider>-<topic>.md` in `docs/application/pipelines/<provider>/<entity>/`
 - H1 heading MUST duplicate filename in Title Case
 - Internal anchors from `##` headings in kebab-case
 - Relative links MUST pass link-checker
@@ -28,21 +28,21 @@ globs: ["docs/**/*.md", "**/INDEX.md", "**/README.md"]
 ## New Entity Documentation
 
 When adding a new entity (contract/pipeline/client), PR MUST include:
-1. Documentation under `docs/02-pipelines/<provider>/<entity>/` using `NN-<entity>-<provider>-<topic>.md`
-2. Entry/update in `docs/reference/abc/INDEX.md` if ABC/contract is added
-3. Updates to `abc_registry.yaml` and `abc_impls.yaml` when creating ABC/Default/Impl
+1. Documentation under `docs/application/pipelines/<provider>/<entity>/` using `NN-<entity>-<provider>-<topic>.md`
+2. Entry/update in `docs/domain/abc/00-index.md` if ABC/contract is added
+3. Updates to `src/bioetl/infrastructure/clients/base/abc_registry.yaml` and `src/bioetl/infrastructure/clients/base/abc_impls.yaml` when creating ABC/Default/Impl
 
 ## Examples
 
 Valid:
-- `docs/02-pipelines/chembl/activity/01-activity-chembl-extract.md`
-- `docs/02-pipelines/chembl/activity/02-activity-chembl-transform.md`
+- `docs/application/pipelines/chembl/activity/01-activity-chembl-extract.md`
+- `docs/application/pipelines/chembl/activity/02-activity-chembl-transform.md`
 - `docs/INDEX.md`
 - `docs/02-pipelines/README.md`
 
 Invalid:
-- `docs/02-pipelines/chembl/activity/extraction.md` (missing NN- prefix)
-- `docs/02-pipelines/Chembl/Activity/Extraction.md` (uppercase, underscores)
+- `docs/application/pipelines/chembl/activity/extraction.md` (missing NN- prefix)
+- `docs/application/pipelines/Chembl/Activity/Extraction.md` (uppercase, underscores)
 
 ## Reference
 

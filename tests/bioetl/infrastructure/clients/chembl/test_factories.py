@@ -10,7 +10,7 @@ from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
 from bioetl.application.services.chembl_extraction import (
-    ChemblExtractionService,
+    ChemblExtractionServiceImpl,
 )
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 
@@ -48,18 +48,11 @@ def test_default_chembl_client_overrides(source_config):
     assert client.request_builder.max_url_length == 500
 
 
-@pytest.mark.skip(reason="Pydantic validation prevents invalid configs")
-def test_default_chembl_client_missing_base_url():
-    """Test factory raises ValueError if base_url is missing."""
-    # Pydantic validation prevents this at model level.
-    # ChemblSourceConfig.base_url has a default value.
-
-
 def test_default_chembl_extraction_service(source_config):
     """Test default extraction service factory."""
     source_config.batch_size = 50
     service = default_chembl_extraction_service(source_config)
-    assert isinstance(service, ChemblExtractionService)
+    assert isinstance(service, ChemblExtractionServiceImpl)
     assert isinstance(service.client, ChemblDataClientHTTPImpl)
     assert service.batch_size == 50
 

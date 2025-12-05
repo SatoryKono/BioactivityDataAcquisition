@@ -1,15 +1,18 @@
 # 00 Document Chembl Overview
 
 ## Pipeline
-**ChemblDocumentPipeline** обрабатывает документные записи ChEMBL, наследуя ChemblCommonPipeline.
+- Универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) с базой `ChemblPipelineBase`.
+- Схема: `domain/schemas/chembl/document.py`.
 
 ## Компоненты
-- **DocumentTransformer** — нормализует DOI/PMID, источники публикаций и статусы обогащения.
-- **DocumentSchema** — описывает обязательные поля документа, ссылки на внешние идентификаторы и порядок колонок.
+- `ChemblExtractorImpl` — API/CSV/ID-list режимы (`input_mode`).
+- `ChemblTransformerImpl` — выравнивает столбцы под Pandera-схему, удаляет строки с null в обязательных полях.
+- Пост-цепочка базового пайплайна: хеши, индекс, версия ChEMBL, дата.
 
 ## Особенности
-- Возможное обогащение по DOI/PMID через внешние источники (CrossRef, PubMed, Semantic Scholar) для заполнения недостающих метаданных.
-- Fallback-политики при отсутствии части метаданных (сохранение минимального набора полей, пометка статуса валидации).
+- `primary_key`: из конфига или `document_id` по умолчанию.
+- `input_mode=csv|id_only|api`; при `id_only` фильтр `<primary_key>__in` формируется автоматически.
+- Хеши и сортировка завязаны на `hashing.business_key_fields`.
 
 ## Связи
-Документы используются другими пайплайнами (Assay, Activity) для ссылок на первичные публикации. Запись осуществляется через UnifiedOutputWriter с генерацией meta.yaml и QC-отчётов.
+- Документы нужны Activity/Assay для ссылок на публикации. Запись: `document.csv` + `meta.yaml` через `UnifiedOutputWriter` (атомарно, checksum).

@@ -1,88 +1,24 @@
 ---
-trigger: model_decision
 description: USE WHEN writing tests or changing code paths; enforce categories, golden tests, property tests, coverage >=85%
 globs: ["tests/**/*.py", "src/**/*.py"]
+alwaysApply: false
 ---
 
-# Testing Rules
+# CATEGORIES (pytest markers)
 
-## 1. Critical Invariants (Must Observe)
-
-### Determinism I/O
-- **Stable Sorting**: All DataFrames must have fixed column order and row sort (`sort_values()`).
-- **Time**: Only use `datetime.now(timezone.utc)`.
-- **Atomic Writes**: Use `write_dataset_atomic()`.
-- **Hashing**: Use `ensure_hash_columns()` for consistency.
-
-### Pandera Validation
-- **Validate Before Write**: `schema.validate(df)` is mandatory.
-- **Column Order**: Must match `COLUMN_ORDER` constants.
-- **Registry**: Use `get_schema()` to retrieve schemas.
-
-### Structured Logging
-- **UnifiedLogger**: No `print()`.
-- **Context**: Use `bind_pipeline_context()` and `pipeline_stage()`.
-- **Required Fields**: `pipeline_code`, `run_id`, `stage`.
-
-### Architecture
-- **Direction**: Orchestration → Domain → Infrastructure.
-- **Mocks**: Only mock Infrastructure layer; Domain logic must be tested deterministically.
-
-## 2. Testing Patterns
-
-### Unit Tests (Simple Path)
-Use the simplified constructor for quick testing:
-```python
-# Does not require full config
-pipeline = ChemblActivityPipeline(source=test_data)
-```
-
-### Integration Tests (Full Path)
-Use full configuration:
-```python
-config = load_config("configs/pipelines/activity/test.yaml")
-pipeline = ChemblActivityPipeline(config, run_id="test-123", source=test_data)
-```
-
-### Mocking HTTP Clients
-```python
-from unittest.mock import Mock
-mock_client = Mock(spec=ChemblClient)
-mock_client.get.return_value = Mock(json=lambda: mock_response)
-```
-
-## 3. Common Problems & Solutions
-
-### Import Errors (Lazy Loading)
-**Problem**: `from bioetl.clients import ChemblClient` fails.
-**Fix**: Import via `__getattr__` or directly:
-```python
-from bioetl.clients.client_chembl import ChemblClient
-```
-
-### Schema Mismatch
-**Fix**: Always normalize test data:
-```python
-df = pd.DataFrame(test_data)
-df = ensure_columns(df, required_columns=schema.columns.keys())
-df = schema.validate(df)
-```
-
-### Timezones
-**Fix**: `now = datetime.now(timezone.utc)` (Never use naive datetime).
-
-### Batch Extraction
-**Fix**: Mock `BatchExtractionStats` for batched tests.
-
-## 4. Structure of a Fix
-1.  **Analyze**: Determine type (Import, Schema, HTTP, Architecture).
-2.  **Root Cause**: Find the violated invariant.
-3.  **Minimal Fix**: Fix only what is necessary.
-4.  **Regression Test**: Add a test to prevent recurrence.
-5.  **Validation**: Run `pytest tests/`.
-
-## Categories (pytest markers)
 unit, integration, golden, determinism, property, schema, qc, slow, api, benchmark.
 
-## Coverage
-CI blocks merge if coverage < 85% for `src/bioetl`.
+## RULES
+
+- Unit tests do NOT hit network; mock external calls.
+- Golden tests protect critical outputs and schemas.
+- Use Hypothesis for transformation properties.
+- CI blocks merge if coverage < 85% for `src/bioetl`.
+
+## STRUCTURE
+
+- Files `test_*.py`; functions `test_*`; classes `Test*`.
+
+## REFERENCE
+
+See `docs/guides/04-testing.md` for detailed documentation.
