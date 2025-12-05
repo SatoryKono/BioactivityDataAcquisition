@@ -213,7 +213,9 @@ class HttpClientMiddleware:
             self._reset_circuit(log_circuit_closure=True)
             return response
 
-        raise RuntimeError("Exceeded maximum retry attempts without returning a response")
+        raise RuntimeError(
+            "Exceeded maximum retry attempts without returning a response"
+        )
 
     def _handle_retry(
         self,
@@ -340,7 +342,9 @@ class HttpClientMiddleware:
     def _http_errors(self) -> tuple[type[Exception], ...]:
         return REQUESTS_HTTP_ERRORS + HTTPX_HTTP_ERRORS
 
-    def _map_status_error(self, status_code: int, url: str) -> ClientRateLimitError | ClientResponseError:
+    def _map_status_error(
+        self, status_code: int, url: str
+    ) -> ClientRateLimitError | ClientResponseError:
         if status_code == 429:
             return ClientRateLimitError(
                 provider=self.provider,
@@ -413,7 +417,9 @@ class HttpClientMiddleware:
         self._circuit_opened_at = None
         self._last_error_type = None
 
-    def _circuit_breaker_error(self, url: str) -> ClientNetworkError | ClientResponseError:
+    def _circuit_breaker_error(
+        self, url: str
+    ) -> ClientNetworkError | ClientResponseError:
         base_kwargs = {
             "provider": self.provider,
             "endpoint": url,

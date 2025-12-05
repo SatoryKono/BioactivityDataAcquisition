@@ -272,7 +272,9 @@ def test_final_failure_logging_and_metrics(monkeypatch, base_client, caplog):
         middleware.request("GET", "http://example.com/500")
 
     final_failure = next(
-        rec for rec in caplog.records if rec.message == "HTTP request failed after retries"
+        rec
+        for rec in caplog.records
+        if rec.message == "HTTP request failed after retries"
     )
 
     assert final_failure.attempts == 2
