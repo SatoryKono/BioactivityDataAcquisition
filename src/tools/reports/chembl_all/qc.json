@@ -1,0 +1,9 @@
+[
+  {
+    "name": "assay_chembl",
+    "success": false,
+    "duration_sec": 0.005358,
+    "error": "Exit code 1",
+    "timestamp": "2025-12-05T16:13:32.463682+00:00"
+  }
+]

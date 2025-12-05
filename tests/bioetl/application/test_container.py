@@ -43,9 +43,13 @@ class DummyComponents(ProviderComponents):
         return {"provider": config.provider, "base_url": str(config.base_url)}
 
     def create_extraction_service(
-        self, client: dict[str, str], config: DummyProviderConfig
+        self,
+        config: DummyProviderConfig,
+        *,
+        client: dict[str, str] | None = None,
     ) -> tuple[str, str]:
-        return client["provider"], client["base_url"]
+        resolved_client = client or self.create_client(config)
+        return resolved_client["provider"], resolved_client["base_url"]
 
 
 @pytest.fixture(autouse=True)

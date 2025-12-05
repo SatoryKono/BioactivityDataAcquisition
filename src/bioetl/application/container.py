@@ -156,7 +156,9 @@ class PipelineContainer:
         source_config = self._resolve_provider_config(definition)
 
         client = definition.components.create_client(source_config)
-        return definition.components.create_extraction_service(client, source_config)
+        return definition.components.create_extraction_service(
+            source_config, client=client
+        )
 
     def get_hash_service(self) -> HashService:
         """Get the hash service."""

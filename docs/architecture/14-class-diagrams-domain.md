@@ -5,6 +5,9 @@
 ## 1. Validation Service Structure
 
 ```mermaid
+---
+id: 610372d5-a04e-4abc-8b74-4611024c3769
+---
 classDiagram
     class ValidationService {
         -_schema_provider: SchemaProviderABC
@@ -49,6 +52,9 @@ classDiagram
 ## 2. Transform Services
 
 ```mermaid
+---
+id: dd6eff40-65cb-44d4-9032-b41719890c6a
+---
 classDiagram
     class TransformerABC {
         <<abstract>>
@@ -92,6 +98,9 @@ classDiagram
 ## 3. Hash Service
 
 ```mermaid
+---
+id: e5bc7e53-826c-4085-a6b1-f89fff70d513
+---
 classDiagram
     class HashService {
         -_hasher: HasherABC
@@ -126,6 +135,9 @@ classDiagram
 ## 4. Normalization Service
 
 ```mermaid
+---
+id: 94ef3597-e183-4cc2-a707-ab005656c990
+---
 classDiagram
     class NormalizationService {
         <<Protocol>>
@@ -157,6 +169,9 @@ classDiagram
 ## 5. Schema Models
 
 ```mermaid
+---
+id: 023d3963-24e3-4381-9d3b-0b2c34a5685b
+---
 classDiagram
     class DataFrameModel {
         <<Pandera>>
@@ -207,6 +222,9 @@ classDiagram
 ## 6. Domain Models
 
 ```mermaid
+---
+id: f7f059a8-dd73-475a-b731-520343769137
+---
 classDiagram
     class RunContext {
         +start_time: datetime
@@ -245,6 +263,9 @@ classDiagram
 ## 7. Provider Registry
 
 ```mermaid
+---
+id: ed1a47f8-769e-47ae-8652-413876aab572
+---
 classDiagram
     class ProviderId {
         <<Enum>>
@@ -281,6 +302,9 @@ classDiagram
 ## 8. Normalizers
 
 ```mermaid
+---
+id: 74518f52-8604-4684-ba4f-af4971902755
+---
 classDiagram
     class NormalizerFunction {
         <<Callable>>
@@ -318,6 +342,9 @@ classDiagram
 ## 9. Domain Contracts
 
 ```mermaid
+---
+id: 60c7ddbc-049c-477c-801e-3b4647c58805
+---
 classDiagram
     class DataClientABC {
         <<abstract>>
@@ -360,6 +387,9 @@ classDiagram
 ## 10. Domain Errors
 
 ```mermaid
+---
+id: 649b2190-d7f1-414c-b3fd-3f9815223e7e
+---
 classDiagram
     class BioetlError {
         +message: str

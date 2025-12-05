@@ -3,6 +3,9 @@
 Диаграмма компонентов системы BioETL, показывающая основные компоненты и их взаимодействие.
 
 ```mermaid
+---
+id: 0ce2be98-2cd9-4f25-8f51-bebf2d4ccad1
+---
 graph TB
     subgraph "Interfaces Layer"
         CLI[CLI Application<br/>bioetl.interfaces.cli]

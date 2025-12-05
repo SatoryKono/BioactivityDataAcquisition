@@ -3,6 +3,17 @@ import sys
 from pathlib import Path
 from typing import Literal, Optional
 
+# Remove old paths that might interfere
+sys.path = [p for p in sys.path if 'bioactivity_data_acquisition1' not in p.lower()]
+
+# Ensure we use the correct source directory
+_current_file = Path(__file__)
+_src_dir = _current_file.parent.parent.parent.parent
+_src_str = str(_src_dir)
+if _src_str in sys.path:
+    sys.path.remove(_src_str)
+sys.path.insert(0, _src_str)
+
 import typer
 from rich.console import Console
 from rich.table import Table

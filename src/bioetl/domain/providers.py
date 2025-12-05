@@ -3,11 +3,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Protocol, runtime_checkable
+from typing import Generic, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
 from bioetl.domain.normalization_service import NormalizationService
+
+ClientT_co = TypeVar("ClientT_co", covariant=True)
+ExtractionServiceT_co = TypeVar("ExtractionServiceT_co", covariant=True)
+NormalizationServiceT_co = TypeVar(
+    "NormalizationServiceT_co", bound=NormalizationService | None, covariant=True
+)
+WriterT_co = TypeVar("WriterT_co", covariant=True)
 
 
 class ProviderId(str, Enum):
@@ -27,13 +34,31 @@ class BaseProviderConfig(BaseModel):
 
 
 @runtime_checkable
-class ProviderComponents(Protocol):
-    """Protocol describing provider component factories."""
+class ProviderComponents(
+    Protocol[
+        ClientT_co,
+        ExtractionServiceT_co,
+        NormalizationServiceT_co,
+        WriterT_co,
+    ],
+    Generic[
+        ClientT_co,
+        ExtractionServiceT_co,
+        NormalizationServiceT_co,
+        WriterT_co,
+    ],
+):
+    """Protocol describing provider component factories with consistent signatures."""
 
-    def create_client(self, config: BaseProviderConfig):
+    def create_client(self, config: BaseProviderConfig) -> ClientT_co:
         """Create provider client instance."""
 
-    def create_extraction_service(self, client: object, config: BaseProviderConfig):
+    def create_extraction_service(
+        self,
+        config: BaseProviderConfig,
+        *,
+        client: ClientT_co | None = None,
+    ) -> ExtractionServiceT_co:
         """Create provider-specific extraction service."""
 
     # Optional factories
@@ -41,12 +66,17 @@ class ProviderComponents(Protocol):
         self,
         config: BaseProviderConfig,
         *,
-        client: object | None = None,
+        client: ClientT_co | None = None,
         pipeline_config: object | None = None,
-    ) -> NormalizationService:  # pragma: no cover - optional
+    ) -> NormalizationServiceT_co:  # pragma: no cover - optional
         """Create provider-specific normalization service."""
 
-    def create_writer(self, config: BaseProviderConfig):  # pragma: no cover - optional
+    def create_writer(
+        self,
+        config: BaseProviderConfig,
+        *,
+        client: ClientT_co | None = None,
+    ) -> WriterT_co:  # pragma: no cover - optional
         """Create provider-specific writer."""
 
 @dataclass(frozen=True)
