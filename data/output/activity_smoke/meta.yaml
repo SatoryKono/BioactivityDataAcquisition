@@ -1,0 +1,11 @@
+checksum: 3703664eb81da6aad290818a4263ad7998b157e44414101b4cce6fe5997f882c
+chembl_release: ChEMBL_36
+entity: activity
+files:
+- activity.csv
+hash: 3703664eb81da6aad290818a4263ad7998b157e44414101b4cce6fe5997f882c
+hash_version: v1_blake2b_256
+provider: chembl
+row_count: 10000
+run_id: 08aa657a-099e-4d2f-85cc-377922472791
+timestamp: '2025-12-05T19:21:40.359336+00:00'
