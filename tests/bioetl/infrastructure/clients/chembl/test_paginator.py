@@ -43,3 +43,37 @@ def test_get_next_marker_no_next():
     marker = paginator.get_next_marker(response)
     assert marker is None
     assert paginator.has_more(response) is False
+
+
+def test_get_next_request_uses_next_link_relative():
+    """Paginator should build absolute URL from relative next link."""
+    paginator = ChemblPaginatorImpl()
+    response = {
+        "page_meta": {
+            "next": "/api/data/activity?offset=20&limit=20",
+            "limit": 20,
+            "offset": 0,
+            "total_count": 40,
+        }
+    }
+
+    next_url = paginator.get_next_request(response, "https://example.org/api/data/activity?offset=0&limit=20")
+
+    assert next_url == "https://example.org/api/data/activity?offset=20&limit=20"
+
+
+def test_get_next_request_builds_from_offset_when_no_next():
+    """Paginator reconstructs URL using updated offset when next is missing."""
+    paginator = ChemblPaginatorImpl()
+    response = {
+        "page_meta": {
+            "next": None,
+            "limit": 20,
+            "offset": 0,
+            "total_count": 40,
+        }
+    }
+
+    next_url = paginator.get_next_request(response, "https://example.org/api/data/activity?offset=0&limit=20&foo=bar")
+
+    assert next_url == "https://example.org/api/data/activity?offset=20&limit=20&foo=bar"
