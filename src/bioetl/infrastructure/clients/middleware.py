@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import random
 import time
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Any, Callable, NamedTuple
 
 from bioetl.domain.errors import (
@@ -104,6 +106,8 @@ class HttpClientMiddleware:
                     elapsed,
                     attempt,
                     total_retry_delay,
+                    None,
+                    None,
                 )
                 total_retry_delay = retry_decision.total_retry_delay
                 if retry_decision.should_retry:
@@ -125,6 +129,8 @@ class HttpClientMiddleware:
                     elapsed,
                     attempt,
                     total_retry_delay,
+                    None,
+                    None,
                 )
                 total_retry_delay = retry_decision.total_retry_delay
                 if retry_decision.should_retry:
@@ -156,6 +162,7 @@ class HttpClientMiddleware:
                     attempt,
                     total_retry_delay,
                     status_code,
+                    response,
                 )
                 total_retry_delay = retry_decision.total_retry_delay
                 if retry_decision.should_retry:
@@ -177,6 +184,7 @@ class HttpClientMiddleware:
                         attempt,
                         total_retry_delay,
                         status_code,
+                        getattr(exc, "response", None),
                     )
                     total_retry_delay = retry_decision.total_retry_delay
                     if retry_decision.should_retry:
@@ -216,6 +224,7 @@ class HttpClientMiddleware:
         attempt: int,
         total_retry_delay: float,
         status_code: int | None = None,
+        response: Any | None = None,
     ) -> _RetryDecision:
         self._record_failure(error)
         self._log_failure(
@@ -238,7 +247,8 @@ class HttpClientMiddleware:
             self._increment_failure_metric()
             return _RetryDecision(False, total_retry_delay)
 
-        delay = self._backoff_delay(attempt)
+        retry_after = self._retry_after_seconds(response, error)
+        delay = self._backoff_delay(attempt, retry_after)
         updated_total_retry_delay = total_retry_delay + delay
         self._log_retry(
             method,
@@ -252,10 +262,49 @@ class HttpClientMiddleware:
         time.sleep(delay)
         return _RetryDecision(True, updated_total_retry_delay)
 
-    def _backoff_delay(self, attempt: int) -> float:
-        delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
-        jitter = random.uniform(0.0, delay)
-        return min(delay + jitter, self.max_delay)
+    def _retry_after_seconds(
+        self, response: Any | None, error: Exception
+    ) -> float | None:
+        header_value = self._retry_after_header(response)
+        if header_value is None:
+            header_value = self._retry_after_header(getattr(error, "response", None))
+        if header_value is None:
+            return None
+
+        try:
+            seconds = float(header_value)
+            return seconds if seconds >= 0 else None
+        except (TypeError, ValueError):
+            pass
+
+        try:
+            retry_at = parsedate_to_datetime(str(header_value))
+        except (TypeError, ValueError):
+            return None
+
+        if retry_at.tzinfo is None:
+            retry_at = retry_at.replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        return max((retry_at - now).total_seconds(), 0.0)
+
+    def _retry_after_header(self, response: Any | None) -> str | None:
+        if response is None:
+            return None
+        headers = getattr(response, "headers", None)
+        if not headers:
+            return None
+        try:
+            lower = {str(key).lower(): value for key, value in headers.items()}
+        except Exception:  # pragma: no cover - defensive for unusual headers
+            return None
+        return lower.get("retry-after")
+
+    def _backoff_delay(self, attempt: int, retry_after: float | None = None) -> float:
+        base_delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
+        combined = base_delay if retry_after is None else max(base_delay, retry_after)
+        capped = min(combined, self.max_delay)
+        jitter = random.uniform(0.0, capped)
+        return min(capped + jitter, self.max_delay)
 
     def _ensure_circuit_allows_request(self, method: str, url: str) -> None:
         if self._circuit_opened_at is None:
