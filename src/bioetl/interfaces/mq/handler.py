@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.config_loader import load_pipeline_config
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.domain.config_loader import load_pipeline_config
 from bioetl.domain.models import RunResult
 
 

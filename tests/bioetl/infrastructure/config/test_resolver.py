@@ -3,7 +3,7 @@ Tests for ConfigResolver.
 """
 import pytest
 
-from bioetl.domain.config_loader import (
+from bioetl.application.config_loader import (
     ConfigFileNotFoundError,
     _load_yaml,
     _resolve_profile,

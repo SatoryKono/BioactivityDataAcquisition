@@ -6,8 +6,8 @@ import asyncio
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from bioetl.application.config_loader import load_pipeline_config
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.domain.config_loader import load_pipeline_config
 from bioetl.domain.models import RunResult
 
 
