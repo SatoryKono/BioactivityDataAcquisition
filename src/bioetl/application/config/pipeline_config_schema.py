@@ -115,10 +115,10 @@ class HashingConfig(BaseModel):
     output_encoding: str = "hex_lower"
     salt: str | None = None
     hash_version: str = "v1_blake2b_256"
-    
+
     canonicalization: CanonicalizationConfig = Field(default_factory=CanonicalizationConfig)
     business_key: BusinessKeyConfig = Field(default_factory=BusinessKeyConfig)
-    
+
     # Поле бизнес-ключей, специфичное для пайплайна
     business_key_fields: list[str] = Field(default_factory=list)
 
@@ -182,12 +182,8 @@ class PipelineConfig(BaseModel):
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
     qc: QcConfig = Field(default_factory=QcConfig)
     hashing: HashingConfig = Field(default_factory=HashingConfig)
-    normalization: NormalizationConfig = Field(
-        default_factory=NormalizationConfig
-    )
-    features: InterfaceFeaturesConfig = Field(
-        default_factory=InterfaceFeaturesConfig
-    )
+    normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
+    features: InterfaceFeaturesConfig = Field(default_factory=InterfaceFeaturesConfig)
 
     pipeline: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
@@ -201,8 +197,7 @@ class PipelineConfig(BaseModel):
     def get_source_config(self, provider: str) -> BaseProviderConfig:
         if provider != self.provider:
             raise ValueError(
-                f"Requested provider '{provider}' does not match "
-                f"config provider '{self.provider}'"
+                f"Requested provider '{provider}' does not match config provider '{self.provider}'"
             )
         return self.provider_config
 
@@ -219,32 +214,20 @@ class PipelineConfig(BaseModel):
     @model_validator(mode="after")
     def validate_provider_alignment(self) -> PipelineConfig:
         if self.provider_config.provider != self.provider:
-            raise ValueError(
-                "provider_config.provider must match top-level provider"
-            )
+            raise ValueError("provider_config.provider must match top-level provider")
         return self
 
     @model_validator(mode="after")
     def validate_input_mode(self) -> PipelineConfig:
         if self.input_mode in {"csv", "id_only"} and not self.input_path:
-            raise ValueError(
-                "input_path must be provided when input_mode is 'csv' "
-                "or 'id_only'"
-            )
+            raise ValueError("input_path must be provided when input_mode is 'csv' or 'id_only'")
 
         if self.input_mode == "csv" and not self.csv_options.header:
-            raise ValueError(
-                "csv_options.header must be true when input_mode is 'csv'"
-            )
+            raise ValueError("csv_options.header must be true when input_mode is 'csv'")
 
-        if (
-            self.input_mode == "auto_detect"
-            and self.input_path
-            and not self.csv_options.header
-        ):
+        if self.input_mode == "auto_detect" and self.input_path and not self.csv_options.header:
             raise ValueError(
-                "csv_options.header must be true when input_mode is "
-                "'auto_detect' and input_path is set"
+                "csv_options.header must be true when input_mode is 'auto_detect' and input_path is set"
             )
 
         return self
@@ -265,3 +248,4 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
 ]
+
