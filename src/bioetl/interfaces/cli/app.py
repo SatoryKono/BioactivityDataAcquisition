@@ -18,8 +18,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.domain.config_loader import load_pipeline_config_from_path
 from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain import config_loader
-from bioetl.domain.config_loader import (
+from bioetl.application import config_loader
+from bioetl.application.config_loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
     UnknownProviderError,

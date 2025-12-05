@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.domain.config_loader import load_pipeline_config_from_path
 
 
 @pytest.mark.integration
