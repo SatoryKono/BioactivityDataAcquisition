@@ -33,10 +33,14 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
+    "import-linter>=2.0.0",
 ]
 
 [project.scripts]
-bioetl = "bioetl.interfaces.cli:app"
+bioetl = "bioetl.interfaces.cli.app:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]

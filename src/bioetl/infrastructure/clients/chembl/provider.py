@@ -19,7 +19,12 @@ from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConf
 
 
 class ChemblProviderComponents(
-    ProviderComponents
+    ProviderComponents[
+        ChemblDataClientABC,
+        ChemblExtractionServiceImpl,
+        ChemblNormalizationService,
+        object,
+    ]
 ):
     """Factory set for building ChEMBL provider components."""
 
@@ -27,7 +32,10 @@ class ChemblProviderComponents(
         return create_client(config)
 
     def create_extraction_service(
-        self, client: ChemblDataClientABC, config: ChemblSourceConfig
+        self,
+        config: ChemblSourceConfig,
+        *,
+        client: ChemblDataClientABC | None = None,
     ) -> ChemblExtractionServiceImpl:
         return create_extraction_service(config, client=client)
 
@@ -35,14 +43,13 @@ class ChemblProviderComponents(
         self,
         config: ChemblSourceConfig,
         *,
-        pipeline_config: PipelineConfig | None = None,
         client: ChemblDataClientABC | None = None,
+        pipeline_config: PipelineConfig | None = None,
     ) -> ChemblNormalizationService:
-        _ = config  # keep signature explicit
-        effective_config = pipeline_config
-        if effective_config is None:
+        _ = client  # signature compatibility; normalization independent from client
+        if pipeline_config is None:
             raise ValueError("PipelineConfig is required to build normalization service")
-        return ChemblNormalizationService(effective_config)
+        return ChemblNormalizationService(pipeline_config)
 
 
 def register_chembl_provider() -> ProviderDefinition:

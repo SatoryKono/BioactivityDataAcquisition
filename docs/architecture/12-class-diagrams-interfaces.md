@@ -31,6 +31,9 @@ classDiagram
 ## 2. REST API Structure
 
 ```mermaid
+---
+id: 4ad0763a-3323-4d48-be3f-d28239a5bd09
+---
 classDiagram
     class FastAPI {
         +app
@@ -63,6 +66,9 @@ classDiagram
 ## 3. MQ Listener Structure
 
 ```mermaid
+---
+id: d0b757fd-3054-4efe-94ef-9b5cfc3f6c0d
+---
 classDiagram
     class MQListener {
         -queue_name: str
@@ -96,6 +102,9 @@ classDiagram
 ## 4. CLI Contracts
 
 ```mermaid
+---
+id: 61e132ca-a2c4-4eff-a676-4556e0800563
+---
 classDiagram
     class CLICommandABC {
         <<abstract>>
@@ -126,6 +135,9 @@ classDiagram
 ## 5. REST API Models
 
 ```mermaid
+---
+id: ec54c376-58fb-4220-b59d-3fd21a9aeedd
+---
 classDiagram
     class BaseModel {
         +model_dump()
@@ -161,6 +173,9 @@ classDiagram
 ## 6. MQ Job Processing
 
 ```mermaid
+---
+id: 2f874225-478b-4ebd-9092-97217689c9ad
+---
 classDiagram
     class MQJob {
         +job_id: str
