@@ -1,4 +1,4 @@
-name: Import Linter
+name: Lint and Type Check
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  import-linter:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,14 +25,21 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .[dev]
 
-      - name: Run architecture import guard
+      - name: Ruff (lint)
+        run: ruff check src tests
+
+      - name: Black (format check)
+        run: black --check src tests
+
+      - name: Isort (import order)
+        run: isort --check-only src tests
+
+      - name: Mypy (strict-ish)
+        run: mypy --config-file pyproject.toml src/bioetl
+
+      - name: Architecture guard (pytest)
         run: pytest tests/architecture/test_layer_dependencies.py
 
-      - name: Run import-linter (warn mode)
+      - name: Import Linter contract
         run: lint-imports --config .importlinter
-        continue-on-error: true
-
-      - name: Reminder to enable fail mode
-        if: always()
-        run: echo "Set continue-on-error: false once violations are fixed."
 

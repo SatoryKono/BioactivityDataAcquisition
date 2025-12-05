@@ -26,8 +26,6 @@ src/bioetl/application/pipelines/chembl/pipeline.py
 src/bioetl/application/pipelines/chembl/transformer.py
 src/bioetl/application/services/__init__.py
 src/bioetl/application/services/chembl_extraction.py
-src/bioetl/core/provider_registry.py
-src/bioetl/core/providers.py
 src/bioetl/domain/__init__.py
 src/bioetl/domain/config_loader.py
 src/bioetl/domain/contracts.py
