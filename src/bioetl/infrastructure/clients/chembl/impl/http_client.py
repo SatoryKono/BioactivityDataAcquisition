@@ -73,13 +73,11 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
             yield response_data
 
-            # Пагинация: сейчас реализована упрощенно, возвращает только данные текущей страницы
-            # В будущем здесь должна быть логика извлечения next_url
-            next_marker = paginator.get_next_marker(response_data)
-            if next_marker:
-                # TODO: Реализовать переход к следующей странице
-                pass
-            break
+            next_request = paginator.get_next_request(response_data, url)
+            if next_request:
+                url = next_request
+            else:
+                break
 
     def metadata(self) -> dict[str, Any]:
         url = self.request_builder.for_endpoint("status").build({})
