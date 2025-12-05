@@ -392,7 +392,7 @@ flowchart LR
     QC["**QC / Golden Data** *bioetl.infrastructure.qc*"]
   end
   subgraph Interfaces["**Interfaces (Ports)**"]
-    IF_Pipeline["**PipelineBase**, **ChemblPipelineBase** *bioetl.core.pipeline*"]
+    IF_Pipeline["**PipelineBase**, **ChemblPipelineBase** *bioetl.application.pipelines.base*"]
     IF_Client["**BaseClient**, **SourceClientABC** *bioetl.interfaces.clients*"]
     IF_Logger["**LoggerAdapterABC** *bioetl.interfaces.logging*"]
     IF_Writer["**WriterABC**, **UnifiedOutputWriterABC** *bioetl.interfaces.output*"]

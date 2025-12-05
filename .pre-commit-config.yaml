@@ -1,0 +1,37 @@
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.6.8
+  hooks:
+    - id: ruff
+      args: ["--fix"]
+
+- repo: https://github.com/psf/black
+  rev: 24.8.0
+  hooks:
+    - id: black
+
+- repo: https://github.com/PyCQA/isort
+  rev: 5.13.2
+  hooks:
+    - id: isort
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.10.0
+  hooks:
+    - id: mypy
+      args: ["--config-file", "pyproject.toml", "src/bioetl"]
+      additional_dependencies: [".[dev]"]
+
+- repo: local
+  hooks:
+    - id: import-linter
+      name: import-linter
+      entry: lint-imports --config .importlinter
+      language: python
+      additional_dependencies: ["import-linter>=2.0.0"]
+
