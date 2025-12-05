@@ -9,8 +9,10 @@ from typing import Any, Callable, Iterable, TYPE_CHECKING
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.enums import ErrorAction
+from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.application.pipelines.stage_runner import StageRunner
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.providers import ProviderId
@@ -72,9 +74,6 @@ class PipelineBase(ABC):
         self._extractor = extractor
         self._transformer = transformer
         self._post_transformer = post_transformer or self._build_default_transformer()
-        self._hooks: list[PipelineHookABC] = list(hooks or [])
-        self._last_error: PipelineStageError | None = None
-        self._stage_starts: dict[str, datetime] = {}
         self._schema_contract = get_pipeline_contract(
             config.id, default_entity=config.entity_name
         )
@@ -82,7 +81,27 @@ class PipelineBase(ABC):
             FailFastErrorPolicyImpl,
         )
 
+        self._hooks_manager = HooksManager(
+            logger=self._logger,
+            provider_id=self._provider_id,
+            entity_name=self._config.entity_name,
+            hooks=hooks,
+        )
         self._error_policy = error_policy or FailFastErrorPolicyImpl()
+        self._error_policy_manager = ErrorPolicyManager(
+            error_policy=self._error_policy,
+            hooks_manager=self._hooks_manager,
+            logger=self._logger,
+            provider_id=self._provider_id,
+            entity_name=self._config.entity_name,
+            default_on_skip=self._default_on_skip,
+        )
+        self._stage_runner = StageRunner(
+            hooks_manager=self._hooks_manager,
+            error_policy_manager=self._error_policy_manager,
+            entity_name=self._config.entity_name,
+            provider_id=self._provider_id,
+        )
         self._instrument_extract_calls()
 
     # === Public API ===
@@ -97,10 +116,9 @@ class PipelineBase(ABC):
         """
         Запускает полный цикл ETL-пайплайна.
         """
-        self._stage_starts.clear()
+        self._hooks_manager.reset()
         if hasattr(self._hash_service, "reset_state"):
             self._hash_service.reset_state()
-        self._last_error = None
 
         context = RunContext(
             entity_name=self._config.entity_name,
@@ -126,7 +144,7 @@ class PipelineBase(ABC):
         validate_started = False
 
         try:
-            self._notify_stage_start("extract", context)
+            self._hooks_manager.notify_stage_start("extract", context)
             chunk_iterator: Iterable[pd.DataFrame] | None = None
 
             def reset_iterator() -> None:
@@ -136,7 +154,7 @@ class PipelineBase(ABC):
             reset_iterator()
             while True:
                 try:
-                    raw_chunk = self._execute_with_error_policy(
+                    raw_chunk = self._error_policy_manager.execute(
                         "extract",
                         context,
                         lambda: next(chunk_iterator),  # type: ignore
@@ -156,17 +174,20 @@ class PipelineBase(ABC):
                     validate_started,
                     validate_chunks,
                     validate_count,
-                ) = self._process_chunk(
+                ) = self._stage_runner.process_chunk(
                     raw_chunk,
                     context,
-                    transform_started,
-                    transform_chunks,
-                    transform_count,
-                    validate_started,
-                    validate_chunks,
-                    validate_count,
-                    validated_chunks,
-                    dry_run,
+                    transform_started=transform_started,
+                    transform_chunks=transform_chunks,
+                    transform_count=transform_count,
+                    validate_started=validate_started,
+                    validate_chunks=validate_chunks,
+                    validate_count=validate_count,
+                    validated_chunks=validated_chunks,
+                    dry_run=dry_run,
+                    transform_fn=self.transform,
+                    apply_transformers=self._apply_transformers,
+                    validate_fn=self.validate,
                 )
 
             if not transform_started:
@@ -177,50 +198,53 @@ class PipelineBase(ABC):
                     validate_started,
                     validate_chunks,
                     validate_count,
-                ) = self._process_chunk(
+                ) = self._stage_runner.process_chunk(
                     pd.DataFrame(),
                     context,
-                    transform_started,
-                    transform_chunks,
-                    transform_count,
-                    validate_started,
-                    validate_chunks,
-                    validate_count,
-                    validated_chunks,
-                    dry_run,
+                    transform_started=transform_started,
+                    transform_chunks=transform_chunks,
+                    transform_count=transform_count,
+                    validate_started=validate_started,
+                    validate_chunks=validate_chunks,
+                    validate_count=validate_count,
+                    validated_chunks=validated_chunks,
+                    dry_run=dry_run,
+                    transform_fn=self.transform,
+                    apply_transformers=self._apply_transformers,
+                    validate_fn=self.validate,
                 )
 
             stages_results.append(
-                self._make_stage_result(
+                self._stage_runner.make_stage_result(
                     "extract",
                     extract_count,
                     chunks=extract_chunks,
                 )
             )
-            self._notify_stage_end("extract", stages_results[-1])
+            self._hooks_manager.notify_stage_end("extract", stages_results[-1])
 
             stages_results.append(
-                self._make_stage_result(
+                self._stage_runner.make_stage_result(
                     "transform",
                     transform_count,
                     chunks=transform_chunks,
                 )
             )
-            self._notify_stage_end("transform", stages_results[-1])
+            self._hooks_manager.notify_stage_end("transform", stages_results[-1])
 
             stages_results.append(
-                self._make_stage_result(
+                self._stage_runner.make_stage_result(
                     "validate",
                     validate_count,
                     chunks=validate_chunks,
                 )
             )
-            self._notify_stage_end("validate", stages_results[-1])
+            self._hooks_manager.notify_stage_end("validate", stages_results[-1])
 
             write_result: WriteResult | None = None
             if not dry_run:
-                if not self._stage_starts.get("write"):
-                    self._notify_stage_start("write", context)
+                if not self._hooks_manager.get_stage_start("write"):
+                    self._hooks_manager.notify_stage_start("write", context)
 
                 df_to_write = (
                     pd.concat(validated_chunks, ignore_index=True)
@@ -228,7 +252,7 @@ class PipelineBase(ABC):
                     else pd.DataFrame()
                 )
 
-                write_result = self._execute_with_error_policy(
+                write_result = self._error_policy_manager.execute(
                     "write",
                     context,
                     lambda: self.write(
@@ -238,7 +262,7 @@ class PipelineBase(ABC):
                     ),
                 )
                 if write_result is None:
-                    return self._handle_stage_failure(
+                    return self._stage_runner.handle_stage_failure(
                         "write", stages_results, context
                     )
 
@@ -246,13 +270,13 @@ class PipelineBase(ABC):
                 write_chunks = max(validate_chunks, 1)
 
                 stages_results.append(
-                    self._make_stage_result(
+                    self._stage_runner.make_stage_result(
                         "write",
                         write_result.row_count,
                         chunks=write_chunks,
                     )
                 )
-                self._notify_stage_end("write", stages_results[-1])
+                self._hooks_manager.notify_stage_end("write", stages_results[-1])
 
             total_row_count = validate_count
             meta = (
@@ -365,112 +389,39 @@ class PipelineBase(ABC):
 
     def add_hook(self, hook: PipelineHookABC) -> None:
         """Добавляет хук выполнения."""
-        self._hooks.append(hook)
+        self._hooks_manager.add_hook(hook)
 
     def add_hooks(self, hooks: list[PipelineHookABC]) -> None:
         """Добавляет список хуков выполнения."""
-        for hook in hooks:
-            self.add_hook(hook)
+        self._hooks_manager.add_hooks(hooks)
 
     def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
         """Устанавливает политику обработки ошибок."""
         self._error_policy = error_policy
+        self._error_policy_manager = ErrorPolicyManager(
+            error_policy=error_policy,
+            hooks_manager=self._hooks_manager,
+            logger=self._logger,
+            provider_id=self._provider_id,
+            entity_name=self._config.entity_name,
+            default_on_skip=self._default_on_skip,
+        )
+        self._stage_runner = StageRunner(
+            hooks_manager=self._hooks_manager,
+            error_policy_manager=self._error_policy_manager,
+            entity_name=self._config.entity_name,
+            provider_id=self._provider_id,
+        )
 
     def set_post_transformer(self, transformer: TransformerABC) -> None:
         """Позволяет заменить пост-обработчик трансформации."""
         self._post_transformer = transformer
 
     # === Internal Methods ===
-    def _notify_stage_start(self, stage: str, context: RunContext) -> None:
-        self._stage_starts[stage] = datetime.now(timezone.utc)
-        self._logger.info(
-            f"Stage started: {stage}",
-            provider=context.provider,
-            entity=context.entity_name,
-            run_id=context.run_id,
-        )
-        for hook in self._hooks:
-            hook.on_stage_start(stage, context)
-
-    def _notify_stage_end(self, stage: str, result: StageResult) -> None:
-        self._logger.info(
-            f"Stage finished: {stage}",
-            records=result.records_processed,
-            chunks=result.chunks_processed,
-            provider=self._provider_id.value,
-            entity=self._config.entity_name,
-        )
-        for hook in self._hooks:
-            hook.on_stage_end(stage, result)
-
-    def _make_stage_result(
-        self,
-        stage: str,
-        count: int,
-        *,
-        success: bool = True,
-        errors: list[str] | None = None,
-        chunks: int = 0,
-    ) -> StageResult:
-        start_time = self._stage_starts.get(stage)
-        duration = 0.0
-        if start_time:
-            duration = (
-                datetime.now(timezone.utc) - start_time
-            ).total_seconds()
-
-        return StageResult(
-            stage_name=stage,
-            success=success,
-            records_processed=count if success else 0,
-            chunks_processed=chunks if success else 0,
-            duration_sec=duration,
-            errors=errors or [],
-        )
-
     def _calculate_duration(self, context: RunContext) -> float:
         return (
             datetime.now(timezone.utc) - context.started_at
         ).total_seconds()
-
-    def _handle_stage_failure(
-        self,
-        stage: str,
-        stages_results: list[StageResult],
-        context: RunContext,
-        *,
-        count: int = 0,
-        chunks: int = 0,
-    ) -> RunResult:
-        errors = self._get_last_error_messages()
-        stage_result = self._make_stage_result(
-            stage,
-            count,
-            success=False,
-            errors=errors,
-            chunks=chunks,
-        )
-        stages_results.append(stage_result)
-        self._notify_stage_end(stage, stage_result)
-        return RunResult(
-            run_id=context.run_id,
-            success=False,
-            entity_name=self._config.entity_name,
-            row_count=0,
-            output_path=None,
-            duration_sec=self._calculate_duration(context),
-            stages=stages_results,
-            errors=errors,
-            meta={},
-        )
-
-    def _get_last_error_messages(self) -> list[str]:
-        if self._last_error is None:
-            return []
-        messages = [str(self._last_error)]
-        if self._last_error.cause:
-            messages.append(str(self._last_error.cause))
-        return messages
 
     def _build_default_transformer(self) -> TransformerABC:
         return TransformerChain(
@@ -495,78 +446,10 @@ class PipelineBase(ABC):
             return df
         return self._post_transformer.apply(df, context)
 
-    def _process_chunk(
-        self,
-        raw_chunk: pd.DataFrame,
-        context: RunContext,
-        transform_started: bool,
-        transform_chunks: int,
-        transform_count: int,
-        validate_started: bool,
-        validate_chunks: int,
-        validate_count: int,
-        validated_chunks: list[pd.DataFrame],
-        dry_run: bool,
-    ) -> tuple[bool, int, int, bool, int, int]:
-        if not transform_started:
-            self._notify_stage_start("transform", context)
-            transform_started = True
-
-        df_transformed = self._execute_with_error_policy(
-            "transform",
-            context,
-            lambda: self._apply_transformers(
-                self.transform(raw_chunk),
-                context,
-            ),
-        )
-        if df_transformed is None:
-            raise PipelineStageError(
-                provider=self._provider_id.value,
-                entity=self._config.entity_name,
-                stage="transform",
-                attempt=1,
-                run_id=context.run_id,
-            )
-
-        transform_chunks += 1
-        transform_count += len(df_transformed)
-
-        if not validate_started:
-            self._notify_stage_start("validate", context)
-            validate_started = True
-
-        df_validated = self._execute_with_error_policy(
-            "validate", context, lambda: self.validate(df_transformed)
-        )
-        if df_validated is None:
-            raise PipelineStageError(
-                provider=self._provider_id.value,
-                entity=self._config.entity_name,
-                stage="validate",
-                attempt=1,
-                run_id=context.run_id,
-            )
-
-        validate_chunks += 1
-        validate_count += len(df_validated)
-
-        if not dry_run:
-            validated_chunks.append(df_validated)
-
-        return (
-            transform_started,
-            transform_chunks,
-            transform_count,
-            validate_started,
-            validate_chunks,
-            validate_count,
-        )
-
     def _create_chunk_iterator(
         self, context: RunContext, **kwargs: Any
     ) -> Iterable[pd.DataFrame]:
-        iterator = self._execute_with_error_policy(
+        iterator = self._error_policy_manager.execute(
             "extract",
             context,
             lambda: self.iter_chunks(**kwargs),
@@ -587,74 +470,13 @@ class PipelineBase(ABC):
         *,
         attempt: int = 1,
     ) -> Any:
-        self._notify_stage_start(stage, context)
-        return self._execute_with_error_policy(
+        self._hooks_manager.notify_stage_start(stage, context)
+        return self._error_policy_manager.execute(
             stage,
             context,
             action,
             attempt=attempt,
         )
-
-    def _execute_with_error_policy(
-        self,
-        stage: str,
-        context: RunContext,
-        action: Callable[[], Any],
-        *,
-        attempt: int = 1,
-        on_retry: Callable[[], None] | None = None,
-    ) -> Any:
-        try:
-            result = action()
-            self._last_error = None
-            return result
-        except StopIteration:
-            raise
-        except Exception as exc:
-            error = PipelineStageError(
-                provider=self._provider_id.value,
-                entity=self._config.entity_name,
-                stage=stage,
-                attempt=attempt,
-                run_id=context.run_id,
-                cause=exc,
-            )
-            self._last_error = error
-            self._logger.error(
-                "Stage failed",
-                stage=stage,
-                provider=self._provider_id.value,
-                entity=self._config.entity_name,
-                run_id=context.run_id,
-                error=str(exc),
-            )
-            for hook in self._hooks:
-                hook.on_error(stage, error)
-            action_on_error = self._error_policy.handle(error, context)
-            if action_on_error == ErrorAction.RETRY and self._error_policy.should_retry(
-                error
-            ):
-                if on_retry:
-                    on_retry()
-                return self._execute_with_error_policy(
-                    stage,
-                    context,
-                    action,
-                    attempt=attempt + 1,
-                    on_retry=on_retry,
-                )
-            if action_on_error == ErrorAction.SKIP:
-                self._logger.warning(
-                    "Stage skipped due to error policy",
-                    stage=stage,
-                    provider=self._provider_id.value,
-                    entity=self._config.entity_name,
-                    run_id=context.run_id,
-                    error=str(exc),
-                )
-                return self._default_on_skip(stage)
-
-            raise error from exc
 
     def _default_on_skip(self, stage: str) -> Any:
         """Возвращает безопасное значение по умолчанию при пропуске стадии."""
