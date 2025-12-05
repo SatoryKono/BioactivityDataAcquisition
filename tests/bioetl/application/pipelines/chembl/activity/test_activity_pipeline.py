@@ -32,6 +32,7 @@ def pipeline():
         validation_service=validation_service,
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
+        hash_service=MagicMock(),
     )
 
 def test_transform_nested_fields(pipeline):

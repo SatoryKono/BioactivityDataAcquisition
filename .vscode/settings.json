@@ -15,5 +15,7 @@
     ],
     "python.linting.pylintArgs": [
         "--ignore=tests/services"
-    ]
+    ],
+    "workbench.editor.enablePreviewFromQuickOpen": false,
+    "workbench.editor.enablePreviewFromCodeNavigation": false
 }

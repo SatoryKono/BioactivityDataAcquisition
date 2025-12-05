@@ -69,6 +69,7 @@ def pipeline(mock_config, mock_extraction_service):
         validation_service=validation_service,
         output_writer=output_writer,
         extraction_service=mock_extraction_service,
+        hash_service=MagicMock(),
     )
 
 
