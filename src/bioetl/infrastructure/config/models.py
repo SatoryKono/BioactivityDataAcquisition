@@ -12,6 +12,7 @@ from bioetl.application.config.pipeline_config_schema import (
     LoggingConfig,
     NormalizationConfig,
     PaginationConfig,
+    PipelineConfig,
     QcConfig,
     StorageConfig,
 )
@@ -33,6 +34,7 @@ __all__ = [
     "LoggingConfig",
     "NormalizationConfig",
     "PaginationConfig",
+    "PipelineConfig",
     "QcConfig",
     "StorageConfig",
     "BaseProviderConfig",
