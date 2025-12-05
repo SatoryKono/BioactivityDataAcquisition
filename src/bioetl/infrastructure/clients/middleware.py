@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import random
 import time
-from typing import Any
+from typing import Any, Callable, NamedTuple
 
 from bioetl.domain.errors import (
     ClientNetworkError,
@@ -36,6 +36,11 @@ except Exception:  # pragma: no cover - fallback when requests is absent
 __all__ = ["HttpClientMiddleware"]
 
 
+class _RetryDecision(NamedTuple):
+    should_retry: bool
+    total_retry_delay: float
+
+
 class HttpClientMiddleware:
     """HTTP client wrapper with retry/backoff, timeout and structured logging."""
 
@@ -51,6 +56,8 @@ class HttpClientMiddleware:
         timeout: float = 30.0,
         circuit_breaker_threshold: int = 5,
         circuit_breaker_recovery_time: float = 60.0,
+        retry_metric_callback: Callable[[int], None] | None = None,
+        failure_metric_callback: Callable[[int], None] | None = None,
     ) -> None:
         self.provider = provider
         self.base_client = base_client
@@ -65,9 +72,12 @@ class HttpClientMiddleware:
         self._failure_count = 0
         self._circuit_opened_at: float | None = None
         self._last_error_type: type[Exception] | None = None
+        self._retry_metric_callback = retry_metric_callback
+        self._failure_metric_callback = failure_metric_callback
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         attempt = 1
+        total_retry_delay = 0.0
         while attempt <= self.max_attempts:
             self._ensure_circuit_allows_request(method, url)
             start = time.perf_counter()
@@ -87,7 +97,16 @@ class HttpClientMiddleware:
                     message="Request timed out",
                     cause=exc,
                 )
-                if self._handle_retry(error, method, url, elapsed, attempt):
+                retry_decision = self._handle_retry(
+                    error,
+                    method,
+                    url,
+                    elapsed,
+                    attempt,
+                    total_retry_delay,
+                )
+                total_retry_delay = retry_decision.total_retry_delay
+                if retry_decision.should_retry:
                     attempt += 1
                     continue
                 raise error from error.cause
@@ -99,7 +118,16 @@ class HttpClientMiddleware:
                     message="Connection error",
                     cause=exc,
                 )
-                if self._handle_retry(error, method, url, elapsed, attempt):
+                retry_decision = self._handle_retry(
+                    error,
+                    method,
+                    url,
+                    elapsed,
+                    attempt,
+                    total_retry_delay,
+                )
+                total_retry_delay = retry_decision.total_retry_delay
+                if retry_decision.should_retry:
                     attempt += 1
                     continue
                 raise error from error.cause
@@ -114,12 +142,23 @@ class HttpClientMiddleware:
                     None,
                     exc.__class__.__name__,
                 )
+                self._increment_failure_metric()
                 raise
 
             status_code = getattr(response, "status_code", None)
             if status_code is not None and self._is_retryable_status(status_code):
                 error = self._map_status_error(status_code, url)
-                if self._handle_retry(error, method, url, elapsed, attempt, status_code):
+                retry_decision = self._handle_retry(
+                    error,
+                    method,
+                    url,
+                    elapsed,
+                    attempt,
+                    total_retry_delay,
+                    status_code,
+                )
+                total_retry_delay = retry_decision.total_retry_delay
+                if retry_decision.should_retry:
                     attempt += 1
                     continue
                 raise error
@@ -130,7 +169,17 @@ class HttpClientMiddleware:
                 status_code = self._extract_status_code(exc)
                 error = self._map_http_error(status_code, url, exc)
                 if status_code is not None and self._is_retryable_status(status_code):
-                    if self._handle_retry(error, method, url, elapsed, attempt, status_code):
+                    retry_decision = self._handle_retry(
+                        error,
+                        method,
+                        url,
+                        elapsed,
+                        attempt,
+                        total_retry_delay,
+                        status_code,
+                    )
+                    total_retry_delay = retry_decision.total_retry_delay
+                    if retry_decision.should_retry:
                         attempt += 1
                         continue
                 self._record_failure(error)
@@ -142,9 +191,17 @@ class HttpClientMiddleware:
                     status_code,
                     error.__class__.__name__,
                 )
+                self._increment_failure_metric()
                 raise error from error.cause
 
-            self._log_success(method, url, elapsed, attempt - 1, status_code)
+            self._log_success(
+                method,
+                url,
+                elapsed,
+                attempt - 1,
+                status_code,
+                total_retry_delay,
+            )
             self._reset_circuit(log_circuit_closure=True)
             return response
 
@@ -157,8 +214,9 @@ class HttpClientMiddleware:
         url: str,
         elapsed: float,
         attempt: int,
+        total_retry_delay: float,
         status_code: int | None = None,
-    ) -> bool:
+    ) -> _RetryDecision:
         self._record_failure(error)
         self._log_failure(
             method,
@@ -169,10 +227,30 @@ class HttpClientMiddleware:
             error.__class__.__name__,
         )
         if attempt >= self.max_attempts:
-            return False
+            self._log_final_failure(
+                method,
+                url,
+                attempt,
+                total_retry_delay,
+                status_code,
+                error.__class__.__name__,
+            )
+            self._increment_failure_metric()
+            return _RetryDecision(False, total_retry_delay)
+
         delay = self._backoff_delay(attempt)
+        updated_total_retry_delay = total_retry_delay + delay
+        self._log_retry(
+            method,
+            url,
+            attempt,
+            delay,
+            updated_total_retry_delay,
+            self._retry_reason(status_code, error),
+        )
+        self._increment_retry_metric()
         time.sleep(delay)
-        return True
+        return _RetryDecision(True, updated_total_retry_delay)
 
     def _backoff_delay(self, attempt: int) -> float:
         delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
@@ -298,6 +376,39 @@ class HttpClientMiddleware:
             return ClientResponseError(**base_kwargs)
         return ClientNetworkError(**base_kwargs)
 
+    def _retry_reason(
+        self,
+        status_code: int | None,
+        error: ClientNetworkError | ClientRateLimitError | ClientResponseError,
+    ) -> str:
+        if status_code is not None:
+            return f"status_{status_code}"
+        if getattr(error, "cause", None) is not None:
+            return error.cause.__class__.__name__
+        return error.__class__.__name__
+
+    def _log_retry(
+        self,
+        method: str,
+        url: str,
+        attempt: int,
+        delay: float,
+        total_retry_delay: float,
+        retry_reason: str,
+    ) -> None:
+        self.logger.info(
+            "Retrying HTTP request",
+            extra={
+                "provider": self.provider,
+                "method": method.upper(),
+                "url": url,
+                "next_attempt": attempt + 1,
+                "delay": delay,
+                "total_retry_delay": total_retry_delay,
+                "retry_reason": retry_reason,
+            },
+        )
+
     def _log_success(
         self,
         method: str,
@@ -305,6 +416,7 @@ class HttpClientMiddleware:
         elapsed: float,
         retry_count: int,
         status_code: int | None,
+        total_retry_delay: float,
     ) -> None:
         self.logger.info(
             "HTTP request succeeded",
@@ -315,6 +427,8 @@ class HttpClientMiddleware:
                 "status_code": status_code,
                 "elapsed": elapsed,
                 "retry_count": retry_count,
+                "attempts": retry_count + 1,
+                "total_retry_delay": total_retry_delay,
                 "error_type": None,
             },
         )
@@ -340,3 +454,35 @@ class HttpClientMiddleware:
                 "error_type": error_type,
             },
         )
+
+    def _log_final_failure(
+        self,
+        method: str,
+        url: str,
+        attempts: int,
+        total_retry_delay: float,
+        status_code: int | None,
+        error_type: str,
+    ) -> None:
+        self.logger.error(
+            "HTTP request failed after retries",
+            extra={
+                "provider": self.provider,
+                "method": method.upper(),
+                "url": url,
+                "status_code": status_code,
+                "attempts": attempts,
+                "total_retry_delay": total_retry_delay,
+                "error_type": error_type,
+            },
+        )
+
+    def _increment_retry_metric(self) -> None:
+        if self._retry_metric_callback is None:
+            return
+        self._retry_metric_callback(1)
+
+    def _increment_failure_metric(self) -> None:
+        if self._failure_metric_callback is None:
+            return
+        self._failure_metric_callback(1)
