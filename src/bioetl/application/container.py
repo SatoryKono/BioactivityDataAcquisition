@@ -1,8 +1,6 @@
 """Dependency Injection Container for the application."""
 from pathlib import Path
 from typing import Any, Callable
-
-import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
