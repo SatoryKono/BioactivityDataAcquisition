@@ -1,7 +1,4 @@
-"""Совместимая прослойка для конфигурационных моделей."""
-from __future__ import annotations
-
-from bioetl.application.config.pipeline_config_schema import (
+from bioetl.application.config.pipeline_config_schema import (  # noqa: F401
     BusinessKeyConfig,
     CanonicalizationConfig,
     ClientConfig,
@@ -15,12 +12,6 @@ from bioetl.application.config.pipeline_config_schema import (
     PipelineConfig,
     QcConfig,
     StorageConfig,
-)
-from bioetl.infrastructure.config.provider_config_schema import (
-    BaseProviderConfig,
-    ChemblSourceConfig,
-    DummyProviderConfig,
-    ProviderConfigUnion,
 )
 
 __all__ = [
@@ -37,8 +28,5 @@ __all__ = [
     "PipelineConfig",
     "QcConfig",
     "StorageConfig",
-    "BaseProviderConfig",
-    "ChemblSourceConfig",
-    "DummyProviderConfig",
-    "ProviderConfigUnion",
 ]
+
