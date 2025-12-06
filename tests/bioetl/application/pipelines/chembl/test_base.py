@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
+from bioetl.domain.transform.contracts import HasherABC
 from bioetl.domain.transform.hash_service import HashService
 
 
@@ -24,6 +25,13 @@ class ConcreteChemblPipeline(ChemblPipelineBase):
 @pytest.fixture
 def mock_dependencies_fixture():
     """Fixture for pipeline dependencies."""
+    class _DummyHasher(HasherABC):
+        def hash_row(self, _row):
+            return "hash_row"
+
+        def hash_columns(self, df, _columns):
+            return pd.Series(["hash_business_key"] * len(df))
+
     config = MagicMock()
     config.entity_name = "test"
     config.provider = "chembl"
@@ -41,7 +49,7 @@ def mock_dependencies_fixture():
         "validation_service": validation_service,
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
-        "hash_service": HashService(),
+        "hash_service": HashService(hasher=_DummyHasher()),
     }
 
 
