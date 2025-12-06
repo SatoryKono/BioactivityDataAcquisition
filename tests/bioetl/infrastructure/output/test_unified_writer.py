@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
