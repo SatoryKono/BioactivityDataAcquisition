@@ -180,6 +180,45 @@ def test_unified_writer_delegates_atomicity(
         assert args_list[2][0][0].name == "correlation_report_table.csv"
 
 
+def test_unified_writer_column_order_and_fill(
+    unified_writer,
+    mock_writer_fixture,
+    mock_quality_reporter,
+    mock_metadata_writer_fixture,
+    run_context,
+    tmp_path,
+):
+    """Unified writer should respect column order and fill missing columns."""
+
+    df = pd.DataFrame({"b": [1]})
+    output_dir = tmp_path / "out"
+    captured_df: pd.DataFrame | None = None
+
+    def capture_df(df_to_write, path, **kwargs):
+        nonlocal captured_df
+        captured_df = df_to_write.copy()
+        return WriteResult(path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0)
+
+    mock_writer_fixture.write.side_effect = capture_df
+
+    with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256", return_value="chk"):
+        result = unified_writer.write_result(
+            df,
+            output_dir,
+            "entity",
+            run_context,
+            column_order=["a", "b", "c"],
+        )
+
+    assert result.row_count == 1
+    assert captured_df is not None
+    assert list(captured_df.columns) == ["a", "b", "c"]
+    assert pd.isna(captured_df.loc[0, "a"])
+    assert captured_df.loc[0, "b"] == 1
+    assert pd.isna(captured_df.loc[0, "c"])
+    mock_metadata_writer_fixture.write_meta.assert_called_once()
+
+
 def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):
     """Test behavior when stable_sort is False."""
     mock_config_fixture.stable_sort = False

@@ -9,6 +9,7 @@ from bioetl.domain.models import RunContext
 from bioetl.infrastructure.config.models import DeterminismConfig, QcConfig
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_file_sha256
+from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.infrastructure.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
@@ -59,7 +60,7 @@ class UnifiedOutputWriter:
         # 1. Валидация колонок (Check if strictly matches order if provided)
         # Note: Actual schema validation happens in PipelineBase.validate()
         # Here we ensure output structure and determinism.
-        df_prepared = self._apply_column_order(df, column_order)
+        df_prepared = apply_column_order(df, column_order)
         
         # 2. Сортировка (Determinism)
         df_prepared = self._stable_sort(df_prepared, run_context, column_order)
@@ -139,28 +140,6 @@ class UnifiedOutputWriter:
                 df = df.sort_values(by=valid_keys, ignore_index=True)
 
         return df
-
-    def _apply_column_order(
-        self, df: pd.DataFrame, column_order: list[str] | None
-    ) -> pd.DataFrame:
-        if not column_order:
-            return df
-
-        df_prepared = df.copy()
-        
-        # Check for missing columns that are expected
-        missing = [c for c in column_order if c not in df_prepared.columns]
-        if missing:
-            # We fill missing columns with None, as schema validation should have caught
-            # mandatory ones if they were critical.
-            # If schema has them as Optional, they might be missing in DF if source didn't provide.
-            # However, PipelineBase._enforce_schema ensures columns exist.
-            # This is double safety.
-            for col in missing:
-                df_prepared[col] = None
-        
-        # Enforce exact order and content
-        return df_prepared[column_order]
 
     def _generate_qc_artifacts(
         self, df: pd.DataFrame, output_path: Path
