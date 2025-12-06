@@ -59,6 +59,8 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "database_version",
     "extracted_at",
 ]
+
+
 class ActivitySchema(pa.DataFrameModel):
     """Схема данных для таблицы Activity."""
 
