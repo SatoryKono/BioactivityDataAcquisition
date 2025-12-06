@@ -20,3 +20,8 @@
 ## Связи
 
 - Документы нужны Activity/Assay для ссылок на публикации. Запись: `document.csv` + `meta.yaml` через `UnifiedOutputWriter` (атомарно, checksum).
+
+## Диаграммы
+- Flowchart: `docs/application/pipelines/chembl/document/diagrams/flow/document-workflow.mmd`
+- Sequence: `docs/application/pipelines/chembl/document/diagrams/sequence/document-main-sequence.mmd`
+- Class: `docs/application/pipelines/chembl/document/diagrams/class/document-pipeline-class.mmd`

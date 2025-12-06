@@ -1,13 +1,35 @@
 """
 Pytest configuration and shared fixtures.
 """
+
 import socket
-from typing import cast
-from unittest.mock import MagicMock, Mock
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, cast
+from unittest.mock import MagicMock
 
 import pandas as pd
-from pydantic import AnyHttpUrl
 import pytest
+from pydantic import AnyHttpUrl
+
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.configs import (
+    ChemblSourceConfig,
+    HashingConfig,
+    LoggingConfig,
+    PipelineConfig,
+    StorageConfig,
+)
+from bioetl.domain.models import RunContext
+from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+
+# Ensure src is on sys.path even if pytest pythonpath is ignored by runners
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_PATH = PROJECT_ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
@@ -20,9 +42,9 @@ def pytest_configure(config):
     try:
         # Import and patch before Hypothesis is used
         from hypothesis.internal.conjecture import providers as hypothesis_providers
-        
+
         _original_get_local_constants = hypothesis_providers._get_local_constants
-        
+
         def _patched_get_local_constants():
             """Patched version that filters out unhashable modules."""
             try:
@@ -33,13 +55,14 @@ def pytest_configure(config):
                     # This is a workaround for Python 3.13 compatibility
                     import sys
                     from types import SimpleNamespace
-                    
+
                     # Create filtered modules dict
                     filtered_modules = {
-                        k: v for k, v in sys.modules.items()
+                        k: v
+                        for k, v in sys.modules.items()
                         if not isinstance(v, SimpleNamespace)
                     }
-                    
+
                     # Temporarily replace sys.modules
                     original_modules = dict(sys.modules)
                     try:
@@ -51,22 +74,11 @@ def pytest_configure(config):
                         sys.modules.clear()
                         sys.modules.update(original_modules)
                 raise
-        
+
         hypothesis_providers._get_local_constants = _patched_get_local_constants
     except (ImportError, AttributeError):
         # Hypothesis not available or structure changed, skip patch
         pass
-
-from bioetl.application.config.pipeline_config_schema import (
-    HashingConfig,
-    LoggingConfig,
-    PipelineConfig,
-    StorageConfig,
-)
-from bioetl.infrastructure.config.models import ChemblSourceConfig
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
-from bioetl.domain.validation.service import ValidationService
 
 
 @pytest.fixture
@@ -114,24 +126,55 @@ def mock_validation_service():
 @pytest.fixture
 def mock_output_writer():
     """Create a mock output writer."""
+    from pathlib import Path
+
+    from bioetl.domain.clients.base.output.contracts import WriteResult
+
     writer = MagicMock(spec=UnifiedOutputWriter)
-    writer.write_result.return_value = Mock(row_count=10)
+    writer.write_result.return_value = WriteResult(
+        path=Path("/tmp/test_output.csv"),
+        row_count=2,  # Default for most tests
+        duration_sec=0.1,
+        checksum=None,
+    )
     return writer
 
 
 @pytest.fixture
 def sample_df():
     """Create a sample DataFrame."""
-    return pd.DataFrame({
-        "id": [1, 2, 3],
-        "value": ["a", "b", "c"]
-    })
+    return pd.DataFrame({"id": [1, 2, 3], "value": ["a", "b", "c"]})
 
 
 @pytest.fixture
-def pipeline_test_config(
-    tmp_path_factory: pytest.TempPathFactory
-) -> PipelineConfig:
+def run_context_factory():
+    """Factory fixture to build RunContext with optional overrides."""
+
+    def _factory(
+        run_id: str = "test-run",
+        entity_name: str = "test_entity",
+        provider: str = "chembl",
+        started_at: datetime | None = None,
+        metadata: dict[str, Any] | None = None,
+        config: dict[str, Any] | None = None,
+        dry_run: bool = False,
+    ) -> RunContext:
+        return RunContext(
+            run_id=run_id,
+            entity_name=entity_name,
+            provider=provider,
+            started_at=started_at
+            or datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            metadata=metadata or {},
+            config=config or {},
+            dry_run=dry_run,
+        )
+
+    return _factory
+
+
+@pytest.fixture
+def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineConfig:
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
@@ -169,9 +212,8 @@ def small_pipeline_df() -> pd.DataFrame:
 @pytest.fixture(autouse=True)
 def disable_network_calls(monkeypatch, request):
     """Block network access unless marked with 'network' or 'integration'."""
-    if (
-        request.node.get_closest_marker("network") or
-        request.node.get_closest_marker("integration")
+    if request.node.get_closest_marker("network") or request.node.get_closest_marker(
+        "integration"
     ):
         return
 
@@ -190,5 +232,6 @@ def disable_network_calls(monkeypatch, request):
 
     monkeypatch.setattr(socket, "socket", GuardedSocket)
     monkeypatch.setattr(socket, "create_connection", guard)
+
 
 # End of conftest

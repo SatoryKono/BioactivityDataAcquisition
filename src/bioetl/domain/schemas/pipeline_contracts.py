@@ -1,4 +1,5 @@
 """Pipeline schema contracts and registry."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -30,41 +31,41 @@ def _default_contract(code: str, entity: str | None) -> PipelineSchemaContract:
 
 
 PIPELINE_CONTRACTS: dict[str, PipelineSchemaContract] = {
-    "activity_chembl": PipelineSchemaContract(
-        pipeline_code="activity_chembl",
+    "chembl.activity": PipelineSchemaContract(
+        pipeline_code="chembl.activity",
         schema_out="activity",
         schema_in="activity_input",
         output_schema="activity_output",
     ),
-    "assay_chembl": PipelineSchemaContract(
-        pipeline_code="assay_chembl",
+    "chembl.assay": PipelineSchemaContract(
+        pipeline_code="chembl.assay",
         schema_out="assay",
         schema_in="assay_input",
         output_schema="assay_output",
     ),
-    "document_chembl": PipelineSchemaContract(
-        pipeline_code="document_chembl",
+    "chembl.document": PipelineSchemaContract(
+        pipeline_code="chembl.document",
         schema_out="document",
         schema_in="document_input",
         output_schema="document_output",
     ),
-    "target_chembl": PipelineSchemaContract(
-        pipeline_code="target_chembl",
+    "chembl.target": PipelineSchemaContract(
+        pipeline_code="chembl.target",
         schema_out="target",
         schema_in="target_input",
         output_schema="target_output",
     ),
-    "testitem_chembl": PipelineSchemaContract(
-        pipeline_code="testitem_chembl",
+    "chembl.testitem": PipelineSchemaContract(
+        pipeline_code="chembl.testitem",
         schema_out="testitem",
         schema_in="testitem_input",
         output_schema="testitem_output",
     ),
-    "molecule_chembl": PipelineSchemaContract(
-        pipeline_code="molecule_chembl",
-        schema_out="testitem",
-        schema_in="testitem_input",
-        output_schema="testitem_output",
+    "chembl.molecule": PipelineSchemaContract(
+        pipeline_code="chembl.molecule",
+        schema_out="molecule",
+        schema_in="molecule_input",
+        output_schema="molecule_output",
     ),
 }
 

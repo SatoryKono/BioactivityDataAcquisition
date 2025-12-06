@@ -182,7 +182,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/application/config/pipeline_config_schema.py
+  - path: src/bioetl/config/pipeline_config_schema.py
     rule_id: CLASS_SUFFIX
     reason: "Options/Config object"
     owner: infra
@@ -339,13 +339,13 @@ exceptions:
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/domain/transform/impl/hasher.py
+  - path: src/bioetl/infrastructure/transform/impl/hasher.py
     rule_id: FUNC_PREFIX
     reason: "Hasher methods (normalize_unicode, format_float...)"
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/domain/transform/impl/normalize.py
+  - path: src/bioetl/infrastructure/transform/impl/normalize.py
     rule_id: FUNC_PREFIX
     reason: "Normalize methods"
     owner: domain
@@ -447,7 +447,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/application/config/pipeline_config_schema.py
+  - path: src/bioetl/config/pipeline_config_schema.py
     rule_id: FUNC_PREFIX
     reason: "Config property (entity_name)"
     owner: infra

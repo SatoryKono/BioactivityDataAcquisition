@@ -1,4 +1,5 @@
 """CSV-based record source implementations."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
@@ -7,24 +8,15 @@ from typing import Any
 
 import pandas as pd
 
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.configs import ChemblSourceConfig, CsvInputOptions
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.domain.record_source import RawRecord, RecordSource
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
     for i in range(0, len(data), size):
         yield data[i : i + size]
-
-
-def _chunk_dataframe(df: pd.DataFrame, chunk_size: int | None) -> Iterator[pd.DataFrame]:
-    if chunk_size is None or chunk_size <= 0:
-        yield df
-        return
-
-    for start in range(0, len(df), chunk_size):
-        yield df.iloc[start : start + chunk_size].reset_index(drop=True)
 
 
 class CsvRecordSourceImpl(RecordSource):
@@ -44,11 +36,9 @@ class CsvRecordSourceImpl(RecordSource):
         self._logger = logger
         self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[pd.DataFrame]:
+    def iter_records(self) -> Iterable[list[RawRecord]]:
         header = 0 if self._csv_options.header else None
-        self._logger.info(
-            f"Extracting records from CSV dataset: {self._input_path}"
-        )
+        self._logger.info(f"Extracting records from CSV dataset: {self._input_path}")
         df = pd.read_csv(
             self._input_path,
             delimiter=self._csv_options.delimiter,
@@ -56,7 +46,12 @@ class CsvRecordSourceImpl(RecordSource):
         )
         if self._limit is not None:
             df = df.head(self._limit)
-        yield from _chunk_dataframe(df, self._chunk_size)
+        records: list[RawRecord] = df.to_dict(orient="records")
+        if self._chunk_size is None or self._chunk_size <= 0:
+            yield records
+            return
+
+        yield from _chunk_list(records, self._chunk_size)
 
     @staticmethod
     def _ensure_csv_options(
@@ -99,10 +94,12 @@ class IdListRecordSourceImpl(RecordSource):
         self._logger = logger
         self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[pd.DataFrame]:
+    def iter_records(self) -> Iterable[list[RawRecord]]:
         header = 0 if self._csv_options.header else None
         usecols: list[Any] = [self._id_column] if self._csv_options.header else [0]
-        names: list[str] | None = [self._id_column] if not self._csv_options.header else None
+        names: list[str] | None = (
+            [self._id_column] if not self._csv_options.header else None
+        )
 
         try:
             df_ids = pd.read_csv(
@@ -116,13 +113,19 @@ class IdListRecordSourceImpl(RecordSource):
             # KeyError when usecols specifies a column that doesn't exist
             # ValueError when pandas can't parse the column
             raise ValueError(
-                f"Required ID column '{self._id_column}' not found in CSV file: {self._input_path}"
+                (
+                    f"Required ID column '{self._id_column}' not found in CSV file: "
+                    f"{self._input_path}"
+                )
             ) from exc
 
         # Additional validation: ensure the column exists after reading
         if self._csv_options.header and self._id_column not in df_ids.columns:
             raise ValueError(
-                f"Required ID column '{self._id_column}' not found in CSV file: {self._input_path}"
+                (
+                    f"Required ID column '{self._id_column}' not found in CSV file: "
+                    f"{self._input_path}"
+                )
             )
 
         ids = df_ids[self._id_column].dropna().astype(str).tolist()
@@ -140,11 +143,9 @@ class IdListRecordSourceImpl(RecordSource):
 
     def _fetch_records(
         self, ids: list[str], batch_size: int
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[list[RawRecord]]:
         for batch_ids in _chunk_list(ids, batch_size):
-            self._logger.info(
-                "Fetching batch from API", batch_size=len(batch_ids)
-            )
+            self._logger.info("Fetching batch from API", batch_size=len(batch_ids))
             response = self._extraction_service.request_batch(
                 self._entity, batch_ids, self._filter_key
             )
@@ -152,8 +153,11 @@ class IdListRecordSourceImpl(RecordSource):
             serialized_records = self._extraction_service.serialize_records(
                 self._entity, batch_records
             )
-            batch_df = pd.DataFrame(serialized_records)
-            yield from _chunk_dataframe(batch_df, self._chunk_size)
+            if self._chunk_size is None or self._chunk_size <= 0:
+                yield serialized_records
+                continue
+
+            yield from _chunk_list(serialized_records, self._chunk_size)
 
     @staticmethod
     def _ensure_csv_options(

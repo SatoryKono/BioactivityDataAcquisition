@@ -1,0 +1,65 @@
+---
+id: 3f8f3a0c-6e6d-4a2b-9eae-6d5d981b37c8
+---
+flowchart LR
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+
+subgraph Infrastructure["Infrastructure Layer"]
+    UnifiedClient["UnifiedAPIClient\nclients.base.impl.unified_client"]:::componentPrimary
+    ChemblHttp["ChemblHttpClientImpl\nclients.chembl.impl.http_client"]:::componentPrimary
+    ExtractionService["ChemblExtractionServiceImpl\nclients.chembl.impl.chembl_extraction_service_impl"]:::componentSecondary
+    RequestBuilder["RequestBuilder\nclients.chembl.request_builder"]:::componentSecondary
+    ResponseParser["ResponseParser\nclients.chembl.response_parser"]:::componentSecondary
+    Paginator["OffsetPaginator\nclients.chembl.paginator"]:::componentSecondary
+    RateLimiter["TokenBucketRateLimiterImpl\nclients.base.impl.rate_limiter"]:::componentSecondary
+    RetryPolicy["ExponentialBackoffRetryImpl\nclients.base.impl.retry_policy"]:::componentSecondary
+    Cache["MemoryCacheImpl\nclients.base.impl.cache"]:::componentSecondary
+    CircuitBreaker["CircuitBreakerImpl\nclients.base.impl.circuit_breaker"]:::componentSecondary
+    Secrets["EnvSecretProvider\nclients.base.factories"]:::componentSecondary
+
+    OutputWriter["UnifiedOutputWriter\ninfrastructure.output.unified_writer"]:::componentPrimary
+    CsvWriter["CsvWriterImpl\ninfrastructure.output.impl.csv_writer"]:::componentSecondary
+    MetadataWriter["MetadataWriter\ninfrastructure.output.impl.metadata_writer"]:::componentSecondary
+    QualityReporter["QualityReporter\ninfrastructure.output.impl.quality_reporter"]:::componentSecondary
+    AtomicIO["AtomicFileOperation + Checksum\ninfrastructure.files.atomic/checksum"]:::componentSecondary
+
+    Logging["LoggerAdapterImpl\ninfrastructure.logging.*"]:::componentSecondary
+    Observability["Prometheus Metrics\ninfrastructure.observability.*"]:::componentSecondary
+    ProviderRegistry["ProviderRegistryLoader\nconfigs/providers.yaml"]:::componentSecondary
+    RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
+end
+class Infrastructure group;
+
+subgraph External["External Systems"]
+    ChemblAPI[(ChEMBL REST API)]:::external
+    Storage[(Filesystem: CSV/Parquet + meta)]:::external
+end
+class External group;
+
+UnifiedClient --> RateLimiter
+UnifiedClient --> RetryPolicy
+UnifiedClient --> Cache
+UnifiedClient --> CircuitBreaker
+UnifiedClient --> Secrets
+UnifiedClient --> Observability
+ChemblHttp --> RequestBuilder
+ChemblHttp --> ResponseParser
+ChemblHttp --> Paginator
+ChemblHttp --> UnifiedClient
+ChemblHttp --> ChemblAPI
+ExtractionService --> ChemblHttp
+ExtractionService --> Observability
+ExtractionService --> RecordSources
+OutputWriter --> CsvWriter
+OutputWriter --> MetadataWriter
+OutputWriter --> QualityReporter
+OutputWriter --> Storage
+Logging --> OutputWriter
+Logging --> ChemblHttp
+ProviderRegistry --> ChemblHttp
+ProviderRegistry --> ExtractionService
+

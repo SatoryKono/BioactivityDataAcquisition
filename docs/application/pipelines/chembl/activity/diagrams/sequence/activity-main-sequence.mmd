@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    participant CLI as CLI
+    participant Pipeline as ActivityPipeline
+    participant Client as Chembl Client
+    participant Validator as ValidationService
+    participant Writer as UnifiedOutputWriter
+
+    CLI->>Pipeline: run(output_path, dry_run)
+    Pipeline->>Client: iter_pages(activity)
+    loop pages
+        Client-->>Pipeline: raw_page
+        Pipeline->>Pipeline: transform(raw_page)
+        Pipeline->>Validator: validate(chunk, activity_schema)
+        Validator-->>Pipeline: validated_chunk
+    end
+    alt not dry_run
+        Pipeline->>Writer: write_result(all_chunks)
+        Writer-->>Pipeline: write_summary
+    else dry_run
+        Pipeline->>Pipeline: skip write
+    end
+    Pipeline-->>CLI: RunResult
+

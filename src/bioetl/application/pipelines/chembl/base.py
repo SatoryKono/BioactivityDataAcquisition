@@ -1,25 +1,22 @@
 """Base pipeline implementation for ChEMBL data extraction."""
+
 from __future__ import annotations
-
-from typing import Any
-
-import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.clients.ports.chembl_extraction_port import ChemblExtractionPort
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
-from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.transform.factories import default_normalization_service
 
 
 class ChemblPipelineBase(PipelineBase):
@@ -30,20 +27,20 @@ class ChemblPipelineBase(PipelineBase):
         config: PipelineConfig,
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
-        output_writer: UnifiedOutputWriter,
-        extraction_service: ExtractionServiceABC,
-        hash_service: HashService,
+        output_writer: OutputWriterABC,
+        extraction_service: ChemblExtractionPort,
+        hash_service: HashServiceABC,
         record_source: RecordSource | None = None,
-        normalization_service: NormalizationService | None = None,
+        normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         post_transformer: TransformerABC | None = None,
     ) -> None:
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
-        
-        norm_service = normalization_service or ChemblNormalizationService(config)
-        
+
+        norm_service = normalization_service or default_normalization_service(config)
+
         # Create Extractor
         extractor = ChemblExtractorImpl(
             config=config,
@@ -52,12 +49,10 @@ class ChemblPipelineBase(PipelineBase):
             logger=logger,
             record_source=record_source,
         )
-        
+
         # Create Transformer
         # Need schema contract
-        contract = get_pipeline_contract(
-            config.id, default_entity=config.entity_name
-        )
+        contract = get_pipeline_contract(config.id, default_entity=config.entity_name)
         transformer = ChemblTransformerImpl(
             validation_service=validation_service,
             schema_contract=contract,
@@ -81,9 +76,7 @@ class ChemblPipelineBase(PipelineBase):
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
         if self._chembl_release is None:
-            self._chembl_release = (
-                self._extraction_service.get_release_version()
-            )
+            self._chembl_release = self._extraction_service.get_release_version()
         return self._chembl_release
 
     def get_chembl_release(self) -> str:
@@ -93,18 +86,16 @@ class ChemblPipelineBase(PipelineBase):
     def _enrich_context(self, context: RunContext) -> None:
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
-    
-    # Removed extract, iter_chunks, transform, validate, write as they are in Base or Components.
-    # pre_transform and _do_transform hooks?
-    # They were called by ChemblPipelineBase.transform.
+
+    # Extract/transform/write implemented by base; hook methods reside in components.
     # Now ChemblTransformerImpl.apply calls its own hooks.
-    # If subclasses override pre_transform/_do_transform on THIS class, 
+    # If subclasses override pre_transform/_do_transform on THIS class,
     # they won't be called by ChemblTransformerImpl.
-    
-    # To support inheritance overriding, ChemblTransformerImpl should call back 
+
+    # To support inheritance overriding, ChemblTransformerImpl should call back
     # or we should subclass ChemblTransformerImpl for specific pipelines.
     # Or we pass 'self' to transformer? No.
-    
+
     # Most ChEMBL pipelines (Activity, Assay) didn't override them.
     # If they did, I'd need to check.
     # ChemblEntityPipeline might override?

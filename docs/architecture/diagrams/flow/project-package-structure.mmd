@@ -1,0 +1,91 @@
+---
+id: e68c4503-315d-4046-98fd-934e38b85e98
+---
+flowchart LR
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+
+subgraph Interfaces["Interfaces (Driving Ports)"]
+  CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
+  REST["REST server\ninterfaces.rest.server"]:::componentSecondary
+  MQ["MQ listener\ninterfaces.mq.listener/handler"]:::componentSecondary
+end
+class Interfaces group;
+
+subgraph Application["Application Layer"]
+  Orchestrator["PipelineOrchestrator\napplication.orchestrator"]:::componentPrimary
+  ConfigLoader["Config Loader\napplication.config_loader"]:::componentSecondary
+  PipelineRegistry["Pipeline registry\napplication.pipelines.registry"]:::componentSecondary
+  Container["PipelineContainer\napplication.container"]:::componentSecondary
+  Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
+  StageRunner["StageRunner\napplication.pipelines.stage_runner"]:::componentSecondary
+  HooksManager["HooksManager\napplication.pipelines.hooks_manager"]:::componentSecondary
+  ErrorPolicyMgr["ErrorPolicyManager\napplication.pipelines.error_policy_manager"]:::componentSecondary
+  HooksImpl["Logging + Metrics hooks\napplication.pipelines.hooks_impl"]:::componentSecondary
+end
+class Application group;
+
+subgraph Domain["Domain Layer"]
+  ProviderRegistry["ProviderRegistry\ndomain.provider_registry"]:::componentSecondary
+  Providers["ProviderDefinition / Components\ndomain.providers"]:::componentSecondary
+  RecordSource["ApiRecordSource\ndomain.record_source"]:::componentSecondary
+  Validation["ValidationService + PanderaValidator\ndomain.validation.*"]:::componentPrimary
+  Schemas["SchemaRegistry + PipelineContracts\ndomain.schemas.*"]:::componentSecondary
+  Transform["HashService / TransformerChain\ndomain.transform.*"]:::componentPrimary
+  Normalization["NormalizationServiceImpl\n(infrastructure.transform.impl.normalize)"]:::componentSecondary
+  Hashing["HasherImpl\n(infrastructure.transform.impl.hasher)"]:::componentSecondary
+end
+class Domain group;
+
+subgraph Infrastructure["Infrastructure Layer (Driven Adapters)"]
+  ProviderLoader["ProviderRegistryLoader\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
+  ClientsBase["UnifiedAPIClient + rate/retry/cache/circuit\ninfrastructure.clients.base.*"]:::componentSecondary
+  ChemblClient["ChemblDataClientHTTPImpl\n+ RequestBuilder/ResponseParser/Paginator\ninfrastructure.clients.chembl.*"]:::componentPrimary
+  Extraction["ChemblExtractionServiceImpl\ninfrastructure.clients.chembl.impl"]:::componentSecondary
+  RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
+  Output["UnifiedOutputWriter + CsvWriter + MetadataWriter + QualityReporter\ninfrastructure.output.*"]:::componentPrimary
+  AtomicIO["AtomicFileOperation + Checksum\ninfrastructure.files.*"]:::componentSecondary
+  Logging["UnifiedLogger\ninfrastructure.logging.*"]:::componentSecondary
+  Observability["Prometheus metrics server\ninfrastructure.observability.*"]:::componentSecondary
+  Config["Config models/resolver\ninfrastructure.config.*"]:::componentSecondary
+end
+class Infrastructure group;
+
+ChEMBL_API[(ChEMBL REST API)]:::external
+Storage[(Filesystem: CSV/Parquet, meta, QC)]:::external
+
+CLI --> Orchestrator
+REST --> Orchestrator
+MQ --> Orchestrator
+Orchestrator --> ConfigLoader
+Orchestrator --> PipelineRegistry
+Orchestrator --> Container
+Container --> Pipelines
+Container --> StageRunner
+Container --> HooksManager
+Container --> ErrorPolicyMgr
+HooksManager --> HooksImpl
+Container --> Validation
+Container --> Normalization
+Container --> Transform
+Container --> ProviderRegistry
+Container --> RecordSource
+Container --> Output
+Container --> Logging
+Container --> Observability
+Container --> Config
+ProviderRegistry --> Providers
+ProviderLoader --> ProviderRegistry
+Providers --> ChemblClient
+ClientsBase --> ChemblClient
+ChemblClient --> Extraction
+RecordSources --> Extraction
+Extraction --> RecordSource
+ChemblClient --> ChEMBL_API
+Output --> AtomicIO
+Output --> Storage
+Observability --> REST
+Logging --> Storage

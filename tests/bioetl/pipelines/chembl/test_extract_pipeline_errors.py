@@ -7,8 +7,7 @@ import pytest
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
-from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig
-from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
+from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
 
 
 class _LoggerStub:
@@ -31,10 +30,10 @@ class _LoggerStub:
         return self
 
 
-def test_extract_stage_wraps_client_error(caplog: pytest.LogCaptureFixture, tmp_path: Path) -> None:
+def test_extract_stage_wraps_client_error(
+    caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
     caplog.set_level("ERROR")
-
-    register_chembl_provider()
 
     config = PipelineConfig(
         id="chembl.activity",

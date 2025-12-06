@@ -1,23 +1,59 @@
 """
 Tests for concrete writer implementations.
 """
+
 # pylint: disable=redefined-outer-name
 import hashlib
+from collections.abc import Callable
+from pathlib import Path
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 import yaml
 
+from bioetl.infrastructure.output.impl.base_writer import BaseWriterImpl
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import (
     MetadataWriterImpl,
+    build_quality_report_table,
 )
+from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
+
+
+class DummyWriter(BaseWriterImpl):
+    """Minimal writer for base class tests."""
+
+    def __init__(self, *, checksum_fn: Callable[[Path], str] | None = None) -> None:
+        super().__init__(atomic=False, checksum_fn=checksum_fn)
+
+    def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
+        df.to_csv(path, index=False)
+
+    def supports_format(self, fmt: str) -> bool:  # pragma: no cover - not used
+        return fmt.lower() == "dummy"
+
+
+def _assert_qc_row(report: pd.DataFrame, expectations: dict[str, object]) -> None:
+    row = report[report["column"] == expectations["column"]].iloc[0]
+    assert row["null_count"] == expectations["null_count"]
+    assert row["non_null_count"] == expectations["non_null_count"]
+    assert row["unique_count"] == expectations["unique_count"]
+    assert row["dtype"] == expectations["dtype"]
+    assert row["coverage"] == expectations["coverage"]
+    assert bool(row["coverage_ok"]) is expectations["coverage_ok"]
 
 
 @pytest.fixture
 def csv_writer():
     """Fixture for CSV writer."""
     return CsvWriterImpl()
+
+
+@pytest.fixture
+def parquet_writer():
+    """Fixture for Parquet writer."""
+    return ParquetWriterImpl()
 
 
 @pytest.fixture
@@ -44,12 +80,60 @@ def test_csv_writer_write(csv_writer, tmp_path):
     pd.testing.assert_frame_equal(df, df_read)
 
 
+def test_csv_writer_column_order_and_fill(csv_writer, tmp_path):
+    """CSV writer should reorder columns and fill missing ones with None."""
+    df = pd.DataFrame({"b": [1], "a": [2]})
+    path = tmp_path / "ordered.csv"
+
+    result = csv_writer.write(df, path, column_order=["a", "b", "c"])
+
+    assert result.row_count == 1
+    df_read = pd.read_csv(path)
+    assert list(df_read.columns) == ["a", "b", "c"]
+    assert df_read.loc[0, "a"] == 2
+    assert df_read.loc[0, "b"] == 1
+    assert pd.isna(df_read.loc[0, "c"])
+
+
 def test_csv_writer_properties(csv_writer):
     """Test CSV writer properties."""
     assert not csv_writer.atomic
     assert csv_writer.supports_format("csv")
     assert csv_writer.supports_format("CSV")
     assert not csv_writer.supports_format("parquet")
+
+
+def test_parquet_writer_column_order_and_fill(parquet_writer, tmp_path):
+    """Parquet writer should reorder columns and fill missing ones with None."""
+    pytest.importorskip("pyarrow")
+    df = pd.DataFrame({"x": ["foo"], "y": ["bar"]})
+    path = tmp_path / "ordered.parquet"
+
+    result = parquet_writer.write(df, path, column_order=["y", "x", "z"])
+
+    assert parquet_writer.atomic
+    assert result.row_count == 1
+    assert result.checksum is None
+    df_read = pd.read_parquet(path)
+    assert list(df_read.columns) == ["y", "x", "z"]
+    assert df_read.loc[0, "y"] == "bar"
+    assert df_read.loc[0, "x"] == "foo"
+    assert pd.isna(df_read.loc[0, "z"])
+
+
+def test_writer_uses_checksum_fn(tmp_path):
+    """Base writer should delegate checksum when provided."""
+    checksum_fn = MagicMock(return_value="abc123")
+    writer = DummyWriter(checksum_fn=checksum_fn)
+    df = pd.DataFrame({"a": [1]})
+    path = tmp_path / "dummy.csv"
+
+    result = writer.write(df, path)
+
+    checksum_fn.assert_called_once_with(path)
+    assert result.checksum == "abc123"
+    assert result.row_count == 1
+    assert list(pd.read_csv(path).columns) == ["a"]
 
 
 def test_metadata_writer_write_meta(metadata_writer, tmp_path):
@@ -65,7 +149,30 @@ def test_metadata_writer_write_meta(metadata_writer, tmp_path):
     assert loaded == meta
 
 
-def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
+@pytest.mark.parametrize(
+    "expectation",
+    [
+        {
+            "column": "a",
+            "null_count": 1,
+            "non_null_count": 1,
+            "unique_count": 1,
+            "dtype": "float64",
+            "coverage": 0.5,
+            "coverage_ok": False,
+        },
+        {
+            "column": "b",
+            "null_count": 0,
+            "non_null_count": 2,
+            "unique_count": 1,
+            "dtype": "object",
+            "coverage": 1.0,
+            "coverage_ok": True,
+        },
+    ],
+)
+def test_metadata_writer_write_qc_report(metadata_writer, tmp_path, expectation):
     """Test writing QC report."""
     df = pd.DataFrame({"a": [1, None], "b": ["x", "x"]})
     path = tmp_path / "qc_report.csv"
@@ -74,14 +181,37 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
 
     assert path.exists()
     report = pd.read_csv(path)
-    assert "column" in report.columns
-    assert "null_count" in report.columns
-    assert "unique_count" in report.columns
+    expected_columns = [
+        "column",
+        "null_count",
+        "non_null_count",
+        "unique_count",
+        "dtype",
+        "coverage",
+        "coverage_ok",
+    ]
+    assert list(report.columns) == expected_columns
 
-    # Check specific values
-    row_a = report[report["column"] == "a"].iloc[0]
-    assert row_a["null_count"] == 1
-    assert row_a["unique_count"] == 1
+    _assert_qc_row(report, expectation)
+
+
+def test_build_quality_report_table_respects_min_coverage():
+    """Quality report table uses provided min_coverage threshold."""
+    df = pd.DataFrame({"a": [1, None]})
+
+    report = build_quality_report_table(df, min_coverage=0.75)
+
+    assert list(report.columns) == [
+        "column",
+        "null_count",
+        "non_null_count",
+        "unique_count",
+        "dtype",
+        "coverage",
+        "coverage_ok",
+    ]
+    assert report.loc[0, "coverage"] == 0.5
+    assert bool(report.loc[0, "coverage_ok"]) is False
 
 
 def test_metadata_writer_generate_checksums(metadata_writer, tmp_path):
@@ -99,9 +229,7 @@ def test_metadata_writer_generate_checksums(metadata_writer, tmp_path):
     assert checksums[f2.name] == hashlib.sha256(b"content2").hexdigest()
 
 
-def test_metadata_writer_generate_checksums_missing_file(
-    metadata_writer, tmp_path
-):
+def test_metadata_writer_generate_checksums_missing_file(metadata_writer, tmp_path):
     """Test checksum generation skips missing files."""
     f1 = tmp_path / "exists.txt"
     f1.write_text("content", encoding="utf-8")

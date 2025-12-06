@@ -72,12 +72,14 @@ def test_replace_with_retry_retries(mock_sleep, atomic_op, tmp_path):
     src.write_text("content")
 
     # Fail twice, then succeed
-    # Note: Since we mock shutil.move, the file won't actually move.
+    # Note: Since we mock os.replace, the file won't actually move.
     # We only verify the retry logic here.
-    with patch("shutil.move", side_effect=[OSError("Busy"), OSError("Busy"), None]) as mock_move:
+    with patch(
+        "os.replace", side_effect=[OSError("Busy"), OSError("Busy"), None]
+    ) as mock_replace:
         atomic_op._replace_with_retry(src, dst)
 
-    assert mock_move.call_count == 3
+    assert mock_replace.call_count == 3
     assert mock_sleep.call_count == 2
 
 
@@ -87,7 +89,7 @@ def test_replace_with_retry_max_retries_exceeded(mock_sleep, atomic_op, tmp_path
     dst = tmp_path / "dst_max.txt"
     src.write_text("content")
 
-    with patch("shutil.move", side_effect=OSError("Locked")):
+    with patch("os.replace", side_effect=OSError("Locked")):
         with pytest.raises(OSError, match="Locked"):
             atomic_op._replace_with_retry(src, dst)
 

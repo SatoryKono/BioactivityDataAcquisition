@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
@@ -66,8 +67,7 @@ def test_rate_limiter_usage(client, mock_components):
     # Arrange
     mock_limiter = mock_components["rate_limiter"]
     mock_components["http_middleware"].request.return_value = MagicMock(
-        json=lambda: {},
-        raise_for_status=lambda: None
+        json=lambda: {}, raise_for_status=lambda: None
     )
 
     # Act

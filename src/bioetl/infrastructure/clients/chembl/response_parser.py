@@ -1,4 +1,5 @@
 from typing import Any
+
 from bioetl.domain.clients.base.contracts import ResponseParserABC
 
 
@@ -18,4 +19,3 @@ class ChemblResponseParserImpl(ResponseParserABC):
 
     def extract_metadata(self, raw_response: dict[str, Any]) -> dict[str, Any]:
         return raw_response.get("page_meta", {})
-

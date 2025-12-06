@@ -1,0 +1,54 @@
+---
+id: 8f0f89c8-5cff-4b57-a4b9-b5443c28908a
+---
+flowchart LR
+
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group           fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+
+subgraph Transformers
+    T_Chain[TransformerChain]:::domainPrimary
+    T_Hash[HashColumnsTransformer]:::domainSecondary
+    T_Index[IndexColumnTransformer]:::domainSecondary
+    T_Date[FulldateTransformer]:::domainSecondary
+    T_ABC[<<TransformerABC>>]:::interface
+end
+class Transformers group;
+
+subgraph Services
+    HS[HashService]:::domainSecondary
+    VS[ValidationService]:::domainSecondary
+    NS[NormalizationServiceImpl]:::domainSecondary
+end
+class Services group;
+
+subgraph Schemas
+    PS[PanderaValidator]:::domainSecondary
+    Registry[Schema Registry]:::domainSecondary
+end
+class Schemas group;
+
+subgraph NormalizationInputs
+    NCfg[NormalizationConfigProvider]:::domainSecondary
+    Normalizers[Normalizers Registry]:::domainSecondary
+end
+class NormalizationInputs group;
+
+Pipeline[Pipeline]:::domainPrimary --> T_Chain
+T_Chain --> T_Hash
+T_Chain --> T_Index
+T_Chain --> T_Date
+T_ABC -. template .- T_Chain
+
+T_Hash -- uses --> HS
+T_Index -- uses --> HS
+
+Pipeline -- validates result --> VS
+Pipeline -- normalizes values --> NS
+
+VS -- delegates --> PS
+PS -- lookups schema --> Registry
+NS -- loads rules --> NCfg
+NS -- resolves normalizers --> Normalizers

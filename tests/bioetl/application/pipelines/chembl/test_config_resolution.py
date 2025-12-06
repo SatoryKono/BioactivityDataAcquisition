@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
-from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+
 
 @pytest.fixture
 def dependencies():
@@ -12,6 +15,7 @@ def dependencies():
         "extraction_service": MagicMock(),
         "hash_service": MagicMock(),
     }
+
 
 def test_pk_resolution_from_field(dependencies):
     """Test that primary_key is picked up from the config field."""
@@ -31,10 +35,11 @@ def test_pk_resolution_from_field(dependencies):
             rate_limit_per_sec=10.0,
         ),
     )
-    
+
     pipeline = ChemblEntityPipeline(config=config, **dependencies)
     assert pipeline.ID_COLUMN == "custom_pk_id"
     assert pipeline.API_FILTER_KEY == "custom_pk_id__in"
+
 
 def test_pk_resolution_from_pipeline_dict(dependencies):
     """Test fallback to pipeline dict for legacy configs."""
@@ -55,10 +60,11 @@ def test_pk_resolution_from_pipeline_dict(dependencies):
             rate_limit_per_sec=10.0,
         ),
     )
-    
+
     pipeline = ChemblEntityPipeline(config=config, **dependencies)
     assert pipeline.ID_COLUMN == "legacy_pk_id"
     assert pipeline.API_FILTER_KEY == "legacy_pk_id__in"
+
 
 def test_pk_resolution_default(dependencies):
     """Test fallback to entity_name_id."""
@@ -78,8 +84,7 @@ def test_pk_resolution_default(dependencies):
             rate_limit_per_sec=10.0,
         ),
     )
-    
+
     pipeline = ChemblEntityPipeline(config=config, **dependencies)
     assert pipeline.ID_COLUMN == "my_entity_id"
     assert pipeline.API_FILTER_KEY == "my_entity_id__in"
-

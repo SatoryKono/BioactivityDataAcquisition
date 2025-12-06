@@ -71,7 +71,7 @@
 - **Сериализация**: Canonical JSON всего объекта.
 
 ## Реализация
-Логика реализована в доменном слое: `src/bioetl/domain/transform/impl/hasher.py` (класс `HasherImpl`).
+Логика реализована в инфраструктурном слое: `src/bioetl/infrastructure/transform/impl/hasher.py` (класс `HasherImpl`).
 
 Конфигурация: `configs/hashing.yaml`.
 

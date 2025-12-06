@@ -5,11 +5,15 @@ These interfaces define the contract that extraction services must implement,
 allowing application layer to depend on abstractions rather than concrete
 implementations.
 """
+
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import pandas as pd
+if TYPE_CHECKING:  # pragma: no cover
+    from bioetl.domain.record_source import RawRecord
 
 
 class ExtractionServiceABC(ABC):
@@ -17,7 +21,7 @@ class ExtractionServiceABC(ABC):
     Abstract base class for data extraction services.
 
     Defines the contract for services that extract data from external sources
-    and return it as DataFrames.
+    and return raw record dictionaries.
     """
 
     @abstractmethod
@@ -30,7 +34,7 @@ class ExtractionServiceABC(ABC):
         """
 
     @abstractmethod
-    def extract_all(self, entity: str, **filters: Any) -> pd.DataFrame:
+    def extract_all(self, entity: str, **filters: Any) -> list[RawRecord]:
         """
         Extract all records for an entity with optional filters.
 
@@ -39,15 +43,15 @@ class ExtractionServiceABC(ABC):
             **filters: Provider-specific filters (e.g., limit, offset)
 
         Returns:
-            DataFrame containing extracted records
+            List of raw record dictionaries
         """
 
     @abstractmethod
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: Any
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[list[RawRecord]]:
         """
-        Stream records for an entity in DataFrame chunks.
+        Stream records for an entity in raw record batches.
 
         Args:
             entity: Entity name to extract (e.g., 'activity', 'assay')
@@ -55,7 +59,7 @@ class ExtractionServiceABC(ABC):
             **filters: Provider-specific filters (e.g., limit, offset)
 
         Returns:
-            Iterable of DataFrames with extracted records
+            Iterable of raw record lists
         """
 
     @abstractmethod
@@ -78,9 +82,7 @@ class ExtractionServiceABC(ABC):
         """
 
     @abstractmethod
-    def parse_response(
-        self, raw_response: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Parse raw API response into list of records.
 

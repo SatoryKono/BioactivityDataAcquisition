@@ -3,13 +3,13 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, Union
 from dataclasses import dataclass
 from enum import Enum
-import pandas as pd
-import numpy as np
-from dependency_injector import containers, providers
+from typing import Any, Dict, List, Optional, Type
 
+import numpy as np
+import pandas as pd
+from dependency_injector import containers, providers
 
 # ============================================================================
 # ПРИМЕР 1: Рефакторинг системы нормализации
@@ -304,9 +304,9 @@ class Container(containers.DeclarativeContainer):
 # ПРИМЕР 3: Параллельная обработка батчей
 # ============================================================================
 
+import logging
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Iterator
-import logging
 
 logger = logging.getLogger(__name__)
 

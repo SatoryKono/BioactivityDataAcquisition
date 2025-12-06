@@ -1,80 +1,72 @@
+from dataclasses import dataclass
+from typing import Any
+from unittest.mock import MagicMock
+
 import pandas as pd
-import pandera.pandas as pa
 import pytest
-from unittest.mock import patch, MagicMock
+
+from bioetl.domain.validation.contracts import (
+    SchemaProviderABC,
+    ValidationResult,
+    ValidatorABC,
+    ValidatorFactoryABC,
+)
 from bioetl.domain.validation.service import ValidationService
-from bioetl.domain.validation.impl.pandera_validator import PanderaValidatorImpl
-from bioetl.domain.validation.contracts import SchemaProviderABC
 
 
-# Define a dummy schema for testing
-class DummySchema(pa.DataFrameModel):
-    id: int = pa.Field(ge=0)
-    name: str = pa.Field()
+@dataclass
+class _FakeValidator(ValidatorABC):
+    should_pass: bool
+    validated: pd.DataFrame | None = None
+
+    def validate(self, df: pd.DataFrame) -> ValidationResult:
+        if self.should_pass:
+            return ValidationResult(
+                is_valid=True,
+                errors=[],
+                warnings=[],
+                validated_df=self.validated or df,
+            )
+        return ValidationResult(is_valid=False, errors=["fail"], warnings=[])
+
+    def is_valid(self, df: pd.DataFrame) -> bool:
+        return self.should_pass
+
+
+class _FakeValidatorFactory(ValidatorFactoryABC):
+    def __init__(self, should_pass: bool) -> None:
+        self.should_pass = should_pass
+
+    def create_validator(self, schema: Any) -> ValidatorABC:
+        return _FakeValidator(self.should_pass)
 
 
 def test_validation_service_success():
-    # Arrange
-    mock_registry = MagicMock(spec=SchemaProviderABC)
-    mock_registry.get_schema.return_value = DummySchema
-    
-    service = ValidationService(schema_provider=mock_registry)
+    schema_provider = MagicMock(spec=SchemaProviderABC)
+    schema_provider.get_schema.return_value = object()
+    schema_provider.get_schema_columns.return_value = ["id", "name"]
+
+    service = ValidationService(
+        schema_provider=schema_provider,
+        validator_factory=_FakeValidatorFactory(should_pass=True),
+    )
     df = pd.DataFrame({"id": [1, 2], "name": ["a", "b"]})
 
-    # Act
-    result = service.validate(df, "test_entity")
+    result = service.validate(df, "entity")
 
-    # Assert
     assert isinstance(result, pd.DataFrame)
     assert len(result) == 2
-    mock_registry.get_schema.assert_called_with("test_entity")
+    schema_provider.get_schema.assert_called_with("entity")
 
 
 def test_validation_service_failure():
-    # Arrange
-    mock_registry = MagicMock(spec=SchemaProviderABC)
-    mock_registry.get_schema.return_value = DummySchema
-    
-    service = ValidationService(schema_provider=mock_registry)
-    df = pd.DataFrame({"id": [-1], "name": ["a"]})  # Invalid id
+    schema_provider = MagicMock(spec=SchemaProviderABC)
+    schema_provider.get_schema.return_value = object()
 
-    # Act & Assert
-    with pytest.raises(
-        ValueError,
-        match="Validation failed for test_entity"
-    ):
-        service.validate(df, "test_entity")
+    service = ValidationService(
+        schema_provider=schema_provider,
+        validator_factory=_FakeValidatorFactory(should_pass=False),
+    )
 
-
-def test_pandera_validator_impl():
-    # Arrange
-    validator = PanderaValidatorImpl(DummySchema)
-    df_valid = pd.DataFrame({"id": [1], "name": ["test"]})
-    df_invalid = pd.DataFrame({"id": [-1], "name": ["test"]})
-
-    # Test validate() success
-    result = validator.validate(df_valid)
-    assert result.is_valid
-    assert not result.errors
-
-    # Test validate() failure
-    result_fail = validator.validate(df_invalid)
-    assert not result_fail.is_valid
-    assert result_fail.errors
-
-    # Test is_valid()
-    assert validator.is_valid(df_valid)
-    assert not validator.is_valid(df_invalid)
-
-
-def test_pandera_validator_exception():
-    # Mock schema to raise generic exception
-    mock_schema = MagicMock()
-    mock_schema.validate.side_effect = Exception("Generic error")
-
-    validator = PanderaValidatorImpl(mock_schema)
-    df = pd.DataFrame({"id": [1]})
-
-    result = validator.validate(df)
-    assert not result.is_valid
-    assert "Generic error" in result.errors[0]
+    with pytest.raises(ValueError, match="Validation failed for test_entity"):
+        service.validate(pd.DataFrame(), "test_entity")

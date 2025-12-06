@@ -1,4 +1,5 @@
 """Юнит-тесты для HttpClientMiddleware: retry, rate-limit, circuit breaker."""
+
 from __future__ import annotations
 
 import logging
@@ -9,7 +10,6 @@ import pytest
 
 from bioetl.domain.errors import (
     ClientNetworkError,
-    ClientRateLimitError,
     ClientResponseError,
 )
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
@@ -125,20 +125,34 @@ def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
     result = middleware.request("GET", "http://example.com")
 
     assert result.status_code == 200
-    retry_record = next(
-        rec for rec in caplog.records if rec.message == "Retrying HTTP request"
-    )
-    success_record = next(
-        rec for rec in caplog.records if rec.message == "HTTP request succeeded"
-    )
-
-    assert retry_record.delay == pytest.approx(0.1)
-    assert retry_record.total_retry_delay == pytest.approx(0.1)
-    assert retry_record.retry_reason == "TimeoutError"
-    assert success_record.total_retry_delay == pytest.approx(0.1)
-    assert success_record.attempts == 2
+    retry_record, success_record = _extract_log_records(caplog.records)
+    _assert_retry_record(retry_record, expected_delay=0.1)
+    _assert_success_record(success_record, expected_total_delay=0.1, attempts=2)
     retry_metric.assert_called_once_with(1)
     failure_metric.assert_not_called()
+
+
+def _extract_log_records(records):
+    retry_record = next(
+        rec for rec in records if rec.message == "Retrying HTTP request"
+    )
+    success_record = next(
+        rec for rec in records if rec.message == "HTTP request succeeded"
+    )
+    return retry_record, success_record
+
+
+def _assert_retry_record(retry_record, *, expected_delay: float) -> None:
+    assert retry_record.delay == pytest.approx(expected_delay)
+    assert retry_record.total_retry_delay == pytest.approx(expected_delay)
+    assert retry_record.retry_reason == "TimeoutError"
+
+
+def _assert_success_record(
+    success_record, *, expected_total_delay: float, attempts: int
+) -> None:
+    assert success_record.total_retry_delay == pytest.approx(expected_total_delay)
+    assert success_record.attempts == attempts
 
 
 def test_retry_after_header_seconds(monkeypatch, base_client):
@@ -201,6 +215,33 @@ def test_retry_after_http_date(monkeypatch, base_client):
     assert result.status_code == 200
     assert base_client.request.call_count == 2
     assert fake_time.value >= expected_delay - 0.1
+
+
+def test_retry_after_exceeds_max_delay(monkeypatch, base_client):
+    """Retry-After больше max_delay не уменьшается после добавления джиттера."""
+
+    fake_time = _FakeTime()
+    monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
+    monkeypatch.setattr("time.sleep", fake_time.sleep)
+
+    retry_after_seconds = 5
+    base_client.request.side_effect = [
+        _response(503, headers={"Retry-After": str(retry_after_seconds)}),
+        _response(200),
+    ]
+
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=base_client,
+        max_attempts=2,
+        base_delay=0.1,
+        max_delay=1.0,
+    )
+
+    result = middleware.request("GET", "http://example.com/over-limit")
+
+    assert result.status_code == 200
+    assert fake_time.value >= retry_after_seconds
 
 
 def test_retry_without_retry_after_header(monkeypatch, base_client):
@@ -371,4 +412,3 @@ def test_circuit_breaker_blocks_and_recovers(monkeypatch, base_client):
     assert recovered.status_code == 200
     assert base_client.request.call_count == 3
     assert middleware._circuit_opened_at is None  # noqa: SLF001
-

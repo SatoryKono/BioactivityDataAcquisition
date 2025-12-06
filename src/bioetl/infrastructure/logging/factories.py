@@ -1,7 +1,12 @@
 import structlog
 
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC, ProgressReporterABC
-from bioetl.infrastructure.logging.impl.progress_reporter import TqdmProgressReporterImpl
+from bioetl.domain.clients.base.logging.contracts import (
+    LoggerAdapterABC,
+    ProgressReporterABC,
+)
+from bioetl.infrastructure.logging.impl.progress_reporter import (
+    TqdmProgressReporterImpl,
+)
 from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
 
 
@@ -25,4 +30,3 @@ def default_progress_reporter() -> ProgressReporterABC:
     Возвращает репортер прогресса по умолчанию (tqdm).
     """
     return TqdmProgressReporterImpl()
-

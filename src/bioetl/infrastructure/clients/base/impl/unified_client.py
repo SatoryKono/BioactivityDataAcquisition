@@ -1,6 +1,7 @@
 """
 Unified HTTP Client implementation.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -8,8 +9,8 @@ from uuid import uuid4
 
 import requests
 
+from bioetl.domain.configs import ClientConfig
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
-from bioetl.infrastructure.config.models import ClientConfig
 
 
 class UnifiedAPIClient:
@@ -27,7 +28,7 @@ class UnifiedAPIClient:
         self.provider = provider
         self.config = config
         self.base_client = base_client or requests.Session()
-        
+
         # Map config to middleware params
         # Note: HttpClientMiddleware might expect slightly different param names
         # We map them here.
@@ -63,4 +64,3 @@ class UnifiedAPIClient:
         """Закрыть соединение."""
         if hasattr(self.base_client, "close"):
             self.base_client.close()
-

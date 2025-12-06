@@ -1,23 +1,36 @@
 """Минимальный REST-сервер для запуска пайплайнов через PipelineOrchestrator."""
+
 from __future__ import annotations
 
 import asyncio
+from functools import partial
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from bioetl.application.config_loader import load_pipeline_config
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.models import RunResult
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    create_provider_loader,
+)
 
 
 class PipelineRunRequest(BaseModel):
     """Запрос на запуск пайплайна."""
 
-    pipeline_name: str = Field(..., description="Имя пайплайна в формате entity_provider")
-    profile: str = Field(default="default", description="Активный конфигурационный профиль")
+    pipeline_name: str = Field(
+        ..., description="Имя пайплайна в формате entity_provider"
+    )
+    profile: str = Field(
+        default="default", description="Активный конфигурационный профиль"
+    )
     dry_run: bool = Field(default=False, description="Запуск без записи вывода")
-    limit: int | None = Field(default=None, description="Ограничение на количество записей")
+    limit: int | None = Field(
+        default=None, description="Ограничение на количество записей"
+    )
 
 
 class PipelineRunResponse(BaseModel):
@@ -41,16 +54,38 @@ def _to_pipeline_id(pipeline_name: str) -> str:
 
 def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrator:
     pipeline_id = _to_pipeline_id(pipeline_name)
-    config = load_pipeline_config(pipeline_id, profile=profile)
+    config = build_runtime_config(pipeline_id=pipeline_id, profile=profile)
     if not config.features.rest_interface_enabled:
         raise HTTPException(
             status_code=503,
             detail="REST interface is disabled by configuration",
         )
-    return PipelineOrchestrator(pipeline_name=pipeline_name, config=config)
+    providers_path = Path("configs") / "providers.yaml"
+    provider_loader_factory = partial(
+        create_provider_loader, config_path=providers_path
+    )
+    feature_flag = config.features.enable_provider_loader_port
+    if feature_flag:
+        provider_loader = provider_loader_factory()
+        provider_registry = None
+    else:
+        provider_loader = None
+        provider_registry = provider_loader_factory().load_registry(
+            registry=InMemoryProviderRegistry()
+        )
+    return PipelineOrchestrator(
+        pipeline_name=pipeline_name,
+        config=config,
+        provider_registry=provider_registry,
+        provider_loader=provider_loader,
+        provider_loader_factory=provider_loader_factory,
+        use_provider_loader_port=feature_flag,
+    )
 
 
-def _run_pipeline_sync(orchestrator: PipelineOrchestrator, dry_run: bool, limit: int | None) -> RunResult:
+def _run_pipeline_sync(
+    orchestrator: PipelineOrchestrator, dry_run: bool, limit: int | None
+) -> RunResult:
     return orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
 
 

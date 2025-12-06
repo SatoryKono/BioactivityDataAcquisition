@@ -2,8 +2,10 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from bioetl.domain.normalization_service import ChemblNormalizationService
 from bioetl.domain.transform.contracts import NormalizationConfig
+from bioetl.infrastructure.transform.impl.chembl_normalization_service import (
+    ChemblNormalizationService,
+)
 
 
 @dataclass
@@ -18,21 +20,30 @@ class _ConfigStub:
         default_factory=lambda: [
             {"name": "name", "data_type": "string"},
             {"name": "activity_id", "data_type": "string"},
+            {"name": "assay_id", "data_type": "string"},
             {"name": "tags", "data_type": "array"},
             {"name": "metadata", "data_type": "object"},
             {"name": "label", "data_type": "string"},
+            {"name": "score", "data_type": "number"},
+            {"name": "count", "data_type": "integer"},
         ]
     )
 
 
 def test_chembl_normalization_service_normalizes_scalars_and_ids() -> None:
     service = ChemblNormalizationService(_ConfigStub())
-    raw = {"name": "  Alpha  ", "activity_id": "act1", "extra": "keep"}
+    raw = {
+        "name": "  Alpha  ",
+        "activity_id": "act1",
+        "assay_id": "ass1",
+        "extra": "keep",
+    }
 
     normalized = service.normalize(raw)
 
     assert normalized["name"] == "alpha"
     assert normalized["activity_id"] == "ACT1"
+    assert normalized["assay_id"] == "ASS1"
     assert normalized["extra"] == "keep"
 
 
@@ -49,6 +60,17 @@ def test_chembl_normalization_service_serializes_nested_values() -> None:
     assert normalized["tags"] == "a|b"
     assert normalized["metadata"] == "key:value"
     assert normalized["label"] == "MiXeD"
+
+
+def test_chembl_normalization_service_handles_empty_collections() -> None:
+    service = ChemblNormalizationService(_ConfigStub())
+    raw = {"tags": [], "metadata": {}, "label": "  NoChange "}
+
+    normalized = service.normalize(raw)
+
+    assert normalized["tags"] is None
+    assert normalized["metadata"] is None
+    assert normalized["label"] == "NoChange"
 
 
 def test_chembl_normalization_service_normalizes_dataframe_batch() -> None:
@@ -73,3 +95,20 @@ def test_chembl_normalization_service_normalizes_dataframe_batch() -> None:
     assert normalized_df["tags"].tolist() == ["a|b", "c"]
     assert normalized_df["metadata"].tolist() == ["key:value", "another:item"]
     assert normalized_df["label"].tolist() == ["MiXeD", "lower"]
+
+
+def test_chembl_normalization_service_coerces_numeric_columns() -> None:
+    service = ChemblNormalizationService(_ConfigStub())
+    df = pd.DataFrame(
+        {
+            "score": ["1.234", "bad", None],
+            "count": ["5", None, ""],
+        }
+    )
+
+    normalized_df = service.normalize_dataframe(df)
+
+    assert str(normalized_df["score"].dtype) == "Float64"
+    assert str(normalized_df["count"].dtype) == "Int64"
+    assert normalized_df["score"].tolist() == [1.234, pd.NA, pd.NA]
+    assert normalized_df["count"].tolist() == [5, pd.NA, pd.NA]

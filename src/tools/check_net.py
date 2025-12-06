@@ -1,5 +1,7 @@
-import requests
 import time
+
+import requests
+
 
 def check(url):
     print(f"Fetching {url}...")
@@ -10,6 +12,7 @@ def check(url):
         print(resp.text[:200])
     except Exception as e:
         print(f"Error: {e}")
+
 
 # check("https://www.ebi.ac.uk/chembl/api/data/status")
 check("https://www.ebi.ac.uk/chembl/api/data/molecule?limit=1")

@@ -1,16 +1,24 @@
 """
 Tests for ChemblPipelineBase generic extract (via ChemblActivityPipeline).
 """
-import pytest
+
+from typing import cast
 from unittest.mock import MagicMock
+
 import pandas as pd
+import pytest
 
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputOptions,
+)
+from bioetl.infrastructure.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
 )
 
 
@@ -99,14 +107,25 @@ def test_extract_no_input_file(pipeline, mock_extraction_service):
 def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     """Test extraction reads full dataframe from CSV."""
     csv_path = tmp_path / "activity.csv"
-    pd.DataFrame({
-        "activity_id": [10, 11],
-        "standard_value": [5.5, 6.6],
-        "standard_type": ["IC50", "Ki"],
-    }).to_csv(csv_path, index=False)
+    pd.DataFrame(
+        {
+            "activity_id": [10, 11],
+            "standard_value": [5.5, 6.6],
+            "standard_type": ["IC50", "Ki"],
+        }
+    ).to_csv(csv_path, index=False)
 
     pipeline._config.input_mode = "csv"
     pipeline._config.input_path = str(csv_path)
+
+    # Create CsvRecordSourceImpl and replace it in extractor
+    csv_record_source = CsvRecordSourceImpl(
+        input_path=csv_path,
+        csv_options=pipeline._config.csv_options,
+        limit=None,
+        logger=cast(LoggerAdapterABC, MagicMock()),
+    )
+    pipeline._extractor.record_source = csv_record_source
 
     df = pipeline.extract()
 
@@ -117,7 +136,9 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     mock_extraction_service.request_batch.assert_not_called()
 
 
-def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
+def test_extract_ids_only_csv(
+    pipeline, mock_extraction_service, tmp_path, source_config
+) -> None:
     """Test extraction fetches data by IDs when CSV contains only IDs."""
     csv_path = tmp_path / "activity_ids.csv"
     ids_df = pd.DataFrame({"activity_id": [100, 101, 102]})
@@ -126,16 +147,31 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
 
-    # Mock parse_response to return records only once
-    # Since all 3 ids are in one batch (batch_size=25 > 3), parse_response is called once
-    mock_extraction_service.parse_response.return_value = [
-        {"activity_id": 100}, {"activity_id": 101}, {"activity_id": 102}
-    ]
-    
-    # Mock serialize_records to return input
-    mock_extraction_service.serialize_records.side_effect = (
-        lambda entity, recs: recs
+    # Create IdListRecordSourceImpl and replace it in extractor
+    id_list_record_source = IdListRecordSourceImpl(
+        input_path=csv_path,
+        id_column="activity_id",
+        csv_options=pipeline._config.csv_options,
+        limit=None,
+        extraction_service=mock_extraction_service,
+        source_config=source_config,
+        entity="activity",
+        filter_key="activity_id__in",
+        logger=cast(LoggerAdapterABC, MagicMock()),
+        chunk_size=None,
     )
+    pipeline._extractor.record_source = id_list_record_source
+
+    # Mock parse_response to return records only once
+    # One batch covers all ids (batch_size=25 > 3), parse called once
+    mock_extraction_service.parse_response.return_value = [
+        {"activity_id": 100},
+        {"activity_id": 101},
+        {"activity_id": 102},
+    ]
+
+    # Mock serialize_records to return input
+    mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs
 
     df = pipeline.extract()
 
@@ -159,6 +195,7 @@ def test_extract_batch_size_from_config(
     pipeline._config.input_path = str(csv_path)
     # Create new source_config with batch_size=2
     from bioetl.infrastructure.config.models import ChemblSourceConfig
+
     new_source_config = ChemblSourceConfig(
         base_url=source_config.base_url,
         batch_size=2,
@@ -170,11 +207,24 @@ def test_extract_batch_size_from_config(
     # Ensure get_source_config returns the updated object
     pipeline._config.get_source_config = lambda provider: new_source_config
 
+    # Create IdListRecordSourceImpl with new batch_size and replace it in extractor
+    id_list_record_source = IdListRecordSourceImpl(
+        input_path=csv_path,
+        id_column="activity_id",
+        csv_options=pipeline._config.csv_options,
+        limit=None,
+        extraction_service=mock_extraction_service,
+        source_config=new_source_config,
+        entity="activity",
+        filter_key="activity_id__in",
+        logger=cast(LoggerAdapterABC, MagicMock()),
+        chunk_size=None,
+    )
+    pipeline._extractor.record_source = id_list_record_source
+
     # Mock parse_response to return empty list
     mock_extraction_service.parse_response.return_value = []
-    mock_extraction_service.serialize_records.side_effect = (
-        lambda entity, recs: recs
-    )
+    mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs
 
     pipeline.extract()
 
@@ -188,13 +238,30 @@ def test_extract_batch_size_from_config(
     assert calls[2][0][1] == ["5"]
 
 
-def test_extract_missing_column(pipeline, tmp_path):
+def test_extract_missing_column(
+    pipeline, mock_extraction_service, tmp_path, source_config
+) -> None:
     """Test validation error when ID column is missing."""
     csv_path = tmp_path / "bad.csv"
     pd.DataFrame({"wrong_col": [1]}).to_csv(csv_path, index=False)
 
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
+
+    # Create IdListRecordSourceImpl and replace it in extractor
+    id_list_record_source = IdListRecordSourceImpl(
+        input_path=csv_path,
+        id_column="activity_id",
+        csv_options=pipeline._config.csv_options,
+        limit=None,
+        extraction_service=mock_extraction_service,
+        source_config=source_config,
+        entity="activity",
+        filter_key="activity_id__in",
+        logger=cast(LoggerAdapterABC, MagicMock()),
+        chunk_size=None,
+    )
+    pipeline._extractor.record_source = id_list_record_source
 
     with pytest.raises(ValueError):
         pipeline.extract()

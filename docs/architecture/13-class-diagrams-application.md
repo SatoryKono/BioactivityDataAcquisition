@@ -1,3 +1,6 @@
+# Class Diagrams — Application Layer
+
+Устаревшие inline-диаграммы удалены. Храните актуальные схемы application-слоя в `docs/architecture/diagrams/class/` (текстовые Mermaid/PlantUML по политике `docs/architecture/diagrams/00-diagramming-policy.md`).
 # Class Diagrams - Application Layer
 
 Диаграммы классов для слоя Application (bioetl.application).
@@ -5,6 +8,9 @@
 ## 1. Pipeline Base Hierarchy
 
 ```mermaid
+---
+id: e95de373-b6d8-46a5-8621-9e6ad6b48ff6
+---
 classDiagram
     class PipelineBase {
         <<abstract>>

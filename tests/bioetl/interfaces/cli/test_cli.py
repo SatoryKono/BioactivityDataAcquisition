@@ -1,6 +1,7 @@
 """
 Tests for the CLI entry point.
 """
+
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -13,9 +14,9 @@ from typer.testing import CliRunner
 sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
+from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig  # noqa: E402
 from bioetl.domain.transform.hash_service import HashService  # noqa: E402
 from bioetl.interfaces.cli import app  # noqa: E402
-from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig  # noqa: E402
 
 runner = CliRunner()
 
@@ -37,7 +38,7 @@ def test_validate_config_missing():
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_validate_config_success(mock_loader):
     """Test validate-config success."""
     mock_loader.return_value = PipelineConfig(
@@ -68,7 +69,7 @@ def test_validate_config_success(mock_loader):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_run_command(mock_loader, mock_orchestrator_cls):
     """Test the run command."""
     mock_orchestrator = MagicMock()
@@ -96,9 +97,7 @@ def test_run_command(mock_loader, mock_orchestrator_cls):
 
     # We need to mock file existence for config
     with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(
-            app, ["run", "test_pipeline", "--config", "test.yaml"]
-        )
+        result = runner.invoke(app, ["run", "test_pipeline", "--config", "test.yaml"])
 
     assert result.exit_code == 0
     assert "Pipeline finished successfully" in result.stdout
@@ -117,7 +116,7 @@ def test_smoke_run(mock_run):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_run_config_not_found_explicit(mock_loader):
     """Test run command with explicit config that doesn't exist."""
     mock_loader.side_effect = FileNotFoundError("No such file or directory")
@@ -132,10 +131,8 @@ def test_run_config_not_found_explicit(mock_loader):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
-def test_run_with_limit_and_dry_run(
-    mock_loader, mock_orchestrator_cls
-):
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
+def test_run_with_limit_and_dry_run(mock_loader, mock_orchestrator_cls):
     """Test run command with limit and dry-run options."""
     mock_orchestrator = MagicMock()
     mock_orchestrator.run_pipeline.return_value = MagicMock(
@@ -174,7 +171,7 @@ def test_run_with_limit_and_dry_run(
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
     """Test run command when pipeline fails."""
     mock_orchestrator = MagicMock()
@@ -205,7 +202,7 @@ def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_run_exception(mock_loader):
     """Test run command unhandled exception."""
     mock_loader.side_effect = RuntimeError("Unexpected error")
@@ -218,11 +215,13 @@ def test_run_exception(mock_loader):
 
 
 @pytest.mark.unit
+@patch("bioetl.interfaces.cli.app.create_provider_loader")
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_run_dry_run_pipeline_metadata(
     mock_loader,
     mock_orchestrator_cls,
+    mock_create_provider_loader,
     pipeline_test_config,
     small_pipeline_df,
 ):
@@ -268,7 +267,9 @@ def test_run_dry_run_pipeline_metadata(
     validation_service.validate.side_effect = lambda df, **__: df
     output_writer = MagicMock()
     output_writer.write_result.return_value = MagicMock(
-        row_count=len(small_pipeline_df), checksum="checksum", path=MagicMock(name="dummy.parquet")
+        row_count=len(small_pipeline_df),
+        checksum="checksum",
+        path=MagicMock(name="dummy.parquet"),
     )
 
     # Mock orchestrator to build and run our pipeline
@@ -297,6 +298,9 @@ def test_run_dry_run_pipeline_metadata(
     mock_orchestrator_cls.return_value = mock_orchestrator
 
     mock_loader.return_value = pipeline_test_config
+    provider_loader = MagicMock()
+    provider_loader.load_registry.return_value = MagicMock()
+    mock_create_provider_loader.return_value = provider_loader
 
     with runner.isolated_filesystem():
         Path("config.yaml").write_text("dummy", encoding="utf-8")

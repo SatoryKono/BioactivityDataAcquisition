@@ -1,27 +1,22 @@
 import os
 import sys
+from functools import partial
 from pathlib import Path
-from typing import Literal, Optional
-
-# Remove old paths that might interfere
-sys.path = [p for p in sys.path if 'bioactivity_data_acquisition1' not in p.lower()]
-
-# Ensure we use the correct source directory
-_current_file = Path(__file__)
-_src_dir = _current_file.parent.parent.parent.parent
-_src_str = str(_src_dir)
-if _src_str in sys.path:
-    sys.path.remove(_src_str)
-sys.path.insert(0, _src_str)
+from typing import Any, Literal, Optional
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
-from bioetl.application.config_loader import load_pipeline_config_from_path
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.domain.configs import MetricsConfig
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    create_provider_loader,
+)
+from bioetl.infrastructure.observability.server import start_metrics_server_once
 
 app = typer.Typer(
     name="bioetl",
@@ -46,7 +41,7 @@ def _resolve_config_path(pipeline_name: str) -> Path:
         # Fallback if naming doesn't match, assume chembl
         entity = pipeline_name
         provider = "chembl"
-    
+
     # Standard path: configs/pipelines/{provider}/{entity}.yaml
     path = _get_config_base_dir() / "pipelines" / provider / f"{entity}.yaml"
     return path
@@ -73,7 +68,7 @@ def validate_config(config_path: Path):
     Validates a configuration file.
     """
     try:
-        config = load_pipeline_config_from_path(config_path)
+        config = build_runtime_config(config_path=config_path)
         console.print(f"[green]Config {config_path} is valid![/green]")
         console.print(f"Entity: {config.entity_name}")
         console.print(f"Provider: {config.provider}")
@@ -86,12 +81,31 @@ def validate_config(config_path: Path):
 def run(
     pipeline_name: str,
     profile: str = typer.Option("default", help="Configuration profile"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Run without writing output"),
-    config_path: Optional[Path] = typer.Option(None, "--config", help="Path to config file"),
-    limit: Optional[int] = typer.Option(None, "--limit", help="Limit number of records to process"),
+    output: Optional[Path] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output directory",
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Run without writing output",
+    ),
+    config_path: Optional[Path] = typer.Option(
+        None,
+        "--config",
+        help="Path to config file",
+    ),
+    limit: Optional[int] = typer.Option(
+        None,
+        "--limit",
+        help="Limit number of records to process",
+    ),
     input_path: Optional[Path] = typer.Option(
-        None, "--input-path", help="Path to CSV input file"
+        None,
+        "--input-path",
+        help="Path to CSV input file",
     ),
     input_mode: Optional[Literal["csv", "id_only", "auto_detect"]] = typer.Option(
         None,
@@ -117,51 +131,47 @@ def run(
     """
     try:
         base_dir = _get_config_base_dir()
-
-        if config_path is None:
-            config_path = _resolve_config_path(pipeline_name)
-
-        config_path = Path(config_path)
-        if config_path.is_absolute():
-            resolved_config_path = config_path
-        elif config_path.exists():
-            resolved_config_path = config_path
-        else:
-            resolved_config_path = base_dir / config_path
-
-        if not resolved_config_path.exists():
-            console.print(f"[red]Config file not found at {resolved_config_path}[/red]")
-            console.print("Please provide --config explicitly.")
+        resolved_config_path = _resolve_config_location(
+            config_path=config_path,
+            pipeline_name=pipeline_name,
+            base_dir=base_dir,
+        )
+        if not resolved_config_path:
             sys.exit(1)
 
-        config = load_pipeline_config_from_path(
-            resolved_config_path,
-            profile=profile,
-            profiles_root=base_dir / "profiles",
+        cli_overrides = _collect_cli_overrides(
+            output=output,
+            input_path=input_path,
+            input_mode=input_mode,
+            csv_delimiter=csv_delimiter,
+            csv_header=csv_header,
         )
-
-        config_payload = config.model_dump()
-
-        if output:
-            config_payload["output_path"] = str(output)
-
-        if input_path:
-            config_payload["input_path"] = str(input_path)
-
-        if input_mode:
-            config_payload["input_mode"] = input_mode
-
-        csv_options = config_payload.get("csv_options", {})
-        if csv_delimiter:
-            csv_options["delimiter"] = csv_delimiter
-        if csv_header is not None:
-            csv_options["header"] = csv_header
-        config_payload["csv_options"] = csv_options
-
-        config = PipelineConfig(**config_payload)
+        config = build_runtime_config(
+            config_path=resolved_config_path,
+            profile=profile,
+            configs_root=base_dir,
+            cli_overrides=cli_overrides,
+        )
+        _start_metrics_exporter(config.metrics, dry_run=dry_run)
+        provider_loader_factory = partial(
+            create_provider_loader, config_path=base_dir / "providers.yaml"
+        )
+        feature_flag = config.features.enable_provider_loader_port
+        if feature_flag:
+            provider_loader = provider_loader_factory()
+            provider_registry = None
+        else:
+            provider_loader = None
+            provider_registry = provider_loader_factory().load_registry(
+                registry=InMemoryProviderRegistry()
+            )
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
+            provider_registry=provider_registry,
+            provider_loader=provider_loader,
+            provider_loader_factory=provider_loader_factory,
+            use_provider_loader_port=feature_flag,
         )
 
         console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")
@@ -174,14 +184,14 @@ def run(
             result = orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
 
         if result.success:
-            console.print(f"[bold green]Pipeline finished successfully![/bold green]")
+            console.print("[bold green]Pipeline finished successfully![/bold green]")
             console.print(f"Rows processed: {result.row_count}")
             console.print(f"Duration: {result.duration_sec:.2f}s")
         else:
-            console.print(f"[bold red]Pipeline failed![/bold red]")
+            console.print("[bold red]Pipeline failed![/bold red]")
             sys.exit(1)
 
-    except Exception as e:
+    except Exception:
         console.print_exception()
         sys.exit(1)
 
@@ -192,6 +202,84 @@ def smoke_run(pipeline_name: str):
     Runs a smoke test (development profile, dry-run).
     """
     run(pipeline_name, profile="development", dry_run=True, limit=10)
+
+
+def _resolve_config_location(
+    *,
+    config_path: Optional[Path],
+    pipeline_name: str,
+    base_dir: Path,
+) -> Optional[Path]:
+    candidate_path = config_path or _resolve_config_path(pipeline_name)
+    path = Path(candidate_path)
+
+    if path.is_absolute() or path.exists() or path.is_relative_to(base_dir):
+        resolved = path
+    else:
+        resolved = base_dir / path
+
+    if resolved.exists():
+        return resolved
+
+    console.print(f"[red]Config file not found at {resolved}[/red]")
+    console.print("Please provide --config explicitly.")
+    return None
+
+
+def _start_metrics_exporter(
+    metrics_config: MetricsConfig, *, dry_run: bool = False
+) -> None:
+    """
+    Запускает экспортер метрик, пропуская запуск для dry-run и не валит CLI
+    при ошибке биндинга сокета.
+    """
+
+    if dry_run or not metrics_config.enabled:
+        return
+
+    try:
+        started = start_metrics_server_once(
+            enabled=True,
+            port=metrics_config.port,
+            address=metrics_config.address,
+        )
+    except Exception as exc:  # pragma: no cover - защитный контур
+        console.print(
+            f"[yellow]Prometheus metrics exporter not started: {exc}[/yellow]"
+        )
+        return
+
+    if started:
+        console.print(
+            f"[green]Prometheus metrics exporter started on"
+            f" {metrics_config.address}:{metrics_config.port}[/green]"
+        )
+
+
+def _collect_cli_overrides(
+    *,
+    output: Optional[Path],
+    input_path: Optional[Path],
+    input_mode: Optional[Literal["csv", "id_only", "auto_detect"]],
+    csv_delimiter: Optional[str],
+    csv_header: Optional[bool],
+) -> dict[str, Any]:
+    overrides: dict[str, Any] = {}
+    if output:
+        overrides["output_path"] = str(output)
+    if input_path:
+        overrides["input_path"] = str(input_path)
+    if input_mode:
+        overrides["input_mode"] = input_mode
+
+    csv_options: dict[str, Any] = {}
+    if csv_delimiter:
+        csv_options["delimiter"] = csv_delimiter
+    if csv_header is not None:
+        csv_options["header"] = csv_header
+    if csv_options:
+        overrides["csv_options"] = csv_options
+    return overrides
 
 
 if __name__ == "__main__":

@@ -1,29 +1,22 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
-sys.modules.setdefault(
-    "tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None)
-)
+import pytest
+from pydantic import ValidationError
 
-import pytest  # noqa: E402
-from pydantic import ValidationError  # noqa: E402
-
-from bioetl.application.container import PipelineContainer  # noqa: E402
-from bioetl.application.pipelines.hooks_impl import (  # noqa: E402
+from bioetl.application.container import PipelineContainer
+from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.domain.provider_registry import (  # noqa: E402
-    ProviderAlreadyRegisteredError,
+from bioetl.domain.provider_registry import (
+    InMemoryProviderRegistry,
     ProviderNotRegisteredError,
-    list_providers,
-    register_provider,
-    reset_provider_registry,
-    restore_provider_registry,
 )
 from bioetl.domain.providers import (
     ProviderComponents,
@@ -31,11 +24,16 @@ from bioetl.domain.providers import (
     ProviderId,
 )
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config import (
+    provider_registry_loader as config_provider_registry,
+)
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     DummyProviderConfig,
+    PipelineConfig,
 )
+
+sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
 
 
 class DummyComponents(ProviderComponents):
@@ -52,15 +50,47 @@ class DummyComponents(ProviderComponents):
         return resolved_client["provider"], resolved_client["base_url"]
 
 
+@pytest.fixture()
+def provider_registry() -> InMemoryProviderRegistry:
+    return InMemoryProviderRegistry()
+
+
 @pytest.fixture(autouse=True)
-def _restore_registry() -> Any:
-    snapshot = list_providers()
+def _patch_provider_registry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Any:
+    """
+    Point provider registry to a temp file that includes chembl and dummy.
+
+    This ensures PipelineConfig validation (which reads configs/providers.yaml)
+    accepts the dummy provider used in these tests.
+    """
+
+    providers_file = tmp_path / "providers.yaml"
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: chembl\n"
+            "    module: tests.dummy\n"
+            "    factory: create_chembl\n"
+            "    active: true\n"
+            "  - id: dummy\n"
+            "    module: tests.dummy\n"
+            "    factory: create_dummy\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        config_provider_registry, "DEFAULT_PROVIDERS_REGISTRY_PATH", providers_file
+    )
+    config_provider_registry.clear_provider_registry_cache()
     yield
-    restore_provider_registry(snapshot)
+    config_provider_registry.clear_provider_registry_cache()
 
 
 def _register_dummy_provider(
-    *, config_type: type[Any] = DummyProviderConfig,
+    *,
+    config_type: type[Any] = DummyProviderConfig,
+    registry: InMemoryProviderRegistry,
 ) -> ProviderDefinition:
     definition = ProviderDefinition(
         id=ProviderId.DUMMY,
@@ -68,10 +98,7 @@ def _register_dummy_provider(
         components=DummyComponents(),
         description="Dummy provider for container tests",
     )
-    try:
-        register_provider(definition)
-    except ProviderAlreadyRegisteredError:
-        pass
+    registry.register_provider(definition)
     return definition
 
 
@@ -91,9 +118,9 @@ def _build_dummy_pipeline_config(
 
 
 def test_get_extraction_service_for_registered_providers() -> None:
-    reset_provider_registry()
-    register_chembl_provider()
-    _register_dummy_provider()
+    registry = InMemoryProviderRegistry()
+    registry.register_provider(register_chembl_provider())
+    _register_dummy_provider(registry=registry)
 
     chembl_container = PipelineContainer(
         PipelineConfig(
@@ -110,7 +137,8 @@ def test_get_extraction_service_for_registered_providers() -> None:
                 max_retries=3,
                 rate_limit_per_sec=10.0,
             ),
-        )
+        ),
+        provider_registry=registry,
     )
     dummy_container = PipelineContainer(
         _build_dummy_pipeline_config(
@@ -120,22 +148,20 @@ def test_get_extraction_service_for_registered_providers() -> None:
                 max_retries=0,
                 rate_limit_per_sec=1.0,
             )
-        )
+        ),
+        provider_registry=registry,
     )
 
     chembl_service = chembl_container.get_extraction_service()
     dummy_service = dummy_container.get_extraction_service()
 
-    from bioetl.application.services.chembl_extraction import (
-        ChemblExtractionServiceImpl,
-    )
+    from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 
-    assert isinstance(chembl_service, ChemblExtractionServiceImpl)
+    assert isinstance(chembl_service, ChemblExtractionClientImpl)
     assert dummy_service == ("dummy", "https://example.com/")
 
 
-def test_unknown_provider_raises() -> None:
-    reset_provider_registry()
+def test_unknown_provider_raises(provider_registry: InMemoryProviderRegistry) -> None:
     dummy_container = PipelineContainer(
         _build_dummy_pipeline_config(
             DummyProviderConfig(
@@ -144,7 +170,8 @@ def test_unknown_provider_raises() -> None:
                 max_retries=0,
                 rate_limit_per_sec=1.0,
             )
-        )
+        ),
+        provider_registry=provider_registry,
     )
 
     with pytest.raises(ProviderNotRegisteredError):
@@ -171,9 +198,10 @@ def test_config_validation_error_is_propagated() -> None:
         )
 
 
-def test_type_mismatch_raises_type_error() -> None:
-    reset_provider_registry()
-    _register_dummy_provider(config_type=ChemblSourceConfig)
+def test_type_mismatch_raises_type_error(
+    provider_registry: InMemoryProviderRegistry,
+) -> None:
+    _register_dummy_provider(config_type=ChemblSourceConfig, registry=provider_registry)
 
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
@@ -181,20 +209,28 @@ def test_type_mismatch_raises_type_error() -> None:
         max_retries=0,
         rate_limit_per_sec=1.0,
     )
-    container = PipelineContainer(_build_dummy_pipeline_config(dummy_config))
+    container = PipelineContainer(
+        _build_dummy_pipeline_config(dummy_config),
+        provider_registry=provider_registry,
+    )
 
     with pytest.raises(TypeError):
         container.get_extraction_service()
 
 
-def test_container_provides_hooks_and_error_policy() -> None:
+def test_container_provides_hooks_and_error_policy(
+    provider_registry: InMemoryProviderRegistry,
+) -> None:
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
         timeout_sec=1,
         max_retries=0,
         rate_limit_per_sec=1.0,
     )
-    container = PipelineContainer(_build_dummy_pipeline_config(dummy_config))
+    container = PipelineContainer(
+        _build_dummy_pipeline_config(dummy_config),
+        provider_registry=provider_registry,
+    )
 
     logger = container.get_logger()
     hooks = container.get_hooks()
@@ -211,14 +247,19 @@ def test_container_provides_hooks_and_error_policy() -> None:
     assert hook_logger is logger
 
 
-def test_hash_service_singleton_scope() -> None:
+def test_hash_service_singleton_scope(
+    provider_registry: InMemoryProviderRegistry,
+) -> None:
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
         timeout_sec=1,
         max_retries=0,
         rate_limit_per_sec=1.0,
     )
-    container = PipelineContainer(_build_dummy_pipeline_config(dummy_config))
+    container = PipelineContainer(
+        _build_dummy_pipeline_config(dummy_config),
+        provider_registry=provider_registry,
+    )
 
     first_instance = container.get_hash_service()
     second_instance = container.get_hash_service()
@@ -226,7 +267,9 @@ def test_hash_service_singleton_scope() -> None:
     assert first_instance is second_instance
 
 
-def test_hash_service_override_propagates_to_transformers() -> None:
+def test_hash_service_override_propagates_to_transformers(
+    provider_registry: InMemoryProviderRegistry,
+) -> None:
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
         timeout_sec=1,
@@ -237,20 +280,16 @@ def test_hash_service_override_propagates_to_transformers() -> None:
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
         hash_service=custom_hash_service,
+        provider_registry=provider_registry,
     )
 
-    post_transformer = container.get_post_transformer(
-        version_provider=lambda: "v1"
-    )
+    post_transformer = container.get_post_transformer(version_provider=lambda: "v1")
     transformer_hashes = {
-        transformer.__class__.__name__: getattr(
-            transformer, "_hash_service", None
-        )
+        transformer.__class__.__name__: getattr(transformer, "_hash_service", None)
         for transformer in post_transformer._transformers  # type: ignore[attr-defined] # noqa: E501
     }
 
     assert transformer_hashes
     assert all(
-        service is custom_hash_service
-        for service in transformer_hashes.values()
+        service is custom_hash_service for service in transformer_hashes.values()
     )

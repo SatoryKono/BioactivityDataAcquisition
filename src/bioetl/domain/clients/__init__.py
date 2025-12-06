@@ -1,6 +1,3 @@
-"""Domain-level client contracts and adapters."""
+"""Client contracts and base definitions."""
 
-from bioetl.domain.clients.contracts import DataClientABC
-
-__all__ = ["DataClientABC"]
-
+__all__ = ["base", "chembl"]

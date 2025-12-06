@@ -1,4 +1,17 @@
+
 # Архитектурные диаграммы
+
+Устаревшие inline-блоки удалены. Актуальные диаграммы хранятся в текстовых источниках согласно политике:
+
+- `docs/architecture/diagrams/flow/high-level-architecture.mmd`
+- `docs/architecture/diagrams/class/pipeline-class-structure.mmd`
+- `docs/architecture/diagrams/sequence/pipeline-run-sequence.mmd`
+- `docs/architecture/diagrams/flow/pipeline-error-flowchart.mmd`
+- `docs/architecture/diagrams/class/client-architecture-three-layer.mmd`
+- `docs/architecture/diagrams/flow/domain-services-transform.mmd`
+- `docs/architecture/diagrams/flow/project-package-structure.mmd`
+
+Полные правила и стиль: `docs/architecture/diagrams/00-diagramming-policy.md`.
 
 ## 1. High-Level Architecture (Hexagonal)
 
@@ -385,7 +398,7 @@ flowchart LR
     Services["**Domain Services** *Normalization, Validation Facades*"]
   end
   subgraph Infrastructure["**Infrastructure Layer**"]
-    Clients["**ChEMBL Clients** *bioetl.clients.chembl*"]
+    Clients["**ChEMBL Clients** *bioetl.infrastructure.clients.chembl*"]
     Output["**Writers &amp; Storage** *bioetl.infrastructure.output*"]
     Logging["**Unified Logger** *bioetl.infrastructure.logging*"]
     Config["**Config / Resolver** *bioetl.infrastructure.config*"]

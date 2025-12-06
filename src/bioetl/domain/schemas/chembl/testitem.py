@@ -1,34 +1,23 @@
 """Pandera schema for ChEMBL testitem/molecule data."""
+
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
-
-OUTPUT_COLUMN_ORDER: list[str] = [
-    "molecule_chembl_id",
-    "pref_name",
-    "molecule_type",
-    "max_phase",
-    "structure_type",
-    "molecule_properties",
-    "molecule_structures",
-    "molecule_hierarchy",
-    "atc_classifications",
-    "molecule_synonyms",
-    "cross_references",
-    "pubchem_cid",
-    "helm_notation",
-]
+from bioetl.domain.transform.normalizers import (
+    CHEMBL_ID_REGEX,
+    PUBCHEM_CID_REGEX,
+)
 
 
 class TestitemSchema(pa.DataFrameModel):
     """Schema for molecule/test item data."""
+
+    __test__ = False
+
     molecule_chembl_id: Series[str] = pa.Field(
         str_matches=CHEMBL_ID_REGEX.pattern, description="ChEMBL ID молекулы"
     )
-    pref_name: Series[str] = pa.Field(
-        nullable=True, description="Название молекулы"
-    )
+    pref_name: Series[str] = pa.Field(nullable=True, description="Название молекулы")
     molecule_type: Series[str] = pa.Field(
         nullable=True,
         description="Тип молекулы (Small molecule, Antibody)",
@@ -59,10 +48,9 @@ class TestitemSchema(pa.DataFrameModel):
     cross_references: Series[str] = pa.Field(
         nullable=True, description="Внешние кросс-референсы"
     )
-    pubchem_cid: Series[float] = pa.Field(
+    pubchem_cid: Series[str] = pa.Field(
         nullable=True,
-        ge=1,
-        le=999_999_999,
+        str_matches=PUBCHEM_CID_REGEX.pattern,
         description="PubChem Compound ID",
     )
     helm_notation: Series[str] = pa.Field(
@@ -79,11 +67,18 @@ class TestitemSchema(pa.DataFrameModel):
         description="Хэш бизнес-ключа",
     )
     index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
-    database_version: Series[str] = pa.Field(nullable=True, description="Версия базы данных")
-    extracted_at: Series[str] = pa.Field(nullable=True, description="Дата и время извлечения")
+    database_version: Series[str] = pa.Field(
+        nullable=True,
+        description="Версия базы данных",
+    )
+    extracted_at: Series[str] = pa.Field(
+        nullable=True,
+        description="Дата и время извлечения",
+    )
 
     class Config:
         """Pandera configuration."""
 
         strict = True
         coerce = True
+        ordered = True

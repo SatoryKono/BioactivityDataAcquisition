@@ -1,0 +1,64 @@
+---
+id: 6c47be5a-03c8-4c4b-9294-6d7b1f6c2b4c
+---
+flowchart TB
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+
+subgraph Interfaces["Interfaces Layer (Ports)"]
+    CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
+    REST["REST Server (FastAPI)\ninterfaces.rest.server"]:::componentPrimary
+    MQ["MQ Listener\ninterfaces.mq.listener/handler"]:::componentSecondary
+
+    PipelinePorts["PipelineBase / ChemblPipelineBase\napplication.pipelines.base"]:::componentSecondary
+    PipelineRegistry["Pipeline Registry\napplication.pipelines.registry"]:::componentSecondary
+    ConfigLoader["Pipeline Config Loader\napplication.config_loader"]:::componentSecondary
+    ClientPorts["SourceClientABC\ninterfaces.clients / domain.clients.base"]:::componentSecondary
+    WriterPorts["WriterABC / UnifiedOutputWriterABC\ninterfaces.output"]:::componentSecondary
+    ValidatorPorts["ValidatorABC\ninterfaces.validation"]:::componentSecondary
+    LoggerPorts["LoggerAdapterABC\ninterfaces.logging"]:::componentSecondary
+    MetricsPort["Metrics endpoint\ninfrastructure.observability.server"]:::componentSecondary
+end
+class Interfaces group;
+
+subgraph Application["Application Layer"]
+    Orchestrator["PipelineOrchestrator"]:::external
+    Pipelines["ChemblEntityPipeline"]:::external
+end
+class Application group;
+
+subgraph Domain["Domain Layer"]
+    Validation["ValidationService"]:::external
+    Normalization["NormalizationServiceImpl\n(infrastructure.transform.impl.normalize)"]:::external
+end
+class Domain group;
+
+subgraph Infrastructure["Infrastructure Layer"]
+    Clients["ChemblHttpClientImpl"]:::external
+    Output["UnifiedOutputWriter"]:::external
+    Logging["Unified Logger"]:::external
+end
+class Infrastructure group;
+
+CLI --> Orchestrator
+REST --> Orchestrator
+MQ --> Orchestrator
+MetricsPort --> REST
+Orchestrator --> Pipelines
+Pipelines --> PipelinePorts
+Pipelines --> PipelineRegistry
+Pipelines --> ConfigLoader
+Pipelines --> ClientPorts
+Pipelines --> WriterPorts
+Pipelines --> ValidatorPorts
+Pipelines --> LoggerPorts
+ClientPorts --> Clients
+WriterPorts --> Output
+ValidatorPorts --> Validation
+PipelinePorts --> Normalization
+LoggerPorts --> Logging
+ConfigLoader --> PipelinePorts
+

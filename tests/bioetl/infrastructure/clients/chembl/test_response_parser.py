@@ -1,12 +1,11 @@
-from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParserImpl
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblResponseParserImpl,
+)
 
 
 def test_parse_activities():
     parser = ChemblResponseParserImpl()
-    response = {
-        "activities": [{"id": 1}, {"id": 2}],
-        "page_meta": {"limit": 20}
-    }
+    response = {"activities": [{"id": 1}, {"id": 2}], "page_meta": {"limit": 20}}
     records = parser.parse(response)
     assert len(records) == 2
     assert records[0]["id"] == 1

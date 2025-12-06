@@ -13,17 +13,19 @@ PIPELINE_REGISTRY: dict[str, Type[PipelineBase]] = {
     "molecule_chembl": ChemblEntityPipeline,  # Alias for testitem
 }
 
+
 def get_pipeline_class(name: str) -> Type[PipelineBase]:
     """
     Returns the pipeline class for the given name.
-    
+
     Args:
         name: Pipeline name (e.g. 'activity_chembl')
-        
+
     Raises:
         ValueError: If pipeline is not found.
     """
     if name not in PIPELINE_REGISTRY:
-        raise ValueError(f"Pipeline '{name}' not found. Available: {list(PIPELINE_REGISTRY.keys())}")
+        raise ValueError(
+            f"Pipeline '{name}' not found. Available: {list(PIPELINE_REGISTRY.keys())}"
+        )
     return PIPELINE_REGISTRY[name]
-

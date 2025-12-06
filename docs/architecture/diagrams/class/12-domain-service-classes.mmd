@@ -1,0 +1,35 @@
+---
+id: 7f1b5e5d-4c9a-4bf0-8c6f-0b3fdde2d0ac
+---
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
+
+class ValidationService {
+  +get_schema(entity_name)
+  +validate(df, entity_name)
+}
+class SchemaProviderABC
+class ValidatorABC
+class PanderaValidator
+class SchemaRegistry
+
+class NormalizationServiceABC
+class BaseNormalizationService
+class ChemblNormalizationService
+class NormalizationServiceImpl
+class NormalizationConfigProvider
+class NormalizationConfig
+
+ValidationService --> SchemaProviderABC
+SchemaRegistry ..|> SchemaProviderABC
+PanderaValidator ..|> ValidatorABC
+SchemaRegistry --> PanderaValidator : validator
+
+ChemblNormalizationService --|> BaseNormalizationService
+NormalizationServiceImpl --|> BaseNormalizationService
+ChemblNormalizationService ..|> NormalizationServiceABC
+NormalizationServiceImpl ..|> NormalizationServiceABC
+ChemblNormalizationService --> NormalizationConfigProvider
+NormalizationServiceImpl --> NormalizationConfigProvider
+NormalizationConfigProvider --> NormalizationConfig
+

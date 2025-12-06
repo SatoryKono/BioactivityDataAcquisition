@@ -1,3 +1,6 @@
+# Class Diagrams — Interfaces Layer
+
+Устаревшие inline-диаграммы удалены. Храните актуальные схемы интерфейсного слоя в текстовых файлах `docs/architecture/diagrams/class/` по политике `docs/architecture/diagrams/00-diagramming-policy.md`.
 # Class Diagrams - Interfaces Layer
 
 Диаграммы классов для слоя Interfaces (bioetl.interfaces).

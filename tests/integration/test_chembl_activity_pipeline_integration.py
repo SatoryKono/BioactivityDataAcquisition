@@ -1,34 +1,49 @@
 """Integration tests for ChEMBL Activity pipeline (TS-001)."""
-from pathlib import Path
-import sys
-from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", MagicMock())
+import sys
+from functools import partial
+from pathlib import Path
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
-from bioetl.infrastructure.config.resolver import ConfigResolver
+from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    create_provider_loader,
+)
+
+sys.modules.setdefault("tqdm", MagicMock())
 
 
 @pytest.mark.integration
 def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     """TS-001: full pipeline run writes data and metadata."""
-    monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
+    monkeypatch.setenv(
+        "BIOETL_CONFIG_DIR",
+        str(Path("tests/fixtures/configs").resolve()),
+    )
     monkeypatch.setattr(
-        ChemblExtractionServiceImpl,
+        ChemblExtractionClientImpl,
         "get_release_version",
         lambda self: "chembl_integration",
     )
 
-    resolver = ConfigResolver()
-    config = resolver.resolve("chembl_activity_test.yaml")
+    config = build_runtime_config(
+        config_path=Path("tests/fixtures/configs/chembl_activity_test.yaml"),
+        configs_root=Path("tests/fixtures/configs"),
+    )
     config.storage.output_path = str(tmp_path / "output")
 
-    container = build_pipeline_dependencies(config)
+    provider_loader_factory = partial(create_provider_loader)
+    registry = provider_loader_factory().load_registry()
+    container = build_pipeline_dependencies(
+        config,
+        provider_registry=registry,
+    )
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,
@@ -39,7 +54,10 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         hash_service=container.get_hash_service(),
     )
 
-    result = pipeline.run(output_path=Path(config.storage.output_path), dry_run=False)
+    result = pipeline.run(
+        output_path=Path(config.storage.output_path),
+        dry_run=False,
+    )
 
     output_file = Path(config.storage.output_path) / "activity.csv"
     meta_file = Path(config.storage.output_path) / "meta.yaml"

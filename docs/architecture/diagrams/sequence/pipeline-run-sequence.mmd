@@ -1,0 +1,85 @@
+---
+id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
+---
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorBorderRadius": 6,
+    "actorFontSize": "18px",
+    "sequenceNumberColor": "#444",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant User as CLI/User
+    participant Pipe as Pipeline (ChemblEntityPipeline)
+    participant Hooks as Hooks (Logging + Metrics)
+    participant Stage as StageRunner/ErrorPolicy
+    participant Extr as Extractor (ChemblExtractorImpl)
+    participant Source as RecordSource (API/CSV/ID list)
+    participant Trans as Transformer (ChemblTransformerImpl)
+    participant Val as Validator (ValidationService)
+    participant Writer as UnifiedWriter
+    participant Meta as MetadataWriter
+
+    User->>Pipe: run(output_path, dry_run=False)
+    activate Pipe
+    
+    Pipe->>Pipe: Initialize RunContext
+    Pipe->>Hooks: on_stage_start("extract")
+    
+    loop For each Chunk
+        Pipe->>Stage: process_chunk(extract/transform/validate)
+        activate Stage
+        Stage->>Extr: extract() (iter_chunks)
+        activate Extr
+        Extr->>Source: next_chunk()
+        activate Source
+        Source-->>Extr: raw_chunk (DataFrame)
+        deactivate Source
+        Extr-->>Stage: raw_chunk
+        deactivate Extr
+        
+        Stage->>Hooks: on_stage_start("transform")
+        Stage->>Trans: transform(raw_chunk)
+        activate Trans
+        Trans-->>Stage: transformed_df
+        deactivate Trans
+        
+        Stage->>Hooks: on_stage_start("validate")
+        Stage->>Val: validate(transformed_df)
+        activate Val
+        Val-->>Stage: validated_df
+        deactivate Val
+        
+        Stage-->>Pipe: Collect validated chunk
+        deactivate Stage
+    end
+
+    Pipe->>Hooks: on_stage_end("extract")
+    Pipe->>Hooks: on_stage_end("transform")
+    Pipe->>Hooks: on_stage_end("validate")
+
+    alt Not Dry Run
+        Pipe->>Hooks: on_stage_start("write")
+        Pipe->>Writer: write_result(all_data, output_path)
+        activate Writer
+        Writer->>Writer: Stable Sort & Reorder
+        Writer->>Writer: Atomic Write (.tmp -> .csv)
+        Writer->>Writer: Compute Checksum
+        Writer->>Meta: write_meta(meta.yaml)
+        Writer->>Hooks: emit metrics/logs
+        Writer-->>Pipe: WriteResult
+        deactivate Writer
+        Pipe->>Hooks: on_stage_end("write")
+    else Dry Run
+        Pipe->>Pipe: Skip Write
+    end
+
+    Pipe-->>User: RunResult (Stats, Meta)
+    deactivate Pipe

@@ -17,3 +17,8 @@
 
 ## Связи
 - Target-данные потребляются Activity/Assay. Итог: `target.csv` + `meta.yaml`, атомарная запись.
+
+## Диаграммы
+- Flowchart: `docs/application/pipelines/chembl/target/diagrams/flow/target-workflow.mmd`
+- Sequence: `docs/application/pipelines/chembl/target/diagrams/sequence/target-main-sequence.mmd`
+- Class: `docs/application/pipelines/chembl/target/diagrams/class/target-pipeline-class.mmd`

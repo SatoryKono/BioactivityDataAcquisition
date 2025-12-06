@@ -1,19 +1,24 @@
 """Golden test for ChEMBL Activity pipeline (TS-004)."""
-from datetime import datetime, timezone
-from pathlib import Path
-import sys
-from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", MagicMock())
+import sys
+from datetime import datetime, timezone
+from functools import partial
+from pathlib import Path
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
-from bioetl.infrastructure.config.resolver import ConfigResolver
+from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    create_provider_loader,
+)
+
+sys.modules.setdefault("tqdm", MagicMock())
 
 
 def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -22,25 +27,38 @@ def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
         def now(cls, tz=None):  # type: ignore[override]
             return datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
-    monkeypatch.setattr("bioetl.domain.transform.hash_service.datetime", _FrozenDatetime)
+    monkeypatch.setattr(
+        "bioetl.domain.transform.hash_service.datetime",
+        _FrozenDatetime,
+    )
 
 
 @pytest.mark.golden
 def test_chembl_activity_golden(tmp_path, monkeypatch):
     """TS-004: pipeline output matches golden snapshot."""
-    monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
+    monkeypatch.setenv(
+        "BIOETL_CONFIG_DIR",
+        str(Path("tests/fixtures/configs").resolve()),
+    )
     monkeypatch.setattr(
-        ChemblExtractionServiceImpl,
+        ChemblExtractionClientImpl,
         "get_release_version",
         lambda self: "chembl_golden",
     )
     _freeze_hash_service_clock(monkeypatch)
 
-    resolver = ConfigResolver()
-    config = resolver.resolve("chembl_activity_test.yaml")
+    config = build_runtime_config(
+        config_path=Path("tests/fixtures/configs/chembl_activity_test.yaml"),
+        configs_root=Path("tests/fixtures/configs"),
+    )
     config.storage.output_path = str(tmp_path / "output")
 
-    container = build_pipeline_dependencies(config)
+    provider_loader_factory = partial(create_provider_loader)
+    registry = provider_loader_factory().load_registry()
+    container = build_pipeline_dependencies(
+        config,
+        provider_registry=registry,
+    )
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,
