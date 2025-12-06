@@ -71,9 +71,7 @@ class ProviderRegistryLoader:
         logger: LoggerAdapterABC | None = None,
     ) -> None:
         self._config_path = (
-            Path(config_path)
-            if config_path
-            else DEFAULT_PROVIDERS_CONFIG_PATH
+            Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
         )
         self._logger = logger or default_logger()
 
@@ -85,7 +83,8 @@ class ProviderRegistryLoader:
             config = ProviderRegistryConfig.model_validate(raw_config)
         except ValidationError as exc:
             raise ProviderRegistryValidationError(
-                self._config_path, exc.__str__()
+                self._config_path,
+                exc.__str__(),
             ) from exc
 
         registered: list[ProviderDefinition] = []
@@ -103,7 +102,8 @@ class ProviderRegistryLoader:
         return registered
 
     def _register_entry(
-        self, entry: ProviderRegistryEntry
+        self,
+        entry: ProviderRegistryEntry,
     ) -> ProviderDefinition | None:
         try:
             module = importlib.import_module(entry.module)

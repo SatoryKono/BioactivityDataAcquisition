@@ -84,5 +84,7 @@ class NormalizationServiceABC(ABC):
         """Нормализует DataFrame чанками или целиком."""
 
     @abstractmethod
-    def normalize_series(self, series: pd.Series, field_cfg: dict[str, Any]) -> pd.Series:
+    def normalize_series(
+        self, series: pd.Series, field_cfg: dict[str, Any]
+    ) -> pd.Series:
         """Нормализует отдельную серию согласно полю конфигурации."""

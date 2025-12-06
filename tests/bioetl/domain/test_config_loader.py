@@ -6,9 +6,9 @@ from bioetl.application import config_loader
 from bioetl.application.config_loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
-    UnknownProviderError,
     load_pipeline_config,
     load_pipeline_config_from_path,
+    UnknownProviderError,
 )
 from bioetl.config import provider_registry
 from bioetl.infrastructure.config.models import ChemblSourceConfig
