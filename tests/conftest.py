@@ -133,7 +133,7 @@ def mock_output_writer():
     writer = MagicMock(spec=UnifiedOutputWriter)
     writer.write_result.return_value = WriteResult(
         path=Path("/tmp/test_output.csv"),
-        row_count=10,
+        row_count=2,  # Default for most tests
         duration_sec=0.1,
         checksum=None,
     )
