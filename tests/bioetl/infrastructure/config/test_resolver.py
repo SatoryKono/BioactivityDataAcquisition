@@ -25,7 +25,16 @@ def _reset_registry() -> None:
     clear_provider_registry_cache()
 
 
-def _write_providers(path: Path, content: str = "providers:\n  - chembl\n") -> None:
+def _write_providers(
+    path: Path,
+    content: str = (
+        "providers:\n"
+        "  - id: chembl\n"
+        "    module: tests.dummy\n"
+        "    factory: create_chembl\n"
+        "    active: true\n"
+    ),
+) -> None:
     path.write_text(content, encoding="utf-8")
 
 

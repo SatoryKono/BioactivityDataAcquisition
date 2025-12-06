@@ -72,7 +72,20 @@ def _patch_provider_registry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     """
 
     providers_file = tmp_path / "providers.yaml"
-    providers_file.write_text("providers:\n  - chembl\n  - dummy\n", encoding="utf-8")
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: chembl\n"
+            "    module: tests.dummy\n"
+            "    factory: create_chembl\n"
+            "    active: true\n"
+            "  - id: dummy\n"
+            "    module: tests.dummy\n"
+            "    factory: create_dummy\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(
         config_provider_registry, "DEFAULT_PROVIDERS_REGISTRY_PATH", providers_file
     )

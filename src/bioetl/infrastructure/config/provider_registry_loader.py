@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 DEFAULT_CONFIGS_ROOT = Path("configs")
 DEFAULT_PROVIDERS_REGISTRY_PATH = DEFAULT_CONFIGS_ROOT / "providers.yaml"
@@ -49,8 +50,31 @@ class ProviderNotConfiguredError(ProviderRegistryError):
         self.provider = provider
         self.registry_path = registry_path
         super().__init__(
-            f"Provider '{provider}' is not configured in registry {registry_path}"
+            (
+                "Provider '{provider}' is not configured in providers config "
+                "{registry_path}"
+            ).format(provider=provider, registry_path=registry_path)
         )
+
+
+class ProviderRegistryEntryModel(BaseModel):
+    """Single provider entry from providers.yaml."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    module: str
+    factory: str
+    active: bool = True
+    description: str | None = None
+
+
+class ProviderRegistryModel(BaseModel):
+    """Validated providers.yaml content."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    providers: list[ProviderRegistryEntryModel] = []
 
 
 def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -> str:
@@ -58,9 +82,12 @@ def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -
 
     path = registry_path or DEFAULT_PROVIDERS_REGISTRY_PATH
     registry = _load_provider_registry(path)
-    if provider not in registry:
-        raise ProviderNotConfiguredError(provider, path)
-    return provider
+    registered_ids = {entry.id for entry in registry.providers if entry.active}
+
+    if provider in registered_ids:
+        return provider
+
+    raise ProviderNotConfiguredError(provider, path)
 
 
 def clear_provider_registry_cache() -> None:
@@ -77,53 +104,10 @@ def _read_registry_data(registry_path: Path) -> Any:
         return yaml.safe_load(file) or {}
 
 
-def _parse_registry_data(data: Any, registry_path: Path) -> set[str]:
-    if not isinstance(data, dict):
-        raise ProviderRegistryFormatError(registry_path, "YAML root must be a mapping")
-
-    providers = data.get("providers")
-    if providers is None:
-        return set()
-    if not isinstance(providers, list):
-        raise ProviderRegistryFormatError(
-            registry_path,
-            "'providers' must be a list",
-        )
-
-    return _collect_provider_ids(providers, registry_path)
-
-
-def _collect_provider_ids(providers: list[Any], registry_path: Path) -> set[str]:
-    registry: set[str] = set()
-    for provider in providers:
-        registry.add(_normalize_provider_entry(provider, registry_path))
-    return registry
-
-
-def _normalize_provider_entry(provider: Any, registry_path: Path) -> str:
-    if isinstance(provider, str):
-        return provider
-    if isinstance(provider, dict):
-        provider_id = provider.get("id")
-        if provider_id is None:
-            raise ProviderRegistryFormatError(
-                registry_path,
-                "Provider entry must have 'id' field",
-            )
-        return str(provider_id)
-    raise ProviderRegistryFormatError(
-        registry_path,
-        ("Provider entry must be string or dict, " f"got {type(provider).__name__}"),
-    )
-
-
 @lru_cache(maxsize=None)
-def _load_provider_registry(registry_path: Path) -> set[str]:
+def _load_provider_registry(registry_path: Path) -> ProviderRegistryModel:
     data: Any = _read_registry_data(registry_path)
-    return _parse_registry_data(data, registry_path)
-
-
-def _list_runtime_providers() -> set[str]:
-    from bioetl.domain.provider_registry import list_providers
-
-    return {definition.id.value for definition in list_providers()}
+    try:
+        return ProviderRegistryModel.model_validate(data)
+    except ValidationError as exc:
+        raise ProviderRegistryFormatError(registry_path, exc.__str__()) from exc
