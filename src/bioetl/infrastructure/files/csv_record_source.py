@@ -8,9 +8,9 @@ from typing import Any
 
 import pandas as pd
 
+from bioetl.domain.configs import ChemblSourceConfig, CsvInputOptions
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.record_source import RecordSource
-from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 
 

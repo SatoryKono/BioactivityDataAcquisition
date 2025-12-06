@@ -5,8 +5,8 @@ Metadata builder service for pipeline outputs.
 from pathlib import Path
 from typing import Any
 
+from bioetl.domain.configs import QcConfig
 from bioetl.domain.models import RunContext
-from bioetl.infrastructure.config.models import QcConfig
 from bioetl.infrastructure.output.contracts import WriteResult
 
 

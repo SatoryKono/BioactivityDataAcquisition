@@ -24,7 +24,7 @@ def debug_fetch():
     from bioetl.infrastructure.clients.chembl.factories import (
         default_chembl_extraction_service,
     )
-    from bioetl.infrastructure.config.models import ChemblSourceConfig
+    from bioetl.domain.configs import ChemblSourceConfig
 
     config = ChemblSourceConfig(base_url="https://www.ebi.ac.uk/chembl/api/data")
     service = default_chembl_extraction_service(config)

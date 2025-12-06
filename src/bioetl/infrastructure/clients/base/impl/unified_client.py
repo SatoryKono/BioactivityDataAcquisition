@@ -9,8 +9,8 @@ from uuid import uuid4
 
 import requests
 
+from bioetl.domain.configs import ClientConfig
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
-from bioetl.infrastructure.config.models import ClientConfig
 
 
 class UnifiedAPIClient:
