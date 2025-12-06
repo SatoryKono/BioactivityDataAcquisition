@@ -6,8 +6,8 @@ from typing import cast
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
-import pytest
 from pydantic import AnyHttpUrl
+import pytest
 
 from bioetl.application.config.pipeline_config_schema import (
     HashingConfig,
