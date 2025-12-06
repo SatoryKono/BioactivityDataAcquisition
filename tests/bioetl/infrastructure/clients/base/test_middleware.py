@@ -125,20 +125,32 @@ def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
     result = middleware.request("GET", "http://example.com")
 
     assert result.status_code == 200
-    retry_record = next(
-        rec for rec in caplog.records if rec.message == "Retrying HTTP request"
-    )
-    success_record = next(
-        rec for rec in caplog.records if rec.message == "HTTP request succeeded"
-    )
-
-    assert retry_record.delay == pytest.approx(0.1)
-    assert retry_record.total_retry_delay == pytest.approx(0.1)
-    assert retry_record.retry_reason == "TimeoutError"
-    assert success_record.total_retry_delay == pytest.approx(0.1)
-    assert success_record.attempts == 2
+    retry_record, success_record = _extract_log_records(caplog.records)
+    _assert_retry_record(retry_record, expected_delay=0.1)
+    _assert_success_record(success_record, expected_total_delay=0.1, attempts=2)
     retry_metric.assert_called_once_with(1)
     failure_metric.assert_not_called()
+
+
+def _extract_log_records(records):
+    retry_record = next(rec for rec in records if rec.message == "Retrying HTTP request")
+    success_record = next(
+        rec for rec in records if rec.message == "HTTP request succeeded"
+    )
+    return retry_record, success_record
+
+
+def _assert_retry_record(retry_record, *, expected_delay: float) -> None:
+    assert retry_record.delay == pytest.approx(expected_delay)
+    assert retry_record.total_retry_delay == pytest.approx(expected_delay)
+    assert retry_record.retry_reason == "TimeoutError"
+
+
+def _assert_success_record(
+    success_record, *, expected_total_delay: float, attempts: int
+) -> None:
+    assert success_record.total_retry_delay == pytest.approx(expected_total_delay)
+    assert success_record.attempts == attempts
 
 
 def test_retry_after_header_seconds(monkeypatch, base_client):

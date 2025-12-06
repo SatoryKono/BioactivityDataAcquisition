@@ -30,19 +30,6 @@ class NormalizationService
 class ChemblNormalizationService
 class NormalizationConfigProvider
 
-HasherABC:::interface
-HasherImpl:::domainSecondary
-HashService:::domainPrimary
-TransformerABC:::interface
-TransformerChain:::domainPrimary
-HashColumnsTransformer:::domainSecondary
-IndexColumnTransformer:::domainSecondary
-DatabaseVersionTransformer:::domainSecondary
-FulldateTransformer:::domainSecondary
-NormalizationService:::interface
-ChemblNormalizationService:::domainPrimary
-NormalizationConfigProvider:::interface
-
 HasherImpl ..|> HasherABC
 HashService --> HasherABC
 TransformerChain --> TransformerABC : components

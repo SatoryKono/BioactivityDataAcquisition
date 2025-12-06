@@ -29,16 +29,6 @@ class ProviderNotRegisteredError
 class ProviderAlreadyRegisteredError
 class ChemblProviderDefinition
 
-ProviderId:::domainSecondary
-BaseProviderConfig:::domainSecondary
-ProviderComponents:::interface
-ProviderDefinition:::domainPrimary
-ProviderRegistry:::domainPrimary
-ProviderRegistryError:::domainSecondary
-ProviderNotRegisteredError:::domainSecondary
-ProviderAlreadyRegisteredError:::domainSecondary
-ChemblProviderDefinition:::domainSecondary
-
 ProviderDefinition --> ProviderId
 ProviderDefinition --> BaseProviderConfig
 ProviderDefinition --> ProviderComponents

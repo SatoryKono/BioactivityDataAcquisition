@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Callable, Iterable, Mapping, MutableMapping
+from typing import Any, Callable, Iterable, Mapping, MutableMapping, cast
 
 from bioetl.domain.transform.normalizers.base import is_missing
 from bioetl.domain.transform.normalizers.identifiers import (
@@ -39,36 +39,58 @@ def normalize_record(
     if is_missing(value):
         return None
 
+    mapping = _coerce_record_mapping(value)
+    normalized: MutableMapping[str, Any] = {}
+
+    for key, item in mapping.items():
+        str_key = str(key)
+        if is_missing(item):
+            continue
+
+        normalized_value = _normalize_record_value(
+            str_key, item, value_normalizer=value_normalizer
+        )
+        if not is_missing(normalized_value):
+            normalized[str_key] = normalized_value
+
+    return normalized or None
+
+
+def _coerce_record_mapping(value: Any) -> Mapping[str, Any]:
     if isinstance(value, str):
         value = value.strip()
         if value.startswith("{") and value.endswith("}"):
             try:
-                value = json.loads(value)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Некорректный JSON для записи: {e}") from e
+                parsed = json.loads(value)
+                if not isinstance(parsed, Mapping):
+                    raise ValueError(
+                        f"Ожидался словарь, получено {type(parsed).__name__}"
+                    )
+                return cast(Mapping[str, Any], parsed)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"Некорректный JSON для записи: {exc}"
+                ) from exc
 
     if not isinstance(value, Mapping):
         raise ValueError(
             f"Ожидался словарь, получено {type(value).__name__}"
         )
+    return cast(Mapping[str, Any], value)
 
-    normalized: MutableMapping[str, Any] = {}
-    for key, item in value.items():
-        str_key = str(key)
-        if is_missing(item):
-            continue
 
-        try:
-            normalized_value = value_normalizer(item) if value_normalizer else item
-        except ValueError as exc:
-            raise ValueError(
-                f"Некорректное значение в поле '{str_key}': {exc}"
-            ) from exc
-
-        if not is_missing(normalized_value):
-            normalized[str_key] = normalized_value
-
-    return normalized or None
+def _normalize_record_value(
+    str_key: str,
+    item: Any,
+    *,
+    value_normalizer: Callable[[Any], Any] | None,
+) -> Any:
+    try:
+        return value_normalizer(item) if value_normalizer else item
+    except ValueError as exc:
+        raise ValueError(
+            f"Некорректное значение в поле '{str_key}': {exc}"
+        ) from exc
 
 
 def normalize_target_components(value: Any) -> list[dict[str, Any]] | None:
@@ -116,7 +138,10 @@ def _coerce_to_iterable(value: Any) -> Iterable[Any]:
         stripped = value.strip()
         if stripped.startswith("[") and stripped.endswith("]"):
             try:
-                return json.loads(stripped)
+                parsed = json.loads(stripped)
+                if isinstance(parsed, Iterable):
+                    return cast(Iterable[Any], parsed)
+                return [parsed]
             except json.JSONDecodeError:
                 return [stripped]
         if ";" in stripped:
