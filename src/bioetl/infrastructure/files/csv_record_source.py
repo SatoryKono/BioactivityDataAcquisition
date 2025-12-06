@@ -119,13 +119,19 @@ class IdListRecordSourceImpl(RecordSource):
             # KeyError when usecols specifies a column that doesn't exist
             # ValueError when pandas can't parse the column
             raise ValueError(
-                f"Required ID column '{self._id_column}' not found in CSV file: {self._input_path}"
+                (
+                    f"Required ID column '{self._id_column}' not found in CSV file: "
+                    f"{self._input_path}"
+                )
             ) from exc
 
         # Additional validation: ensure the column exists after reading
         if self._csv_options.header and self._id_column not in df_ids.columns:
             raise ValueError(
-                f"Required ID column '{self._id_column}' not found in CSV file: {self._input_path}"
+                (
+                    f"Required ID column '{self._id_column}' not found in CSV file: "
+                    f"{self._input_path}"
+                )
             )
 
         ids = df_ids[self._id_column].dropna().astype(str).tolist()

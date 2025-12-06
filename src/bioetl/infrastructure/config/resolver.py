@@ -48,7 +48,7 @@ class ConfigResolver:
         Returns:
             Валидированная конфигурация пайплайна.
         """
-        # Разрешаем путь относительно base_dir, если путь относительный и файл не существует
+        # Разрешаем путь относительно base_dir, если путь относительный и файла нет
         config_path_obj = Path(config_path)
         if not config_path_obj.is_absolute() and not config_path_obj.exists():
             config_path_obj = self.base_dir / config_path_obj
