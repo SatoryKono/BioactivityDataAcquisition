@@ -3,6 +3,8 @@ Pytest configuration and shared fixtures.
 """
 
 import socket
+import sys
+from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock, Mock
 
@@ -20,6 +22,12 @@ from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+
+# Ensure src is on sys.path even if pytest pythonpath is ignored by runners
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_PATH = PROJECT_ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
