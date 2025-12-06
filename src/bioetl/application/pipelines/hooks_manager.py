@@ -19,12 +19,15 @@ class HooksManager:
         provider_id: ProviderId,
         entity_name: str,
         hooks: Iterable[PipelineHookABC] | None = None,
+        pipeline_id: str | None = None,
     ) -> None:
         self._logger = logger
         self._provider_id = provider_id
         self._entity_name = entity_name
         self._hooks: list[PipelineHookABC] = list(hooks or [])
         self._stage_starts: dict[str, datetime] = {}
+        self._pipeline_id = pipeline_id
+        self._current_run_id: str | None = None
 
     @property
     def hooks(self) -> list[PipelineHookABC]:
@@ -36,6 +39,7 @@ class HooksManager:
         """Сбрасывает накопленное состояние (например, тайминги стадий)."""
 
         self._stage_starts.clear()
+        self._current_run_id = None
 
     def add_hook(self, hook: PipelineHookABC) -> None:
         """Добавляет хук выполнения."""
@@ -52,11 +56,14 @@ class HooksManager:
         """Уведомляет о старте стадии и логирует событие."""
 
         self._stage_starts[stage] = datetime.now(timezone.utc)
+        self._current_run_id = context.run_id
         self._logger.info(
-            f"Stage started: {stage}",
+            "Stage started",
             provider=context.provider,
             entity=context.entity_name,
             run_id=context.run_id,
+            stage=stage,
+            pipeline=self._pipeline_id,
         )
         for hook in self._hooks:
             hook.on_stage_start(stage, context)
@@ -65,11 +72,15 @@ class HooksManager:
         """Уведомляет о завершении стадии и логирует событие."""
 
         self._logger.info(
-            f"Stage finished: {stage}",
+            "Stage finished",
             records=result.records_processed,
             chunks=result.chunks_processed,
             provider=self._provider_id.value,
             entity=self._entity_name,
+            stage=stage,
+            pipeline=self._pipeline_id,
+            run_id=self._current_run_id,
+            outcome="success" if result.success else "error",
         )
         for hook in self._hooks:
             hook.on_stage_end(stage, result)
@@ -78,3 +89,8 @@ class HooksManager:
         """Возвращает время старта указанной стадии, если оно зафиксировано."""
 
         return self._stage_starts.get(stage)
+
+    def set_logger(self, logger: LoggerAdapterABC) -> None:
+        """Обновляет логгер для хуков."""
+
+        self._logger = logger
