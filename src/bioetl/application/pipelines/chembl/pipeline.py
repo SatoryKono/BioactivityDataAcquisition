@@ -8,9 +8,9 @@ with a configurable generic implementation.
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
+from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -32,7 +32,7 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         extraction_service: ExtractionServiceABC,
         hash_service: HashService,
         record_source: RecordSource | None = None,
-        normalization_service: NormalizationService | None = None,
+        normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
     ) -> None:

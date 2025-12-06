@@ -7,7 +7,10 @@ from typing import Any, Protocol, TypedDict, cast
 import pandas as pd
 
 from bioetl.domain.record_source import RawRecord
-from bioetl.domain.transform.contracts import NormalizationConfigProvider
+from bioetl.domain.transform.contracts import (
+    NormalizationConfigProvider,
+    NormalizationServiceABC,
+)
 from bioetl.domain.transform.impl import normalize as normalize_impl
 from bioetl.domain.transform.impl.base_normalizer import BaseNormalizationService
 from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
@@ -41,7 +44,9 @@ class NormalizationService(Protocol):
         """Normalize a Series using field configuration."""
 
 
-class ChemblNormalizationService(BaseNormalizationService, NormalizationService):
+class ChemblNormalizationService(
+    BaseNormalizationService, NormalizationServiceABC, NormalizationService
+):
     """Normalization service for ChEMBL records."""
 
     def __init__(self, config: NormalizationConfigProvider):
@@ -96,6 +101,9 @@ class ChemblNormalizationService(BaseNormalizationService, NormalizationService)
         return normalized_df
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.normalize_dataframe(df)
+
+    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         return self.normalize_dataframe(df)
 
     def normalize_series(

@@ -5,8 +5,8 @@ ChEMBL data transformer implementation.
 import pandas as pd
 
 from bioetl.domain.models import RunContext
-from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaContract
+from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -24,7 +24,7 @@ class ChemblTransformerImpl(TransformerABC):
         self,
         validation_service: ValidationService,
         schema_contract: PipelineSchemaContract,
-        normalization_service: NormalizationService,
+        normalization_service: NormalizationServiceABC,
         logger: LoggerAdapterABC,
     ) -> None:
         self.validation_service = validation_service
