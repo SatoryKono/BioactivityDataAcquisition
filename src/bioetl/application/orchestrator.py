@@ -135,7 +135,9 @@ class PipelineOrchestrator:
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
         if provider_loader_factory is None:
-            raise RuntimeError("Provider loader factory is required for background runs")
+            raise RuntimeError(
+                "Provider loader factory is required for background runs"
+            )
         loader = provider_loader_factory()
         registry = (
             loader.load_registry(registry=InMemoryProviderRegistry())
@@ -155,7 +157,10 @@ class PipelineOrchestrator:
     def _get_provider_registry(self) -> ProviderRegistryABC:
         if self._provider_registry is not None:
             return self._provider_registry
-        if self._provider_registry_provider is not None and not self._use_provider_loader_port:
+        if (
+            self._provider_registry_provider is not None
+            and not self._use_provider_loader_port
+        ):
             registry = self._provider_registry_provider()
             if registry is None:
                 raise RuntimeError("Provider registry provider returned None")
