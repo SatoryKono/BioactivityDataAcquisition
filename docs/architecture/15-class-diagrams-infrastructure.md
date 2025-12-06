@@ -1,7 +1,6 @@
 # Class Diagrams — Infrastructure Layer
 
 Устаревшие inline-диаграммы удалены. Актуальные схемы инфраструктурного слоя храните в `docs/architecture/diagrams/class/` (Mermaid/PlantUML) согласно `docs/architecture/diagrams/00-diagramming-policy.md`.
-# Class Diagrams - Infrastructure Layer
 
 Диаграммы классов для слоя Infrastructure (bioetl.infrastructure).
 
@@ -429,4 +428,3 @@ classDiagram
     ProviderDefinition --> BaseProviderConfig : uses
     ChemblSourceConfig --|> BaseProviderConfig
 ```
-

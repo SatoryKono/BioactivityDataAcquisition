@@ -9,7 +9,11 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from bioetl.domain.provider_registry import register_provider
+from bioetl.domain.provider_registry import (
+    ProviderAlreadyRegisteredError,
+    get_provider,
+    register_provider,
+)
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
@@ -66,7 +70,9 @@ class ProviderRegistryLoader:
         *,
         logger: LoggerAdapterABC | None = None,
     ) -> None:
-        self._config_path = Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
+        self._config_path = (
+            Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
+        )
         self._logger = logger or default_logger()
 
     def load(self) -> list[ProviderDefinition]:
@@ -76,7 +82,9 @@ class ProviderRegistryLoader:
         try:
             config = ProviderRegistryConfig.model_validate(raw_config)
         except ValidationError as exc:
-            raise ProviderRegistryValidationError(self._config_path, exc.__str__()) from exc
+            raise ProviderRegistryValidationError(
+                self._config_path, exc.__str__()
+            ) from exc
 
         registered: list[ProviderDefinition] = []
         for entry in config.providers:
@@ -92,7 +100,9 @@ class ProviderRegistryLoader:
                 registered.append(definition)
         return registered
 
-    def _register_entry(self, entry: ProviderRegistryEntry) -> ProviderDefinition | None:
+    def _register_entry(
+        self, entry: ProviderRegistryEntry
+    ) -> ProviderDefinition | None:
         try:
             module = importlib.import_module(entry.module)
         except Exception as exc:  # pragma: no cover - defensive logging
@@ -136,7 +146,15 @@ class ProviderRegistryLoader:
             )
             return None
 
-        register_provider(definition)
+        try:
+            register_provider(definition)
+        except ProviderAlreadyRegisteredError:
+            self._logger.debug(
+                "Provider already registered; reusing existing definition",
+                provider=entry.id.value,
+                module=entry.module,
+            )
+            return get_provider(definition.id)
         return definition
 
     def _load_config(self, path: Path) -> dict[str, Any]:

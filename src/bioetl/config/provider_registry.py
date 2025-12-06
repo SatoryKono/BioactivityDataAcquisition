@@ -71,42 +71,55 @@ def clear_provider_registry_cache() -> None:
     _REGISTRY_CACHE.clear()
 
 
-def _load_provider_registry(registry_path: Path) -> set[str]:
-    if registry_path in _REGISTRY_CACHE:
-        return _REGISTRY_CACHE[registry_path]
-
+def _read_registry_data(registry_path: Path) -> Any:
     if not registry_path.exists():
         raise ProviderRegistryNotFoundError(registry_path)
 
     with registry_path.open("r", encoding="utf-8") as file:
-        data: Any = yaml.safe_load(file) or {}
+        return yaml.safe_load(file) or {}
 
+
+def _parse_registry_data(data: Any, registry_path: Path) -> set[str]:
     if not isinstance(data, dict):
         raise ProviderRegistryFormatError(registry_path, "YAML root must be a mapping")
 
     providers = data.get("providers")
     if providers is None:
-        registry: set[str] = set()
-    elif not isinstance(providers, list):
+        return set()
+    if not isinstance(providers, list):
         raise ProviderRegistryFormatError(registry_path, "'providers' must be a list")
-    else:
-        # Support both old format (list of strings) and new format (list of dicts with 'id')
-        registry: set[str] = set()
-        for provider in providers:
-            if isinstance(provider, str):
-                registry.add(provider)
-            elif isinstance(provider, dict):
-                provider_id = provider.get("id")
-                if provider_id is not None:
-                    registry.add(str(provider_id))
-                else:
-                    raise ProviderRegistryFormatError(
-                        registry_path, "Provider entry must have 'id' field"
-                    )
-            else:
-                raise ProviderRegistryFormatError(
-                    registry_path, f"Provider entry must be string or dict, got {type(provider).__name__}"
-                )
 
+    return _collect_provider_ids(providers, registry_path)
+
+
+def _collect_provider_ids(providers: list[Any], registry_path: Path) -> set[str]:
+    registry: set[str] = set()
+    for provider in providers:
+        registry.add(_normalize_provider_entry(provider, registry_path))
+    return registry
+
+
+def _normalize_provider_entry(provider: Any, registry_path: Path) -> str:
+    if isinstance(provider, str):
+        return provider
+    if isinstance(provider, dict):
+        provider_id = provider.get("id")
+        if provider_id is None:
+            raise ProviderRegistryFormatError(
+                registry_path, "Provider entry must have 'id' field"
+            )
+        return str(provider_id)
+    raise ProviderRegistryFormatError(
+        registry_path,
+        f"Provider entry must be string or dict, got {type(provider).__name__}",
+    )
+
+
+def _load_provider_registry(registry_path: Path) -> set[str]:
+    if registry_path in _REGISTRY_CACHE:
+        return _REGISTRY_CACHE[registry_path]
+
+    data: Any = _read_registry_data(registry_path)
+    registry = _parse_registry_data(data, registry_path)
     _REGISTRY_CACHE[registry_path] = registry
     return registry

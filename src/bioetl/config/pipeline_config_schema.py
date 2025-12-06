@@ -14,11 +14,8 @@ from pydantic import (
     model_validator,
 )
 
-from bioetl.config.provider_registry import (
-    ProviderRegistryError,
-    ensure_provider_known,
-)
 from bioetl.config.provider_config_schema import BaseProviderConfig, ProviderConfigUnion
+from bioetl.config.provider_registry import ProviderRegistryError, ensure_provider_known
 from bioetl.domain.transform.contracts import NormalizationConfigProvider
 
 

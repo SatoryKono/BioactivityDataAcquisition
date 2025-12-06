@@ -1,6 +1,6 @@
 name: Lint, Type Check, and Tests
 
-'on':
+on:
   push:
     branches:
       - main
