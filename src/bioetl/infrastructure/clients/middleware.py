@@ -6,12 +6,14 @@ import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Any, Callable, NamedTuple
+from urllib.parse import urlparse
 
 from bioetl.domain.errors import (
     ClientNetworkError,
     ClientRateLimitError,
     ClientResponseError,
 )
+from bioetl.infrastructure.observability import metrics
 
 try:  # pragma: no cover - optional dependency
     import httpx
@@ -78,144 +80,300 @@ class HttpClientMiddleware:
         self._failure_metric_callback = failure_metric_callback
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        attempt = 1
-        total_retry_delay = 0.0
-        while attempt <= self.max_attempts:
-            self._ensure_circuit_allows_request(method, url)
-            start = time.perf_counter()
-            try:
-                response = self.base_client.request(
-                    method=method,
-                    url=url,
-                    timeout=kwargs.pop("timeout", self.timeout),
-                    **kwargs,
-                )
-                elapsed = time.perf_counter() - start
-            except self._timeout_exceptions as exc:
-                elapsed = time.perf_counter() - start
-                error = ClientNetworkError(
-                    provider=self.provider,
-                    endpoint=url,
-                    message="Request timed out",
-                    cause=exc,
-                )
-                retry_decision = self._handle_retry(
-                    error,
-                    method,
-                    url,
-                    elapsed,
-                    attempt,
-                    total_retry_delay,
-                    None,
-                    None,
-                )
-                total_retry_delay = retry_decision.total_retry_delay
-                if retry_decision.should_retry:
-                    attempt += 1
-                    continue
-                raise error from error.cause
-            except self._connection_exceptions as exc:
-                elapsed = time.perf_counter() - start
-                error = ClientNetworkError(
-                    provider=self.provider,
-                    endpoint=url,
-                    message="Connection error",
-                    cause=exc,
-                )
-                retry_decision = self._handle_retry(
-                    error,
-                    method,
-                    url,
-                    elapsed,
-                    attempt,
-                    total_retry_delay,
-                    None,
-                    None,
-                )
-                total_retry_delay = retry_decision.total_retry_delay
-                if retry_decision.should_retry:
-                    attempt += 1
-                    continue
-                raise error from error.cause
-            except Exception as exc:  # pragma: no cover - unexpected errors
-                elapsed = time.perf_counter() - start
-                self._record_failure(exc)
-                self._log_failure(
-                    method,
-                    url,
-                    elapsed,
-                    attempt - 1,
-                    None,
-                    exc.__class__.__name__,
-                )
-                self._increment_failure_metric()
-                raise
+        return self._execute_with_retries(
+            method,
+            url,
+            kwargs,
+            attempt=1,
+            total_retry_delay=0.0,
+        )
 
-            status_code = getattr(response, "status_code", None)
-            if status_code is not None and self._is_retryable_status(status_code):
-                error = self._map_status_error(status_code, url)
-                retry_decision = self._handle_retry(
-                    error,
-                    method,
-                    url,
-                    elapsed,
-                    attempt,
-                    total_retry_delay,
-                    status_code,
-                    response,
-                )
-                total_retry_delay = retry_decision.total_retry_delay
-                if retry_decision.should_retry:
-                    attempt += 1
-                    continue
-                raise error
+    def _execute_with_retries(
+        self,
+        method: str,
+        url: str,
+        kwargs: dict[str, Any],
+        *,
+        attempt: int,
+        total_retry_delay: float,
+    ) -> Any:
+        if attempt > self.max_attempts:
+            raise ClientNetworkError(
+                provider=self.provider, endpoint=url, message="Max attempts exceeded"
+            )
 
-            try:
-                response.raise_for_status()
-            except self._http_errors as exc:
-                status_code = self._extract_status_code(exc)
-                error = self._map_http_error(status_code, url, exc)
-                if status_code is not None and self._is_retryable_status(status_code):
-                    retry_decision = self._handle_retry(
-                        error,
-                        method,
-                        url,
-                        elapsed,
-                        attempt,
-                        total_retry_delay,
-                        status_code,
-                        getattr(exc, "response", None),
-                    )
-                    total_retry_delay = retry_decision.total_retry_delay
-                    if retry_decision.should_retry:
-                        attempt += 1
-                        continue
-                self._record_failure(error)
-                self._log_failure(
-                    method,
-                    url,
-                    elapsed,
-                    attempt - 1,
-                    status_code,
-                    error.__class__.__name__,
-                )
-                self._increment_failure_metric()
-                raise error from error.cause
+        self._ensure_circuit_allows_request(method, url)
+        attempt_kwargs = dict(kwargs)
+        outcome = self._process_attempt(
+            method,
+            url,
+            attempt,
+            total_retry_delay,
+            attempt_kwargs,
+        )
+        updated_delay = outcome["total_retry_delay"]
+        resolved_response = self._resolve_attempt_outcome(outcome)
+        if resolved_response is not None:
+            self._reset_circuit(log_circuit_closure=True)
+            return resolved_response
 
-            self._log_success(
+        return self._execute_with_retries(
+            method,
+            url,
+            kwargs,
+            attempt=attempt + 1,
+            total_retry_delay=updated_delay,
+        )
+
+    def _process_attempt(
+        self,
+        method: str,
+        url: str,
+        attempt: int,
+        total_retry_delay: float,
+        kwargs: dict[str, Any],
+    ) -> dict[str, Any]:
+        start = time.perf_counter()
+        try:
+            response = self.base_client.request(
+                method=method,
+                url=url,
+                timeout=kwargs.pop("timeout", self.timeout),
+                **kwargs,
+            )
+            elapsed = time.perf_counter() - start
+        except self._timeout_exceptions as exc:
+            elapsed = time.perf_counter() - start
+            return self._retry_decision_or_error(
+                *self._handle_timeout_exception(
+                    method, url, elapsed, attempt, total_retry_delay, exc
+                )
+            )
+        except self._connection_exceptions as exc:
+            elapsed = time.perf_counter() - start
+            return self._retry_decision_or_error(
+                *self._handle_connection_exception(
+                    method, url, elapsed, attempt, total_retry_delay, exc
+                )
+            )
+        except Exception as exc:  # pragma: no cover - unexpected errors
+            elapsed = time.perf_counter() - start
+            self._record_failure(exc)
+            self._log_failure(
                 method,
                 url,
                 elapsed,
                 attempt - 1,
-                status_code,
+                None,
+                exc.__class__.__name__,
+            )
+            self._increment_failure_metric()
+            raise
+
+        retry_decision, status_error = self._handle_retryable_response_status(
+            response,
+            method,
+            url,
+            elapsed,
+            attempt,
+            total_retry_delay,
+        )
+        if retry_decision is not None:
+            return {
+                "response": None,
+                "should_retry": retry_decision.should_retry,
+                "total_retry_delay": retry_decision.total_retry_delay,
+                "error": status_error if not retry_decision.should_retry else None,
+            }
+
+        status_code = getattr(response, "status_code", None)
+        try:
+            response.raise_for_status()
+        except self._http_errors as exc:
+            handled = self._handle_http_error_response(
+                exc,
+                method,
+                url,
+                elapsed,
+                attempt,
                 total_retry_delay,
             )
-            self._reset_circuit(log_circuit_closure=True)
-            return response
+            return {
+                "response": None,
+                "should_retry": handled.should_retry,
+                "total_retry_delay": handled.total_retry_delay,
+                "error": None,
+            }
 
-        raise RuntimeError(
-            "Exceeded maximum retry attempts without returning a response"
+        self._log_success(
+            method,
+            url,
+            elapsed,
+            attempt - 1,
+            status_code,
+            total_retry_delay,
         )
+        return {
+            "response": response,
+            "should_retry": False,
+            "total_retry_delay": total_retry_delay,
+            "error": None,
+        }
+
+    @staticmethod
+    def _retry_decision_or_error(
+        should_retry: bool, total_retry_delay: float, error: Exception
+    ) -> dict[str, Any]:
+        return {
+            "response": None,
+            "should_retry": should_retry,
+            "total_retry_delay": total_retry_delay,
+            "error": None if should_retry else error,
+        }
+
+    def _resolve_attempt_outcome(self, outcome: dict[str, Any]) -> Any | None:
+        if outcome["should_retry"]:
+            return None
+        if outcome["error"] is not None:
+            raise outcome["error"] from getattr(outcome["error"], "cause", None)
+        return outcome["response"]
+
+    def _handle_timeout_exception(
+        self,
+        method: str,
+        url: str,
+        elapsed: float,
+        attempt: int,
+        total_retry_delay: float,
+        exc: Exception,
+    ) -> tuple[bool, float, Exception]:
+        error = self._build_network_error(message="Request timed out", url=url, exc=exc)
+        return self._handle_attempt_error(
+            error,
+            method,
+            url,
+            elapsed,
+            attempt,
+            total_retry_delay,
+            None,
+            None,
+        ) + (error,)
+
+    def _handle_connection_exception(
+        self,
+        method: str,
+        url: str,
+        elapsed: float,
+        attempt: int,
+        total_retry_delay: float,
+        exc: Exception,
+    ) -> tuple[bool, float, Exception]:
+        error = self._build_network_error(message="Connection error", url=url, exc=exc)
+        return self._handle_attempt_error(
+            error,
+            method,
+            url,
+            elapsed,
+            attempt,
+            total_retry_delay,
+            None,
+            None,
+        ) + (error,)
+
+    def _handle_retryable_response_status(
+        self,
+        response: Any,
+        method: str,
+        url: str,
+        elapsed: float,
+        attempt: int,
+        total_retry_delay: float,
+    ) -> tuple[Any, Any]:
+        status_code = getattr(response, "status_code", None)
+        if status_code is None or not self._is_retryable_status(status_code):
+            return None, None
+
+        error = self._map_status_error(status_code, url)
+        retry_decision = self._handle_retry(
+            error,
+            method,
+            url,
+            elapsed,
+            attempt,
+            total_retry_delay,
+            status_code,
+            response,
+        )
+        return retry_decision, error
+
+    def _handle_http_error_response(
+        self,
+        exc: Exception,
+        method: str,
+        url: str,
+        elapsed: float,
+        attempt: int,
+        total_retry_delay: float,
+    ) -> Any:
+        status_code = self._extract_status_code(exc)
+        error = self._map_http_error(status_code, url, exc)
+        if status_code is not None and self._is_retryable_status(status_code):
+            retry_decision = self._handle_retry(
+                error,
+                method,
+                url,
+                elapsed,
+                attempt,
+                total_retry_delay,
+                status_code,
+                getattr(exc, "response", None),
+            )
+            return retry_decision
+
+        self._record_failure(error)
+        self._log_failure(
+            method,
+            url,
+            elapsed,
+            attempt - 1,
+            status_code,
+            error.__class__.__name__,
+        )
+        self._increment_failure_metric()
+        raise error from error.cause
+
+    def _build_network_error(
+        self, *, message: str, url: str, exc: Exception
+    ) -> ClientNetworkError:
+        return ClientNetworkError(
+            provider=self.provider,
+            endpoint=url,
+            message=message,
+            cause=exc,
+        )
+
+    def _handle_attempt_error(
+        self,
+        error: ClientNetworkError | ClientRateLimitError | ClientResponseError,
+        method: str,
+        url: str,
+        elapsed: float,
+        attempt: int,
+        total_retry_delay: float,
+        status_code: int | None,
+        response: Any | None,
+    ) -> tuple[bool, float]:
+        retry_decision = self._handle_retry(
+            error,
+            method,
+            url,
+            elapsed,
+            attempt,
+            total_retry_delay,
+            status_code,
+            response,
+        )
+        return retry_decision.should_retry, retry_decision.total_retry_delay
 
     def _handle_retry(
         self,
@@ -303,10 +461,16 @@ class HttpClientMiddleware:
 
     def _backoff_delay(self, attempt: int, retry_after: float | None = None) -> float:
         base_delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
-        combined = base_delay if retry_after is None else max(base_delay, retry_after)
-        capped = min(combined, self.max_delay)
-        jitter = random.uniform(0.0, capped)
-        return min(capped + jitter, self.max_delay)
+        combined_delay = (
+            base_delay if retry_after is None else max(base_delay, retry_after)
+        )
+        jitter = random.uniform(0.0, combined_delay)
+        delay_with_jitter = combined_delay + jitter
+
+        if retry_after is not None and retry_after > self.max_delay:
+            return delay_with_jitter
+
+        return min(delay_with_jitter, self.max_delay)
 
     def _ensure_circuit_allows_request(self, method: str, url: str) -> None:
         if self._circuit_opened_at is None:
@@ -487,6 +651,13 @@ class HttpClientMiddleware:
                 "error_type": None,
             },
         )
+        self._observe_http_metrics(
+            method,
+            url,
+            elapsed,
+            status_code,
+            error=False,
+        )
 
     def _log_failure(
         self,
@@ -508,6 +679,13 @@ class HttpClientMiddleware:
                 "retry_count": retry_count,
                 "error_type": error_type,
             },
+        )
+        self._observe_http_metrics(
+            method,
+            url,
+            elapsed,
+            status_code,
+            error=status_code is None,
         )
 
     def _log_final_failure(
@@ -541,3 +719,47 @@ class HttpClientMiddleware:
         if self._failure_metric_callback is None:
             return
         self._failure_metric_callback(1)
+
+    def _observe_http_metrics(
+        self,
+        method: str,
+        url: str,
+        elapsed: float,
+        status_code: int | None,
+        *,
+        error: bool,
+    ) -> None:
+        endpoint = self._normalize_endpoint(url)
+        status_class = self._status_class(status_code, error)
+        metrics.HTTP_REQUESTS_TOTAL.labels(
+            provider=self.provider,
+            endpoint=endpoint,
+            method=method.upper(),
+            status_class=status_class,
+        ).inc()
+        metrics.HTTP_LATENCY_SECONDS.labels(
+            provider=self.provider,
+            endpoint=endpoint,
+            method=method.upper(),
+            status_class=status_class,
+        ).observe(elapsed)
+
+    @staticmethod
+    def _normalize_endpoint(url: str) -> str:
+        parsed = urlparse(url)
+        endpoint = f"{parsed.netloc}{parsed.path}".rstrip("/")
+        return endpoint or url
+
+    @staticmethod
+    def _status_class(status_code: int | None, error: bool) -> str:
+        if error:
+            return "error"
+        if status_code is None:
+            return "error"
+        if 200 <= status_code < 300:
+            return "2xx"
+        if 400 <= status_code < 500:
+            return "4xx"
+        if 500 <= status_code < 600:
+            return "5xx"
+        return "error"

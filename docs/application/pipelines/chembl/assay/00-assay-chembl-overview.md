@@ -14,3 +14,12 @@
 
 ## Связи
 Данные ассеев используются Activity-пайплайном для контекста экспериментов; общие компоненты (ValidationService, UnifiedOutputWriter) обеспечивают консистентную запись и QC.
+
+## Конфигурация
+- `configs/pipelines/chembl/assay.yaml` (профиль `chembl_default`).
+- Smoke: `--profile dev --limit 100 --dry-run`; прод — полный запуск без `--dry-run`.
+
+## Диаграммы
+- Flowchart: `docs/application/pipelines/chembl/assay/diagrams/flow/assay-workflow.mmd`
+- Sequence: `docs/application/pipelines/chembl/assay/diagrams/sequence/assay-main-sequence.mmd`
+- Class: `docs/application/pipelines/chembl/assay/diagrams/class/assay-pipeline-class.mmd`

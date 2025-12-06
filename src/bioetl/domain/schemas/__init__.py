@@ -5,15 +5,17 @@ Pandera Schemas.
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema
-from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
     DOCUMENT_OUTPUT_COLUMNS,
+    MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
     TESTITEM_OUTPUT_COLUMNS,
 )
+from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 from bioetl.domain.validation.contracts import SchemaProviderABC
 
 
@@ -31,6 +33,11 @@ def register_schemas(registry: SchemaProviderABC) -> None:
     registry.register("document_input", DocumentSchema)
     registry.register(
         "document_output", DocumentSchema, column_order=DOCUMENT_OUTPUT_COLUMNS
+    )
+    registry.register("molecule", MoleculeSchema)
+    registry.register("molecule_input", MoleculeSchema)
+    registry.register(
+        "molecule_output", MoleculeSchema, column_order=MOLECULE_OUTPUT_COLUMNS
     )
     registry.register("target", TargetSchema)
     registry.register("target_input", TargetSchema)

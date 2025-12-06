@@ -3,43 +3,57 @@
 
 ## 1. Общий обзор
 
-Репозиторий структурирован по уровневой архитектуре: `domain`, `application`, `infrastructure`, `interfaces`.  
-Каждый слой изолирует ответственность и взаимодействует только через четко определенные контракты.
+Слои: `interfaces`, `application`, `domain`, `infrastructure`.  
+Все взаимодействия проходят через контракты, гарантируя детерминизм (фиксированный порядок, UTC, атомарная запись) и валидацию данных перед записью (Pandera-схемы).
 
 ## 2. Слой domain
 
-Содержит:
-- протоколы (`DataClientProtocol`, `PipelineProtocol`);
-- ошибки (`DomainError`, `SchemaValidationError`, `ExternalAPIError`, `RetryExhaustedError`);
-- модели и схемы (каркасные модули).
+Назначение: контракты и бизнес-инварианты без привязки к инфраструктуре.
 
-Основная задача — описать доменные контракты, не зависящие от реализации.
+Состав:
+- контракты клиентов и пайплайнов (`domain.contracts`, `domain.clients.*`, `domain.transform.contracts`);
+- реестр провайдеров (`domain.provider_registry`, `domain.providers`);
+- ошибки (`domain.errors`);
+- схемы (Pandera) и реестр схем (`domain.schemas.*`, `domain.schemas.registry`);
+- сервисы: валидация (`domain.validation.service`), нормализация (`infrastructure.transform.impl`), хеширование (порт `domain.transform.contracts.HashServiceABC`, реализация `infrastructure.transform.impl.hash_service_impl`), трансформеры/нормалайзеры (`domain.transform.*`);
+- контракты пайплайнов (`domain.schemas.pipeline_contracts`).
 
 ## 3. Слой infrastructure
 
-Содержит:
-- HTTP‑клиент `UnifiedAPIClient`;
-- клиент ChEMBL `ChemblDataClientHTTPImpl`;
-- файловое хранилище `FileStorageImpl`;
-- логирование.
+Назначение: реализации внешних зависимостей и техник I/O.
 
-Этот слой реализует внешние зависимости, определенные протоколами из domain.
+Состав:
+- HTTP клиенты: `infrastructure.clients.base.impl.unified_client` (retry/backoff, rate limit, circuit breaker), ChEMBL HTTP `infrastructure.clients.chembl.impl.http_client` + пагинатор/парсер;
+- логирование: `infrastructure.logging.impl.unified_logger` (структурные события);
+- вывод: `infrastructure.output.unified_writer` (CSV/Parquet + metadata, атомарная запись, checksums);
+- конфиги: резолвер и модели провайдеров (`infrastructure.config.*`);
+- файловые утилиты: атомарные записи, checksum, CSV record source (`infrastructure.files.*`).
 
 ## 4. Слой application
 
-Содержит:
-- конкретные пайплайны (extract, transform, validate, export);
-- сервисы orchestration (`PipelineRunner`);
-- реестр пайплайнов (`PipelineRegistry`).
+Назначение: сборка и выполнение пайплайнов.
 
-Этот слой реализует бизнес‑логику ETL.
+Состав:
+- оркестратор (`application.orchestrator`) + DI контейнер (`application.container`);
+- реестр пайплайнов (`application.pipelines.registry`);
+- базовый пайплайн (Template Method: extract → transform → validate → write) `application.pipelines.base` + менеджеры стадий/хуков/политики ошибок;
+- ChEMBL базовый пайплайн и сущностные пайплайны (`application.pipelines.chembl.*`);
+- сервис извлечения ChEMBL (`application.services.chembl_extraction`);
+- конфиг пайплайна (`bioetl.infrastructure.config.loader`, `application.config.runtime`), пост-трансформеры (хеши, индексы, версии, даты).
+
+Контейнер регистрирует провайдеров, создает логгер, хук/политику ошибок, сервисы валидации/нормализации/хеширования, источники данных (API/CSV/ID-only), writer и post-transformer chain.
 
 ## 5. Слой interfaces
 
-CLI‑интерфейс на базе `typer`, обеспечивающий точку входа для запуска пайплайнов.
+Точки входа:
+- CLI (`interfaces.cli.app`, Typer);
+- REST сервер (`interfaces.rest.server`);
+- MQ listener/handler (`interfaces.mq.*`).
 
 ## 6. Документация и конфиги
 
-- YAML‑конфиг пайплайна;
-- Markdown‑документация в `docs/`.
+- YAML-конфиги провайдеров/пайплайнов (`configs/`);
+- архитектурные схемы в `docs/architecture/` (см. компонентную диаграмму `11-component-diagram.md`);
+- правила детерминизма, схем и именования — в общих правилах проекта (docs/00-styleguide).
+- архитектурные решения фиксируются в ADR каталоге `docs/architecture/decisions/0000-adr-index.md`.
 

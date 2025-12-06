@@ -1,0 +1,30 @@
+---
+id: 2fbc0e6a-4f3d-4d73-8a1d-5f7b9fdf7f0d
+---
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
+
+class ConfigLoader {
+  +load_pipeline_config(pipeline_id, profile)
+  +load_pipeline_config_from_path(path, profile)
+  -_resolve_profile(profile)
+  -_validate_provider(config, path)
+  -_transform_legacy_config(config, path)
+}
+
+class PipelineConfig
+class ConfigError
+class ConfigFileNotFoundError
+class ConfigValidationError
+class UnknownProviderError
+class DeepMerge
+
+ConfigFileNotFoundError --|> ConfigError
+ConfigValidationError --|> ConfigError
+UnknownProviderError --|> ConfigError
+ConfigLoader --> PipelineConfig
+ConfigLoader --> DeepMerge : deep_merge
+ConfigLoader --> ConfigFileNotFoundError
+ConfigLoader --> ConfigValidationError
+ConfigLoader --> UnknownProviderError
+

@@ -3,7 +3,7 @@ from typing import Any, Self
 import structlog
 from structlog.stdlib import BoundLogger
 
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class UnifiedLoggerImpl(LoggerAdapterABC):
@@ -28,4 +28,3 @@ class UnifiedLoggerImpl(LoggerAdapterABC):
 
     def bind(self, **ctx: Any) -> Self:
         return self.__class__(self._logger.bind(**ctx))
-

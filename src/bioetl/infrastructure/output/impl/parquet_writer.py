@@ -1,54 +1,23 @@
-import time
+from __future__ import annotations
+
+from collections.abc import Callable
 from pathlib import Path
+
 import pandas as pd
 
-from bioetl.infrastructure.output.contracts import WriterABC, WriteResult
+from bioetl.infrastructure.output.impl.base_writer import BaseWriterImpl
 
 
-class ParquetWriterImpl(WriterABC):
+class ParquetWriterImpl(BaseWriterImpl):
     """
     Запись Parquet.
     """
 
-    @property
-    def atomic(self) -> bool:
-        return True
+    def __init__(self, *, checksum_fn: Callable[[Path], str] | None = None) -> None:
+        super().__init__(atomic=True, checksum_fn=checksum_fn)
 
-    def write(
-        self,
-        df: pd.DataFrame,
-        path: Path,
-        *,
-        column_order: list[str] | None = None,
-    ) -> WriteResult:
-        start_time = time.monotonic()
-
-        df_to_write = self._apply_column_order(df, column_order)
-
-        df_to_write.to_parquet(path, index=False)
-        
-        duration = time.monotonic() - start_time
-        
-        return WriteResult(
-            path=path,
-            row_count=len(df_to_write),
-            checksum="",
-            duration_sec=duration,
-        )
+    def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
+        df.to_parquet(path, index=False)
 
     def supports_format(self, fmt: str) -> bool:
         return fmt.lower() == "parquet"
-
-    def _apply_column_order(
-        self, df: pd.DataFrame, column_order: list[str] | None
-    ) -> pd.DataFrame:
-        if not column_order:
-            return df
-
-        df_to_write = df.copy()
-        for col in column_order:
-            if col not in df_to_write.columns:
-                df_to_write[col] = None
-
-        return df_to_write[column_order]
-

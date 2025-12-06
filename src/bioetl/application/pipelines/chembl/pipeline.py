@@ -4,16 +4,16 @@ Generic ChEMBL Entity Pipeline.
 Replaces specific pipeline implementations (Activity, Assay, etc.)
 with a configurable generic implementation.
 """
+
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.normalization_service import NormalizationService
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.record_source import RecordSource
+from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
 class ChemblEntityPipeline(ChemblPipelineBase):
@@ -27,11 +27,11 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         config: PipelineConfig,
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
-        output_writer: UnifiedOutputWriter,
+        output_writer: OutputWriterABC,
         extraction_service: ExtractionServiceABC,
-        hash_service: HashService,
+        hash_service: HashServiceABC,
         record_source: RecordSource | None = None,
-        normalization_service: NormalizationService | None = None,
+        normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
     ) -> None:

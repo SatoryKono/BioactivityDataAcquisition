@@ -1,8 +1,9 @@
 """
 Atomic file operation utilities.
 """
+
 import os
-import shutil
+import platform
 import time
 from pathlib import Path
 from typing import Callable
@@ -15,9 +16,7 @@ class AtomicFileOperation:
     Утилита для атомарных операций с файлами.
     """
 
-    def write_atomic(
-        self, path: Path, write_fn: Callable[[Path], None]
-    ) -> None:
+    def write_atomic(self, path: Path, write_fn: Callable[[Path], None]) -> None:
         """
         Выполняет атомарную запись через временный файл.
 
@@ -46,16 +45,63 @@ class AtomicFileOperation:
     def _replace_with_retry(self, src: Path, dst: Path) -> None:
         """
         Атомарная замена файла с повторными попытками (для Windows).
-        Использует shutil.move, чтобы позволить перезапись и поддержать мок в тестах.
+        Использует os.replace для атомарной замены на всех платформах.
         """
-        move_fn = shutil.move
         last_error: OSError | None = None
+        is_windows = platform.system() == "Windows"
+        # На Windows используем более длительную задержку из-за антивирусов/индексаторов
+        delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
+
         for attempt in range(MAX_FILE_RETRIES):
             try:
-                move_fn(src, dst)
-                return
+                if self._try_replace(src, dst, is_windows):
+                    return
+                # Если попытка не выбросила исключение, но не удалась, фиксируем ошибку.
+                last_error = last_error or OSError(
+                    "Move failed without explicit error."
+                )
             except OSError as exc:
                 last_error = exc
+
             if attempt == MAX_FILE_RETRIES - 1:
                 raise last_error or OSError("Move failed without explicit error.")
-            time.sleep(RETRY_DELAY_SEC)
+            time.sleep(delay)
+
+    def _try_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
+        """
+        Попытка заменить файл атомарно.
+
+        Returns:
+            True если замена успешна, False иначе.
+        """
+        try:
+            os.replace(src, dst)
+            return True
+        except PermissionError:
+            # На Windows PermissionError часто означает, что файл заблокирован
+            return self._try_windows_unlock_replace(src, dst, is_windows)
+        except OSError:
+            # Передаём исключение наверх, чтобы оно учитывалось в retry и сообщениях
+            raise
+
+    def _try_windows_unlock_replace(
+        self,
+        src: Path,
+        dst: Path,
+        is_windows: bool,
+    ) -> bool:
+        """
+        Попытка разблокировать и заменить файл на Windows.
+
+        Returns:
+            True если замена успешна, False иначе.
+        """
+        if not is_windows or not dst.exists():
+            return False
+
+        try:
+            dst.unlink()
+            os.replace(src, dst)
+            return True
+        except OSError:
+            return False

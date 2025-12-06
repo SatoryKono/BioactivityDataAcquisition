@@ -1,0 +1,56 @@
+---
+id: 8e1b7c45-0c2f-4e6a-9fd7-26cbdc6b22a2
+---
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
+
+class HasherABC
+class HasherImpl {
+  +algorithm: str
+  +hash_row(row)
+  +hash_columns(df, columns)
+}
+class HashService {
+  +add_hash_columns(df, business_key_cols)
+  +add_index_column(df)
+  +add_database_version_column(df, version)
+  +add_fulldate_column(df)
+}
+
+class TransformerABC
+class TransformerChain {
+  +apply(df, context)
+}
+class HashColumnsTransformer
+class IndexColumnTransformer
+class DatabaseVersionTransformer
+class FulldateTransformer
+
+class BaseNormalizationService
+class NormalizationServiceABC
+class ChemblNormalizationService
+class NormalizationServiceImpl
+class NormalizationConfigProvider
+
+HasherImpl ..|> HasherABC
+HashService --> HasherABC
+TransformerChain --> TransformerABC : components
+HashColumnsTransformer ..|> TransformerABC
+IndexColumnTransformer ..|> TransformerABC
+DatabaseVersionTransformer ..|> TransformerABC
+FulldateTransformer ..|> TransformerABC
+TransformerChain --> HashColumnsTransformer
+TransformerChain --> IndexColumnTransformer
+TransformerChain --> DatabaseVersionTransformer
+TransformerChain --> FulldateTransformer
+ChemblNormalizationService --|> BaseNormalizationService
+NormalizationServiceImpl --|> BaseNormalizationService
+ChemblNormalizationService ..|> NormalizationServiceABC
+NormalizationServiceImpl ..|> NormalizationServiceABC
+ChemblNormalizationService --> NormalizationConfigProvider
+NormalizationServiceImpl --> NormalizationConfigProvider
+HashColumnsTransformer --> HashService
+IndexColumnTransformer --> HashService
+DatabaseVersionTransformer --> HashService
+FulldateTransformer --> HashService
+

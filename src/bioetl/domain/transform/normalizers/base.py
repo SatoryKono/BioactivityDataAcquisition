@@ -1,4 +1,5 @@
 """Base utilities and regex patterns for normalizers."""
+
 from __future__ import annotations
 
 import re
@@ -20,8 +21,7 @@ _UNIPROT_PATTERN_PQ = r"[OPQ][0-9][A-Z0-9]{3}[0-9]"
 _UNIPROT_PATTERN_LONG = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9][A-Z0-9]{3}[0-9]"
 
 UNIPROT_ID_REGEX = re.compile(
-    f"^(?:{_UNIPROT_PATTERN_PQ}|{_UNIPROT_PATTERN_SHORT}|"
-    f"{_UNIPROT_PATTERN_LONG})$",
+    f"^(?:{_UNIPROT_PATTERN_PQ}|{_UNIPROT_PATTERN_SHORT}|" f"{_UNIPROT_PATTERN_LONG})$",
     flags=re.IGNORECASE,
 )
 

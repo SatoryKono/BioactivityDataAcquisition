@@ -1,4 +1,5 @@
 """Normalizers for domain-specific identifiers (DOI, ChEMBL, PMID, etc.)."""
+
 from __future__ import annotations
 
 import re
@@ -32,9 +33,7 @@ def normalize_doi(value: Any) -> str | None:
         return None
 
     if not doi.startswith("10."):
-        raise ValueError(
-            f"Неверный формат DOI (должен начинаться с '10.'): '{value}'"
-        )
+        raise ValueError(f"Неверный формат DOI (должен начинаться с '10.'): '{value}'")
 
     if not DOI_REGEX.match(doi):
         raise ValueError(f"Неверный формат DOI: '{value}'")
@@ -88,9 +87,7 @@ def normalize_pmid(value: Any) -> int | None:
         return None
 
     if not text.isdigit():
-        raise ValueError(
-            f"Неверный PubMed ID (содержит нецифровые символы): '{value}'"
-        )
+        raise ValueError(f"Неверный PubMed ID (содержит нецифровые символы): '{value}'")
 
     parsed = int(text)
     if parsed <= 0:
@@ -100,37 +97,11 @@ def normalize_pmid(value: Any) -> int | None:
 
 def normalize_pcid(value: Any) -> int | None:
     """Normalize PubChem CID as positive integer."""
-    if is_missing(value):
-        return None
-
-    if isinstance(value, float):
-        if value.is_integer():
-            value = int(value)
-        else:
-            msg = f"PubChem CID не является целым числом: '{value}'"
-            raise ValueError(msg)
-
-    if isinstance(value, int):
-        if value <= 0:
-            raise ValueError("PubChem CID должен быть положительным числом")
-        return value
-
-    text = str(value).strip().upper()
-    if not text:
-        return None
-
-    if text.startswith("CID"):
-        text = text[3:]
-    elif text.startswith("PCID"):
-        text = text[4:]
-
-    if not text.isdigit():
-        raise ValueError(f"Неверный PubChem CID: '{value}'")
-
-    parsed = int(text)
-    if parsed <= 0:
-        raise ValueError("PubChem CID должен быть положительным числом")
-    return parsed
+    return _parse_positive_int_with_prefixes(
+        value,
+        field_name="PubChem CID",
+        prefixes=("CID", "PCID"),
+    )
 
 
 def normalize_uniprot(value: Any) -> str | None:
@@ -163,9 +134,7 @@ def normalize_bao_id(value: Any) -> str | None:
         return None
 
     if not BAO_ID_REGEX.match(text):
-        raise ValueError(
-            f"Неверный BAO ID (ожидался формат BAO_<digits>): '{value}'"
-        )
+        raise ValueError(f"Неверный BAO ID (ожидался формат BAO_<digits>): '{value}'")
 
     return text
 
@@ -180,6 +149,54 @@ def normalize_bao_label(value: Any) -> str | None:
 
     text = value.strip()
     return text if text else None
+
+
+def _parse_positive_int_with_prefixes(
+    value: Any, *, field_name: str, prefixes: tuple[str, ...]
+) -> int | None:
+    if is_missing(value):
+        return None
+
+    numeric = _coerce_positive_int(value, field_name)
+    if numeric is not None:
+        return numeric
+
+    text = str(value).strip().upper()
+    if not text:
+        return None
+
+    stripped = _strip_prefix(text, prefixes)
+    if not stripped.isdigit():
+        raise ValueError(f"Неверный {field_name}: '{value}'")
+
+    parsed = int(stripped)
+    _ensure_positive(parsed, field_name)
+    return parsed
+
+
+def _coerce_positive_int(value: Any, field_name: str) -> int | None:
+    if isinstance(value, float):
+        if not value.is_integer():
+            raise ValueError(f"{field_name} не является целым числом: '{value}'")
+        value = int(value)
+
+    if isinstance(value, int):
+        _ensure_positive(value, field_name)
+        return value
+
+    return None
+
+
+def _strip_prefix(text: str, prefixes: tuple[str, ...]) -> str:
+    for prefix in prefixes:
+        if text.startswith(prefix):
+            return text[len(prefix) :]
+    return text
+
+
+def _ensure_positive(value: int, field_name: str) -> None:
+    if value <= 0:
+        raise ValueError(f"{field_name} должен быть положительным числом")
 
 
 __all__ = [

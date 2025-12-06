@@ -1,0 +1,142 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
+
+    %% Core Abstractions
+    class PipelineBase {
+        <<Abstract>>
+        +run(output_path, dry_run) RunResult
+        +iter_chunks() Iterable[DataFrame]
+        +extract()* DataFrame
+        +transform()* DataFrame
+        +validate(df) DataFrame
+        +write(df, path, context) WriteResult
+        #_hooks_manager: HooksManager
+        #_error_policy_manager: ErrorPolicyManager
+        #_stage_runner: StageRunner
+        #_extractor: ExtractorABC
+        #_transformer: TransformerABC
+        #_post_transformer: TransformerABC
+    }
+
+    class ChemblEntityPipeline {
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +get_database_version()
+    }
+
+    class ChemblPipelineBase {
+        +_extraction_service
+        +_chembl_release
+        +get_version()
+        +get_chembl_release()
+    }
+
+    %% Services
+    class ValidationService {
+        -_schema_provider: SchemaProviderABC
+        +get_schema(entity_name)
+        +get_schema_columns(entity_name)
+        +validate(df, entity_name)
+    }
+
+    class HashService {
+        -_hasher: HasherABC
+        +add_hash_columns(df, keys)
+        +add_index_column(df)
+        +add_database_version_column(df, version)
+        +add_fulldate_column(df)
+    }
+
+    class UnifiedOutputWriter {
+        -_writer: WriterABC
+        -_metadata_writer: MetadataWriterABC
+        -_atomic_op: AtomicFileOperation
+        +write_result(df, path, context)
+        #_stable_sort(df)
+        #_apply_column_order(df)
+    }
+
+    class StageRunner {
+        +process_chunk(raw_chunk, context, ...)
+        +make_stage_result(stage, count, chunks)
+        +handle_stage_failure(stage, results, context)
+    }
+
+    class HooksManager {
+        +notify_stage_start(stage, context)
+        +notify_stage_end(stage, result)
+        +reset()
+    }
+
+    class ErrorPolicyManager {
+        +execute(stage, context, fn, on_retry)
+        +get_last_error_messages()
+        +reset()
+    }
+
+    class ChemblExtractorImpl {
+        +extract(**kwargs) Iterable[DataFrame]
+    }
+
+    class ChemblTransformerImpl {
+        +apply(df) DataFrame
+    }
+
+    class NormalizationServiceABC
+    class RecordSource
+
+    %% Interfaces
+    class PipelineHookABC {
+        <<Interface>>
+        +on_stage_start(stage, context)
+        +on_stage_end(stage, result)
+        +on_error(stage, error)
+    }
+
+    class ErrorPolicyABC {
+        <<Interface>>
+        +handle(error, context) ErrorAction
+        +should_retry(error) bool
+    }
+
+    %% Relations
+    PipelineBase <|-- ChemblPipelineBase
+    ChemblPipelineBase <|-- ChemblEntityPipeline
+    PipelineBase o-- ValidationService : uses
+    PipelineBase o-- HashService : uses
+    PipelineBase o-- UnifiedOutputWriter : uses
+    PipelineBase o-- HooksManager : uses
+    PipelineBase o-- ErrorPolicyManager : uses
+    PipelineBase o-- StageRunner : uses
+    PipelineBase o-- PipelineHookABC : has many
+    PipelineBase o-- ErrorPolicyABC : uses
+    PipelineBase o-- TransformerABC : uses
+    PipelineBase o-- ExtractorABC : uses
+    
+    ValidationService ..> PipelineBase : validates data
+    HashService ..> PipelineBase : enriches data
+    UnifiedOutputWriter ..> PipelineBase : persists data
+    HooksManager ..> PipelineHookABC : notifies
+    ErrorPolicyManager ..> ErrorPolicyABC : delegates
+    StageRunner ..> HooksManager : coordinates
+    StageRunner ..> ErrorPolicyManager
+    ChemblPipelineBase o-- ChemblExtractorImpl : builds
+    ChemblPipelineBase o-- ChemblTransformerImpl : builds
+    ChemblPipelineBase o-- NormalizationServiceABC : uses
+    ChemblPipelineBase o-- RecordSource : optional
+
+    class PipelineBase domainPrimary
+    class ChemblPipelineBase domainPrimary
+    class ChemblEntityPipeline domainPrimary
+    class ValidationService domainSecondary
+    class HashService domainSecondary
+    class UnifiedOutputWriter domainSecondary
+    class StageRunner domainSecondary
+    class HooksManager domainSecondary
+    class ErrorPolicyManager domainSecondary
+    class ChemblExtractorImpl domainSecondary
+    class ChemblTransformerImpl domainSecondary
+    class NormalizationServiceABC interface
+    class RecordSource interface
+    class PipelineHookABC interface
+    class ErrorPolicyABC interface

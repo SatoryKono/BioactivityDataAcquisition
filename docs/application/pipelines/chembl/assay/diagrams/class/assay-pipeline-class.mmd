@@ -1,0 +1,30 @@
+classDiagram
+    class ChemblEntityPipeline {
+        <<abstract>>
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +run(output_path, dry_run) RunResult
+    }
+
+    class AssayPipeline {
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+    }
+
+    class ValidationService {
+        +validate(df, entity_name) DataFrame
+    }
+
+    class HashService {
+        +add_hash_columns(df, keys) DataFrame
+    }
+
+    class UnifiedOutputWriter {
+        +write_result(df, path, context) WriteResult
+    }
+
+    ChemblEntityPipeline <|-- AssayPipeline
+    AssayPipeline o-- ValidationService
+    AssayPipeline o-- HashService
+    AssayPipeline o-- UnifiedOutputWriter
+

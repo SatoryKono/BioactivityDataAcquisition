@@ -1,6 +1,7 @@
 """
 Constants for infrastructure layer.
 """
+
 from typing import Final
 
 # File Operation Constants

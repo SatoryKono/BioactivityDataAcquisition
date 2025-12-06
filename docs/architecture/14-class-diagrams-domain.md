@@ -1,3 +1,6 @@
+# Class Diagrams — Domain Layer
+
+Устаревшие inline-диаграммы удалены. Для актуальных схем доменного слоя используйте текстовые файлы в `docs/architecture/diagrams/class/` и следуйте политике `docs/architecture/diagrams/00-diagramming-policy.md`.
 # Class Diagrams - Domain Layer
 
 Диаграммы классов для слоя Domain (bioetl.domain).
@@ -6,7 +9,7 @@
 
 ```mermaid
 ---
-id: 610372d5-a04e-4abc-8b74-4611024c3769
+id: e4f1d308-ddc1-4664-8ee1-0f889790f678
 ---
 classDiagram
     class ValidationService {

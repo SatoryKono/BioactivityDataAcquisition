@@ -17,3 +17,8 @@
 
 ## Связи
 - TestItem используется Activity-пайплайном. Вывод: `testitem.csv` + `meta.yaml` через атомарную запись.
+
+## Диаграммы
+- Flowchart: `docs/application/pipelines/chembl/testitem/diagrams/flow/testitem-workflow.mmd`
+- Sequence: `docs/application/pipelines/chembl/testitem/diagrams/sequence/testitem-main-sequence.mmd`
+- Class: `docs/application/pipelines/chembl/testitem/diagrams/class/testitem-pipeline-class.mmd`

@@ -1,22 +1,21 @@
 """
 ChEMBL data transformer implementation.
 """
-from typing import Any
 
 import pandas as pd
 
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.models import RunContext
-from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaContract
+from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 
 
 class ChemblTransformerImpl(TransformerABC):
     """
     Transformer for ChEMBL data.
-    
+
     Chain:
     pre_transform -> do_transform -> normalize -> enforce_schema -> drop nulls
     """
@@ -25,7 +24,7 @@ class ChemblTransformerImpl(TransformerABC):
         self,
         validation_service: ValidationService,
         schema_contract: PipelineSchemaContract,
-        normalization_service: NormalizationService,
+        normalization_service: NormalizationServiceABC,
         logger: LoggerAdapterABC,
     ) -> None:
         self.validation_service = validation_service
@@ -33,7 +32,9 @@ class ChemblTransformerImpl(TransformerABC):
         self.normalization_service = normalization_service
         self.logger = logger
 
-    def apply(self, df: pd.DataFrame, context: RunContext | None = None) -> pd.DataFrame:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         df = self.pre_transform(df)
         df = self.do_transform(df)
         df = self.normalization_service.normalize_dataframe(df)
@@ -81,9 +82,7 @@ class ChemblTransformerImpl(TransformerABC):
         required_cols = [
             name
             for name, col in schema.columns.items()
-            if not col.nullable
-            and name in df.columns
-            and name not in ignored_cols
+            if not col.nullable and name in df.columns and name not in ignored_cols
         ]
 
         if not required_cols:
@@ -95,8 +94,10 @@ class ChemblTransformerImpl(TransformerABC):
 
         if dropped_count > 0:
             self.logger.warning(
-                f"Dropped {dropped_count} rows with nulls in required columns: {required_cols}"
+                (
+                    f"Dropped {dropped_count} rows with nulls in required columns: "
+                    f"{required_cols}"
+                )
             )
 
         return df_clean
-

@@ -1,0 +1,31 @@
+---
+id: 5de5bb67-2d1c-4e36-a7d6-f5a3b7a3e4d5
+---
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
+
+class SchemaProviderABC
+class SchemaRegistry {
+  +register(name, schema, column_order)
+  +get_schema(name)
+  +get_schema_columns(name)
+  +list_schemas()
+}
+class ValidatorABC
+class PanderaValidator {
+  +validate(df)
+  +is_valid(df)
+}
+class ValidationResult {
+  +is_valid: bool
+  +errors: list
+  +warnings: list
+}
+class DataFrameModel
+
+SchemaRegistry ..|> SchemaProviderABC
+PanderaValidator ..|> ValidatorABC
+PanderaValidator --> ValidationResult
+SchemaRegistry --> DataFrameModel : holds schemas
+ValidatorABC --> DataFrameModel : validates against
+

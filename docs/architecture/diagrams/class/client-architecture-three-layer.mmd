@@ -1,0 +1,101 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
+
+    %% Contracts (Ports)
+    class SourceClientABC {
+        <<Interface>>
+        +fetch_one(id)
+        +fetch_many(ids)
+        +iter_pages(request)
+        +metadata()
+    }
+    class RequestBuilderABC {
+        <<Interface>>
+        +build(params)
+        +with_pagination(offset, limit)
+    }
+    class ResponseParserABC {
+        <<Interface>>
+        +parse(response)
+        +extract_metadata(response)
+    }
+    class PaginatorABC {
+        <<Interface>>
+        +paginate(request)
+    }
+    class RateLimiterABC
+    class RetryPolicyABC
+    class CacheABC
+    class CircuitBreakerABC
+    class SecretProviderABC
+    class ExtractionServiceABC
+
+    %% Default factories
+    class BaseClientFactories {
+      +default_rate_limiter()
+      +default_retry_policy()
+      +default_cache()
+      +default_secret_provider()
+    }
+    class ChemblClientFactory {
+      +create_client(config) SourceClientABC
+      +create_default() SourceClientABC
+    }
+    class ChemblExtractionServiceFactory {
+      +create_extraction_service(config, client)
+    }
+
+    %% Implementations
+    class UnifiedAPIClient
+    class ChemblDataClientHTTPImpl
+    class ChemblRequestBuilderImpl
+    class ChemblResponseParserImpl
+    class OffsetPaginator
+    class TokenBucketRateLimiterImpl
+    class ExponentialBackoffRetryImpl
+    class MemoryCacheImpl
+    class CircuitBreakerImpl
+    class EnvSecretProvider
+    class ChemblExtractionServiceImpl
+
+    SourceClientABC <|-- ChemblDataClientHTTPImpl
+    RequestBuilderABC <|-- ChemblRequestBuilderImpl
+    ResponseParserABC <|-- ChemblResponseParserImpl
+    PaginatorABC <|-- OffsetPaginator
+    RateLimiterABC <|-- TokenBucketRateLimiterImpl
+    RetryPolicyABC <|-- ExponentialBackoffRetryImpl
+    CacheABC <|-- MemoryCacheImpl
+    SecretProviderABC <|-- EnvSecretProvider
+    CircuitBreakerABC <|-- CircuitBreakerImpl
+    ExtractionServiceABC <|-- ChemblExtractionServiceImpl
+
+    ChemblClientFactory ..> ChemblDataClientHTTPImpl : instantiates
+    ChemblClientFactory ..> UnifiedAPIClient : uses
+    ChemblExtractionServiceFactory ..> ChemblExtractionServiceImpl
+
+    ChemblDataClientHTTPImpl *-- ChemblRequestBuilderImpl
+    ChemblDataClientHTTPImpl *-- ChemblResponseParserImpl
+    ChemblDataClientHTTPImpl *-- OffsetPaginator
+    ChemblDataClientHTTPImpl *-- UnifiedAPIClient
+    UnifiedAPIClient --> RateLimiterABC
+    UnifiedAPIClient --> RetryPolicyABC
+    UnifiedAPIClient --> CacheABC
+    UnifiedAPIClient --> CircuitBreakerABC
+    UnifiedAPIClient --> SecretProviderABC
+    ChemblExtractionServiceImpl --> ChemblDataClientHTTPImpl
+
+    class ChemblDataClientHTTPImpl domainPrimary
+    class ChemblExtractionServiceImpl domainPrimary
+    class ChemblClientFactory domainSecondary
+    class ChemblExtractionServiceFactory domainSecondary
+    class BaseClientFactories domainSecondary
+    class SourceClientABC interface
+    class RequestBuilderABC interface
+    class ResponseParserABC interface
+    class PaginatorABC interface
+    class RateLimiterABC interface
+    class RetryPolicyABC interface
+    class CacheABC interface
+    class CircuitBreakerABC interface
+    class SecretProviderABC interface
+    class ExtractionServiceABC interface

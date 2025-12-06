@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Iterator, TypeVar
+from typing import Any, Generic, TypeVar
 
 from bioetl.domain.clients.contracts import DataClientABC
 
@@ -12,6 +12,7 @@ class SourceClientABC(DataClientABC):
     Основной контракт клиента источника данных.
     Наследует доменный контракт DataClientABC.
     """
+
     pass
 
 
@@ -110,7 +111,7 @@ class CacheABC(ABC, Generic[T]):
     @abstractmethod
     def invalidate(self, key: str) -> None:
         """Удаляет значение из кэша."""
-    
+
     @abstractmethod
     def clear(self) -> None:
         """Очищает весь кэш."""

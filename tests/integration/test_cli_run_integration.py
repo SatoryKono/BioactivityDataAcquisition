@@ -1,14 +1,16 @@
 """Integration tests for CLI commands (TS-002, TS-003)."""
-from pathlib import Path
+
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", MagicMock())
 import pytest
 from typer.testing import CliRunner
 
+from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 from bioetl.interfaces.cli import app
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+
+sys.modules.setdefault("tqdm", MagicMock())
 
 runner = CliRunner()
 
@@ -16,9 +18,12 @@ runner = CliRunner()
 @pytest.mark.integration
 def test_cli_run_dry_run_success(tmp_path, monkeypatch):
     """TS-002: bioetl run executes dry-run without writing outputs."""
-    monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
+    monkeypatch.setenv(
+        "BIOETL_CONFIG_DIR",
+        str(Path("tests/fixtures/configs").resolve()),
+    )
     monkeypatch.setattr(
-        ChemblExtractionServiceImpl,
+        ChemblExtractionClientImpl,
         "get_release_version",
         lambda self: "chembl_cli_integration",
     )

@@ -5,7 +5,7 @@ import os
 import pickle
 import time
 from pathlib import Path
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from bioetl.domain.clients.base.contracts import CacheABC
 
@@ -102,4 +102,3 @@ class FileCacheImpl(CacheABC[T]):
         digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
         safe_name = f"{digest}.cache"
         return self._cache_dir / safe_name
-

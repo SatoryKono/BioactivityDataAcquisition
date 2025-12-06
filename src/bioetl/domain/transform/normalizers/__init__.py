@@ -7,6 +7,7 @@ This package provides:
 - Normalizers for collections (arrays, records)
 - Field normalizer registry
 """
+
 from bioetl.domain.transform.normalizers.base import (
     BAO_ID_REGEX,
     CHEMBL_ID_REGEX,

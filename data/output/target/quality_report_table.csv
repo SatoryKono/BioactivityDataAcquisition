@@ -1,0 +1,16 @@
+column,null_count,non_null_count,unique_count,dtype,coverage,coverage_ok
+cross_references,1000,0,0,object,0.0,False
+database_version,0,1000,1,object,1.0,True
+extracted_at,0,1000,1,object,1.0,True
+hash_business_key,0,1000,1000,object,1.0,True
+hash_row,0,1000,1000,object,1.0,True
+index,0,1000,1000,int64,1.0,True
+organism,0,1000,31,object,1.0,True
+pref_name,0,1000,885,object,1.0,True
+score,1000,0,0,float64,0.0,False
+species_group_flag,0,1000,1,bool,1.0,True
+target_chembl_id,0,1000,1000,object,1.0,True
+target_components,1000,0,0,object,0.0,False
+target_type,0,1000,1,object,1.0,True
+tax_id,0,1000,30,float64,1.0,True
+uniprot_id,1000,0,0,object,0.0,False

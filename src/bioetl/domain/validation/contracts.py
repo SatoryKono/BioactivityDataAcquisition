@@ -1,41 +1,40 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
 
 import pandas as pd
-import pandera.pandas as pa
+
+SchemaType = Any
 
 
 @dataclass
 class ValidationResult:
-    """Результат валидации."""
+    """Результат валидации доменного уровня."""
+
     is_valid: bool
-    errors: list[Any]  # ValidationError
+    errors: list[Any]
     warnings: list[str]
+    validated_df: pd.DataFrame | None = None
 
 
 class ValidatorABC(ABC):
-    """
-    Валидация данных.
-    """
+    """Доменный интерфейс валидатора."""
 
     @abstractmethod
     def validate(self, df: pd.DataFrame) -> ValidationResult:
-        """Валидирует DataFrame, возвращает результат."""
+        """Валидирует DataFrame и возвращает результат проверки."""
 
     @abstractmethod
     def is_valid(self, df: pd.DataFrame) -> bool:
-        """Простая проверка валидности."""
+        """Упрощенная проверка валидности."""
 
 
 class SchemaProviderABC(ABC):
-    """
-    Провайдер схем данных.
-    """
+    """Провайдер схем данных (без привязки к конкретной технологии)."""
 
     @abstractmethod
-    def get_schema(self, name: str) -> type[pa.DataFrameModel]:
-        """Возвращает класс схемы по имени."""
+    def get_schema(self, name: str) -> SchemaType:
+        """Возвращает схему по имени."""
 
     @abstractmethod
     def list_schemas(self) -> list[str]:
@@ -49,8 +48,22 @@ class SchemaProviderABC(ABC):
     def register(
         self,
         name: str,
-        schema: type[pa.DataFrameModel],
+        schema: SchemaType,
         *,
         column_order: list[str] | None = None,
     ) -> None:
         """Регистрирует новую схему."""
+
+
+class ValidatorFactoryABC(Protocol):
+    """Фабрика валидаторов под конкретную схему."""
+
+    def create_validator(self, schema: SchemaType) -> ValidatorABC:
+        """Создает валидатор для указанной схемы."""
+
+
+class SchemaProviderFactoryABC(Protocol):
+    """Фабрика провайдеров схем."""
+
+    def create_schema_provider(self) -> SchemaProviderABC:
+        """Создает провайдер схем."""

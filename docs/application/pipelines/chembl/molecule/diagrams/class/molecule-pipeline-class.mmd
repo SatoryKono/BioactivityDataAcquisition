@@ -1,0 +1,33 @@
+classDiagram
+    class ChemblEntityPipeline {
+        <<abstract>>
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +run(output_path, dry_run) RunResult
+    }
+
+    class MoleculePipeline {
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+    }
+
+    class ValidationService {
+        +validate(df, entity_name) DataFrame
+    }
+
+    class HashService {
+        +add_hash_columns(df, keys) DataFrame
+    }
+
+    class UnifiedOutputWriter {
+        +write_result(df, path, context) WriteResult
+    }
+
+    class ChemblExtractorImpl
+
+    ChemblEntityPipeline <|-- MoleculePipeline
+    MoleculePipeline o-- ValidationService
+    MoleculePipeline o-- HashService
+    MoleculePipeline o-- UnifiedOutputWriter
+    MoleculePipeline o-- ChemblExtractorImpl : id_only / api / csv
+

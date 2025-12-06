@@ -1,6 +1,7 @@
 """
 Tests for the PipelineBase class.
 """
+
 # pylint: disable=redefined-outer-name, protected-access
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -8,16 +9,24 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.hooks import PipelineHookABC
+from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
-from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
+from bioetl.domain.pipelines.contracts import PipelineHookABC
+from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.transform.transformers import HashColumnsTransformer
+from bioetl.domain.transform.transformers import (
+    DatabaseVersionTransformer,
+    FulldateTransformer,
+    HashColumnsTransformer,
+    IndexColumnTransformer,
+    TransformerABC,
+    TransformerChain,
+)
 
 
 class ConcretePipeline(PipelineBase):
@@ -55,9 +64,7 @@ def hash_service():
 @pytest.fixture
 def default_extractor():
     extractor = MagicMock()
-    extractor.extract.return_value = [
-        pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})
-    ]
+    extractor.extract.return_value = [pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})]
     return extractor
 
 
@@ -93,10 +100,7 @@ def test_pipeline_run_success(
     assert len(result.stages) == 4  # extract, transform, validate, write
 
     # Verify logger calls
-    mock_logger.info.assert_any_call(
-        "Pipeline started",
-        run_id=result.run_id
-    )
+    mock_logger.info.assert_any_call("Pipeline started", run_id=result.run_id)
 
     # Verify write called
     mock_output_writer.write_result.assert_called_once()
@@ -195,9 +199,7 @@ def test_pipeline_error_hooks(
     pipeline.add_hook(mock_hook)
 
     # Mock extract to fail
-    pipeline._extractor.extract = MagicMock(
-        side_effect=ValueError("Extraction failed")
-    )
+    pipeline._extractor.extract = MagicMock(side_effect=ValueError("Extraction failed"))
 
     # Act & Assert
     with pytest.raises(PipelineStageError) as exc_info:
@@ -320,8 +322,9 @@ def test_error_policy_retry_callback_and_skip(
     assert result_df.empty
     assert attempts["count"] == 2
     on_retry.assert_called_once()
-    assert pipeline._error_policy_manager.last_error is not None  # noqa: SLF001
-    assert pipeline._error_policy_manager.last_error.attempt == 2  # noqa: SLF001
+    last_error = pipeline._error_policy_manager.last_error  # noqa: SLF001
+    assert last_error is not None
+    assert last_error.attempt == 2
 
 
 @pytest.mark.unit
@@ -360,6 +363,12 @@ def test_hashing_logic(
     hash_service,
 ):
     """Test different scenarios for business key hashing."""
+    _ = (
+        mock_config,
+        mock_logger,
+        mock_validation_service,
+        mock_output_writer,
+    )
     transformer = HashColumnsTransformer(hash_service, ["id"])
     df = pd.DataFrame({"id": [1], "val": ["x"]})
     res = transformer.apply(df)
@@ -404,19 +413,116 @@ def test_pipeline_dry_run_metadata_and_stages(
     assert result.success
     assert result.output_path is None
     assert result.errors == []
-    assert [stage.stage_name for stage in result.stages] == [
-        "extract",
-        "transform",
-        "validate",
-    ]
+    _assert_stages(
+        result,
+        expected_names=["extract", "transform", "validate"],
+        expected_count=len(small_pipeline_df),
+    )
+    _assert_dry_run_meta(
+        result, pipeline_test_config, expected_count=len(small_pipeline_df)
+    )
+
+
+@pytest.mark.unit
+def test_post_transformer_factory_alignment(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    hash_service,
+    default_extractor,
+):
+    """Container и PipelineBase собирают идентичную цепочку пост-трансформеров."""
+
+    pipeline = ConcretePipeline(
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        hash_service=hash_service,
+        extractor=default_extractor,
+    )
+
+    factory_transformer = default_post_transformer(
+        hash_service=hash_service,
+        business_key_fields=mock_config.hashing.business_key_fields,
+        version_provider=pipeline.get_version,
+    )
+
+    pipeline_signature = _extract_chain_signature(pipeline._post_transformer)
+    container_signature = _extract_chain_signature(factory_transformer)
+
+    assert pipeline_signature == container_signature
+
+
+def _assert_stages(
+    result,
+    *,
+    expected_names: list[str],
+    expected_count: int,
+) -> None:
+    assert [stage.stage_name for stage in result.stages] == expected_names
     assert [stage.records_processed for stage in result.stages] == [
-        len(small_pipeline_df),
-        len(small_pipeline_df),
-        len(small_pipeline_df),
+        expected_count for _ in expected_names
     ]
     assert all(stage.errors == [] for stage in result.stages)
-    assert result.meta["dry_run"] is True
-    assert result.meta["row_count"] == len(small_pipeline_df)
-    assert result.meta["provider"] == pipeline_test_config.provider
-    assert result.meta["entity"] == pipeline_test_config.entity_name
     assert all(stage.duration_sec >= 0 for stage in result.stages)
+
+
+def _assert_dry_run_meta(
+    result,
+    config,
+    *,
+    expected_count: int,
+) -> None:
+    meta = result.meta
+    assert meta["dry_run"] is True
+    assert meta["row_count"] == expected_count
+    assert meta["provider"] == config.provider
+    assert meta["entity"] == config.entity_name
+
+
+def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
+    assert isinstance(transformer, TransformerChain)
+
+    signature: list[tuple] = []
+    for component in transformer._transformers:  # type: ignore[attr-defined]
+        if isinstance(component, HashColumnsTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                    component._business_key_fields,  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+        if isinstance(component, IndexColumnTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+        if isinstance(component, DatabaseVersionTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                    component._database_version_provider(),  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+        if isinstance(component, FulldateTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+    return signature

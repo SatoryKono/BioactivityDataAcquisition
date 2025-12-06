@@ -6,6 +6,13 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/project/00-rules-summary.md`.
 
+## Локальные проверки качества
+
+- Установить хуки: `pre-commit install`
+- Прогнать форматирование и линтеры: `pre-commit run --all-files` (ruff, black, isort, mypy, import-linter)
+- Запустить архитектурный тест: `pytest tests/architecture/test_layer_dependencies.py`
+- Полный цикл lint/type-check в CI: ruff → black --check → isort --check-only → mypy → архитектурные тесты → import-linter
+
 ## Документация
 
 ### Структура документации
@@ -26,14 +33,9 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 
 | # | Документ | Описание |
 |---|----------|----------|
-| 00 | [pipeline-base](docs/02-pipelines/00-pipeline-base.md) | Базовая архитектура пайплайнов |
-| 01 | [base-external-data-client](docs/02-pipelines/01-base-external-data-client.md) | Базовый клиент внешних API (Legacy) |
-| 02 | [logging-and-configuration](docs/02-pipelines/02-logging-and-configuration.md) | Логирование и конфигурация |
-| 03 | [unified-api-client](docs/02-pipelines/03-unified-api-client.md) | Унифицированный API-клиент |
-| 04 | [unified-output-writer](docs/02-pipelines/04-unified-output-writer.md) | Унифицированный writer для записи |
-| 05 | [schema-registry](docs/02-pipelines/05-schema-registry.md) | Реестр схем для валидации |
-| 06 | [validation-service](docs/02-pipelines/06-validation-service.md) | Сервис валидации данных |
-| 07 | [client-architecture](docs/02-pipelines/07-client-architecture.md) | Архитектура клиентского слоя |
+| 00 | [index](docs/02-pipelines/00-index.md) | Навигация по core-документации пайплайнов |
+| 01 | [pipeline-core-normalization](docs/02-pipelines/01-pipeline-core-normalization.md) | Архитектура сервисов нормализации, базовые и ChEMBL-специфичные реализации |
+| 02 | [pipeline-core-provider-registry](docs/02-pipelines/02-pipeline-core-provider-registry.md) | Провайдерский реестр, orchestrator-порт загрузчика и фабрики |
 
 ### Пайплайны по провайдерам
 

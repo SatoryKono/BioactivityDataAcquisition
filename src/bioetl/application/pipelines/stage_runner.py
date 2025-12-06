@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from datetime import datetime, timezone
+
 import pandas as pd
 
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
@@ -44,51 +45,35 @@ class StageRunner:
         apply_transformers: Callable[[pd.DataFrame, RunContext], pd.DataFrame],
         validate_fn: Callable[[pd.DataFrame], pd.DataFrame],
     ) -> tuple[bool, int, int, bool, int, int]:
-        if not transform_started:
-            self._hooks_manager.notify_stage_start("transform", context)
-            transform_started = True
-
-        df_transformed = self._error_policy_manager.execute(
+        (
+            transform_started,
+            transform_chunks,
+            transform_count,
+            df_transformed,
+        ) = self._execute_stage(
             "transform",
             context,
-            lambda: apply_transformers(
-                transform_fn(raw_chunk),
-                context,
-            ),
+            lambda: apply_transformers(transform_fn(raw_chunk), context),
+            started=transform_started,
+            chunks=transform_chunks,
+            count=transform_count,
         )
-        if df_transformed is None:
-            raise PipelineStageError(
-                provider=self._provider_id.value,
-                entity=self._entity_name,
-                stage="transform",
-                attempt=1,
-                run_id=context.run_id,
-            )
 
-        transform_chunks += 1
-        transform_count += len(df_transformed)
-
-        if not validate_started:
-            self._hooks_manager.notify_stage_start("validate", context)
-            validate_started = True
-
-        df_validated = self._error_policy_manager.execute(
-            "validate", context, lambda: validate_fn(df_transformed)
+        (
+            validate_started,
+            validate_chunks,
+            validate_count,
+            df_validated,
+        ) = self._execute_stage(
+            "validate",
+            context,
+            lambda: validate_fn(df_transformed),
+            started=validate_started,
+            chunks=validate_chunks,
+            count=validate_count,
+            dry_run=dry_run,
+            validated_chunks=validated_chunks,
         )
-        if df_validated is None:
-            raise PipelineStageError(
-                provider=self._provider_id.value,
-                entity=self._entity_name,
-                stage="validate",
-                attempt=1,
-                run_id=context.run_id,
-            )
-
-        validate_chunks += 1
-        validate_count += len(df_validated)
-
-        if not dry_run:
-            validated_chunks.append(df_validated)
 
         return (
             transform_started,
@@ -98,6 +83,40 @@ class StageRunner:
             validate_chunks,
             validate_count,
         )
+
+    def _execute_stage(
+        self,
+        stage: str,
+        context: RunContext,
+        action: Callable[[], pd.DataFrame],
+        *,
+        started: bool,
+        chunks: int,
+        count: int,
+        dry_run: bool = False,
+        validated_chunks: list[pd.DataFrame] | None = None,
+    ) -> tuple[bool, int, int, pd.DataFrame]:
+        if not started:
+            self._hooks_manager.notify_stage_start(stage, context)
+            started = True
+
+        df_result = self._error_policy_manager.execute(stage, context, action)
+        if df_result is None:
+            raise PipelineStageError(
+                provider=self._provider_id.value,
+                entity=self._entity_name,
+                stage=stage,
+                attempt=1,
+                run_id=context.run_id,
+            )
+
+        chunks += 1
+        count += len(df_result)
+
+        if stage == "validate" and not dry_run and validated_chunks is not None:
+            validated_chunks.append(df_result)
+
+        return started, chunks, count, df_result
 
     def make_stage_result(
         self,
@@ -111,9 +130,7 @@ class StageRunner:
         start_time = self._hooks_manager.get_stage_start(stage)
         duration = 0.0
         if start_time:
-            duration = (
-                datetime.now(timezone.utc) - start_time
-            ).total_seconds()
+            duration = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return StageResult(
             stage_name=stage,
@@ -157,6 +174,4 @@ class StageRunner:
 
     @staticmethod
     def _calculate_duration(context: RunContext) -> float:
-        return (
-            datetime.now(timezone.utc) - context.started_at
-        ).total_seconds()
+        return (datetime.now(timezone.utc) - context.started_at).total_seconds()

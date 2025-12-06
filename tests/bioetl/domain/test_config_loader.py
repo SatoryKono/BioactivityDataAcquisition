@@ -2,15 +2,27 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application import config_loader
-from bioetl.application.config_loader import (
+from bioetl.domain.configs import ChemblSourceConfig
+from bioetl.infrastructure.config import (
+    loader as config_loader,
+)
+from bioetl.infrastructure.config import (
+    provider_registry_loader,
+)
+from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
     UnknownProviderError,
     load_pipeline_config,
     load_pipeline_config_from_path,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig
+
+
+@pytest.fixture(autouse=True)
+def _reset_provider_registry() -> None:
+    provider_registry_loader.clear_provider_registry_cache()
+    yield
+    provider_registry_loader.clear_provider_registry_cache()
 
 
 def test_load_pipeline_config_from_path_valid():
@@ -23,8 +35,20 @@ def test_load_pipeline_config_from_path_valid():
     assert config.provider_config.timeout_sec == 30
 
 
-def test_extra_field_triggers_validation_error():
+def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):
     path = Path("tests/fixtures/configs/chembl_activity_invalid_extra_key.yaml")
+    providers_file = Path("tests/fixtures/configs/providers.yaml")
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    monkeypatch.setattr(
+        config_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
     with pytest.raises(ConfigValidationError):
         load_pipeline_config_from_path(path)
 
@@ -34,9 +58,34 @@ def test_missing_config_file_raises():
         load_pipeline_config_from_path(Path("tests/fixtures/configs/missing.yaml"))
 
 
+def test_load_pipeline_config_from_path_missing_input_path(tmp_path: Path) -> None:
+    config_path = tmp_path / "chembl_activity.yaml"
+    config_path.write_text(
+        """id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: csv
+input_path: ./does_not_exist.csv
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError):
+        load_pipeline_config_from_path(config_path)
+
+
 def test_unknown_provider_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    pipelines_root = tmp_path / "pipelines"
-    profiles_root = tmp_path / "profiles"
+    base_dir = tmp_path
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
     (pipelines_root / "unknown").mkdir(parents=True)
     profiles_root.mkdir()
 
@@ -59,16 +108,131 @@ provider_config:
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(config_loader, "PIPELINES_ROOT", pipelines_root)
-    monkeypatch.setattr(config_loader, "PROFILES_ROOT", profiles_root)
+    with pytest.raises(UnknownProviderError):
+        load_pipeline_config("unknown.entity", base_dir=base_dir)
+
+
+def test_provider_registry_allows_known_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    base_dir = tmp_path
+    providers_file = base_dir / "providers.yaml"
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: chembl\n"
+            "    module: tests.dummy\n"
+            "    factory: create_chembl\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
+
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
+    chembl_dir = pipelines_root / "chembl"
+    chembl_dir.mkdir(parents=True)
+    profiles_root.mkdir()
+
+    pipeline_file = chembl_dir / "activity.yaml"
+    pipeline_file.write_text(
+        """id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: auto_detect
+input_path: null
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
+
+    config = load_pipeline_config("chembl.activity", base_dir=base_dir)
+
+    assert config.provider == "chembl"
+
+
+def test_provider_registry_rejects_missing_provider(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    base_dir = tmp_path
+    providers_file = base_dir / "providers.yaml"
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: dummy\n"
+            "    module: tests.dummy\n"
+            "    factory: create_dummy\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
+
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
+    chembl_dir = pipelines_root / "chembl"
+    chembl_dir.mkdir(parents=True)
+    profiles_root.mkdir()
+
+    pipeline_file = chembl_dir / "activity.yaml"
+    pipeline_file.write_text(
+        """id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: auto_detect
+input_path: null
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
 
     with pytest.raises(UnknownProviderError):
-        load_pipeline_config("unknown.entity")
+        load_pipeline_config("chembl.activity", base_dir=base_dir)
 
 
 def test_profile_merge_applied(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
-    pipelines_root = tmp_path / "pipelines"
-    profiles_root = tmp_path / "profiles"
+    base_dir = tmp_path
+    providers_file = base_dir / "providers.yaml"
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: chembl\n"
+            "    module: tests.dummy\n"
+            "    factory: create_chembl\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
+
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
     chembl_dir = pipelines_root / "chembl"
     chembl_dir.mkdir(parents=True)
     profiles_root.mkdir()
@@ -101,10 +265,14 @@ batch_size: 25
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(config_loader, "PIPELINES_ROOT", pipelines_root)
-    monkeypatch.setattr(config_loader, "PROFILES_ROOT", profiles_root)
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
 
-    config = load_pipeline_config("chembl.activity")
+    config = load_pipeline_config("chembl.activity", base_dir=base_dir)
 
     assert config.output_path == "/tmp/out"  # pipeline overrides profile
     assert config.batch_size == 10

@@ -1,13 +1,16 @@
 """Tests for ChemblPipelineBase."""
+
 # pylint: disable=redefined-outer-name, unused-argument, protected-access
 from datetime import datetime, timezone
+from typing import cast
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
-from bioetl.domain.models import RunContext
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.models import RunContext
+from bioetl.domain.transform.contracts import HasherABC
 from bioetl.domain.transform.hash_service import HashService
 
 
@@ -22,6 +25,13 @@ class ConcreteChemblPipeline(ChemblPipelineBase):
 @pytest.fixture
 def mock_dependencies_fixture():
     """Fixture for pipeline dependencies."""
+    class _DummyHasher(HasherABC):
+        def hash_row(self, _row):
+            return "hash_row"
+
+        def hash_columns(self, df, _columns):
+            return pd.Series(["hash_business_key"] * len(df))
+
     config = MagicMock()
     config.entity_name = "test"
     config.provider = "chembl"
@@ -39,7 +49,7 @@ def mock_dependencies_fixture():
         "validation_service": validation_service,
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
-        "hash_service": HashService(),
+        "hash_service": HashService(hasher=_DummyHasher()),
     }
 
 
@@ -60,9 +70,9 @@ def pipeline_fixture(mock_dependencies_fixture):
 
 def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
     """Test ChEMBL release version retrieval."""
-    mock_dependencies_fixture[
-        "extraction_service"
-    ].get_release_version.return_value = "chembl_34"
+    mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
+        "chembl_34"
+    )
 
     release1 = pipeline_fixture.get_chembl_release()
     release2 = pipeline_fixture.get_chembl_release()
@@ -70,20 +80,19 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
     assert release1 == "chembl_34"
     assert release2 == "chembl_34"
     (
-        mock_dependencies_fixture["extraction_service"]
-        .get_release_version.assert_called_once()
+        mock_dependencies_fixture[
+            "extraction_service"
+        ].get_release_version.assert_called_once()
     )
 
 
 def test_enrich_context(pipeline_fixture, mock_dependencies_fixture):
     """Test context enrichment with ChEMBL release."""
-    mock_dependencies_fixture[
-        "extraction_service"
-    ].get_release_version.return_value = "chembl_99"
+    mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
+        "chembl_99"
+    )
     context = RunContext(
-        entity_name="test",
-        provider="chembl",
-        started_at=datetime.now(timezone.utc)
+        entity_name="test", provider="chembl", started_at=datetime.now(timezone.utc)
     )
 
     pipeline_fixture._enrich_context(context)
@@ -92,9 +101,7 @@ def test_enrich_context(pipeline_fixture, mock_dependencies_fixture):
     assert context.metadata["chembl_release"] == "chembl_99"
 
 
-def test_transform_nested_normalization(
-    pipeline_fixture, mock_dependencies_fixture
-):
+def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixture):
     """Test that transform applies nested normalization."""
     mock_dependencies_fixture["config"].fields = [
         {"name": "nested", "data_type": "array"},
@@ -109,34 +116,63 @@ def test_transform_nested_normalization(
     norm.id_fields = []
     mock_dependencies_fixture["config"].normalization = norm
 
-    schema_cols = [
-        "nested", "obj", "simple", "pubmed_id",
-        "references", "doi"
-    ]
+    schema_cols = ["nested", "obj", "simple", "pubmed_id", "references", "doi"]
     validation = pipeline_fixture._validation_service
     validation.get_schema_columns.return_value = schema_cols
 
-    df = pd.DataFrame({
-        "nested": [["x", "y"], ["z"]],
-        "obj": [{"k": "v"}, None],
-        "simple": ["s1", "s2"],
-        "pubmed_id": [" 12345 ", "67890"],
-        "references": [["12345", 67890], [None, " 333 "]],
-        "doi": ["https://doi.org/10.1000/ABC", "10.2345/xyz"]
-    })
+    df = pd.DataFrame(
+        {
+            "nested": [["x", "y"], ["z"]],
+            "obj": [{"k": "v"}, None],
+            "simple": ["s1", "s2"],
+            "pubmed_id": [" 12345 ", "67890"],
+            "references": [["12345", 67890], [None, " 333 "]],
+            "doi": ["https://doi.org/10.1000/ABC", "10.2345/xyz"],
+        }
+    )
 
     result = pipeline_fixture.transform(df)
 
-    assert list(result.columns) == schema_cols
-    assert result.iloc[0]["nested"] == "x|y"
-    assert result.iloc[0]["obj"] == "k:v"
-    assert result.iloc[1]["nested"] == "z"
-    assert pd.isna(result.iloc[1]["obj"])
-    assert result.iloc[0]["simple"] == "s1"
-    assert result.iloc[0]["pubmed_id"] == 12345
-    assert result.iloc[0]["references"] == "12345|67890"
-    assert result.iloc[1]["references"] == "333"
-    assert result.iloc[0]["doi"] == "10.1000/abc"
+    _assert_normalized_columns(result, schema_cols)
+    _assert_normalized_row(
+        result,
+        0,
+        {
+            "nested": "x|y",
+            "obj": "k:v",
+            "simple": "s1",
+            "pubmed_id": 12345,
+            "references": "12345|67890",
+            "doi": "10.1000/abc",
+        },
+    )
+    _assert_normalized_row(
+        result,
+        1,
+        {
+            "nested": "z",
+            "obj": None,
+            "simple": "s2",
+            "pubmed_id": 67890,
+            "references": "333",
+            "doi": "10.2345/xyz",
+        },
+    )
+
+
+def _assert_normalized_columns(result: pd.DataFrame, expected: list[str]) -> None:
+    assert list(result.columns) == expected
+
+
+def _assert_normalized_row(
+    result: pd.DataFrame, index: int, expected: dict[str, object]
+) -> None:
+    row = result.iloc[index]
+    for key, expected_value in expected.items():
+        actual = row[key]
+        if expected_value is None and pd.isna(actual):
+            continue
+        assert actual == expected_value
 
 
 def test_transform_uses_batch_normalization(mock_dependencies_fixture):
@@ -161,7 +197,7 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
     result = pipeline.transform(df)
 
     normalization_service.normalize_dataframe.assert_called_once()
-    
+
     # Verify result matches normalization output
     pd.testing.assert_frame_equal(
         result, normalization_service.normalize_dataframe.return_value
@@ -172,14 +208,14 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
     """Test that extract yields DataFrame chunks for further processing."""
     record_source = MagicMock()
     raw_chunks = [
-        pd.DataFrame([{"id": 1}, {"id": 2}]),
-        pd.DataFrame([{"id": 3}]),
+        [{"id": 1}, {"id": 2}],
+        [{"id": 3}],
     ]
     record_source.iter_records.return_value = raw_chunks
 
     normalization_service = MagicMock()
-    normalization_service.normalize_batch.side_effect = (
-        lambda df: df.assign(processed=True)
+    normalization_service.normalize_batch.side_effect = lambda df: df.assign(
+        processed=True
     )
 
     pipeline = ChemblPipelineBase(
@@ -198,8 +234,13 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
     assert normalization_service.normalize_batch.call_count == 2
 
     expected = pd.concat(
-        [chunk.assign(processed=True) for chunk in raw_chunks], ignore_index=True
+        [
+            pd.DataFrame(chunk).assign(processed=True)
+            for chunk in cast(list[list[dict[str, int]]], raw_chunks)
+        ],
+        ignore_index=True,
     )
-    
-    pd.testing.assert_frame_equal(result.reset_index(drop=True), expected.reset_index(drop=True))
 
+    pd.testing.assert_frame_equal(
+        result.reset_index(drop=True), expected.reset_index(drop=True)
+    )

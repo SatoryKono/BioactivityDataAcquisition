@@ -1,9 +1,13 @@
 """
 Tests for serialization utilities.
 """
+
 import pandas as pd
-import pytest
-from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
+
+from bioetl.infrastructure.transform.impl.serializer import (
+    serialize_dict,
+    serialize_list,
+)
 
 
 def test_serialize_list_primitives():
@@ -39,4 +43,3 @@ def test_serialize_dict_determinism():
 def test_serialize_dict_nested_skip():
     val = {"a": 1, "nested": {"x": 1}}
     assert serialize_dict(val) == "a:1"
-

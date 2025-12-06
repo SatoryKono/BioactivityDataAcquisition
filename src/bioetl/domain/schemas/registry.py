@@ -1,17 +1,15 @@
 """
-Registry implementation for Pandera schemas.
+Registry implementation for schema objects (technology-agnostic).
 """
+
 from dataclasses import dataclass
-from typing import Type
 
-import pandera.pandas as pa
-
-from bioetl.domain.validation import SchemaProviderABC
+from bioetl.domain.validation import SchemaProviderABC, SchemaType
 
 
 @dataclass
 class _SchemaEntry:
-    schema: Type[pa.DataFrameModel]
+    schema: SchemaType
     column_order: list[str] | None = None
 
 
@@ -26,16 +24,14 @@ class SchemaRegistry(SchemaProviderABC):
     def register(
         self,
         name: str,
-        schema: Type[pa.DataFrameModel],
+        schema: SchemaType,
         *,
         column_order: list[str] | None = None,
     ) -> None:
         """Register a schema by name."""
-        self._schemas[name] = _SchemaEntry(
-            schema=schema, column_order=column_order
-        )
+        self._schemas[name] = _SchemaEntry(schema=schema, column_order=column_order)
 
-    def get_schema(self, name: str) -> Type[pa.DataFrameModel]:
+    def get_schema(self, name: str) -> SchemaType:
         """Get schema by name, raises ValueError if not found."""
         if name not in self._schemas:
             raise ValueError(f"Schema for '{name}' not found in registry.")
@@ -48,7 +44,13 @@ class SchemaRegistry(SchemaProviderABC):
         entry = self._schemas[name]
         if entry.column_order:
             return list(entry.column_order)
-        return list(entry.schema.to_schema().columns.keys())
+        # Best-effort extraction of column order if schema exposes to_schema
+        schema = entry.schema
+        if hasattr(schema, "to_schema"):
+            columns = getattr(schema, "to_schema")().columns
+            if hasattr(columns, "keys"):
+                return list(columns.keys())
+        raise ValueError(f"Column order for schema '{name}' is not available.")
 
     def list_schemas(self) -> list[str]:
         """Return list of registered schema names."""

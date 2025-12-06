@@ -1,6 +1,7 @@
 """
 Domain layer package.
 """
+
 from bioetl.domain.errors import (
     BioetlError,
     ClientError,

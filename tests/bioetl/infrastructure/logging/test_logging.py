@@ -1,10 +1,16 @@
 """
 Tests for logging and progress reporting components.
 """
+
 from unittest.mock import patch
 
-from bioetl.infrastructure.logging.factories import default_logger, default_progress_reporter
-from bioetl.infrastructure.logging.impl.progress_reporter import TqdmProgressReporterImpl
+from bioetl.infrastructure.logging.factories import (
+    default_logger,
+    default_progress_reporter,
+)
+from bioetl.infrastructure.logging.impl.progress_reporter import (
+    TqdmProgressReporterImpl,
+)
 from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
 
 
@@ -44,7 +50,9 @@ def test_progress_reporter():
     reporter = TqdmProgressReporterImpl()
 
     # Mock tqdm
-    with patch("bioetl.infrastructure.logging.impl.progress_reporter.tqdm") as mock_tqdm:
+    with patch(
+        "bioetl.infrastructure.logging.impl.progress_reporter.tqdm"
+    ) as mock_tqdm:
         # Test create_bar
         with reporter.create_bar(total=100, desc="test") as progress_bar:
             assert progress_bar is not None

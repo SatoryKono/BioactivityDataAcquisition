@@ -1,15 +1,14 @@
 """
-Tests for ChemblExtractionServiceImpl.
+Tests for ChemblExtractionClientImpl.
 """
+
 # pylint: disable=redefined-outer-name
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.services.chembl_extraction import (
-    ChemblExtractionServiceImpl,
-)
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 
 
 @pytest.fixture
@@ -20,8 +19,8 @@ def mock_client():
 
 @pytest.fixture
 def service(mock_client):
-    """ChemblExtractionServiceImpl instance with mock client."""
-    return ChemblExtractionServiceImpl(client=mock_client, batch_size=10)
+    """ChemblExtractionClientImpl instance with mock client."""
+    return ChemblExtractionClientImpl(client=mock_client, batch_size=10)
 
 
 def test_get_release_version(service, mock_client):
@@ -47,11 +46,11 @@ def test_extract_all_single_page(service, mock_client):
     mock_paginator.has_more.return_value = False
 
     # Act
-    df = service.extract_all("activity")
+    records = service.extract_all("activity")
 
     # Assert
-    assert len(df) == 2
-    assert df.iloc[0]["id"] == 1
+    assert len(records) == 2
+    assert records[0]["id"] == 1
     mock_client.request_activity.assert_called_with(offset=0, limit=10)
 
 
@@ -68,21 +67,15 @@ def test_extract_all_pagination(service, mock_client):
     # Call 1: returns 2 items, has_more=True
     # Call 2: returns 1 item, has_more=False
 
-    mock_client.request_activity.side_effect = [
-        {"data": "page1"},
-        {"data": "page2"}
-    ]
-    mock_parser.parse.side_effect = [
-        [{"id": 1}, {"id": 2}],
-        [{"id": 3}]
-    ]
+    mock_client.request_activity.side_effect = [{"data": "page1"}, {"data": "page2"}]
+    mock_parser.parse.side_effect = [[{"id": 1}, {"id": 2}], [{"id": 3}]]
     mock_paginator.has_more.side_effect = [True, False]
 
     # Act
-    df = service.extract_all("activity")
+    records = service.extract_all("activity")
 
     # Assert
-    assert len(df) == 3
+    assert len(records) == 3
     assert mock_client.request_activity.call_count == 2
     # Check call args
     calls = mock_client.request_activity.call_args_list
@@ -108,26 +101,29 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
     ]
     mock_paginator.has_more.return_value = False
 
-    df = service.extract_all("activity")
+    records = service.extract_all("activity")
 
-    assert df.iloc[0]["activity_properties"] == "k1:v1|k2:v2"
-    assert df.iloc[0]["ligand_efficiency"] == "le:1.1"
+    assert records[0]["activity_properties"] == "k1:v1|k2:v2"
+    assert records[0]["ligand_efficiency"] == "le:1.1"
 
 
 def test_extract_all_limit(service, mock_client):
     """Test extraction with limit."""
-    # Mock parser
+    # Mock parser and paginator
     mock_parser = MagicMock()
+    mock_paginator = MagicMock()
     service.parser = mock_parser
+    service.paginator = mock_paginator
 
     # Returns 10 items per call
     mock_parser.parse.return_value = [{"id": i} for i in range(10)]
+    mock_paginator.has_more.return_value = False
 
     # Act - request limit 5
-    df = service.extract_all("activity", limit=5)
+    records = service.extract_all("activity", limit=5)
 
     # Assert
-    assert len(df) == 5
+    assert len(records) == 5
     # Should call client with limit=5
     mock_client.request_activity.assert_called_with(offset=0, limit=5)
 
@@ -183,12 +179,15 @@ def test_extract_unknown_entity(service):
         service.extract_all("unknown_entity")
 
 
-@pytest.mark.parametrize("entity,method", [
-    ("assay", "request_assay"),
-    ("target", "request_target"),
-    ("document", "request_document"),
-    ("testitem", "request_molecule"),
-])
+@pytest.mark.parametrize(
+    "entity,method",
+    [
+        ("assay", "request_assay"),
+        ("target", "request_target"),
+        ("document", "request_document"),
+        ("testitem", "request_molecule"),
+    ],
+)
 def test_extract_entities_dispatch(service, mock_client, entity, method):
     """Test correct client method dispatch for entities."""
     # Mock parser - paginator not strictly needed as we return empty list
