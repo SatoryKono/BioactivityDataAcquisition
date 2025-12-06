@@ -1,4 +1,5 @@
 """Golden snapshot for target_chembl pipeline outputs."""
+
 from pathlib import Path
 
 from .utils import load_expected_records

@@ -42,7 +42,7 @@ def _resolve_module(
     base_parts = current_parts if is_package else current_parts[:-1]
     if level > len(base_parts):
         return module
-    prefix = base_parts[: -level]
+    prefix = base_parts[:-level]
     if module:
         prefix.extend(module.split("."))
     return ".".join(prefix)

@@ -201,9 +201,7 @@ def test_config_validation_error_is_propagated() -> None:
 def test_type_mismatch_raises_type_error(
     provider_registry: InMemoryProviderRegistry,
 ) -> None:
-    _register_dummy_provider(
-        config_type=ChemblSourceConfig, registry=provider_registry
-    )
+    _register_dummy_provider(config_type=ChemblSourceConfig, registry=provider_registry)
 
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]

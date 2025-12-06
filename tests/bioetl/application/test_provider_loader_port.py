@@ -49,4 +49,3 @@ def test_orchestrator_uses_provider_loader_when_flag_enabled() -> None:
 
     assert registry is loader.registry
     assert loader.calls == 1
-

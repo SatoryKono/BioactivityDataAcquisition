@@ -265,6 +265,7 @@ class PipelineContainer(PipelineContainerABC):
             )
         return source_config
 
+
 def build_pipeline_dependencies(
     config: PipelineConfig,
     *,

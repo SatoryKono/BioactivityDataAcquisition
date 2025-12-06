@@ -6,4 +6,3 @@ from bioetl.domain.provider_registry import ProviderRegistryLoaderABC
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
 __all__ = ["ProviderLoaderProtocol", "ProviderRegistryLoaderABC"]
-

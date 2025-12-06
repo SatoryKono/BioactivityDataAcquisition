@@ -3,7 +3,8 @@
 
 import json
 
-expected_assay_records = json.loads("""
+expected_assay_records = json.loads(
+    """
 [
     {
         "aidx": "cld0",
@@ -228,4 +229,5 @@ expected_assay_records = json.loads("""
         "extracted_at": "2025-12-06T12:42:34.383793+00:00"
     }
 ]
-""")
+"""
+)

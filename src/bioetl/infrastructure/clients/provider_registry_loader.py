@@ -226,6 +226,8 @@ def create_provider_loader(
 
 
 ProviderRegistryLoader = ProviderLoaderImpl
+
+
 def default_provider_registry_loader(
     *,
     config_path: str | Path | None = None,
@@ -234,6 +236,7 @@ def default_provider_registry_loader(
     """Default factory for provider registry loader."""
 
     return ProviderLoaderImpl(config_path=config_path, logger=logger)
+
 
 __all__ = [
     "ProviderLoaderImpl",

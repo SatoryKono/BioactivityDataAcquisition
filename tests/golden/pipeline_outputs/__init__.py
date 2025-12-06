@@ -1,4 +1,5 @@
 """Golden records for pipeline output regression tests."""
+
 from .activity_chembl_golden import expected_activity_records
 from .assay_chembl_golden import expected_assay_records
 from .document_chembl_golden import expected_document_records

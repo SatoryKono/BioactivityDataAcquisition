@@ -1,4 +1,5 @@
 """Regression tests for pipeline outputs across key ChEMBL entities."""
+
 from __future__ import annotations
 
 import importlib
@@ -73,8 +74,7 @@ def _normalize_records(df: pd.DataFrame, *, sort_key: str) -> list[dict[str, Any
     records: list[dict[str, Any]] = []
     for record in cleaned.to_dict(orient="records"):
         normalized = {
-            key: (None if pd.isna(value) else value)
-            for key, value in record.items()
+            key: (None if pd.isna(value) else value) for key, value in record.items()
         }
         records.append(normalized)
     return sorted(records, key=lambda item: item.get(sort_key))
@@ -132,9 +132,9 @@ def test_pipeline_outputs(
         if "Network access disabled" in cause_text:
             pytest.xfail(f"Network blocked for {pipeline_name}: {cause_text}")
         raise
-    assert run_result.success, (
-        f"Pipeline {pipeline_name} failed: {run_result.error_message}"
-    )
+    assert (
+        run_result.success
+    ), f"Pipeline {pipeline_name} failed: {run_result.error_message}"
 
     output_csv = output_dir / f"{entity_name}.csv"
     if not output_csv.exists():
