@@ -31,6 +31,12 @@ logging:
   structured: true
   redact_secrets: true
 
+# Параметры экспорта метрик Prometheus
+metrics:
+  enabled: true
+  port: 9108
+  address: 0.0.0.0
+
 # Фиче-флаги интерфейсов
 features:
   rest_interface_enabled: false
