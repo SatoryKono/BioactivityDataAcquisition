@@ -23,6 +23,9 @@ from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    load_provider_registry,
+)
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
@@ -235,6 +238,16 @@ class PipelineContainer:
                 f"provider '{self._provider_id.value}'"
             )
         return source_config
+
+    def _register_providers(self) -> None:
+        """
+        Регистрирует провайдеров в глобальном реестре.
+
+        Использует загрузчик, поэтому вызов идемпотентен и безопасен
+        при повторных вызовах.
+        """
+        registry = getattr(self, "_provider_registry", None) or get_provider_registry()
+        self._provider_registry = load_provider_registry(registry=registry)
 
 
 def build_pipeline_dependencies(

@@ -63,7 +63,9 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
     def reset_provider_registry(self) -> None:
         """Clear registry content (used for tests)."""
 
-    def restore_provider_registry(self, definitions: Iterable[ProviderDefinition]) -> None:
+    def restore_provider_registry(
+        self, definitions: Iterable[ProviderDefinition]
+    ) -> None:
         """Restore registry from supplied definitions."""
 
 
@@ -90,7 +92,9 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
     def reset_provider_registry(self) -> None:
         self._providers.clear()
 
-    def restore_provider_registry(self, definitions: Iterable[ProviderDefinition]) -> None:
+    def restore_provider_registry(
+        self, definitions: Iterable[ProviderDefinition]
+    ) -> None:
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition

@@ -14,6 +14,7 @@ from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_li
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
+
 class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService):
     """
     Сервис нормализации данных.
