@@ -1,3 +1,5 @@
 """Application services - orchestration layer."""
 
-__all__: list[str] = []
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+
+__all__ = ["ChemblExtractionServiceImpl"]

@@ -13,8 +13,8 @@ from bioetl.application.services.chembl_extraction import (  # noqa: E402
     ChemblExtractionServiceImpl,
 )
 
-from bioetl.application.config_loader import (
-    load_pipeline_config_from_path,  # noqa: E402
+from bioetl.application.config_loader import (  # noqa: E402
+    load_pipeline_config_from_path,
 )
 from bioetl.application.container import build_pipeline_dependencies  # noqa: E402
 from bioetl.application.pipelines.registry import get_pipeline_class  # noqa: E402
