@@ -14,10 +14,7 @@ from pydantic import (
     model_validator,
 )
 
-from bioetl.infrastructure.config.provider_config_schema import (
-    BaseProviderConfig,
-    ProviderConfigUnion,
-)
+from bioetl.config.provider_config_schema import BaseProviderConfig, ProviderConfigUnion
 
 
 class PaginationConfig(BaseModel):

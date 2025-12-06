@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 import pandas as pd
 
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager

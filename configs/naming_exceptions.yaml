@@ -182,7 +182,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/application/config/pipeline_config_schema.py
+  - path: src/bioetl/config/pipeline_config_schema.py
     rule_id: CLASS_SUFFIX
     reason: "Options/Config object"
     owner: infra
@@ -447,7 +447,7 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/application/config/pipeline_config_schema.py
+  - path: src/bioetl/config/pipeline_config_schema.py
     rule_id: FUNC_PREFIX
     reason: "Config property (entity_name)"
     owner: infra
