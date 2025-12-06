@@ -5,14 +5,14 @@ Factories for ChEMBL clients.
 from typing import Any
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.ports.chembl_extraction_port import ChemblExtractionPort
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
-from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
-from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
-    ChemblExtractionServiceImpl,
+from bioetl.infrastructure.clients.chembl.chembl_extraction_client_impl import (
+    ChemblExtractionClientImpl,
 )
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
@@ -85,7 +85,7 @@ def default_chembl_extraction_service(
     client_config: ClientConfig | None = None,
     *,
     client: ChemblDataClientABC | None = None,
-) -> ExtractionServiceABC:
+) -> ChemblExtractionPort:
     """
     Создает сервис экстракции ChEMBL.
 
@@ -100,7 +100,7 @@ def default_chembl_extraction_service(
     if client is None:
         client = default_chembl_client(config, client_config=client_config)
 
-    return ChemblExtractionServiceImpl(
+    return ChemblExtractionClientImpl(
         client=client,
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
