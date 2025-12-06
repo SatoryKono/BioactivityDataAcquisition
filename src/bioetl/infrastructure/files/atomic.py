@@ -3,6 +3,7 @@ Atomic file operation utilities.
 """
 
 import os
+import platform
 import time
 from pathlib import Path
 from typing import Callable
@@ -47,14 +48,34 @@ class AtomicFileOperation:
         Использует os.replace для атомарной замены на всех платформах.
         """
         last_error: OSError | None = None
+        is_windows = platform.system() == "Windows"
+        # На Windows используем более длительную задержку из-за антивирусов/индексаторов
+        delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
+        
         for attempt in range(MAX_FILE_RETRIES):
             try:
                 # os.replace атомарно заменяет файл на всех платформах
                 # На Windows использует MoveFileEx с MOVEFILE_REPLACE_EXISTING
                 os.replace(src, dst)
                 return
+            except PermissionError as exc:
+                # На Windows PermissionError часто означает, что файл заблокирован
+                last_error = exc
+                if is_windows and dst.exists():
+                    # Попытка удалить целевой файл перед заменой (может помочь)
+                    try:
+                        dst.unlink()
+                        # Повторная попытка сразу после удаления
+                        try:
+                            os.replace(src, dst)
+                            return
+                        except OSError:
+                            pass  # Продолжаем с обычным retry
+                    except OSError:
+                        pass  # Не удалось удалить, продолжаем с retry
             except OSError as exc:
                 last_error = exc
+                
             if attempt == MAX_FILE_RETRIES - 1:
                 raise last_error or OSError("Move failed without explicit error.")
-            time.sleep(RETRY_DELAY_SEC)
+            time.sleep(delay)

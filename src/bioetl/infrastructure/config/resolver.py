@@ -43,7 +43,11 @@ class ConfigResolver:
         else:
             self.profiles_dir = Path(profiles_dir)
 
-    def resolve(self, config_path: str, profile: str = "default") -> PipelineConfigProtocol:
+    def resolve(
+        self,
+        config_path: str,
+        profile: str = "default",
+    ) -> PipelineConfigProtocol:
         """
         Загружает и валидирует конфигурацию пайплайна.
 
@@ -61,7 +65,11 @@ class ConfigResolver:
 
         profile_name = None if profile == "default" else profile
         profiles_root = self.profiles_dir if self.profiles_dir else None
-        return self.loader(config_path_obj, profile=profile_name, profiles_root=profiles_root)
+        return self.loader(
+            config_path_obj,
+            profile=profile_name,
+            profiles_root=profiles_root,
+        )
 
 
 __all__ = ["ConfigResolver"]
