@@ -6,8 +6,6 @@ Tests for MetadataBuilder.
 from datetime import datetime, timezone
 from pathlib import Path
 
-import pytest
-
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.output.metadata import (

@@ -19,8 +19,8 @@ from bioetl.config.pipeline_config_schema import (
     PipelineConfig,
     StorageConfig,
 )
-from bioetl.domain.validation.service import ValidationService
 from bioetl.domain.models import RunContext
+from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
