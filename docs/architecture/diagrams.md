@@ -1,6 +1,6 @@
 # Архитектурные диаграммы
 
-Актуальный код: основной вход — CLI (`bioetl.interfaces.cli`), оркестратор пайплайнов — `PipelineBase`/`ChemblPipelineBase` + `ChemblEntityPipeline`, запись — `UnifiedOutputWriter` с атомарной записью и checksum, обработка ошибок — `ErrorPolicyABC` (по умолчанию fail-fast с retry/skip через хуки), логирование — `UnifiedLogger`.
+Актуальный код: входные точки CLI/REST/MQ (`bioetl.interfaces.*`); сборка пайплайна через `PipelineOrchestrator` + `PipelineContainer` с реестром провайдеров (`configs/providers.yaml` → `ProviderRegistryLoader`); запуск `ChemblEntityPipeline` c хуками логов и метрик; источники — API/CSV/ID-list (`ApiRecordSource`, `CsvRecordSourceImpl`, `IdListRecordSourceImpl`) + стек ChEMBL клиента (`UnifiedAPIClient` + `ChemblDataClientHTTPImpl`); выход — `UnifiedOutputWriter` (стабильная сортировка, атомарная запись, checksum, QC/meta); метрики Prometheus экспонирует `infrastructure.observability.server`.
 
 Политика и стили: см. `docs/architecture/diagrams/00-diagramming-policy.md` (обязательные шрифты 22/18 pt, нейтральная палитра, линии ≥1.5 px, единый layout). Перед PR убедитесь, что все диаграммы ниже соответствуют стилю; при изменениях обновляйте файлы.
 

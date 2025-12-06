@@ -4,30 +4,48 @@ id: 15d7b6ea-8c7c-4b0e-9d3a-0b6e3d6e9f11
 %%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
 classDiagram-v2
 
-class PipelineBase
+class PipelineBase {
+  <<Abstract>>
+}
 class ChemblPipelineBase
 class ChemblEntityPipeline
+class ChemblExtractorImpl
+class ChemblTransformerImpl
+class ChemblExtractionServiceImpl
 class StageRunner
 class HooksManager
 class ErrorPolicyManager
+class RecordSource
+class ValidationService
+class NormalizationServiceABC
+class HashService
+class UnifiedOutputWriter
 class PipelineHookABC
 class ErrorPolicyABC
 class ExtractorABC
-class ChemblExtractorImpl
-class ChemblTransformerImpl
 class TransformerABC
+class ExtractionServiceABC
 
 ChemblPipelineBase --|> PipelineBase
 ChemblEntityPipeline --|> ChemblPipelineBase
+ChemblPipelineBase --> ChemblExtractorImpl : extractor
+ChemblPipelineBase --> ChemblTransformerImpl : transformer
+ChemblPipelineBase --> ChemblExtractionServiceImpl : extraction_service
+ChemblPipelineBase --> RecordSource : csv/id_only/api
+ChemblPipelineBase --> ValidationService
+ChemblPipelineBase --> NormalizationServiceABC
+ChemblPipelineBase --> HashService
+ChemblPipelineBase --> UnifiedOutputWriter
 PipelineBase --> StageRunner
 PipelineBase --> HooksManager
 PipelineBase --> ErrorPolicyManager
 PipelineBase --> TransformerABC : post_transformer
 PipelineBase --> ExtractorABC
+ChemblExtractorImpl --> ExtractionServiceABC
+ChemblExtractorImpl --> RecordSource
+ChemblTransformerImpl --> TransformerABC
 HooksManager --> PipelineHookABC
 ErrorPolicyManager --> ErrorPolicyABC
-ChemblPipelineBase --> ChemblExtractorImpl : extractor
-ChemblPipelineBase --> ChemblTransformerImpl : transformer
-ChemblPipelineBase --> PipelineBase : uses template
-ChemblTransformerImpl --> TransformerABC
+StageRunner --> HooksManager
+StageRunner --> ErrorPolicyManager
 

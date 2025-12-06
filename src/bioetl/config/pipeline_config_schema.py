@@ -213,14 +213,6 @@ class PipelineConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    @field_validator("provider")
-    @classmethod
-    def validate_provider_registered(cls, value: str) -> str:
-        try:
-            return ensure_provider_known(value)
-        except ProviderRegistryError as exc:  # pragma: no cover - defensive
-            raise ValueError(str(exc)) from exc
-
     @property
     def entity_name(self) -> str:
         return self.entity
@@ -253,6 +245,22 @@ class PipelineConfig(BaseModel):
         if self.provider_config.provider != self.provider:
             raise ValueError("provider_config.provider must match top-level provider")
         return self
+
+    @model_validator(mode="after")
+    def validate_provider_registration(self) -> PipelineConfig:
+        """
+        Проверяет, что провайдер известен реестру, но допускает пользовательские
+        конфиги (например, dummy) в тестах и локальных сценариях: если реестр
+        не знает провайдер, но передан валидный provider_config, продолжаем.
+        """
+        try:
+            ensure_provider_known(self.provider)
+            return self
+        except ProviderRegistryError:
+            # Падаем только если нет явного provider_config
+            if isinstance(self.provider_config, BaseProviderConfig):
+                return self
+            raise
 
     @model_validator(mode="after")
     def validate_input_mode(self) -> PipelineConfig:

@@ -11,6 +11,7 @@ classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#1
 subgraph Infrastructure["Infrastructure Layer"]
     UnifiedClient["UnifiedAPIClient\nclients.base.impl.unified_client"]:::componentPrimary
     ChemblHttp["ChemblHttpClientImpl\nclients.chembl.impl.http_client"]:::componentPrimary
+    ExtractionService["ChemblExtractionServiceImpl\nclients.chembl.impl.chembl_extraction_service_impl"]:::componentSecondary
     RequestBuilder["RequestBuilder\nclients.chembl.request_builder"]:::componentSecondary
     ResponseParser["ResponseParser\nclients.chembl.response_parser"]:::componentSecondary
     Paginator["OffsetPaginator\nclients.chembl.paginator"]:::componentSecondary
@@ -24,8 +25,12 @@ subgraph Infrastructure["Infrastructure Layer"]
     CsvWriter["CsvWriterImpl\ninfrastructure.output.impl.csv_writer"]:::componentSecondary
     MetadataWriter["MetadataWriter\ninfrastructure.output.impl.metadata_writer"]:::componentSecondary
     QualityReporter["QualityReporter\ninfrastructure.output.impl.quality_reporter"]:::componentSecondary
+    AtomicIO["AtomicFileOperation + Checksum\ninfrastructure.files.atomic/checksum"]:::componentSecondary
 
     Logging["LoggerAdapterImpl\ninfrastructure.logging.*"]:::componentSecondary
+    Observability["Prometheus Metrics\ninfrastructure.observability.*"]:::componentSecondary
+    ProviderRegistry["ProviderRegistryLoader\nconfigs/providers.yaml"]:::componentSecondary
+    RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
 end
 class Infrastructure group;
 
@@ -40,15 +45,21 @@ UnifiedClient --> RetryPolicy
 UnifiedClient --> Cache
 UnifiedClient --> CircuitBreaker
 UnifiedClient --> Secrets
+UnifiedClient --> Observability
 ChemblHttp --> RequestBuilder
 ChemblHttp --> ResponseParser
 ChemblHttp --> Paginator
 ChemblHttp --> UnifiedClient
 ChemblHttp --> ChemblAPI
+ExtractionService --> ChemblHttp
+ExtractionService --> Observability
+ExtractionService --> RecordSources
 OutputWriter --> CsvWriter
 OutputWriter --> MetadataWriter
 OutputWriter --> QualityReporter
 OutputWriter --> Storage
 Logging --> OutputWriter
 Logging --> ChemblHttp
+ProviderRegistry --> ChemblHttp
+ProviderRegistry --> ExtractionService
 

@@ -33,6 +33,11 @@ class TransformerABC
 class PipelineHookABC
 class ErrorPolicyABC
 class LoggerAdapterABC
+class MetricsPipelineHookImpl
+class LoggingPipelineHookImpl
+class ProviderRegistryABC
+class ProviderRegistryLoader
+class ProviderDefinition
 
 PipelineOrchestrator --> PipelineContainer
 PipelineOrchestrator --> PipelineBase : build_pipeline()
@@ -47,6 +52,9 @@ PipelineContainer --> HashService
 PipelineContainer --> TransformerABC
 PipelineContainer --> PipelineHookABC
 PipelineContainer --> ErrorPolicyABC
+PipelineContainer --> ProviderRegistryABC
+PipelineContainer --> MetricsPipelineHookImpl
+PipelineContainer --> LoggingPipelineHookImpl
 PipelineBase --> ValidationService
 PipelineBase --> UnifiedOutputWriter
 PipelineBase --> ExtractionServiceABC
@@ -56,4 +64,6 @@ PipelineBase --> HashService
 PipelineBase --> TransformerABC
 PipelineBase --> PipelineHookABC
 PipelineBase --> ErrorPolicyABC
+ProviderRegistryLoader ..> ProviderRegistryABC : load_provider_registry()
+ProviderRegistryABC --> ProviderDefinition
 

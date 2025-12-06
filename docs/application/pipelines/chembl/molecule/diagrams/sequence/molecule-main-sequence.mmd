@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    participant CLI as CLI
+    participant Pipe as MoleculePipeline
+    participant Extr as ChemblExtractorImpl
+    participant Source as IdListRecordSourceImpl
+    participant Trans as ChemblTransformerImpl
+    participant Val as ValidationService
+    participant Writer as UnifiedOutputWriter
+
+    CLI->>Pipe: run(output_path, dry_run)
+    Pipe->>Extr: iter_chunks()
+    Extr->>Source: read id list / fetch via API
+    Source-->>Extr: raw chunk
+    Extr-->>Pipe: raw chunk
+    Pipe->>Trans: apply transform + normalize
+    Trans-->>Pipe: transformed_df
+    Pipe->>Val: validate(transformed_df)
+    Val-->>Pipe: validated_df
+    alt Not dry run
+        Pipe->>Writer: write_result(validated_df, output_path)
+    else Dry run
+        Pipe->>Writer: skip write, prepare meta
+    end
+    Pipe-->>CLI: RunResult (stats, meta)
+

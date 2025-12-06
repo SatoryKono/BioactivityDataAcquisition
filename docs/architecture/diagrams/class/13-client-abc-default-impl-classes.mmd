@@ -12,6 +12,8 @@ class RateLimiterABC
 class RetryPolicyABC
 class CacheABC
 class SecretProviderABC
+class CircuitBreakerABC
+class ExtractionServiceABC
 
 class BaseClientFactories {
   +default_rate_limiter()
@@ -30,6 +32,7 @@ class ExponentialBackoffRetryImpl
 class MemoryCacheImpl
 class EnvSecretProvider
 class CircuitBreakerImpl
+class ChemblExtractionServiceImpl
 
 ChemblHttpClientImpl ..|> SourceClientABC
 ChemblRequestBuilder ..|> RequestBuilderABC
@@ -39,17 +42,44 @@ TokenBucketRateLimiterImpl ..|> RateLimiterABC
 ExponentialBackoffRetryImpl ..|> RetryPolicyABC
 MemoryCacheImpl ..|> CacheABC
 EnvSecretProvider ..|> SecretProviderABC
+ChemblExtractionServiceImpl ..|> ExtractionServiceABC
+CircuitBreakerImpl ..|> CircuitBreakerABC
 UnifiedAPIClient --> RateLimiterABC
 UnifiedAPIClient --> RetryPolicyABC
 UnifiedAPIClient --> CacheABC
-UnifiedAPIClient --> CircuitBreakerImpl
+UnifiedAPIClient --> CircuitBreakerABC
 UnifiedAPIClient --> SecretProviderABC
 ChemblHttpClientImpl --> UnifiedAPIClient
 ChemblHttpClientImpl --> ChemblRequestBuilder
 ChemblHttpClientImpl --> ChemblResponseParser
 ChemblHttpClientImpl --> OffsetPaginator
+ChemblExtractionServiceImpl --> ChemblHttpClientImpl
 BaseClientFactories --> TokenBucketRateLimiterImpl
 BaseClientFactories --> ExponentialBackoffRetryImpl
 BaseClientFactories --> MemoryCacheImpl
 BaseClientFactories --> EnvSecretProvider
+BaseClientFactories --> CircuitBreakerImpl
+
+class ChemblHttpClientImpl domainPrimary
+class ChemblExtractionServiceImpl domainPrimary
+class ChemblRequestBuilder domainSecondary
+class ChemblResponseParser domainSecondary
+class OffsetPaginator domainSecondary
+class UnifiedAPIClient domainSecondary
+class TokenBucketRateLimiterImpl domainSecondary
+class ExponentialBackoffRetryImpl domainSecondary
+class MemoryCacheImpl domainSecondary
+class EnvSecretProvider domainSecondary
+class CircuitBreakerImpl domainSecondary
+class BaseClientFactories domainSecondary
+class SourceClientABC interface
+class RequestBuilderABC interface
+class ResponseParserABC interface
+class PaginatorABC interface
+class RateLimiterABC interface
+class RetryPolicyABC interface
+class CacheABC interface
+class SecretProviderABC interface
+class CircuitBreakerABC interface
+class ExtractionServiceABC interface
 

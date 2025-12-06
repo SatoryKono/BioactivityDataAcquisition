@@ -28,6 +28,9 @@ class ProviderRegistryError
 class ProviderNotRegisteredError
 class ProviderAlreadyRegisteredError
 class ChemblProviderDefinition
+class ProviderRegistryLoader
+class ProviderRegistryConfig
+class ProviderRegistryEntry
 
 ProviderDefinition --> ProviderId
 ProviderDefinition --> BaseProviderConfig
@@ -36,4 +39,8 @@ ProviderRegistry --> ProviderDefinition
 ProviderRegistryError <|-- ProviderNotRegisteredError
 ProviderRegistryError <|-- ProviderAlreadyRegisteredError
 ChemblProviderDefinition ..|> ProviderDefinition
+ProviderRegistryLoader --> ProviderRegistryConfig
+ProviderRegistryLoader --> ProviderRegistry : load()
+ProviderRegistryConfig --> ProviderRegistryEntry
+ProviderRegistryEntry --> ProviderDefinition : factory()
 

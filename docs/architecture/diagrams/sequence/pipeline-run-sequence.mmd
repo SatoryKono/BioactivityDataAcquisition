@@ -17,11 +17,13 @@ id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
 sequenceDiagram
     autonumber
     participant User as CLI/User
-    participant Pipe as Pipeline
-    participant Hooks as PipelineHooks
-    participant Extr as Extractor (Source)
-    participant Trans as Transformer
-    participant Val as Validator
+    participant Pipe as Pipeline (ChemblEntityPipeline)
+    participant Hooks as Hooks (Logging + Metrics)
+    participant Stage as StageRunner/ErrorPolicy
+    participant Extr as Extractor (ChemblExtractorImpl)
+    participant Source as RecordSource (API/CSV/ID list)
+    participant Trans as Transformer (ChemblTransformerImpl)
+    participant Val as Validator (ValidationService)
     participant Writer as UnifiedWriter
     participant Meta as MetadataWriter
 
@@ -29,44 +31,52 @@ sequenceDiagram
     activate Pipe
     
     Pipe->>Pipe: Initialize RunContext
-    Pipe->>Hooks: on_stage_start(\"extract\")
+    Pipe->>Hooks: on_stage_start("extract")
     
     loop For each Chunk
-        Pipe->>Extr: extract() (iter_chunks)
+        Pipe->>Stage: process_chunk(extract/transform/validate)
+        activate Stage
+        Stage->>Extr: extract() (iter_chunks)
         activate Extr
-        Extr-->>Pipe: raw_chunk (DataFrame)
+        Extr->>Source: next_chunk()
+        activate Source
+        Source-->>Extr: raw_chunk (DataFrame)
+        deactivate Source
+        Extr-->>Stage: raw_chunk
         deactivate Extr
         
-        Pipe->>Hooks: on_stage_start(\"transform\")
-        Pipe->>Trans: transform(raw_chunk)
+        Stage->>Hooks: on_stage_start("transform")
+        Stage->>Trans: transform(raw_chunk)
         activate Trans
-        Trans-->>Pipe: transformed_df
+        Trans-->>Stage: transformed_df
         deactivate Trans
         
-        Pipe->>Hooks: on_stage_start(\"validate\")
-        Pipe->>Val: validate(transformed_df)
+        Stage->>Hooks: on_stage_start("validate")
+        Stage->>Val: validate(transformed_df)
         activate Val
-        Val-->>Pipe: validated_df
+        Val-->>Stage: validated_df
         deactivate Val
         
-        Pipe->>Pipe: Collect validated chunk
+        Stage-->>Pipe: Collect validated chunk
+        deactivate Stage
     end
 
-    Pipe->>Hooks: on_stage_end(\"extract\")
-    Pipe->>Hooks: on_stage_end(\"transform\")
-    Pipe->>Hooks: on_stage_end(\"validate\")
+    Pipe->>Hooks: on_stage_end("extract")
+    Pipe->>Hooks: on_stage_end("transform")
+    Pipe->>Hooks: on_stage_end("validate")
 
     alt Not Dry Run
-        Pipe->>Hooks: on_stage_start(\"write\")
+        Pipe->>Hooks: on_stage_start("write")
         Pipe->>Writer: write_result(all_data, output_path)
         activate Writer
         Writer->>Writer: Stable Sort & Reorder
         Writer->>Writer: Atomic Write (.tmp -> .csv)
         Writer->>Writer: Compute Checksum
         Writer->>Meta: write_meta(meta.yaml)
+        Writer->>Hooks: emit metrics/logs
         Writer-->>Pipe: WriteResult
         deactivate Writer
-        Pipe->>Hooks: on_stage_end(\"write\")
+        Pipe->>Hooks: on_stage_end("write")
     else Dry Run
         Pipe->>Pipe: Skip Write
     end
