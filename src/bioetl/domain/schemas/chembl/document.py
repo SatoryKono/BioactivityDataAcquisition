@@ -25,6 +25,11 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "title",
     "volume",
     "year",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
 ]
 
 
@@ -111,3 +116,4 @@ class DocumentSchema(pa.DataFrameModel):
 
         strict = True
         coerce = True
+        ordered = True

@@ -18,6 +18,11 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "cross_references",
     "pubchem_cid",
     "helm_notation",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
 ]
 
 
@@ -87,3 +92,4 @@ class TestitemSchema(pa.DataFrameModel):
 
         strict = True
         coerce = True
+        ordered = True
