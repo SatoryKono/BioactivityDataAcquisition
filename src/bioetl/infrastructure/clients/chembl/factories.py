@@ -5,6 +5,7 @@ Factories for ChEMBL clients.
 from typing import Any
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
@@ -22,7 +23,6 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
 
 
 def default_chembl_client(

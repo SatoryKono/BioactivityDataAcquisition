@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
@@ -19,7 +20,6 @@ from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 class ChemblProviderComponents(
