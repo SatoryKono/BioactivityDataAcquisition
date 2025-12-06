@@ -1,4 +1,4 @@
-name: Lint and Type Check
+name: Lint, Type Check, and Tests
 
 on:
   push:
@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
 
       - name: Install dependencies
         run: |
@@ -42,4 +44,183 @@ jobs:
 
       - name: Import Linter contract
         run: lint-imports --config .importlinter
+
+  unit-tests:
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+
+      - name: Restore pytest cache
+        uses: actions/cache@v4
+        with:
+          path: .pytest_cache
+          key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
+
+      - name: Unit tests with coverage
+        run: |
+          pytest tests --ignore=tests/integration --ignore=tests/architecture \
+            --cov=src --cov-report=xml:coverage-unit.xml --cov-report=term-missing
+
+      - name: Enforce coverage thresholds
+        run: |
+          python - <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          tree = ET.parse("coverage-unit.xml")
+          root = tree.getroot()
+
+          def overall_percent() -> float:
+            try:
+              covered = int(root.attrib["lines-covered"])
+              valid = int(root.attrib["lines-valid"])
+              return 100 * covered / valid if valid else 100.0
+            except KeyError:
+              return float(root.attrib.get("line-rate", 0)) * 100
+
+          def percent_for_prefix(prefixes: tuple[str, ...]) -> float:
+            covered = total = 0
+            for cls in root.iterfind(".//class"):
+              filename = cls.attrib.get("filename", "")
+              if not filename or not filename.startswith(prefixes):
+                continue
+              for line in cls.iterfind(".//line"):
+                total += 1
+                if int(line.attrib.get("hits", "0")) > 0:
+                  covered += 1
+            if total == 0:
+              return 100.0
+            return 100 * covered / total
+
+          overall = overall_percent()
+          domain_app = percent_for_prefix(("bioetl/application", "bioetl/domain"))
+
+          print(f"Overall coverage: {overall:.2f}%")
+          print(f"Domain/Application coverage: {domain_app:.2f}%")
+
+          errors = []
+          if overall < 80:
+            errors.append(f"Overall coverage below 80%: {overall:.2f}%")
+          if domain_app < 90:
+            errors.append(
+              f"Domain/Application coverage below 90%: {domain_app:.2f}%"
+            )
+
+          if errors:
+            for error in errors:
+              print(error)
+            sys.exit(1)
+          PY
+
+  integration-tests:
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+
+      - name: Restore pytest cache
+        uses: actions/cache@v4
+        with:
+          path: .pytest_cache
+          key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
+
+      - name: Integration tests with coverage
+        run: |
+          pytest tests/integration --cov=src --cov-report=xml:coverage-integration.xml --cov-report=term-missing
+
+      - name: Enforce coverage thresholds
+        run: |
+          python - <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          tree = ET.parse("coverage-integration.xml")
+          root = tree.getroot()
+
+          def overall_percent() -> float:
+            try:
+              covered = int(root.attrib["lines-covered"])
+              valid = int(root.attrib["lines-valid"])
+              return 100 * covered / valid if valid else 100.0
+            except KeyError:
+              return float(root.attrib.get("line-rate", 0)) * 100
+
+          def percent_for_prefix(prefixes: tuple[str, ...]) -> float:
+            covered = total = 0
+            for cls in root.iterfind(".//class"):
+              filename = cls.attrib.get("filename", "")
+              if not filename or not filename.startswith(prefixes):
+                continue
+              for line in cls.iterfind(".//line"):
+                total += 1
+                if int(line.attrib.get("hits", "0")) > 0:
+                  covered += 1
+            if total == 0:
+              return 100.0
+            return 100 * covered / total
+
+          overall = overall_percent()
+          domain_app = percent_for_prefix(("bioetl/application", "bioetl/domain"))
+
+          print(f"Overall coverage: {overall:.2f}%")
+          print(f"Domain/Application coverage: {domain_app:.2f}%")
+
+          errors = []
+          if overall < 80:
+            errors.append(f"Overall coverage below 80%: {overall:.2f}%")
+          if domain_app < 90:
+            errors.append(
+              f"Domain/Application coverage below 90%: {domain_app:.2f}%"
+            )
+
+          if errors:
+            for error in errors:
+              print(error)
+            sys.exit(1)
+          PY
+
+  checks-complete:
+    needs:
+      - lint
+      - unit-tests
+      - integration-tests
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Final status
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.unit-tests.result }}" != "success" || "${{ needs['integration-tests'].result }}" != "success" ]]; then
+            echo "One or more checks failed"
+            exit 1
+          fi
+          echo "All checks completed successfully."
 
