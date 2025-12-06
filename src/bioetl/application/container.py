@@ -9,7 +9,6 @@ from bioetl.application.pipelines.hooks_impl import (
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     OutputWriterABC,
@@ -18,6 +17,7 @@ from bioetl.domain.clients.base.output.contracts import (
 )
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
@@ -32,7 +32,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.infrastructure.logging.factories import default_logger
+from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.infrastructure.output.factories import (
     default_metadata_writer,
     default_output_writer,
@@ -51,7 +51,7 @@ class PipelineContainer(PipelineContainerABC):
         self,
         config: PipelineConfig,
         *,
-        logger: LoggerAdapterABC | None = None,
+        logger: LoggingPort | None = None,
         writer: WriterABC | None = None,
         metadata_writer: MetadataWriterABC | None = None,
         quality_reporter: QualityReportABC | None = None,
@@ -70,7 +70,7 @@ class PipelineContainer(PipelineContainerABC):
         self._validator_factory: ValidatorFactoryABC = (
             validator_factory or self._default_validator_factory()
         )
-        self._logger: LoggerAdapterABC = logger or default_logger()
+        self._logger: LoggingPort = logger or default_logging_port()
         self._writer: WriterABC = writer or default_writer()
         self._metadata_writer: MetadataWriterABC = (
             metadata_writer or default_metadata_writer()
@@ -101,7 +101,7 @@ class PipelineContainer(PipelineContainerABC):
     def config(self) -> PipelineConfig:
         return self._config
 
-    def get_logger(self) -> LoggerAdapterABC:
+    def get_logger(self) -> LoggingPort:
         """Get the configured logger."""
         return self._logger
 
@@ -138,7 +138,7 @@ class PipelineContainer(PipelineContainerABC):
         extraction_service: Any,
         *,
         limit: int | None = None,
-        logger: LoggerAdapterABC | None = None,
+        logger: LoggingPort | None = None,
     ) -> RecordSource:
         """Create record source based on pipeline input configuration."""
         mode = self._config.input_mode
@@ -284,7 +284,7 @@ class PipelineContainer(PipelineContainerABC):
 def build_pipeline_dependencies(
     config: PipelineConfig,
     *,
-    logger: LoggerAdapterABC | None = None,
+    logger: LoggingPort | None = None,
     writer: WriterABC | None = None,
     metadata_writer: MetadataWriterABC | None = None,
     quality_reporter: QualityReportABC | None = None,
