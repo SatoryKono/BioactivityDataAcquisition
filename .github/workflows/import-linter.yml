@@ -80,10 +80,7 @@ jobs:
         run: pytest tests/architecture/test_layer_dependencies.py
 
       - name: Import Linter contract
-        continue-on-error: true
-        run: |
-          echo "Import Linter currently allowed to fail; set continue-on-error to false once violations are fixed."
-          lint-imports --config .importlinter
+        run: lint-imports --config .importlinter
 
   unit-tests:
     needs: lint
