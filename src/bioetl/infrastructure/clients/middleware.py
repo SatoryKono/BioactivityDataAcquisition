@@ -80,7 +80,13 @@ class HttpClientMiddleware:
         self._failure_metric_callback = failure_metric_callback
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        return self._execute_with_retries(method, url, kwargs, attempt=1, total_retry_delay=0.0)
+        return self._execute_with_retries(
+            method,
+            url,
+            kwargs,
+            attempt=1,
+            total_retry_delay=0.0,
+        )
 
     def _execute_with_retries(
         self,

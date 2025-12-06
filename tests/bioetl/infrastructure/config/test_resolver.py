@@ -19,7 +19,10 @@ def test_resolver_simple(tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text("entity_name: test\nprovider: chembl", encoding="utf-8")
 
-    resolver = ConfigResolver(loader=load_pipeline_config_from_path, profiles_dir=str(tmp_path))
+    resolver = ConfigResolver(
+        loader=load_pipeline_config_from_path,
+        profiles_dir=str(tmp_path),
+    )
     config = resolver.resolve(str(config_file))
 
     assert config.entity_name == "test"
@@ -133,7 +136,10 @@ def test_circular_dependency(tmp_path):
 
 def test_profile_not_found(tmp_path):
     """Test error when profile missing."""
-    resolver = ConfigResolver(loader=load_pipeline_config_from_path, profiles_dir=str(tmp_path))
+    resolver = ConfigResolver(
+        loader=load_pipeline_config_from_path,
+        profiles_dir=str(tmp_path),
+    )
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: missing_profile", encoding="utf-8")
 

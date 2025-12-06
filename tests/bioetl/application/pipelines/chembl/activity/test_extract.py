@@ -131,7 +131,8 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
     pipeline._config.input_path = str(csv_path)
 
     # Mock parse_response to return records only once
-    # Since all 3 ids are in one batch (batch_size=25 > 3), parse_response is called once
+    # Since all 3 ids are in one batch (batch_size=25 > 3),
+    # parse_response is called once
     mock_extraction_service.parse_response.return_value = [
         {"activity_id": 100},
         {"activity_id": 101},
