@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -10,7 +9,6 @@ import pytest
 import yaml
 
 from bioetl.config.pipeline_config_schema import DeterminismConfig, QcConfig
-from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
@@ -19,7 +17,7 @@ from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
 @pytest.mark.integration
-def test_unified_writer_writes_data_and_meta(tmp_path):
+def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
     df = pd.DataFrame({"value": [3, 1, 2], "id": [2, 3, 1]})
     config = DeterminismConfig(stable_sort=True)
     qc_config = QcConfig(enable_quality_report=True, enable_correlation_report=True)
@@ -28,11 +26,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path):
     quality_reporter = QualityReportImpl()
     atomic_op, calls = _with_tracking_atomic()
 
-    run_context = RunContext(
-        run_id="test-run",
-        entity_name="test_entity",
-        provider="chembl",
-        started_at=datetime.now(timezone.utc),
+    run_context = run_context_factory(
         config={"hashing": {"business_key_fields": ["id"]}},
     )
 
