@@ -28,7 +28,7 @@ jobs:
           python -m pip install .[dev]
 
       - name: Ruff (lint)
-        run: ruff check src tests
+        run: ruff check src testsruff check src tests
 
       - name: Black (format check)
         run: black --check src tests
