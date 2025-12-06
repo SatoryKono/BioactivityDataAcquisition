@@ -134,7 +134,9 @@ class PipelineOrchestrator:
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None,
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
-        loader = provider_loader_factory() if provider_loader_factory else None
+        if provider_loader_factory is None:
+            raise RuntimeError("Provider loader factory is required for background runs")
+        loader = provider_loader_factory()
         registry = (
             loader.load_registry(registry=InMemoryProviderRegistry())
             if loader
