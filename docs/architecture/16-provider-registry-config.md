@@ -39,6 +39,12 @@ A reference sample is available at `configs/providers.example.yaml`.
 - Successful calls return a list of registered `ProviderDefinition` objects in config order.
 - Dependencies (`registry`, `logger`, `config_path`) are injectable for tests and custom runs.
 
+## Runtime wiring (no globals)
+
+- Глобальный синглтон реестра удалён: `ProviderRegistryABC` должен передаваться явно в `PipelineOrchestrator`/контейнер.
+- Типовой путь: `registry = load_provider_registry(registry=InMemoryProviderRegistry())`, затем передать `provider_registry=registry` в оркестратор.
+- В тестах и интеграциях реестр также создаётся/очищается через экземпляр `MutableProviderRegistryABC`; скрытые глобальные состояния не используются.
+
 ## Error handling
 
 - `ProviderRegistryConfigNotFoundError` — raised when `config_path` is absent.
