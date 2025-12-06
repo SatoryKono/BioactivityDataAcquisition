@@ -16,4 +16,3 @@ class ProfileConfig(BaseModel):
 
 
 __all__ = ["ProfileConfig"]
-
