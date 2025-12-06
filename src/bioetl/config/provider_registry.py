@@ -90,7 +90,23 @@ def _load_provider_registry(registry_path: Path) -> set[str]:
     elif not isinstance(providers, list):
         raise ProviderRegistryFormatError(registry_path, "'providers' must be a list")
     else:
-        registry = {str(provider) for provider in providers}
+        # Support both old format (list of strings) and new format (list of dicts with 'id')
+        registry: set[str] = set()
+        for provider in providers:
+            if isinstance(provider, str):
+                registry.add(provider)
+            elif isinstance(provider, dict):
+                provider_id = provider.get("id")
+                if provider_id is not None:
+                    registry.add(str(provider_id))
+                else:
+                    raise ProviderRegistryFormatError(
+                        registry_path, "Provider entry must have 'id' field"
+                    )
+            else:
+                raise ProviderRegistryFormatError(
+                    registry_path, f"Provider entry must be string or dict, got {type(provider).__name__}"
+                )
 
     _REGISTRY_CACHE[registry_path] = registry
     return registry

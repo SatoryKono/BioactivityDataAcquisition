@@ -48,7 +48,8 @@ entity_name: override""",
     )
 
     resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
+        loader=load_pipeline_config_from_path,
+        profiles_dir=str(profiles_dir),
     )
     config = resolver.resolve(str(config_file))
 
@@ -85,7 +86,8 @@ def test_resolver_cli_override(tmp_path):
     )
 
     resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
+        loader=load_pipeline_config_from_path,
+        profiles_dir=str(profiles_dir),
     )
     config = resolver.resolve(str(config_file), profile="prod")
 

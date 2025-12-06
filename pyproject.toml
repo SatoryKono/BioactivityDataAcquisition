@@ -98,3 +98,6 @@ module = [
 ]
 ignore_errors = true
 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
