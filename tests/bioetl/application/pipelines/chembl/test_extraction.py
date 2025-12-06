@@ -46,11 +46,11 @@ def test_extract_all_single_page(service, mock_client):
     mock_paginator.has_more.return_value = False
 
     # Act
-    df = service.extract_all("activity")
+    records = service.extract_all("activity")
 
     # Assert
-    assert len(df) == 2
-    assert df.iloc[0]["id"] == 1
+    assert len(records) == 2
+    assert records[0]["id"] == 1
     mock_client.request_activity.assert_called_with(offset=0, limit=10)
 
 
@@ -72,10 +72,10 @@ def test_extract_all_pagination(service, mock_client):
     mock_paginator.has_more.side_effect = [True, False]
 
     # Act
-    df = service.extract_all("activity")
+    records = service.extract_all("activity")
 
     # Assert
-    assert len(df) == 3
+    assert len(records) == 3
     assert mock_client.request_activity.call_count == 2
     # Check call args
     calls = mock_client.request_activity.call_args_list
@@ -101,26 +101,29 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
     ]
     mock_paginator.has_more.return_value = False
 
-    df = service.extract_all("activity")
+    records = service.extract_all("activity")
 
-    assert df.iloc[0]["activity_properties"] == "k1:v1|k2:v2"
-    assert df.iloc[0]["ligand_efficiency"] == "le:1.1"
+    assert records[0]["activity_properties"] == "k1:v1|k2:v2"
+    assert records[0]["ligand_efficiency"] == "le:1.1"
 
 
 def test_extract_all_limit(service, mock_client):
     """Test extraction with limit."""
-    # Mock parser
+    # Mock parser and paginator
     mock_parser = MagicMock()
+    mock_paginator = MagicMock()
     service.parser = mock_parser
+    service.paginator = mock_paginator
 
     # Returns 10 items per call
     mock_parser.parse.return_value = [{"id": i} for i in range(10)]
+    mock_paginator.has_more.return_value = False
 
     # Act - request limit 5
-    df = service.extract_all("activity", limit=5)
+    records = service.extract_all("activity", limit=5)
 
     # Assert
-    assert len(df) == 5
+    assert len(records) == 5
     # Should call client with limit=5
     mock_client.request_activity.assert_called_with(offset=0, limit=5)
 

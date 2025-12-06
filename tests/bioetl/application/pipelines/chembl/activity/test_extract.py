@@ -2,6 +2,7 @@
 Tests for ChemblPipelineBase generic extract (via ChemblActivityPipeline).
 """
 
+from typing import cast
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -10,10 +11,12 @@ import pytest
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputOptions,
 )
+from bioetl.infrastructure.files.csv_record_source import CsvRecordSourceImpl
 
 
 @pytest.fixture
@@ -111,6 +114,15 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
 
     pipeline._config.input_mode = "csv"
     pipeline._config.input_path = str(csv_path)
+
+    # Create CsvRecordSourceImpl and replace it in extractor
+    csv_record_source = CsvRecordSourceImpl(
+        input_path=csv_path,
+        csv_options=pipeline._config.csv_options,
+        limit=None,
+        logger=cast(LoggerAdapterABC, MagicMock()),
+    )
+    pipeline._extractor.record_source = csv_record_source
 
     df = pipeline.extract()
 
