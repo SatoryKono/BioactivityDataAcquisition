@@ -7,6 +7,7 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
+from bioetl.domain.clients.ports import ChemblExtractionPort
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
