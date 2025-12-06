@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Callable, Iterable, Mapping, MutableMapping, cast
+from typing import Any, Callable, Iterable, Mapping, MutableMapping
 
 from bioetl.domain.transform.normalizers.base import is_missing
 from bioetl.domain.transform.normalizers.identifiers import (
@@ -62,15 +62,16 @@ def _coerce_record_mapping(value: Any) -> Mapping[str, Any]:
         if value.startswith("{") and value.endswith("}"):
             try:
                 parsed = json.loads(value)
-                if not isinstance(parsed, Mapping):
-                    raise ValueError(
-                        f"Ожидался словарь, получено {type(parsed).__name__}"
-                    )
-                return cast(Mapping[str, Any], parsed)
             except json.JSONDecodeError as exc:
                 raise ValueError(
                     f"Некорректный JSON для записи: {exc}"
                 ) from exc
+
+            if not isinstance(parsed, Mapping):
+                raise ValueError(
+                    f"Ожидался словарь, получено {type(parsed).__name__}"
+                )
+            return dict(parsed)
 
     if not isinstance(value, Mapping):
         raise ValueError(
@@ -139,11 +140,12 @@ def _coerce_to_iterable(value: Any) -> Iterable[Any]:
         if stripped.startswith("[") and stripped.endswith("]"):
             try:
                 parsed = json.loads(stripped)
-                if isinstance(parsed, Iterable):
-                    return cast(Iterable[Any], parsed)
-                return [parsed]
             except json.JSONDecodeError:
                 return [stripped]
+
+            if isinstance(parsed, (list, tuple)):
+                return parsed
+            return [parsed]
         if ";" in stripped:
             return [x.strip() for x in stripped.split(";")]
         return [stripped]
