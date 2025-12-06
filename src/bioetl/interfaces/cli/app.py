@@ -149,7 +149,7 @@ def run(
             csv_header=csv_header,
         )
         config = PipelineConfig(**config_payload)
-        _start_metrics_exporter(config.metrics)
+        _start_metrics_exporter(config.metrics, dry_run=dry_run)
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
@@ -206,12 +206,29 @@ def _resolve_config_location(
     return None
 
 
-def _start_metrics_exporter(metrics_config: MetricsConfig) -> None:
-    started = start_metrics_server_once(
-        enabled=metrics_config.enabled,
-        port=metrics_config.port,
-        address=metrics_config.address,
-    )
+def _start_metrics_exporter(
+    metrics_config: MetricsConfig, *, dry_run: bool = False
+) -> None:
+    """
+    Запускает экспортер метрик, пропуская запуск для dry-run и не валит CLI
+    при ошибке биндинга сокета.
+    """
+
+    if dry_run or not metrics_config.enabled:
+        return
+
+    try:
+        started = start_metrics_server_once(
+            enabled=True,
+            port=metrics_config.port,
+            address=metrics_config.address,
+        )
+    except Exception as exc:  # pragma: no cover - защитный контур
+        console.print(
+            f"[yellow]Prometheus metrics exporter not started: {exc}[/yellow]"
+        )
+        return
+
     if started:
         console.print(
             f"[green]Prometheus metrics exporter started on"
