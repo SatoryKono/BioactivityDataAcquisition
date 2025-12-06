@@ -4,7 +4,8 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 from typing import Callable, cast
 
-from bioetl.application.container import PipelineContainer, build_pipeline_dependencies
+from bioetl.application.container import build_pipeline_dependencies
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.configs import PipelineConfig
@@ -25,7 +26,7 @@ class PipelineOrchestrator:
         *,
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
-        container_factory: Callable[..., PipelineContainer] | None = None,
+        container_factory: Callable[..., PipelineContainerABC] | None = None,
     ) -> None:
         self._pipeline_name = pipeline_name
         self._config = config
@@ -36,7 +37,7 @@ class PipelineOrchestrator:
     def build_pipeline(self, *, limit: int | None = None) -> PipelineBase:
         """Создает экземпляр пайплайна с зависимостями."""
         pipeline_cls = get_pipeline_class(self._pipeline_name)
-        container = self._container_factory(
+        container: PipelineContainerABC = self._container_factory(
             self._config,
             provider_registry=self._provider_registry,
             provider_registry_provider=self._provider_registry_provider,
