@@ -234,4 +234,3 @@ ProviderConfigUnion = Annotated[
     ChemblSourceConfig | DummyProviderConfig,
     Field(discriminator="provider"),
 ]
-

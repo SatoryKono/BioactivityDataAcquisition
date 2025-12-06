@@ -31,9 +31,7 @@ def build_runtime_config(
         return load_pipeline_config_from_path(
             config_path,
             profile=profile,
-            profiles_root=Path(configs_root) / "profiles"
-            if configs_root
-            else None,
+            profiles_root=Path(configs_root) / "profiles" if configs_root else None,
             cli_overrides=cli_overrides,
             env_overrides=env_overrides,
         )
@@ -51,4 +49,3 @@ def build_runtime_config(
 
 
 __all__ = ["build_runtime_config"]
-

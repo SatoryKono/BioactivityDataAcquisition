@@ -75,6 +75,7 @@ def unified_writer(
         atomic_op=mock_atomic_op,
     )
 
+
 def test_write_result_success(
     unified_writer,
     mock_writer_fixture,
