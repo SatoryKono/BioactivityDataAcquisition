@@ -28,7 +28,7 @@ class Application group;
 
 subgraph Domain["Domain Dependencies"]
     Validation["ValidationService\nbioetl.domain.validation.service"]:::componentSecondary
-    Normalization["NormalizationServiceImpl\nbioetl.domain.transform.impl.normalize"]:::componentSecondary
+    Normalization["NormalizationServiceImpl\nbioetl.infrastructure.transform.impl.normalize"]:::componentSecondary
     Hashing["HashService\nbioetl.domain.transform.hash_service"]:::componentSecondary
     Transformers["TransformerChain\nHash/Index/Fulldate/DbVersion"]:::componentSecondary
     Contracts["PipelineSchemaContract\nbioetl.domain.schemas.pipeline_contracts"]:::componentSecondary

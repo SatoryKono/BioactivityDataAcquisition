@@ -35,8 +35,8 @@ subgraph Domain["Domain Layer"]
   Validation["ValidationService + PanderaValidator\ndomain.validation.*"]:::componentPrimary
   Schemas["SchemaRegistry + PipelineContracts\ndomain.schemas.*"]:::componentSecondary
   Transform["HashService / TransformerChain\ndomain.transform.*"]:::componentPrimary
-  Normalization["NormalizationServiceImpl\n(domain.transform.impl.normalize)"]:::componentSecondary
-  Hashing["HasherImpl\n(domain.transform.impl.hasher)"]:::componentSecondary
+  Normalization["NormalizationServiceImpl\n(infrastructure.transform.impl.normalize)"]:::componentSecondary
+  Hashing["HasherImpl\n(infrastructure.transform.impl.hasher)"]:::componentSecondary
 end
 class Domain group;
 
