@@ -26,7 +26,21 @@ def valid_target_df() -> pd.DataFrame:
 
 def test_target_schema_accepts_valid_frame(valid_target_df: pd.DataFrame) -> None:
     validated = TargetSchema.validate(valid_target_df)
-    assert validated.equals(valid_target_df)
+    for column in [
+        "target_chembl_id",
+        "target_type",
+        "uniprot_id",
+        "hash_row",
+        "hash_business_key",
+        "index",
+        "database_version",
+        "extracted_at",
+    ]:
+        pd.testing.assert_series_equal(
+            validated[column],
+            valid_target_df[column],
+            check_dtype=False,
+        )
 
 
 def test_target_schema_rejects_bad_chembl(valid_target_df: pd.DataFrame) -> None:

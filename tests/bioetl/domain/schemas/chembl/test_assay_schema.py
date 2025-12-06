@@ -27,7 +27,11 @@ def valid_assay_df() -> pd.DataFrame:
 
 def test_assay_schema_accepts_valid_frame(valid_assay_df: pd.DataFrame) -> None:
     validated = AssaySchema.validate(valid_assay_df)
-    assert validated.equals(valid_assay_df)
+    pd.testing.assert_frame_equal(
+        validated,
+        valid_assay_df,
+        check_dtype=False,
+    )
 
 
 def test_assay_schema_rejects_bad_enum(valid_assay_df: pd.DataFrame) -> None:

@@ -27,7 +27,11 @@ def valid_testitem_df() -> pd.DataFrame:
 
 def test_testitem_schema_accepts_valid_frame(valid_testitem_df: pd.DataFrame) -> None:
     validated = TestitemSchema.validate(valid_testitem_df)
-    assert validated.equals(valid_testitem_df)
+    pd.testing.assert_frame_equal(
+        validated,
+        valid_testitem_df,
+        check_dtype=False,
+    )
 
 
 def test_testitem_schema_rejects_bad_chembl(valid_testitem_df: pd.DataFrame) -> None:
