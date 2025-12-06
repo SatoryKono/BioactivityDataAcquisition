@@ -4,8 +4,9 @@ Pytest configuration and shared fixtures.
 
 import socket
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
@@ -19,6 +20,7 @@ from bioetl.config.pipeline_config_schema import (
     StorageConfig,
 )
 from bioetl.domain.validation.service import ValidationService
+from bioetl.domain.models import RunContext
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
@@ -133,6 +135,33 @@ def mock_output_writer():
 def sample_df():
     """Create a sample DataFrame."""
     return pd.DataFrame({"id": [1, 2, 3], "value": ["a", "b", "c"]})
+
+
+@pytest.fixture
+def run_context_factory():
+    """Factory fixture to build RunContext with optional overrides."""
+
+    def _factory(
+        run_id: str = "test-run",
+        entity_name: str = "test_entity",
+        provider: str = "chembl",
+        started_at: datetime | None = None,
+        metadata: dict[str, Any] | None = None,
+        config: dict[str, Any] | None = None,
+        dry_run: bool = False,
+    ) -> RunContext:
+        return RunContext(
+            run_id=run_id,
+            entity_name=entity_name,
+            provider=provider,
+            started_at=started_at
+            or datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            metadata=metadata or {},
+            config=config or {},
+            dry_run=dry_run,
+        )
+
+    return _factory
 
 
 @pytest.fixture

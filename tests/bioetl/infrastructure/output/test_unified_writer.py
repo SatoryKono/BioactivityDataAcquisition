@@ -3,13 +3,11 @@ Tests for the UnifiedOutputWriter.
 """
 
 # pylint: disable=redefined-outer-name, protected-access
-from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 
-from bioetl.domain.models import RunContext
 from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
@@ -77,28 +75,17 @@ def unified_writer(
         atomic_op=mock_atomic_op,
     )
 
-
-@pytest.fixture
-def run_context():
-    """Fixture for run context."""
-    return RunContext(
-        run_id="test-run",
-        entity_name="test_entity",
-        provider="chembl",
-        started_at=datetime.now(timezone.utc),
-    )
-
-
 def test_write_result_success(
     unified_writer,
     mock_writer_fixture,
     mock_metadata_writer_fixture,
     mock_quality_reporter,
-    run_context,
+    run_context_factory,
     tmp_path,
 ):
     """Test successful write result handling."""
     # Arrange
+    run_context = run_context_factory()
     df = pd.DataFrame({"a": [1, 2]})
     output_dir = tmp_path / "out"
 
@@ -142,11 +129,12 @@ def test_unified_writer_delegates_atomicity(
     mock_writer_fixture,
     mock_atomic_op,
     mock_quality_reporter,
-    run_context,
+    run_context_factory,
     tmp_path,
 ):
     """Test that UnifiedOutputWriter delegates to AtomicFileOperation."""
     # Arrange
+    run_context = run_context_factory()
     df = pd.DataFrame({"a": [1]})
     output_dir = tmp_path / "out"
 
@@ -175,11 +163,12 @@ def test_unified_writer_column_order_and_fill(
     mock_writer_fixture,
     mock_quality_reporter,
     mock_metadata_writer_fixture,
-    run_context,
+    run_context_factory,
     tmp_path,
 ):
     """Unified writer should respect column order and fill missing columns."""
 
+    run_context = run_context_factory()
     df = pd.DataFrame({"b": [1]})
     output_dir = tmp_path / "out"
     captured_df: pd.DataFrame | None = None
@@ -217,9 +206,10 @@ def test_unified_writer_column_order_and_fill(
     mock_metadata_writer_fixture.write_meta.assert_called_once()
 
 
-def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):
+def test_stable_sort_false(unified_writer, mock_config_fixture, run_context_factory):
     """Test behavior when stable_sort is False."""
     mock_config_fixture.stable_sort = False
+    run_context = run_context_factory()
     df = pd.DataFrame({"b": [2], "a": [1]})
 
     result_df = unified_writer._stable_sort(df, run_context)
@@ -229,12 +219,15 @@ def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):
     assert result_df.iloc[0]["b"] == 2
 
 
-def test_stable_sort_columns_and_rows(unified_writer, mock_config_fixture, run_context):
+def test_stable_sort_columns_and_rows(
+    unified_writer, mock_config_fixture, run_context_factory
+):
     """Test stable sort of columns and rows."""
     mock_config_fixture.stable_sort = True
 
-    # Setup config with business keys
-    run_context.config = {"hashing": {"business_key_fields": ["id"]}}
+    run_context = run_context_factory(
+        config={"hashing": {"business_key_fields": ["id"]}},
+    )
 
     df = pd.DataFrame({"id": [2, 1, 3], "b": [20, 10, 30], "a": [200, 100, 300]})
 
@@ -249,10 +242,11 @@ def test_stable_sort_columns_and_rows(unified_writer, mock_config_fixture, run_c
 
 
 def test_write_result_raises_on_no_inner_result(
-    unified_writer, mock_writer_fixture, run_context, tmp_path
+    unified_writer, mock_writer_fixture, run_context_factory, tmp_path
 ):
     """Test error raised when inner writer returns nothing."""
     # Arrange
+    run_context = run_context_factory()
     df = pd.DataFrame({"a": [1]})
     output_dir = tmp_path / "out"
 
