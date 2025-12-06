@@ -57,7 +57,9 @@ class AtomicFileOperation:
                 if self._try_replace(src, dst, is_windows):
                     return
                 # Если попытка не выбросила исключение, но не удалась, фиксируем ошибку.
-                last_error = last_error or OSError("Move failed without explicit error.")
+                last_error = last_error or OSError(
+                    "Move failed without explicit error."
+                )
             except OSError as exc:
                 last_error = exc
 

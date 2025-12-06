@@ -14,8 +14,8 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
-from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,

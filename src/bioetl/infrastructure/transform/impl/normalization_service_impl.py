@@ -9,8 +9,8 @@ from bioetl.domain.transform.contracts import (
     NormalizationServiceABC,
 )
 from bioetl.domain.transform.impl.base_normalizer import BaseNormalizationService
-from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
 from bioetl.domain.transform.impl.normalize import normalize_scalar
+from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
