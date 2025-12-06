@@ -16,15 +16,9 @@ from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
-    FulldateTransformer,
-    HashColumnsTransformer,
-    IndexColumnTransformer,
-    TransformerABC,
-    TransformerChain,
-)
+from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.provider_registry_loader import (
     DEFAULT_PROVIDERS_CONFIG_PATH,
@@ -183,17 +177,10 @@ class PipelineContainer:
     ) -> TransformerABC:
         """Собирает цепочку стандартных трансформеров."""
         if self._post_transformer is None:
-            hash_service = self.get_hash_service()
-            provider = version_provider or (lambda: "unknown")
-            self._post_transformer = TransformerChain(
-                [
-                    HashColumnsTransformer(
-                        hash_service, self.config.hashing.business_key_fields
-                    ),
-                    IndexColumnTransformer(hash_service),
-                    DatabaseVersionTransformer(hash_service, provider),
-                    FulldateTransformer(hash_service),
-                ]
+            self._post_transformer = default_post_transformer(
+                hash_service=self.get_hash_service(),
+                business_key_fields=self.config.hashing.business_key_fields,
+                version_provider=version_provider,
             )
         return self._post_transformer
 
