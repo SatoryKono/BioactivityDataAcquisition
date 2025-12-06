@@ -1,11 +1,11 @@
 """
 CSV Writer implementation.
 """
-import hashlib
 import time
 from pathlib import Path
 import pandas as pd
 
+from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.contracts import WriterABC, WriteResult
 
 
@@ -34,10 +34,7 @@ class CsvWriterImpl(WriterABC):
 
         duration = time.monotonic() - start_time
 
-        # Calculate checksum
-        sha256 = hashlib.sha256()
-        sha256.update(path.read_bytes())
-        checksum = sha256.hexdigest()
+        checksum = compute_file_sha256(path)
 
         return WriteResult(
             path=path,
