@@ -53,21 +53,30 @@ class AtomicFileOperation:
         delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
         
         for attempt in range(MAX_FILE_RETRIES):
-            try:
-                # os.replace атомарно заменяет файл на всех платформах
-                # На Windows использует MoveFileEx с MOVEFILE_REPLACE_EXISTING
-                os.replace(src, dst)
+            if self._try_replace(src, dst, is_windows):
                 return
-            except PermissionError as exc:
-                last_error = exc
-                if self._try_windows_unlock_replace(src, dst, is_windows):
-                    return
             except OSError as exc:
                 last_error = exc
                 
             if attempt == MAX_FILE_RETRIES - 1:
                 raise last_error or OSError("Move failed without explicit error.")
             time.sleep(delay)
+
+    def _try_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
+        """
+        Попытка заменить файл атомарно.
+        
+        Returns:
+            True если замена успешна, False иначе.
+        """
+        try:
+            os.replace(src, dst)
+            return True
+        except PermissionError:
+            # На Windows PermissionError часто означает, что файл заблокирован
+            return self._try_windows_unlock_replace(src, dst, is_windows)
+        except OSError:
+            return False
 
     def _try_windows_unlock_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
         """
