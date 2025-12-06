@@ -17,16 +17,16 @@ SRC_PATH = Path(__file__).resolve().parents[1] / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from bioetl.config.pipeline_config_schema import (
+from bioetl.config.pipeline_config_schema import (  # noqa: E402
     HashingConfig,
     LoggingConfig,
     PipelineConfig,
     StorageConfig,
 )
-from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.config.models import ChemblSourceConfig
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.domain.validation.service import ValidationService  # noqa: E402
+from bioetl.infrastructure.config.models import ChemblSourceConfig  # noqa: E402
+from bioetl.infrastructure.logging.contracts import LoggerAdapterABC  # noqa: E402
+from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter  # noqa: E402
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
