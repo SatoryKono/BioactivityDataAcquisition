@@ -1,0 +1,14 @@
+flowchart TD
+    Start([Start target_chembl run]) --> Extract[Extract target pages]
+    Extract --> Transform[Transform & normalize]
+    Transform --> Validate[Validate with Pandera schema]
+    Validate --> Decision{Dry run?}
+    Decision -- No --> Write[Stable sort + write outputs]
+    Write --> Meta[Generate meta.yaml]
+    Decision -- Yes --> SkipWrite[Skip write; produce summary]
+    Meta --> End([Success])
+    SkipWrite --> End
+    Extract -->|Error| Retry{Retry/Skip/Fail per policy}
+    Retry --> Extract
+    Retry --> End
+

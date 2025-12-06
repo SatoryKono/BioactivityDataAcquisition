@@ -5,6 +5,9 @@
 ## 1. Client Architecture
 
 ```mermaid
+---
+id: 9f5e7de8-3350-47cb-8b63-8ec00ddc9944
+---
 classDiagram
     class SourceClientABC {
         <<abstract>>

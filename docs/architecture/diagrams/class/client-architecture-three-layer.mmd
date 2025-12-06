@@ -1,0 +1,44 @@
+classDiagram
+    class SourceClientABC {
+        <<Interface>>
+        +fetch_one(id)
+        +fetch_many(ids)
+        +iter_pages(request)
+        +metadata()
+    }
+
+    class RequestBuilderABC {
+        <<Interface>>
+        +build(params)
+        +with_pagination(offset, limit)
+    }
+
+    class ResponseParserABC {
+        <<Interface>>
+        +parse(response)
+        +extract_metadata(response)
+    }
+
+    class ChemblClientHTTPImpl {
+        -http_session: ClientSession
+        -rate_limiter: RateLimiterABC
+        -retry_policy: RetryPolicyABC
+        +fetch_one(id)
+        +fetch_many(ids)
+        +iter_pages(request)
+    }
+
+    class ChemblClientFactory {
+        +create_client(config) SourceClientABC
+        +create_default() SourceClientABC
+    }
+
+    SourceClientABC <|-- ChemblClientHTTPImpl
+    ChemblClientFactory ..> SourceClientABC : creates
+    ChemblClientFactory ..> ChemblClientHTTPImpl : instantiates
+
+    ChemblClientHTTPImpl *-- RequestBuilderABC : uses
+    ChemblClientHTTPImpl *-- ResponseParserABC : uses
+    ChemblClientHTTPImpl *-- RateLimiterABC : uses
+    ChemblClientHTTPImpl *-- RetryPolicyABC : uses
+
