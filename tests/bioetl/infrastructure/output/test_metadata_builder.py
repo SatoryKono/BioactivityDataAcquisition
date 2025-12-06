@@ -35,7 +35,21 @@ def test_build_metadata(run_context):
         checksum="abc123hash"
     )
 
-    meta = build_run_metadata(run_context, write_result)
+    qc_artifacts = [
+        Path("/tmp/out/quality_report_table.csv"),
+        Path("/tmp/out/correlation_report_table.csv"),
+    ]
+    qc_checksums = {
+        "quality_report_table.csv": "qc1",
+        "correlation_report_table.csv": "qc2",
+    }
+
+    meta = build_run_metadata(
+        run_context,
+        write_result,
+        qc_artifacts=qc_artifacts,
+        qc_checksums=qc_checksums,
+    )
 
     assert meta["run_id"] == "test-run-123"
     assert meta["entity"] == "test_entity"
@@ -43,7 +57,14 @@ def test_build_metadata(run_context):
     assert meta["timestamp"] == "2023-01-01T12:00:00+00:00"
     assert meta["row_count"] == 100
     assert meta["checksum"] == "abc123hash"
-    assert meta["files"] == ["test.csv"]
+    assert meta["files"] == [
+        "correlation_report_table.csv",
+        "quality_report_table.csv",
+        "test.csv",
+    ]
+    assert meta["checksums"]["test.csv"] == "abc123hash"
+    assert meta["checksums"]["quality_report_table.csv"] == "qc1"
+    assert meta["qc_artifacts"]["quality_report_table.csv"]["checksum"] == "qc1"
     assert meta["extra_key"] == "extra_value"
 
 
