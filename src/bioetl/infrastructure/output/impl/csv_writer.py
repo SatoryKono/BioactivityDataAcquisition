@@ -3,6 +3,7 @@ CSV Writer implementation.
 """
 import time
 from pathlib import Path
+
 import pandas as pd
 
 from bioetl.infrastructure.files.checksum import compute_file_sha256
