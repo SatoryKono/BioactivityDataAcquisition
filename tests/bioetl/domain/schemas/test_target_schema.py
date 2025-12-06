@@ -8,31 +8,37 @@ from pandera.errors import SchemaError
 from bioetl.domain.schemas.chembl.target import TargetSchema
 
 
+SCHEMA_COLUMNS = list(TargetSchema.to_schema().columns.keys())
+
+
 @pytest.fixture
 def valid_target_data():
     """Return a valid target dictionary."""
-    return {
-        "target_chembl_id": "CHEMBL202",
-        "pref_name": "Serotonin receptor",
-        "organism": "Homo sapiens",
-        "target_type": "SINGLE PROTEIN",
-        "tax_id": 9606,
-        "species_group_flag": False,
-        "target_components": [{"accession": "P12345"}],
-        "cross_references": [{"xref_src": "Uniprot", "xref_id": "P12345"}],
-        "uniprot_id": "P12345",
-        "hash_row": "0" * 64,
-        "hash_business_key": None,
-        "index": 0,
-        "database_version": "chembl_34",
-        "extracted_at": "2023-10-26T12:00:00+00:00",
-        "score": None,
-    }
+    df = pd.DataFrame(
+        {
+            "target_chembl_id": "CHEMBL202",
+            "pref_name": "Serotonin receptor",
+            "organism": "Homo sapiens",
+            "target_type": "SINGLE PROTEIN",
+            "tax_id": 9606,
+            "species_group_flag": False,
+            "target_components": [{"accession": "P12345"}],
+            "cross_references": [{"xref_src": "Uniprot", "xref_id": "P12345"}],
+            "uniprot_id": "P12345",
+            "hash_row": "0" * 64,
+            "hash_business_key": None,
+            "index": 0,
+            "database_version": "chembl_34",
+            "extracted_at": "2023-10-26T12:00:00+00:00",
+            "score": None,
+        }
+    )
+    return df.reindex(columns=SCHEMA_COLUMNS)
 
 
 def test_target_schema_valid(valid_target_data):
     """Test that valid data passes validation."""
-    df = pd.DataFrame([valid_target_data])
+    df = valid_target_data.copy()
     target = TargetSchema.validate(df)
     assert target.loc[0, "target_chembl_id"] == "CHEMBL202"
     assert "P12345" in str(target.loc[0, "target_components"])
@@ -40,18 +46,18 @@ def test_target_schema_valid(valid_target_data):
 
 def test_target_schema_invalid_chembl_id(valid_target_data):
     """Test invalid target_chembl_id format."""
-    data = valid_target_data.copy()
-    data["target_chembl_id"] = "INVALID"
+    df = valid_target_data.copy()
+    df["target_chembl_id"] = "INVALID"
 
     with pytest.raises(SchemaError):
-        TargetSchema.validate(pd.DataFrame([data]))
+        TargetSchema.validate(df)
 
 
 def test_target_schema_missing_type(valid_target_data):
     """Test missing target_type."""
-    data = valid_target_data.copy()
-    del data["target_type"]
+    df = valid_target_data.copy()
+    df = df.drop(columns=["target_type"])
 
     with pytest.raises(SchemaError):
-        TargetSchema.validate(pd.DataFrame([data]))
+        TargetSchema.validate(df)
 

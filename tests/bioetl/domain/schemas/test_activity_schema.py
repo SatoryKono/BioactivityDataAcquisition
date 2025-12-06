@@ -11,7 +11,7 @@ from bioetl.domain.schemas.chembl.activity import ActivitySchema
 @pytest.fixture
 def valid_activity_df():
     """Return a valid activity DataFrame with all required columns."""
-    return pd.DataFrame({
+    df = pd.DataFrame({
         "activity_id": [100],
         "action_type": ["agonist"],
         "assay_chembl_id": ["CHEMBL1"],
@@ -66,6 +66,8 @@ def valid_activity_df():
         "database_version": ["chembl_34"],
         "extracted_at": ["2023-10-26T12:00:00+00:00"]
     })
+    schema_columns = list(ActivitySchema.to_schema().columns.keys())
+    return df.reindex(columns=schema_columns)
 
 
 def test_activity_schema_valid(valid_activity_df):
