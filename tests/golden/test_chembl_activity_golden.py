@@ -22,13 +22,19 @@ def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
         def now(cls, tz=None):  # type: ignore[override]
             return datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
-    monkeypatch.setattr("bioetl.domain.transform.hash_service.datetime", _FrozenDatetime)
+    monkeypatch.setattr(
+        "bioetl.domain.transform.hash_service.datetime",
+        _FrozenDatetime,
+    )
 
 
 @pytest.mark.golden
 def test_chembl_activity_golden(tmp_path, monkeypatch):
     """TS-004: pipeline output matches golden snapshot."""
-    monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
+    monkeypatch.setenv(
+        "BIOETL_CONFIG_DIR",
+        str(Path("tests/fixtures/configs").resolve()),
+    )
     monkeypatch.setattr(
         ChemblExtractionServiceImpl,
         "get_release_version",

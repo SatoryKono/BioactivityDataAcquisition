@@ -3,12 +3,13 @@ from pathlib import Path
 import sys
 from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", MagicMock())
 import pytest
 from typer.testing import CliRunner
 
-from bioetl.interfaces.cli import app
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+sys.modules.setdefault("tqdm", MagicMock())
+
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl  # noqa: E402
+from bioetl.interfaces.cli import app  # noqa: E402
 
 runner = CliRunner()
 
@@ -16,7 +17,10 @@ runner = CliRunner()
 @pytest.mark.integration
 def test_cli_run_dry_run_success(tmp_path, monkeypatch):
     """TS-002: bioetl run executes dry-run without writing outputs."""
-    monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
+    monkeypatch.setenv(
+        "BIOETL_CONFIG_DIR",
+        str(Path("tests/fixtures/configs").resolve()),
+    )
     monkeypatch.setattr(
         ChemblExtractionServiceImpl,
         "get_release_version",

@@ -31,7 +31,9 @@ class _LoggerStub:
         return self
 
 
-def test_extract_stage_wraps_client_error(caplog: pytest.LogCaptureFixture, tmp_path: Path) -> None:
+def test_extract_stage_wraps_client_error(
+    caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
     caplog.set_level("ERROR")
 
     register_chembl_provider()

@@ -114,7 +114,9 @@ def test_write_result_success(
     mock_writer_fixture.write.side_effect = create_file
     
     # Patch checksum function
-    with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256") as mock_checksum:
+    with patch(
+        "bioetl.infrastructure.output.unified_writer.compute_file_sha256"
+    ) as mock_checksum:
         mock_checksum.side_effect = [
             "real_checksum",
             "qc_quality",
@@ -161,7 +163,9 @@ def test_unified_writer_delegates_atomicity(
         duration_sec=0.1
     )
     
-    with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256") as mock_checksum:
+    with patch(
+        "bioetl.infrastructure.output.unified_writer.compute_file_sha256"
+    ) as mock_checksum:
         mock_checksum.side_effect = ["abc", "qc1", "qc2"]
 
         # Act
@@ -197,11 +201,19 @@ def test_unified_writer_column_order_and_fill(
     def capture_df(df_to_write, path, **kwargs):
         nonlocal captured_df
         captured_df = df_to_write.copy()
-        return WriteResult(path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0)
+        return WriteResult(
+            path=path,
+            row_count=len(df_to_write),
+            checksum="",
+            duration_sec=0.0,
+        )
 
     mock_writer_fixture.write.side_effect = capture_df
 
-    with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256", return_value="chk"):
+    with patch(
+        "bioetl.infrastructure.output.unified_writer.compute_file_sha256",
+        return_value="chk",
+    ):
         result = unified_writer.write_result(
             df,
             output_dir,

@@ -268,7 +268,9 @@ def test_run_dry_run_pipeline_metadata(
     validation_service.validate.side_effect = lambda df, **__: df
     output_writer = MagicMock()
     output_writer.write_result.return_value = MagicMock(
-        row_count=len(small_pipeline_df), checksum="checksum", path=MagicMock(name="dummy.parquet")
+        row_count=len(small_pipeline_df),
+        checksum="checksum",
+        path=MagicMock(name="dummy.parquet"),
     )
 
     # Mock orchestrator to build and run our pipeline

@@ -3,21 +3,24 @@ from pathlib import Path
 import sys
 from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", MagicMock())
-
 import pandas as pd
 import pytest
 
-from bioetl.application.container import build_pipeline_dependencies
-from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
-from bioetl.infrastructure.config.resolver import ConfigResolver
+sys.modules.setdefault("tqdm", MagicMock())
+
+from bioetl.application.container import build_pipeline_dependencies  # noqa: E402
+from bioetl.application.pipelines.registry import get_pipeline_class  # noqa: E402
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl  # noqa: E402
+from bioetl.infrastructure.config.resolver import ConfigResolver  # noqa: E402
 
 
 @pytest.mark.integration
 def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     """TS-001: full pipeline run writes data and metadata."""
-    monkeypatch.setenv("BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve()))
+    monkeypatch.setenv(
+        "BIOETL_CONFIG_DIR",
+        str(Path("tests/fixtures/configs").resolve()),
+    )
     monkeypatch.setattr(
         ChemblExtractionServiceImpl,
         "get_release_version",
