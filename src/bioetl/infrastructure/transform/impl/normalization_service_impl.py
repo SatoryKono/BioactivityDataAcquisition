@@ -20,7 +20,10 @@ _NUMERIC_DTYPES: dict[str, str] = {
 }
 
 
-def _coerce_numeric_columns(df: pd.DataFrame, fields_cfg: list[dict[str, Any]]) -> pd.DataFrame:
+def _coerce_numeric_columns(
+    df: pd.DataFrame,
+    fields_cfg: list[dict[str, Any]],
+) -> pd.DataFrame:
     for field_cfg in fields_cfg:
         name = field_cfg.get("name")
         dtype = field_cfg.get("data_type")

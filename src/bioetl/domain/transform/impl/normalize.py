@@ -5,8 +5,8 @@ Normalization implementation for domain entities.
 from typing import Any, Callable, cast
 
 import pandas as pd
+from pandas._typing import DtypeArg
 
-from bioetl.domain.record_source import RawRecord
 from bioetl.domain.transform.contracts import (
     NormalizationConfigProvider,
     NormalizationServiceABC,
@@ -22,20 +22,26 @@ from bioetl.domain.transform.normalizers import (
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
-_NUMERIC_DTYPES: dict[str, str] = {
+_NUMERIC_DTYPES: dict[str, DtypeArg] = {
     "number": "Float64",
     "integer": "Int64",
 }
 
 
-def _coerce_numeric_columns(df: pd.DataFrame, fields_cfg: list[dict[str, Any]]) -> pd.DataFrame:
+def _coerce_numeric_columns(
+    df: pd.DataFrame, fields_cfg: list[dict[str, Any]]
+) -> pd.DataFrame:
     for field_cfg in fields_cfg:
         name = field_cfg.get("name")
         dtype = field_cfg.get("data_type")
-        target_dtype = _NUMERIC_DTYPES.get(dtype)
-        if not name or target_dtype is None or name not in df.columns:
+        if not isinstance(name, str) or not isinstance(dtype, str):
             continue
-        df[name] = pd.to_numeric(df[name], errors="coerce").astype(target_dtype)
+        target_dtype = _NUMERIC_DTYPES.get(dtype)
+        if target_dtype is None or name not in df.columns:
+            continue
+        df[name] = pd.to_numeric(df[name], errors="coerce").astype(
+            target_dtype
+        )  # type: ignore[arg-type]
     return df
 
 # Aliases for backward compatibility or convenience
@@ -105,7 +111,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
     def __init__(self, config: NormalizationConfigProvider):
         BaseNormalizationService.__init__(self, config, empty_value=pd.NA)
 
-    def normalize(self, raw: RawRecord | pd.Series) -> dict[str, Any]:
+    def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame([raw])
         normalized = self.normalize_dataframe(df)
         return cast(dict[str, Any], normalized.iloc[0].to_dict())
@@ -128,16 +134,16 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
                 base_normalizer: Callable[[Any], Any] = custom_normalizer
             else:
 
-                def _default_normalizer(val: Any, m=mode) -> Any:
+                def _default_normalizer(val: Any, m: str = mode) -> Any:
                     return normalize_scalar(val, mode=m)
 
                 base_normalizer = _default_normalizer
 
             def _apply_value(
                 val: Any,
-                norm=base_normalizer,
-                field_name=name,
-                data_type=dtype,
+                norm: Callable[[Any], Any] = base_normalizer,
+                field_name: str = name,
+                data_type: str | None = dtype,
             ) -> Any:
                 try:
                     return self._normalize_value(
@@ -161,12 +167,10 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
         return _coerce_numeric_columns(df, self._config.fields)
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        normalized = self.normalize_fields(df)
-        return _coerce_numeric_columns(normalized, self._config.fields)
+        return self.normalize_fields(df)
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
-        normalized = self.normalize_dataframe(df)
-        return _coerce_numeric_columns(normalized, self._config.fields)
+        return self.normalize_dataframe(df)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
@@ -180,7 +184,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             base_normalizer = custom_normalizer
         else:
 
-            def _default_normalizer(val: Any, m=mode) -> Any:
+            def _default_normalizer(val: Any, m: str = mode) -> Any:
                 return normalize_scalar(val, mode=m)
 
             base_normalizer = _default_normalizer
@@ -203,7 +207,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
                 allow_container_normalizer=True,
             )
 
-        return series.apply(_normalize_value_from_series)
+        return cast(pd.Series, series.apply(_normalize_value_from_series))
 
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
@@ -251,7 +255,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             ) from exc
         if normalized_dict is None:
             return pd.NA
-        return serialize_dict(normalized_dict)
+        return serialize_dict(dict(normalized_dict))
 
 
 # Backward compatibility alias
