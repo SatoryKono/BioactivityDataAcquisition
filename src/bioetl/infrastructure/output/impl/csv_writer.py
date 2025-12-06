@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from bioetl.infrastructure.files.checksum import compute_file_sha256
+from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.infrastructure.output.contracts import WriterABC, WriteResult
 
 
@@ -28,7 +29,7 @@ class CsvWriterImpl(WriterABC):
     ) -> WriteResult:
         start_time = time.monotonic()
 
-        df_to_write = self._apply_column_order(df, column_order)
+        df_to_write = apply_column_order(df, column_order)
 
         df_to_write.to_csv(path, index=False, encoding="utf-8")
 
@@ -45,16 +46,3 @@ class CsvWriterImpl(WriterABC):
 
     def supports_format(self, fmt: str) -> bool:
         return fmt.lower() == "csv"
-
-    def _apply_column_order(
-        self, df: pd.DataFrame, column_order: list[str] | None
-    ) -> pd.DataFrame:
-        if not column_order:
-            return df
-
-        df_to_write = df.copy()
-        for col in column_order:
-            if col not in df_to_write.columns:
-                df_to_write[col] = None
-
-        return df_to_write[column_order]

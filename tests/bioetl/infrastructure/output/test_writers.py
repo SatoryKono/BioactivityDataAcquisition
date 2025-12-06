@@ -12,12 +12,19 @@ from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import (
     MetadataWriterImpl,
 )
+from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
 
 
 @pytest.fixture
 def csv_writer():
     """Fixture for CSV writer."""
     return CsvWriterImpl()
+
+
+@pytest.fixture
+def parquet_writer():
+    """Fixture for Parquet writer."""
+    return ParquetWriterImpl()
 
 
 @pytest.fixture
@@ -44,12 +51,43 @@ def test_csv_writer_write(csv_writer, tmp_path):
     pd.testing.assert_frame_equal(df, df_read)
 
 
+def test_csv_writer_column_order_and_fill(csv_writer, tmp_path):
+    """CSV writer should reorder columns and fill missing ones with None."""
+    df = pd.DataFrame({"b": [1], "a": [2]})
+    path = tmp_path / "ordered.csv"
+
+    result = csv_writer.write(df, path, column_order=["a", "b", "c"])
+
+    assert result.row_count == 1
+    df_read = pd.read_csv(path)
+    assert list(df_read.columns) == ["a", "b", "c"]
+    assert df_read.loc[0, "a"] == 2
+    assert df_read.loc[0, "b"] == 1
+    assert pd.isna(df_read.loc[0, "c"])
+
+
 def test_csv_writer_properties(csv_writer):
     """Test CSV writer properties."""
     assert not csv_writer.atomic
     assert csv_writer.supports_format("csv")
     assert csv_writer.supports_format("CSV")
     assert not csv_writer.supports_format("parquet")
+
+
+def test_parquet_writer_column_order_and_fill(parquet_writer, tmp_path):
+    """Parquet writer should reorder columns and fill missing ones with None."""
+    pytest.importorskip("pyarrow")
+    df = pd.DataFrame({"x": ["foo"], "y": ["bar"]})
+    path = tmp_path / "ordered.parquet"
+
+    result = parquet_writer.write(df, path, column_order=["y", "x", "z"])
+
+    assert result.row_count == 1
+    df_read = pd.read_parquet(path)
+    assert list(df_read.columns) == ["y", "x", "z"]
+    assert df_read.loc[0, "y"] == "bar"
+    assert df_read.loc[0, "x"] == "foo"
+    assert pd.isna(df_read.loc[0, "z"])
 
 
 def test_metadata_writer_write_meta(metadata_writer, tmp_path):
