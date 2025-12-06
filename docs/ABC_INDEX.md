@@ -29,7 +29,7 @@
   - Провайдер побочных данных (справочников).
 
 - `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
-  - Загрузчик реестра провайдеров из конфигурации.
+  - Загрузчик реестра провайдеров из конфигурации. Default factory: ``bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader``. Implementations: ``ProviderRegistryLoader``.
 
 - `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
   - Контейнер пайплайна.
@@ -68,7 +68,7 @@
   - Фасад для вычисления hash_row/hash_business_key и служебных колонок.
 
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
-  - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации
+  - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации. Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``NormalizationServiceImpl``, ``ChemblNormalizationService``.
 
 - `ValidatorABC` — `bioetl.domain.validation.contracts.ValidatorABC`
   - Валидация данных. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorImpl`` (`bioetl.infrastructure.validation.impl.pandera_validator`).
