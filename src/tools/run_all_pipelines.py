@@ -3,9 +3,6 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, str(Path("src").absolute()))
-
 from bioetl.interfaces.cli.app import app
 
 # Pipeline dependency order
@@ -25,7 +22,7 @@ def run_pipeline(name: str, limit: int) -> dict:
     print(f"{'='*50}")
 
     # Mock args
-    # Assume standard config location based on name: {entity}_chembl -> configs/pipelines/chembl/{entity}.yaml
+    # Assume config path: {entity}_chembl -> configs/pipelines/chembl/{entity}.yaml
     entity = name.split("_")[0]
     config_path = f"configs/pipelines/chembl/{entity}.yaml"
     output_path = f"data/output/{entity}"

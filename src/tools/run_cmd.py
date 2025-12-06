@@ -1,11 +1,6 @@
-import os
 import sys
 from pathlib import Path
 from unittest.mock import patch
-
-# Add src to path
-src_path = os.path.abspath("src")
-sys.path.insert(0, src_path)
 
 # Ensure output dir exists
 Path("data/output/target").mkdir(parents=True, exist_ok=True)
@@ -14,8 +9,6 @@ try:
     from bioetl.infrastructure.services.chembl_extraction import (
         ChemblExtractionServiceImpl,
     )
-
-    import bioetl.application.container
 
     # print(f"Container module: {bioetl.application.container.__file__}")
     from bioetl.interfaces.cli.app import app

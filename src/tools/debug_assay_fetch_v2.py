@@ -8,10 +8,6 @@ import pandas as pd
 # Force unbuffered stdout
 sys.stdout.reconfigure(line_buffering=True)
 
-# Add src to path
-src_path = os.path.abspath("src")
-sys.path.insert(0, src_path)
-
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.interfaces.cli.app import app
 

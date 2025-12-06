@@ -2,11 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, str(Path("src").absolute()))
-print(f"CWD: {os.getcwd()}")
-print(f"Added to path: {str(Path('src').absolute())}")
-
 # Import and run app
 from bioetl.interfaces.cli.app import app
 
