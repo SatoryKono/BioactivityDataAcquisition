@@ -1,8 +1,8 @@
 """
-ChEMBL Extraction Service.
+ChEMBL Extraction Service implementation for the infrastructure layer.
 
-Orchestrates data extraction from ChEMBL API.
-Application-layer service that coordinates infrastructure components.
+Orchestrates data extraction from ChEMBL API using infrastructure clients and
+domain contracts.
 """
 from collections.abc import Iterable
 from typing import Any, Type
@@ -172,3 +172,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         self, model_cls: Type[ChemblRecordModel], batch_records: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
         return [model_cls(**batch_record).model_dump() for batch_record in batch_records]
+
+
+__all__ = ["ChemblExtractionServiceImpl"]
