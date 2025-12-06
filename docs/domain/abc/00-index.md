@@ -4,7 +4,7 @@ Catalog актуальных ABC и их реализаций.
 
 - Реестры машинного уровня: `src/bioetl/infrastructure/clients/base/abc_registry.yaml` и `abc_impls.yaml` (соответствие ABC ↔ default factory ↔ impl).
 - Клиентский контракт: `ChemblDataClientABC` (`src/bioetl/domain/clients/chembl/contracts.py`).
-- Пайплайновые хуки и политики: `PipelineHookABC`, `ErrorPolicyABC` (`src/bioetl/application/pipelines/hooks.py`).
+- Пайплайновые хуки и политики: `PipelineHookABC`, `ErrorPolicyABC` (`src/bioetl/domain/pipelines/contracts.py`).
 - Валидация: `ValidatorABC`, `SchemaProviderABC` (`src/bioetl/domain/validation/contracts.py`).
 - Нормализация/трансформации: `TransformerABC` (`src/bioetl/domain/transform/transformers.py`).
 - Экстракция: `ExtractorABC` (`src/bioetl/application/pipelines/contracts.py`).

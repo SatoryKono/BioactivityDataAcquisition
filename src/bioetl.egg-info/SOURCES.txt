@@ -19,12 +19,10 @@ src/bioetl/application/pipelines/__init__.py
 src/bioetl/application/pipelines/base.py
 src/bioetl/application/pipelines/contracts.py
 src/bioetl/application/pipelines/error_policy_manager.py
-src/bioetl/application/pipelines/hooks.py
 src/bioetl/application/pipelines/hooks_impl.py
 src/bioetl/application/pipelines/hooks_manager.py
 src/bioetl/application/pipelines/registry.py
 src/bioetl/application/pipelines/stage_runner.py
-src/bioetl/application/pipelines/stages.py
 src/bioetl/application/pipelines/chembl/__init__.py
 src/bioetl/application/pipelines/chembl/base.py
 src/bioetl/application/pipelines/chembl/extractor.py
@@ -38,6 +36,8 @@ src/bioetl/domain/contracts.py
 src/bioetl/domain/enums.py
 src/bioetl/domain/errors.py
 src/bioetl/domain/models.py
+src/bioetl/domain/pipelines/__init__.py
+src/bioetl/domain/pipelines/contracts.py
 src/bioetl/domain/normalization_service.py
 src/bioetl/domain/provider_registry.py
 src/bioetl/domain/providers.py
