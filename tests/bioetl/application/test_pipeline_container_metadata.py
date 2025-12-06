@@ -7,7 +7,6 @@ import pandas as pd
 import pytest
 
 from bioetl.application.container import PipelineContainer
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
@@ -16,6 +15,7 @@ from bioetl.domain.clients.base.output.contracts import (
 )
 from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
 from bioetl.domain.models import RunContext
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 

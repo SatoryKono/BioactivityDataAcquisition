@@ -7,6 +7,7 @@ with a configurable generic implementation.
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
@@ -14,7 +15,6 @@ from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 
 
 class ChemblEntityPipeline(ChemblPipelineBase):
