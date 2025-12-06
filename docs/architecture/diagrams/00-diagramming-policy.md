@@ -57,11 +57,11 @@ One file — one diagram.
 
 ```mermaid
 %% Shared palette
-classDef primary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
-classDef secondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
-classDef group     fill=#e6ecef,stroke=#333,stroke-width:1.5px,color=#111,font-size:22px;
+classDef primary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef secondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef group     fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 
-linkStyle default stroke=#666,stroke-width:1.2px,color=#111;
+linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 ```
 
 Reuse this block across diagrams to keep palette and typography uniform.
@@ -71,10 +71,10 @@ Reuse this block across diagrams to keep palette and typography uniform.
 #### Component diagram (flowchart)
 
 ```mermaid
-classDef componentPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
-classDef componentSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
-classDef external           fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
-linkStyle default stroke=#666,stroke-width:1.2px,color=#111;
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 ```
 
 - componentPrimary: ключевые компоненты приложения.
@@ -84,9 +84,9 @@ linkStyle default stroke=#666,stroke-width:1.2px,color=#111;
 #### Class diagram
 
 ```mermaid
-classDef domainPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
-classDef domainSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
-classDef interface       fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
 ```
 
 - domainPrimary: ключевые доменные сущности.
@@ -96,9 +96,9 @@ classDef interface       fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#1
 #### Sequence diagram
 
 ```mermaid
-classDef actorPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
-classDef actorSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
-classDef actorExternal  fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
+classDef actorPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef actorSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef actorExternal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
 ```
 
 Применяйте классы к participant: основные акторы — actorPrimary, внутренние сервисы — actorSecondary, внешние системы — actorExternal.
@@ -106,11 +106,11 @@ classDef actorExternal  fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#11
 #### Flowchart (workflow)
 
 ```mermaid
-classDef stepPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
-classDef stepDecision  fill=#e6ecef,stroke=#333,stroke-width:1.5px,color=#111,font-size:22px;
-classDef stepSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
-classDef stepTerminal  fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
-linkStyle default stroke=#666,stroke-width:1.2px,color=#111;
+classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef stepDecision  fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef stepTerminal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 ```
 
 - stepPrimary: основные шаги процесса.
