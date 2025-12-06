@@ -146,3 +146,101 @@ def test_stage_runner_process_and_failure(mock_logger):
     failure = runner.handle_stage_failure("validate", [transform_stage], context)
     assert not failure.success
     assert failure.errors
+
+
+@pytest.mark.unit
+def test_stage_runner_handles_skip_and_counts(mock_logger):
+    hooks_manager = HooksManager(
+        logger=mock_logger,
+        provider_id=ProviderId("chembl"),
+        entity_name="entity",
+    )
+    manager = ErrorPolicyManager(
+        error_policy=ContinueOnErrorPolicyImpl(),
+        hooks_manager=hooks_manager,
+        logger=mock_logger,
+        provider_id=ProviderId("chembl"),
+        entity_name="entity",
+        default_on_skip=lambda stage: pd.DataFrame(),
+    )
+    runner = StageRunner(
+        hooks_manager=hooks_manager,
+        error_policy_manager=manager,
+        entity_name="entity",
+        provider_id=ProviderId("chembl"),
+    )
+    context = _build_context()
+    validated_chunks: list[pd.DataFrame] = []
+
+    (
+        transform_started,
+        transform_chunks,
+        transform_count,
+        validate_started,
+        validate_chunks,
+        validate_count,
+    ) = runner.process_chunk(
+        pd.DataFrame({"id": [1]}),
+        context,
+        transform_started=False,
+        transform_chunks=0,
+        transform_count=0,
+        validate_started=False,
+        validate_chunks=0,
+        validate_count=0,
+        validated_chunks=validated_chunks,
+        dry_run=False,
+        transform_fn=lambda _: (_ for _ in ()).throw(ValueError("fail")),
+        apply_transformers=lambda df, _: df,
+        validate_fn=lambda df: df,
+    )
+
+    assert transform_started and validate_started
+    assert transform_chunks == 1 and validate_chunks == 1
+    assert transform_count == 0 and validate_count == 0
+    assert len(validated_chunks) == 1 and validated_chunks[0].empty
+
+
+@pytest.mark.unit
+def test_stage_runner_raises_on_missing_result(mock_logger):
+    hooks_manager = HooksManager(
+        logger=mock_logger,
+        provider_id=ProviderId("chembl"),
+        entity_name="entity",
+    )
+    manager = ErrorPolicyManager(
+        error_policy=ContinueOnErrorPolicyImpl(),
+        hooks_manager=hooks_manager,
+        logger=mock_logger,
+        provider_id=ProviderId("chembl"),
+        entity_name="entity",
+        default_on_skip=lambda stage: pd.DataFrame(),
+    )
+    runner = StageRunner(
+        hooks_manager=hooks_manager,
+        error_policy_manager=manager,
+        entity_name="entity",
+        provider_id=ProviderId("chembl"),
+    )
+    context = _build_context()
+
+    manager.execute = MagicMock(return_value=None)  # type: ignore[method-assign]
+
+    with pytest.raises(PipelineStageError):
+        runner.process_chunk(
+            pd.DataFrame({"id": [1]}),
+            context,
+            transform_started=False,
+            transform_chunks=0,
+            transform_count=0,
+            validate_started=False,
+            validate_chunks=0,
+            validate_count=0,
+            validated_chunks=[],
+            dry_run=False,
+            transform_fn=lambda df: df,
+            apply_transformers=lambda df, _: df,
+            validate_fn=lambda df: df,
+        )
+
+    manager.execute.assert_called_once()
