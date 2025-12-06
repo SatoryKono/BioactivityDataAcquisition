@@ -24,6 +24,7 @@ from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
+from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.files.csv_record_source import (
@@ -37,11 +38,7 @@ from bioetl.infrastructure.output.factories import (
     default_quality_reporter,
     default_writer,
 )
-from bioetl.infrastructure.transform.factories import (
-    default_hash_service,
-    default_normalization_service,
-)
-from bioetl.domain.transform.factories import default_post_transformer
+from bioetl.infrastructure.transform.factories import default_hash_service
 
 
 class PipelineContainer(PipelineContainerABC):
