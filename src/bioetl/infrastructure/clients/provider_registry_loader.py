@@ -14,9 +14,9 @@ from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,
+    ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.provider_loader import ProviderLoaderProtocol
 from bioetl.infrastructure.logging.factories import default_logger
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")
@@ -62,7 +62,7 @@ class ProviderRegistryConfig(BaseModel):
     providers: list[ProviderRegistryEntry]
 
 
-class ProviderLoaderImpl(ProviderLoaderProtocol):
+class ProviderLoaderImpl(ProviderRegistryLoaderABC):
     """Loads provider registry entries and registers them dynamically."""
 
     def __init__(
@@ -192,7 +192,10 @@ def load_provider_registry(
 ) -> MutableProviderRegistryABC:
     """Utility to load provider registry and return the populated instance."""
 
-    loader = ProviderLoaderImpl(config_path=config_path, logger=logger)
+    loader = default_provider_registry_loader(
+        config_path=config_path,
+        logger=logger,
+    )
     registry_to_use = registry or InMemoryProviderRegistry()
     return loader.load_registry(registry=registry_to_use)
 
@@ -201,17 +204,26 @@ def create_provider_loader(
     *,
     config_path: str | Path | None = None,
     logger: LoggerAdapterABC | None = None,
-) -> ProviderLoaderProtocol:
+) -> ProviderRegistryLoaderABC:
     """Factory for ProviderLoaderProtocol implementations."""
 
     return ProviderLoaderImpl(config_path=config_path, logger=logger)
 
 
 ProviderRegistryLoader = ProviderLoaderImpl
+def default_provider_registry_loader(
+    *,
+    config_path: str | Path | None = None,
+    logger: LoggerAdapterABC | None = None,
+) -> ProviderRegistryLoaderABC:
+    """Default factory for provider registry loader."""
+
+    return ProviderLoaderImpl(config_path=config_path, logger=logger)
 
 __all__ = [
     "ProviderLoaderImpl",
     "ProviderRegistryLoader",
+    "default_provider_registry_loader",
     "create_provider_loader",
     "load_provider_registry",
     "ProviderRegistryLoaderError",

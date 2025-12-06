@@ -79,6 +79,11 @@ class ProviderRegistryLoaderABC(Protocol):
     ) -> list[ProviderDefinition]:
         """Load provider definitions into registry and return them."""
 
+    def load_registry(
+        self, *, registry: MutableProviderRegistryABC | None = None
+    ) -> MutableProviderRegistryABC:
+        """Populate registry and return it (compatibility helper)."""
+
 
 class InMemoryProviderRegistry(MutableProviderRegistryABC):
     """In-memory implementation of provider registry."""

@@ -30,7 +30,7 @@ A reference sample is available at `configs/providers.example.yaml`.
 
 ## Loader behavior
 
-- Entrypoints: `ProviderRegistryLoader.load` and helper `load_provider_registry` (returns the populated registry).
+- Entrypoints: `ProviderLoaderImpl.load_registry` (via `ProviderLoaderProtocol`) and helper `load_provider_registry` (returns the populated registry).
 - Pydantic validation with `extra="forbid"`; invalid shapes raise `ProviderRegistryValidationError`.
 - Missing config file raises `ProviderRegistryConfigNotFoundError`.
 - Disabled entries (`active: false`) are skipped with a debug log.
@@ -38,12 +38,13 @@ A reference sample is available at `configs/providers.example.yaml`.
 - Duplicate provider ids reuse the existing definition (logged at debug); no exception is propagated to callers.
 - Successful calls return a list of registered `ProviderDefinition` objects in config order.
 - Dependencies (`registry`, `logger`, `config_path`) are injectable for tests and custom runs.
+- Feature flag: `features.enable_provider_loader_port` controls использование порта (default: false, сохраняет прежнее поведение).
 
 ## Runtime wiring (no globals)
 
 - Глобальный синглтон реестра удалён: `ProviderRegistryABC` должен передаваться явно в `PipelineOrchestrator`/контейнер.
-- Типовой путь: `registry = load_provider_registry(registry=InMemoryProviderRegistry())`, затем передать `provider_registry=registry` в оркестратор.
-- В тестах и интеграциях реестр также создаётся/очищается через экземпляр `MutableProviderRegistryABC`; скрытые глобальные состояния не используются.
+- Типовой путь: через `ProviderLoaderProtocol` (`create_provider_loader(...).load_registry(...)`) или helper `load_provider_registry`, затем передать `provider_registry` или `provider_loader` в оркестратор через контейнер.
+- В тестах и интеграциях реестр создаётся/очищается через `MutableProviderRegistryABC`; скрытые глобальные состояния не используются.
 
 ## Error handling
 

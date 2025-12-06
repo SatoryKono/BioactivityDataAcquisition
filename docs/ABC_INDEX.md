@@ -28,6 +28,9 @@
 - `SideInputProviderABC` — `bioetl.domain.clients.base.contracts.SideInputProviderABC`
   - Провайдер побочных данных (справочников).
 
+- `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
+  - Загрузчик реестра провайдеров из конфигурации.
+
 - `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
   - Контейнер пайплайна.
 
@@ -61,6 +64,9 @@
 - `HasherABC` — `bioetl.domain.transform.contracts.HasherABC`
   - Хеширование строк.
 
+- `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
+  - Фасад для вычисления hash_row/hash_business_key и служебных колонок.
+
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
   - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации
 
@@ -78,3 +84,6 @@
 
 - `QualityReportABC` — `bioetl.domain.clients.base.output.contracts.QualityReportABC`
   - Порт генератора QC-отчетов.
+
+- `OutputWriterABC` — `bioetl.domain.clients.base.output.contracts.OutputWriterABC`
+  - Фасад записи результатов пайплайна (данные, метаданные, QC).
