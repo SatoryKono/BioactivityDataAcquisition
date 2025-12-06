@@ -9,13 +9,6 @@ DOMAIN_ROOT = SOURCE_ROOT / "bioetl" / "domain"
 APPLICATION_ROOT = SOURCE_ROOT / "bioetl" / "application"
 INFRASTRUCTURE_ROOT = SOURCE_ROOT / "bioetl" / "infrastructure"
 
-APPLICATION_IMPL_ALLOWLIST: set[tuple[str, str]] = {
-    (
-        "src/bioetl/application/services/chembl_extraction.py",
-        "bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl",
-    ),
-}
-
 
 @dataclass(frozen=True)
 class ImportReference:
@@ -158,16 +151,7 @@ def test_application_avoids_infrastructure_implementations() -> None:
             if not reference.module.startswith("bioetl.infrastructure"):
                 continue
 
-            is_allowed = any(
-                file_path.as_posix() == allowed_path
-                and (
-                    reference.module == allowed_module
-                    or reference.module.startswith(f"{allowed_module}.")
-                )
-                for allowed_path, allowed_module in APPLICATION_IMPL_ALLOWLIST
-            )
-
-            if "impl" in reference.module.split(".") and not is_allowed:
+            if "impl" in reference.module.split("."):
                 violations.append(
                     _format_violation(
                         file_path,

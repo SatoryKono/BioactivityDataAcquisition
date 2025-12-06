@@ -65,7 +65,7 @@
   - Хеширование строк.
 
 - `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
-  - Фасад для вычисления hash_row/hash_business_key и служебных колонок.
+  - Фасад для вычисления hash_row/hash_business_key и служебных колонок. Default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.infrastructure.transform.impl.hash_service_impl.HashServiceImpl`.
 
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
   - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации. Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``NormalizationServiceImpl``, ``ChemblNormalizationService``.

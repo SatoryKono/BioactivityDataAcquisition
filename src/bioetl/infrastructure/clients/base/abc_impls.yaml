@@ -51,7 +51,7 @@ HasherABC:
 HashServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_hash_service
   implementations:
-    Default: bioetl.domain.transform.hash_service.HashServiceImpl
+    Default: bioetl.infrastructure.transform.impl.hash_service_impl.HashServiceImpl
 
 WriterABC:
   default_factory: bioetl.infrastructure.output.factories.default_writer
