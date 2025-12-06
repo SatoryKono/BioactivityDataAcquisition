@@ -1,7 +1,7 @@
 """Совместимая прослойка для конфигурационных моделей."""
 from __future__ import annotations
 
-from bioetl.application.config.pipeline_config_schema import (
+from bioetl.config.pipeline_config_schema import (
     BusinessKeyConfig,
     CanonicalizationConfig,
     ClientConfig,
@@ -16,7 +16,11 @@ from bioetl.application.config.pipeline_config_schema import (
     QcConfig,
     StorageConfig,
 )
-from bioetl.infrastructure.config.provider_config_schema import (
+from bioetl.config.protocols import (
+    PipelineConfigLoaderProtocol,
+    PipelineConfigProtocol,
+)
+from bioetl.config.provider_config_schema import (
     BaseProviderConfig,
     ChemblSourceConfig,
     DummyProviderConfig,
@@ -35,6 +39,8 @@ __all__ = [
     "NormalizationConfig",
     "PaginationConfig",
     "PipelineConfig",
+    "PipelineConfigProtocol",
+    "PipelineConfigLoaderProtocol",
     "QcConfig",
     "StorageConfig",
     "BaseProviderConfig",

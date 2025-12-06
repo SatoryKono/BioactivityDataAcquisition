@@ -10,7 +10,7 @@ from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,

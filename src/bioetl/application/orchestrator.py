@@ -10,7 +10,7 @@ from bioetl.application.container import PipelineContainer, build_pipeline_depen
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.models import RunResult
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import PipelineConfig
 
 
 class PipelineOrchestrator:

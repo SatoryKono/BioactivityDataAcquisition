@@ -11,7 +11,7 @@ from bioetl.domain.record_source import RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
