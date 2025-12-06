@@ -16,7 +16,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class ChemblExtractorImpl(ExtractorABC):

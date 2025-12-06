@@ -23,8 +23,8 @@ from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,

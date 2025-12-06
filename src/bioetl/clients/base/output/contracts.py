@@ -18,6 +18,9 @@ class WriteResult:
 class WriterABC(ABC):
     """
     Запись данных в файл.
+
+    Default factory: ``bioetl.infrastructure.output.factories.default_writer``.
+    Implementations: ``CsvWriterImpl``, ``ParquetWriterImpl``.
     """
 
     @property
@@ -43,6 +46,9 @@ class WriterABC(ABC):
 class MetadataWriterABC(ABC):
     """
     Запись метаданных и отчетов.
+
+    Default factory: ``bioetl.infrastructure.output.factories.default_metadata_writer``.
+    Implementations: ``MetadataWriterImpl``.
     """
 
     @abstractmethod
@@ -72,3 +78,11 @@ class QualityReportABC(ABC):
     @abstractmethod
     def build_correlation_report(self, df: pd.DataFrame) -> pd.DataFrame:
         """Строит корреляционную матрицу по числовым колонкам."""
+
+
+__all__ = [
+    "WriteResult",
+    "WriterABC",
+    "MetadataWriterABC",
+    "QualityReportABC",
+]
