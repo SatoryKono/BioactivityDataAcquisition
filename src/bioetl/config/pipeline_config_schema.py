@@ -15,6 +15,7 @@ from pydantic import (
 )
 
 from bioetl.config.provider_config_schema import BaseProviderConfig, ProviderConfigUnion
+from bioetl.domain.transform.contracts import NormalizationConfigProvider
 
 
 class PaginationConfig(BaseModel):
@@ -193,6 +194,11 @@ class PipelineConfig(BaseModel):
     @property
     def entity_name(self) -> str:
         return self.entity
+
+    def as_normalization_config_provider(self) -> NormalizationConfigProvider:
+        """Return self to satisfy NormalizationConfigProvider protocol."""
+
+        return self
 
     def get_source_config(self, provider: str) -> BaseProviderConfig:
         if provider != self.provider:

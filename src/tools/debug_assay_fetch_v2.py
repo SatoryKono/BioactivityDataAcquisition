@@ -4,12 +4,11 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.interfaces.cli.app import app
+from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 
 # Force unbuffered stdout
 sys.stdout.reconfigure(line_buffering=True)
-
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
 
