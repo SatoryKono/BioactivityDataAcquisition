@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from functools import lru_cache
 from typing import Any
 
 import yaml
@@ -52,9 +53,6 @@ class ProviderNotConfiguredError(ProviderRegistryError):
         )
 
 
-_REGISTRY_CACHE: dict[Path, set[str]] = {}
-
-
 def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -> str:
     """Validate that provider exists in registry and return it back."""
 
@@ -68,7 +66,7 @@ def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -
 def clear_provider_registry_cache() -> None:
     """Reset cached registry content (used in tests)."""
 
-    _REGISTRY_CACHE.clear()
+    _load_provider_registry.cache_clear()
 
 
 def _read_registry_data(registry_path: Path) -> Any:
@@ -122,11 +120,7 @@ def _normalize_provider_entry(provider: Any, registry_path: Path) -> str:
     )
 
 
+@lru_cache(maxsize=None)
 def _load_provider_registry(registry_path: Path) -> set[str]:
-    if registry_path in _REGISTRY_CACHE:
-        return _REGISTRY_CACHE[registry_path]
-
     data: Any = _read_registry_data(registry_path)
-    registry = _parse_registry_data(data, registry_path)
-    _REGISTRY_CACHE[registry_path] = registry
-    return registry
+    return _parse_registry_data(data, registry_path)
