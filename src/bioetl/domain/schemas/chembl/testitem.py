@@ -4,28 +4,6 @@ from pandera.typing import Series
 
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
 
-OUTPUT_COLUMN_ORDER: list[str] = [
-    "molecule_chembl_id",
-    "pref_name",
-    "molecule_type",
-    "max_phase",
-    "structure_type",
-    "molecule_properties",
-    "molecule_structures",
-    "molecule_hierarchy",
-    "atc_classifications",
-    "molecule_synonyms",
-    "cross_references",
-    "pubchem_cid",
-    "helm_notation",
-    "hash_row",
-    "hash_business_key",
-    "index",
-    "database_version",
-    "extracted_at",
-]
-
-
 class TestitemSchema(pa.DataFrameModel):
     """Schema for molecule/test item data."""
     molecule_chembl_id: Series[str] = pa.Field(
