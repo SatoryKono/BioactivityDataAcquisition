@@ -14,7 +14,7 @@ src/bioetl/application/config_loader.py
 src/bioetl/application/container.py
 src/bioetl/application/orchestrator.py
 src/bioetl/application/config/__init__.py
-src/bioetl/application/config/pipeline_config_schema.py
+src/bioetl/config/pipeline_config_schema.py
 src/bioetl/application/pipelines/__init__.py
 src/bioetl/application/pipelines/base.py
 src/bioetl/application/pipelines/contracts.py
@@ -102,7 +102,7 @@ src/bioetl/infrastructure/clients/chembl/impl/__init__.py
 src/bioetl/infrastructure/clients/chembl/impl/http_client.py
 src/bioetl/infrastructure/config/__init__.py
 src/bioetl/infrastructure/config/models.py
-src/bioetl/infrastructure/config/provider_config_schema.py
+src/bioetl/config/provider_config_schema.py
 src/bioetl/infrastructure/config/resolver.py
 src/bioetl/infrastructure/files/atomic.py
 src/bioetl/infrastructure/files/checksum.py

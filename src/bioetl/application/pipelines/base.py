@@ -28,7 +28,7 @@ from bioetl.domain.transform.transformers import (
     TransformerChain,
 )
 from bioetl.domain.validation.service import ValidationService
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.observability import metrics

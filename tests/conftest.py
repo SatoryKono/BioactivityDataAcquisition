@@ -57,7 +57,7 @@ def pytest_configure(config):
         # Hypothesis not available or structure changed, skip patch
         pass
 
-from bioetl.application.config.pipeline_config_schema import (
+from bioetl.config.pipeline_config_schema import (
     HashingConfig,
     LoggingConfig,
     PipelineConfig,
