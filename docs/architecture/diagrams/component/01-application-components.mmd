@@ -5,13 +5,13 @@ flowchart TB
 
 classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
 classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:14px;
+classDef entryPoint         fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 
 subgraph Entry["Interfaces / Entry Points"]
-    CLI["CLI (Typer) / REST / MQ\nbioetl.interfaces.*"]:::external
+    CLI["**CLI (Typer) / REST / MQ**\nbioetl.interfaces.*"]:::external
 end
-class Entry group;
+class Entry entryPoint;
 
 subgraph Application["Application Layer"]
     Orchestrator["PipelineOrchestrator\nbioetl.application.orchestrator"]:::componentPrimary
