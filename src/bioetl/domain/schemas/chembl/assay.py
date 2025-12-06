@@ -32,6 +32,11 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "target_chembl_id",
     "tissue_chembl_id",
     "variant_sequence",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
 ]
 
 
@@ -77,3 +82,4 @@ class AssaySchema(pa.DataFrameModel):
     class Config:
         strict = True
         coerce = True
+        ordered = True

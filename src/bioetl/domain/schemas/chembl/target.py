@@ -18,6 +18,11 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "target_components",
     "cross_references",
     "uniprot_id",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
 ]
 
 
@@ -72,3 +77,4 @@ class TargetSchema(pa.DataFrameModel):
 
         strict = True
         coerce = True
+        ordered = True
