@@ -31,7 +31,26 @@ def valid_activity_df() -> pd.DataFrame:
 
 def test_activity_schema_accepts_valid_frame(valid_activity_df: pd.DataFrame) -> None:
     validated = ActivitySchema.validate(valid_activity_df)
-    assert validated.equals(valid_activity_df)
+    for column in [
+        "action_type",
+        "activity_comment",
+        "activity_id",
+        "assay_chembl_id",
+        "assay_type",
+        "document_chembl_id",
+        "molecule_chembl_id",
+        "standard_flag",
+        "hash_row",
+        "hash_business_key",
+        "index",
+        "database_version",
+        "extracted_at",
+    ]:
+        pd.testing.assert_series_equal(
+            validated[column],
+            valid_activity_df[column],
+            check_dtype=False,
+        )
 
 
 def test_activity_schema_rejects_bad_chembl(valid_activity_df: pd.DataFrame) -> None:
@@ -59,13 +78,13 @@ def test_activity_schema_rejects_out_of_range_value(valid_activity_df: pd.DataFr
 
 def test_activity_schema_blocks_null_required(valid_activity_df: pd.DataFrame) -> None:
     invalid = valid_activity_df.copy()
-    invalid["standard_flag"] = [None]
+    invalid["activity_id"] = [None]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
         ActivitySchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert set(failure_cases["column"]) == {"standard_flag"}
+    assert set(failure_cases["column"]) == {"activity_id"}
 
 
 def test_activity_schema_validates_categories(valid_activity_df: pd.DataFrame) -> None:

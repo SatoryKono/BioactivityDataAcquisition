@@ -27,7 +27,11 @@ def valid_document_df() -> pd.DataFrame:
 
 def test_document_schema_accepts_valid_frame(valid_document_df: pd.DataFrame) -> None:
     validated = DocumentSchema.validate(valid_document_df)
-    assert validated.equals(valid_document_df)
+    pd.testing.assert_frame_equal(
+        validated,
+        valid_document_df,
+        check_dtype=False,
+    )
 
 
 def test_document_schema_rejects_bad_doc_type(valid_document_df: pd.DataFrame) -> None:

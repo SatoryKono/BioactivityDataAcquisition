@@ -1,6 +1,6 @@
 name: Lint, Type Check, and Tests
 
-on:
+'on':
   push:
     branches:
       - main
@@ -31,7 +31,8 @@ jobs:
         run: ruff check src tests
 
       - name: Black (format check)
-        run: black --check src tests
+        run: |
+          black --check src tests
 
       - name: Isort (import order)
         run: isort --check-only src tests

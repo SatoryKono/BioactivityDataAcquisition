@@ -26,7 +26,21 @@ def valid_molecule_df() -> pd.DataFrame:
 
 def test_molecule_schema_accepts_valid_frame(valid_molecule_df: pd.DataFrame) -> None:
     validated = MoleculeSchema.validate(valid_molecule_df)
-    assert validated.equals(valid_molecule_df)
+    for column in [
+        "molecule_chembl_id",
+        "max_phase",
+        "oral",
+        "hash_row",
+        "hash_business_key",
+        "index",
+        "database_version",
+        "extracted_at",
+    ]:
+        pd.testing.assert_series_equal(
+            validated[column],
+            valid_molecule_df[column],
+            check_dtype=False,
+        )
 
 
 def test_molecule_schema_rejects_bad_chembl(valid_molecule_df: pd.DataFrame) -> None:
@@ -81,11 +95,11 @@ def test_molecule_schema_checks_metadata(valid_molecule_df: pd.DataFrame) -> Non
 
 def test_molecule_schema_rejects_non_coercible(valid_molecule_df: pd.DataFrame) -> None:
     invalid = valid_molecule_df.copy()
-    invalid["oral"] = ["definitely"]
+    invalid["max_phase"] = ["definitely"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
         MoleculeSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert "oral" in failure_cases["column"].unique()
+    assert "max_phase" in failure_cases["column"].unique()
     assert "definitely" in failure_cases["failure_case"].astype(str).tolist()

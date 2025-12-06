@@ -8,12 +8,12 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
+from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
-from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
@@ -320,8 +320,9 @@ def test_error_policy_retry_callback_and_skip(
     assert result_df.empty
     assert attempts["count"] == 2
     on_retry.assert_called_once()
-    assert pipeline._error_policy_manager.last_error is not None  # noqa: SLF001
-    assert pipeline._error_policy_manager.last_error.attempt == 2  # noqa: SLF001
+    last_error = pipeline._error_policy_manager.last_error  # noqa: SLF001
+    assert last_error is not None
+    assert last_error.attempt == 2
 
 
 @pytest.mark.unit
@@ -360,6 +361,12 @@ def test_hashing_logic(
     hash_service,
 ):
     """Test different scenarios for business key hashing."""
+    _ = (
+        mock_config,
+        mock_logger,
+        mock_validation_service,
+        mock_output_writer,
+    )
     transformer = HashColumnsTransformer(hash_service, ["id"])
     df = pd.DataFrame({"id": [1], "val": ["x"]})
     res = transformer.apply(df)
