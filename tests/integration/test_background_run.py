@@ -1,5 +1,6 @@
 """Smoke-тест фонового запуска пайплайна."""
 
+from functools import partial
 from pathlib import Path
 
 import pytest
@@ -7,7 +8,7 @@ import pytest
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
-    load_provider_registry,
+    create_provider_loader,
 )
 
 
@@ -27,9 +28,14 @@ def test_run_in_background_dry_run(tmp_path):
         cli_overrides=cli_overrides,
     )
 
-    registry = load_provider_registry()
+    provider_loader_factory = partial(create_provider_loader)
+    registry = provider_loader_factory().load_registry()
     orchestrator = PipelineOrchestrator(
-        "activity_chembl", config_copy, provider_registry=registry
+        "activity_chembl",
+        config_copy,
+        provider_registry=registry,
+        provider_loader_factory=provider_loader_factory,
+        use_provider_loader_port=False,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)

@@ -21,8 +21,8 @@ from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
-from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.output.metadata import (
@@ -50,7 +50,7 @@ class PipelineBase(ABC):
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
         output_writer: "OutputWriterABC",
-        hash_service: HashService,
+        hash_service: HashServiceABC,
         extractor: ExtractorABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,

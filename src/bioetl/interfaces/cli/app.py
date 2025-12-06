@@ -1,5 +1,6 @@
 import os
 import sys
+from functools import partial
 from pathlib import Path
 from typing import Any, Literal, Optional
 
@@ -13,7 +14,7 @@ from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import MetricsConfig
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
-    load_provider_registry,
+    create_provider_loader,
 )
 from bioetl.infrastructure.observability.server import start_metrics_server_once
 
@@ -152,14 +153,25 @@ def run(
             cli_overrides=cli_overrides,
         )
         _start_metrics_exporter(config.metrics, dry_run=dry_run)
-        provider_registry = load_provider_registry(
-            config_path=base_dir / "providers.yaml",
-            registry=InMemoryProviderRegistry(),
+        provider_loader_factory = partial(
+            create_provider_loader, config_path=base_dir / "providers.yaml"
         )
+        feature_flag = config.features.enable_provider_loader_port
+        if feature_flag:
+            provider_loader = provider_loader_factory()
+            provider_registry = None
+        else:
+            provider_loader = None
+            provider_registry = provider_loader_factory().load_registry(
+                registry=InMemoryProviderRegistry()
+            )
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
             provider_registry=provider_registry,
+            provider_loader=provider_loader,
+            provider_loader_factory=provider_loader_factory,
+            use_provider_loader_port=feature_flag,
         )
 
         console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")

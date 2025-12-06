@@ -12,8 +12,7 @@ from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
-from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 
@@ -87,7 +86,7 @@ class PipelineContainerABC(ABC):
         """Return record source for pipeline input according to config."""
 
     @abstractmethod
-    def get_hash_service(self) -> HashService:
+    def get_hash_service(self) -> HashServiceABC:
         """Return hash service used for checksum generation."""
 
     @abstractmethod

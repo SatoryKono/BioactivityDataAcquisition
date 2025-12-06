@@ -23,9 +23,11 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
-from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.domain.transform.factories import default_post_transformer
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
+from bioetl.domain.transform.factories import (
+    default_hash_service,
+    default_post_transformer,
+)
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.files.csv_record_source import (
@@ -56,7 +58,7 @@ class PipelineContainer(PipelineContainerABC):
         quality_reporter: QualityReportABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
-        hash_service: HashService | None = None,
+        hash_service: HashServiceABC | None = None,
         post_transformer: TransformerABC | None = None,
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
@@ -74,7 +76,7 @@ class PipelineContainer(PipelineContainerABC):
         )
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy: ErrorPolicyABC | None = error_policy
-        self._hash_service: HashService | None = hash_service
+        self._hash_service: HashServiceABC | None = hash_service
         self._post_transformer: TransformerABC | None = post_transformer
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
@@ -190,10 +192,10 @@ class PipelineContainer(PipelineContainerABC):
             source_config, client=client
         )
 
-    def get_hash_service(self) -> HashService:
+    def get_hash_service(self) -> HashServiceABC:
         """Get the hash service."""
         if self._hash_service is None:
-            self._hash_service = HashService()
+            self._hash_service = default_hash_service()
         return self._hash_service
 
     def get_post_transformer(
@@ -272,7 +274,7 @@ def build_pipeline_dependencies(
     quality_reporter: QualityReportABC | None = None,
     hooks: list[PipelineHookABC] | None = None,
     error_policy: ErrorPolicyABC | None = None,
-    hash_service: HashService | None = None,
+    hash_service: HashServiceABC | None = None,
     post_transformer: TransformerABC | None = None,
     provider_registry: ProviderRegistryABC | None = None,
     provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
