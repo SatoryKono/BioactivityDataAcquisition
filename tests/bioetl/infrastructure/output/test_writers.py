@@ -11,6 +11,7 @@ import yaml
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import (
     MetadataWriterImpl,
+    build_quality_report_table,
 )
 from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
 
@@ -112,14 +113,51 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
 
     assert path.exists()
     report = pd.read_csv(path)
-    assert "column" in report.columns
-    assert "null_count" in report.columns
-    assert "unique_count" in report.columns
+    expected_columns = [
+        "column",
+        "null_count",
+        "non_null_count",
+        "unique_count",
+        "dtype",
+        "coverage",
+        "coverage_ok",
+    ]
+    assert list(report.columns) == expected_columns
 
-    # Check specific values
     row_a = report[report["column"] == "a"].iloc[0]
     assert row_a["null_count"] == 1
+    assert row_a["non_null_count"] == 1
     assert row_a["unique_count"] == 1
+    assert row_a["dtype"] == "float64"
+    assert row_a["coverage"] == 0.5
+    assert bool(row_a["coverage_ok"]) is False
+
+    row_b = report[report["column"] == "b"].iloc[0]
+    assert row_b["null_count"] == 0
+    assert row_b["non_null_count"] == 2
+    assert row_b["unique_count"] == 1
+    assert row_b["dtype"] == "object"
+    assert row_b["coverage"] == 1.0
+    assert bool(row_b["coverage_ok"]) is True
+
+
+def test_build_quality_report_table_respects_min_coverage():
+    """Quality report table uses provided min_coverage threshold."""
+    df = pd.DataFrame({"a": [1, None]})
+
+    report = build_quality_report_table(df, min_coverage=0.75)
+
+    assert list(report.columns) == [
+        "column",
+        "null_count",
+        "non_null_count",
+        "unique_count",
+        "dtype",
+        "coverage",
+        "coverage_ok",
+    ]
+    assert report.loc[0, "coverage"] == 0.5
+    assert bool(report.loc[0, "coverage_ok"]) is False
 
 
 def test_metadata_writer_generate_checksums(metadata_writer, tmp_path):
