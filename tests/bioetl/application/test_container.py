@@ -5,17 +5,15 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
+import pytest
+from pydantic import ValidationError
 
-import pytest  # noqa: E402
-from pydantic import ValidationError  # noqa: E402
-
-from bioetl.application.container import PipelineContainer  # noqa: E402
-from bioetl.application.pipelines.hooks_impl import (  # noqa: E402
+from bioetl.application.container import PipelineContainer
+from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.domain.provider_registry import (  # noqa: E402
+from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
     list_providers,
@@ -23,19 +21,19 @@ from bioetl.domain.provider_registry import (  # noqa: E402
     reset_provider_registry,
     restore_provider_registry,
 )
-from bioetl.domain.providers import (  # noqa: E402
+from bioetl.domain.providers import (
     ProviderComponents,
     ProviderDefinition,
     ProviderId,
 )
-from bioetl.infrastructure.clients.chembl.provider import (  # noqa: E402
-    register_chembl_provider,
-)
-from bioetl.infrastructure.config.models import (  # noqa: E402
+from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
+from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     DummyProviderConfig,
     PipelineConfig,
 )
+
+sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
 
 
 class DummyComponents(ProviderComponents):

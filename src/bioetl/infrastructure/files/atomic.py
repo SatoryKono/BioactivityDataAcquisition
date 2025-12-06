@@ -53,8 +53,9 @@ class AtomicFileOperation:
         delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
         
         for attempt in range(MAX_FILE_RETRIES):
-            if self._try_replace(src, dst, is_windows):
-                return
+            try:
+                if self._try_replace(src, dst, is_windows):
+                    return
             except OSError as exc:
                 last_error = exc
                 
