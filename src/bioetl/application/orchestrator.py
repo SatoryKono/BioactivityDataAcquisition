@@ -157,27 +157,33 @@ class PipelineOrchestrator:
     def _get_provider_registry(self) -> ProviderRegistryABC:
         if self._provider_registry is not None:
             return self._provider_registry
-        if (
-            self._provider_registry_provider is not None
-            and not self._use_provider_loader_port
-        ):
-            registry = self._provider_registry_provider()
-            if registry is None:
-                raise RuntimeError("Provider registry provider returned None")
-            self._provider_registry = registry
+
+        registry = self._load_registry_via_loader()
+        if registry is not None:
             return registry
 
-        if self._use_provider_loader_port:
-            loader = self._provider_loader
-            if loader is None and self._provider_loader_factory is not None:
-                loader = self._provider_loader_factory()
-                self._provider_loader = loader
-            if loader is not None:
-                self._provider_registry = loader.load_registry(
-                    registry=self._provider_registry
-                )
-                return self._provider_registry
+        return self._resolve_registry_from_provider()
 
+    def _load_registry_via_loader(self) -> ProviderRegistryABC | None:
+        """Попытаться загрузить реестр через loader (если включён порт)."""
+        if not self._use_provider_loader_port:
+            return None
+
+        loader = self._provider_loader
+        if loader is None and self._provider_loader_factory is not None:
+            loader = self._provider_loader_factory()
+            self._provider_loader = loader
+
+        if loader is None:
+            return None
+
+        self._provider_registry = loader.load_registry(
+            registry=self._provider_registry
+        )
+        return self._provider_registry
+
+    def _resolve_registry_from_provider(self) -> ProviderRegistryABC:
+        """Получить реестр через provider (fallback)."""
         if self._provider_registry_provider is None:
             raise RuntimeError("Provider registry is not configured")
 

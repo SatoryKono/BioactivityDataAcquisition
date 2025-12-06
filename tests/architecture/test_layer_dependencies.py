@@ -56,7 +56,9 @@ def _collect_imports(path: Path) -> list[ImportReference]:
 
     for node in ast.walk(tree):
         imports.extend(
-            _imports_from_node(node, current_module=current_module, is_package=is_package)
+            _imports_from_node(
+                node, current_module=current_module, is_package=is_package
+            )
         )
 
     return imports

@@ -141,7 +141,9 @@ class IdListRecordSourceImpl(RecordSource):
 
         yield from self._fetch_records(ids, batch_size)
 
-    def _fetch_records(self, ids: list[str], batch_size: int) -> Iterable[list[RawRecord]]:
+    def _fetch_records(
+        self, ids: list[str], batch_size: int
+    ) -> Iterable[list[RawRecord]]:
         for batch_ids in _chunk_list(ids, batch_size):
             self._logger.info("Fetching batch from API", batch_size=len(batch_ids))
             response = self._extraction_service.request_batch(
