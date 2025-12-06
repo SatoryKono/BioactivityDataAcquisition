@@ -58,7 +58,7 @@ def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -
 
     path = registry_path or DEFAULT_PROVIDERS_REGISTRY_PATH
     registry = _load_provider_registry(path)
-    if provider not in registry:
+    if provider not in registry and provider not in _list_runtime_providers():
         raise ProviderNotConfiguredError(provider, path)
     return provider
 
@@ -124,3 +124,9 @@ def _normalize_provider_entry(provider: Any, registry_path: Path) -> str:
 def _load_provider_registry(registry_path: Path) -> set[str]:
     data: Any = _read_registry_data(registry_path)
     return _parse_registry_data(data, registry_path)
+
+
+def _list_runtime_providers() -> set[str]:
+    from bioetl.domain.provider_registry import list_providers
+
+    return {definition.id.value for definition in list_providers()}
