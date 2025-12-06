@@ -43,6 +43,8 @@ OUTPUT_COLUMN_ORDER: list[str] = [
 
 
 class AssaySchema(pa.DataFrameModel):
+    """Pandera schema describing normalized ChEMBL assay records."""
+
     aidx: Series[str] = pa.Field(
         nullable=True, description="Внутренний индекс ассая/ID депозитора"
     )
