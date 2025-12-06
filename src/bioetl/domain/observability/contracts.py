@@ -10,8 +10,7 @@ class LoggingPort(ABC):
     """
     Port describing structured logging operations.
 
-    Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``.
-    Implementations: ``StructuredLoggerImpl``.
+    Реализации предоставляются инфраструктурой и должны связываться через DI.
     """
 
     @abstractmethod
@@ -39,8 +38,7 @@ class TracingPort(ABC):
     """
     Port describing distributed tracing operations.
 
-    Default factory: ``bioetl.infrastructure.observability.factories.default_tracing_port``.
-    Implementations: ``TracingAdapterImpl``.
+    Инфраструктура должна предоставить адаптер трассировки и связать его через DI.
     """
 
     @abstractmethod

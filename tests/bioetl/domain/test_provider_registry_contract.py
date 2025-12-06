@@ -1,12 +1,8 @@
 import pytest
 
 from bioetl.domain.provider_registry import (
+    InMemoryProviderRegistry,
     ProviderAlreadyRegisteredError,
-    get_provider,
-    list_providers,
-    register_provider,
-    reset_provider_registry,
-    restore_provider_registry,
 )
 from bioetl.domain.providers import (
     BaseProviderConfig,
@@ -52,11 +48,9 @@ class DummyProviderComponents(
         return {"writer_config": config, "client": client}
 
 
-@pytest.fixture(autouse=True)
-def restore_registry_state() -> None:
-    original_definitions = list_providers()
-    yield
-    restore_provider_registry(original_definitions)
+@pytest.fixture
+def registry() -> InMemoryProviderRegistry:
+    return InMemoryProviderRegistry()
 
 
 @pytest.fixture
@@ -80,37 +74,37 @@ def chembl_provider_definition() -> ProviderDefinition:
 
 
 def test_register_and_get_provider(
+    registry: InMemoryProviderRegistry,
     dummy_provider_definition: ProviderDefinition,
 ) -> None:
-    reset_provider_registry()
+    registry.register_provider(dummy_provider_definition)
 
-    register_provider(dummy_provider_definition)
-
-    assert get_provider(dummy_provider_definition.id) is dummy_provider_definition
-    assert list_providers() == [dummy_provider_definition]
+    assert registry.get_provider(dummy_provider_definition.id) is dummy_provider_definition
+    assert registry.list_providers() == [dummy_provider_definition]
 
 
 def test_register_provider_duplicate(
+    registry: InMemoryProviderRegistry,
     dummy_provider_definition: ProviderDefinition,
 ) -> None:
-    reset_provider_registry()
-    register_provider(dummy_provider_definition)
+    registry.register_provider(dummy_provider_definition)
 
     with pytest.raises(ProviderAlreadyRegisteredError):
-        register_provider(dummy_provider_definition)
+        registry.register_provider(dummy_provider_definition)
 
 
 def test_reset_and_restore_provider_registry(
+    registry: InMemoryProviderRegistry,
     dummy_provider_definition: ProviderDefinition,
     chembl_provider_definition: ProviderDefinition,
 ) -> None:
     definitions = [dummy_provider_definition, chembl_provider_definition]
 
-    restore_provider_registry(definitions)
-    assert list_providers() == definitions
+    registry.restore_provider_registry(definitions)
+    assert registry.list_providers() == definitions
 
-    reset_provider_registry()
-    assert list_providers() == []
+    registry.reset_provider_registry()
+    assert registry.list_providers() == []
 
-    restore_provider_registry(definitions)
-    assert list_providers() == definitions
+    registry.restore_provider_registry(definitions)
+    assert registry.list_providers() == definitions
