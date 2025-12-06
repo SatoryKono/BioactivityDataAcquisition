@@ -446,7 +446,8 @@ class PipelineBase(ABC):
                     yield from result
                     return
                 raise TypeError(
-                    "Extractor.extract() must return DataFrame or iterable of DataFrames."
+                    "Extractor.extract() must return DataFrame or iterable of "
+                    "DataFrames."
                 )
 
             return _extractor_generator()
