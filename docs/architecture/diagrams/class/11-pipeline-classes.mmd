@@ -1,23 +1,13 @@
 ---
 id: 15d7b6ea-8c7c-4b0e-9d3a-0b6e3d6e9f11
 ---
-classDiagram
-classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
 
-class PipelineBase {
-  +run(output_path, dry_run)
-  +set_post_transformer(t)
-  +add_hooks(hooks)
-  +set_error_policy(policy)
-}
+class PipelineBase
 class ChemblPipelineBase
 class ChemblEntityPipeline
-class StageRunner {
-  +process_chunk(...)
-  +handle_stage_failure(...)
-}
+class StageRunner
 class HooksManager
 class ErrorPolicyManager
 class PipelineHookABC
@@ -26,19 +16,6 @@ class ExtractorABC
 class ChemblExtractorImpl
 class ChemblTransformerImpl
 class TransformerABC
-
-PipelineBase:::domainPrimary
-ChemblPipelineBase:::domainPrimary
-ChemblEntityPipeline:::domainPrimary
-StageRunner:::domainSecondary
-HooksManager:::domainSecondary
-ErrorPolicyManager:::domainSecondary
-PipelineHookABC:::interface
-ErrorPolicyABC:::interface
-ExtractorABC:::interface
-ChemblExtractorImpl:::domainSecondary
-ChemblTransformerImpl:::domainSecondary
-TransformerABC:::interface
 
 ChemblPipelineBase --|> PipelineBase
 ChemblEntityPipeline --|> ChemblPipelineBase
