@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.config import provider_registry
 from bioetl.application import config_loader
 from bioetl.application.config_loader import (
     ConfigFileNotFoundError,
@@ -11,6 +10,7 @@ from bioetl.application.config_loader import (
     load_pipeline_config,
     load_pipeline_config_from_path,
 )
+from bioetl.config import provider_registry
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 

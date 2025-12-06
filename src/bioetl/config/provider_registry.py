@@ -87,7 +87,10 @@ def _parse_registry_data(data: Any, registry_path: Path) -> set[str]:
     if providers is None:
         return set()
     if not isinstance(providers, list):
-        raise ProviderRegistryFormatError(registry_path, "'providers' must be a list")
+        raise ProviderRegistryFormatError(
+            registry_path,
+            "'providers' must be a list",
+        )
 
     return _collect_provider_ids(providers, registry_path)
 
@@ -106,12 +109,16 @@ def _normalize_provider_entry(provider: Any, registry_path: Path) -> str:
         provider_id = provider.get("id")
         if provider_id is None:
             raise ProviderRegistryFormatError(
-                registry_path, "Provider entry must have 'id' field"
+                registry_path,
+                "Provider entry must have 'id' field",
             )
         return str(provider_id)
     raise ProviderRegistryFormatError(
         registry_path,
-        f"Provider entry must be string or dict, got {type(provider).__name__}",
+        (
+            "Provider entry must be string or dict, "
+            f"got {type(provider).__name__}"
+        ),
     )
 
 

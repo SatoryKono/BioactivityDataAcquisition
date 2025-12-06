@@ -114,7 +114,8 @@ def _validate_provider(config: dict[str, Any], path: Path) -> None:
         ensure_provider_known(str(provider))
     except ProviderNotConfiguredError as exc:
         raise UnknownProviderError(
-            str(provider), registry_path=exc.registry_path
+            str(provider),
+            registry_path=exc.registry_path,
         ) from exc
     except ProviderRegistryNotFoundError as exc:
         raise ConfigValidationError(path, str(exc)) from exc
