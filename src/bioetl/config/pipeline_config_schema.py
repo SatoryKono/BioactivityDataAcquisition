@@ -246,8 +246,6 @@ class PipelineConfig(BaseModel):
         if value is None or value == "":
             return None
         path = Path(value)
-        if not path.exists():
-            raise ValueError(f"Input path does not exist: {value}")
         return str(path)
 
     @model_validator(mode="after")
