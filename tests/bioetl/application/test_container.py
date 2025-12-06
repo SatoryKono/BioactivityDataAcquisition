@@ -14,7 +14,6 @@ from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.config import provider_registry as config_provider_registry
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
@@ -29,6 +28,7 @@ from bioetl.domain.providers import (
     ProviderId,
 )
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
+from bioetl.infrastructure.config import provider_registry_loader as config_provider_registry
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     DummyProviderConfig,
