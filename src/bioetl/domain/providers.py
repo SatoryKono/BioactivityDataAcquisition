@@ -8,12 +8,12 @@ from typing import Generic, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
-from bioetl.domain.normalization_service import NormalizationService
+from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 ClientT_co = TypeVar("ClientT_co", covariant=True)
 ExtractionServiceT_co = TypeVar("ExtractionServiceT_co", covariant=True)
 NormalizationServiceT_co = TypeVar(
-    "NormalizationServiceT_co", bound=NormalizationService | None, covariant=True
+    "NormalizationServiceT_co", bound=NormalizationServiceABC | None, covariant=True
 )
 WriterT_co = TypeVar("WriterT_co", covariant=True)
 
