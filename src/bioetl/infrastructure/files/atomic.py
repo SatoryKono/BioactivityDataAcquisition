@@ -83,7 +83,10 @@ class AtomicFileOperation:
             raise
 
     def _try_windows_unlock_replace(
-        self, src: Path, dst: Path, is_windows: bool
+        self,
+        src: Path,
+        dst: Path,
+        is_windows: bool,
     ) -> bool:
         """
         Попытка разблокировать и заменить файл на Windows.
