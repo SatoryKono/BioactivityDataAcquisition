@@ -1,10 +1,20 @@
 ---
 id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
 ---
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorBorderRadius": 6,
+    "actorFontSize": "18px",
+    "sequenceNumberColor": "#444",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
 sequenceDiagram
-    classDef actorPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-    classDef actorSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-    classDef actorExternal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
     autonumber
     participant User as CLI/User
     participant Pipe as Pipeline
@@ -14,10 +24,6 @@ sequenceDiagram
     participant Val as Validator
     participant Writer as UnifiedWriter
     participant Meta as MetadataWriter
-
-    class User,Pipe actorPrimary
-    class Hooks,Trans,Val,Writer,Meta actorSecondary
-    class Extr actorExternal
 
     User->>Pipe: run(output_path, dry_run=False)
     activate Pipe
