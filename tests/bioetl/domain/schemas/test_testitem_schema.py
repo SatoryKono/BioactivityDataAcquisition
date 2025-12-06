@@ -23,7 +23,7 @@ def valid_testitem_data():
         "atc_classifications": ["M01AE01"],
         "molecule_synonyms": [],
         "cross_references": [{"xref_src": "PubChem", "xref_id": "3672"}],
-        "pubchem_cid": 3672,
+        "pubchem_cid": "3672",
         "helm_notation": None,
         "hash_row": "9" * 64,
         "hash_business_key": None,
