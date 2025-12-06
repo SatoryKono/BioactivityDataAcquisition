@@ -66,7 +66,9 @@ def build_run_metadata(
 
     files.extend(path.name for path in qc_artifacts)
 
-    meta = build_base_metadata(context, row_count=result.row_count, include_metadata=False)
+    meta = build_base_metadata(
+        context, row_count=result.row_count, include_metadata=False
+    )
     meta.update(
         {
             "checksum": result.checksum,
