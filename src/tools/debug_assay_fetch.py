@@ -5,10 +5,6 @@ from unittest.mock import patch
 
 import pandas as pd
 
-# Add src to path
-src_path = os.path.abspath("src")
-sys.path.insert(0, src_path)
-
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.interfaces.cli.app import app
 

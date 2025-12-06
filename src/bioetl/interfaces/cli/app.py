@@ -76,17 +76,30 @@ def run(
     pipeline_name: str,
     profile: str = typer.Option("default", help="Configuration profile"),
     output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output directory"
+        None,
+        "--output",
+        "-o",
+        help="Output directory",
     ),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Run without writing output"),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Run without writing output",
+    ),
     config_path: Optional[Path] = typer.Option(
-        None, "--config", help="Path to config file"
+        None,
+        "--config",
+        help="Path to config file",
     ),
     limit: Optional[int] = typer.Option(
-        None, "--limit", help="Limit number of records to process"
+        None,
+        "--limit",
+        help="Limit number of records to process",
     ),
     input_path: Optional[Path] = typer.Option(
-        None, "--input-path", help="Path to CSV input file"
+        None,
+        "--input-path",
+        help="Path to CSV input file",
     ),
     input_mode: Optional[Literal["csv", "id_only", "auto_detect"]] = typer.Option(
         None,

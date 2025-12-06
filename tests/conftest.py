@@ -3,12 +3,19 @@ Pytest configuration and shared fixtures.
 """
 
 import socket
+import sys
+from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
 import pytest
 from pydantic import AnyHttpUrl
+
+# Ensure local src is first on sys.path to avoid picking up stale installations
+SRC_PATH = Path(__file__).resolve().parents[1] / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 from bioetl.application.config.pipeline_config_schema import (
     HashingConfig,
