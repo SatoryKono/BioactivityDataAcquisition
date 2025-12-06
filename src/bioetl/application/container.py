@@ -12,6 +12,7 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
+    OutputWriterABC,
     QualityReportABC,
     WriterABC,
 )
@@ -40,11 +41,11 @@ from bioetl.infrastructure.files.csv_record_source import (
 )
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (
+    default_output_writer,
     default_metadata_writer,
     default_quality_reporter,
     default_writer,
 )
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
 class PipelineContainer(PipelineContainerABC):
@@ -84,12 +85,12 @@ class PipelineContainer(PipelineContainerABC):
         self._post_transformer: TransformerABC | None = post_transformer
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
-        self._output_writer = UnifiedOutputWriter(
+        self._output_writer: OutputWriterABC = default_output_writer(
+            config=self._config.determinism,
+            qc_config=self._config.qc,
             writer=self._writer,
             metadata_writer=self._metadata_writer,
             quality_reporter=self._quality_reporter,
-            config=self._config.determinism,
-            qc_config=self._config.qc,
         )
         register_schemas(self._schema_registry)
 
@@ -105,7 +106,7 @@ class PipelineContainer(PipelineContainerABC):
         """Get the validation service with registered schemas."""
         return ValidationService(schema_provider=self._schema_registry)
 
-    def get_output_writer(self) -> UnifiedOutputWriter:
+    def get_output_writer(self) -> OutputWriterABC:
         """Get the unified output writer."""
         return self._output_writer
 

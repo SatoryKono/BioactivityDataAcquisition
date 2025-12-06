@@ -31,7 +31,7 @@ from bioetl.infrastructure.output.metadata import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+    from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 
 
 class PipelineBase(ABC):
@@ -49,7 +49,7 @@ class PipelineBase(ABC):
         config: PipelineConfig,
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
-        output_writer: "UnifiedOutputWriter",
+        output_writer: "OutputWriterABC",
         hash_service: HashService,
         extractor: ExtractorABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
