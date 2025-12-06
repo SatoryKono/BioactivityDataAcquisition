@@ -46,6 +46,10 @@ pagination:
   limit: 1000
 hashing:
   business_key_fields: []
+qc:
+  enable_quality_report: true
+  enable_correlation_report: true
+  min_coverage: 0.85
 ```
 
 **Конфиг `configs/pipelines/chembl/activity.yaml`**:
@@ -60,6 +64,10 @@ hashing:
   business_key_fields:
     - activity_id
     - molecule_chembl_id
+qc:
+  enable_quality_report: true
+  enable_correlation_report: false
+  min_coverage: 0.9
 ```
 
 Пайплайн-секция может ссылаться на профиль `chembl_default` и одновременно задавать собственные поля (`entity_name`, `pipeline`, `hashing` и др.), которые будут объединены с настройками профиля при разрешении конфигурации.

@@ -55,3 +55,17 @@ class MetadataWriterABC(ABC):
     def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
         """Генерирует контрольные суммы файлов."""
 
+
+class QualityReportABC(ABC):
+    """Порт генератора QC-отчетов."""
+
+    @abstractmethod
+    def build_quality_report(
+        self, df: pd.DataFrame, *, min_coverage: float
+    ) -> pd.DataFrame:
+        """Строит таблицу покрытия и базовых метрик по колонкам."""
+
+    @abstractmethod
+    def build_correlation_report(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Строит корреляционную матрицу по числовым колонкам."""
+

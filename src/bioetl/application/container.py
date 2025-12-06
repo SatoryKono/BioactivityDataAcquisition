@@ -29,6 +29,7 @@ from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (
     default_metadata_writer,
+    default_quality_reporter,
     default_writer,
 )
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
@@ -75,7 +76,9 @@ class PipelineContainer:
         return UnifiedOutputWriter(
             writer=default_writer(),
             metadata_writer=default_metadata_writer(),
+            quality_reporter=default_quality_reporter(),
             config=self.config.determinism,
+            qc_config=self.config.qc,
         )
 
     def get_normalization_service(self) -> NormalizationService:
