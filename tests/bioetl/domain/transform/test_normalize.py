@@ -3,13 +3,11 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from bioetl.domain.transform.impl.normalize import (
-    NormalizationService,
-    normalize_scalar,
-)
+from bioetl.domain.transform.impl.normalize import normalize_scalar
 from bioetl.domain.transform.normalizers.registry import (
     CUSTOM_FIELD_NORMALIZERS,
 )
+from bioetl.infrastructure.transform.factories import default_normalization_service
 
 
 def test_normalize_scalar():
@@ -58,7 +56,7 @@ def test_normalization_service_full():
     # src/bioetl/domain/transform/normalizers/registry.py
     # We rely on that global registration here.
 
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     df = pd.DataFrame(
         {
@@ -98,7 +96,7 @@ def test_normalization_service_raises_on_invalid_custom_value():
         [{"name": "fail_field", "data_type": "string"}], normalization=norm_config
     )
 
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     def fail_normalizer(val):
         raise ValueError("Test failure")
@@ -139,7 +137,7 @@ def test_normalization_service_id_detection():
         {"name": "normal_col", "data_type": "string"},
     ]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     df = pd.DataFrame(
         {
@@ -165,7 +163,7 @@ def test_normalization_service_case_sensitive():
     norm_config = MockNormalizationConfig(case_sensitive_fields=["secret_code"])
     config = MockConfig(fields, normalization=norm_config)
 
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     df = pd.DataFrame({"secret_code": ["  MixEd  "]})
     res = service.normalize_fields(df)
@@ -181,7 +179,7 @@ def test_normalization_service_missing_field():
         {"name": "missing", "data_type": "string"},
     ]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     df = pd.DataFrame({"exists": ["A"]})
     # Should not raise error
@@ -194,7 +192,7 @@ def test_normalization_service_nested_fallback_error():
     """Test error handling when nested normalizer fails on scalar fallback."""
     fields = [{"name": "bad_nested", "data_type": "array"}]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     def fail_norm(val):
         raise ValueError("Scalar fail")
@@ -213,7 +211,7 @@ def test_normalization_service_nested_na():
     """Test handling of pd.NA in nested fields."""
     fields = [{"name": "list_col", "data_type": "array"}]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     df = pd.DataFrame({"list_col": [pd.NA, None]})
     res = service.normalize_fields(df)
@@ -226,7 +224,7 @@ def test_normalization_service_nested_scalar_success():
     """Test scalar value successfully normalized in nested field."""
     fields = [{"name": "arr_col", "data_type": "array"}]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     # Pass a scalar string to an array field
     df = pd.DataFrame({"arr_col": ["  Value  "]})
@@ -240,7 +238,7 @@ def test_normalization_service_nested_complex_structures():
     """Test normalization of list of dicts."""
     fields = [{"name": "complex_col", "data_type": "array"}]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     # List of dicts
     data = [[{"k1": " V1 "}, {"k2": " V2 "}]]
@@ -260,7 +258,7 @@ def test_normalization_service_nested_errors_list():
     """Test error propagation in list items."""
     fields = [{"name": "err_list", "data_type": "array"}]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     def fail_on_x(val):
         if not isinstance(val, str):
@@ -281,7 +279,7 @@ def test_normalization_service_custom_container_normalizer():
     """Test a custom normalizer that returns a list/dict itself."""
     fields = [{"name": "custom_container", "data_type": "array"}]
     config = MockConfig(fields)
-    service = NormalizationService(config)
+    service = default_normalization_service(config)
 
     def list_producer(val):
         return ["a", "b"]
