@@ -2,21 +2,16 @@
 ChEMBL data extractor implementation.
 """
 
-from pathlib import Path
-from typing import Any, Iterable, cast
+from typing import Any, Iterable
 
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
-from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.infrastructure.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -47,10 +42,9 @@ class ChemblExtractorImpl(ExtractorABC):
         Yields chunks of normalized data.
         """
         limit = kwargs.pop("limit", None)
-        record_source = self._resolve_record_source(limit)
 
         remaining = limit
-        for raw_chunk in record_source.iter_records():
+        for raw_chunk in self.record_source.iter_records():
             working_chunk = raw_chunk
             if remaining is not None:
                 if remaining <= 0:
@@ -66,35 +60,3 @@ class ChemblExtractorImpl(ExtractorABC):
                 remaining -= len(working_chunk)
                 if remaining <= 0:
                     break
-
-    def _resolve_record_source(self, limit: int | None) -> RecordSource:
-        """Возвращает источник записей с учетом конфигурации input_mode."""
-
-        if hasattr(self.config, "input_mode") and hasattr(self.config, "input_path"):
-            mode = self.config.input_mode
-            path = self.config.input_path
-
-            if mode == "csv" and path:
-                return CsvRecordSourceImpl(
-                    input_path=Path(path),
-                    csv_options=self.config.csv_options,
-                    limit=limit,
-                    logger=self.logger,
-                )
-            if mode == "id_only" and path:
-                source_config = self.config.get_source_config(self.config.provider)
-                id_column = self.config.primary_key or f"{self.config.entity_name}_id"
-                filter_key = f"{id_column}__in"
-                return IdListRecordSourceImpl(
-                    input_path=Path(path),
-                    id_column=id_column,
-                    csv_options=self.config.csv_options,
-                    limit=limit,
-                    extraction_service=self.extraction_service,
-                    source_config=cast(ChemblSourceConfig, source_config),
-                    entity=self.config.entity_name,
-                    filter_key=filter_key,
-                    logger=self.logger,
-                )
-
-        return self.record_source

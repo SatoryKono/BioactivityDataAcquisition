@@ -8,8 +8,6 @@ domain contracts.
 from collections.abc import Iterable
 from typing import Any, Type
 
-import pandas as pd
-
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.schemas.chembl.models import (
@@ -26,7 +24,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     """
     Service to orchestrate data extraction from ChEMBL.
 
-    Handles pagination and dataframe assembly.
+    Handles pagination and record assembly.
     """
 
     def __init__(
@@ -97,7 +95,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         model_cls = self._get_model_cls(entity)
         return [model_cls(**record).model_dump() for record in records]
 
-    def extract_all(self, entity: str, **filters: Any) -> pd.DataFrame:
+    def extract_all(self, entity: str, **filters: Any) -> list[dict[str, Any]]:
         """
         Extract all records for an entity.
 
@@ -106,16 +104,17 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             **filters: API filters including optional 'limit'
 
         Returns:
-            DataFrame with extracted records
+            List of extracted records
         """
         chunks = list(self.iter_extract(entity, **filters))
-        if not chunks:
-            return pd.DataFrame()
-        return pd.concat(chunks, ignore_index=True)
+        records: list[dict[str, Any]] = []
+        for chunk in chunks:
+            records.extend(chunk)
+        return records
 
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: Any
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[list[dict[str, Any]]]:
         """Stream records for an entity respecting pagination and limits."""
         offset = int(filters.pop("offset", 0))
         remaining = filters.pop("limit", None)
@@ -140,7 +139,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
                 serialized_records = serialized_records[:remaining]
 
             if serialized_records:
-                yield pd.DataFrame(serialized_records)
+                yield serialized_records
 
             if remaining is not None:
                 remaining -= len(serialized_records)
