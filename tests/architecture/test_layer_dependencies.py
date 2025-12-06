@@ -110,10 +110,8 @@ def test_domain_has_no_outer_dependencies() -> None:
                     _format_violation(
                         file_path,
                         reference.lineno,
-                        (
-                            f"domain must not depend on infrastructure "
-                            f"(imported {reference.module})"
-                        ),
+                        "domain must not depend on infrastructure "
+                        f"(imported {reference.module})",
                     )
                 )
             if reference.module.startswith("bioetl.application"):
@@ -121,10 +119,8 @@ def test_domain_has_no_outer_dependencies() -> None:
                     _format_violation(
                         file_path,
                         reference.lineno,
-                        (
-                            f"domain must not depend on application "
-                            f"(imported {reference.module})"
-                        ),
+                        "domain must not depend on application "
+                        f"(imported {reference.module})",
                     )
                 )
 
