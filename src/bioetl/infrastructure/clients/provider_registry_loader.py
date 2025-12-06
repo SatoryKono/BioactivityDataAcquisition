@@ -71,7 +71,9 @@ class ProviderRegistryLoader:
         logger: LoggerAdapterABC | None = None,
     ) -> None:
         self._config_path = (
-            Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
+            Path(config_path)
+            if config_path
+            else DEFAULT_PROVIDERS_CONFIG_PATH
         )
         self._logger = logger or default_logger()
 
