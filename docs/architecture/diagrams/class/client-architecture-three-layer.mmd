@@ -1,5 +1,11 @@
 classDiagram
 
+    %% Styling
+    classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+
+    %% Core Contracts
     class SourceClientABC {
         <<Interface>>
         +fetch_one(id)
@@ -48,7 +54,3 @@ classDiagram
     class SourceClientABC interface
     class RequestBuilderABC interface
     class ResponseParserABC interface
-
-classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
