@@ -1,4 +1,5 @@
 """Utilities for loading golden pipeline outputs."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -11,4 +11,3 @@ def test_provider_loader_port_flag_can_be_enabled() -> None:
     features = InterfaceFeaturesConfig(enable_provider_loader_port=True)
 
     assert features.enable_provider_loader_port is True
-

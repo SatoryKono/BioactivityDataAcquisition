@@ -177,9 +177,7 @@ class PipelineOrchestrator:
         if loader is None:
             return None
 
-        self._provider_registry = loader.load_registry(
-            registry=self._provider_registry
-        )
+        self._provider_registry = loader.load_registry(registry=self._provider_registry)
         return self._provider_registry
 
     def _resolve_registry_from_provider(self) -> ProviderRegistryABC:

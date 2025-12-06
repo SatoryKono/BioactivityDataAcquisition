@@ -3,7 +3,8 @@
 
 import json
 
-expected_testitem_records = json.loads("""
+expected_testitem_records = json.loads(
+    """
 [
     {
         "molecule_chembl_id": "CHEMBL105457",
@@ -126,4 +127,5 @@ expected_testitem_records = json.loads("""
         "extracted_at": "2025-12-06T10:00:22.069781+00:00"
     }
 ]
-""")
+"""
+)

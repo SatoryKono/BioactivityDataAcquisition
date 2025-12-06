@@ -3,7 +3,8 @@
 
 import json
 
-expected_document_records = json.loads("""
+expected_document_records = json.loads(
+    """
 [
     {
         "abstract": "a new route to 5-(p-hydroxybenzyl)pyrimidines has been developed which utilizes phenolic mannich bases plus pyrimidines containing at least two activating groups. the products can be alkylated on the phenolic oxygen or on the pyrimidine n-1 atom, depending on conditions. this method has been used to prepare trimethoprim, a broad-spectrum antibacterial agent, starting from 2,4-diaminopyrimidine and 2,6-dimethoxyphenol.",
@@ -168,4 +169,5 @@ expected_document_records = json.loads("""
         "extracted_at": "2025-12-06T13:34:13.027556+00:00"
     }
 ]
-""")
+"""
+)

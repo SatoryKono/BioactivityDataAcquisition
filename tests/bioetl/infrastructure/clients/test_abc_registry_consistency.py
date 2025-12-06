@@ -65,9 +65,7 @@ def _resolve_implementations(role: str, cfg: dict) -> dict:
     return implementations
 
 
-def _validate_impl_class(
-    role: str, impl_name: str, impl_path: str, abc_class
-) -> None:
+def _validate_impl_class(role: str, impl_name: str, impl_path: str, abc_class) -> None:
     impl_class = _load_symbol(impl_path)
     assert inspect.isclass(impl_class), f"{role}:{impl_name} must resolve to class"
     try:
@@ -77,4 +75,3 @@ def _validate_impl_class(
     except TypeError:
         # Some Protocols are not runtime-checkable; skip subclass assertion.
         pass
-

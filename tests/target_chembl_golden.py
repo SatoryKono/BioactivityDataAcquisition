@@ -3,7 +3,8 @@
 
 import json
 
-expected_target_records = json.loads("""
+expected_target_records = json.loads(
+    """
 [
     {
         "target_chembl_id": "CHEMBL1075045",
@@ -108,4 +109,5 @@ expected_target_records = json.loads("""
         "extracted_at": "2025-12-06T13:39:15.649381+00:00"
     }
 ]
-""")
+"""
+)
