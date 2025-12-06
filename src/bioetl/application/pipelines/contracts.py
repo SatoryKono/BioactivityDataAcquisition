@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterable
 import pandas as pd
 
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
@@ -15,7 +16,6 @@ from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
 class ExtractorABC(ABC):
@@ -65,7 +65,7 @@ class PipelineContainerABC(ABC):
         """Return validation service bound to registered schemas."""
 
     @abstractmethod
-    def get_output_writer(self) -> UnifiedOutputWriter:
+    def get_output_writer(self) -> OutputWriterABC:
         """Return unified writer for data, metadata and QC outputs."""
 
     @abstractmethod

@@ -8,6 +8,7 @@ import pandas as pd
 
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
+    OutputWriterABC,
     QualityReportABC,
     WriterABC,
     WriteResult,
@@ -20,7 +21,7 @@ from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.infrastructure.output.metadata import build_run_metadata
 
 
-class UnifiedOutputWriter:
+class UnifiedOutputWriter(OutputWriterABC):
     """
     Фасад для записи результатов пайплайна.
 
