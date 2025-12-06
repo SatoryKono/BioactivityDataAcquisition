@@ -1,6 +1,6 @@
 """Infrastructure implementation of the normalization service."""
 
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 import pandas as pd
 
@@ -92,6 +92,98 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
                 df[name] = df[name].astype("string").replace({pd.NA: None})
 
         return _coerce_numeric_columns(df, self._config.fields)
+
+    def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+        normalized: dict[str, Any] = {}
+
+        for field_cfg in self._config.fields:
+            name = field_cfg.get("name")
+            if not isinstance(name, str) or name not in raw:
+                continue
+
+            dtype = field_cfg.get("data_type")
+            mode = self._resolve_mode(name)
+            custom_normalizer = get_normalizer(name)
+
+            if custom_normalizer:
+                base_normalizer = custom_normalizer
+            else:
+
+                def _default_normalizer(val: Any, m: str = mode) -> Any:
+                    return normalize_scalar(val, mode=m)
+
+                base_normalizer = _default_normalizer
+
+            value = raw.get(name)
+            normalized[name] = self._normalize_value(
+                value,
+                dtype,
+                base_normalizer,
+                name,
+                allow_container_normalizer=True,
+            )
+
+        for key, value in raw.items():
+            key_str = cast(str, key)
+            if key_str not in normalized:
+                normalized[key_str] = value
+
+        return normalized
+
+    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        normalized_df = df.copy()
+
+        for field_cfg in self._config.fields:
+            name = field_cfg.get("name")
+            if not name or name not in normalized_df.columns:
+                continue
+
+            normalized_df[name] = self.normalize_series(
+                normalized_df[name], cast(dict[str, Any], field_cfg)
+            )
+
+        return _coerce_numeric_columns(normalized_df, self._config.fields)
+
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        normalized = self.normalize_dataframe(df)
+        return _coerce_numeric_columns(normalized, self._config.fields)
+
+    def normalize_series(
+        self, series: pd.Series, field_cfg: dict[str, Any]
+    ) -> pd.Series:
+        name = cast(str, field_cfg.get("name"))
+        dtype = field_cfg.get("data_type")
+        mode = self._resolve_mode(name)
+        custom_normalizer = get_normalizer(name)
+
+        if custom_normalizer:
+            base_normalizer = custom_normalizer
+        else:
+
+            def _default_normalizer(val: Any, m: str = mode) -> Any:
+                return normalize_scalar(val, mode=m)
+
+            base_normalizer = _default_normalizer
+
+        def _normalize_value_from_series(val: Any) -> Any:
+            if (
+                custom_normalizer
+                and dtype == "array"
+                and isinstance(val, (list, tuple))
+            ):
+                normalized_value = custom_normalizer(val)
+                if normalized_value is None or not normalized_value:
+                    return pd.NA
+                return serialize_list(normalized_value, value_normalizer=None)
+            return self._normalize_value(
+                val,
+                dtype,
+                base_normalizer,
+                name,
+                allow_container_normalizer=True,
+            )
+
+        return cast(pd.Series, series.apply(_normalize_value_from_series))
 
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
