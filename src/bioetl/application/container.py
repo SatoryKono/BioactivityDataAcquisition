@@ -25,7 +25,9 @@ from bioetl.domain.transform.transformers import (
     TransformerChain,
 )
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    ProviderRegistryLoader,
+)
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
@@ -54,17 +56,19 @@ class PipelineContainer:
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashService | None = None,
         post_transformer: TransformerABC | None = None,
+        providers_config_path: str | Path | None = None,
     ) -> None:
         self.config = config
         self._provider_id = ProviderId(self.config.provider)
         self._schema_registry = SchemaRegistry()
-        register_schemas(self._schema_registry)
-        self._register_providers()
         self._logger: LoggerAdapterABC | None = logger
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy: ErrorPolicyABC | None = error_policy
         self._hash_service: HashService | None = hash_service
         self._post_transformer: TransformerABC | None = post_transformer
+        self._providers_config_path = providers_config_path
+        register_schemas(self._schema_registry)
+        self._register_providers()
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
@@ -216,7 +220,10 @@ class PipelineContainer:
         return pk
 
     def _register_providers(self) -> None:
-        register_chembl_provider()
+        loader = ProviderRegistryLoader(
+            self._providers_config_path, logger=self.get_logger()
+        )
+        loader.load()
 
     def _get_provider_definition(self) -> ProviderDefinition:
         return get_provider(self._provider_id)
@@ -239,6 +246,7 @@ def build_pipeline_dependencies(
     error_policy: ErrorPolicyABC | None = None,
     hash_service: HashService | None = None,
     post_transformer: TransformerABC | None = None,
+    providers_config_path: str | Path | None = None,
 ) -> PipelineContainer:
     """Factory for the container."""
     return PipelineContainer(
@@ -248,4 +256,5 @@ def build_pipeline_dependencies(
         error_policy=error_policy,
         hash_service=hash_service,
         post_transformer=post_transformer,
+        providers_config_path=providers_config_path,
     )

@@ -1,0 +1,156 @@
+"""Loader for provider registry definitions from YAML configuration."""
+
+from __future__ import annotations
+
+import importlib
+from pathlib import Path
+from typing import Any
+
+import yaml
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+from bioetl.domain.provider_registry import register_provider
+from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.infrastructure.logging.factories import default_logger
+
+DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")
+
+
+class ProviderRegistryLoaderError(Exception):
+    """Base error for provider registry loading."""
+
+
+class ProviderRegistryConfigNotFoundError(ProviderRegistryLoaderError):
+    """Raised when provider registry config file is missing."""
+
+    def __init__(self, path: Path) -> None:
+        super().__init__(f"Provider registry config not found: {path}")
+        self.path = path
+
+
+class ProviderRegistryValidationError(ProviderRegistryLoaderError):
+    """Raised when provider registry config is invalid."""
+
+    def __init__(self, path: Path, message: str) -> None:
+        super().__init__(f"{path}: {message}")
+        self.path = path
+
+
+class ProviderRegistryEntry(BaseModel):
+    """Single provider entry from registry config."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: ProviderId
+    module: str
+    factory: str
+    active: bool = True
+    description: str | None = None
+
+
+class ProviderRegistryConfig(BaseModel):
+    """Root provider registry configuration."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    providers: list[ProviderRegistryEntry]
+
+
+class ProviderRegistryLoader:
+    """Loads provider registry entries and registers them dynamically."""
+
+    def __init__(
+        self,
+        config_path: str | Path | None = None,
+        *,
+        logger: LoggerAdapterABC | None = None,
+    ) -> None:
+        self._config_path = Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
+        self._logger = logger or default_logger()
+
+    def load(self) -> list[ProviderDefinition]:
+        """Load providers from YAML and register active entries."""
+
+        raw_config = self._load_config(self._config_path)
+        try:
+            config = ProviderRegistryConfig.model_validate(raw_config)
+        except ValidationError as exc:
+            raise ProviderRegistryValidationError(self._config_path, exc.__str__()) from exc
+
+        registered: list[ProviderDefinition] = []
+        for entry in config.providers:
+            if not entry.active:
+                self._logger.debug(
+                    "Provider entry is disabled; skipping",
+                    provider=entry.id.value,
+                    module=entry.module,
+                )
+                continue
+            definition = self._register_entry(entry)
+            if definition:
+                registered.append(definition)
+        return registered
+
+    def _register_entry(self, entry: ProviderRegistryEntry) -> ProviderDefinition | None:
+        try:
+            module = importlib.import_module(entry.module)
+        except Exception as exc:  # pragma: no cover - defensive logging
+            self._logger.error(
+                "Failed to import provider module",
+                provider=entry.id.value,
+                module=entry.module,
+                error=str(exc),
+            )
+            return None
+
+        factory: Any = getattr(module, entry.factory, None)
+        if factory is None:
+            self._logger.error(
+                "Provider factory not found",
+                provider=entry.id.value,
+                module=entry.module,
+                factory=entry.factory,
+            )
+            return None
+
+        try:
+            definition = factory()
+        except Exception as exc:  # pragma: no cover - defensive logging
+            self._logger.error(
+                "Provider factory invocation failed",
+                provider=entry.id.value,
+                module=entry.module,
+                factory=entry.factory,
+                error=str(exc),
+            )
+            return None
+
+        if not isinstance(definition, ProviderDefinition):
+            self._logger.error(
+                "Factory returned unexpected type",
+                provider=entry.id.value,
+                module=entry.module,
+                factory=entry.factory,
+                returned_type=type(definition).__name__,
+            )
+            return None
+
+        register_provider(definition)
+        return definition
+
+    def _load_config(self, path: Path) -> dict[str, Any]:
+        if not path.exists():
+            raise ProviderRegistryConfigNotFoundError(path)
+
+        with path.open("r", encoding="utf-8") as file:
+            data = yaml.safe_load(file) or {}
+        return data
+
+
+__all__ = [
+    "ProviderRegistryLoader",
+    "ProviderRegistryLoaderError",
+    "ProviderRegistryConfigNotFoundError",
+    "ProviderRegistryValidationError",
+]

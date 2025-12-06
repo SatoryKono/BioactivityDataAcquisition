@@ -1,0 +1,6 @@
+providers:
+  - id: chembl
+    module: bioetl.infrastructure.clients.chembl.provider
+    factory: register_chembl_provider
+    active: true
+    description: "ChEMBL data provider"
