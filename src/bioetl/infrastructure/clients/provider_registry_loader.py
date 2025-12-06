@@ -17,6 +17,7 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.logging.factories import default_logger
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")
@@ -105,6 +106,20 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
             definition = self._register_entry(entry, registry_to_use)
             if definition:
                 registered.append(definition)
+        # Fallback to builtin ChEMBL provider if nothing was registered (defensive).
+        if not registered:
+            builtin = register_chembl_provider()
+            try:
+                registry_to_use.register_provider(builtin)
+            except ProviderAlreadyRegisteredError:
+                self._logger.debug(
+                    "Provider already registered; reusing existing definition",
+                    provider=builtin.id.value,
+                    module="bioetl.infrastructure.clients.chembl.provider",
+                )
+                registered.append(registry_to_use.get_provider(builtin.id))
+            else:
+                registered.append(builtin)
         return registered
 
     def load_registry(
