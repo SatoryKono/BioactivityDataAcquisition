@@ -9,7 +9,6 @@ import pytest
 
 from bioetl.domain.errors import (
     ClientNetworkError,
-    ClientRateLimitError,
     ClientResponseError,
 )
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient

@@ -17,7 +17,6 @@ from bioetl.domain.schemas.chembl.output_views import (
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
-
 METADATA_COLUMNS = [
     "hash_row",
     "hash_business_key",

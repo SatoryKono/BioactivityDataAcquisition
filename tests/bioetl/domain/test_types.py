@@ -1,5 +1,6 @@
-import pytest
 import pandas as pd
+import pytest
+
 from bioetl.domain.transform.normalizers import (
     BAO_ID_REGEX,
     CHEMBL_ID_REGEX,

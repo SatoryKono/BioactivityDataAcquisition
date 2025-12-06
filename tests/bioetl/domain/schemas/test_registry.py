@@ -1,5 +1,7 @@
 import pytest
+
 from bioetl.domain.schemas.registry import SchemaRegistry
+
 
 def test_registry_flow():
     registry = SchemaRegistry()

@@ -145,6 +145,24 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
     df = pd.DataFrame({"a": [1, None], "b": ["x", "x"]})
     path = tmp_path / "qc_report.csv"
 
+    def _assert_row(
+        report: pd.DataFrame,
+        column: str,
+        null_count: int,
+        non_null_count: int,
+        unique_count: int,
+        dtype: str,
+        coverage: float,
+        coverage_ok: bool,
+    ) -> None:
+        row = report[report["column"] == column].iloc[0]
+        assert row["null_count"] == null_count
+        assert row["non_null_count"] == non_null_count
+        assert row["unique_count"] == unique_count
+        assert row["dtype"] == dtype
+        assert row["coverage"] == coverage
+        assert bool(row["coverage_ok"]) is coverage_ok
+
     metadata_writer.write_qc_report(df, path)
 
     assert path.exists()
@@ -160,21 +178,26 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
     ]
     assert list(report.columns) == expected_columns
 
-    row_a = report[report["column"] == "a"].iloc[0]
-    assert row_a["null_count"] == 1
-    assert row_a["non_null_count"] == 1
-    assert row_a["unique_count"] == 1
-    assert row_a["dtype"] == "float64"
-    assert row_a["coverage"] == 0.5
-    assert bool(row_a["coverage_ok"]) is False
-
-    row_b = report[report["column"] == "b"].iloc[0]
-    assert row_b["null_count"] == 0
-    assert row_b["non_null_count"] == 2
-    assert row_b["unique_count"] == 1
-    assert row_b["dtype"] == "object"
-    assert row_b["coverage"] == 1.0
-    assert bool(row_b["coverage_ok"]) is True
+    _assert_row(
+        report,
+        column="a",
+        null_count=1,
+        non_null_count=1,
+        unique_count=1,
+        dtype="float64",
+        coverage=0.5,
+        coverage_ok=False,
+    )
+    _assert_row(
+        report,
+        column="b",
+        null_count=0,
+        non_null_count=2,
+        unique_count=1,
+        dtype="object",
+        coverage=1.0,
+        coverage_ok=True,
+    )
 
 
 def test_build_quality_report_table_respects_min_coverage():

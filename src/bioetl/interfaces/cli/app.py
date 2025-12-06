@@ -18,9 +18,9 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 
 app = typer.Typer(
@@ -155,14 +155,14 @@ def run(
             result = orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
 
         if result.success:
-            console.print(f"[bold green]Pipeline finished successfully![/bold green]")
+            console.print("[bold green]Pipeline finished successfully![/bold green]")
             console.print(f"Rows processed: {result.row_count}")
             console.print(f"Duration: {result.duration_sec:.2f}s")
         else:
-            console.print(f"[bold red]Pipeline failed![/bold red]")
+            console.print("[bold red]Pipeline failed![/bold red]")
             sys.exit(1)
 
-    except Exception as e:
+    except Exception:
         console.print_exception()
         sys.exit(1)
 

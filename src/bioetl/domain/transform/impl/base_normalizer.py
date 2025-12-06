@@ -34,48 +34,68 @@ class BaseNormalizationService:
         allow_container_normalizer: bool = False,
         serialize_with_value_normalizer: bool = True,
     ) -> Any:
-        if value is None:
+        if self._is_empty_value(value):
             return self._empty_value
 
-        if not isinstance(value, (list, tuple, dict)):
-            try:
-                if pd.isna(value):
-                    return self._empty_value
-            except ValueError:
-                pass
-
         if dtype in ("array", "object"):
-            if isinstance(value, (list, tuple, dict)) and allow_container_normalizer:
-                handled, direct_result = self._apply_container_normalizer(
-                    value,
-                    normalizer,
-                    field_name,
-                    serialize_with_value_normalizer=serialize_with_value_normalizer,
-                )
-                if handled:
-                    return direct_result
-
-            if isinstance(value, (list, tuple)):
-                return self._process_list(
-                    value,
-                    normalizer,
-                    field_name,
-                    serialize_with_value_normalizer=serialize_with_value_normalizer,
-                )
-
-            if isinstance(value, dict):
-                return self._process_dict(value, normalizer, field_name)
-
-            normalized = self._apply_normalizer(value, normalizer, field_name)
-            if isinstance(normalized, (list, tuple, dict)):
-                return self._serialize_container_result(
-                    normalized,
-                    normalizer,
-                    serialize_with_value_normalizer=serialize_with_value_normalizer,
-                )
-            return normalized
+            return self._normalize_container_value(
+                value,
+                normalizer,
+                field_name,
+                allow_container_normalizer=allow_container_normalizer,
+                serialize_with_value_normalizer=serialize_with_value_normalizer,
+            )
 
         return self._apply_normalizer(value, normalizer, field_name)
+
+    def _normalize_container_value(
+        self,
+        value: Any,
+        normalizer: Callable[[Any], Any],
+        field_name: str,
+        *,
+        allow_container_normalizer: bool,
+        serialize_with_value_normalizer: bool,
+    ) -> Any:
+        if isinstance(value, (list, tuple, dict)) and allow_container_normalizer:
+            handled, direct_result = self._apply_container_normalizer(
+                value,
+                normalizer,
+                field_name,
+                serialize_with_value_normalizer=serialize_with_value_normalizer,
+            )
+            if handled:
+                return direct_result
+
+        if isinstance(value, (list, tuple)):
+            return self._process_list(
+                value,
+                normalizer,
+                field_name,
+                serialize_with_value_normalizer=serialize_with_value_normalizer,
+            )
+
+        if isinstance(value, dict):
+            return self._process_dict(value, normalizer, field_name)
+
+        normalized = self._apply_normalizer(value, normalizer, field_name)
+        if isinstance(normalized, (list, tuple, dict)):
+            return self._serialize_container_result(
+                normalized,
+                normalizer,
+                serialize_with_value_normalizer=serialize_with_value_normalizer,
+            )
+        return normalized
+
+    def _is_empty_value(self, value: Any) -> bool:
+        if value is None:
+            return True
+        if isinstance(value, (list, tuple, dict)):
+            return False
+        try:
+            return bool(pd.isna(value))
+        except ValueError:
+            return False
 
     def _process_list(
         self,

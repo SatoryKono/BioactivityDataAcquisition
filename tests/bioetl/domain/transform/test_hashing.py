@@ -1,12 +1,15 @@
 import json
-import pytest
 from pathlib import Path
+
 import pandas as pd
+import pytest
+
 from bioetl.domain.transform.impl.hasher import (
+    HasherImpl,
     _serialize_canonical,
     blake2b_hash_hex,
-    HasherImpl
 )
+
 
 def canonical_json_from_record(data):
     """Helper to access internal serialization for testing."""

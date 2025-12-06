@@ -1,15 +1,16 @@
-import sys
 import os
-import pandas as pd
+import sys
 from pathlib import Path
 from unittest.mock import patch
+
+import pandas as pd
 
 # Add src to path
 src_path = os.path.abspath("src")
 sys.path.insert(0, src_path)
 
-from bioetl.interfaces.cli.app import app
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+from bioetl.interfaces.cli.app import app
 
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
@@ -24,8 +25,10 @@ def debug_fetch():
     test_id = df['assay_chembl_id'].iloc[0]
     
     # Simulate what pipeline does
+    from bioetl.infrastructure.clients.chembl.factories import (
+        default_chembl_extraction_service,
+    )
     from bioetl.infrastructure.config.models import ChemblSourceConfig
-    from bioetl.infrastructure.clients.chembl.factories import default_chembl_extraction_service
     
     config = ChemblSourceConfig(base_url="https://www.ebi.ac.uk/chembl/api/data")
     service = default_chembl_extraction_service(config)

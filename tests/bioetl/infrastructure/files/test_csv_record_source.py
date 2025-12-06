@@ -4,14 +4,14 @@ from typing import cast
 import pandas as pd
 from pydantic import AnyHttpUrl
 
-from bioetl.infrastructure.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputOptions,
+)
+from bioetl.infrastructure.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
 )
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 

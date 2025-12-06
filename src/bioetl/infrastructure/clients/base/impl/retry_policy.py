@@ -1,5 +1,4 @@
 import random
-import time
 
 from bioetl.domain.clients.base.contracts import RetryPolicyABC
 

@@ -4,6 +4,7 @@ from pandera.typing import Series
 
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
 
+
 class MoleculeSchema(pa.DataFrameModel):
     """Schema for molecule data."""
     atc_classifications: Series[str] = pa.Field(

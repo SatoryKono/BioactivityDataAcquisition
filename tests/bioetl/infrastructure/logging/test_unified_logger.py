@@ -1,6 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
+
 
 @pytest.fixture
 def mock_structlog():

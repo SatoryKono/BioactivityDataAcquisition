@@ -5,7 +5,7 @@ import time
 
 from bioetl.infrastructure.clients.base.impl.circuit_breaker import (
     CircuitBreakerImpl,
-    CircuitState
+    CircuitState,
 )
 
 

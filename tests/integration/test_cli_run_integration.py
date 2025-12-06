@@ -1,6 +1,6 @@
 """Integration tests for CLI commands (TS-002, TS-003)."""
-from pathlib import Path
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -8,7 +8,9 @@ from typer.testing import CliRunner
 
 sys.modules.setdefault("tqdm", MagicMock())
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl  # noqa: E402
+from bioetl.application.services.chembl_extraction import (
+    ChemblExtractionServiceImpl,  # noqa: E402
+)
 from bioetl.interfaces.cli import app  # noqa: E402
 
 runner = CliRunner()

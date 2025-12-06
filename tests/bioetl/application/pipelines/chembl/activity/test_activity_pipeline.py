@@ -1,7 +1,8 @@
-import pytest
+from unittest.mock import MagicMock
+
 import pandas as pd
 import pandera as pa
-from unittest.mock import MagicMock
+import pytest
 
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,

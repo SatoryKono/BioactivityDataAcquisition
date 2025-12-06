@@ -1,5 +1,7 @@
-import pytest
-from bioetl.infrastructure.clients.chembl.request_builder import ChemblRequestBuilderImpl
+from bioetl.infrastructure.clients.chembl.request_builder import (
+    ChemblRequestBuilderImpl,
+)
+
 
 def test_build_url():
     builder = ChemblRequestBuilderImpl("http://api")

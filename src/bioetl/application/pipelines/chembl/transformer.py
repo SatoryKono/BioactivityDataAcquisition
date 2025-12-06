@@ -1,7 +1,6 @@
 """
 ChEMBL data transformer implementation.
 """
-from typing import Any
 
 import pandas as pd
 

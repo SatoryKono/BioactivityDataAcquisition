@@ -7,6 +7,7 @@ from bioetl.domain.transform.normalizers import (
     UNIPROT_ID_REGEX,
 )
 
+
 class TargetSchema(pa.DataFrameModel):
     """Schema for biological target data."""
     target_chembl_id: Series[str] = pa.Field(

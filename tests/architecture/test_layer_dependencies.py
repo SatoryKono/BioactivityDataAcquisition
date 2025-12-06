@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 
-
 DOMAIN_ROOT = Path("src/bioetl/domain")
 FORBIDDEN_ABSOLUTE_PREFIXES: tuple[str, ...] = ("bioetl.infrastructure",)
 FORBIDDEN_RELATIVE_PREFIXES: tuple[str, ...] = ("infrastructure",)

@@ -1,8 +1,10 @@
-import pytest
-import pandas as pd
 from unittest.mock import MagicMock
 
+import pandas as pd
+import pytest
+
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+
 
 @pytest.fixture
 def common_dependencies():

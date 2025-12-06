@@ -4,8 +4,8 @@ Pipeline lifecycle hooks.
 from abc import ABC, abstractmethod
 from typing import Any
 
-from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.enums import ErrorAction
+from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
 
 

@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
-from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+
 
 @pytest.fixture
 def dependencies():

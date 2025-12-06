@@ -2,7 +2,7 @@
 Tests for serialization utilities.
 """
 import pandas as pd
-import pytest
+
 from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
 
 

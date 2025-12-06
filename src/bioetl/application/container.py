@@ -1,15 +1,16 @@
 """Dependency Injection Container for the application."""
 from pathlib import Path
 from typing import Any, Callable
+
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.infrastructure.files.csv_record_source import CsvRecordSourceImpl, IdListRecordSourceImpl
+from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.provider_registry import get_provider
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
@@ -24,7 +25,10 @@ from bioetl.domain.transform.transformers import (
 )
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.infrastructure.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
+)
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (

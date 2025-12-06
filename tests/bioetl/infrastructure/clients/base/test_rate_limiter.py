@@ -1,6 +1,9 @@
-import pytest
 import time
-from bioetl.infrastructure.clients.base.impl.rate_limiter import TokenBucketRateLimiterImpl
+
+from bioetl.infrastructure.clients.base.impl.rate_limiter import (
+    TokenBucketRateLimiterImpl,
+)
+
 
 def test_rate_limiter_acquire():
     limiter = TokenBucketRateLimiterImpl(rate=50, capacity=1)

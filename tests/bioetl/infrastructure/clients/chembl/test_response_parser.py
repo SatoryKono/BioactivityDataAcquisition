@@ -1,4 +1,6 @@
-from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParserImpl
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblResponseParserImpl,
+)
 
 
 def test_parse_activities():
