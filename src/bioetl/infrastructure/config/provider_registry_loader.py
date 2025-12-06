@@ -54,13 +54,22 @@ class ProviderNotConfiguredError(ProviderRegistryError):
 
 
 def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -> str:
-    """Validate that provider exists in registry and return it back."""
+    """Validate that provider exists in registry and return it back.
+
+    Если задан явный путь к реестру, игнорируем рантайм-регистрации
+    (нужно для строгой валидации конфигов в тестах и CLI).
+    """
 
     path = registry_path or DEFAULT_PROVIDERS_REGISTRY_PATH
     registry = _load_provider_registry(path)
-    if provider not in registry and provider not in _list_runtime_providers():
-        raise ProviderNotConfiguredError(provider, path)
-    return provider
+    if provider in registry:
+        return provider
+
+    # Разрешаем fallback на рантайм только когда используется дефолтный реестр
+    if registry_path is None and provider in _list_runtime_providers():
+        return provider
+
+    raise ProviderNotConfiguredError(provider, path)
 
 
 def clear_provider_registry_cache() -> None:
