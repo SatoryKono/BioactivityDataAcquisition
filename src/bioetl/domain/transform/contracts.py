@@ -58,8 +58,31 @@ class HasherABC(ABC):
 class NormalizationServiceABC(ABC):
     """
     Сервис нормализации данных в DataFrame.
+
+    Обязательные операции:
+    - normalize: нормализация единичной записи
+    - normalize_fields: пакетная нормализация DataFrame по конфигурации
+    - normalize_dataframe: совместимый алиас для normalize_fields
+    - normalize_batch: пакетная нормализация чанка
+    - normalize_series: нормализация столбца по конфигурации
     """
+
+    @abstractmethod
+    def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+        """Нормализует одиночную запись или Series."""
 
     @abstractmethod
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Нормализует поля DataFrame согласно конфигурации."""
+
+    @abstractmethod
+    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Алиас для normalize_fields для обратной совместимости."""
+
+    @abstractmethod
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Нормализует DataFrame чанками или целиком."""
+
+    @abstractmethod
+    def normalize_series(self, series: pd.Series, field_cfg: dict[str, Any]) -> pd.Series:
+        """Нормализует отдельную серию согласно полю конфигурации."""
