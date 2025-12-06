@@ -12,7 +12,6 @@ sys.modules.setdefault("tqdm", MagicMock())
 from bioetl.application.services.chembl_extraction import (  # noqa: E402
     ChemblExtractionServiceImpl,
 )
-
 from bioetl.interfaces.cli import app  # noqa: E402
 
 runner = CliRunner()

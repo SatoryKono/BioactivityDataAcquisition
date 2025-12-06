@@ -26,7 +26,9 @@ from bioetl.config.pipeline_config_schema import (  # noqa: E402
 from bioetl.domain.validation.service import ValidationService  # noqa: E402
 from bioetl.infrastructure.config.models import ChemblSourceConfig  # noqa: E402
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC  # noqa: E402
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter  # noqa: E402
+from bioetl.infrastructure.output.unified_writer import (
+    UnifiedOutputWriter,  # noqa: E402
+)
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
