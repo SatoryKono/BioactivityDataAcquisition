@@ -11,13 +11,13 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProvider,
     NormalizationServiceABC,
 )
-from bioetl.domain.transform.impl import normalize as normalize_impl
-from bioetl.domain.transform.impl.base_normalizer import BaseNormalizationService
-from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
 from bioetl.domain.transform.normalizers import (
     normalize_array,
     normalize_record,
 )
+from bioetl.infrastructure.transform.impl import normalize as normalize_impl
+from bioetl.infrastructure.transform.impl.base_normalizer import BaseNormalizationService
+from bioetl.infrastructure.transform.impl.serializer import serialize_dict, serialize_list
 
 
 class NormalizedRecord(TypedDict, total=False):
