@@ -3,16 +3,35 @@ Tests for concrete writer implementations.
 """
 # pylint: disable=redefined-outer-name
 import hashlib
+from collections.abc import Callable
+from pathlib import Path
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 import yaml
 
+from bioetl.infrastructure.output.impl.base_writer import BaseWriterImpl
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import (
     MetadataWriterImpl,
 )
 from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
+
+
+class DummyWriter(BaseWriterImpl):
+    """Minimal writer for base class tests."""
+
+    def __init__(
+        self, *, checksum_fn: Callable[[Path], str] | None = None
+    ) -> None:
+        super().__init__(atomic=False, checksum_fn=checksum_fn)
+
+    def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
+        df.to_csv(path, index=False)
+
+    def supports_format(self, fmt: str) -> bool:  # pragma: no cover - not used
+        return fmt.lower() == "dummy"
 
 
 @pytest.fixture
@@ -82,12 +101,29 @@ def test_parquet_writer_column_order_and_fill(parquet_writer, tmp_path):
 
     result = parquet_writer.write(df, path, column_order=["y", "x", "z"])
 
+    assert parquet_writer.atomic
     assert result.row_count == 1
+    assert result.checksum is None
     df_read = pd.read_parquet(path)
     assert list(df_read.columns) == ["y", "x", "z"]
     assert df_read.loc[0, "y"] == "bar"
     assert df_read.loc[0, "x"] == "foo"
     assert pd.isna(df_read.loc[0, "z"])
+
+
+def test_writer_uses_checksum_fn(tmp_path):
+    """Base writer should delegate checksum when provided."""
+    checksum_fn = MagicMock(return_value="abc123")
+    writer = DummyWriter(checksum_fn=checksum_fn)
+    df = pd.DataFrame({"a": [1]})
+    path = tmp_path / "dummy.csv"
+
+    result = writer.write(df, path)
+
+    checksum_fn.assert_called_once_with(path)
+    assert result.checksum == "abc123"
+    assert result.row_count == 1
+    assert list(pd.read_csv(path).columns) == ["a"]
 
 
 def test_metadata_writer_write_meta(metadata_writer, tmp_path):
