@@ -6,7 +6,6 @@ from pathlib import Path
 
 import yaml
 
-
 REGISTRY_PATH = Path("src/bioetl/infrastructure/clients/base/abc_registry.yaml")
 IMPLS_PATH = Path("src/bioetl/infrastructure/clients/base/abc_impls.yaml")
 

@@ -3,8 +3,8 @@
 from typing import Callable
 
 from bioetl.domain.transform.contracts import (
-    HashServiceABC,
     HasherABC,
+    HashServiceABC,
     NormalizationConfigProvider,
     NormalizationServiceABC,
 )

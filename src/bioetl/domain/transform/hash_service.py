@@ -3,7 +3,7 @@ from typing import Callable
 
 import pandas as pd
 
-from bioetl.domain.transform.contracts import HashServiceABC, HasherABC
+from bioetl.domain.transform.contracts import HasherABC, HashServiceABC
 from bioetl.domain.transform.impl.hasher import HasherImpl
 
 __all__ = ["HashService", "HashServiceImpl"]
