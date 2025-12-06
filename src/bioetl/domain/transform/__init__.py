@@ -1,7 +1,6 @@
-"""
-Data transformation logic.
-"""
+"""Data transformation logic."""
 
+from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
@@ -18,4 +17,5 @@ __all__ = [
     "IndexColumnTransformer",
     "DatabaseVersionTransformer",
     "FulldateTransformer",
+    "HashService",
 ]
