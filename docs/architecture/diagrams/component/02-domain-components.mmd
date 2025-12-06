@@ -1,0 +1,47 @@
+---
+id: 5ce0c6b3-7f5b-4c5c-8d1a-4c1cbf2c2a9e
+---
+flowchart LR
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+
+subgraph Domain["Domain Layer"]
+    Validation["ValidationService\nbioetl.domain.validation.service"]:::componentPrimary
+    Normalization["ChemblNormalizationService\nbioetl.domain.normalization_service"]:::componentPrimary
+    Hashing["HashService\nbioetl.domain.transform.hash_service"]:::componentPrimary
+    Transformers["TransformerChain\nHash/Index/DbVersion/Fulldate"]:::componentSecondary
+    Hasher["HasherImpl\ncanonical serializer"]:::componentSecondary
+    Schemas["SchemaRegistry\nbioetl.domain.schemas.registry"]:::componentSecondary
+    Pandera["PanderaValidator\nbioetl.domain.validation.impl"]:::componentSecondary
+    Normalizers["Scalar/array/dict normalizers\nbioetl.domain.transform.normalizers.*"]:::componentSecondary
+end
+class Domain group;
+
+subgraph Application["Application"]
+    Pipeline["PipelineBase / ChemblPipelineBase\napplication.pipelines.*"]:::external
+    Config["PipelineConfig\napplication.config"]:::external
+end
+class Application group;
+
+subgraph Infrastructure["Infrastructure"]
+    Writers["UnifiedOutputWriter\ninfrastructure.output.*"]:::external
+    Clients["ChEMBL Client\ninfrastructure.clients.chembl.*"]:::external
+end
+class Infrastructure group;
+
+Pipeline --> Validation
+Pipeline --> Normalization
+Pipeline --> Hashing
+Pipeline --> Transformers
+Validation --> Schemas
+Validation --> Pandera
+Normalization --> Normalizers
+Hashing --> Hasher
+Transformers --> Hashing
+Transformers --> Normalization
+Pipeline --> Writers
+Pipeline --> Clients
+

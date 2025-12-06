@@ -1,0 +1,77 @@
+---
+id: 3d4e1b0a-6d83-4d8b-9c6f-1e6e8f2471ab
+---
+classDiagram
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+
+class SourceClientABC
+class RequestBuilderABC
+class ResponseParserABC
+class PaginatorABC
+class RateLimiterABC
+class RetryPolicyABC
+class CacheABC
+class SecretProviderABC
+
+class BaseClientFactories {
+  +default_rate_limiter()
+  +default_retry_policy()
+  +default_cache()
+  +default_secret_provider()
+}
+
+class UnifiedAPIClient
+class ChemblHttpClientImpl
+class ChemblRequestBuilder
+class ChemblResponseParser
+class OffsetPaginator
+class TokenBucketRateLimiterImpl
+class ExponentialBackoffRetryImpl
+class MemoryCacheImpl
+class EnvSecretProvider
+class CircuitBreakerImpl
+
+SourceClientABC:::interface
+RequestBuilderABC:::interface
+ResponseParserABC:::interface
+PaginatorABC:::interface
+RateLimiterABC:::interface
+RetryPolicyABC:::interface
+CacheABC:::interface
+SecretProviderABC:::interface
+BaseClientFactories:::domainSecondary
+UnifiedAPIClient:::domainPrimary
+ChemblHttpClientImpl:::domainPrimary
+ChemblRequestBuilder:::domainSecondary
+ChemblResponseParser:::domainSecondary
+OffsetPaginator:::domainSecondary
+TokenBucketRateLimiterImpl:::domainSecondary
+ExponentialBackoffRetryImpl:::domainSecondary
+MemoryCacheImpl:::domainSecondary
+EnvSecretProvider:::domainSecondary
+CircuitBreakerImpl:::domainSecondary
+
+ChemblHttpClientImpl ..|> SourceClientABC
+ChemblRequestBuilder ..|> RequestBuilderABC
+ChemblResponseParser ..|> ResponseParserABC
+OffsetPaginator ..|> PaginatorABC
+TokenBucketRateLimiterImpl ..|> RateLimiterABC
+ExponentialBackoffRetryImpl ..|> RetryPolicyABC
+MemoryCacheImpl ..|> CacheABC
+EnvSecretProvider ..|> SecretProviderABC
+UnifiedAPIClient --> RateLimiterABC
+UnifiedAPIClient --> RetryPolicyABC
+UnifiedAPIClient --> CacheABC
+UnifiedAPIClient --> CircuitBreakerImpl
+UnifiedAPIClient --> SecretProviderABC
+ChemblHttpClientImpl --> UnifiedAPIClient
+ChemblHttpClientImpl --> ChemblRequestBuilder
+ChemblHttpClientImpl --> ChemblResponseParser
+ChemblHttpClientImpl --> OffsetPaginator
+BaseClientFactories --> TokenBucketRateLimiterImpl
+BaseClientFactories --> ExponentialBackoffRetryImpl
+BaseClientFactories --> MemoryCacheImpl
+BaseClientFactories --> EnvSecretProvider
+
