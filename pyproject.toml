@@ -91,11 +91,8 @@ implicit_reexport = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["tests.*"]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
 module = [
+  "tests.*",
   "bioetl.infrastructure.*",
   "bioetl.interfaces.*",
 ]
