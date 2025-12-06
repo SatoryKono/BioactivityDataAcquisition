@@ -42,7 +42,10 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         hash_service=container.get_hash_service(),
     )
 
-    result = pipeline.run(output_path=Path(config.storage.output_path), dry_run=False)
+    result = pipeline.run(
+        output_path=Path(config.storage.output_path),
+        dry_run=False,
+    )
 
     output_file = Path(config.storage.output_path) / "activity.csv"
     meta_file = Path(config.storage.output_path) / "meta.yaml"
