@@ -30,11 +30,19 @@ A reference sample is available at `configs/providers.example.yaml`.
 
 ## Loader behavior
 
-- The loader validates the YAML via a Pydantic schema (extra fields are forbidden).
+- Entrypoints: `ProviderRegistryLoader.load` and helper `load_provider_registry` (returns the populated registry).
+- Pydantic validation with `extra="forbid"`; invalid shapes raise `ProviderRegistryValidationError`.
+- Missing config file raises `ProviderRegistryConfigNotFoundError`.
 - Disabled entries (`active: false`) are skipped with a debug log.
-- For each enabled entry the loader dynamically imports the module, resolves the factory, and executes it.
-- Failures to import modules, missing factories, or runtime exceptions are logged and do not stop other entries.
-- The factory return value must be a `ProviderDefinition`; otherwise the entry is skipped with an error log.
+- Import errors, missing factories, runtime exceptions, and wrong return types are logged; processing continues for other entries.
+- Duplicate provider ids reuse the existing definition (logged at debug); no exception is propagated to callers.
+- Successful calls return a list of registered `ProviderDefinition` objects in config order.
+- Dependencies (`registry`, `logger`, `config_path`) are injectable for tests and custom runs.
+
+## Error handling
+
+- `ProviderRegistryConfigNotFoundError` — raised when `config_path` is absent.
+- `ProviderRegistryValidationError` — wraps Pydantic validation errors with the source path.
 
 ## Adding a new provider
 
