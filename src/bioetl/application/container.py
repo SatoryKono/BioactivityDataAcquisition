@@ -32,9 +32,9 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
-from bioetl.infrastructure.output.contracts import MetadataWriterABC
+from bioetl.domain.clients.base.output.contracts import MetadataWriterABC
 from bioetl.infrastructure.output.factories import (
     default_metadata_writer,
     default_quality_reporter,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from bioetl.infrastructure.output.contracts import QualityReportABC
+from bioetl.domain.clients.base.output.contracts import QualityReportABC
 
 
 class QualityReportImpl(QualityReportABC):
