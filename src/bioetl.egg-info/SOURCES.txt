@@ -9,14 +9,21 @@ src/bioetl.egg-info/dependency_links.txt
 src/bioetl.egg-info/entry_points.txt
 src/bioetl.egg-info/requires.txt
 src/bioetl.egg-info/top_level.txt
+src/bioetl/application/__init__.py
+src/bioetl/application/config_loader.py
 src/bioetl/application/container.py
 src/bioetl/application/orchestrator.py
+src/bioetl/application/config/__init__.py
+src/bioetl/application/config/pipeline_config_schema.py
 src/bioetl/application/pipelines/__init__.py
 src/bioetl/application/pipelines/base.py
 src/bioetl/application/pipelines/contracts.py
+src/bioetl/application/pipelines/error_policy_manager.py
 src/bioetl/application/pipelines/hooks.py
 src/bioetl/application/pipelines/hooks_impl.py
+src/bioetl/application/pipelines/hooks_manager.py
 src/bioetl/application/pipelines/registry.py
+src/bioetl/application/pipelines/stage_runner.py
 src/bioetl/application/pipelines/stages.py
 src/bioetl/application/pipelines/chembl/__init__.py
 src/bioetl/application/pipelines/chembl/base.py
@@ -27,7 +34,6 @@ src/bioetl/application/pipelines/chembl/transformer.py
 src/bioetl/application/services/__init__.py
 src/bioetl/application/services/chembl_extraction.py
 src/bioetl/domain/__init__.py
-src/bioetl/domain/config_loader.py
 src/bioetl/domain/contracts.py
 src/bioetl/domain/enums.py
 src/bioetl/domain/errors.py
@@ -38,6 +44,10 @@ src/bioetl/domain/providers.py
 src/bioetl/domain/record_source.py
 src/bioetl/domain/clients/__init__.py
 src/bioetl/domain/clients/contracts.py
+src/bioetl/domain/clients/base/__init__.py
+src/bioetl/domain/clients/base/contracts.py
+src/bioetl/domain/clients/chembl/__init__.py
+src/bioetl/domain/clients/chembl/contracts.py
 src/bioetl/domain/schemas/__init__.py
 src/bioetl/domain/schemas/pipeline_contracts.py
 src/bioetl/domain/schemas/registry.py
@@ -70,10 +80,6 @@ src/bioetl/domain/validation/factories.py
 src/bioetl/domain/validation/service.py
 src/bioetl/domain/validation/impl/__init__.py
 src/bioetl/domain/validation/impl/pandera_validator.py
-src/bioetl/domain/clients/base/__init__.py
-src/bioetl/domain/clients/base/contracts.py
-src/bioetl/domain/clients/chembl/__init__.py
-src/bioetl/domain/clients/chembl/contracts.py
 src/bioetl/infrastructure/chembl_client.py
 src/bioetl/infrastructure/constants.py
 src/bioetl/infrastructure/clients/middleware.py
@@ -96,7 +102,6 @@ src/bioetl/infrastructure/clients/chembl/impl/__init__.py
 src/bioetl/infrastructure/clients/chembl/impl/http_client.py
 src/bioetl/infrastructure/config/__init__.py
 src/bioetl/infrastructure/config/models.py
-src/bioetl/infrastructure/config/pipeline_config_schema.py
 src/bioetl/infrastructure/config/provider_config_schema.py
 src/bioetl/infrastructure/config/resolver.py
 src/bioetl/infrastructure/files/atomic.py
@@ -108,6 +113,8 @@ src/bioetl/infrastructure/logging/factories.py
 src/bioetl/infrastructure/logging/impl/__init__.py
 src/bioetl/infrastructure/logging/impl/progress_reporter.py
 src/bioetl/infrastructure/logging/impl/unified_logger.py
+src/bioetl/infrastructure/observability/__init__.py
+src/bioetl/infrastructure/observability/metrics.py
 src/bioetl/infrastructure/output/__init__.py
 src/bioetl/infrastructure/output/contracts.py
 src/bioetl/infrastructure/output/factories.py
@@ -117,6 +124,7 @@ src/bioetl/infrastructure/output/impl/__init__.py
 src/bioetl/infrastructure/output/impl/csv_writer.py
 src/bioetl/infrastructure/output/impl/metadata_writer.py
 src/bioetl/infrastructure/output/impl/parquet_writer.py
+src/bioetl/infrastructure/output/impl/quality_report.py
 src/bioetl/interfaces/__init__.py
 src/bioetl/interfaces/cli/__init__.py
 src/bioetl/interfaces/cli/app.py
