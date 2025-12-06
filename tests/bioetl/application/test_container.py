@@ -23,13 +23,13 @@ from bioetl.domain.provider_registry import (  # noqa: E402
     reset_provider_registry,
     restore_provider_registry,
 )
-from bioetl.domain.providers import (
+from bioetl.domain.providers import (  # noqa: E402
     ProviderComponents,
     ProviderDefinition,
     ProviderId,
 )
-from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.config.models import (
+from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider  # noqa: E402
+from bioetl.infrastructure.config.models import (  # noqa: E402
     ChemblSourceConfig,
     DummyProviderConfig,
     PipelineConfig,
