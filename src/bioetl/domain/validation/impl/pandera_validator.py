@@ -5,8 +5,8 @@ This module provides a Pandera-based validator implementation.
 """
 
 import pandas as pd
-from pandera.errors import SchemaErrors
 import pandera.pandas as pa
+from pandera.errors import SchemaErrors
 
 from bioetl.domain.validation.contracts import ValidationResult, ValidatorABC
 

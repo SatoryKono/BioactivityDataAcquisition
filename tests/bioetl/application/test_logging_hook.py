@@ -23,7 +23,9 @@ class _DummyLogger(LoggerAdapterABC):
     def warning(self, msg: str, **ctx: object) -> None:
         self.calls.append(("warning", msg, ctx))
 
-    def bind(self, **ctx: object) -> Self:  # pragma: no cover - не используется в тестах
+    def bind(
+        self, **ctx: object
+    ) -> Self:  # pragma: no cover - не используется в тестах
         return self
 
 
@@ -31,7 +33,9 @@ def test_logging_hook_records_messages_and_context():
     logger = _DummyLogger()
     hook = LoggingPipelineHookImpl(logger)
 
-    context = SimpleNamespace(run_id="run-123", provider="chembl", entity_name="bioactivity")
+    context = SimpleNamespace(
+        run_id="run-123", provider="chembl", entity_name="bioactivity"
+    )
     stage_result = StageResult(
         stage_name="extract",
         success=True,
@@ -57,7 +61,12 @@ def test_logging_hook_records_messages_and_context():
         (
             "debug",
             "Hook: stage started",
-            {"stage": "extract", "run_id": "run-123", "provider": "chembl", "entity": "bioactivity"},
+            {
+                "stage": "extract",
+                "run_id": "run-123",
+                "provider": "chembl",
+                "entity": "bioactivity",
+            },
         ),
         (
             "debug",

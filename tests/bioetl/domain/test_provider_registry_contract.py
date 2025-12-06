@@ -8,7 +8,12 @@ from bioetl.domain.provider_registry import (
     reset_provider_registry,
     restore_provider_registry,
 )
-from bioetl.domain.providers import BaseProviderConfig, ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.domain.providers import (
+    BaseProviderConfig,
+    ProviderComponents,
+    ProviderDefinition,
+    ProviderId,
+)
 
 
 class DummyProviderConfig(BaseProviderConfig):
@@ -23,7 +28,9 @@ class DummyProviderComponents(
     def create_client(self, config: BaseProviderConfig) -> object:
         return {"client_config": config}
 
-    def create_extraction_service(self, config: BaseProviderConfig, *, client: object | None = None) -> object:
+    def create_extraction_service(
+        self, config: BaseProviderConfig, *, client: object | None = None
+    ) -> object:
         return {"extraction_config": config, "client": client}
 
     def create_normalization_service(
@@ -33,9 +40,15 @@ class DummyProviderComponents(
         client: object | None = None,
         pipeline_config: object | None = None,
     ) -> object | None:
-        return {"normalization_config": config, "client": client, "pipeline_config": pipeline_config}
+        return {
+            "normalization_config": config,
+            "client": client,
+            "pipeline_config": pipeline_config,
+        }
 
-    def create_writer(self, config: BaseProviderConfig, *, client: object | None = None) -> object:
+    def create_writer(
+        self, config: BaseProviderConfig, *, client: object | None = None
+    ) -> object:
         return {"writer_config": config, "client": client}
 
 
@@ -66,7 +79,9 @@ def chembl_provider_definition() -> ProviderDefinition:
     )
 
 
-def test_register_and_get_provider(dummy_provider_definition: ProviderDefinition) -> None:
+def test_register_and_get_provider(
+    dummy_provider_definition: ProviderDefinition,
+) -> None:
     reset_provider_registry()
 
     register_provider(dummy_provider_definition)
@@ -75,7 +90,9 @@ def test_register_and_get_provider(dummy_provider_definition: ProviderDefinition
     assert list_providers() == [dummy_provider_definition]
 
 
-def test_register_provider_duplicate(dummy_provider_definition: ProviderDefinition) -> None:
+def test_register_provider_duplicate(
+    dummy_provider_definition: ProviderDefinition,
+) -> None:
     reset_provider_registry()
     register_provider(dummy_provider_definition)
 
@@ -84,7 +101,8 @@ def test_register_provider_duplicate(dummy_provider_definition: ProviderDefiniti
 
 
 def test_reset_and_restore_provider_registry(
-    dummy_provider_definition: ProviderDefinition, chembl_provider_definition: ProviderDefinition
+    dummy_provider_definition: ProviderDefinition,
+    chembl_provider_definition: ProviderDefinition,
 ) -> None:
     definitions = [dummy_provider_definition, chembl_provider_definition]
 

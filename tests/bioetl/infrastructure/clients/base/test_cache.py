@@ -2,8 +2,8 @@
 Tests for cache implementations.
 """
 
-from pathlib import Path
 import time
+from pathlib import Path
 
 from bioetl.infrastructure.clients.base.impl.cache import FileCacheImpl, MemoryCacheImpl
 

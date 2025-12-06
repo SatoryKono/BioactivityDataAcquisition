@@ -10,8 +10,8 @@ from bioetl.application.container import PipelineContainer
 from bioetl.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
-    WriteResult,
     WriterABC,
+    WriteResult,
 )
 from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
 from bioetl.domain.models import RunContext
@@ -119,7 +119,10 @@ def test_container_uses_overridden_metadata_writer(
     df = pd.DataFrame({"id": [1]})
 
     result = output_writer.write_result(
-        df, Path(container.config.output_path), container.config.entity_name, run_context
+        df,
+        Path(container.config.output_path),
+        container.config.entity_name,
+        run_context,
     )
 
     assert result.row_count == 1
@@ -128,7 +131,9 @@ def test_container_uses_overridden_metadata_writer(
     assert metadata_writer.meta_calls[0]["path"].name == "meta.yaml"
 
 
-def test_container_defaults_use_factories(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_container_defaults_use_factories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     default_writer_instance = RecordingWriter()
     default_metadata_writer_instance = RecordingMetadataWriter()
     default_quality_reporter_instance = StubQualityReporter()

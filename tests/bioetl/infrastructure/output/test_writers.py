@@ -2,10 +2,9 @@
 Tests for concrete writer implementations.
 """
 
-from collections.abc import Callable
-
 # pylint: disable=redefined-outer-name
 import hashlib
+from collections.abc import Callable
 from pathlib import Path
 from unittest.mock import MagicMock
 
