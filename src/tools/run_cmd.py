@@ -36,7 +36,9 @@ def main():
 
     # Patch get_release_version to avoid /status call
     with patch.object(
-        ChemblExtractionServiceImpl, "get_release_version", return_value="chembl_mock"
+        ChemblExtractionServiceImpl,
+        "get_release_version",
+        return_value="chembl_mock",
     ):
         try:
             app()

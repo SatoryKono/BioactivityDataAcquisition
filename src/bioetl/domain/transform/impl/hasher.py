@@ -120,14 +120,7 @@ class HasherImpl(HasherABC):
             values = []
             for col in columns:
                 val = row.get(col)
-                # If any component is missing (though row.get usually returns None or NaN if missing in index?)
-                # In DataFrame apply(axis=1), row has all columns.
-                # But we should check if the value itself effectively means "missing" if that's the logic.
-                # The old logic: if field not in record -> return None.
-                # Here the column exists in DF, but value might be None/NaN.
-                # Standard logic: just take the value (None/NaN handling in serializer).
-                # But wait, compute_hash_business_key returned None if key missing.
-                # Here we assume columns exist in DF.
+                # Columns exist in DF; None/NaN handled by serializer.
                 values.append(val)
 
             serialized = _serialize_canonical(values)

@@ -29,9 +29,9 @@ class HashService:
         Добавляет столбцы hash_row и hash_business_key.
 
         Logic:
-        1. Calculate hash_business_key (if configured) based on specific columns (values list).
+        1. Calculate hash_business_key (if configured) based on specific columns.
         2. Add hash_business_key to DataFrame.
-        3. Calculate hash_row based on ALL columns (including hash_business_key) as a canonical JSON object.
+        3. Calculate hash_row based on ALL columns as canonical JSON.
         """
         df = df.copy()
 

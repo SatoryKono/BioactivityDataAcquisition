@@ -94,7 +94,10 @@ class ChemblTransformerImpl(TransformerABC):
 
         if dropped_count > 0:
             self.logger.warning(
-                f"Dropped {dropped_count} rows with nulls in required columns: {required_cols}"
+                (
+                    f"Dropped {dropped_count} rows with nulls in required columns: "
+                    f"{required_cols}"
+                )
             )
 
         return df_clean
