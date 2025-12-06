@@ -6,8 +6,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
+import yaml
 
 DEFAULT_CONFIGS_ROOT = Path("configs")
 DEFAULT_PROVIDERS_REGISTRY_PATH = DEFAULT_CONFIGS_ROOT / "providers.yaml"

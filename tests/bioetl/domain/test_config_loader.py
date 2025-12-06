@@ -3,8 +3,10 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.configs import ChemblSourceConfig
-from bioetl.infrastructure.config import loader as config_loader
-from bioetl.infrastructure.config import provider_registry_loader
+from bioetl.infrastructure.config import (
+    loader as config_loader,
+    provider_registry_loader,
+)
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,

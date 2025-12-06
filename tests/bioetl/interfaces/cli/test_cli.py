@@ -2,8 +2,8 @@
 Tests for the CLI entry point.
 """
 
-import sys
 from pathlib import Path
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest

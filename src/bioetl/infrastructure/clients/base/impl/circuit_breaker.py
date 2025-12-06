@@ -1,5 +1,5 @@
-import time
 from enum import Enum
+import time
 
 
 class CircuitState(Enum):

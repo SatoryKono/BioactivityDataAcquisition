@@ -1,8 +1,8 @@
+from decimal import Decimal
 import hashlib
 import json
-import unicodedata
-from decimal import Decimal
 from typing import Any, Iterable
+import unicodedata
 
 import pandas as pd
 

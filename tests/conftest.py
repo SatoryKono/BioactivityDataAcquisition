@@ -2,16 +2,16 @@
 Pytest configuration and shared fixtures.
 """
 
-import socket
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
+import socket
+import sys
 from typing import Any, cast
 from unittest.mock import MagicMock
 
 import pandas as pd
-import pytest
 from pydantic import AnyHttpUrl
+import pytest
 
 from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import (

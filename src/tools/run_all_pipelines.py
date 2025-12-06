@@ -1,7 +1,7 @@
-import json
-import sys
 from datetime import datetime, timezone
+import json
 from pathlib import Path
+import sys
 
 from bioetl.interfaces.cli.app import app
 
