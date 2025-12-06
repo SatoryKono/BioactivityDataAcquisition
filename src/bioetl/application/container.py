@@ -34,7 +34,11 @@ from bioetl.infrastructure.files.csv_record_source import (
 )
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
-from bioetl.infrastructure.output.contracts import MetadataWriterABC
+from bioetl.infrastructure.output.contracts import (
+    MetadataWriterABC,
+    QualityReportABC,
+    WriterABC,
+)
 from bioetl.infrastructure.output.factories import (
     default_metadata_writer,
     default_quality_reporter,
@@ -53,7 +57,9 @@ class PipelineContainer(PipelineContainerABC):
         config: PipelineConfig,
         *,
         logger: LoggerAdapterABC | None = None,
+        writer: WriterABC | None = None,
         metadata_writer: MetadataWriterABC | None = None,
+        quality_reporter: QualityReportABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashService | None = None,
@@ -65,13 +71,24 @@ class PipelineContainer(PipelineContainerABC):
         self._provider_id = ProviderId(self._config.provider)
         self._schema_registry = SchemaRegistry()
         self._logger: LoggerAdapterABC = logger or default_logger()
+        self._writer: WriterABC = writer or default_writer()
         self._metadata_writer: MetadataWriterABC = metadata_writer or default_metadata_writer()
+        self._quality_reporter: QualityReportABC = (
+            quality_reporter or default_quality_reporter()
+        )
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy: ErrorPolicyABC | None = error_policy
         self._hash_service: HashService | None = hash_service
         self._post_transformer: TransformerABC | None = post_transformer
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
+        self._output_writer = UnifiedOutputWriter(
+            writer=self._writer,
+            metadata_writer=self._metadata_writer,
+            quality_reporter=self._quality_reporter,
+            config=self._config.determinism,
+            qc_config=self._config.qc,
+        )
         register_schemas(self._schema_registry)
 
     @property
@@ -88,13 +105,7 @@ class PipelineContainer(PipelineContainerABC):
 
     def get_output_writer(self) -> UnifiedOutputWriter:
         """Get the unified output writer."""
-        return UnifiedOutputWriter(
-            writer=default_writer(),
-            metadata_writer=self._metadata_writer,
-            quality_reporter=default_quality_reporter(),
-            config=self._config.determinism,
-            qc_config=self._config.qc,
-        )
+        return self._output_writer
 
     def get_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
@@ -273,7 +284,9 @@ def build_pipeline_dependencies(
     config: PipelineConfig,
     *,
     logger: LoggerAdapterABC | None = None,
+    writer: WriterABC | None = None,
     metadata_writer: MetadataWriterABC | None = None,
+    quality_reporter: QualityReportABC | None = None,
     hooks: list[PipelineHookABC] | None = None,
     error_policy: ErrorPolicyABC | None = None,
     hash_service: HashService | None = None,
@@ -285,7 +298,9 @@ def build_pipeline_dependencies(
     return PipelineContainer(
         config,
         logger=logger,
+        writer=writer,
         metadata_writer=metadata_writer,
+        quality_reporter=quality_reporter,
         hooks=hooks,
         error_policy=error_policy,
         hash_service=hash_service,
