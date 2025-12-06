@@ -8,7 +8,7 @@ from bioetl.application.pipelines.hooks_impl import (
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
-from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import (
     MutableProviderRegistryABC,

@@ -1,14 +1,14 @@
-"""Загрузчик конфигураций пайплайнов со строгой валидацией."""
+"""Загрузчик конфигураций пайплайнов (инфраструктура)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
-import yaml
 from pydantic import ValidationError
 
-from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.transform.merge import deep_merge
 from bioetl.infrastructure.config.provider_registry_loader import (
     ProviderNotConfiguredError,
     ProviderRegistryError,
@@ -16,11 +16,11 @@ from bioetl.infrastructure.config.provider_registry_loader import (
     ProviderRegistryNotFoundError,
     ensure_provider_known,
 )
-from bioetl.domain.transform.merge import deep_merge
-
-CONFIGS_ROOT = Path("configs")
-PIPELINES_ROOT = CONFIGS_ROOT / "pipelines"
-PROFILES_ROOT = CONFIGS_ROOT / "profiles"
+from bioetl.infrastructure.config.sources import (
+    get_configs_root,
+    read_yaml_from_path,
+    resolve_pipeline_config_path,
+)
 
 
 class ConfigError(Exception):
@@ -54,65 +54,115 @@ class UnknownProviderError(ConfigError):
 
 
 def load_pipeline_config(
-    pipeline_id: str, profile: str | None = None
+    pipeline_id: str,
+    *,
+    profile: str | None = None,
+    cli_overrides: dict[str, Any] | None = None,
+    env_overrides: dict[str, Any] | None = None,
+    base_dir: str | Path | None = None,
 ) -> PipelineConfig:
-    """Загружает конфиг по идентификатору вида \"provider.entity\"."""
+    """Загружает конфиг по идентификатору вида '<provider>.<entity>'."""
 
+    config_path = resolve_pipeline_config_path(pipeline_id, base_dir=base_dir)
     try:
-        provider, entity = pipeline_id.split(".", maxsplit=1)
-    except ValueError as exc:
-        raise ConfigError(
-            "Pipeline id must be in format '<provider>.<entity>'"
-        ) from exc
+        config_path, merged_config = read_yaml_from_path(
+            config_path,
+            profile=profile,
+            profiles_root=get_configs_root(base_dir) / "profiles",
+        )
+    except FileNotFoundError as exc:
+        raise ConfigFileNotFoundError(config_path) from exc
 
-    config_path = PIPELINES_ROOT / provider / f"{entity}.yaml"
-    return load_pipeline_config_from_path(config_path, profile=profile)
+    registry_path = get_configs_root(base_dir) / "providers.yaml"
+    return _finalize_config(
+        merged_config,
+        config_path,
+        cli_overrides=cli_overrides,
+        env_overrides=env_overrides,
+        registry_path=registry_path,
+    )
 
 
 def load_pipeline_config_from_path(
     config_path: str | Path,
+    *,
     profile: str | None = None,
     profiles_root: Path | None = None,
+    cli_overrides: dict[str, Any] | None = None,
+    env_overrides: dict[str, Any] | None = None,
 ) -> PipelineConfig:
     """Загружает и валидирует конфигурацию из файла."""
 
-    path = Path(config_path)
-    if not path.exists():
-        raise ConfigFileNotFoundError(path)
+    try:
+        path, merged_config = read_yaml_from_path(
+            config_path,
+            profile=profile,
+            profiles_root=profiles_root,
+        )
+    except FileNotFoundError as exc:
+        raise ConfigFileNotFoundError(Path(config_path)) from exc
 
-    raw_config = _load_yaml(path)
-    extends_profile = raw_config.pop("extends", None)
+    configs_root = path.parents[2] if len(path.parents) >= 3 else path.parent
+    registry_path = configs_root / "providers.yaml"
+    return _finalize_config(
+        merged_config,
+        path,
+        cli_overrides=cli_overrides,
+        env_overrides=env_overrides,
+        registry_path=registry_path,
+    )
 
-    merged_config: dict[str, Any] = {}
-    if extends_profile:
-        base_profile = _resolve_profile(extends_profile, profiles_root=profiles_root)
-        merged_config = deep_merge(merged_config, base_profile)
 
-    merged_config = deep_merge(merged_config, raw_config)
-    merged_config.pop("extends", None)
+def _finalize_config(
+    merged_config: dict[str, Any],
+    config_path: Path,
+    *,
+    cli_overrides: dict[str, Any] | None,
+    env_overrides: dict[str, Any] | None,
+    registry_path: Path,
+) -> PipelineConfig:
+    _validate_provider(merged_config, config_path, registry_path=registry_path)
 
-    if profile and profile != "default":
-        profile_overrides = _resolve_profile(profile, profiles_root=profiles_root)
-        merged_config = deep_merge(merged_config, profile_overrides)
-
-    _validate_provider(merged_config, path)
-
-    merged_config = _transform_legacy_config(merged_config, path)
-    _validate_input_path_exists(merged_config, path)
+    merged_config = _transform_legacy_config(merged_config, config_path)
+    merged_config = _apply_overrides(
+        merged_config,
+        env_overrides=env_overrides,
+        cli_overrides=cli_overrides,
+    )
+    _validate_input_path_exists(merged_config, config_path)
 
     try:
         return PipelineConfig.model_validate(merged_config)
     except ValidationError as exc:
-        raise ConfigValidationError(path, exc.__str__()) from exc
+        raise ConfigValidationError(config_path, exc.__str__()) from exc
 
 
-def _validate_provider(config: dict[str, Any], path: Path) -> None:
+def _apply_overrides(
+    base_config: dict[str, Any],
+    *,
+    env_overrides: dict[str, Any] | None,
+    cli_overrides: dict[str, Any] | None,
+) -> dict[str, Any]:
+    merged = dict(base_config)
+    if env_overrides:
+        merged = deep_merge(merged, env_overrides)
+    if cli_overrides:
+        merged = deep_merge(merged, cli_overrides)
+    return merged
+
+
+def _validate_provider(
+    config: dict[str, Any],
+    path: Path,
+    *,
+    registry_path: Path,
+) -> None:
     provider = config.get("provider")
     if provider is None:
         raise ConfigValidationError(path, "'provider' field is required")
 
     try:
-        ensure_provider_known(str(provider))
+        ensure_provider_known(str(provider), registry_path=registry_path)
     except ProviderNotConfiguredError as exc:
         raise UnknownProviderError(
             str(provider),
@@ -238,40 +288,6 @@ def _drop_legacy_fields(transformed: dict[str, Any]) -> None:
         transformed.pop(field, None)
 
 
-_def_profile_cache: dict[str, dict[str, Any]] = {}
-
-
-def _resolve_profile(
-    profile_name: str, profiles_root: Path | None = None
-) -> dict[str, Any]:
-    profiles_dir = profiles_root or PROFILES_ROOT
-    cache_key = f"{profiles_dir}:{profile_name}"
-
-    if cache_key in _def_profile_cache:
-        return _def_profile_cache[cache_key]
-
-    profile_path = profiles_dir / f"{profile_name}.yaml"
-    if not profile_path.exists():
-        raise ConfigFileNotFoundError(profile_path)
-
-    profile_data = _load_yaml(profile_path)
-    parent = profile_data.get("extends")
-    if parent:
-        parent_data = _resolve_profile(parent, profiles_root=profiles_root)
-        profile_data = deep_merge(parent_data, profile_data)
-
-    _def_profile_cache[cache_key] = profile_data
-    return profile_data
-
-
-def _load_yaml(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as file:
-        data = yaml.safe_load(file) or {}
-    if not isinstance(data, dict):
-        raise ConfigValidationError(path, "YAML root must be a mapping")
-    return data
-
-
 def _validate_input_path_exists(config: dict[str, Any], config_path: Path) -> None:
     input_path = config.get("input_path")
     if input_path is None or input_path == "":
@@ -279,7 +295,9 @@ def _validate_input_path_exists(config: dict[str, Any], config_path: Path) -> No
 
     input_path_obj = Path(str(input_path))
     if not input_path_obj.exists():
-        raise ConfigValidationError(config_path, f"Input path does not exist: {input_path}")
+        raise ConfigValidationError(
+            config_path, f"Input path does not exist: {input_path}"
+        )
 
     config["input_path"] = str(input_path_obj)
 
@@ -292,3 +310,4 @@ __all__ = [
     "load_pipeline_config",
     "load_pipeline_config_from_path",
 ]
+

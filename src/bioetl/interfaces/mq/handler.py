@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.config_loader import load_pipeline_config
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.models import RunResult
 from bioetl.infrastructure.clients.provider_registry_loader import (
@@ -36,7 +36,7 @@ class MQJobHandler:
 
     def handle(self, job: MQJob) -> RunResult:
         pipeline_id = _to_pipeline_id(job.pipeline_name)
-        config = load_pipeline_config(pipeline_id, profile=job.profile)
+        config = build_runtime_config(pipeline_id=pipeline_id, profile=job.profile)
         if not config.features.mq_interface_enabled:
             raise RuntimeError("MQ interface is disabled by configuration")
 

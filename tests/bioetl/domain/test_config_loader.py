@@ -2,23 +2,22 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application import config_loader
-from bioetl.application.config_loader import (
+from bioetl.domain.configs import ChemblSourceConfig
+from bioetl.infrastructure.config import provider_registry_loader
+from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
     UnknownProviderError,
     load_pipeline_config,
     load_pipeline_config_from_path,
 )
-from bioetl.config import provider_registry
-from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 @pytest.fixture(autouse=True)
 def _reset_provider_registry() -> None:
-    provider_registry.clear_provider_registry_cache()
+    provider_registry_loader.clear_provider_registry_cache()
     yield
-    provider_registry.clear_provider_registry_cache()
+    provider_registry_loader.clear_provider_registry_cache()
 
 
 def test_load_pipeline_config_from_path_valid():
@@ -67,8 +66,9 @@ provider_config:
 
 
 def test_unknown_provider_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    pipelines_root = tmp_path / "pipelines"
-    profiles_root = tmp_path / "profiles"
+    base_dir = tmp_path
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
     (pipelines_root / "unknown").mkdir(parents=True)
     profiles_root.mkdir()
 
@@ -91,21 +91,19 @@ provider_config:
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(config_loader, "PIPELINES_ROOT", pipelines_root)
-    monkeypatch.setattr(config_loader, "PROFILES_ROOT", profiles_root)
-
     with pytest.raises(UnknownProviderError):
-        load_pipeline_config("unknown.entity")
+        load_pipeline_config("unknown.entity", base_dir=base_dir)
 
 
 def test_provider_registry_allows_known_provider(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    providers_file = tmp_path / "providers.yaml"
+    base_dir = tmp_path
+    providers_file = base_dir / "providers.yaml"
     providers_file.write_text("providers:\n  - chembl\n", encoding="utf-8")
 
-    pipelines_root = tmp_path / "pipelines"
-    profiles_root = tmp_path / "profiles"
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
     chembl_dir = pipelines_root / "chembl"
     chembl_dir.mkdir(parents=True)
     profiles_root.mkdir()
@@ -129,16 +127,14 @@ provider_config:
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(config_loader, "PIPELINES_ROOT", pipelines_root)
-    monkeypatch.setattr(config_loader, "PROFILES_ROOT", profiles_root)
     monkeypatch.setattr(
-        provider_registry,
+        provider_registry_loader,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry.clear_provider_registry_cache()
+    provider_registry_loader.clear_provider_registry_cache()
 
-    config = load_pipeline_config("chembl.activity")
+    config = load_pipeline_config("chembl.activity", base_dir=base_dir)
 
     assert config.provider == "chembl"
 
@@ -146,11 +142,12 @@ provider_config:
 def test_provider_registry_rejects_missing_provider(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    providers_file = tmp_path / "providers.yaml"
+    base_dir = tmp_path
+    providers_file = base_dir / "providers.yaml"
     providers_file.write_text("providers:\n  - dummy\n", encoding="utf-8")
 
-    pipelines_root = tmp_path / "pipelines"
-    profiles_root = tmp_path / "profiles"
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
     chembl_dir = pipelines_root / "chembl"
     chembl_dir.mkdir(parents=True)
     profiles_root.mkdir()
@@ -174,22 +171,21 @@ provider_config:
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(config_loader, "PIPELINES_ROOT", pipelines_root)
-    monkeypatch.setattr(config_loader, "PROFILES_ROOT", profiles_root)
     monkeypatch.setattr(
-        provider_registry,
+        provider_registry_loader,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry.clear_provider_registry_cache()
+    provider_registry_loader.clear_provider_registry_cache()
 
     with pytest.raises(UnknownProviderError):
-        load_pipeline_config("chembl.activity")
+        load_pipeline_config("chembl.activity", base_dir=base_dir)
 
 
 def test_profile_merge_applied(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
-    pipelines_root = tmp_path / "pipelines"
-    profiles_root = tmp_path / "profiles"
+    base_dir = tmp_path
+    pipelines_root = base_dir / "pipelines"
+    profiles_root = base_dir / "profiles"
     chembl_dir = pipelines_root / "chembl"
     chembl_dir.mkdir(parents=True)
     profiles_root.mkdir()
@@ -222,10 +218,7 @@ batch_size: 25
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(config_loader, "PIPELINES_ROOT", pipelines_root)
-    monkeypatch.setattr(config_loader, "PROFILES_ROOT", profiles_root)
-
-    config = load_pipeline_config("chembl.activity")
+    config = load_pipeline_config("chembl.activity", base_dir=base_dir)
 
     assert config.output_path == "/tmp/out"  # pipeline overrides profile
     assert config.batch_size == 10

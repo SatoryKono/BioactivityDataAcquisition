@@ -7,10 +7,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from bioetl.application.config_loader import load_pipeline_config_from_path
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
-from bioetl.config.pipeline_config_schema import MetricsConfig, PipelineConfig
+from bioetl.domain.configs import MetricsConfig
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
@@ -66,7 +66,7 @@ def validate_config(config_path: Path):
     Validates a configuration file.
     """
     try:
-        config = load_pipeline_config_from_path(config_path)
+        config = build_runtime_config(config_path=config_path)
         console.print(f"[green]Config {config_path} is valid![/green]")
         console.print(f"Entity: {config.entity_name}")
         console.print(f"Provider: {config.provider}")
@@ -137,21 +137,19 @@ def run(
         if not resolved_config_path:
             sys.exit(1)
 
-        config = load_pipeline_config_from_path(
-            resolved_config_path,
-            profile=profile,
-            profiles_root=base_dir / "profiles",
-        )
-
-        config_payload = _apply_cli_overrides(
-            config.model_dump(),
+        cli_overrides = _collect_cli_overrides(
             output=output,
             input_path=input_path,
             input_mode=input_mode,
             csv_delimiter=csv_delimiter,
             csv_header=csv_header,
         )
-        config = PipelineConfig(**config_payload)
+        config = build_runtime_config(
+            config_path=resolved_config_path,
+            profile=profile,
+            configs_root=base_dir,
+            cli_overrides=cli_overrides,
+        )
         _start_metrics_exporter(config.metrics, dry_run=dry_run)
         provider_registry = load_provider_registry(
             config_path=base_dir / "providers.yaml"
@@ -243,8 +241,7 @@ def _start_metrics_exporter(
         )
 
 
-def _apply_cli_overrides(
-    config_payload: dict[str, Any],
+def _collect_cli_overrides(
     *,
     output: Optional[Path],
     input_path: Optional[Path],
@@ -252,21 +249,22 @@ def _apply_cli_overrides(
     csv_delimiter: Optional[str],
     csv_header: Optional[bool],
 ) -> dict[str, Any]:
-    payload = dict(config_payload)
+    overrides: dict[str, Any] = {}
     if output:
-        payload["output_path"] = str(output)
+        overrides["output_path"] = str(output)
     if input_path:
-        payload["input_path"] = str(input_path)
+        overrides["input_path"] = str(input_path)
     if input_mode:
-        payload["input_mode"] = input_mode
+        overrides["input_mode"] = input_mode
 
-    csv_options = payload.get("csv_options", {})
+    csv_options: dict[str, Any] = {}
     if csv_delimiter:
         csv_options["delimiter"] = csv_delimiter
     if csv_header is not None:
         csv_options["header"] = csv_header
-    payload["csv_options"] = csv_options
-    return payload
+    if csv_options:
+        overrides["csv_options"] = csv_options
+    return overrides
 
 
 if __name__ == "__main__":
