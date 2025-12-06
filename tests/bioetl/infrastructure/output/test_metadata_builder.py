@@ -69,8 +69,9 @@ def test_build_dry_run_metadata(run_context_factory):
     assert "files" not in meta
 
 
-def test_run_and_dry_run_share_base_fields(run_context):
+def test_run_and_dry_run_share_base_fields(run_context_factory):
     """Run и dry-run должны совпадать по базовым полям и различаться по специфике."""
+    run_context = run_context_factory()
     write_result = WriteResult(
         path=Path("/tmp/out/test.csv"),
         row_count=42,
