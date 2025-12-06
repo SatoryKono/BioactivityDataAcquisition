@@ -1,10 +1,8 @@
 ---
 id: 7f1b5e5d-4c9a-4bf0-8c6f-0b3fdde2d0ac
 ---
-classDiagram
-classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
 
 class ValidationService {
   +get_schema(entity_name)
@@ -22,16 +20,6 @@ class ChemblNormalizationService {
 }
 class NormalizationConfigProvider
 class NormalizationConfig
-
-ValidationService:::domainPrimary
-ChemblNormalizationService:::domainPrimary
-NormalizationService:::interface
-SchemaProviderABC:::interface
-ValidatorABC:::interface
-PanderaValidator:::domainSecondary
-SchemaRegistry:::domainSecondary
-NormalizationConfigProvider:::interface
-NormalizationConfig:::domainSecondary
 
 ValidationService --> SchemaProviderABC
 SchemaRegistry ..|> SchemaProviderABC

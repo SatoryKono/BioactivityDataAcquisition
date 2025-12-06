@@ -1,10 +1,8 @@
 ---
 id: 2fbc0e6a-4f3d-4d73-8a1d-5f7b9fdf7f0d
 ---
-classDiagram
-classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram-v2
 
 class ConfigLoader {
   +load_pipeline_config(pipeline_id, profile)
@@ -20,14 +18,6 @@ class ConfigFileNotFoundError
 class ConfigValidationError
 class UnknownProviderError
 class DeepMerge
-
-ConfigLoader:::domainPrimary
-PipelineConfig:::domainSecondary
-ConfigError:::interface
-ConfigFileNotFoundError:::domainSecondary
-ConfigValidationError:::domainSecondary
-UnknownProviderError:::domainSecondary
-DeepMerge:::domainSecondary
 
 ConfigFileNotFoundError --|> ConfigError
 ConfigValidationError --|> ConfigError
