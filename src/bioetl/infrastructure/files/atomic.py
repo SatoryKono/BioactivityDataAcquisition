@@ -3,7 +3,6 @@ Atomic file operation utilities.
 """
 
 import os
-import shutil
 import time
 from pathlib import Path
 from typing import Callable
@@ -45,13 +44,14 @@ class AtomicFileOperation:
     def _replace_with_retry(self, src: Path, dst: Path) -> None:
         """
         Атомарная замена файла с повторными попытками (для Windows).
-        Использует shutil.move, чтобы позволить перезапись и поддержать мок в тестах.
+        Использует os.replace для атомарной замены на всех платформах.
         """
-        move_fn = shutil.move
         last_error: OSError | None = None
         for attempt in range(MAX_FILE_RETRIES):
             try:
-                move_fn(src, dst)
+                # os.replace атомарно заменяет файл на всех платформах
+                # На Windows использует MoveFileEx с MOVEFILE_REPLACE_EXISTING
+                os.replace(src, dst)
                 return
             except OSError as exc:
                 last_error = exc

@@ -8,7 +8,7 @@ def main() -> None:
     if str(src_dir) not in sys.path:
         sys.path.insert(0, str(src_dir))
 
-    from bioetl.interfaces.cli.app import app  # noqa: WPS433 local import
+    from bioetl.interfaces.cli.app import app
 
     app()
 
