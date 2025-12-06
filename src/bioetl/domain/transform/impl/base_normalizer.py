@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Callable, cast
 
 import pandas as pd
+from pandas._typing import DtypeArg
 
 from bioetl.domain.transform.contracts import NormalizationConfigProvider
 from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
@@ -14,9 +15,33 @@ from bioetl.domain.transform.normalizers import normalize_array, normalize_recor
 class BaseNormalizationService:
     """Provide reusable normalization helpers for services."""
 
+    _NUMERIC_DTYPES: dict[str, DtypeArg] = {
+        "number": "Float64",
+        "integer": "Int64",
+    }
+
     def __init__(self, config: NormalizationConfigProvider, empty_value: Any = None):
         self._config = config
         self._empty_value = empty_value
+
+    def coerce_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Cast configured numeric columns to nullable pandas dtypes."""
+
+        for field_cfg in self._config.fields:
+            name = field_cfg.get("name")
+            dtype = field_cfg.get("data_type")
+
+            if not isinstance(name, str) or not isinstance(dtype, str):
+                continue
+
+            target_dtype = self._NUMERIC_DTYPES.get(dtype)
+            if target_dtype is None or name not in df.columns:
+                continue
+
+            coerced = pd.to_numeric(df[name], errors="coerce")
+            df[name] = pd.Series(coerced, dtype=target_dtype)  # type: ignore[arg-type]
+
+        return df
 
     def _resolve_mode(self, field_name: str) -> str:
         if field_name in self._config.normalization.case_sensitive_fields:

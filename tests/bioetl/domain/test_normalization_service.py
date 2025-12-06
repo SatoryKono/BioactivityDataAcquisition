@@ -22,6 +22,8 @@ class _ConfigStub:
             {"name": "tags", "data_type": "array"},
             {"name": "metadata", "data_type": "object"},
             {"name": "label", "data_type": "string"},
+            {"name": "score", "data_type": "number"},
+            {"name": "count", "data_type": "integer"},
         ]
     )
 
@@ -91,3 +93,20 @@ def test_chembl_normalization_service_normalizes_dataframe_batch() -> None:
     assert normalized_df["tags"].tolist() == ["a|b", "c"]
     assert normalized_df["metadata"].tolist() == ["key:value", "another:item"]
     assert normalized_df["label"].tolist() == ["MiXeD", "lower"]
+
+
+def test_chembl_normalization_service_coerces_numeric_columns() -> None:
+    service = ChemblNormalizationService(_ConfigStub())
+    df = pd.DataFrame(
+        {
+            "score": ["1.234", "bad", None],
+            "count": ["5", None, ""],
+        }
+    )
+
+    normalized_df = service.normalize_dataframe(df)
+
+    assert str(normalized_df["score"].dtype) == "Float64"
+    assert str(normalized_df["count"].dtype) == "Int64"
+    assert normalized_df["score"].tolist() == [1.234, pd.NA, pd.NA]
+    assert normalized_df["count"].tolist() == [5, pd.NA, pd.NA]

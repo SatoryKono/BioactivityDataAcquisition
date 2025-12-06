@@ -14,26 +14,6 @@ from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_li
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
-_NUMERIC_DTYPES: dict[str, str] = {
-    "number": "Float64",
-    "integer": "Int64",
-}
-
-
-def _coerce_numeric_columns(
-    df: pd.DataFrame,
-    fields_cfg: list[dict[str, Any]],
-) -> pd.DataFrame:
-    for field_cfg in fields_cfg:
-        name = field_cfg.get("name")
-        dtype = field_cfg.get("data_type")
-        target_dtype = _NUMERIC_DTYPES.get(dtype)
-        if not name or target_dtype is None or name not in df.columns:
-            continue
-        df[name] = pd.to_numeric(df[name], errors="coerce").astype(target_dtype)
-    return df
-
-
 class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService):
     """
     Сервис нормализации данных.
@@ -91,7 +71,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             if dtype in ("array", "object"):
                 df[name] = df[name].astype("string").replace({pd.NA: None})
 
-        return _coerce_numeric_columns(df, self._config.fields)
+        return self.coerce_numeric_columns(df)
 
     def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         normalized: dict[str, Any] = {}
@@ -142,11 +122,11 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
                 normalized_df[name], cast(dict[str, Any], field_cfg)
             )
 
-        return _coerce_numeric_columns(normalized_df, self._config.fields)
+        return self.coerce_numeric_columns(normalized_df)
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         normalized = self.normalize_dataframe(df)
-        return _coerce_numeric_columns(normalized, self._config.fields)
+        return self.coerce_numeric_columns(normalized)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
