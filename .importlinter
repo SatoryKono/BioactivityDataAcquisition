@@ -1,12 +1,57 @@
 [importlinter]
 root_package = bioetl
 
-[contract:domain_no_infrastructure_interfaces]
-name = Domain does not import infrastructure or interfaces
+[contract:domain_purity]
+name = Domain depends only on itself and shared/stdlib utilities
 type = forbidden
 source_modules =
     bioetl.domain
 forbidden_modules =
+    bioetl.application
     bioetl.infrastructure
     bioetl.interfaces
 
+[contract:application_allowed_dependencies]
+name = Application imports domain plus explicitly allowed infrastructure contracts
+type = forbidden
+source_modules =
+    bioetl.application
+forbidden_modules =
+    bioetl.infrastructure
+ignore_imports =
+    bioetl.application.config.runtime -> bioetl.infrastructure.config.loader
+    bioetl.application.container -> bioetl.infrastructure.clients.provider_registry_loader
+    bioetl.application.container -> bioetl.infrastructure.files.csv_record_source
+    bioetl.application.container -> bioetl.infrastructure.logging.factories
+    bioetl.application.container -> bioetl.infrastructure.output.factories
+    bioetl.application.container -> bioetl.infrastructure.output.unified_writer
+    bioetl.application.orchestrator -> bioetl.infrastructure.clients.provider_registry_loader
+    bioetl.application.pipelines.contracts -> bioetl.infrastructure.output.unified_writer
+    bioetl.application.pipelines.hooks_impl -> bioetl.infrastructure.observability.metrics
+    bioetl.application.pipelines.base -> bioetl.infrastructure.output.metadata
+    bioetl.application.pipelines.base -> bioetl.infrastructure.output.unified_writer
+    bioetl.application.pipelines.chembl.base -> bioetl.infrastructure.output.unified_writer
+    bioetl.application.pipelines.chembl.extractor -> bioetl.infrastructure.files.csv_record_source
+    bioetl.application.pipelines.chembl.pipeline -> bioetl.infrastructure.output.unified_writer
+    bioetl.application.services.chembl_extraction -> bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl
+
+[contract:application_avoids_infrastructure_implementations]
+name = Application does not depend on infrastructure implementations (except compatibility facade)
+type = forbidden
+source_modules =
+    bioetl.application
+forbidden_modules =
+    bioetl.infrastructure.clients.chembl.impl
+    bioetl.infrastructure.clients.base.impl
+    bioetl.infrastructure.logging.impl
+ignore_imports =
+    bioetl.application.services.chembl_extraction -> bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl
+
+[contract:infrastructure_no_upper_layers]
+name = Infrastructure imports domain (and stdlib) but not higher layers
+type = forbidden
+source_modules =
+    bioetl.infrastructure
+forbidden_modules =
+    bioetl.application
+    bioetl.interfaces
