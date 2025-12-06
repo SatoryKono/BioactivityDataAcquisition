@@ -9,6 +9,13 @@ import yaml
 from pydantic import ValidationError
 
 from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.provider_registry import (
+    ProviderNotConfiguredError,
+    ProviderRegistryError,
+    ProviderRegistryFormatError,
+    ProviderRegistryNotFoundError,
+    ensure_provider_known,
+)
 from bioetl.domain.transform.merge import deep_merge
 
 CONFIGS_ROOT = Path("configs")
@@ -39,12 +46,11 @@ class ConfigValidationError(ConfigError):
 class UnknownProviderError(ConfigError):
     """Указан неизвестный провайдер."""
 
-    def __init__(self, provider: str) -> None:
-        super().__init__(f"Unknown provider: {provider}")
+    def __init__(self, provider: str, *, registry_path: Path | None = None) -> None:
+        suffix = f" in registry {registry_path}" if registry_path else ""
+        super().__init__(f"Unknown provider: {provider}{suffix}")
         self.provider = provider
-
-
-SUPPORTED_PROVIDERS = {"chembl"}
+        self.registry_path = registry_path
 
 
 def load_pipeline_config(
@@ -103,8 +109,17 @@ def _validate_provider(config: dict[str, Any], path: Path) -> None:
     provider = config.get("provider")
     if provider is None:
         raise ConfigValidationError(path, "'provider' field is required")
-    if provider not in SUPPORTED_PROVIDERS:
-        raise UnknownProviderError(str(provider))
+
+    try:
+        ensure_provider_known(str(provider))
+    except ProviderNotConfiguredError as exc:
+        raise UnknownProviderError(str(provider), registry_path=exc.registry_path) from exc
+    except ProviderRegistryNotFoundError as exc:
+        raise ConfigValidationError(path, str(exc)) from exc
+    except ProviderRegistryFormatError as exc:
+        raise ConfigValidationError(path, str(exc)) from exc
+    except ProviderRegistryError as exc:  # pragma: no cover - defensive
+        raise ConfigValidationError(path, str(exc)) from exc
 
 
 def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, Any]:
