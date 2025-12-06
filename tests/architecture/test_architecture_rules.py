@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import ast
+import importlib
+import inspect
 from collections import defaultdict
 from pathlib import Path
 from typing import Iterable
@@ -118,6 +120,22 @@ def abc_impls() -> dict[str, dict]:
     return yaml.safe_load(impls_path.read_text(encoding="utf-8"))
 
 
+def _load_class(target: str) -> type:
+    module_path, class_name = target.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    obj = getattr(module, class_name)
+    if not inspect.isclass(obj):
+        pytest.fail(f"{target} is not a class")
+    return obj
+
+
+def _is_explicit_subclass(candidate: type, expected_base: type) -> bool:
+    try:
+        return issubclass(candidate, expected_base)
+    except TypeError:
+        return expected_base in candidate.__mro__
+
+
 def test_abcs_have_documented_implementations(
     abc_registry: dict[str, str], abc_impls: dict[str, dict]
 ) -> None:
@@ -152,6 +170,32 @@ def test_abcs_have_documented_implementations(
         pytest.fail(
             "Referenced modules are absent: " + ", ".join(sorted(set(missing_files)))
         )
+
+
+def test_registered_impls_subclass_their_abcs(
+    abc_registry: dict[str, str], abc_impls: dict[str, dict]
+) -> None:
+    violations: list[str] = []
+
+    for abc_name, abc_target in abc_registry.items():
+        impl_entry = abc_impls.get(abc_name)
+        implementations = impl_entry.get("implementations") if impl_entry else None
+        if not implementations:
+            if abc_name in ALLOWED_ABCS_WITHOUT_IMPL:
+                continue
+            violations.append(f"{abc_name} is missing implementations")
+            continue
+
+        abc_cls = _load_class(abc_target)
+        for impl_target in implementations.values():
+            impl_cls = _load_class(impl_target)
+            if not _is_explicit_subclass(impl_cls, abc_cls):
+                violations.append(
+                    f"{impl_target} must subclass {abc_target} as per ABC/Impl pattern"
+                )
+
+    if violations:
+        pytest.fail("ABC/Impl contract violations:\n" + "\n".join(sorted(set(violations))))
 
 
 def test_pipeline_docs_and_stage_structure() -> None:
