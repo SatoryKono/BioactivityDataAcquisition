@@ -8,7 +8,11 @@ from bioetl.application.container import PipelineContainer, build_pipeline_depen
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.models import RunResult
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    load_provider_registry,
+)
 
 
 class PipelineOrchestrator:
@@ -18,16 +22,25 @@ class PipelineOrchestrator:
         self,
         pipeline_name: str,
         config: PipelineConfig,
-        container_factory: Callable[[PipelineConfig], PipelineContainer] | None = None,
+        *,
+        provider_registry: ProviderRegistryABC | None = None,
+        provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+        container_factory: Callable[..., PipelineContainer] | None = None,
     ) -> None:
         self._pipeline_name = pipeline_name
         self._config = config
+        self._provider_registry = provider_registry
+        self._provider_registry_provider = provider_registry_provider
         self._container_factory = container_factory or build_pipeline_dependencies
 
     def build_pipeline(self, *, limit: int | None = None) -> PipelineBase:
         """Создает экземпляр пайплайна с зависимостями."""
         pipeline_cls = get_pipeline_class(self._pipeline_name)
-        container = self._container_factory(self._config)
+        container = self._container_factory(
+            self._config,
+            provider_registry=self._provider_registry,
+            provider_registry_provider=self._provider_registry_provider,
+        )
 
         logger = container.get_logger()
         validation_service = container.get_validation_service()
@@ -105,7 +118,12 @@ class PipelineOrchestrator:
         limit: int | None,
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
-        orchestrator = PipelineOrchestrator(pipeline_name, config)
+        registry = load_provider_registry()
+        orchestrator = PipelineOrchestrator(
+            pipeline_name,
+            config,
+            provider_registry=registry,
+        )
         return orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
 
 

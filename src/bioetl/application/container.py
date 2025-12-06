@@ -10,7 +10,10 @@ from bioetl.application.pipelines.hooks_impl import (
 )
 from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.provider_registry import get_provider
+from bioetl.domain.provider_registry import (
+    ProviderRegistryABC,
+    get_provider_registry,
+)
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
@@ -26,10 +29,6 @@ from bioetl.domain.transform.transformers import (
     TransformerChain,
 )
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.clients.provider_registry_loader import (
-    DEFAULT_PROVIDERS_CONFIG_PATH,
-    ProviderRegistryLoader,
-)
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
@@ -58,7 +57,8 @@ class PipelineContainer:
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashService | None = None,
         post_transformer: TransformerABC | None = None,
-        providers_config_path: str | Path | None = None,
+        provider_registry: ProviderRegistryABC | None = None,
+        provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
     ) -> None:
         self.config = config
         self._provider_id = ProviderId(self.config.provider)
@@ -68,9 +68,9 @@ class PipelineContainer:
         self._error_policy: ErrorPolicyABC | None = error_policy
         self._hash_service: HashService | None = hash_service
         self._post_transformer: TransformerABC | None = post_transformer
-        self._providers_config_path = providers_config_path
+        self._provider_registry = provider_registry
+        self._provider_registry_provider = provider_registry_provider
         register_schemas(self._schema_registry)
-        self._register_providers()
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
@@ -228,22 +228,17 @@ class PipelineContainer:
             )
         return pk
 
-    def _register_providers(self) -> None:
-        providers_config_path = getattr(
-            self, "_providers_config_path", DEFAULT_PROVIDERS_CONFIG_PATH
-        )
-        # object.__new__ в тестах не вызывает __init__, поэтому поднимаем
-        # резервный логгер, если атрибут ещё не создан.
-        logger = getattr(self, "_logger", None)
-        if logger is None:
-            logger = default_logger()
-            # сохраняем, чтобы последующие вызовы get_logger не падали
-            self._logger = logger
-        loader = ProviderRegistryLoader(providers_config_path, logger=logger)
-        loader.load()
-
     def _get_provider_definition(self) -> ProviderDefinition:
-        return get_provider(self._provider_id)
+        return self._get_provider_registry().get_provider(self._provider_id)
+
+    def _get_provider_registry(self) -> ProviderRegistryABC:
+        if self._provider_registry is not None:
+            return self._provider_registry
+        if self._provider_registry_provider is not None:
+            self._provider_registry = self._provider_registry_provider()
+        else:
+            self._provider_registry = get_provider_registry()
+        return self._provider_registry
 
     def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
         source_config = self.config.get_source_config(self._provider_id.value)
@@ -263,7 +258,8 @@ def build_pipeline_dependencies(
     error_policy: ErrorPolicyABC | None = None,
     hash_service: HashService | None = None,
     post_transformer: TransformerABC | None = None,
-    providers_config_path: str | Path | None = None,
+    provider_registry: ProviderRegistryABC | None = None,
+    provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
 ) -> PipelineContainer:
     """Factory for the container."""
     return PipelineContainer(
@@ -273,5 +269,6 @@ def build_pipeline_dependencies(
         error_policy=error_policy,
         hash_service=hash_service,
         post_transformer=post_transformer,
-        providers_config_path=providers_config_path,
+        provider_registry=provider_registry,
+        provider_registry_provider=provider_registry_provider,
     )

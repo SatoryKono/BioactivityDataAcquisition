@@ -14,6 +14,9 @@ from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.infrastructure.config.resolver import ConfigResolver
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    load_provider_registry,
+)
 
 sys.modules.setdefault("tqdm", MagicMock())
 
@@ -48,7 +51,11 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     config = resolver.resolve("chembl_activity_test.yaml")
     config.storage.output_path = str(tmp_path / "output")
 
-    container = build_pipeline_dependencies(config)
+    registry = load_provider_registry()
+    container = build_pipeline_dependencies(
+        config,
+        provider_registry=registry,
+    )
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,
