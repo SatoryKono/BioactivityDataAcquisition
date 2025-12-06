@@ -26,6 +26,7 @@ from bioetl.domain.transform.transformers import (
 )
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.provider_registry_loader import (
+    DEFAULT_PROVIDERS_CONFIG_PATH,
     ProviderRegistryLoader,
 )
 from bioetl.infrastructure.files.csv_record_source import (
@@ -220,9 +221,17 @@ class PipelineContainer:
         return pk
 
     def _register_providers(self) -> None:
-        loader = ProviderRegistryLoader(
-            self._providers_config_path, logger=self.get_logger()
+        providers_config_path = getattr(
+            self, "_providers_config_path", DEFAULT_PROVIDERS_CONFIG_PATH
         )
+        # object.__new__ в тестах не вызывает __init__, поэтому поднимаем
+        # резервный логгер, если атрибут ещё не создан.
+        logger = getattr(self, "_logger", None)
+        if logger is None:
+            logger = default_logger()
+            # сохраняем, чтобы последующие вызовы get_logger не падали
+            self._logger = logger
+        loader = ProviderRegistryLoader(providers_config_path, logger=logger)
         loader.load()
 
     def _get_provider_definition(self) -> ProviderDefinition:

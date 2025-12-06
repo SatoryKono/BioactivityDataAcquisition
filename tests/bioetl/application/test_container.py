@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
@@ -13,6 +14,7 @@ from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
+from bioetl.config import provider_registry as config_provider_registry
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     ProviderNotRegisteredError,
@@ -55,6 +57,28 @@ def _restore_registry() -> Any:
     snapshot = list_providers()
     yield
     restore_provider_registry(snapshot)
+    config_provider_registry.clear_provider_registry_cache()
+
+
+@pytest.fixture(autouse=True)
+def _patch_provider_registry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Any:
+    """
+    Point provider registry to a temp file that includes chembl and dummy.
+
+    This ensures PipelineConfig validation (which reads configs/providers.yaml)
+    accepts the dummy provider used in these tests.
+    """
+
+    providers_file = tmp_path / "providers.yaml"
+    providers_file.write_text(
+        "providers:\n  - chembl\n  - dummy\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(
+        config_provider_registry, "DEFAULT_PROVIDERS_REGISTRY_PATH", providers_file
+    )
+    config_provider_registry.clear_provider_registry_cache()
+    yield
+    config_provider_registry.clear_provider_registry_cache()
 
 
 def _register_dummy_provider(
