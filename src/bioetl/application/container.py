@@ -255,9 +255,11 @@ class PipelineContainer:
             registry_candidate, "register_provider"
         ):
             raise TypeError("Provider registry must be mutable for registration")
-        mutable_registry = cast(
-            MutableProviderRegistryABC | None, registry_candidate
-        ) or get_provider_registry()
+        mutable_registry: MutableProviderRegistryABC = cast(
+            MutableProviderRegistryABC,
+            cast(MutableProviderRegistryABC | None, registry_candidate)
+            or get_provider_registry(),
+        )
         self._provider_registry = load_provider_registry(registry=mutable_registry)
 
 
