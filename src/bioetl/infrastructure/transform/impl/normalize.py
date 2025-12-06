@@ -18,8 +18,13 @@ from bioetl.domain.transform.normalizers import (
     normalize_uniprot,
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
-from bioetl.infrastructure.transform.impl.base_normalizer import BaseNormalizationService
-from bioetl.infrastructure.transform.impl.serializer import serialize_dict, serialize_list
+from bioetl.infrastructure.transform.impl.base_normalizer import (
+    BaseNormalizationService,
+)
+from bioetl.infrastructure.transform.impl.serializer import (
+    serialize_dict,
+    serialize_list,
+)
 
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid

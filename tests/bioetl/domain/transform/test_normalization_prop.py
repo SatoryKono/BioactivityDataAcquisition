@@ -10,7 +10,10 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
-from bioetl.infrastructure.transform.impl.serializer import serialize_dict, serialize_list
+from bioetl.infrastructure.transform.impl.serializer import (
+    serialize_dict,
+    serialize_list,
+)
 
 
 @settings(suppress_health_check=[], database=None)

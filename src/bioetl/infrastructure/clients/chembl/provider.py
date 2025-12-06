@@ -10,11 +10,11 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProvider,
     NormalizationServiceABC,
 )
-from bioetl.infrastructure.transform.factories import default_normalization_service
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
+from bioetl.infrastructure.transform.factories import default_normalization_service
 
 
 class ChemblProviderComponents(

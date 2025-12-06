@@ -16,8 +16,13 @@ from bioetl.domain.transform.normalizers import (
     normalize_record,
 )
 from bioetl.infrastructure.transform.impl import normalize as normalize_impl
-from bioetl.infrastructure.transform.impl.base_normalizer import BaseNormalizationService
-from bioetl.infrastructure.transform.impl.serializer import serialize_dict, serialize_list
+from bioetl.infrastructure.transform.impl.base_normalizer import (
+    BaseNormalizationService,
+)
+from bioetl.infrastructure.transform.impl.serializer import (
+    serialize_dict,
+    serialize_list,
+)
 
 
 class NormalizedRecord(TypedDict, total=False):

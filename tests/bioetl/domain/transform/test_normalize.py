@@ -3,11 +3,9 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
-from bioetl.domain.transform.normalizers.registry import (
-    CUSTOM_FIELD_NORMALIZERS,
-)
+from bioetl.domain.transform.normalizers.registry import CUSTOM_FIELD_NORMALIZERS
 from bioetl.infrastructure.transform.factories import default_normalization_service
+from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
 
 
 def test_normalize_scalar():
