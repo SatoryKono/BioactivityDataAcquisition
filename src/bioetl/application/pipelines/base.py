@@ -19,15 +19,9 @@ from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
-    FulldateTransformer,
-    HashColumnsTransformer,
-    IndexColumnTransformer,
-    TransformerABC,
-    TransformerChain,
-)
+from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.contracts import WriteResult
@@ -75,7 +69,13 @@ class PipelineBase(ABC):
         self._hash_service = hash_service
         self._extractor = extractor
         self._transformer = transformer
-        self._post_transformer = post_transformer or self._build_default_transformer()
+        self._post_transformer = post_transformer
+        if self._post_transformer is None:
+            self._post_transformer = default_post_transformer(
+                hash_service=self._hash_service,
+                business_key_fields=self._config.hashing.business_key_fields,
+                version_provider=self.get_version,
+            )
         self._schema_contract = get_pipeline_contract(
             config.id, default_entity=config.entity_name
         )
@@ -479,22 +479,6 @@ class PipelineBase(ABC):
     # === Internal Methods ===
     def _calculate_duration(self, context: RunContext) -> float:
         return (datetime.now(timezone.utc) - context.started_at).total_seconds()
-
-    def _build_default_transformer(self) -> TransformerABC:
-        return TransformerChain(
-            [
-                HashColumnsTransformer(
-                    hash_service=self._hash_service,
-                    business_key_fields=self._config.hashing.business_key_fields,
-                ),
-                IndexColumnTransformer(hash_service=self._hash_service),
-                DatabaseVersionTransformer(
-                    hash_service=self._hash_service,
-                    database_version_provider=self.get_version,
-                ),
-                FulldateTransformer(hash_service=self._hash_service),
-            ]
-        )
 
     def _apply_transformers(
         self, df: pd.DataFrame, context: RunContext

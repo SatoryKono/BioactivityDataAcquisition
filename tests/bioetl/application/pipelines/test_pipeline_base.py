@@ -17,8 +17,16 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
+from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
-from bioetl.domain.transform.transformers import HashColumnsTransformer
+from bioetl.domain.transform.transformers import (
+    DatabaseVersionTransformer,
+    FulldateTransformer,
+    HashColumnsTransformer,
+    IndexColumnTransformer,
+    TransformerABC,
+    TransformerChain,
+)
 
 
 class ConcretePipeline(PipelineBase):
@@ -415,6 +423,38 @@ def test_pipeline_dry_run_metadata_and_stages(
     )
 
 
+@pytest.mark.unit
+def test_post_transformer_factory_alignment(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    hash_service,
+    default_extractor,
+):
+    """Container и PipelineBase собирают идентичную цепочку пост-трансформеров."""
+
+    pipeline = ConcretePipeline(
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        hash_service=hash_service,
+        extractor=default_extractor,
+    )
+
+    factory_transformer = default_post_transformer(
+        hash_service=hash_service,
+        business_key_fields=mock_config.hashing.business_key_fields,
+        version_provider=pipeline.get_version,
+    )
+
+    pipeline_signature = _extract_chain_signature(pipeline._post_transformer)
+    container_signature = _extract_chain_signature(factory_transformer)
+
+    assert pipeline_signature == container_signature
+
+
 def _assert_stages(
     result,
     *,
@@ -440,3 +480,49 @@ def _assert_dry_run_meta(
     assert meta["row_count"] == expected_count
     assert meta["provider"] == config.provider
     assert meta["entity"] == config.entity_name
+
+
+def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
+    assert isinstance(transformer, TransformerChain)
+
+    signature: list[tuple] = []
+    for component in transformer._transformers:  # type: ignore[attr-defined]
+        if isinstance(component, HashColumnsTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                    component._business_key_fields,  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+        if isinstance(component, IndexColumnTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+        if isinstance(component, DatabaseVersionTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                    component._database_version_provider(),  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+        if isinstance(component, FulldateTransformer):
+            signature.append(
+                (
+                    component.__class__.__name__,
+                    component._hash_service,  # type: ignore[attr-defined]
+                )
+            )
+            continue
+
+    return signature
