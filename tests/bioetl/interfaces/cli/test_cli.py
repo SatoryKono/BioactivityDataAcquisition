@@ -218,11 +218,13 @@ def test_run_exception(mock_loader):
 
 
 @pytest.mark.unit
+@patch("bioetl.interfaces.cli.app.load_provider_registry")
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
 def test_run_dry_run_pipeline_metadata(
     mock_loader,
     mock_orchestrator_cls,
+    mock_provider_registry_loader,
     pipeline_test_config,
     small_pipeline_df,
 ):
@@ -299,6 +301,7 @@ def test_run_dry_run_pipeline_metadata(
     mock_orchestrator_cls.return_value = mock_orchestrator
 
     mock_loader.return_value = pipeline_test_config
+    mock_provider_registry_loader.return_value = MagicMock()
 
     with runner.isolated_filesystem():
         Path("config.yaml").write_text("dummy", encoding="utf-8")

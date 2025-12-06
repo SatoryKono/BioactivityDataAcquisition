@@ -11,10 +11,10 @@ from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
-from bioetl.infrastructure.config.resolver import ConfigResolver
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
+from bioetl.infrastructure.config.resolver import ConfigResolver
 
 sys.modules.setdefault("tqdm", MagicMock())
 

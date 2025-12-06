@@ -8,8 +8,8 @@ from bioetl.application.container import PipelineContainer, build_pipeline_depen
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.config.pipeline_config_schema import PipelineConfig
-from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.models import RunResult
+from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )

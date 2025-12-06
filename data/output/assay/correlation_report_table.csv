@@ -1,6 +1,6 @@
 column,assay_tax_id,confidence_score,index,score,src_id
-assay_tax_id,1.0,,-0.6963106238227915,,
+assay_tax_id,1.0,,0.024296940649794787,,
 confidence_score,,,,,
-index,-0.6963106238227915,,1.0,,
+index,0.024296940649794787,,1.0,,
 score,,,,,
 src_id,,,,,
