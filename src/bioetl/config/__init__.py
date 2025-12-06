@@ -1,4 +1,5 @@
 """Shared configuration schemas and protocols."""
+
 from bioetl.config.pipeline_config_schema import (
     BusinessKeyConfig,
     CanonicalizationConfig,

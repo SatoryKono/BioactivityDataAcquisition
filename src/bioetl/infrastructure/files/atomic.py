@@ -51,7 +51,7 @@ class AtomicFileOperation:
         is_windows = platform.system() == "Windows"
         # На Windows используем более длительную задержку из-за антивирусов/индексаторов
         delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
-        
+
         for attempt in range(MAX_FILE_RETRIES):
             try:
                 if self._try_replace(src, dst, is_windows):
@@ -70,7 +70,7 @@ class AtomicFileOperation:
     def _try_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
         """
         Попытка заменить файл атомарно.
-        
+
         Returns:
             True если замена успешна, False иначе.
         """
@@ -92,13 +92,13 @@ class AtomicFileOperation:
     ) -> bool:
         """
         Попытка разблокировать и заменить файл на Windows.
-        
+
         Returns:
             True если замена успешна, False иначе.
         """
         if not is_windows or not dst.exists():
             return False
-        
+
         try:
             dst.unlink()
             os.replace(src, dst)
