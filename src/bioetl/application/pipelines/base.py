@@ -14,7 +14,6 @@ from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
 from bioetl.config.pipeline_config_schema import PipelineConfig
-from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
@@ -31,7 +30,6 @@ from bioetl.domain.transform.transformers import (
 )
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.observability import metrics
 from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
@@ -147,7 +145,6 @@ class PipelineBase(ABC):
                 counters["extract_count"],
                 counters["extract_chunks"],
             )
-            self._record_stage_metrics(stages_results[-1], "extract")
 
             self._append_stage_result(
                 stages_results,
@@ -155,7 +152,6 @@ class PipelineBase(ABC):
                 counters["transform_count"],
                 counters["transform_chunks"],
             )
-            self._record_stage_metrics(stages_results[-1], "transform")
 
             self._append_stage_result(
                 stages_results,
@@ -163,7 +159,6 @@ class PipelineBase(ABC):
                 counters["validate_count"],
                 counters["validate_chunks"],
             )
-            self._record_stage_metrics(stages_results[-1], "validate")
 
             write_result: WriteResult | None = None
             if not dry_run:
@@ -174,11 +169,7 @@ class PipelineBase(ABC):
                     run_result = self._stage_runner.handle_stage_failure(
                         "write", stages_results, context
                     )
-                    if run_result.stages:
-                        self._record_stage_metrics(run_result.stages[-1], "write")
                     return run_result
-
-                self._record_stage_metrics(stages_results[-1], "write")
 
             meta = (
                 build_run_metadata(context, write_result)
@@ -206,7 +197,6 @@ class PipelineBase(ABC):
             )
             stages_results.append(stage_result)
             self._hooks_manager.notify_stage_end(error.stage, stage_result)
-            self._record_stage_metrics(stage_result, error.stage)
             self._logger.error(
                 "Pipeline failed",
                 stage=error.stage,
@@ -608,28 +598,3 @@ class PipelineBase(ABC):
         Хук для обогащения контекста (например, добавления версии релиза).
         """
 
-    def _record_stage_metrics(self, stage_result: StageResult, stage: str) -> None:
-        outcome = self._determine_stage_outcome(stage, stage_result)
-        metrics.STAGE_DURATION_SECONDS.labels(
-            pipeline=self._config.id,
-            provider=self._provider_id.value,
-            entity=self._config.entity_name,
-            stage=stage,
-            outcome=outcome,
-        ).observe(stage_result.duration_sec)
-        metrics.STAGE_TOTAL.labels(
-            pipeline=self._config.id,
-            provider=self._provider_id.value,
-            entity=self._config.entity_name,
-            stage=stage,
-            outcome=outcome,
-        ).inc()
-
-    def _determine_stage_outcome(self, stage: str, stage_result: StageResult) -> str:
-        if not stage_result.success:
-            return "error"
-
-        action = self._error_policy_manager.get_last_action(stage)
-        if action is not None and action == ErrorAction.SKIP:
-            return "skip"
-        return "success"

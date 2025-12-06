@@ -6,6 +6,7 @@ from typing import Any, Callable
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
+    MetricsPipelineHookImpl,
 )
 from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
@@ -199,7 +200,14 @@ class PipelineContainer:
     def get_hooks(self) -> list[PipelineHookABC]:
         """Возвращает список хуков выполнения пайплайна."""
         if self._hooks is None:
-            self._hooks = [LoggingPipelineHookImpl(self.get_logger())]
+            self._hooks = [
+                LoggingPipelineHookImpl(self.get_logger()),
+                MetricsPipelineHookImpl(
+                    pipeline_id=self.config.id,
+                    provider=self._provider_id.value,
+                    entity_name=self.config.entity_name,
+                ),
+            ]
         return list(self._hooks)
 
     def get_error_policy(self) -> ErrorPolicyABC:
