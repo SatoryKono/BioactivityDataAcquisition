@@ -42,6 +42,30 @@ def test_missing_config_file_raises():
         load_pipeline_config_from_path(Path("tests/fixtures/configs/missing.yaml"))
 
 
+def test_load_pipeline_config_from_path_missing_input_path(tmp_path: Path) -> None:
+    config_path = tmp_path / "chembl_activity.yaml"
+    config_path.write_text(
+        """id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: csv
+input_path: ./does_not_exist.csv
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError):
+        load_pipeline_config_from_path(config_path)
+
+
 def test_unknown_provider_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     pipelines_root = tmp_path / "pipelines"
     profiles_root = tmp_path / "profiles"

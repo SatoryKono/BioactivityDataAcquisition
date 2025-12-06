@@ -98,6 +98,7 @@ def load_pipeline_config_from_path(
     _validate_provider(merged_config, path)
 
     merged_config = _transform_legacy_config(merged_config, path)
+    _validate_input_path_exists(merged_config, path)
 
     try:
         return PipelineConfig.model_validate(merged_config)
@@ -269,6 +270,18 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ConfigValidationError(path, "YAML root must be a mapping")
     return data
+
+
+def _validate_input_path_exists(config: dict[str, Any], config_path: Path) -> None:
+    input_path = config.get("input_path")
+    if input_path is None or input_path == "":
+        return
+
+    input_path_obj = Path(str(input_path))
+    if not input_path_obj.exists():
+        raise ConfigValidationError(config_path, f"Input path does not exist: {input_path}")
+
+    config["input_path"] = str(input_path_obj)
 
 
 __all__ = [
