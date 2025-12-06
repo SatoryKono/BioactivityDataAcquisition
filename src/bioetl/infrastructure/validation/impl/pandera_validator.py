@@ -41,4 +41,3 @@ class PanderaValidatorImpl(ValidatorABC):
 
     def is_valid(self, df: pd.DataFrame) -> bool:
         return self.validate(df).is_valid
-

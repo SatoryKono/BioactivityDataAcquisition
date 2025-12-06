@@ -35,4 +35,3 @@ def default_validator_factory() -> ValidatorFactoryABC:
 def default_schema_provider_factory() -> SchemaProviderFactoryABC:
     """Возвращает фабрику провайдера схем по умолчанию."""
     return PanderaSchemaProviderFactory()
-
