@@ -79,7 +79,9 @@ class AtomicFileOperation:
         except OSError:
             return False
 
-    def _try_windows_unlock_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
+    def _try_windows_unlock_replace(
+        self, src: Path, dst: Path, is_windows: bool
+    ) -> bool:
         """
         Попытка разблокировать и заменить файл на Windows.
         

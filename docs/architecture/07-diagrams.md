@@ -1,6 +1,8 @@
+
 # Архитектурные диаграммы
 
 Устаревшие inline-блоки удалены. Актуальные диаграммы хранятся в текстовых источниках согласно политике:
+
 - `docs/architecture/diagrams/flow/high-level-architecture.mmd`
 - `docs/architecture/diagrams/class/pipeline-class-structure.mmd`
 - `docs/architecture/diagrams/sequence/pipeline-run-sequence.mmd`
@@ -10,7 +12,6 @@
 - `docs/architecture/diagrams/flow/project-package-structure.mmd`
 
 Полные правила и стиль: `docs/architecture/diagrams/00-diagramming-policy.md`.
-# Архитектурные диаграммы
 
 ## 1. High-Level Architecture (Hexagonal)
 

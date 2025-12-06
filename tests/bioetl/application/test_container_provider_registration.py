@@ -36,3 +36,25 @@ def test_register_providers_registers_chembl() -> None:
     finally:
         restore_provider_registry(snapshot)
         sys.modules.pop("tqdm", None)
+
+
+def test_register_providers_is_idempotent() -> None:
+    snapshot = list_providers()
+    try:
+        reset_provider_registry()
+        sys.modules.setdefault("tqdm", _stub_tqdm_module())
+
+        from bioetl.application.container import PipelineContainer
+
+        container = object.__new__(PipelineContainer)
+
+        container._register_providers()
+        first_definition = get_provider(ProviderId.CHEMBL)
+
+        container._register_providers()
+        second_definition = get_provider(ProviderId.CHEMBL)
+
+        assert first_definition is second_definition
+    finally:
+        restore_provider_registry(snapshot)
+        sys.modules.pop("tqdm", None)
