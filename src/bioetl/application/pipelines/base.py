@@ -13,6 +13,7 @@ from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.providers import ProviderId
@@ -30,6 +31,7 @@ from bioetl.domain.validation.service import ValidationService
 from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.infrastructure.observability import metrics
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
@@ -67,6 +69,7 @@ class PipelineBase(ABC):
         self._logger = logger.bind(
             entity=config.entity_name,
             provider=self._provider_id.value,
+            pipeline=config.id,
         )
         self._validation_service = validation_service
         self._output_writer = output_writer
@@ -86,6 +89,7 @@ class PipelineBase(ABC):
             provider_id=self._provider_id,
             entity_name=self._config.entity_name,
             hooks=hooks,
+            pipeline_id=self._config.id,
         )
         self._error_policy = error_policy or FailFastErrorPolicyImpl()
         self._error_policy_manager = ErrorPolicyManager(
@@ -117,6 +121,7 @@ class PipelineBase(ABC):
         Запускает полный цикл ETL-пайплайна.
         """
         self._hooks_manager.reset()
+        self._error_policy_manager.reset()
         if hasattr(self._hash_service, "reset_state"):
             self._hash_service.reset_state()
 
@@ -128,6 +133,9 @@ class PipelineBase(ABC):
         )
 
         self._enrich_context(context)
+        self._logger = self._logger.bind(run_id=context.run_id)
+        self._hooks_manager.set_logger(self._logger)
+        self._error_policy_manager.set_logger(self._logger)
         self._logger.info("Pipeline started", run_id=context.run_id)
         stages_results: list[StageResult] = []
 
@@ -222,6 +230,7 @@ class PipelineBase(ABC):
                 )
             )
             self._hooks_manager.notify_stage_end("extract", stages_results[-1])
+            self._record_stage_metrics(stages_results[-1], "extract")
 
             stages_results.append(
                 self._stage_runner.make_stage_result(
@@ -231,6 +240,7 @@ class PipelineBase(ABC):
                 )
             )
             self._hooks_manager.notify_stage_end("transform", stages_results[-1])
+            self._record_stage_metrics(stages_results[-1], "transform")
 
             stages_results.append(
                 self._stage_runner.make_stage_result(
@@ -240,6 +250,7 @@ class PipelineBase(ABC):
                 )
             )
             self._hooks_manager.notify_stage_end("validate", stages_results[-1])
+            self._record_stage_metrics(stages_results[-1], "validate")
 
             write_result: WriteResult | None = None
             if not dry_run:
@@ -262,9 +273,12 @@ class PipelineBase(ABC):
                     ),
                 )
                 if write_result is None:
-                    return self._stage_runner.handle_stage_failure(
+                    run_result = self._stage_runner.handle_stage_failure(
                         "write", stages_results, context
                     )
+                    if run_result.stages:
+                        self._record_stage_metrics(run_result.stages[-1], "write")
+                    return run_result
 
                 write_count = write_result.row_count
                 write_chunks = max(validate_chunks, 1)
@@ -277,6 +291,7 @@ class PipelineBase(ABC):
                     )
                 )
                 self._hooks_manager.notify_stage_end("write", stages_results[-1])
+                self._record_stage_metrics(stages_results[-1], "write")
 
             total_row_count = validate_count
             meta = (
@@ -297,6 +312,15 @@ class PipelineBase(ABC):
                 meta=meta,
             )
         except PipelineStageError as error:
+            stage_result = self._stage_runner.make_stage_result(
+                error.stage,
+                0,
+                success=False,
+                errors=self._error_policy_manager.get_last_error_messages(),
+            )
+            stages_results.append(stage_result)
+            self._hooks_manager.notify_stage_end(error.stage, stage_result)
+            self._record_stage_metrics(stage_result, error.stage)
             self._logger.error(
                 "Pipeline failed",
                 stage=error.stage,
@@ -542,3 +566,29 @@ class PipelineBase(ABC):
         """
         Хук для обогащения контекста (например, добавления версии релиза).
         """
+
+    def _record_stage_metrics(self, stage_result: StageResult, stage: str) -> None:
+        outcome = self._determine_stage_outcome(stage, stage_result)
+        metrics.STAGE_DURATION_SECONDS.labels(
+            pipeline=self._config.id,
+            provider=self._provider_id.value,
+            entity=self._config.entity_name,
+            stage=stage,
+            outcome=outcome,
+        ).observe(stage_result.duration_sec)
+        metrics.STAGE_TOTAL.labels(
+            pipeline=self._config.id,
+            provider=self._provider_id.value,
+            entity=self._config.entity_name,
+            stage=stage,
+            outcome=outcome,
+        ).inc()
+
+    def _determine_stage_outcome(self, stage: str, stage_result: StageResult) -> str:
+        if not stage_result.success:
+            return "error"
+
+        action = self._error_policy_manager.get_last_action(stage)
+        if action is not None and action == ErrorAction.SKIP:
+            return "skip"
+        return "success"

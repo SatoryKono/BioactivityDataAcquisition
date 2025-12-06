@@ -4,6 +4,8 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 from typing import Callable
 
+from prometheus_client import start_http_server
+
 from bioetl.application.container import PipelineContainer, build_pipeline_dependencies
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
@@ -68,6 +70,7 @@ class PipelineOrchestrator:
     def run_pipeline(self, *, dry_run: bool = False, limit: int | None = None) -> RunResult:
         """Запускает пайплайн в текущем процессе."""
         pipeline = self.build_pipeline(limit=limit)
+        start_http_server(9108, addr="0.0.0.0")
         return pipeline.run(
             output_path=Path(self._config.output_path),
             dry_run=dry_run,
