@@ -15,8 +15,6 @@ from pydantic import (
 )
 
 from bioetl.domain.configs.base import (
-    BusinessKeyConfig,
-    CanonicalizationConfig,
     ClientConfig,
     CsvInputOptions,
     DeterminismConfig,

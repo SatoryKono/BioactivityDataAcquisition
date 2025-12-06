@@ -9,13 +9,13 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.provider_registry import (
     MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,
     get_provider_registry,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")

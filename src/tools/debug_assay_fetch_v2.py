@@ -22,10 +22,10 @@ def debug_fetch():
         print("\nDEBUG: Testing single ID fetch...", flush=True)
         test_id = df["assay_chembl_id"].iloc[0]
 
+        from bioetl.domain.configs import ChemblSourceConfig
         from bioetl.infrastructure.clients.chembl.factories import (
             default_chembl_extraction_service,
         )
-        from bioetl.domain.configs import ChemblSourceConfig
 
         config = ChemblSourceConfig(base_url="https://www.ebi.ac.uk/chembl/api/data")
         service = default_chembl_extraction_service(config)

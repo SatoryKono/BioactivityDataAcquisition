@@ -8,6 +8,7 @@ from typing import Any, Iterable, cast
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
@@ -16,7 +17,6 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class ChemblExtractorImpl(ExtractorABC):

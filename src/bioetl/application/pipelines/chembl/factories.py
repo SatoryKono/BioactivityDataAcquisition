@@ -2,8 +2,8 @@
 Factories for ChEMBL pipelines.
 """
 
-from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 
 
 def create_chembl_pipeline(container: PipelineContainerABC) -> ChemblEntityPipeline:

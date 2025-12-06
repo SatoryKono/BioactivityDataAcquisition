@@ -98,6 +98,31 @@ def _build_config() -> PipelineConfig:
     )
 
 
+def _assert_dependencies(
+    pipeline: DummyPipeline, stub_container: StubContainer
+) -> None:
+    """Проверяет корректность зависимостей пайплайна."""
+    expected_deps = {
+        "logger": "logger",
+        "validation_service": "validation",
+        "output_writer": "writer",
+        "extraction_service": "extraction",
+        "normalization_service": "normalization",
+        "record_source": "record_source",
+        "hash_service": "hash",
+        "hooks": ["hook"],
+        "error_policy": "error_policy",
+    }
+    for key, expected_value in expected_deps.items():
+        assert pipeline.dependencies[key] == expected_value
+
+    assert stub_container.record_source_calls == [{"limit": 5, "logger": "logger"}]
+    assert pipeline.post_transformer == "post_transformer"
+    assert stub_container.post_transformer_version == "pipeline-version"
+    assert pipeline.hooks == ["hook"]
+    assert pipeline.error_policy == "error_policy"
+
+
 def test_pipeline_container_satisfies_contract(monkeypatch: Any) -> None:
     config = _build_config()
     container = PipelineContainer(config)
@@ -118,17 +143,4 @@ def test_pipeline_container_satisfies_contract(monkeypatch: Any) -> None:
     pipeline = orchestrator.build_pipeline(limit=5)
 
     assert isinstance(pipeline, DummyPipeline)
-    assert pipeline.dependencies["logger"] == "logger"
-    assert pipeline.dependencies["validation_service"] == "validation"
-    assert pipeline.dependencies["output_writer"] == "writer"
-    assert pipeline.dependencies["extraction_service"] == "extraction"
-    assert pipeline.dependencies["normalization_service"] == "normalization"
-    assert pipeline.dependencies["record_source"] == "record_source"
-    assert pipeline.dependencies["hash_service"] == "hash"
-    assert pipeline.dependencies["hooks"] == ["hook"]
-    assert pipeline.dependencies["error_policy"] == "error_policy"
-    assert stub_container.record_source_calls == [{"limit": 5, "logger": "logger"}]
-    assert pipeline.post_transformer == "post_transformer"
-    assert stub_container.post_transformer_version == "pipeline-version"
-    assert pipeline.hooks == ["hook"]
-    assert pipeline.error_policy == "error_policy"
+    _assert_dependencies(pipeline, stub_container)

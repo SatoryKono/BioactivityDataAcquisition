@@ -3,12 +3,14 @@
 from pathlib import Path
 from typing import Any, Callable, cast
 
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.clients.base.output.contracts import MetadataWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import (
@@ -32,9 +34,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
-from bioetl.clients.base.output.contracts import MetadataWriterABC
 from bioetl.infrastructure.output.factories import (
     default_metadata_writer,
     default_quality_reporter,

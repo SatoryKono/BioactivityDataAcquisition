@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Callable, cast
 
 from bioetl.application.container import build_pipeline_dependencies
-from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunResult

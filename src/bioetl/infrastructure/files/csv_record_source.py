@@ -8,10 +8,10 @@ from typing import Any
 
 import pandas as pd
 
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputOptions
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.record_source import RecordSource
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
