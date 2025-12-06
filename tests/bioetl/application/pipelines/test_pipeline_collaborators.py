@@ -6,12 +6,12 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
-from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult
+from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.providers import ProviderId
 
 
