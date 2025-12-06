@@ -29,7 +29,7 @@ class Application group;
 
 subgraph Domain["Domain Layer"]
     Validation["ValidationService"]:::external
-    Normalization["ChemblNormalizationService"]:::external
+    Normalization["NormalizationServiceImpl\n(domain.transform.impl.normalize)"]:::external
 end
 class Domain group;
 

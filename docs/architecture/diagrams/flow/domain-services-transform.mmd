@@ -20,7 +20,7 @@ class Transformers group;
 subgraph Services
     HS[HashService]:::domainSecondary
     VS[ValidationService]:::domainSecondary
-    NS[NormalizationService]:::domainSecondary
+    NS[NormalizationServiceImpl]:::domainSecondary
 end
 class Services group;
 
@@ -29,6 +29,12 @@ subgraph Schemas
     Registry[Schema Registry]:::domainSecondary
 end
 class Schemas group;
+
+subgraph NormalizationInputs
+    NCfg[NormalizationConfigProvider]:::domainSecondary
+    Normalizers[Normalizers Registry]:::domainSecondary
+end
+class NormalizationInputs group;
 
 Pipeline[Pipeline]:::domainPrimary --> T_Chain
 T_Chain --> T_Hash
@@ -44,4 +50,5 @@ Pipeline -- normalizes values --> NS
 
 VS -- delegates --> PS
 PS -- lookups schema --> Registry
-NS -- lookups rules --> Registry
+NS -- loads rules --> NCfg
+NS -- resolves normalizers --> Normalizers

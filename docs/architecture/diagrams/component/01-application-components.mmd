@@ -25,7 +25,7 @@ end
 class Application group;
 
 subgraph Domain["Domain Dependencies"]
-    DomainServices["ValidationService\nHashService\nChemblNormalizationService"]:::componentSecondary
+    DomainServices["ValidationService\nHashService\nNormalizationServiceImpl\nbioetl.domain.transform.impl.normalize"]:::componentSecondary
     Transformers["TransformerChain\nHash/Index/Fulldate/DbVersion"]:::componentSecondary
     Schemas["SchemaRegistry\nPandera schemas"]:::componentSecondary
 end

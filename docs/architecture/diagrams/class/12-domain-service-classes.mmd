@@ -13,11 +13,10 @@ class ValidatorABC
 class PanderaValidator
 class SchemaRegistry
 
-class NormalizationService
-class ChemblNormalizationService {
-  +normalize(raw)
-  +normalize_dataframe(df)
-}
+class NormalizationServiceABC
+class BaseNormalizationService
+class ChemblNormalizationService
+class NormalizationServiceImpl
 class NormalizationConfigProvider
 class NormalizationConfig
 
@@ -25,7 +24,12 @@ ValidationService --> SchemaProviderABC
 SchemaRegistry ..|> SchemaProviderABC
 PanderaValidator ..|> ValidatorABC
 SchemaRegistry --> PanderaValidator : validator
-ChemblNormalizationService ..|> NormalizationService
+
+ChemblNormalizationService --|> BaseNormalizationService
+NormalizationServiceImpl --|> BaseNormalizationService
+ChemblNormalizationService ..|> NormalizationServiceABC
+NormalizationServiceImpl ..|> NormalizationServiceABC
 ChemblNormalizationService --> NormalizationConfigProvider
+NormalizationServiceImpl --> NormalizationConfigProvider
 NormalizationConfigProvider --> NormalizationConfig
 
