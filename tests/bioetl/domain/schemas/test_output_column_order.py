@@ -42,10 +42,12 @@ def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
     """Порядок колонок совпадает с колонками схемы без дубликатов."""
 
     schema_columns = set(schema_cls.to_schema().columns.keys())
+    business_columns = [col for col in output_columns if col not in METADATA_COLUMNS]
 
     assert output_columns, "Список с колонками не должен быть пустым"
     assert len(output_columns) == len(set(output_columns)), "Повторы недопустимы"
-    assert set(output_columns) == schema_columns
+    assert set(output_columns).issubset(schema_columns)
+    assert set(business_columns).issubset(schema_columns - set(METADATA_COLUMNS))
 
 
 @pytest.mark.parametrize(

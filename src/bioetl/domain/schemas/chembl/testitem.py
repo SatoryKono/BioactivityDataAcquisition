@@ -2,7 +2,7 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
+from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX, PUBCHEM_CID_REGEX
 
 class TestitemSchema(pa.DataFrameModel):
     """Schema for molecule/test item data."""
@@ -42,10 +42,9 @@ class TestitemSchema(pa.DataFrameModel):
     cross_references: Series[str] = pa.Field(
         nullable=True, description="Внешние кросс-референсы"
     )
-    pubchem_cid: Series[float] = pa.Field(
+    pubchem_cid: Series[str] = pa.Field(
         nullable=True,
-        ge=1,
-        le=999_999_999,
+        str_matches=PUBCHEM_CID_REGEX.pattern,
         description="PubChem Compound ID",
     )
     helm_notation: Series[str] = pa.Field(

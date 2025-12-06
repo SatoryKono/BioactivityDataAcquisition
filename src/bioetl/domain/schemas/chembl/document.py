@@ -2,7 +2,7 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.normalizers import DOI_REGEX
+from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX, DOI_REGEX, PUBMED_ID_REGEX
 
 class DocumentSchema(pa.DataFrameModel):
     """Schema for document/publication data."""
@@ -24,7 +24,7 @@ class DocumentSchema(pa.DataFrameModel):
         description="Тип документа",
     )
     document_chembl_id: Series[str] = pa.Field(
-        str_matches=r"^CHEMBL\d+$", description="ChEMBL ID документа"
+        str_matches=CHEMBL_ID_REGEX.pattern, description="ChEMBL ID документа"
     )
     doi: Series[str] = pa.Field(
         nullable=True,
@@ -52,8 +52,9 @@ class DocumentSchema(pa.DataFrameModel):
     patent_id: Series[str] = pa.Field(
         nullable=True, description="Идентификатор патента"
     )
-    pubmed_id: Series[int] = pa.Field(
+    pubmed_id: Series[str] = pa.Field(
         nullable=True,
+        str_matches=PUBMED_ID_REGEX.pattern,
         description="PubMed ID",
     )
     score: Series[float] = pa.Field(
