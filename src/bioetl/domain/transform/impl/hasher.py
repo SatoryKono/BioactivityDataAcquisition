@@ -37,48 +37,46 @@ def _serialize_canonical(obj: Any) -> str:
     """
     if obj is None:
         return "null"
-
     if isinstance(obj, bool):
         return "true" if obj else "false"
-
     if isinstance(obj, (int, float, Decimal)):
-        if isinstance(obj, bool):  # Python bools are ints
-            return "true" if obj else "false"
-        if isinstance(obj, int) and not isinstance(obj, bool):
-            return str(obj)
-        # Float/Decimal
-        return format_float(obj)
-
+        return _serialize_number(obj)
     if isinstance(obj, str):
-        # Normalize NFC
-        norm_str = normalize_unicode(obj)
-        # JSON escape. json.dumps adds quotes and escapes.
-        # ensure_ascii=False allows non-ascii chars.
-        return json.dumps(norm_str, ensure_ascii=False)
-
+        return _serialize_string(obj)
     if isinstance(obj, (list, tuple)):
-        # Preserve order
-        items = [_serialize_canonical(item) for item in obj]
-        return "[" + ",".join(items) + "]"
-
+        return _serialize_sequence(obj)
     if isinstance(obj, dict):
-        # Sort keys
-        sorted_keys = sorted(obj.keys())
-        items = []
-        for k in sorted_keys:
-            # Keys must be strings for JSON
-            if not isinstance(k, str):
-                raise TypeError(f"Dict keys must be strings, got {type(k)}")
-
-            # Serialize key (quoted) and value
-            # key is string, so standard json dump is fine (with NFC)
-            key_str = json.dumps(normalize_unicode(k), ensure_ascii=False)
-            val_str = _serialize_canonical(obj[k])
-            items.append(f"{key_str}:{val_str}")
-
-        return "{" + ",".join(items) + "}"
+        return _serialize_mapping(obj)
 
     raise TypeError(f"Type {type(obj)} not supported for canonical serialization")
+
+
+def _serialize_number(value: int | float | Decimal) -> str:
+    if isinstance(value, int) and not isinstance(value, bool):
+        return str(value)
+    return format_float(value)
+
+
+def _serialize_string(text: str) -> str:
+    norm_str = normalize_unicode(text)
+    return json.dumps(norm_str, ensure_ascii=False)
+
+
+def _serialize_sequence(items: Iterable[Any]) -> str:
+    serialized_items = [_serialize_canonical(item) for item in items]
+    return "[" + ",".join(serialized_items) + "]"
+
+
+def _serialize_mapping(obj: dict[str, Any]) -> str:
+    sorted_keys = sorted(obj.keys())
+    items = []
+    for key in sorted_keys:
+        if not isinstance(key, str):
+            raise TypeError(f"Dict keys must be strings, got {type(key)}")
+        key_str = json.dumps(normalize_unicode(key), ensure_ascii=False)
+        val_str = _serialize_canonical(obj[key])
+        items.append(f"{key_str}:{val_str}")
+    return "{" + ",".join(items) + "}"
 
 
 def blake2b_hash_hex(data_bytes: bytes, digest_size: int = 32) -> str:

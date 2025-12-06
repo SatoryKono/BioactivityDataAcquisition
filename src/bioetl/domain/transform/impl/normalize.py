@@ -41,38 +41,42 @@ def normalize_scalar(value: Any, mode: str = "default") -> Any:
     if value is None:
         return None
 
-    # Safety check for lists/arrays to avoid "truth value ... ambiguous"
     if isinstance(value, (list, tuple, dict)):
-        # Scalar normalizer should not receive collections.
         if not value:
             return None
         raise ValueError(f"Expected scalar, got {type(value).__name__}")
 
-    try:
-        if pd.isna(value):
-            return None
-    except ValueError:
-        pass
+    if _is_missing_value(value):
+        return None
 
     if isinstance(value, float):
-        # User requested: "double (3 знака после запятой)"
         return round(value, 3)
 
     if isinstance(value, int):
         return value
 
     if isinstance(value, str):
-        val = value.strip()
-        if not val:
-            return None
-
-        if mode == "id":
-            return val.upper()
-        if mode == "sensitive":
-            return val
-        return val.lower()  # default
+        return _normalize_string_value(value, mode)
 
     return value
+
+
+def _is_missing_value(value: Any) -> bool:
+    try:
+        return bool(pd.isna(value))
+    except ValueError:
+        return False
+
+
+def _normalize_string_value(value: str, mode: str) -> str | None:
+    val = value.strip()
+    if not val:
+        return None
+    if mode == "id":
+        return val.upper()
+    if mode == "sensitive":
+        return val
+    return val.lower()
 
 
 class NormalizationService(NormalizationServiceABC):

@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 # Remove old paths that might interfere
 sys.path = [p for p in sys.path if 'bioactivity_data_acquisition1' not in p.lower()]
@@ -117,21 +117,12 @@ def run(
     """
     try:
         base_dir = _get_config_base_dir()
-
-        if config_path is None:
-            config_path = _resolve_config_path(pipeline_name)
-
-        config_path = Path(config_path)
-        if config_path.is_absolute():
-            resolved_config_path = config_path
-        elif config_path.exists():
-            resolved_config_path = config_path
-        else:
-            resolved_config_path = base_dir / config_path
-
-        if not resolved_config_path.exists():
-            console.print(f"[red]Config file not found at {resolved_config_path}[/red]")
-            console.print("Please provide --config explicitly.")
+        resolved_config_path = _resolve_config_location(
+            config_path=config_path,
+            pipeline_name=pipeline_name,
+            base_dir=base_dir,
+        )
+        if not resolved_config_path:
             sys.exit(1)
 
         config = load_pipeline_config_from_path(
@@ -140,24 +131,14 @@ def run(
             profiles_root=base_dir / "profiles",
         )
 
-        config_payload = config.model_dump()
-
-        if output:
-            config_payload["output_path"] = str(output)
-
-        if input_path:
-            config_payload["input_path"] = str(input_path)
-
-        if input_mode:
-            config_payload["input_mode"] = input_mode
-
-        csv_options = config_payload.get("csv_options", {})
-        if csv_delimiter:
-            csv_options["delimiter"] = csv_delimiter
-        if csv_header is not None:
-            csv_options["header"] = csv_header
-        config_payload["csv_options"] = csv_options
-
+        config_payload = _apply_cli_overrides(
+            config.model_dump(),
+            output=output,
+            input_path=input_path,
+            input_mode=input_mode,
+            csv_delimiter=csv_delimiter,
+            csv_header=csv_header,
+        )
         config = PipelineConfig(**config_payload)
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
@@ -192,6 +173,53 @@ def smoke_run(pipeline_name: str):
     Runs a smoke test (development profile, dry-run).
     """
     run(pipeline_name, profile="development", dry_run=True, limit=10)
+
+
+def _resolve_config_location(
+    *,
+    config_path: Optional[Path],
+    pipeline_name: str,
+    base_dir: Path,
+) -> Optional[Path]:
+    candidate_path = config_path or _resolve_config_path(pipeline_name)
+    path = Path(candidate_path)
+    if path.is_absolute() or path.exists():
+        resolved = path
+    else:
+        resolved = base_dir / path
+
+    if resolved.exists():
+        return resolved
+
+    console.print(f"[red]Config file not found at {resolved}[/red]")
+    console.print("Please provide --config explicitly.")
+    return None
+
+
+def _apply_cli_overrides(
+    config_payload: dict[str, Any],
+    *,
+    output: Optional[Path],
+    input_path: Optional[Path],
+    input_mode: Optional[Literal["csv", "id_only", "auto_detect"]],
+    csv_delimiter: Optional[str],
+    csv_header: Optional[bool],
+) -> dict[str, Any]:
+    payload = dict(config_payload)
+    if output:
+        payload["output_path"] = str(output)
+    if input_path:
+        payload["input_path"] = str(input_path)
+    if input_mode:
+        payload["input_mode"] = input_mode
+
+    csv_options = payload.get("csv_options", {})
+    if csv_delimiter:
+        csv_options["delimiter"] = csv_delimiter
+    if csv_header is not None:
+        csv_options["header"] = csv_header
+    payload["csv_options"] = csv_options
+    return payload
 
 
 if __name__ == "__main__":

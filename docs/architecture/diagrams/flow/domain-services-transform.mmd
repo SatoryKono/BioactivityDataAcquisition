@@ -1,35 +1,44 @@
-graph TD
-    subgraph "Transformers"
-        T_Chain[TransformerChain]
-        T_Hash[HashColumnsTransformer]
-        T_Index[IndexColumnTransformer]
-        T_Date[FulldateTransformer]
-        T_ABC[<<TransformerABC>>]
-    end
+flowchart LR
 
-    subgraph "Services"
-        HS[HashService]
-        VS[ValidationService]
-        NS[NormalizationService]
-    end
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group           fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 
-    subgraph "Schemas"
-        PS[PanderaValidator]
-        Registry[Schema Registry]
-    end
+subgraph Transformers
+    T_Chain[TransformerChain]:::domainPrimary
+    T_Hash[HashColumnsTransformer]:::domainSecondary
+    T_Index[IndexColumnTransformer]:::domainSecondary
+    T_Date[FulldateTransformer]:::domainSecondary
+    T_ABC[<<TransformerABC>>]:::interface
+end
+class Transformers group;
 
-    Pipeline[Pipeline] --> T_Chain
-    T_Chain --> T_Hash
-    T_Chain --> T_Index
-    T_Chain --> T_Date
+subgraph Services
+    HS[HashService]:::domainSecondary
+    VS[ValidationService]:::domainSecondary
+    NS[NormalizationService]:::domainSecondary
+end
+class Services group;
 
-    T_Hash -- uses --> HS[HashService]
-    T_Index -- uses --> HS[HashService]
+subgraph Schemas
+    PS[PanderaValidator]:::domainSecondary
+    Registry[Schema Registry]:::domainSecondary
+end
+class Schemas group;
 
-    Pipeline -- validates result --> VS[ValidationService]
-    Pipeline -- normalizes values --> NS[NormalizationService]
+Pipeline[Pipeline]:::domainPrimary --> T_Chain
+T_Chain --> T_Hash
+T_Chain --> T_Index
+T_Chain --> T_Date
+T_ABC -. template .- T_Chain
 
-    VS -- delegates --> PS[PanderaValidator]
-    PS -- lookups schema --> Registry[Schema Registry]
-    NS -- lookups rules --> Registry[Schema Registry]
+T_Hash -- uses --> HS
+T_Index -- uses --> HS
 
+Pipeline -- validates result --> VS
+Pipeline -- normalizes values --> NS
+
+VS -- delegates --> PS
+PS -- lookups schema --> Registry
+NS -- lookups rules --> Registry

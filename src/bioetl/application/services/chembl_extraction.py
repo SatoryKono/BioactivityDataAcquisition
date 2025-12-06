@@ -122,29 +122,23 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         model_cls = self._get_model_cls(entity)
         page_size = chunk_size or self.batch_size
 
-        while True:
-            if remaining is not None and remaining <= 0:
-                break
-
-            current_limit = page_size if remaining is None else min(page_size, remaining)
-            request_filters = {
-                **filters,
-                "offset": offset,
-                "limit": current_limit,
-            }
+        while remaining is None or remaining > 0:
+            current_limit, request_filters = self._build_request_filters(
+                base_filters=filters,
+                offset=offset,
+                page_size=page_size,
+                remaining=remaining,
+            )
 
             response = self._request_entity(entity, **request_filters)
             batch_records = self.parser.parse(response)
-
             if not batch_records:
                 break
 
-            serialized_records = [
-                model_cls(**batch_record).model_dump()
-                for batch_record in batch_records
-            ]
-            if remaining is not None and len(serialized_records) > remaining:
+            serialized_records = self._serialize_records(model_cls, batch_records)
+            if remaining is not None:
                 serialized_records = serialized_records[:remaining]
+
             if serialized_records:
                 yield pd.DataFrame(serialized_records)
 
@@ -157,3 +151,24 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
                 break
 
             offset += current_limit
+
+    def _build_request_filters(
+        self,
+        *,
+        base_filters: dict[str, Any],
+        offset: int,
+        page_size: int,
+        remaining: int | None,
+    ) -> tuple[int, dict[str, Any]]:
+        current_limit = page_size if remaining is None else min(page_size, remaining)
+        request_filters = {
+            **base_filters,
+            "offset": offset,
+            "limit": current_limit,
+        }
+        return current_limit, request_filters
+
+    def _serialize_records(
+        self, model_cls: Type[ChemblRecordModel], batch_records: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        return [model_cls(**batch_record).model_dump() for batch_record in batch_records]

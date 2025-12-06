@@ -32,6 +32,7 @@ dev = [
     "mypy>=1.0.0",
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "hypothesis==6.103.0",
     "black>=24.3.0",
     "isort>=5.12.0",
     "ruff>=0.1.0",

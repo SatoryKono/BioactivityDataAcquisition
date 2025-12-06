@@ -18,26 +18,11 @@ from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 @pytest.mark.integration
 def test_unified_writer_writes_data_and_meta(tmp_path):
-    df = pd.DataFrame(
-        {
-            "value": [3, 1, 2],
-            "id": [2, 3, 1],
-        }
-    )
-
+    df = pd.DataFrame({"value": [3, 1, 2], "id": [2, 3, 1]})
     config = DeterminismConfig(stable_sort=True)
     writer = CsvWriterImpl()
     metadata_writer = MetadataWriterImpl()
-    atomic_op = AtomicFileOperation()
-
-    calls = {"count": 0}
-    original_write_atomic = atomic_op.write_atomic
-
-    def tracking_write_atomic(path: Path, write_fn):
-        calls["count"] += 1
-        return original_write_atomic(path, write_fn)
-
-    atomic_op.write_atomic = tracking_write_atomic  # type: ignore[assignment]
+    atomic_op, calls = _with_tracking_atomic()
 
     run_context = RunContext(
         run_id="test-run",
@@ -60,6 +45,29 @@ def test_unified_writer_writes_data_and_meta(tmp_path):
     data_path = output_dir / "test_entity.csv"
     meta_path = output_dir / "meta.yaml"
 
+    _assert_write_results(calls, result, data_path, meta_path, run_context)
+
+
+def _with_tracking_atomic() -> tuple[AtomicFileOperation, dict[str, int]]:
+    atomic_op = AtomicFileOperation()
+    calls = {"count": 0}
+    original_write_atomic = atomic_op.write_atomic
+
+    def tracking_write_atomic(path: Path, write_fn):
+        calls["count"] += 1
+        return original_write_atomic(path, write_fn)
+
+    atomic_op.write_atomic = tracking_write_atomic  # type: ignore[assignment]
+    return atomic_op, calls
+
+
+def _assert_write_results(
+    calls: dict[str, int],
+    result,
+    data_path: Path,
+    meta_path: Path,
+    run_context: RunContext,
+) -> None:
     assert calls["count"] == 1
     assert data_path.exists()
     assert meta_path.exists()

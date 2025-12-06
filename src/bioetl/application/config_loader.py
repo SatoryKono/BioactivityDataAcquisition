@@ -105,76 +105,113 @@ def _validate_provider(config: dict[str, Any], path: Path) -> None:
 def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, Any]:
     """Преобразует старый формат конфигурации в новый."""
     transformed = config.copy()
-
     provider = transformed.get("provider", "chembl")
 
-    if "entity_name" in transformed and "entity" not in transformed:
-        transformed["entity"] = transformed.pop("entity_name")
-
-    if "id" not in transformed:
-        entity = transformed.get("entity", transformed.get("entity_name", "unknown"))
-        transformed["id"] = f"{provider}.{entity}"
-
-    if "sources" in transformed and "provider_config" not in transformed:
-        sources = transformed.pop("sources", {})
-        chembl_source = sources.get("chembl", {})
-
-        api_base_url = chembl_source.get("base_url") or transformed.pop("api_base_url", None)
-        if not api_base_url:
-            api_base_url = "https://www.ebi.ac.uk/chembl/api/data"
-
-        provider_config = {
-            "provider": provider,
-            "base_url": api_base_url,
-            "timeout_sec": transformed.get("client", {}).get("timeout", 30.0),
-            "max_retries": transformed.get("client", {}).get("max_retries", 3),
-            "rate_limit_per_sec": transformed.get("client", {}).get("rate_limit", 10.0),
-        }
-
-        if "max_url_length" in chembl_source:
-            provider_config["max_url_length"] = chembl_source["max_url_length"]
-        if "batch_size" in chembl_source:
-            provider_config["batch_size"] = chembl_source["batch_size"]
-
-        transformed["provider_config"] = provider_config
-
-    if "provider_config" in transformed and "batch_size" not in transformed:
-        provider_cfg = transformed["provider_config"]
-        if isinstance(provider_cfg, dict) and "batch_size" in provider_cfg:
-            transformed["batch_size"] = provider_cfg["batch_size"]
-
-    if "batch_size" not in transformed:
-        transformed["batch_size"] = 20
-
-    if "output_path" not in transformed:
-        storage = transformed.get("storage", {})
-        if isinstance(storage, dict) and "output_path" in storage:
-            transformed["output_path"] = storage["output_path"]
-        else:
-            entity = transformed.get("entity", "unknown")
-            transformed["output_path"] = f"./data/output/{entity}"
-
-    if "input_mode" not in transformed:
-        transformed["input_mode"] = "auto_detect"
-
-    if "input_path" not in transformed:
-        transformed["input_path"] = None
-
-    if "provider_config" not in transformed:
-        provider = transformed.get("provider", "chembl")
-        transformed["provider_config"] = {
-            "provider": provider,
-            "base_url": "https://www.ebi.ac.uk/chembl/api/data",
-            "timeout_sec": 30.0,
-            "max_retries": 3,
-            "rate_limit_per_sec": 10.0,
-        }
-
-    legacy_fields = ["endpoint", "api_base_url", "sources"]
-    for field in legacy_fields:
-        transformed.pop(field, None)
+    _ensure_entity_fields(transformed, provider)
+    _ensure_id(transformed, provider)
+    _hydrate_provider_config(transformed, provider)
+    _ensure_batch_size(transformed)
+    _ensure_output_settings(transformed)
+    _ensure_input_settings(transformed)
+    _drop_legacy_fields(transformed)
 
     return transformed
+
+
+def _ensure_entity_fields(transformed: dict[str, Any], provider: str) -> None:
+    if "entity_name" in transformed and "entity" not in transformed:
+        transformed["entity"] = transformed.pop("entity_name")
+    transformed.setdefault("provider", provider)
+
+
+def _ensure_id(transformed: dict[str, Any], provider: str) -> None:
+    if "id" in transformed:
+        return
+    entity = transformed.get("entity", transformed.get("entity_name", "unknown"))
+    transformed["id"] = f"{provider}.{entity}"
+
+
+def _hydrate_provider_config(transformed: dict[str, Any], provider: str) -> None:
+    if "sources" in transformed and "provider_config" not in transformed:
+        transformed["provider_config"] = _build_provider_config_from_sources(
+            transformed.pop("sources", {}),
+            transformed,
+            provider,
+        )
+
+    if "provider_config" not in transformed:
+        transformed["provider_config"] = _default_provider_config(provider)
+
+    provider_cfg = transformed.get("provider_config")
+    if (
+        isinstance(provider_cfg, dict)
+        and "batch_size" in provider_cfg
+        and "batch_size" not in transformed
+    ):
+        transformed["batch_size"] = provider_cfg["batch_size"]
+
+
+def _build_provider_config_from_sources(
+    sources: dict[str, Any],
+    transformed: dict[str, Any],
+    provider: str,
+) -> dict[str, Any]:
+    chembl_source = sources.get("chembl", {})
+    api_base_url = chembl_source.get("base_url") or transformed.pop(
+        "api_base_url", None
+    )
+    if not api_base_url:
+        api_base_url = "https://www.ebi.ac.uk/chembl/api/data"
+
+    provider_config: dict[str, Any] = {
+        "provider": provider,
+        "base_url": api_base_url,
+        "timeout_sec": transformed.get("client", {}).get("timeout", 30.0),
+        "max_retries": transformed.get("client", {}).get("max_retries", 3),
+        "rate_limit_per_sec": transformed.get("client", {}).get("rate_limit", 10.0),
+    }
+
+    for optional_key in ("max_url_length", "batch_size"):
+        if optional_key in chembl_source:
+            provider_config[optional_key] = chembl_source[optional_key]
+    return provider_config
+
+
+def _default_provider_config(provider: str) -> dict[str, Any]:
+    return {
+        "provider": provider,
+        "base_url": "https://www.ebi.ac.uk/chembl/api/data",
+        "timeout_sec": 30.0,
+        "max_retries": 3,
+        "rate_limit_per_sec": 10.0,
+    }
+
+
+def _ensure_batch_size(transformed: dict[str, Any]) -> None:
+    transformed.setdefault("batch_size", 20)
+
+
+def _ensure_output_settings(transformed: dict[str, Any]) -> None:
+    if "output_path" in transformed:
+        return
+
+    storage = transformed.get("storage", {})
+    if isinstance(storage, dict) and "output_path" in storage:
+        transformed["output_path"] = storage["output_path"]
+        return
+
+    entity = transformed.get("entity", "unknown")
+    transformed["output_path"] = f"./data/output/{entity}"
+
+
+def _ensure_input_settings(transformed: dict[str, Any]) -> None:
+    transformed.setdefault("input_mode", "auto_detect")
+    transformed.setdefault("input_path", None)
+
+
+def _drop_legacy_fields(transformed: dict[str, Any]) -> None:
+    for field in ("endpoint", "api_base_url", "sources"):
+        transformed.pop(field, None)
 
 
 _def_profile_cache: dict[str, dict[str, Any]] = {}
