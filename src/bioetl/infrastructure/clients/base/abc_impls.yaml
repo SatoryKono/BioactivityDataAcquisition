@@ -33,9 +33,9 @@ ProgressReporterABC:
     Tqdm: bioetl.infrastructure.logging.impl.progress_reporter.TqdmProgressReporterImpl
 
 ValidatorABC:
-  default_factory: bioetl.domain.validation.factories.default_validator
+  default_factory: bioetl.infrastructure.validation.factories.default_validator_factory
   implementations:
-    Pandera: bioetl.domain.validation.impl.pandera_validator.PanderaValidatorImpl
+    Pandera: bioetl.infrastructure.validation.impl.pandera_validator.PanderaValidatorImpl
 
 NormalizationServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
