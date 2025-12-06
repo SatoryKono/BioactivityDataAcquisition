@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from bioetl.infrastructure.logging.contracts import ProgressReporterABC
+from bioetl.clients.base.logging.contracts import ProgressReporterABC
 
 
 class TqdmProgressReporterImpl(ProgressReporterABC):

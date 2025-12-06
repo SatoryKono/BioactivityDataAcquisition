@@ -1,4 +1,4 @@
-from bioetl.infrastructure.output.contracts import (
+from bioetl.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
     WriterABC,
