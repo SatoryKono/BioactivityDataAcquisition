@@ -9,7 +9,7 @@ import yaml
 from pydantic import ValidationError
 
 from bioetl.config.pipeline_config_schema import PipelineConfig
-from bioetl.config.provider_registry import (
+from bioetl.infrastructure.config.provider_registry_loader import (
     ProviderNotConfiguredError,
     ProviderRegistryError,
     ProviderRegistryFormatError,
