@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
-from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
+from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 from bioetl.interfaces.cli import app
 
 sys.modules.setdefault("tqdm", MagicMock())
@@ -23,7 +23,7 @@ def test_cli_run_dry_run_success(tmp_path, monkeypatch):
         str(Path("tests/fixtures/configs").resolve()),
     )
     monkeypatch.setattr(
-        ChemblExtractionServiceImpl,
+        ChemblExtractionClientImpl,
         "get_release_version",
         lambda self: "chembl_cli_integration",
     )
