@@ -55,29 +55,51 @@ def _collect_imports(path: Path) -> list[ImportReference]:
     imports: list[ImportReference] = []
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imports.extend(
-                ImportReference(alias.name, node.lineno) for alias in node.names
-            )
-        elif isinstance(node, ast.ImportFrom):
-            module = _resolve_module(
-                current_module,
-                module=node.module or "",
-                level=node.level,
-                is_package=is_package,
-            )
-            if module:
-                imports.append(ImportReference(module, node.lineno))
-            for alias in node.names:
-                target = module
-                if target:
-                    target = f"{target}.{alias.name}" if alias.name else target
-                else:
-                    target = alias.name
-                if target:
-                    imports.append(ImportReference(target, node.lineno))
+        imports.extend(
+            _imports_from_node(node, current_module=current_module, is_package=is_package)
+        )
 
     return imports
+
+
+def _imports_from_node(
+    node: ast.AST, *, current_module: str, is_package: bool
+) -> list[ImportReference]:
+    if isinstance(node, ast.Import):
+        return [ImportReference(alias.name, node.lineno) for alias in node.names]
+
+    if isinstance(node, ast.ImportFrom):
+        return _imports_from_import_from(
+            node, current_module=current_module, is_package=is_package
+        )
+
+    return []
+
+
+def _imports_from_import_from(
+    node: ast.ImportFrom, *, current_module: str, is_package: bool
+) -> list[ImportReference]:
+    module = _resolve_module(
+        current_module,
+        module=node.module or "",
+        level=node.level,
+        is_package=is_package,
+    )
+
+    references: list[ImportReference] = []
+    if module:
+        references.append(ImportReference(module, node.lineno))
+
+    for alias in node.names:
+        target = module
+        if target:
+            target = f"{target}.{alias.name}" if alias.name else target
+        else:
+            target = alias.name
+        if target:
+            references.append(ImportReference(target, node.lineno))
+
+    return references
 
 
 def _layer_segment(module: str, layer: str) -> str | None:

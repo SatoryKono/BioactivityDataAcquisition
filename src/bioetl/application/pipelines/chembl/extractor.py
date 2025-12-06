@@ -74,70 +74,27 @@ class ChemblExtractorImpl(ExtractorABC):
         Falls back to API iteration when no input file is provided.
         """
 
-        mode = getattr(self.config, "input_mode", "auto_detect")
-        input_path = getattr(self.config, "input_path", None)
-        csv_options: dict[str, Any] | CsvInputOptions = (
-            getattr(self.config, "csv_options", None) or {}
-        )
-        raw_batch_size = getattr(self.config, "batch_size", None)
-        batch_size = (
-            int(raw_batch_size)
-            if isinstance(raw_batch_size, (int, float)) and raw_batch_size > 0
-            else None
-        )
-
-        if mode == "auto_detect" and input_path:
-            mode = "csv"
+        mode, input_path = self._resolve_mode()
+        csv_options = self._resolve_csv_options()
+        batch_size = self._resolve_batch_size()
 
         if mode == "csv":
-            if not input_path:
-                raise ValueError("input_path is required for CSV mode")
-            input_path_obj = Path(input_path)
-            return CsvRecordSourceImpl(
-                input_path=input_path_obj,
+            return self._build_csv_source(
+                input_path=input_path,
                 csv_options=csv_options,
                 limit=limit,
                 chunk_size=batch_size,
-                logger=self.logger,
             )
 
         if mode == "id_only":
-            if not input_path:
-                raise ValueError("input_path is required for ID-only mode")
-            input_path_obj = Path(input_path)
-            id_column = self._resolve_primary_key()
-            filter_key = f"{id_column}__in"
-            source_config_raw = self.config.get_source_config(self.config.provider)
-            source_config = cast(ChemblSourceConfig, source_config_raw)
-            if not isinstance(source_config, ChemblSourceConfig):
-                raise TypeError(
-                    "Expected ChemblSourceConfig for provider "
-                    f"'{self.config.provider}', got "
-                    f"{type(source_config).__name__}"
-                )
-            return IdListRecordSourceImpl(
-                input_path=input_path_obj,
-                id_column=id_column,
+            return self._build_id_list_source(
+                input_path=input_path,
                 csv_options=csv_options,
                 limit=limit,
-                extraction_service=self.extraction_service,
-                source_config=source_config,
-                entity=self.config.entity_name,
-                filter_key=filter_key,
-                logger=self.logger,
                 chunk_size=batch_size,
             )
 
-        filters = dict(getattr(self.config, "pipeline", {}) or {})
-        if limit is not None:
-            filters["limit"] = limit
-
-        return ApiRecordSource(
-            extraction_service=self.extraction_service,
-            entity=self.config.entity_name,
-            filters=filters,
-            chunk_size=batch_size,
-        )
+        return self._build_api_source(limit=limit, chunk_size=batch_size)
 
     def _resolve_primary_key(self) -> str:
         pk = getattr(self.config, "primary_key", None)
@@ -151,3 +108,83 @@ class ChemblExtractorImpl(ExtractorABC):
                 f"Could not resolve ID column for entity '{self.config.entity_name}'"
             )
         return pk
+
+    def _resolve_mode(self) -> tuple[str, str | None]:
+        mode = getattr(self.config, "input_mode", "auto_detect")
+        input_path = getattr(self.config, "input_path", None)
+        if mode == "auto_detect" and input_path:
+            return "csv", input_path
+        return mode, input_path
+
+    def _resolve_csv_options(self) -> dict[str, Any] | CsvInputOptions:
+        return getattr(self.config, "csv_options", None) or {}
+
+    def _resolve_batch_size(self) -> int | None:
+        raw_batch_size = getattr(self.config, "batch_size", None)
+        if isinstance(raw_batch_size, (int, float)) and raw_batch_size > 0:
+            return int(raw_batch_size)
+        return None
+
+    def _build_csv_source(
+        self,
+        *,
+        input_path: str | None,
+        csv_options: dict[str, Any] | CsvInputOptions,
+        limit: int | None,
+        chunk_size: int | None,
+    ) -> RecordSource:
+        if not input_path:
+            raise ValueError("input_path is required for CSV mode")
+        return CsvRecordSourceImpl(
+            input_path=Path(input_path),
+            csv_options=csv_options,
+            limit=limit,
+            chunk_size=chunk_size,
+            logger=self.logger,
+        )
+
+    def _build_id_list_source(
+        self,
+        *,
+        input_path: str | None,
+        csv_options: dict[str, Any] | CsvInputOptions,
+        limit: int | None,
+        chunk_size: int | None,
+    ) -> RecordSource:
+        if not input_path:
+            raise ValueError("input_path is required for ID-only mode")
+        id_column = self._resolve_primary_key()
+        filter_key = f"{id_column}__in"
+        source_config_raw = self.config.get_source_config(self.config.provider)
+        source_config = cast(ChemblSourceConfig, source_config_raw)
+        if not isinstance(source_config, ChemblSourceConfig):
+            raise TypeError(
+                "Expected ChemblSourceConfig for provider "
+                f"'{self.config.provider}', got "
+                f"{type(source_config).__name__}"
+            )
+        return IdListRecordSourceImpl(
+            input_path=Path(input_path),
+            id_column=id_column,
+            csv_options=csv_options,
+            limit=limit,
+            extraction_service=self.extraction_service,
+            source_config=source_config,
+            entity=self.config.entity_name,
+            filter_key=filter_key,
+            logger=self.logger,
+            chunk_size=chunk_size,
+        )
+
+    def _build_api_source(
+        self, *, limit: int | None, chunk_size: int | None
+    ) -> RecordSource:
+        filters = dict(getattr(self.config, "pipeline", {}) or {})
+        if limit is not None:
+            filters["limit"] = limit
+        return ApiRecordSource(
+            extraction_service=self.extraction_service,
+            entity=self.config.entity_name,
+            filters=filters,
+            chunk_size=chunk_size,
+        )
