@@ -16,20 +16,13 @@ from bioetl.infrastructure.output.metadata import (
 )
 
 
-@pytest.fixture
-def run_context():
-    """Fixture for RunContext."""
-    return RunContext(
+def test_build_metadata(run_context_factory):
+    """Test building metadata from WriteResult."""
+    run_context = run_context_factory(
         run_id="test-run-123",
-        entity_name="test_entity",
-        provider="chembl",
         started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
         metadata={"extra_key": "extra_value"},
     )
-
-
-def test_build_metadata(run_context):
-    """Test building metadata from WriteResult."""
     write_result = WriteResult(
         path=Path("/tmp/out/test.csv"),
         row_count=100,
@@ -57,8 +50,13 @@ def test_build_metadata(run_context):
     _assert_checksums(meta)
 
 
-def test_build_dry_run_metadata(run_context):
+def test_build_dry_run_metadata(run_context_factory):
     """Test building metadata for dry run."""
+    run_context = run_context_factory(
+        run_id="test-run-123",
+        started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+        metadata={"extra_key": "extra_value"},
+    )
     meta = build_dry_run_metadata(run_context, row_count=50)
 
     assert meta["run_id"] == "test-run-123"
