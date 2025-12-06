@@ -9,7 +9,7 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.provider_registry import (
     MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,

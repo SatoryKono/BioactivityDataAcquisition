@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from bioetl.clients.base.output.contracts import (
+from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
 )

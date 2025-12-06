@@ -9,8 +9,8 @@ from bioetl.application.pipelines.hooks_impl import (
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
-from bioetl.clients.base.output.contracts import (
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
     WriterABC,

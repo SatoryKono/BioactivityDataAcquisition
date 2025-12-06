@@ -17,9 +17,9 @@ PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
 ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
 CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
 
-LoggerAdapterABC: bioetl.clients.base.logging.contracts.LoggerAdapterABC
-ProgressReporterABC: bioetl.clients.base.logging.contracts.ProgressReporterABC
-TracerABC: bioetl.clients.base.logging.contracts.TracerABC
+LoggerAdapterABC: bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC
+ProgressReporterABC: bioetl.domain.clients.base.logging.contracts.ProgressReporterABC
+TracerABC: bioetl.domain.clients.base.logging.contracts.TracerABC
 
 HasherABC: bioetl.domain.transform.contracts.HasherABC
 NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceABC
@@ -27,6 +27,6 @@ NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceA
 ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
 SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC
 
-WriterABC: bioetl.clients.base.output.contracts.WriterABC
-MetadataWriterABC: bioetl.clients.base.output.contracts.MetadataWriterABC
-QualityReportABC: bioetl.clients.base.output.contracts.QualityReportABC
+WriterABC: bioetl.domain.clients.base.output.contracts.WriterABC
+MetadataWriterABC: bioetl.domain.clients.base.output.contracts.MetadataWriterABC
+QualityReportABC: bioetl.domain.clients.base.output.contracts.QualityReportABC

@@ -1,6 +1,6 @@
 import structlog
 
-from bioetl.clients.base.logging.contracts import (
+from bioetl.domain.clients.base.logging.contracts import (
     LoggerAdapterABC,
     ProgressReporterABC,
 )

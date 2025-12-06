@@ -7,7 +7,7 @@ from typing import Any, Callable, Iterable
 
 import pandas as pd
 
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
