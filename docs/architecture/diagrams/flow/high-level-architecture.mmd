@@ -1,7 +1,7 @@
 flowchart LR
 
 subgraph Interfaces["Interfaces (Driving)"]
-    CLI[CLI App]:::componentPrimary
+    CLI[CLI App (Typer)]:::componentPrimary
     RestAPI[REST Server]:::componentSecondary
     MQ[MQ Listener]:::componentSecondary
 end
@@ -9,7 +9,9 @@ class Interfaces group;
 
 subgraph Application["Application Layer"]
     Pipeline[Pipeline Orchestrator]:::componentPrimary
-    Hooks[Pipeline Hooks]:::componentSecondary
+    ConfigLoader[Config Loader]:::componentSecondary
+    Container[PipelineContainer]:::componentSecondary
+    Hooks[Hooks (Logging + Metrics)]:::componentSecondary
 end
 class Application group;
 
@@ -17,48 +19,61 @@ subgraph Domain["Domain Layer (Core)"]
     Validation[Validation Service]:::componentPrimary
     Normalization[Normalization Service]:::componentPrimary
     Hashing[Hash Service]:::componentSecondary
-    Schemas[Pandera Schemas]:::componentSecondary
+    Transformers[TransformerChain]:::componentSecondary
+    Schemas[Pandera Schemas + Contracts]:::componentSecondary
 end
 class Domain group;
 
 subgraph Infrastructure["Infrastructure (Driven)"]
     subgraph Input
-        ChEMBL[ChEMBL Client]:::componentPrimary
-        PubChem[PubChem Client]:::componentSecondary
+        ProviderRegistry[ProviderRegistryLoader]:::componentSecondary
+        RecordSource[Api/Csv/IdList Record Sources]:::componentPrimary
+        ChEMBL[ChEMBL Client Stack\nUnifiedAPIClient + HTTP client]:::componentPrimary
     end
     subgraph Output
         Writer[Unified Output Writer]:::componentPrimary
         Logger[Unified Logger]:::componentSecondary
+        QC[QC + Metadata Writers]:::componentSecondary
+    end
+    subgraph Observability
+        Metrics[Prometheus Metrics Server]:::componentSecondary
     end
     subgraph Config
-        CfgLoad[Config Loader]:::componentSecondary
-        Pydantic[Pydantic Models]:::componentSecondary
+        Pydantic[Pydantic Models\nPipelineConfig]:::componentSecondary
     end
 end
 class Infrastructure group;
 
 ExtChEMBL[(ChEMBL REST API)]:::external
-ExtPubChem[(PubChem API)]:::external
+FS[(File system: CSV/Parquet, meta, QC)]:::external
 
 CLI -->|Calls| Pipeline
 RestAPI --> Pipeline
 MQ --> Pipeline
 
-Pipeline -->|Uses| Validation
-Pipeline -->|Uses| Normalization
-Pipeline -->|Uses| Hashing
+Pipeline -->|Uses| ConfigLoader
+Pipeline -->|Uses| Container
+Container --> Hooks
+Container --> Validation
+Container --> Normalization
+Container --> Hashing
+Container --> Transformers
 Validation -->|Validates| Schemas
 Normalization -.->|Uses| Schemas
-
-Pipeline -->|Uses| ChEMBL
-Pipeline -->|Uses| PubChem
-Pipeline -->|Uses| Writer
-Pipeline -->|Uses| Logger
-Pipeline -->|Configures| CfgLoad
-Pipeline -->|Reads| Pydantic
+Container --> RecordSource
+Container --> ChEMBL
+Container --> Writer
+Container --> Logger
+Container --> Metrics
+Container --> ProviderRegistry
+Container --> Pydantic
 
 ChEMBL --> ExtChEMBL
-PubChem --> ExtPubChem
+RecordSource --> ChEMBL
+Writer --> FS
+QC --> FS
+Logger --> FS
+Metrics --> RestAPI
 
 classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
 classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;

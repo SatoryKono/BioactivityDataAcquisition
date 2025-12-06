@@ -9,50 +9,71 @@ classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color
 classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 
 subgraph Entry["Interfaces / Entry Points"]
-    CLI["CLI / REST / MQ\nbioetl.interfaces.*"]:::external
+    CLI["CLI (Typer) / REST / MQ\nbioetl.interfaces.*"]:::external
 end
 class Entry group;
 
 subgraph Application["Application Layer"]
     Orchestrator["PipelineOrchestrator\nbioetl.application.orchestrator"]:::componentPrimary
     Container["PipelineContainer\nbioetl.application.container"]:::componentPrimary
-    Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\nbioetl.application.pipelines.*"]:::componentSecondary
-    StageRunner["StageRunner\nbioetl.application.pipelines.stage_runner"]:::componentSecondary
-    Hooks["Hooks / ErrorPolicy\nhooks.py + hooks_impl.py"]:::componentSecondary
-    ConfigLoader["Config Loader\nconfig_loader.py"]:::componentSecondary
-    PipelineConfig["PipelineConfig\nbioetl.config.pipeline_config_schema"]:::componentSecondary
+    PipelineRegistry["Pipeline Registry\nbioetl.application.pipelines.registry"]:::componentSecondary
+    ConfigLoader["Config Loader\napplication.config_loader"]:::componentSecondary
+    PipelineConfig["PipelineConfig\nconfig.pipeline_config_schema"]:::componentSecondary
+    StageRunner["StageRunner\napplication.pipelines.stage_runner"]:::componentSecondary
+    Hooks["Hooks (Logging + Metrics)\nLoggingPipelineHookImpl\nMetricsPipelineHookImpl"]:::componentSecondary
+    ErrorPolicy["ErrorPolicyManager\nFailFast/ContinueOnError"]:::componentSecondary
+    Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
 end
 class Application group;
 
 subgraph Domain["Domain Dependencies"]
-    DomainServices["ValidationService\nHashService\nNormalizationServiceImpl\nbioetl.domain.transform.impl.normalize"]:::componentSecondary
+    Validation["ValidationService\nbioetl.domain.validation.service"]:::componentSecondary
+    Normalization["NormalizationServiceImpl\nbioetl.domain.transform.impl.normalize"]:::componentSecondary
+    Hashing["HashService\nbioetl.domain.transform.hash_service"]:::componentSecondary
     Transformers["TransformerChain\nHash/Index/Fulldate/DbVersion"]:::componentSecondary
-    Schemas["SchemaRegistry\nPandera schemas"]:::componentSecondary
+    Contracts["PipelineSchemaContract\nbioetl.domain.schemas.pipeline_contracts"]:::componentSecondary
+    Schemas["SchemaRegistry + PanderaValidator\nbioetl.domain.schemas.registry"]:::componentSecondary
 end
 class Domain group;
 
 subgraph Infrastructure["Infrastructure Dependencies"]
-    Clients["ChEMBL Clients\ninfrastructure.clients.chembl.*"]:::componentSecondary
-    Output["UnifiedOutputWriter\nCSV/metadata/QC writers"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry + Loader\nconfigs/providers.yaml\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
+    Clients["ChEMBL Client Stack\nUnifiedAPIClient + ChemblDataClientHTTPImpl"]:::componentSecondary
+    RecordSources["Record Sources\nApiRecordSource / CsvRecordSourceImpl / IdListRecordSourceImpl"]:::componentSecondary
+    Output["UnifiedOutputWriter\nCSV writer + MetadataWriter + QC"]:::componentSecondary
     Logging["Unified Logger\ninfrastructure.logging.*"]:::componentSecondary
+    Observability["Prometheus Metrics\nstart_metrics_server_once"]:::componentSecondary
 end
 class Infrastructure group;
 
 CLI --> Orchestrator
 ConfigLoader --> PipelineConfig
+Orchestrator --> PipelineRegistry
 Orchestrator --> Container
-Orchestrator --> Pipelines
 Orchestrator --> StageRunner
 Container --> Pipelines
-Container --> DomainServices
+Container --> Validation
+Container --> Normalization
+Container --> Hashing
 Container --> Transformers
+Container --> Contracts
 Container --> Schemas
+Container --> ProviderRegistry
 Container --> Clients
+Container --> RecordSources
 Container --> Output
 Container --> Logging
+Container --> Observability
 Pipelines --> StageRunner
-Pipelines --> DomainServices
+Pipelines --> Validation
+Pipelines --> Normalization
+Pipelines --> Hashing
 Pipelines --> Output
 Pipelines --> Logging
-DomainServices --> Schemas
+Pipelines --> Hooks
+StageRunner --> Hooks
+StageRunner --> ErrorPolicy
+Validation --> Schemas
+Normalization --> Contracts
+RecordSources --> Clients
 

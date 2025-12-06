@@ -9,15 +9,18 @@ classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color
 classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 
 subgraph Interfaces["Interfaces Layer (Ports)"]
-    CLI["CLI App\ninterfaces.cli.app"]:::componentPrimary
-    REST["REST Server\ninterfaces.rest.server"]:::componentPrimary
+    CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
+    REST["REST Server (FastAPI)\ninterfaces.rest.server"]:::componentPrimary
     MQ["MQ Listener\ninterfaces.mq.listener/handler"]:::componentSecondary
 
     PipelinePorts["PipelineBase / ChemblPipelineBase\napplication.pipelines.base"]:::componentSecondary
+    PipelineRegistry["Pipeline Registry\napplication.pipelines.registry"]:::componentSecondary
+    ConfigLoader["Pipeline Config Loader\napplication.config_loader"]:::componentSecondary
     ClientPorts["SourceClientABC\ninterfaces.clients / domain.clients.base"]:::componentSecondary
     WriterPorts["WriterABC / UnifiedOutputWriterABC\ninterfaces.output"]:::componentSecondary
     ValidatorPorts["ValidatorABC\ninterfaces.validation"]:::componentSecondary
     LoggerPorts["LoggerAdapterABC\ninterfaces.logging"]:::componentSecondary
+    MetricsPort["Metrics endpoint\ninfrastructure.observability.server"]:::componentSecondary
 end
 class Interfaces group;
 
@@ -43,8 +46,11 @@ class Infrastructure group;
 CLI --> Orchestrator
 REST --> Orchestrator
 MQ --> Orchestrator
+MetricsPort --> REST
 Orchestrator --> Pipelines
 Pipelines --> PipelinePorts
+Pipelines --> PipelineRegistry
+Pipelines --> ConfigLoader
 Pipelines --> ClientPorts
 Pipelines --> WriterPorts
 Pipelines --> ValidatorPorts
@@ -54,4 +60,5 @@ WriterPorts --> Output
 ValidatorPorts --> Validation
 PipelinePorts --> Normalization
 LoggerPorts --> Logging
+ConfigLoader --> PipelinePorts
 

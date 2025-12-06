@@ -14,9 +14,11 @@ subgraph Domain["Domain Layer"]
     Hashing["HashService\nbioetl.domain.transform.hash_service"]:::componentPrimary
     Transformers["TransformerChain\nHash/Index/DbVersion/Fulldate"]:::componentSecondary
     Hasher["HasherImpl\ncanonical serializer"]:::componentSecondary
-    Schemas["SchemaRegistry\nbioetl.domain.schemas.registry"]:::componentSecondary
+    Schemas["SchemaRegistry\nPipelineSchemaContract\nbioetl.domain.schemas.registry"]:::componentSecondary
     Pandera["PanderaValidator\nbioetl.domain.validation.impl"]:::componentSecondary
     Normalizers["Scalar/array/dict normalizers\nbioetl.domain.transform.normalizers.*"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry\nbioetl.domain.provider_registry"]:::componentSecondary
+    RecordSource["ApiRecordSource\nbioetl.domain.record_source"]:::componentSecondary
 end
 class Domain group;
 
@@ -39,9 +41,12 @@ Pipeline --> Transformers
 Validation --> Schemas
 Validation --> Pandera
 Normalization --> Normalizers
+Normalization --> Schemas
 Hashing --> Hasher
 Transformers --> Hashing
 Transformers --> Normalization
 Pipeline --> Writers
 Pipeline --> Clients
+Pipeline --> ProviderRegistry
+Pipeline --> RecordSource
 

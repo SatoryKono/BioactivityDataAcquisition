@@ -1,7 +1,7 @@
 """Dependency Injection Container for the application."""
 
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
@@ -11,6 +11,7 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import (
+    MutableProviderRegistryABC,
     ProviderRegistryABC,
     get_provider_registry,
 )
@@ -96,7 +97,10 @@ class PipelineContainer:
         source_config = self._resolve_provider_config(definition)
         components = definition.components
 
-        factory = getattr(components, "create_normalization_service", None)
+        factory = cast(
+            Callable[..., NormalizationServiceABC] | None,
+            getattr(components, "create_normalization_service", None),
+        )
         if factory is None:
             raise ValueError(
                 f"Unsupported provider for normalization: {self._provider_id.value}"
@@ -246,8 +250,15 @@ class PipelineContainer:
         Использует загрузчик, поэтому вызов идемпотентен и безопасен
         при повторных вызовах.
         """
-        registry = getattr(self, "_provider_registry", None) or get_provider_registry()
-        self._provider_registry = load_provider_registry(registry=registry)
+        registry_candidate = getattr(self, "_provider_registry", None)
+        if registry_candidate is not None and not hasattr(
+            registry_candidate, "register_provider"
+        ):
+            raise TypeError("Provider registry must be mutable for registration")
+        mutable_registry = cast(
+            MutableProviderRegistryABC | None, registry_candidate
+        ) or get_provider_registry()
+        self._provider_registry = load_provider_registry(registry=mutable_registry)
 
 
 def build_pipeline_dependencies(
