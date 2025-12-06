@@ -2,7 +2,8 @@
 ChEMBL data extractor implementation.
 """
 
-from typing import Any, Iterable
+from pathlib import Path
+from typing import Any, Iterable, cast
 
 import pandas as pd
 
@@ -16,6 +17,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -74,7 +76,9 @@ class ChemblExtractorImpl(ExtractorABC):
 
         mode = getattr(self.config, "input_mode", "auto_detect")
         input_path = getattr(self.config, "input_path", None)
-        csv_options = getattr(self.config, "csv_options", None)
+        csv_options: dict[str, Any] | CsvInputOptions = (
+            getattr(self.config, "csv_options", None) or {}
+        )
         batch_size = getattr(self.config, "batch_size", None)
 
         if mode == "auto_detect" and input_path:
@@ -83,8 +87,9 @@ class ChemblExtractorImpl(ExtractorABC):
         if mode == "csv":
             if not input_path:
                 raise ValueError("input_path is required for CSV mode")
+            input_path_obj = Path(input_path)
             return CsvRecordSourceImpl(
-                input_path=input_path,
+                input_path=input_path_obj,
                 csv_options=csv_options,
                 limit=limit,
                 chunk_size=batch_size,
@@ -94,11 +99,19 @@ class ChemblExtractorImpl(ExtractorABC):
         if mode == "id_only":
             if not input_path:
                 raise ValueError("input_path is required for ID-only mode")
+            input_path_obj = Path(input_path)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
-            source_config = self.config.get_source_config(self.config.provider)
+            source_config_raw = self.config.get_source_config(self.config.provider)
+            source_config = cast(ChemblSourceConfig, source_config_raw)
+            if not isinstance(source_config, ChemblSourceConfig):
+                raise TypeError(
+                    "Expected ChemblSourceConfig for provider "
+                    f"'{self.config.provider}', got "
+                    f"{type(source_config).__name__}"
+                )
             return IdListRecordSourceImpl(
-                input_path=input_path,
+                input_path=input_path_obj,
                 id_column=id_column,
                 csv_options=csv_options,
                 limit=limit,
