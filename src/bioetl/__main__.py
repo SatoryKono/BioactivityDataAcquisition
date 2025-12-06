@@ -1,5 +1,5 @@
-import sys
 from pathlib import Path
+import sys
 
 
 def main() -> None:

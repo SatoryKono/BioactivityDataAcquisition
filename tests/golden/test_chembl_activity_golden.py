@@ -1,8 +1,8 @@
 """Golden test for ChEMBL Activity pipeline (TS-004)."""
 
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
+import sys
 from unittest.mock import MagicMock
 
 import pandas as pd

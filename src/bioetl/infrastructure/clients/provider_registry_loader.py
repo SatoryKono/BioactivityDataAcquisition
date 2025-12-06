@@ -6,8 +6,8 @@ import importlib
 from pathlib import Path
 from typing import Any
 
-import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
+import yaml
 
 from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.provider_registry import (

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.hooks_impl import (

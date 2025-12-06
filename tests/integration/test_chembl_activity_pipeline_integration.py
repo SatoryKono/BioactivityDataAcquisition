@@ -1,7 +1,7 @@
 """Integration tests for ChEMBL Activity pipeline (TS-001)."""
 
-import sys
 from pathlib import Path
+import sys
 from unittest.mock import MagicMock
 
 import pandas as pd

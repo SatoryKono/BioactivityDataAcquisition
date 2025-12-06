@@ -3,9 +3,9 @@ Atomic file operation utilities.
 """
 
 import os
+from pathlib import Path
 import platform
 import time
-from pathlib import Path
 from typing import Callable
 
 from bioetl.infrastructure.constants import MAX_FILE_RETRIES, RETRY_DELAY_SEC

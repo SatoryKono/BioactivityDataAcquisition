@@ -1,11 +1,11 @@
 import os
-import sys
 from pathlib import Path
+import sys
 from typing import Any, Literal, Optional
 
-import typer
 from rich.console import Console
 from rich.table import Table
+import typer
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
