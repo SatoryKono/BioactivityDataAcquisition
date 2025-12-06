@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Golden records snapshot for assay_chembl."""
 
 import json
