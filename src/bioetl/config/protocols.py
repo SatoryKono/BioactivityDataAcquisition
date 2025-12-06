@@ -1,4 +1,5 @@
 """Configuration protocols for decoupling infrastructure from application."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -20,8 +21,7 @@ class PipelineConfigProtocol(Protocol):
     fields: list[dict[str, Any]]
 
     @property
-    def entity_name(self) -> str:
-        ...
+    def entity_name(self) -> str: ...
 
 
 class PipelineConfigLoaderProtocol(Protocol):
@@ -32,8 +32,7 @@ class PipelineConfigLoaderProtocol(Protocol):
         config_path: str | Path,
         profile: str | None = None,
         profiles_root: Path | None = None,
-    ) -> PipelineConfigProtocol:
-        ...
+    ) -> PipelineConfigProtocol: ...
 
 
 __all__ = ["PipelineConfigProtocol", "PipelineConfigLoaderProtocol"]

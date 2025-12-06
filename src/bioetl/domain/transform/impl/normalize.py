@@ -43,6 +43,7 @@ def _coerce_numeric_columns(
         df[name] = pd.Series(coerced, dtype=target_dtype)  # type: ignore[arg-type]
     return df
 
+
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid
 normalize_pubchem_cid = normalize_pcid

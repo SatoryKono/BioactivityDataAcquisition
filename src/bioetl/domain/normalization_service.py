@@ -105,15 +105,11 @@ class ChemblNormalizationService(
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         normalized = self.normalize_dataframe(df)
-        return normalize_impl._coerce_numeric_columns(
-            normalized, self._config.fields
-        )
+        return normalize_impl._coerce_numeric_columns(normalized, self._config.fields)
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         normalized = self.normalize_dataframe(df)
-        return normalize_impl._coerce_numeric_columns(
-            normalized, self._config.fields
-        )
+        return normalize_impl._coerce_numeric_columns(normalized, self._config.fields)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]

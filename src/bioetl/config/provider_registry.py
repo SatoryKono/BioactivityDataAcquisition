@@ -113,10 +113,7 @@ def _normalize_provider_entry(provider: Any, registry_path: Path) -> str:
         return str(provider_id)
     raise ProviderRegistryFormatError(
         registry_path,
-        (
-            "Provider entry must be string or dict, "
-            f"got {type(provider).__name__}"
-        ),
+        ("Provider entry must be string or dict, " f"got {type(provider).__name__}"),
     )
 
 

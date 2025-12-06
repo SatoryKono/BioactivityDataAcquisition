@@ -10,4 +10,3 @@ from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl im
 )
 
 __all__ = ["ChemblExtractionServiceImpl"]
-
