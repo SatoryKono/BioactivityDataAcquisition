@@ -59,23 +59,29 @@ class AtomicFileOperation:
                 os.replace(src, dst)
                 return
             except PermissionError as exc:
-                # На Windows PermissionError часто означает, что файл заблокирован
                 last_error = exc
-                if is_windows and dst.exists():
-                    # Попытка удалить целевой файл перед заменой (может помочь)
-                    try:
-                        dst.unlink()
-                        # Повторная попытка сразу после удаления
-                        try:
-                            os.replace(src, dst)
-                            return
-                        except OSError:
-                            pass  # Продолжаем с обычным retry
-                    except OSError:
-                        pass  # Не удалось удалить, продолжаем с retry
+                if self._try_windows_unlock_replace(src, dst, is_windows):
+                    return
             except OSError as exc:
                 last_error = exc
                 
             if attempt == MAX_FILE_RETRIES - 1:
                 raise last_error or OSError("Move failed without explicit error.")
             time.sleep(delay)
+
+    def _try_windows_unlock_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
+        """
+        Попытка разблокировать и заменить файл на Windows.
+        
+        Returns:
+            True если замена успешна, False иначе.
+        """
+        if not is_windows or not dst.exists():
+            return False
+        
+        try:
+            dst.unlink()
+            os.replace(src, dst)
+            return True
+        except OSError:
+            return False
