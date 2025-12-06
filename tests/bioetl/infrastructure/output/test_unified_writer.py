@@ -26,6 +26,19 @@ def mock_metadata_writer_fixture():
 
 
 @pytest.fixture
+def mock_quality_reporter():
+    """Fixture for mock quality reporter."""
+    reporter = MagicMock()
+    reporter.build_quality_report.return_value = pd.DataFrame(
+        {"column": ["a"], "null_count": [0]}
+    )
+    reporter.build_correlation_report.return_value = pd.DataFrame(
+        {"column": ["a"], "a": [1.0]}
+    )
+    return reporter
+
+
+@pytest.fixture
 def mock_config_fixture():
     """Fixture for mock configuration."""
     config = MagicMock()
@@ -49,6 +62,7 @@ def mock_atomic_op():
 def unified_writer(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
+    mock_quality_reporter,
     mock_config_fixture,
     mock_atomic_op,
 ):
@@ -56,6 +70,7 @@ def unified_writer(
     return UnifiedOutputWriter(
         mock_writer_fixture,
         mock_metadata_writer_fixture,
+        mock_quality_reporter,
         mock_config_fixture,
         atomic_op=mock_atomic_op,
     )
@@ -76,6 +91,7 @@ def test_write_result_success(
     unified_writer,
     mock_writer_fixture,
     mock_metadata_writer_fixture,
+    mock_quality_reporter,
     run_context,
     tmp_path
 ):
@@ -99,7 +115,11 @@ def test_write_result_success(
     
     # Patch checksum function
     with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256") as mock_checksum:
-        mock_checksum.return_value = "real_checksum"
+        mock_checksum.side_effect = [
+            "real_checksum",
+            "qc_quality",
+            "qc_correlation",
+        ]
 
         # Act
         result = unified_writer.write_result(
@@ -116,13 +136,16 @@ def test_write_result_success(
         # Verify calls
         mock_writer_fixture.write.assert_called_once()
         mock_metadata_writer_fixture.write_meta.assert_called_once()
-        mock_checksum.assert_called_once()
+        assert mock_checksum.call_count == 3
+        mock_quality_reporter.build_quality_report.assert_called_once()
+        mock_quality_reporter.build_correlation_report.assert_called_once()
 
 
 def test_unified_writer_delegates_atomicity(
     unified_writer,
     mock_writer_fixture,
     mock_atomic_op,
+    mock_quality_reporter,
     run_context,
     tmp_path
 ):
@@ -139,7 +162,7 @@ def test_unified_writer_delegates_atomicity(
     )
     
     with patch("bioetl.infrastructure.output.unified_writer.compute_file_sha256") as mock_checksum:
-        mock_checksum.return_value = "abc"
+        mock_checksum.side_effect = ["abc", "qc1", "qc2"]
 
         # Act
         unified_writer.write_result(
@@ -150,10 +173,11 @@ def test_unified_writer_delegates_atomicity(
         )
 
         # Assert
-        mock_atomic_op.write_atomic.assert_called_once()
-        # Verify that the first argument to write_atomic is the correct path
-        args, _ = mock_atomic_op.write_atomic.call_args
-        assert args[0] == output_dir / "test_entity.csv"
+        assert mock_atomic_op.write_atomic.call_count == 3
+        args_list = mock_atomic_op.write_atomic.call_args_list
+        assert args_list[0][0][0] == output_dir / "test_entity.csv"
+        assert args_list[1][0][0].name == "quality_report_table.csv"
+        assert args_list[2][0][0].name == "correlation_report_table.csv"
 
 
 def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):

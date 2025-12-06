@@ -1,14 +1,21 @@
 """
 Metadata builder service for pipeline outputs.
 """
+from pathlib import Path
 from typing import Any
 
 from bioetl.domain.models import RunContext
+from bioetl.infrastructure.config.models import QcConfig
 from bioetl.infrastructure.output.contracts import WriteResult
 
 
 def build_run_metadata(
-    context: RunContext, result: WriteResult
+    context: RunContext,
+    result: WriteResult,
+    *,
+    qc_artifacts: list[Path] | None = None,
+    qc_checksums: dict[str, str] | None = None,
+    qc_config: QcConfig | None = None,
 ) -> dict[str, Any]:
     """
     Создает словарь метаданных.
@@ -17,6 +24,13 @@ def build_run_metadata(
         context: Контекст запуска.
         result: Результат записи.
     """
+    files = [result.path.name]
+    qc_artifacts = qc_artifacts or []
+    qc_checksums = qc_checksums or {}
+    qc_config = qc_config or QcConfig()
+
+    files.extend(path.name for path in qc_artifacts)
+
     meta = {
         "run_id": context.run_id,
         "entity": context.entity_name,
@@ -27,7 +41,23 @@ def build_run_metadata(
         "checksum": result.checksum,
         # For backward compatibility and explicitness, keep hash alongside checksum.
         "hash": result.checksum,
-        "files": [result.path.name],
+        "files": sorted(files),
+        "checksums": {
+            result.path.name: result.checksum,
+            **qc_checksums,
+        },
+        "qc_artifacts": {
+            path.name: {
+                "path": path.name,
+                "checksum": qc_checksums.get(path.name),
+            }
+            for path in sorted(qc_artifacts, key=lambda p: p.name)
+        },
+        "qc_config": {
+            "enable_quality_report": qc_config.enable_quality_report,
+            "enable_correlation_report": qc_config.enable_correlation_report,
+            "min_coverage": qc_config.min_coverage,
+        },
     }
     meta.update(context.metadata)
     return meta

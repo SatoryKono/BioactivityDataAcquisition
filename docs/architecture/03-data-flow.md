@@ -19,5 +19,5 @@
 2. ChemblClient извлекает данные по дескриптору (release, фильтры), пагинирует и передаёт батчи в ActivityTransformer.
 3. Transformer нормализует значения, считает `hash_business_key` и `hash_row`, сопоставляет TestItem/Target идентификаторы.
 4. ValidationService применяет ActivitySchema, формирует QC-отчёты и метрики валидации.
-5. UnifiedOutputWriter записывает таблицы в `tables/`, создаёт `meta.yaml`, QC-отчёты в `qc/` и контрольные суммы в `checksums/`.
+5. UnifiedOutputWriter записывает таблицы в `tables/`, создаёт `meta.yaml`, формирует `quality_report_table.csv` и `correlation_report_table.csv` атомарно и вычисляет контрольные суммы.
 6. finalize_run закрывает ресурсы клиента и публикует финальное состояние RunResult.
