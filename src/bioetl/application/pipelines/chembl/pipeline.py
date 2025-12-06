@@ -14,7 +14,7 @@ from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 
 
 class ChemblEntityPipeline(ChemblPipelineBase):
@@ -28,7 +28,7 @@ class ChemblEntityPipeline(ChemblPipelineBase):
         config: PipelineConfig,
         logger: LoggerAdapterABC,
         validation_service: ValidationService,
-        output_writer: UnifiedOutputWriter,
+        output_writer: OutputWriterABC,
         extraction_service: ExtractionServiceABC,
         hash_service: HashService,
         record_source: RecordSource | None = None,

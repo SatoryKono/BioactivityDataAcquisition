@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -80,9 +81,31 @@ class QualityReportABC(ABC):
         """Строит корреляционную матрицу по числовым колонкам."""
 
 
+class OutputWriterABC(ABC):
+    """
+    Фасад для записи результатов пайплайна (данные + метаданные).
+
+    Default factory: ``bioetl.infrastructure.output.factories.default_output_writer``.
+    Implementations: ``UnifiedOutputWriter``.
+    """
+
+    @abstractmethod
+    def write_result(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        entity_name: str,
+        run_context: Any,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        """Записывает результирующий DataFrame и сопутствующие артефакты, возвращая сведения о записи."""
+
+
 __all__ = [
     "WriteResult",
     "WriterABC",
     "MetadataWriterABC",
     "QualityReportABC",
+    "OutputWriterABC",
 ]
