@@ -54,71 +54,63 @@ def network_cause() -> Exception:
     return ConnectionError("socket closed")
 
 
-def test_client_network_error_properties(network_cause: Exception) -> None:
-    error = ClientNetworkError(
-        provider="chembl",
-        message="connection failed",
-        endpoint="/ping",
-        cause=network_cause,
-    )
+@pytest.mark.parametrize(
+    ("error_factory", "expected_endpoint", "expected_status", "message_fragment"),
+    [
+        (
+            lambda cause: ClientNetworkError(
+                provider="chembl",
+                message="connection failed",
+                endpoint="/ping",
+                cause=cause,
+            ),
+            "/ping",
+            None,
+            "connection failed",
+        ),
+        (
+            lambda cause: ClientRateLimitError(
+                provider="chembl",
+                message="rate limited",
+                endpoint="/activities",
+                status_code=429,
+                cause=cause,
+            ),
+            "/activities",
+            429,
+            "rate limited",
+        ),
+        (
+            lambda cause: ClientResponseError(
+                provider="chembl",
+                message="unexpected response",
+                endpoint="/targets",
+                status_code=500,
+                cause=cause,
+            ),
+            "/targets",
+            500,
+            "unexpected response",
+        ),
+    ],
+)
+def test_client_errors_properties(
+    error_factory, expected_endpoint, expected_status, message_fragment
+) -> None:
+    cause = RuntimeError("reason")
+    error = error_factory(cause)
 
     assert isinstance(error, ClientError)
     assert isinstance(error, ProviderError)
     assert isinstance(error, BioetlError)
     assert error.provider == "chembl"
-    assert error.endpoint == "/ping"
-    assert error.status_code is None
-    assert error.cause is network_cause
-    assert "ClientNetworkError" in str(error)
-    assert "chembl" in str(error)
-    assert "/ping" in str(error)
-
-
-def test_client_rate_limit_error_properties() -> None:
-    cause = RuntimeError("too many requests")
-    error = ClientRateLimitError(
-        provider="chembl",
-        message="rate limited",
-        endpoint="/activities",
-        status_code=429,
-        cause=cause,
-    )
-
-    assert isinstance(error, ClientError)
-    assert isinstance(error, ProviderError)
-    assert isinstance(error, BioetlError)
-    assert error.provider == "chembl"
-    assert error.endpoint == "/activities"
-    assert error.status_code == 429
+    assert error.endpoint == expected_endpoint
+    assert error.status_code == expected_status
     assert error.cause is cause
     message = str(error)
-    assert "ClientRateLimitError" in message
-    assert "429" in message
+    assert error.__class__.__name__ in message
     assert "chembl" in message
-    assert "/activities" in message
-    assert "rate limited" in message
-
-
-def test_client_response_error_properties() -> None:
-    cause = ValueError("invalid body")
-    error = ClientResponseError(
-        provider="chembl",
-        message="unexpected response",
-        endpoint="/targets",
-        status_code=500,
-        cause=cause,
-    )
-
-    assert isinstance(error, ClientError)
-    assert isinstance(error, ProviderError)
-    assert isinstance(error, BioetlError)
-    assert error.provider == "chembl"
-    assert error.endpoint == "/targets"
-    assert error.status_code == 500
-    assert error.cause is cause
-    message = str(error)
-    assert "ClientResponseError" in message
-    assert "500" in message
-    assert "chembl" in message
-    assert "/targets" in message
-    assert "unexpected response" in message
+    assert expected_endpoint in message
+    if expected_status:
+        assert str(expected_status) in message
+    assert message_fragment in message

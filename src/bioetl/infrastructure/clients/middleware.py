@@ -93,13 +93,10 @@ class HttpClientMiddleware:
                 elapsed = time.perf_counter() - start
             except self._timeout_exceptions as exc:
                 elapsed = time.perf_counter() - start
-                error = ClientNetworkError(
-                    provider=self.provider,
-                    endpoint=url,
-                    message="Request timed out",
-                    cause=exc,
+                error = self._build_network_error(
+                    message="Request timed out", url=url, exc=exc
                 )
-                retry_decision = self._handle_retry(
+                should_retry, total_retry_delay = self._handle_attempt_error(
                     error,
                     method,
                     url,
@@ -109,20 +106,16 @@ class HttpClientMiddleware:
                     None,
                     None,
                 )
-                total_retry_delay = retry_decision.total_retry_delay
-                if retry_decision.should_retry:
+                if should_retry:
                     attempt += 1
                     continue
                 raise error from error.cause
             except self._connection_exceptions as exc:
                 elapsed = time.perf_counter() - start
-                error = ClientNetworkError(
-                    provider=self.provider,
-                    endpoint=url,
-                    message="Connection error",
-                    cause=exc,
+                error = self._build_network_error(
+                    message="Connection error", url=url, exc=exc
                 )
-                retry_decision = self._handle_retry(
+                should_retry, total_retry_delay = self._handle_attempt_error(
                     error,
                     method,
                     url,
@@ -132,8 +125,7 @@ class HttpClientMiddleware:
                     None,
                     None,
                 )
-                total_retry_delay = retry_decision.total_retry_delay
-                if retry_decision.should_retry:
+                if should_retry:
                     attempt += 1
                     continue
                 raise error from error.cause
@@ -216,6 +208,39 @@ class HttpClientMiddleware:
         raise RuntimeError(
             "Exceeded maximum retry attempts without returning a response"
         )
+
+    def _build_network_error(
+        self, *, message: str, url: str, exc: Exception
+    ) -> ClientNetworkError:
+        return ClientNetworkError(
+            provider=self.provider,
+            endpoint=url,
+            message=message,
+            cause=exc,
+        )
+
+    def _handle_attempt_error(
+        self,
+        error: ClientNetworkError | ClientRateLimitError | ClientResponseError,
+        method: str,
+        url: str,
+        elapsed: float,
+        attempt: int,
+        total_retry_delay: float,
+        status_code: int | None,
+        response: Any | None,
+    ) -> tuple[bool, float]:
+        retry_decision = self._handle_retry(
+            error,
+            method,
+            url,
+            elapsed,
+            attempt,
+            total_retry_delay,
+            status_code,
+            response,
+        )
+        return retry_decision.should_retry, retry_decision.total_retry_delay
 
     def _handle_retry(
         self,

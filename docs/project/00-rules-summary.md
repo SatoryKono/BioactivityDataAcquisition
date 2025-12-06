@@ -14,6 +14,7 @@
 
 ## 3. Данные и Схемы
 - Pandera-схемы для всех выходов.
+- Полный регламент валидации: `docs/domain/schemas/01-pandera-validation-rules.md` (ValidationService + SchemaRegistry, strict/coerce, OUTPUT_COLUMN_ORDER, обязательные системные колонки, lazy-валидация).
 - Pydantic для конфигов и JSON.
 - Валидация перед записью.
 - Детерминизм: сортировка, атомарная запись, чек-суммы.

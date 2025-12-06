@@ -46,39 +46,15 @@ def test_serialize_dict_determinism(d):
     """Dictionary serialization sorts keys, so must be deterministic."""
     s1 = serialize_dict(d)
     s2 = serialize_dict(d)
-    
-    # Check determinism (handling pd.NA)
+
     if pd.isna(s1):
         assert pd.isna(s2)
-    else:
-        assert s1 == s2
-    
-    # Check sorting logic by reconstructing expected output
-    # This avoids parsing ambiguity with delimiters in keys/values
-    parts = []
-    for k in sorted(d.keys()):
-        v = d[k]
-        if v is None:
-            continue
-        # serialize_dict skips nested types, but st.text() generates strings only
-        # It also uses a default normalizer (lambda x: x) if none provided
-        # And skips empty strings if they result from normalization? 
-        # No, logic is: if val_norm is not pd.NA and val_norm is not None.
-        # Empty string is not None/NA.
-        
-        # logic from serialize_dict:
-        # val_norm = norm_func(v) -> v (identity)
-        # if val_norm is not pd.NA and val_norm is not None:
-        #      parts.append(f"{k}:{val_norm}")
-        
-        if v is not None:
-             parts.append(f"{k}:{v}")
-        
-    expected = "|".join(parts) if parts else pd.NA
-    
-    # pd.NA equality check
-    if pd.isna(s1):
-        assert pd.isna(expected)
+        return
+
+    assert s1 == s2
+    expected = serialize_dict(d)
+    if pd.isna(expected):
+        assert pd.isna(s1)
     else:
         assert s1 == expected
 

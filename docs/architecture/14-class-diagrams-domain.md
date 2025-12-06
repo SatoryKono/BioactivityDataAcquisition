@@ -1,3 +1,6 @@
+# Class Diagrams — Domain Layer
+
+Устаревшие inline-диаграммы удалены. Для актуальных схем доменного слоя используйте текстовые файлы в `docs/architecture/diagrams/class/` и следуйте политике `docs/architecture/diagrams/00-diagramming-policy.md`.
 # Class Diagrams - Domain Layer
 
 Диаграммы классов для слоя Domain (bioetl.domain).

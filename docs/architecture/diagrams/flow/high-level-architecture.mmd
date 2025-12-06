@@ -1,52 +1,67 @@
-graph TB
-    subgraph Interfaces ["Interfaces (Driving)"]
-        CLI[CLI App]
-        RestAPI[REST Server]
-        MQ[MQ Listener]
+flowchart LR
+
+subgraph Interfaces["Interfaces (Driving)"]
+    CLI[CLI App]:::componentPrimary
+    RestAPI[REST Server]:::componentSecondary
+    MQ[MQ Listener]:::componentSecondary
+end
+class Interfaces group;
+
+subgraph Application["Application Layer"]
+    Pipeline[Pipeline Orchestrator]:::componentPrimary
+    Hooks[Pipeline Hooks]:::componentSecondary
+end
+class Application group;
+
+subgraph Domain["Domain Layer (Core)"]
+    Validation[Validation Service]:::componentPrimary
+    Normalization[Normalization Service]:::componentPrimary
+    Hashing[Hash Service]:::componentSecondary
+    Schemas[Pandera Schemas]:::componentSecondary
+end
+class Domain group;
+
+subgraph Infrastructure["Infrastructure (Driven)"]
+    subgraph Input
+        ChEMBL[ChEMBL Client]:::componentPrimary
+        PubChem[PubChem Client]:::componentSecondary
     end
-
-    subgraph Infrastructure ["Infrastructure (Driven)"]
-        subgraph Input
-            ChEMBL[ChEMBL Client]
-            PubChem[PubChem Client]
-        end
-        subgraph Output
-            Writer[Unified Output Writer]
-            Logger[Unified Logger]
-        end
-        subgraph Config
-            CfgLoad[Config Loader]
-            Pydantic[Pydantic Models]
-        end
+    subgraph Output
+        Writer[Unified Output Writer]:::componentPrimary
+        Logger[Unified Logger]:::componentSecondary
     end
-
-    subgraph Application ["Application Layer"]
-        Pipeline[Pipeline Orchestrator]
-        Hooks[Pipeline Hooks]
+    subgraph Config
+        CfgLoad[Config Loader]:::componentSecondary
+        Pydantic[Pydantic Models]:::componentSecondary
     end
+end
+class Infrastructure group;
 
-    subgraph Domain ["Domain Layer (Core)"]
-        Validation[Validation Service]
-        Normalization[Normalization Service]
-        Hashing[Hash Service]
-        Schemas[Pandera Schemas]
-    end
+ExtChEMBL[(ChEMBL REST API)]:::external
+ExtPubChem[(PubChem API)]:::external
 
-    CLI -->|Calls| Pipeline
-    Pipeline -->|Uses| Validation
-    Pipeline -->|Uses| Normalization
-    Pipeline -->|Uses| Hashing
-    
-    Validation -->|Validates| Schemas
-    Normalization -.->|Uses| Schemas
+CLI -->|Calls| Pipeline
+RestAPI --> Pipeline
+MQ --> Pipeline
 
-    Pipeline -->|Uses| ChEMBL
-    Pipeline -->|Uses| Writer
-    Pipeline -->|Uses| Logger
-    Pipeline -->|Configures| CfgLoad
+Pipeline -->|Uses| Validation
+Pipeline -->|Uses| Normalization
+Pipeline -->|Uses| Hashing
+Validation -->|Validates| Schemas
+Normalization -.->|Uses| Schemas
 
-    style Domain fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style Application fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Infrastructure fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    style Interfaces fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
+Pipeline -->|Uses| ChEMBL
+Pipeline -->|Uses| PubChem
+Pipeline -->|Uses| Writer
+Pipeline -->|Uses| Logger
+Pipeline -->|Configures| CfgLoad
+Pipeline -->|Reads| Pydantic
+
+ChEMBL --> ExtChEMBL
+PubChem --> ExtPubChem
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 

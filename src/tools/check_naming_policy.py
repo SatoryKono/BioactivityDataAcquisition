@@ -237,6 +237,15 @@ PIPELINE_PATH_REGEX = re.compile(
 TEST_FILE_REGEX = re.compile(r"^test_[a-z0-9_]+\.py$")
 
 
+def _has_exception(
+    exceptions: List[Dict[str, Any]], path: str, rule_id: str
+) -> bool:
+    return any(
+        exc.get("path") == path and exc.get("rule_id") == rule_id
+        for exc in exceptions
+    )
+
+
 def resolve_layer(file_path):
     normalized = file_path.replace("\\", "/")
     if "bioetl/application/" in normalized:
@@ -335,43 +344,43 @@ class NamingValidator(ast.NodeVisitor):
 
     def _check_function(self, node: Any):
         """Helper to check function naming."""
-        if not FUNC_REGEX.match(node.name):
-            # Allow AST visitor methods like visit_ClassDef, visit_Assign, etc.
-            if node.name.startswith("visit_"):
-                return
+        if not FUNC_REGEX.match(node.name) and not node.name.startswith("visit_"):
             if not self.is_excepted("FUNC_FORMAT", node.name):
                 self.violations.append(
                     f"Function '{node.name}' does not match snake_case format."
                 )
+            return
 
-        if not node.name.startswith("_"):  # Public function
-            # Skip if it's a test function in a test file (often test_...)
-            if self.is_test and node.name.startswith("test_"):
-                return
+        if node.name.startswith("_"):
+            return
 
-            layer = resolve_layer(self.file_path)
-            allowed_names = set()
+        if self.is_test and node.name.startswith("test_"):
+            return
 
-            if layer and layer in LAYER_FUNCTION_ALLOWED_NAMES:
-                allowed_names |= set(LAYER_FUNCTION_ALLOWED_NAMES[layer])
+        allowed_names = self._resolve_allowed_function_names()
+        if node.name in allowed_names:
+            return
 
-            if self.is_pipeline:
-                allowed_names |= set(PIPELINE_FUNCTION_ALLOWED_NAMES)
-
-            if node.name in allowed_names:
-                return
-
-            allowed_prefixes = set(FUNCTION_PREFIXES)
-
-            has_valid_prefix = any(
-                node.name.startswith(prefix) for prefix in allowed_prefixes
+        if not self._has_valid_prefix(node.name):
+            self.violations.append(
+                f"Public function '{node.name}' must start with one "
+                f"of: {', '.join(sorted(FUNCTION_PREFIXES))}"
             )
-            if not has_valid_prefix:
-                if not self.is_excepted("FUNC_PREFIX", node.name):
-                    self.violations.append(
-                        f"Public function '{node.name}' must start with one "
-                        f"of: {', '.join(sorted(allowed_prefixes))}"
-                    )
+
+    def _has_valid_prefix(self, name: str) -> bool:
+        return any(name.startswith(prefix) for prefix in FUNCTION_PREFIXES) or (
+            self.is_excepted("FUNC_PREFIX", name)
+        )
+
+    def _resolve_allowed_function_names(self) -> set[str]:
+        layer = resolve_layer(self.file_path)
+        allowed_names: set[str] = set()
+        if layer and layer in LAYER_FUNCTION_ALLOWED_NAMES:
+            allowed_names |= set(LAYER_FUNCTION_ALLOWED_NAMES[layer])
+
+        if self.is_pipeline:
+            allowed_names |= set(PIPELINE_FUNCTION_ALLOWED_NAMES)
+        return allowed_names
 
     def visit_Assign(self, node: ast.Assign):
         # pylint: disable=invalid-name
@@ -410,51 +419,19 @@ def check_file_naming(
     str_path = str(file_path).replace("\\", "/")
     filename = file_path.name
 
-    # 1. File name format (snake_case)
-    # Remove extension
+    def _is_excepted(rule_id: str) -> bool:
+        return _has_exception(exceptions, str_path, rule_id)
+
     stem = file_path.stem
-    if not MODULE_REGEX.match(stem):
-        # Check for specific exceptions
-        is_excepted = False
-        for exc in exceptions:
-            if (
-                exc.get("path") == str_path
-                and exc.get("rule_id") == "MODULE_NAME"
-            ):
-                is_excepted = True
-                break
-        if not is_excepted:
-            violations.append(
-                f"File '{filename}' does not match snake_case."
-            )
+    if not MODULE_REGEX.match(stem) and not _is_excepted("MODULE_NAME"):
+        violations.append(f"File '{filename}' does not match snake_case.")
 
-    # 2. Pipeline structure
-    if (
-        "pipelines" in str_path
-        and "src/bioetl/application/pipelines" in str_path
+    if "tests" in str_path and not filename.startswith(
+        ("conftest.py", "__init__.py")
     ):
-        # Check if it's deep enough to be a stage file or part of the structure
-        pass
-
-    # 3. Test files
-    if "tests" in str_path:
-        if not filename.startswith("conftest.py") and not filename.startswith(
-            "__init__.py"
-        ):
-            if not TEST_FILE_REGEX.match(filename):
-                is_excepted = False
-                for exc in exceptions:
-                    if (
-                        exc.get("path") == str_path
-                        and exc.get("rule_id") == "TEST_NAME"
-                    ):
-                        is_excepted = True
-                        break
-                if not is_excepted:
-                    # violations.append(
-                    #     f"Test file '{filename}' must start with 'test_'."
-                    # )
-                    pass
+        if not TEST_FILE_REGEX.match(filename) and not _is_excepted("TEST_NAME"):
+            # Violations muted by policy; keep placeholder for future reporting.
+            pass
 
     return violations
 

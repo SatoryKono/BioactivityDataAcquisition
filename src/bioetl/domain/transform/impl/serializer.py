@@ -49,30 +49,40 @@ def serialize_list(
     """
     if not value:
         return pd.NA
-
-    parts = []
     norm_func = value_normalizer if value_normalizer else (lambda x: x)
 
-    # Check first element to decide strategy (heuristic for homogeneity)
-    if len(value) > 0 and isinstance(value[0], dict):
-        for item in value:
-            if isinstance(item, dict):
-                s = serialize_dict(item, value_normalizer=norm_func)
-                if s is not pd.NA and s is not None:
-                    parts.append(s)
+    if value and isinstance(value[0], dict):
+        parts = _serialize_dict_items(value, norm_func)
     else:
-        for item in value:
-            if isinstance(item, (list, dict)):
-                continue
-            
-            val_norm = norm_func(item)
-            if val_norm is not pd.NA and val_norm is not None:
-                parts.append(str(val_norm))
-            
-    if not parts:
-        return pd.NA
-        
-    return "|".join(parts)
+        parts = _serialize_flat_items(value, norm_func)
+
+    return pd.NA if not parts else "|".join(parts)
+
+
+def _serialize_dict_items(
+    value: Sequence[Any], norm_func: Callable[[Any], Any]
+) -> list[str]:
+    parts: list[str] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        serialized = serialize_dict(item, value_normalizer=norm_func)
+        if serialized is not pd.NA and serialized is not None:
+            parts.append(serialized)
+    return parts
+
+
+def _serialize_flat_items(
+    value: Sequence[Any], norm_func: Callable[[Any], Any]
+) -> list[str]:
+    parts: list[str] = []
+    for item in value:
+        if isinstance(item, (list, dict)):
+            continue
+        val_norm = norm_func(item)
+        if val_norm is not pd.NA and val_norm is not None:
+            parts.append(str(val_norm))
+    return parts
 
 
 __all__ = ["serialize_dict", "serialize_list"]

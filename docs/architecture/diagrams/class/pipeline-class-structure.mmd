@@ -1,4 +1,5 @@
 classDiagram
+
     %% Core Abstractions
     class PipelineBase {
         <<Abstract>>
@@ -75,4 +76,12 @@ classDiagram
     ValidationService ..> PipelineBase : validates data
     HashService ..> PipelineBase : enriches data
     UnifiedOutputWriter ..> PipelineBase : persists data
+
+    class PipelineBase, ChemblEntityPipeline domainPrimary
+    class ValidationService, HashService, UnifiedOutputWriter domainSecondary
+    class PipelineHookABC, ErrorPolicyABC interface
+
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
 

@@ -55,7 +55,7 @@ One file — one diagram.
 
 ### 2.7 Base reusable palette (Mermaid)
 
-```
+```mermaid
 %% Shared palette
 classDef primary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
 classDef secondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
@@ -70,7 +70,7 @@ Reuse this block across diagrams to keep palette and typography uniform.
 
 #### Component diagram (flowchart)
 
-```
+```mermaid
 classDef componentPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
 classDef componentSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
 classDef external           fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
@@ -83,7 +83,7 @@ linkStyle default stroke=#666,stroke-width:1.2px,color=#111;
 
 #### Class diagram
 
-```
+```mermaid
 classDef domainPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
 classDef domainSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
 classDef interface       fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
@@ -95,7 +95,7 @@ classDef interface       fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#1
 
 #### Sequence diagram
 
-```
+```mermaid
 classDef actorPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
 classDef actorSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
 classDef actorExternal  fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#111,font-size:22px;
@@ -105,7 +105,7 @@ classDef actorExternal  fill=#dde7f2,stroke=#44546a,stroke-width:1.5px,color=#11
 
 #### Flowchart (workflow)
 
-```
+```mermaid
 classDef stepPrimary   fill=#f5f5f5,stroke=#444,stroke-width:1.5px,color=#111,font-size:22px;
 classDef stepDecision  fill=#e6ecef,stroke=#333,stroke-width:1.5px,color=#111,font-size:22px;
 classDef stepSecondary fill=#e3e7ec,stroke=#555,stroke-width:1.2px,color=#111,font-size:18px;
@@ -240,7 +240,7 @@ For any existing diagram, verify palette and typography compliance (22/18 pt fon
 
 ## 9. Example Directory Layout
 
-```
+```text
 docs/
   architecture/
     diagrams/
@@ -256,4 +256,3 @@ docs/
           sequence/
           flow/
 ```
-

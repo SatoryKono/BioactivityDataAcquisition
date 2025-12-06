@@ -100,37 +100,11 @@ def normalize_pmid(value: Any) -> int | None:
 
 def normalize_pcid(value: Any) -> int | None:
     """Normalize PubChem CID as positive integer."""
-    if is_missing(value):
-        return None
-
-    if isinstance(value, float):
-        if value.is_integer():
-            value = int(value)
-        else:
-            msg = f"PubChem CID не является целым числом: '{value}'"
-            raise ValueError(msg)
-
-    if isinstance(value, int):
-        if value <= 0:
-            raise ValueError("PubChem CID должен быть положительным числом")
-        return value
-
-    text = str(value).strip().upper()
-    if not text:
-        return None
-
-    if text.startswith("CID"):
-        text = text[3:]
-    elif text.startswith("PCID"):
-        text = text[4:]
-
-    if not text.isdigit():
-        raise ValueError(f"Неверный PubChem CID: '{value}'")
-
-    parsed = int(text)
-    if parsed <= 0:
-        raise ValueError("PubChem CID должен быть положительным числом")
-    return parsed
+    return _parse_positive_int_with_prefixes(
+        value,
+        field_name="PubChem CID",
+        prefixes=("CID", "PCID"),
+    )
 
 
 def normalize_uniprot(value: Any) -> str | None:
@@ -180,6 +154,40 @@ def normalize_bao_label(value: Any) -> str | None:
 
     text = value.strip()
     return text if text else None
+
+
+def _parse_positive_int_with_prefixes(
+    value: Any, *, field_name: str, prefixes: tuple[str, ...]
+) -> int | None:
+    if is_missing(value):
+        return None
+
+    if isinstance(value, float):
+        if not value.is_integer():
+            raise ValueError(f"{field_name} не является целым числом: '{value}'")
+        value = int(value)
+
+    if isinstance(value, int):
+        if value <= 0:
+            raise ValueError(f"{field_name} должен быть положительным числом")
+        return value
+
+    text = str(value).strip().upper()
+    if not text:
+        return None
+
+    for prefix in prefixes:
+        if text.startswith(prefix):
+            text = text[len(prefix) :]
+            break
+
+    if not text.isdigit():
+        raise ValueError(f"Неверный {field_name}: '{value}'")
+
+    parsed = int(text)
+    if parsed <= 0:
+        raise ValueError(f"{field_name} должен быть положительным числом")
+    return parsed
 
 
 __all__ = [
