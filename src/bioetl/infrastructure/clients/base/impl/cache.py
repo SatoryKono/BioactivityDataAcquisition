@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import os
-from pathlib import Path
 import pickle
 import time
+from pathlib import Path
 from typing import TypeVar
 
 from bioetl.domain.clients.base.contracts import CacheABC

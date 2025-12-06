@@ -4,9 +4,9 @@ Base helpers for writer implementations.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from pathlib import Path
-import time
 
 import pandas as pd
 

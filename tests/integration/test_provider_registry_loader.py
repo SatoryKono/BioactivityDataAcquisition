@@ -12,7 +12,9 @@ from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import DummyProviderConfig
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
-from bioetl.infrastructure.clients.provider_registry_loader import ProviderRegistryLoader
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    ProviderRegistryLoader,
+)
 
 
 @dataclass(frozen=True)
@@ -69,7 +71,9 @@ def provider_definition_factory() -> Callable[[ProviderId], ProviderDefinition]:
     return _factory
 
 
-def _register_module(module_name: str, factory_name: str, factory: Callable[[], Any]) -> None:
+def _register_module(
+    module_name: str, factory_name: str, factory: Callable[[], Any]
+) -> None:
     module = ModuleType(module_name)
     setattr(module, factory_name, factory)
     sys.modules[module_name] = module

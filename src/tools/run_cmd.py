@@ -1,5 +1,5 @@
-from pathlib import Path
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 # Ensure output dir exists

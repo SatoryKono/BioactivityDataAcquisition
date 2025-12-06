@@ -5,8 +5,9 @@ Property-based tests for normalization.
 import pytest
 
 pytest.importorskip("hypothesis")
-from hypothesis import given, settings, strategies as st
 import pandas as pd
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from bioetl.domain.transform.impl.normalize import normalize_scalar
 from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
