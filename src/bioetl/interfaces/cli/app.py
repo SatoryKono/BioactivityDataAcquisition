@@ -10,7 +10,8 @@ from rich.table import Table
 from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
-from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import MetricsConfig, PipelineConfig
+from bioetl.infrastructure.observability.server import start_metrics_server_once
 
 app = typer.Typer(
     name="bioetl",
@@ -148,6 +149,7 @@ def run(
             csv_header=csv_header,
         )
         config = PipelineConfig(**config_payload)
+        _start_metrics_exporter(config.metrics)
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
@@ -202,6 +204,19 @@ def _resolve_config_location(
     console.print(f"[red]Config file not found at {resolved}[/red]")
     console.print("Please provide --config explicitly.")
     return None
+
+
+def _start_metrics_exporter(metrics_config: MetricsConfig) -> None:
+    started = start_metrics_server_once(
+        enabled=metrics_config.enabled,
+        port=metrics_config.port,
+        address=metrics_config.address,
+    )
+    if started:
+        console.print(
+            f"[green]Prometheus metrics exporter started on"
+            f" {metrics_config.address}:{metrics_config.port}[/green]"
+        )
 
 
 def _apply_cli_overrides(
