@@ -85,6 +85,8 @@ class NormalizationServiceABC(ABC):
 
     @abstractmethod
     def normalize_series(
-        self, series: pd.Series, field_cfg: dict[str, Any]
+        self,
+        series: pd.Series,
+        field_cfg: dict[str, Any],
     ) -> pd.Series:
         """Нормализует отдельную серию согласно полю конфигурации."""
