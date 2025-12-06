@@ -14,6 +14,22 @@ from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_li
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
+_NUMERIC_DTYPES: dict[str, str] = {
+    "number": "Float64",
+    "integer": "Int64",
+}
+
+
+def _coerce_numeric_columns(df: pd.DataFrame, fields_cfg: list[dict[str, Any]]) -> pd.DataFrame:
+    for field_cfg in fields_cfg:
+        name = field_cfg.get("name")
+        dtype = field_cfg.get("data_type")
+        target_dtype = _NUMERIC_DTYPES.get(dtype)
+        if not name or target_dtype is None or name not in df.columns:
+            continue
+        df[name] = pd.to_numeric(df[name], errors="coerce").astype(target_dtype)
+    return df
+
 
 class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService):
     """
@@ -72,7 +88,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             if dtype in ("array", "object"):
                 df[name] = df[name].astype("string").replace({pd.NA: None})
 
-        return df
+        return _coerce_numeric_columns(df, self._config.fields)
 
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
