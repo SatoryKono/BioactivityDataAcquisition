@@ -27,10 +27,20 @@ LoggerAdapterABC:
   implementations:
     Unified: bioetl.infrastructure.logging.impl.unified_logger.UnifiedLoggerImpl
 
+LoggingPort:
+  default_factory: bioetl.infrastructure.observability.factories.default_logging_port
+  implementations:
+    Structured: bioetl.infrastructure.observability.adapters.StructuredLoggerImpl
+
 ProgressReporterABC:
   default_factory: bioetl.infrastructure.logging.factories.default_progress_reporter
   implementations:
     Tqdm: bioetl.infrastructure.logging.impl.progress_reporter.TqdmProgressReporterImpl
+
+TracingPort:
+  default_factory: bioetl.infrastructure.observability.factories.default_tracing_port
+  implementations:
+    Default: bioetl.infrastructure.observability.adapters.TracingAdapterImpl
 
 ValidatorABC:
   default_factory: bioetl.infrastructure.validation.factories.default_validator_factory

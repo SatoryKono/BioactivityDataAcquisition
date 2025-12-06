@@ -3,9 +3,9 @@
 from datetime import datetime, timezone
 from typing import Iterable
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.providers import ProviderId
 
 
@@ -15,7 +15,7 @@ class HooksManager:
     def __init__(
         self,
         *,
-        logger: LoggerAdapterABC,
+        logger: LoggingPort,
         provider_id: ProviderId,
         entity_name: str,
         hooks: Iterable[PipelineHookABC] | None = None,
@@ -90,7 +90,7 @@ class HooksManager:
 
         return self._stage_starts.get(stage)
 
-    def set_logger(self, logger: LoggerAdapterABC) -> None:
+    def set_logger(self, logger: LoggingPort) -> None:
         """Обновляет логгер для хуков."""
 
         self._logger = logger

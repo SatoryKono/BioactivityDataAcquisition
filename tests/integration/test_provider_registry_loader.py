@@ -8,9 +8,9 @@ from typing import Any, Callable
 import pytest
 import yaml
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import DummyProviderConfig
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.provider_registry_loader import (
     ProviderRegistryLoader,
@@ -29,7 +29,7 @@ class DummyComponents(ProviderComponents):
         return resolved_client, config.provider
 
 
-class RecordingLogger(LoggerAdapterABC):
+class RecordingLogger(LoggingPort):
     def __init__(self) -> None:
         self.records: list[tuple[str, str, dict[str, Any]]] = []
 

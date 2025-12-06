@@ -5,11 +5,11 @@ from __future__ import annotations
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
@@ -25,7 +25,7 @@ class ChemblPipelineBase(PipelineBase):
     def __init__(
         self,
         config: PipelineConfig,
-        logger: LoggerAdapterABC,
+        logger: LoggingPort,
         validation_service: ValidationService,
         output_writer: OutputWriterABC,
         extraction_service: ExtractionServiceABC,

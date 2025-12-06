@@ -1,28 +1,16 @@
-import structlog
-
-from bioetl.domain.clients.base.logging.contracts import (
-    LoggerAdapterABC,
-    ProgressReporterABC,
-)
+from bioetl.domain.clients.base.logging.contracts import ProgressReporterABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.infrastructure.logging.impl.progress_reporter import (
     TqdmProgressReporterImpl,
 )
-from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 
-def default_logger() -> LoggerAdapterABC:
+def default_logger() -> LoggingPort:
     """
     Создает и конфигурирует логгер по умолчанию.
     """
-    if not structlog.is_configured():
-        structlog.configure(
-            processors=[
-                structlog.processors.TimeStamper(fmt="iso"),
-                structlog.processors.JSONRenderer(),
-            ],
-            logger_factory=structlog.PrintLoggerFactory(),
-        )
-    return UnifiedLoggerImpl()
+    return default_logging_port()
 
 
 def default_progress_reporter() -> ProgressReporterABC:
