@@ -203,6 +203,33 @@ def test_retry_after_http_date(monkeypatch, base_client):
     assert fake_time.value >= expected_delay - 0.1
 
 
+def test_retry_after_exceeds_max_delay(monkeypatch, base_client):
+    """Retry-After больше max_delay не уменьшается после добавления джиттера."""
+
+    fake_time = _FakeTime()
+    monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
+    monkeypatch.setattr("time.sleep", fake_time.sleep)
+
+    retry_after_seconds = 5
+    base_client.request.side_effect = [
+        _response(503, headers={"Retry-After": str(retry_after_seconds)}),
+        _response(200),
+    ]
+
+    middleware = HttpClientMiddleware(
+        provider="chembl",
+        base_client=base_client,
+        max_attempts=2,
+        base_delay=0.1,
+        max_delay=1.0,
+    )
+
+    result = middleware.request("GET", "http://example.com/over-limit")
+
+    assert result.status_code == 200
+    assert fake_time.value >= retry_after_seconds
+
+
 def test_retry_without_retry_after_header(monkeypatch, base_client):
     """При отсутствии Retry-After используется обычный backoff."""
     fake_time = _FakeTime()
