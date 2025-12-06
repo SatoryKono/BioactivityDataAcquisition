@@ -2,11 +2,11 @@
 Factories for ChEMBL pipelines.
 """
 
-from bioetl.application.container import PipelineContainer
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 
 
-def create_chembl_pipeline(container: PipelineContainer) -> ChemblEntityPipeline:
+def create_chembl_pipeline(container: PipelineContainerABC) -> ChemblEntityPipeline:
     """
     Creates a ChEMBL entity pipeline using dependencies from container.
 
