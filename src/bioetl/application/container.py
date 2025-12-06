@@ -8,6 +8,7 @@ from bioetl.application.pipelines.hooks_impl import (
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import (
@@ -41,7 +42,7 @@ from bioetl.infrastructure.output.factories import (
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
-class PipelineContainer:
+class PipelineContainer(PipelineContainerABC):
     """
     DI Container for pipeline dependencies.
     """
@@ -58,8 +59,8 @@ class PipelineContainer:
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
     ) -> None:
-        self.config = config
-        self._provider_id = ProviderId(self.config.provider)
+        self._config = config
+        self._provider_id = ProviderId(self._config.provider)
         self._schema_registry = SchemaRegistry()
         self._logger: LoggerAdapterABC | None = logger
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
@@ -69,6 +70,10 @@ class PipelineContainer:
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
         register_schemas(self._schema_registry)
+
+    @property
+    def config(self) -> PipelineConfig:
+        return self._config
 
     def get_logger(self) -> LoggerAdapterABC:
         """Get the configured logger."""
@@ -86,8 +91,8 @@ class PipelineContainer:
             writer=default_writer(),
             metadata_writer=default_metadata_writer(),
             quality_reporter=default_quality_reporter(),
-            config=self.config.determinism,
-            qc_config=self.config.qc,
+            config=self._config.determinism,
+            qc_config=self._config.qc,
         )
 
     def get_normalization_service(self) -> NormalizationServiceABC:
@@ -105,7 +110,7 @@ class PipelineContainer:
             raise ValueError(
                 f"Unsupported provider for normalization: {self._provider_id.value}"
             )
-        return factory(source_config, pipeline_config=self.config)
+        return factory(source_config, pipeline_config=self._config)
 
     def get_record_source(
         self,
@@ -115,8 +120,8 @@ class PipelineContainer:
         logger: LoggerAdapterABC | None = None,
     ) -> RecordSource:
         """Create record source based on pipeline input configuration."""
-        mode = self.config.input_mode
-        path = self.config.input_path
+        mode = self._config.input_mode
+        path = self._config.input_path
 
         if mode == "auto_detect" and path:
             mode = "csv"
@@ -128,7 +133,7 @@ class PipelineContainer:
                 raise ValueError("input_path is required for CSV mode")
             return CsvRecordSourceImpl(
                 input_path=Path(path),
-                csv_options=self.config.csv_options,
+                csv_options=self._config.csv_options,
                 limit=limit,
                 logger=effective_logger,
             )
@@ -143,24 +148,24 @@ class PipelineContainer:
             return IdListRecordSourceImpl(
                 input_path=Path(path),
                 id_column=id_column,
-                csv_options=self.config.csv_options,
+                csv_options=self._config.csv_options,
                 limit=limit,
                 extraction_service=extraction_service,
                 source_config=source_config,
-                entity=self.config.entity_name,
+                entity=self._config.entity_name,
                 filter_key=filter_key,
                 logger=effective_logger,
             )
 
-        filters = self.config.pipeline.copy()
+        filters = self._config.pipeline.copy()
         if limit is not None:
             filters["limit"] = limit
 
         return ApiRecordSource(
             extraction_service=extraction_service,
-            entity=self.config.entity_name,
+            entity=self._config.entity_name,
             filters=filters,
-            chunk_size=self.config.batch_size,
+            chunk_size=self._config.batch_size,
         )
 
     def get_extraction_service(self) -> Any:
@@ -186,7 +191,7 @@ class PipelineContainer:
         if self._post_transformer is None:
             self._post_transformer = default_post_transformer(
                 hash_service=self.get_hash_service(),
-                business_key_fields=self.config.hashing.business_key_fields,
+                business_key_fields=self._config.hashing.business_key_fields,
                 version_provider=version_provider,
             )
         return self._post_transformer
@@ -197,9 +202,9 @@ class PipelineContainer:
             self._hooks = [
                 LoggingPipelineHookImpl(self.get_logger()),
                 MetricsPipelineHookImpl(
-                    pipeline_id=self.config.id,
+                    pipeline_id=self._config.id,
                     provider=self._provider_id.value,
-                    entity_name=self.config.entity_name,
+                    entity_name=self._config.entity_name,
                 ),
             ]
         return list(self._hooks)
@@ -211,14 +216,14 @@ class PipelineContainer:
         return self._error_policy
 
     def _resolve_primary_key(self) -> str:
-        pk = self.config.primary_key
-        if not pk and self.config.pipeline and "primary_key" in self.config.pipeline:
-            pk = self.config.pipeline["primary_key"]
+        pk = self._config.primary_key
+        if not pk and self._config.pipeline and "primary_key" in self._config.pipeline:
+            pk = self._config.pipeline["primary_key"]
         if not pk:
-            pk = f"{self.config.entity_name}_id"
+            pk = f"{self._config.entity_name}_id"
         if not pk:
             raise ValueError(
-                f"Could not resolve primary key for entity '{self.config.entity_name}'"
+                f"Could not resolve primary key for entity '{self._config.entity_name}'"
             )
         return pk
 
@@ -235,7 +240,7 @@ class PipelineContainer:
         return self._provider_registry
 
     def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
-        source_config = self.config.get_source_config(self._provider_id.value)
+        source_config = self._config.get_source_config(self._provider_id.value)
         if not isinstance(source_config, definition.config_type):
             raise TypeError(
                 f"Expected config type {definition.config_type.__name__} for "
@@ -273,7 +278,7 @@ def build_pipeline_dependencies(
     post_transformer: TransformerABC | None = None,
     provider_registry: ProviderRegistryABC | None = None,
     provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
-) -> PipelineContainer:
+) -> PipelineContainerABC:
     """Factory for the container."""
     return PipelineContainer(
         config,
