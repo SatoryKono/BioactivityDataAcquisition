@@ -40,6 +40,8 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "database_version",
     "extracted_at",
 ]
+
+
 class AssaySchema(pa.DataFrameModel):
     aidx: Series[str] = pa.Field(nullable=True, description="Внутренний индекс ассая/ID депозитора")
     assay_category: Series[str] = pa.Field(nullable=True, description="Категория ассая (primary/confirmatory/screening и т.п.)")
