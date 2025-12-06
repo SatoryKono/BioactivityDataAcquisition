@@ -129,7 +129,7 @@ class HasherImpl(HasherABC):
                 # But wait, compute_hash_business_key returned None if key missing.
                 # Here we assume columns exist in DF.
                 values.append(val)
-            
+
             serialized = _serialize_canonical(values)
             return blake2b_hash_hex(serialized.encode("utf-8"))
 

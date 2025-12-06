@@ -1,4 +1,5 @@
 """Provider configuration schemas with strict validation."""
+
 from __future__ import annotations
 
 from typing import Annotated, Literal

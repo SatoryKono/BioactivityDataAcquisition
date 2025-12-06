@@ -1,4 +1,5 @@
 """REST-интерфейсы для запуска пайплайнов."""
+
 from bioetl.interfaces.rest.server import (
     PipelineRunRequest,
     PipelineRunResponse,

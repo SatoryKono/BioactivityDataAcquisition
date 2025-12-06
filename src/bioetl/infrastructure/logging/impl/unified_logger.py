@@ -28,4 +28,3 @@ class UnifiedLoggerImpl(LoggerAdapterABC):
 
     def bind(self, **ctx: Any) -> Self:
         return self.__class__(self._logger.bind(**ctx))
-

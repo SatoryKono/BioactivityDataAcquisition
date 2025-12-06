@@ -74,7 +74,9 @@ def test_replace_with_retry_retries(mock_sleep, atomic_op, tmp_path):
     # Fail twice, then succeed
     # Note: Since we mock shutil.move, the file won't actually move.
     # We only verify the retry logic here.
-    with patch("shutil.move", side_effect=[OSError("Busy"), OSError("Busy"), None]) as mock_move:
+    with patch(
+        "shutil.move", side_effect=[OSError("Busy"), OSError("Busy"), None]
+    ) as mock_move:
         atomic_op._replace_with_retry(src, dst)
 
     assert mock_move.call_count == 3

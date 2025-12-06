@@ -1,4 +1,3 @@
 """
 Output writer implementations.
 """
-

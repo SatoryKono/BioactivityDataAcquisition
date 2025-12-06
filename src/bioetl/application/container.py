@@ -1,4 +1,5 @@
 """Dependency Injection Container for the application."""
+
 from pathlib import Path
 from typing import Any, Callable
 
@@ -184,9 +185,7 @@ class PipelineContainer:
                         hash_service, self.config.hashing.business_key_fields
                     ),
                     IndexColumnTransformer(hash_service),
-                    DatabaseVersionTransformer(
-                        hash_service, provider
-                    ),
+                    DatabaseVersionTransformer(hash_service, provider),
                     FulldateTransformer(hash_service),
                 ]
             )

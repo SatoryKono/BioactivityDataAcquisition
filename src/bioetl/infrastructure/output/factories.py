@@ -18,4 +18,3 @@ def default_metadata_writer() -> MetadataWriterABC:
 
 def default_quality_reporter() -> QualityReportABC:
     return QualityReportImpl()
-

@@ -1,4 +1,5 @@
 """CSV-based record source implementations."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
@@ -18,7 +19,9 @@ def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
         yield data[i : i + size]
 
 
-def _chunk_dataframe(df: pd.DataFrame, chunk_size: int | None) -> Iterator[pd.DataFrame]:
+def _chunk_dataframe(
+    df: pd.DataFrame, chunk_size: int | None
+) -> Iterator[pd.DataFrame]:
     if chunk_size is None or chunk_size <= 0:
         yield df
         return
@@ -46,9 +49,7 @@ class CsvRecordSourceImpl(RecordSource):
 
     def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
-        self._logger.info(
-            f"Extracting records from CSV dataset: {self._input_path}"
-        )
+        self._logger.info(f"Extracting records from CSV dataset: {self._input_path}")
         df = pd.read_csv(
             self._input_path,
             delimiter=self._csv_options.delimiter,
@@ -102,7 +103,9 @@ class IdListRecordSourceImpl(RecordSource):
     def iter_records(self) -> Iterable[pd.DataFrame]:
         header = 0 if self._csv_options.header else None
         usecols: list[Any] = [self._id_column] if self._csv_options.header else [0]
-        names: list[str] | None = [self._id_column] if not self._csv_options.header else None
+        names: list[str] | None = (
+            [self._id_column] if not self._csv_options.header else None
+        )
 
         try:
             df_ids = pd.read_csv(
@@ -138,13 +141,9 @@ class IdListRecordSourceImpl(RecordSource):
 
         yield from self._fetch_records(ids, batch_size)
 
-    def _fetch_records(
-        self, ids: list[str], batch_size: int
-    ) -> Iterable[pd.DataFrame]:
+    def _fetch_records(self, ids: list[str], batch_size: int) -> Iterable[pd.DataFrame]:
         for batch_ids in _chunk_list(ids, batch_size):
-            self._logger.info(
-                "Fetching batch from API", batch_size=len(batch_ids)
-            )
+            self._logger.info("Fetching batch from API", batch_size=len(batch_ids))
             response = self._extraction_service.request_batch(
                 self._entity, batch_ids, self._filter_key
             )

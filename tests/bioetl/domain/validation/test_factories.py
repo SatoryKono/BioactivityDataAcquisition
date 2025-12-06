@@ -12,6 +12,7 @@ def test_default_validator():
     assert isinstance(validator, PanderaValidatorImpl)
     assert validator.schema == schema
 
+
 def test_default_schema_provider():
     provider = default_schema_provider()
     assert isinstance(provider, SchemaRegistry)

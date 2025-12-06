@@ -1,4 +1,5 @@
 """Общие исключения BioETL."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -32,11 +33,7 @@ class ProviderError(BioetlError):
     """Ошибки провайдера данных."""
 
     def __init__(
-        self,
-        provider: str,
-        message: str,
-        *,
-        cause: Exception | None = None
+        self, provider: str, message: str, *, cause: Exception | None = None
     ) -> None:
         super().__init__(message)
         self.provider = provider

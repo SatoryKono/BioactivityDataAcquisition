@@ -68,4 +68,3 @@ def test_metadata_columns_last(output_columns) -> None:
 
     assert metadata_suffix == METADATA_COLUMNS
     assert not set(METADATA_COLUMNS) & set(business_prefix)
-

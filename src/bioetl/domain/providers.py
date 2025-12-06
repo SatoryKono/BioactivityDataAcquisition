@@ -1,4 +1,5 @@
 """Provider domain abstractions and factories."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -78,6 +79,7 @@ class ProviderComponents(
         client: ClientT_co | None = None,
     ) -> WriterT_co:  # pragma: no cover - optional
         """Create provider-specific writer."""
+
 
 @dataclass(frozen=True)
 class ProviderDefinition:

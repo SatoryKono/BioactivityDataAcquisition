@@ -30,4 +30,3 @@ def default_progress_reporter() -> ProgressReporterABC:
     Возвращает репортер прогресса по умолчанию (tqdm).
     """
     return TqdmProgressReporterImpl()
-

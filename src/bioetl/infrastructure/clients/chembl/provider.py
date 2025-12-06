@@ -49,7 +49,9 @@ class ChemblProviderComponents(
     ) -> ChemblNormalizationService:
         _ = client  # signature compatibility; normalization independent from client
         if pipeline_config is None:
-            raise ValueError("PipelineConfig is required to build normalization service")
+            raise ValueError(
+                "PipelineConfig is required to build normalization service"
+            )
         return ChemblNormalizationService(pipeline_config)
 
 

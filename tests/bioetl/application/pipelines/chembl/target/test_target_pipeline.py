@@ -1,4 +1,5 @@
 """Tests for ChemblEntityPipeline (Target context)."""
+
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -47,19 +48,19 @@ def test_transform_nested_fields(pipeline):
         {"name": "target_type", "data_type": "string"},  # Required field
     ]
 
-    df = pd.DataFrame({
-        "target_chembl_id": ["CHEMBL1"],
-        "target_type": ["SINGLE PROTEIN"],  # Required field
-        "target_components": [
-            [
-                {"component_id": 1, "accession": "P12345"},
-                {"component_id": 2, "accession": "Q67890"}
-            ]
-        ],
-        "cross_references": [
-            [{"xref_src": "PubMed", "xref_id": "123"}]
-        ]
-    })
+    df = pd.DataFrame(
+        {
+            "target_chembl_id": ["CHEMBL1"],
+            "target_type": ["SINGLE PROTEIN"],  # Required field
+            "target_components": [
+                [
+                    {"component_id": 1, "accession": "P12345"},
+                    {"component_id": 2, "accession": "Q67890"},
+                ]
+            ],
+            "cross_references": [[{"xref_src": "PubMed", "xref_id": "123"}]],
+        }
+    )
 
     result = pipeline.transform(df)
 

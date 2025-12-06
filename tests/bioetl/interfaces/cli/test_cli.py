@@ -1,6 +1,7 @@
 """
 Tests for the CLI entry point.
 """
+
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -99,9 +100,7 @@ def test_run_command(mock_loader, mock_orchestrator_cls):
 
     # We need to mock file existence for config
     with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(
-            app, ["run", "test_pipeline", "--config", "test.yaml"]
-        )
+        result = runner.invoke(app, ["run", "test_pipeline", "--config", "test.yaml"])
 
     assert result.exit_code == 0
     assert "Pipeline finished successfully" in result.stdout
@@ -136,9 +135,7 @@ def test_run_config_not_found_explicit(mock_loader):
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
 @patch("bioetl.interfaces.cli.app.load_pipeline_config_from_path")
-def test_run_with_limit_and_dry_run(
-    mock_loader, mock_orchestrator_cls
-):
+def test_run_with_limit_and_dry_run(mock_loader, mock_orchestrator_cls):
     """Test run command with limit and dry-run options."""
     mock_orchestrator = MagicMock()
     mock_orchestrator.run_pipeline.return_value = MagicMock(

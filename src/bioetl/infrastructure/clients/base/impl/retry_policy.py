@@ -37,4 +37,3 @@ class ExponentialBackoffRetryImpl(RetryPolicyABC):
         if self._jitter:
             delay *= random.uniform(0.5, 1.5)
         return min(delay, self._max_delay)
-

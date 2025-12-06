@@ -35,13 +35,17 @@ class _DummyExtractionService:
     def get_release_version(self) -> str:  # pragma: no cover
         return "v1"
 
-    def request_batch(self, entity: str, batch_ids: list[str], filter_key: str):  # pragma: no cover
+    def request_batch(
+        self, entity: str, batch_ids: list[str], filter_key: str
+    ):  # pragma: no cover
         raise NotImplementedError
 
     def parse_response(self, raw_response):  # pragma: no cover
         raise NotImplementedError
 
-    def serialize_records(self, entity: str, records: list[dict[str, str]]):  # pragma: no cover
+    def serialize_records(
+        self, entity: str, records: list[dict[str, str]]
+    ):  # pragma: no cover
         raise NotImplementedError
 
 

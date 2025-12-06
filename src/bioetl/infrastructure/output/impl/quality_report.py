@@ -1,4 +1,5 @@
 """Quality report generator implementation."""
+
 from __future__ import annotations
 
 import pandas as pd
@@ -25,10 +26,14 @@ class QualityReportImpl(QualityReportABC):
                 "non_null_count": non_nulls.values,
                 "unique_count": unique_counts.values,
                 "dtype": df.dtypes.values.astype(str),
-                "coverage": coverage.values if hasattr(coverage, "values") else coverage,
-                "coverage_ok": (coverage >= min_coverage).values
-                if hasattr(coverage, "values")
-                else False,
+                "coverage": (
+                    coverage.values if hasattr(coverage, "values") else coverage
+                ),
+                "coverage_ok": (
+                    (coverage >= min_coverage).values
+                    if hasattr(coverage, "values")
+                    else False
+                ),
             }
         )
 

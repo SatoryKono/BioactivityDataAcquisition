@@ -11,10 +11,12 @@ print("Script started")
 
 try:
     from bioetl.domain.schemas.chembl.activity import ActivitySchema
+
     print("Schema imported")
 except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)
+
 
 def main():
     path = Path("qc/golden/chembl_activity/expected_output.csv")
@@ -28,11 +30,11 @@ def main():
 
     print(f"Reading {path}")
     df = pd.read_csv(path)
-    
+
     # Get columns from schema to ensure correct order
     schema = ActivitySchema.to_schema()
     expected_columns = list(schema.columns.keys())
-    
+
     print("Reordering columns...")
     missing = [c for c in expected_columns if c not in df.columns]
     if missing:
@@ -40,10 +42,11 @@ def main():
         return
 
     df = df[expected_columns]
-    
+
     print(f"Writing back to {path}")
     df.to_csv(path, index=False)
     print("Done.")
+
 
 if __name__ == "__main__":
     main()

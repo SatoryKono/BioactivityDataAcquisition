@@ -1,6 +1,7 @@
 """
 Factories for ChEMBL pipelines.
 """
+
 from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 
@@ -8,10 +9,10 @@ from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 def create_chembl_pipeline(container: PipelineContainer) -> ChemblEntityPipeline:
     """
     Creates a ChEMBL entity pipeline using dependencies from container.
-    
+
     Args:
         container: Dependency injection container.
-        
+
     Returns:
         Configured ChemblEntityPipeline.
     """
@@ -27,4 +28,3 @@ def create_chembl_pipeline(container: PipelineContainer) -> ChemblEntityPipeline
         hooks=container.get_hooks(),
         error_policy=container.get_error_policy(),
     )
-

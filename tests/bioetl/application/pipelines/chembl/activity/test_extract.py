@@ -1,6 +1,7 @@
 """
 Tests for ChemblPipelineBase generic extract (via ChemblActivityPipeline).
 """
+
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -100,11 +101,13 @@ def test_extract_no_input_file(pipeline, mock_extraction_service):
 def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     """Test extraction reads full dataframe from CSV."""
     csv_path = tmp_path / "activity.csv"
-    pd.DataFrame({
-        "activity_id": [10, 11],
-        "standard_value": [5.5, 6.6],
-        "standard_type": ["IC50", "Ki"],
-    }).to_csv(csv_path, index=False)
+    pd.DataFrame(
+        {
+            "activity_id": [10, 11],
+            "standard_value": [5.5, 6.6],
+            "standard_type": ["IC50", "Ki"],
+        }
+    ).to_csv(csv_path, index=False)
 
     pipeline._config.input_mode = "csv"
     pipeline._config.input_path = str(csv_path)
@@ -130,13 +133,13 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path):
     # Mock parse_response to return records only once
     # Since all 3 ids are in one batch (batch_size=25 > 3), parse_response is called once
     mock_extraction_service.parse_response.return_value = [
-        {"activity_id": 100}, {"activity_id": 101}, {"activity_id": 102}
+        {"activity_id": 100},
+        {"activity_id": 101},
+        {"activity_id": 102},
     ]
-    
+
     # Mock serialize_records to return input
-    mock_extraction_service.serialize_records.side_effect = (
-        lambda entity, recs: recs
-    )
+    mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs
 
     df = pipeline.extract()
 
@@ -160,6 +163,7 @@ def test_extract_batch_size_from_config(
     pipeline._config.input_path = str(csv_path)
     # Create new source_config with batch_size=2
     from bioetl.infrastructure.config.models import ChemblSourceConfig
+
     new_source_config = ChemblSourceConfig(
         base_url=source_config.base_url,
         batch_size=2,
@@ -173,9 +177,7 @@ def test_extract_batch_size_from_config(
 
     # Mock parse_response to return empty list
     mock_extraction_service.parse_response.return_value = []
-    mock_extraction_service.serialize_records.side_effect = (
-        lambda entity, recs: recs
-    )
+    mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs
 
     pipeline.extract()
 

@@ -1,4 +1,5 @@
 """Tests for ChemblEntityPipeline (Testitem context)."""
+
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -49,14 +50,17 @@ def test_transform_columns_preserved(pipeline):
     ]
     # Mock schema to include tested columns
     pipeline._validation_service.get_schema_columns.return_value = [
-        "molecule_chembl_id", "max_phase"
+        "molecule_chembl_id",
+        "max_phase",
     ]
 
-    df = pd.DataFrame({
-        "molecule_chembl_id": ["CHEMBL1", "CHEMBL2"],
-        "extra_col": [1, 2],
-        "max_phase": [4, None]
-    })
+    df = pd.DataFrame(
+        {
+            "molecule_chembl_id": ["CHEMBL1", "CHEMBL2"],
+            "extra_col": [1, 2],
+            "max_phase": [4, None],
+        }
+    )
 
     # Transform processes fields
     result = pipeline.transform(df)
@@ -74,13 +78,16 @@ def test_transform_max_phase(pipeline):
         {"name": "molecule_chembl_id", "data_type": "string"},
     ]
     pipeline._validation_service.get_schema_columns.return_value = [
-        "molecule_chembl_id", "max_phase"
+        "molecule_chembl_id",
+        "max_phase",
     ]
 
-    df = pd.DataFrame({
-        "max_phase": [4, "3", None, "invalid"],
-        "molecule_chembl_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"]
-    })
+    df = pd.DataFrame(
+        {
+            "max_phase": [4, "3", None, "invalid"],
+            "molecule_chembl_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
+        }
+    )
 
     # Using transform which invokes NormalizationService
     result = pipeline.transform(df)
@@ -133,14 +140,18 @@ def test_transform_nested_fields(pipeline):
         {"name": "molecule_chembl_id", "data_type": "string"},
     ]
     pipeline._validation_service.get_schema_columns.return_value = [
-        "molecule_chembl_id", "atc_classifications", "molecule_properties"
+        "molecule_chembl_id",
+        "atc_classifications",
+        "molecule_properties",
     ]
 
-    df = pd.DataFrame({
-        "molecule_chembl_id": ["CHEMBL1"],
-        "atc_classifications": [["L01", "A02"]],
-        "molecule_properties": [{"alogp": 2.5}]
-    })
+    df = pd.DataFrame(
+        {
+            "molecule_chembl_id": ["CHEMBL1"],
+            "atc_classifications": [["L01", "A02"]],
+            "molecule_properties": [{"alogp": 2.5}],
+        }
+    )
 
     result = pipeline.transform(df)
 

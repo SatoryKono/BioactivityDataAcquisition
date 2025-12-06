@@ -15,7 +15,7 @@ from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 class ChemblTransformerImpl(TransformerABC):
     """
     Transformer for ChEMBL data.
-    
+
     Chain:
     pre_transform -> do_transform -> normalize -> enforce_schema -> drop nulls
     """
@@ -32,7 +32,9 @@ class ChemblTransformerImpl(TransformerABC):
         self.normalization_service = normalization_service
         self.logger = logger
 
-    def apply(self, df: pd.DataFrame, context: RunContext | None = None) -> pd.DataFrame:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         df = self.pre_transform(df)
         df = self.do_transform(df)
         df = self.normalization_service.normalize_dataframe(df)
@@ -80,9 +82,7 @@ class ChemblTransformerImpl(TransformerABC):
         required_cols = [
             name
             for name, col in schema.columns.items()
-            if not col.nullable
-            and name in df.columns
-            and name not in ignored_cols
+            if not col.nullable and name in df.columns and name not in ignored_cols
         ]
 
         if not required_cols:
@@ -98,4 +98,3 @@ class ChemblTransformerImpl(TransformerABC):
             )
 
         return df_clean
-

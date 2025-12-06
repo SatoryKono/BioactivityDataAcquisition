@@ -1,6 +1,7 @@
 """
 Factories for ChEMBL clients.
 """
+
 from typing import Any
 
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
@@ -46,7 +47,7 @@ def default_chembl_client(
             max_retries=source_config.max_retries,
             rate_limit=source_config.rate_limit_per_sec or 10.0,
         )
-    
+
     # Create Unified Client
     unified_client = UnifiedAPIClient(
         provider="chembl",

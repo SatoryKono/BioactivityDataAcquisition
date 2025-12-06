@@ -20,8 +20,10 @@ def test_parquet_write():
     path = Path("test.parquet")
 
     # Mock to_parquet
-    with patch("pandas.DataFrame.to_parquet") as mock_to_parquet, \
-         patch("time.monotonic", side_effect=[0.0, 0.1]):
+    with (
+        patch("pandas.DataFrame.to_parquet") as mock_to_parquet,
+        patch("time.monotonic", side_effect=[0.0, 0.1]),
+    ):
 
         result = writer.write(df, path)
 

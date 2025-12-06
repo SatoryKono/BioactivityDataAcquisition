@@ -65,7 +65,9 @@ def test_activity_schema_rejects_bad_chembl(valid_activity_df: pd.DataFrame) -> 
     assert "BAD" in failure_cases["failure_case"].astype(str).tolist()
 
 
-def test_activity_schema_rejects_out_of_range_value(valid_activity_df: pd.DataFrame) -> None:
+def test_activity_schema_rejects_out_of_range_value(
+    valid_activity_df: pd.DataFrame,
+) -> None:
     invalid = valid_activity_df.copy()
     invalid["pchembl_value"] = [16.5]
 
@@ -73,7 +75,12 @@ def test_activity_schema_rejects_out_of_range_value(valid_activity_df: pd.DataFr
         ActivitySchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert failure_cases.loc[failure_cases["column"] == "pchembl_value", "failure_case"].iloc[0] == 16.5
+    assert (
+        failure_cases.loc[
+            failure_cases["column"] == "pchembl_value", "failure_case"
+        ].iloc[0]
+        == 16.5
+    )
 
 
 def test_activity_schema_blocks_null_required(valid_activity_df: pd.DataFrame) -> None:

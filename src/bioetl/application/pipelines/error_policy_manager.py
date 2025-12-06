@@ -80,7 +80,10 @@ class ErrorPolicyManager:
 
             action_on_error = self._error_policy.handle(error, context)
             self._last_stage_action[stage] = action_on_error
-            if action_on_error == ErrorAction.RETRY and self._error_policy.should_retry(error):
+            if (
+                action_on_error == ErrorAction.RETRY
+                and self._error_policy.should_retry(error)
+            ):
                 if on_retry:
                     on_retry()
                 return self.execute(

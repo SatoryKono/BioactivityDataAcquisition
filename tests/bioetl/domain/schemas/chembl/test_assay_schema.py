@@ -66,7 +66,12 @@ def test_assay_schema_rejects_out_of_range(valid_assay_df: pd.DataFrame) -> None
         AssaySchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert failure_cases.loc[failure_cases["column"] == "confidence_score", "failure_case"].iloc[0] == 15
+    assert (
+        failure_cases.loc[
+            failure_cases["column"] == "confidence_score", "failure_case"
+        ].iloc[0]
+        == 15
+    )
 
 
 def test_assay_schema_requires_hash(valid_assay_df: pd.DataFrame) -> None:

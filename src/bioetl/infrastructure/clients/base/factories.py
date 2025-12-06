@@ -35,4 +35,3 @@ def default_cache() -> CacheABC[Any]:
 
 def default_secret_provider() -> SecretProviderABC:
     return EnvSecretProvider()
-

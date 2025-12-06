@@ -23,20 +23,28 @@ except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)
 
+
 def main():
     # Simulate CLI arguments
     # python -m bioetl run target_chembl --config ... --output ... --limit 10
     sys.argv = [
-        "bioetl", "run", "target_chembl",
-        "--config", "configs/pipelines/chembl/target.yaml",
-        "--output", "data/output/target",
-        "--limit", "10"
+        "bioetl",
+        "run",
+        "target_chembl",
+        "--config",
+        "configs/pipelines/chembl/target.yaml",
+        "--output",
+        "data/output/target",
+        "--limit",
+        "10",
     ]
-    
+
     print("Running CLI app via wrapper...")
-    
+
     # Patch get_release_version to avoid /status call
-    with patch.object(ChemblExtractionServiceImpl, 'get_release_version', return_value="chembl_mock"):
+    with patch.object(
+        ChemblExtractionServiceImpl, "get_release_version", return_value="chembl_mock"
+    ):
         try:
             app()
         except SystemExit as e:
@@ -45,6 +53,7 @@ def main():
             print(f"Exception: {e}")
         finally:
             print("Wrapper finished.")
+
 
 if __name__ == "__main__":
     main()

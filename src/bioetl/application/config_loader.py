@@ -1,4 +1,5 @@
 """Загрузчик конфигураций пайплайнов со строгой валидацией."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -46,13 +47,17 @@ class UnknownProviderError(ConfigError):
 SUPPORTED_PROVIDERS = {"chembl"}
 
 
-def load_pipeline_config(pipeline_id: str, profile: str | None = None) -> PipelineConfig:
+def load_pipeline_config(
+    pipeline_id: str, profile: str | None = None
+) -> PipelineConfig:
     """Загружает конфиг по идентификатору вида \"provider.entity\"."""
 
     try:
         provider, entity = pipeline_id.split(".", maxsplit=1)
     except ValueError as exc:
-        raise ConfigError("Pipeline id must be in format '<provider>.<entity>'") from exc
+        raise ConfigError(
+            "Pipeline id must be in format '<provider>.<entity>'"
+        ) from exc
 
     config_path = PIPELINES_ROOT / provider / f"{entity}.yaml"
     return load_pipeline_config_from_path(config_path, profile=profile)
@@ -217,7 +222,9 @@ def _drop_legacy_fields(transformed: dict[str, Any]) -> None:
 _def_profile_cache: dict[str, dict[str, Any]] = {}
 
 
-def _resolve_profile(profile_name: str, profiles_root: Path | None = None) -> dict[str, Any]:
+def _resolve_profile(
+    profile_name: str, profiles_root: Path | None = None
+) -> dict[str, Any]:
     profiles_dir = profiles_root or PROFILES_ROOT
     cache_key = f"{profiles_dir}:{profile_name}"
 
@@ -254,4 +261,3 @@ __all__ = [
     "load_pipeline_config",
     "load_pipeline_config_from_path",
 ]
-

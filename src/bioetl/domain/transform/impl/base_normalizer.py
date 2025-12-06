@@ -1,4 +1,5 @@
 """Shared helpers for normalization services."""
+
 from __future__ import annotations
 
 from typing import Any, Callable, cast
@@ -37,7 +38,7 @@ class BaseNormalizationService:
         if self._is_empty_value(value):
             return self._empty_value
 
-        if dtype in ("array", "object"):
+        if self._is_container_dtype(dtype):
             return self._normalize_container_value(
                 value,
                 normalizer,
@@ -46,6 +47,15 @@ class BaseNormalizationService:
                 serialize_with_value_normalizer=serialize_with_value_normalizer,
             )
 
+        return self._normalize_scalar_value(value, normalizer, field_name)
+
+    @staticmethod
+    def _is_container_dtype(dtype: str | None) -> bool:
+        return dtype in ("array", "object")
+
+    def _normalize_scalar_value(
+        self, value: Any, normalizer: Callable[[Any], Any], field_name: str
+    ) -> Any:
         return self._apply_normalizer(value, normalizer, field_name)
 
     def _normalize_container_value(
@@ -147,9 +157,7 @@ class BaseNormalizationService:
         try:
             return normalizer(value)
         except ValueError as exc:
-            raise ValueError(
-                f"Ошибка нормализации поля '{field_name}': {exc}"
-            ) from exc
+            raise ValueError(f"Ошибка нормализации поля '{field_name}': {exc}") from exc
 
     def _apply_container_normalizer(
         self,
@@ -186,7 +194,9 @@ class BaseNormalizationService:
                 return self._empty_value
             return serialize_list(
                 list(result),
-                value_normalizer=normalizer if serialize_with_value_normalizer else None,
+                value_normalizer=(
+                    normalizer if serialize_with_value_normalizer else None
+                ),
             )
 
         if isinstance(result, dict):
@@ -195,7 +205,9 @@ class BaseNormalizationService:
 
         return str(result)
 
-    def _normalize_container_item(self, item: Any, normalizer: Callable[[Any], Any]) -> Any:
+    def _normalize_container_item(
+        self, item: Any, normalizer: Callable[[Any], Any]
+    ) -> Any:
         if isinstance(item, dict):
             normalized_dict = normalize_record(
                 cast(dict[str, Any], item), value_normalizer=normalizer

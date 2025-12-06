@@ -1,6 +1,7 @@
 """
 Базовый класс пайплайна.
 """
+
 from abc import ABC
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,7 +48,7 @@ class PipelineBase(ABC):
 
     Реализует паттерн Template Method для стадий:
     extract → transform → validate → write
-    
+
     Использует композицию для стадий (Extractor, Transformer).
     """
 
@@ -421,9 +422,7 @@ class PipelineBase(ABC):
     ) -> WriteResult:
         """Записывает валидированный DataFrame."""
         output_schema_name = self._schema_contract.get_output_schema()
-        output_columns = self._validation_service.get_schema_columns(
-            output_schema_name
-        )
+        output_columns = self._validation_service.get_schema_columns(output_schema_name)
 
         return self._output_writer.write_result(
             df=df,
@@ -436,6 +435,7 @@ class PipelineBase(ABC):
     def iter_chunks(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
         """Возвращает итератор по чанкам данных после extract."""
         if self._extractor is not None:
+
             def _extractor_generator() -> Iterable[pd.DataFrame]:
                 self._increment_extract_call_count()
                 result = self._extractor.extract(**kwargs)
@@ -487,9 +487,7 @@ class PipelineBase(ABC):
 
     # === Internal Methods ===
     def _calculate_duration(self, context: RunContext) -> float:
-        return (
-            datetime.now(timezone.utc) - context.started_at
-        ).total_seconds()
+        return (datetime.now(timezone.utc) - context.started_at).total_seconds()
 
     def _build_default_transformer(self) -> TransformerABC:
         return TransformerChain(
@@ -562,9 +560,7 @@ class PipelineBase(ABC):
         Uses subclass extract() implementation; raises if not overridden.
         """
         if self.__class__.extract is PipelineBase.extract:
-            raise ValueError(
-                "Extractor is required when extract() is not overridden."
-            )
+            raise ValueError("Extractor is required when extract() is not overridden.")
 
         def _generator() -> Iterable[pd.DataFrame]:
             result = self.extract(**kwargs)

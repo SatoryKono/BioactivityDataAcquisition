@@ -25,15 +25,15 @@ class ValidationService:
     def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
         """
         Валидирует DataFrame по схеме.
-        
+
         Returns:
             Валидированный DataFrame (Pandera может модифицировать типы).
-            
+
         Raises:
             ValueError: Если валидация не прошла.
         """
         schema_cls = self._schema_provider.get_schema(entity_name)
-        
+
         # Pandera validation
         # We validate directly with schema to get typed dataframe back
         try:

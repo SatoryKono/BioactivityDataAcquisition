@@ -24,4 +24,3 @@ class TqdmProgressReporterImpl(ProgressReporterABC):
         if self._pbar is not None:
             self._pbar.close()
             self._pbar = None
-

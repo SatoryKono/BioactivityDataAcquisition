@@ -1,4 +1,5 @@
 """Core record source interfaces and helpers."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
@@ -57,7 +58,9 @@ class ApiRecordSource(RecordSource):
         )
 
 
-def _chunk_dataframe(df: pd.DataFrame, chunk_size: int | None) -> Iterator[pd.DataFrame]:
+def _chunk_dataframe(
+    df: pd.DataFrame, chunk_size: int | None
+) -> Iterator[pd.DataFrame]:
     if chunk_size is None or chunk_size <= 0:
         yield df
         return

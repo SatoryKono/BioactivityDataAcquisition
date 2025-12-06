@@ -1,4 +1,5 @@
 """Tests for ChemblEntityPipeline (Document context)."""
+
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -58,16 +59,14 @@ def test_transform_chembl_release(pipeline):
     to extract values from dictionary fields when a custom normalizer is
     applied.
     """
-    df = pd.DataFrame({
-        "chembl_release": [{"chembl_release": "chembl_33"}, "chembl_34"]
-    })
+    df = pd.DataFrame(
+        {"chembl_release": [{"chembl_release": "chembl_33"}, "chembl_34"]}
+    )
 
     # Mock schema columns to test this field in isolation
     # This ensures _enforce_schema returns only this column
     # and _drop_nulls_in_required_columns ignores missing required cols
-    pipeline._validation_service.get_schema_columns.return_value = [
-        "chembl_release"
-    ]
+    pipeline._validation_service.get_schema_columns.return_value = ["chembl_release"]
 
     # Define extraction logic to be injected
     def extract_release(val):
@@ -76,14 +75,12 @@ def test_transform_chembl_release(pipeline):
         return val
 
     # Patch get_normalizer in the module used by ChemblNormalizationService
-    with patch(
-        "bioetl.domain.transform.impl.normalize.get_normalizer"
-    ) as mock_get:
+    with patch("bioetl.domain.transform.impl.normalize.get_normalizer") as mock_get:
         # Return extractor only for 'chembl_release', None for others
         mock_get.side_effect = lambda name: (
             extract_release if name == "chembl_release" else None
         )
-    
+
         result = pipeline.transform(df)
 
     assert result.iloc[0]["chembl_release"] == "chembl_33"
@@ -92,15 +89,15 @@ def test_transform_chembl_release(pipeline):
 
 def test_transform_int_columns(pipeline):
     """Test integer column conversion."""
-    df = pd.DataFrame({
-        "year": [2020, None, 2021],
-        "src_id": [1, 2, None],
-        "other": ["a", "b", "c"]
-    })
+    df = pd.DataFrame(
+        {"year": [2020, None, 2021], "src_id": [1, 2, None], "other": ["a", "b", "c"]}
+    )
 
     # Ensure columns exist in schema for _enforce_schema
     pipeline._validation_service.get_schema_columns.return_value = [
-        "year", "src_id", "other"
+        "year",
+        "src_id",
+        "other",
     ]
 
     result = pipeline.transform(df)
@@ -119,12 +116,8 @@ def test_transform_int_columns(pipeline):
 
 def test_transform_pubmed_id(pipeline):
     """Test pubmed_id field transformation."""
-    df = pd.DataFrame({
-        "pubmed_id": [12345, None, 67890]
-    })
-    pipeline._validation_service.get_schema_columns.return_value = [
-        "pubmed_id"
-    ]
+    df = pd.DataFrame({"pubmed_id": [12345, None, 67890]})
+    pipeline._validation_service.get_schema_columns.return_value = ["pubmed_id"]
 
     result = pipeline.transform(df)
 

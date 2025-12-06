@@ -5,9 +5,7 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
-sys.modules.setdefault(
-    "tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None)
-)
+sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
 
 import pytest  # noqa: E402
 from pydantic import ValidationError  # noqa: E402
@@ -60,7 +58,8 @@ def _restore_registry() -> Any:
 
 
 def _register_dummy_provider(
-    *, config_type: type[Any] = DummyProviderConfig,
+    *,
+    config_type: type[Any] = DummyProviderConfig,
 ) -> ProviderDefinition:
     definition = ProviderDefinition(
         id=ProviderId.DUMMY,
@@ -239,18 +238,13 @@ def test_hash_service_override_propagates_to_transformers() -> None:
         hash_service=custom_hash_service,
     )
 
-    post_transformer = container.get_post_transformer(
-        version_provider=lambda: "v1"
-    )
+    post_transformer = container.get_post_transformer(version_provider=lambda: "v1")
     transformer_hashes = {
-        transformer.__class__.__name__: getattr(
-            transformer, "_hash_service", None
-        )
+        transformer.__class__.__name__: getattr(transformer, "_hash_service", None)
         for transformer in post_transformer._transformers  # type: ignore[attr-defined] # noqa: E501
     }
 
     assert transformer_hashes
     assert all(
-        service is custom_hash_service
-        for service in transformer_hashes.values()
+        service is custom_hash_service for service in transformer_hashes.values()
     )

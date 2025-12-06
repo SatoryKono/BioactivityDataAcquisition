@@ -13,6 +13,6 @@ def main():
     """Entry point for bioetl command."""
     app()
 
+
 if __name__ == "__main__":
     main()
-

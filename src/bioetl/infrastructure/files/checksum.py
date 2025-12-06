@@ -27,4 +27,3 @@ def compute_files_sha256(paths: list[Path]) -> dict[str, str]:
             continue
         checksums[path.name] = compute_file_sha256(path)
     return checksums
-

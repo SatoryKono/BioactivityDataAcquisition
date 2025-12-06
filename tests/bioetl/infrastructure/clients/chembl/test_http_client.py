@@ -93,9 +93,7 @@ def test_request_activity(client, mock_request_builder):
 
     # Verify
     mock_request_builder.for_endpoint.assert_called_with("activity")
-    mock_request_builder.build.assert_called_with(
-        {"molecule_chembl_id": "CHEMBL1"}
-    )
+    mock_request_builder.build.assert_called_with({"molecule_chembl_id": "CHEMBL1"})
     assert result == {"activities": []}
 
 
@@ -155,7 +153,10 @@ def test_iter_pages_fetches_all_pages(client):
 
     pages = list(client.iter_pages("https://example.org/page1"))
 
-    assert pages == [first_response.json.return_value, second_response.json.return_value]
+    assert pages == [
+        first_response.json.return_value,
+        second_response.json.return_value,
+    ]
     assert client.http.request.call_count == 2
     client.http.request.assert_any_call("GET", "https://example.org/page1")
     client.http.request.assert_any_call("GET", "https://example.org/page2")

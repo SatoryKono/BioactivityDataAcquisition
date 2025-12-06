@@ -56,7 +56,6 @@ LAYER_SUFFIXES = {
         "Impl",
         "Config",
     },
-
     # Domain layer (pure domain and business logic)
     "domain": {
         # Core models / DTOs
@@ -85,7 +84,6 @@ LAYER_SUFFIXES = {
         "Impl",
         "Config",
     },
-
     # Infrastructure layer (clients, files, output, logging, config)
     "infrastructure": {
         # HTTP / client side
@@ -120,7 +118,6 @@ LAYER_SUFFIXES = {
         "ABC",
         "Impl",
     },
-
     # Interfaces layer (pure interfaces / contracts)
     "interfaces": {
         "ABC",
@@ -231,18 +228,14 @@ FUNC_REGEX = re.compile(r"^[a-z_][a-z0-9_]*$")
 CONST_REGEX = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 PIPELINE_PATH_REGEX = re.compile(
-    r"src/bioetl/application/pipelines/"
-    r"([a-z0-9_]+)/([a-z0-9_]+)/([a-z0-9_]+)\.py$"
+    r"src/bioetl/application/pipelines/" r"([a-z0-9_]+)/([a-z0-9_]+)/([a-z0-9_]+)\.py$"
 )
 TEST_FILE_REGEX = re.compile(r"^test_[a-z0-9_]+\.py$")
 
 
-def _has_exception(
-    exceptions: List[Dict[str, Any]], path: str, rule_id: str
-) -> bool:
+def _has_exception(exceptions: List[Dict[str, Any]], path: str, rule_id: str) -> bool:
     return any(
-        exc.get("path") == path and exc.get("rule_id") == rule_id
-        for exc in exceptions
+        exc.get("path") == path and exc.get("rule_id") == rule_id for exc in exceptions
     )
 
 
@@ -283,10 +276,7 @@ class NamingValidator(ast.NodeVisitor):
     def is_excepted(self, rule_id: str, _node_name: str) -> bool:
         """Check if a rule is excepted for the given node."""
         for exc in self.exceptions:
-            if (
-                exc.get("path") == self.file_path
-                and exc.get("rule_id") == rule_id
-            ):
+            if exc.get("path") == self.file_path and exc.get("rule_id") == rule_id:
                 # Could add more granular checks here (e.g. by symbol name)
                 # checking if the exception applies to this specific symbol
                 # if specified. For now, simplicity: if file has exception
@@ -411,9 +401,7 @@ def load_exceptions() -> List[Dict[str, Any]]:
         return []
 
 
-def check_file_naming(
-    file_path: Path, exceptions: List[Dict[str, Any]]
-) -> List[str]:
+def check_file_naming(file_path: Path, exceptions: List[Dict[str, Any]]) -> List[str]:
     """Check if file name follows conventions."""
     violations = []
     str_path = str(file_path).replace("\\", "/")
@@ -426,9 +414,7 @@ def check_file_naming(
     if not MODULE_REGEX.match(stem) and not _is_excepted("MODULE_NAME"):
         violations.append(f"File '{filename}' does not match snake_case.")
 
-    if "tests" in str_path and not filename.startswith(
-        ("conftest.py", "__init__.py")
-    ):
+    if "tests" in str_path and not filename.startswith(("conftest.py", "__init__.py")):
         if not TEST_FILE_REGEX.match(filename) and not _is_excepted("TEST_NAME"):
             # Violations muted by policy; keep placeholder for future reporting.
             pass
@@ -436,17 +422,13 @@ def check_file_naming(
     return violations
 
 
-def check_file_content(
-    file_path: Path, exceptions: List[Dict[str, Any]]
-) -> List[str]:
+def check_file_content(file_path: Path, exceptions: List[Dict[str, Any]]) -> List[str]:
     """Parse and validate file content."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         tree = ast.parse(content, filename=str(file_path))
-        validator = NamingValidator(
-            str(file_path).replace("\\", "/"), exceptions
-        )
+        validator = NamingValidator(str(file_path).replace("\\", "/"), exceptions)
         validator.visit(tree)
         return validator.violations
     except Exception as e:  # pylint: disable=broad-except

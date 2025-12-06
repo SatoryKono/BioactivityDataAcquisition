@@ -1,6 +1,7 @@
 """
 Tests for ConfigResolver.
 """
+
 import pytest
 
 from bioetl.application.config_loader import (
@@ -15,10 +16,7 @@ from bioetl.infrastructure.config.resolver import ConfigResolver
 def test_resolver_simple(tmp_path):
     """Test simple config resolution."""
     config_file = tmp_path / "config.yaml"
-    config_file.write_text(
-        "entity_name: test\nprovider: chembl",
-        encoding="utf-8"
-    )
+    config_file.write_text("entity_name: test\nprovider: chembl", encoding="utf-8")
 
     resolver = ConfigResolver(profiles_dir=str(tmp_path))
     config = resolver.resolve(str(config_file))
@@ -35,14 +33,14 @@ def test_resolver_extends(tmp_path):
     base_profile = profiles_dir / "base.yaml"
     base_profile.write_text(
         "qc:\n  min_coverage: 0.5\nentity_name: base\nprovider: chembl",
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     config_file = tmp_path / "config.yaml"
     config_file.write_text(
         """extends: base
 entity_name: override""",
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     resolver = ConfigResolver(profiles_dir=str(profiles_dir))
@@ -71,15 +69,13 @@ def test_resolver_cli_override(tmp_path):
 
     # CLI profile
     (profiles_dir / "prod.yaml").write_text(
-        "entity_name: prod_entity\nprovider: chembl",
-        encoding="utf-8"
+        "entity_name: prod_entity\nprovider: chembl", encoding="utf-8"
     )
 
     # Config file
     config_file = tmp_path / "config.yaml"
     config_file.write_text(
-        "entity_name: config_entity\nprovider: chembl",
-        encoding="utf-8"
+        "entity_name: config_entity\nprovider: chembl", encoding="utf-8"
     )
 
     resolver = ConfigResolver(profiles_dir=str(profiles_dir))
@@ -95,13 +91,9 @@ def test_profile_inheritance_recursive(tmp_path):
     profiles_dir = tmp_path / "profiles"
     profiles_dir.mkdir()
 
-    (profiles_dir / "root.yaml").write_text(
-        "entity_name: root",
-        encoding="utf-8"
-    )
+    (profiles_dir / "root.yaml").write_text("entity_name: root", encoding="utf-8")
     (profiles_dir / "parent.yaml").write_text(
-        "extends: root\nentity_name: parent\nprovider: chembl",
-        encoding="utf-8"
+        "extends: root\nentity_name: parent\nprovider: chembl", encoding="utf-8"
     )
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: parent", encoding="utf-8")
@@ -124,7 +116,7 @@ def test_circular_dependency(tmp_path):
     resolver = ConfigResolver(profiles_dir=str(profiles_dir))
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: a\nprovider: chembl", encoding="utf-8")
-    
+
     # Should raise RecursionError or similar due to circular dependency
     with pytest.raises((RecursionError, ConfigFileNotFoundError)):
         resolver.resolve(str(config_file))
@@ -145,7 +137,7 @@ def test_default_profile_missing(tmp_path):
     # Test that missing default profile raises ConfigFileNotFoundError
     profiles_dir = tmp_path / "profiles"
     profiles_dir.mkdir()
-    
+
     # When default profile doesn't exist, it should raise ConfigFileNotFoundError
     with pytest.raises(ConfigFileNotFoundError):
         _resolve_profile("default", profiles_root=profiles_dir)

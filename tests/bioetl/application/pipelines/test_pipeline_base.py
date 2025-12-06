@@ -1,6 +1,7 @@
 """
 Tests for the PipelineBase class.
 """
+
 # pylint: disable=redefined-outer-name, protected-access
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -55,9 +56,7 @@ def hash_service():
 @pytest.fixture
 def default_extractor():
     extractor = MagicMock()
-    extractor.extract.return_value = [
-        pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})
-    ]
+    extractor.extract.return_value = [pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})]
     return extractor
 
 
@@ -93,10 +92,7 @@ def test_pipeline_run_success(
     assert len(result.stages) == 4  # extract, transform, validate, write
 
     # Verify logger calls
-    mock_logger.info.assert_any_call(
-        "Pipeline started",
-        run_id=result.run_id
-    )
+    mock_logger.info.assert_any_call("Pipeline started", run_id=result.run_id)
 
     # Verify write called
     mock_output_writer.write_result.assert_called_once()
@@ -195,9 +191,7 @@ def test_pipeline_error_hooks(
     pipeline.add_hook(mock_hook)
 
     # Mock extract to fail
-    pipeline._extractor.extract = MagicMock(
-        side_effect=ValueError("Extraction failed")
-    )
+    pipeline._extractor.extract = MagicMock(side_effect=ValueError("Extraction failed"))
 
     # Act & Assert
     with pytest.raises(PipelineStageError) as exc_info:
@@ -416,7 +410,9 @@ def test_pipeline_dry_run_metadata_and_stages(
         expected_names=["extract", "transform", "validate"],
         expected_count=len(small_pipeline_df),
     )
-    _assert_dry_run_meta(result, pipeline_test_config, expected_count=len(small_pipeline_df))
+    _assert_dry_run_meta(
+        result, pipeline_test_config, expected_count=len(small_pipeline_df)
+    )
 
 
 def _assert_stages(
@@ -427,8 +423,7 @@ def _assert_stages(
 ) -> None:
     assert [stage.stage_name for stage in result.stages] == expected_names
     assert [stage.records_processed for stage in result.stages] == [
-        expected_count
-        for _ in expected_names
+        expected_count for _ in expected_names
     ]
     assert all(stage.errors == [] for stage in result.stages)
     assert all(stage.duration_sec >= 0 for stage in result.stages)

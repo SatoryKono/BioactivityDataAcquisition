@@ -3,17 +3,6 @@ import sys
 from pathlib import Path
 from typing import Any, Literal, Optional
 
-# Remove old paths that might interfere
-sys.path = [p for p in sys.path if 'bioactivity_data_acquisition1' not in p.lower()]
-
-# Ensure we use the correct source directory
-_current_file = Path(__file__)
-_src_dir = _current_file.parent.parent.parent.parent
-_src_str = str(_src_dir)
-if _src_str in sys.path:
-    sys.path.remove(_src_str)
-sys.path.insert(0, _src_str)
-
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -46,7 +35,7 @@ def _resolve_config_path(pipeline_name: str) -> Path:
         # Fallback if naming doesn't match, assume chembl
         entity = pipeline_name
         provider = "chembl"
-    
+
     # Standard path: configs/pipelines/{provider}/{entity}.yaml
     path = _get_config_base_dir() / "pipelines" / provider / f"{entity}.yaml"
     return path
@@ -86,10 +75,16 @@ def validate_config(config_path: Path):
 def run(
     pipeline_name: str,
     profile: str = typer.Option("default", help="Configuration profile"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output directory"),
+    output: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output directory"
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Run without writing output"),
-    config_path: Optional[Path] = typer.Option(None, "--config", help="Path to config file"),
-    limit: Optional[int] = typer.Option(None, "--limit", help="Limit number of records to process"),
+    config_path: Optional[Path] = typer.Option(
+        None, "--config", help="Path to config file"
+    ),
+    limit: Optional[int] = typer.Option(
+        None, "--limit", help="Limit number of records to process"
+    ),
     input_path: Optional[Path] = typer.Option(
         None, "--input-path", help="Path to CSV input file"
     ),

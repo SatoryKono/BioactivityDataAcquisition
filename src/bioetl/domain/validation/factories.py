@@ -1,6 +1,7 @@
 """
 Factories for validation components.
 """
+
 import pandera.pandas as pa
 
 from bioetl.domain.schemas.registry import registry

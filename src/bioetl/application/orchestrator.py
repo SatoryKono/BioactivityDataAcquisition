@@ -57,9 +57,7 @@ class PipelineOrchestrator:
         )
 
         pipeline.set_post_transformer(
-            container.get_post_transformer(
-                version_provider=pipeline.get_version
-            )
+            container.get_post_transformer(version_provider=pipeline.get_version)
         )
 
         pipeline.add_hooks(hooks)
@@ -67,7 +65,9 @@ class PipelineOrchestrator:
 
         return pipeline
 
-    def run_pipeline(self, *, dry_run: bool = False, limit: int | None = None) -> RunResult:
+    def run_pipeline(
+        self, *, dry_run: bool = False, limit: int | None = None
+    ) -> RunResult:
         """Запускает пайплайн в текущем процессе."""
         pipeline = self.build_pipeline(limit=limit)
         start_http_server(9108, addr="0.0.0.0")

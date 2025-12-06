@@ -63,7 +63,12 @@ def test_molecule_schema_rejects_out_of_range(valid_molecule_df: pd.DataFrame) -
         MoleculeSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert failure_cases.loc[failure_cases["column"] == "max_phase", "failure_case"].iloc[0] == 10
+    assert (
+        failure_cases.loc[failure_cases["column"] == "max_phase", "failure_case"].iloc[
+            0
+        ]
+        == 10
+    )
 
 
 def test_molecule_schema_rejects_non_nullable(valid_molecule_df: pd.DataFrame) -> None:

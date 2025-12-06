@@ -1,6 +1,7 @@
 """
 Tests for ChEMBL factories.
 """
+
 import pytest
 
 from bioetl.application.services.chembl_extraction import (
@@ -41,9 +42,7 @@ def test_default_chembl_client_success(source_config):
 def test_default_chembl_client_overrides(source_config):
     """Test overriding config parameters via kwargs."""
     client = default_chembl_client(
-        source_config,
-        base_url="https://override.com",
-        max_url_length=500
+        source_config, base_url="https://override.com", max_url_length=500
     )
     assert client.request_builder.base_url == "https://override.com"
     assert client.request_builder.max_url_length == 500

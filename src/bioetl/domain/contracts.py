@@ -5,6 +5,7 @@ These interfaces define the contract that extraction services must implement,
 allowing application layer to depend on abstractions rather than concrete
 implementations.
 """
+
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Any
@@ -78,9 +79,7 @@ class ExtractionServiceABC(ABC):
         """
 
     @abstractmethod
-    def parse_response(
-        self, raw_response: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Parse raw API response into list of records.
 

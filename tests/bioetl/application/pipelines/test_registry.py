@@ -11,6 +11,7 @@ def test_get_pipeline_class_success():
         assert pipeline_cls == cls
         assert issubclass(pipeline_cls, PipelineBase)
 
+
 def test_get_pipeline_class_failure():
     with pytest.raises(ValueError, match="Pipeline 'unknown' not found"):
         get_pipeline_class("unknown")

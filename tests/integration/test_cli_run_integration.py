@@ -1,4 +1,5 @@
 """Integration tests for CLI commands (TS-002, TS-003)."""
+
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock

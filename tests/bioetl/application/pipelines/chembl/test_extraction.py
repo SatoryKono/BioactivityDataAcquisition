@@ -1,6 +1,7 @@
 """
 Tests for ChemblExtractionServiceImpl.
 """
+
 # pylint: disable=redefined-outer-name
 from unittest.mock import MagicMock
 
@@ -68,14 +69,8 @@ def test_extract_all_pagination(service, mock_client):
     # Call 1: returns 2 items, has_more=True
     # Call 2: returns 1 item, has_more=False
 
-    mock_client.request_activity.side_effect = [
-        {"data": "page1"},
-        {"data": "page2"}
-    ]
-    mock_parser.parse.side_effect = [
-        [{"id": 1}, {"id": 2}],
-        [{"id": 3}]
-    ]
+    mock_client.request_activity.side_effect = [{"data": "page1"}, {"data": "page2"}]
+    mock_parser.parse.side_effect = [[{"id": 1}, {"id": 2}], [{"id": 3}]]
     mock_paginator.has_more.side_effect = [True, False]
 
     # Act
@@ -183,12 +178,15 @@ def test_extract_unknown_entity(service):
         service.extract_all("unknown_entity")
 
 
-@pytest.mark.parametrize("entity,method", [
-    ("assay", "request_assay"),
-    ("target", "request_target"),
-    ("document", "request_document"),
-    ("testitem", "request_molecule"),
-])
+@pytest.mark.parametrize(
+    "entity,method",
+    [
+        ("assay", "request_assay"),
+        ("target", "request_target"),
+        ("document", "request_document"),
+        ("testitem", "request_molecule"),
+    ],
+)
 def test_extract_entities_dispatch(service, mock_client, entity, method):
     """Test correct client method dispatch for entities."""
     # Mock parser - paginator not strictly needed as we return empty list

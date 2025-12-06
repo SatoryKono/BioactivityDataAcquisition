@@ -1,6 +1,7 @@
 """
 Property-based tests for normalization.
 """
+
 import pytest
 
 pytest.importorskip("hypothesis")
@@ -58,4 +59,3 @@ def test_serialize_dict_determinism(d):
         assert pd.isna(s1)
     else:
         assert s1 == expected
-

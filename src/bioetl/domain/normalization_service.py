@@ -1,4 +1,5 @@
 """Domain-level normalization service interfaces."""
+
 from __future__ import annotations
 
 from typing import Any, Protocol, TypedDict, cast
@@ -61,6 +62,7 @@ class ChemblNormalizationService(BaseNormalizationService, NormalizationService)
             if custom_normalizer:
                 base_normalizer = custom_normalizer
             else:
+
                 def _default_normalizer(val: Any, m=mode) -> Any:
                     return normalize_impl.normalize_scalar(val, mode=m)
 
@@ -89,9 +91,7 @@ class ChemblNormalizationService(BaseNormalizationService, NormalizationService)
             if not name or name not in normalized_df.columns:
                 continue
 
-            normalized_df[name] = self.normalize_series(
-                normalized_df[name], field_cfg
-            )
+            normalized_df[name] = self.normalize_series(normalized_df[name], field_cfg)
 
         return normalized_df
 
@@ -109,13 +109,18 @@ class ChemblNormalizationService(BaseNormalizationService, NormalizationService)
         if custom_normalizer:
             base_normalizer = custom_normalizer
         else:
+
             def _default_normalizer(val: Any, m=mode) -> Any:
                 return normalize_impl.normalize_scalar(val, mode=m)
 
             base_normalizer = _default_normalizer
 
         def _normalize_value_from_series(val: Any) -> Any:
-            if custom_normalizer and dtype == "array" and isinstance(val, (list, tuple)):
+            if (
+                custom_normalizer
+                and dtype == "array"
+                and isinstance(val, (list, tuple))
+            ):
                 normalized = custom_normalizer(val)
                 if normalized is None or not normalized:
                     return None
@@ -157,14 +162,10 @@ class ChemblNormalizationService(BaseNormalizationService, NormalizationService)
             value_normalizer=normalizer if serialize_with_value_normalizer else None,
         )
 
-    def _process_dict(
-        self, value: Any, normalizer: Any, field_name: str
-    ) -> Any:
+    def _process_dict(self, value: Any, normalizer: Any, field_name: str) -> Any:
         try:
             dict_value = cast(dict[str, Any], value)
-            normalized_dict = normalize_record(
-                dict_value, value_normalizer=normalizer
-            )
+            normalized_dict = normalize_record(dict_value, value_normalizer=normalizer)
         except ValueError as exc:
             raise ValueError(
                 f"Ошибка нормализации записи в поле '{field_name}': {exc}"

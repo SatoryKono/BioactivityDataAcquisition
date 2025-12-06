@@ -4,6 +4,7 @@ ChEMBL Extraction Service.
 Orchestrates data extraction from ChEMBL API.
 Application-layer service that coordinates infrastructure components.
 """
+
 from collections.abc import Iterable
 from typing import Any, Type
 
@@ -42,7 +43,9 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         """Get ChEMBL release version from API metadata."""
         try:
             meta = self.client.metadata()
-            return meta.get("chembl_release") or meta.get("chembl_db_version", "unknown")
+            return meta.get("chembl_release") or meta.get(
+                "chembl_db_version", "unknown"
+            )
         except Exception:
             # Fallback if metadata endpoint fails (e.g. timeout or bad response)
             return "unknown"
@@ -83,19 +86,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         filter_kwargs = {filter_key: str_ids}
         return self._request_entity(entity, **filter_kwargs)
 
-    def parse_response(
-        self, raw_response: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
         """Parse raw API response into list of records."""
         return self.parser.parse(raw_response)
 
-    def serialize_records(self, entity: str, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def serialize_records(
+        self, entity: str, records: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """Serialize records using the entity's Pydantic model."""
         model_cls = self._get_model_cls(entity)
-        return [
-            model_cls(**record).model_dump()
-            for record in records
-        ]
+        return [model_cls(**record).model_dump() for record in records]
 
     def extract_all(self, entity: str, **filters: Any) -> pd.DataFrame:
         """
@@ -171,4 +171,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     def _serialize_records(
         self, model_cls: Type[ChemblRecordModel], batch_records: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        return [model_cls(**batch_record).model_dump() for batch_record in batch_records]
+        return [
+            model_cls(**batch_record).model_dump() for batch_record in batch_records
+        ]

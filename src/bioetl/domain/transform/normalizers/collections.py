@@ -1,8 +1,9 @@
 """Normalizers for array and record (dict) types."""
+
 from __future__ import annotations
 
 import json
-from typing import Any, Callable, Iterable, Mapping, MutableMapping
+from typing import Any, Callable, Iterable, Mapping, MutableMapping, cast
 
 from bioetl.domain.transform.normalizers.base import is_missing
 from bioetl.domain.transform.normalizers.identifiers import (
@@ -63,20 +64,14 @@ def _coerce_record_mapping(value: Any) -> Mapping[str, Any]:
             try:
                 parsed = json.loads(value)
             except json.JSONDecodeError as exc:
-                raise ValueError(
-                    f"Некорректный JSON для записи: {exc}"
-                ) from exc
+                raise ValueError(f"Некорректный JSON для записи: {exc}") from exc
 
             if not isinstance(parsed, Mapping):
-                raise ValueError(
-                    f"Ожидался словарь, получено {type(parsed).__name__}"
-                )
+                raise ValueError(f"Ожидался словарь, получено {type(parsed).__name__}")
             return dict(parsed)
 
     if not isinstance(value, Mapping):
-        raise ValueError(
-            f"Ожидался словарь, получено {type(value).__name__}"
-        )
+        raise ValueError(f"Ожидался словарь, получено {type(value).__name__}")
     return cast(Mapping[str, Any], value)
 
 
@@ -89,9 +84,7 @@ def _normalize_record_value(
     try:
         return value_normalizer(item) if value_normalizer else item
     except ValueError as exc:
-        raise ValueError(
-            f"Некорректное значение в поле '{str_key}': {exc}"
-        ) from exc
+        raise ValueError(f"Некорректное значение в поле '{str_key}': {exc}") from exc
 
 
 def normalize_target_components(value: Any) -> list[dict[str, Any]] | None:

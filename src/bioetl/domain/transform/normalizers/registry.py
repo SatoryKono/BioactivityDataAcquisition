@@ -1,4 +1,5 @@
 """Registry mapping field names to normalizer functions."""
+
 from typing import Any, Callable
 
 from bioetl.domain.transform.normalizers.collections import (

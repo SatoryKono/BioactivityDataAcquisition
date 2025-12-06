@@ -1,4 +1,5 @@
 """Реализации хуков и политик обработки ошибок пайплайна."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -52,7 +53,9 @@ class FailFastErrorPolicyImpl(ErrorPolicyABC):
     def handle(self, error: PipelineStageError, context: Any) -> ErrorAction:
         return ErrorAction.FAIL
 
-    def should_retry(self, error: PipelineStageError) -> bool:  # noqa: ARG002 - интерфейс
+    def should_retry(
+        self, error: PipelineStageError
+    ) -> bool:  # noqa: ARG002 - интерфейс
         return False
 
 

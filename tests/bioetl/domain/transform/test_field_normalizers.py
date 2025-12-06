@@ -1,6 +1,7 @@
 """
 Tests for field normalizers.
 """
+
 import pandas as pd
 import pytest
 
@@ -140,7 +141,7 @@ class TestNormalizeArray:
             {"pmid": 456},
             None,
         ]
-        
+
         def dict_normalizer(d):
             return normalize_record(d, value_normalizer=normalize_pmid)
 
@@ -211,7 +212,7 @@ class TestNormalizeCrossReferences:
             {"xref_src": "Other", "xref_id": "unknown"},
         ]
         result = normalize_cross_references(data)
-        
+
         assert result[0]["xref_id"] == 123  # PCID is int
         assert result[1]["xref_id"] == "P12345"  # UniProt is upper
         assert result[2]["xref_id"] == "unknown"  # Unchanged
@@ -228,7 +229,6 @@ class TestNormalizeTargetComponents:
             {"accession": None},
         ]
         result = normalize_target_components(data)
-        
+
         assert result[0]["accession"] == "P12345"
         assert result[1]["accession"] is None
-
