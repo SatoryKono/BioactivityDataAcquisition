@@ -39,9 +39,8 @@ def _coerce_numeric_columns(
         target_dtype = _NUMERIC_DTYPES.get(dtype)
         if target_dtype is None or name not in df.columns:
             continue
-        df[name] = pd.to_numeric(df[name], errors="coerce").astype(
-            target_dtype
-        )  # type: ignore[arg-type]
+        coerced = pd.to_numeric(df[name], errors="coerce")
+        df[name] = pd.Series(coerced, dtype=target_dtype)  # type: ignore[arg-type]
     return df
 
 # Aliases for backward compatibility or convenience

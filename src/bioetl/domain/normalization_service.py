@@ -52,12 +52,12 @@ class ChemblNormalizationService(
     def __init__(self, config: NormalizationConfigProvider):
         super().__init__(config)
 
-    def normalize(self, raw: RawRecord) -> NormalizedRecord:
+    def normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
         normalized: dict[str, Any] = {}
 
         for field_cfg in self._config.fields:
             name = field_cfg.get("name")
-            if not name or name not in raw:
+            if not isinstance(name, str) or name not in raw:
                 continue
 
             dtype = field_cfg.get("data_type")
@@ -68,7 +68,7 @@ class ChemblNormalizationService(
                 base_normalizer = custom_normalizer
             else:
 
-                def _default_normalizer(val: Any, m=mode) -> Any:
+                def _default_normalizer(val: Any, m: str = mode) -> Any:
                     return normalize_impl.normalize_scalar(val, mode=m)
 
                 base_normalizer = _default_normalizer
@@ -83,8 +83,9 @@ class ChemblNormalizationService(
             )
 
         for key, value in raw.items():
-            if key not in normalized:
-                normalized[key] = value
+            key_str = cast(str, key)
+            if key_str not in normalized:
+                normalized[key_str] = value
 
         return cast(NormalizedRecord, normalized)
 
@@ -126,7 +127,7 @@ class ChemblNormalizationService(
             base_normalizer = custom_normalizer
         else:
 
-            def _default_normalizer(val: Any, m=mode) -> Any:
+            def _default_normalizer(val: Any, m: str = mode) -> Any:
                 return normalize_impl.normalize_scalar(val, mode=m)
 
             base_normalizer = _default_normalizer
@@ -149,7 +150,7 @@ class ChemblNormalizationService(
                 allow_container_normalizer=True,
             )
 
-        return series.apply(_normalize_value_from_series)
+        return cast(pd.Series, series.apply(_normalize_value_from_series))
 
     def _process_list(
         self,
