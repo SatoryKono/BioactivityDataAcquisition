@@ -8,7 +8,6 @@ from bioetl.application.pipelines.hooks_impl import (
     LoggingPipelineHookImpl,
 )
 from bioetl.config.pipeline_config_schema import PipelineConfig
-from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import get_provider
 from bioetl.domain.providers import ProviderDefinition, ProviderId
@@ -16,6 +15,7 @@ from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
@@ -90,7 +90,7 @@ class PipelineContainer:
             qc_config=self.config.qc,
         )
 
-    def get_normalization_service(self) -> NormalizationService:
+    def get_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
 
         definition = self._get_provider_definition()

@@ -8,14 +8,12 @@ from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImp
 from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
-from bioetl.domain.normalization_service import (
-    ChemblNormalizationService,
-    NormalizationService,
-)
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.domain.transform.factories import default_normalization_service
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -34,7 +32,7 @@ class ChemblPipelineBase(PipelineBase):
         extraction_service: ExtractionServiceABC,
         hash_service: HashService,
         record_source: RecordSource | None = None,
-        normalization_service: NormalizationService | None = None,
+        normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         post_transformer: TransformerABC | None = None,
@@ -42,7 +40,7 @@ class ChemblPipelineBase(PipelineBase):
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
 
-        norm_service = normalization_service or ChemblNormalizationService(config)
+        norm_service = normalization_service or default_normalization_service(config)
 
         # Create Extractor
         extractor = ChemblExtractorImpl(
