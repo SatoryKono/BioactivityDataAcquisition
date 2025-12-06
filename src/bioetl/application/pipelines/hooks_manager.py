@@ -3,8 +3,8 @@
 from datetime import datetime, timezone
 from typing import Iterable
 
-from bioetl.application.pipelines.hooks import PipelineHookABC
 from bioetl.domain.models import RunContext, StageResult
+from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 

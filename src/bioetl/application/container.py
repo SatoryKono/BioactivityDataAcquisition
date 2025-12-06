@@ -1,11 +1,11 @@
 """Dependency Injection Container for the application."""
 from pathlib import Path
 from typing import Any, Callable
-from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.infrastructure.files.csv_record_source import CsvRecordSourceImpl, IdListRecordSourceImpl
 from bioetl.domain.provider_registry import get_provider
 from bioetl.domain.providers import ProviderDefinition, ProviderId

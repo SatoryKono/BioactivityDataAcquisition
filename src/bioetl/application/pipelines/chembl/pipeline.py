@@ -5,10 +5,10 @@ Replaces specific pipeline implementations (Activity, Assay, etc.)
 with a configurable generic implementation.
 """
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.normalization_service import NormalizationService
-from bioetl.domain.record_source import RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.validation.service import ValidationService
 from bioetl.application.config.pipeline_config_schema import PipelineConfig

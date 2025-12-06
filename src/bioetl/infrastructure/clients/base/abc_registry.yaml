@@ -12,9 +12,9 @@ CacheABC: bioetl.domain.clients.base.contracts.CacheABC
 SecretProviderABC: bioetl.domain.clients.base.contracts.SecretProviderABC
 SideInputProviderABC: bioetl.domain.clients.base.contracts.SideInputProviderABC
 
-StageABC: bioetl.application.pipelines.stages.StageABC
-PipelineHookABC: bioetl.application.pipelines.hooks.PipelineHookABC
-ErrorPolicyABC: bioetl.application.pipelines.hooks.ErrorPolicyABC
+StageABC: bioetl.domain.pipelines.contracts.StageABC
+PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
+ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
 CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
 
 LoggerAdapterABC: bioetl.infrastructure.logging.contracts.LoggerAdapterABC
