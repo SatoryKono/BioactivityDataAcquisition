@@ -3,12 +3,12 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from bioetl.infrastructure.files.checksum import compute_files_sha256
 from bioetl.infrastructure.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
 )
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
-from bioetl.infrastructure.files.checksum import compute_files_sha256
 
 
 def build_quality_report_table(

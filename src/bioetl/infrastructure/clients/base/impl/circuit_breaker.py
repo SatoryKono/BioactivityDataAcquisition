@@ -1,8 +1,6 @@
 import time
 from enum import Enum
 
-from bioetl.domain.clients.base.contracts import RetryPolicyABC
-
 
 class CircuitState(Enum):
     CLOSED = "closed"  # Normal operation

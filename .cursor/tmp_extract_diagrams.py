@@ -4,7 +4,6 @@ import re
 import textwrap
 from pathlib import Path
 
-
 BASE = Path("docs/architecture/diagrams")
 TARGETS = [
     Path("docs/architecture/06-architecture-diagrams.md"),

@@ -1,23 +1,22 @@
 """Base pipeline implementation for ChEMBL data extraction."""
 from __future__ import annotations
 
-from typing import Any
-
-import pandas as pd
-
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
-from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.normalization_service import (
+    ChemblNormalizationService,
+    NormalizationService,
+)
+from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 

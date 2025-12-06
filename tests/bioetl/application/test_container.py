@@ -31,10 +31,10 @@ from bioetl.domain.providers import (
     ProviderId,
 )
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.config.models import PipelineConfig
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     DummyProviderConfig,
+    PipelineConfig,
 )
 
 

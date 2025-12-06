@@ -1,6 +1,10 @@
 """Registry mapping field names to normalizer functions."""
 from typing import Any, Callable
 
+from bioetl.domain.transform.normalizers.collections import (
+    normalize_cross_references,
+    normalize_target_components,
+)
 from bioetl.domain.transform.normalizers.identifiers import (
     normalize_bao_id,
     normalize_bao_label,
@@ -10,11 +14,6 @@ from bioetl.domain.transform.normalizers.identifiers import (
     normalize_pmid,
     normalize_uniprot,
 )
-from bioetl.domain.transform.normalizers.collections import (
-    normalize_cross_references,
-    normalize_target_components,
-)
-
 
 CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
     # DOI variants

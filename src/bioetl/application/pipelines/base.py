@@ -4,10 +4,11 @@
 from abc import ABC
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Iterable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 import pandas as pd
 
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
@@ -28,10 +29,9 @@ from bioetl.domain.transform.transformers import (
     TransformerChain,
 )
 from bioetl.domain.validation.service import ValidationService
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.observability import metrics
+from bioetl.infrastructure.output.contracts import WriteResult
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,

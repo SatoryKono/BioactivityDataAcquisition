@@ -1,6 +1,7 @@
-import sys
 import os
+import sys
 from pathlib import Path
+
 import pandas as pd
 
 # Add src to python path
@@ -32,7 +33,7 @@ def main():
     schema = ActivitySchema.to_schema()
     expected_columns = list(schema.columns.keys())
     
-    print(f"Reordering columns...")
+    print("Reordering columns...")
     missing = [c for c in expected_columns if c not in df.columns]
     if missing:
         print(f"Error: Missing columns in CSV: {missing}")

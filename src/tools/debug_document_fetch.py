@@ -1,5 +1,6 @@
 import requests
 
+
 def main():
     # Check connectivity to document endpoint which worked before
     url = "https://www.ebi.ac.uk/chembl/api/data/document.json?limit=1"

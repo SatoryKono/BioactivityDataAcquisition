@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,10 +11,14 @@ sys.path.insert(0, src_path)
 Path("data/output/target").mkdir(parents=True, exist_ok=True)
 
 try:
+    from bioetl.infrastructure.services.chembl_extraction import (
+        ChemblExtractionServiceImpl,
+    )
+
     import bioetl.application.container
+
     # print(f"Container module: {bioetl.application.container.__file__}")
     from bioetl.interfaces.cli.app import app
-    from bioetl.infrastructure.services.chembl_extraction import ChemblExtractionServiceImpl
 except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)

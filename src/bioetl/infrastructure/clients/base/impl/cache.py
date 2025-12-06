@@ -5,7 +5,7 @@ import os
 import pickle
 import time
 from pathlib import Path
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from bioetl.domain.clients.base.contracts import CacheABC
 

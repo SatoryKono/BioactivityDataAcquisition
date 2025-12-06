@@ -1,6 +1,9 @@
 import hashlib
 
-from bioetl.infrastructure.files.checksum import compute_file_sha256, compute_files_sha256
+from bioetl.infrastructure.files.checksum import (
+    compute_file_sha256,
+    compute_files_sha256,
+)
 
 
 def test_compute_sha256(tmp_path):

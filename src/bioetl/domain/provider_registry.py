@@ -1,5 +1,6 @@
 """Registry for provider definitions."""
 from __future__ import annotations
+
 from typing import Iterable
 
 from bioetl.domain.errors import ProviderError

@@ -1,8 +1,8 @@
 """
 Tests for the CLI entry point.
 """
-from pathlib import Path
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,8 +14,11 @@ sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
 from bioetl.domain.transform.hash_service import HashService  # noqa: E402
+from bioetl.infrastructure.config.models import (  # noqa: E402
+    ChemblSourceConfig,
+    PipelineConfig,
+)
 from bioetl.interfaces.cli import app  # noqa: E402
-from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig  # noqa: E402
 
 runner = CliRunner()
 

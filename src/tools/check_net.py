@@ -1,5 +1,7 @@
-import requests
 import time
+
+import requests
+
 
 def check(url):
     print(f"Fetching {url}...")

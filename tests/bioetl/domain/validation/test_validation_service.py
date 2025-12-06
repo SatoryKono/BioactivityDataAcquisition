@@ -1,10 +1,12 @@
+from unittest.mock import MagicMock
+
 import pandas as pd
 import pandera.pandas as pa
 import pytest
-from unittest.mock import patch, MagicMock
-from bioetl.domain.validation.service import ValidationService
-from bioetl.domain.validation.impl.pandera_validator import PanderaValidatorImpl
+
 from bioetl.domain.validation.contracts import SchemaProviderABC
+from bioetl.domain.validation.impl.pandera_validator import PanderaValidatorImpl
+from bioetl.domain.validation.service import ValidationService
 
 
 # Define a dummy schema for testing

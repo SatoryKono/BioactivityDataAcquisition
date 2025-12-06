@@ -3,8 +3,13 @@ Tests for logging and progress reporting components.
 """
 from unittest.mock import patch
 
-from bioetl.infrastructure.logging.factories import default_logger, default_progress_reporter
-from bioetl.infrastructure.logging.impl.progress_reporter import TqdmProgressReporterImpl
+from bioetl.infrastructure.logging.factories import (
+    default_logger,
+    default_progress_reporter,
+)
+from bioetl.infrastructure.logging.impl.progress_reporter import (
+    TqdmProgressReporterImpl,
+)
 from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
 
 

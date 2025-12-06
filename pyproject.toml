@@ -68,6 +68,8 @@ line-length = 88
 target-version = "py311"
 src = ["src", "tests"]
 respect-gitignore = true
+
+[tool.ruff.lint]
 select = ["E", "F", "I"]
 ignore = []
 

@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.domain.models import RunContext
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
 
 

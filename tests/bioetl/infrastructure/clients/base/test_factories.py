@@ -5,15 +5,19 @@ import os
 from unittest.mock import patch
 
 from bioetl.infrastructure.clients.base.factories import (
+    EnvSecretProvider,
+    default_cache,
     default_rate_limiter,
     default_retry_policy,
-    default_cache,
     default_secret_provider,
-    EnvSecretProvider
 )
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
-from bioetl.infrastructure.clients.base.impl.rate_limiter import TokenBucketRateLimiterImpl
-from bioetl.infrastructure.clients.base.impl.retry_policy import ExponentialBackoffRetryImpl
+from bioetl.infrastructure.clients.base.impl.rate_limiter import (
+    TokenBucketRateLimiterImpl,
+)
+from bioetl.infrastructure.clients.base.impl.retry_policy import (
+    ExponentialBackoffRetryImpl,
+)
 
 
 def test_default_factories():

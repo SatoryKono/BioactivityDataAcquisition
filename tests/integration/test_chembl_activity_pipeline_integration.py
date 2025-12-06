@@ -1,6 +1,6 @@
 """Integration tests for ChEMBL Activity pipeline (TS-001)."""
-from pathlib import Path
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -10,7 +10,9 @@ sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.application.container import build_pipeline_dependencies  # noqa: E402
 from bioetl.application.pipelines.registry import get_pipeline_class  # noqa: E402
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl  # noqa: E402
+from bioetl.application.services.chembl_extraction import (
+    ChemblExtractionServiceImpl,  # noqa: E402
+)
 from bioetl.infrastructure.config.resolver import ConfigResolver  # noqa: E402
 
 

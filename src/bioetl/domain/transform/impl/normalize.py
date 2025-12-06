@@ -23,7 +23,6 @@ from bioetl.domain.transform.normalizers import (
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
-
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid
 normalize_pubchem_cid = normalize_pcid

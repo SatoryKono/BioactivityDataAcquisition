@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from datetime import datetime, timezone
+
 import pandas as pd
 
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager

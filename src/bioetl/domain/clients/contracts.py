@@ -2,7 +2,7 @@
 Domain contracts for data clients.
 """
 from abc import ABC, abstractmethod
-from typing import Any, Iterator, TypeVar
+from typing import Any, Iterator
 
 Record = dict[str, Any]
 

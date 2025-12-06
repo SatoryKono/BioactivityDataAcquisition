@@ -8,6 +8,7 @@ if str(src_dir) not in sys.path:
 
 from bioetl.interfaces.cli.app import app
 
+
 def main():
     """Entry point for bioetl command."""
     app()

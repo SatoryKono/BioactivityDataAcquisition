@@ -6,8 +6,6 @@ from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
-from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
@@ -16,6 +14,8 @@ from bioetl.domain.schemas.chembl.output_views import (
     TARGET_OUTPUT_COLUMNS,
     TESTITEM_OUTPUT_COLUMNS,
 )
+from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 from bioetl.domain.validation.contracts import SchemaProviderABC
 
 

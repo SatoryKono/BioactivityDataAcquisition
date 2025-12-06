@@ -1,11 +1,11 @@
 """
 Модели данных для ядра ETL-пайплайна.
 """
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
-import uuid
 
 
 @dataclass

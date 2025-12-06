@@ -1,14 +1,12 @@
-import sys
-import os
 import json
-from pathlib import Path
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path("src").absolute()))
 
 from bioetl.interfaces.cli.app import app
-from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 
 # Pipeline dependency order
 PIPELINES = [
@@ -94,7 +92,7 @@ def main():
         
     # Write Summary MD
     with open(summary_path, "w", encoding="utf-8") as f:
-        f.write(f"# ChEMBL Pipelines Execution Report\n\n")
+        f.write("# ChEMBL Pipelines Execution Report\n\n")
         f.write(f"**Date:** {datetime.now(timezone.utc).isoformat()}\n")
         f.write(f"**Limit:** {limit}\n\n")
         f.write("| Pipeline | Status | Duration (s) | Error |\n")

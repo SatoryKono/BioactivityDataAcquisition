@@ -2,7 +2,12 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX, DOI_REGEX, PUBMED_ID_REGEX
+from bioetl.domain.transform.normalizers import (
+    CHEMBL_ID_REGEX,
+    DOI_REGEX,
+    PUBMED_ID_REGEX,
+)
+
 
 class DocumentSchema(pa.DataFrameModel):
     """Schema for document/publication data."""

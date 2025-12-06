@@ -1,7 +1,12 @@
 import structlog
 
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC, ProgressReporterABC
-from bioetl.infrastructure.logging.impl.progress_reporter import TqdmProgressReporterImpl
+from bioetl.infrastructure.logging.contracts import (
+    LoggerAdapterABC,
+    ProgressReporterABC,
+)
+from bioetl.infrastructure.logging.impl.progress_reporter import (
+    TqdmProgressReporterImpl,
+)
 from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
 
 
