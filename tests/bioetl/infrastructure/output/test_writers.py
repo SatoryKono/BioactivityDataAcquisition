@@ -169,7 +169,8 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
     ]
     assert list(report.columns) == expected_columns
 
-    expectations = [
+    _assert_qc_row(
+        report,
         {
             "column": "a",
             "null_count": 1,
@@ -179,6 +180,9 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
             "coverage": 0.5,
             "coverage_ok": False,
         },
+    )
+    _assert_qc_row(
+        report,
         {
             "column": "b",
             "null_count": 0,
@@ -188,10 +192,7 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
             "coverage": 1.0,
             "coverage_ok": True,
         },
-    ]
-
-    for expectation in expectations:
-        _assert_qc_row(report, expectation)
+    )
 
 
 def test_build_quality_report_table_respects_min_coverage():
