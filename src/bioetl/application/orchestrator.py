@@ -6,7 +6,7 @@ from typing import Callable
 
 from prometheus_client import start_http_server
 
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.container import PipelineContainer, build_pipeline_dependencies
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class

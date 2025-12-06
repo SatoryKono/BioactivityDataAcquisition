@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.normalization_service import ChemblNormalizationService
 from bioetl.domain.provider_registry import (
@@ -12,6 +10,8 @@ from bioetl.domain.provider_registry import (
     register_provider,
 )
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.domain.transform.contracts import NormalizationConfigProvider
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
@@ -45,7 +45,7 @@ class ChemblProviderComponents(
         config: ChemblSourceConfig,
         *,
         client: ChemblDataClientABC | None = None,
-        pipeline_config: PipelineConfig | None = None,
+        pipeline_config: NormalizationConfigProvider | None = None,
     ) -> ChemblNormalizationService:
         _ = client  # signature compatibility; normalization independent from client
         if pipeline_config is None:

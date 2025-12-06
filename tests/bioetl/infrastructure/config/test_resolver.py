@@ -8,6 +8,7 @@ from bioetl.application.config_loader import (
     ConfigFileNotFoundError,
     _load_yaml,
     _resolve_profile,
+    load_pipeline_config_from_path,
 )
 from bioetl.domain.transform.merge import deep_merge
 from bioetl.infrastructure.config.resolver import ConfigResolver
@@ -18,7 +19,7 @@ def test_resolver_simple(tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text("entity_name: test\nprovider: chembl", encoding="utf-8")
 
-    resolver = ConfigResolver(profiles_dir=str(tmp_path))
+    resolver = ConfigResolver(loader=load_pipeline_config_from_path, profiles_dir=str(tmp_path))
     config = resolver.resolve(str(config_file))
 
     assert config.entity_name == "test"
@@ -43,7 +44,9 @@ entity_name: override""",
         encoding="utf-8",
     )
 
-    resolver = ConfigResolver(profiles_dir=str(profiles_dir))
+    resolver = ConfigResolver(
+        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
+    )
     config = resolver.resolve(str(config_file))
 
     assert config.entity_name == "override"  # Overridden
@@ -78,7 +81,9 @@ def test_resolver_cli_override(tmp_path):
         "entity_name: config_entity\nprovider: chembl", encoding="utf-8"
     )
 
-    resolver = ConfigResolver(profiles_dir=str(profiles_dir))
+    resolver = ConfigResolver(
+        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
+    )
     config = resolver.resolve(str(config_file), profile="prod")
 
     # CLI profile wins over config file for entity_name
@@ -98,7 +103,9 @@ def test_profile_inheritance_recursive(tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: parent", encoding="utf-8")
 
-    resolver = ConfigResolver(profiles_dir=str(profiles_dir))
+    resolver = ConfigResolver(
+        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
+    )
     config = resolver.resolve(str(config_file))
 
     assert config.entity_name == "parent"
@@ -113,7 +120,9 @@ def test_circular_dependency(tmp_path):
     (profiles_dir / "b.yaml").write_text("extends: a", encoding="utf-8")
 
     # Test circular dependency through resolve (will hit recursion limit)
-    resolver = ConfigResolver(profiles_dir=str(profiles_dir))
+    resolver = ConfigResolver(
+        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
+    )
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: a\nprovider: chembl", encoding="utf-8")
 
@@ -124,7 +133,7 @@ def test_circular_dependency(tmp_path):
 
 def test_profile_not_found(tmp_path):
     """Test error when profile missing."""
-    resolver = ConfigResolver(profiles_dir=str(tmp_path))
+    resolver = ConfigResolver(loader=load_pipeline_config_from_path, profiles_dir=str(tmp_path))
     config_file = tmp_path / "config.yaml"
     config_file.write_text("extends: missing_profile", encoding="utf-8")
 

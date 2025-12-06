@@ -11,10 +11,11 @@ import pytest
 
 sys.modules.setdefault("tqdm", MagicMock())
 
+from bioetl.application.config_loader import load_pipeline_config_from_path  # noqa: E402
 from bioetl.application.container import build_pipeline_dependencies  # noqa: E402
 from bioetl.application.pipelines.registry import get_pipeline_class  # noqa: E402
-from bioetl.application.services.chembl_extraction import (
-    ChemblExtractionServiceImpl,  # noqa: E402
+from bioetl.application.services.chembl_extraction import (  # noqa: E402
+    ChemblExtractionServiceImpl,
 )
 from bioetl.infrastructure.config.resolver import ConfigResolver  # noqa: E402
 
@@ -45,7 +46,7 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     )
     _freeze_hash_service_clock(monkeypatch)
 
-    resolver = ConfigResolver()
+    resolver = ConfigResolver(loader=load_pipeline_config_from_path)
     config = resolver.resolve("chembl_activity_test.yaml")
     config.storage.output_path = str(tmp_path / "output")
 

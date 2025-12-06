@@ -1,4 +1,5 @@
-from bioetl.config.pipeline_config_schema import (  # noqa: F401
+"""Shared configuration schemas and protocols."""
+from bioetl.config.pipeline_config_schema import (
     BusinessKeyConfig,
     CanonicalizationConfig,
     ClientConfig,
@@ -13,6 +14,13 @@ from bioetl.config.pipeline_config_schema import (  # noqa: F401
     QcConfig,
     StorageConfig,
 )
+from bioetl.config.provider_config_schema import (
+    BaseProviderConfig,
+    ChemblSourceConfig,
+    DummyProviderConfig,
+    ProviderConfigUnion,
+)
+from bioetl.config.protocols import PipelineConfigLoaderProtocol, PipelineConfigProtocol
 
 __all__ = [
     "BusinessKeyConfig",
@@ -28,4 +36,10 @@ __all__ = [
     "PipelineConfig",
     "QcConfig",
     "StorageConfig",
+    "BaseProviderConfig",
+    "ChemblSourceConfig",
+    "DummyProviderConfig",
+    "ProviderConfigUnion",
+    "PipelineConfigProtocol",
+    "PipelineConfigLoaderProtocol",
 ]

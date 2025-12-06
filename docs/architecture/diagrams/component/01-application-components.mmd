@@ -20,7 +20,7 @@ subgraph Application["Application Layer"]
     StageRunner["StageRunner\nbioetl.application.pipelines.stage_runner"]:::componentSecondary
     Hooks["Hooks / ErrorPolicy\nhooks.py + hooks_impl.py"]:::componentSecondary
     ConfigLoader["Config Loader\nconfig_loader.py"]:::componentSecondary
-    PipelineConfig["PipelineConfig\napplication.config.pipeline_config_schema"]:::componentSecondary
+    PipelineConfig["PipelineConfig\nbioetl.config.pipeline_config_schema"]:::componentSecondary
 end
 class Application group;
 

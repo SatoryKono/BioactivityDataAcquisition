@@ -39,7 +39,7 @@
 - базовый пайплайн (Template Method: extract → transform → validate → write) `application.pipelines.base` + менеджеры стадий/хуков/политики ошибок;
 - ChEMBL базовый пайплайн и сущностные пайплайны (`application.pipelines.chembl.*`);
 - сервис извлечения ChEMBL (`application.services.chembl_extraction`);
-- конфиг пайплайна (`application.config.pipeline_config_schema`, `config_loader`), пост-трансформеры (хеши, индексы, версии, даты).
+- конфиг пайплайна (`bioetl.config.pipeline_config_schema`, `config_loader`), пост-трансформеры (хеши, индексы, версии, даты).
 
 Контейнер регистрирует провайдеров, создает логгер, хук/политику ошибок, сервисы валидации/нормализации/хеширования, источники данных (API/CSV/ID-only), writer и post-transformer chain.
 

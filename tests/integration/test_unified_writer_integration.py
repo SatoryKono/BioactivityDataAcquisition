@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from bioetl.application.config.pipeline_config_schema import DeterminismConfig, QcConfig
+from bioetl.config.pipeline_config_schema import DeterminismConfig, QcConfig
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
