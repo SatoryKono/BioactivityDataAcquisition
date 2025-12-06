@@ -15,7 +15,7 @@ from bioetl.domain.provider_registry import (
     get_provider_registry,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")

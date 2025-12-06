@@ -4,7 +4,7 @@ import pandas as pd
 import yaml
 
 from bioetl.infrastructure.files.checksum import compute_files_sha256
-from bioetl.infrastructure.output.contracts import (
+from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
 )

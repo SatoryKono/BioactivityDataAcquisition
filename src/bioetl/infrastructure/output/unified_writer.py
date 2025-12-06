@@ -11,7 +11,7 @@ from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.column_order import apply_column_order
-from bioetl.infrastructure.output.contracts import (
+from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
     WriterABC,
