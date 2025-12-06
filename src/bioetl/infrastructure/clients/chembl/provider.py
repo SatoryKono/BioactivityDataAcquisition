@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.domain.normalization_service import ChemblNormalizationService
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     get_provider,
@@ -11,18 +11,18 @@ from bioetl.domain.provider_registry import (
 )
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.transform.contracts import NormalizationConfigProvider
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
-from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 class ChemblProviderComponents(
     ProviderComponents[
         ChemblDataClientABC,
-        ChemblExtractionServiceImpl,
+        ExtractionServiceABC,
         ChemblNormalizationService,
         object,
     ]
@@ -37,7 +37,7 @@ class ChemblProviderComponents(
         config: ChemblSourceConfig,
         *,
         client: ChemblDataClientABC | None = None,
-    ) -> ChemblExtractionServiceImpl:
+    ) -> ExtractionServiceABC:
         return create_extraction_service(config, client=client)
 
     def create_normalization_service(
@@ -45,11 +45,13 @@ class ChemblProviderComponents(
         config: ChemblSourceConfig,
         *,
         client: ChemblDataClientABC | None = None,
-        pipeline_config: PipelineConfig | None = None,
+        pipeline_config: NormalizationConfigProvider | None = None,
     ) -> ChemblNormalizationService:
         _ = client  # signature compatibility; normalization independent from client
         if pipeline_config is None:
-            raise ValueError("PipelineConfig is required to build normalization service")
+            raise ValueError(
+                "NormalizationConfigProvider is required to build normalization service"
+            )
         return ChemblNormalizationService(pipeline_config)
 
 

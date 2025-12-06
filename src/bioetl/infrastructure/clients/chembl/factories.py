@@ -3,14 +3,17 @@ Factories for ChEMBL clients.
 """
 from typing import Any
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
+)
+from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
+    ChemblExtractionServiceImpl,
 )
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
@@ -81,7 +84,7 @@ def default_chembl_extraction_service(
     client_config: ClientConfig | None = None,
     *,
     client: ChemblDataClientABC | None = None,
-) -> ChemblExtractionServiceImpl:
+) -> ExtractionServiceABC:
     """
     Создает сервис экстракции ChEMBL.
 

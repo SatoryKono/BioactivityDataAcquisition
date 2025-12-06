@@ -14,7 +14,7 @@ try:
     import bioetl.application.container
     # print(f"Container module: {bioetl.application.container.__file__}")
     from bioetl.interfaces.cli.app import app
-    from bioetl.infrastructure.services.chembl_extraction import ChemblExtractionServiceImpl
+    from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)

@@ -9,7 +9,7 @@ src_path = os.path.abspath("src")
 sys.path.insert(0, src_path)
 
 from bioetl.interfaces.cli.app import app
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
