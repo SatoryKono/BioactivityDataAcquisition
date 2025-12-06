@@ -37,4 +37,4 @@ def test_run_in_background_dry_run(tmp_path):
 
     assert result.success
     assert result.row_count >= 0
-    assert not (Path(payload["output_path"]) / "activity.csv").exists()
+    assert not (Path(config_copy.output_path) / "activity.csv").exists()
