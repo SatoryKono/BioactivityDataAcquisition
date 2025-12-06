@@ -9,11 +9,10 @@ from bioetl.domain.transform.contracts import (
     NormalizationServiceABC,
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
-from bioetl.domain.transform.normalizers.registry import get_normalizer
+from bioetl.infrastructure.transform.impl import normalize as normalize_utils
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationService,
 )
-from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
 from bioetl.infrastructure.transform.impl.serializer import (
     serialize_dict,
     serialize_list,
@@ -41,14 +40,14 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
                 continue
 
             mode = self._resolve_mode(name)
-            custom_normalizer = get_normalizer(name)
+            custom_normalizer = normalize_utils.get_normalizer(name)
 
             if custom_normalizer:
                 base_normalizer: Callable[[Any], Any] = custom_normalizer
             else:
 
                 def _default_normalizer(val: Any, m=mode) -> Any:
-                    return normalize_scalar(val, mode=m)
+                    return normalize_utils.normalize_scalar(val, mode=m)
 
                 base_normalizer = _default_normalizer
 
@@ -89,14 +88,14 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
 
             dtype = field_cfg.get("data_type")
             mode = self._resolve_mode(name)
-            custom_normalizer = get_normalizer(name)
+            custom_normalizer = normalize_utils.get_normalizer(name)
 
             if custom_normalizer:
                 base_normalizer = custom_normalizer
             else:
 
                 def _default_normalizer(val: Any, m: str = mode) -> Any:
-                    return normalize_scalar(val, mode=m)
+                    return normalize_utils.normalize_scalar(val, mode=m)
 
                 base_normalizer = _default_normalizer
 
@@ -140,14 +139,14 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
         name = cast(str, field_cfg.get("name"))
         dtype = field_cfg.get("data_type")
         mode = self._resolve_mode(name)
-        custom_normalizer = get_normalizer(name)
+        custom_normalizer = normalize_utils.get_normalizer(name)
 
         if custom_normalizer:
             base_normalizer = custom_normalizer
         else:
 
             def _default_normalizer(val: Any, m: str = mode) -> Any:
-                return normalize_scalar(val, mode=m)
+                return normalize_utils.normalize_scalar(val, mode=m)
 
             base_normalizer = _default_normalizer
 

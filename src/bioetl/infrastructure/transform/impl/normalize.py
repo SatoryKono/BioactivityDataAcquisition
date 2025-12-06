@@ -245,6 +245,7 @@ NormalizationService = NormalizationServiceImpl
 
 
 __all__ = [
+    "get_normalizer",
     "normalize_scalar",
     "normalize_pubmed_id",
     "normalize_pubchem_cid",

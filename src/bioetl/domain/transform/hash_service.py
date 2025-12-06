@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+import hashlib
+import json
 from typing import Callable
 
 import pandas as pd
@@ -15,9 +17,12 @@ class HashServiceImpl(HashServiceABC):
 
     def __init__(
         self,
-        hasher: HasherABC,
+        hasher: HasherABC | None = None,
         now_provider: Callable[[], datetime] | None = None,
     ) -> None:
+        if hasher is None:
+            hasher = _FallbackHasher()
+
         self._hasher = hasher
         self._index_counter = 0
         self._now_provider = now_provider or (lambda: datetime.now(timezone.utc))
@@ -99,3 +104,27 @@ class HashServiceImpl(HashServiceABC):
 
 # Alias for compatibility with existing imports/tests.
 HashService = HashServiceImpl
+
+
+class _FallbackHasher(HasherABC):
+    """Простая встроенная реализация Hasher для доменных тестов."""
+
+    @property
+    def algorithm(self) -> str:
+        return "blake2b_256"
+
+    def hash_row(self, row: pd.Series) -> str:
+        record = row.to_dict()
+        serialized = json.dumps(record, ensure_ascii=False, sort_keys=True, default=str)
+        return hashlib.blake2b(serialized.encode("utf-8"), digest_size=32).hexdigest()
+
+    def hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
+        if not columns:
+            return pd.Series([None] * len(df), index=df.index, dtype=object)
+
+        def _hash(row: pd.Series) -> str:
+            values = [row.get(col) for col in columns]
+            serialized = json.dumps(values, ensure_ascii=False, default=str)
+            return hashlib.blake2b(serialized.encode("utf-8"), digest_size=32).hexdigest()
+
+        return df.apply(_hash, axis=1)
