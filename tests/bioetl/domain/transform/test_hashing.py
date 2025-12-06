@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from bioetl.domain.transform.impl.hasher import (
+from bioetl.infrastructure.transform.impl.hasher import (
     HasherImpl,
     _serialize_canonical,
     blake2b_hash_hex,

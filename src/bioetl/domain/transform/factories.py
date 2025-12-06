@@ -2,15 +2,7 @@
 
 from typing import Callable
 
-from bioetl.domain.transform.contracts import (
-    HasherABC,
-    HashServiceABC,
-    NormalizationConfigProvider,
-    NormalizationServiceABC,
-)
-from bioetl.domain.transform.hash_service import HashServiceImpl
-from bioetl.domain.transform.impl import NormalizationServiceImpl
-from bioetl.domain.transform.impl.hasher import HasherImpl
+from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
@@ -20,32 +12,7 @@ from bioetl.domain.transform.transformers import (
     TransformerChain,
 )
 
-__all__ = [
-    "default_hasher",
-    "default_hash_service",
-    "default_normalization_service",
-    "default_post_transformer",
-]
-
-
-def default_hasher() -> HasherABC:
-    """Создает дефолтную реализацию Hasher."""
-
-    return HasherImpl()
-
-
-def default_hash_service() -> HashServiceABC:
-    """Создает дефолтный HashService."""
-
-    return HashServiceImpl()
-
-
-def default_normalization_service(
-    config: NormalizationConfigProvider,
-) -> NormalizationServiceABC:
-    """Create default normalization service implementation."""
-
-    return NormalizationServiceImpl(config)
+__all__ = ["default_post_transformer"]
 
 
 def default_post_transformer(

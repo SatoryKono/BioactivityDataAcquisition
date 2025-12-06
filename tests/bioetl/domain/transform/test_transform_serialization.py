@@ -4,7 +4,7 @@ Tests for serialization utilities.
 
 import pandas as pd
 
-from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
+from bioetl.infrastructure.transform.impl.serializer import serialize_dict, serialize_list
 
 
 def test_serialize_list_primitives():

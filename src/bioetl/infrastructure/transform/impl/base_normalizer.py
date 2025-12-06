@@ -8,8 +8,8 @@ import pandas as pd
 from pandas._typing import DtypeArg
 
 from bioetl.domain.transform.contracts import NormalizationConfigProvider
-from bioetl.domain.transform.impl.serializer import serialize_dict, serialize_list
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
+from bioetl.infrastructure.transform.impl.serializer import serialize_dict, serialize_list
 
 
 class BaseNormalizationService:
