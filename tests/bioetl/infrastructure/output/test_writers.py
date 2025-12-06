@@ -149,7 +149,30 @@ def test_metadata_writer_write_meta(metadata_writer, tmp_path):
     assert loaded == meta
 
 
-def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
+@pytest.mark.parametrize(
+    "expectation",
+    [
+        {
+            "column": "a",
+            "null_count": 1,
+            "non_null_count": 1,
+            "unique_count": 1,
+            "dtype": "float64",
+            "coverage": 0.5,
+            "coverage_ok": False,
+        },
+        {
+            "column": "b",
+            "null_count": 0,
+            "non_null_count": 2,
+            "unique_count": 1,
+            "dtype": "object",
+            "coverage": 1.0,
+            "coverage_ok": True,
+        },
+    ],
+)
+def test_metadata_writer_write_qc_report(metadata_writer, tmp_path, expectation):
     """Test writing QC report."""
     df = pd.DataFrame({"a": [1, None], "b": ["x", "x"]})
     path = tmp_path / "qc_report.csv"
@@ -169,30 +192,7 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
     ]
     assert list(report.columns) == expected_columns
 
-    _assert_qc_row(
-        report,
-        {
-            "column": "a",
-            "null_count": 1,
-            "non_null_count": 1,
-            "unique_count": 1,
-            "dtype": "float64",
-            "coverage": 0.5,
-            "coverage_ok": False,
-        },
-    )
-    _assert_qc_row(
-        report,
-        {
-            "column": "b",
-            "null_count": 0,
-            "non_null_count": 2,
-            "unique_count": 1,
-            "dtype": "object",
-            "coverage": 1.0,
-            "coverage_ok": True,
-        },
-    )
+    _assert_qc_row(report, expectation)
 
 
 def test_build_quality_report_table_respects_min_coverage():

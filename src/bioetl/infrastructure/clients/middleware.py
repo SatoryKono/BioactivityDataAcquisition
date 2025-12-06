@@ -80,29 +80,43 @@ class HttpClientMiddleware:
         self._failure_metric_callback = failure_metric_callback
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        return self._execute_with_retries(method, url, kwargs)
+        return self._execute_with_retries(method, url, kwargs, attempt=1, total_retry_delay=0.0)
 
     def _execute_with_retries(
-        self, method: str, url: str, kwargs: dict[str, Any]
+        self,
+        method: str,
+        url: str,
+        kwargs: dict[str, Any],
+        *,
+        attempt: int,
+        total_retry_delay: float,
     ) -> Any:
-        total_retry_delay = 0.0
-        for attempt in range(1, self.max_attempts + 1):
-            self._ensure_circuit_allows_request(method, url)
-            attempt_kwargs = dict(kwargs)
-            outcome = self._process_attempt(
-                method,
-                url,
-                attempt,
-                total_retry_delay,
-                attempt_kwargs,
+        if attempt > self.max_attempts:
+            raise ClientNetworkError(
+                provider=self.provider, endpoint=url, message="Max attempts exceeded"
             )
-            total_retry_delay = outcome["total_retry_delay"]
-            resolved_response = self._resolve_attempt_outcome(outcome)
-            if resolved_response is not None:
-                self._reset_circuit(log_circuit_closure=True)
-                return resolved_response
-        raise ClientNetworkError(
-            provider=self.provider, endpoint=url, message="Max attempts exceeded"
+
+        self._ensure_circuit_allows_request(method, url)
+        attempt_kwargs = dict(kwargs)
+        outcome = self._process_attempt(
+            method,
+            url,
+            attempt,
+            total_retry_delay,
+            attempt_kwargs,
+        )
+        updated_delay = outcome["total_retry_delay"]
+        resolved_response = self._resolve_attempt_outcome(outcome)
+        if resolved_response is not None:
+            self._reset_circuit(log_circuit_closure=True)
+            return resolved_response
+
+        return self._execute_with_retries(
+            method,
+            url,
+            kwargs,
+            attempt=attempt + 1,
+            total_retry_delay=updated_delay,
         )
 
     def _process_attempt(
