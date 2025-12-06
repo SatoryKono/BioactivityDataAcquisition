@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.normalization_service import (

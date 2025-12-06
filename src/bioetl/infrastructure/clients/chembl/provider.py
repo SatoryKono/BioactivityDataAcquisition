@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.domain.normalization_service import ChemblNormalizationService
 from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.normalization_service import ChemblNormalizationService
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     get_provider,

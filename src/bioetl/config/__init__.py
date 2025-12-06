@@ -14,13 +14,13 @@ from bioetl.config.pipeline_config_schema import (
     QcConfig,
     StorageConfig,
 )
+from bioetl.config.protocols import PipelineConfigLoaderProtocol, PipelineConfigProtocol
 from bioetl.config.provider_config_schema import (
     BaseProviderConfig,
     ChemblSourceConfig,
     DummyProviderConfig,
     ProviderConfigUnion,
 )
-from bioetl.config.protocols import PipelineConfigLoaderProtocol, PipelineConfigProtocol
 
 __all__ = [
     "BusinessKeyConfig",

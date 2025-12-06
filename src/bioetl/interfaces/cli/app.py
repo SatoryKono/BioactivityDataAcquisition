@@ -7,10 +7,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.config.pipeline_config_schema import PipelineConfig
 
 app = typer.Typer(
     name="bioetl",

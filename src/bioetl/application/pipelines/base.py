@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 import pandas as pd
 
-from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult

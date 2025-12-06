@@ -7,8 +7,8 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
-from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
