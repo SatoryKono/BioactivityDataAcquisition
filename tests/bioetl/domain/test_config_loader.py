@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.configs import ChemblSourceConfig
+from bioetl.infrastructure.config import loader as config_loader
 from bioetl.infrastructure.config import provider_registry_loader
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
@@ -30,8 +31,20 @@ def test_load_pipeline_config_from_path_valid():
     assert config.provider_config.timeout_sec == 30
 
 
-def test_extra_field_triggers_validation_error():
+def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):
     path = Path("tests/fixtures/configs/chembl_activity_invalid_extra_key.yaml")
+    providers_file = Path("tests/fixtures/configs/providers.yaml")
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    monkeypatch.setattr(
+        config_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
     with pytest.raises(ConfigValidationError):
         load_pipeline_config_from_path(path)
 
@@ -202,6 +215,18 @@ provider_config:
 
 def test_profile_merge_applied(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     base_dir = tmp_path
+    providers_file = base_dir / "providers.yaml"
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: chembl\n"
+            "    module: tests.dummy\n"
+            "    factory: create_chembl\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
+
     pipelines_root = base_dir / "pipelines"
     profiles_root = base_dir / "profiles"
     chembl_dir = pipelines_root / "chembl"
@@ -235,6 +260,13 @@ batch_size: 25
 """,
         encoding="utf-8",
     )
+
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
 
     config = load_pipeline_config("chembl.activity", base_dir=base_dir)
 

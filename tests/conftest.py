@@ -7,7 +7,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -126,8 +126,17 @@ def mock_validation_service():
 @pytest.fixture
 def mock_output_writer():
     """Create a mock output writer."""
+    from pathlib import Path
+
+    from bioetl.infrastructure.output.contracts import WriteResult
+
     writer = MagicMock(spec=UnifiedOutputWriter)
-    writer.write_result.return_value = Mock(row_count=10)
+    writer.write_result.return_value = WriteResult(
+        path=Path("/tmp/test_output.csv"),
+        row_count=10,
+        duration_sec=0.1,
+        checksum=None,
+    )
     return writer
 
 
