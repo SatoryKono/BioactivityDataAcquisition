@@ -17,7 +17,9 @@ class ProviderDefinition {
   +config_type: type[BaseProviderConfig]
   +components: ProviderComponents
 }
-class ProviderRegistry {
+class ProviderRegistryABC
+class MutableProviderRegistryABC
+class InMemoryProviderRegistry {
   +register_provider(definition)
   +get_provider(provider_id)
   +list_providers()
@@ -27,20 +29,50 @@ class ProviderRegistry {
 class ProviderRegistryError
 class ProviderNotRegisteredError
 class ProviderAlreadyRegisteredError
-class ChemblProviderDefinition
-class ProviderRegistryLoader
+class ProviderRegistryLoaderError
+class ProviderRegistryConfigNotFoundError
+class ProviderRegistryValidationError
+class ProviderRegistryLoader {
+  +load(registry?)
+  -_load_config(path)
+}
 class ProviderRegistryConfig
-class ProviderRegistryEntry
+class ProviderRegistryEntry {
+  +id: ProviderId
+  +module: str
+  +factory: str
+  +active: bool
+  +description: str?
+}
 
 ProviderDefinition --> ProviderId
 ProviderDefinition --> BaseProviderConfig
 ProviderDefinition --> ProviderComponents
-ProviderRegistry --> ProviderDefinition
+ProviderRegistryABC <|-- MutableProviderRegistryABC
+MutableProviderRegistryABC <|-- InMemoryProviderRegistry
 ProviderRegistryError <|-- ProviderNotRegisteredError
 ProviderRegistryError <|-- ProviderAlreadyRegisteredError
-ChemblProviderDefinition ..|> ProviderDefinition
+ProviderRegistryLoaderError <|-- ProviderRegistryConfigNotFoundError
+ProviderRegistryLoaderError <|-- ProviderRegistryValidationError
 ProviderRegistryLoader --> ProviderRegistryConfig
-ProviderRegistryLoader --> ProviderRegistry : load()
 ProviderRegistryConfig --> ProviderRegistryEntry
+ProviderRegistryLoader --> MutableProviderRegistryABC : load()
 ProviderRegistryEntry --> ProviderDefinition : factory()
+
+class ProviderId domainPrimary
+class ProviderDefinition domainPrimary
+class BaseProviderConfig domainSecondary
+class ProviderComponents domainSecondary
+class ProviderRegistryABC interface
+class MutableProviderRegistryABC interface
+class InMemoryProviderRegistry domainSecondary
+class ProviderRegistryError domainSecondary
+class ProviderNotRegisteredError domainSecondary
+class ProviderAlreadyRegisteredError domainSecondary
+class ProviderRegistryLoaderError domainSecondary
+class ProviderRegistryConfigNotFoundError domainSecondary
+class ProviderRegistryValidationError domainSecondary
+class ProviderRegistryLoader domainSecondary
+class ProviderRegistryConfig domainSecondary
+class ProviderRegistryEntry domainSecondary
 
