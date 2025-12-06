@@ -16,7 +16,7 @@ from bioetl.domain.transform.factories import default_normalization_service
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 

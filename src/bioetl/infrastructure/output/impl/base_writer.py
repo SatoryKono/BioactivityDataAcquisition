@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas as pd
 
 from bioetl.infrastructure.output.column_order import apply_column_order
-from bioetl.infrastructure.output.contracts import WriterABC, WriteResult
+from bioetl.clients.base.output.contracts import WriterABC, WriteResult
 
 
 class BaseWriterImpl(WriterABC):

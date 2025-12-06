@@ -6,7 +6,7 @@ from typing import Iterable
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.providers import ProviderId
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class HooksManager:

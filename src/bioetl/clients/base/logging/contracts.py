@@ -6,6 +6,9 @@ from typing import Any, Iterator, Self
 class LoggerAdapterABC(ABC):
     """
     Интерфейс структурированного логгера.
+
+    Default factory: ``bioetl.infrastructure.logging.factories.default_logger``.
+    Implementations: ``UnifiedLoggerImpl``.
     """
 
     @abstractmethod
@@ -32,6 +35,9 @@ class LoggerAdapterABC(ABC):
 class ProgressReporterABC(ABC):
     """
     Интерфейс отчетности о прогрессе.
+
+    Default factory: ``bioetl.infrastructure.logging.factories.default_progress_reporter``.
+    Implementations: ``TqdmProgressReporterImpl``.
     """
 
     @abstractmethod
@@ -62,6 +68,8 @@ class ProgressReporterABC(ABC):
 class TracerABC(ABC):
     """
     Интерфейс распределенной трассировки.
+
+    Implementations expected to be provided by infrastructure tracing backends.
     """
 
     @abstractmethod
@@ -75,3 +83,10 @@ class TracerABC(ABC):
     @abstractmethod
     def inject_context(self, headers: dict[str, str]) -> None:
         """Внедряет контекст трассировки в заголовки."""
+
+
+__all__ = [
+    "LoggerAdapterABC",
+    "ProgressReporterABC",
+    "TracerABC",
+]

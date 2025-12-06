@@ -7,7 +7,7 @@ from typing import Any
 
 from bioetl.domain.configs import QcConfig
 from bioetl.domain.models import RunContext
-from bioetl.infrastructure.output.contracts import WriteResult
+from bioetl.clients.base.output.contracts import WriteResult
 
 
 def build_base_metadata(

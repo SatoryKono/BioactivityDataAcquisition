@@ -48,3 +48,7 @@ MetadataWriterABC:
   implementations:
     Standard: bioetl.infrastructure.output.impl.metadata_writer.MetadataWriterImpl
 
+QualityReportABC:
+  default_factory: bioetl.infrastructure.output.factories.default_quality_reporter
+  implementations:
+    Default: bioetl.infrastructure.output.impl.quality_report.QualityReportImpl
