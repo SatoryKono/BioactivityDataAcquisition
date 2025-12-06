@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
