@@ -1,0 +1,76 @@
+---
+id: 0f1e2f2a-4f5c-4b6b-b3d0-9d6e3a7c5b2f
+---
+classDiagram
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+
+class PipelineOrchestrator {
+  +build_pipeline(limit)
+  +run_pipeline(dry_run, limit)
+  +run_in_background(dry_run, limit, executor)
+}
+class PipelineContainer {
+  +get_logger()
+  +get_validation_service()
+  +get_output_writer()
+  +get_normalization_service()
+  +get_record_source(extraction_service, limit, logger)
+  +get_extraction_service()
+  +get_hash_service()
+  +get_post_transformer(version_provider)
+  +get_hooks()
+  +get_error_policy()
+}
+class PipelineConfig
+class PipelineBase
+class ValidationService
+class NormalizationService
+class HashService
+class UnifiedOutputWriter
+class RecordSource
+class ExtractionServiceABC
+class TransformerABC
+class PipelineHookABC
+class ErrorPolicyABC
+class LoggerAdapterABC
+
+PipelineOrchestrator:::domainPrimary
+PipelineContainer:::domainPrimary
+PipelineConfig:::domainSecondary
+PipelineBase:::domainSecondary
+ValidationService:::domainSecondary
+NormalizationService:::interface
+HashService:::domainSecondary
+UnifiedOutputWriter:::domainSecondary
+RecordSource:::domainSecondary
+ExtractionServiceABC:::interface
+TransformerABC:::interface
+PipelineHookABC:::interface
+ErrorPolicyABC:::interface
+LoggerAdapterABC:::interface
+
+PipelineOrchestrator --> PipelineContainer
+PipelineOrchestrator --> PipelineBase : build_pipeline()
+PipelineOrchestrator --> PipelineConfig
+PipelineContainer --> LoggerAdapterABC
+PipelineContainer --> ValidationService
+PipelineContainer --> UnifiedOutputWriter
+PipelineContainer --> NormalizationService
+PipelineContainer --> RecordSource
+PipelineContainer --> ExtractionServiceABC
+PipelineContainer --> HashService
+PipelineContainer --> TransformerABC
+PipelineContainer --> PipelineHookABC
+PipelineContainer --> ErrorPolicyABC
+PipelineBase --> ValidationService
+PipelineBase --> UnifiedOutputWriter
+PipelineBase --> ExtractionServiceABC
+PipelineBase --> RecordSource
+PipelineBase --> NormalizationService
+PipelineBase --> HashService
+PipelineBase --> TransformerABC
+PipelineBase --> PipelineHookABC
+PipelineBase --> ErrorPolicyABC
+

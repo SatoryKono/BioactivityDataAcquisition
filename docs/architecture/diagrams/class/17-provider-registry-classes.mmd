@@ -1,0 +1,51 @@
+---
+id: 4c1d9d2a-0f90-4b7a-97ab-2a8d7e9a7d6b
+---
+classDiagram
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+
+class ProviderId
+class BaseProviderConfig
+class ProviderComponents {
+  +create_client(config)
+  +create_extraction_service(config, client)
+  +create_normalization_service(config, client, pipeline_config)
+  +create_writer(config, client)
+}
+class ProviderDefinition {
+  +id: ProviderId
+  +config_type: type[BaseProviderConfig]
+  +components: ProviderComponents
+}
+class ProviderRegistry {
+  +register_provider(definition)
+  +get_provider(provider_id)
+  +list_providers()
+  +reset_provider_registry()
+  +restore_provider_registry(definitions)
+}
+class ProviderRegistryError
+class ProviderNotRegisteredError
+class ProviderAlreadyRegisteredError
+class ChemblProviderDefinition
+
+ProviderId:::domainSecondary
+BaseProviderConfig:::domainSecondary
+ProviderComponents:::interface
+ProviderDefinition:::domainPrimary
+ProviderRegistry:::domainPrimary
+ProviderRegistryError:::domainSecondary
+ProviderNotRegisteredError:::domainSecondary
+ProviderAlreadyRegisteredError:::domainSecondary
+ChemblProviderDefinition:::domainSecondary
+
+ProviderDefinition --> ProviderId
+ProviderDefinition --> BaseProviderConfig
+ProviderDefinition --> ProviderComponents
+ProviderRegistry --> ProviderDefinition
+ProviderRegistryError <|-- ProviderNotRegisteredError
+ProviderRegistryError <|-- ProviderAlreadyRegisteredError
+ChemblProviderDefinition ..|> ProviderDefinition
+

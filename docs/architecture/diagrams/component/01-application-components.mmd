@@ -1,0 +1,58 @@
+---
+id: 7a0c7b7f-3f2b-4f8a-8f2c-6c3e0c4da2f2
+---
+flowchart TB
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+
+subgraph Entry["Interfaces / Entry Points"]
+    CLI["CLI / REST / MQ\nbioetl.interfaces.*"]:::external
+end
+class Entry group;
+
+subgraph Application["Application Layer"]
+    Orchestrator["PipelineOrchestrator\nbioetl.application.orchestrator"]:::componentPrimary
+    Container["PipelineContainer\nbioetl.application.container"]:::componentPrimary
+    Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\nbioetl.application.pipelines.*"]:::componentSecondary
+    StageRunner["StageRunner\nbioetl.application.pipelines.stage_runner"]:::componentSecondary
+    Hooks["Hooks / ErrorPolicy\nhooks.py + hooks_impl.py"]:::componentSecondary
+    ConfigLoader["Config Loader\nconfig_loader.py"]:::componentSecondary
+    PipelineConfig["PipelineConfig\napplication.config.pipeline_config_schema"]:::componentSecondary
+end
+class Application group;
+
+subgraph Domain["Domain Dependencies"]
+    DomainServices["ValidationService\nHashService\nChemblNormalizationService"]:::componentSecondary
+    Transformers["TransformerChain\nHash/Index/Fulldate/DbVersion"]:::componentSecondary
+    Schemas["SchemaRegistry\nPandera schemas"]:::componentSecondary
+end
+class Domain group;
+
+subgraph Infrastructure["Infrastructure Dependencies"]
+    Clients["ChEMBL Clients\ninfrastructure.clients.chembl.*"]:::componentSecondary
+    Output["UnifiedOutputWriter\nCSV/metadata/QC writers"]:::componentSecondary
+    Logging["Unified Logger\ninfrastructure.logging.*"]:::componentSecondary
+end
+class Infrastructure group;
+
+CLI --> Orchestrator
+ConfigLoader --> PipelineConfig
+Orchestrator --> Container
+Orchestrator --> Pipelines
+Orchestrator --> StageRunner
+Container --> Pipelines
+Container --> DomainServices
+Container --> Transformers
+Container --> Schemas
+Container --> Clients
+Container --> Output
+Container --> Logging
+Pipelines --> StageRunner
+Pipelines --> DomainServices
+Pipelines --> Output
+Pipelines --> Logging
+DomainServices --> Schemas
+
