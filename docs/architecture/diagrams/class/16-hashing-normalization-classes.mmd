@@ -26,8 +26,10 @@ class IndexColumnTransformer
 class DatabaseVersionTransformer
 class FulldateTransformer
 
-class NormalizationService
+class BaseNormalizationService
+class NormalizationServiceABC
 class ChemblNormalizationService
+class NormalizationServiceImpl
 class NormalizationConfigProvider
 
 HasherImpl ..|> HasherABC
@@ -41,8 +43,12 @@ TransformerChain --> HashColumnsTransformer
 TransformerChain --> IndexColumnTransformer
 TransformerChain --> DatabaseVersionTransformer
 TransformerChain --> FulldateTransformer
-ChemblNormalizationService ..|> NormalizationService
+ChemblNormalizationService --|> BaseNormalizationService
+NormalizationServiceImpl --|> BaseNormalizationService
+ChemblNormalizationService ..|> NormalizationServiceABC
+NormalizationServiceImpl ..|> NormalizationServiceABC
 ChemblNormalizationService --> NormalizationConfigProvider
+NormalizationServiceImpl --> NormalizationConfigProvider
 HashColumnsTransformer --> HashService
 IndexColumnTransformer --> HashService
 DatabaseVersionTransformer --> HashService
