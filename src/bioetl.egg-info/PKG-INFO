@@ -16,12 +16,18 @@ Requires-Dist: requests>=2.31.0
 Requires-Dist: PyYAML>=6.0
 Requires-Dist: pydantic>=2.0.0
 Requires-Dist: fastapi>=0.110.0
+Requires-Dist: prometheus_client>=0.20.0
 Provides-Extra: dev
 Requires-Dist: types-PyYAML>=6.0; extra == "dev"
 Requires-Dist: mypy>=1.0.0; extra == "dev"
 Requires-Dist: pytest>=7.0.0; extra == "dev"
 Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: hypothesis==6.103.0; extra == "dev"
+Requires-Dist: black>=24.3.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
 Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: pre-commit>=3.5.0; extra == "dev"
+Requires-Dist: import-linter>=2.0.0; extra == "dev"
 Dynamic: license-file
 
 # BioactivityDataAcquisition
@@ -31,6 +37,13 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 ## Правила проекта
 
 Проект следует строгим правилам именования, архитектуры и документации. Актуальная сводка правил: `docs/project/00-rules-summary.md`.
+
+## Локальные проверки качества
+
+- Установить хуки: `pre-commit install`
+- Прогнать форматирование и линтеры: `pre-commit run --all-files` (ruff, black, isort, mypy, import-linter)
+- Запустить архитектурный тест: `pytest tests/architecture/test_layer_dependencies.py`
+- Полный цикл lint/type-check в CI: ruff → black --check → isort --check-only → mypy → архитектурные тесты → import-linter
 
 ## Документация
 
