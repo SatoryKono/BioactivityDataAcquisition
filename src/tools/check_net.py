@@ -13,5 +13,6 @@ def check(url):
     except Exception as e:
         print(f"Error: {e}")
 
+
 # check("https://www.ebi.ac.uk/chembl/api/data/status")
 check("https://www.ebi.ac.uk/chembl/api/data/molecule?limit=1")

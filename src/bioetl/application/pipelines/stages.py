@@ -16,4 +16,3 @@ class StageABC(ABC):
     @abstractmethod
     def close(self) -> None:
         """Освобождает ресурсы стадии."""
-

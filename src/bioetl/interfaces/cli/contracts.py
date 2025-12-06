@@ -14,4 +14,3 @@ class CLICommandABC(ABC):
     @abstractmethod
     def run_pipeline(self, config: Any, options: dict[str, Any]) -> Any:
         """Запускает пайплайн с конфигурацией."""
-

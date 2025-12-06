@@ -80,9 +80,8 @@ class HttpClientMiddleware:
         self._failure_metric_callback = failure_metric_callback
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        attempt = 1
         total_retry_delay = 0.0
-        while attempt <= self.max_attempts:
+        for attempt in range(1, self.max_attempts + 1):
             self._ensure_circuit_allows_request(method, url)
             attempt_kwargs = dict(kwargs)
             outcome = self._process_attempt(
@@ -93,13 +92,10 @@ class HttpClientMiddleware:
                 attempt_kwargs,
             )
             total_retry_delay = outcome["total_retry_delay"]
-            if outcome["should_retry"]:
-                attempt += 1
-                continue
-            if outcome["error"] is not None:
-                raise outcome["error"] from getattr(outcome["error"], "cause", None)
-            self._reset_circuit(log_circuit_closure=True)
-            return outcome["response"]
+            resolved_response = self._resolve_attempt_outcome(outcome)
+            if resolved_response is not None:
+                self._reset_circuit(log_circuit_closure=True)
+                return resolved_response
         raise ClientNetworkError(
             provider=self.provider, endpoint=url, message="Max attempts exceeded"
         )
@@ -210,6 +206,13 @@ class HttpClientMiddleware:
             "error": None if should_retry else error,
         }
 
+    def _resolve_attempt_outcome(self, outcome: dict[str, Any]) -> Any | None:
+        if outcome["should_retry"]:
+            return None
+        if outcome["error"] is not None:
+            raise outcome["error"] from getattr(outcome["error"], "cause", None)
+        return outcome["response"]
+
     def _handle_timeout_exception(
         self,
         method: str,
@@ -219,9 +222,7 @@ class HttpClientMiddleware:
         total_retry_delay: float,
         exc: Exception,
     ) -> tuple[bool, float, Exception]:
-        error = self._build_network_error(
-            message="Request timed out", url=url, exc=exc
-        )
+        error = self._build_network_error(message="Request timed out", url=url, exc=exc)
         return self._handle_attempt_error(
             error,
             method,
@@ -242,9 +243,7 @@ class HttpClientMiddleware:
         total_retry_delay: float,
         exc: Exception,
     ) -> tuple[bool, float, Exception]:
-        error = self._build_network_error(
-            message="Connection error", url=url, exc=exc
-        )
+        error = self._build_network_error(message="Connection error", url=url, exc=exc)
         return self._handle_attempt_error(
             error,
             method,
@@ -437,7 +436,9 @@ class HttpClientMiddleware:
 
     def _backoff_delay(self, attempt: int, retry_after: float | None = None) -> float:
         base_delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
-        combined_delay = base_delay if retry_after is None else max(base_delay, retry_after)
+        combined_delay = (
+            base_delay if retry_after is None else max(base_delay, retry_after)
+        )
         jitter = random.uniform(0.0, combined_delay)
         delay_with_jitter = combined_delay + jitter
 

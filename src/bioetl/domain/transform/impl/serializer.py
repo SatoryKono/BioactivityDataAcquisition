@@ -1,14 +1,14 @@
 """
 Serialization utilities for domain entities.
 """
+
 from typing import Any, Callable, Optional, Sequence
 
 import pandas as pd
 
 
 def serialize_dict(
-    value: dict[str, Any], 
-    value_normalizer: Optional[Callable[[Any], Any]] = None
+    value: dict[str, Any], value_normalizer: Optional[Callable[[Any], Any]] = None
 ) -> Any:
     """
     Преобразует словарь в строку key:value|key:value.
@@ -27,21 +27,20 @@ def serialize_dict(
             continue
         if isinstance(v, (list, dict)):
             continue
-        
+
         # Normalize value
         val_norm = norm_func(v)
         if val_norm is not pd.NA and val_norm is not None:
-             parts.append(f"{k}:{val_norm}")
-        
+            parts.append(f"{k}:{val_norm}")
+
     if not parts:
         return pd.NA
-        
+
     return "|".join(parts)
 
 
 def serialize_list(
-    value: Sequence[Any],
-    value_normalizer: Optional[Callable[[Any], Any]] = None
+    value: Sequence[Any], value_normalizer: Optional[Callable[[Any], Any]] = None
 ) -> Any:
     """
     Преобразует список в строку, соединяя элементы через |.

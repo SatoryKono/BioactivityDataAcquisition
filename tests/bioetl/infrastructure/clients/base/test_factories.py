@@ -1,6 +1,7 @@
 """
 Tests for factory implementations.
 """
+
 import os
 from unittest.mock import patch
 

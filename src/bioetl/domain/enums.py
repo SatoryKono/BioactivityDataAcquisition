@@ -6,6 +6,7 @@ from typing import Any
 
 class ErrorAction(Enum):
     """Действия при ошибке."""
+
     FAIL = "fail"
     SKIP = "skip"
     RETRY = "retry"
@@ -14,6 +15,7 @@ class ErrorAction(Enum):
 @dataclass
 class StageResult:
     """Результат выполнения стадии."""
+
     stage_name: str
     success: bool
     records_processed: int = 0

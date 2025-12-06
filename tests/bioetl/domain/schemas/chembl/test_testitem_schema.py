@@ -46,7 +46,9 @@ def test_testitem_schema_rejects_bad_chembl(valid_testitem_df: pd.DataFrame) -> 
     assert "chembl-555" in failure_cases["failure_case"].astype(str).tolist()
 
 
-def test_testitem_schema_rejects_invalid_pubchem(valid_testitem_df: pd.DataFrame) -> None:
+def test_testitem_schema_rejects_invalid_pubchem(
+    valid_testitem_df: pd.DataFrame,
+) -> None:
     invalid = valid_testitem_df.copy()
     invalid["pubchem_cid"] = ["CID-1"]
 
@@ -66,7 +68,12 @@ def test_testitem_schema_rejects_out_of_range(valid_testitem_df: pd.DataFrame) -
         TestitemSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert failure_cases.loc[failure_cases["column"] == "max_phase", "failure_case"].iloc[0] == -1
+    assert (
+        failure_cases.loc[failure_cases["column"] == "max_phase", "failure_case"].iloc[
+            0
+        ]
+        == -1
+    )
 
 
 def test_testitem_schema_checks_metadata(valid_testitem_df: pd.DataFrame) -> None:

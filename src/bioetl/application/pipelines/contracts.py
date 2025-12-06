@@ -1,6 +1,7 @@
 """
 Contracts for pipeline components.
 """
+
 from abc import ABC, abstractmethod
 from typing import Any, Iterable
 
@@ -29,4 +30,3 @@ class LoaderABC(ABC):
         """
         Loads data to destination.
         """
-

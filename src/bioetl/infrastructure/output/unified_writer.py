@@ -1,6 +1,7 @@
 """
 Unified output writer implementation.
 """
+
 from pathlib import Path
 
 import pandas as pd
@@ -61,7 +62,7 @@ class UnifiedOutputWriter:
         # Note: Actual schema validation happens in PipelineBase.validate()
         # Here we ensure output structure and determinism.
         df_prepared = apply_column_order(df, column_order)
-        
+
         # 2. Сортировка (Determinism)
         df_prepared = self._stable_sort(df_prepared, run_context, column_order)
 
@@ -92,12 +93,8 @@ class UnifiedOutputWriter:
             checksum=checksum,
         )
 
-        qc_artifacts = self._generate_qc_artifacts(
-            df_prepared, output_path
-        )
-        qc_checksums = {
-            path.name: compute_file_sha256(path) for path in qc_artifacts
-        }
+        qc_artifacts = self._generate_qc_artifacts(df_prepared, output_path)
+        qc_checksums = {path.name: compute_file_sha256(path) for path in qc_artifacts}
 
         # 5. Запись метаданных
         meta = build_run_metadata(
@@ -141,9 +138,7 @@ class UnifiedOutputWriter:
 
         return df
 
-    def _generate_qc_artifacts(
-        self, df: pd.DataFrame, output_path: Path
-    ) -> list[Path]:
+    def _generate_qc_artifacts(self, df: pd.DataFrame, output_path: Path) -> list[Path]:
         artifacts: list[Path] = []
 
         if self._qc_config.enable_quality_report:

@@ -1,4 +1,5 @@
 """Обработчики MQ-заданий для запуска пайплайнов."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -36,7 +37,9 @@ class MQJobHandler:
         if not config.features.mq_interface_enabled:
             raise RuntimeError("MQ interface is disabled by configuration")
 
-        orchestrator = PipelineOrchestrator(pipeline_name=job.pipeline_name, config=config)
+        orchestrator = PipelineOrchestrator(
+            pipeline_name=job.pipeline_name, config=config
+        )
         return orchestrator.run_pipeline(dry_run=job.dry_run, limit=job.limit)
 
 

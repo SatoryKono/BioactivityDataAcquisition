@@ -1,6 +1,7 @@
 """
 Tests for concrete writer implementations.
 """
+
 # pylint: disable=redefined-outer-name
 import hashlib
 from collections.abc import Callable
@@ -23,9 +24,7 @@ from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
 class DummyWriter(BaseWriterImpl):
     """Minimal writer for base class tests."""
 
-    def __init__(
-        self, *, checksum_fn: Callable[[Path], str] | None = None
-    ) -> None:
+    def __init__(self, *, checksum_fn: Callable[[Path], str] | None = None) -> None:
         super().__init__(atomic=False, checksum_fn=checksum_fn)
 
     def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
@@ -33,6 +32,16 @@ class DummyWriter(BaseWriterImpl):
 
     def supports_format(self, fmt: str) -> bool:  # pragma: no cover - not used
         return fmt.lower() == "dummy"
+
+
+def _assert_qc_row(report: pd.DataFrame, expectations: dict[str, object]) -> None:
+    row = report[report["column"] == expectations["column"]].iloc[0]
+    assert row["null_count"] == expectations["null_count"]
+    assert row["non_null_count"] == expectations["non_null_count"]
+    assert row["unique_count"] == expectations["unique_count"]
+    assert row["dtype"] == expectations["dtype"]
+    assert row["coverage"] == expectations["coverage"]
+    assert bool(row["coverage_ok"]) is expectations["coverage_ok"]
 
 
 @pytest.fixture
@@ -145,24 +154,6 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
     df = pd.DataFrame({"a": [1, None], "b": ["x", "x"]})
     path = tmp_path / "qc_report.csv"
 
-    def _assert_row(
-        report: pd.DataFrame,
-        column: str,
-        null_count: int,
-        non_null_count: int,
-        unique_count: int,
-        dtype: str,
-        coverage: float,
-        coverage_ok: bool,
-    ) -> None:
-        row = report[report["column"] == column].iloc[0]
-        assert row["null_count"] == null_count
-        assert row["non_null_count"] == non_null_count
-        assert row["unique_count"] == unique_count
-        assert row["dtype"] == dtype
-        assert row["coverage"] == coverage
-        assert bool(row["coverage_ok"]) is coverage_ok
-
     metadata_writer.write_qc_report(df, path)
 
     assert path.exists()
@@ -178,26 +169,29 @@ def test_metadata_writer_write_qc_report(metadata_writer, tmp_path):
     ]
     assert list(report.columns) == expected_columns
 
-    _assert_row(
-        report,
-        column="a",
-        null_count=1,
-        non_null_count=1,
-        unique_count=1,
-        dtype="float64",
-        coverage=0.5,
-        coverage_ok=False,
-    )
-    _assert_row(
-        report,
-        column="b",
-        null_count=0,
-        non_null_count=2,
-        unique_count=1,
-        dtype="object",
-        coverage=1.0,
-        coverage_ok=True,
-    )
+    expectations = [
+        {
+            "column": "a",
+            "null_count": 1,
+            "non_null_count": 1,
+            "unique_count": 1,
+            "dtype": "float64",
+            "coverage": 0.5,
+            "coverage_ok": False,
+        },
+        {
+            "column": "b",
+            "null_count": 0,
+            "non_null_count": 2,
+            "unique_count": 1,
+            "dtype": "object",
+            "coverage": 1.0,
+            "coverage_ok": True,
+        },
+    ]
+
+    for expectation in expectations:
+        _assert_qc_row(report, expectation)
 
 
 def test_build_quality_report_table_respects_min_coverage():
@@ -234,9 +228,7 @@ def test_metadata_writer_generate_checksums(metadata_writer, tmp_path):
     assert checksums[f2.name] == hashlib.sha256(b"content2").hexdigest()
 
 
-def test_metadata_writer_generate_checksums_missing_file(
-    metadata_writer, tmp_path
-):
+def test_metadata_writer_generate_checksums_missing_file(metadata_writer, tmp_path):
     """Test checksum generation skips missing files."""
     f1 = tmp_path / "exists.txt"
     f1.write_text("content", encoding="utf-8")

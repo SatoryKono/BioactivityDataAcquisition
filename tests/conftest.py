@@ -1,6 +1,7 @@
 """
 Pytest configuration and shared fixtures.
 """
+
 import socket
 from typing import cast
 from unittest.mock import MagicMock, Mock
@@ -31,9 +32,9 @@ def pytest_configure(config):
     try:
         # Import and patch before Hypothesis is used
         from hypothesis.internal.conjecture import providers as hypothesis_providers
-        
+
         _original_get_local_constants = hypothesis_providers._get_local_constants
-        
+
         def _patched_get_local_constants():
             """Patched version that filters out unhashable modules."""
             try:
@@ -44,13 +45,14 @@ def pytest_configure(config):
                     # This is a workaround for Python 3.13 compatibility
                     import sys
                     from types import SimpleNamespace
-                    
+
                     # Create filtered modules dict
                     filtered_modules = {
-                        k: v for k, v in sys.modules.items()
+                        k: v
+                        for k, v in sys.modules.items()
                         if not isinstance(v, SimpleNamespace)
                     }
-                    
+
                     # Temporarily replace sys.modules
                     original_modules = dict(sys.modules)
                     try:
@@ -62,11 +64,12 @@ def pytest_configure(config):
                         sys.modules.clear()
                         sys.modules.update(original_modules)
                 raise
-        
+
         hypothesis_providers._get_local_constants = _patched_get_local_constants
     except (ImportError, AttributeError):
         # Hypothesis not available or structure changed, skip patch
         pass
+
 
 @pytest.fixture
 def mock_config():
@@ -121,16 +124,11 @@ def mock_output_writer():
 @pytest.fixture
 def sample_df():
     """Create a sample DataFrame."""
-    return pd.DataFrame({
-        "id": [1, 2, 3],
-        "value": ["a", "b", "c"]
-    })
+    return pd.DataFrame({"id": [1, 2, 3], "value": ["a", "b", "c"]})
 
 
 @pytest.fixture
-def pipeline_test_config(
-    tmp_path_factory: pytest.TempPathFactory
-) -> PipelineConfig:
+def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineConfig:
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
@@ -168,9 +166,8 @@ def small_pipeline_df() -> pd.DataFrame:
 @pytest.fixture(autouse=True)
 def disable_network_calls(monkeypatch, request):
     """Block network access unless marked with 'network' or 'integration'."""
-    if (
-        request.node.get_closest_marker("network") or
-        request.node.get_closest_marker("integration")
+    if request.node.get_closest_marker("network") or request.node.get_closest_marker(
+        "integration"
     ):
         return
 
@@ -189,5 +186,6 @@ def disable_network_calls(monkeypatch, request):
 
     monkeypatch.setattr(socket, "socket", GuardedSocket)
     monkeypatch.setattr(socket, "create_connection", guard)
+
 
 # End of conftest

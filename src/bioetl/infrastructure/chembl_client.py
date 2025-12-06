@@ -1,4 +1,5 @@
 """Factories for constructing ChEMBL client stack."""
+
 from __future__ import annotations
 
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl

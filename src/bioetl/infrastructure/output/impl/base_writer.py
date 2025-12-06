@@ -1,6 +1,7 @@
 """
 Base helpers for writer implementations.
 """
+
 from __future__ import annotations
 
 import time

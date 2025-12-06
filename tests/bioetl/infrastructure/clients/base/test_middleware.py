@@ -1,4 +1,5 @@
 """Юнит-тесты для HttpClientMiddleware: retry, rate-limit, circuit breaker."""
+
 from __future__ import annotations
 
 import logging
@@ -132,7 +133,9 @@ def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
 
 
 def _extract_log_records(records):
-    retry_record = next(rec for rec in records if rec.message == "Retrying HTTP request")
+    retry_record = next(
+        rec for rec in records if rec.message == "Retrying HTTP request"
+    )
     success_record = next(
         rec for rec in records if rec.message == "HTTP request succeeded"
     )
@@ -409,4 +412,3 @@ def test_circuit_breaker_blocks_and_recovers(monkeypatch, base_client):
     assert recovered.status_code == 200
     assert base_client.request.call_count == 3
     assert middleware._circuit_opened_at is None  # noqa: SLF001
-

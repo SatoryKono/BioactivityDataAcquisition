@@ -1,6 +1,7 @@
 """
 ChEMBL specific schemas.
 """
+
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema

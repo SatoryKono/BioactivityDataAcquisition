@@ -1,6 +1,7 @@
 """
 ChEMBL data extractor implementation.
 """
+
 from pathlib import Path
 from typing import Any, Iterable, cast
 
@@ -57,9 +58,7 @@ class ChemblExtractorImpl(ExtractorABC):
                     break
                 working_chunk = raw_chunk.head(remaining)
 
-            normalized_chunk = self.normalization_service.normalize_batch(
-                working_chunk
-            )
+            normalized_chunk = self.normalization_service.normalize_batch(working_chunk)
 
             if not normalized_chunk.empty:
                 yield normalized_chunk
@@ -100,4 +99,3 @@ class ChemblExtractorImpl(ExtractorABC):
                 )
 
         return self.record_source
-

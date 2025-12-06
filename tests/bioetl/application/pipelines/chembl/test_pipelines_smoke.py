@@ -24,22 +24,25 @@ def common_dependencies():
     }
 
 
-@pytest.mark.parametrize("pipeline_info", [
-    ("activity", "activity_id"),
-    ("assay", "assay_chembl_id"),
-    ("document", "document_chembl_id"),
-    ("target", "target_chembl_id"),
-    ("testitem", "molecule_chembl_id"),
-])
+@pytest.mark.parametrize(
+    "pipeline_info",
+    [
+        ("activity", "activity_id"),
+        ("assay", "assay_chembl_id"),
+        ("document", "document_chembl_id"),
+        ("target", "target_chembl_id"),
+        ("testitem", "molecule_chembl_id"),
+    ],
+)
 def test_pipeline_instantiation(pipeline_info, common_dependencies):
     """Smoke test: pipelines can be instantiated and config works."""
     entity_name, id_col = pipeline_info
-    
+
     config = MagicMock()
     config.entity_name = entity_name
     config.provider = "chembl"
     config.primary_key = id_col
-    
+
     pipeline = ChemblEntityPipeline(
         config=config,
         logger=common_dependencies["logger"],
@@ -48,14 +51,11 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         extraction_service=common_dependencies["extraction_service"],
         hash_service=common_dependencies["hash_service"],
     )
-    
+
     assert pipeline.ID_COLUMN == id_col
     assert pipeline.API_FILTER_KEY == f"{id_col}__in"
 
     # Test transform (coverage for _do_transform)
-    df = pd.DataFrame({
-        "id": [1],
-        "chembl_release": [{"chembl_release": "34"}]
-    })
+    df = pd.DataFrame({"id": [1], "chembl_release": [{"chembl_release": "34"}]})
     result = pipeline.transform(df)
     assert isinstance(result, pd.DataFrame)

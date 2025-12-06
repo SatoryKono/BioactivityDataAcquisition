@@ -1,4 +1,5 @@
 """Normalizers for domain-specific identifiers (DOI, ChEMBL, PMID, etc.)."""
+
 from __future__ import annotations
 
 import re
@@ -32,9 +33,7 @@ def normalize_doi(value: Any) -> str | None:
         return None
 
     if not doi.startswith("10."):
-        raise ValueError(
-            f"Неверный формат DOI (должен начинаться с '10.'): '{value}'"
-        )
+        raise ValueError(f"Неверный формат DOI (должен начинаться с '10.'): '{value}'")
 
     if not DOI_REGEX.match(doi):
         raise ValueError(f"Неверный формат DOI: '{value}'")
@@ -88,9 +87,7 @@ def normalize_pmid(value: Any) -> int | None:
         return None
 
     if not text.isdigit():
-        raise ValueError(
-            f"Неверный PubMed ID (содержит нецифровые символы): '{value}'"
-        )
+        raise ValueError(f"Неверный PubMed ID (содержит нецифровые символы): '{value}'")
 
     parsed = int(text)
     if parsed <= 0:
@@ -137,9 +134,7 @@ def normalize_bao_id(value: Any) -> str | None:
         return None
 
     if not BAO_ID_REGEX.match(text):
-        raise ValueError(
-            f"Неверный BAO ID (ожидался формат BAO_<digits>): '{value}'"
-        )
+        raise ValueError(f"Неверный BAO ID (ожидался формат BAO_<digits>): '{value}'")
 
     return text
 

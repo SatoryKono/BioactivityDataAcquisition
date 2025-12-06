@@ -22,10 +22,12 @@ class HashService:
         self._now_provider = now_provider or (lambda: datetime.now(timezone.utc))
         self._extracted_at: str | None = None
 
-    def add_hash_columns(self, df: pd.DataFrame, business_key_cols: list[str] | None = None) -> pd.DataFrame:
+    def add_hash_columns(
+        self, df: pd.DataFrame, business_key_cols: list[str] | None = None
+    ) -> pd.DataFrame:
         """
         Добавляет столбцы hash_row и hash_business_key.
-        
+
         Logic:
         1. Calculate hash_business_key (if configured) based on specific columns (values list).
         2. Add hash_business_key to DataFrame.
@@ -36,15 +38,10 @@ class HashService:
         # 1. hash_business_key
         if business_key_cols:
             # Ensure columns exist before hashing
-            cols_to_hash = [
-                c for c in business_key_cols if c in df.columns
-            ]
+            cols_to_hash = [c for c in business_key_cols if c in df.columns]
             if cols_to_hash:
                 # Uses hash_columns -> list hashing (canonical list)
-                df["hash_business_key"] = self._hasher.hash_columns(
-                    df,
-                    cols_to_hash
-                )
+                df["hash_business_key"] = self._hasher.hash_columns(df, cols_to_hash)
             else:
                 df["hash_business_key"] = None
         else:
@@ -69,7 +66,9 @@ class HashService:
         self._index_counter = end_index
         return df
 
-    def add_database_version_column(self, df: pd.DataFrame, database_version: str) -> pd.DataFrame:
+    def add_database_version_column(
+        self, df: pd.DataFrame, database_version: str
+    ) -> pd.DataFrame:
         """
         Добавляет колонку 'database_version' со значением database_version (str).
         Возвращает копию df.

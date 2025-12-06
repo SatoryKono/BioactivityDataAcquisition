@@ -9,6 +9,7 @@ import pandera.pandas as pa
 @dataclass
 class ValidationResult:
     """Результат валидации."""
+
     is_valid: bool
     errors: list[Any]  # ValidationError
     warnings: list[str]

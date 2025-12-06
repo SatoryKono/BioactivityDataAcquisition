@@ -1,6 +1,7 @@
 """
 Normalization implementation for domain entities.
 """
+
 from typing import Any, Callable
 
 import pandas as pd
@@ -107,6 +108,7 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
             if custom_normalizer:
                 base_normalizer: Callable[[Any], Any] = custom_normalizer
             else:
+
                 def _default_normalizer(val: Any, m=mode) -> Any:
                     return normalize_scalar(val, mode=m)
 
@@ -139,7 +141,9 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
 
         return df
 
-    def _normalize_container_item(self, item: Any, normalizer: Callable[[Any], Any]) -> Any:
+    def _normalize_container_item(
+        self, item: Any, normalizer: Callable[[Any], Any]
+    ) -> Any:
         if isinstance(item, dict):
             normalized_dict = normalize_record(item, value_normalizer=normalizer)
             return normalized_dict if normalized_dict is not None else {}
@@ -154,10 +158,13 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
         serialize_with_value_normalizer: bool = False,
     ) -> Any:
         try:
+
             def _smart_normalizer(item: Any) -> Any:
                 return self._normalize_container_item(item, norm)
 
-            normalized_list = normalize_array(list(val), item_normalizer=_smart_normalizer)
+            normalized_list = normalize_array(
+                list(val), item_normalizer=_smart_normalizer
+            )
         except ValueError as exc:
             raise ValueError(
                 f"Ошибка нормализации списка в поле '{field_name}': {exc}"
@@ -169,7 +176,9 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
             value_normalizer=norm if serialize_with_value_normalizer else None,
         )
 
-    def _process_dict(self, val: Any, norm: Callable[[Any], Any], field_name: str) -> Any:
+    def _process_dict(
+        self, val: Any, norm: Callable[[Any], Any], field_name: str
+    ) -> Any:
         try:
             normalized_dict = normalize_record(val, value_normalizer=norm)
         except ValueError as exc:

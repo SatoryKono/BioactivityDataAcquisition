@@ -1,4 +1,5 @@
 """Совместимая прослойка для конфигурационных моделей."""
+
 from __future__ import annotations
 
 from bioetl.application.config.pipeline_config_schema import (

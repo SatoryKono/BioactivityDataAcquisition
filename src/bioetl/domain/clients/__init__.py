@@ -3,4 +3,3 @@
 from bioetl.domain.clients.contracts import DataClientABC
 
 __all__ = ["DataClientABC"]
-

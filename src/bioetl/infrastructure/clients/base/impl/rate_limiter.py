@@ -42,4 +42,3 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
         if new_tokens > 0:
             self._tokens = min(self._capacity, self._tokens + new_tokens)
             self._last_refill = now
-

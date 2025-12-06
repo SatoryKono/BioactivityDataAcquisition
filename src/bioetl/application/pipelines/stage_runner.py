@@ -112,9 +112,7 @@ class StageRunner:
         start_time = self._hooks_manager.get_stage_start(stage)
         duration = 0.0
         if start_time:
-            duration = (
-                datetime.now(timezone.utc) - start_time
-            ).total_seconds()
+            duration = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return StageResult(
             stage_name=stage,
@@ -158,6 +156,4 @@ class StageRunner:
 
     @staticmethod
     def _calculate_duration(context: RunContext) -> float:
-        return (
-            datetime.now(timezone.utc) - context.started_at
-        ).total_seconds()
+        return (datetime.now(timezone.utc) - context.started_at).total_seconds()

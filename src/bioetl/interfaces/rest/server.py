@@ -1,4 +1,5 @@
 """Минимальный REST-сервер для запуска пайплайнов через PipelineOrchestrator."""
+
 from __future__ import annotations
 
 import asyncio
@@ -14,10 +15,16 @@ from bioetl.domain.models import RunResult
 class PipelineRunRequest(BaseModel):
     """Запрос на запуск пайплайна."""
 
-    pipeline_name: str = Field(..., description="Имя пайплайна в формате entity_provider")
-    profile: str = Field(default="default", description="Активный конфигурационный профиль")
+    pipeline_name: str = Field(
+        ..., description="Имя пайплайна в формате entity_provider"
+    )
+    profile: str = Field(
+        default="default", description="Активный конфигурационный профиль"
+    )
     dry_run: bool = Field(default=False, description="Запуск без записи вывода")
-    limit: int | None = Field(default=None, description="Ограничение на количество записей")
+    limit: int | None = Field(
+        default=None, description="Ограничение на количество записей"
+    )
 
 
 class PipelineRunResponse(BaseModel):
@@ -50,7 +57,9 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
     return PipelineOrchestrator(pipeline_name=pipeline_name, config=config)
 
 
-def _run_pipeline_sync(orchestrator: PipelineOrchestrator, dry_run: bool, limit: int | None) -> RunResult:
+def _run_pipeline_sync(
+    orchestrator: PipelineOrchestrator, dry_run: bool, limit: int | None
+) -> RunResult:
     return orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
 
 

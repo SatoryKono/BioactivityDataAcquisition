@@ -1,6 +1,7 @@
 """
 Tests for MetadataBuilder.
 """
+
 # pylint: disable=redefined-outer-name
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,7 +24,7 @@ def run_context():
         entity_name="test_entity",
         provider="chembl",
         started_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
-        metadata={"extra_key": "extra_value"}
+        metadata={"extra_key": "extra_value"},
     )
 
 
@@ -33,7 +34,7 @@ def test_build_metadata(run_context):
         path=Path("/tmp/out/test.csv"),
         row_count=100,
         duration_sec=1.5,
-        checksum="abc123hash"
+        checksum="abc123hash",
     )
 
     qc_artifacts = [

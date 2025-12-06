@@ -45,11 +45,12 @@ class MetadataWriterImpl(MetadataWriterABC):
         path.parent.mkdir(parents=True, exist_ok=True)
         report = build_quality_report_table(
             df,
-            min_coverage=min_coverage if min_coverage is not None else self._min_coverage,
+            min_coverage=(
+                min_coverage if min_coverage is not None else self._min_coverage
+            ),
             quality_reporter=self._quality_reporter,
         )
         report.to_csv(path, index=False)
 
     def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
         return compute_files_sha256(paths)
-

@@ -1,4 +1,5 @@
 """Заглушка слушателя очереди для интеграции с MQ-провайдерами."""
+
 from __future__ import annotations
 
 from bioetl.domain.models import RunResult
@@ -13,7 +14,9 @@ class MQListener:
 
     def start(self) -> None:
         """Запуск основного цикла слушателя (заглушка)."""
-        raise NotImplementedError("Queue listening is not implemented; provide MQ integration")
+        raise NotImplementedError(
+            "Queue listening is not implemented; provide MQ integration"
+        )
 
     def process_job(self, job: MQJob) -> RunResult:
         """Обрабатывает одиночное задание."""

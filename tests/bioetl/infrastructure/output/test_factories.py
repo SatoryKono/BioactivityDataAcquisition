@@ -10,6 +10,7 @@ def test_default_writer():
     writer = default_writer()
     assert isinstance(writer, CsvWriterImpl)
 
+
 def test_default_metadata_writer():
     writer = default_metadata_writer()
     assert isinstance(writer, MetadataWriterImpl)

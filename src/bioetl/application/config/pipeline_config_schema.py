@@ -1,4 +1,5 @@
 """Строгие схемы конфигурации пайплайна."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -116,7 +117,9 @@ class HashingConfig(BaseModel):
     salt: str | None = None
     hash_version: str = "v1_blake2b_256"
 
-    canonicalization: CanonicalizationConfig = Field(default_factory=CanonicalizationConfig)
+    canonicalization: CanonicalizationConfig = Field(
+        default_factory=CanonicalizationConfig
+    )
     business_key: BusinessKeyConfig = Field(default_factory=BusinessKeyConfig)
 
     # Поле бизнес-ключей, специфичное для пайплайна
@@ -220,12 +223,18 @@ class PipelineConfig(BaseModel):
     @model_validator(mode="after")
     def validate_input_mode(self) -> PipelineConfig:
         if self.input_mode in {"csv", "id_only"} and not self.input_path:
-            raise ValueError("input_path must be provided when input_mode is 'csv' or 'id_only'")
+            raise ValueError(
+                "input_path must be provided when input_mode is 'csv' or 'id_only'"
+            )
 
         if self.input_mode == "csv" and not self.csv_options.header:
             raise ValueError("csv_options.header must be true when input_mode is 'csv'")
 
-        if self.input_mode == "auto_detect" and self.input_path and not self.csv_options.header:
+        if (
+            self.input_mode == "auto_detect"
+            and self.input_path
+            and not self.csv_options.header
+        ):
             raise ValueError(
                 "csv_options.header must be true when input_mode is 'auto_detect' and input_path is set"
             )
@@ -248,4 +257,3 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
 ]
-

@@ -8,7 +8,7 @@ class ChemblDataClientABC(SourceClientABC):
     """
     Контракт клиента ChEMBL.
     """
-    
+
     @abstractmethod
     def request_activity(self, **filters: Any) -> Any:
         """Запрос к эндпоинту activity."""
@@ -20,12 +20,11 @@ class ChemblDataClientABC(SourceClientABC):
     @abstractmethod
     def request_target(self, **filters: Any) -> Any:
         """Запрос к эндпоинту target."""
-    
+
     @abstractmethod
     def request_document(self, **filters: Any) -> Any:
         """Запрос к эндпоинту document."""
-        
+
     @abstractmethod
     def request_molecule(self, **filters: Any) -> Any:
         """Запрос к эндпоинту molecule."""
-

@@ -11,14 +11,13 @@ from bioetl.domain.transform.normalizers import (
 
 class TestitemSchema(pa.DataFrameModel):
     """Schema for molecule/test item data."""
+
     __test__ = False
 
     molecule_chembl_id: Series[str] = pa.Field(
         str_matches=CHEMBL_ID_REGEX.pattern, description="ChEMBL ID молекулы"
     )
-    pref_name: Series[str] = pa.Field(
-        nullable=True, description="Название молекулы"
-    )
+    pref_name: Series[str] = pa.Field(nullable=True, description="Название молекулы")
     molecule_type: Series[str] = pa.Field(
         nullable=True,
         description="Тип молекулы (Small molecule, Antibody)",

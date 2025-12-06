@@ -1,6 +1,7 @@
 """
 Tests for the UnifiedOutputWriter.
 """
+
 # pylint: disable=redefined-outer-name, protected-access
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
@@ -54,6 +55,7 @@ def mock_atomic_op():
     # Default implementation calls the callback
     def side_effect(path, write_fn):
         write_fn(path)
+
     op.write_atomic.side_effect = side_effect
     return op
 
@@ -83,7 +85,7 @@ def run_context():
         run_id="test-run",
         entity_name="test_entity",
         provider="chembl",
-        started_at=datetime.now(timezone.utc)
+        started_at=datetime.now(timezone.utc),
     )
 
 
@@ -93,7 +95,7 @@ def test_write_result_success(
     mock_metadata_writer_fixture,
     mock_quality_reporter,
     run_context,
-    tmp_path
+    tmp_path,
 ):
     """Test successful write result handling."""
     # Arrange
@@ -105,14 +107,11 @@ def test_write_result_success(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
         return WriteResult(
-            path=path,
-            row_count=len(df),
-            checksum="abc",
-            duration_sec=0.1
+            path=path, row_count=len(df), checksum="abc", duration_sec=0.1
         )
 
     mock_writer_fixture.write.side_effect = create_file
-    
+
     # Patch checksum function
     with patch(
         "bioetl.infrastructure.output.unified_writer.compute_file_sha256"
@@ -124,12 +123,7 @@ def test_write_result_success(
         ]
 
         # Act
-        result = unified_writer.write_result(
-            df,
-            output_dir,
-            "test_entity",
-            run_context
-        )
+        result = unified_writer.write_result(df, output_dir, "test_entity", run_context)
 
         # Assert
         assert result.row_count == 2
@@ -149,7 +143,7 @@ def test_unified_writer_delegates_atomicity(
     mock_atomic_op,
     mock_quality_reporter,
     run_context,
-    tmp_path
+    tmp_path,
 ):
     """Test that UnifiedOutputWriter delegates to AtomicFileOperation."""
     # Arrange
@@ -157,24 +151,16 @@ def test_unified_writer_delegates_atomicity(
     output_dir = tmp_path / "out"
 
     mock_writer_fixture.write.return_value = WriteResult(
-        path=output_dir / "test.csv",
-        row_count=1,
-        checksum="abc",
-        duration_sec=0.1
+        path=output_dir / "test.csv", row_count=1, checksum="abc", duration_sec=0.1
     )
-    
+
     with patch(
         "bioetl.infrastructure.output.unified_writer.compute_file_sha256"
     ) as mock_checksum:
         mock_checksum.side_effect = ["abc", "qc1", "qc2"]
 
         # Act
-        unified_writer.write_result(
-            df,
-            output_dir,
-            "test_entity",
-            run_context
-        )
+        unified_writer.write_result(df, output_dir, "test_entity", run_context)
 
         # Assert
         assert mock_atomic_op.write_atomic.call_count == 3
@@ -243,24 +229,14 @@ def test_stable_sort_false(unified_writer, mock_config_fixture, run_context):
     assert result_df.iloc[0]["b"] == 2
 
 
-def test_stable_sort_columns_and_rows(
-    unified_writer, mock_config_fixture, run_context
-):
+def test_stable_sort_columns_and_rows(unified_writer, mock_config_fixture, run_context):
     """Test stable sort of columns and rows."""
     mock_config_fixture.stable_sort = True
 
     # Setup config with business keys
-    run_context.config = {
-        "hashing": {
-            "business_key_fields": ["id"]
-        }
-    }
+    run_context.config = {"hashing": {"business_key_fields": ["id"]}}
 
-    df = pd.DataFrame({
-        "id": [2, 1, 3],
-        "b": [20, 10, 30],
-        "a": [200, 100, 300]
-    })
+    df = pd.DataFrame({"id": [2, 1, 3], "b": [20, 10, 30], "a": [200, 100, 300]})
 
     result_df = unified_writer._stable_sort(df, run_context)
 
@@ -273,10 +249,7 @@ def test_stable_sort_columns_and_rows(
 
 
 def test_write_result_raises_on_no_inner_result(
-    unified_writer,
-    mock_writer_fixture,
-    run_context,
-    tmp_path
+    unified_writer, mock_writer_fixture, run_context, tmp_path
 ):
     """Test error raised when inner writer returns nothing."""
     # Arrange
@@ -287,12 +260,5 @@ def test_write_result_raises_on_no_inner_result(
     mock_writer_fixture.write.return_value = None
 
     # Act & Assert
-    with pytest.raises(
-        RuntimeError, match="Inner writer did not return result"
-    ):
-        unified_writer.write_result(
-            df,
-            output_dir,
-            "test_entity",
-            run_context
-        )
+    with pytest.raises(RuntimeError, match="Inner writer did not return result"):
+        unified_writer.write_result(df, output_dir, "test_entity", run_context)

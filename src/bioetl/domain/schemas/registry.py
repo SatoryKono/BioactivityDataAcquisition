@@ -1,6 +1,7 @@
 """
 Registry implementation for Pandera schemas.
 """
+
 from dataclasses import dataclass
 from typing import Type
 
@@ -31,9 +32,7 @@ class SchemaRegistry(SchemaProviderABC):
         column_order: list[str] | None = None,
     ) -> None:
         """Register a schema by name."""
-        self._schemas[name] = _SchemaEntry(
-            schema=schema, column_order=column_order
-        )
+        self._schemas[name] = _SchemaEntry(schema=schema, column_order=column_order)
 
     def get_schema(self, name: str) -> Type[pa.DataFrameModel]:
         """Get schema by name, raises ValueError if not found."""

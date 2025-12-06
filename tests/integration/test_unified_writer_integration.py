@@ -1,4 +1,5 @@
 """Интеграционный тест UnifiedOutputWriter с реальными зависимостями."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -103,4 +104,3 @@ def _assert_written_meta(meta_path: Path, run_context: RunContext) -> None:
     assert "hash" in meta
     assert "quality_report_table.csv" in meta["files"]
     assert "correlation_report_table.csv" in meta["files"]
-

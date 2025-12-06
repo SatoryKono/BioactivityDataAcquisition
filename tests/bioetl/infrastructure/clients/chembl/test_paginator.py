@@ -1,6 +1,7 @@
 """
 Tests for ChemblPaginatorImpl.
 """
+
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 
 
@@ -21,7 +22,7 @@ def test_get_next_marker_has_next():
             "next": "/url?offset=20&limit=20",
             "limit": 20,
             "offset": 0,
-            "total_count": 100
+            "total_count": 100,
         }
     }
     marker = paginator.get_next_marker(response)
@@ -33,12 +34,7 @@ def test_get_next_marker_no_next():
     """Test getting next marker when no more pages."""
     paginator = ChemblPaginatorImpl()
     response = {
-        "page_meta": {
-            "next": None,
-            "limit": 20,
-            "offset": 80,
-            "total_count": 100
-        }
+        "page_meta": {"next": None, "limit": 20, "offset": 80, "total_count": 100}
     }
     marker = paginator.get_next_marker(response)
     assert marker is None
@@ -57,7 +53,9 @@ def test_get_next_request_uses_next_link_relative():
         }
     }
 
-    next_url = paginator.get_next_request(response, "https://example.org/api/data/activity?offset=0&limit=20")
+    next_url = paginator.get_next_request(
+        response, "https://example.org/api/data/activity?offset=0&limit=20"
+    )
 
     assert next_url == "https://example.org/api/data/activity?offset=20&limit=20"
 
@@ -74,6 +72,10 @@ def test_get_next_request_builds_from_offset_when_no_next():
         }
     }
 
-    next_url = paginator.get_next_request(response, "https://example.org/api/data/activity?offset=0&limit=20&foo=bar")
+    next_url = paginator.get_next_request(
+        response, "https://example.org/api/data/activity?offset=0&limit=20&foo=bar"
+    )
 
-    assert next_url == "https://example.org/api/data/activity?offset=20&limit=20&foo=bar"
+    assert (
+        next_url == "https://example.org/api/data/activity?offset=20&limit=20&foo=bar"
+    )

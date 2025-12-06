@@ -19,7 +19,7 @@ def test_validation_service_success():
     # Arrange
     mock_registry = MagicMock(spec=SchemaProviderABC)
     mock_registry.get_schema.return_value = DummySchema
-    
+
     service = ValidationService(schema_provider=mock_registry)
     df = pd.DataFrame({"id": [1, 2], "name": ["a", "b"]})
 
@@ -36,15 +36,12 @@ def test_validation_service_failure():
     # Arrange
     mock_registry = MagicMock(spec=SchemaProviderABC)
     mock_registry.get_schema.return_value = DummySchema
-    
+
     service = ValidationService(schema_provider=mock_registry)
     df = pd.DataFrame({"id": [-1], "name": ["a"]})  # Invalid id
 
     # Act & Assert
-    with pytest.raises(
-        ValueError,
-        match="Validation failed for test_entity"
-    ):
+    with pytest.raises(ValueError, match="Validation failed for test_entity"):
         service.validate(df, "test_entity")
 
 

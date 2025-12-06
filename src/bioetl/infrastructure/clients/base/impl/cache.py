@@ -102,4 +102,3 @@ class FileCacheImpl(CacheABC[T]):
         digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
         safe_name = f"{digest}.cache"
         return self._cache_dir / safe_name
-

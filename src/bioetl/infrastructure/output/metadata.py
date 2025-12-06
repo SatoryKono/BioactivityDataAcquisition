@@ -1,6 +1,7 @@
 """
 Metadata builder service for pipeline outputs.
 """
+
 from pathlib import Path
 from typing import Any
 
@@ -63,9 +64,7 @@ def build_run_metadata(
     return meta
 
 
-def build_dry_run_metadata(
-    context: RunContext, row_count: int
-) -> dict[str, Any]:
+def build_dry_run_metadata(context: RunContext, row_count: int) -> dict[str, Any]:
     """
     Создает метаданные для dry run.
     """
@@ -80,4 +79,3 @@ def build_dry_run_metadata(
     }
     meta.update(context.metadata)
     return meta
-

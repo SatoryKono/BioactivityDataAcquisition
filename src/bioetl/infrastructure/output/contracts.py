@@ -8,6 +8,7 @@ import pandas as pd
 @dataclass
 class WriteResult:
     """Результат записи."""
+
     path: Path
     row_count: int
     duration_sec: float
@@ -71,4 +72,3 @@ class QualityReportABC(ABC):
     @abstractmethod
     def build_correlation_report(self, df: pd.DataFrame) -> pd.DataFrame:
         """Строит корреляционную матрицу по числовым колонкам."""
-

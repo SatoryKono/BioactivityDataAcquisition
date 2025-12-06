@@ -28,10 +28,7 @@ def test_normalize_scalar():
 
 class MockNormalizationConfig:
     def __init__(
-        self,
-        case_sensitive_fields=None,
-        id_fields=None,
-        custom_normalizers=None
+        self, case_sensitive_fields=None, id_fields=None, custom_normalizers=None
     ):
         self.case_sensitive_fields = case_sensitive_fields or []
         self.id_fields = id_fields or []
@@ -98,8 +95,7 @@ def test_normalization_service_full():
 def test_normalization_service_raises_on_invalid_custom_value():
     norm_config = MockNormalizationConfig()
     config = MockConfig(
-        [{"name": "fail_field", "data_type": "string"}],
-        normalization=norm_config
+        [{"name": "fail_field", "data_type": "string"}], normalization=norm_config
     )
 
     service = NormalizationService(config)
@@ -122,7 +118,7 @@ def test_normalize_scalar_edge_cases():
     assert normalize_scalar(None) is None
     assert normalize_scalar([]) is None
     assert normalize_scalar({}) is None
-    assert normalize_scalar(float('nan')) is None
+    assert normalize_scalar(float("nan")) is None
 
     # Boolean pass-through (not explicitly handled but falls to return value)
     assert normalize_scalar(True) is True
@@ -145,11 +141,13 @@ def test_normalization_service_id_detection():
     config = MockConfig(fields)
     service = NormalizationService(config)
 
-    df = pd.DataFrame({
-        "some_chembl_id": [" lower "],
-        "id_prefix": [" lower "],
-        "normal_col": [" UPPER "],
-    })
+    df = pd.DataFrame(
+        {
+            "some_chembl_id": [" lower "],
+            "id_prefix": [" lower "],
+            "normal_col": [" UPPER "],
+        }
+    )
 
     res = service.normalize_fields(df)
 
@@ -164,9 +162,7 @@ def test_normalization_service_id_detection():
 def test_normalization_service_case_sensitive():
     """Test case sensitive field normalization."""
     fields = [{"name": "secret_code", "data_type": "string"}]
-    norm_config = MockNormalizationConfig(
-        case_sensitive_fields=["secret_code"]
-    )
+    norm_config = MockNormalizationConfig(case_sensitive_fields=["secret_code"])
     config = MockConfig(fields, normalization=norm_config)
 
     service = NormalizationService(config)
@@ -182,7 +178,7 @@ def test_normalization_service_missing_field():
     """Test graceful handling of configured fields missing from DataFrame."""
     fields = [
         {"name": "exists", "data_type": "string"},
-        {"name": "missing", "data_type": "string"}
+        {"name": "missing", "data_type": "string"},
     ]
     config = MockConfig(fields)
     service = NormalizationService(config)
@@ -290,9 +286,7 @@ def test_normalization_service_custom_container_normalizer():
     def list_producer(val):
         return ["a", "b"]
 
-    with patch.dict(
-        CUSTOM_FIELD_NORMALIZERS, {"custom_container": list_producer}
-    ):
+    with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"custom_container": list_producer}):
         df = pd.DataFrame({"custom_container": ["input"]})
         res = service.normalize_fields(df)
         # Should be serialized list "a|b"

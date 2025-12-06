@@ -20,17 +20,11 @@ class ChemblPaginatorImpl(PaginatorABC):
         meta = response.get("page_meta", {})
         next_meta = meta.get("next")
         if next_meta:
-            # ChEMBL returns metadata but simple offset calculation is safer if we control state
-            # Here we just return offset + limit if next is present, or parse "next" url.
-            # For simplicity, we'll assume the caller manages offset state or we parse it.
-            # Let's parse offset from next URL if possible, or just return a signal.
-            # Since SourceClient usually manages loop, Paginator should return next state.
-            # But contracts say get_next_marker(response).
-            
+            # Prefer offset calculation even if next URL is provided.
             limit = meta.get("limit", 0)
             offset = meta.get("offset", 0)
             total = meta.get("total_count", 0)
-            
+
             if offset + limit < total:
                 return offset + limit
         return None
@@ -56,7 +50,11 @@ class ChemblPaginatorImpl(PaginatorABC):
         total = meta.get("total_count")
 
         if next_link:
-            return urljoin(current_url or "", str(next_link)) if current_url else str(next_link)
+            return (
+                urljoin(current_url or "", str(next_link))
+                if current_url
+                else str(next_link)
+            )
 
         if None in (limit, offset, total):
             return None
@@ -74,4 +72,3 @@ class ChemblPaginatorImpl(PaginatorABC):
         query["limit"] = [str(limit)]
         new_query = urlencode(query, doseq=True)
         return parsed._replace(query=new_query).geturl()
-

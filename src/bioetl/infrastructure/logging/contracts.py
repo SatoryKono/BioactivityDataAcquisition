@@ -75,4 +75,3 @@ class TracerABC(ABC):
     @abstractmethod
     def inject_context(self, headers: dict[str, str]) -> None:
         """Внедряет контекст трассировки в заголовки."""
-

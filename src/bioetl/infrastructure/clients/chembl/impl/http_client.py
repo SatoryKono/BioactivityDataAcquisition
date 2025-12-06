@@ -1,6 +1,7 @@
 """
 Implementation of ChEMBL HTTP client.
 """
+
 from __future__ import annotations
 
 from typing import Any, Iterator
@@ -44,9 +45,12 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         elif client is not None:
             self.http = client.middleware
         else:
-            # Fallback stub to keep attribute accessible in tests; real runs must inject middleware
+            # Fallback stub to keep attribute accessible in tests;
+            # real runs must inject middleware.
             class _NullHttpMiddleware:
-                def request(self, method: str, url: str, **_: Any) -> Any:  # pragma: no cover
+                def request(
+                    self, method: str, url: str, **_: Any
+                ) -> Any:  # pragma: no cover
                     raise RuntimeError("HTTP middleware is not configured")
 
             self.http = _NullHttpMiddleware()

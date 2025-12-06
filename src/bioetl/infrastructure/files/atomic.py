@@ -1,6 +1,7 @@
 """
 Atomic file operation utilities.
 """
+
 import os
 import shutil
 import time
@@ -15,9 +16,7 @@ class AtomicFileOperation:
     Утилита для атомарных операций с файлами.
     """
 
-    def write_atomic(
-        self, path: Path, write_fn: Callable[[Path], None]
-    ) -> None:
+    def write_atomic(self, path: Path, write_fn: Callable[[Path], None]) -> None:
         """
         Выполняет атомарную запись через временный файл.
 

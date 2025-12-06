@@ -4,6 +4,7 @@ Generic ChEMBL Entity Pipeline.
 Replaces specific pipeline implementations (Activity, Assay, etc.)
 with a configurable generic implementation.
 """
+
 from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC

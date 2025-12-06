@@ -61,9 +61,7 @@ def _violations_for_import_from(node: ast.ImportFrom, path: Path) -> list[str]:
         )
     )
     violations.extend(
-        _alias_violations(
-            path, node, module=module, is_relative=node.level > 0
-        )
+        _alias_violations(path, node, module=module, is_relative=node.level > 0)
     )
     return violations
 
@@ -112,4 +110,3 @@ def test_domain_does_not_depend_on_infrastructure() -> None:
     if violations:
         formatted = "\n".join(sorted(set(violations)))
         pytest.fail(f"Forbidden imports detected:\n{formatted}")
-

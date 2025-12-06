@@ -8,7 +8,11 @@ def _flatten_value(value: Any) -> Any:
         return None
 
     if isinstance(value, dict):
-        parts = [f"{key}:{_scalar_to_str(val)}" for key, val in value.items() if val not in (None, "")]
+        parts = [
+            f"{key}:{_scalar_to_str(val)}"
+            for key, val in value.items()
+            if val not in (None, "")
+        ]
         return "|".join(parts) if parts else None
 
     if isinstance(value, list):

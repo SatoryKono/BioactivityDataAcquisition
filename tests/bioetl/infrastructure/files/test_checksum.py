@@ -49,4 +49,3 @@ def test_compute_files_sha256_empty_list(tmp_path):
     checksums = compute_files_sha256([])
 
     assert checksums == {}
-
