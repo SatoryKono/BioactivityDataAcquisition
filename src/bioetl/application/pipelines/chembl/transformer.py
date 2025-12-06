@@ -9,7 +9,7 @@ from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaContract
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class ChemblTransformerImpl(TransformerABC):
