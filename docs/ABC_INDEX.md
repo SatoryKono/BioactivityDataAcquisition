@@ -71,10 +71,10 @@
   - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации
 
 - `ValidatorABC` — `bioetl.domain.validation.contracts.ValidatorABC`
-  - Валидация данных.
+  - Валидация данных. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorImpl`` (`bioetl.infrastructure.validation.impl.pandera_validator`).
 
 - `SchemaProviderABC` — `bioetl.domain.validation.contracts.SchemaProviderABC`
-  - Провайдер схем данных.
+  - Провайдер схем данных. Default factory: ``bioetl.infrastructure.validation.factories.default_schema_provider_factory``. Implementations: ``SchemaRegistry`` (`bioetl.domain.schemas.registry.SchemaRegistry`).
 
 - `WriterABC` — `bioetl.domain.clients.base.output.contracts.WriterABC`
   - Запись данных в файл. Default factory: ``bioetl.infrastructure.output.factories.default_writer``. Implementations: ``CsvWriterImpl``, ``ParquetWriterImpl``.

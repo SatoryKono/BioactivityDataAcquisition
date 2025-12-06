@@ -1,4 +1,3 @@
-
 import pandas as pd
 
 from bioetl.domain.validation.contracts import (
@@ -46,8 +45,6 @@ class ValidationService:
         result: ValidationResult = validator.validate(df)
 
         if not result.is_valid:
-            raise ValueError(
-                f"Validation failed for {entity_name}: {result.errors}"
-            )
+            raise ValueError(f"Validation failed for {entity_name}: {result.errors}")
 
         return result.validated_df if result.validated_df is not None else df

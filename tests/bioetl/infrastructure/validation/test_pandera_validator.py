@@ -73,4 +73,3 @@ def test_schema_provider_factory_explicit():
     factory = PanderaSchemaProviderFactory()
     provider = factory.create_schema_provider()
     assert isinstance(provider, SchemaRegistry)
-
