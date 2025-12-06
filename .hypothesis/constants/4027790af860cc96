@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\provider_registry.py
+# hypothesis_version: 6.140.3
+
+['get_provider', 'list_providers', 'register_provider']

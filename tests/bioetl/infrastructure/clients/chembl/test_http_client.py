@@ -5,24 +5,24 @@ from unittest.mock import Mock
 
 import pytest
 
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
 from bioetl.infrastructure.clients.chembl.request_builder import (
-    ChemblRequestBuilder,
+    ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
+    ChemblResponseParserImpl,
 )
 
 
 @pytest.fixture(name="mock_request_builder")
 def fixture_request_builder():
-    """Mock ChemblRequestBuilder."""
-    builder = Mock(spec=ChemblRequestBuilder)
+    """Mock ChemblRequestBuilderImpl."""
+    builder = Mock(spec=ChemblRequestBuilderImpl)
     builder.for_endpoint.return_value = builder
     builder.build.return_value = "http://test-url"
     return builder
@@ -30,8 +30,8 @@ def fixture_request_builder():
 
 @pytest.fixture(name="mock_response_parser")
 def fixture_response_parser():
-    """Mock ChemblResponseParser."""
-    return Mock(spec=ChemblResponseParser)
+    """Mock ChemblResponseParserImpl."""
+    return Mock(spec=ChemblResponseParserImpl)
 
 
 @pytest.fixture(name="mock_rate_limiter")
@@ -127,3 +127,52 @@ def test_rate_limiter_called(client):
 
     client.rate_limiter.wait_if_needed.assert_called()
     client.rate_limiter.acquire.assert_called()
+
+
+def test_iter_pages_fetches_all_pages(client):
+    """iter_pages should continue requesting while next link exists."""
+    first_response = Mock()
+    first_response.json.return_value = {
+        "page_meta": {
+            "next": "/page2",
+            "limit": 20,
+            "offset": 0,
+            "total_count": 40,
+        },
+        "results": [1],
+    }
+    second_response = Mock()
+    second_response.json.return_value = {
+        "page_meta": {
+            "next": None,
+            "limit": 20,
+            "offset": 20,
+            "total_count": 40,
+        },
+        "results": [2],
+    }
+    client.http.request.side_effect = [first_response, second_response]
+
+    pages = list(client.iter_pages("https://example.org/page1"))
+
+    assert pages == [first_response.json.return_value, second_response.json.return_value]
+    assert client.http.request.call_count == 2
+    client.http.request.assert_any_call("GET", "https://example.org/page1")
+    client.http.request.assert_any_call("GET", "https://example.org/page2")
+    assert client.rate_limiter.wait_if_needed.call_count == 2
+    assert client.rate_limiter.acquire.call_count == 2
+
+
+def test_iter_pages_without_next_stops_after_first(client):
+    """iter_pages yields single page when pagination metadata lacks next link."""
+    response = Mock()
+    response.json.return_value = {
+        "page_meta": {"next": None, "limit": 20, "offset": 0, "total_count": 20},
+        "results": [1],
+    }
+    client.http.request.return_value = response
+
+    pages = list(client.iter_pages("https://example.org/page1"))
+
+    assert pages == [response.json.return_value]
+    client.http.request.assert_called_once_with("GET", "https://example.org/page1")

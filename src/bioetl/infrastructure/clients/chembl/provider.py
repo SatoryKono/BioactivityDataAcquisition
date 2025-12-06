@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionService
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.domain.normalization_service import ChemblNormalizationService
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
@@ -10,16 +10,22 @@ from bioetl.domain.provider_registry import (
     register_provider,
 )
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
+from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 class ChemblProviderComponents(
-    ProviderComponents
+    ProviderComponents[
+        ChemblDataClientABC,
+        ChemblExtractionServiceImpl,
+        ChemblNormalizationService,
+        object,
+    ]
 ):
     """Factory set for building ChEMBL provider components."""
 
@@ -27,22 +33,24 @@ class ChemblProviderComponents(
         return create_client(config)
 
     def create_extraction_service(
-        self, client: ChemblDataClientABC, config: ChemblSourceConfig
-    ) -> ChemblExtractionService:
+        self,
+        config: ChemblSourceConfig,
+        *,
+        client: ChemblDataClientABC | None = None,
+    ) -> ChemblExtractionServiceImpl:
         return create_extraction_service(config, client=client)
 
     def create_normalization_service(
         self,
         config: ChemblSourceConfig,
         *,
-        pipeline_config: PipelineConfig | None = None,
         client: ChemblDataClientABC | None = None,
+        pipeline_config: PipelineConfig | None = None,
     ) -> ChemblNormalizationService:
-        _ = config  # keep signature explicit
-        effective_config = pipeline_config
-        if effective_config is None:
+        _ = client  # signature compatibility; normalization independent from client
+        if pipeline_config is None:
             raise ValueError("PipelineConfig is required to build normalization service")
-        return ChemblNormalizationService(effective_config)
+        return ChemblNormalizationService(pipeline_config)
 
 
 def register_chembl_provider() -> ProviderDefinition:

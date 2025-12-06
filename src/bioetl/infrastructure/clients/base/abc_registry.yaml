@@ -2,15 +2,15 @@
 # This file maps abstract component roles to their interface definitions
 # Format: Role: Module.ClassName
 
-SourceClientABC: bioetl.infrastructure.clients.base.contracts.SourceClientABC
-RequestBuilderABC: bioetl.infrastructure.clients.base.contracts.RequestBuilderABC
-ResponseParserABC: bioetl.infrastructure.clients.base.contracts.ResponseParserABC
-PaginatorABC: bioetl.infrastructure.clients.base.contracts.PaginatorABC
-RateLimiterABC: bioetl.infrastructure.clients.base.contracts.RateLimiterABC
-RetryPolicyABC: bioetl.infrastructure.clients.base.contracts.RetryPolicyABC
-CacheABC: bioetl.infrastructure.clients.base.contracts.CacheABC
-SecretProviderABC: bioetl.infrastructure.clients.base.contracts.SecretProviderABC
-SideInputProviderABC: bioetl.infrastructure.clients.base.contracts.SideInputProviderABC
+SourceClientABC: bioetl.domain.clients.base.contracts.SourceClientABC
+RequestBuilderABC: bioetl.domain.clients.base.contracts.RequestBuilderABC
+ResponseParserABC: bioetl.domain.clients.base.contracts.ResponseParserABC
+PaginatorABC: bioetl.domain.clients.base.contracts.PaginatorABC
+RateLimiterABC: bioetl.domain.clients.base.contracts.RateLimiterABC
+RetryPolicyABC: bioetl.domain.clients.base.contracts.RetryPolicyABC
+CacheABC: bioetl.domain.clients.base.contracts.CacheABC
+SecretProviderABC: bioetl.domain.clients.base.contracts.SecretProviderABC
+SideInputProviderABC: bioetl.domain.clients.base.contracts.SideInputProviderABC
 
 StageABC: bioetl.application.pipelines.stages.StageABC
 PipelineHookABC: bioetl.application.pipelines.hooks.PipelineHookABC

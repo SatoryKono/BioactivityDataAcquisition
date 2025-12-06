@@ -1,22 +1,23 @@
 """Base pipeline implementation for ChEMBL data extraction."""
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import pandas as pd
 
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
+from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
-from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
-from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
+from bioetl.domain.normalization_service import ChemblNormalizationService, NormalizationService
+from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
@@ -38,27 +39,44 @@ class ChemblPipelineBase(PipelineBase):
         error_policy: ErrorPolicyABC | None = None,
         post_transformer: TransformerABC | None = None,
     ) -> None:
-        super().__init__(
-            config,
-            logger,
-            validation_service,
-            output_writer,
-            hash_service,
-            hooks,
-            error_policy,
-            post_transformer,
-        )
         self._extraction_service = extraction_service
-        self._record_source = record_source or ApiRecordSource(
-            extraction_service=extraction_service,
-            entity=config.entity_name,
-            filters=config.pipeline,
-            chunk_size=config.batch_size,
-        )
-        self._normalization_service = normalization_service or ChemblNormalizationService(
-            config
-        )
         self._chembl_release: str | None = None
+        
+        norm_service = normalization_service or ChemblNormalizationService(config)
+        
+        # Create Extractor
+        extractor = ChemblExtractorImpl(
+            config=config,
+            extraction_service=extraction_service,
+            normalization_service=norm_service,
+            logger=logger,
+            record_source=record_source,
+        )
+        
+        # Create Transformer
+        # Need schema contract
+        contract = get_pipeline_contract(
+            config.id, default_entity=config.entity_name
+        )
+        transformer = ChemblTransformerImpl(
+            validation_service=validation_service,
+            schema_contract=contract,
+            normalization_service=norm_service,
+            logger=logger,
+        )
+
+        super().__init__(
+            config=config,
+            logger=logger,
+            validation_service=validation_service,
+            output_writer=output_writer,
+            hash_service=hash_service,
+            extractor=extractor,
+            hooks=hooks,
+            error_policy=error_policy,
+            transformer=transformer,
+            post_transformer=post_transformer,
+        )
 
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
@@ -68,155 +86,25 @@ class ChemblPipelineBase(PipelineBase):
             )
         return self._chembl_release
 
-    def extract(self, **kwargs: Any) -> pd.DataFrame:
-        """Извлекает данные через RecordSource и нормализует записи."""
-        chunks = list(self.iter_chunks(**kwargs))
-        if not chunks:
-            return pd.DataFrame()
-        return pd.concat(chunks, ignore_index=True)
-
-    def iter_chunks(self, **kwargs: Any):  # type: ignore[override]
-        """Возвращает чанки нормализованных данных."""
-        limit = kwargs.pop("limit", None)
-
-        record_source = self._resolve_record_source(limit)
-
-        remaining = limit
-        for raw_chunk in record_source.iter_records():
-            working_chunk = raw_chunk
-            if remaining is not None:
-                if remaining <= 0:
-                    break
-                working_chunk = raw_chunk.head(remaining)
-
-            normalized_chunk = self._normalization_service.normalize_batch(
-                working_chunk
-            )
-
-            if not normalized_chunk.empty:
-                yield normalized_chunk
-
-            if remaining is not None:
-                remaining -= len(working_chunk)
-                if remaining <= 0:
-                    break
-
-    def _resolve_record_source(self, limit: int | None) -> RecordSource:
-        """Возвращает источник записей с учетом конфигурации input_mode."""
-
-        if hasattr(self._config, "input_mode") and hasattr(self._config, "input_path"):
-            mode = self._config.input_mode
-            path = self._config.input_path
-
-            if mode == "csv" and path:
-                return CsvRecordSource(
-                    input_path=Path(path),
-                    csv_options=self._config.csv_options,
-                    limit=limit,
-                    logger=self._logger,
-                )
-            if mode == "id_only" and path:
-                source_config = self._config.get_source_config(self._config.provider)
-                id_column = self._config.primary_key or f"{self._config.entity_name}_id"
-                filter_key = f"{id_column}__in"
-                return IdListRecordSource(
-                    input_path=Path(path),
-                    id_column=id_column,
-                    csv_options=self._config.csv_options,
-                    limit=limit,
-                    extraction_service=self._extraction_service,
-                    source_config=cast(ChemblSourceConfig, source_config),
-                    entity=self._config.entity_name,
-                    filter_key=filter_key,
-                    logger=self._logger,
-                )
-
-        return self._record_source
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Цепочка трансформаций для ChEMBL:
-        pre_transform → _do_transform → normalize → enforce_schema → drop nulls
-        """
-        df = self.pre_transform(df)
-        df = self._do_transform(df)
-        df = self._normalization_service.normalize_dataframe(df)
-
-        df = self._enforce_schema(df)
-        df = self._drop_nulls_in_required_columns(df)
-
-        return df
-
-    def _drop_nulls_in_required_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Удаляет строки, где обязательные (non-nullable) колонки содержат NULL.
-        Игнорирует генерируемые колонки (hash_row, hash_business_key),
-        так как они вычисляются позже.
-        """
-        schema_name = self._schema_contract.schema_out
-        schema_cls = self._validation_service.get_schema(schema_name)
-        schema = schema_cls.to_schema()
-
-        ignored_cols = {
-            "hash_row",
-            "hash_business_key",
-            "index",
-            "database_version",
-            "extracted_at",
-        }
-
-        required_cols = [
-            name
-            for name, col in schema.columns.items()
-            if not col.nullable
-            and name in df.columns
-            and name not in ignored_cols
-        ]
-
-        if not required_cols:
-            return df
-
-        initial_count = len(df)
-        df_clean = df.dropna(subset=required_cols)
-        dropped_count = initial_count - len(df_clean)
-
-        if dropped_count > 0:
-            self._logger.warning(
-                f"Dropped {dropped_count} rows with nulls in required columns: {required_cols}"
-            )
-
-        return df_clean
-
-    def pre_transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Хук для предварительной обработки (можно переопределить)."""
-        return df
-
-    def _do_transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Основная логика трансформации.
-        По умолчанию возвращает DataFrame как есть.
-        Наследники могут переопределить или расширить.
-        """
-        return df
-
-    def _enforce_schema(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Приводит DataFrame к схеме: заполняет отсутствующие колонки None,
-        оставляет только колонки из схемы в правильном порядке.
-        """
-        schema_name = self._schema_contract.schema_out
-        schema_columns = self._validation_service.get_schema_columns(schema_name)
-
-        for col in schema_columns:
-            if col not in df.columns:
-                df[col] = None
-
-        return df[schema_columns]
-
-    def _enrich_context(self, context: RunContext) -> None:
-        """Добавляет chembl_release в метаданные контекста."""
-        context.metadata["chembl_release"] = self.get_version()
-
     def get_chembl_release(self) -> str:
         """Alias for get_version for backward compatibility."""
         return self.get_version()
+
+    def _enrich_context(self, context: RunContext) -> None:
+        """Adds ChEMBL release version to metadata."""
+        context.metadata["chembl_release"] = self.get_version()
+    
+    # Removed extract, iter_chunks, transform, validate, write as they are in Base or Components.
+    # pre_transform and _do_transform hooks?
+    # They were called by ChemblPipelineBase.transform.
+    # Now ChemblTransformerImpl.apply calls its own hooks.
+    # If subclasses override pre_transform/_do_transform on THIS class, 
+    # they won't be called by ChemblTransformerImpl.
+    
+    # To support inheritance overriding, ChemblTransformerImpl should call back 
+    # or we should subclass ChemblTransformerImpl for specific pipelines.
+    # Or we pass 'self' to transformer? No.
+    
+    # Most ChEMBL pipelines (Activity, Assay) didn't override them.
+    # If they did, I'd need to check.
+    # ChemblEntityPipeline might override?

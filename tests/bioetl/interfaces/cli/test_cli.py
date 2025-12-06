@@ -15,8 +15,7 @@ sys.modules.setdefault("tqdm", MagicMock())
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
 from bioetl.domain.transform.hash_service import HashService  # noqa: E402
 from bioetl.interfaces.cli import app  # noqa: E402
-from bioetl.infrastructure.config.models import PipelineConfig  # noqa: E402
-from bioetl.schemas.provider_config_schema import ChemblSourceConfig  # noqa: E402
+from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig  # noqa: E402
 
 runner = CliRunner()
 

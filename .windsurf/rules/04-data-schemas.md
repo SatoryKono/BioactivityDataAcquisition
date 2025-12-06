@@ -1,0 +1,18 @@
+> Scope:
+> - USE WHEN defining outputs or touching write paths; enforce Pandera schemas with ordered columns and versioning
+> - Use when editing files matching: `src/bioetl/schemas/**/*.py`, `src/**/*.py`, `docs/schemas/**/*.md`
+# POLICY
+
+- Every output table MUST have a Pandera schema; validate before any write.
+- Enforce fixed column order via `ordered=True`; schema drives `column_order`.
+- Version schemas; document changes and migrations.
+
+## WRITE CONTRACT
+
+- On validation failure: raise, do not write.
+- Nullability explicit for all columns; use `coerce=True` when appropriate.
+- Reference controlled vocabularies (e.g., BAO, UniProt) where applicable.
+
+## REFERENCE
+
+See [docs/styleguide/03-data-schemas.md](../../docs/styleguide/03-data-schemas.md) for detailed documentation.

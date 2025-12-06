@@ -7,9 +7,8 @@ import pytest
 from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.infrastructure.config.models import PipelineConfig, ChemblSourceConfig
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.schemas.provider_config_schema import ChemblSourceConfig
 
 
 class _LoggerStub:
@@ -63,6 +62,8 @@ def test_extract_stage_wraps_client_error(caplog: pytest.LogCaptureFixture, tmp_
 
     output_writer = MagicMock()
 
+    hash_service = MagicMock()
+
     logger = _LoggerStub(logging.getLogger("pipeline-test"))
 
     pipeline = ChemblEntityPipeline(
@@ -71,7 +72,7 @@ def test_extract_stage_wraps_client_error(caplog: pytest.LogCaptureFixture, tmp_
         validation_service=validation_service,
         output_writer=output_writer,
         extraction_service=extraction_service,
-        hash_service=MagicMock(),
+        hash_service=hash_service,
     )
 
     with pytest.raises(PipelineStageError) as exc_info:

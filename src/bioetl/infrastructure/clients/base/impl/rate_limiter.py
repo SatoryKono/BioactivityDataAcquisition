@@ -1,7 +1,7 @@
 import time
 from threading import Lock
 
-from bioetl.infrastructure.clients.base.contracts import RateLimiterABC
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 
 
 class TokenBucketRateLimiterImpl(RateLimiterABC):

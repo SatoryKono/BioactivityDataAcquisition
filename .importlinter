@@ -1,0 +1,12 @@
+[importlinter]
+root_package = bioetl
+
+[contract:domain_no_infrastructure_interfaces]
+name = Domain does not import infrastructure or interfaces
+type = forbidden
+source_modules =
+    bioetl.domain
+forbidden_modules =
+    bioetl.infrastructure
+    bioetl.interfaces
+

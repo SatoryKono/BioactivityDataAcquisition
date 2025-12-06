@@ -9,9 +9,13 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.hooks import PipelineHookABC
-from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
+from bioetl.application.pipelines.hooks_impl import (
+    ContinueOnErrorPolicyImpl,
+    FailFastErrorPolicyImpl,
+)
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.errors import PipelineStageError
+from bioetl.domain.models import RunContext
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import HashColumnsTransformer
 
@@ -48,6 +52,15 @@ def hash_service():
     return HashService()
 
 
+@pytest.fixture
+def default_extractor():
+    extractor = MagicMock()
+    extractor.extract.return_value = [
+        pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})
+    ]
+    return extractor
+
+
 @pytest.mark.unit
 def test_pipeline_run_success(
     mock_config,
@@ -56,6 +69,7 @@ def test_pipeline_run_success(
     mock_output_writer,
     tmp_path,
     hash_service,
+    default_extractor,
 ):
     """Test a successful pipeline run."""
     # Arrange
@@ -65,6 +79,7 @@ def test_pipeline_run_success(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
         hash_service=hash_service,
+        extractor=default_extractor,
     )
 
     output_path = tmp_path / "output.parquet"
@@ -95,6 +110,7 @@ def test_pipeline_dry_run(
     mock_output_writer,
     tmp_path,
     hash_service,
+    default_extractor,
 ):
     """Test a dry run of the pipeline."""
     # Arrange
@@ -104,6 +120,7 @@ def test_pipeline_dry_run(
         mock_validation_service,
         mock_output_writer,
         hash_service,
+        extractor=default_extractor,
     )
 
     # Act
@@ -128,6 +145,7 @@ def test_pipeline_hooks(
     mock_validation_service,
     mock_output_writer,
     hash_service,
+    default_extractor,
 ):
     """Test that hooks are called correctly."""
     # Arrange
@@ -137,6 +155,7 @@ def test_pipeline_hooks(
         mock_validation_service,
         mock_output_writer,
         hash_service,
+        extractor=default_extractor,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.add_hook(mock_hook)
@@ -160,6 +179,7 @@ def test_pipeline_error_hooks(
     mock_validation_service,
     mock_output_writer,
     hash_service,
+    default_extractor,
 ):
     """Test that error hooks are called on failure."""
     # Arrange
@@ -169,12 +189,15 @@ def test_pipeline_error_hooks(
         mock_validation_service,
         mock_output_writer,
         hash_service,
+        extractor=default_extractor,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.add_hook(mock_hook)
 
     # Mock extract to fail
-    pipeline.extract = MagicMock(side_effect=ValueError("Extraction failed"))
+    pipeline._extractor.extract = MagicMock(
+        side_effect=ValueError("Extraction failed")
+    )
 
     # Act & Assert
     with pytest.raises(PipelineStageError) as exc_info:
@@ -200,6 +223,7 @@ def test_error_policy_skip_stage(
     mock_output_writer,
     tmp_path,
     hash_service,
+    default_extractor,
 ):
     """Пайплайн продолжает работу при политике SKIP."""
 
@@ -210,8 +234,9 @@ def test_error_policy_skip_stage(
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(),
         hash_service=hash_service,
+        extractor=default_extractor,
     )
-    pipeline.extract = MagicMock(side_effect=ValueError("boom"))
+    pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)
 
@@ -227,6 +252,7 @@ def test_error_policy_retry(
     mock_output_writer,
     tmp_path,
     hash_service,
+    default_extractor,
 ):
     """Пайплайн повторяет стадию при политике RETRY."""
 
@@ -237,9 +263,10 @@ def test_error_policy_retry(
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
         hash_service=hash_service,
+        extractor=default_extractor,
     )
 
-    pipeline.extract = MagicMock(
+    pipeline._extractor.extract = MagicMock(
         side_effect=[ValueError("temporary"), pd.DataFrame({"id": [1]})]
     )
 
@@ -248,6 +275,80 @@ def test_error_policy_retry(
     assert result.success
     assert result.row_count == 1
     assert pipeline.extract.call_count == 2
+
+
+@pytest.mark.unit
+def test_error_policy_retry_callback_and_skip(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    hash_service,
+    default_extractor,
+):
+    """Политика RETRY вызывает on_retry и пропускает стадию после лимита."""
+    pipeline = ConcretePipeline(
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
+        hash_service=hash_service,
+        extractor=default_extractor,
+    )
+
+    attempts = {"count": 0}
+
+    def failing_action():
+        attempts["count"] += 1
+        raise ValueError("unstable")
+
+    on_retry = MagicMock()
+    context = RunContext(
+        entity_name=mock_config.entity_name,
+        provider=pipeline._provider_id.value,  # noqa: SLF001
+    )
+
+    result_df = pipeline._error_policy_manager.execute(  # noqa: SLF001
+        "extract",
+        context,
+        failing_action,
+        on_retry=on_retry,
+    )
+
+    assert isinstance(result_df, pd.DataFrame)
+    assert result_df.empty
+    assert attempts["count"] == 2
+    on_retry.assert_called_once()
+    assert pipeline._error_policy_manager.last_error is not None  # noqa: SLF001
+    assert pipeline._error_policy_manager.last_error.attempt == 2  # noqa: SLF001
+
+
+@pytest.mark.unit
+def test_error_policy_failfast_raises(
+    mock_config,
+    mock_logger,
+    mock_validation_service,
+    mock_output_writer,
+    tmp_path,
+    hash_service,
+    default_extractor,
+):
+    """FailFast останавливает пайплайн при первой ошибке."""
+    pipeline = ConcretePipeline(
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        output_writer=mock_output_writer,
+        error_policy=FailFastErrorPolicyImpl(),
+        hash_service=hash_service,
+        extractor=default_extractor,
+    )
+    pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
+
+    with pytest.raises(PipelineStageError):
+        pipeline.run(output_path=tmp_path, dry_run=True)
+    assert pipeline.extract.call_count == 1
 
 
 @pytest.mark.unit
@@ -286,6 +387,8 @@ def test_pipeline_dry_run_metadata_and_stages(
     hash_service,
 ):
     """Dry-run returns accurate stage info and metadata."""
+    extractor = MagicMock()
+    extractor.extract.return_value = [small_pipeline_df.copy()]
     pipeline = DatasetPipeline(
         config=pipeline_test_config,
         logger=mock_logger,
@@ -293,6 +396,7 @@ def test_pipeline_dry_run_metadata_and_stages(
         output_writer=mock_output_writer,
         hash_service=hash_service,
         dataset=small_pipeline_df,
+        extractor=extractor,
     )
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)

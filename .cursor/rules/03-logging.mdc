@@ -1,10 +1,10 @@
 ---
-trigger: model_decision
 description: USE WHEN adding logging; require UnifiedLogger, structured events, redaction, run context
 globs: ["src/**/*.py"]
+alwaysApply: false
 ---
 
-# Logging Rules
+# Logging rules
 
 ## Mandatory
 
@@ -24,4 +24,4 @@ log.info("Extraction completed", source="chembl", rows=len(df), duration_ms=elap
 
 ## Reference
 
-See `docs/02-pipelines/02-logging-and-configuration.md` for detailed documentation.
+See `docs/infrastructure/logging/00-index.md` for detailed documentation.
