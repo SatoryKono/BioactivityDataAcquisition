@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from bioetl.domain.transform.impl.normalize import normalize_scalar
+from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
 from bioetl.domain.transform.normalizers.registry import (
     CUSTOM_FIELD_NORMALIZERS,
 )

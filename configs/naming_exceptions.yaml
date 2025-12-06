@@ -339,13 +339,13 @@ exceptions:
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/domain/transform/impl/hasher.py
+  - path: src/bioetl/infrastructure/transform/impl/hasher.py
     rule_id: FUNC_PREFIX
     reason: "Hasher methods (normalize_unicode, format_float...)"
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/domain/transform/impl/normalize.py
+  - path: src/bioetl/infrastructure/transform/impl/normalize.py
     rule_id: FUNC_PREFIX
     reason: "Normalize methods"
     owner: domain

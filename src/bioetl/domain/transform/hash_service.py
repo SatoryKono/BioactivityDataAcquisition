@@ -4,7 +4,6 @@ from typing import Callable
 import pandas as pd
 
 from bioetl.domain.transform.contracts import HasherABC, HashServiceABC
-from bioetl.domain.transform.impl.hasher import HasherImpl
 
 __all__ = ["HashService", "HashServiceImpl"]
 
@@ -16,10 +15,10 @@ class HashServiceImpl(HashServiceABC):
 
     def __init__(
         self,
-        hasher: HasherABC | None = None,
+        hasher: HasherABC,
         now_provider: Callable[[], datetime] | None = None,
     ) -> None:
-        self._hasher = hasher or HasherImpl()
+        self._hasher = hasher
         self._index_counter = 0
         self._now_provider = now_provider or (lambda: datetime.now(timezone.utc))
         self._extracted_at: str | None = None

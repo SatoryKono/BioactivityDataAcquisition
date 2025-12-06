@@ -2,7 +2,9 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from bioetl.domain.normalization_service import ChemblNormalizationService
+from bioetl.infrastructure.transform.impl.chembl_normalization_service import (
+    ChemblNormalizationService,
+)
 from bioetl.domain.transform.contracts import NormalizationConfig
 
 

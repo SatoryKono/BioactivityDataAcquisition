@@ -38,17 +38,17 @@ ValidatorABC:
     Pandera: bioetl.domain.validation.impl.pandera_validator.PanderaValidatorImpl
 
 NormalizationServiceABC:
-  default_factory: bioetl.domain.transform.factories.default_normalization_service
+  default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
   implementations:
-    Default: bioetl.domain.transform.impl.normalize.NormalizationServiceImpl
+    Default: bioetl.infrastructure.transform.impl.normalization_service_impl.NormalizationServiceImpl
 
 HasherABC:
-  default_factory: bioetl.domain.transform.factories.default_hasher
+  default_factory: bioetl.infrastructure.transform.factories.default_hasher
   implementations:
-    Blake2b: bioetl.domain.transform.impl.hasher.HasherImpl
+    Blake2b: bioetl.infrastructure.transform.impl.hasher.HasherImpl
 
 HashServiceABC:
-  default_factory: bioetl.domain.transform.factories.default_hash_service
+  default_factory: bioetl.infrastructure.transform.factories.default_hash_service
   implementations:
     Default: bioetl.domain.transform.hash_service.HashServiceImpl
 
