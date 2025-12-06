@@ -62,6 +62,23 @@ class LoggingConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class MetricsConfig(BaseModel):
+    """Конфигурация экспорта метрик."""
+
+    enabled: bool = True
+    port: int = 9108
+    address: str = "0.0.0.0"
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("port")
+    @classmethod
+    def validate_port(cls, value: int) -> int:
+        if value <= 0 or value > 65535:
+            raise ValueError("metrics.port must be between 1 and 65535")
+        return value
+
+
 class DeterminismConfig(BaseModel):
     """Конфигурация детерминизма."""
 
@@ -181,6 +198,7 @@ class PipelineConfig(BaseModel):
     client: ClientConfig = Field(default_factory=ClientConfig)
     storage: StorageConfig = Field(default_factory=StorageConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    metrics: MetricsConfig = Field(default_factory=MetricsConfig)
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
     qc: QcConfig = Field(default_factory=QcConfig)
     hashing: HashingConfig = Field(default_factory=HashingConfig)
@@ -269,6 +287,7 @@ __all__ = [
     "BusinessKeyConfig",
     "InterfaceFeaturesConfig",
     "LoggingConfig",
+    "MetricsConfig",
     "NormalizationConfig",
     "PaginationConfig",
     "PipelineConfig",
