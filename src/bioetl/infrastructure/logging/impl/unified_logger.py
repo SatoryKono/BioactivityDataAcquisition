@@ -1,17 +1,18 @@
-from typing import Any, Self
+"""Structlog-based unified logger implementation."""
+
+from __future__ import annotations
 
 from typing import Any, Self
 
 import structlog
 from structlog.stdlib import BoundLogger
 
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.observability import LoggingPort
 
 
-class UnifiedLoggerImpl(LoggingPort):
-    """
-    Реализация логгера на основе structlog.
-    """
+class UnifiedLoggerImpl(LoggerAdapterABC, LoggingPort):
+    """Реализация структурированного логгера на базе structlog."""
 
     def __init__(self, logger: BoundLogger | None = None) -> None:
         self._logger = logger or structlog.get_logger()
@@ -30,3 +31,6 @@ class UnifiedLoggerImpl(LoggingPort):
 
     def bind(self, **ctx: Any) -> Self:
         return self.__class__(self._logger.bind(**ctx))
+
+
+__all__ = ["UnifiedLoggerImpl"]
