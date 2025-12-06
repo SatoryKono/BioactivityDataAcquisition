@@ -48,7 +48,9 @@ class MetadataWriterABC(ABC):
         """Записывает метаданные (yaml)."""
 
     @abstractmethod
-    def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
+    def write_qc_report(
+        self, df: pd.DataFrame, path: Path, *, min_coverage: float | None = None
+    ) -> None:
         """Записывает отчет качества."""
 
     @abstractmethod
