@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Protocol, TypedDict
+from typing import Any, Protocol, TypedDict, cast
+
+import pandas as pd
 
 from bioetl.domain.contracts import ExtractionServiceABC
 
@@ -58,4 +60,29 @@ class ApiRecordSource(RecordSource):
         for raw_batch in self._extraction_service.iter_extract(
             self._entity, chunk_size=self._chunk_size, **filters
         ):
-            yield list(raw_batch)
+            yield self._coerce_batch(raw_batch)
+
+    def _coerce_batch(self, raw_batch: Any) -> list[RawRecord]:
+        """
+        Normalize provider batches to a list of raw records.
+
+        Supports DataFrame, mapping, iterable of mappings, and None.
+        """
+        if raw_batch is None:
+            return []
+
+        if isinstance(raw_batch, pd.DataFrame):
+            return cast(list[RawRecord], raw_batch.to_dict(orient="records"))
+
+        if isinstance(raw_batch, dict):
+            return [cast(RawRecord, raw_batch)]
+
+        if isinstance(raw_batch, list):
+            return cast(list[RawRecord], raw_batch)
+
+        if isinstance(raw_batch, Iterable) and not isinstance(raw_batch, (str, bytes)):
+            return cast(list[RawRecord], list(raw_batch))
+
+        raise TypeError(
+            "iter_extract must yield DataFrame, mapping, or iterable of mappings."
+        )
