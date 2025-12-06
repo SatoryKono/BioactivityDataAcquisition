@@ -42,7 +42,8 @@ class ProgressReporterABC(ABC):
     """
     Интерфейс отчетности о прогрессе.
 
-    Default factory: ``bioetl.infrastructure.logging.factories.default_progress_reporter``.
+    Default factory:
+    ``bioetl.infrastructure.logging.factories.default_progress_reporter``.
     Implementations: ``TqdmProgressReporterImpl``.
     """
 
