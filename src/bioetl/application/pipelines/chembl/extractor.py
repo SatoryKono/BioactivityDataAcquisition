@@ -13,11 +13,11 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -79,7 +79,12 @@ class ChemblExtractorImpl(ExtractorABC):
         csv_options: dict[str, Any] | CsvInputOptions = (
             getattr(self.config, "csv_options", None) or {}
         )
-        batch_size = getattr(self.config, "batch_size", None)
+        raw_batch_size = getattr(self.config, "batch_size", None)
+        batch_size = (
+            int(raw_batch_size)
+            if isinstance(raw_batch_size, (int, float)) and raw_batch_size > 0
+            else None
+        )
 
         if mode == "auto_detect" and input_path:
             mode = "csv"

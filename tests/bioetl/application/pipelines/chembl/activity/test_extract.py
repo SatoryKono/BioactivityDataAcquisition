@@ -136,7 +136,9 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     mock_extraction_service.request_batch.assert_not_called()
 
 
-def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path, source_config):
+def test_extract_ids_only_csv(
+    pipeline, mock_extraction_service, tmp_path, source_config
+) -> None:
     """Test extraction fetches data by IDs when CSV contains only IDs."""
     csv_path = tmp_path / "activity_ids.csv"
     ids_df = pd.DataFrame({"activity_id": [100, 101, 102]})
@@ -156,6 +158,7 @@ def test_extract_ids_only_csv(pipeline, mock_extraction_service, tmp_path, sourc
         entity="activity",
         filter_key="activity_id__in",
         logger=cast(LoggerAdapterABC, MagicMock()),
+        chunk_size=None,
     )
     pipeline._extractor.record_source = id_list_record_source
 
@@ -215,6 +218,7 @@ def test_extract_batch_size_from_config(
         entity="activity",
         filter_key="activity_id__in",
         logger=cast(LoggerAdapterABC, MagicMock()),
+        chunk_size=None,
     )
     pipeline._extractor.record_source = id_list_record_source
 
@@ -234,7 +238,9 @@ def test_extract_batch_size_from_config(
     assert calls[2][0][1] == ["5"]
 
 
-def test_extract_missing_column(pipeline, mock_extraction_service, tmp_path, source_config):
+def test_extract_missing_column(
+    pipeline, mock_extraction_service, tmp_path, source_config
+) -> None:
     """Test validation error when ID column is missing."""
     csv_path = tmp_path / "bad.csv"
     pd.DataFrame({"wrong_col": [1]}).to_csv(csv_path, index=False)
@@ -253,6 +259,7 @@ def test_extract_missing_column(pipeline, mock_extraction_service, tmp_path, sou
         entity="activity",
         filter_key="activity_id__in",
         logger=cast(LoggerAdapterABC, MagicMock()),
+        chunk_size=None,
     )
     pipeline._extractor.record_source = id_list_record_source
 
