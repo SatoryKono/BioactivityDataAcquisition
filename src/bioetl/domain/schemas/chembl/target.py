@@ -7,25 +7,6 @@ from bioetl.domain.transform.normalizers import (
     UNIPROT_ID_REGEX,
 )
 
-OUTPUT_COLUMN_ORDER: list[str] = [
-    "target_chembl_id",
-    "pref_name",
-    "score",
-    "organism",
-    "target_type",
-    "tax_id",
-    "species_group_flag",
-    "target_components",
-    "cross_references",
-    "uniprot_id",
-    "hash_row",
-    "hash_business_key",
-    "index",
-    "database_version",
-    "extracted_at",
-]
-
-
 class TargetSchema(pa.DataFrameModel):
     """Schema for biological target data."""
     target_chembl_id: Series[str] = pa.Field(
