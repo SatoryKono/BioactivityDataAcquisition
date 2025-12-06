@@ -3,12 +3,12 @@
 from collections.abc import Callable
 
 from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC
 from bioetl.domain.providers import ProviderId
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class ErrorPolicyManager:

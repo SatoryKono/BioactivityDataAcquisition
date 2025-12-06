@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.clients.base.output.contracts import WriterABC, WriteResult
+from bioetl.infrastructure.output.column_order import apply_column_order
 
 
 class BaseWriterImpl(WriterABC):

@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 from pydantic import AnyHttpUrl
 
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import (
     ChemblSourceConfig,
     HashingConfig,
@@ -22,7 +23,6 @@ from bioetl.domain.configs import (
 )
 from bioetl.domain.models import RunContext
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 # Ensure src is on sys.path even if pytest pythonpath is ignored by runners
@@ -128,7 +128,7 @@ def mock_output_writer():
     """Create a mock output writer."""
     from pathlib import Path
 
-    from bioetl.infrastructure.output.contracts import WriteResult
+    from bioetl.clients.base.output.contracts import WriteResult
 
     writer = MagicMock(spec=UnifiedOutputWriter)
     writer.write_result.return_value = WriteResult(

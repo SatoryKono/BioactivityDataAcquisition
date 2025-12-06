@@ -96,10 +96,22 @@ def test_deep_merge():
 
 def test_profile_not_found_raises(tmp_path: Path):
     config_path = tmp_path / "config.yaml"
-    config_path.write_text(
-        "extends: missing\nprovider: chembl\nentity: e\ninput_mode: auto_detect\ninput_path: null\noutput_path: /tmp/out\nbatch_size: 1\nprovider_config:\n  provider: chembl\n  base_url: https://www.ebi.ac.uk/chembl/api/data\n  timeout_sec: 30\n  max_retries: 3\n  rate_limit_per_sec: 10.0\n",
-        encoding="utf-8",
+    config_content = (
+        "extends: missing\n"
+        "provider: chembl\n"
+        "entity: e\n"
+        "input_mode: auto_detect\n"
+        "input_path: null\n"
+        "output_path: /tmp/out\n"
+        "batch_size: 1\n"
+        "provider_config:\n"
+        "  provider: chembl\n"
+        "  base_url: https://www.ebi.ac.uk/chembl/api/data\n"
+        "  timeout_sec: 30\n"
+        "  max_retries: 3\n"
+        "  rate_limit_per_sec: 10.0\n"
     )
+    config_path.write_text(config_content, encoding="utf-8")
     providers_file = tmp_path / "providers.yaml"
     _write_providers(providers_file)
 

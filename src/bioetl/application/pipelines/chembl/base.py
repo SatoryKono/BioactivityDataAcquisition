@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.models import RunContext
@@ -16,7 +17,6 @@ from bioetl.domain.transform.factories import default_normalization_service
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 

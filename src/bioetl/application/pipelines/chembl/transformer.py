@@ -4,12 +4,12 @@ ChEMBL data transformer implementation.
 
 import pandas as pd
 
+from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaContract
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
 
 
 class ChemblTransformerImpl(TransformerABC):
