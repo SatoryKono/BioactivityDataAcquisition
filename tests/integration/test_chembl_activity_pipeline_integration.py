@@ -7,14 +7,13 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.config_loader import load_pipeline_config_from_path
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
-from bioetl.infrastructure.config.resolver import ConfigResolver
 
 sys.modules.setdefault("tqdm", MagicMock())
 
@@ -32,8 +31,10 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         lambda self: "chembl_integration",
     )
 
-    resolver = ConfigResolver(loader=load_pipeline_config_from_path)
-    config = resolver.resolve("chembl_activity_test.yaml")
+    config = build_runtime_config(
+        config_path=Path("tests/fixtures/configs/chembl_activity_test.yaml"),
+        configs_root=Path("tests/fixtures/configs"),
+    )
     config.storage.output_path = str(tmp_path / "output")
 
     registry = load_provider_registry()

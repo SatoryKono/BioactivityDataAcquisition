@@ -13,7 +13,7 @@ from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
-from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
@@ -248,7 +248,7 @@ class PipelineBase(ABC):
         reset_iterator()
         while True:
             try:
-                raw_chunk = self._error_policy_manager.execute(
+                raw_chunk_obj = self._error_policy_manager.execute(
                     "extract",
                     context,
                     lambda: next(chunk_iterator),  # type: ignore
@@ -258,7 +258,12 @@ class PipelineBase(ABC):
                 break
 
             counters["extract_chunks"] += 1
-            raw_chunk = raw_chunk if raw_chunk is not None else pd.DataFrame()
+            if raw_chunk_obj is None:
+                raw_chunk: pd.DataFrame = pd.DataFrame()
+            elif isinstance(raw_chunk_obj, pd.DataFrame):
+                raw_chunk = raw_chunk_obj
+            else:
+                raise TypeError("Extractor must yield pandas DataFrame chunks.")
             counters["extract_count"] += len(raw_chunk)
 
             (
@@ -343,7 +348,7 @@ class PipelineBase(ABC):
             else pd.DataFrame()
         )
 
-        write_result = self._error_policy_manager.execute(
+        write_result_obj = self._error_policy_manager.execute(
             "write",
             context,
             lambda: self.write(
@@ -352,8 +357,11 @@ class PipelineBase(ABC):
                 context,
             ),
         )
-        if write_result is None:
+        if write_result_obj is None:
             return None, counters
+        if not isinstance(write_result_obj, WriteResult):
+            raise TypeError("Writer must return WriteResult or None.")
+        write_result = write_result_obj
 
         counters["write_count"] = write_result.row_count
         counters["write_chunks"] = max(counters["validate_chunks"], 1)
@@ -425,10 +433,11 @@ class PipelineBase(ABC):
     def iter_chunks(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
         """Возвращает итератор по чанкам данных после extract."""
         if self._extractor is not None:
+            extractor = self._extractor
 
             def _extractor_generator() -> Iterable[pd.DataFrame]:
                 self._increment_extract_call_count()
-                result = self._extractor.extract(**kwargs)
+                result = extractor.extract(**kwargs)
                 if isinstance(result, pd.DataFrame):
                     yield result
                     return
@@ -565,17 +574,18 @@ class PipelineBase(ABC):
         original_extract = self.extract
 
         def _wrapped_extract(*args: Any, **kwargs: Any) -> pd.DataFrame:
-            _wrapped_extract.call_count += 1
+            call_count = getattr(_wrapped_extract, "call_count", 0)
+            setattr(_wrapped_extract, "call_count", call_count + 1)
             return original_extract(*args, **kwargs)
 
-        _wrapped_extract.call_count = 0  # type: ignore[attr-defined]
-        self.extract = _wrapped_extract  # type: ignore[assignment]
+        setattr(_wrapped_extract, "call_count", 0)
+        self.extract = _wrapped_extract  # type: ignore[method-assign]
 
     def _increment_extract_call_count(self) -> None:
         """Helper to bump extract.call_count when using external extractor."""
         call_count = getattr(self.extract, "call_count", None)
-        if call_count is not None:
-            self.extract.call_count = call_count + 1  # type: ignore[attr-defined]
+        if isinstance(call_count, int):
+            setattr(self.extract, "call_count", call_count + 1)
 
     def _enrich_context(self, context: RunContext) -> None:
         """

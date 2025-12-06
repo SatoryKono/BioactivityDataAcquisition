@@ -22,7 +22,7 @@ class NormalizationConfigProvider(Protocol):
     """
     Protocol for objects that can provide normalization configuration.
 
-    PipelineConfig from bioetl.config implements this implicitly.
+    PipelineConfig from bioetl.domain.configs implements this implicitly.
     """
 
     @property

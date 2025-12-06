@@ -7,7 +7,7 @@ import asyncio
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from bioetl.application.config_loader import load_pipeline_config
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.models import RunResult
 from bioetl.infrastructure.clients.provider_registry_loader import (
@@ -51,7 +51,7 @@ def _to_pipeline_id(pipeline_name: str) -> str:
 
 def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrator:
     pipeline_id = _to_pipeline_id(pipeline_name)
-    config = load_pipeline_config(pipeline_id, profile=profile)
+    config = build_runtime_config(pipeline_id=pipeline_id, profile=profile)
     if not config.features.rest_interface_enabled:
         raise HTTPException(
             status_code=503,

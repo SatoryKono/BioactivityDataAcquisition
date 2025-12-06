@@ -1,61 +1,77 @@
 """
-Tests for ConfigResolver.
+Tests for configuration loading and profile handling.
 """
+
+from pathlib import Path
 
 import pytest
 
-from bioetl.application.config_loader import (
+from bioetl.domain.transform.merge import deep_merge
+from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
-    _load_yaml,
-    _resolve_profile,
+    ConfigValidationError,
     load_pipeline_config_from_path,
 )
-from bioetl.domain.transform.merge import deep_merge
-from bioetl.infrastructure.config.resolver import ConfigResolver
+from bioetl.infrastructure.config.provider_registry_loader import (
+    clear_provider_registry_cache,
+)
+from bioetl.infrastructure.config.sources import read_yaml_from_path
 
 
-def test_resolver_simple(tmp_path):
-    """Test simple config resolution."""
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text("entity_name: test\nprovider: chembl", encoding="utf-8")
-
-    resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path,
-        profiles_dir=str(tmp_path),
-    )
-    config = resolver.resolve(str(config_file))
-
-    assert config.entity_name == "test"
-    assert config.provider == "chembl"
+@pytest.fixture(autouse=True)
+def _reset_registry() -> None:
+    clear_provider_registry_cache()
+    yield
+    clear_provider_registry_cache()
 
 
-def test_resolver_extends(tmp_path):
-    """Test config inheritance via 'extends'."""
-    profiles_dir = tmp_path / "profiles"
-    profiles_dir.mkdir()
+def _write_providers(path: Path, content: str = "providers:\n  - chembl\n") -> None:
+    path.write_text(content, encoding="utf-8")
 
-    base_profile = profiles_dir / "base.yaml"
-    base_profile.write_text(
-        "qc:\n  min_coverage: 0.5\nentity_name: base\nprovider: chembl",
-        encoding="utf-8",
+
+def test_load_with_profile_and_extends(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    providers_file = tmp_path / "providers.yaml"
+    _write_providers(providers_file)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.config.provider_registry_loader.DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
     )
 
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text(
+    profiles_root = tmp_path / "profiles"
+    profiles_root.mkdir()
+    (profiles_root / "base.yaml").write_text("batch_size: 5", encoding="utf-8")
+    (profiles_root / "prod.yaml").write_text("batch_size: 20", encoding="utf-8")
+
+    pipelines_root = tmp_path / "pipelines" / "chembl"
+    pipelines_root.mkdir(parents=True)
+    config_path = pipelines_root / "activity.yaml"
+    config_path.write_text(
         """extends: base
-entity_name: override""",
+id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: auto_detect
+input_path: null
+output_path: /tmp/out
+batch_size: 10
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
         encoding="utf-8",
     )
 
-    resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path,
-        profiles_dir=str(profiles_dir),
+    config = load_pipeline_config_from_path(
+        config_path,
+        profile="prod",
+        profiles_root=profiles_root,
     )
-    config = resolver.resolve(str(config_file))
 
-    assert config.entity_name == "override"  # Overridden
-    # pylint: disable=no-member
-    assert config.qc.min_coverage == 0.5  # Inherited
+    assert config.batch_size == 20  # profile override wins
+    assert config.output_path == "/tmp/out"  # pipeline override
 
 
 def test_deep_merge():
@@ -69,102 +85,59 @@ def test_deep_merge():
     assert result["b"] == 3
 
 
-def test_resolver_cli_override(tmp_path):
-    """Test CLI profile overriding config."""
-    profiles_dir = tmp_path / "profiles"
-    profiles_dir.mkdir()
-
-    # CLI profile
-    (profiles_dir / "prod.yaml").write_text(
-        "entity_name: prod_entity\nprovider: chembl", encoding="utf-8"
+def test_profile_not_found_raises(tmp_path: Path):
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        "extends: missing\nprovider: chembl\nentity: e\ninput_mode: auto_detect\ninput_path: null\noutput_path: /tmp/out\nbatch_size: 1\nprovider_config:\n  provider: chembl\n  base_url: https://www.ebi.ac.uk/chembl/api/data\n  timeout_sec: 30\n  max_retries: 3\n  rate_limit_per_sec: 10.0\n",
+        encoding="utf-8",
     )
-
-    # Config file
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text(
-        "entity_name: config_entity\nprovider: chembl", encoding="utf-8"
-    )
-
-    resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path,
-        profiles_dir=str(profiles_dir),
-    )
-    config = resolver.resolve(str(config_file), profile="prod")
-
-    # CLI profile wins over config file for entity_name
-    assert config.entity_name == "prod_entity"
-    assert config.provider == "chembl"
-
-
-def test_profile_inheritance_recursive(tmp_path):
-    """Test profile inheriting from another profile."""
-    profiles_dir = tmp_path / "profiles"
-    profiles_dir.mkdir()
-
-    (profiles_dir / "root.yaml").write_text("entity_name: root", encoding="utf-8")
-    (profiles_dir / "parent.yaml").write_text(
-        "extends: root\nentity_name: parent\nprovider: chembl", encoding="utf-8"
-    )
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text("extends: parent", encoding="utf-8")
-
-    resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
-    )
-    config = resolver.resolve(str(config_file))
-
-    assert config.entity_name == "parent"
-    assert config.provider == "chembl"
-
-
-def test_circular_dependency(tmp_path):
-    """Test detection of circular dependencies in profiles."""
-    profiles_dir = tmp_path / "profiles"
-    profiles_dir.mkdir()
-    (profiles_dir / "a.yaml").write_text("extends: b", encoding="utf-8")
-    (profiles_dir / "b.yaml").write_text("extends: a", encoding="utf-8")
-
-    # Test circular dependency through resolve (will hit recursion limit)
-    resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path, profiles_dir=str(profiles_dir)
-    )
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text("extends: a\nprovider: chembl", encoding="utf-8")
-
-    # Should raise RecursionError or similar due to circular dependency
-    with pytest.raises((RecursionError, ConfigFileNotFoundError)):
-        resolver.resolve(str(config_file))
-
-
-def test_profile_not_found(tmp_path):
-    """Test error when profile missing."""
-    resolver = ConfigResolver(
-        loader=load_pipeline_config_from_path,
-        profiles_dir=str(tmp_path),
-    )
-    config_file = tmp_path / "config.yaml"
-    config_file.write_text("extends: missing_profile", encoding="utf-8")
+    providers_file = tmp_path / "providers.yaml"
+    _write_providers(providers_file)
 
     with pytest.raises(ConfigFileNotFoundError):
-        resolver.resolve(str(config_file))
+        load_pipeline_config_from_path(
+            config_path,
+            profile="missing",
+            profiles_root=tmp_path / "profiles",
+        )
 
 
-def test_default_profile_missing(tmp_path):
-    """Test default profile is optional."""
-    # Test that missing default profile raises ConfigFileNotFoundError
-    profiles_dir = tmp_path / "profiles"
-    profiles_dir.mkdir()
+def test_validate_input_path_exists(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    providers_file = tmp_path / "providers.yaml"
+    _write_providers(providers_file)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.config.provider_registry_loader.DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
 
-    # When default profile doesn't exist, it should raise ConfigFileNotFoundError
-    with pytest.raises(ConfigFileNotFoundError):
-        _resolve_profile("default", profiles_root=profiles_dir)
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        """id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: csv
+input_path: /does/not/exist.csv
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError):
+        load_pipeline_config_from_path(config_path)
 
 
-def test_empty_yaml(tmp_path):
+def test_empty_yaml(tmp_path: Path):
     """Test handling of empty YAML file."""
     empty_file = tmp_path / "empty.yaml"
     empty_file.touch()
 
-    # Test _load_yaml directly
-    data = _load_yaml(empty_file)
+    path, data = read_yaml_from_path(empty_file, profile=None, profiles_root=tmp_path)
     assert data == {}
+    assert path == empty_file

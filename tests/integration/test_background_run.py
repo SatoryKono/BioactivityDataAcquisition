@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.config_loader import load_pipeline_config_from_path
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
@@ -14,18 +14,18 @@ from bioetl.infrastructure.clients.provider_registry_loader import (
 @pytest.mark.integration
 def test_run_in_background_dry_run(tmp_path):
     config_path = Path("tests/fixtures/configs/chembl_activity_test.yaml")
-    config = load_pipeline_config_from_path(
-        config_path,
+    cli_overrides = {
+        "output_path": str(tmp_path / "out"),
+        "input_path": str(
+            Path("tests/fixtures/input/chembl_activity_small.csv").resolve()
+        ),
+    }
+    config_copy = build_runtime_config(
+        config_path=config_path,
         profile="default",
-        profiles_root=Path("tests/fixtures/configs"),
+        configs_root=Path("tests/fixtures/configs"),
+        cli_overrides=cli_overrides,
     )
-
-    payload = config.model_dump()
-    payload["output_path"] = str(tmp_path / "out")
-    payload["input_path"] = str(
-        Path("tests/fixtures/input/chembl_activity_small.csv").resolve()
-    )
-    config_copy = config.__class__(**payload)
 
     registry = load_provider_registry()
     orchestrator = PipelineOrchestrator(

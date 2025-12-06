@@ -6,7 +6,7 @@ with a configurable generic implementation.
 """
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource

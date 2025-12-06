@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
-from typing import Callable
+from typing import Callable, cast
 
 from bioetl.application.container import PipelineContainer, build_pipeline_dependencies
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunResult
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.infrastructure.clients.provider_registry_loader import (
@@ -54,7 +54,10 @@ class PipelineOrchestrator:
         hooks = container.get_hooks()
         error_policy = container.get_error_policy()
 
-        pipeline = pipeline_cls(
+        pipeline_factory: Callable[..., PipelineBase] = cast(
+            Callable[..., PipelineBase], pipeline_cls
+        )
+        pipeline: PipelineBase = pipeline_factory(
             config=self._config,
             logger=logger,
             validation_service=validation_service,
