@@ -169,7 +169,11 @@ def _validate_provider(
             registry_path=exc.registry_path,
         ) from exc
     except ProviderRegistryNotFoundError as exc:
-        raise ConfigValidationError(path, str(exc)) from exc
+        # Отсутствие реестра трактуем как неизвестного провайдера
+        raise UnknownProviderError(
+            str(provider),
+            registry_path=exc.registry_path,
+        ) from exc
     except ProviderRegistryFormatError as exc:
         raise ConfigValidationError(path, str(exc)) from exc
     except ProviderRegistryError as exc:  # pragma: no cover - defensive

@@ -198,7 +198,8 @@ def _resolve_config_location(
 ) -> Optional[Path]:
     candidate_path = config_path or _resolve_config_path(pipeline_name)
     path = Path(candidate_path)
-    if path.is_absolute() or path.exists():
+
+    if path.is_absolute() or path.exists() or path.is_relative_to(base_dir):
         resolved = path
     else:
         resolved = base_dir / path

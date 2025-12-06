@@ -1,5 +1,5 @@
 column,index,score,species_group_flag,tax_id
-index,1.0,,,
+index,1.0,,,-0.05095549137434056
 score,,,,
 species_group_flag,,,,
-tax_id,,,,
+tax_id,-0.05095549137434056,,,1.0
