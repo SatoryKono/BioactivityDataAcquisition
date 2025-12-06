@@ -1,8 +1,5 @@
-import os
 import sys
-from pathlib import Path
 
-# Import and run app
 from bioetl.interfaces.cli.app import app
 
 # Mock sys.argv

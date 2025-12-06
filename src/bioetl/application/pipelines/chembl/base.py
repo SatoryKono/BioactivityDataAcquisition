@@ -90,9 +90,7 @@ class ChemblPipelineBase(PipelineBase):
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
 
-    # Removed extract, iter_chunks, transform, validate, write as they are in Base or Components.
-    # pre_transform and _do_transform hooks?
-    # They were called by ChemblPipelineBase.transform.
+    # Extract/transform/write implemented by base; hook methods reside in components.
     # Now ChemblTransformerImpl.apply calls its own hooks.
     # If subclasses override pre_transform/_do_transform on THIS class,
     # they won't be called by ChemblTransformerImpl.

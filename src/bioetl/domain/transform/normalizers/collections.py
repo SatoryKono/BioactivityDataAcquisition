@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Callable, Iterable, Mapping, MutableMapping, cast
+from typing import Any, Callable, Iterable, Mapping, MutableMapping
 
 from bioetl.domain.transform.normalizers.base import is_missing
 from bioetl.domain.transform.normalizers.identifiers import (
@@ -72,7 +72,9 @@ def _coerce_record_mapping(value: Any) -> Mapping[str, Any]:
 
     if not isinstance(value, Mapping):
         raise ValueError(f"Ожидался словарь, получено {type(value).__name__}")
-    return cast(Mapping[str, Any], value)
+    # Make a shallow copy to avoid mutating caller-provided mappings and to keep
+    # a predictable mapping type downstream.
+    return dict(value)
 
 
 def _normalize_record_value(
