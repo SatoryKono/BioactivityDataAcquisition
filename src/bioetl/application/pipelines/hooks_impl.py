@@ -9,6 +9,7 @@ from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.infrastructure.observability import metrics
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):
@@ -76,6 +77,39 @@ class ContinueOnErrorPolicyImpl(ErrorPolicyABC):
 
 __all__ = [
     "LoggingPipelineHookImpl",
+    "MetricsPipelineHookImpl",
     "FailFastErrorPolicyImpl",
     "ContinueOnErrorPolicyImpl",
 ]
+
+
+class MetricsPipelineHookImpl(PipelineHookABC):
+    """Хук, фиксирующий метрики завершения стадий."""
+
+    def __init__(self, *, pipeline_id: str, provider: str, entity_name: str) -> None:
+        self._pipeline_id = pipeline_id
+        self._provider = provider
+        self._entity_name = entity_name
+
+    def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
+        """Хук старта стадии не требует метрик."""
+
+    def on_stage_end(self, stage: str, result: StageResult) -> None:
+        outcome = "success" if result.success else "error"
+        metrics.STAGE_DURATION_SECONDS.labels(
+            pipeline=self._pipeline_id,
+            provider=self._provider,
+            entity=self._entity_name,
+            stage=stage,
+            outcome=outcome,
+        ).observe(result.duration_sec)
+        metrics.STAGE_TOTAL.labels(
+            pipeline=self._pipeline_id,
+            provider=self._provider,
+            entity=self._entity_name,
+            stage=stage,
+            outcome=outcome,
+        ).inc()
+
+    def on_error(self, stage: str, error: PipelineStageError) -> None:  # noqa: ARG002
+        """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
