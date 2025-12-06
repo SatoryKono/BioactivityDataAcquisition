@@ -23,13 +23,6 @@ class ValidationResult {
 }
 class DataFrameModel
 
-SchemaProviderABC:::interface
-ValidatorABC:::interface
-SchemaRegistry:::domainPrimary
-PanderaValidator:::domainSecondary
-ValidationResult:::domainSecondary
-DataFrameModel:::interface
-
 SchemaRegistry ..|> SchemaProviderABC
 PanderaValidator ..|> ValidatorABC
 PanderaValidator --> ValidationResult
