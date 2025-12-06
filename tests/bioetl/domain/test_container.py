@@ -155,9 +155,7 @@ def test_get_extraction_service_for_registered_providers() -> None:
     chembl_service = chembl_container.get_extraction_service()
     dummy_service = dummy_container.get_extraction_service()
 
-    from bioetl.application.services.chembl_extraction import (
-        ChemblExtractionServiceImpl,
-    )
+    from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 
     assert isinstance(chembl_service, ChemblExtractionServiceImpl)
     assert dummy_service == ("dummy", "https://example.com/")
