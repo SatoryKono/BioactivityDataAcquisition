@@ -1,8 +1,8 @@
 """
 Golden tests for normalization determinism.
 """
-from bioetl.domain.transform.impl.serializer import serialize_list, serialize_dict
 from bioetl.domain.transform.impl.normalize import normalize_scalar
+from bioetl.domain.transform.impl.serializer import serialize_list
 
 
 def test_golden_complex_serialization():
