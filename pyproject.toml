@@ -24,6 +24,7 @@ dependencies = [
     "PyYAML>=6.0",
     "pydantic>=2.0.0",
     "fastapi>=0.110.0",
+    "prometheus_client>=0.20.0",
 ]
 
 [project.optional-dependencies]
