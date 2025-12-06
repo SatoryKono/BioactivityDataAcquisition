@@ -8,6 +8,9 @@ from pandera.errors import SchemaError
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 
 
+SCHEMA_COLUMNS = list(DocumentSchema.to_schema().columns.keys())
+
+
 @pytest.fixture
 def valid_document_data():
     """Return a valid document dictionary."""
@@ -24,7 +27,7 @@ def valid_document_data():
         "journal_full_title": "Journal of Medicinal Chemistry",
         "last_page": "110",
         "patent_id": None,
-        "pubmed_id": 12345678,
+        "pubmed_id": "12345678",
         "src_id": 1,
         "title": "New Inhibitors",
         "volume": "50",
@@ -43,7 +46,7 @@ def valid_document_data():
 def test_document_schema_valid(valid_document_data):
     """Test that valid data passes validation."""
     df = pd.DataFrame([valid_document_data])
-    doc = DocumentSchema.validate(df)
+    doc = DocumentSchema.validate(df.reindex(columns=SCHEMA_COLUMNS))
     assert doc.loc[0, "doc_type"] == "PUBLICATION"
     assert doc.loc[0, "year"] == 2021
 
@@ -54,16 +57,16 @@ def test_document_schema_invalid_doc_type(valid_document_data):
     data["doc_type"] = "INVALID_TYPE"
 
     with pytest.raises(SchemaError):
-        DocumentSchema.validate(pd.DataFrame([data]))
+        DocumentSchema.validate(pd.DataFrame([data]).reindex(columns=SCHEMA_COLUMNS))
 
 
 def test_document_schema_missing_required(valid_document_data):
     """Test that missing title fails validation."""
     data = valid_document_data.copy()
-    del data["title"]
+    del data["document_chembl_id"]
 
     with pytest.raises(SchemaError):
-        DocumentSchema.validate(pd.DataFrame([data]))
+        DocumentSchema.validate(pd.DataFrame([data]).reindex(columns=SCHEMA_COLUMNS))
 
 
 def test_document_schema_bad_hash(valid_document_data):
@@ -72,5 +75,5 @@ def test_document_schema_bad_hash(valid_document_data):
     data["hash_row"] = "short_hash"
 
     with pytest.raises(SchemaError):
-        DocumentSchema.validate(pd.DataFrame([data]))
+        DocumentSchema.validate(pd.DataFrame([data]).reindex(columns=SCHEMA_COLUMNS))
 

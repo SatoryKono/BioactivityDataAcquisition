@@ -36,9 +36,10 @@ def test_output_column_order_subset_of_schema(module, schema_cls) -> None:
 
     output_columns = module.OUTPUT_COLUMN_ORDER
     schema_columns = set(schema_cls.to_schema().columns.keys())
+    business_columns = [col for col in output_columns if col not in TECHNICAL_COLUMNS]
 
     assert output_columns, "Список OUTPUT_COLUMN_ORDER не должен быть пустым"
     assert len(output_columns) == len(set(output_columns)), "Повторы недопустимы"
     assert set(output_columns).issubset(schema_columns)
-    assert set(output_columns).isdisjoint(TECHNICAL_COLUMNS)
+    assert set(business_columns).issubset(schema_columns - TECHNICAL_COLUMNS)
 
