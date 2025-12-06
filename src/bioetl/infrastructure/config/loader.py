@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.transform.merge import deep_merge
 from bioetl.infrastructure.config.provider_registry_loader import (
+    DEFAULT_PROVIDERS_REGISTRY_PATH,
     ProviderNotConfiguredError,
     ProviderRegistryError,
     ProviderRegistryFormatError,
@@ -73,7 +74,9 @@ def load_pipeline_config(
     except FileNotFoundError as exc:
         raise ConfigFileNotFoundError(config_path) from exc
 
-    registry_path = get_configs_root(base_dir) / "providers.yaml"
+    registry_path = _resolve_registry_path(
+        get_configs_root(base_dir) / "providers.yaml"
+    )
     return _finalize_config(
         merged_config,
         config_path,
@@ -103,7 +106,7 @@ def load_pipeline_config_from_path(
         raise ConfigFileNotFoundError(Path(config_path)) from exc
 
     configs_root = path.parents[2] if len(path.parents) >= 3 else path.parent
-    registry_path = configs_root / "providers.yaml"
+    registry_path = _resolve_registry_path(configs_root / "providers.yaml")
     return _finalize_config(
         merged_config,
         path,
@@ -111,6 +114,17 @@ def load_pipeline_config_from_path(
         env_overrides=env_overrides,
         registry_path=registry_path,
     )
+
+
+def _resolve_registry_path(candidate: Path) -> Path:
+    """
+    Возвращает путь к реестру провайдеров, падая обратно на дефолтный,
+    если локальный файл отсутствует.
+    """
+
+    if candidate.exists():
+        return candidate
+    return DEFAULT_PROVIDERS_REGISTRY_PATH
 
 
 def _finalize_config(
