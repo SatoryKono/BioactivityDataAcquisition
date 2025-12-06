@@ -4,16 +4,16 @@ from pathlib import Path
 import sys
 from unittest.mock import MagicMock
 
-sys.modules.setdefault("tqdm", MagicMock())
-
 import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
-from bioetl.application.container import build_pipeline_dependencies
-from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
-from bioetl.infrastructure.config.resolver import ConfigResolver
+sys.modules.setdefault("tqdm", MagicMock())
+
+from bioetl.application.container import build_pipeline_dependencies  # noqa: E402
+from bioetl.application.pipelines.registry import get_pipeline_class  # noqa: E402
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl  # noqa: E402
+from bioetl.infrastructure.config.resolver import ConfigResolver  # noqa: E402
 
 
 def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
