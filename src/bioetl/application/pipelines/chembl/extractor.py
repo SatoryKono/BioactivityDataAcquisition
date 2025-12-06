@@ -45,11 +45,14 @@ class ChemblExtractorImpl(ExtractorABC):
 
         remaining = limit
         for raw_chunk in self.record_source.iter_records():
-            working_chunk = raw_chunk
+            if remaining is not None and remaining <= 0:
+                break
+
+            chunk_records = raw_chunk
             if remaining is not None:
-                if remaining <= 0:
-                    break
-                working_chunk = raw_chunk.head(remaining)
+                chunk_records = raw_chunk[:remaining]
+
+            working_chunk = pd.DataFrame(chunk_records)
 
             normalized_chunk = self.normalization_service.normalize_batch(working_chunk)
 
@@ -57,6 +60,6 @@ class ChemblExtractorImpl(ExtractorABC):
                 yield normalized_chunk
 
             if remaining is not None:
-                remaining -= len(working_chunk)
+                remaining -= len(chunk_records)
                 if remaining <= 0:
                     break

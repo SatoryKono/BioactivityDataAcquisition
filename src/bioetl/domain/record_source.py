@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from typing import Any, Protocol, TypedDict
-
-import pandas as pd
 
 from bioetl.domain.contracts import ExtractionServiceABC
 
@@ -18,10 +16,10 @@ class RawRecord(TypedDict, total=False):
 
 
 class RecordSource(Protocol):
-    """Protocol for record sources returning DataFrame chunks."""
+    """Protocol for record sources returning record batches."""
 
-    def iter_records(self) -> Iterable[pd.DataFrame]:
-        """Return iterable over raw record DataFrame chunks."""
+    def iter_records(self) -> Iterable[list[RawRecord]]:
+        """Return iterable over raw record batches as lists of mappings."""
 
 
 class InMemoryRecordSource(RecordSource):
@@ -31,9 +29,13 @@ class InMemoryRecordSource(RecordSource):
         self._records = list(records)
         self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[pd.DataFrame]:
-        df = pd.DataFrame(self._records)
-        yield from _chunk_dataframe(df, self._chunk_size)
+    def iter_records(self) -> Iterable[list[RawRecord]]:
+        if self._chunk_size is None or self._chunk_size <= 0:
+            yield self._records[:]
+            return
+
+        for start in range(0, len(self._records), self._chunk_size):
+            yield self._records[start : start + self._chunk_size]
 
 
 class ApiRecordSource(RecordSource):
@@ -51,20 +53,9 @@ class ApiRecordSource(RecordSource):
         self._filters = filters or {}
         self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[pd.DataFrame]:
+    def iter_records(self) -> Iterable[list[RawRecord]]:
         filters = dict(self._filters)
         for raw_batch in self._extraction_service.iter_extract(
             self._entity, chunk_size=self._chunk_size, **filters
         ):
-            yield pd.DataFrame(raw_batch)
-
-
-def _chunk_dataframe(
-    df: pd.DataFrame, chunk_size: int | None
-) -> Iterator[pd.DataFrame]:
-    if chunk_size is None or chunk_size <= 0:
-        yield df
-        return
-
-    for start in range(0, len(df), chunk_size):
-        yield df.iloc[start : start + chunk_size].reset_index(drop=True)
+            yield list(raw_batch)
