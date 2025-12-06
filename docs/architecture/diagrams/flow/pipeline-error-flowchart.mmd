@@ -1,0 +1,48 @@
+flowchart TD
+    Start([Start Run]) --> Init[Init Context & Reset Services]
+    Init --> ExtractStart[Notify Extract Start]
+    ExtractStart --> ChunkLoop{Has Next Chunk?}
+    
+    %% Extraction Loop
+    ChunkLoop -- Yes --> ExtractExec[Execute extract()]
+    ExtractExec -- Success --> TransformStart[Notify Transform Start]
+    ExtractExec -- Error --> ErrHandler{Error Policy}
+    
+    ErrHandler -- Retry --> RetryChk{Retries Left?}
+    RetryChk -- Yes --> ExtractExec
+    RetryChk -- No --> FailAction
+    
+    ErrHandler -- Skip --> LogSkip[Log Skip]
+    LogSkip --> ChunkLoop
+    
+    ErrHandler -- Fail --> FailAction[Raise PipelineStageError]
+    FailAction --> EndFail([Run Failed])
+
+    %% Transformation
+    TransformStart --> TransExec[Execute transform()]
+    TransExec -- Success --> ValidateStart[Notify Validate Start]
+    TransExec -- Error --> ErrHandler
+    
+    %% Validation
+    ValidateStart --> ValExec[Execute validate()]
+    ValExec -- Success --> Accumulate[Accumulate Chunk]
+    ValExec -- Error --> ErrHandler
+    
+    Accumulate --> ChunkLoop
+    
+    %% Post-Loop
+    ChunkLoop -- No --> NotifyEnds[Notify Stages End]
+    NotifyEnds --> DryRunChk{Dry Run?}
+    
+    %% Write Stage
+    DryRunChk -- No --> WriteStart[Notify Write Start]
+    WriteStart --> WriteExec[Execute write()]
+    WriteExec --> MetaGen[Generate Metadata]
+    MetaGen --> NotifyWriteEnd[Notify Write End]
+    NotifyWriteEnd --> SuccessResult
+    
+    DryRunChk -- Yes --> DryRunMeta[Generate DryRun Metadata]
+    DryRunMeta --> SuccessResult
+    
+    SuccessResult([Run Success])
+

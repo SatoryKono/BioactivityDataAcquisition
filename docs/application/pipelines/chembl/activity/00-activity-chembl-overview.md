@@ -19,3 +19,8 @@
 ## Конфигурация
 - `configs/pipelines/chembl/activity.yaml` (совместно с `configs/profiles/chembl_default.yaml`).
 - Рекомендация: для smoke → `--profile dev --limit 100 --dry-run`; для прод — полный запуск без `--dry-run`.
+
+## Диаграммы
+- Flowchart: `docs/application/pipelines/chembl/activity/diagrams/flow/activity-workflow.mmd`
+- Sequence: `docs/application/pipelines/chembl/activity/diagrams/sequence/activity-main-sequence.mmd`
+- Class: `docs/application/pipelines/chembl/activity/diagrams/class/activity-pipeline-class.mmd`

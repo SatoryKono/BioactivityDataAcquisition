@@ -1,0 +1,78 @@
+classDiagram
+    %% Core Abstractions
+    class PipelineBase {
+        <<Abstract>>
+        +_config: PipelineConfig
+        +_logger: LoggerAdapterABC
+        +_validation_service: ValidationService
+        +_hash_service: HashService
+        +_output_writer: UnifiedOutputWriter
+        +_hooks: list[PipelineHookABC]
+        +_error_policy: ErrorPolicyABC
+        +run(output_path, dry_run) RunResult
+        +iter_chunks() Iterable[DataFrame]
+        +extract()* DataFrame
+        +transform()* DataFrame
+        +validate(df) DataFrame
+        +write(df, path) WriteResult
+        #_process_chunk()
+        #_execute_with_error_policy()
+    }
+
+    class ChemblEntityPipeline {
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +get_database_version()
+    }
+
+    %% Services
+    class ValidationService {
+        -_schema_provider: SchemaProviderABC
+        +get_schema(entity_name)
+        +get_schema_columns(entity_name)
+        +validate(df, entity_name)
+    }
+
+    class HashService {
+        -_hasher: HasherABC
+        +add_hash_columns(df, keys)
+        +add_index_column(df)
+        +add_database_version_column(df, version)
+        +add_fulldate_column(df)
+    }
+
+    class UnifiedOutputWriter {
+        -_writer: WriterABC
+        -_metadata_writer: MetadataWriterABC
+        -_atomic_op: AtomicFileOperation
+        +write_result(df, path, context)
+        #_stable_sort(df)
+        #_apply_column_order(df)
+    }
+
+    %% Interfaces
+    class PipelineHookABC {
+        <<Interface>>
+        +on_stage_start(stage, context)
+        +on_stage_end(stage, result)
+        +on_error(stage, error)
+    }
+
+    class ErrorPolicyABC {
+        <<Interface>>
+        +handle(error, context) ErrorAction
+        +should_retry(error) bool
+    }
+
+    %% Relations
+    PipelineBase <|-- ChemblEntityPipeline
+    PipelineBase o-- ValidationService : uses
+    PipelineBase o-- HashService : uses
+    PipelineBase o-- UnifiedOutputWriter : uses
+    PipelineBase o-- PipelineHookABC : has many
+    PipelineBase o-- ErrorPolicyABC : uses
+    
+    ValidationService ..> PipelineBase : validates data
+    HashService ..> PipelineBase : enriches data
+    UnifiedOutputWriter ..> PipelineBase : persists data
+

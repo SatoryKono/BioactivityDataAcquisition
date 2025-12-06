@@ -1,0 +1,35 @@
+graph TD
+    subgraph "Transformers"
+        T_Chain[TransformerChain]
+        T_Hash[HashColumnsTransformer]
+        T_Index[IndexColumnTransformer]
+        T_Date[FulldateTransformer]
+        T_ABC[<<TransformerABC>>]
+    end
+
+    subgraph "Services"
+        HS[HashService]
+        VS[ValidationService]
+        NS[NormalizationService]
+    end
+
+    subgraph "Schemas"
+        PS[PanderaValidator]
+        Registry[Schema Registry]
+    end
+
+    Pipeline[Pipeline] --> T_Chain
+    T_Chain --> T_Hash
+    T_Chain --> T_Index
+    T_Chain --> T_Date
+
+    T_Hash -- uses --> HS[HashService]
+    T_Index -- uses --> HS[HashService]
+
+    Pipeline -- validates result --> VS[ValidationService]
+    Pipeline -- normalizes values --> NS[NormalizationService]
+
+    VS -- delegates --> PS[PanderaValidator]
+    PS -- lookups schema --> Registry[Schema Registry]
+    NS -- lookups rules --> Registry[Schema Registry]
+

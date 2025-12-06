@@ -1,7 +1,7 @@
 ---
 trigger: model_decision
-description: USE WHEN writing or modifying documentation; enforce synchronization with code, auto-generation markers, and pipeline doc format
-globs: ["docs/**/*.md", "**/INDEX.md", "**/README.md"]
+description: USE WHEN writing or modifying documentation or diagrams; enforce synchronization with code, auto-generation markers, pipeline doc format, and diagramming policy
+globs: ["docs/**/*.md", "docs/**/diagrams/**/*.mmd", "docs/**/diagrams/**/*.puml", "**/INDEX.md", "**/README.md"]
 ---
 
 # Documentation Standards
@@ -31,6 +31,21 @@ When adding a new entity (contract/pipeline/client), PR MUST include:
 1. Documentation under `docs/application/pipelines/<provider>/<entity>/` using `NN-<entity>-<provider>-<topic>.md`
 2. Entry/update in `docs/domain/abc/00-index.md` if ABC/contract is added
 3. Updates to `src/bioetl/infrastructure/clients/base/abc_registry.yaml` and `src/bioetl/infrastructure/clients/base/abc_impls.yaml` when creating ABC/Default/Impl
+
+## Architecture & Pipeline Diagrams
+
+- Diagrams are part of architecture documentation and MUST be kept in sync with code and pipeline behavior
+- Primary storage:
+  - `docs/architecture/diagrams/`
+  - `docs/pipelines/<provider>/<entity>/diagrams/`
+- Primary format is text (Mermaid/PlantUML). PRs touching diagrams MUST include source files (`*.mmd`, `*.puml`). PNG/SVG are allowed mirrors only
+- Filenames MUST use kebab-case, one file per diagram (e.g. `activity-chembl-class.mmd`, `activity-chembl-sequence-full-run.mmd`, `pipeline-run-error-flowchart.mmd`)
+- For each production pipeline, the minimal required set is:
+  1. Flowchart of the overall workflow
+  2. Sequence diagram of the main scenario (extract → transform → validate → write)
+  3. Class diagram if custom models or abstractions exist
+- Any change to architecture, protocols, pipelines, or API clients MUST be reflected in diagrams in the same PR; missing or stale diagrams for such changes is a PR blocker
+- Each PR touching architecture or pipelines MUST explicitly state whether Class/Sequence/Flowchart updates are needed; if "yes", updated diagram files MUST be present in the diff
 
 ## Examples
 

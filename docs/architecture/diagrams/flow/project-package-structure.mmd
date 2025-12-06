@@ -1,0 +1,58 @@
+---
+id: e68c4503-315d-4046-98fd-934e38b85e98
+---
+flowchart LR
+  subgraph User["**Пользователь / CLI**"]
+    CLI["**CLI** *main.py*"]
+  end
+  subgraph Application["**Application Layer** *(Оркестрация)*"]
+    Pipelines["**Pipelines** *bioetl.application.pipelines.chembl*"]
+    Runtime["**Pipeline Runtime / Runner** *bioetl.application.runtime*"]
+  end
+  subgraph Domain["**Domain Layer**"]
+    DomainCore["**Domain Models & Transformations** *bioetl.domain.***"]
+    Schemas["**Pandera Schemas** *bioetl.schemas.***"]
+    Services["**Domain Services** *Normalization, Validation Facades*"]
+  end
+  subgraph Infrastructure["**Infrastructure Layer**"]
+    Clients["**ChEMBL Clients** *bioetl.clients.chembl*"]
+    Output["**Writers & Storage** *bioetl.infrastructure.output*"]
+    Logging["**Unified Logger** *bioetl.infrastructure.logging*"]
+    Config["**Config / Resolver** *bioetl.infrastructure.config*"]
+    QC["**QC / Golden Data** *bioetl.infrastructure.qc*"]
+  end
+  subgraph Interfaces["**Interfaces (Ports)**"]
+    IF_Pipeline["**PipelineBase**, **ChemblPipelineBase** *bioetl.application.pipelines.base*"]
+    IF_Client["**BaseClient**, **SourceClientABC** *bioetl.interfaces.clients*"]
+    IF_Logger["**LoggerAdapterABC** *bioetl.interfaces.logging*"]
+    IF_Writer["**WriterABC**, **UnifiedOutputWriterABC** *bioetl.interfaces.output*"]
+    IF_Validator["**ValidatorABC** *bioetl.interfaces.validation*"]
+  end
+  CLI --> Runtime
+  Runtime --> Pipelines
+  Pipelines --> IF_Pipeline
+  Pipelines --> IF_Client
+  Pipelines --> IF_Writer
+  Pipelines --> IF_Validator
+  Pipelines --> IF_Logger
+  Pipelines --> Config
+  Pipelines --> QC
+  IF_Pipeline --> DomainCore
+  IF_Pipeline --> Schemas
+  IF_Pipeline --> Services
+  IF_Client --> Clients
+  Clients --> ext_api["**ChEMBL REST API**"]
+  IF_Writer --> Output
+  Output --> fs["**Файловая система** (CSV/Parquet, metadata)"]
+  IF_Validator --> Services
+  Services --> Schemas
+  IF_Logger --> Logging
+
+  ext_api:::ext
+  fs:::ext
+  classDef default font-size:16px
+  classDef ext fill:#fff,border:#999,stroke-dasharray:5 5,font-size:20px
+  style Application fill:#FFFFFF
+  style Interfaces fill:transparent
+  style Domain fill:#FFFFFF
+  style Infrastructure fill:#FFFFFF
