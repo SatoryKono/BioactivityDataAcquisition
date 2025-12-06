@@ -13,7 +13,6 @@ import pandas as pd
 import pytest
 from pydantic import AnyHttpUrl
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import (
     ChemblSourceConfig,
     HashingConfig,
@@ -22,6 +21,7 @@ from bioetl.domain.configs import (
     StorageConfig,
 )
 from bioetl.domain.models import RunContext
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
@@ -108,7 +108,7 @@ def mock_config():
 @pytest.fixture
 def mock_logger():
     """Create a mock logger."""
-    logger = MagicMock(spec=LoggerAdapterABC)
+    logger = MagicMock(spec=LoggingPort)
     logger.bind.return_value = logger
     return logger
 

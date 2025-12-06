@@ -11,7 +11,7 @@ import pytest
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputOptions,
@@ -123,7 +123,7 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
         input_path=csv_path,
         csv_options=pipeline._config.csv_options,
         limit=None,
-        logger=cast(LoggerAdapterABC, MagicMock()),
+        logger=cast(LoggingPort, MagicMock()),
     )
     pipeline._extractor.record_source = csv_record_source
 
@@ -157,7 +157,7 @@ def test_extract_ids_only_csv(
         source_config=source_config,
         entity="activity",
         filter_key="activity_id__in",
-        logger=cast(LoggerAdapterABC, MagicMock()),
+        logger=cast(LoggingPort, MagicMock()),
         chunk_size=None,
     )
     pipeline._extractor.record_source = id_list_record_source
@@ -217,7 +217,7 @@ def test_extract_batch_size_from_config(
         source_config=new_source_config,
         entity="activity",
         filter_key="activity_id__in",
-        logger=cast(LoggerAdapterABC, MagicMock()),
+        logger=cast(LoggingPort, MagicMock()),
         chunk_size=None,
     )
     pipeline._extractor.record_source = id_list_record_source
@@ -258,7 +258,7 @@ def test_extract_missing_column(
         source_config=source_config,
         entity="activity",
         filter_key="activity_id__in",
-        logger=cast(LoggerAdapterABC, MagicMock()),
+        logger=cast(LoggingPort, MagicMock()),
         chunk_size=None,
     )
     pipeline._extractor.record_source = id_list_record_source

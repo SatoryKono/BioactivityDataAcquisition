@@ -1,12 +1,14 @@
 from typing import Any, Self
 
+from typing import Any, Self
+
 import structlog
 from structlog.stdlib import BoundLogger
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.observability import LoggingPort
 
 
-class UnifiedLoggerImpl(LoggerAdapterABC):
+class UnifiedLoggerImpl(LoggingPort):
     """
     Реализация логгера на основе structlog.
     """

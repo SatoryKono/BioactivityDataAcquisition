@@ -4,18 +4,18 @@ from __future__ import annotations
 
 from typing import Any
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.infrastructure.observability import metrics
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):
     """Хук, логирующий события жизненного цикла стадий."""
 
-    def __init__(self, logger: LoggerAdapterABC) -> None:
+    def __init__(self, logger: LoggingPort) -> None:
         self._logger = logger
 
     def on_stage_start(self, stage: str, context: Any) -> None:
