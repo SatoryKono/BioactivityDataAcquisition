@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
     default_chembl_extraction_service,

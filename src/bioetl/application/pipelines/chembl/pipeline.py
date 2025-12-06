@@ -5,8 +5,8 @@ Replaces specific pipeline implementations (Activity, Assay, etc.)
 with a configurable generic implementation.
 """
 
-from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.config.pipeline_config_schema import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC

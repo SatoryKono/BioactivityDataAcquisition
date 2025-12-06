@@ -10,11 +10,11 @@ from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
-from bioetl.infrastructure.clients.chembl.impl.http_client import (
-    ChemblDataClientHTTPImpl,
-)
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
+)
+from bioetl.infrastructure.clients.chembl.impl.http_client import (
+    ChemblDataClientHTTPImpl,
 )
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
