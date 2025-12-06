@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.container import PipelineContainer
-from bioetl.clients.base.output.contracts import (
+from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
     WriterABC,

@@ -8,7 +8,7 @@ from typing import Any, Callable
 import pytest
 import yaml
 
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.configs import DummyProviderConfig
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
