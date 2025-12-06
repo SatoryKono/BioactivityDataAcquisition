@@ -1,7 +1,7 @@
 import random
 import time
 
-from bioetl.infrastructure.clients.base.contracts import RetryPolicyABC
+from bioetl.domain.clients.base.contracts import RetryPolicyABC
 
 
 class ExponentialBackoffRetryImpl(RetryPolicyABC):

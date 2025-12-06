@@ -25,6 +25,8 @@ def build_run_metadata(
         "hash_version": "v1_blake2b_256",
         "row_count": result.row_count,
         "checksum": result.checksum,
+        # For backward compatibility and explicitness, keep hash alongside checksum.
+        "hash": result.checksum,
         "files": [result.path.name],
     }
     meta.update(context.metadata)

@@ -52,12 +52,22 @@ def mock_config(source_config):
 def mock_extraction_service():
     service = MagicMock()
     service.extract_all.return_value = pd.DataFrame({"activity_id": [1, 2, 3]})
+    service.iter_extract.return_value = iter([pd.DataFrame({"activity_id": [1, 2, 3]})])
     service.request_batch.return_value = {"activities": [{"activity_id": 1}]}
     return service
 
 
 @pytest.fixture
-def pipeline(mock_config, mock_extraction_service):
+def mock_normalization_service():
+    """Create mock normalization service."""
+    service = MagicMock()
+    service.normalize_batch.side_effect = lambda df: df
+    service.normalize_dataframe.side_effect = lambda df: df
+    return service
+
+
+@pytest.fixture
+def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     """Create pipeline with mocked dependencies."""
     logger = MagicMock()
     validation_service = MagicMock()
@@ -70,6 +80,7 @@ def pipeline(mock_config, mock_extraction_service):
         output_writer=output_writer,
         extraction_service=mock_extraction_service,
         hash_service=MagicMock(),
+        normalization_service=mock_normalization_service,
     )
 
 
@@ -80,7 +91,7 @@ def test_extract_no_input_file(pipeline, mock_extraction_service):
 
     df = pipeline.extract()
 
-    mock_extraction_service.extract_all.assert_called_once()
+    mock_extraction_service.iter_extract.assert_called_once()
     assert not df.empty
     assert "activity_id" in df.columns
 
@@ -102,6 +113,7 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     assert len(df) == 2
     assert "standard_value" in df.columns
     mock_extraction_service.extract_all.assert_not_called()
+    mock_extraction_service.iter_extract.assert_not_called()
     mock_extraction_service.request_batch.assert_not_called()
 
 
@@ -146,7 +158,7 @@ def test_extract_batch_size_from_config(
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
     # Create new source_config with batch_size=2
-    from bioetl.schemas.provider_config_schema import ChemblSourceConfig
+    from bioetl.infrastructure.config.models import ChemblSourceConfig
     new_source_config = ChemblSourceConfig(
         base_url=source_config.base_url,
         batch_size=2,

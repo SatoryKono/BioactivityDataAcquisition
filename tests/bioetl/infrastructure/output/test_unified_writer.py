@@ -85,7 +85,7 @@ def test_write_result_success(
     output_dir = tmp_path / "out"
 
     # Mock writer side effect to create the file
-    def create_file(df, path):
+    def create_file(df, path, **kwargs):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
         return WriteResult(

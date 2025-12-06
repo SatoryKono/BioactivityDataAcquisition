@@ -14,7 +14,7 @@ try:
     import bioetl.application.container
     # print(f"Container module: {bioetl.application.container.__file__}")
     from bioetl.interfaces.cli.app import app
-    from bioetl.infrastructure.services.chembl_extraction import ChemblExtractionService
+    from bioetl.infrastructure.services.chembl_extraction import ChemblExtractionServiceImpl
 except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)
@@ -32,7 +32,7 @@ def main():
     print("Running CLI app via wrapper...")
     
     # Patch get_release_version to avoid /status call
-    with patch.object(ChemblExtractionService, 'get_release_version', return_value="chembl_mock"):
+    with patch.object(ChemblExtractionServiceImpl, 'get_release_version', return_value="chembl_mock"):
         try:
             app()
         except SystemExit as e:

@@ -1,91 +1,103 @@
+"""
+Factories for ChEMBL clients.
+"""
 from typing import Any
 
-import requests
-
-from bioetl.infrastructure.clients.base.factories import default_rate_limiter
-from bioetl.infrastructure.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.infrastructure.clients.base.impl.rate_limiter import (
+    TokenBucketRateLimiterImpl,
+)
+from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
 from bioetl.infrastructure.clients.chembl.request_builder import (
-    ChemblRequestBuilder,
+    ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParser,
+    ChemblResponseParserImpl,
 )
-from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
-from bioetl.application.services.chembl_extraction import (
-    ChemblExtractionService,
-)
-from bioetl.infrastructure.config.models import ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
 
 
 def default_chembl_client(
     source_config: ChemblSourceConfig,
-    **options: Any
+    client_config: ClientConfig | None = None,
+    **options: Any,
 ) -> ChemblDataClientABC:
     """
-    Creates a default ChEMBL HTTP client.
+    Создает клиент ChEMBL по умолчанию.
 
-    Uses conservative rate limiting and exponential backoff retry.
-    Config fields are now top-level (no nested 'parameters').
+    Args:
+        source_config: Конфигурация источника.
+        client_config: Конфигурация клиента (опционально).
+        **options: Дополнительные опции.
+
+    Returns:
+        Настроенный экземпляр клиента.
     """
-    base_url = str(options.get("base_url") or source_config.base_url)
-    max_len = options.get("max_url_length") or source_config.max_url_length
-    timeout = options.get("timeout", float(source_config.timeout_sec))
-    max_attempts = options.get("max_attempts", int(source_config.max_retries))
-    base_delay = options.get("base_delay", 1.0)
-    max_delay = options.get("max_delay", 30.0)
-    backoff_factor = options.get("backoff_factor", 2.0)
-    circuit_breaker_threshold = options.get("circuit_breaker_threshold", 5)
-    circuit_breaker_recovery_time = options.get("circuit_breaker_recovery_time", 60.0)
-    rate_limit = options.get("rate_limit_per_sec") or source_config.rate_limit_per_sec
-    rate_limit_value = float(rate_limit) if rate_limit is not None else 5.0
-
-    middleware = HttpClientMiddleware(
+    # If client_config is not provided, create a default one
+    # Note: ChemblSourceConfig doesn't have client params directly in recent schema?
+    # We might need to extract them or use defaults.
+    if client_config is None:
+        client_config = ClientConfig(
+            timeout=source_config.timeout_sec,
+            max_retries=source_config.max_retries,
+            rate_limit=source_config.rate_limit_per_sec or 10.0,
+        )
+    
+    # Create Unified Client
+    unified_client = UnifiedAPIClient(
         provider="chembl",
-        base_client=requests.Session(),
-        max_attempts=max_attempts,
-        base_delay=base_delay,
-        max_delay=max_delay,
-        backoff_factor=backoff_factor,
-        timeout=timeout,
-        circuit_breaker_threshold=circuit_breaker_threshold,
-        circuit_breaker_recovery_time=circuit_breaker_recovery_time,
+        config=client_config,
+    )
+
+    # Allow explicit overrides via kwargs (used in tests and manual runs)
+    base_url = str(options.get("base_url", source_config.base_url))
+    max_url_length = options.get("max_url_length", source_config.max_url_length)
+
+    # Rate limiter for proactive limiting (in addition to middleware backoff)
+    # Using explicit rate limiter in client logic
+    rate_limiter = TokenBucketRateLimiterImpl(
+        rate=client_config.rate_limit,
+        capacity=max(1.0, client_config.rate_limit),
     )
 
     return ChemblDataClientHTTPImpl(
-        request_builder=ChemblRequestBuilder(
+        request_builder=ChemblRequestBuilderImpl(
             base_url=base_url,
-            max_url_length=max_len
+            max_url_length=max_url_length,
         ),
-        response_parser=ChemblResponseParser(),
-        rate_limiter=default_rate_limiter(
-            rate=rate_limit_value,
-            capacity=rate_limit_value,
-        ),
-        http_middleware=middleware,
+        response_parser=ChemblResponseParserImpl(),
+        rate_limiter=rate_limiter,
+        client=unified_client,
         provider="chembl",
     )
 
 
 def default_chembl_extraction_service(
-    source_config: ChemblSourceConfig,
-    **client_options: Any
-) -> ChemblExtractionService:
+    config: ChemblSourceConfig,
+    client_config: ClientConfig | None = None,
+    *,
+    client: ChemblDataClientABC | None = None,
+) -> ChemblExtractionServiceImpl:
     """
-    Creates a default ChEMBL extraction service.
+    Создает сервис экстракции ChEMBL.
 
-    Uses default client and configured batch size.
+    Args:
+        config: Конфигурация источника.
+        client_config: Конфигурация клиента.
+        client: Уже созданный клиент (опционально).
+
+    Returns:
+        Сервис экстракции.
     """
-    client = client_options.pop("client", None) or default_chembl_client(
-        source_config, **client_options
-    )
-    # ChEMBL API supports up to 1000 items per page.
-    hard_cap = source_config.page_size or 1000
-    batch_size = source_config.resolve_effective_batch_size(hard_cap=hard_cap)
+    if client is None:
+        client = default_chembl_client(config, client_config=client_config)
 
-    return ChemblExtractionService(
+    return ChemblExtractionServiceImpl(
         client=client,
-        batch_size=batch_size
+        # Allow provider config to set batch_size while keeping a generous hard cap
+        batch_size=config.resolve_effective_batch_size(hard_cap=1000),
     )

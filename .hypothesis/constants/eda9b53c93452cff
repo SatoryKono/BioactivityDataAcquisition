@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\domain\providers.py
+# hypothesis_version: 6.140.3
+
+['BaseProviderConfig', 'ProviderComponents', 'ProviderDefinition', 'ProviderId', 'chembl', 'dummy', 'forbid', 'pubchem', 'pubmed', 'uniprot']

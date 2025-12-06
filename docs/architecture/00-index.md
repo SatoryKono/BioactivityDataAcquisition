@@ -9,4 +9,4 @@
 
 ## Навигация
 
-Для обзора проекта начните с `docs/architecture/system_design.md`. За справочниками по API и схемам переходите в `docs/domain/*` и `docs/infrastructure/*`, за практическими шагами — в `docs/guides/*`, а за конкретными пайплайнами — в `docs/application/pipelines/chembl/*`.
+Для обзора проекта начните с `docs/architecture/10-system-design.md`. За справочниками по API и схемам переходите в `docs/domain/*` и `docs/infrastructure/*`, за практическими шагами — в `docs/guides/*`, а за конкретными пайплайнами — в `docs/application/pipelines/chembl/*`.

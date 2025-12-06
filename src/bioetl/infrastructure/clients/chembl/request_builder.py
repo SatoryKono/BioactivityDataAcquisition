@@ -1,8 +1,8 @@
 from typing import Any, Optional
-from bioetl.infrastructure.clients.base.contracts import RequestBuilderABC
+from bioetl.domain.clients.base.contracts import RequestBuilderABC
 
 
-class ChemblRequestBuilder(RequestBuilderABC):
+class ChemblRequestBuilderImpl(RequestBuilderABC):
     """
     Builder для запросов к ChEMBL API.
     """
@@ -15,7 +15,7 @@ class ChemblRequestBuilder(RequestBuilderABC):
         self._endpoint: str = ""
         self._params: dict[str, Any] = {}
     
-    def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilder":
+    def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
         self._endpoint = endpoint.strip("/")
         return self
 
@@ -44,7 +44,7 @@ class ChemblRequestBuilder(RequestBuilderABC):
 
         return url
 
-    def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilder":
+    def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilderImpl":
         self._params["offset"] = offset
         self._params["limit"] = limit
         return self

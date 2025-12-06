@@ -1,7 +1,7 @@
 """Application services - orchestration layer."""
 
 from bioetl.application.services.chembl_extraction import (
-    ChemblExtractionService,
+    ChemblExtractionServiceImpl,
 )
 
-__all__ = ["ChemblExtractionService"]
+__all__ = ["ChemblExtractionServiceImpl"]

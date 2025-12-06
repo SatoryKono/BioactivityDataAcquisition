@@ -1,6 +1,5 @@
 """Tests for ChemblEntityPipeline (Document context)."""
-import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
@@ -13,12 +12,15 @@ from bioetl.domain.schemas.chembl.document import DocumentSchema
 
 @pytest.fixture
 def pipeline():
+    """Create a configured ChemblEntityPipeline for testing."""
     config = MagicMock()
     config.provider = "chembl"
     config.entity_name = "document"
     config.primary_key = "document_chembl_id"
+    # Mock model_dump to return dict representation if needed
     config.model_dump.return_value = {}
     config.pipeline = {}
+
     # Setup fields for normalization
     config.fields = [
         {"name": "chembl_release", "data_type": "string"},
@@ -33,13 +35,10 @@ def pipeline():
 
     validation_service = MagicMock()
     validation_service.get_schema.return_value = DocumentSchema
+    # Default to full schema columns
     validation_service.get_schema_columns.return_value = list(
         DocumentSchema.to_schema().columns.keys()
     )
-
-    # We need real normalization service logic or mocked?
-    # ChemblPipelineBase initializes NormalizationService(config).
-    # So we rely on that service working with our mock config.
 
     return ChemblEntityPipeline(
         config=config,
@@ -52,35 +51,39 @@ def pipeline():
 
 
 def test_transform_chembl_release(pipeline):
-    """Test chembl_release field transformation (dict extraction)."""
-    # We need a custom normalizer to extract 'chembl_release' from dict
-    # because generic string normalizer expects scalars.
-    
+    """
+    Test chembl_release field transformation (dict extraction).
+
+    Verifies that the pipeline correctly uses the normalization service
+    to extract values from dictionary fields when a custom normalizer is
+    applied.
+    """
     df = pd.DataFrame({
         "chembl_release": [{"chembl_release": "chembl_33"}, "chembl_34"]
     })
 
-    # Mock validation to return df as is
+    # Mock schema columns to test this field in isolation
+    # This ensures _enforce_schema returns only this column
+    # and _drop_nulls_in_required_columns ignores missing required cols
     pipeline._validation_service.get_schema_columns.return_value = [
         "chembl_release"
     ]
 
-    # Define extraction logic
+    # Define extraction logic to be injected
     def extract_release(val):
         if isinstance(val, dict):
             return val.get("chembl_release")
         return val
 
-    # Patch get_normalizer to return our extractor for 'chembl_release'
-    # Note: We patch where it is imported/used in NormalizationService
-    with unittest.mock.patch(
+    # Patch get_normalizer in the module used by ChemblNormalizationService
+    with patch(
         "bioetl.domain.transform.impl.normalize.get_normalizer"
     ) as mock_get:
         # Return extractor only for 'chembl_release', None for others
         mock_get.side_effect = lambda name: (
             extract_release if name == "chembl_release" else None
         )
-        
+    
         result = pipeline.transform(df)
 
     assert result.iloc[0]["chembl_release"] == "chembl_33"

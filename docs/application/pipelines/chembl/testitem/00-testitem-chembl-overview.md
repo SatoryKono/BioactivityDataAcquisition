@@ -1,16 +1,19 @@
 # 00 Testitem Chembl Overview
 
 ## Pipeline
-**ChemblTestitemPipeline** нормализует тестируемые объекты, наследуя логику ChemblCommonPipeline.
+- Универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) поверх `ChemblPipelineBase`.
+- Схема: `domain/schemas/chembl/testitem.py`.
 
 ## Компоненты
-- **TestitemTransformer** — приводит идентификаторы (molecule_chembl_id, pubchem_cid), структуры и связи родитель/потомок к целевому формату.
-- **TestitemSchema** — определяет обязательные поля, типы структурных идентификаторов и порядок колонок.
+- `ChemblExtractorImpl` — `input_mode` `api|csv|id_only`.
+- `ChemblTransformerImpl` — нормализация под Pandera-схему, удаление строк с пустыми обязательными полями.
+- Пост-цепочка: хеши, индекс, версия базы, дата.
+- `UnifiedOutputWriter` — стабильная сортировка по бизнес-ключам, атомарная запись.
 
 ## Особенности
-- Поддержка иерархий тест-объектов (например, родительские соединения).
-- Возможное обогащение через вторичные API (PubChem) для получения дополнительных идентификаторов или структур.
-- Расчёт хешей и бизнес-ключей для дедупликации.
+- `primary_key`: из конфига или `testitem_id` по умолчанию.
+- `input_mode=csv` позволяет прогонять офлайн выгрузки; `id_only` подтягивает записи по списку ID.
+- Хеши рассчитываются на нормализованных данных; сортировка стабилизирует вывод перед записью.
 
 ## Связи
-TestItem используется Activity-пайплайном для связывания результатов активности с конкретными объектами. Общие сервисы (UnifiedAPIClient, ValidationService, UnifiedOutputWriter) обеспечивают единообразный поток данных.
+- TestItem используется Activity-пайплайном. Вывод: `testitem.csv` + `meta.yaml` через атомарную запись.

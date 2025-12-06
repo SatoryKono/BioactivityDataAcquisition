@@ -1,0 +1,4 @@
+# file: e:\github\BioactivityDataAcquisition\src\bioetl\infrastructure\config\pipeline_config_schema.py
+# hypothesis_version: 6.140.3
+
+[0.85, 2.0, 10.0, 30.0, 60.0, 1000, ',', './data/cache', './data/output', './data/temp', 'ClientConfig', 'CsvInputOptions', 'DeterminismConfig', 'HashingConfig', 'INFO', 'LoggingConfig', 'NormalizationConfig', 'PaginationConfig', 'PipelineConfig', 'QcConfig', 'StorageConfig', 'after', 'auto_detect', 'csv', 'delimiter', 'forbid', 'id_only', 'input_path']

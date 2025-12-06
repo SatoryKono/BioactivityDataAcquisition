@@ -7,7 +7,7 @@ import pytest
 from bioetl.application.pipelines.chembl.pipeline import (
     ChemblEntityPipeline,
 )
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+from bioetl.domain.schemas.chembl.testitem import TestitemSchema as SchemaTestitem
 
 
 @pytest.fixture
@@ -25,9 +25,9 @@ def pipeline():  # pylint: disable=redefined-outer-name
     config.normalization.custom_normalizers = {}
 
     validation_service = MagicMock()
-    validation_service.get_schema.return_value = TestitemSchema
+    validation_service.get_schema.return_value = SchemaTestitem
     validation_service.get_schema_columns.return_value = list(
-        TestitemSchema.to_schema().columns.keys()
+        SchemaTestitem.to_schema().columns.keys()
     )
 
     return ChemblEntityPipeline(

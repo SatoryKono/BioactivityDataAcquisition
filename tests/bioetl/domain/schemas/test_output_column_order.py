@@ -8,7 +8,7 @@ from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
+from bioetl.domain.schemas.chembl.testitem import TestitemSchema as SchemaTestitem
 
 
 TECHNICAL_COLUMNS = {
@@ -28,7 +28,7 @@ TECHNICAL_COLUMNS = {
         (document, DocumentSchema),
         (molecule, MoleculeSchema),
         (target, TargetSchema),
-        (testitem, TestitemSchema),
+        (testitem, SchemaTestitem),
     ],
 )
 def test_output_column_order_subset_of_schema(module, schema_cls) -> None:

@@ -2,15 +2,15 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain import config_loader
-from bioetl.domain.config_loader import (
+from bioetl.application import config_loader
+from bioetl.application.config_loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
     UnknownProviderError,
     load_pipeline_config,
     load_pipeline_config_from_path,
 )
-from bioetl.schemas.provider_config_schema import ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 def test_load_pipeline_config_from_path_valid():

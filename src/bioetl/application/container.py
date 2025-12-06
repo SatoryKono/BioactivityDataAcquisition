@@ -1,17 +1,15 @@
 """Dependency Injection Container for the application."""
 from pathlib import Path
 from typing import Any, Callable
-
-import bioetl.infrastructure.clients.chembl.provider  # noqa: F401 - ensure registration
 from bioetl.application.pipelines.hooks import ErrorPolicyABC, PipelineHookABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
 )
-from bioetl.clients.csv_record_source import CsvRecordSource, IdListRecordSource
-from bioetl.domain.normalization_service import NormalizationService
+from bioetl.infrastructure.files.csv_record_source import CsvRecordSourceImpl, IdListRecordSourceImpl
 from bioetl.domain.provider_registry import get_provider
 from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.domain.normalization_service import NormalizationService
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
@@ -26,7 +24,7 @@ from bioetl.domain.transform.transformers import (
 )
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.config.models import PipelineConfig
+from bioetl.application.config.pipeline_config_schema import PipelineConfig
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.infrastructure.output.factories import (
@@ -113,7 +111,7 @@ class PipelineContainer:
         if mode == "csv":
             if path is None:
                 raise ValueError("input_path is required for CSV mode")
-            return CsvRecordSource(
+            return CsvRecordSourceImpl(
                 input_path=Path(path),
                 csv_options=self.config.csv_options,
                 limit=limit,
@@ -127,7 +125,7 @@ class PipelineContainer:
             source_config = self._resolve_provider_config(definition)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
-            return IdListRecordSource(
+            return IdListRecordSourceImpl(
                 input_path=Path(path),
                 id_column=id_column,
                 csv_options=self.config.csv_options,
@@ -156,7 +154,9 @@ class PipelineContainer:
         source_config = self._resolve_provider_config(definition)
 
         client = definition.components.create_client(source_config)
-        return definition.components.create_extraction_service(client, source_config)
+        return definition.components.create_extraction_service(
+            source_config, client=client
+        )
 
     def get_hash_service(self) -> HashService:
         """Get the hash service."""

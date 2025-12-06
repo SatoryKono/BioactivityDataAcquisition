@@ -12,7 +12,7 @@ src_path = os.path.abspath("src")
 sys.path.insert(0, src_path)
 
 from bioetl.interfaces.cli.app import app
-from bioetl.application.services.chembl_extraction import ChemblExtractionService
+from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
 
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         "--limit", "10",
         "--output", "data/output/assay"
     ]
-    with patch.object(ChemblExtractionService, 'get_release_version', return_value="chembl_test_v1"):
+    with patch.object(ChemblExtractionServiceImpl, 'get_release_version', return_value="chembl_test_v1"):
         try:
             app()
         except SystemExit as e:

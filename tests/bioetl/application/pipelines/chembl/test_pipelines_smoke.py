@@ -1,4 +1,4 @@
-import pytest
+ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыimport pytest
 import pandas as pd
 from unittest.mock import MagicMock
 
@@ -18,6 +18,7 @@ def common_dependencies():
         "validation_service": MagicMock(),
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
+        "hash_service": MagicMock(),
     }
 
 
@@ -43,7 +44,7 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         validation_service=common_dependencies["validation_service"],
         output_writer=common_dependencies["output_writer"],
         extraction_service=common_dependencies["extraction_service"],
-        hash_service=MagicMock(),
+        hash_service=common_dependencies["hash_service"],
     )
     
     assert pipeline.ID_COLUMN == id_col
