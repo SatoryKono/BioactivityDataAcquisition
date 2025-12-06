@@ -1,0 +1,11 @@
+providers:
+  - id: chembl
+    module: bioetl.infrastructure.clients.chembl.provider
+    factory: register_chembl_provider
+    active: true
+    description: "ChEMBL data provider"
+  - id: pubchem
+    module: bioetl.infrastructure.clients.pubchem.provider
+    factory: register_pubchem_provider
+    active: false
+    description: "PubChem provider (enable after implementation)"

@@ -9,6 +9,7 @@ import yaml
 from pydantic import ValidationError
 
 from bioetl.config.pipeline_config_schema import PipelineConfig
+from bioetl.domain.providers import ProviderId
 from bioetl.domain.transform.merge import deep_merge
 
 CONFIGS_ROOT = Path("configs")
@@ -44,7 +45,7 @@ class UnknownProviderError(ConfigError):
         self.provider = provider
 
 
-SUPPORTED_PROVIDERS = {"chembl"}
+SUPPORTED_PROVIDERS = {provider.value for provider in ProviderId}
 
 
 def load_pipeline_config(
