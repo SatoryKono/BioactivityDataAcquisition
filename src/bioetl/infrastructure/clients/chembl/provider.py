@@ -4,14 +4,17 @@ from __future__ import annotations
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.normalization_service import ChemblNormalizationService
 from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
     get_provider,
     register_provider,
 )
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
-from bioetl.domain.transform.contracts import NormalizationConfigProvider
+from bioetl.domain.transform.contracts import (
+    NormalizationConfigProvider,
+    NormalizationServiceABC,
+)
+from bioetl.domain.transform.factories import default_normalization_service
 from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
@@ -23,7 +26,7 @@ class ChemblProviderComponents(
     ProviderComponents[
         ChemblDataClientABC,
         ExtractionServiceABC,
-        ChemblNormalizationService,
+        NormalizationServiceABC,
         object,
     ]
 ):
@@ -46,13 +49,13 @@ class ChemblProviderComponents(
         *,
         client: ChemblDataClientABC | None = None,
         pipeline_config: NormalizationConfigProvider | None = None,
-    ) -> ChemblNormalizationService:
+    ) -> NormalizationServiceABC:
         _ = client  # signature compatibility; normalization independent from client
         if pipeline_config is None:
             raise ValueError(
                 "NormalizationConfigProvider is required to build normalization service"
             )
-        return ChemblNormalizationService(pipeline_config)
+        return default_normalization_service(pipeline_config)
 
 
 def register_chembl_provider() -> ProviderDefinition:

@@ -2,7 +2,7 @@
 Normalization implementation for domain entities.
 """
 
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 import pandas as pd
 
@@ -23,6 +23,7 @@ from bioetl.domain.transform.normalizers import (
     normalize_uniprot,
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
+from bioetl.domain.record_source import RawRecord
 
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid
@@ -80,7 +81,7 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
     return val.lower()
 
 
-class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
+class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService):
     """
     Сервис нормализации данных.
     Выполняет:
@@ -90,6 +91,11 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
 
     def __init__(self, config: NormalizationConfigProvider):
         BaseNormalizationService.__init__(self, config, empty_value=pd.NA)
+
+    def normalize(self, raw: RawRecord | pd.Series) -> dict[str, Any]:
+        df = pd.DataFrame([raw])
+        normalized = self.normalize_dataframe(df)
+        return cast(dict[str, Any], normalized.iloc[0].to_dict())
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -141,6 +147,49 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
 
         return df
 
+    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.normalize_fields(df)
+
+    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.normalize_dataframe(df)
+
+    def normalize_series(
+        self, series: pd.Series, field_cfg: dict[str, Any]
+    ) -> pd.Series:
+        name = cast(str, field_cfg.get("name"))
+        dtype = field_cfg.get("data_type")
+        mode = self._resolve_mode(name)
+        custom_normalizer = get_normalizer(name)
+
+        if custom_normalizer:
+            base_normalizer = custom_normalizer
+        else:
+
+            def _default_normalizer(val: Any, m=mode) -> Any:
+                return normalize_scalar(val, mode=m)
+
+            base_normalizer = _default_normalizer
+
+        def _normalize_value_from_series(val: Any) -> Any:
+            if (
+                custom_normalizer
+                and dtype == "array"
+                and isinstance(val, (list, tuple))
+            ):
+                normalized = custom_normalizer(val)
+                if normalized is None or not normalized:
+                    return None
+                return serialize_list(normalized, value_normalizer=None)
+            return self._normalize_value(
+                val,
+                dtype,
+                base_normalizer,
+                name,
+                allow_container_normalizer=True,
+            )
+
+        return series.apply(_normalize_value_from_series)
+
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
     ) -> Any:
@@ -188,3 +237,7 @@ class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
         if normalized_dict is None:
             return pd.NA
         return serialize_dict(normalized_dict)
+
+
+# Backward compatibility alias
+NormalizationService = NormalizationServiceImpl
