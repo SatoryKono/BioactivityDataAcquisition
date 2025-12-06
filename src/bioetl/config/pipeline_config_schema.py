@@ -14,6 +14,10 @@ from pydantic import (
     model_validator,
 )
 
+from bioetl.config.provider_registry import (
+    ProviderRegistryError,
+    ensure_provider_known,
+)
 from bioetl.config.provider_config_schema import BaseProviderConfig, ProviderConfigUnion
 from bioetl.domain.transform.contracts import NormalizationConfigProvider
 
@@ -190,6 +194,14 @@ class PipelineConfig(BaseModel):
     fields: list[dict[str, Any]] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("provider")
+    @classmethod
+    def validate_provider_registered(cls, value: str) -> str:
+        try:
+            return ensure_provider_known(value)
+        except ProviderRegistryError as exc:  # pragma: no cover - defensive
+            raise ValueError(str(exc)) from exc
 
     @property
     def entity_name(self) -> str:

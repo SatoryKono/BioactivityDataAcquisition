@@ -4,9 +4,20 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import AnyHttpUrl, ConfigDict, Field, PositiveFloat, PositiveInt
+from pydantic import (
+    AnyHttpUrl,
+    ConfigDict,
+    Field,
+    PositiveFloat,
+    PositiveInt,
+    field_validator,
+)
 from pydantic.types import NonNegativeInt
 
+from bioetl.config.provider_registry import (
+    ProviderRegistryError,
+    ensure_provider_known,
+)
 from bioetl.domain.providers import BaseProviderConfig as ProviderConfigBase
 
 
@@ -20,6 +31,14 @@ class BaseProviderConfig(ProviderConfigBase):
     rate_limit_per_sec: PositiveFloat | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("provider")
+    @classmethod
+    def validate_provider_registered(cls, value: str) -> str:
+        try:
+            return ensure_provider_known(value)
+        except ProviderRegistryError as exc:  # pragma: no cover - defensive
+            raise ValueError(str(exc)) from exc
 
 
 class ChemblSourceConfig(BaseProviderConfig):
