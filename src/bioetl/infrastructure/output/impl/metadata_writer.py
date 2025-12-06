@@ -1,9 +1,9 @@
-import hashlib
 from pathlib import Path
 import pandas as pd
 import yaml
 
 from bioetl.infrastructure.output.contracts import MetadataWriterABC
+from bioetl.infrastructure.files.checksum import compute_files_sha256
 
 
 class MetadataWriterImpl(MetadataWriterABC):
@@ -26,14 +26,5 @@ class MetadataWriterImpl(MetadataWriterABC):
         report.to_csv(path, index=False)
 
     def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
-        checksums = {}
-        for path in paths:
-            if not path.exists():
-                continue
-            sha256 = hashlib.sha256()
-            with open(path, "rb") as f:
-                for chunk in iter(lambda: f.read(8192), b""):
-                    sha256.update(chunk)
-            checksums[path.name] = sha256.hexdigest()
-        return checksums
+        return compute_files_sha256(paths)
 
