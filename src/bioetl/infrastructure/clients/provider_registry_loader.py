@@ -10,9 +10,9 @@ import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from bioetl.domain.provider_registry import (
+    MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,
-    get_provider,
-    register_provider,
+    get_provider_registry,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
@@ -75,9 +75,14 @@ class ProviderRegistryLoader:
         )
         self._logger = logger or default_logger()
 
-    def load(self) -> list[ProviderDefinition]:
+    def load(
+        self,
+        *,
+        registry: MutableProviderRegistryABC | None = None,
+    ) -> list[ProviderDefinition]:
         """Load providers from YAML and register active entries."""
 
+        registry_to_use = registry or get_provider_registry()
         raw_config = self._load_config(self._config_path)
         try:
             config = ProviderRegistryConfig.model_validate(raw_config)
@@ -96,7 +101,7 @@ class ProviderRegistryLoader:
                     module=entry.module,
                 )
                 continue
-            definition = self._register_entry(entry)
+            definition = self._register_entry(entry, registry_to_use)
             if definition:
                 registered.append(definition)
         return registered
@@ -104,6 +109,7 @@ class ProviderRegistryLoader:
     def _register_entry(
         self,
         entry: ProviderRegistryEntry,
+        registry: MutableProviderRegistryABC,
     ) -> ProviderDefinition | None:
         try:
             module = importlib.import_module(entry.module)
@@ -149,14 +155,14 @@ class ProviderRegistryLoader:
             return None
 
         try:
-            register_provider(definition)
+            registry.register_provider(definition)
         except ProviderAlreadyRegisteredError:
             self._logger.debug(
                 "Provider already registered; reusing existing definition",
                 provider=entry.id.value,
                 module=entry.module,
             )
-            return get_provider(definition.id)
+            return registry.get_provider(definition.id)
         return definition
 
     def _load_config(self, path: Path) -> dict[str, Any]:
@@ -168,8 +174,23 @@ class ProviderRegistryLoader:
         return data
 
 
+def load_provider_registry(
+    *,
+    config_path: str | Path | None = None,
+    logger: LoggerAdapterABC | None = None,
+    registry: MutableProviderRegistryABC | None = None,
+) -> MutableProviderRegistryABC:
+    """Utility to load provider registry and return the populated instance."""
+
+    loader = ProviderRegistryLoader(config_path=config_path, logger=logger)
+    registry_to_use = registry or get_provider_registry()
+    loader.load(registry=registry_to_use)
+    return registry_to_use
+
+
 __all__ = [
     "ProviderRegistryLoader",
+    "load_provider_registry",
     "ProviderRegistryLoaderError",
     "ProviderRegistryConfigNotFoundError",
     "ProviderRegistryValidationError",

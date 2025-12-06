@@ -11,6 +11,9 @@ from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.config.pipeline_config_schema import MetricsConfig, PipelineConfig
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    load_provider_registry,
+)
 from bioetl.infrastructure.observability.server import start_metrics_server_once
 
 app = typer.Typer(
@@ -150,9 +153,13 @@ def run(
         )
         config = PipelineConfig(**config_payload)
         _start_metrics_exporter(config.metrics, dry_run=dry_run)
+        provider_registry = load_provider_registry(
+            config_path=base_dir / "providers.yaml"
+        )
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
+            provider_registry=provider_registry,
         )
 
         console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")

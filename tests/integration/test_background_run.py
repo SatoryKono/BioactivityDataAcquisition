@@ -6,6 +6,9 @@ import pytest
 
 from bioetl.application.config_loader import load_pipeline_config_from_path
 from bioetl.application.orchestrator import PipelineOrchestrator
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    load_provider_registry,
+)
 
 
 @pytest.mark.integration
@@ -24,7 +27,10 @@ def test_run_in_background_dry_run(tmp_path):
     )
     config_copy = config.__class__(**payload)
 
-    orchestrator = PipelineOrchestrator("activity_chembl", config_copy)
+    registry = load_provider_registry()
+    orchestrator = PipelineOrchestrator(
+        "activity_chembl", config_copy, provider_registry=registry
+    )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)
     result = future.result()
