@@ -4,7 +4,7 @@ ChEMBL data transformer implementation.
 
 import pandas as pd
 
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.models import RunContext
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaContract
 from bioetl.domain.transform.contracts import NormalizationServiceABC

@@ -398,7 +398,7 @@ flowchart LR
     Services["**Domain Services** *Normalization, Validation Facades*"]
   end
   subgraph Infrastructure["**Infrastructure Layer**"]
-    Clients["**ChEMBL Clients** *bioetl.clients.chembl*"]
+    Clients["**ChEMBL Clients** *bioetl.infrastructure.clients.chembl*"]
     Output["**Writers &amp; Storage** *bioetl.infrastructure.output*"]
     Logging["**Unified Logger** *bioetl.infrastructure.logging*"]
     Config["**Config / Resolver** *bioetl.infrastructure.config*"]

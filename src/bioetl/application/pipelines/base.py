@@ -13,8 +13,8 @@ from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
-from bioetl.clients.base.logging.contracts import LoggerAdapterABC
-from bioetl.clients.base.output.contracts import WriteResult
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
