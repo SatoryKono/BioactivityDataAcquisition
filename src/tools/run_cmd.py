@@ -7,8 +7,8 @@ Path("data/output/target").mkdir(parents=True, exist_ok=True)
 
 try:
     # print(f"Container module: {bioetl.application.container.__file__}")
-    from bioetl.interfaces.cli.app import app
     from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
+    from bioetl.interfaces.cli.app import app
 except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)
