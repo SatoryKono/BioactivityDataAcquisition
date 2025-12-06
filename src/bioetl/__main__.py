@@ -1,16 +1,15 @@
 import sys
 from pathlib import Path
 
-# Ensure we use the correct source directory
-src_dir = Path(__file__).parent.parent
-if str(src_dir) not in sys.path:
-    sys.path.insert(0, str(src_dir))
 
-from bioetl.interfaces.cli.app import app
-
-
-def main():
+def main() -> None:
     """Entry point for bioetl command."""
+    src_dir = Path(__file__).parent.parent
+    if str(src_dir) not in sys.path:
+        sys.path.insert(0, str(src_dir))
+
+    from bioetl.interfaces.cli.app import app  # noqa: WPS433 local import
+
     app()
 
 

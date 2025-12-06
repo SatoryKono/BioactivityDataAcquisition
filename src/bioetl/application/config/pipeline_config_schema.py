@@ -200,7 +200,10 @@ class PipelineConfig(BaseModel):
     def get_source_config(self, provider: str) -> BaseProviderConfig:
         if provider != self.provider:
             raise ValueError(
-                f"Requested provider '{provider}' does not match config provider '{self.provider}'"
+                (
+                    f"Requested provider '{provider}' does not match config provider "
+                    f"'{self.provider}'"
+                )
             )
         return self.provider_config
 
@@ -236,7 +239,10 @@ class PipelineConfig(BaseModel):
             and not self.csv_options.header
         ):
             raise ValueError(
-                "csv_options.header must be true when input_mode is 'auto_detect' and input_path is set"
+                (
+                    "csv_options.header must be true when input_mode is 'auto_detect' "
+                    "and input_path is set"
+                )
             )
 
         return self
