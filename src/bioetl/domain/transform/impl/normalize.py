@@ -22,6 +22,22 @@ from bioetl.domain.transform.normalizers import (
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
+_NUMERIC_DTYPES: dict[str, str] = {
+    "number": "Float64",
+    "integer": "Int64",
+}
+
+
+def _coerce_numeric_columns(df: pd.DataFrame, fields_cfg: list[dict[str, Any]]) -> pd.DataFrame:
+    for field_cfg in fields_cfg:
+        name = field_cfg.get("name")
+        dtype = field_cfg.get("data_type")
+        target_dtype = _NUMERIC_DTYPES.get(dtype)
+        if not name or target_dtype is None or name not in df.columns:
+            continue
+        df[name] = pd.to_numeric(df[name], errors="coerce").astype(target_dtype)
+    return df
+
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid
 normalize_pubchem_cid = normalize_pcid
@@ -142,13 +158,15 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             if dtype in ("array", "object"):
                 df[name] = df[name].astype("string").replace({pd.NA: None})
 
-        return df
+        return _coerce_numeric_columns(df, self._config.fields)
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        return self.normalize_fields(df)
+        normalized = self.normalize_fields(df)
+        return _coerce_numeric_columns(normalized, self._config.fields)
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
-        return self.normalize_dataframe(df)
+        normalized = self.normalize_dataframe(df)
+        return _coerce_numeric_columns(normalized, self._config.fields)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
