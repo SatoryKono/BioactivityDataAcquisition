@@ -31,6 +31,7 @@ class ErrorPolicyManager:
         self._entity_name = entity_name
         self._default_on_skip = default_on_skip
         self._last_error: PipelineStageError | None = None
+        self._last_stage_action: dict[str, ErrorAction | None] = {}
 
     @property
     def last_error(self) -> PipelineStageError | None:
@@ -52,6 +53,7 @@ class ErrorPolicyManager:
         try:
             result = action()
             self._last_error = None
+            self._last_stage_action[stage] = None
             return result
         except StopIteration:
             raise
@@ -77,6 +79,7 @@ class ErrorPolicyManager:
                 hook.on_error(stage, error)
 
             action_on_error = self._error_policy.handle(error, context)
+            self._last_stage_action[stage] = action_on_error
             if action_on_error == ErrorAction.RETRY and self._error_policy.should_retry(error):
                 if on_retry:
                     on_retry()
@@ -110,3 +113,19 @@ class ErrorPolicyManager:
         if self._last_error.cause:
             messages.append(str(self._last_error.cause))
         return messages
+
+    def get_last_action(self, stage: str) -> ErrorAction | None:
+        """Возвращает последнее действие политики ошибок для стадии."""
+
+        return self._last_stage_action.get(stage)
+
+    def reset(self) -> None:
+        """Сбрасывает состояние ошибок и действий политики."""
+
+        self._last_error = None
+        self._last_stage_action.clear()
+
+    def set_logger(self, logger: LoggerAdapterABC) -> None:
+        """Обновляет логгер для дальнейших сообщений."""
+
+        self._logger = logger

@@ -5,6 +5,7 @@ import random
 import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+from urllib.parse import urlparse
 from typing import Any, Callable, NamedTuple
 
 from bioetl.domain.errors import (
@@ -12,6 +13,7 @@ from bioetl.domain.errors import (
     ClientRateLimitError,
     ClientResponseError,
 )
+from bioetl.infrastructure.observability import metrics
 
 try:  # pragma: no cover - optional dependency
     import httpx
@@ -328,10 +330,14 @@ class HttpClientMiddleware:
 
     def _backoff_delay(self, attempt: int, retry_after: float | None = None) -> float:
         base_delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
-        combined = base_delay if retry_after is None else max(base_delay, retry_after)
-        capped = min(combined, self.max_delay)
-        jitter = random.uniform(0.0, capped)
-        return min(capped + jitter, self.max_delay)
+        combined_delay = base_delay if retry_after is None else max(base_delay, retry_after)
+        jitter = random.uniform(0.0, combined_delay)
+        delay_with_jitter = combined_delay + jitter
+
+        if retry_after is not None and retry_after > self.max_delay:
+            return delay_with_jitter
+
+        return min(delay_with_jitter, self.max_delay)
 
     def _ensure_circuit_allows_request(self, method: str, url: str) -> None:
         if self._circuit_opened_at is None:
@@ -512,6 +518,13 @@ class HttpClientMiddleware:
                 "error_type": None,
             },
         )
+        self._observe_http_metrics(
+            method,
+            url,
+            elapsed,
+            status_code,
+            error=False,
+        )
 
     def _log_failure(
         self,
@@ -533,6 +546,13 @@ class HttpClientMiddleware:
                 "retry_count": retry_count,
                 "error_type": error_type,
             },
+        )
+        self._observe_http_metrics(
+            method,
+            url,
+            elapsed,
+            status_code,
+            error=status_code is None,
         )
 
     def _log_final_failure(
@@ -566,3 +586,47 @@ class HttpClientMiddleware:
         if self._failure_metric_callback is None:
             return
         self._failure_metric_callback(1)
+
+    def _observe_http_metrics(
+        self,
+        method: str,
+        url: str,
+        elapsed: float,
+        status_code: int | None,
+        *,
+        error: bool,
+    ) -> None:
+        endpoint = self._normalize_endpoint(url)
+        status_class = self._status_class(status_code, error)
+        metrics.HTTP_REQUESTS_TOTAL.labels(
+            provider=self.provider,
+            endpoint=endpoint,
+            method=method.upper(),
+            status_class=status_class,
+        ).inc()
+        metrics.HTTP_LATENCY_SECONDS.labels(
+            provider=self.provider,
+            endpoint=endpoint,
+            method=method.upper(),
+            status_class=status_class,
+        ).observe(elapsed)
+
+    @staticmethod
+    def _normalize_endpoint(url: str) -> str:
+        parsed = urlparse(url)
+        endpoint = f"{parsed.netloc}{parsed.path}".rstrip("/")
+        return endpoint or url
+
+    @staticmethod
+    def _status_class(status_code: int | None, error: bool) -> str:
+        if error:
+            return "error"
+        if status_code is None:
+            return "error"
+        if 200 <= status_code < 300:
+            return "2xx"
+        if 400 <= status_code < 500:
+            return "4xx"
+        if 500 <= status_code < 600:
+            return "5xx"
+        return "error"
