@@ -11,7 +11,7 @@ classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#1
 subgraph Domain["Domain Layer"]
     Validation["ValidationService\nbioetl.domain.validation.service"]:::componentPrimary
     Normalization["NormalizationServiceImpl\nbioetl.infrastructure.transform.impl.normalize"]:::componentPrimary
-    Hashing["HashService\nbioetl.domain.transform.hash_service"]:::componentPrimary
+    Hashing["HashServiceABC\nbioetl.domain.transform.contracts"]:::componentPrimary
     Transformers["TransformerChain\nHash/Index/DbVersion/Fulldate"]:::componentSecondary
     Hasher["HasherImpl\ncanonical serializer"]:::componentSecondary
     Schemas["SchemaRegistry\nPipelineSchemaContract\nbioetl.domain.schemas.registry"]:::componentSecondary

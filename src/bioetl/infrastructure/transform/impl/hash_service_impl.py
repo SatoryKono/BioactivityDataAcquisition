@@ -5,13 +5,11 @@ import pandas as pd
 
 from bioetl.domain.transform.contracts import HasherABC, HashServiceABC
 
-__all__ = ["HashService", "HashServiceImpl"]
+__all__ = ["HashServiceImpl"]
 
 
 class HashServiceImpl(HashServiceABC):
-    """
-    Реализация фасада хеш-сервиса.
-    """
+    """Реализация фасада хеш-сервиса."""
 
     def __init__(
         self,
@@ -95,7 +93,3 @@ class HashServiceImpl(HashServiceABC):
 
         self._index_counter = 0
         self._extracted_at = None
-
-
-# Alias for compatibility with existing imports/tests.
-HashService = HashServiceImpl
