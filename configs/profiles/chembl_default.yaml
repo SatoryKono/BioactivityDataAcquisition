@@ -41,6 +41,7 @@ metrics:
 features:
   rest_interface_enabled: false
   mq_interface_enabled: false
+  enable_provider_loader_port: false
 
 # Параметры детерминизма
 determinism:

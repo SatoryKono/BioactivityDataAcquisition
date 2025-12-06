@@ -157,6 +157,7 @@ class InterfaceFeaturesConfig(BaseModel):
 
     rest_interface_enabled: bool = False
     mq_interface_enabled: bool = False
+    enable_provider_loader_port: bool = False
 
     model_config = ConfigDict(extra="forbid")
 

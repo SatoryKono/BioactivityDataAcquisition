@@ -16,6 +16,7 @@ from bioetl.domain.provider_registry import (
     ProviderAlreadyRegisteredError,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.domain.provider_loader import ProviderLoaderProtocol
 from bioetl.infrastructure.logging.factories import default_logger
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")
@@ -61,7 +62,7 @@ class ProviderRegistryConfig(BaseModel):
     providers: list[ProviderRegistryEntry]
 
 
-class ProviderRegistryLoader:
+class ProviderLoaderImpl(ProviderLoaderProtocol):
     """Loads provider registry entries and registers them dynamically."""
 
     def __init__(
@@ -105,6 +106,15 @@ class ProviderRegistryLoader:
             if definition:
                 registered.append(definition)
         return registered
+
+    def load_registry(
+        self, *, registry: MutableProviderRegistryABC | None = None
+    ) -> MutableProviderRegistryABC:
+        """Load providers and return populated registry (Protocol compatibility)."""
+
+        registry_to_use = registry or InMemoryProviderRegistry()
+        self.load(registry=registry_to_use)
+        return registry_to_use
 
     def _register_entry(
         self,
@@ -182,13 +192,15 @@ def load_provider_registry(
 ) -> MutableProviderRegistryABC:
     """Utility to load provider registry and return the populated instance."""
 
-    loader = ProviderRegistryLoader(config_path=config_path, logger=logger)
+    loader = ProviderLoaderImpl(config_path=config_path, logger=logger)
     registry_to_use = registry or InMemoryProviderRegistry()
-    loader.load(registry=registry_to_use)
-    return registry_to_use
+    return loader.load_registry(registry=registry_to_use)
 
+
+ProviderRegistryLoader = ProviderLoaderImpl
 
 __all__ = [
+    "ProviderLoaderImpl",
     "ProviderRegistryLoader",
     "load_provider_registry",
     "ProviderRegistryLoaderError",
