@@ -37,7 +37,29 @@ class BaseNormalizationService:
     ) -> Any:
         if self._is_empty_value(value):
             return self._empty_value
+        return self._dispatch_normalization(
+            value,
+            dtype,
+            normalizer,
+            field_name,
+            allow_container_normalizer=allow_container_normalizer,
+            serialize_with_value_normalizer=serialize_with_value_normalizer,
+        )
 
+    @staticmethod
+    def _is_container_dtype(dtype: str | None) -> bool:
+        return dtype in ("array", "object")
+
+    def _dispatch_normalization(
+        self,
+        value: Any,
+        dtype: str | None,
+        normalizer: Callable[[Any], Any],
+        field_name: str,
+        *,
+        allow_container_normalizer: bool,
+        serialize_with_value_normalizer: bool,
+    ) -> Any:
         if self._is_container_dtype(dtype):
             return self._normalize_container_value(
                 value,
@@ -48,10 +70,6 @@ class BaseNormalizationService:
             )
 
         return self._normalize_scalar_value(value, normalizer, field_name)
-
-    @staticmethod
-    def _is_container_dtype(dtype: str | None) -> bool:
-        return dtype in ("array", "object")
 
     def _normalize_scalar_value(
         self, value: Any, normalizer: Callable[[Any], Any], field_name: str
