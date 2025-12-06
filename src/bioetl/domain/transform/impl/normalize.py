@@ -1,13 +1,18 @@
 """
 Normalization implementation for domain entities.
 """
-from typing import Any, Callable, cast
+from typing import Any, Callable
 
 import pandas as pd
 
 from bioetl.domain.transform.contracts import (
     NormalizationConfigProvider,
     NormalizationServiceABC,
+)
+from bioetl.domain.transform.impl.base_normalizer import BaseNormalizationService
+from bioetl.domain.transform.impl.serializer import (
+    serialize_dict,
+    serialize_list,
 )
 from bioetl.domain.transform.normalizers import (
     normalize_array,
@@ -17,10 +22,6 @@ from bioetl.domain.transform.normalizers import (
     normalize_uniprot,
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
-from bioetl.domain.transform.impl.serializer import (
-    serialize_dict,
-    serialize_list,
-)
 
 
 # Aliases for backward compatibility or convenience
@@ -79,7 +80,7 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
     return val.lower()
 
 
-class NormalizationService(NormalizationServiceABC):
+class NormalizationService(NormalizationServiceABC, BaseNormalizationService):
     """
     Сервис нормализации данных.
     Выполняет:
@@ -88,21 +89,7 @@ class NormalizationService(NormalizationServiceABC):
     """
 
     def __init__(self, config: NormalizationConfigProvider):
-        self._config = config
-
-    def is_case_sensitive(self, field_name: str) -> bool:
-        """Check if field should be case-sensitive."""
-        return field_name in self._config.normalization.case_sensitive_fields
-
-    def is_id_field(self, field_name: str) -> bool:
-        """Check if field is an ID field (should be uppercased)."""
-        if field_name in self._config.normalization.id_fields:
-            return True
-        if field_name.endswith("_id") or field_name.endswith("_chembl_id"):
-            return True
-        if field_name.startswith("id_"):
-            return True
-        return False
+        BaseNormalizationService.__init__(self, config, empty_value=pd.NA)
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -115,134 +102,81 @@ class NormalizationService(NormalizationServiceABC):
             if name not in df.columns:
                 continue
 
-            # Determine normalization mode
-            mode = "default"
-            if self.is_case_sensitive(name):
-                mode = "sensitive"
-            elif self.is_id_field(name):
-                mode = "id"
-
-            # Resolve normalizer
+            mode = self._resolve_mode(name)
             custom_normalizer = get_normalizer(name)
 
             if custom_normalizer:
                 base_normalizer: Callable[[Any], Any] = custom_normalizer
             else:
-                # Create default scalar normalizer
                 def _default_normalizer(val: Any, m=mode) -> Any:
                     return normalize_scalar(val, mode=m)
 
                 base_normalizer = _default_normalizer
 
-            # Define wrapper to capture base_normalizer
             def _apply_value(
                 val: Any,
                 norm=base_normalizer,
-                field_name=name
+                field_name=name,
+                data_type=dtype,
             ) -> Any:
                 try:
-                    return norm(val)
+                    return self._normalize_value(
+                        val,
+                        data_type,
+                        norm,
+                        field_name,
+                        allow_container_normalizer=True,
+                        serialize_with_value_normalizer=False,
+                    )
                 except ValueError as exc:
                     raise ValueError(
                         f"Ошибка нормализации поля '{field_name}': {exc}"
                     ) from exc
 
+            df[name] = df[name].apply(_apply_value)
+
             if dtype in ("array", "object"):
-                self._normalize_nested(df, name, base_normalizer)
-            elif dtype in ("string", "integer", "number", "float", "boolean"):
-                # For scalars, apply directly
-                df[name] = df[name].apply(_apply_value)
+                df[name] = df[name].astype("string").replace({pd.NA: None})
 
         return df
 
-    def _normalize_nested(
+    def _normalize_container_item(self, item: Any, normalizer: Callable[[Any], Any]) -> Any:
+        if isinstance(item, dict):
+            normalized_dict = normalize_record(item, value_normalizer=normalizer)
+            return normalized_dict if normalized_dict is not None else {}
+        return normalizer(item)
+
+    def _process_list(
         self,
-        df: pd.DataFrame,
-        name: str,
-        base_normalizer: Callable[[Any], Any]
-    ) -> None:
-        """Helper to handle nested field normalization."""
-        def _serialize_wrapper(
-            val: Any,
-            norm=base_normalizer,
-            field_name=name
-        ) -> Any:
-            try:
-                if val is None:
-                    return pd.NA
-                if not isinstance(val, (list, dict, tuple)) and pd.isna(val):
-                    return pd.NA
-            except ValueError:
-                pass
-
-            # Try applying normalizer to the container first.
-            if isinstance(val, (list, dict, tuple)):
-                try:
-                    res = norm(val)
-                    # Normalizer worked, use result.
-                    if res is not None and res is not pd.NA:
-                        if isinstance(res, (list, tuple)):
-                            return serialize_list(list(res))
-                        if isinstance(res, dict):
-                            return serialize_dict(res)
-                        return str(res)
-                except (ValueError, TypeError):
-                    # Proceed to element-wise processing.
-                    pass
-
-            if isinstance(val, (list, tuple)):
-                return self._process_list(val, norm, field_name)
-
-            if isinstance(val, dict):
-                return self._process_dict(val, norm, field_name)
-
-            # Fallback for unexpected scalar in nested field
-            try:
-                res = norm(val)
-            except ValueError as exc:
-                raise ValueError(
-                    f"Ошибка нормализации поля '{field_name}': {exc}"
-                ) from exc
-
-            if res is not None and res is not pd.NA:
-                if isinstance(res, (list, tuple)):
-                    return serialize_list(list(res))
-                if isinstance(res, dict):
-                    return serialize_dict(res)
-                return str(res)
-            return pd.NA
-
-        df[name] = df[name].apply(_serialize_wrapper)
-        df[name] = df[name].astype("string").replace({pd.NA: None})
-
-    def _process_list(self, val: Any, norm: Callable, field_name: str) -> Any:
-        """Process list values."""
+        val: Any,
+        norm: Callable[[Any], Any],
+        field_name: str,
+        *,
+        serialize_with_value_normalizer: bool = False,
+    ) -> Any:
         try:
             def _smart_normalizer(item: Any) -> Any:
-                if isinstance(item, dict):
-                    return normalize_record(item, value_normalizer=norm)
-                return norm(item)
+                return self._normalize_container_item(item, norm)
 
-            normalized_list = normalize_array(
-                list(val), item_normalizer=_smart_normalizer
-            )
+            normalized_list = normalize_array(list(val), item_normalizer=_smart_normalizer)
         except ValueError as exc:
             raise ValueError(
                 f"Ошибка нормализации списка в поле '{field_name}': {exc}"
             ) from exc
         if not normalized_list:
             return pd.NA
-        return serialize_list(normalized_list)
+        return serialize_list(
+            normalized_list,
+            value_normalizer=norm if serialize_with_value_normalizer else None,
+        )
 
-    def _process_dict(self, val: Any, norm: Callable, field_name: str) -> Any:
-        """Process dict values."""
+    def _process_dict(self, val: Any, norm: Callable[[Any], Any], field_name: str) -> Any:
         try:
-            dict_val = cast(dict[str, Any], val)
-            normalized_dict = normalize_record(dict_val, value_normalizer=norm)
+            normalized_dict = normalize_record(val, value_normalizer=norm)
         except ValueError as exc:
             raise ValueError(
                 f"Ошибка нормализации записи в поле '{field_name}': {exc}"
             ) from exc
         if normalized_dict is None:
             return pd.NA
-        return serialize_dict(dict(normalized_dict))
+        return serialize_dict(normalized_dict)
