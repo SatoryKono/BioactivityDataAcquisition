@@ -17,6 +17,11 @@ CacheABC:
     Memory: bioetl.infrastructure.clients.base.impl.cache.MemoryCacheImpl
     File: bioetl.infrastructure.clients.base.impl.cache.FileCacheImpl
 
+ProviderRegistryLoaderABC:
+  default_factory: bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader
+  implementations:
+    Default: bioetl.infrastructure.clients.provider_registry_loader.ProviderRegistryLoader
+
 LoggerAdapterABC:
   default_factory: bioetl.infrastructure.logging.factories.default_logger
   implementations:
@@ -37,6 +42,16 @@ NormalizationServiceABC:
   implementations:
     Default: bioetl.domain.transform.impl.normalize.NormalizationServiceImpl
 
+HasherABC:
+  default_factory: bioetl.domain.transform.factories.default_hasher
+  implementations:
+    Blake2b: bioetl.domain.transform.impl.hasher.HasherImpl
+
+HashServiceABC:
+  default_factory: bioetl.domain.transform.factories.default_hash_service
+  implementations:
+    Default: bioetl.domain.transform.hash_service.HashServiceImpl
+
 WriterABC:
   default_factory: bioetl.infrastructure.output.factories.default_writer
   implementations:
@@ -52,3 +67,8 @@ QualityReportABC:
   default_factory: bioetl.infrastructure.output.factories.default_quality_reporter
   implementations:
     Default: bioetl.infrastructure.output.impl.quality_report.QualityReportImpl
+
+OutputWriterABC:
+  default_factory: bioetl.infrastructure.output.factories.default_output_writer
+  implementations:
+    Unified: bioetl.infrastructure.output.unified_writer.UnifiedOutputWriter

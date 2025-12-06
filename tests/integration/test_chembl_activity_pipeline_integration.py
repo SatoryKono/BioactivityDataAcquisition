@@ -1,6 +1,7 @@
 """Integration tests for ChEMBL Activity pipeline (TS-001)."""
 
 import sys
+from functools import partial
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -12,7 +13,7 @@ from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
-    load_provider_registry,
+    create_provider_loader,
 )
 
 sys.modules.setdefault("tqdm", MagicMock())
@@ -37,7 +38,8 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     )
     config.storage.output_path = str(tmp_path / "output")
 
-    registry = load_provider_registry()
+    provider_loader_factory = partial(create_provider_loader)
+    registry = provider_loader_factory().load_registry()
     container = build_pipeline_dependencies(
         config,
         provider_registry=registry,

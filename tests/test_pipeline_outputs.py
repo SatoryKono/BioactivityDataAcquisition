@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +13,7 @@ from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.errors import PipelineStageError
 from bioetl.infrastructure.clients.provider_registry_loader import (
-    load_provider_registry,
+    create_provider_loader,
 )
 
 _PIPELINE_CASES = [
@@ -102,12 +103,24 @@ def test_pipeline_outputs(
     config.output_path = str(output_dir)
     config.storage.output_path = str(output_dir)
 
-    provider_registry = load_provider_registry(
-        config_path=Path("configs/providers.yaml")
+    provider_loader_factory = partial(
+        create_provider_loader, config_path=Path("configs/providers.yaml")
     )
+    feature_flag = config.features.enable_provider_loader_port
+    if feature_flag:
+        provider_loader = provider_loader_factory()
+        provider_registry = None
+    else:
+        provider_loader = None
+        provider_registry = provider_loader_factory().load_registry()
 
     orchestrator = PipelineOrchestrator(
-        pipeline_name, config, provider_registry=provider_registry
+        pipeline_name,
+        config,
+        provider_registry=provider_registry,
+        provider_loader=provider_loader,
+        provider_loader_factory=provider_loader_factory,
+        use_provider_loader_port=feature_flag,
     )
     try:
         run_result = orchestrator.run_pipeline(limit=5, dry_run=False)

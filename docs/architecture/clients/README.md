@@ -6,7 +6,7 @@ Describe how API clients are structured under the hexagonal model: domain define
 ## Layout
 - **Domain ports:** `src/bioetl/domain/clients/...` — ABC/Protocol definitions (no network code).
 - **Infrastructure adapters:** `src/bioetl/infrastructure/clients/...` — concrete `*Impl` classes that use `UnifiedAPIClient` + `HttpClientMiddleware` for retries, backoff, rate limiting, and circuit breaker.
-- **Registries:** `src/bioetl/infrastructure/clients/base/abc_registry.yaml` and `abc_impls.yaml` map ABC ↔ default factory ↔ implementation.
+- **Registries:** `src/bioetl/infrastructure/clients/base/abc_registry.yaml` and `abc_impls.yaml` map ABC ↔ default factory ↔ implementation (включая loaders, writers, hash services).
 
 ## Creation flow
 1) Application/pipelines request a domain port (e.g., `ChemblDataClientABC`, `RequestBuilderABC`, `PaginatorABC`).  
