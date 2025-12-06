@@ -6,12 +6,9 @@ from unittest.mock import patch
 Path("data/output/target").mkdir(parents=True, exist_ok=True)
 
 try:
-    from bioetl.infrastructure.services.chembl_extraction import (
-        ChemblExtractionServiceImpl,
-    )
-
     # print(f"Container module: {bioetl.application.container.__file__}")
     from bioetl.interfaces.cli.app import app
+    from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 except ImportError as e:
     print(f"ImportError: {e}")
     sys.exit(1)
