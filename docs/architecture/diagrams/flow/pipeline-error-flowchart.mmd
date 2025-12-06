@@ -9,25 +9,19 @@ Start([Start Run]) --> Init[Init Context & Reset Services];
 Init --> ExtractStart[Notify Extract Start];
 ExtractStart --> ChunkLoop{Has Next Chunk?};
 
-ChunkLoop -->|Yes| ExtractExec[Execute extract()];
-ExtractExec -->|Success| TransformStart[Notify Transform Start];
-ExtractExec -->|Error| ErrHandler{Error Policy};
+ChunkLoop -->|Yes| ExtractExec[Execute extract]; ExtractExec -->|Success| TransformStart[Notify Transform Start]; ExtractExec -->|Error| ErrHandler{Error Policy};
 
-ErrHandler -->|Retry| RetryChk{Retries Left?};
-RetryChk -->|Yes| ExtractExec;
-RetryChk -->|No| FailAction[PipelineStageError];
+ErrHandler -->|Retry| RetryChk{Retries Left?}; RetryChk -->|Yes| ExtractExec; RetryChk -->|No| FailAction[PipelineStageError];
 
-ErrHandler -->|Skip| LogSkip[Log Skip];
-LogSkip --> ChunkLoop;
+ErrHandler -->|Skip| LogSkip[Log Skip]; LogSkip --> ChunkLoop;
 
-ErrHandler -->|Fail| FailAction;
-FailAction --> EndFail([Run Failed]);
+ErrHandler -->|Fail| FailAction; FailAction --> EndFail([Run Failed]);
 
-TransformStart --> TransExec[Execute transform()];
+TransformStart --> TransExec[Execute transform];
 TransExec -->|Success| ValidateStart[Notify Validate Start];
 TransExec -->|Error| ErrHandler;
 
-ValidateStart --> ValExec[Execute validate()];
+ValidateStart --> ValExec[Execute validate];
 ValExec -->|Success| Accumulate[Accumulate Chunk];
 ValExec -->|Error| ErrHandler;
 
@@ -37,7 +31,7 @@ ChunkLoop -->|No| NotifyEnds[Notify Stages End];
 NotifyEnds --> DryRunChk{Dry Run?};
 
 DryRunChk -->|No| WriteStart[Notify Write Start];
-WriteStart --> WriteExec[Execute write()];
+WriteStart --> WriteExec[Execute write];
 WriteExec --> MetaGen[Generate Metadata];
 MetaGen --> NotifyWriteEnd[Notify Write End];
 NotifyWriteEnd --> SuccessResult([Run Success]);
