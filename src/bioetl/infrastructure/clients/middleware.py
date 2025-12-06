@@ -303,10 +303,14 @@ class HttpClientMiddleware:
 
     def _backoff_delay(self, attempt: int, retry_after: float | None = None) -> float:
         base_delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
-        combined = base_delay if retry_after is None else max(base_delay, retry_after)
-        capped = min(combined, self.max_delay)
-        jitter = random.uniform(0.0, capped)
-        return min(capped + jitter, self.max_delay)
+        combined_delay = base_delay if retry_after is None else max(base_delay, retry_after)
+        jitter = random.uniform(0.0, combined_delay)
+        delay_with_jitter = combined_delay + jitter
+
+        if retry_after is not None and retry_after > self.max_delay:
+            return delay_with_jitter
+
+        return min(delay_with_jitter, self.max_delay)
 
     def _ensure_circuit_allows_request(self, method: str, url: str) -> None:
         if self._circuit_opened_at is None:
