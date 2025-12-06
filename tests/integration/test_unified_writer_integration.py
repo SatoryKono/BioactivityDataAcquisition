@@ -9,10 +9,11 @@ import pytest
 import yaml
 
 from bioetl.domain.models import RunContext
-from bioetl.application.config.pipeline_config_schema import DeterminismConfig
+from bioetl.application.config.pipeline_config_schema import DeterminismConfig, QcConfig
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
+from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
@@ -26,8 +27,10 @@ def test_unified_writer_writes_data_and_meta(tmp_path):
     )
 
     config = DeterminismConfig(stable_sort=True)
+    qc_config = QcConfig(enable_quality_report=True, enable_correlation_report=True)
     writer = CsvWriterImpl()
     metadata_writer = MetadataWriterImpl()
+    quality_reporter = QualityReportImpl()
     atomic_op = AtomicFileOperation()
 
     calls = {"count": 0}
@@ -50,7 +53,9 @@ def test_unified_writer_writes_data_and_meta(tmp_path):
     unified_writer = UnifiedOutputWriter(
         writer,
         metadata_writer,
+        quality_reporter,
         config,
+        qc_config=qc_config,
         atomic_op=atomic_op,
     )
 
@@ -60,7 +65,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path):
     data_path = output_dir / "test_entity.csv"
     meta_path = output_dir / "meta.yaml"
 
-    assert calls["count"] == 1
+    assert calls["count"] == 3
     assert data_path.exists()
     assert meta_path.exists()
     assert result.row_count == 3
@@ -74,4 +79,6 @@ def test_unified_writer_writes_data_and_meta(tmp_path):
     meta = yaml.safe_load(meta_path.read_text(encoding="utf-8"))
     assert meta["run_id"] == run_context.run_id
     assert "hash" in meta
+    assert "quality_report_table.csv" in meta["files"]
+    assert "correlation_report_table.csv" in meta["files"]
 
