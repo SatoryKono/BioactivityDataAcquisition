@@ -15,7 +15,7 @@
 - реестр провайдеров (`domain.provider_registry`, `domain.providers`);
 - ошибки (`domain.errors`);
 - схемы (Pandera) и реестр схем (`domain.schemas.*`, `domain.schemas.registry`);
-- сервисы: валидация (`domain.validation.service`), нормализация (`infrastructure.transform.impl`), хеширование (`domain.transform.hash_service`), трансформеры/нормалайзеры (`domain.transform.*`);
+- сервисы: валидация (`domain.validation.service`), нормализация (`infrastructure.transform.impl`), хеширование (порт `domain.transform.contracts.HashServiceABC`, реализация `infrastructure.transform.impl.hash_service_impl`), трансформеры/нормалайзеры (`domain.transform.*`);
 - контракты пайплайнов (`domain.schemas.pipeline_contracts`).
 
 ## 3. Слой infrastructure
