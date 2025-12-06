@@ -100,7 +100,16 @@ def test_provider_registry_allows_known_provider(
 ) -> None:
     base_dir = tmp_path
     providers_file = base_dir / "providers.yaml"
-    providers_file.write_text("providers:\n  - chembl\n", encoding="utf-8")
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: chembl\n"
+            "    module: tests.dummy\n"
+            "    factory: create_chembl\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
 
     pipelines_root = base_dir / "pipelines"
     profiles_root = base_dir / "profiles"
@@ -144,7 +153,16 @@ def test_provider_registry_rejects_missing_provider(
 ) -> None:
     base_dir = tmp_path
     providers_file = base_dir / "providers.yaml"
-    providers_file.write_text("providers:\n  - dummy\n", encoding="utf-8")
+    providers_file.write_text(
+        (
+            "providers:\n"
+            "  - id: dummy\n"
+            "    module: tests.dummy\n"
+            "    factory: create_dummy\n"
+            "    active: true\n"
+        ),
+        encoding="utf-8",
+    )
 
     pipelines_root = base_dir / "pipelines"
     profiles_root = base_dir / "profiles"
