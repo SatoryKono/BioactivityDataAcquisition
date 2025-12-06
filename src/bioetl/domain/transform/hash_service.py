@@ -6,6 +6,8 @@ import pandas as pd
 from bioetl.domain.transform.contracts import HashServiceABC, HasherABC
 from bioetl.domain.transform.impl.hasher import HasherImpl
 
+__all__ = ["HashService", "HashServiceImpl"]
+
 
 class HashServiceImpl(HashServiceABC):
     """
@@ -94,3 +96,7 @@ class HashServiceImpl(HashServiceABC):
 
         self._index_counter = 0
         self._extracted_at = None
+
+
+# Alias for compatibility with existing imports/tests.
+HashService = HashServiceImpl

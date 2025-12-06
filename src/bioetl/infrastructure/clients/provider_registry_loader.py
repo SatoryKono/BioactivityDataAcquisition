@@ -197,11 +197,22 @@ def load_provider_registry(
     return loader.load_registry(registry=registry_to_use)
 
 
+def create_provider_loader(
+    *,
+    config_path: str | Path | None = None,
+    logger: LoggerAdapterABC | None = None,
+) -> ProviderLoaderProtocol:
+    """Factory for ProviderLoaderProtocol implementations."""
+
+    return ProviderLoaderImpl(config_path=config_path, logger=logger)
+
+
 ProviderRegistryLoader = ProviderLoaderImpl
 
 __all__ = [
     "ProviderLoaderImpl",
     "ProviderRegistryLoader",
+    "create_provider_loader",
     "load_provider_registry",
     "ProviderRegistryLoaderError",
     "ProviderRegistryConfigNotFoundError",

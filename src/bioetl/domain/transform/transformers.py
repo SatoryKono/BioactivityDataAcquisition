@@ -10,7 +10,7 @@ from typing import Callable
 import pandas as pd
 
 from bioetl.domain.models import RunContext
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import HashServiceABC
 
 
 class TransformerABC(ABC):
@@ -42,7 +42,7 @@ class HashColumnsTransformer(TransformerABC):
     """Добавляет hash_business_key и hash_row."""
 
     def __init__(
-        self, hash_service: HashService, business_key_fields: list[str] | None
+        self, hash_service: HashServiceABC, business_key_fields: list[str] | None
     ) -> None:
         self._hash_service = hash_service
         self._business_key_fields = business_key_fields or []
@@ -61,7 +61,7 @@ class HashColumnsTransformer(TransformerABC):
 class IndexColumnTransformer(TransformerABC):
     """Добавляет индексную колонку."""
 
-    def __init__(self, hash_service: HashService) -> None:
+    def __init__(self, hash_service: HashServiceABC) -> None:
         self._hash_service = hash_service
 
     def apply(
@@ -75,7 +75,7 @@ class DatabaseVersionTransformer(TransformerABC):
 
     def __init__(
         self,
-        hash_service: HashService,
+        hash_service: HashServiceABC,
         database_version_provider: Callable[[], str | None],
     ) -> None:
         self._hash_service = hash_service
@@ -93,7 +93,7 @@ class DatabaseVersionTransformer(TransformerABC):
 class FulldateTransformer(TransformerABC):
     """Добавляет колонку extracted_at с таймстампом."""
 
-    def __init__(self, hash_service: HashService) -> None:
+    def __init__(self, hash_service: HashServiceABC) -> None:
         self._hash_service = hash_service
 
     def apply(
