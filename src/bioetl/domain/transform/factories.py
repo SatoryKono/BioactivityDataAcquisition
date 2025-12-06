@@ -4,6 +4,7 @@ from typing import Callable
 
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
+    HasherABC,
     NormalizationConfigProvider,
     NormalizationServiceABC,
 )
