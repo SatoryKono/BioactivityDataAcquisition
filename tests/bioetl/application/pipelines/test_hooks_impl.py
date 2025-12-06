@@ -1,7 +1,8 @@
+from prometheus_client import Histogram
+
 from bioetl.application.pipelines.hooks_impl import MetricsPipelineHookImpl
 from bioetl.domain.models import StageResult
 from bioetl.infrastructure.observability import metrics
-from prometheus_client import Histogram
 
 
 def _histogram_stats(child: Histogram) -> tuple[float, float]:
