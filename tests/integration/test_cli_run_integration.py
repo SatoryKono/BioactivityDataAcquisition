@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
-from bioetl.application.services.chembl_extraction import ChemblExtractionServiceImpl
+from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
 from bioetl.interfaces.cli import app
 
 sys.modules.setdefault("tqdm", MagicMock())
