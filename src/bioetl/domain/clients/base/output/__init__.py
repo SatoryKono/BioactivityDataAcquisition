@@ -1,8 +1,8 @@
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
-    WriteResult,
     WriterABC,
+    WriteResult,
 )
 
 __all__ = [

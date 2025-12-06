@@ -6,7 +6,15 @@ from pathlib import Path
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = PROJECT_ROOT / "src/bioetl/infrastructure/clients/base/abc_registry.yaml"
+REGISTRY_PATH = (
+    PROJECT_ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "clients"
+    / "base"
+    / "abc_registry.yaml"
+)
 INDEX_PATH = PROJECT_ROOT / "docs/ABC_INDEX.md"
 
 
