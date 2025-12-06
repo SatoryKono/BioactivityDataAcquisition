@@ -13,11 +13,11 @@ from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
@@ -47,7 +47,7 @@ class PipelineBase(ABC):
     def __init__(
         self,
         config: PipelineConfig,
-        logger: LoggerAdapterABC,
+        logger: LoggingPort,
         validation_service: ValidationService,
         output_writer: "OutputWriterABC",
         hash_service: HashServiceABC,
