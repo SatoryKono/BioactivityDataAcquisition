@@ -41,6 +41,7 @@ NormalizationServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
   implementations:
     Default: bioetl.infrastructure.transform.impl.normalization_service_impl.NormalizationServiceImpl
+    Chembl: bioetl.infrastructure.transform.impl.chembl_normalization_service.ChemblNormalizationService
 
 HasherABC:
   default_factory: bioetl.infrastructure.transform.factories.default_hasher
