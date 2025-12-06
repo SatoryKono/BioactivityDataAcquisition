@@ -11,9 +11,9 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.provider_registry import (
+    InMemoryProviderRegistry,
     MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,
-    get_provider_registry,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.logging.factories import default_logger
@@ -82,7 +82,7 @@ class ProviderRegistryLoader:
     ) -> list[ProviderDefinition]:
         """Load providers from YAML and register active entries."""
 
-        registry_to_use = registry or get_provider_registry()
+        registry_to_use = registry or InMemoryProviderRegistry()
         raw_config = self._load_config(self._config_path)
         try:
             config = ProviderRegistryConfig.model_validate(raw_config)
@@ -183,7 +183,7 @@ def load_provider_registry(
     """Utility to load provider registry and return the populated instance."""
 
     loader = ProviderRegistryLoader(config_path=config_path, logger=logger)
-    registry_to_use = registry or get_provider_registry()
+    registry_to_use = registry or InMemoryProviderRegistry()
     loader.load(registry=registry_to_use)
     return registry_to_use
 

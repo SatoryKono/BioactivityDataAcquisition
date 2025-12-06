@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.models import RunResult
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
@@ -57,7 +58,7 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
             status_code=503,
             detail="REST interface is disabled by configuration",
         )
-    registry = load_provider_registry()
+    registry = load_provider_registry(registry=InMemoryProviderRegistry())
     return PipelineOrchestrator(
         pipeline_name=pipeline_name,
         config=config,
