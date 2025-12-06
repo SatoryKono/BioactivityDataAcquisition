@@ -1,11 +1,18 @@
 """Pandera schema for ChEMBL testitem/molecule data."""
+
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX, PUBCHEM_CID_REGEX
+from bioetl.domain.transform.normalizers import (
+    CHEMBL_ID_REGEX,
+    PUBCHEM_CID_REGEX,
+)
+
 
 class TestitemSchema(pa.DataFrameModel):
     """Schema for molecule/test item data."""
+    __test__ = False
+
     molecule_chembl_id: Series[str] = pa.Field(
         str_matches=CHEMBL_ID_REGEX.pattern, description="ChEMBL ID молекулы"
     )
@@ -61,8 +68,14 @@ class TestitemSchema(pa.DataFrameModel):
         description="Хэш бизнес-ключа",
     )
     index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
-    database_version: Series[str] = pa.Field(nullable=True, description="Версия базы данных")
-    extracted_at: Series[str] = pa.Field(nullable=True, description="Дата и время извлечения")
+    database_version: Series[str] = pa.Field(
+        nullable=True,
+        description="Версия базы данных",
+    )
+    extracted_at: Series[str] = pa.Field(
+        nullable=True,
+        description="Дата и время извлечения",
+    )
 
     class Config:
         """Pandera configuration."""
