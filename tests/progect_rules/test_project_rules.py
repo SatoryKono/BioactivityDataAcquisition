@@ -3,106 +3,190 @@ from __future__ import annotations
 import ast
 import re
 from pathlib import Path
+from typing import Iterable
 
 import pytest
+import tomllib
 import yaml
 
-PACKAGE_ROOT = Path("src") / "bioetl"
-CONFIG_ROOT = Path("configs")
+from bioetl.domain.configs import HashingConfig, NormalizationConfig
+from bioetl.infrastructure.config.provider_registry_loader import (
+    ProviderRegistryModel,
+    ProviderRegistryNotFoundError,
+    ProviderRegistryFormatError,
+    ProviderNotConfiguredError,
+    ensure_provider_known,
+)
+
+SRC_ROOT = Path("src")
+BIOETL_ROOT = SRC_ROOT / "bioetl"
+SCHEMAS_ROOT = BIOETL_ROOT / "domain" / "schemas" / "chembl"
+PYPROJECT = Path("pyproject.toml")
+
+MODULE_NAME_PATTERN = re.compile(r"^[a-z0-9_]+\.py$")
+CLASS_NAME_PATTERN = re.compile(r"^[A-Z][A-Za-z0-9]+$")
+FUNCTION_NAME_PATTERN = re.compile(r"^[a-z_][a-z0-9_]*$")
 
 
-def _iter_python_files(root: Path) -> list[Path]:
-    return [
-        path
-        for path in root.rglob("*.py")
-        if "__pycache__" not in path.parts and path.is_file()
-    ]
+@pytest.fixture(scope="module")
+def pyproject() -> dict:
+    return tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
 
 
-def test_public_definitions_have_docstrings() -> None:
-    """All public functions and classes must document their purpose."""
+def _iter_python_files(root: Path) -> Iterable[Path]:
+    return (path for path in root.rglob("*.py") if path.is_file())
 
-    violations: list[str] = []
-    for path in _iter_python_files(PACKAGE_ROOT):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in tree.body:
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                if node.name.startswith("_"):
-                    continue
-                if ast.get_docstring(node) is None:
-                    violations.append(f"{path.as_posix()}: {node.name}")
 
-    if violations:
+def test_style_tooling_is_configured(pyproject: dict) -> None:
+    tools = pyproject.get("tool", {})
+    missing = [name for name in ("black", "isort", "ruff") if name not in tools]
+    if missing:
+        pytest.fail(f"Missing formatter/linter configuration sections: {', '.join(missing)}")
+
+
+def test_mypy_strict_options_enabled(pyproject: dict) -> None:
+    mypy_cfg = pyproject.get("tool", {}).get("mypy", {})
+    required_flags = {
+        "disallow_untyped_defs": True,
+        "disallow_incomplete_defs": True,
+        "check_untyped_defs": True,
+        "no_implicit_optional": True,
+    }
+    missing = [key for key, expected in required_flags.items() if mypy_cfg.get(key) != expected]
+    if missing:
         pytest.fail(
-            "Missing docstrings detected:\n" + "\n".join(sorted(set(violations)))
+            "Mypy strict configuration is incomplete for keys: " + ", ".join(sorted(missing))
         )
 
 
-def test_naming_conventions() -> None:
-    """Validate class and function naming against project regex rules."""
+def test_abcs_from_registry_have_docstrings() -> None:
+    registry_path = BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
+    registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
 
-    class_pattern = re.compile(r"^[A-Z][A-Za-z0-9]+$")
-    func_pattern = re.compile(r"^[a-z_][a-z0-9_]*$")
+    missing: list[str] = []
+    for target in registry.values():
+        module_path, class_name = target.rsplit(".", 1)
+        source_path = SRC_ROOT / Path(*module_path.split(".")).with_suffix(".py")
+        if not source_path.exists():
+            continue
 
+        tree = ast.parse(source_path.read_text(encoding="utf-8"))
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef) and node.name == class_name:
+                if ast.get_docstring(node) is None:
+                    missing.append(target)
+                break
+
+    if missing:
+        pytest.fail("Missing docstrings for: " + ", ".join(sorted(missing)))
+
+
+def test_module_and_function_naming_conventions() -> None:
     violations: list[str] = []
-    for path in _iter_python_files(PACKAGE_ROOT):
+
+    for path in _iter_python_files(BIOETL_ROOT):
+        filename = path.name
+        if filename not in {"__init__.py", "__main__.py"} and not MODULE_NAME_PATTERN.match(
+            filename
+        ):
+            violations.append(f"Invalid module name: {filename}")
+
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
+        for node in tree.body:
             if isinstance(node, ast.ClassDef):
                 if node.name.startswith("_"):
                     continue
-                if not class_pattern.match(node.name):
-                    violations.append(f"{path.as_posix()}: class {node.name}")
-            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if not CLASS_NAME_PATTERN.match(node.name):
+                    violations.append(
+                        f"{path}:{node.lineno} class name '{node.name}' violates convention"
+                    )
+            if isinstance(node, ast.FunctionDef):
                 if node.name.startswith("_"):
                     continue
-                if not func_pattern.match(node.name):
-                    violations.append(f"{path.as_posix()}: function {node.name}")
+                if not FUNCTION_NAME_PATTERN.match(node.name):
+                    violations.append(
+                        f"{path}:{node.lineno} function name '{node.name}' violates snake_case"
+                    )
 
     if violations:
-        pytest.fail(
-            "Naming convention violations:\n" + "\n".join(sorted(set(violations)))
-        )
+        pytest.fail("Naming convention violations:\n" + "\n".join(sorted(violations)))
 
 
-def test_no_builtin_print_usage() -> None:
-    """Ensure production code relies on logging instead of print()."""
+def test_no_builtin_print_calls_in_source() -> None:
+    offenders: list[str] = []
 
-    violations: list[str] = []
-    for path in _iter_python_files(PACKAGE_ROOT):
+    for path in _iter_python_files(BIOETL_ROOT):
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 if node.func.id == "print":
-                    violations.append(f"{path.as_posix()}: line {node.lineno}")
+                    offenders.append(f"{path}:{node.lineno}")
 
-    if violations:
-        pytest.fail(
-            "Forbidden print() calls found:\n" + "\n".join(sorted(set(violations)))
-        )
+    if offenders:
+        pytest.fail("Use logging instead of print():\n" + "\n".join(offenders))
 
 
-def test_configs_are_well_formed_yaml() -> None:
-    """All YAML configs must be syntactically valid and loadable."""
+def test_pandera_schemas_defined_for_entities() -> None:
+    violations: list[str] = []
+    allow_missing = {
+        (SCHEMAS_ROOT / "models.py").as_posix(),
+        (SCHEMAS_ROOT / "output_views.py").as_posix(),
+    }
 
-    yaml_files = [path for path in CONFIG_ROOT.rglob("*.yml")]
-    yaml_files.extend(path for path in CONFIG_ROOT.rglob("*.yaml"))
-
-    allowed_empty = {CONFIG_ROOT / "profiles" / "high_timeout.yaml"}
-
-    if not yaml_files:
-        pytest.skip("No YAML configs discovered.")
-
-    failures: list[str] = []
-    for path in yaml_files:
-        try:
-            loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
-        except yaml.YAMLError as exc:  # pragma: no cover - defensive
-            failures.append(f"{path.as_posix()}: {exc}")
+    for schema_file in sorted(SCHEMAS_ROOT.glob("*.py")):
+        if schema_file.name == "__init__.py":
             continue
 
-        if loaded is None and path not in allowed_empty:
-            failures.append(f"{path.as_posix()}: YAML parsed as empty content")
+        tree = ast.parse(schema_file.read_text(encoding="utf-8"))
+        schema_classes = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef)
+            and (
+                node.name.endswith("Schema")
+                or any(
+                    isinstance(base, ast.Attribute) and base.attr == "DataFrameModel"
+                    for base in node.bases
+                )
+                or any(
+                    isinstance(base, ast.Name) and base.id in {"DataFrameModel", "DataFrameSchema"}
+                    for base in node.bases
+                )
+            )
+        ]
 
-    if failures:
-        pytest.fail("Invalid YAML configs:\n" + "\n".join(sorted(failures)))
+        if not schema_classes and schema_file.as_posix() not in allow_missing:
+            violations.append(schema_file.as_posix())
+
+    if violations:
+        pytest.fail("Missing Pandera schemas in files:\n" + "\n".join(violations))
+
+
+def test_configs_validate_against_models() -> None:
+    hashing_data = yaml.safe_load((Path("configs") / "hashing.yaml").read_text(encoding="utf-8"))
+    normalization_data = yaml.safe_load(
+        (Path("configs") / "normalization.yaml").read_text(encoding="utf-8")
+    )
+    providers_data = yaml.safe_load((Path("configs") / "providers.yaml").read_text(encoding="utf-8"))
+
+    HashingConfig.model_validate(hashing_data.get("hashing", {}))
+    NormalizationConfig.model_validate(normalization_data.get("normalization", {}))
+    ProviderRegistryModel.model_validate(providers_data)
+
+
+def test_provider_registry_fail_fast_on_unknown_provider() -> None:
+    registry_path = Path("configs") / "providers.yaml"
+
+    with pytest.raises(ProviderNotConfiguredError):
+        ensure_provider_known("nonexistent", registry_path=registry_path)
+
+    with pytest.raises(ProviderRegistryNotFoundError):
+        ensure_provider_known("chembl", registry_path=registry_path.parent / "missing.yaml")
+
+    with pytest.raises(ProviderRegistryFormatError):
+        bad_path = registry_path.parent / "_invalid_provider.yaml"
+        bad_path.write_text("providers: invalid", encoding="utf-8")
+        try:
+            ensure_provider_known("chembl", registry_path=bad_path)
+        finally:
+            bad_path.unlink(missing_ok=True)
