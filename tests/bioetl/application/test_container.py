@@ -28,7 +28,9 @@ from bioetl.domain.providers import (  # noqa: E402
     ProviderDefinition,
     ProviderId,
 )
-from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider  # noqa: E402
+from bioetl.infrastructure.clients.chembl.provider import (
+    register_chembl_provider,  # noqa: E402
+)
 from bioetl.infrastructure.config.models import (  # noqa: E402
     ChemblSourceConfig,
     DummyProviderConfig,
