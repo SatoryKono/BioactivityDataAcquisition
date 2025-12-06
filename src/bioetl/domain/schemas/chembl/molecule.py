@@ -39,6 +39,11 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "usan_year",
     "veterinary",
     "withdrawn_flag",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
 ]
 
 
@@ -164,4 +169,5 @@ class MoleculeSchema(pa.DataFrameModel):
         """Pandera configuration."""
         strict = True
         coerce = True
+        ordered = True
 

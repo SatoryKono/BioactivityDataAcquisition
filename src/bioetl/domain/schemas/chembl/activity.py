@@ -51,6 +51,11 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "uo_units",
     "upper_value",
     "value",
+    "hash_row",
+    "hash_business_key",
+    "index",
+    "database_version",
+    "extracted_at",
 ]
 
 
@@ -114,3 +119,4 @@ class ActivitySchema(pa.DataFrameModel):
     class Config:
         strict = True
         coerce = True
+        ordered = True
