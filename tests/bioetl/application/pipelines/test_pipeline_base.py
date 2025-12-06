@@ -411,19 +411,37 @@ def test_pipeline_dry_run_metadata_and_stages(
     assert result.success
     assert result.output_path is None
     assert result.errors == []
-    assert [stage.stage_name for stage in result.stages] == [
-        "extract",
-        "transform",
-        "validate",
-    ]
+    _assert_stages(
+        result,
+        expected_names=["extract", "transform", "validate"],
+        expected_count=len(small_pipeline_df),
+    )
+    _assert_dry_run_meta(result, pipeline_test_config, expected_count=len(small_pipeline_df))
+
+
+def _assert_stages(
+    result,
+    *,
+    expected_names: list[str],
+    expected_count: int,
+) -> None:
+    assert [stage.stage_name for stage in result.stages] == expected_names
     assert [stage.records_processed for stage in result.stages] == [
-        len(small_pipeline_df),
-        len(small_pipeline_df),
-        len(small_pipeline_df),
+        expected_count
+        for _ in expected_names
     ]
     assert all(stage.errors == [] for stage in result.stages)
-    assert result.meta["dry_run"] is True
-    assert result.meta["row_count"] == len(small_pipeline_df)
-    assert result.meta["provider"] == pipeline_test_config.provider
-    assert result.meta["entity"] == pipeline_test_config.entity_name
     assert all(stage.duration_sec >= 0 for stage in result.stages)
+
+
+def _assert_dry_run_meta(
+    result,
+    config,
+    *,
+    expected_count: int,
+) -> None:
+    meta = result.meta
+    assert meta["dry_run"] is True
+    assert meta["row_count"] == expected_count
+    assert meta["provider"] == config.provider
+    assert meta["entity"] == config.entity_name

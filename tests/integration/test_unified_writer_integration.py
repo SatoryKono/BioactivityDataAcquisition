@@ -73,17 +73,31 @@ def _assert_write_results(
     meta_path: Path,
     run_context: RunContext,
 ) -> None:
-    assert calls["count"] == 3
-    assert data_path.exists()
-    assert meta_path.exists()
+    _assert_atomic_calls(calls)
+    _assert_written_artifacts(data_path, meta_path)
+    _assert_written_data(data_path)
+    _assert_written_meta(meta_path, run_context)
     assert result.row_count == 3
     assert result.checksum is not None
 
+
+def _assert_atomic_calls(calls: dict[str, int]) -> None:
+    assert calls["count"] == 3
+
+
+def _assert_written_artifacts(data_path: Path, meta_path: Path) -> None:
+    assert data_path.exists()
+    assert meta_path.exists()
+
+
+def _assert_written_data(data_path: Path) -> None:
     written = pd.read_csv(data_path)
     assert list(written.columns) == ["id", "value"]
     assert written["id"].tolist() == [1, 2, 3]
     assert written["value"].tolist() == [2, 3, 1]
 
+
+def _assert_written_meta(meta_path: Path, run_context: RunContext) -> None:
     meta = yaml.safe_load(meta_path.read_text(encoding="utf-8"))
     assert meta["run_id"] == run_context.run_id
     assert "hash" in meta

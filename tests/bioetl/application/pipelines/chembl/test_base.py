@@ -127,16 +127,46 @@ def test_transform_nested_normalization(
 
     result = pipeline_fixture.transform(df)
 
-    assert list(result.columns) == schema_cols
-    assert result.iloc[0]["nested"] == "x|y"
-    assert result.iloc[0]["obj"] == "k:v"
-    assert result.iloc[1]["nested"] == "z"
-    assert pd.isna(result.iloc[1]["obj"])
-    assert result.iloc[0]["simple"] == "s1"
-    assert result.iloc[0]["pubmed_id"] == 12345
-    assert result.iloc[0]["references"] == "12345|67890"
-    assert result.iloc[1]["references"] == "333"
-    assert result.iloc[0]["doi"] == "10.1000/abc"
+    _assert_normalized_columns(result, schema_cols)
+    _assert_normalized_row(
+        result,
+        0,
+        {
+            "nested": "x|y",
+            "obj": "k:v",
+            "simple": "s1",
+            "pubmed_id": 12345,
+            "references": "12345|67890",
+            "doi": "10.1000/abc",
+        },
+    )
+    _assert_normalized_row(
+        result,
+        1,
+        {
+            "nested": "z",
+            "obj": None,
+            "simple": "s2",
+            "pubmed_id": 67890,
+            "references": "333",
+            "doi": "10.2345/xyz",
+        },
+    )
+
+
+def _assert_normalized_columns(result: pd.DataFrame, expected: list[str]) -> None:
+    assert list(result.columns) == expected
+
+
+def _assert_normalized_row(
+    result: pd.DataFrame, index: int, expected: dict[str, object]
+) -> None:
+    row = result.iloc[index]
+    for key, expected_value in expected.items():
+        actual = row[key]
+        if expected_value is None and pd.isna(actual):
+            continue
+        assert actual == expected_value
 
 
 def test_transform_uses_batch_normalization(mock_dependencies_fixture):

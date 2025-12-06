@@ -6,8 +6,19 @@ from typing import cast
 from unittest.mock import MagicMock, Mock
 
 import pandas as pd
-from pydantic import AnyHttpUrl
 import pytest
+from pydantic import AnyHttpUrl
+
+from bioetl.application.config.pipeline_config_schema import (
+    HashingConfig,
+    LoggingConfig,
+    PipelineConfig,
+    StorageConfig,
+)
+from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.config.models import ChemblSourceConfig
+from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
+from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
@@ -56,18 +67,6 @@ def pytest_configure(config):
     except (ImportError, AttributeError):
         # Hypothesis not available or structure changed, skip patch
         pass
-
-from bioetl.application.config.pipeline_config_schema import (
-    HashingConfig,
-    LoggingConfig,
-    PipelineConfig,
-    StorageConfig,
-)
-from bioetl.infrastructure.config.models import ChemblSourceConfig
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
-from bioetl.domain.validation.service import ValidationService
-
 
 @pytest.fixture
 def mock_config():

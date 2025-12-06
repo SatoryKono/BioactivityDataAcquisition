@@ -103,10 +103,42 @@ def test_client_errors_properties(
     assert isinstance(error, ClientError)
     assert isinstance(error, ProviderError)
     assert isinstance(error, BioetlError)
+    _assert_error_properties(
+        error,
+        cause,
+        expected_endpoint=expected_endpoint,
+        expected_status=expected_status,
+        message_fragment=message_fragment,
+    )
+
+
+def _assert_error_properties(
+    error: ClientError,
+    cause: Exception,
+    *,
+    expected_endpoint: str,
+    expected_status: int | None,
+    message_fragment: str,
+) -> None:
     assert error.provider == "chembl"
     assert error.endpoint == expected_endpoint
     assert error.status_code == expected_status
     assert error.cause is cause
+    _assert_error_message(
+        error,
+        expected_endpoint=expected_endpoint,
+        expected_status=expected_status,
+        message_fragment=message_fragment,
+    )
+
+
+def _assert_error_message(
+    error: ClientError,
+    *,
+    expected_endpoint: str,
+    expected_status: int | None,
+    message_fragment: str,
+) -> None:
     message = str(error)
     assert error.__class__.__name__ in message
     assert "chembl" in message

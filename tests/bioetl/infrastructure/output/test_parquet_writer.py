@@ -1,6 +1,7 @@
-import pandas as pd
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
+
+import pandas as pd
 
 from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
 

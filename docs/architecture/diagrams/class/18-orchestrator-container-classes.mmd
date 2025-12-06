@@ -34,21 +34,6 @@ class PipelineHookABC
 class ErrorPolicyABC
 class LoggerAdapterABC
 
-PipelineOrchestrator:::domainPrimary
-PipelineContainer:::domainPrimary
-PipelineConfig:::domainSecondary
-PipelineBase:::domainSecondary
-ValidationService:::domainSecondary
-NormalizationService:::interface
-HashService:::domainSecondary
-UnifiedOutputWriter:::domainSecondary
-RecordSource:::domainSecondary
-ExtractionServiceABC:::interface
-TransformerABC:::interface
-PipelineHookABC:::interface
-ErrorPolicyABC:::interface
-LoggerAdapterABC:::interface
-
 PipelineOrchestrator --> PipelineContainer
 PipelineOrchestrator --> PipelineBase : build_pipeline()
 PipelineOrchestrator --> PipelineConfig

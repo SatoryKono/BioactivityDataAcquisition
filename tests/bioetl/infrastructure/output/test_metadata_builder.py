@@ -4,6 +4,7 @@ Tests for MetadataBuilder.
 # pylint: disable=redefined-outer-name
 from datetime import datetime, timezone
 from pathlib import Path
+
 import pytest
 
 from bioetl.domain.models import RunContext
@@ -51,21 +52,8 @@ def test_build_metadata(run_context):
         qc_checksums=qc_checksums,
     )
 
-    assert meta["run_id"] == "test-run-123"
-    assert meta["entity"] == "test_entity"
-    assert meta["provider"] == "chembl"
-    assert meta["timestamp"] == "2023-01-01T12:00:00+00:00"
-    assert meta["row_count"] == 100
-    assert meta["checksum"] == "abc123hash"
-    assert meta["files"] == [
-        "correlation_report_table.csv",
-        "quality_report_table.csv",
-        "test.csv",
-    ]
-    assert meta["checksums"]["test.csv"] == "abc123hash"
-    assert meta["checksums"]["quality_report_table.csv"] == "qc1"
-    assert meta["qc_artifacts"]["quality_report_table.csv"]["checksum"] == "qc1"
-    assert meta["extra_key"] == "extra_value"
+    _assert_metadata(meta, write_result, run_context)
+    _assert_checksums(meta)
 
 
 def test_build_dry_run_metadata(run_context):
@@ -81,3 +69,26 @@ def test_build_dry_run_metadata(run_context):
     assert meta["extra_key"] == "extra_value"
     assert "checksum" not in meta
     assert "files" not in meta
+
+
+def _assert_metadata(
+    meta: dict, write_result: WriteResult, run_context: RunContext
+) -> None:
+    assert meta["run_id"] == run_context.run_id
+    assert meta["entity"] == run_context.entity_name
+    assert meta["provider"] == run_context.provider
+    assert meta["timestamp"] == run_context.started_at.isoformat()
+    assert meta["row_count"] == write_result.row_count
+    assert meta["checksum"] == write_result.checksum
+    assert meta["files"] == [
+        "correlation_report_table.csv",
+        "quality_report_table.csv",
+        "test.csv",
+    ]
+    assert meta["extra_key"] == "extra_value"
+
+
+def _assert_checksums(meta: dict) -> None:
+    assert meta["checksums"]["test.csv"] == "abc123hash"
+    assert meta["checksums"]["quality_report_table.csv"] == "qc1"
+    assert meta["qc_artifacts"]["quality_report_table.csv"]["checksum"] == "qc1"

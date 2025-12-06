@@ -53,26 +53,55 @@ def _violations_for_import(node: ast.Import, path: Path) -> list[str]:
 def _violations_for_import_from(node: ast.ImportFrom, path: Path) -> list[str]:
     module = node.module or ""
     violations: list[str] = []
-
-    if module and _is_forbidden_absolute(module):
-        violations.append(_format_violation(path, node.lineno, module))
-    if node.level > 0 and module and _is_forbidden_relative(module):
-        violations.append(_format_violation(path, node.lineno, module))
-
-    if node.level > 0 and not module:
-        violations.extend(
-            _format_violation(path, node.lineno, alias.name)
-            for alias in node.names
-            if _is_forbidden_relative(alias.name)
+    violations.extend(
+        _module_import_violations(path, node.lineno, module, is_relative=node.level > 0)
+    )
+    violations.extend(
+        _relative_alias_violations(
+            path, node, module, has_relative_prefix=node.level > 0
         )
+    )
+    violations.extend(
+        _alias_violations(
+            path, node, module=module, is_relative=node.level > 0
+        )
+    )
+    return violations
 
+
+def _module_import_violations(
+    path: Path, lineno: int, module: str, *, is_relative: bool
+) -> list[str]:
+    violations: list[str] = []
+    if module and _is_forbidden_absolute(module):
+        violations.append(_format_violation(path, lineno, module))
+    if is_relative and module and _is_forbidden_relative(module):
+        violations.append(_format_violation(path, lineno, module))
+    return violations
+
+
+def _relative_alias_violations(
+    path: Path, node: ast.ImportFrom, module: str, *, has_relative_prefix: bool
+) -> list[str]:
+    if not has_relative_prefix or module:
+        return []
+    return [
+        _format_violation(path, node.lineno, alias.name)
+        for alias in node.names
+        if _is_forbidden_relative(alias.name)
+    ]
+
+
+def _alias_violations(
+    path: Path, node: ast.ImportFrom, *, module: str, is_relative: bool
+) -> list[str]:
+    violations: list[str] = []
     for alias in node.names:
         qualified = f"{module}.{alias.name}" if module else alias.name
         if _is_forbidden_absolute(qualified):
             violations.append(_format_violation(path, node.lineno, qualified))
-        if node.level > 0 and _is_forbidden_relative(qualified):
+        if is_relative and _is_forbidden_relative(qualified):
             violations.append(_format_violation(path, node.lineno, qualified))
-
     return violations
 
 

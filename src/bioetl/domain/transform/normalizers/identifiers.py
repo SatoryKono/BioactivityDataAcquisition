@@ -162,32 +162,46 @@ def _parse_positive_int_with_prefixes(
     if is_missing(value):
         return None
 
+    numeric = _coerce_positive_int(value, field_name)
+    if numeric is not None:
+        return numeric
+
+    text = str(value).strip().upper()
+    if not text:
+        return None
+
+    stripped = _strip_prefix(text, prefixes)
+    if not stripped.isdigit():
+        raise ValueError(f"Неверный {field_name}: '{value}'")
+
+    parsed = int(stripped)
+    _ensure_positive(parsed, field_name)
+    return parsed
+
+
+def _coerce_positive_int(value: Any, field_name: str) -> int | None:
     if isinstance(value, float):
         if not value.is_integer():
             raise ValueError(f"{field_name} не является целым числом: '{value}'")
         value = int(value)
 
     if isinstance(value, int):
-        if value <= 0:
-            raise ValueError(f"{field_name} должен быть положительным числом")
+        _ensure_positive(value, field_name)
         return value
 
-    text = str(value).strip().upper()
-    if not text:
-        return None
+    return None
 
+
+def _strip_prefix(text: str, prefixes: tuple[str, ...]) -> str:
     for prefix in prefixes:
         if text.startswith(prefix):
-            text = text[len(prefix) :]
-            break
+            return text[len(prefix) :]
+    return text
 
-    if not text.isdigit():
-        raise ValueError(f"Неверный {field_name}: '{value}'")
 
-    parsed = int(text)
-    if parsed <= 0:
+def _ensure_positive(value: int, field_name: str) -> None:
+    if value <= 0:
         raise ValueError(f"{field_name} должен быть положительным числом")
-    return parsed
 
 
 __all__ = [
