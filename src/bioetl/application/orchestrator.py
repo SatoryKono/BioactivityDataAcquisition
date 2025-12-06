@@ -10,12 +10,10 @@ from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunResult
+from bioetl.domain.provider_loader import ProviderLoaderProtocol
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     ProviderRegistryABC,
-)
-from bioetl.infrastructure.clients.provider_registry_loader import (
-    load_provider_registry,
 )
 
 
@@ -30,12 +28,18 @@ class PipelineOrchestrator:
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
         container_factory: Callable[..., PipelineContainerABC] | None = None,
+        provider_loader: ProviderLoaderProtocol | None = None,
+        provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None = None,
+        use_provider_loader_port: bool | None = None,
     ) -> None:
         self._pipeline_name = pipeline_name
         self._config = config
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
         self._container_factory = container_factory or build_pipeline_dependencies
+        self._provider_loader = provider_loader
+        self._provider_loader_factory = provider_loader_factory
+        self._use_provider_loader_port = use_provider_loader_port or False
 
     def build_pipeline(self, *, limit: int | None = None) -> PipelineBase:
         """Создает экземпляр пайплайна с зависимостями."""
@@ -111,6 +115,8 @@ class PipelineOrchestrator:
             self._config.model_dump(),
             dry_run,
             limit,
+            self._use_provider_loader_port,
+            self._provider_loader_factory,
         )
 
         if created_executor:
@@ -124,19 +130,47 @@ class PipelineOrchestrator:
         config_payload: dict,
         dry_run: bool,
         limit: int | None,
+        use_provider_loader_port: bool,
+        provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None,
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
-        registry = load_provider_registry(registry=InMemoryProviderRegistry())
+        loader = provider_loader_factory() if provider_loader_factory else None
+        registry = (
+            loader.load_registry(registry=InMemoryProviderRegistry())
+            if loader
+            else InMemoryProviderRegistry()
+        )
         orchestrator = PipelineOrchestrator(
             pipeline_name,
             config,
             provider_registry=registry,
+            provider_loader=loader,
+            provider_loader_factory=provider_loader_factory,
+            use_provider_loader_port=use_provider_loader_port,
         )
         return orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
 
     def _get_provider_registry(self) -> ProviderRegistryABC:
         if self._provider_registry is not None:
             return self._provider_registry
+        if self._provider_registry_provider is not None and not self._use_provider_loader_port:
+            registry = self._provider_registry_provider()
+            if registry is None:
+                raise RuntimeError("Provider registry provider returned None")
+            self._provider_registry = registry
+            return registry
+
+        if self._use_provider_loader_port:
+            loader = self._provider_loader
+            if loader is None and self._provider_loader_factory is not None:
+                loader = self._provider_loader_factory()
+                self._provider_loader = loader
+            if loader is not None:
+                self._provider_registry = loader.load_registry(
+                    registry=self._provider_registry
+                )
+                return self._provider_registry
+
         if self._provider_registry_provider is None:
             raise RuntimeError("Provider registry is not configured")
 

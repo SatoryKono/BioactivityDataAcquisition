@@ -3,10 +3,11 @@
 from typing import Callable
 
 from bioetl.domain.transform.contracts import (
+    HashServiceABC,
     NormalizationConfigProvider,
     NormalizationServiceABC,
 )
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.hash_service import HashServiceImpl
 from bioetl.domain.transform.impl import NormalizationServiceImpl
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
@@ -18,9 +19,16 @@ from bioetl.domain.transform.transformers import (
 )
 
 __all__ = [
+    "default_hash_service",
     "default_normalization_service",
     "default_post_transformer",
 ]
+
+
+def default_hash_service() -> HashServiceABC:
+    """Создает дефолтный HashService."""
+
+    return HashServiceImpl()
 
 
 def default_normalization_service(
@@ -33,7 +41,7 @@ def default_normalization_service(
 
 def default_post_transformer(
     *,
-    hash_service: HashService,
+    hash_service: HashServiceABC,
     business_key_fields: list[str] | None,
     version_provider: Callable[[], str | None] | None = None,
 ) -> TransformerABC:

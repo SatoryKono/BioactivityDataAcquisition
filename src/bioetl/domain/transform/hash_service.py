@@ -3,13 +3,13 @@ from typing import Callable
 
 import pandas as pd
 
-from bioetl.domain.transform.contracts import HasherABC
+from bioetl.domain.transform.contracts import HashServiceABC, HasherABC
 from bioetl.domain.transform.impl.hasher import HasherImpl
 
 
-class HashService:
+class HashServiceImpl(HashServiceABC):
     """
-    Сервис для вычисления и добавления хеш-сумм.
+    Реализация фасада хеш-сервиса.
     """
 
     def __init__(

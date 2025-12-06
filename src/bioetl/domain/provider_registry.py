@@ -14,6 +14,11 @@ __all__ = [
     "ProviderRegistryABC",
     "MutableProviderRegistryABC",
     "InMemoryProviderRegistry",
+    "register_provider",
+    "get_provider",
+    "list_providers",
+    "reset_provider_registry",
+    "restore_provider_registry",
 ]
 
 
@@ -92,3 +97,33 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition
+
+
+_registry: MutableProviderRegistryABC = InMemoryProviderRegistry()
+
+
+def register_provider(definition: ProviderDefinition) -> None:
+    """Register provider definition in the default in-memory registry."""
+    _registry.register_provider(definition)
+
+
+def get_provider(provider_id: ProviderId) -> ProviderDefinition:
+    """Return provider definition by id from the default registry."""
+    return _registry.get_provider(provider_id)
+
+
+def list_providers() -> list[ProviderDefinition]:
+    """List provider definitions from the default registry."""
+    return _registry.list_providers()
+
+
+def reset_provider_registry() -> None:
+    """Clear default registry (utility for tests)."""
+    _registry.reset_provider_registry()
+
+
+def restore_provider_registry(
+    definitions: Iterable[ProviderDefinition],
+) -> None:
+    """Restore default registry from provided definitions."""
+    _registry.restore_provider_registry(definitions)

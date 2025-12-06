@@ -90,3 +90,42 @@ class NormalizationServiceABC(ABC):
         field_cfg: dict[str, Any],
     ) -> pd.Series:
         """Нормализует отдельную серию согласно полю конфигурации."""
+
+
+class HashServiceABC(ABC):
+    """
+    Фасад для вычисления и добавления хеш-сумм и служебных колонок.
+    """
+
+    @abstractmethod
+    def add_hash_columns(
+        self, df: pd.DataFrame, business_key_cols: list[str] | None = None
+    ) -> pd.DataFrame:
+        """Добавляет hash_row и hash_business_key с учетом бизнес-ключа."""
+
+    @abstractmethod
+    def add_index_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Добавляет порядковый индекс строк (int, начиная с 0)."""
+
+    @abstractmethod
+    def add_database_version_column(
+        self, df: pd.DataFrame, database_version: str
+    ) -> pd.DataFrame:
+        """Добавляет колонку database_version."""
+
+    @abstractmethod
+    def add_fulldate_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Добавляет колонку extracted_at (UTC ISO-8601) для детерминизма."""
+
+    @abstractmethod
+    def reset_state(self) -> None:
+        """Сбрасывает внутреннее состояние между запусками."""
+
+
+__all__ = [
+    "NormalizationConfig",
+    "NormalizationConfigProvider",
+    "HasherABC",
+    "NormalizationServiceABC",
+    "HashServiceABC",
+]

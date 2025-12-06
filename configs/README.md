@@ -179,6 +179,7 @@ Prometheus-эндпоинта или переопределите `port`/`addres
 ### Секция `features`
 - `rest_interface_enabled`: включает REST-сервер на FastAPI (по умолчанию `false`)
 - `mq_interface_enabled`: разрешает запуск через MQ-слушатель (по умолчанию `false`)
+- `enable_provider_loader_port`: включает порт загрузчика провайдеров вместо прямой инфраструктурной зависимости (по умолчанию `false`)
 
 ## Related Documents
 
