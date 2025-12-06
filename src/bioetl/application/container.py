@@ -26,6 +26,7 @@ from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
+from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
@@ -60,10 +61,15 @@ class PipelineContainer(PipelineContainerABC):
         post_transformer: TransformerABC | None = None,
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+        schema_provider: SchemaProviderABC | None = None,
+        validator_factory: ValidatorFactoryABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
-        self._schema_registry = SchemaRegistry()
+        self._schema_provider: SchemaProviderABC = schema_provider or SchemaRegistry()
+        self._validator_factory: ValidatorFactoryABC = (
+            validator_factory or self._default_validator_factory()
+        )
         self._logger: LoggerAdapterABC = logger or default_logger()
         self._writer: WriterABC = writer or default_writer()
         self._metadata_writer: MetadataWriterABC = (
@@ -89,7 +95,7 @@ class PipelineContainer(PipelineContainerABC):
             metadata_writer=self._metadata_writer,
             quality_reporter=self._quality_reporter,
         )
-        register_schemas(self._schema_registry)
+        register_schemas(self._schema_provider)
 
     @property
     def config(self) -> PipelineConfig:
@@ -101,7 +107,10 @@ class PipelineContainer(PipelineContainerABC):
 
     def get_validation_service(self) -> ValidationService:
         """Get the validation service with registered schemas."""
-        return ValidationService(schema_provider=self._schema_registry)
+        return ValidationService(
+            schema_provider=self._schema_provider,
+            validator_factory=self._validator_factory,
+        )
 
     def get_output_writer(self) -> OutputWriterABC:
         """Get the unified output writer."""
@@ -179,6 +188,14 @@ class PipelineContainer(PipelineContainerABC):
             filters=filters,
             chunk_size=self._config.batch_size,
         )
+
+    @staticmethod
+    def _default_validator_factory() -> ValidatorFactoryABC:
+        from bioetl.infrastructure.validation.factories import (
+            default_validator_factory,
+        )
+
+        return default_validator_factory()
 
     def get_extraction_service(self) -> Any:
         """Get the extraction service based on provider configuration."""
