@@ -17,11 +17,7 @@ from bioetl.domain.clients.base.output.contracts import (
 )
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.provider_registry import (
-    MutableProviderRegistryABC,
-    ProviderRegistryABC,
-    get_provider_registry,
-)
+from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
@@ -31,9 +27,6 @@ from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.clients.provider_registry_loader import (
-    load_provider_registry,
-)
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
@@ -84,6 +77,10 @@ class PipelineContainer(PipelineContainerABC):
         self._post_transformer: TransformerABC | None = post_transformer
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
+        if self._provider_registry is None and self._provider_registry_provider is None:
+            raise ValueError(
+                "Provider registry must be supplied (instance or provider callable)"
+            )
         self._output_writer = UnifiedOutputWriter(
             writer=self._writer,
             metadata_writer=self._metadata_writer,
@@ -247,10 +244,13 @@ class PipelineContainer(PipelineContainerABC):
     def _get_provider_registry(self) -> ProviderRegistryABC:
         if self._provider_registry is not None:
             return self._provider_registry
-        if self._provider_registry_provider is not None:
-            self._provider_registry = self._provider_registry_provider()
-        else:
-            self._provider_registry = get_provider_registry()
+        if self._provider_registry_provider is None:
+            raise RuntimeError("Provider registry provider is not configured")
+
+        self._provider_registry = self._provider_registry_provider()
+        if self._provider_registry is None:
+            raise RuntimeError("Provider registry provider returned None")
+
         return self._provider_registry
 
     def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
@@ -261,26 +261,6 @@ class PipelineContainer(PipelineContainerABC):
                 f"provider '{self._provider_id.value}'"
             )
         return source_config
-
-    def _register_providers(self) -> None:
-        """
-        Регистрирует провайдеров в глобальном реестре.
-
-        Использует загрузчик, поэтому вызов идемпотентен и безопасен
-        при повторных вызовах.
-        """
-        registry_candidate = getattr(self, "_provider_registry", None)
-        if registry_candidate is not None and not hasattr(
-            registry_candidate, "register_provider"
-        ):
-            raise TypeError("Provider registry must be mutable for registration")
-        mutable_registry: MutableProviderRegistryABC = cast(
-            MutableProviderRegistryABC,
-            cast(MutableProviderRegistryABC | None, registry_candidate)
-            or get_provider_registry(),
-        )
-        self._provider_registry = load_provider_registry(registry=mutable_registry)
-
 
 def build_pipeline_dependencies(
     config: PipelineConfig,

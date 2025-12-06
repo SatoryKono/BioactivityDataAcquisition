@@ -14,6 +14,7 @@ __all__ = [
     "ProviderRegistryABC",
     "MutableProviderRegistryABC",
     "InMemoryProviderRegistry",
+    # Deprecated: keep temporarily for compatibility; prefer instance injection.
     "get_provider_registry",
     "register_provider",
     "get_provider",
@@ -103,37 +104,53 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
 _PROVIDERS = InMemoryProviderRegistry()
 
 
-def get_provider_registry() -> ProviderRegistryABC:
-    """Return global provider registry instance."""
+def _warn_deprecated_global() -> None:
+    import warnings
 
+    warnings.warn(
+        "Global provider registry is deprecated; inject an instance instead.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
+def get_provider_registry() -> ProviderRegistryABC:
+    """Deprecated: return global provider registry instance."""
+
+    _warn_deprecated_global()
     return _PROVIDERS
 
 
 def register_provider(definition: ProviderDefinition) -> None:
-    """Register provider definition in the global registry."""
+    """Deprecated: register provider definition in the global registry."""
 
+    _warn_deprecated_global()
     _PROVIDERS.register_provider(definition)
 
 
 def get_provider(provider_id: ProviderId) -> ProviderDefinition:
-    """Get provider definition by id from global registry."""
+    """Deprecated: get provider definition by id from global registry."""
 
+    _warn_deprecated_global()
     return _PROVIDERS.get_provider(provider_id)
 
 
 def list_providers() -> list[ProviderDefinition]:
-    """List all registered provider definitions from global registry."""
+    """Deprecated: list all registered provider definitions from global registry."""
 
+    _warn_deprecated_global()
     return _PROVIDERS.list_providers()
 
 
 def reset_provider_registry() -> None:
-    """Clear global registry (intended for test isolation)."""
+    """Deprecated: clear global registry (intended for test isolation)."""
 
+    _warn_deprecated_global()
     _PROVIDERS.reset_provider_registry()
 
 
 def restore_provider_registry(definitions: Iterable[ProviderDefinition]) -> None:
-    """Restore global registry to provided definitions (used in tests)."""
+    """Deprecated: restore global registry to provided definitions (used in tests)."""
 
+    _warn_deprecated_global()
     _PROVIDERS.restore_provider_registry(definitions)

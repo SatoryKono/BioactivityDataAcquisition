@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.container import PipelineContainer
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
@@ -91,10 +92,16 @@ def _build_config(output_path: Path) -> PipelineConfig:
     )
 
 
+@pytest.fixture()
+def provider_registry() -> InMemoryProviderRegistry:
+    return InMemoryProviderRegistry()
+
+
 def test_container_uses_overridden_metadata_writer(
     run_context_factory: Callable[..., RunContext],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    provider_registry: InMemoryProviderRegistry,
 ) -> None:
     writer = RecordingWriter()
     metadata_writer = RecordingMetadataWriter()
@@ -104,6 +111,7 @@ def test_container_uses_overridden_metadata_writer(
         writer=writer,
         metadata_writer=metadata_writer,
         quality_reporter=quality_reporter,
+        provider_registry=provider_registry,
     )
 
     output_writer = container.get_output_writer()
@@ -132,7 +140,9 @@ def test_container_uses_overridden_metadata_writer(
 
 
 def test_container_defaults_use_factories(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    provider_registry: InMemoryProviderRegistry,
 ) -> None:
     default_writer_instance = RecordingWriter()
     default_metadata_writer_instance = RecordingMetadataWriter()
@@ -165,7 +175,9 @@ def test_container_defaults_use_factories(
         "bioetl.application.container.default_quality_reporter", quality_factory
     )
 
-    container = PipelineContainer(_build_config(tmp_path / "defaults"))
+    container = PipelineContainer(
+        _build_config(tmp_path / "defaults"), provider_registry=provider_registry
+    )
     output_writer = container.get_output_writer()
 
     assert writer_calls == 1

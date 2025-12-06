@@ -6,6 +6,7 @@ from bioetl.application.container import PipelineContainer
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 
 
 class StubContainer(PipelineContainerABC):
@@ -125,7 +126,8 @@ def _assert_dependencies(
 
 def test_pipeline_container_satisfies_contract(monkeypatch: Any) -> None:
     config = _build_config()
-    container = PipelineContainer(config)
+    provider_registry = InMemoryProviderRegistry()
+    container = PipelineContainer(config, provider_registry=provider_registry)
 
     assert isinstance(container, PipelineContainerABC)
 
@@ -137,6 +139,7 @@ def test_pipeline_container_satisfies_contract(monkeypatch: Any) -> None:
     orchestrator = PipelineOrchestrator(
         "dummy.entity",
         config,
+        provider_registry=provider_registry,
         container_factory=lambda *args, **kwargs: stub_container,
     )
 

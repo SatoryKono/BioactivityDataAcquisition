@@ -1,60 +1,30 @@
 from __future__ import annotations
 
-import sys
-import types
-
-from bioetl.domain.provider_registry import (
-    get_provider,
-    list_providers,
-    reset_provider_registry,
-    restore_provider_registry,
-)
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderId
-
-
-def _stub_tqdm_module() -> types.ModuleType:
-    module = types.ModuleType("tqdm")
-    module.tqdm = lambda *args, **kwargs: None
-    return module
+from bioetl.infrastructure.clients.provider_registry_loader import (
+    load_provider_registry,
+)
 
 
 def test_register_providers_registers_chembl() -> None:
-    snapshot = list_providers()
-    try:
-        reset_provider_registry()
-        sys.modules.setdefault("tqdm", _stub_tqdm_module())
+    registry = InMemoryProviderRegistry()
+    load_provider_registry(registry=registry)
 
-        from bioetl.application.container import PipelineContainer
-
-        container = object.__new__(PipelineContainer)
-
-        container._register_providers()
-
-        provider = get_provider(ProviderId.CHEMBL)
-        assert provider.id == ProviderId.CHEMBL
-        assert ProviderId.CHEMBL in {definition.id for definition in list_providers()}
-    finally:
-        restore_provider_registry(snapshot)
-        sys.modules.pop("tqdm", None)
+    provider = registry.get_provider(ProviderId.CHEMBL)
+    assert provider.id == ProviderId.CHEMBL
+    assert ProviderId.CHEMBL in {
+        definition.id for definition in registry.list_providers()
+    }
 
 
 def test_register_providers_is_idempotent() -> None:
-    snapshot = list_providers()
-    try:
-        reset_provider_registry()
-        sys.modules.setdefault("tqdm", _stub_tqdm_module())
+    registry = InMemoryProviderRegistry()
 
-        from bioetl.application.container import PipelineContainer
+    load_provider_registry(registry=registry)
+    first_definition = registry.get_provider(ProviderId.CHEMBL)
 
-        container = object.__new__(PipelineContainer)
+    load_provider_registry(registry=registry)
+    second_definition = registry.get_provider(ProviderId.CHEMBL)
 
-        container._register_providers()
-        first_definition = get_provider(ProviderId.CHEMBL)
-
-        container._register_providers()
-        second_definition = get_provider(ProviderId.CHEMBL)
-
-        assert first_definition is second_definition
-    finally:
-        restore_provider_registry(snapshot)
-        sys.modules.pop("tqdm", None)
+    assert first_definition is second_definition

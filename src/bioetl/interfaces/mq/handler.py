@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.models import RunResult
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
@@ -40,7 +41,7 @@ class MQJobHandler:
         if not config.features.mq_interface_enabled:
             raise RuntimeError("MQ interface is disabled by configuration")
 
-        registry = load_provider_registry()
+        registry = load_provider_registry(registry=InMemoryProviderRegistry())
         orchestrator = PipelineOrchestrator(
             pipeline_name=job.pipeline_name,
             config=config,

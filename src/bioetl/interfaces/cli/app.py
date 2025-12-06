@@ -11,6 +11,7 @@ from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import MetricsConfig
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     load_provider_registry,
 )
@@ -152,7 +153,8 @@ def run(
         )
         _start_metrics_exporter(config.metrics, dry_run=dry_run)
         provider_registry = load_provider_registry(
-            config_path=base_dir / "providers.yaml"
+            config_path=base_dir / "providers.yaml",
+            registry=InMemoryProviderRegistry(),
         )
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
