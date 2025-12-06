@@ -4,6 +4,7 @@ from typing import cast
 import pandas as pd
 from pydantic import AnyHttpUrl
 
+from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
@@ -13,7 +14,6 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.infrastructure.logging.contracts import LoggerAdapterABC
 
 
 class _StubExtractionService:
@@ -64,8 +64,8 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
     chunks = list(source.iter_records())
 
     assert len(chunks) == 1
-    expected = pd.DataFrame([{"id": 1, "name": "alpha"}])
-    pd.testing.assert_frame_equal(chunks[0].reset_index(drop=True), expected)
+    expected = [{"id": 1, "name": "alpha"}]
+    assert chunks[0] == expected
 
 
 def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
@@ -99,6 +99,6 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
 
     assert extraction.batches == [["A1", "A2"], ["A3"]]
     assert len(records) == 2
-    combined = pd.concat(records, ignore_index=True)
-    expected = pd.DataFrame({"id": ["A1", "A2", "A3"]})
-    pd.testing.assert_frame_equal(combined, expected)
+    combined = [record for batch in records for record in batch]
+    expected = [{"id": "A1"}, {"id": "A2"}, {"id": "A3"}]
+    assert combined == expected

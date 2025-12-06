@@ -2,6 +2,7 @@
 
 # pylint: disable=redefined-outer-name, unused-argument, protected-access
 from datetime import datetime, timezone
+from typing import cast
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -199,8 +200,8 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
     """Test that extract yields DataFrame chunks for further processing."""
     record_source = MagicMock()
     raw_chunks = [
-        pd.DataFrame([{"id": 1}, {"id": 2}]),
-        pd.DataFrame([{"id": 3}]),
+        [{"id": 1}, {"id": 2}],
+        [{"id": 3}],
     ]
     record_source.iter_records.return_value = raw_chunks
 
@@ -225,7 +226,11 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
     assert normalization_service.normalize_batch.call_count == 2
 
     expected = pd.concat(
-        [chunk.assign(processed=True) for chunk in raw_chunks], ignore_index=True
+        [
+            pd.DataFrame(chunk).assign(processed=True)
+            for chunk in cast(list[list[dict[str, int]]], raw_chunks)
+        ],
+        ignore_index=True,
     )
 
     pd.testing.assert_frame_equal(
