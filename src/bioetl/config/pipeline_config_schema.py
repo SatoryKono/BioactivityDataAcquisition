@@ -15,7 +15,10 @@ from pydantic import (
 )
 
 from bioetl.config.provider_config_schema import BaseProviderConfig, ProviderConfigUnion
-from bioetl.config.provider_registry import ProviderRegistryError, ensure_provider_known
+from bioetl.infrastructure.config.provider_registry_loader import (
+    ProviderRegistryError,
+    ensure_provider_known,
+)
 from bioetl.domain.transform.contracts import NormalizationConfigProvider
 
 

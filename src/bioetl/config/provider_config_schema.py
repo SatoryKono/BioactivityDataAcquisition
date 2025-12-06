@@ -14,7 +14,7 @@ from pydantic import (
 )
 from pydantic.types import NonNegativeInt
 
-from bioetl.config.provider_registry import (
+from bioetl.infrastructure.config.provider_registry_loader import (
     ProviderRegistryError,
     ensure_provider_known,
 )
