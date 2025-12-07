@@ -31,7 +31,7 @@ subgraph Domain["Domain Dependencies"]
     Normalization["NormalizationServiceImpl\nbioetl.infrastructure.transform.impl.normalize"]:::componentSecondary
     Hashing["HashServiceABC\nbioetl.domain.transform.contracts"]:::componentSecondary
     Transformers["TransformerChain\nHash/Index/Fulldate/DbVersion"]:::componentSecondary
-    Contracts["PipelineSchemaContract\nbioetl.domain.schemas.pipeline_contracts"]:::componentSecondary
+    Contracts["PipelineSchemaModel\nbioetl.domain.schemas.pipeline_contracts"]:::componentSecondary
     Schemas["SchemaRegistry + PanderaValidator\nbioetl.domain.schemas.registry"]:::componentSecondary
 end
 class Domain group;
