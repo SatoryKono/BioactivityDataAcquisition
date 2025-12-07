@@ -7,7 +7,7 @@
 ## Компоненты
 - `ChemblExtractorImpl` — API/CSV/ID-list режимы через `input_mode`.
 - `ChemblTransformerImpl` — приводит к `activity`-схеме, убирает строки с null в обязательных столбцах.
-- Post-transform: `HashColumnsTransformerImpl`, `IndexColumnTransformerImpl`, `DatabaseVersionTransformerImpl`, `FulldateTransformerImpl`.
+- Post-transform: `HashColumnsTransformerImpl`, `IndexColumnTransformerImpl`, `DatabaseVersionTransformer`, `FulldateTransformerImpl`.
 - `ValidationService` + Pandera-схема `chembl.activity`.
 - `UnifiedOutputWriter` — стабильная сортировка, атомарная запись `<output>/activity.csv`, `meta.yaml`.
 
