@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
+from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
@@ -19,12 +19,12 @@ class StageRunner:
         self,
         *,
         hooks_manager: HooksManager,
-        error_policy_manager: ErrorPolicyManager,
+        error_policy_facade: ErrorPolicyFacade,
         entity_name: str,
         provider_id: ProviderId,
     ) -> None:
         self._hooks_manager = hooks_manager
-        self._error_policy_manager = error_policy_manager
+        self._error_policy_facade = error_policy_facade
         self._entity_name = entity_name
         self._provider_id = provider_id
 
@@ -100,7 +100,7 @@ class StageRunner:
             self._hooks_manager.notify_stage_start(stage, context)
             started = True
 
-        df_result = self._error_policy_manager.execute(stage, context, action)
+        df_result = self._error_policy_facade.execute(stage, context, action)
         if df_result is None:
             raise PipelineStageError(
                 provider=self._provider_id.value,
@@ -150,7 +150,7 @@ class StageRunner:
         count: int = 0,
         chunks: int = 0,
     ) -> RunResult:
-        errors = self._error_policy_manager.get_last_error_messages()
+        errors = self._error_policy_facade.get_last_error_messages()
         stage_result = self.make_stage_result(
             stage,
             count,
