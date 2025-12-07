@@ -4,8 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.config import load_defaults
-from bioetl.infrastructure.config.defaults_loader import DefaultsValidationError
+from bioetl.infrastructure.config.defaults_loader import (
+    DefaultsValidationError,
+    get_defaults_config,
+)
 
 
 def _write(path: Path, content: str) -> None:
@@ -13,7 +15,9 @@ def _write(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def test_load_defaults_with_env_substitution(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_defaults_with_env_substitution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setenv("HASH_SALT", "secret-salt")
     monkeypatch.setenv("MAX_URL_LEN", "1500")
     monkeypatch.setenv("CHEMBL_BASE", "https://env.example.org")
@@ -60,7 +64,7 @@ sources:
         """,
     )
 
-    defaults = load_defaults(base_dir=tmp_path)
+    defaults = get_defaults_config(base_dir=tmp_path)
 
     assert defaults.hashing.hashing.salt == "secret-salt"
     assert defaults.network is not None
@@ -100,4 +104,4 @@ http:
     )
 
     with pytest.raises(DefaultsValidationError):
-        load_defaults(base_dir=tmp_path)
+        get_defaults_config(base_dir=tmp_path)

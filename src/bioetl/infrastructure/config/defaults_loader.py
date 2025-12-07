@@ -17,7 +17,11 @@ from bioetl.domain.configs import (
     SourcesDefaultsConfig,
 )
 from bioetl.infrastructure.config.env import resolve_env_placeholders
-from bioetl.infrastructure.config.sources import get_configs_root, get_yaml
+from bioetl.infrastructure.config.sources import (
+    DEFAULT_CONFIGS_ROOT,
+    get_configs_root,
+    get_yaml,
+)
 
 
 class DefaultsConfigError(Exception):
@@ -40,10 +44,12 @@ class DefaultsValidationError(DefaultsConfigError):
         self.path = path
 
 
-def load_defaults_config(*, base_dir: str | Path | None = None) -> DefaultsConfig:
+def get_defaults_config(*, base_dir: str | Path | None = None) -> DefaultsConfig:
     """Читает и валидирует глобальные конфигурации по умолчанию."""
 
-    root = get_configs_root(base_dir).resolve()
+    primary_root = get_configs_root(base_dir).resolve()
+    fallback_root = DEFAULT_CONFIGS_ROOT.resolve()
+    root = _select_defaults_root(primary_root, fallback_root)
     return _load_defaults_cached(root)
 
 
@@ -67,6 +73,23 @@ def _load_defaults_cached(root: Path) -> DefaultsConfig:
     )
 
 
+def _select_defaults_root(primary: Path, fallback: Path) -> Path:
+    if _has_defaults(primary):
+        return primary
+    if primary != fallback and _has_defaults(fallback):
+        return fallback
+    missing = primary if primary.exists() else fallback
+    raise DefaultsFileNotFoundError(missing / "hashing.yaml")
+
+
+def _has_defaults(root: Path) -> bool:
+    return (
+        (root / "hashing.yaml").exists()
+        and (root / "normalization.yaml").exists()
+        and (root / "defaults").exists()
+    )
+
+
 def _load_section(path: Path, *, model: type[Any], key: str) -> Any:
     if not path.exists():
         raise DefaultsFileNotFoundError(path)
@@ -82,7 +105,9 @@ def _load_section(path: Path, *, model: type[Any], key: str) -> Any:
         raise DefaultsValidationError(path, exc.__str__()) from exc
 
 
-def _load_defaults_directory(directory: Path) -> tuple[NetworkDefaultsConfig | None, dict[str, SourceDefaultsConfig]]:
+def _load_defaults_directory(
+    directory: Path,
+) -> tuple[NetworkDefaultsConfig | None, dict[str, SourceDefaultsConfig]]:
     if not directory.exists():
         raise DefaultsFileNotFoundError(directory)
 
@@ -127,5 +152,5 @@ __all__ = [
     "DefaultsConfigError",
     "DefaultsFileNotFoundError",
     "DefaultsValidationError",
-    "load_defaults_config",
+    "get_defaults_config",
 ]
