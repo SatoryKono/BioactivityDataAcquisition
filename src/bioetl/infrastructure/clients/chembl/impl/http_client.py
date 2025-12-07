@@ -88,7 +88,7 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
     def metadata(self) -> dict[str, Any]:
         """Fetch ChEMBL API status/metadata endpoint."""
-        url = self.request_builder.for_endpoint("status").build({})
+        url = self.request_builder.build_for_endpoint("status").build_request({})
         data = self._execute_request(url)
         return data
 
@@ -103,27 +103,27 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
     def request_activity(self, **filters: Any) -> Any:
         """Request activity endpoint with provided filters."""
-        url = self.request_builder.for_endpoint("activity").build(filters)
+        url = self.request_builder.build_for_endpoint("activity").build_request(filters)
         return self._execute_request(url)
 
     def request_assay(self, **filters: Any) -> Any:
         """Request assay endpoint with provided filters."""
-        url = self.request_builder.for_endpoint("assay").build(filters)
+        url = self.request_builder.build_for_endpoint("assay").build_request(filters)
         return self._execute_request(url)
 
     def request_target(self, **filters: Any) -> Any:
         """Request target endpoint with provided filters."""
-        url = self.request_builder.for_endpoint("target").build(filters)
+        url = self.request_builder.build_for_endpoint("target").build_request(filters)
         return self._execute_request(url)
 
     def request_document(self, **filters: Any) -> Any:
         """Request document endpoint with provided filters."""
-        url = self.request_builder.for_endpoint("document").build(filters)
+        url = self.request_builder.build_for_endpoint("document").build_request(filters)
         return self._execute_request(url)
 
     def request_molecule(self, **filters: Any) -> Any:
         """Request molecule endpoint with provided filters."""
-        url = self.request_builder.for_endpoint("molecule").build(filters)
+        url = self.request_builder.build_for_endpoint("molecule").build_request(filters)
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
