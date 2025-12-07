@@ -19,7 +19,7 @@ from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
+    DatabaseVersionTransformerImpl,
     FulldateTransformerImpl,
     HashColumnsTransformerImpl,
     IndexColumnTransformerImpl,
@@ -506,7 +506,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, DatabaseVersionTransformer):
+        if isinstance(component, DatabaseVersionTransformerImpl):
             signature.append(
                 (
                     component.__class__.__name__,
