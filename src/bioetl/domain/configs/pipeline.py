@@ -66,8 +66,8 @@ class PipelineConfig(BaseModel):
     def entity_name(self) -> str:
         return self.entity
 
-    def as_normalization_config_provider(self) -> NormalizationConfigProviderProtocol:
-        """Return self to satisfy NormalizationConfigProviderProtocol contract."""
+    def get_normalization_config_provider(self) -> NormalizationConfigProviderProtocol:
+        """Return self to satisfy NormalizationConfigProviderProtocol."""
 
         return self
 
