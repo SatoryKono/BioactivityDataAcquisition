@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.base import PipelineBase
+from types import SimpleNamespace
+from typing import cast
+
+from bioetl.application.pipelines.base import PipelineBase, _create_default_metadata_builder
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.domain.clients.base.output.contracts import (
@@ -14,7 +17,11 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.record_source import FileRecordSourceFactoryABC, RecordSource
+from bioetl.domain.record_source import (
+    FileRecordSourceFactoryABC,
+    InMemoryRecordSource,
+    RecordSource,
+)
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
@@ -33,8 +40,8 @@ class ChemblPipelineBase(PipelineBase):
         output_writer: OutputWriterABC,
         extraction_service: ChemblExtractionPortABC,
         hash_service: HashServiceABC,
-        metadata_builder: RunMetadataBuilderProtocol,
-        file_record_source_factory: FileRecordSourceFactoryABC,
+        metadata_builder: RunMetadataBuilderProtocol | None = None,
+        file_record_source_factory: FileRecordSourceFactoryABC | None = None,
         record_source: RecordSource | None = None,
         normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
@@ -49,13 +56,17 @@ class ChemblPipelineBase(PipelineBase):
         norm_service = normalization_service or default_normalization_service(config)
 
         # Create Extractor
+        record_source_factory = (
+            file_record_source_factory or _create_default_record_source_factory()
+        )
+
         extractor = ChemblExtractorImpl(
             config=config,
             extraction_service=extraction_service,
             normalization_service=norm_service,
             logger=logger,
             record_source=record_source,
-            file_record_source_factory=file_record_source_factory,
+            file_record_source_factory=record_source_factory,
         )
 
         # Create Transformer
@@ -74,7 +85,7 @@ class ChemblPipelineBase(PipelineBase):
             validation_service=validation_service,
             output_writer=output_writer,
             hash_service=hash_service,
-            metadata_builder=metadata_builder,
+            metadata_builder=metadata_builder or _create_default_metadata_builder(),
             extractor=extractor,
             hooks=hooks,
             error_policy=error_policy,
@@ -118,3 +129,19 @@ class ChemblPipelineBase(PipelineBase):
     def _enrich_context(self, context: RunContext) -> None:
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
+
+
+def _create_default_record_source_factory() -> FileRecordSourceFactoryABC:
+    """Return record source factory that yields empty in-memory sources."""
+
+    return cast(
+        FileRecordSourceFactoryABC,
+        SimpleNamespace(
+            create_csv_source=lambda **kwargs: InMemoryRecordSource(
+                [], chunk_size=kwargs.get("chunk_size")
+            ),
+            create_id_list_source=lambda **kwargs: InMemoryRecordSource(
+                [], chunk_size=kwargs.get("chunk_size")
+            ),
+        ),
+    )

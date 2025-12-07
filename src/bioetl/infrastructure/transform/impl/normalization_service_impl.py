@@ -30,9 +30,19 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
     def __init__(self, config: NormalizationConfigProviderProtocol):
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
+    def _iter_fields(self) -> list[dict[str, Any]]:
+        """Safely iterate over field configs from various config shapes."""
+
+        if hasattr(self._config, "get_fields"):
+            fields = cast(list[dict[str, Any]], self._config.get_fields())
+            return fields
+        if hasattr(self._config, "fields"):
+            return list(cast(list[dict[str, Any]], self._config.fields))
+        raise AttributeError("Normalization config must expose fields")
+
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
-        for field_cfg in self._config.get_fields():
+        for field_cfg in self._iter_fields():
             name = field_cfg["name"]
             dtype = field_cfg.get("data_type")
 
@@ -82,7 +92,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
         """Normalize a raw record into a dict using configured field rules."""
         normalized: dict[str, Any] = {}
 
-        for field_cfg in self._config.get_fields():
+        for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
             if not isinstance(name, str) or name not in raw:
                 continue
@@ -120,7 +130,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
         """Normalize configured columns in the provided dataframe."""
         normalized_df = df.copy()
 
-        for field_cfg in self._config.get_fields():
+        for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
             if not name or name not in normalized_df.columns:
                 continue

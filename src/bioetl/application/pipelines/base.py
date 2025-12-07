@@ -1,11 +1,10 @@
-"""
-Базовый класс пайплайна.
-"""
+"""Базовый класс пайплайна."""
 
 from abc import ABC
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, Callable, Iterable, cast
 
 import pandas as pd
 
@@ -31,6 +30,30 @@ if TYPE_CHECKING:
     from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 
 
+def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
+    """Fallback metadata builder for cases when container is not provided."""
+
+    return cast(
+        RunMetadataBuilderProtocol,
+        SimpleNamespace(
+            build_run_metadata=lambda context, write_result: {
+                "run_id": getattr(context, "run_id", None),
+                "provider": getattr(context, "provider", None),
+                "entity": getattr(context, "entity_name", None),
+                "row_count": getattr(write_result, "row_count", 0),
+                "dry_run": False,
+            },
+            build_dry_run_metadata=lambda context, row_count: {
+                "run_id": getattr(context, "run_id", None),
+                "provider": getattr(context, "provider", None),
+                "entity": getattr(context, "entity_name", None),
+                "row_count": row_count,
+                "dry_run": True,
+            },
+        ),
+    )
+
+
 class PipelineBase(ABC):
     """
     Абстрактный базовый класс для всех ETL-пайплайнов.
@@ -48,7 +71,7 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         output_writer: "OutputWriterABC",
         hash_service: HashServiceABC,
-        metadata_builder: RunMetadataBuilderProtocol,
+        metadata_builder: RunMetadataBuilderProtocol | None = None,
         extractor: ExtractorABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
@@ -65,7 +88,7 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service
-        self._metadata_builder = metadata_builder
+        self._metadata_builder = metadata_builder or _create_default_metadata_builder()
         self._extractor = extractor
         self._transformer = transformer
         self._post_transformer = post_transformer
@@ -103,9 +126,7 @@ class PipelineBase(ABC):
         dry_run: bool = False,
         **kwargs: Any,
     ) -> RunResult:
-        """
-        Запускает полный цикл ETL-пайплайна.
-        """
+        """Запускает полный цикл ETL-пайплайна."""
         self._runtime_manager.reset()
         if hasattr(self._hash_service, "reset_state"):
             self._hash_service.reset_state()

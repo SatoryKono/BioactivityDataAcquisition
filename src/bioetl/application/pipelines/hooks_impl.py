@@ -105,7 +105,7 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         self._pipeline_id = pipeline_id
         self._provider = provider
         self._entity_name = entity_name
-        self._metrics = metrics_port or _create_noop_metrics_port()
+        self._metrics = metrics_port or _create_metrics_port()
 
     def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
         """Хук старта стадии не требует метрик."""
@@ -133,17 +133,29 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
 
 
-def _create_noop_metrics_port() -> PipelineMetricsPortABC:
-    """Return metrics port that safely ignores updates (used in tests)."""
+def _create_metrics_port() -> PipelineMetricsPortABC:
+    """Return metrics port backed by Prometheus collectors."""
 
     return cast(
         PipelineMetricsPortABC,
         type(
-            "NoopMetricsPort",
+            "PromMetricsPort",
             (),
             {
-                "update_stage_duration": lambda self, **_kwargs: None,
-                "update_stage_total": lambda self, **_kwargs: None,
+                "update_stage_duration": lambda self, **kwargs: metrics.STAGE_DURATION_SECONDS.labels(
+                    pipeline=kwargs["pipeline"],
+                    provider=kwargs["provider"],
+                    entity=kwargs["entity"],
+                    stage=kwargs["stage"],
+                    outcome=kwargs["outcome"],
+                ).observe(kwargs["duration_sec"]),
+                "update_stage_total": lambda self, **kwargs: metrics.STAGE_TOTAL.labels(
+                    pipeline=kwargs["pipeline"],
+                    provider=kwargs["provider"],
+                    entity=kwargs["entity"],
+                    stage=kwargs["stage"],
+                    outcome=kwargs["outcome"],
+                ).inc(),
             },
         )(),
     )
