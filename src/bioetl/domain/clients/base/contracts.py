@@ -103,19 +103,19 @@ class CacheABC(ABC, Generic[T]):
     """
 
     @abstractmethod
-    def get(self, key: str) -> T | None:
+    def get_value(self, key: str) -> T | None:
         """Получает значение из кэша или ``None``, если его нет или оно истекло."""
 
     @abstractmethod
-    def set(self, key: str, value: T, ttl: int | None = None) -> None:
+    def apply_set(self, key: str, value: T, ttl: int | None = None) -> None:
         """Сохраняет значение в кэш с опциональным TTL в секундах."""
 
     @abstractmethod
-    def invalidate(self, key: str) -> None:
+    def apply_invalidate(self, key: str) -> None:
         """Удаляет значение из кэша."""
 
     @abstractmethod
-    def clear(self) -> None:
+    def apply_clear(self) -> None:
         """Очищает весь кэш."""
 
 
