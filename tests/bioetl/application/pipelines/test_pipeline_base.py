@@ -22,7 +22,7 @@ from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
     HashColumnsTransformer,
-    IndexColumnTransformer,
+    LocalIndexColumnTransformer,
     TransformerABC,
     TransformerChain,
 )
@@ -497,7 +497,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, IndexColumnTransformer):
+        if isinstance(component, LocalIndexColumnTransformer):
             signature.append(
                 (
                     component.__class__.__name__,

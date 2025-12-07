@@ -5,7 +5,7 @@ from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
     HashColumnsTransformer,
-    IndexColumnTransformer,
+    LocalIndexColumnTransformer,
     TransformerABC,
     TransformerChain,
 )
@@ -14,7 +14,7 @@ __all__ = [
     "TransformerABC",
     "TransformerChain",
     "HashColumnsTransformer",
-    "IndexColumnTransformer",
+    "LocalIndexColumnTransformer",
     "DatabaseVersionTransformer",
     "FulldateTransformer",
     "HashService",

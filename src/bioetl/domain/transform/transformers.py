@@ -58,8 +58,8 @@ class HashColumnsTransformer(TransformerABC):
         )
 
 
-class IndexColumnTransformer(TransformerABC):
-    """Добавляет индексную колонку."""
+class LocalIndexColumnTransformer(TransformerABC):
+    """Добавляет локальную индексную колонку."""
 
     def __init__(self, hash_service: HashServiceABC) -> None:
         self._hash_service = hash_service
@@ -106,7 +106,7 @@ __all__ = [
     "TransformerABC",
     "TransformerChain",
     "HashColumnsTransformer",
-    "IndexColumnTransformer",
+    "LocalIndexColumnTransformer",
     "DatabaseVersionTransformer",
     "FulldateTransformer",
 ]
