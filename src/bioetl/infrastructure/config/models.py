@@ -29,6 +29,14 @@ from bioetl.domain.configs import (  # noqa: F401
     QualityConfig,
     RuntimeConfig,
     StorageConfig,
+    DefaultsConfig,
+    HashingDefaultsConfig,
+    HttpDefaultsConfig,
+    NetworkDefaultsConfig,
+    NetworkHttpDefaultsConfig,
+    NormalizationDefaultsConfig,
+    SourceDefaultsConfig,
+    SourcesDefaultsConfig,
 )
 
 __all__ = [
@@ -55,4 +63,12 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
     "FeatureFlagsConfig",
+    "DefaultsConfig",
+    "HashingDefaultsConfig",
+    "HttpDefaultsConfig",
+    "NetworkDefaultsConfig",
+    "NetworkHttpDefaultsConfig",
+    "NormalizationDefaultsConfig",
+    "SourceDefaultsConfig",
+    "SourcesDefaultsConfig",
 ]

@@ -24,7 +24,18 @@ from bioetl.domain.configs.pipeline import (
     RuntimeConfig,
     StorageConfig,
 )
+from bioetl.domain.configs.defaults import (
+    DefaultsConfig,
+    HashingDefaultsConfig,
+    HttpDefaultsConfig,
+    NetworkDefaultsConfig,
+    NetworkHttpDefaultsConfig,
+    NormalizationDefaultsConfig,
+    SourceDefaultsConfig,
+    SourcesDefaultsConfig,
+)
 from bioetl.domain.configs.profile import ProfileConfig
+from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 
 __all__ = [
     "BaseProviderConfig",
@@ -41,14 +52,22 @@ __all__ = [
     "LoggingConfig",
     "MetricsConfig",
     "NormalizationConfig",
+    "DefaultsConfig",
+    "HashingDefaultsConfig",
+    "HttpDefaultsConfig",
+    "NetworkDefaultsConfig",
+    "NetworkHttpDefaultsConfig",
+    "NormalizationDefaultsConfig",
     "ObservabilityConfig",
     "PaginationConfig",
     "ProfileConfig",
     "ProviderConfigUnion",
+    "PipelineConfigLoaderProtocol",
     "QualityConfig",
     "RuntimeConfig",
     "QcConfig",
     "StorageConfig",
     "PipelineConfig",
-    "PipelineConfigLoaderProtocol",
+    "SourceDefaultsConfig",
+    "SourcesDefaultsConfig",
 ]
