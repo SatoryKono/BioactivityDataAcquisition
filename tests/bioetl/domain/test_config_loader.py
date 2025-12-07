@@ -82,7 +82,9 @@ provider_config:
         load_pipeline_config_from_path(config_path)
 
 
-def test_unknown_provider_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_unknown_provider_raises_config_loader(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
     base_dir = tmp_path
     pipelines_root = base_dir / "pipelines"
     profiles_root = base_dir / "profiles"

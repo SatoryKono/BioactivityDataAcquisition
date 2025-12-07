@@ -130,8 +130,8 @@ def test_transform_max_phase(pipeline):
     assert len(result) == 4
 
 
-def test_transform_nested_fields(pipeline):
-    """Test nested field normalization."""
+def test_transform_nested_fields_testitem(pipeline):
+    """Test nested field normalization for testitem."""
     # Treat atc_classifications as ID field to preserve/enforce uppercase
     pipeline._config.normalization.id_fields = ["atc_classifications"]
     pipeline._config.fields = [

@@ -117,7 +117,7 @@ def _build_dummy_pipeline_config(
     )
 
 
-def test_get_extraction_service_for_registered_providers() -> None:
+def test_get_extraction_service_for_registered_providers_container() -> None:
     registry = InMemoryProviderRegistry()
     registry.register_provider(register_chembl_provider())
     _register_dummy_provider(registry=registry)
@@ -161,7 +161,7 @@ def test_get_extraction_service_for_registered_providers() -> None:
     assert dummy_service == ("dummy", "https://example.com/")
 
 
-def test_unknown_provider_raises(provider_registry: InMemoryProviderRegistry) -> None:
+def test_unknown_provider_raises_container(provider_registry: InMemoryProviderRegistry) -> None:
     dummy_container = PipelineContainer(
         _build_dummy_pipeline_config(
             DummyProviderConfig(
@@ -178,7 +178,7 @@ def test_unknown_provider_raises(provider_registry: InMemoryProviderRegistry) ->
         dummy_container.get_extraction_service()
 
 
-def test_config_validation_error_is_propagated() -> None:
+def test_config_validation_error_is_propagated_container() -> None:
     with pytest.raises(ValidationError):
         PipelineConfig(
             id="chembl.activity",
@@ -198,7 +198,7 @@ def test_config_validation_error_is_propagated() -> None:
         )
 
 
-def test_type_mismatch_raises_type_error(
+def test_type_mismatch_raises_type_error_container(
     provider_registry: InMemoryProviderRegistry,
 ) -> None:
     _register_dummy_provider(config_type=ChemblSourceConfig, registry=provider_registry)
@@ -218,7 +218,7 @@ def test_type_mismatch_raises_type_error(
         container.get_extraction_service()
 
 
-def test_container_provides_hooks_and_error_policy(
+def test_container_provides_hooks_and_error_policy_container(
     provider_registry: InMemoryProviderRegistry,
 ) -> None:
     dummy_config = DummyProviderConfig(
@@ -247,7 +247,7 @@ def test_container_provides_hooks_and_error_policy(
     assert hook_logger is logger
 
 
-def test_hash_service_singleton_scope(
+def test_hash_service_singleton_scope_container(
     provider_registry: InMemoryProviderRegistry,
 ) -> None:
     dummy_config = DummyProviderConfig(
@@ -267,7 +267,7 @@ def test_hash_service_singleton_scope(
     assert first_instance is second_instance
 
 
-def test_hash_service_override_propagates_to_transformers(
+def test_hash_service_override_propagates_to_transformers_container(
     provider_registry: InMemoryProviderRegistry,
 ) -> None:
     dummy_config = DummyProviderConfig(

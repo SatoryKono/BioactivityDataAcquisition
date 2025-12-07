@@ -47,7 +47,7 @@ def test_serialize_list_determinism(lst):
 
 @settings(suppress_health_check=[], database=None)
 @given(st.dictionaries(st.text(), st.text()))
-def test_serialize_dict_determinism(d):
+def test_serialize_dict_determinism_prop(d):
     """Dictionary serialization sorts keys, so must be deterministic."""
     s1 = serialize_dict(d)
     s2 = serialize_dict(d)

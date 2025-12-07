@@ -161,7 +161,9 @@ def test_get_extraction_service_for_registered_providers() -> None:
     assert dummy_service == ("dummy", "https://example.com/")
 
 
-def test_unknown_provider_raises(provider_registry: InMemoryProviderRegistry) -> None:
+def test_unknown_provider_raises_in_container(
+    provider_registry: InMemoryProviderRegistry,
+) -> None:
     dummy_container = PipelineContainer(
         _build_dummy_pipeline_config(
             DummyProviderConfig(

@@ -73,7 +73,7 @@ def chembl_provider_definition() -> ProviderDefinition:
     )
 
 
-def test_register_and_get_provider(
+def test_register_and_get_provider_contract(
     registry: InMemoryProviderRegistry,
     dummy_provider_definition: ProviderDefinition,
 ) -> None:

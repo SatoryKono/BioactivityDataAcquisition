@@ -47,7 +47,7 @@ def test_register_and_get_provider(registry: InMemoryProviderRegistry) -> None:
     assert registry.list_providers() == [definition]
 
 
-def test_unknown_provider_raises(registry: InMemoryProviderRegistry) -> None:
+def test_unknown_provider_raises_registry(registry: InMemoryProviderRegistry) -> None:
     with pytest.raises(ProviderNotRegisteredError):
         registry.get_provider(ProviderId.CHEMBL)
 

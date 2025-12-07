@@ -17,8 +17,8 @@ def dependencies():
     }
 
 
-def test_pk_resolution_from_field(dependencies):
-    """Test that primary_key is picked up from the config field."""
+def test_pk_resolution_from_field_config(dependencies):
+    """Test that primary_key is picked up from the config field (config module)."""
     config = PipelineConfig(
         id="chembl.test_entity",
         provider="chembl",
@@ -41,8 +41,8 @@ def test_pk_resolution_from_field(dependencies):
     assert pipeline.API_FILTER_KEY == "custom_pk_id__in"
 
 
-def test_pk_resolution_from_pipeline_dict(dependencies):
-    """Test fallback to pipeline dict for legacy configs."""
+def test_pk_resolution_from_pipeline_dict_config(dependencies):
+    """Test fallback to pipeline dict for legacy configs (config module)."""
     config = PipelineConfig(
         id="chembl.test_entity",
         provider="chembl",
@@ -66,8 +66,8 @@ def test_pk_resolution_from_pipeline_dict(dependencies):
     assert pipeline.API_FILTER_KEY == "legacy_pk_id__in"
 
 
-def test_pk_resolution_default(dependencies):
-    """Test fallback to entity_name_id."""
+def test_pk_resolution_default_config(dependencies):
+    """Test fallback to entity_name_id (config module)."""
     config = PipelineConfig(
         id="chembl.my_entity",
         provider="chembl",
