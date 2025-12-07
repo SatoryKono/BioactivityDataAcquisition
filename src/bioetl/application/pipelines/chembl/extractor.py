@@ -7,10 +7,9 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
-from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.observability import LoggingPort
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC

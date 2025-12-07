@@ -35,6 +35,11 @@ def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
         "bioetl.domain.transform.hash_service.datetime",
         _FrozenDatetime,
     )
+    # Мокируем datetime.now в models.py для фиксации started_at в RunContext
+    monkeypatch.setattr(
+        "bioetl.domain.models.datetime",
+        _FrozenDatetime,
+    )
 
 
 @pytest.mark.golden

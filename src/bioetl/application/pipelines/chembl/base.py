@@ -5,8 +5,8 @@ from __future__ import annotations
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPort
