@@ -7,14 +7,14 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
-from bioetl.domain.clients.ports import ChemblExtractionPort
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.observability import LoggingPort
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputOptions
+from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputConfig
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
@@ -29,7 +29,7 @@ class ChemblExtractorImpl(ExtractorABC):
     def __init__(
         self,
         config: PipelineConfig,
-        extraction_service: ChemblExtractionPort,
+        extraction_service: ChemblExtractionPortABC,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPort,
         record_source: RecordSource | None = None,
@@ -117,7 +117,7 @@ class ChemblExtractorImpl(ExtractorABC):
             return "csv", input_path
         return mode, input_path
 
-    def _resolve_csv_options(self) -> dict[str, Any] | CsvInputOptions:
+    def _resolve_csv_options(self) -> dict[str, Any] | CsvInputConfig:
         return getattr(self.config, "csv_options", None) or {}
 
     def _resolve_batch_size(self) -> int | None:
@@ -130,7 +130,7 @@ class ChemblExtractorImpl(ExtractorABC):
         self,
         *,
         input_path: str | None,
-        csv_options: dict[str, Any] | CsvInputOptions,
+        csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
         chunk_size: int | None,
     ) -> RecordSource:
@@ -148,7 +148,7 @@ class ChemblExtractorImpl(ExtractorABC):
         self,
         *,
         input_path: str | None,
-        csv_options: dict[str, Any] | CsvInputOptions,
+        csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
         chunk_size: int | None,
     ) -> RecordSource:

@@ -12,7 +12,7 @@ import pandas as pd
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_manager import HooksManager
-from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
@@ -99,7 +99,7 @@ class PipelineBase(ABC):
             entity_name=self._config.entity_name,
             default_on_skip=self._default_on_skip,
         )
-        self._stage_runner = StageRunner(
+        self._stage_runner = StageRunnerFacade(
             hooks_manager=self._hooks_manager,
             error_policy_manager=self._error_policy_manager,
             entity_name=self._config.entity_name,
@@ -474,7 +474,7 @@ class PipelineBase(ABC):
             entity_name=self._config.entity_name,
             default_on_skip=self._default_on_skip,
         )
-        self._stage_runner = StageRunner(
+        self._stage_runner = StageRunnerFacade(
             hooks_manager=self._hooks_manager,
             error_policy_manager=self._error_policy_manager,
             entity_name=self._config.entity_name,
