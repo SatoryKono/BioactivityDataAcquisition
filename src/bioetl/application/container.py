@@ -23,9 +23,9 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
-from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
+from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.service import ValidationService

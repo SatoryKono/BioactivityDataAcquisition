@@ -852,6 +852,73 @@ exceptions:
     owner: tests
     expiry: permanent
 
+  # Module/File Naming Exceptions
+  - path: tests/project_rules/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Pytest plugin package initializer; required name"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/project_rules/conftest.py
+    rule_id: MODULE_NAME
+    reason: "Pytest plugin configuration module; pytest naming"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/conftest.py
+    rule_id: MODULE_NAME
+    reason: "Root pytest configuration module; pytest naming"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/golden/pipeline_outputs/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for golden fixtures"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for domain tests"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for application tests"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/clients/base/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for infra client base tests"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/output/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for output tests"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/validation/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for validation tests"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for pipelines tests"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/clients/chembl/__init__.py
+    rule_id: MODULE_NAME
+    reason: "Package initializer required for chembl client tests"
+    owner: tests
+    expiry: permanent
+
   # Constant Format Exceptions
   - path: src/bioetl/domain/transform/normalizers/base.py
     rule_id: CONST_FORMAT
