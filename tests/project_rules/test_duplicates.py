@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import ast
+from collections import defaultdict
 import importlib
 import inspect
-from collections import defaultdict
 from pathlib import Path
 
 import yaml
@@ -166,8 +166,7 @@ def test_yaml_pipeline_ids_unique(configs_root: Path) -> None:
         pipe_id = data.get("id")
         if pipe_id:
             assert pipe_id not in ids, (
-                "Дублирующийся id "
-                f"'{pipe_id}' в {file_path} и {ids[pipe_id]}"
+                "Дублирующийся id " f"'{pipe_id}' в {file_path} и {ids[pipe_id]}"
             )
             ids[pipe_id] = file_path
 
@@ -226,9 +225,9 @@ def test_abc_impls_unique(configs_root: Path) -> None:
     for abc, impl in impls_data.items():
         reverse_map[str(impl)].append(str(abc))
     duplicates = {impl: abcs for impl, abcs in reverse_map.items() if len(abcs) > 1}
-    assert not duplicates, (
-        f"Для следующих реализаций назначено несколько ABC: {duplicates}"
-    )
+    assert (
+        not duplicates
+    ), f"Для следующих реализаций назначено несколько ABC: {duplicates}"
 
 
 # -----------------------------------------------------------------------------

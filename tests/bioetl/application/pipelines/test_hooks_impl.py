@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from prometheus_client import Histogram
 
 from bioetl.application.pipelines.hooks_impl import MetricsPipelineHookImpl
@@ -21,10 +23,27 @@ def _reset_metrics() -> None:
 
 def test_metrics_hook_records_successful_stage() -> None:
     _reset_metrics()
+    metrics_port = SimpleNamespace(
+        update_stage_duration=lambda **kwargs: metrics.STAGE_DURATION_SECONDS.labels(
+            pipeline=kwargs["pipeline"],
+            provider=kwargs["provider"],
+            entity=kwargs["entity"],
+            stage=kwargs["stage"],
+            outcome=kwargs["outcome"],
+        ).observe(kwargs["duration_sec"]),
+        update_stage_total=lambda **kwargs: metrics.STAGE_TOTAL.labels(
+            pipeline=kwargs["pipeline"],
+            provider=kwargs["provider"],
+            entity=kwargs["entity"],
+            stage=kwargs["stage"],
+            outcome=kwargs["outcome"],
+        ).inc(),
+    )
     hook = MetricsPipelineHookImpl(
         pipeline_id="pipeline-x",
         provider="chembl",
         entity_name="activity",
+        metrics_port=metrics_port,
     )
     result = StageResult(
         stage_name="extract",
@@ -61,10 +80,27 @@ def test_metrics_hook_records_successful_stage() -> None:
 
 def test_metrics_hook_records_failed_stage() -> None:
     _reset_metrics()
+    metrics_port = SimpleNamespace(
+        update_stage_duration=lambda **kwargs: metrics.STAGE_DURATION_SECONDS.labels(
+            pipeline=kwargs["pipeline"],
+            provider=kwargs["provider"],
+            entity=kwargs["entity"],
+            stage=kwargs["stage"],
+            outcome=kwargs["outcome"],
+        ).observe(kwargs["duration_sec"]),
+        update_stage_total=lambda **kwargs: metrics.STAGE_TOTAL.labels(
+            pipeline=kwargs["pipeline"],
+            provider=kwargs["provider"],
+            entity=kwargs["entity"],
+            stage=kwargs["stage"],
+            outcome=kwargs["outcome"],
+        ).inc(),
+    )
     hook = MetricsPipelineHookImpl(
         pipeline_id="pipeline-x",
         provider="chembl",
         entity_name="activity",
+        metrics_port=metrics_port,
     )
     result = StageResult(
         stage_name="validate",

@@ -1,14 +1,14 @@
 """Typer-based CLI for BioETL pipelines."""
 
-import os
-import sys
 from functools import partial
+import os
 from pathlib import Path
+import sys
 from typing import Any, Literal, Optional
 
-import typer
 from rich.console import Console
 from rich.table import Table
+import typer
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
@@ -168,9 +168,7 @@ def run(
             create_provider_loader, config_path=provider_config_path
         )
         interface_features = getattr(config.features, "interfaces", config.features)
-        feature_flag = getattr(
-            interface_features, "enable_provider_loader_port", False
-        )
+        feature_flag = getattr(interface_features, "enable_provider_loader_port", False)
         provider_loader = None
         provider_registry = None
         try:

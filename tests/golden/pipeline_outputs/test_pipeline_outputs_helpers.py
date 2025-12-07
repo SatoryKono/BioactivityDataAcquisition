@@ -29,5 +29,3 @@ def load_expected_records(csv_path: Path, *, sort_key: str) -> list[dict[str, ob
 
 
 __all__ = ["load_expected_records"]
-
-

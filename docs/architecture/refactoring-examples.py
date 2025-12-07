@@ -9,9 +9,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
+from dependency_injector import containers, providers
 import numpy as np
 import pandas as pd
-from dependency_injector import containers, providers
 
 # ============================================================================
 # ПРИМЕР 1: Рефакторинг системы нормализации
@@ -315,8 +315,8 @@ class Container(containers.DeclarativeContainer):
 # ПРИМЕР 3: Параллельная обработка батчей
 # ============================================================================
 
-import logging
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import logging
 from typing import Iterator
 
 logger = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Wrapper script to run bioetl CLI with correct path setup."""
 
-import sys
 from pathlib import Path
+import sys
 
 # Remove old paths that might interfere
 sys.path = [p for p in sys.path if "bioactivity_data_acquisition1" not in p.lower()]

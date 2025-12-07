@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import ast
+from pathlib import Path
 import re
 import tomllib
-from pathlib import Path
 from typing import Iterable
 
 import pytest
@@ -42,8 +42,7 @@ def test_style_tooling_is_configured(pyproject: dict) -> None:
     missing = [name for name in ("black", "isort", "ruff") if name not in tools]
     if missing:
         pytest.fail(
-            "Missing formatter/linter configuration sections: "
-            + ", ".join(missing)
+            "Missing formatter/linter configuration sections: " + ", ".join(missing)
         )
 
 
@@ -56,9 +55,7 @@ def test_mypy_strict_options_enabled(pyproject: dict) -> None:
         "no_implicit_optional": True,
     }
     missing = [
-        key
-        for key, expected in required_flags.items()
-        if mypy_cfg.get(key) != expected
+        key for key, expected in required_flags.items() if mypy_cfg.get(key) != expected
     ]
     if missing:
         pytest.fail(
@@ -69,11 +66,7 @@ def test_mypy_strict_options_enabled(pyproject: dict) -> None:
 
 def test_abcs_from_registry_have_docstrings() -> None:
     registry_path = (
-        BIOETL_ROOT
-        / "infrastructure"
-        / "clients"
-        / "base"
-        / "abc_registry.yaml"
+        BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
     )
     registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
 
@@ -186,9 +179,7 @@ def test_configs_validate_against_models() -> None:
     providers_path = Path("configs") / "providers.yaml"
 
     hashing_data = yaml.safe_load(hashing_path.read_text(encoding="utf-8"))
-    normalization_data = yaml.safe_load(
-        normalization_path.read_text(encoding="utf-8")
-    )
+    normalization_data = yaml.safe_load(normalization_path.read_text(encoding="utf-8"))
     providers_data = yaml.safe_load(providers_path.read_text(encoding="utf-8"))
 
     HashingConfig.model_validate(hashing_data.get("hashing", {}))

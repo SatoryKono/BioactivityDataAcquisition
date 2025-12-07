@@ -4,9 +4,9 @@ Script to check naming conventions in the project against defined rules.
 """
 
 import ast
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from typing import Any, Callable, Dict, List
 
 import yaml

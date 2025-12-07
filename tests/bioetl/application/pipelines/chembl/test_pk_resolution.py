@@ -14,7 +14,17 @@ def dependencies():
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
         "hash_service": MagicMock(),
+        "normalization_service": _build_normalization_service(),
     }
+
+
+def _build_normalization_service():
+    normalization_service = MagicMock()
+    normalization_service.apply_normalize_dataframe.side_effect = lambda df: df
+    normalization_service.apply_normalize_batch.side_effect = lambda df: df
+    normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
+    normalization_service.apply_normalize.side_effect = lambda record: record
+    return normalization_service
 
 
 def test_pk_resolution_from_field(dependencies):

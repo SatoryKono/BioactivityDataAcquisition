@@ -43,6 +43,7 @@ def test_orchestrator_uses_provider_loader_when_flag_enabled() -> None:
         provider_loader=loader,
         provider_loader_factory=lambda: loader,
         use_provider_loader_port=True,
+        container_factory=lambda *args, **kwargs: None,  # type: ignore[arg-type]
     )
 
     registry = orchestrator._get_provider_registry()

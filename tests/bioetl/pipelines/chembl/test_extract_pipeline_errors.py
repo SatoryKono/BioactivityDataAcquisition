@@ -65,6 +65,12 @@ def test_extract_stage_wraps_client_error(
 
     logger = _LoggerStub(logging.getLogger("pipeline-test"))
 
+    normalization_service = MagicMock()
+    normalization_service.apply_normalize_dataframe.side_effect = lambda df: df
+    normalization_service.apply_normalize_batch.side_effect = lambda df: df
+    normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
+    normalization_service.apply_normalize.side_effect = lambda record: record
+
     pipeline = ChemblPipelineBase(
         config=config,
         logger=logger,
@@ -72,6 +78,7 @@ def test_extract_stage_wraps_client_error(
         output_writer=output_writer,
         extraction_service=extraction_service,
         hash_service=hash_service,
+        normalization_service=normalization_service,
     )
 
     with pytest.raises(PipelineStageError) as exc_info:

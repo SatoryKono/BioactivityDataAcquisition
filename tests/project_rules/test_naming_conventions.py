@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import ast
-import re
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from typing import Iterable, Iterator, Mapping
 
 import pytest
 import yaml
+
 from src.tools.check_naming_policy import (
     check_file_content,
     check_file_naming,
@@ -259,9 +260,9 @@ def test_t02_global_name_conventions() -> None:
                             continue
                         if not SNAKE_CASE_PATTERN.match(name):
                             violations.append(f"{file.as_posix()}: variable {name}")
-    assert not violations, (
-        f"Нарушения в именах глобальных переменных/функций: {sorted(violations)}"
-    )
+    assert (
+        not violations
+    ), f"Нарушения в именах глобальных переменных/функций: {sorted(violations)}"
 
 
 def test_t03_class_suffix_pascal_case() -> None:
@@ -326,9 +327,9 @@ def test_t04_no_camelcase_or_hyphen_names() -> None:
                     continue
                 if "-" in name or " " in name:
                     violations.append(f"{file.as_posix()}: класс {name}")
-    assert not violations, (
-        f"Выявлены camelCase/дефис/пробел в именах: {sorted(violations)}"
-    )
+    assert (
+        not violations
+    ), f"Выявлены camelCase/дефис/пробел в именах: {sorted(violations)}"
 
 
 def _has_allowed_prefix(name: str) -> bool:
@@ -345,8 +346,10 @@ def test_t05_function_prefix_rules() -> None:
         for node in tree.body:
             if isinstance(node, ast.FunctionDef):
                 name = node.name
-                if name.startswith("__") or name.startswith("test_") or name.startswith(
-                    "_"
+                if (
+                    name.startswith("__")
+                    or name.startswith("test_")
+                    or name.startswith("_")
                 ):
                     continue
                 if _is_pytest_fixture(node):
@@ -359,9 +362,7 @@ def test_t05_function_prefix_rules() -> None:
                     violations.append(f"{file.as_posix()}: {name}")
             elif isinstance(node, ast.ClassDef):
                 for method in (
-                    item
-                    for item in node.body
-                    if isinstance(item, ast.FunctionDef)
+                    item for item in node.body if isinstance(item, ast.FunctionDef)
                 ):
                     name = method.name
                     if name.startswith("__") or name.startswith("_"):
@@ -371,12 +372,9 @@ def test_t05_function_prefix_rules() -> None:
                     if exceptions.is_excepted(file, "FUNC_PREFIX"):
                         continue
                     if not _has_allowed_prefix(name):
-                        violations.append(
-                            f"{file.as_posix()}: {node.name}.{name}"
-                        )
+                        violations.append(f"{file.as_posix()}: {node.name}.{name}")
     assert not violations, (
-        "Функции/методы без разрешённых префиксов: "
-        f"{sorted(violations)}"
+        "Функции/методы без разрешённых префиксов: " f"{sorted(violations)}"
     )
 
 
@@ -417,10 +415,7 @@ def test_t07_pipeline_stage_filenames() -> None:
                 f"{entity_dir.as_posix()}: "
                 f"missing={sorted(missing)}, unexpected={sorted(unexpected)}"
             )
-    assert not violations, (
-        "Нарушения в именах файлов этапов: "
-        f"{sorted(violations)}"
-    )
+    assert not violations, "Нарушения в именах файлов этапов: " f"{sorted(violations)}"
 
 
 def test_t08_test_filename_conventions() -> None:
@@ -435,8 +430,7 @@ def test_t08_test_filename_conventions() -> None:
         if "golden" in file.stem and not file.name.endswith("_golden.py"):
             violations.append(f"{file.as_posix()}: golden без суффикса _golden")
     assert not violations, (
-        "Нарушены правила именования тестовых файлов: "
-        f"{sorted(violations)}"
+        "Нарушены правила именования тестовых файлов: " f"{sorted(violations)}"
     )
 
 
@@ -449,8 +443,7 @@ def test_t09_doc_filename_case() -> None:
         if not KEBAB_CASE_PATTERN.match(stem):
             violations.append(file.as_posix())
     assert not violations, (
-        "Файлы документации нарушают kebab-case/англ.названия: "
-        f"{sorted(violations)}"
+        "Файлы документации нарушают kebab-case/англ.названия: " f"{sorted(violations)}"
     )
 
 

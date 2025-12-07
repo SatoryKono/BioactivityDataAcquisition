@@ -1,4 +1,5 @@
 """Pipeline configuration models (domain layer, no I/O)."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -284,6 +285,36 @@ class FeatureFlagsConfig(BaseModel):
     )
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    @property
+    def enable_provider_loader_port(self) -> bool:
+        """Backwards-compatible access to provider loader flag."""
+
+        return self.interfaces.enable_provider_loader_port
+
+    @enable_provider_loader_port.setter
+    def enable_provider_loader_port(self, value: bool) -> None:
+        self.interfaces.enable_provider_loader_port = value
+
+    @property
+    def rest_interface_enabled(self) -> bool:
+        """Backwards-compatible access to REST flag."""
+
+        return self.interfaces.rest_interface_enabled
+
+    @rest_interface_enabled.setter
+    def rest_interface_enabled(self, value: bool) -> None:
+        self.interfaces.rest_interface_enabled = value
+
+    @property
+    def mq_interface_enabled(self) -> bool:
+        """Backwards-compatible access to MQ flag."""
+
+        return self.interfaces.mq_interface_enabled
+
+    @mq_interface_enabled.setter
+    def mq_interface_enabled(self, value: bool) -> None:
+        self.interfaces.mq_interface_enabled = value
 
     @model_validator(mode="before")
     @classmethod

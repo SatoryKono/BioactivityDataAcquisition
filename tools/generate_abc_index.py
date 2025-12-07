@@ -3,8 +3,8 @@ from __future__ import annotations
 import importlib
 import inspect
 import os
-import sys
 from pathlib import Path
+import sys
 from typing import Iterable
 
 import yaml

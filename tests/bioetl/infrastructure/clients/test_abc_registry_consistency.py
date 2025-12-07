@@ -27,9 +27,9 @@ def test_registry_entries_resolve_to_classes():
 
     for role, dotted_path in sorted(registry.items()):
         symbol = _load_symbol(dotted_path)
-        assert inspect.isclass(symbol), (
-            f"{role} at {dotted_path} must resolve to class/Protocol"
-        )
+        assert inspect.isclass(
+            symbol
+        ), f"{role} at {dotted_path} must resolve to class/Protocol"
 
 
 def test_impl_entries_resolve_and_match_registry():
@@ -69,9 +69,9 @@ def _validate_impl_class(role: str, impl_name: str, impl_path: str, abc_class) -
     impl_class = _load_symbol(impl_path)
     assert inspect.isclass(impl_class), f"{role}:{impl_name} must resolve to class"
     try:
-        assert issubclass(impl_class, abc_class), (
-            f"{impl_class.__name__} must implement {abc_class.__name__}"
-        )
+        assert issubclass(
+            impl_class, abc_class
+        ), f"{impl_class.__name__} must implement {abc_class.__name__}"
     except TypeError:
         # Some Protocols are not runtime-checkable; skip subclass assertion.
         pass

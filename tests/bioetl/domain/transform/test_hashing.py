@@ -165,6 +165,6 @@ def test_golden_examples():
 
         expected_row = ex.get("expected_hash_row")
         if expected_row and "TO BE FILLED" not in expected_row:
-            assert row_hash == expected_row, (
-                f"Row Hash mismatch for {ex['description']}"
-            )
+            assert (
+                row_hash == expected_row
+            ), f"Row Hash mismatch for {ex['description']}"

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import importlib
 from functools import partial
+import importlib
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,7 @@ from bioetl.domain.errors import PipelineStageError
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.interfaces.wiring import create_config_loader, create_container_factory
 
 _PIPELINE_CASES = [
     (
@@ -93,10 +94,12 @@ def test_pipeline_outputs(
     sort_key: str,
 ) -> None:
     config_path = _resolve_config_path(pipeline_name)
+    config_loader = create_config_loader()
     try:
         config = build_runtime_config(
             config_path=config_path,
             configs_root=Path("configs"),
+            loader=config_loader,
         )
     except Exception as exc:  # noqa: BLE001 - propagate as xfail for missing configs
         pytest.xfail(f"Config unavailable for {pipeline_name}: {exc}")
@@ -117,6 +120,7 @@ def test_pipeline_outputs(
         provider_loader = None
         provider_registry = provider_loader_factory().get_registry()
 
+    container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         pipeline_name,
         config,
@@ -124,6 +128,7 @@ def test_pipeline_outputs(
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
         use_provider_loader_port=feature_flag,
+        container_factory=container_factory,
     )
     try:
         run_result = orchestrator.run_pipeline(limit=5, dry_run=False)
@@ -132,9 +137,9 @@ def test_pipeline_outputs(
         if "Network access disabled" in cause_text:
             pytest.xfail(f"Network blocked for {pipeline_name}: {cause_text}")
         raise
-    assert run_result.success, (
-        f"Pipeline {pipeline_name} failed: {run_result.error_message}"
-    )
+    assert (
+        run_result.success
+    ), f"Pipeline {pipeline_name} failed: {run_result.error_message}"
 
     output_csv = output_dir / f"{entity_name}.csv"
     if not output_csv.exists():

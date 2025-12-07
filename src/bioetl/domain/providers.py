@@ -11,11 +11,13 @@ from pydantic import BaseModel, ConfigDict
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 client_t = TypeVar("client_t")
-extraction_service_t = TypeVar("extraction_service_t")
+extraction_service_t = TypeVar("extraction_service_t", covariant=True)
 normalization_service_t = TypeVar(
-    "normalization_service_t", bound=NormalizationServiceABC | None
+    "normalization_service_t",
+    bound=NormalizationServiceABC | None,
+    covariant=True,
 )
-writer_t = TypeVar("writer_t")
+writer_t = TypeVar("writer_t", covariant=True)
 
 
 class ProviderId(str, Enum):

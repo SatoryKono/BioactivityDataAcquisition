@@ -10,4 +10,3 @@ def default_tracer() -> TracerABC:
 
 
 __all__ = ["default_tracer"]
-

@@ -16,6 +16,7 @@ from bioetl.domain.clients.base.output.contracts import (
 from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.infrastructure.output.factories import default_output_writer
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
 
 
@@ -103,14 +104,19 @@ def test_container_uses_overridden_metadata_writer(
     monkeypatch: pytest.MonkeyPatch,
     provider_registry: InMemoryProviderRegistry,
 ) -> None:
+    config = _build_config(tmp_path / "out")
     writer = RecordingWriter()
     metadata_writer = RecordingMetadataWriter()
     quality_reporter = StubQualityReporter()
     container = PipelineContainer(
-        _build_config(tmp_path / "out"),
-        writer=writer,
-        metadata_writer=metadata_writer,
-        quality_reporter=quality_reporter,
+        config,
+        output_writer=default_output_writer(
+            config=config.determinism,
+            qc_config=config.qc,
+            writer=writer,
+            metadata_writer=metadata_writer,
+            quality_reporter=quality_reporter,
+        ),
         provider_registry=provider_registry,
     )
 
@@ -167,16 +173,18 @@ def test_container_defaults_use_factories(
         quality_calls += 1
         return default_quality_reporter_instance
 
-    monkeypatch.setattr("bioetl.application.container.default_writer", writer_factory)
-    monkeypatch.setattr(
-        "bioetl.application.container.default_metadata_writer", metadata_factory
-    )
-    monkeypatch.setattr(
-        "bioetl.application.container.default_quality_reporter", quality_factory
-    )
+    factories_path = "bioetl.infrastructure.output.factories"
+    monkeypatch.setattr(f"{factories_path}.default_writer", writer_factory)
+    monkeypatch.setattr(f"{factories_path}.default_metadata_writer", metadata_factory)
+    monkeypatch.setattr(f"{factories_path}.default_quality_reporter", quality_factory)
 
+    config = _build_config(tmp_path / "defaults")
     container = PipelineContainer(
-        _build_config(tmp_path / "defaults"), provider_registry=provider_registry
+        config,
+        output_writer=default_output_writer(
+            config=config.determinism, qc_config=config.qc
+        ),
+        provider_registry=provider_registry,
     )
     output_writer = container.get_output_writer()
 

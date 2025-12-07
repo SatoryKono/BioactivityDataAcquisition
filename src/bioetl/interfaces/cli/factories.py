@@ -10,4 +10,3 @@ def default_cli_command() -> CLICommandABC:
 
 
 __all__ = ["default_cli_command"]
-

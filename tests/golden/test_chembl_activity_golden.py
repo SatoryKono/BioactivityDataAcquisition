@@ -1,9 +1,9 @@
 """Golden test for ChEMBL Activity pipeline (TS-004)."""
 
-import sys
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
+import sys
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -11,12 +11,12 @@ import pandas.testing as pd_testing
 import pytest
 
 from bioetl.application.config.runtime import build_runtime_config
-from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.interfaces.wiring import build_default_container, create_config_loader
 
 sys.modules.setdefault("tqdm", MagicMock())
 
@@ -56,15 +56,17 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     )
     _freeze_hash_service_clock(monkeypatch)
 
+    config_loader = create_config_loader()
     config = build_runtime_config(
         config_path=Path("tests/fixtures/configs/chembl_activity_test.yaml"),
         configs_root=Path("tests/fixtures/configs"),
+        loader=config_loader,
     )
     config.storage.output_path = str(tmp_path / "output")
 
     provider_loader_factory = partial(create_provider_loader)
     registry = provider_loader_factory().get_registry()
-    container = build_pipeline_dependencies(
+    container = build_default_container(
         config,
         provider_registry=registry,
     )
@@ -75,6 +77,7 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         validation_service=container.get_validation_service(),
         output_writer=container.get_output_writer(),
         extraction_service=container.get_extraction_service(),
+        normalization_service=container.get_normalization_service(),
         record_source=container.get_record_source(
             extraction_service=container.get_extraction_service(),
             logger=container.get_logger(),

@@ -6,8 +6,8 @@ import importlib
 from pathlib import Path
 from typing import Any
 
-import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
+import yaml
 
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
@@ -43,7 +43,7 @@ class ProviderRegistryValidationError(ProviderRegistryLoaderError):
         self.path = path
 
 
-class ProviderRegistryEntry(BaseModel):
+class ProviderRegistryEntryModel(BaseModel):
     """Single provider entry from registry config."""
 
     model_config = ConfigDict(extra="forbid")
@@ -60,7 +60,7 @@ class ProviderRegistryConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    providers: list[ProviderRegistryEntry]
+    providers: list[ProviderRegistryEntryModel]
 
 
 class ProviderLoaderImpl(ProviderRegistryLoaderABC):
@@ -122,6 +122,15 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
                 registered.append(builtin)
         return registered
 
+    def load(
+        self, *, registry: MutableProviderRegistryABC | None = None
+    ) -> list[ProviderDefinition]:
+        """
+        Backward-compatible alias for get_providers expected by tests and callers.
+        """
+
+        return self.get_providers(registry=registry)
+
     def get_registry(
         self, *, registry: MutableProviderRegistryABC | None = None
     ) -> MutableProviderRegistryABC:
@@ -133,7 +142,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
 
     def _register_entry(
         self,
-        entry: ProviderRegistryEntry,
+        entry: ProviderRegistryEntryModel,
         registry: MutableProviderRegistryABC,
     ) -> ProviderDefinition | None:
         try:

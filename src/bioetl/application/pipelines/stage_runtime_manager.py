@@ -158,9 +158,8 @@ class StageRuntimeManagerImpl:
 
             action_on_error = self._error_policy.handle(error, context)
             self._last_stage_action[stage] = action_on_error
-            if (
-                action_on_error == ErrorAction.RETRY
-                and self._error_policy.can_retry(error)
+            if action_on_error == ErrorAction.RETRY and self._error_policy.can_retry(
+                error
             ):
                 if on_retry:
                     on_retry()
@@ -332,8 +331,8 @@ class StageRuntimeManagerImpl:
             self.notify_stage_start(stage, context)
             started = True
 
-        df_result = self.execute_stage(stage, context, action)
-        if df_result is None:
+        df_result_obj = self.execute_stage(stage, context, action)
+        if df_result_obj is None:
             raise PipelineStageError(
                 provider=self._provider_id.value,
                 entity=self._entity_name,
@@ -341,6 +340,16 @@ class StageRuntimeManagerImpl:
                 attempt=1,
                 run_id=context.run_id,
             )
+
+        if not isinstance(df_result_obj, pd.DataFrame):
+            raise PipelineStageError(
+                provider=self._provider_id.value,
+                entity=self._entity_name,
+                stage=stage,
+                attempt=1,
+                run_id=context.run_id,
+            )
+        df_result = df_result_obj
 
         chunks += 1
         count += len(df_result)
