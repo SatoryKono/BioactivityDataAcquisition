@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
-from pathlib import Path
 from typing import Iterable
 
 MERMAID_CLI_VERSION = "10.9.1"
@@ -164,4 +164,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
