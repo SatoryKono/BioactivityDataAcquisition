@@ -12,7 +12,7 @@
 ## Жизненный цикл (run)
 
 1) `iter_chunks` вызывает `ChemblExtractorImpl` (API/CSV/ID list).  
-2) `transform` применяет `ChemblTransformerImpl` + post-transform цепочку по умолчанию (`HashColumnsTransformer`, `LocalIndexColumnTransformer`, `DatabaseVersionTransformer`, `FulldateTransformer`).
+2) `transform` применяет `ChemblTransformerImpl` + post-transform цепочку по умолчанию (`HashColumnsTransformerImpl`, `IndexColumnTransformerImpl`, `DatabaseVersionTransformerImpl`, `FulldateTransformerImpl`).
 3) `validate` использует `ValidationService` + Pandera-схемы (`domain/schemas/chembl/*`).  
 4) `write` — `UnifiedOutputWriter`: стабильная сортировка по `hashing.business_key_fields`, атомарная запись `<entity>.csv`, checksum, `meta.yaml`.  
 5) Error handling — `ErrorPolicyABC` (по умолчанию fail-fast; retry/skip через хуки). Все события проходят через `PipelineHookABC`.
