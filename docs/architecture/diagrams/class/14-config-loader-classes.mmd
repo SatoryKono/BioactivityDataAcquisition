@@ -23,7 +23,7 @@ ConfigFileNotFoundError --|> ConfigError
 ConfigValidationError --|> ConfigError
 UnknownProviderError --|> ConfigError
 ConfigLoader --> PipelineConfig
-ConfigLoader --> DeepMerge : deep_merge
+ConfigLoader --> DeepMerge : apply_deep_merge
 ConfigLoader --> ConfigFileNotFoundError
 ConfigLoader --> ConfigValidationError
 ConfigLoader --> UnknownProviderError
