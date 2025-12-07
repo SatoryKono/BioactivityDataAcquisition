@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-import logging
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.domain.errors import (
-    ClientNetworkError,
-    ClientResponseError,
-)
+from bioetl.domain.errors import ClientNetworkError, ClientResponseError
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.infrastructure.config.models import ClientConfig
@@ -29,6 +27,37 @@ class _FakeTime:
 
     def sleep(self, delay: float) -> None:
         self.value += delay
+
+
+class _RecordingLogger(LoggingPortABC):
+    """Тестовый логгер с накоплением записей."""
+
+    def __init__(
+        self,
+        context: dict[str, Any] | None = None,
+        records: list[dict[str, Any]] | None = None,
+    ) -> None:
+        self._context = context or {}
+        self.records = records if records is not None else []
+
+    def _record(self, level: str, msg: str, ctx: dict[str, Any]) -> None:
+        merged = {**self._context, **ctx}
+        self.records.append({"level": level, "message": msg, **merged})
+
+    def info(self, msg: str, **ctx: Any) -> None:
+        self._record("info", msg, ctx)
+
+    def error(self, msg: str, **ctx: Any) -> None:
+        self._record("error", msg, ctx)
+
+    def debug(self, msg: str, **ctx: Any) -> None:
+        self._record("debug", msg, ctx)
+
+    def warning(self, msg: str, **ctx: Any) -> None:
+        self._record("warning", msg, ctx)
+
+    def apply_bind(self, **ctx: Any) -> LoggingPortABC:
+        return _RecordingLogger({**self._context, **ctx}, self.records)
 
 
 @pytest.fixture(autouse=True)
@@ -101,7 +130,7 @@ def test_retry_on_rate_limit_then_success(monkeypatch, base_client):
     assert base_client.request.call_count == 2
 
 
-def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
+def test_retry_logging_and_metrics(monkeypatch, base_client):
     """Лог ретраев содержит задержку, причину и суммарное ожидание."""
     fake_time = _FakeTime()
     monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
@@ -111,6 +140,7 @@ def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
 
     retry_metric = MagicMock()
     failure_metric = MagicMock()
+    logger = _RecordingLogger()
     middleware = HttpClientMiddleware(
         provider="chembl",
         base_client=base_client,
@@ -119,40 +149,52 @@ def test_retry_logging_and_metrics(monkeypatch, base_client, caplog):
         backoff_factor=2.0,
         retry_metric_callback=retry_metric,
         failure_metric_callback=failure_metric,
+        logger=logger,
     )
 
-    caplog.set_level(logging.INFO)
     result = middleware.request("GET", "http://example.com")
 
     assert result.status_code == 200
-    retry_record, success_record = _extract_log_records(caplog.records)
-    _assert_retry_record(retry_record, expected_delay=0.1)
-    _assert_success_record(success_record, expected_total_delay=0.1, attempts=2)
+    retry_record, success_record = _extract_log_records(logger.records)
+    _assert_retry_record(retry_record, expected_delay=0.1, expected_attempt=1)
+    _assert_success_record(
+        success_record, expected_total_delay=0.1, attempts=2, expected_attempt=2
+    )
     retry_metric.assert_called_once_with(1)
     failure_metric.assert_not_called()
 
 
-def _extract_log_records(records):
+def _extract_log_records(records: list[dict[str, Any]]):
     retry_record = next(
-        rec for rec in records if rec.message == "Retrying HTTP request"
+        rec for rec in records if rec["message"] == "Retrying HTTP request"
     )
     success_record = next(
-        rec for rec in records if rec.message == "HTTP request succeeded"
+        rec for rec in records if rec["message"] == "HTTP request succeeded"
     )
     return retry_record, success_record
 
 
-def _assert_retry_record(retry_record, *, expected_delay: float) -> None:
-    assert retry_record.delay == pytest.approx(expected_delay)
-    assert retry_record.total_retry_delay == pytest.approx(expected_delay)
-    assert retry_record.retry_reason == "TimeoutError"
+def _assert_retry_record(
+    retry_record, *, expected_delay: float, expected_attempt: int
+) -> None:
+    assert retry_record["delay"] == pytest.approx(expected_delay)
+    assert retry_record["total_retry_delay"] == pytest.approx(expected_delay)
+    assert retry_record["retry_reason"] == "TimeoutError"
+    assert retry_record["attempt"] == expected_attempt
+    assert retry_record["endpoint"] == "example.com"
 
 
 def _assert_success_record(
-    success_record, *, expected_total_delay: float, attempts: int
+    success_record,
+    *,
+    expected_total_delay: float,
+    attempts: int,
+    expected_attempt: int,
 ) -> None:
-    assert success_record.total_retry_delay == pytest.approx(expected_total_delay)
-    assert success_record.attempts == attempts
+    assert success_record["total_retry_delay"] == pytest.approx(expected_total_delay)
+    assert success_record["attempts"] == attempts
+    assert success_record["attempt"] == expected_attempt
+    assert success_record["endpoint"] == "example.com"
 
 
 def test_retry_after_header_seconds(monkeypatch, base_client):
@@ -288,7 +330,7 @@ def test_server_error_retries_until_give_up(monkeypatch, base_client):
     assert base_client.request.call_count == 2
 
 
-def test_final_failure_logging_and_metrics(monkeypatch, base_client, caplog):
+def test_final_failure_logging_and_metrics(monkeypatch, base_client):
     """Итоговый лог при неуспехе содержит количество попыток и общее ожидание."""
     fake_time = _FakeTime()
     monkeypatch.setattr("time.perf_counter", fake_time.perf_counter)
@@ -299,6 +341,7 @@ def test_final_failure_logging_and_metrics(monkeypatch, base_client, caplog):
 
     retry_metric = MagicMock()
     failure_metric = MagicMock()
+    logger = _RecordingLogger()
     middleware = HttpClientMiddleware(
         provider="chembl",
         base_client=base_client,
@@ -306,20 +349,20 @@ def test_final_failure_logging_and_metrics(monkeypatch, base_client, caplog):
         base_delay=0.01,
         retry_metric_callback=retry_metric,
         failure_metric_callback=failure_metric,
+        logger=logger,
     )
 
-    caplog.set_level(logging.INFO)
     with pytest.raises(ClientResponseError):
         middleware.request("GET", "http://example.com/500")
 
     final_failure = next(
         rec
-        for rec in caplog.records
-        if rec.message == "HTTP request failed after retries"
+        for rec in logger.records
+        if rec["message"] == "HTTP request failed after retries"
     )
 
-    assert final_failure.attempts == 2
-    assert final_failure.total_retry_delay == pytest.approx(0.01)
+    assert final_failure["attempts"] == 2
+    assert final_failure["total_retry_delay"] == pytest.approx(0.01)
     retry_metric.assert_called_once_with(1)
     failure_metric.assert_called_once_with(1)
 
