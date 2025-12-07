@@ -101,7 +101,7 @@ class PipelineBase(ABC):
         )
         self._stage_runner = StageRunnerFacade(
             hooks_manager=self._hooks_manager,
-            error_policy_manager=self._error_policy_manager,
+            error_policy_facade=self._error_policy_manager,
             entity_name=self._config.entity_name,
             provider_id=self._provider_id,
         )
@@ -476,7 +476,7 @@ class PipelineBase(ABC):
         )
         self._stage_runner = StageRunnerFacade(
             hooks_manager=self._hooks_manager,
-            error_policy_manager=self._error_policy_manager,
+            error_policy_facade=self._error_policy_manager,
             entity_name=self._config.entity_name,
             provider_id=self._provider_id,
         )
