@@ -8,7 +8,7 @@ from typing import Any
 
 import pandas as pd
 
-from bioetl.domain.configs import ChemblSourceConfig, CsvInputOptions
+from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.observability import LoggingPort
 from bioetl.domain.record_source import RawRecord, RecordSource
@@ -25,7 +25,7 @@ class CsvRecordSourceImpl(RecordSource):
     def __init__(
         self,
         input_path: Path,
-        csv_options: dict[str, Any] | CsvInputOptions,
+        csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
         logger: LoggingPort,
         chunk_size: int | None = None,
@@ -55,11 +55,11 @@ class CsvRecordSourceImpl(RecordSource):
 
     @staticmethod
     def _ensure_csv_options(
-        options: dict[str, Any] | CsvInputOptions,
-    ) -> CsvInputOptions:
-        if isinstance(options, CsvInputOptions):
+        options: dict[str, Any] | CsvInputConfig,
+    ) -> CsvInputConfig:
+        if isinstance(options, CsvInputConfig):
             return options
-        return CsvInputOptions(**options)
+        return CsvInputConfig(**options)
 
 
 class IdListRecordSourceImpl(RecordSource):
@@ -69,7 +69,7 @@ class IdListRecordSourceImpl(RecordSource):
         self,
         input_path: Path,
         id_column: str,
-        csv_options: dict[str, Any] | CsvInputOptions,
+        csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
         extraction_service: ExtractionServiceABC,
         source_config: ChemblSourceConfig,
@@ -161,8 +161,8 @@ class IdListRecordSourceImpl(RecordSource):
 
     @staticmethod
     def _ensure_csv_options(
-        options: dict[str, Any] | CsvInputOptions,
-    ) -> CsvInputOptions:
-        if isinstance(options, CsvInputOptions):
+        options: dict[str, Any] | CsvInputConfig,
+    ) -> CsvInputConfig:
+        if isinstance(options, CsvInputConfig):
             return options
-        return CsvInputOptions(**options)
+        return CsvInputConfig(**options)
