@@ -6,9 +6,9 @@ from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.validation import (
     SchemaProviderABC,
     SchemaProviderFactoryABC,
-    schema_type,
     ValidatorABC,
     ValidatorFactoryABC,
+    schema_type,
 )
 from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValidatorImpl
 

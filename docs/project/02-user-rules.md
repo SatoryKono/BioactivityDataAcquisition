@@ -1,4 +1,4 @@
-# USER_RULES.md — правила пользователя для Cursor
+# User Rules
 
 Репозиторий: SatoryKono/bioactivity_data_acquisition (ветка `@test_refactoring_32`)
 Дата: 2025-10-29

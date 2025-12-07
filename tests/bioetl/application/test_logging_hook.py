@@ -1,5 +1,4 @@
 from types import SimpleNamespace
-from types import SimpleNamespace
 from typing import Self
 
 from bioetl.application.pipelines.hooks_impl import LoggingPipelineHookImpl

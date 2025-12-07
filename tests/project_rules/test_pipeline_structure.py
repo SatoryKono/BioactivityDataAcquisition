@@ -19,7 +19,9 @@ def _expected_pipeline_dirs(configs_root: Path) -> set[tuple[str, str]]:
     return pairs
 
 
-def test_pipeline_directories_and_docs(bioetl_root: Path, configs_root: Path, docs_root: Path) -> None:
+def test_pipeline_directories_and_docs(
+    bioetl_root: Path, configs_root: Path, docs_root: Path
+) -> None:
     expected = _expected_pipeline_dirs(configs_root)
     violations: list[str] = []
 
@@ -49,4 +51,3 @@ def test_pipeline_directories_and_docs(bioetl_root: Path, configs_root: Path, do
 
     if violations:
         pytest.fail("\n".join(violations))
-

@@ -5,18 +5,20 @@ from __future__ import annotations
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+from bioetl.domain.clients.base.output.contracts import (
+    OutputWriterABC,
+    RunMetadataBuilderProtocol,
+)
 from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.record_source import FileRecordSourceFactoryABC, RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.transform.factories import default_normalization_service
 
 
 class ChemblPipelineBase(PipelineBase):
@@ -30,6 +32,8 @@ class ChemblPipelineBase(PipelineBase):
         output_writer: OutputWriterABC,
         extraction_service: ChemblExtractionPortABC,
         hash_service: HashServiceABC,
+        metadata_builder: RunMetadataBuilderProtocol,
+        file_record_source_factory: FileRecordSourceFactoryABC,
         record_source: RecordSource | None = None,
         normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
@@ -39,7 +43,9 @@ class ChemblPipelineBase(PipelineBase):
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
 
-        norm_service = normalization_service or default_normalization_service(config)
+        if normalization_service is None:
+            raise ValueError("Normalization service is required")
+        norm_service = normalization_service
 
         # Create Extractor
         extractor = ChemblExtractorImpl(
@@ -48,6 +54,7 @@ class ChemblPipelineBase(PipelineBase):
             normalization_service=norm_service,
             logger=logger,
             record_source=record_source,
+            file_record_source_factory=file_record_source_factory,
         )
 
         # Create Transformer
@@ -66,6 +73,7 @@ class ChemblPipelineBase(PipelineBase):
             validation_service=validation_service,
             output_writer=output_writer,
             hash_service=hash_service,
+            metadata_builder=metadata_builder,
             extractor=extractor,
             hooks=hooks,
             error_policy=error_policy,

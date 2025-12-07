@@ -1,4 +1,4 @@
-# Архитектурные диаграммы
+# Diagrams
 
 Актуальный код: входные точки CLI/REST/MQ (`bioetl.interfaces.*`); сборка пайплайна через `PipelineOrchestrator` + `PipelineContainer` с реестром провайдеров (`configs/providers.yaml` → `ProviderRegistryLoader`); запуск `ChemblEntityPipeline` c хуками логов и метрик; источники — API/CSV/ID-list (`ApiRecordSource`, `CsvRecordSourceImpl`, `IdListRecordSourceImpl`) + стек ChEMBL клиента (`UnifiedAPIClient` + `ChemblDataClientHTTPImpl`); выход — `UnifiedOutputWriter` (стабильная сортировка, атомарная запись, checksum, QC/meta); метрики Prometheus экспонирует `infrastructure.observability.server`.
 

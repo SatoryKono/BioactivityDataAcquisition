@@ -1,4 +1,4 @@
-# 00 Common Logic
+# Common Logic
 
 ## Текущая реализация
 

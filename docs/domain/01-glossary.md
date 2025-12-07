@@ -1,4 +1,4 @@
-# 03 Glossary
+# Glossary
 
 - **Assay** — описание биологического эксперимента; детали полей и схем см. `docs/architecture/01-domain-objects.md`.
 - **Activity** — запись о результатах эксперимента с бизнес-ключом и хешами; подробности в `docs/architecture/01-domain-objects.md` и `docs/domain/schemas/00-schemas-overview.md`.

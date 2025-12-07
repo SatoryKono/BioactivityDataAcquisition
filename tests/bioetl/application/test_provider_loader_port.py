@@ -29,7 +29,7 @@ def test_orchestrator_uses_provider_loader_when_flag_enabled() -> None:
             self.registry = InMemoryProviderRegistry()
             self.calls = 0
 
-        def load_registry(
+        def get_registry(
             self, *, registry: InMemoryProviderRegistry | None = None
         ) -> InMemoryProviderRegistry:
             self.calls += 1

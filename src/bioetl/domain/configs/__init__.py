@@ -50,4 +50,5 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
     "PipelineConfig",
+    "PipelineConfigLoaderProtocol",
 ]

@@ -1,6 +1,7 @@
 """Компонент, инкапсулирующий применение политики обработки ошибок."""
 
 from collections.abc import Callable
+from typing import Generic, TypeVar
 
 from bioetl.application.pipelines.hooks_registry import HooksRegistry
 from bioetl.domain.enums import ErrorAction
@@ -10,8 +11,10 @@ from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC
 from bioetl.domain.providers import ProviderId
 
+_ResultT = TypeVar("_ResultT")
 
-class ErrorPolicyFacade:
+
+class ErrorPolicyFacade(Generic[_ResultT]):
     """Делегат для применения политики ошибок и вызова хуков."""
 
     def __init__(
@@ -22,7 +25,7 @@ class ErrorPolicyFacade:
         logger: LoggingPortABC,
         provider_id: ProviderId,
         entity_name: str,
-        default_on_skip: Callable[[str], object],
+        default_on_skip: Callable[[str], _ResultT],
     ) -> None:
         self._error_policy = error_policy
         self._hooks_manager = hooks_manager
@@ -43,11 +46,11 @@ class ErrorPolicyFacade:
         self,
         stage: str,
         context: RunContext,
-        action: Callable[[], object],
+        action: Callable[[], _ResultT],
         *,
         attempt: int = 1,
         on_retry: Callable[[], None] | None = None,
-    ) -> object:
+    ) -> _ResultT:
         """Выполняет действие с учётом политики ошибок."""
 
         try:
@@ -80,9 +83,8 @@ class ErrorPolicyFacade:
 
             action_on_error = self._error_policy.handle(error, context)
             self._last_stage_action[stage] = action_on_error
-            if (
-                action_on_error == ErrorAction.RETRY
-                and self._error_policy.can_retry(error)
+            if action_on_error == ErrorAction.RETRY and self._error_policy.can_retry(
+                error
             ):
                 if on_retry:
                     on_retry()

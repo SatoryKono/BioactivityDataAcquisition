@@ -10,7 +10,7 @@ from bioetl.infrastructure.clients.provider_registry_loader import (
 def test_register_providers_registers_chembl() -> None:
     registry = InMemoryProviderRegistry()
     loader = create_provider_loader()
-    loader.load_registry(registry=registry)
+    loader.get_registry(registry=registry)
 
     provider = registry.get_provider(ProviderId.CHEMBL)
     assert provider.id == ProviderId.CHEMBL
@@ -23,10 +23,10 @@ def test_register_providers_is_idempotent() -> None:
     registry = InMemoryProviderRegistry()
     loader = create_provider_loader()
 
-    loader.load_registry(registry=registry)
+    loader.get_registry(registry=registry)
     first_definition = registry.get_provider(ProviderId.CHEMBL)
 
-    loader.load_registry(registry=registry)
+    loader.get_registry(registry=registry)
     second_definition = registry.get_provider(ProviderId.CHEMBL)
 
     assert first_definition is second_definition

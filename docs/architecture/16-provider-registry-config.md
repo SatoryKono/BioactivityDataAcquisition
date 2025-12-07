@@ -1,4 +1,4 @@
-# 16 Provider Registry Config
+# Provider Registry Config
 
 ## Purpose
 

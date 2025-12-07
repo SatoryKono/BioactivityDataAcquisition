@@ -10,7 +10,10 @@ import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
-from bioetl.domain.transform.contracts import HasherABC
+from bioetl.domain.transform.contracts import HasherABC, NormalizationConfig
+from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
+    ChemblNormalizationServiceImpl,
+)
 from bioetl.infrastructure.transform.impl.hash_service_impl import HashServiceImpl
 
 
@@ -25,6 +28,7 @@ class ConcreteChemblPipeline(ChemblPipelineBase):
 @pytest.fixture
 def mock_dependencies_fixture():
     """Fixture for pipeline dependencies."""
+
     class _DummyHasher(HasherABC):
         def get_algorithm(self):
             return "sha256"
@@ -41,10 +45,22 @@ def mock_dependencies_fixture():
     config.id = "test_pipeline"
     config.hashing = MagicMock()
     config.hashing.business_key_fields = []
+    config.fields = []
+    config.normalization = NormalizationConfig()
+    config.get_fields.side_effect = lambda: config.fields
+    config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
     # Default schema columns
     validation_service.get_schema_columns.return_value = ["a", "transformed"]
+
+    metadata_builder = MagicMock()
+    metadata_builder.build_run_metadata.return_value = {}
+    metadata_builder.build_dry_run_metadata.return_value = {}
+
+    file_record_source_factory = MagicMock()
+
+    normalization_service = ChemblNormalizationServiceImpl(config=config)
 
     return {
         "config": config,
@@ -53,6 +69,9 @@ def mock_dependencies_fixture():
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
         "hash_service": HashServiceImpl(hasher=_DummyHasher()),
+        "metadata_builder": metadata_builder,
+        "file_record_source_factory": file_record_source_factory,
+        "normalization_service": normalization_service,
     }
 
 
@@ -67,15 +86,20 @@ def pipeline_fixture(mock_dependencies_fixture):
         validation_service=mock_dependencies_fixture["validation_service"],
         output_writer=mock_dependencies_fixture["output_writer"],
         extraction_service=mock_dependencies_fixture["extraction_service"],
+        normalization_service=mock_dependencies_fixture["normalization_service"],
         hash_service=mock_dependencies_fixture["hash_service"],
+        metadata_builder=mock_dependencies_fixture["metadata_builder"],
+        file_record_source_factory=mock_dependencies_fixture[
+            "file_record_source_factory"
+        ],
     )
 
 
 def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
     """Test ChEMBL release version retrieval."""
-    mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
-        "chembl_34"
-    )
+    mock_dependencies_fixture[
+        "extraction_service"
+    ].get_release_version.return_value = "chembl_34"
 
     release1 = pipeline_fixture.get_chembl_release()
     release2 = pipeline_fixture.get_chembl_release()
@@ -91,9 +115,9 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
 
 def test_enrich_context(pipeline_fixture, mock_dependencies_fixture):
     """Test context enrichment with ChEMBL release."""
-    mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
-        "chembl_99"
-    )
+    mock_dependencies_fixture[
+        "extraction_service"
+    ].get_release_version.return_value = "chembl_99"
     context = RunContext(
         entity_name="test", provider="chembl", started_at=datetime.now(timezone.utc)
     )
@@ -193,6 +217,10 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         extraction_service=mock_dependencies_fixture["extraction_service"],
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
+        metadata_builder=mock_dependencies_fixture["metadata_builder"],
+        file_record_source_factory=mock_dependencies_fixture[
+            "file_record_source_factory"
+        ],
     )
 
     df = pd.DataFrame({"a": [1, 2]})
@@ -230,6 +258,10 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         record_source=record_source,
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
+        metadata_builder=mock_dependencies_fixture["metadata_builder"],
+        file_record_source_factory=mock_dependencies_fixture[
+            "file_record_source_factory"
+        ],
     )
 
     result = pipeline.extract()

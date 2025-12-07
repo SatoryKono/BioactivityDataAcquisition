@@ -6,7 +6,6 @@ import inspect
 from collections import defaultdict
 from pathlib import Path
 
-import pytest
 import yaml
 
 
@@ -27,7 +26,9 @@ def test_no_duplicate_class_names(project_root: Path) -> None:
         for node in tree.body:
             if isinstance(node, ast.ClassDef):
                 class_occurrences[node.name].append(file_path)
-    duplicates = {cls: files for cls, files in class_occurrences.items() if len(files) > 1}
+    duplicates = {
+        cls: files for cls, files in class_occurrences.items() if len(files) > 1
+    }
     assert not duplicates, f"Повторяющиеся имена классов обнаружены: {duplicates}"
 
 
@@ -70,9 +71,8 @@ def test_no_duplicate_function_bodies(project_root: Path) -> None:
                 body = ast.dump(node, include_attributes=False)
                 body_hashes[body].append((file_path, node.name))
     duplicates = {body: locs for body, locs in body_hashes.items() if len(locs) > 1}
-    assert not duplicates, (
-        "Найдены дублирующиеся тела функций: "
-        + ", ".join(f"{locs}" for locs in duplicates.values())
+    assert not duplicates, "Найдены дублирующиеся тела функций: " + ", ".join(
+        f"{locs}" for locs in duplicates.values()
     )
 
 
@@ -86,9 +86,7 @@ def test_pipeline_inherits_base(project_root: Path) -> None:
     root = project_root / "src/bioetl/application/pipelines"
     src_root = project_root / "src"
     for file_path in sorted(root.rglob("*/pipeline.py")):
-        module_name = ".".join(
-            file_path.with_suffix("").relative_to(src_root).parts
-        )
+        module_name = ".".join(file_path.with_suffix("").relative_to(src_root).parts)
         try:
             module = importlib.import_module(module_name)
         except ImportError:
@@ -98,7 +96,10 @@ def test_pipeline_inherits_base(project_root: Path) -> None:
                 bases = [base.__name__ for base in cls.mro()[1:]]
                 assert any(
                     base in {"PipelineBase", "ChemblPipelineBase"} for base in bases
-                ), f"{cls.__name__} не наследует базовый класс PipelineBase/ChemblPipelineBase"
+                ), (
+                    f"{cls.__name__} не наследует базовый класс "
+                    "PipelineBase/ChemblPipelineBase"
+                )
 
 
 # -----------------------------------------------------------------------------
@@ -143,7 +144,9 @@ def test_no_duplicate_schema_filenames(project_root: Path) -> None:
         if file_path.name == "__init__.py":
             continue
         file_occurrences[file_path.name].append(file_path)
-    duplicates = {name: files for name, files in file_occurrences.items() if len(files) > 1}
+    duplicates = {
+        name: files for name, files in file_occurrences.items() if len(files) > 1
+    }
     assert not duplicates, f"Дублирующиеся файлы схем: {duplicates}"
 
 
@@ -197,7 +200,8 @@ def test_cli_commands_unique(project_root: Path) -> None:
                             cmd_name = node.name
                         if cmd_name in command_names:
                             raise AssertionError(
-                                f"Дублирующаяся CLI‑команда '{cmd_name}' в {file_path} и {command_names[cmd_name]}"
+                                "Дублирующаяся CLI‑команда "
+                                f"'{cmd_name}' в {file_path} и {command_names[cmd_name]}"
                             )
                         command_names[cmd_name] = file_path
 
@@ -213,7 +217,6 @@ def test_abc_impls_unique(configs_root: Path) -> None:
     impls_path = configs_root / "abc_impls.yaml"
     if not (registry_path.exists() and impls_path.exists()):
         return
-    registry_data = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
     impls_data = yaml.safe_load(impls_path.read_text(encoding="utf-8"))
     if not isinstance(impls_data, dict):
         return
@@ -221,7 +224,9 @@ def test_abc_impls_unique(configs_root: Path) -> None:
     for abc, impl in impls_data.items():
         reverse_map[str(impl)].append(str(abc))
     duplicates = {impl: abcs for impl, abcs in reverse_map.items() if len(abcs) > 1}
-    assert not duplicates, f"Для следующих реализаций назначено несколько ABC: {duplicates}"
+    assert not duplicates, (
+        f"Для следующих реализаций назначено несколько ABC: {duplicates}"
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -241,7 +246,7 @@ def test_test_function_names_unique(project_root: Path) -> None:
             if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
                 if node.name in seen_names:
                     raise AssertionError(
-                        f"Имя тестовой функции '{node.name}' повторяется в {file_path} и {seen_names[node.name]}"
+                        "Имя тестовой функции "
+                        f"'{node.name}' повторяется в {file_path} и {seen_names[node.name]}"
                     )
                 seen_names[node.name] = file_path
-

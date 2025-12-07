@@ -36,4 +36,3 @@ def test_pandera_schemas_registered(configs_root: Path) -> None:
 
     if missing:
         pytest.fail("Не найдены схемы Pandera:\n" + "\n".join(missing))
-

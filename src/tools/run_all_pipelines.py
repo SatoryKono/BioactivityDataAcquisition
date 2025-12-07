@@ -17,9 +17,9 @@ PIPELINES = [
 
 def run_pipeline(name: str, limit: int) -> dict:
     start_time = datetime.now(timezone.utc)
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"Starting pipeline: {name}")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
 
     # Mock args
     # Assume config path: {entity}_chembl -> configs/pipelines/chembl/{entity}.yaml

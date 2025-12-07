@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from typing import Iterable
 
 from bioetl.domain.models import RunContext, StageResult
-from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.providers import ProviderId
 
 

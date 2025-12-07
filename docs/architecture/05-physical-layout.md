@@ -1,4 +1,4 @@
-# 05 Physical Layout
+# Physical Layout
 
 ## Соответствие слоев и структуры кода
 

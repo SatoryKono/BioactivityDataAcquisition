@@ -1,4 +1,4 @@
-# Logging Module Diagram
+# Logging Diagram
 
 ## Class Diagram
 

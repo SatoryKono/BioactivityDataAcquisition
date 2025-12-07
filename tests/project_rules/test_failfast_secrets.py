@@ -34,8 +34,9 @@ def test_configs_use_env_placeholders_for_secrets(configs_root: Path) -> None:
             if not _looks_like_secret_key(field_path):
                 continue
             if isinstance(value, str) and "${" not in value:
-                violations.append(f"{path.as_posix()}:{field_path} содержит захардкоженный секрет")
+                violations.append(
+                    f"{path.as_posix()}:{field_path} содержит захардкоженный секрет"
+                )
 
     if violations:
         pytest.fail("Секреты должны читаться из окружения:\n" + "\n".join(violations))
-

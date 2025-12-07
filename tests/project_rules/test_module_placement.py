@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from tests.project_rules.conftest import iter_python_files
 
 ALLOWED_LAYERS = {"domain", "application", "infrastructure", "interfaces"}
@@ -33,4 +32,3 @@ def test_new_modules_are_in_layers(bioetl_root: Path) -> None:
 
     if violations:
         pytest.fail("\n".join(sorted(set(violations))))
-

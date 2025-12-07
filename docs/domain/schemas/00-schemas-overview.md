@@ -1,4 +1,4 @@
-# 00 Schemas Overview
+# Schemas Overview
 
 ## Pandera-схемы
 - **ActivitySchema** — бизнес-ключ активности, числовые поля значений, идентификаторы Assay/Target/TestItem, контроль типов единиц.

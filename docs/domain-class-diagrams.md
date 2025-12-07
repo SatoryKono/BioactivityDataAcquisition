@@ -1,4 +1,4 @@
-# BioETL Domain Class Diagrams
+# Domain Class Diagrams
 
 ## Errors and Providers
 ```mermaid

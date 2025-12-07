@@ -8,7 +8,7 @@ def check(url):
     try:
         start = time.time()
         resp = requests.get(url, timeout=10)
-        print(f"Status: {resp.status_code} in {time.time()-start:.2f}s")
+        print(f"Status: {resp.status_code} in {time.time() - start:.2f}s")
         print(resp.text[:200])
     except Exception as e:
         print(f"Error: {e}")

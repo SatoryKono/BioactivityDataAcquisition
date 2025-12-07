@@ -1,4 +1,4 @@
-# 00 Target Chembl Overview
+# Target Chembl Overview
 
 ## Pipeline
 - Универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) поверх `ChemblPipelineBase`.
