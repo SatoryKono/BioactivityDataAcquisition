@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-from bioetl.domain.transform.merge import deep_merge
+from bioetl.domain.transform.merge import apply_deep_merge
 
 CONFIGS_ROOT_ENV = "BIOETL_CONFIG_DIR"
 DEFAULT_CONFIGS_ROOT = Path("configs")
@@ -56,7 +56,7 @@ def _merge_with_profile(
     merged = dict(config)
     if profile and profile != "default":
         profile_data = _resolve_profile(profile, profiles_root=profiles_root)
-        merged = deep_merge(merged, profile_data)
+        merged = apply_deep_merge(merged, profile_data)
     return merged
 
 
@@ -69,8 +69,8 @@ def _apply_extends(
     extends_profile = config.get("extends")
     if extends_profile:
         base_profile = _resolve_profile(extends_profile, profiles_root=profiles_root)
-        merged = deep_merge(merged, base_profile)
-    merged = deep_merge(merged, config)
+        merged = apply_deep_merge(merged, base_profile)
+    merged = apply_deep_merge(merged, config)
     merged.pop("extends", None)
     return merged
 
@@ -128,7 +128,7 @@ def _resolve_profile(
     parent = profile_data.get("extends")
     if parent:
         parent_data = _resolve_profile(parent, profiles_root=profiles_root)
-        profile_data = deep_merge(parent_data, profile_data)
+        profile_data = apply_deep_merge(parent_data, profile_data)
     return profile_data
 
 

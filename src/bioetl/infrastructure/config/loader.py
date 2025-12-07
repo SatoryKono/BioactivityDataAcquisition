@@ -10,7 +10,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.transform.merge import deep_merge
+from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.infrastructure.config.provider_registry_loader import (
     DEFAULT_PROVIDERS_REGISTRY_PATH,
     ProviderNotConfiguredError,
@@ -162,9 +162,9 @@ def _apply_overrides(
 ) -> dict[str, Any]:
     merged = dict(base_config)
     if env_overrides:
-        merged = deep_merge(merged, env_overrides)
+        merged = apply_deep_merge(merged, env_overrides)
     if cli_overrides:
-        merged = deep_merge(merged, cli_overrides)
+        merged = apply_deep_merge(merged, cli_overrides)
     return merged
 
 

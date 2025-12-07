@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain.transform.merge import deep_merge
+from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
@@ -83,12 +83,12 @@ provider_config:
     assert config.output_path == "/tmp/out"  # pipeline override
 
 
-def test_deep_merge():
+def test_apply_deep_merge():
     """Test deep dictionary merge."""
     base = {"a": {"x": 1}}
     update = {"a": {"y": 2}, "b": 3}
 
-    result = deep_merge(base, update)
+    result = apply_deep_merge(base, update)
     assert result["a"]["x"] == 1
     assert result["a"]["y"] == 2
     assert result["b"] == 3
