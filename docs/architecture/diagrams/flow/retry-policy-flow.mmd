@@ -1,0 +1,24 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart TD
+    classDef stepPrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef stepDecision fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepTerminal fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    start([Request attempt 1]):::stepTerminal
+    call["HTTP call via UnifiedAPIClient"]:::stepPrimary
+    status{Success?\n(status < 500 and no timeout)}:::stepDecision
+    handle(["Return response"]):::stepPrimary
+    error["Capture exception / 5xx response"]:::stepSecondary
+    retryCount["Increment attempt counter"]:::stepSecondary
+    limit{attempts <= max_retries?}:::stepDecision
+    backoff["Sleep backoff (exponential + jitter)\nrespect rate limits"]:::stepSecondary
+    fail([Raise error to caller]):::stepTerminal
+
+    start --> call --> status
+    status -- Yes --> handle
+    status -- No --> error --> retryCount --> limit
+    limit -- Yes --> backoff --> call
+    limit -- No --> fail
+

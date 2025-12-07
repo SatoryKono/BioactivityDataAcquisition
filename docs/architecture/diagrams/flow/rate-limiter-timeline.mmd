@@ -1,0 +1,21 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart LR
+    classDef stepPrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef stepDecision fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    request1["Request N (timestamp tₙ)"]:::stepPrimary
+    check["RateLimiter.acquire()\ncompute elapsed = tₙ - tₙ₋₁"]:::stepSecondary
+    allow{elapsed ≥ min_interval?}:::stepDecision
+    sleep["Sleep (min_interval - elapsed)\nrespect global window & burst limits"]:::stepSecondary
+    token["Consume token / store timestamp"]:::stepSecondary
+    request2["Forward to UnifiedAPIClient"]:::stepPrimary
+
+    request1 --> check --> allow
+    allow -- Yes --> token --> request2
+    allow -- No --> sleep --> token --> request2
+
+    note1["min_interval = 1 / requests_per_second\nwindow buckets enforce additional profile-specific caps"]:::stepSecondary
+    request2 --> note1
+

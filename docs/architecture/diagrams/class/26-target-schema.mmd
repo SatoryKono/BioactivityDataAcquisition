@@ -1,0 +1,21 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class TargetSchema {
+        <<Pandera DataFrameModel>>
+        target_chembl_id : CHEMBL ID (required)
+        target_pref_name : str?
+        target_type : str?
+        target_organism : str?
+        target_tax_id : float?
+        organism_class : str?
+        component_accession : str?
+        component_synonyms : str?
+        uniprot_id : str?
+        iuphar_id : str?
+        gene_name : str?
+        cross_references : str?
+        hash_row : hex64
+        hash_business_key : hex64?
+        extracted_at : datetime?
+    }
+

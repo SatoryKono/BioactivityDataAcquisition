@@ -1,0 +1,24 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class MoleculeModel {
+        <<ChemblRecordModel>>
+        atc_classifications : list[Any] | None
+        cross_references : list[Any] | None
+        molecule_hierarchy : dict[str, Any] | None
+        molecule_properties : dict[str, Any] | None
+        molecule_structures : dict[str, Any] | None
+        molecule_synonyms : list[Any] | None
+    }
+    class MoleculeHierarchy {
+        parent_chembl_id : str?
+        molecule_chembl_id : str
+    }
+    class MoleculeProperties {
+        mw_freebase : float?
+        logp : float?
+        psa : float?
+    }
+
+    MoleculeModel --> MoleculeHierarchy
+    MoleculeModel --> MoleculeProperties
+

@@ -1,0 +1,63 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart TB
+    classDef componentPrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef port fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef group fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    subgraph Interfaces["Driving Ports (Interfaces layer)"]
+        cli["CLI (Typer commands)"]:::port
+        rest["REST entrypoint"]:::port
+        mq["MQ consumers"]:::port
+    end
+    class Interfaces group
+
+    subgraph Application["Application layer (Use-case orchestration)"]
+        orchestrator["PipelineOrchestrator\n(run, build_pipeline)"]:::componentPrimary
+        container["PipelineContainer\n(manual DI)"]:::componentSecondary
+        registry["PipelineRegistry\n(entity to class map)"]:::componentSecondary
+        hooksManager["HooksManager + ErrorPolicy"]:::componentSecondary
+    end
+    class Application group
+
+    subgraph Domain["Domain core (Ports)"]
+        contracts["ABC contracts\n(ExtractionServiceABC, TransformerABC, OutputWriterABC, etc.)"]:::componentPrimary
+        schemas["Schemas + ValidationService"]:::componentSecondary
+        normalization["Normalization/Hash services"]:::componentSecondary
+    end
+    class Domain group
+
+    subgraph Infrastructure["Adapters (Driven ports)"]
+        apiClients["UnifiedAPIClient + ChemblDataClientHTTPImpl"]:::componentPrimary
+        recordSources["CsvRecordSource / IdListSource"]:::componentSecondary
+        extraction["ChemblExtractionServiceImpl"]:::componentSecondary
+        transformers["ChemblTransformerImpl + enrichers"]:::componentSecondary
+        writers["UnifiedOutputWriter + MetadataWriter"]:::componentSecondary
+        observability["UnifiedLogger + Metrics hooks"]:::componentSecondary
+    end
+    class Infrastructure group
+
+    cli --> orchestrator
+    rest --> orchestrator
+    mq --> orchestrator
+
+    orchestrator --> container
+    container --> registry
+    container --> contracts
+    container --> schemas
+
+    contracts --> apiClients
+    contracts --> recordSources
+    contracts --> extraction
+    contracts --> transformers
+    contracts --> writers
+    contracts --> observability
+
+    apiClients --> Chembl[(ChEMBL API)]
+    recordSources --> Files[(Offline CSV dumps)]
+    writers --> Storage[(Deterministic storage\nCSV/Parquet/meta)]
+    observability --> Monitoring[(Logging, Metrics, Alerts)]
+
+    class Chembl,Files,Storage,Monitoring port
+

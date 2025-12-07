@@ -1,0 +1,51 @@
+%%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
+flowchart LR
+    classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef storage            fill:#f0f4d4,stroke:#596235,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    subgraph Sources["External data sources"]
+        chembl[(ChEMBL REST API\nactivity/assay/target/document/molecule)]:::external
+        uniprot[(UniProt / IUPHAR APIs\nprotein enrichment)]:::external
+        openalex[(OpenAlex API\nliterature enrichment)]:::external
+        semanticscholar[(Semantic Scholar API\ncitation enrichment)]:::external
+    end
+    class Sources group
+
+    subgraph BioETL["BioETL platform"]
+        orchestrator["PipelineOrchestrator"]:::componentPrimary
+        pipelines["Entity-specific pipelines\nActivity/Assay/Target/Document/TestItem"]:::componentSecondary
+        hooks["Logging & Metrics Hooks\n(Structured logs, Prometheus)"]:::componentSecondary
+        writer["UnifiedOutputWriter\n(CSV/Parquet + meta)"]:::componentPrimary
+        registry["ProviderRegistry + UnifiedAPIClient\n(rate-limit, retry)"]:::componentSecondary
+    end
+    class BioETL group
+
+    subgraph Sinks["Internal storage targets"]
+        csv[(Deterministic CSV exports\nper entity run)]:::storage
+        parquet[(Parquet datasets / analytical lake)]:::storage
+        metadata[(meta.yaml + QC sidecars\nchecksums, versions, row_count)]:::storage
+        database[(Optional internal DB / downstream warehouse)]:::storage
+    end
+    class Sinks group
+
+    chembl --> registry
+    uniprot --> registry
+    openalex --> registry
+    semanticscholar --> registry
+
+    registry --> orchestrator
+    orchestrator --> pipelines
+    pipelines --> hooks
+    pipelines --> writer
+
+    writer --> csv
+    writer --> parquet
+    writer --> metadata
+    metadata --> database
+
+    hooks --> metadata
+

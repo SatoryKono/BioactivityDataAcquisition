@@ -1,0 +1,31 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorFontSize": "18px",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant CLI as CLI command
+    participant Orchestrator as PipelineOrchestrator
+    participant Container as PipelineContainer
+    participant Registry as ProviderRegistryLoader
+    participant Factories as Provider factories (clients, writers, hooks)
+    participant Pipeline as Pipeline class
+
+    CLI->>Orchestrator: run(pipeline_name, cli_args)
+    Orchestrator->>Container: build_pipeline_dependencies(config)
+    Container->>Registry: load_provider_registry(profile)
+    Registry-->>Container: ProviderRegistryABC
+    Container->>Factories: resolve default_xxx_factory()
+    Factories-->>Container: concrete implementations (ExtractionServiceImpl, OutputWriter, Hooks...)
+    Container->>Container: compose Dependencies dataclass
+    Container-->>Orchestrator: Dependencies
+    Orchestrator->>Pipeline: instantiate(pipeline_cls, config, deps)
+    Orchestrator-->>CLI: ready Pipeline -> run()
+

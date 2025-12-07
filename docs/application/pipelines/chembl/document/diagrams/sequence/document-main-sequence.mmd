@@ -1,24 +1,40 @@
 sequenceDiagram
     autonumber
     participant CLI as CLI
+    participant Orchestrator as PipelineOrchestrator
     participant Pipeline as DocumentPipeline
-    participant Client as Chembl Client
-    participant Validator as ValidationService
+    participant Extraction as ChemblExtractionService
+    participant DataClient as ChemblDataClientHTTPImpl
+    participant Enrich as OpenAlex/SemanticScholar Client
+    participant Transformer as DocumentTransformer
+    participant Validator as ValidationService(DocumentSchema)
     participant Writer as UnifiedOutputWriter
 
-    CLI->>Pipeline: run(output_path, dry_run)
-    Pipeline->>Client: iter_pages(document)
-    loop pages
-        Client-->>Pipeline: raw_page
-        Pipeline->>Pipeline: transform(raw_page)
-        Pipeline->>Validator: validate(chunk, document_schema)
-        Validator-->>Pipeline: validated_chunk
+    CLI->>Orchestrator: run("document_chembl")
+    Orchestrator->>Pipeline: build + run
+    Pipeline->>Extraction: extract_all("document")
+    loop for each page
+        Extraction->>DataClient: request_document(offset)
+        DataClient-->>Extraction: document page
+        Extraction-->>Pipeline: batch_df
+        Pipeline->>Enrich: fetch_by_doi(batch_df.doi_list)
+        alt enrichment success
+            Enrich-->>Pipeline: enrichment map
+        else enrichment failure
+            Enrich-->>Pipeline: error -> mark enrichment_partial
+        end
+        Pipeline->>Transformer: merge enrichment + normalize
+        Transformer-->>Pipeline: normalized_df
+        Pipeline->>Validator: validate("chembl.document", normalized_df)
+        Validator-->>Pipeline: validated_df
+        Pipeline->>Pipeline: append(validated_df)
     end
-    alt not dry_run
-        Pipeline->>Writer: write_result(all_chunks)
-        Writer-->>Pipeline: write_summary
+    alt dry_run == False
+        Pipeline->>Writer: write(sorted_df, cfg)
+        Writer-->>Pipeline: meta/checksums
     else dry_run
         Pipeline->>Pipeline: skip write
     end
-    Pipeline-->>CLI: RunResult
+    Pipeline-->>Orchestrator: RunResult
+    Orchestrator-->>CLI: summary
 

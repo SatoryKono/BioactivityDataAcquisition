@@ -1,0 +1,27 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart LR
+    classDef componentPrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef external fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    typer["Typer App\n`bioetl.interfaces.cli.app`"]:::componentPrimary
+    commandRegistry["CLICommandABC implementations\n(run, list, validate-config, profile helpers)"]:::componentSecondary
+    runCmd["RunPipelineCommand\nparses args, resolves config"]:::componentPrimary
+    profiles["Profile loader\nconfigs/profiles/*.yaml"]:::componentSecondary
+    pipelineConfig["Pipeline config loader\nconfigs/pipelines/<provider>/<entity>.yaml"]:::componentSecondary
+    overrides["CLI overrides (--limit, --output, --dry-run)\nmerged into config"]:::componentSecondary
+    orchestrator["PipelineOrchestrator\n(application.orchestrator)"]:::componentPrimary
+    feedback["Structured CLI feedback\ninfo/error logs via UnifiedLogger"]:::componentSecondary
+    scripts["`bioetl` console script / `python -m bioetl`\nentrypoints"]:::external
+
+    scripts --> typer
+    typer --> commandRegistry
+    commandRegistry --> runCmd
+    runCmd --> profiles
+    runCmd --> pipelineConfig
+    runCmd --> overrides
+    runCmd --> orchestrator
+    orchestrator --> feedback
+    feedback --> typer
+

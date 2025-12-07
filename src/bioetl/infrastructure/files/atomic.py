@@ -77,9 +77,11 @@ class AtomicFileOperation:
         try:
             os.replace(src, dst)
             return True
-        except PermissionError:
+        except PermissionError as exc:
             # На Windows PermissionError часто означает, что файл заблокирован
-            return self._try_windows_unlock_replace(src, dst, is_windows)
+            if self._try_windows_unlock_replace(src, dst, is_windows):
+                return True
+            raise exc
         except OSError:
             # Передаём исключение наверх, чтобы оно учитывалось в retry и сообщениях
             raise

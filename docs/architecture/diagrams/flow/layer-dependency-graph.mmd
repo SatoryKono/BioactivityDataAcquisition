@@ -1,0 +1,39 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart LR
+    classDef app fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef domain fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef infra fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    orchestrator["Application.PipelineOrchestrator"]:::app
+    container["Application.PipelineContainer"]:::app
+    pipeline["Application.ChemblPipelineBase"]:::app
+
+    hookPort["Domain.PipelineHookABC"]:::domain
+    validationPort["Domain.ValidationServiceABC\n+ SchemaRegistry"]:::domain
+    registryPort["Domain.ProviderRegistryABC"]:::domain
+    writerPort["Domain.OutputWriterABC"]:::domain
+    errorPolicyPort["Domain.ErrorPolicyABC"]:::domain
+
+    loggingImpl["Infrastructure.LoggingPipelineHookImpl"]:::infra
+    metricsImpl["Infrastructure.MetricsPipelineHookImpl"]:::infra
+    providerLoader["Infrastructure.ProviderRegistryLoader"]:::infra
+    unifiedWriter["Infrastructure.UnifiedOutputWriter"]:::infra
+    validationSvc["Infrastructure.ValidationService (Pandera)"]:::infra
+    chemblClient["Infrastructure.ChemblDataClientHTTPImpl"]:::infra
+
+    orchestrator --> container
+    container --> pipeline
+    pipeline --> hookPort
+    pipeline --> validationPort
+    pipeline --> writerPort
+    pipeline --> errorPolicyPort
+    container --> registryPort
+    registryPort --> providerLoader
+    hookPort --> loggingImpl
+    hookPort --> metricsImpl
+    validationPort --> validationSvc
+    writerPort --> unifiedWriter
+    registryPort --> chemblClient
+    validationPort -.x-|no back-depend| pipeline
+

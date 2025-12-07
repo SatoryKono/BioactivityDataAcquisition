@@ -1,26 +1,33 @@
 sequenceDiagram
     autonumber
     participant CLI as CLI
-    participant Pipe as MoleculePipeline
-    participant Extr as ChemblExtractorImpl
-    participant Source as IdListRecordSourceImpl
-    participant Trans as ChemblTransformerImpl
-    participant Val as ValidationService
+    participant Orchestrator as PipelineOrchestrator
+    participant Pipeline as MoleculePipeline
+    participant Extraction as ChemblExtractionService
+    participant DataClient as ChemblDataClientHTTPImpl
+    participant Transformer as ChemblTransformerImpl
+    participant Validator as ValidationService(TestItemSchema)
     participant Writer as UnifiedOutputWriter
 
-    CLI->>Pipe: run(output_path, dry_run)
-    Pipe->>Extr: iter_chunks()
-    Extr->>Source: read id list / fetch via API
-    Source-->>Extr: raw chunk
-    Extr-->>Pipe: raw chunk
-    Pipe->>Trans: apply transform + normalize
-    Trans-->>Pipe: transformed_df
-    Pipe->>Val: validate(transformed_df)
-    Val-->>Pipe: validated_df
-    alt Not dry run
-        Pipe->>Writer: write_result(validated_df, output_path)
-    else Dry run
-        Pipe->>Writer: skip write, prepare meta
+    CLI->>Orchestrator: run("molecule_chembl")
+    Orchestrator->>Pipeline: build + run
+    Pipeline->>Extraction: extract_all("molecule")
+    loop per page
+        Extraction->>DataClient: request_molecule(offset)
+        DataClient-->>Extraction: molecule batch
+        Extraction-->>Pipeline: batch_df
+        Pipeline->>Transformer: apply(batch_df)
+        Transformer-->>Pipeline: normalized_df
+        Pipeline->>Validator: validate("chembl.testitem", normalized_df)
+        Validator-->>Pipeline: validated_df
+        Pipeline->>Pipeline: append(validated_df)
     end
-    Pipe-->>CLI: RunResult (stats, meta)
+    alt dry_run == False
+        Pipeline->>Writer: write(sorted_df, cfg)
+        Writer-->>Pipeline: meta/checksums
+    else dry_run
+        Pipeline->>Pipeline: skip write
+    end
+    Pipeline-->>Orchestrator: RunResult
+    Orchestrator-->>CLI: summary
 

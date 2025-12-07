@@ -574,11 +574,17 @@ class PipelineConfig(BaseModel):
         migrated = dict(data)
 
         def _pack(section_key: str, keys: list[str]) -> None:
-            if section_key in migrated:
-                return
             collected = {key: migrated.pop(key) for key in keys if key in migrated}
-            if collected:
+            if not collected:
+                return
+
+            if section_key not in migrated or not isinstance(
+                migrated.get(section_key), dict
+            ):
                 migrated[section_key] = collected
+                return
+
+            migrated[section_key] = {**migrated[section_key], **collected}
 
         _pack(
             "runtime",

@@ -1,24 +1,36 @@
 sequenceDiagram
     autonumber
     participant CLI as CLI
+    participant Orchestrator as PipelineOrchestrator
     participant Pipeline as TargetPipeline
-    participant Client as Chembl Client
-    participant Validator as ValidationService
+    participant Extraction as ChemblExtractionService
+    participant DataClient as ChemblDataClientHTTPImpl
+    participant Enrich as UniProt/IUPHAR Client
+    participant Transformer as TargetTransformer
+    participant Validator as ValidationService(TargetSchema)
     participant Writer as UnifiedOutputWriter
 
-    CLI->>Pipeline: run(output_path, dry_run)
-    Pipeline->>Client: iter_pages(target)
-    loop pages
-        Client-->>Pipeline: raw_page
-        Pipeline->>Pipeline: transform(raw_page)
-        Pipeline->>Validator: validate(chunk, target_schema)
-        Validator-->>Pipeline: validated_chunk
+    CLI->>Orchestrator: run("target_chembl")
+    Orchestrator->>Pipeline: build + run
+    Pipeline->>Extraction: extract_all("target")
+    loop page
+        Extraction->>DataClient: request_target(offset)
+        DataClient-->>Extraction: target page
+        Extraction-->>Pipeline: batch_df
+        Pipeline->>Enrich: fetch_uniprot(batch_df.uniprot_accession)
+        Enrich-->>Pipeline: enrichment dict (gene_name, sequence, iuphar_id)
+        Pipeline->>Transformer: merge_enrichment(batch_df, enrichment)
+        Transformer-->>Pipeline: normalized_df
+        Pipeline->>Validator: validate("chembl.target", normalized_df)
+        Validator-->>Pipeline: validated_df
+        Pipeline->>Pipeline: append(validated_df)
     end
-    alt not dry_run
-        Pipeline->>Writer: write_result(all_chunks)
-        Writer-->>Pipeline: write_summary
+    alt dry_run == False
+        Pipeline->>Writer: write(sorted_df, cfg)
+        Writer-->>Pipeline: meta/checksums
     else dry_run
         Pipeline->>Pipeline: skip write
     end
-    Pipeline-->>CLI: RunResult
+    Pipeline-->>Orchestrator: RunResult
+    Orchestrator-->>CLI: summary
 

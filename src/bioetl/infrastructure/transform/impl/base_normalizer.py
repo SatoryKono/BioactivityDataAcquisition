@@ -118,6 +118,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
                 value,
                 normalizer,
                 field_name,
+                dtype=dtype,
                 allow_container_normalizer=allow_container_normalizer,
                 serialize_with_value_normalizer=serialize_with_value_normalizer,
             )
@@ -135,12 +136,26 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         normalizer: Callable[[Any], Any],
         field_name: str,
         *,
+        dtype: str | None,
         allow_container_normalizer: bool,
         serialize_with_value_normalizer: bool,
     ) -> Any:
-        if isinstance(value, (list, tuple, dict)) and allow_container_normalizer:
+        container_value = value
+        if dtype == "array" and not isinstance(value, (list, tuple)):
+            try:
+                container_value = normalize_array(
+                    value, item_normalizer=lambda item: item
+                )
+            except ValueError as exc:
+                raise ValueError(
+                    f"Ошибка нормализации списка в поле '{field_name}': {exc}"
+                ) from exc
+            if not container_value:
+                return self._empty_value
+
+        if isinstance(container_value, (list, tuple, dict)) and allow_container_normalizer:
             handled, direct_result = self._apply_container_normalizer(
-                value,
+                container_value,
                 normalizer,
                 field_name,
                 serialize_with_value_normalizer=serialize_with_value_normalizer,
@@ -148,18 +163,18 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
             if handled:
                 return direct_result
 
-        if isinstance(value, (list, tuple)):
+        if isinstance(container_value, (list, tuple)):
             return self._process_list(
-                value,
+                container_value,
                 normalizer,
                 field_name,
                 serialize_with_value_normalizer=serialize_with_value_normalizer,
             )
 
-        if isinstance(value, dict):
-            return self._process_dict(value, normalizer, field_name)
+        if isinstance(container_value, dict):
+            return self._process_dict(container_value, normalizer, field_name)
 
-        normalized = self._apply_normalizer(value, normalizer, field_name)
+        normalized = self._apply_normalizer(container_value, normalizer, field_name)
         if isinstance(normalized, (list, tuple, dict)):
             return self._serialize_container_result(
                 normalized,
@@ -188,7 +203,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
     ) -> Any:
         try:
             normalized_list = normalize_array(
-                list(value),
+                value,
                 item_normalizer=lambda item: self._normalize_container_item(
                     item, normalizer
                 ),

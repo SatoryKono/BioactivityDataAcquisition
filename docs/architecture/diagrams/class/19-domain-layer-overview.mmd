@@ -1,0 +1,66 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class ExtractionServiceABC {
+        +extract_all(entity, config) -> Iterable[dict]
+        +get_release_version() -> str
+    }
+    class TransformerABC {
+        +apply(df) -> DataFrame
+    }
+    class ValidationService {
+        +validate(schema_name, df) -> DataFrame
+        +get_schema_columns(schema_name) -> list[str]
+    }
+    class SchemaRegistry {
+        +register(name, model)
+        +get(name)
+    }
+    class HashService {
+        +hash_row(row) -> str
+        +hash_business_key(row, fields) -> str
+    }
+    class NormalizationServiceABC {
+        +apply_normalize_dataframe(df) -> DataFrame
+    }
+    class ProviderRegistryABC {
+        +resolve(provider, component) -> DefaultFactory
+    }
+    class PipelineHookABC {
+        +on_start(ctx)
+        +on_stage(stage, ctx)
+        +on_error(ctx, exc)
+        +on_finish(ctx)
+    }
+    class OutputWriterABC {
+        +write(dataset, metadata)
+    }
+    class Schemas {
+        <<module>>
+        activity.ActivitySchema
+        assay.AssaySchema
+        target.TargetSchema
+        document.DocumentSchema
+        testitem.TestItemSchema
+    }
+    class Models {
+        <<module>>
+        ChemblRecordModel
+        ActivityModel
+        AssayModel
+        MoleculeModel
+    }
+    class DomainErrors {
+        <<module>>
+        FailFastErrorPolicy
+        PipelineError
+    }
+
+    ExtractionServiceABC --> ProviderRegistryABC : depends on
+    TransformerABC --> NormalizationServiceABC
+    TransformerABC --> ValidationService : uses schema columns
+    ValidationService --> SchemaRegistry
+    HashService --> Schemas
+    OutputWriterABC --> Schemas : fixed column order
+    PipelineHookABC --> DomainErrors : reports
+    ProviderRegistryABC --> Models : typed payloads
+
