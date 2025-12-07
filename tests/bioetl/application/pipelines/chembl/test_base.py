@@ -10,7 +10,7 @@ import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
-from bioetl.domain.transform.contracts import HasherABC, NormalizationConfig
+from bioetl.domain.transform.contracts import HasherABC
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,
 )
