@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, cast
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
-from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManager
+from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
@@ -93,9 +93,10 @@ class PipelineBase(ABC):
         self._transformer = transformer
         self._post_transformer = post_transformer
         if self._post_transformer is None:
+            business_key_fields = self._resolve_business_key_fields()
             self._post_transformer = default_post_transformer(
                 hash_service=self._hash_service,
-                business_key_fields=self._config.hashing.business_key_fields,
+                business_key_fields=business_key_fields,
                 version_provider=self.get_version,
             )
         self._schema_contract = get_pipeline_contract(
@@ -106,7 +107,7 @@ class PipelineBase(ABC):
         )
 
         self._error_policy = error_policy or FailFastErrorPolicyImpl()
-        self._runtime_manager = StageRuntimeManager(
+        self._runtime_manager = StageRuntimeManagerImpl(
             logger=self._logger,
             provider_id=self._provider_id,
             entity_name=self._config.entity_name,
@@ -177,12 +178,15 @@ class PipelineBase(ABC):
                     )
                     return run_result
 
-            meta = (
+            meta_raw = (
                 self._metadata_builder.build_run_metadata(context, write_result)
                 if write_result
                 else self._metadata_builder.build_dry_run_metadata(
                     context, counters["validate_count"]
                 )
+            )
+            meta = self._normalize_meta(
+                meta_raw, context, counters["validate_count"], dry_run
             )
 
             return RunResult(
@@ -215,6 +219,26 @@ class PipelineBase(ABC):
             )
             raise
 
+    def _resolve_business_key_fields(self) -> list[str] | None:
+        """Возвращает бизнес-ключи из конфига с поддержкой legacy-полей."""
+
+        hashing_section = getattr(self._config, "hashing", None)
+        if isinstance(hashing_section, property):
+            hashing_section = (
+                hashing_section.fget(self._config) if hashing_section.fget else None
+            )
+
+        if hashing_section is None or isinstance(hashing_section, property):
+            hashing_section = getattr(
+                getattr(self._config, "quality", None), "hashing", None
+            )
+
+        fields = getattr(hashing_section, "business_key_fields", None)
+        if fields is None:
+            return None
+
+        return list(fields)
+
     def _build_context(self, dry_run: bool) -> RunContext:
         context = RunContext(
             entity_name=self._config.entity_name,
@@ -224,6 +248,27 @@ class PipelineBase(ABC):
         )
         self._enrich_context(context)
         return context
+
+    def _normalize_meta(
+        self, meta: dict[str, Any], context: RunContext, row_count: int, dry_run: bool
+    ) -> dict[str, Any]:
+        """
+        Ensures required metadata fields are present even with minimal builders.
+        """
+        if not isinstance(meta, dict):
+            raise TypeError("Metadata builder must return a dict.")
+
+        normalized_meta = dict(meta)
+        normalized_meta.setdefault("run_id", context.run_id)
+        normalized_meta.setdefault("provider", context.provider)
+        normalized_meta.setdefault("entity", context.entity_name)
+        normalized_meta.setdefault("row_count", row_count)
+        if dry_run:
+            normalized_meta["dry_run"] = True
+        else:
+            normalized_meta.setdefault("dry_run", False)
+
+        return normalized_meta
 
     def _init_stage_counters(self) -> dict[str, int]:
         return {

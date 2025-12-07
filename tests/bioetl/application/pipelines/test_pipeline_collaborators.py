@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
-from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManager
+from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
@@ -20,7 +20,7 @@ def _build_context() -> RunContext:
 @pytest.mark.unit
 def test_stage_runtime_notifies_hooks(mock_logger):
     hook = MagicMock(spec=PipelineHookABC)
-    manager = StageRuntimeManager(
+    manager = StageRuntimeManagerImpl(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
@@ -49,7 +49,7 @@ def test_stage_runtime_notifies_hooks(mock_logger):
 @pytest.mark.unit
 def test_stage_runtime_retry_and_skip(mock_logger):
     policy = ContinueOnErrorPolicyImpl(max_retries=1)
-    manager = StageRuntimeManager(
+    manager = StageRuntimeManagerImpl(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
@@ -72,7 +72,7 @@ def test_stage_runtime_retry_and_skip(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runtime_process_and_failure(mock_logger):
-    manager = StageRuntimeManager(
+    manager = StageRuntimeManagerImpl(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
@@ -132,7 +132,7 @@ def test_stage_runtime_process_and_failure(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runtime_handles_skip_and_counts(mock_logger):
-    manager = StageRuntimeManager(
+    manager = StageRuntimeManagerImpl(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
@@ -173,7 +173,7 @@ def test_stage_runtime_handles_skip_and_counts(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runtime_raises_on_missing_result(mock_logger):
-    manager = StageRuntimeManager(
+    manager = StageRuntimeManagerImpl(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",

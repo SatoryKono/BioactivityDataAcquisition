@@ -37,7 +37,7 @@ class ProviderRegistryLoader {
   -_load_config(path)
 }
 class ProviderRegistryConfig
-class ProviderRegistryEntryModel {
+class ProviderRegistryEntryConfig {
   +id: ProviderId
   +module: str
   +factory: str
@@ -55,9 +55,9 @@ ProviderRegistryError <|-- ProviderAlreadyRegisteredError
 ProviderRegistryLoaderError <|-- ProviderRegistryConfigNotFoundError
 ProviderRegistryLoaderError <|-- ProviderRegistryValidationError
 ProviderRegistryLoader --> ProviderRegistryConfig
-ProviderRegistryConfig --> ProviderRegistryEntryModel
+ProviderRegistryConfig --> ProviderRegistryEntryConfig
 ProviderRegistryLoader --> MutableProviderRegistryABC : load()
-ProviderRegistryEntryModel --> ProviderDefinition : factory()
+ProviderRegistryEntryConfig --> ProviderDefinition : factory()
 
 class ProviderId domainPrimary
 class ProviderDefinition domainPrimary
@@ -74,5 +74,5 @@ class ProviderRegistryConfigNotFoundError domainSecondary
 class ProviderRegistryValidationError domainSecondary
 class ProviderRegistryLoader domainSecondary
 class ProviderRegistryConfig domainSecondary
-class ProviderRegistryEntryModel domainSecondary
+class ProviderRegistryEntryConfig domainSecondary
 

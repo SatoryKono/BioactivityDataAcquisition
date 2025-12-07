@@ -37,3 +37,18 @@ def default_validator_factory() -> ValidatorFactoryABC:
 def default_schema_provider_factory() -> SchemaProviderFactoryABC:
     """Возвращает фабрику провайдера схем по умолчанию."""
     return PanderaSchemaProviderFactory()
+
+
+def default_validator() -> ValidatorABC:
+    """Stub default validator until configured."""
+
+    raise NotImplementedError("ValidatorABC default factory is not configured")
+
+
+__all__ = [
+    "PanderaValidatorFactory",
+    "PanderaSchemaProviderFactory",
+    "default_validator_factory",
+    "default_schema_provider_factory",
+    "default_validator",
+]

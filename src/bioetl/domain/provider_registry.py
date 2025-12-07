@@ -117,3 +117,15 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition
+
+
+def default_provider_registry() -> ProviderRegistryABC:
+    """Return default provider registry implementation."""
+
+    return InMemoryProviderRegistry()
+
+
+def default_mutable_provider_registry() -> MutableProviderRegistryABC:
+    """Return default mutable provider registry implementation."""
+
+    return InMemoryProviderRegistry()

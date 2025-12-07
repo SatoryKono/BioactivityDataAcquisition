@@ -32,10 +32,28 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         self._config = config
         self._empty_value = empty_value
 
+    def _iter_fields(self) -> list[dict[str, Any]]:
+        """Return field configs from provider, supporting legacy shapes."""
+
+        if hasattr(self._config, "get_fields"):
+            return cast(list[dict[str, Any]], self._config.get_fields())
+        if hasattr(self._config, "fields"):
+            return list(cast(list[dict[str, Any]], self._config.fields))
+        raise AttributeError("Normalization config must expose fields")
+
+    def _get_normalization_config(self) -> Any:
+        """Return normalization settings from provider or attribute."""
+
+        if hasattr(self._config, "get_normalization"):
+            return self._config.get_normalization()
+        if hasattr(self._config, "normalization"):
+            return self._config.normalization
+        raise AttributeError("Normalization config must expose normalization")
+
     def ensure_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Cast configured numeric columns to nullable pandas dtypes."""
 
-        for field_cfg in self._config.get_fields():
+        for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
             dtype = field_cfg.get("data_type")
 
@@ -52,7 +70,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         return df
 
     def _resolve_mode(self, field_name: str) -> str:
-        normalization_config = self._config.get_normalization()
+        normalization_config = self._get_normalization_config()
 
         if field_name in normalization_config.case_sensitive_fields:
             return "sensitive"
@@ -269,7 +287,8 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         return normalizer(item)
 
     def _is_id_field(self, field_name: str) -> bool:
-        if field_name in self._config.get_normalization().id_fields:
+        normalization_config = self._get_normalization_config()
+        if field_name in normalization_config.id_fields:
             return True
         if field_name.endswith("_id") or field_name.endswith("_chembl_id"):
             return True

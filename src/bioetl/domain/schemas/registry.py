@@ -61,3 +61,12 @@ class SchemaRegistry(SchemaProviderABC):
 
 # Global registry singleton
 registry = SchemaRegistry()
+
+
+def default_schema_provider() -> SchemaProviderABC:
+    """Return the default schema provider (in-memory registry)."""
+
+    return registry
+
+
+__all__ = ["SchemaRegistry", "registry", "default_schema_provider"]

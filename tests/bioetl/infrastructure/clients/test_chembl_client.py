@@ -19,8 +19,10 @@ from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 @pytest.fixture
 def mock_components():
+    request_builder = MagicMock(spec=ChemblRequestBuilderImpl)
+    request_builder.for_endpoint = MagicMock(return_value=request_builder)
     return {
-        "request_builder": MagicMock(spec=ChemblRequestBuilderImpl),
+        "request_builder": request_builder,
         "response_parser": MagicMock(spec=ChemblResponseParserImpl),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
         "http_middleware": MagicMock(spec=HttpClientMiddleware),

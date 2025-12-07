@@ -53,10 +53,12 @@ SchemaProviderFactoryABC:
     Pandera: bioetl.infrastructure.validation.factories.PanderaSchemaProviderFactory
 
 ValidatorABC:
+  default_factory: bioetl.infrastructure.validation.factories.default_validator
   implementations:
     Pandera: bioetl.infrastructure.validation.impl.pandera_validator.PanderaValidatorImpl
 
 SchemaProviderABC:
+  default_factory: bioetl.domain.schemas.registry.default_schema_provider
   implementations:
     Registry: bioetl.domain.schemas.registry.SchemaRegistry
 
@@ -108,14 +110,17 @@ SourceClientABC:
     ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.http_client.ChemblDataClientHTTPImpl
 
 RequestBuilderABC:
+  default_factory: bioetl.infrastructure.clients.base.factories.default_request_builder
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.request_builder.ChemblRequestBuilderImpl
 
 ResponseParserABC:
+  default_factory: bioetl.infrastructure.clients.base.factories.default_response_parser
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblResponseParserImpl
 
 PaginatorABC:
+  default_factory: bioetl.infrastructure.clients.base.factories.default_paginator
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.paginator.ChemblPaginatorImpl
 
@@ -125,39 +130,48 @@ SecretProviderABC:
     Env: bioetl.infrastructure.clients.base.factories.EnvSecretProvider
 
 SideInputProviderABC:
-  implementations: {}
+  default_factory: bioetl.infrastructure.clients.base.factories.default_side_input_provider
+  implementations:
+    Stub: bioetl.domain.clients.base.contracts.SideInputProviderABC
 
 PipelineContainerABC:
+  default_factory: bioetl.application.pipelines.factories.default_pipeline_container
   implementations:
     Default: bioetl.application.container.PipelineContainer
 
 StageABC:
-  implementations: {}
+  default_factory: bioetl.application.pipelines.factories.default_stage
+  implementations:
+    Stub: bioetl.domain.pipelines.contracts.StageABC
 
 PipelineHookABC:
+  default_factory: bioetl.application.pipelines.factories.default_pipeline_hook
   implementations:
     Logging: bioetl.application.pipelines.hooks_impl.LoggingPipelineHookImpl
     Metrics: bioetl.application.pipelines.hooks_impl.MetricsPipelineHookImpl
 
 ErrorPolicyABC:
+  default_factory: bioetl.application.pipelines.factories.default_error_policy
   implementations:
     FailFast: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
     ContinueOnError: bioetl.application.pipelines.hooks_impl.ContinueOnErrorPolicyImpl
 
 CLICommandABC:
-  implementations: {}
+  default_factory: bioetl.interfaces.cli.factories.default_cli_command
+  implementations:
+    Stub: bioetl.interfaces.cli.contracts.CLICommandABC
 
 ProviderRegistryABC:
+  default_factory: bioetl.domain.provider_registry.default_provider_registry
   implementations:
     InMemory: bioetl.domain.provider_registry.InMemoryProviderRegistry
 
 MutableProviderRegistryABC:
+  default_factory: bioetl.domain.provider_registry.default_mutable_provider_registry
   implementations:
     InMemory: bioetl.domain.provider_registry.InMemoryProviderRegistry
 
 TracerABC:
-  implementations: {}
-
-SchemaProviderABC:
+  default_factory: bioetl.domain.clients.base.logging.factories.default_tracer
   implementations:
-    Default: bioetl.domain.schemas.registry.SchemaRegistry
+    Stub: bioetl.domain.clients.base.logging.contracts.TracerABC

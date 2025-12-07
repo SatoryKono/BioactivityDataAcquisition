@@ -5,11 +5,13 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any, Callable
 
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.container import build_pipeline_dependencies
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.observability import PipelineMetricsPortABC
+from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.record_source import FileRecordSourceFactoryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.config.loader import (
@@ -96,9 +98,9 @@ def _create_validator_factory() -> ValidatorFactoryABC:
 def build_default_container(
     config: PipelineConfig,
     *,
-    provider_registry=None,
-    provider_registry_provider=None,
-):
+    provider_registry: ProviderRegistryABC | None = None,
+    provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+) -> PipelineContainerABC:
     """Construct application container with infrastructure defaults."""
 
     logger = default_logging_port()
