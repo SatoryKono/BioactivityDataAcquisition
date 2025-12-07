@@ -1,16 +1,21 @@
 import requests
 
+from bioetl.infrastructure.logging.factories import default_logger
+
 
 def main():
-    # Check connectivity to document endpoint which worked before
+    logger = default_logger().apply_bind(
+        pipeline="document_chembl", entity="document", stage="debug_fetch"
+    )
+
     url = "https://www.ebi.ac.uk/chembl/api/data/document.json?limit=1"
-    print(f"Fetching {url}...")
+    logger.info("Fetching document endpoint", url=url)
     try:
         resp = requests.get(url, timeout=10)
-        print(f"Status: {resp.status_code}")
-        print("Success!")
+        resp.raise_for_status()
+        logger.info("Fetch succeeded", status_code=resp.status_code)
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error("Fetch failed", error=str(e))
 
 
 if __name__ == "__main__":
