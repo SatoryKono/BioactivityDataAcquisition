@@ -27,8 +27,7 @@ class BaseWriterImpl(WriterABC):
         self._checksum_fn = checksum_fn
 
     @property
-    def atomic(self) -> bool:
-        """Indicate whether writer performs atomic file replacement."""
+    def is_atomic(self) -> bool:
         return self._atomic
 
     def write(

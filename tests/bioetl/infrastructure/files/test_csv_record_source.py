@@ -8,7 +8,7 @@ import pandas as pd
 from pydantic import AnyHttpUrl
 
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputConfig,
@@ -40,7 +40,7 @@ class _StubExtractionService:
         return records
 
 
-class _DummyLogger(LoggingPort):
+class _DummyLogger(LoggingPortABC):
     def info(self, *args, **kwargs):  # pragma: no cover
         return None
 
@@ -67,7 +67,7 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
         input_path=csv_path,
         csv_options=CsvInputConfig(),
         limit=1,
-        logger=cast(LoggingPort, _DummyLogger()),
+        logger=cast(LoggingPortABC, _DummyLogger()),
     )
 
     chunks = list(source.iter_records())
@@ -101,7 +101,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
         source_config=source_config,
         entity="activity",
         filter_key="activity_id__in",
-        logger=cast(LoggingPort, _DummyLogger()),
+        logger=cast(LoggingPortABC, _DummyLogger()),
     )
 
     records = list(source.iter_records())

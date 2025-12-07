@@ -54,5 +54,5 @@ class MetadataWriterImpl(MetadataWriterABC):
         )
         report.to_csv(path, index=False)
 
-    def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
+    def build_checksums(self, paths: list[Path]) -> dict[str, str]:
         return compute_files_sha256(paths)

@@ -23,7 +23,7 @@ class TransformerChainImpl {
 }
 class HashColumnsTransformerImpl
 class IndexColumnTransformerImpl
-class DatabaseVersionTransformer
+class DatabaseVersionTransformerImpl
 class FulldateTransformerImpl
 
 class BaseNormalizationServiceABC
@@ -31,28 +31,28 @@ class BaseNormalizationServiceImpl
 class NormalizationServiceABC
 class ChemblNormalizationServiceImpl
 class NormalizationServiceImpl
-class NormalizationConfigProvider
+class NormalizationConfigProviderProtocol
 
 HasherImpl ..|> HasherABC
 HashService --> HasherABC
 TransformerChainImpl --> TransformerABC : components
 HashColumnsTransformerImpl ..|> TransformerABC
 IndexColumnTransformerImpl ..|> TransformerABC
-DatabaseVersionTransformer ..|> TransformerABC
+DatabaseVersionTransformerImpl ..|> TransformerABC
 FulldateTransformerImpl ..|> TransformerABC
 TransformerChainImpl --> HashColumnsTransformerImpl
 TransformerChainImpl --> IndexColumnTransformerImpl
-TransformerChainImpl --> DatabaseVersionTransformer
+TransformerChainImpl --> DatabaseVersionTransformerImpl
 TransformerChainImpl --> FulldateTransformerImpl
 BaseNormalizationServiceImpl ..|> BaseNormalizationServiceABC
 ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
 NormalizationServiceImpl --|> BaseNormalizationServiceImpl
 ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
 NormalizationServiceImpl ..|> NormalizationServiceABC
-ChemblNormalizationServiceImpl --> NormalizationConfigProvider
-NormalizationServiceImpl --> NormalizationConfigProvider
+ChemblNormalizationServiceImpl --> NormalizationConfigProviderProtocol
+NormalizationServiceImpl --> NormalizationConfigProviderProtocol
 HashColumnsTransformerImpl --> HashService
 IndexColumnTransformerImpl --> HashService
-DatabaseVersionTransformer --> HashService
+DatabaseVersionTransformerImpl --> HashService
 FulldateTransformerImpl --> HashService
 

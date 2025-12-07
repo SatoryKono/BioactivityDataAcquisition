@@ -7,7 +7,7 @@ from typing import Any
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.infrastructure.observability import metrics
 
@@ -15,7 +15,7 @@ from bioetl.infrastructure.observability import metrics
 class LoggingPipelineHookImpl(PipelineHookABC):
     """Хук, логирующий события жизненного цикла стадий."""
 
-    def __init__(self, logger: LoggingPort) -> None:
+    def __init__(self, logger: LoggingPortABC) -> None:
         self._logger = logger
 
     def on_stage_start(self, stage: str, context: Any) -> None:
@@ -58,7 +58,7 @@ class FailFastErrorPolicyImpl(ErrorPolicyABC):
         """Always fail the pipeline on first error."""
         return ErrorAction.FAIL
 
-    def should_retry(
+    def can_retry(
         self, error: PipelineStageError
     ) -> bool:  # noqa: ARG002 - интерфейс
         """Fail-fast policy never retries."""
@@ -77,7 +77,7 @@ class ContinueOnErrorPolicyImpl(ErrorPolicyABC):
             return ErrorAction.RETRY
         return ErrorAction.SKIP
 
-    def should_retry(self, error: PipelineStageError) -> bool:
+    def can_retry(self, error: PipelineStageError) -> bool:
         """Determine whether another retry is allowed."""
         return error.attempt <= self._max_retries
 

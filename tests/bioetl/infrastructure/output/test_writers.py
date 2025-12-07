@@ -30,7 +30,7 @@ class DummyWriter(BaseWriterImpl):
     def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
         df.to_csv(path, index=False)
 
-    def supports_format(self, fmt: str) -> bool:  # pragma: no cover - not used
+    def has_format_support(self, fmt: str) -> bool:  # pragma: no cover - not used
         return fmt.lower() == "dummy"
 
 
@@ -97,10 +97,10 @@ def test_csv_writer_column_order_and_fill(csv_writer, tmp_path):
 
 def test_csv_writer_properties(csv_writer):
     """Test CSV writer properties."""
-    assert not csv_writer.atomic
-    assert csv_writer.supports_format("csv")
-    assert csv_writer.supports_format("CSV")
-    assert not csv_writer.supports_format("parquet")
+    assert not csv_writer.is_atomic
+    assert csv_writer.has_format_support("csv")
+    assert csv_writer.has_format_support("CSV")
+    assert not csv_writer.has_format_support("parquet")
 
 
 def test_parquet_writer_column_order_and_fill(parquet_writer, tmp_path):
@@ -111,7 +111,7 @@ def test_parquet_writer_column_order_and_fill(parquet_writer, tmp_path):
 
     result = parquet_writer.write(df, path, column_order=["y", "x", "z"])
 
-    assert parquet_writer.atomic
+    assert parquet_writer.is_atomic
     assert result.row_count == 1
     assert result.checksum is None
     df_read = pd.read_parquet(path)
@@ -214,14 +214,14 @@ def test_build_quality_report_table_respects_min_coverage():
     assert bool(report.loc[0, "coverage_ok"]) is False
 
 
-def test_metadata_writer_generate_checksums(metadata_writer, tmp_path):
+def test_metadata_writer_build_checksums(metadata_writer, tmp_path):
     """Test checksum generation for files."""
     f1 = tmp_path / "f1.txt"
     f1.write_text("content1", encoding="utf-8")
     f2 = tmp_path / "f2.txt"
     f2.write_text("content2", encoding="utf-8")
 
-    checksums = metadata_writer.generate_checksums([f1, f2])
+    checksums = metadata_writer.build_checksums([f1, f2])
 
     assert f1.name in checksums
     assert f2.name in checksums
@@ -229,13 +229,13 @@ def test_metadata_writer_generate_checksums(metadata_writer, tmp_path):
     assert checksums[f2.name] == hashlib.sha256(b"content2").hexdigest()
 
 
-def test_metadata_writer_generate_checksums_missing_file(metadata_writer, tmp_path):
+def test_metadata_writer_build_checksums_missing_file(metadata_writer, tmp_path):
     """Test checksum generation skips missing files."""
     f1 = tmp_path / "exists.txt"
     f1.write_text("content", encoding="utf-8")
     f2 = tmp_path / "missing.txt"
 
-    checksums = metadata_writer.generate_checksums([f1, f2])
+    checksums = metadata_writer.build_checksums([f1, f2])
 
     assert f1.name in checksums
     assert f2.name not in checksums

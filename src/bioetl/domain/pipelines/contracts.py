@@ -46,5 +46,5 @@ class ErrorPolicyABC(ABC):
         """Определяет действие при ошибке."""
 
     @abstractmethod
-    def should_retry(self, error: PipelineStageError) -> bool:
+    def can_retry(self, error: PipelineStageError) -> bool:
         """Проверяет, стоит ли повторять операцию."""

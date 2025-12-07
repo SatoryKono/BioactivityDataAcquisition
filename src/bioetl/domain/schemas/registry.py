@@ -4,12 +4,12 @@ Registry implementation for schema objects (technology-agnostic).
 
 from dataclasses import dataclass
 
-from bioetl.domain.validation import SchemaProviderABC, SchemaType
+from bioetl.domain.validation import SchemaProviderABC, schema_type
 
 
 @dataclass
 class _SchemaEntry:
-    schema: SchemaType
+    schema: schema_type
     column_order: list[str] | None = None
 
 
@@ -24,14 +24,14 @@ class SchemaRegistry(SchemaProviderABC):
     def register(
         self,
         name: str,
-        schema: SchemaType,
+        schema: schema_type,
         *,
         column_order: list[str] | None = None,
     ) -> None:
         """Register a schema by name."""
         self._schemas[name] = _SchemaEntry(schema=schema, column_order=column_order)
 
-    def get_schema(self, name: str) -> SchemaType:
+    def get_schema(self, name: str) -> schema_type:
         """Get schema by name, raises ValueError if not found."""
         if name not in self._schemas:
             raise ValueError(f"Schema for '{name}' not found in registry.")

@@ -24,7 +24,7 @@ class RecordingWriter(WriterABC):
         self.calls: list[dict[str, object]] = []
 
     @property
-    def atomic(self) -> bool:
+    def is_atomic(self) -> bool:
         return False
 
     def write(
@@ -37,7 +37,7 @@ class RecordingWriter(WriterABC):
             path=path, row_count=len(df.index), duration_sec=0.0, checksum="stub"
         )
 
-    def supports_format(self, fmt: str) -> bool:
+    def has_format_support(self, fmt: str) -> bool:
         return True
 
 
@@ -59,7 +59,7 @@ class RecordingMetadataWriter(MetadataWriterABC):
         path.write_text("qc", encoding="utf-8")
         self.qc_calls.append({"df": df, "path": path, "min_coverage": min_coverage})
 
-    def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
+    def build_checksums(self, paths: list[Path]) -> dict[str, str]:
         self.checksum_calls.append(list(paths))
         return {path.name: "chk" for path in paths}
 
