@@ -19,7 +19,7 @@ from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformerImpl,
+    DatabaseVersionTransformer,
     FulldateTransformerImpl,
     HashColumnsTransformerImpl,
     IndexColumnTransformerImpl,
@@ -311,7 +311,7 @@ def test_error_policy_retry_callback_and_skip(
         provider=pipeline._provider_id.value,  # noqa: SLF001
     )
 
-    result_df = pipeline._error_policy_facade.execute(  # noqa: SLF001
+    result_df = pipeline._error_policy_manager.execute(  # noqa: SLF001
         "extract",
         context,
         failing_action,
@@ -322,7 +322,7 @@ def test_error_policy_retry_callback_and_skip(
     assert result_df.empty
     assert attempts["count"] == 2
     on_retry.assert_called_once()
-    last_error = pipeline._error_policy_facade.last_error  # noqa: SLF001
+    last_error = pipeline._error_policy_manager.last_error  # noqa: SLF001
     assert last_error is not None
     assert last_error.attempt == 2
 
@@ -506,7 +506,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, DatabaseVersionTransformerImpl):
+        if isinstance(component, DatabaseVersionTransformer):
             signature.append(
                 (
                     component.__class__.__name__,

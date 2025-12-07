@@ -2,7 +2,7 @@
 
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformerImpl,
+    DatabaseVersionTransformer,
     FulldateTransformerImpl,
     HashColumnsTransformerImpl,
     IndexColumnTransformerImpl,
@@ -15,7 +15,7 @@ __all__ = [
     "TransformerChainImpl",
     "HashColumnsTransformerImpl",
     "IndexColumnTransformerImpl",
-    "DatabaseVersionTransformerImpl",
+    "DatabaseVersionTransformer",
     "FulldateTransformerImpl",
     "HashService",
 ]
