@@ -7,7 +7,7 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
-from bioetl.domain.clients.ports import ChemblExtractionPort
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
@@ -29,7 +29,7 @@ class ChemblExtractorImpl(ExtractorABC):
     def __init__(
         self,
         config: PipelineConfig,
-        extraction_service: ChemblExtractionPort,
+        extraction_service: ChemblExtractionPortABC,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPort,
         record_source: RecordSource | None = None,

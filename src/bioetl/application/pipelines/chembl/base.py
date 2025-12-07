@@ -5,7 +5,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.domain.clients.ports import ChemblExtractionPort
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
@@ -28,7 +28,7 @@ class ChemblPipelineBase(PipelineBase):
         logger: LoggingPort,
         validation_service: ValidationService,
         output_writer: OutputWriterABC,
-        extraction_service: ChemblExtractionPort,
+        extraction_service: ChemblExtractionPortABC,
         hash_service: HashServiceABC,
         record_source: RecordSource | None = None,
         normalization_service: NormalizationServiceABC | None = None,

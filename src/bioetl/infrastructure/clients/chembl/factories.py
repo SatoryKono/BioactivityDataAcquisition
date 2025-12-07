@@ -5,7 +5,7 @@ Factories for ChEMBL clients.
 from typing import Any
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.domain.clients.ports.chembl_extraction_port import ChemblExtractionPort
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
@@ -85,7 +85,7 @@ def default_chembl_extraction_service(
     client_config: ClientConfig | None = None,
     *,
     client: ChemblDataClientABC | None = None,
-) -> ChemblExtractionPort:
+) -> ChemblExtractionPortABC:
     """
     Создает сервис экстракции ChEMBL.
 
