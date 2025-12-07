@@ -190,3 +190,4 @@ def test_provider_registry_fail_fast_on_unknown_provider() -> None:
             ensure_provider_known("chembl", registry_path=bad_path)
         finally:
             bad_path.unlink(missing_ok=True)
+

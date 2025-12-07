@@ -31,6 +31,10 @@ def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
         "bioetl.infrastructure.transform.impl.hash_service_impl.datetime",
         _FrozenDatetime,
     )
+    monkeypatch.setattr(
+        "bioetl.domain.transform.hash_service.datetime",
+        _FrozenDatetime,
+    )
 
 
 @pytest.mark.golden
