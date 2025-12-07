@@ -20,8 +20,7 @@ class WriterABC(ABC):
     """
     Запись данных в файл.
 
-    Default factory: ``bioetl.infrastructure.output.factories.default_writer``.
-    Implementations: ``CsvWriterImpl``, ``ParquetWriterImpl``.
+    Реализация предоставляется инфраструктурой через DI-контейнер.
     """
 
     @property
@@ -48,8 +47,7 @@ class MetadataWriterABC(ABC):
     """
     Запись метаданных и отчетов.
 
-    Default factory: ``bioetl.infrastructure.output.factories.default_metadata_writer``.
-    Implementations: ``MetadataWriterImpl``.
+    Реализация предоставляется инфраструктурой через DI-контейнер.
     """
 
     @abstractmethod
@@ -85,8 +83,7 @@ class OutputWriterABC(ABC):
     """
     Фасад для записи результатов пайплайна (данные + метаданные).
 
-    Default factory: ``bioetl.infrastructure.output.factories.default_output_writer``.
-    Implementations: ``UnifiedOutputWriter``.
+    Реализация предоставляется инфраструктурой через DI-контейнер.
     """
 
     @abstractmethod

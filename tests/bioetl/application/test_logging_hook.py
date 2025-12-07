@@ -1,13 +1,14 @@
 from types import SimpleNamespace
+from types import SimpleNamespace
 from typing import Self
 
 from bioetl.application.pipelines.hooks_impl import LoggingPipelineHookImpl
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
+from bioetl.domain.observability import LoggingPort
 
 
-class _DummyLogger(LoggerAdapterABC):
+class _DummyLogger(LoggingPort):
     def __init__(self) -> None:
         self.calls: list[tuple[str, str, dict[str, object]]] = []
 

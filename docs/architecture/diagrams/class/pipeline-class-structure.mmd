@@ -1,7 +1,12 @@
-%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
-classDiagram-v2
+---
+id: 6a6b7b4a-3cda-4b65-8136-343b1a602b2e
+---
+%% Shared palette
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
 
-    %% Core Abstractions
+classDiagram-v2
     class PipelineBase {
         <<Abstract>>
         +run(output_path, dry_run) RunResult
@@ -18,12 +23,6 @@ classDiagram-v2
         #_post_transformer: TransformerABC
     }
 
-    class ChemblEntityPipeline {
-        +ID_COLUMN: str
-        +API_FILTER_KEY: str
-        +get_database_version()
-    }
-
     class ChemblPipelineBase {
         +_extraction_service
         +_chembl_release
@@ -31,7 +30,30 @@ classDiagram-v2
         +get_chembl_release()
     }
 
-    %% Services
+    class ChemblEntityPipeline {
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +get_database_version()
+    }
+
+    class StageRunner {
+        +process_chunk(raw_chunk, context, ...)
+        +make_stage_result(stage, count, chunks)
+        +handle_stage_failure(stage, results, context)
+    }
+
+    class HooksManager {
+        +notify_stage_start(stage, context)
+        +notify_stage_end(stage, result)
+        +reset()
+    }
+
+    class ErrorPolicyManager {
+        +execute(stage, context, fn, on_retry)
+        +get_last_error_messages()
+        +reset()
+    }
+
     class ValidationService {
         -_schema_provider: SchemaProviderABC
         +get_schema(entity_name)
@@ -56,24 +78,6 @@ classDiagram-v2
         #_apply_column_order(df)
     }
 
-    class StageRunner {
-        +process_chunk(raw_chunk, context, ...)
-        +make_stage_result(stage, count, chunks)
-        +handle_stage_failure(stage, results, context)
-    }
-
-    class HooksManager {
-        +notify_stage_start(stage, context)
-        +notify_stage_end(stage, result)
-        +reset()
-    }
-
-    class ErrorPolicyManager {
-        +execute(stage, context, fn, on_retry)
-        +get_last_error_messages()
-        +reset()
-    }
-
     class ChemblExtractorImpl {
         +extract(**kwargs) Iterable[DataFrame]
     }
@@ -84,8 +88,8 @@ classDiagram-v2
 
     class NormalizationServiceABC
     class RecordSource
-
-    %% Interfaces
+    class ExtractorABC
+    class TransformerABC
     class PipelineHookABC {
         <<Interface>>
         +on_stage_start(stage, context)
@@ -99,9 +103,9 @@ classDiagram-v2
         +should_retry(error) bool
     }
 
-    %% Relations
     PipelineBase <|-- ChemblPipelineBase
     ChemblPipelineBase <|-- ChemblEntityPipeline
+
     PipelineBase o-- ValidationService : uses
     PipelineBase o-- HashService : uses
     PipelineBase o-- UnifiedOutputWriter : uses
@@ -112,14 +116,17 @@ classDiagram-v2
     PipelineBase o-- ErrorPolicyABC : uses
     PipelineBase o-- TransformerABC : uses
     PipelineBase o-- ExtractorABC : uses
-    
-    ValidationService ..> PipelineBase : validates data
-    HashService ..> PipelineBase : enriches data
-    UnifiedOutputWriter ..> PipelineBase : persists data
+
+    ValidationService ..> SchemaProviderABC : delegates
+    HashService ..> HasherABC : delegates
+    UnifiedOutputWriter ..> WriterABC : delegates
+    UnifiedOutputWriter ..> MetadataWriterABC : writes meta
+    UnifiedOutputWriter ..> AtomicFileOperation : atomic IO
     HooksManager ..> PipelineHookABC : notifies
     ErrorPolicyManager ..> ErrorPolicyABC : delegates
     StageRunner ..> HooksManager : coordinates
     StageRunner ..> ErrorPolicyManager
+
     ChemblPipelineBase o-- ChemblExtractorImpl : builds
     ChemblPipelineBase o-- ChemblTransformerImpl : builds
     ChemblPipelineBase o-- NormalizationServiceABC : uses
@@ -138,5 +145,7 @@ classDiagram-v2
     class ChemblTransformerImpl domainSecondary
     class NormalizationServiceABC interface
     class RecordSource interface
+    class ExtractorABC interface
+    class TransformerABC interface
     class PipelineHookABC interface
     class ErrorPolicyABC interface

@@ -37,14 +37,13 @@ class NormalizationConfigProvider(Protocol):
 
 
 class HasherABC(ABC):
-    """
-    Хеширование строк.
-    """
+    """Хеширование строк."""
 
     @property
-    @abstractmethod
     def algorithm(self) -> str:
-        """Используемый алгоритм (sha256)."""
+        """Используемый алгоритм (по умолчанию blake2b_256)."""
+
+        return "blake2b_256"
 
     @abstractmethod
     def hash_row(self, row: pd.Series) -> str:

@@ -13,8 +13,8 @@ class LoggerAdapterABC(ABC):
     """
     Интерфейс структурированного логгера.
 
-    Default factory: ``bioetl.infrastructure.logging.factories.default_logger``.
-    Implementations: ``UnifiedLoggerImpl``.
+    Реализация должна предоставляться инфраструктурой через DI-контейнер
+    по контракту доменного слоя.
     """
 
     @abstractmethod
@@ -42,9 +42,7 @@ class ProgressReporterABC(ABC):
     """
     Интерфейс отчетности о прогрессе.
 
-    Default factory:
-    ``bioetl.infrastructure.logging.factories.default_progress_reporter``.
-    Implementations: ``TqdmProgressReporterImpl``.
+    Реализация выбирается инфраструктурой и связывается с контейнером.
     """
 
     @abstractmethod
@@ -76,7 +74,7 @@ class TracerABC(ABC):
     """
     Интерфейс распределенной трассировки.
 
-    Implementations expected to be provided by infrastructure tracing backends.
+    Реализации предоставляются адаптерами инфраструктуры (трассировка).
     """
 
     @abstractmethod
