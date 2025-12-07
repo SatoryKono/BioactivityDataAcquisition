@@ -138,7 +138,7 @@ classDiagram
     class TransformerChainImpl
     class HashColumnsTransformerImpl
     class IndexColumnTransformerImpl
-    class DatabaseVersionTransformerImpl
+    class DatabaseVersionTransformer
     class FulldateTransformerImpl
 
     HasherABC <|-- HasherImpl
@@ -146,11 +146,11 @@ classDiagram
     TransformerABC <|-- TransformerChainImpl
     TransformerABC <|-- HashColumnsTransformerImpl
     TransformerABC <|-- IndexColumnTransformerImpl
-    TransformerABC <|-- DatabaseVersionTransformerImpl
+    TransformerABC <|-- DatabaseVersionTransformer
     TransformerABC <|-- FulldateTransformerImpl
     HashColumnsTransformerImpl --> HashService
     IndexColumnTransformerImpl --> HashService
-    DatabaseVersionTransformerImpl --> HashService
+    DatabaseVersionTransformer --> HashService
     FulldateTransformerImpl --> HashService
 ```
 
