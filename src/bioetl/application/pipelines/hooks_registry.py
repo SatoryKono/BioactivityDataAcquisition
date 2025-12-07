@@ -5,7 +5,7 @@ from typing import Iterable
 
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.providers import ProviderId
 
 
@@ -15,7 +15,7 @@ class HooksRegistry:
     def __init__(
         self,
         *,
-        logger: LoggingPort,
+        logger: LoggingPortABC,
         provider_id: ProviderId,
         entity_name: str,
         hooks: Iterable[PipelineHookABC] | None = None,
@@ -90,7 +90,7 @@ class HooksRegistry:
 
         return self._stage_starts.get(stage)
 
-    def set_logger(self, logger: LoggingPort) -> None:
+    def set_logger(self, logger: LoggingPortABC) -> None:
         """Обновляет логгер для хуков."""
 
         self._logger = logger

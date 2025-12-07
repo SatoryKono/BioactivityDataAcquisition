@@ -23,34 +23,36 @@ class TransformerChainImpl {
 }
 class HashColumnsTransformerImpl
 class IndexColumnTransformerImpl
-class DatabaseVersionTransformer
+class DatabaseVersionTransformerImpl
 class FulldateTransformerImpl
 
-class BaseNormalizationService
+class BaseNormalizationServiceABC
+class BaseNormalizationServiceImpl
 class NormalizationServiceABC
-class ChemblNormalizationService
+class ChemblNormalizationServiceImpl
 class NormalizationServiceImpl
-class NormalizationConfigProvider
+class NormalizationConfigProviderProtocol
 
 HasherImpl ..|> HasherABC
 HashService --> HasherABC
 TransformerChainImpl --> TransformerABC : components
 HashColumnsTransformerImpl ..|> TransformerABC
 IndexColumnTransformerImpl ..|> TransformerABC
-DatabaseVersionTransformer ..|> TransformerABC
+DatabaseVersionTransformerImpl ..|> TransformerABC
 FulldateTransformerImpl ..|> TransformerABC
 TransformerChainImpl --> HashColumnsTransformerImpl
 TransformerChainImpl --> IndexColumnTransformerImpl
-TransformerChainImpl --> DatabaseVersionTransformer
+TransformerChainImpl --> DatabaseVersionTransformerImpl
 TransformerChainImpl --> FulldateTransformerImpl
-ChemblNormalizationService --|> BaseNormalizationService
-NormalizationServiceImpl --|> BaseNormalizationService
-ChemblNormalizationService ..|> NormalizationServiceABC
+BaseNormalizationServiceImpl ..|> BaseNormalizationServiceABC
+ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
+NormalizationServiceImpl --|> BaseNormalizationServiceImpl
+ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
 NormalizationServiceImpl ..|> NormalizationServiceABC
-ChemblNormalizationService --> NormalizationConfigProvider
-NormalizationServiceImpl --> NormalizationConfigProvider
+ChemblNormalizationServiceImpl --> NormalizationConfigProviderProtocol
+NormalizationServiceImpl --> NormalizationConfigProviderProtocol
 HashColumnsTransformerImpl --> HashService
 IndexColumnTransformerImpl --> HashService
-DatabaseVersionTransformer --> HashService
+DatabaseVersionTransformerImpl --> HashService
 FulldateTransformerImpl --> HashService
 

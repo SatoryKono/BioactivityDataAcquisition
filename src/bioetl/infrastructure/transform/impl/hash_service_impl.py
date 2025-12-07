@@ -76,7 +76,9 @@ class HashServiceImpl(HashServiceABC):
         df["database_version"] = str(database_version)
         return df
 
-    def add_fulldate_column(self, df: pd.DataFrame) -> pd.DataFrame:
+    def add_fulldate_column(
+        self, df: pd.DataFrame, timestamp: datetime | None = None
+    ) -> pd.DataFrame:
         """
         Добавляет колонку 'extracted_at' — метку времени извлечения в ISO-8601 (UTC).
         Значение одинаковое для всех строк.
@@ -84,7 +86,10 @@ class HashServiceImpl(HashServiceABC):
         """
         df = df.copy()
         if self._extracted_at is None:
-            self._extracted_at = self._now_provider().isoformat()
+            ts = timestamp or self._now_provider()
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            self._extracted_at = ts.isoformat()
         df["extracted_at"] = self._extracted_at
         return df
 

@@ -55,7 +55,7 @@
 - `LoggerAdapterABC` — `bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC`
   - Интерфейс структурированного логгера. Default factory: ``bioetl.infrastructure.logging.factories.default_logger``. Implementations: ``UnifiedLoggerImpl``.
 
-- `LoggingPort` — `bioetl.domain.observability.contracts.LoggingPort`
+- `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
   - Порт структурированного логгирования. Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``. Implementations: ``StructuredLoggerImpl``.
 
 - `ProgressReporterABC` — `bioetl.domain.clients.base.logging.contracts.ProgressReporterABC`
@@ -64,7 +64,7 @@
 - `TracerABC` — `bioetl.domain.clients.base.logging.contracts.TracerABC`
   - Интерфейс распределенной трассировки. Implementations expected to be provided by infrastructure tracing backends.
 
-- `TracingPort` — `bioetl.domain.observability.contracts.TracingPort`
+- `TracingPortABC` — `bioetl.domain.observability.contracts.TracingPortABC`
   - Порт для распределенной трассировки. Default factory: ``bioetl.infrastructure.observability.factories.default_tracing_port``. Implementations: ``TracingAdapterImpl``.
 
 - `HasherABC` — `bioetl.domain.transform.contracts.HasherABC`
@@ -77,7 +77,7 @@
   - Базовый контракт сервисов нормализации. Default factory: ``bioetl.infrastructure.transform.factories.default_base_normalization_service``. Implementations: ``BaseNormalizationServiceImpl``.
 
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
-  - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации. Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``NormalizationServiceImpl``, ``ChemblNormalizationService``.
+  - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации. Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``NormalizationServiceImpl``, ``ChemblNormalizationServiceImpl``.
 
 - `ValidatorABC` — `bioetl.domain.validation.contracts.ValidatorABC`
   - Валидация данных. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorImpl`` (`bioetl.infrastructure.validation.impl.pandera_validator`).

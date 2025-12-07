@@ -7,10 +7,10 @@ from typing import Any, Self
 import structlog
 from structlog.stdlib import BoundLogger
 
-from bioetl.domain.observability import LoggingPort, TracingPort
+from bioetl.domain.observability import LoggingPortABC, TracingPortABC
 
 
-class StructuredLoggerImpl(LoggingPort):
+class StructuredLoggerImpl(LoggingPortABC):
     """Structured logger adapter built on top of structlog."""
 
     def __init__(self, logger: BoundLogger | None = None) -> None:
@@ -32,7 +32,7 @@ class StructuredLoggerImpl(LoggingPort):
         return self.__class__(self._logger.bind(**ctx))
 
 
-class TracingAdapterImpl(TracingPort):
+class TracingAdapterImpl(TracingPortABC):
     """No-op tracing adapter placeholder for distributed tracing backends."""
 
     def start_span(self, name: str) -> dict[str, str]:

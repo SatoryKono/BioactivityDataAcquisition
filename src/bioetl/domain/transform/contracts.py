@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Callable, Protocol
 
 import pandas as pd
@@ -18,7 +19,7 @@ class NormalizationConfig:
     fields: list[dict[str, Any]] = field(default_factory=list)
 
 
-class NormalizationConfigProvider(Protocol):
+class NormalizationConfigProviderProtocol(Protocol):
     """
     Protocol for objects that can provide normalization configuration.
 
@@ -169,7 +170,9 @@ class HashServiceABC(ABC):
         """Добавляет колонку database_version."""
 
     @abstractmethod
-    def add_fulldate_column(self, df: pd.DataFrame) -> pd.DataFrame:
+    def add_fulldate_column(
+        self, df: pd.DataFrame, timestamp: datetime | None = None
+    ) -> pd.DataFrame:
         """Добавляет колонку extracted_at (UTC ISO-8601) для детерминизма."""
 
     @abstractmethod
@@ -180,7 +183,7 @@ class HashServiceABC(ABC):
 __all__ = [
     "BaseNormalizationServiceABC",
     "NormalizationConfig",
-    "NormalizationConfigProvider",
+    "NormalizationConfigProviderProtocol",
     "HasherABC",
     "NormalizationServiceABC",
     "HashServiceABC",

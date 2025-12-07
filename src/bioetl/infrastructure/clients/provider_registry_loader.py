@@ -9,7 +9,7 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     MutableProviderRegistryABC,
@@ -43,7 +43,7 @@ class ProviderRegistryValidationError(ProviderRegistryLoaderError):
         self.path = path
 
 
-class ProviderRegistryEntry(BaseModel):
+class ProviderRegistryEntryModel(BaseModel):
     """Single provider entry from registry config."""
 
     model_config = ConfigDict(extra="forbid")
@@ -60,7 +60,7 @@ class ProviderRegistryConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    providers: list[ProviderRegistryEntry]
+    providers: list[ProviderRegistryEntryModel]
 
 
 class ProviderLoaderImpl(ProviderRegistryLoaderABC):
@@ -70,7 +70,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         self,
         config_path: str | Path | None = None,
         *,
-        logger: LoggingPort | None = None,
+        logger: LoggingPortABC | None = None,
     ) -> None:
         self._config_path = (
             Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
@@ -133,7 +133,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
 
     def _register_entry(
         self,
-        entry: ProviderRegistryEntry,
+        entry: ProviderRegistryEntryModel,
         registry: MutableProviderRegistryABC,
     ) -> ProviderDefinition | None:
         try:
@@ -202,7 +202,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
 def load_provider_registry(
     *,
     config_path: str | Path | None = None,
-    logger: LoggingPort | None = None,
+    logger: LoggingPortABC | None = None,
     registry: MutableProviderRegistryABC | None = None,
 ) -> MutableProviderRegistryABC:
     """Utility to load provider registry and return the populated instance."""
@@ -218,7 +218,7 @@ def load_provider_registry(
 def create_provider_loader(
     *,
     config_path: str | Path | None = None,
-    logger: LoggingPort | None = None,
+    logger: LoggingPortABC | None = None,
 ) -> ProviderRegistryLoaderABC:
     """Factory for ProviderLoaderProtocol implementations."""
 
@@ -231,7 +231,7 @@ ProviderRegistryLoader = ProviderLoaderImpl
 def default_provider_registry_loader(
     *,
     config_path: str | Path | None = None,
-    logger: LoggingPort | None = None,
+    logger: LoggingPortABC | None = None,
 ) -> ProviderRegistryLoaderABC:
     """Default factory for provider registry loader."""
 

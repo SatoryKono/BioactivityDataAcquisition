@@ -70,7 +70,7 @@ class IndexColumnTransformerImpl(TransformerABC):
         return self._hash_service.add_index_column(df)
 
 
-class DatabaseVersionTransformer(TransformerABC):
+class DatabaseVersionTransformerImpl(TransformerABC):
     """Добавляет колонку с версией базы данных."""
 
     def __init__(
@@ -108,6 +108,6 @@ __all__ = [
     "TransformerChainImpl",
     "HashColumnsTransformerImpl",
     "IndexColumnTransformerImpl",
-    "DatabaseVersionTransformer",
+    "DatabaseVersionTransformerImpl",
     "FulldateTransformerImpl",
 ]

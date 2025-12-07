@@ -115,17 +115,25 @@ classDiagram
     class ApiRecordSource
     class RawRecord { <<TypedDict>> ... }
     class NormalizedRecord { <<TypedDict>> ... }
-    class NormalizationConfigProvider { <<protocol>> normalization; fields }
-    class NormalizationService { <<protocol>> normalize(); normalize_batch(); normalize_dataframe(); normalize_series() }
-    class ChemblNormalizationService
+    class NormalizationConfigProviderProtocol { <<protocol>> normalization; fields }
+    class NormalizationServiceABC { <<ABC>> normalize(); normalize_batch(); normalize_dataframe(); normalize_series() }
+    class BaseNormalizationServiceABC { <<ABC>> }
+    class BaseNormalizationServiceImpl
+    class NormalizationServiceImpl
+    class ChemblNormalizationServiceImpl
 
     RecordSource <|.. InMemoryRecordSource
     RecordSource <|.. ApiRecordSource
     ApiRecordSource --> ExtractionServiceABC
-    ChemblNormalizationService ..|> NormalizationService
-    ChemblNormalizationService --> NormalizationConfigProvider
-    ChemblNormalizationService --> RawRecord
-    ChemblNormalizationService --> NormalizedRecord
+    BaseNormalizationServiceImpl ..|> BaseNormalizationServiceABC
+    NormalizationServiceImpl --|> BaseNormalizationServiceImpl
+    ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
+    NormalizationServiceImpl ..|> NormalizationServiceABC
+    ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
+    NormalizationServiceImpl --> NormalizationConfigProviderProtocol
+    ChemblNormalizationServiceImpl --> NormalizationConfigProviderProtocol
+    ChemblNormalizationServiceImpl --> RawRecord
+    ChemblNormalizationServiceImpl --> NormalizedRecord
 ```
 
 ## Transformations and Hashing
@@ -138,7 +146,7 @@ classDiagram
     class TransformerChainImpl
     class HashColumnsTransformerImpl
     class IndexColumnTransformerImpl
-    class DatabaseVersionTransformer
+    class DatabaseVersionTransformerImpl
     class FulldateTransformerImpl
 
     HasherABC <|-- HasherImpl
@@ -146,11 +154,11 @@ classDiagram
     TransformerABC <|-- TransformerChainImpl
     TransformerABC <|-- HashColumnsTransformerImpl
     TransformerABC <|-- IndexColumnTransformerImpl
-    TransformerABC <|-- DatabaseVersionTransformer
+    TransformerABC <|-- DatabaseVersionTransformerImpl
     TransformerABC <|-- FulldateTransformerImpl
     HashColumnsTransformerImpl --> HashService
     IndexColumnTransformerImpl --> HashService
-    DatabaseVersionTransformer --> HashService
+    DatabaseVersionTransformerImpl --> HashService
     FulldateTransformerImpl --> HashService
 ```
 
