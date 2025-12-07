@@ -112,10 +112,10 @@ exceptions:
 
   - path: src/bioetl/domain/schemas/registry.py
     rule_id: CLASS_FORMAT
-    reason: "Private inner class _SchemaEntry"
+    reason: "Private inner class _SchemaEntryModel"
     owner: domain
     expiry: permanent
-  
+
   - path: src/bioetl/domain/schemas/registry.py
     rule_id: CLASS_SUFFIX
     reason: "Private inner class"
