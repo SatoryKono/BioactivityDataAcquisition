@@ -139,7 +139,7 @@ classDiagram
     class HashColumnsTransformer
     class LocalIndexColumnTransformer
     class DatabaseVersionTransformer
-    class FulldateTransformer
+    class FulldateTransformerImpl
 
     HasherABC <|-- HasherImpl
     HashService --> HasherABC
@@ -147,11 +147,11 @@ classDiagram
     TransformerABC <|-- HashColumnsTransformer
     TransformerABC <|-- LocalIndexColumnTransformer
     TransformerABC <|-- DatabaseVersionTransformer
-    TransformerABC <|-- FulldateTransformer
+    TransformerABC <|-- FulldateTransformerImpl
     HashColumnsTransformer --> HashService
     LocalIndexColumnTransformer --> HashService
     DatabaseVersionTransformer --> HashService
-    FulldateTransformer --> HashService
+    FulldateTransformerImpl --> HashService
 ```
 
 ## Validation and Schemas

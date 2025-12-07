@@ -9,7 +9,7 @@
 
 - `ChemblExtractorImpl` — `input_mode=id_only` по умолчанию, использует `IdListRecordSourceImpl` (список ChEMBL ID из CSV) или API/CSV при смене режима.
 - `ChemblTransformerImpl` — приводит к схеме `molecule`, нормализует вложенные объекты (structures, properties, hierarchy) и убирает null в обязательных столбцах.
-- Post-transform: `HashColumnsTransformer`, `LocalIndexColumnTransformer`, `DatabaseVersionTransformer`, `FulldateTransformer`.
+- Post-transform: `HashColumnsTransformer`, `LocalIndexColumnTransformer`, `DatabaseVersionTransformer`, `FulldateTransformerImpl`.
 - `ValidationService` + Pandera-схема `chembl.molecule`.
 - `UnifiedOutputWriter` — стабильная сортировка, атомарная запись `<output>/molecule.csv`, `meta.yaml`, QC-отчёты.
 
