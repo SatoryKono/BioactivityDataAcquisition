@@ -224,6 +224,7 @@ class ActivitySchema(pa.DataFrameModel):
     )
 
     class Config:
+        """Pandera configuration enforcing strict ordered validation."""
         strict = True
         coerce = True
         ordered = True

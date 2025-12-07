@@ -1,30 +1,33 @@
 # Assay Pipeline Configuration
-# Наследует общие параметры из chembl_default profile
 
-extends: chembl_default
-
-entity_name: assay
-endpoint: /assay
+id: assay_chembl
+provider: chembl
+entity: assay
 primary_key: assay_chembl_id
+input_mode: id_only
+input_path: data/input/assay.csv
+output_path: ./data/output/chembl/assay
+batch_size: 20
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30.0
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+  max_url_length: 2000
+  batch_size: 20
+  page_size: 1000
+  api_version: null
+
+csv_options:
+  delimiter: ","
+  header: true
 
 pipeline:
   name: assay_chembl
   version: "1.0.0"
   owner: "Data Acquisition Team"
   description: "Extract assay records from ChEMBL API"
-
-sources:
-  chembl:
-    provider: chembl
-    batch_size: 20
-    base_url: "https://www.ebi.ac.uk/chembl/api/data"
-    max_url_length: 2000
-
-input_mode: id_only
-input_path: data/input/assay.csv
-csv_options:
-  delimiter: ","
-  header: true
 
 fields:
   - name: aidx
@@ -217,4 +220,4 @@ normalization:
   id_fields:
     - assay_type
 
-# pagination наследуется из chembl_default profile
+# pagination задаётся провайдером и batch_size по умолчанию 20

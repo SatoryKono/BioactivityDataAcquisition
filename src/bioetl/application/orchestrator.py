@@ -1,3 +1,5 @@
+"""Pipeline orchestration utilities for BioETL."""
+
 from __future__ import annotations
 
 from concurrent.futures import Future, ProcessPoolExecutor

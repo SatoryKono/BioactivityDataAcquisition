@@ -1,3 +1,5 @@
+"""Response parser for ChEMBL API responses."""
+
 from typing import Any
 
 from bioetl.domain.clients.base.contracts import ResponseParserABC
@@ -9,6 +11,7 @@ class ChemblResponseParserImpl(ResponseParserABC):
     """
 
     def parse(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
+        """Extract main payload list from ChEMBL response."""
         # ChEMBL responses are usually { "activities": [...], "page_meta": ... }
         # We need to find the list key.
         # Heuristic: find the key that holds a list of dicts.
@@ -18,4 +21,5 @@ class ChemblResponseParserImpl(ResponseParserABC):
         return []
 
     def extract_metadata(self, raw_response: dict[str, Any]) -> dict[str, Any]:
+        """Return pagination metadata section from response."""
         return raw_response.get("page_meta", {})

@@ -1,3 +1,5 @@
+"""Domain-level transform contracts and DTOs."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime

@@ -931,6 +931,60 @@ exceptions:
     owner: tests
     expiry: permanent
 
+  - path: tests/bioetl/application/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/application/pipelines/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/domain/validation/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/clients/base/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/clients/chembl/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/bioetl/infrastructure/output/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/golden/pipeline_outputs/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
+  - path: tests/project_rules/init.py
+    rule_id: MODULE_NAME
+    reason: "Legacy init module kept for pytest discovery compatibility"
+    owner: tests
+    expiry: permanent
+
   # Constant Format Exceptions
   - path: src/bioetl/domain/transform/normalizers/base.py
     rule_id: CONST_FORMAT

@@ -19,6 +19,7 @@ class LoggingPipelineHookImpl(PipelineHookABC):
         self._logger = logger
 
     def on_stage_start(self, stage: str, context: Any) -> None:
+        """Log start of a pipeline stage."""
         self._logger.debug(
             "Hook: stage started",
             stage=stage,
@@ -28,6 +29,7 @@ class LoggingPipelineHookImpl(PipelineHookABC):
         )
 
     def on_stage_end(self, stage: str, result: StageResult) -> None:
+        """Log completion of a pipeline stage."""
         self._logger.debug(
             "Hook: stage finished",
             stage=stage,
@@ -37,6 +39,7 @@ class LoggingPipelineHookImpl(PipelineHookABC):
         )
 
     def on_error(self, stage: str, error: PipelineStageError) -> None:
+        """Log pipeline stage error details."""
         self._logger.error(
             "Hook: stage error",
             stage=stage,
@@ -52,11 +55,13 @@ class FailFastErrorPolicyImpl(ErrorPolicyABC):
     """Политика остановки пайплайна при первой ошибке."""
 
     def handle(self, error: PipelineStageError, context: Any) -> ErrorAction:
+        """Always fail the pipeline on first error."""
         return ErrorAction.FAIL
 
     def should_retry(
         self, error: PipelineStageError
     ) -> bool:  # noqa: ARG002 - интерфейс
+        """Fail-fast policy never retries."""
         return False
 
 
@@ -67,11 +72,13 @@ class ContinueOnErrorPolicyImpl(ErrorPolicyABC):
         self._max_retries = max_retries
 
     def handle(self, error: PipelineStageError, context: Any) -> ErrorAction:
+        """Return retry or skip action based on attempts."""
         if self._max_retries > 0 and error.attempt <= self._max_retries:
             return ErrorAction.RETRY
         return ErrorAction.SKIP
 
     def should_retry(self, error: PipelineStageError) -> bool:
+        """Determine whether another retry is allowed."""
         return error.attempt <= self._max_retries
 
 
@@ -95,6 +102,7 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         """Хук старта стадии не требует метрик."""
 
     def on_stage_end(self, stage: str, result: StageResult) -> None:
+        """Record Prometheus metrics for stage completion."""
         outcome = "success" if result.success else "error"
         metrics.STAGE_DURATION_SECONDS.labels(
             pipeline=self._pipeline_id,

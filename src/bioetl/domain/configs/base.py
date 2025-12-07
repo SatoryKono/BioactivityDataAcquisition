@@ -73,6 +73,7 @@ class MetricsConfig(BaseModel):
     @field_validator("port")
     @classmethod
     def validate_port(cls, value: int) -> int:
+        """Ensure metrics port is within valid TCP range."""
         if value <= 0 or value > 65535:
             raise ValueError("metrics.port must be between 1 and 65535")
         return value
@@ -173,6 +174,7 @@ class CsvInputConfig(BaseModel):
     @field_validator("delimiter")
     @classmethod
     def validate_delimiter(cls, value: str) -> str:
+        """Validate that CSV delimiter is a non-empty string."""
         if not value:
             raise ValueError("CSV delimiter must be a non-empty string")
         return value
@@ -192,6 +194,7 @@ class BaseProviderConfig(BaseModel):
     @field_validator("provider")
     @classmethod
     def validate_provider_known(cls, value: str) -> str:
+        """Ensure provider identifier is known to the registry."""
         known = {provider.value for provider in ProviderId}
         if value not in known:
             raise ValueError(f"Unknown provider: {value}")

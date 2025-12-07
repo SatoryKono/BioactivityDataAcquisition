@@ -1,3 +1,5 @@
+"""Pydantic models representing raw ChEMBL payloads before normalization."""
+
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, model_serializer
@@ -40,6 +42,7 @@ class ChemblRecordModel(BaseModel):
 
     @model_serializer(mode="wrap")
     def serialize(self, handler: Any) -> dict[str, Any]:
+        """Flatten nested structures into string-friendly values."""
         data = handler(self)
         return {key: _flatten_value(value) for key, value in data.items()}
 

@@ -45,6 +45,7 @@ class StageRunnerFacade:
         apply_transformers: Callable[[pd.DataFrame, RunContext], pd.DataFrame],
         validate_fn: Callable[[pd.DataFrame], pd.DataFrame],
     ) -> tuple[bool, int, int, bool, int, int]:
+        """Run transform and validate stages for a single chunk."""
         (
             transform_started,
             transform_chunks,
@@ -127,6 +128,7 @@ class StageRunnerFacade:
         errors: list[str] | None = None,
         chunks: int = 0,
     ) -> StageResult:
+        """Build a StageResult with duration and counters."""
         start_time = self._hooks_manager.get_stage_start(stage)
         duration = 0.0
         if start_time:
@@ -150,6 +152,7 @@ class StageRunnerFacade:
         count: int = 0,
         chunks: int = 0,
     ) -> RunResult:
+        """Record failure result, notify hooks, and build RunResult."""
         errors = self._error_policy_facade.get_last_error_messages()
         stage_result = self.make_stage_result(
             stage,

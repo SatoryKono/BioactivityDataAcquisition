@@ -99,6 +99,7 @@ class PipelineContainer(PipelineContainerABC):
 
     @property
     def config(self) -> PipelineConfig:
+        """Return the pipeline configuration."""
         return self._config
 
     def get_logger(self) -> LoggingPort:

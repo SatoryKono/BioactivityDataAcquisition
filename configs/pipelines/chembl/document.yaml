@@ -1,31 +1,33 @@
 # Document Pipeline Configuration
-# Наследует общие параметры из chembl_default profile
 
-extends: chembl_default
-
-entity_name: document
-endpoint: /document
+id: document_chembl
+provider: chembl
+entity: document
 primary_key: document_chembl_id
+input_mode: id_only
+input_path: data/input/document.csv
+output_path: ./data/output/chembl/document
+batch_size: 10
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30.0
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+  max_url_length: 2000
+  batch_size: 10
+  page_size: 1000
+  api_version: null
 
+csv_options:
+  delimiter: ","
+  header: true
 
 pipeline:
   name: document_chembl
   version: "1.0.0"
   owner: "Data Acquisition Team"
   description: "Extract document records from ChEMBL API"
-
-sources:
-  chembl:
-    provider: chembl
-    batch_size: 10
-    base_url: "https://www.ebi.ac.uk/chembl/api/data"
-    max_url_length: 2000
-
-input_mode: id_only
-input_path: data/input/document.csv
-csv_options:
-  delimiter: ","
-  header: true
 
 fields:
   - name: abstract
@@ -151,4 +153,4 @@ fields:
 hashing:
     business_key_fields:
       - document_chembl_id
-# pagination наследуется из chembl_default profile
+# pagination задаётся провайдером и batch_size по умолчанию 10

@@ -1,3 +1,5 @@
+"""Checksum helpers for deterministic file hashing."""
+
 import hashlib
 from pathlib import Path
 

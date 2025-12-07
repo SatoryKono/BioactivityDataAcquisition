@@ -1,3 +1,5 @@
+"""HTTP client middleware adding retry/backoff, timeouts, and metrics."""
+
 from __future__ import annotations
 
 import logging
@@ -80,6 +82,7 @@ class HttpClientMiddleware:
         self._failure_metric_callback = failure_metric_callback
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
+        """Execute HTTP request with retry, timeout, and circuit breaker."""
         return self._execute_with_retries(
             method,
             url,

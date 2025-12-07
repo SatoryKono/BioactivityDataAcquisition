@@ -1,3 +1,5 @@
+"""Observability adapters and default factory exports."""
+
 from bioetl.infrastructure.observability.adapters import (
     StructuredLoggerImpl,
     TracingAdapterImpl,

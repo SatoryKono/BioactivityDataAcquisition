@@ -37,6 +37,7 @@ class CsvRecordSourceImpl(RecordSource):
         self._chunk_size = chunk_size
 
     def iter_records(self) -> Iterable[list[RawRecord]]:
+        """Read CSV dataset and yield records respecting limits and chunking."""
         header = 0 if self._csv_options.header else None
         self._logger.info(f"Extracting records from CSV dataset: {self._input_path}")
         df = pd.read_csv(
@@ -95,6 +96,7 @@ class IdListRecordSourceImpl(RecordSource):
         self._chunk_size = chunk_size
 
     def iter_records(self) -> Iterable[list[RawRecord]]:
+        """Stream records resolved by IDs from CSV via extraction service."""
         header = 0 if self._csv_options.header else None
         usecols: list[Any] = [self._id_column] if self._csv_options.header else [0]
         names: list[str] | None = (

@@ -1,3 +1,5 @@
+"""Contracts for ChEMBL data client interactions."""
+
 from abc import abstractmethod
 from typing import Any
 

@@ -1,3 +1,5 @@
+"""Pagination helper for ChEMBL offset/limit responses."""
+
 from typing import Any
 from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 
@@ -10,6 +12,7 @@ class ChemblPaginatorImpl(PaginatorABC):
     """
 
     def get_items(self, response: dict[str, Any]) -> list[dict[str, Any]]:
+        """Extract list payload from response body."""
         # Use parser logic or duplicate simple logic
         for key, value in response.items():
             if isinstance(value, list):
@@ -17,6 +20,7 @@ class ChemblPaginatorImpl(PaginatorABC):
         return []
 
     def get_next_marker(self, response: dict[str, Any]) -> int | None:
+        """Calculate next offset marker if more pages are available."""
         meta = response.get("page_meta", {})
         next_meta = meta.get("next")
         if next_meta:
@@ -30,6 +34,7 @@ class ChemblPaginatorImpl(PaginatorABC):
         return None
 
     def has_more(self, response: dict[str, Any]) -> bool:
+        """Return True if response indicates another page exists."""
         return self.get_next_marker(response) is not None
 
     def get_next_request(

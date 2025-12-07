@@ -1,34 +1,33 @@
 # Activity Pipeline Configuration
-# Наследует общие параметры из chembl_default profile
 
-extends: chembl_default
-
-entity_name: activity
-endpoint: /activity
+id: activity_chembl
+provider: chembl
+entity: activity
 primary_key: activity_id
+input_mode: id_only
+input_path: data/input/activity.csv
+output_path: ./data/output/chembl/activity
+batch_size: 20
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30.0
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+  max_url_length: 2000
+  batch_size: 20
+  page_size: 1000
+  api_version: null
 
+csv_options:
+  delimiter: ","
+  header: true
 
 pipeline:
   name: activity_chembl
   version: "1.0.0"
   owner: "Data Acquisition Team"
   description: "Extract biological activity records from ChEMBL API"
-
-sources:
-  chembl:
-    provider: chembl
-    batch_size: 20
-    base_url: "https://www.ebi.ac.uk/chembl/api/data"
-    max_url_length: 2000
-    data_validity:
-      enabled: false
-      page_limit: 100
-
-input_mode: id_only
-input_path: data/input/activity.csv
-csv_options:
-  delimiter: ","
-  header: true
 
 fields:
   - name: action_type
@@ -317,4 +316,4 @@ hashing:
 pipeline:
   enable_denormalization: false
   
-# pagination наследуется из chembl_default profile
+# pagination задаётся провайдером и batch_size по умолчанию 20

@@ -1,3 +1,5 @@
+"""Retry policy implementation with exponential backoff and jitter."""
+
 import random
 
 from bioetl.domain.clients.base.contracts import RetryPolicyABC
@@ -24,15 +26,18 @@ class ExponentialBackoffRetryImpl(RetryPolicyABC):
 
     @property
     def max_attempts(self) -> int:
+        """Maximum retry attempts allowed."""
         return self._max_attempts
 
     def should_retry(self, error: Exception, attempt: int) -> bool:
+        """Decide whether another retry should be attempted."""
         if attempt >= self._max_attempts:
             return False
         # В реальной реализации здесь была бы проверка типа ошибки
         return True
 
     def get_delay(self, attempt: int) -> float:
+        """Compute delay before next attempt with optional jitter."""
         delay = self._base_delay * (self._backoff_factor ** (attempt - 1))
         if self._jitter:
             delay *= random.uniform(0.5, 1.5)

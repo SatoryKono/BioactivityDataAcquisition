@@ -28,6 +28,7 @@ class ChemblProviderComponents(
     """Factory set for building ChEMBL provider components."""
 
     def create_client(self, config: ChemblSourceConfig) -> ChemblDataClientABC:
+        """Build configured ChEMBL data client."""
         return create_client(config)
 
     def create_extraction_service(
@@ -36,6 +37,7 @@ class ChemblProviderComponents(
         *,
         client: ChemblDataClientABC | None = None,
     ) -> ChemblExtractionPortABC:
+        """Construct extraction service with optional prebuilt client."""
         return create_extraction_service(config, client=client)
 
     def create_normalization_service(
@@ -45,6 +47,7 @@ class ChemblProviderComponents(
         client: ChemblDataClientABC | None = None,
         pipeline_config: NormalizationConfigProviderProtocol | None = None,
     ) -> NormalizationServiceABC:
+        """Create normalization service using pipeline configuration."""
         _ = client  # signature compatibility; normalization independent from client
         if pipeline_config is None:
             raise ValueError(

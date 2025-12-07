@@ -1,3 +1,5 @@
+"""Factories for infrastructure client helpers (cache, retry, rate limit)."""
+
 import os
 from typing import Any
 
@@ -20,6 +22,7 @@ class EnvSecretProvider(SecretProviderABC):
     """Resolve secrets from environment variables."""
 
     def get_secret(self, name: str) -> str | None:
+        """Fetch secret value from environment variables."""
         return os.getenv(name)
 
 
