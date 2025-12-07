@@ -34,7 +34,7 @@ class LoggerAdapterABC(ABC):
         """Log warning message."""
 
     @abstractmethod
-    def bind(self, **ctx: Any) -> Self:
+    def apply_bind(self, **ctx: Any) -> Self:
         """Возвращает логгер с привязанным контекстом."""
 
 

@@ -109,7 +109,7 @@ def mock_config():
 def mock_logger():
     """Create a mock logger."""
     logger = MagicMock(spec=LoggingPortABC)
-    logger.bind.return_value = logger
+    logger.apply_bind.return_value = logger
     return logger
 
 
