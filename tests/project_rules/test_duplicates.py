@@ -84,8 +84,11 @@ def test_no_duplicate_function_bodies(project_root: Path) -> None:
 # общих стадий и исключает дублирование реализации ETL.
 def test_pipeline_inherits_base(project_root: Path) -> None:
     root = project_root / "src/bioetl/application/pipelines"
+    src_root = project_root / "src"
     for file_path in sorted(root.rglob("*/pipeline.py")):
-        module_name = ".".join(file_path.with_suffix("").parts)
+        module_name = ".".join(
+            file_path.with_suffix("").relative_to(src_root).parts
+        )
         try:
             module = importlib.import_module(module_name)
         except ImportError:
