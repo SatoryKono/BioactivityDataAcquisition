@@ -203,12 +203,12 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runner_raises_on_missing_result(mock_logger):
-    hooks_manager = HooksRegistry(
+    hooks_manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyFacade(
+    manager = ErrorPolicyManager(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
