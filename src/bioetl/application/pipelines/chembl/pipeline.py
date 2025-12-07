@@ -9,7 +9,7 @@ from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -25,7 +25,7 @@ class ChemblEntityPipeline(ChemblPipelineBase):
     def __init__(
         self,
         config: PipelineConfig,
-        logger: LoggingPort,
+        logger: LoggingPortABC,
         validation_service: ValidationService,
         output_writer: OutputWriterABC,
         extraction_service: ExtractionServiceABC,

@@ -6,7 +6,7 @@ Normalization is driven by `NormalizationServiceABC` (`bioetl.domain.transform.c
 
 ## Components
 
-- **Contracts**: `NormalizationServiceABC`, `BaseNormalizationServiceABC`, `NormalizationConfigProvider` (field config access) — declared in `bioetl.domain.transform.contracts`.
+- **Contracts**: `NormalizationServiceABC`, `BaseNormalizationServiceABC`, `NormalizationConfigProviderProtocol` (field config access) — declared in `bioetl.domain.transform.contracts`.
 - **Factories**: `default_normalization_service(config)` (`bioetl.infrastructure.transform.factories`) returning the default implementation.
 - **Shared helpers**: `BaseNormalizationServiceImpl` (`bioetl.infrastructure.transform.impl.base_normalizer`) implementing `BaseNormalizationServiceABC` with deterministic normalization for scalars and containers, numeric coercion, and empty-value handling.
 - **Implementations**:
