@@ -42,7 +42,8 @@ def test_style_tooling_is_configured(pyproject: dict) -> None:
     missing = [name for name in ("black", "isort", "ruff") if name not in tools]
     if missing:
         pytest.fail(
-            f"Missing formatter/linter configuration sections: {', '.join(missing)}"
+            "Missing formatter/linter configuration sections: "
+            + ", ".join(missing)
         )
 
 
@@ -68,7 +69,11 @@ def test_mypy_strict_options_enabled(pyproject: dict) -> None:
 
 def test_abcs_from_registry_have_docstrings() -> None:
     registry_path = (
-        BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
+        BIOETL_ROOT
+        / "infrastructure"
+        / "clients"
+        / "base"
+        / "abc_registry.yaml"
     )
     registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
 
