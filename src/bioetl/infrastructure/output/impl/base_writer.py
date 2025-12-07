@@ -28,6 +28,7 @@ class BaseWriterImpl(WriterABC):
 
     @property
     def is_atomic(self) -> bool:
+        """Indicate whether writer performs atomic file replacement."""
         return self._atomic
 
     def write(
