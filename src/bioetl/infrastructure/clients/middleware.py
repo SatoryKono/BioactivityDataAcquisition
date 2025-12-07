@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
-import logging
 import random
 import time
 from typing import Any, Callable, NamedTuple
@@ -15,7 +14,9 @@ from bioetl.domain.errors import (
     ClientRateLimitError,
     ClientResponseError,
 )
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.observability import metrics
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 try:  # pragma: no cover - optional dependency
     import httpx
@@ -64,6 +65,7 @@ class HttpClientMiddleware:
         circuit_breaker_recovery_time: float = 60.0,
         retry_metric_callback: Callable[[int], None] | None = None,
         failure_metric_callback: Callable[[int], None] | None = None,
+        logger: LoggingPortABC | None = None,
     ) -> None:
         self.provider = provider
         self.base_client = base_client
@@ -74,7 +76,9 @@ class HttpClientMiddleware:
         self.timeout = timeout
         self.circuit_breaker_threshold = circuit_breaker_threshold
         self.circuit_breaker_recovery_time = circuit_breaker_recovery_time
-        self.logger = logging.getLogger(f"bioetl.clients.{provider}")
+        self._logger: LoggingPortABC = (logger or default_logging_port()).apply_bind(
+            provider=provider
+        )
         self._failure_count = 0
         self._circuit_opened_at: float | None = None
         self._last_error_type: type[Exception] | None = None
@@ -105,7 +109,7 @@ class HttpClientMiddleware:
                 provider=self.provider, endpoint=url, message="Max attempts exceeded"
             )
 
-        self._ensure_circuit_allows_request(method, url)
+        self._ensure_circuit_allows_request(method, url, attempt)
         attempt_kwargs = dict(kwargs)
         outcome = self._process_attempt(
             method,
@@ -161,11 +165,12 @@ class HttpClientMiddleware:
             )
         except Exception as exc:  # pragma: no cover - unexpected errors
             elapsed = time.perf_counter() - start
-            self._record_failure(exc)
+            self._record_failure(exc, url=url, attempt=attempt)
             self._log_failure(
                 method,
                 url,
                 elapsed,
+                attempt,
                 attempt - 1,
                 None,
                 exc.__class__.__name__,
@@ -212,6 +217,7 @@ class HttpClientMiddleware:
             method,
             url,
             elapsed,
+            attempt,
             attempt - 1,
             status_code,
             total_retry_delay,
@@ -333,11 +339,12 @@ class HttpClientMiddleware:
             )
             return retry_decision
 
-        self._record_failure(error)
+        self._record_failure(error, url=url, attempt=attempt)
         self._log_failure(
             method,
             url,
             elapsed,
+            attempt,
             attempt - 1,
             status_code,
             error.__class__.__name__,
@@ -389,11 +396,12 @@ class HttpClientMiddleware:
         status_code: int | None = None,
         response: Any | None = None,
     ) -> _RetryDecision:
-        self._record_failure(error)
+        self._record_failure(error, url=url, attempt=attempt)
         self._log_failure(
             method,
             url,
             elapsed,
+            attempt,
             attempt - 1,
             status_code,
             error.__class__.__name__,
@@ -475,7 +483,9 @@ class HttpClientMiddleware:
 
         return min(delay_with_jitter, self.max_delay)
 
-    def _ensure_circuit_allows_request(self, method: str, url: str) -> None:
+    def _ensure_circuit_allows_request(
+        self, method: str, url: str, attempt: int
+    ) -> None:
         if self._circuit_opened_at is None:
             return
 
@@ -485,16 +495,14 @@ class HttpClientMiddleware:
             return
 
         error = self._circuit_breaker_error(url)
-        self.logger.warning(
+        self._logger_with_context(
+            url=url, attempt=attempt, circuit_state="open"
+        ).warning(
             "Circuit breaker blocking request",
-            extra={
-                "provider": self.provider,
-                "method": method.upper(),
-                "url": url,
-                "circuit_state": "open",
-                "elapsed_since_open": elapsed,
-            },
+            method=method.upper(),
+            elapsed_since_open=elapsed,
         )
+        self._observe_http_metrics(method, url, elapsed, None, error=True)
         raise error
 
     @property
@@ -555,7 +563,9 @@ class HttpClientMiddleware:
         response = getattr(exc, "response", None)
         return getattr(response, "status_code", None)
 
-    def _record_failure(self, error: Exception) -> None:
+    def _record_failure(
+        self, error: Exception, *, url: str | None = None, attempt: int | None = None
+    ) -> None:
         self._failure_count += 1
         self._last_error_type = error.__class__
         if (
@@ -563,22 +573,18 @@ class HttpClientMiddleware:
             and self._circuit_opened_at is None
         ):
             self._circuit_opened_at = time.perf_counter()
-            self.logger.warning(
+            self._logger_with_context(
+                url=url, attempt=attempt, circuit_state="open"
+            ).warning(
                 "Circuit breaker opened",
-                extra={
-                    "provider": self.provider,
-                    "failure_count": self._failure_count,
-                    "threshold": self.circuit_breaker_threshold,
-                },
+                failure_count=self._failure_count,
+                threshold=self.circuit_breaker_threshold,
             )
 
     def _reset_circuit(self, log_circuit_closure: bool = False) -> None:
         if log_circuit_closure and self._circuit_opened_at is not None:
-            self.logger.info(
-                "Circuit breaker closed",
-                extra={
-                    "provider": self.provider,
-                },
+            self._logger_with_context(circuit_state="closed").info(
+                "Circuit breaker closed"
             )
         self._failure_count = 0
         self._circuit_opened_at = None
@@ -609,6 +615,22 @@ class HttpClientMiddleware:
             return error.cause.__class__.__name__
         return error.__class__.__name__
 
+    def _logger_with_context(
+        self,
+        *,
+        url: str | None = None,
+        attempt: int | None = None,
+        circuit_state: str | None = None,
+    ) -> LoggingPortABC:
+        context: dict[str, Any] = {}
+        if url is not None:
+            context["endpoint"] = self._normalize_endpoint(url)
+        if attempt is not None:
+            context["attempt"] = attempt
+        if circuit_state is not None:
+            context["circuit_state"] = circuit_state
+        return self._logger.apply_bind(**context)
+
     def _log_retry(
         self,
         method: str,
@@ -618,17 +640,15 @@ class HttpClientMiddleware:
         total_retry_delay: float,
         retry_reason: str,
     ) -> None:
-        self.logger.info(
+        self._logger_with_context(
+            url=url, attempt=attempt, circuit_state=self._circuit_state
+        ).info(
             "Retrying HTTP request",
-            extra={
-                "provider": self.provider,
-                "method": method.upper(),
-                "url": url,
-                "next_attempt": attempt + 1,
-                "delay": delay,
-                "total_retry_delay": total_retry_delay,
-                "retry_reason": retry_reason,
-            },
+            method=method.upper(),
+            next_attempt=attempt + 1,
+            delay=delay,
+            total_retry_delay=total_retry_delay,
+            retry_reason=retry_reason,
         )
 
     def _log_success(
@@ -636,23 +656,22 @@ class HttpClientMiddleware:
         method: str,
         url: str,
         elapsed: float,
+        attempt: int,
         retry_count: int,
         status_code: int | None,
         total_retry_delay: float,
     ) -> None:
-        self.logger.info(
+        self._logger_with_context(
+            url=url, attempt=attempt, circuit_state=self._circuit_state
+        ).info(
             "HTTP request succeeded",
-            extra={
-                "provider": self.provider,
-                "method": method.upper(),
-                "url": url,
-                "status_code": status_code,
-                "elapsed": elapsed,
-                "retry_count": retry_count,
-                "attempts": retry_count + 1,
-                "total_retry_delay": total_retry_delay,
-                "error_type": None,
-            },
+            method=method.upper(),
+            status_code=status_code,
+            elapsed=elapsed,
+            retry_count=retry_count,
+            attempts=retry_count + 1,
+            total_retry_delay=total_retry_delay,
+            error_type=None,
         )
         self._observe_http_metrics(
             method,
@@ -667,21 +686,20 @@ class HttpClientMiddleware:
         method: str,
         url: str,
         elapsed: float,
+        attempt: int,
         retry_count: int,
         status_code: int | None,
         error_type: str,
     ) -> None:
-        self.logger.warning(
+        self._logger_with_context(
+            url=url, attempt=attempt, circuit_state=self._circuit_state
+        ).warning(
             "HTTP request failed",
-            extra={
-                "provider": self.provider,
-                "method": method.upper(),
-                "url": url,
-                "status_code": status_code,
-                "elapsed": elapsed,
-                "retry_count": retry_count,
-                "error_type": error_type,
-            },
+            method=method.upper(),
+            status_code=status_code,
+            elapsed=elapsed,
+            retry_count=retry_count,
+            error_type=error_type,
         )
         self._observe_http_metrics(
             method,
@@ -700,17 +718,15 @@ class HttpClientMiddleware:
         status_code: int | None,
         error_type: str,
     ) -> None:
-        self.logger.error(
+        self._logger_with_context(
+            url=url, attempt=attempts, circuit_state=self._circuit_state
+        ).error(
             "HTTP request failed after retries",
-            extra={
-                "provider": self.provider,
-                "method": method.upper(),
-                "url": url,
-                "status_code": status_code,
-                "attempts": attempts,
-                "total_retry_delay": total_retry_delay,
-                "error_type": error_type,
-            },
+            method=method.upper(),
+            status_code=status_code,
+            attempts=attempts,
+            total_retry_delay=total_retry_delay,
+            error_type=error_type,
         )
 
     def _increment_retry_metric(self) -> None:
@@ -766,3 +782,7 @@ class HttpClientMiddleware:
         if 500 <= status_code < 600:
             return "5xx"
         return "error"
+
+    @property
+    def _circuit_state(self) -> str:
+        return "open" if self._circuit_opened_at is not None else "closed"
