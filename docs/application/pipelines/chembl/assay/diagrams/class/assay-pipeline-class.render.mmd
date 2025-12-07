@@ -1,0 +1,23 @@
+classDiagram
+    class ChemblPipelineBase {
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +run(output_path, dry_run) RunResult
+    }
+
+    class ValidationService {
+        +validate(df, entity_name) DataFrame
+    }
+
+    class HashService {
+        +add_hash_columns(df, keys) DataFrame
+    }
+
+    class UnifiedOutputWriter {
+        +write_result(df, path, context) WriteResult
+    }
+
+    ChemblPipelineBase o-- ValidationService
+    ChemblPipelineBase o-- HashService
+    ChemblPipelineBase o-- UnifiedOutputWriter
+
