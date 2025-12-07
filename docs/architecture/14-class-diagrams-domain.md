@@ -28,7 +28,7 @@ classDiagram
     }
 
     class SchemaRegistry {
-        -_schemas: dict[str, _SchemaEntry]
+        -_schemas: dict[str, _SchemaEntryModel]
         +register(name, schema, column_order)
         +get_schema(name) Type[DataFrameModel]
         +get_schema_columns(name) list[str]
