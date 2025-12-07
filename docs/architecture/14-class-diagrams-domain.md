@@ -64,38 +64,38 @@ classDiagram
         +apply(df, context)* DataFrame
     }
 
-    class TransformerChain {
+    class TransformerChainImpl {
         -_transformers: list[TransformerABC]
         +apply(df, context) DataFrame
     }
 
-    class HashColumnsTransformer {
+    class HashColumnsTransformerImpl {
         -_hash_service: HashService
         -_business_key_fields: list[str]
         +apply(df, context) DataFrame
     }
 
-    class LocalIndexColumnTransformer {
+    class IndexColumnTransformerImpl {
         -_hash_service: HashService
         +apply(df, context) DataFrame
     }
 
-    class DatabaseVersionTransformer {
+    class DatabaseVersionTransformerImpl {
         -_hash_service: HashService
         -_database_version_provider: Callable
         +apply(df, context) DataFrame
     }
 
-    class FulldateTransformer {
+    class FulldateTransformerImpl {
         -_hash_service: HashService
         +apply(df, context) DataFrame
     }
 
-    TransformerABC <|-- TransformerChain
-    TransformerABC <|-- HashColumnsTransformer
-    TransformerABC <|-- LocalIndexColumnTransformer
-    TransformerABC <|-- DatabaseVersionTransformer
-    TransformerABC <|-- FulldateTransformer
+    TransformerABC <|-- TransformerChainImpl
+    TransformerABC <|-- HashColumnsTransformerImpl
+    TransformerABC <|-- IndexColumnTransformerImpl
+    TransformerABC <|-- DatabaseVersionTransformerImpl
+    TransformerABC <|-- FulldateTransformerImpl
 ```
 
 ## 3. Hash Service
