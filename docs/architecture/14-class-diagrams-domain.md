@@ -94,7 +94,7 @@ classDiagram
     TransformerABC <|-- TransformerChainImpl
     TransformerABC <|-- HashColumnsTransformerImpl
     TransformerABC <|-- IndexColumnTransformerImpl
-    TransformerABC <|-- DatabaseVersionTransformer
+    TransformerABC <|-- DatabaseVersionTransformerImpl
     TransformerABC <|-- FulldateTransformerImpl
 ```
 

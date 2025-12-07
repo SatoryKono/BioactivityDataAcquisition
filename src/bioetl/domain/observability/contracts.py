@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Self
 
 
-class LoggingPort(ABC):
+class LoggingPortABC(ABC):
     """
     Port describing structured logging operations.
 
@@ -34,7 +34,7 @@ class LoggingPort(ABC):
         """Return logger instance with bound context."""
 
 
-class TracingPort(ABC):
+class TracingPortABC(ABC):
     """
     Port describing distributed tracing operations.
 
@@ -55,6 +55,6 @@ class TracingPort(ABC):
 
 
 __all__ = [
-    "LoggingPort",
-    "TracingPort",
+    "LoggingPortABC",
+    "TracingPortABC",
 ]

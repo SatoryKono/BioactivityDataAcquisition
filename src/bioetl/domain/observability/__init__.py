@@ -1,6 +1,6 @@
-from bioetl.domain.observability.contracts import LoggingPort, TracingPort
+from bioetl.domain.observability.contracts import LoggingPortABC, TracingPortABC
 
 __all__ = [
-    "LoggingPort",
-    "TracingPort",
+    "LoggingPortABC",
+    "TracingPortABC",
 ]
