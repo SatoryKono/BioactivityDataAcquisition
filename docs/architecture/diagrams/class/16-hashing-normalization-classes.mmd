@@ -22,7 +22,7 @@ class TransformerChain {
   +apply(df, context)
 }
 class HashColumnsTransformer
-class IndexColumnTransformer
+class LocalIndexColumnTransformer
 class DatabaseVersionTransformer
 class FulldateTransformer
 
@@ -36,11 +36,11 @@ HasherImpl ..|> HasherABC
 HashService --> HasherABC
 TransformerChain --> TransformerABC : components
 HashColumnsTransformer ..|> TransformerABC
-IndexColumnTransformer ..|> TransformerABC
+LocalIndexColumnTransformer ..|> TransformerABC
 DatabaseVersionTransformer ..|> TransformerABC
 FulldateTransformer ..|> TransformerABC
 TransformerChain --> HashColumnsTransformer
-TransformerChain --> IndexColumnTransformer
+TransformerChain --> LocalIndexColumnTransformer
 TransformerChain --> DatabaseVersionTransformer
 TransformerChain --> FulldateTransformer
 ChemblNormalizationService --|> BaseNormalizationService
@@ -50,7 +50,7 @@ NormalizationServiceImpl ..|> NormalizationServiceABC
 ChemblNormalizationService --> NormalizationConfigProvider
 NormalizationServiceImpl --> NormalizationConfigProvider
 HashColumnsTransformer --> HashService
-IndexColumnTransformer --> HashService
+LocalIndexColumnTransformer --> HashService
 DatabaseVersionTransformer --> HashService
 FulldateTransformer --> HashService
 

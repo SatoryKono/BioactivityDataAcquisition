@@ -7,7 +7,7 @@ from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
     HashColumnsTransformer,
-    IndexColumnTransformer,
+    LocalIndexColumnTransformer,
     TransformerABC,
     TransformerChain,
 )
@@ -29,7 +29,7 @@ def default_post_transformer(
             HashColumnsTransformer(
                 hash_service=hash_service, business_key_fields=business_key_fields
             ),
-            IndexColumnTransformer(hash_service=hash_service),
+            LocalIndexColumnTransformer(hash_service=hash_service),
             DatabaseVersionTransformer(
                 hash_service=hash_service,
                 database_version_provider=provider,

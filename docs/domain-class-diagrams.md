@@ -137,7 +137,7 @@ classDiagram
     class TransformerABC { <<ABC>> +apply(df, context) }
     class TransformerChain
     class HashColumnsTransformer
-    class IndexColumnTransformer
+    class LocalIndexColumnTransformer
     class DatabaseVersionTransformer
     class FulldateTransformer
 
@@ -145,11 +145,11 @@ classDiagram
     HashService --> HasherABC
     TransformerABC <|-- TransformerChain
     TransformerABC <|-- HashColumnsTransformer
-    TransformerABC <|-- IndexColumnTransformer
+    TransformerABC <|-- LocalIndexColumnTransformer
     TransformerABC <|-- DatabaseVersionTransformer
     TransformerABC <|-- FulldateTransformer
     HashColumnsTransformer --> HashService
-    IndexColumnTransformer --> HashService
+    LocalIndexColumnTransformer --> HashService
     DatabaseVersionTransformer --> HashService
     FulldateTransformer --> HashService
 ```
