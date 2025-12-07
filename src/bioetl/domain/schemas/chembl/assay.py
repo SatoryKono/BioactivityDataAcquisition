@@ -1,3 +1,5 @@
+"""Pandera schemas for normalized ChEMBL assay datasets."""
+
 import pandera as pa
 from pandera.typing import Series
 
@@ -165,6 +167,7 @@ class AssaySchema(pa.DataFrameModel):
     )
 
     class Config:
+        """Pandera config enforcing strict, ordered validation."""
         strict = True
         coerce = True
         ordered = True

@@ -1,31 +1,34 @@
 # Molecule Pipeline Configuration
-# Наследует общие параметры из chembl_default profile
 
-extends: chembl_default
-
-entity_name: molecule
-endpoint: /molecule
+id: molecule_chembl
+provider: chembl
+entity: molecule
 primary_key: molecule_chembl_id
-
-pipeline:
-  name: testitem_chembl
-  version: "0.1.0"
-  owner: bioetl-team
-  description: "ChEMBL Molecules (/molecule) → normalized test items"
-
-sources:
-  chembl:
-    provider: chembl
-    batch_size: 20
-    base_url: "https://www.ebi.ac.uk/chembl/api/data"
-    max_url_length: 2000
-
 input_mode: id_only
 input_path: data/input/testitem.csv
+output_path: ./data/output/chembl/molecule
+batch_size: 20
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30.0
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+  max_url_length: 2000
+  batch_size: 20
+  page_size: 1000
+  api_version: null
+
 csv_options:
   delimiter: ","
   header: true
-  
+
+pipeline:
+  name: molecule_chembl
+  version: "0.1.0"
+  owner: bioetl-team
+  description: "ChEMBL Molecules (/molecule) pipeline"
+
 fields:
   - name: atc_classifications
     data_type: array
@@ -235,4 +238,4 @@ hashing:
   business_key_fields:
     - molecule_chembl_id
 
-# pagination наследуется из chembl_default profile
+# pagination задаётся провайдером и batch_size по умолчанию 20

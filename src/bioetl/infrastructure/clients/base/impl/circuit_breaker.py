@@ -1,3 +1,5 @@
+"""Circuit breaker implementation for client resilience."""
+
 import time
 from enum import Enum
 
@@ -28,6 +30,7 @@ class CircuitBreakerImpl:
         self._last_failure_time = 0.0
 
     def allow_request(self) -> bool:
+        """Return whether a request is permitted based on circuit state."""
         if self._state == CircuitState.CLOSED:
             return True
 
@@ -45,6 +48,7 @@ class CircuitBreakerImpl:
         return True
 
     def record_success(self) -> None:
+        """Reset counters and close circuit after a successful call."""
         if self._state == CircuitState.HALF_OPEN:
             self._state = CircuitState.CLOSED
             self._failures = 0
@@ -52,6 +56,7 @@ class CircuitBreakerImpl:
             self._failures = 0
 
     def record_failure(self) -> None:
+        """Increment failure count and open circuit when threshold reached."""
         self._failures += 1
         self._last_failure_time = time.monotonic()
 

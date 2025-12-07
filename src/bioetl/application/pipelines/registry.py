@@ -1,3 +1,5 @@
+"""Registry of available pipeline implementations."""
+
 from typing import Type
 
 from bioetl.application.pipelines.base import PipelineBase

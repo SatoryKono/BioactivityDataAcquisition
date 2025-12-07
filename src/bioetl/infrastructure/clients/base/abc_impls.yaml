@@ -42,10 +42,23 @@ TracingPort:
   implementations:
     Default: bioetl.infrastructure.observability.adapters.TracingAdapterImpl
 
-ValidatorABC:
+ValidatorFactoryABC:
   default_factory: bioetl.infrastructure.validation.factories.default_validator_factory
   implementations:
+    Pandera: bioetl.infrastructure.validation.factories.PanderaValidatorFactory
+
+SchemaProviderFactoryABC:
+  default_factory: bioetl.infrastructure.validation.factories.default_schema_provider_factory
+  implementations:
+    Pandera: bioetl.infrastructure.validation.factories.PanderaSchemaProviderFactory
+
+ValidatorABC:
+  implementations:
     Pandera: bioetl.infrastructure.validation.impl.pandera_validator.PanderaValidatorImpl
+
+SchemaProviderABC:
+  implementations:
+    Registry: bioetl.domain.schemas.registry.SchemaRegistry
 
 BaseNormalizationServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_base_normalization_service

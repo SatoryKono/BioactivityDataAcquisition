@@ -32,6 +32,7 @@ class InMemoryRecordSource(RecordSource):
         self._chunk_size = chunk_size
 
     def iter_records(self) -> Iterable[list[RawRecord]]:
+        """Yield in-memory records in configured chunk sizes."""
         if self._chunk_size is None or self._chunk_size <= 0:
             yield self._records[:]
             return
@@ -56,6 +57,7 @@ class ApiRecordSource(RecordSource):
         self._chunk_size = chunk_size
 
     def iter_records(self) -> Iterable[list[RawRecord]]:
+        """Iterate over extracted provider batches as normalized records."""
         filters = dict(self._filters)
         for raw_batch in self._extraction_service.iter_extract(
             self._entity, chunk_size=self._chunk_size, **filters

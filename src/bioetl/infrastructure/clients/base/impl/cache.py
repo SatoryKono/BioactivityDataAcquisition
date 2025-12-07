@@ -1,3 +1,5 @@
+"""In-memory and file-based cache implementations with TTL support."""
+
 from __future__ import annotations
 
 import hashlib
@@ -29,6 +31,7 @@ class MemoryCacheImpl(CacheABC[T]):
         self._store: dict[str, tuple[T, float | None]] = {}
 
     def get(self, key: str) -> T | None:
+        """Return cached value if present and not expired."""
         value_with_expiry = self._store.get(key)
         if value_with_expiry is None:
             return None
@@ -41,13 +44,16 @@ class MemoryCacheImpl(CacheABC[T]):
         return value
 
     def set(self, key: str, value: T, ttl: int | None = None) -> None:
+        """Store value with optional TTL."""
         self._store[key] = (value, _get_expiry_timestamp(ttl))
 
     def invalidate(self, key: str) -> None:
+        """Remove entry from cache if present."""
         if key in self._store:
             del self._store[key]
 
     def clear(self) -> None:
+        """Clear entire in-memory cache."""
         self._store.clear()
 
 
@@ -61,6 +67,7 @@ class FileCacheImpl(CacheABC[T]):
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
     def get(self, key: str) -> T | None:
+        """Load cached value from disk if present and valid."""
         cache_file = self._key_to_path(key)
         if not cache_file.exists():
             return None
@@ -80,6 +87,7 @@ class FileCacheImpl(CacheABC[T]):
         return value
 
     def set(self, key: str, value: T, ttl: int | None = None) -> None:
+        """Persist value to disk using atomic write."""
         cache_file = self._key_to_path(key)
         tmp_file = cache_file.with_suffix(cache_file.suffix + ".tmp")
         payload: tuple[T, float | None] = (value, _get_expiry_timestamp(ttl))
@@ -90,11 +98,13 @@ class FileCacheImpl(CacheABC[T]):
         os.replace(tmp_file, cache_file)
 
     def invalidate(self, key: str) -> None:
+        """Delete cached file if it exists."""
         cache_file = self._key_to_path(key)
         if cache_file.exists():
             cache_file.unlink(missing_ok=True)
 
     def clear(self) -> None:
+        """Remove all cache files in directory."""
         for cache_file in self._cache_dir.glob("*.cache"):
             cache_file.unlink(missing_ok=True)
 

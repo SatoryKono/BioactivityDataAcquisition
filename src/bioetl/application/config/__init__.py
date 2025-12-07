@@ -1,3 +1,5 @@
+"""Public application configuration exports."""
+
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.domain.configs import (  # noqa: F401
     BaseProviderConfig,

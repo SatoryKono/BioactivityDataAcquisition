@@ -89,14 +89,17 @@ class _DefaultHasher(HasherABC):
 
     @property
     def algorithm(self) -> str:
+        """Return canonical hash algorithm identifier."""
         return "blake2b_256"
 
     def hash_row(self, row: pd.Series) -> str:
+        """Hash a pandas Series row using canonical serialization."""
         record = row.to_dict()
         serialized = _serialize_canonical(record)
         return _blake2b_hash_hex(serialized.encode("utf-8"))
 
     def hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
+        """Hash selected columns row-wise; returns Series of digests."""
         if not columns:
             return pd.Series([None] * len(df), index=df.index, dtype=object)
 
@@ -125,6 +128,7 @@ class HashService(HashServiceABC):
     def add_hash_columns(
         self, df: pd.DataFrame, business_key_cols: list[str] | None = None
     ) -> pd.DataFrame:
+        """Add deterministic row and business-key hashes."""
         df = df.copy()
 
         if business_key_cols:
@@ -140,6 +144,7 @@ class HashService(HashServiceABC):
         return df
 
     def add_index_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Append sequential index column starting from current state."""
         df = df.copy()
         start_index = self._index_counter
         end_index = start_index + len(df)
@@ -150,6 +155,7 @@ class HashService(HashServiceABC):
     def add_database_version_column(
         self, df: pd.DataFrame, database_version: str
     ) -> pd.DataFrame:
+        """Attach database_version column as string."""
         df = df.copy()
         df["database_version"] = str(database_version)
         return df
@@ -157,6 +163,7 @@ class HashService(HashServiceABC):
     def add_fulldate_column(
         self, df: pd.DataFrame, timestamp: datetime | None = None
     ) -> pd.DataFrame:
+        """Attach extracted_at in UTC ISO-8601, cached per service instance."""
         df = df.copy()
         if self._extracted_at is None:
             ts = timestamp or self._now_provider()
@@ -167,6 +174,7 @@ class HashService(HashServiceABC):
         return df
 
     def reset_state(self) -> None:
+        """Reset internal counters and cached timestamps."""
         self._index_counter = 0
         self._extracted_at = None
 

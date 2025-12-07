@@ -32,6 +32,7 @@ class TransformerChainImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
+        """Последовательно применяет зарегистрированные трансформеры."""
         result = df
         for transformer in self._transformers:
             result = transformer.apply(result, context)
@@ -50,6 +51,7 @@ class HashColumnsTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
+        """Добавляет hash_business_key и hash_row, если DataFrame не пуст."""
         if df.empty:
             return df.assign(hash_business_key=None, hash_row=None)
 
@@ -67,6 +69,7 @@ class IndexColumnTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
+        """Добавляет порядковый индекс строк."""
         return self._hash_service.add_index_column(df)
 
 
@@ -84,6 +87,7 @@ class DatabaseVersionTransformer(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
+        """Добавляет database_version, если значение предоставлено."""
         version = self._database_version_provider()
         if version is None:
             return df
@@ -99,6 +103,7 @@ class FulldateTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
+        """Добавляет extracted_at из контекста (UTC)."""
         timestamp = context.started_at if context else None
         return self._hash_service.add_fulldate_column(df, timestamp=timestamp)
 

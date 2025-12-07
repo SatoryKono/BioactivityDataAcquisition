@@ -1,3 +1,5 @@
+"""Contracts for writing pipeline outputs and metadata."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path

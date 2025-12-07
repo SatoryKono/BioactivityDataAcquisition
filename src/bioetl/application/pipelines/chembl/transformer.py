@@ -35,6 +35,7 @@ class ChemblTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
+        """Apply ChEMBL pipeline transforms to the dataframe."""
         df = self.pre_transform(df)
         df = self.do_transform(df)
         df = self.normalization_service.normalize_dataframe(df)

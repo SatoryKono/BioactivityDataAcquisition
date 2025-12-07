@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Protocol
+from typing import Iterable, Protocol, runtime_checkable
 
 from bioetl.domain.errors import ProviderError
 from bioetl.domain.providers import ProviderDefinition, ProviderId
@@ -39,6 +39,7 @@ class ProviderAlreadyRegisteredError(ProviderRegistryError):
         super().__init__(provider, f"Provider '{provider}' already registered")
 
 
+@runtime_checkable
 class ProviderRegistryABC(Protocol):
     """Port defining read access to provider definitions."""
 
@@ -49,6 +50,7 @@ class ProviderRegistryABC(Protocol):
         """Return all registered provider definitions."""
 
 
+@runtime_checkable
 class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
     """Mutable port for registering provider definitions."""
 
@@ -64,6 +66,7 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
         """Restore registry from supplied definitions."""
 
 
+@runtime_checkable
 class ProviderRegistryLoaderABC(Protocol):
     """Loader contract for provider registry definitions."""
 
@@ -87,25 +90,30 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
         self._providers: dict[ProviderId, ProviderDefinition] = {}
 
     def register_provider(self, definition: ProviderDefinition) -> None:
+        """Register a provider definition, rejecting duplicates."""
         if definition.id in self._providers:
             raise ProviderAlreadyRegisteredError(definition.id.value)
         self._providers[definition.id] = definition
 
     def get_provider(self, provider_id: ProviderId) -> ProviderDefinition:
+        """Return provider definition by id or raise if missing."""
         try:
             return self._providers[provider_id]
         except KeyError as exc:  # pragma: no cover - defensive
             raise ProviderNotRegisteredError(provider_id.value) from exc
 
     def list_providers(self) -> list[ProviderDefinition]:
+        """List all registered provider definitions."""
         return list(self._providers.values())
 
     def reset_provider_registry(self) -> None:
+        """Clear registry content."""
         self._providers.clear()
 
     def restore_provider_registry(
         self, definitions: Iterable[ProviderDefinition]
     ) -> None:
+        """Replace registry content with provided definitions."""
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition

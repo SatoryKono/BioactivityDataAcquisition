@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-SOURCE_ROOT = Path("src")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SOURCE_ROOT = REPO_ROOT / "src"
 DOMAIN_ROOT = SOURCE_ROOT / "bioetl" / "domain"
 APPLICATION_ROOT = SOURCE_ROOT / "bioetl" / "application"
 INFRASTRUCTURE_ROOT = SOURCE_ROOT / "bioetl" / "infrastructure"

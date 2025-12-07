@@ -1,3 +1,5 @@
+"""Validation service orchestrating schema lookup and validators."""
+
 import pandas as pd
 
 from bioetl.domain.validation.contracts import (

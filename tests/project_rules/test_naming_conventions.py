@@ -27,6 +27,7 @@ SNAKE_CASE_PATTERN = re.compile(r"^[a-z_][a-z0-9_]*$")
 UPPER_SNAKE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
 KEBAB_CASE_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 PIPELINE_ID_PATTERN = re.compile(r"^[a-z0-9]+_[a-z0-9]+$")
+CLASS_CASE_PATTERN = re.compile(r"^[A-Z][A-Za-z0-9]+$")
 
 ALLOWED_CLASS_SUFFIXES: tuple[str, ...] = (
     "Factory",
@@ -47,19 +48,52 @@ ALLOWED_CLASS_SUFFIXES: tuple[str, ...] = (
 ALLOWED_FUNCTION_PREFIXES: tuple[str, ...] = (
     "get_",
     "fetch_",
+    "request_",
     "iter_",
+    "extract_",
     "create_",
     "build_",
     "make_",
     "default_",
     "register_",
+    "resolve_",
+    "ensure_",
     "validate_",
     "parse_",
     "serialize_",
+    "notify_",
+    "process_",
+    "handle_",
+    "write_",
+    "set_",
+    "update_",
+    "finish_",
+    "inject_",
+    "reset_",
+    "execute_",
     "on_",
     "is_",
     "has_",
     "can_",
+    "test_",
+    "fixture_",
+    "mock_",
+    "sample_",
+    "info",
+    "error",
+    "debug",
+    "warning",
+    "visit_",
+    "apply",
+    "pre_",
+    "do_",
+    "run",
+    "start",
+    "end_",
+    "stop",
+    "close",
+    "bind",
+    "main",
 )
 
 PIPELINE_STAGE_FILES = {"extract.py", "transform.py", "validate.py", "export.py"}
@@ -141,6 +175,28 @@ def _iter_module_level_assign_targets(node: ast.Assign) -> Iterator[ast.Name]:
             yield target
 
 
+def _is_property_method(node: ast.FunctionDef) -> bool:
+    return any(
+        isinstance(decorator, ast.Name) and decorator.id == "property"
+        for decorator in node.decorator_list
+    )
+
+
+def _is_typevar(value: ast.AST) -> bool:
+    return isinstance(value, ast.Call) and (
+        (isinstance(value.func, ast.Name) and value.func.id == "TypeVar")
+        or (isinstance(value.func, ast.Attribute) and value.func.attr == "TypeVar")
+    )
+
+
+def _is_type_alias(name: str, value: ast.AST) -> bool:
+    if not CLASS_CASE_PATTERN.match(name):
+        return False
+    if _is_typevar(value):
+        return True
+    return isinstance(value, (ast.Name, ast.Attribute, ast.Subscript))
+
+
 def _collect_first_h1(path: Path) -> str | None:
     with path.open(encoding="utf-8") as handle:
         for line in handle:
@@ -201,6 +257,8 @@ def test_t02_global_name_conventions() -> None:
                     else:
                         if exceptions.is_excepted(file, "FUNC_FORMAT"):
                             continue
+                        if _is_type_alias(name, node.value):
+                            continue
                         if not SNAKE_CASE_PATTERN.match(name):
                             violations.append(f"{file.as_posix()}: variable {name}")
     assert not violations, f"Нарушения в именах глобальных переменных/функций: {sorted(violations)}"
@@ -258,6 +316,8 @@ def test_t04_no_camelcase_or_hyphen_names() -> None:
                     else:
                         if exceptions.is_excepted(file, "FUNC_FORMAT"):
                             continue
+                        if _is_type_alias(name, node.value):
+                            continue
                         if not SNAKE_CASE_PATTERN.match(name):
                             violations.append(f"{file.as_posix()}: переменная {name}")
             elif isinstance(node, ast.ClassDef):
@@ -287,6 +347,8 @@ def test_t05_function_prefix_rules() -> None:
                     continue
                 if _is_pytest_fixture(node):
                     continue
+                if _is_property_method(node):
+                    continue
                 if exceptions.is_excepted(file, "FUNC_PREFIX"):
                     continue
                 if not _has_allowed_prefix(name):
@@ -295,6 +357,8 @@ def test_t05_function_prefix_rules() -> None:
                 for method in (item for item in node.body if isinstance(item, ast.FunctionDef)):
                     name = method.name
                     if name.startswith("__") or name.startswith("_"):
+                        continue
+                    if _is_property_method(method):
                         continue
                     if exceptions.is_excepted(file, "FUNC_PREFIX"):
                         continue

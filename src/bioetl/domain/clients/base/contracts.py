@@ -1,3 +1,5 @@
+"""Base contracts for data source clients and helpers."""
+
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 

@@ -64,6 +64,7 @@ class PipelineConfig(BaseModel):
 
     @property
     def entity_name(self) -> str:
+        """Return canonical entity name."""
         return self.entity
 
     def as_normalization_config_provider(self) -> NormalizationConfigProviderProtocol:
@@ -72,6 +73,7 @@ class PipelineConfig(BaseModel):
         return self
 
     def get_source_config(self, provider: str) -> ProviderConfigUnion:
+        """Return provider-specific config ensuring provider matches."""
         if provider != self.provider:
             raise ValueError(
                 (
@@ -84,6 +86,7 @@ class PipelineConfig(BaseModel):
     @field_validator("input_path")
     @classmethod
     def validate_input_path(cls, value: str | None) -> str | None:
+        """Normalize empty input path to None and ensure path string."""
         if value is None or value == "":
             return None
         path = Path(value)
@@ -91,12 +94,14 @@ class PipelineConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_provider_alignment(self) -> PipelineConfig:
+        """Ensure provider_config provider aligns with top-level provider."""
         if self.provider_config.provider != self.provider:
             raise ValueError("provider_config.provider must match top-level provider")
         return self
 
     @model_validator(mode="after")
     def validate_input_mode(self) -> PipelineConfig:
+        """Validate that input_mode is compatible with provided paths and headers."""
         if self.input_mode in {"csv", "id_only"} and not self.input_path:
             raise ValueError(
                 "input_path must be provided when input_mode is 'csv' or 'id_only'"

@@ -1,7 +1,11 @@
+"""Factories for structured logging adapters and progress reporters."""
+
 import structlog
 
-from bioetl.domain.clients.base.logging.contracts import ProgressReporterABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.clients.base.logging.contracts import (
+    LoggerAdapterABC,
+    ProgressReporterABC,
+)
 from bioetl.infrastructure.logging.impl.progress_reporter import (
     TqdmProgressReporterImpl,
 )
@@ -9,7 +13,7 @@ from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
 from bioetl.infrastructure.observability import factories as observability_factories
 
 
-def default_logger() -> LoggingPort:
+def default_logger() -> LoggerAdapterABC:
     """
     Создает и конфигурирует логгер по умолчанию.
     """

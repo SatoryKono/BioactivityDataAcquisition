@@ -58,14 +58,17 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
     # pylint: disable=redefined-builtin
     def fetch_one(self, id: str) -> dict[str, Any]:
+        """Not implemented: ChEMBL requires entity-specific endpoints."""
         # Generic fetch not fully supported by ChEMBL generic endpoint
         # unless we know entity
         raise NotImplementedError("Use specific request methods")
 
     def fetch_many(self, ids: list[str]) -> list[dict[str, Any]]:
+        """Not implemented: use entity-specific request helpers instead."""
         raise NotImplementedError("Use specific request methods")
 
     def iter_pages(self, request: Any) -> Iterator[Any]:
+        """Iterate over paginated responses for a built request."""
         url = str(request)
         paginator = ChemblPaginatorImpl()
 
@@ -84,11 +87,13 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
                 break
 
     def metadata(self) -> dict[str, Any]:
+        """Fetch ChEMBL API status/metadata endpoint."""
         url = self.request_builder.for_endpoint("status").build({})
         data = self._execute_request(url)
         return data
 
     def close(self) -> None:
+        """Close underlying HTTP client if present."""
         if self.client is not None:
             self.client.close()
         elif hasattr(self.http, "base_client") and hasattr(
@@ -97,22 +102,27 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
             self.http.base_client.close()
 
     def request_activity(self, **filters: Any) -> Any:
+        """Request activity endpoint with provided filters."""
         url = self.request_builder.for_endpoint("activity").build(filters)
         return self._execute_request(url)
 
     def request_assay(self, **filters: Any) -> Any:
+        """Request assay endpoint with provided filters."""
         url = self.request_builder.for_endpoint("assay").build(filters)
         return self._execute_request(url)
 
     def request_target(self, **filters: Any) -> Any:
+        """Request target endpoint with provided filters."""
         url = self.request_builder.for_endpoint("target").build(filters)
         return self._execute_request(url)
 
     def request_document(self, **filters: Any) -> Any:
+        """Request document endpoint with provided filters."""
         url = self.request_builder.for_endpoint("document").build(filters)
         return self._execute_request(url)
 
     def request_molecule(self, **filters: Any) -> Any:
+        """Request molecule endpoint with provided filters."""
         url = self.request_builder.for_endpoint("molecule").build(filters)
         return self._execute_request(url)
 

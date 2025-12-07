@@ -1,3 +1,5 @@
+"""Token bucket rate limiter implementation for HTTP clients."""
+
 import time
 from threading import Lock
 
@@ -22,6 +24,7 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
         return self._rate
 
     def acquire(self) -> None:
+        """Block until a token is available, then consume it."""
         with self._lock:
             while True:
                 self._refill()
@@ -32,6 +35,7 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
                 time.sleep(1.0 / self._rate)
 
     def wait_if_needed(self) -> None:
+        """Compatibility method; acquire already enforces waiting."""
         # Simplified check, acquire does the waiting
         pass
 

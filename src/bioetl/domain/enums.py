@@ -1,3 +1,5 @@
+"""Common enumerations used across BioETL domain."""
+
 from enum import Enum
 
 

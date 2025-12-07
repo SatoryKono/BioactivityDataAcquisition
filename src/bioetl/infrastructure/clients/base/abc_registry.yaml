@@ -35,6 +35,8 @@ NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceA
 
 ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
 SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC
+ValidatorFactoryABC: bioetl.domain.validation.contracts.ValidatorFactoryABC
+SchemaProviderFactoryABC: bioetl.domain.validation.contracts.SchemaProviderFactoryABC
 
 WriterABC: bioetl.domain.clients.base.output.contracts.WriterABC
 MetadataWriterABC: bioetl.domain.clients.base.output.contracts.MetadataWriterABC

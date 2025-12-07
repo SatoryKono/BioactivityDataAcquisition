@@ -1,3 +1,5 @@
+"""Output writer contracts re-export."""
+
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,

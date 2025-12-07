@@ -1,3 +1,5 @@
+"""Request builder for constructing ChEMBL API URLs."""
+
 from typing import Any, Optional
 
 from bioetl.domain.clients.base.contracts import RequestBuilderABC
@@ -17,6 +19,7 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         self._params: dict[str, Any] = {}
 
     def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
+        """Select API endpoint (e.g., activity, assay, target)."""
         self._endpoint = endpoint.strip("/")
         return self
 
@@ -48,6 +51,7 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         return url
 
     def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilderImpl":
+        """Attach pagination parameters for subsequent requests."""
         self._params["offset"] = offset
         self._params["limit"] = limit
         return self

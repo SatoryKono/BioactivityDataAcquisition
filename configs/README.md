@@ -5,30 +5,25 @@
 ```
 configs/
 ├── profiles/               # Переиспользуемые профили конфигураций
-│   ├── chembl_default.yaml    # Базовые настройки для всех ChEMBL-пайплайнов
+│   ├── chembl_default.yaml    # Базовые настройки для ChEMBL (опциональные overrides)
 │   ├── development.yaml       # Профиль для локальной разработки
 │   └── production.yaml        # Профиль для production окружения
 │
 └── pipelines/             # Конфигурации конкретных пайплайнов
     └── chembl/
-        ├── activity.yaml      # Activity pipeline (extends chembl_default)
-        ├── assay.yaml         # Assay pipeline (extends chembl_default)
-        ├── target.yaml        # Target pipeline (extends chembl_default)
-        ├── document.yaml      # Document pipeline (extends chembl_default)
-        └── molecule.yaml      # Molecule pipeline (extends chembl_default)
+        ├── activity.yaml      # Activity pipeline
+        ├── assay.yaml         # Assay pipeline
+        ├── target.yaml        # Target pipeline
+        ├── document.yaml      # Document pipeline
+        └── molecule.yaml      # Molecule pipeline
 ```
 
-## Иерархия наследования
+## Профили (опциональные overrides)
 
-```
-chembl_default.yaml (базовые параметры: pagination, client, storage, logging)
-      ↓ extends
-development.yaml / production.yaml (override для окружения)
-      ↓ extends
-activity.yaml / assay.yaml / ... (специфика entity: endpoint, fields)
-```
-
-## Использование профилей
+Профили (`configs/profiles/*.yaml`) содержат общие значения и могут применяться
+инструментами/CLI поверх полноценного PipelineConfig. Сами pipeline YAML
+(`configs/pipelines/chembl/*.yaml`) теперь самодостаточны и не используют ключ
+`extends`.
 
 ### Development (быстрые прогоны)
 
@@ -60,7 +55,7 @@ bioetl run activity_chembl --profile production
 bioetl run activity_chembl
 ```
 
-Автоматически применяется `chembl_default.yaml`.
+Используются значения из pipeline-конфига без наложения профиля.
 
 ## Переопределение параметров
 
@@ -98,11 +93,22 @@ bioetl run activity_chembl
 
 ```yaml
 # configs/pipelines/chembl/new_entity.yaml
-extends: chembl_default
-
-entity_name: new_entity
-endpoint: /new_entity
+id: new_entity_chembl
+provider: chembl
+entity: new_entity
 primary_key: entity_id
+input_mode: id_only
+input_path: data/input/new_entity.csv
+output_path: ./data/output/chembl/new_entity
+batch_size: 20
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30.0
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+  page_size: 1000
+  batch_size: 20
 
 fields:
   - name: entity_id

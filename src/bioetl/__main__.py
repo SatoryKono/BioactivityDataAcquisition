@@ -1,9 +1,11 @@
+"""BioETL command-line entrypoint."""
+
 import sys
 from pathlib import Path
 
 
 def main() -> None:
-    """Entry point for bioetl command."""
+    """Entry point for the `bioetl` CLI."""
     src_dir = Path(__file__).parent.parent
     if str(src_dir) not in sys.path:
         sys.path.insert(0, str(src_dir))
