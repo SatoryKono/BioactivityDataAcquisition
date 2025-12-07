@@ -36,15 +36,11 @@ classDiagram
         +get_database_version() str | None
         -_build_extractor() ExtractorABC
         -_build_transformer() TransformerABC
-    }
-
-    class ChemblEntityPipeline {
         +ID_COLUMN: str
         +API_FILTER_KEY: str
     }
 
     PipelineBase <|-- ChemblPipelineBase
-    ChemblPipelineBase <|-- ChemblEntityPipeline
 ```
 
 ## 2. Pipeline Container
@@ -210,11 +206,11 @@ classDiagram
         <<abstract>>
     }
 
-    class ChemblEntityPipeline {
+    class ChemblPipelineBase {
     }
 
     PipelineRegistry --> PipelineBase : stores
-    PipelineRegistry ..> ChemblEntityPipeline : registers
+    PipelineRegistry ..> ChemblPipelineBase : registers
 ```
 
 ## 7. Extraction Service
@@ -303,12 +299,12 @@ classDiagram
         <<abstract>>
     }
 
-    class ChemblEntityPipeline {
+    class ChemblPipelineBase {
     }
 
     PipelineFactory --> PipelineContainer : uses
     PipelineFactory --> PipelineBase : creates
-    PipelineFactory ..> ChemblEntityPipeline : instantiates
+    PipelineFactory ..> ChemblPipelineBase : instantiates
 ```
 
 ## 10. Pipeline Execution Flow

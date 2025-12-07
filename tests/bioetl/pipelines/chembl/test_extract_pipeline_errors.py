@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
@@ -65,7 +65,7 @@ def test_extract_stage_wraps_client_error(
 
     logger = _LoggerStub(logging.getLogger("pipeline-test"))
 
-    pipeline = ChemblEntityPipeline(
+    pipeline = ChemblPipelineBase(
         config=config,
         logger=logger,
         validation_service=validation_service,

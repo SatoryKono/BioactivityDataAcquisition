@@ -8,9 +8,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.chembl.pipeline import (
-    ChemblEntityPipeline,
-)
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
@@ -46,6 +44,8 @@ def mock_config(source_config):
     config.get_source_config = lambda provider: config.provider_config
     config.normalization = MagicMock()
     config.normalization.rules = {}
+    config.normalization.case_sensitive_fields = []
+    config.normalization.id_fields = []
     config.hashing = MagicMock()
     config.hashing.business_key_fields = ["activity_id"]
     config.primary_key = "activity_id"
@@ -53,6 +53,9 @@ def mock_config(source_config):
     config.input_path = None
     config.csv_options = CsvInputConfig()
     config.model_dump.return_value = {}
+    config.fields = []
+    config.get_fields.side_effect = lambda: config.fields
+    config.get_normalization.side_effect = lambda: config.normalization
     return config
 
 
@@ -83,7 +86,7 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     metadata_builder = MagicMock()
     file_record_source_factory = MagicMock()
 
-    return ChemblEntityPipeline(
+    return ChemblPipelineBase(
         config=mock_config,
         logger=logger,
         validation_service=validation_service,

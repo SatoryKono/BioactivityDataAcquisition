@@ -3,16 +3,16 @@
 from typing import Type
 
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 
 # Registry mapping pipeline names to their implementation classes
 PIPELINE_REGISTRY: dict[str, Type[PipelineBase]] = {
-    "activity_chembl": ChemblEntityPipeline,
-    "assay_chembl": ChemblEntityPipeline,
-    "document_chembl": ChemblEntityPipeline,
-    "target_chembl": ChemblEntityPipeline,
-    "testitem_chembl": ChemblEntityPipeline,
-    "molecule_chembl": ChemblEntityPipeline,  # Alias for testitem
+    "activity_chembl": ChemblPipelineBase,
+    "assay_chembl": ChemblPipelineBase,
+    "document_chembl": ChemblPipelineBase,
+    "target_chembl": ChemblPipelineBase,
+    "testitem_chembl": ChemblPipelineBase,
+    "molecule_chembl": ChemblPipelineBase,  # Alias for testitem
 }
 
 

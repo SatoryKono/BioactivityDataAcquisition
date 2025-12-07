@@ -1,14 +1,8 @@
 classDiagram
-    class ChemblEntityPipeline {
-        <<abstract>>
+    class ChemblPipelineBase {
         +ID_COLUMN: str
         +API_FILTER_KEY: str
         +run(output_path, dry_run) RunResult
-    }
-
-    class DocumentPipeline {
-        +ID_COLUMN: str
-        +API_FILTER_KEY: str
     }
 
     class ValidationService {
@@ -23,8 +17,7 @@ classDiagram
         +write_result(df, path, context) WriteResult
     }
 
-    ChemblEntityPipeline <|-- DocumentPipeline
-    DocumentPipeline o-- ValidationService
-    DocumentPipeline o-- HashService
-    DocumentPipeline o-- UnifiedOutputWriter
+    ChemblPipelineBase o-- ValidationService
+    ChemblPipelineBase o-- HashService
+    ChemblPipelineBase o-- UnifiedOutputWriter
 

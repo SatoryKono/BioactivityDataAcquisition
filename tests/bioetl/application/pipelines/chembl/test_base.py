@@ -46,7 +46,9 @@ def mock_dependencies_fixture():
     config.hashing = MagicMock()
     config.hashing.business_key_fields = []
     config.fields = []
-    config.normalization = NormalizationConfig()
+    config.normalization = MagicMock()
+    config.normalization.case_sensitive_fields = []
+    config.normalization.id_fields = []
     config.get_fields.side_effect = lambda: config.fields
     config.get_normalization.side_effect = lambda: config.normalization
 

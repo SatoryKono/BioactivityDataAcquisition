@@ -17,7 +17,7 @@ id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
 sequenceDiagram
     autonumber
     participant User as CLI/User
-    participant Pipe as Pipeline (ChemblEntityPipeline)
+    participant Pipe as Pipeline (ChemblPipelineBase)
     participant Hooks as Hooks (Logging + Metrics)
     participant Stage as StageRunnerFacade/ErrorPolicy
     participant Extr as Extractor (ChemblExtractorImpl)
