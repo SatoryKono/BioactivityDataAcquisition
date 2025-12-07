@@ -6,6 +6,7 @@ import socket
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, cast
 from unittest.mock import MagicMock
 
@@ -138,6 +139,26 @@ def mock_output_writer():
         checksum=None,
     )
     return writer
+
+
+@pytest.fixture
+def mock_metadata_builder():
+    """Create a mock metadata builder compatible with RunMetadataBuilderProtocol."""
+    return SimpleNamespace(
+        build_run_metadata=lambda context, write_result: {
+            "run_id": getattr(context, "run_id", None),
+            "row_count": getattr(write_result, "row_count", 0),
+            "provider": getattr(context, "provider", None),
+            "entity": getattr(context, "entity_name", None),
+        },
+        build_dry_run_metadata=lambda context, row_count: {
+            "run_id": getattr(context, "run_id", None),
+            "row_count": row_count,
+            "dry_run": True,
+            "provider": getattr(context, "provider", None),
+            "entity": getattr(context, "entity_name", None),
+        },
+    )
 
 
 @pytest.fixture

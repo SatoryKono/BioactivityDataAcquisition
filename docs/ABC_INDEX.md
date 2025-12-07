@@ -85,6 +85,12 @@
 - `SchemaProviderABC` — `bioetl.domain.validation.contracts.SchemaProviderABC`
   - Провайдер схем данных. Default factory: ``bioetl.infrastructure.validation.factories.default_schema_provider_factory``. Implementations: ``SchemaRegistry`` (`bioetl.domain.schemas.registry.SchemaRegistry`).
 
+- `ValidatorFactoryABC` — `bioetl.domain.validation.contracts.ValidatorFactoryABC`
+  - Фабрика валидаторов под конкретную схему. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorFactory``.
+
+- `SchemaProviderFactoryABC` — `bioetl.domain.validation.contracts.SchemaProviderFactoryABC`
+  - Фабрика провайдеров схем. Default factory: ``bioetl.infrastructure.validation.factories.default_schema_provider_factory``. Implementations: ``PanderaSchemaProviderFactory``.
+
 - `WriterABC` — `bioetl.domain.clients.base.output.contracts.WriterABC`
   - Запись данных в файл. Default factory: ``bioetl.infrastructure.output.factories.default_writer``. Implementations: ``CsvWriterImpl``, ``ParquetWriterImpl``.
 

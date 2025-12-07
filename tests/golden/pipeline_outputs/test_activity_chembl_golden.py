@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from .utils import load_expected_records
+from .test_pipeline_outputs_helpers import load_expected_records
 
 expected_activity_records = load_expected_records(
     Path("data/output/activity/activity.csv"), sort_key="activity_id"

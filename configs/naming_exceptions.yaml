@@ -26,6 +26,12 @@ exceptions:
     owner: core
     expiry: permanent
 
+  - path: src/bioetl/application/pipelines/stage_runtime_manager.py
+    rule_id: CLASS_SUFFIX
+    reason: "Runtime manager component uses Manager suffix outside allowed list"
+    owner: core
+    expiry: permanent
+
   - path: src/bioetl/application/pipelines/chembl/base.py
     rule_id: CLASS_SUFFIX
     reason: "Base class for ChEMBL pipelines"
@@ -303,6 +309,12 @@ exceptions:
     owner: core
     expiry: permanent
 
+  - path: src/bioetl/application/pipelines/stage_runtime_manager.py
+    rule_id: FUNC_PREFIX
+    reason: "Runtime manager lifecycle helpers (reset/notify) follow contract naming"
+    owner: core
+    expiry: permanent
+
   - path: src/bioetl/application/services/chembl_extraction.py
     rule_id: FUNC_PREFIX
     reason: "Service methods (request_batch, extract_all)"
@@ -320,6 +332,12 @@ exceptions:
     reason: "Loader methods (load_...)"
     owner: domain
     expiry: 2025-06-01
+
+  - path: src/bioetl/domain/configs/pipeline.py
+    rule_id: FUNC_PREFIX
+    reason: "Backwards-compatible property accessors for nested config sections"
+    owner: domain
+    expiry: permanent
 
   - path: src/bioetl/domain/contracts.py
     rule_id: FUNC_PREFIX

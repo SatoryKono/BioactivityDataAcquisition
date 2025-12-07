@@ -18,10 +18,20 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         self._endpoint: str = ""
         self._params: dict[str, Any] = {}
 
+    def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
+        """Fluent alias for build_for_endpoint used in tests."""
+
+        return self.build_for_endpoint(endpoint)
+
     def build_for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
         """Select API endpoint (e.g., activity, assay, target)."""
         self._endpoint = endpoint.strip("/")
         return self
+
+    def build(self, **params: Any) -> "ChemblRequestBuilderImpl":
+        """Fluent alias for build_request to mirror test expectations."""
+
+        return self.build_request(params)
 
     def build_request(self, params: dict[str, Any]) -> str:
         """

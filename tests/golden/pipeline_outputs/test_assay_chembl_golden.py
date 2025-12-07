@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from .utils import load_expected_records
+from .test_pipeline_outputs_helpers import load_expected_records
 
 expected_assay_records = load_expected_records(
     Path("data/output/assay/assay.csv"), sort_key="assay_chembl_id"

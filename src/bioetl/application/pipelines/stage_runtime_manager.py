@@ -13,7 +13,7 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.providers import ProviderId
 
 
-class StageRuntimeManager:
+class StageRuntimeManagerImpl:
     """Инкапсулирует вызовы хуков, политику ошибок и исполнение стадий."""
 
     def __init__(
@@ -353,3 +353,7 @@ class StageRuntimeManager:
     @staticmethod
     def _calculate_duration(context: RunContext) -> float:
         return (datetime.now(timezone.utc) - context.started_at).total_seconds()
+
+
+# Backwards compatibility for legacy imports
+StageRuntimeManager = StageRuntimeManagerImpl

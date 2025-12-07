@@ -64,7 +64,9 @@ def hash_service():
 @pytest.fixture
 def default_extractor():
     extractor = MagicMock()
-    extractor.extract.return_value = [pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})]
+    extractor.extract.return_value = [
+        pd.DataFrame({"id": [1, 2], "val": ["x", "y"]}),
+    ]
     return extractor
 
 
@@ -74,6 +76,7 @@ def test_pipeline_run_success(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     tmp_path,
     hash_service,
     default_extractor,
@@ -86,6 +89,7 @@ def test_pipeline_run_success(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
 
@@ -112,6 +116,7 @@ def test_pipeline_dry_run(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     tmp_path,
     hash_service,
     default_extractor,
@@ -124,6 +129,7 @@ def test_pipeline_dry_run(
         mock_validation_service,
         mock_output_writer,
         hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
 
@@ -148,6 +154,7 @@ def test_pipeline_hooks(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     hash_service,
     default_extractor,
 ):
@@ -159,6 +166,7 @@ def test_pipeline_hooks(
         mock_validation_service,
         mock_output_writer,
         hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
@@ -182,6 +190,7 @@ def test_pipeline_error_hooks(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     hash_service,
     default_extractor,
 ):
@@ -193,13 +202,16 @@ def test_pipeline_error_hooks(
         mock_validation_service,
         mock_output_writer,
         hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.register_hook(mock_hook)
 
     # Mock extract to fail
-    pipeline._extractor.extract = MagicMock(side_effect=ValueError("Extraction failed"))
+    pipeline._extractor.extract = MagicMock(
+        side_effect=ValueError("Extraction failed"),
+    )
 
     # Act & Assert
     with pytest.raises(PipelineStageError) as exc_info:
@@ -223,6 +235,7 @@ def test_error_policy_skip_stage(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     tmp_path,
     hash_service,
     default_extractor,
@@ -236,6 +249,7 @@ def test_error_policy_skip_stage(
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(),
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
     pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
@@ -252,6 +266,7 @@ def test_error_policy_retry(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     tmp_path,
     hash_service,
     default_extractor,
@@ -265,6 +280,7 @@ def test_error_policy_retry(
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
 
@@ -276,7 +292,9 @@ def test_error_policy_retry(
 
     assert result.success
     assert result.row_count == 1
-    assert pipeline.extract.call_count == 2
+    mock_extract = pipeline._extractor.extract
+    assert isinstance(mock_extract, MagicMock)
+    assert mock_extract.call_count == 2
 
 
 @pytest.mark.unit
@@ -285,6 +303,7 @@ def test_error_policy_retry_callback_and_skip(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     hash_service,
     default_extractor,
 ):
@@ -296,6 +315,7 @@ def test_error_policy_retry_callback_and_skip(
         output_writer=mock_output_writer,
         error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
 
@@ -333,6 +353,7 @@ def test_error_policy_failfast_raises(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     tmp_path,
     hash_service,
     default_extractor,
@@ -345,13 +366,16 @@ def test_error_policy_failfast_raises(
         output_writer=mock_output_writer,
         error_policy=FailFastErrorPolicyImpl(),
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
     pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
 
     with pytest.raises(PipelineStageError):
         pipeline.run(output_path=tmp_path, dry_run=True)
-    assert pipeline.extract.call_count == 1
+    mock_extract = pipeline._extractor.extract
+    assert isinstance(mock_extract, MagicMock)
+    assert mock_extract.call_count == 1
 
 
 @pytest.mark.unit
@@ -376,11 +400,17 @@ def test_hashing_logic(
     assert "hash_business_key" in res.columns
     assert res["hash_business_key"].iloc[0] is not None
 
-    transformer_missing = HashColumnsTransformerImpl(hash_service, ["missing_col"])
+    transformer_missing = HashColumnsTransformerImpl(
+        hash_service,
+        ["missing_col"],
+    )
     res_missing = transformer_missing.apply(df)
     assert res_missing["hash_business_key"].iloc[0] is None
 
-    transformer_empty = HashColumnsTransformerImpl(hash_service, [])
+    transformer_empty = HashColumnsTransformerImpl(
+        hash_service,
+        [],
+    )
     res_empty = transformer_empty.apply(df)
     assert res_empty["hash_business_key"].iloc[0] is None
 
@@ -391,6 +421,7 @@ def test_pipeline_dry_run_metadata_and_stages(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     small_pipeline_df,
     tmp_path,
     hash_service,
@@ -404,6 +435,7 @@ def test_pipeline_dry_run_metadata_and_stages(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         dataset=small_pipeline_df,
         extractor=extractor,
     )
@@ -412,7 +444,7 @@ def test_pipeline_dry_run_metadata_and_stages(
 
     assert result.success
     assert result.output_path is None
-    assert result.errors == []
+    assert not result.errors
     _assert_stages(
         result,
         expected_names=["extract", "transform", "validate"],
@@ -429,10 +461,12 @@ def test_post_transformer_factory_alignment(
     mock_logger,
     mock_validation_service,
     mock_output_writer,
+    mock_metadata_builder,
     hash_service,
     default_extractor,
 ):
-    """Container и PipelineBase собирают идентичную цепочку пост-трансформеров."""
+    """Container и PipelineBase собирают идентичную цепочку
+    пост-трансформеров."""
 
     pipeline = ConcretePipeline(
         config=mock_config,
@@ -440,6 +474,7 @@ def test_post_transformer_factory_alignment(
         validation_service=mock_validation_service,
         output_writer=mock_output_writer,
         hash_service=hash_service,
+        metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
 
@@ -486,43 +521,38 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
     assert isinstance(transformer, TransformerChainImpl)
 
     signature: list[tuple] = []
-    for component in transformer._transformers:  # type: ignore[attr-defined]
+    components = transformer._transformers  # type: ignore[attr-defined]
+    for component in components:
         if isinstance(component, HashColumnsTransformerImpl):
+            hash_service = component._hash_service  # type: ignore[attr-defined]
+            business_key_fields = (
+                component._business_key_fields  # type: ignore[attr-defined]
+            )
             signature.append(
                 (
                     component.__class__.__name__,
-                    component._hash_service,  # type: ignore[attr-defined]
-                    component._business_key_fields,  # type: ignore[attr-defined]
+                    hash_service,
+                    business_key_fields,
                 )
             )
             continue
 
         if isinstance(component, IndexColumnTransformerImpl):
-            signature.append(
-                (
-                    component.__class__.__name__,
-                    component._hash_service,  # type: ignore[attr-defined]
-                )
-            )
+            hash_service = component._hash_service  # type: ignore[attr-defined]
+            signature.append((component.__class__.__name__, hash_service))
             continue
 
         if isinstance(component, DatabaseVersionTransformerImpl):
+            hash_service = component._hash_service  # type: ignore[attr-defined]
+            version = component._database_version_provider()  # type: ignore[attr-defined]
             signature.append(
-                (
-                    component.__class__.__name__,
-                    component._hash_service,  # type: ignore[attr-defined]
-                    component._database_version_provider(),  # type: ignore[attr-defined]
-                )
+                (component.__class__.__name__, hash_service, version)
             )
             continue
 
         if isinstance(component, FulldateTransformerImpl):
-            signature.append(
-                (
-                    component.__class__.__name__,
-                    component._hash_service,  # type: ignore[attr-defined]
-                )
-            )
+            hash_service = component._hash_service  # type: ignore[attr-defined]
+            signature.append((component.__class__.__name__, hash_service))
             continue
 
     return signature

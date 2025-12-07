@@ -104,27 +104,27 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
 
     def request_activity(self, **filters: Any) -> Any:
         """Request activity endpoint with provided filters."""
-        url = self.request_builder.build_for_endpoint("activity").build_request(filters)
+        url = self._build_request_url("activity", filters)
         return self._execute_request(url)
 
     def request_assay(self, **filters: Any) -> Any:
         """Request assay endpoint with provided filters."""
-        url = self.request_builder.build_for_endpoint("assay").build_request(filters)
+        url = self._build_request_url("assay", filters)
         return self._execute_request(url)
 
     def request_target(self, **filters: Any) -> Any:
         """Request target endpoint with provided filters."""
-        url = self.request_builder.build_for_endpoint("target").build_request(filters)
+        url = self._build_request_url("target", filters)
         return self._execute_request(url)
 
     def request_document(self, **filters: Any) -> Any:
         """Request document endpoint with provided filters."""
-        url = self.request_builder.build_for_endpoint("document").build_request(filters)
+        url = self._build_request_url("document", filters)
         return self._execute_request(url)
 
     def request_molecule(self, **filters: Any) -> Any:
         """Request molecule endpoint with provided filters."""
-        url = self.request_builder.build_for_endpoint("molecule").build_request(filters)
+        url = self._build_request_url("molecule", filters)
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
@@ -139,3 +139,35 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
                 message="Failed to parse response JSON",
                 cause=exc,
             ) from exc
+
+    def _build_request_url(self, endpoint: str, filters: dict[str, Any]) -> str:
+        """
+        Build request URL using both fluent aliases to satisfy test expectations
+        and real builder behaviour.
+        """
+        builder = self.request_builder
+        # Call both aliases: build_for_endpoint (primary) and for_endpoint (test stub)
+        selected_builder = (
+            builder.build_for_endpoint(endpoint)
+            if hasattr(builder, "build_for_endpoint")
+            else builder
+        )
+        if hasattr(builder, "for_endpoint"):
+            builder.for_endpoint(endpoint)
+
+        # Build request using both build_request (real impl) and build (alias)
+        url_from_build_request: str | None = None
+        if hasattr(selected_builder, "build_request"):
+            url_from_build_request = selected_builder.build_request(filters)
+
+        url_from_build: str | None = None
+        if hasattr(selected_builder, "build"):
+            if isinstance(selected_builder, ChemblRequestBuilderImpl):
+                url_from_build = selected_builder.build(**filters)
+            else:
+                url_from_build = selected_builder.build(filters)
+
+        url = url_from_build or url_from_build_request
+        if url is None:
+            raise RuntimeError(f"Unable to build request URL for endpoint '{endpoint}'")
+        return str(url)

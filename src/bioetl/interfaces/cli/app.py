@@ -163,18 +163,28 @@ def run(
             loader=config_loader,
         )
         _start_metrics_exporter(config.metrics, dry_run=dry_run)
+        provider_config_path = base_dir / "providers.yaml"
         provider_loader_factory = partial(
-            create_provider_loader, config_path=base_dir / "providers.yaml"
+            create_provider_loader, config_path=provider_config_path
         )
-        feature_flag = config.features.enable_provider_loader_port
-        if feature_flag:
-            provider_loader = provider_loader_factory()
-            provider_registry = None
-        else:
-            provider_loader = None
-            provider_registry = provider_loader_factory().get_registry(
-                registry=InMemoryProviderRegistry()
+        interface_features = getattr(config.features, "interfaces", config.features)
+        feature_flag = getattr(
+            interface_features, "enable_provider_loader_port", False
+        )
+        provider_loader = None
+        provider_registry = None
+        try:
+            if feature_flag:
+                provider_loader = provider_loader_factory()
+            else:
+                provider_registry = provider_loader_factory().get_registry(
+                    registry=InMemoryProviderRegistry()
+                )
+        except FileNotFoundError:
+            console.print(
+                "[yellow]Providers config not found; using empty registry[/yellow]"
             )
+            provider_registry = InMemoryProviderRegistry()
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,

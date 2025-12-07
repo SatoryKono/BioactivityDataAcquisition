@@ -323,121 +323,144 @@ class PipelineConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    @property
-    def entity_name(self) -> str:
+    def get_entity_name(self) -> str:
         """Return canonical entity name."""
 
         return self.entity
 
-    @property
-    def pagination(self) -> PaginationConfig:
+    entity_name = property(get_entity_name)
+
+    def get_pagination(self) -> PaginationConfig:
         """Backwards compatible access to pagination section."""
 
         return self.runtime.pagination
 
-    @pagination.setter
-    def pagination(self, value: PaginationConfig) -> None:
+    def set_pagination(self, value: PaginationConfig) -> None:
+        """Update pagination section in runtime config."""
+
         self.runtime.pagination = value
 
-    @property
-    def client(self) -> ClientConfig:
+    pagination = property(get_pagination, set_pagination)
+
+    def get_client(self) -> ClientConfig:
         """Backwards compatible access to client section."""
 
         return self.runtime.client
 
-    @client.setter
-    def client(self, value: ClientConfig) -> None:
+    def set_client(self, value: ClientConfig) -> None:
+        """Update client section in runtime config."""
+
         self.runtime.client = value
 
-    @property
-    def storage(self) -> StorageConfig:
+    client = property(get_client, set_client)
+
+    def get_storage(self) -> StorageConfig:
         """Backwards compatible access to storage section."""
 
         return self.runtime.storage
 
-    @storage.setter
-    def storage(self, value: StorageConfig) -> None:
+    def set_storage(self, value: StorageConfig) -> None:
+        """Update storage section in runtime config."""
+
         self.runtime.storage = value
 
-    @property
-    def csv_options(self) -> CsvInputConfig:
+    storage = property(get_storage, set_storage)
+
+    def get_csv_options(self) -> CsvInputConfig:
         """Backwards compatible access to csv section."""
 
         return self.runtime.csv
 
-    @csv_options.setter
-    def csv_options(self, value: CsvInputConfig) -> None:
+    def set_csv_options(self, value: CsvInputConfig) -> None:
+        """Update CSV input options in runtime config."""
+
         self.runtime.csv = value
 
-    @property
-    def logging(self) -> LoggingConfig:
+    csv_options = property(get_csv_options, set_csv_options)
+
+    def get_logging(self) -> LoggingConfig:
         """Backwards compatible access to logging section."""
 
         return self.observability.logging
 
-    @logging.setter
-    def logging(self, value: LoggingConfig) -> None:
+    def set_logging(self, value: LoggingConfig) -> None:
+        """Update logging settings in observability config."""
+
         self.observability.logging = value
 
-    @property
-    def metrics(self) -> MetricsConfig:
+    logging = property(get_logging, set_logging)
+
+    def get_metrics(self) -> MetricsConfig:
         """Backwards compatible access to metrics section."""
 
         return self.observability.metrics
 
-    @metrics.setter
-    def metrics(self, value: MetricsConfig) -> None:
+    def set_metrics(self, value: MetricsConfig) -> None:
+        """Update metrics settings in observability config."""
+
         self.observability.metrics = value
 
-    @property
-    def determinism(self) -> DeterminismConfig:
+    metrics = property(get_metrics, set_metrics)
+
+    def get_determinism(self) -> DeterminismConfig:
         """Backwards compatible access to determinism section."""
 
         return self.quality.determinism
 
-    @determinism.setter
-    def determinism(self, value: DeterminismConfig) -> None:
+    def set_determinism(self, value: DeterminismConfig) -> None:
+        """Update determinism settings in quality config."""
+
         self.quality.determinism = value
 
-    @property
-    def qc(self) -> QcConfig:
+    determinism = property(get_determinism, set_determinism)
+
+    def get_qc(self) -> QcConfig:
         """Backwards compatible access to QC section."""
 
         return self.quality.qc
 
-    @qc.setter
-    def qc(self, value: QcConfig) -> None:
+    def set_qc(self, value: QcConfig) -> None:
+        """Update quality control settings in quality config."""
+
         self.quality.qc = value
 
-    @property
-    def hashing(self) -> HashingConfig:
+    qc = property(get_qc, set_qc)
+
+    def get_hashing(self) -> HashingConfig:
         """Backwards compatible access to hashing section."""
 
         return self.quality.hashing
 
-    @hashing.setter
-    def hashing(self, value: HashingConfig) -> None:
+    def set_hashing(self, value: HashingConfig) -> None:
+        """Update hashing settings in quality config."""
+
         self.quality.hashing = value
 
-    @property
-    def normalization(self) -> NormalizationConfig:
+    hashing = property(get_hashing, set_hashing)
+
+    def _get_normalization_section(self) -> NormalizationConfig:
         """Backwards compatible access to normalization section."""
 
         return self.quality.normalization
 
-    @normalization.setter
-    def normalization(self, value: NormalizationConfig) -> None:
+    def set_normalization_section(self, value: NormalizationConfig) -> None:
+        """Update normalization settings in quality config."""
+
         self.quality.normalization = value
 
-    @property
-    def interface_features(self) -> InterfaceFeaturesConfig:
+    normalization = property(_get_normalization_section, set_normalization_section)
+
+    def get_interface_features(self) -> InterfaceFeaturesConfig:
         """Backwards compatible access to interface features."""
 
         return self.features.interfaces
 
-    @interface_features.setter
-    def interface_features(self, value: InterfaceFeaturesConfig) -> None:
+    def set_interface_features(self, value: InterfaceFeaturesConfig) -> None:
+        """Update interface feature flags in features config."""
+
         self.features.interfaces = value
+
+    interface_features = property(get_interface_features, set_interface_features)
 
     def get_normalization(self) -> NormalizationConfig:
         """Return normalization configuration section."""

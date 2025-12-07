@@ -57,8 +57,8 @@ class ProviderNotConfiguredError(ProviderRegistryError):
         )
 
 
-class _ProviderRegistryEntryModel(BaseModel):
-    """Single provider entry from providers.yaml (private model to avoid clashes)."""
+class ProviderRegistryEntryConfig(BaseModel):
+    """Single provider entry from providers.yaml (private config model)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -74,7 +74,7 @@ class ProviderRegistryModel(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    providers: list[_ProviderRegistryEntryModel] = []
+    providers: list[ProviderRegistryEntryConfig] = []
 
 
 def ensure_provider_known(provider: str, *, registry_path: Path | None = None) -> str:

@@ -5,9 +5,13 @@ from typing import Any
 
 from bioetl.domain.clients.base.contracts import (
     CacheABC,
+    PaginatorABC,
     RateLimiterABC,
+    RequestBuilderABC,
+    ResponseParserABC,
     RetryPolicyABC,
     SecretProviderABC,
+    SideInputProviderABC,
 )
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
@@ -15,6 +19,13 @@ from bioetl.infrastructure.clients.base.impl.rate_limiter import (
 )
 from bioetl.infrastructure.clients.base.impl.retry_policy import (
     ExponentialBackoffRetryImpl,
+)
+from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
+from bioetl.infrastructure.clients.chembl.request_builder import (
+    ChemblRequestBuilderImpl,
+)
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblResponseParserImpl,
 )
 
 
@@ -48,3 +59,33 @@ def default_secret_provider() -> SecretProviderABC:
     """Expose the environment-backed secret provider implementation."""
 
     return EnvSecretProvider()
+
+
+def default_request_builder(*, base_url: str | None = None) -> RequestBuilderABC:
+    """
+    Stub default request builder factory.
+
+    Requires explicit base_url; raises if not provided to avoid silent misuse.
+    """
+
+    if not base_url:
+        raise NotImplementedError("default_request_builder requires base_url")
+    return ChemblRequestBuilderImpl(base_url)
+
+
+def default_response_parser() -> ResponseParserABC:
+    """Return the default response parser implementation."""
+
+    return ChemblResponseParserImpl()
+
+
+def default_paginator() -> PaginatorABC:
+    """Return the default paginator implementation."""
+
+    return ChemblPaginatorImpl()
+
+
+def default_side_input_provider() -> SideInputProviderABC:
+    """Stub factory for side input providers until implemented."""
+
+    raise NotImplementedError("SideInputProviderABC has no default implementation yet")

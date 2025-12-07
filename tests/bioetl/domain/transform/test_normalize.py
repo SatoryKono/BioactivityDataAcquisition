@@ -1,8 +1,10 @@
+from typing import Any
 from unittest.mock import patch
 
 import pandas as pd
 import pytest
 
+from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 from bioetl.domain.transform.normalizers.registry import CUSTOM_FIELD_NORMALIZERS
 from bioetl.infrastructure.transform.factories import default_normalization_service
 from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
@@ -24,17 +26,30 @@ def test_normalize_scalar():
 
 class MockNormalizationConfig:
     def __init__(
-        self, case_sensitive_fields=None, id_fields=None, custom_normalizers=None
+        self,
+        case_sensitive_fields: list[str] | None = None,
+        id_fields: list[str] | None = None,
+        custom_normalizers: dict[str, Any] | None = None,
     ):
         self.case_sensitive_fields = case_sensitive_fields or []
         self.id_fields = id_fields or []
         self.custom_normalizers = custom_normalizers or {}
 
 
-class MockConfig:
-    def __init__(self, fields, normalization=None):
-        self.fields = fields
+class MockConfig(NormalizationConfigProviderProtocol):
+    def __init__(
+        self,
+        fields: list[dict[str, Any]],
+        normalization: MockNormalizationConfig | None = None,
+    ):
+        self._fields = fields
         self.normalization = normalization or MockNormalizationConfig()
+
+    def get_fields(self) -> list[dict[str, Any]]:
+        return self._fields
+
+    def get_normalization(self) -> MockNormalizationConfig:
+        return self.normalization
 
 
 def test_normalization_service_full():

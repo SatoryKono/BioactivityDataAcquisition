@@ -43,7 +43,7 @@ class ProviderRegistryValidationError(ProviderRegistryLoaderError):
         self.path = path
 
 
-class ProviderRegistryEntryModel(BaseModel):
+class ProviderRegistryEntry(BaseModel):
     """Single provider entry from registry config."""
 
     model_config = ConfigDict(extra="forbid")
@@ -60,7 +60,7 @@ class ProviderRegistryConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    providers: list[ProviderRegistryEntryModel]
+    providers: list[ProviderRegistryEntry]
 
 
 class ProviderLoaderImpl(ProviderRegistryLoaderABC):
@@ -133,7 +133,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
 
     def _register_entry(
         self,
-        entry: ProviderRegistryEntryModel,
+        entry: ProviderRegistryEntry,
         registry: MutableProviderRegistryABC,
     ) -> ProviderDefinition | None:
         try:
