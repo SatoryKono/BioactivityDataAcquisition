@@ -87,18 +87,17 @@ def _blake2b_hash_hex(data_bytes: bytes, digest_size: int = 32) -> str:
 class _DefaultHasherImpl(HasherABC):
     """Доменная реализация HasherABC с канонической сериализацией."""
 
-    @property
-    def algorithm(self) -> str:
+    def get_algorithm(self) -> str:
         """Return canonical hash algorithm identifier."""
         return "blake2b_256"
 
-    def hash_row(self, row: pd.Series) -> str:
+    def compute_hash_row(self, row: pd.Series) -> str:
         """Hash a pandas Series row using canonical serialization."""
         record = row.to_dict()
         serialized = _serialize_canonical(record)
         return _blake2b_hash_hex(serialized.encode("utf-8"))
 
-    def hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
+    def compute_hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
         """Hash selected columns row-wise; returns Series of digests."""
         if not columns:
             return pd.Series([None] * len(df), index=df.index, dtype=object)
@@ -134,13 +133,15 @@ class HashService(HashServiceABC):
         if business_key_cols:
             cols_to_hash = [c for c in business_key_cols if c in df.columns]
             if cols_to_hash:
-                df["hash_business_key"] = self._hasher.hash_columns(df, cols_to_hash)
+                df["hash_business_key"] = self._hasher.compute_hash_columns(
+                    df, cols_to_hash
+                )
             else:
                 df["hash_business_key"] = None
         else:
             df["hash_business_key"] = None
 
-        df["hash_row"] = df.apply(self._hasher.hash_row, axis=1)
+        df["hash_row"] = df.apply(self._hasher.compute_hash_row, axis=1)
         return df
 
     def add_index_column(self, df: pd.DataFrame) -> pd.DataFrame:

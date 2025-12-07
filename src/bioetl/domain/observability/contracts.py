@@ -30,7 +30,7 @@ class LoggingPortABC(ABC):
         """Log warning message with structured context."""
 
     @abstractmethod
-    def bind(self, **ctx: Any) -> Self:
+    def apply_bind(self, **ctx: Any) -> Self:
         """Return logger instance with bound context."""
 
 

@@ -34,7 +34,7 @@ class NormalizationServiceImpl(
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg["name"]
             dtype = field_cfg.get("data_type")
 
@@ -84,7 +84,7 @@ class NormalizationServiceImpl(
         """Normalize a raw record into a dict using configured field rules."""
         normalized: dict[str, Any] = {}
 
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg.get("name")
             if not isinstance(name, str) or name not in raw:
                 continue
@@ -122,7 +122,7 @@ class NormalizationServiceImpl(
         """Normalize configured columns in the provided dataframe."""
         normalized_df = df.copy()
 
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg.get("name")
             if not name or name not in normalized_df.columns:
                 continue

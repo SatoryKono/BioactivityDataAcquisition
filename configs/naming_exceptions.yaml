@@ -365,7 +365,7 @@ exceptions:
 
   - path: src/bioetl/domain/transform/merge.py
     rule_id: FUNC_PREFIX
-    reason: "Utility function (deep_merge)"
+    reason: "Utility function (apply_deep_merge)"
     owner: domain
     expiry: permanent
 

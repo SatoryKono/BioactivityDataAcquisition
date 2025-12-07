@@ -59,7 +59,7 @@ class PipelineBase(ABC):
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(config.provider)
-        self._logger = logger.bind(
+        self._logger = logger.apply_bind(
             entity=config.entity_name,
             provider=self._provider_id.value,
             pipeline=config.id,
@@ -125,7 +125,7 @@ class PipelineBase(ABC):
             self._hash_service.reset_state()
 
         context = self._build_context(dry_run)
-        self._logger = self._logger.bind(run_id=context.run_id)
+        self._logger = self._logger.apply_bind(run_id=context.run_id)
         self._hooks_manager.set_logger(self._logger)
         self._error_policy_manager.set_logger(self._logger)
         self._logger.info("Pipeline started", run_id=context.run_id)
