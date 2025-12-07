@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -143,6 +145,7 @@ def _finalize_config(
         env_overrides=env_overrides,
         cli_overrides=cli_overrides,
     )
+    merged_config = _resolve_env_placeholders(merged_config)
     _validate_input_path_exists(merged_config, config_path)
 
     try:
@@ -192,6 +195,37 @@ def _validate_provider(
         raise ConfigValidationError(path, str(exc)) from exc
     except ProviderRegistryError as exc:  # pragma: no cover - defensive
         raise ConfigValidationError(path, str(exc)) from exc
+
+
+ENV_PATTERN = re.compile(r"\$\{([A-Z0-9_]+)(:-([^}]*))?\}")
+
+
+def _resolve_env_placeholders(value: Any) -> Any:
+    """Recursively resolve ${ENV[:-default]} placeholders in config mappings."""
+
+    if isinstance(value, dict):
+        return {key: _resolve_env_placeholders(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_resolve_env_placeholders(item) for item in value]
+    if isinstance(value, str):
+        return _substitute_env(value)
+    return value
+
+
+def _substitute_env(raw: str) -> str:
+    """Replace env placeholders with OS values, falling back to defaults."""
+
+    def replace(match: re.Match[str]) -> str:
+        var_name = match.group(1)
+        default_value = match.group(3)
+        env_value = os.environ.get(var_name)
+        if env_value is not None:
+            return env_value
+        if default_value is not None:
+            return default_value
+        return match.group(0)
+
+    return ENV_PATTERN.sub(replace, raw)
 
 
 def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, Any]:

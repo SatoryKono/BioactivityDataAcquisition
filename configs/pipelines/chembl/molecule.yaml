@@ -3,7 +3,7 @@
 id: molecule_chembl
 provider: chembl
 entity: molecule
-primary_key: molecule_chembl_id
+primary_key: "${CHEMBL_MOLECULE_PRIMARY_KEY:-molecule_chembl_id}"
 input_mode: id_only
 input_path: data/input/testitem.csv
 output_path: ./data/output/chembl/molecule

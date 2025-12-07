@@ -6,7 +6,7 @@ import ast
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 import yaml
 
@@ -241,6 +241,23 @@ def _has_exception(exceptions: List[Dict[str, Any]], path: str, rule_id: str) ->
     )
 
 
+def _resolve_exception_predicate(exceptions: Any) -> Callable[[str, str], bool]:
+    """Unify exception checks for list-based config and ExceptionIndex."""
+
+    if hasattr(exceptions, "is_excepted"):
+        def _from_index(path: str, rule_id: str) -> bool:
+            try:
+                return bool(exceptions.is_excepted(Path(path), rule_id))
+            except Exception:
+                return False
+        return _from_index
+
+    if isinstance(exceptions, list):
+        return lambda path, rule_id: _has_exception(exceptions, path, rule_id)
+
+    return lambda _path, _rule_id: False
+
+
 def resolve_layer(file_path):
     normalized = file_path.replace("\\", "/")
     if "bioetl/application/" in normalized:
@@ -259,9 +276,9 @@ class NamingValidator(ast.NodeVisitor):
     AST Visitor to validate naming conventions.
     """
 
-    def __init__(self, file_path: str, exceptions: List[Dict[str, Any]]):
+    def __init__(self, file_path: str, exceptions: Any):
         self.file_path = file_path
-        self.exceptions = exceptions
+        self._is_excepted = _resolve_exception_predicate(exceptions)
         self.violations: List[str] = []
         normalized = file_path.replace("\\", "/")
         # Treat modules under application/pipelines as part of pipeline layer
@@ -277,18 +294,7 @@ class NamingValidator(ast.NodeVisitor):
 
     def is_excepted(self, rule_id: str, _node_name: str) -> bool:
         """Check if a rule is excepted for the given node."""
-        for exc in self.exceptions:
-            if exc.get("path") == self.file_path and exc.get("rule_id") == rule_id:
-                # Could add more granular checks here (e.g. by symbol name)
-                # checking if the exception applies to this specific symbol
-                # if specified. For now, simplicity: if file has exception
-                # for rule, skip it?
-                # Better: Exception entry should probably target specific
-                # symbols or just the file for a rule.
-                # The plan said "path, rule_id". Let's assume file-level
-                # exception for the rule.
-                return True
-        return False
+        return self._is_excepted(self.file_path, rule_id)
 
     def visit_ClassDef(self, node: ast.ClassDef):
         # pylint: disable=invalid-name
@@ -403,28 +409,27 @@ def load_exceptions() -> List[Dict[str, Any]]:
         return []
 
 
-def check_file_naming(file_path: Path, exceptions: List[Dict[str, Any]]) -> List[str]:
+def check_file_naming(file_path: Path, exceptions: Any) -> List[str]:
     """Check if file name follows conventions."""
     violations = []
     str_path = str(file_path).replace("\\", "/")
     filename = file_path.name
 
-    def _is_excepted(rule_id: str) -> bool:
-        return _has_exception(exceptions, str_path, rule_id)
+    is_excepted = _resolve_exception_predicate(exceptions)
 
     stem = file_path.stem
-    if not MODULE_REGEX.match(stem) and not _is_excepted("MODULE_NAME"):
+    if not MODULE_REGEX.match(stem) and not is_excepted(str_path, "MODULE_NAME"):
         violations.append(f"File '{filename}' does not match snake_case.")
 
     if "tests" in str_path and not filename.startswith(("conftest.py", "__init__.py")):
-        if not TEST_FILE_REGEX.match(filename) and not _is_excepted("TEST_NAME"):
+        if not TEST_FILE_REGEX.match(filename) and not is_excepted(str_path, "TEST_NAME"):
             # Violations muted by policy; keep placeholder for future reporting.
             pass
 
     return violations
 
 
-def check_file_content(file_path: Path, exceptions: List[Dict[str, Any]]) -> List[str]:
+def check_file_content(file_path: Path, exceptions: Any) -> List[str]:
     """Parse and validate file content."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
