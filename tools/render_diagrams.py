@@ -69,8 +69,12 @@ def _find_diagrams(root: Path) -> list[Path]:
     return sorted(diagrams)
 
 
-def _render_diagram(path: Path, background: str, scale: float) -> None:
-    raw_content = path.read_text(encoding="utf-8")
+def _render_diagram(path: Path, background: str, scale: float) -> tuple[bool, str]:
+    try:
+        raw_content = path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        return False, f"missing input: {exc}"
+
     content = _strip_front_matter(raw_content)
 
     target = path.with_suffix(".png").resolve()
@@ -100,22 +104,39 @@ def _render_diagram(path: Path, background: str, scale: float) -> None:
     ]
 
     try:
-        subprocess.run(cmd, check=True)
+        result = subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
         if not tmp_out_path.exists():
-            raise FileNotFoundError(f"Rendered file missing: {tmp_out_path}")
+            raise FileNotFoundError(f"rendered file missing: {tmp_out_path}")
         tmp_out_path.replace(target)
-    except Exception:
-        # Keep temp files for debugging
-        raise
-    else:
+    except subprocess.CalledProcessError as exc:
+        detail = exc.stderr or exc.stdout or str(exc)
+        return False, f"mermaid-cli exit {exc.returncode}: {detail}".strip()
+    except Exception as exc:  # noqa: BLE001
+        return False, str(exc)
+    finally:
         tmp_in_path.unlink(missing_ok=True)
         if tmp_out_path.exists():
             tmp_out_path.unlink()
 
+    return True, result.stderr or result.stdout or ""
+
 
 def _render_all(paths: Iterable[Path], background: str, scale: float) -> None:
+    errors: list[tuple[Path, str]] = []
     for diagram_path in paths:
-        _render_diagram(diagram_path, background=background, scale=scale)
+        ok, message = _render_diagram(diagram_path, background=background, scale=scale)
+        if ok:
+            continue
+        errors.append((diagram_path, message))
+        print(f"[error] {diagram_path}: {message}", file=sys.stderr)
+
+    if errors:
+        raise RuntimeError(f"{len(errors)} diagram(s) failed")
 
 
 def main() -> int:

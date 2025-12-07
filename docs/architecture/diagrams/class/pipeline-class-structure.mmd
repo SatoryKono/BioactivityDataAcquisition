@@ -1,13 +1,11 @@
----
-id: 6a6b7b4a-3cda-4b65-8136-343b1a602b2e
----
-%% Shared palette
+%%{init: { 'classDiagram': { 'useMaxWidth': true } }}%%
+classDiagram-v2
+
 classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
 classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
 classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
 
-classDiagram-v2
-    class PipelineBase {
+class PipelineBase {
         <<Abstract>>
         +run(output_path, dry_run) RunResult
         +iter_chunks() Iterable[DataFrame]
@@ -142,4 +140,4 @@ classDiagram-v2
     class ExtractorABC interface
     class TransformerABC interface
     class PipelineHookABC interface
-    class ErrorPolicyABC interface
+class ErrorPolicyABC interface
