@@ -74,8 +74,8 @@ class UnifiedOutputWriter(OutputWriterABC):
         inner_result: WriteResult | None = None
 
         def write_wrapper(path: Path) -> None:
-            nonlocal inner_result
             """Write dataset to the provided path via underlying writer."""
+            nonlocal inner_result
             inner_result = self._writer.write(
                 df_prepared, path, column_order=column_order
             )

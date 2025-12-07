@@ -1,3 +1,5 @@
+"""Stage descriptors wiring for the ChEMBL document pipeline."""
+
 from bioetl.application.pipelines.chembl.document.extract import (
     get_stage_descriptor as get_extract_stage_descriptor,
 )

@@ -1,3 +1,5 @@
+"""Writers for pipeline metadata and QC artifacts."""
+
 from pathlib import Path
 
 import pandas as pd
@@ -38,12 +40,14 @@ class MetadataWriterImpl(MetadataWriterABC):
         self._min_coverage = min_coverage
 
     def write_meta(self, meta: dict, path: Path) -> None:
+        """Persist run metadata as YAML with stable key ordering."""
         with open(path, "w", encoding="utf-8") as f:
             yaml.dump(meta, f, sort_keys=True)
 
     def write_qc_report(
         self, df: pd.DataFrame, path: Path, *, min_coverage: float | None = None
     ) -> None:
+        """Generate and store QC report CSV with optional coverage override."""
         path.parent.mkdir(parents=True, exist_ok=True)
         report = build_quality_report_table(
             df,
@@ -55,4 +59,5 @@ class MetadataWriterImpl(MetadataWriterABC):
         report.to_csv(path, index=False)
 
     def build_checksums(self, paths: list[Path]) -> dict[str, str]:
+        """Calculate SHA256 checksums for a list of artifact paths."""
         return compute_files_sha256(paths)

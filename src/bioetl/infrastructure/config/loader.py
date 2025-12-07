@@ -216,6 +216,7 @@ def _substitute_env(raw: str) -> str:
     """Replace env placeholders with OS values, falling back to defaults."""
 
     def replace(match: re.Match[str]) -> str:
+        """Resolve a single ${ENV[:-default]} placeholder with environment or default."""
         var_name = match.group(1)
         default_value = match.group(3)
         env_value = os.environ.get(var_name)

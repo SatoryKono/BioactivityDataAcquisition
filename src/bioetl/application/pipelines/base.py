@@ -242,8 +242,8 @@ class PipelineBase(ABC):
         validate_started = False
 
         def reset_iterator() -> None:
-            nonlocal chunk_iterator
             """Recreate extractor iterator for retries."""
+            nonlocal chunk_iterator
             chunk_iterator = self._create_chunk_iterator(context, **kwargs)
 
         reset_iterator()

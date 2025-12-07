@@ -51,6 +51,7 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
                 def request(
                     self, method: str, url: str, **_: Any
                 ) -> Any:  # pragma: no cover
+                    """Fail fast when HTTP middleware is not configured."""
                     raise RuntimeError("HTTP middleware is not configured")
 
             self.http = _NullHttpMiddleware()
