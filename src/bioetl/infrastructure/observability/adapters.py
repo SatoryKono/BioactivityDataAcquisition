@@ -17,18 +17,23 @@ class StructuredLoggerImpl(LoggingPort):
         self._logger = logger or structlog.get_logger()
 
     def info(self, msg: str, **ctx: Any) -> None:
+        """Log info message with structured context."""
         self._logger.info(msg, **ctx)
 
     def error(self, msg: str, **ctx: Any) -> None:
+        """Log error message with structured context."""
         self._logger.error(msg, **ctx)
 
     def debug(self, msg: str, **ctx: Any) -> None:
+        """Log debug message with structured context."""
         self._logger.debug(msg, **ctx)
 
     def warning(self, msg: str, **ctx: Any) -> None:
+        """Log warning message with structured context."""
         self._logger.warning(msg, **ctx)
 
     def bind(self, **ctx: Any) -> Self:
+        """Return logger bound with additional context."""
         return self.__class__(self._logger.bind(**ctx))
 
 
@@ -36,12 +41,15 @@ class TracingAdapterImpl(TracingPort):
     """No-op tracing adapter placeholder for distributed tracing backends."""
 
     def start_span(self, name: str) -> dict[str, str]:
+        """Start a tracing span (no-op stub)."""
         return {"span": name}
 
     def end_span(self, span: Any) -> None:  # pragma: no cover - no-op
+        """Finish a tracing span (no-op)."""
         _ = span
 
     def inject_context(self, headers: dict[str, str]) -> None:  # pragma: no cover - no-op
+        """Inject tracing context into headers (no-op stub)."""
         headers.update({"trace": "noop"})
 
 

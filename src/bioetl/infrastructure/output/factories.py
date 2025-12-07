@@ -1,3 +1,5 @@
+"""Factories composing output writers for pipeline artifacts."""
+
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     OutputWriterABC,
