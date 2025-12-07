@@ -8,7 +8,7 @@ import pandas as pd
 
 from bioetl.domain.record_source import RawRecord
 from bioetl.domain.transform.contracts import (
-    NormalizationConfigProvider,
+    NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
 from bioetl.domain.transform.normalizers import (
@@ -36,7 +36,7 @@ class ChemblNormalizationServiceImpl(
 ):
     """Normalization service for ChEMBL records."""
 
-    def __init__(self, config: NormalizationConfigProvider):
+    def __init__(self, config: NormalizationConfigProviderProtocol):
         super().__init__(config)
 
     def normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
