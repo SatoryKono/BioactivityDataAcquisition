@@ -28,7 +28,7 @@ from bioetl.domain.configs.base import (
     QcConfig,
     StorageConfig,
 )
-from bioetl.domain.transform.contracts import NormalizationConfigProvider
+from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 
 
 class PipelineConfig(BaseModel):
@@ -66,8 +66,8 @@ class PipelineConfig(BaseModel):
     def entity_name(self) -> str:
         return self.entity
 
-    def as_normalization_config_provider(self) -> NormalizationConfigProvider:
-        """Return self to satisfy NormalizationConfigProvider protocol."""
+    def as_normalization_config_provider(self) -> NormalizationConfigProviderProtocol:
+        """Return self to satisfy NormalizationConfigProviderProtocol."""
 
         return self
 

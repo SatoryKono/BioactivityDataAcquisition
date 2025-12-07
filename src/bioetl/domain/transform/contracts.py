@@ -19,7 +19,7 @@ class NormalizationConfig:
     fields: list[dict[str, Any]] = field(default_factory=list)
 
 
-class NormalizationConfigProvider(Protocol):
+class NormalizationConfigProviderProtocol(Protocol):
     """
     Protocol for objects that can provide normalization configuration.
 
@@ -183,7 +183,7 @@ class HashServiceABC(ABC):
 __all__ = [
     "BaseNormalizationServiceABC",
     "NormalizationConfig",
-    "NormalizationConfigProvider",
+    "NormalizationConfigProviderProtocol",
     "HasherABC",
     "NormalizationServiceABC",
     "HashServiceABC",
