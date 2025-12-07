@@ -14,7 +14,7 @@ subgraph Domain["Domain Layer"]
     Hashing["HashServiceABC\nbioetl.domain.transform.contracts"]:::componentPrimary
     Transformers["TransformerChain\nHash/Index/DbVersion/Fulldate"]:::componentSecondary
     Hasher["HasherImpl\ncanonical serializer"]:::componentSecondary
-    Schemas["SchemaRegistry\nPipelineSchemaContract\nbioetl.domain.schemas.registry"]:::componentSecondary
+    Schemas["SchemaRegistry\nPipelineSchemaModel\nbioetl.domain.schemas.registry"]:::componentSecondary
     Pandera["PanderaValidator\nbioetl.domain.validation.impl"]:::componentSecondary
     Normalizers["Scalar/array/dict normalizers\nbioetl.domain.transform.normalizers.*"]:::componentSecondary
     ProviderRegistry["ProviderRegistry\nbioetl.domain.provider_registry"]:::componentSecondary
