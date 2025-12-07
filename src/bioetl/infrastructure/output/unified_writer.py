@@ -73,14 +73,14 @@ class UnifiedOutputWriter(OutputWriterABC):
         # Wrapper to capture inner write result
         inner_result: WriteResult | None = None
 
-        def write_wrapper(path: Path) -> None:
+        def _write_wrapper(path: Path) -> None:
             """Write dataset to the provided path via underlying writer."""
             nonlocal inner_result
             inner_result = self._writer.write(
                 df_prepared, path, column_order=column_order
             )
 
-        self._atomic_op.write_atomic(data_path, write_wrapper)
+        self._atomic_op.write_atomic(data_path, _write_wrapper)
 
         if inner_result is None:
             raise RuntimeError("Inner writer did not return result")
@@ -164,10 +164,10 @@ class UnifiedOutputWriter(OutputWriterABC):
         return artifacts
 
     def _write_qc_csv(self, path: Path, df: pd.DataFrame) -> Path:
-        def write_wrapper(temp_path: Path) -> None:
+        def _write_qc_wrapper(temp_path: Path) -> None:
             """Write QC dataframe to a CSV atomically."""
             path.parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(temp_path, index=False)
 
-        self._atomic_op.write_atomic(path, write_wrapper)
+        self._atomic_op.write_atomic(path, _write_qc_wrapper)
         return path

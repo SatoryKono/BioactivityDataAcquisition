@@ -215,8 +215,8 @@ def _resolve_env_placeholders(value: Any) -> Any:
 def _substitute_env(raw: str) -> str:
     """Replace env placeholders with OS values, falling back to defaults."""
 
-    def replace(match: re.Match[str]) -> str:
-        """Resolve a single ${ENV[:-default]} placeholder with environment or default."""
+    def _replace_env_placeholder(match: re.Match[str]) -> str:
+        """Resolve one ${ENV[:-default]} placeholder using env or default."""
         var_name = match.group(1)
         default_value = match.group(3)
         env_value = os.environ.get(var_name)
@@ -226,7 +226,7 @@ def _substitute_env(raw: str) -> str:
             return default_value
         return match.group(0)
 
-    return ENV_PATTERN.sub(replace, raw)
+    return ENV_PATTERN.sub(_replace_env_placeholder, raw)
 
 
 def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, Any]:

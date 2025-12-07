@@ -37,7 +37,7 @@ def pipeline():
     )
 
 
-def test_transform_nested_fields(pipeline):
+def test_transform_nested_fields_activity_properties(pipeline):
     # Mock schema to avoid dropping rows due to missing required fields
     class MockSchema(pa.DataFrameModel):
         activity_properties: pa.typing.Series[str] = pa.Field(nullable=True)
