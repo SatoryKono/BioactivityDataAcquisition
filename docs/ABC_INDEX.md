@@ -55,7 +55,7 @@
 - `LoggerAdapterABC` — `bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC`
   - Интерфейс структурированного логгера. Default factory: ``bioetl.infrastructure.logging.factories.default_logger``. Implementations: ``UnifiedLoggerImpl``.
 
-- `LoggingPort` — `bioetl.domain.observability.contracts.LoggingPort`
+- `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
   - Порт структурированного логгирования. Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``. Implementations: ``StructuredLoggerImpl``.
 
 - `ProgressReporterABC` — `bioetl.domain.clients.base.logging.contracts.ProgressReporterABC`
@@ -64,7 +64,7 @@
 - `TracerABC` — `bioetl.domain.clients.base.logging.contracts.TracerABC`
   - Интерфейс распределенной трассировки. Implementations expected to be provided by infrastructure tracing backends.
 
-- `TracingPort` — `bioetl.domain.observability.contracts.TracingPort`
+- `TracingPortABC` — `bioetl.domain.observability.contracts.TracingPortABC`
   - Порт для распределенной трассировки. Default factory: ``bioetl.infrastructure.observability.factories.default_tracing_port``. Implementations: ``TracingAdapterImpl``.
 
 - `HasherABC` — `bioetl.domain.transform.contracts.HasherABC`

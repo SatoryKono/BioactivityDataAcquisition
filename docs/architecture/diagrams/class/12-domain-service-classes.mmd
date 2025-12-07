@@ -18,7 +18,7 @@ class BaseNormalizationServiceABC
 class BaseNormalizationServiceImpl
 class ChemblNormalizationServiceImpl
 class NormalizationServiceImpl
-class NormalizationConfigProvider
+class NormalizationConfigProviderProtocol
 class NormalizationConfig
 
 ValidationService --> SchemaProviderABC
@@ -31,7 +31,7 @@ ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
 NormalizationServiceImpl --|> BaseNormalizationServiceImpl
 ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
 NormalizationServiceImpl ..|> NormalizationServiceABC
-ChemblNormalizationServiceImpl --> NormalizationConfigProvider
-NormalizationServiceImpl --> NormalizationConfigProvider
-NormalizationConfigProvider --> NormalizationConfig
+ChemblNormalizationServiceImpl --> NormalizationConfigProviderProtocol
+NormalizationServiceImpl --> NormalizationConfigProviderProtocol
+NormalizationConfigProviderProtocol --> NormalizationConfig
 

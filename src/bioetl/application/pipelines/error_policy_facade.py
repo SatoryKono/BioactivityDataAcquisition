@@ -6,7 +6,7 @@ from bioetl.application.pipelines.hooks_registry import HooksRegistry
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC
 from bioetl.domain.providers import ProviderId
 
@@ -19,7 +19,7 @@ class ErrorPolicyFacade:
         *,
         error_policy: ErrorPolicyABC,
         hooks_manager: HooksRegistry,
-        logger: LoggingPort,
+        logger: LoggingPortABC,
         provider_id: ProviderId,
         entity_name: str,
         default_on_skip: Callable[[str], object],
@@ -128,7 +128,7 @@ class ErrorPolicyFacade:
         self._last_error = None
         self._last_stage_action.clear()
 
-    def set_logger(self, logger: LoggingPort) -> None:
+    def set_logger(self, logger: LoggingPortABC) -> None:
         """Обновляет логгер для дальнейших сообщений."""
 
         self._logger = logger
