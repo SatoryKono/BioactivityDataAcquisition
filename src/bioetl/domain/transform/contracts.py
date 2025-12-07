@@ -28,13 +28,11 @@ class NormalizationConfigProviderProtocol(Protocol):
     PipelineConfig from bioetl.domain.configs implements this implicitly.
     """
 
-    @property
-    def normalization(self) -> Any:
+    def get_normalization(self) -> Any:
         """Return normalization section."""
         ...
 
-    @property
-    def fields(self) -> list[dict[str, Any]]:
+    def get_fields(self) -> list[dict[str, Any]]:
         """Return fields configuration."""
         ...
 
@@ -98,18 +96,19 @@ class BaseNormalizationServiceABC(ABC):
 class HasherABC(ABC):
     """Хеширование строк."""
 
-    @property
-    def algorithm(self) -> str:
+    def get_algorithm(self) -> str:
         """Используемый алгоритм (по умолчанию blake2b_256)."""
 
         return "blake2b_256"
 
     @abstractmethod
-    def hash_row(self, row: pd.Series) -> str:
+    def compute_hash_row(self, row: pd.Series) -> str:
         """Хеширует строку Series."""
 
     @abstractmethod
-    def hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
+    def compute_hash_columns(
+        self, df: pd.DataFrame, columns: list[str]
+    ) -> pd.Series:
         """Хеширует выбранные колонки DataFrame."""
 
 

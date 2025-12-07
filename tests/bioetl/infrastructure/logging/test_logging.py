@@ -34,7 +34,7 @@ def test_unified_logger():
     # UnifiedLoggerImpl usually wraps structlog.get_logger()
 
     # Test binding
-    bound = logger.bind(key="value")
+    bound = logger.apply_bind(key="value")
     assert isinstance(bound, UnifiedLoggerImpl)
     # Check if context is preserved (implementation detail)
 
@@ -58,6 +58,6 @@ def test_progress_reporter():
             assert progress_bar is not None
 
             # Test update
-            reporter.update(10)
+            reporter.apply_update(10)
 
         mock_tqdm.assert_called()

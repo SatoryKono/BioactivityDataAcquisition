@@ -34,7 +34,7 @@ class LoggerAdapterABC(ABC):
         """Log warning message."""
 
     @abstractmethod
-    def bind(self, **ctx: Any) -> Self:
+    def apply_bind(self, **ctx: Any) -> Self:
         """Возвращает логгер с привязанным контекстом."""
 
 
@@ -50,24 +50,24 @@ class ProgressReporterABC(ABC):
         """Начинает отслеживание прогресса."""
 
     @abstractmethod
-    def update(self, n: int = 1) -> None:
+    def apply_update(self, n: int = 1) -> None:
         """Обновляет прогресс на n единиц."""
 
     @abstractmethod
-    def finish(self) -> None:
+    def stop_reporting(self) -> None:
         """Завершает отслеживание."""
 
     @contextmanager
     def create_bar(self, total: int, desc: str = "") -> Iterator[Any]:
         """
         Context manager for progress bar.
-        Default implementation delegates to start/finish.
+        Default implementation delegates to start/stop.
         """
         self.start(total, description=desc)
         try:
             yield self
         finally:
-            self.finish()
+            self.stop_reporting()
 
 
 class TracerABC(ABC):

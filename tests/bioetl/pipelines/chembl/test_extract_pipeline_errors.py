@@ -26,7 +26,7 @@ class _LoggerStub:
     def warning(self, msg: str, **ctx):  # pragma: no cover - delegating
         self._logger.warning(msg, extra=ctx)
 
-    def bind(self, **ctx):  # pragma: no cover - delegating
+    def apply_bind(self, **ctx):  # pragma: no cover - delegating
         return self
 
 

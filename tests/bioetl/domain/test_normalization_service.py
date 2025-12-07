@@ -29,6 +29,12 @@ class _ConfigStub:
         ]
     )
 
+    def get_normalization(self) -> NormalizationConfig:
+        return self.normalization
+
+    def get_fields(self) -> list[dict[str, str]]:
+        return self.fields
+
 
 def test_chembl_normalization_service_normalizes_scalars_and_ids() -> None:
     service = ChemblNormalizationServiceImpl(_ConfigStub())
