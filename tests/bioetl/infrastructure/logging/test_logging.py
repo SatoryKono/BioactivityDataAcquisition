@@ -58,6 +58,6 @@ def test_progress_reporter():
             assert progress_bar is not None
 
             # Test update
-            reporter.update(10)
+            reporter.apply_update(10)
 
         mock_tqdm.assert_called()
