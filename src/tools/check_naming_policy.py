@@ -210,10 +210,10 @@ LAYER_FUNCTION_ALLOWED_NAMES = {
     },
     "domain": {
         "validate",
-        "normalize",
-        "normalize_batch",
-        "normalize_dataframe",
-        "normalize_series",
+        "apply_normalize",
+        "apply_normalize_batch",
+        "apply_normalize_dataframe",
+        "apply_normalize_series",
         "iter_records",
     },
     "infrastructure": {

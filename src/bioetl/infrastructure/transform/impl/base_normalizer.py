@@ -30,7 +30,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         self._config = config
         self._empty_value = empty_value
 
-    def coerce_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+    def ensure_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Cast configured numeric columns to nullable pandas dtypes."""
 
         for field_cfg in self._config.fields:

@@ -59,7 +59,9 @@ class ChemblExtractorImpl(ExtractorABC):
 
             working_chunk = pd.DataFrame(chunk_records)
 
-            normalized_chunk = self.normalization_service.normalize_batch(working_chunk)
+            normalized_chunk = self.normalization_service.apply_normalize_batch(
+                working_chunk
+            )
 
             if not normalized_chunk.empty:
                 yield normalized_chunk
