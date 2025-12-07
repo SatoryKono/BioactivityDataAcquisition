@@ -5,10 +5,10 @@ from typing import Self
 from bioetl.application.pipelines.hooks_impl import LoggingPipelineHookImpl
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 
 
-class _DummyLogger(LoggingPort):
+class _DummyLogger(LoggingPortABC):
     def __init__(self) -> None:
         self.calls: list[tuple[str, str, dict[str, object]]] = []
 

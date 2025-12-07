@@ -11,7 +11,7 @@ from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputConfig
@@ -31,7 +31,7 @@ class ChemblExtractorImpl(ExtractorABC):
         config: PipelineConfig,
         extraction_service: ChemblExtractionPortABC,
         normalization_service: NormalizationServiceABC,
-        logger: LoggingPort,
+        logger: LoggingPortABC,
         record_source: RecordSource | None = None,
     ) -> None:
         self.config = config

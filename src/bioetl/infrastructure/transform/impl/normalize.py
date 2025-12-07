@@ -7,7 +7,7 @@ from typing import Any, Callable, cast
 import pandas as pd
 
 from bioetl.domain.transform.contracts import (
-    NormalizationConfigProvider,
+    NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
 from bioetl.domain.transform.normalizers import (
@@ -92,7 +92,7 @@ class NormalizationServiceImpl(
     - Нормализацию скалярных типов (float->round, str->trim/lower/upper)
     """
 
-    def __init__(self, config: NormalizationConfigProvider):
+    def __init__(self, config: NormalizationConfigProviderProtocol):
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
     def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:

@@ -27,7 +27,7 @@ LoggerAdapterABC:
   implementations:
     Unified: bioetl.infrastructure.logging.impl.unified_logger.UnifiedLoggerImpl
 
-LoggingPort:
+LoggingPortABC:
   default_factory: bioetl.infrastructure.observability.factories.default_logging_port
   implementations:
     Structured: bioetl.infrastructure.observability.adapters.StructuredLoggerImpl
@@ -37,7 +37,7 @@ ProgressReporterABC:
   implementations:
     Tqdm: bioetl.infrastructure.logging.impl.progress_reporter.TqdmProgressReporterImpl
 
-TracingPort:
+TracingPortABC:
   default_factory: bioetl.infrastructure.observability.factories.default_tracing_port
   implementations:
     Default: bioetl.infrastructure.observability.adapters.TracingAdapterImpl

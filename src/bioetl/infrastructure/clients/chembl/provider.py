@@ -7,7 +7,7 @@ from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.domain.transform.contracts import (
-    NormalizationConfigProvider,
+    NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
 from bioetl.infrastructure.chembl_client import (
@@ -43,12 +43,15 @@ class ChemblProviderComponents(
         config: ChemblSourceConfig,
         *,
         client: ChemblDataClientABC | None = None,
-        pipeline_config: NormalizationConfigProvider | None = None,
+        pipeline_config: NormalizationConfigProviderProtocol | None = None,
     ) -> NormalizationServiceABC:
         _ = client  # signature compatibility; normalization independent from client
         if pipeline_config is None:
             raise ValueError(
-                "NormalizationConfigProvider is required to build normalization service"
+                (
+                    "NormalizationConfigProviderProtocol is required to build "
+                    "normalization service"
+                )
             )
         return default_normalization_service(pipeline_config)
 
