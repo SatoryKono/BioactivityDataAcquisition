@@ -82,9 +82,7 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
     return val.lower()
 
 
-class NormalizationServiceImpl(
-    NormalizationServiceABC, BaseNormalizationServiceImpl
-):
+class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationServiceImpl):
     """
     Сервис нормализации данных.
     Выполняет:

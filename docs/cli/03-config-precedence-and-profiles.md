@@ -1,4 +1,4 @@
-# 03 Config Precedence and Profiles
+# Config Precedence and Profiles
 
 BioETL supports layered configuration so that defaults can be shared across pipelines while still allowing precise overrides.
 

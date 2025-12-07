@@ -9,9 +9,7 @@ class _DummyExtractionService:
     def __init__(self) -> None:
         self.called_with: dict[str, str] | None = None
 
-    def extract_all(
-        self, entity: str, **filters: str
-    ) -> list[RawRecord]:  # type: ignore[override]
+    def extract_all(self, entity: str, **filters: str) -> list[RawRecord]:  # type: ignore[override]
         record_batches = list(self.iter_extract(entity, **filters))
         flattened: list[RawRecord] = []
         for batch in record_batches:

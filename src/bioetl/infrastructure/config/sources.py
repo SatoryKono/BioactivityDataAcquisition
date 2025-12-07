@@ -37,7 +37,7 @@ def resolve_pipeline_config_path(
     return root / "pipelines" / provider / f"{entity}.yaml"
 
 
-def read_yaml(path: Path) -> dict[str, Any]:
+def get_yaml(path: Path) -> dict[str, Any]:
     """Read YAML file ensuring mapping root."""
 
     with path.open("r", encoding="utf-8") as file:
@@ -75,7 +75,7 @@ def _apply_extends(
     return merged
 
 
-def read_yaml_for_pipeline(
+def get_yaml_for_pipeline(
     pipeline_id: str,
     *,
     profile: str | None = None,
@@ -84,14 +84,14 @@ def read_yaml_for_pipeline(
     """Read pipeline YAML by id with optional profile merge."""
 
     config_path = resolve_pipeline_config_path(pipeline_id, base_dir=base_dir)
-    return read_yaml_from_path(
+    return get_yaml_from_path(
         config_path,
         profile=profile,
         profiles_root=get_configs_root(base_dir) / "profiles",
     )
 
 
-def read_yaml_from_path(
+def get_yaml_from_path(
     config_path: str | Path,
     *,
     profile: str | None = None,
@@ -104,7 +104,7 @@ def read_yaml_from_path(
         raise FileNotFoundError(f"Config file not found: {path}")
 
     effective_profiles_root = profiles_root or path.parent.parent / "profiles"
-    raw_config = read_yaml(path)
+    raw_config = get_yaml(path)
     merged = _apply_extends(raw_config, profiles_root=effective_profiles_root)
     merged = _merge_with_profile(
         merged,
@@ -124,7 +124,7 @@ def _resolve_profile(
     if not profile_path.exists():
         raise FileNotFoundError(f"Profile file not found: {profile_path}")
 
-    profile_data = read_yaml(profile_path)
+    profile_data = get_yaml(profile_path)
     parent = profile_data.get("extends")
     if parent:
         parent_data = _resolve_profile(parent, profiles_root=profiles_root)
@@ -137,7 +137,7 @@ __all__ = [
     "DEFAULT_CONFIGS_ROOT",
     "get_configs_root",
     "resolve_pipeline_config_path",
-    "read_yaml",
-    "read_yaml_for_pipeline",
-    "read_yaml_from_path",
+    "get_yaml",
+    "get_yaml_for_pipeline",
+    "get_yaml_from_path",
 ]

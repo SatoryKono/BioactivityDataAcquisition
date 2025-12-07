@@ -1,4 +1,4 @@
-# 0003 Provider Registry Via Config
+# Provider Registry Via Config
 
 ## Status
 Accepted

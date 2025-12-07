@@ -13,7 +13,10 @@ from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
 from bioetl.application.pipelines.hooks_registry import HooksRegistry
 from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
-from bioetl.domain.clients.base.output.contracts import WriteResult
+from bioetl.domain.clients.base.output.contracts import (
+    RunMetadataBuilderProtocol,
+    WriteResult,
+)
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
@@ -25,10 +28,6 @@ from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.output.metadata import (
-    build_dry_run_metadata,
-    build_run_metadata,
-)
 
 if TYPE_CHECKING:
     from bioetl.domain.clients.base.output.contracts import OutputWriterABC
@@ -51,6 +50,7 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         output_writer: "OutputWriterABC",
         hash_service: HashServiceABC,
+        metadata_builder: RunMetadataBuilderProtocol,
         extractor: ExtractorABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
@@ -67,6 +67,7 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._output_writer = output_writer
         self._hash_service = hash_service
+        self._metadata_builder = metadata_builder
         self._extractor = extractor
         self._transformer = transformer
         self._post_transformer = post_transformer
@@ -172,9 +173,11 @@ class PipelineBase(ABC):
                     return run_result
 
             meta = (
-                build_run_metadata(context, write_result)
+                self._metadata_builder.build_run_metadata(context, write_result)
                 if write_result
-                else build_dry_run_metadata(context, counters["validate_count"])
+                else self._metadata_builder.build_dry_run_metadata(
+                    context, counters["validate_count"]
+                )
             )
 
             return RunResult(

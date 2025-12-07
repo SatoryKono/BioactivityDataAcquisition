@@ -1,4 +1,4 @@
-# Class Diagrams — Infrastructure Layer
+# Class Diagrams Infrastructure
 
 Устаревшие inline-диаграммы удалены. Актуальные схемы инфраструктурного слоя храните в `docs/architecture/diagrams/class/` (Mermaid/PlantUML) согласно `docs/architecture/diagrams/00-diagramming-policy.md`.
 

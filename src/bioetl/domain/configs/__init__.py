@@ -19,6 +19,7 @@ from bioetl.domain.configs.base import (
     QcConfig,
     StorageConfig,
 )
+from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.configs.pipeline import PipelineConfig
 from bioetl.domain.configs.profile import ProfileConfig
 
@@ -42,4 +43,5 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
     "PipelineConfig",
+    "PipelineConfigLoaderProtocol",
 ]

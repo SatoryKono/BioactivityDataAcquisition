@@ -16,6 +16,10 @@ from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.interfaces.wiring import (
+    create_config_loader,
+    create_container_factory,
+)
 
 
 class PipelineRunRequest(BaseModel):
@@ -54,7 +58,10 @@ def _to_pipeline_id(pipeline_name: str) -> str:
 
 def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrator:
     pipeline_id = _to_pipeline_id(pipeline_name)
-    config = build_runtime_config(pipeline_id=pipeline_id, profile=profile)
+    config_loader = create_config_loader()
+    config = build_runtime_config(
+        pipeline_id=pipeline_id, profile=profile, loader=config_loader
+    )
     if not config.features.rest_interface_enabled:
         raise HTTPException(
             status_code=503,
@@ -70,9 +77,10 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
         provider_registry = None
     else:
         provider_loader = None
-        provider_registry = provider_loader_factory().load_registry(
+        provider_registry = provider_loader_factory().get_registry(
             registry=InMemoryProviderRegistry()
         )
+    container_factory = create_container_factory()
     return PipelineOrchestrator(
         pipeline_name=pipeline_name,
         config=config,
@@ -80,6 +88,7 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
         use_provider_loader_port=feature_flag,
+        container_factory=container_factory,
     )
 
 

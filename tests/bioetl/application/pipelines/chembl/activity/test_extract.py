@@ -80,6 +80,8 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     logger = MagicMock()
     validation_service = MagicMock()
     output_writer = MagicMock()
+    metadata_builder = MagicMock()
+    file_record_source_factory = MagicMock()
 
     return ChemblEntityPipeline(
         config=mock_config,
@@ -89,6 +91,8 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
         extraction_service=mock_extraction_service,
         hash_service=MagicMock(),
         normalization_service=mock_normalization_service,
+        metadata_builder=metadata_builder,
+        file_record_source_factory=file_record_source_factory,
     )
 
 

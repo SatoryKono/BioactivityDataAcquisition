@@ -123,6 +123,24 @@ exceptions:
     expiry: permanent
 
   - path: src/bioetl/domain/transform/hash_service.py
+    rule_id: CLASS_FORMAT
+    reason: "Private hasher implementation helper uses leading underscore"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/impl/http_client.py
+    rule_id: CLASS_FORMAT
+    reason: "Stub middleware placeholder is private and uses leading underscore"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/middleware.py
+    rule_id: CLASS_FORMAT
+    reason: "Retry decision tuple is private helper with leading underscore"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/hash_service.py
     rule_id: CLASS_SUFFIX
     reason: "Service suffix"
     owner: domain
@@ -492,6 +510,90 @@ exceptions:
   - path: src/bioetl/infrastructure/logging/impl/unified_logger.py
     rule_id: FUNC_PREFIX
     reason: "Logger methods (bind)"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/chembl/extractor.py
+    rule_id: FUNC_PREFIX
+    reason: "Extractor lifecycle method extract without extra prefix per contract"
+    owner: chembl
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/error_policy_facade.py
+    rule_id: FUNC_PREFIX
+    reason: "Facade lifecycle methods execute/reset follow existing contract naming"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/application/pipelines/hooks_registry.py
+    rule_id: FUNC_PREFIX
+    reason: "Registry reset verb kept without prefix for contract compatibility"
+    owner: core
+    expiry: permanent
+
+  - path: src/bioetl/domain/clients/base/output/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Writer contract exposes write verb without prefix across implementations"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/configs/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Config loader contract uses load_* verbs without extra prefixes"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/observability/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Metrics port uses increment/observe verbs aligned with metrics contract"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/pipelines/contracts.py
+    rule_id: FUNC_PREFIX
+    reason: "Error policy contract uses handle verb per public interface"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/provider_registry_loader.py
+    rule_id: FUNC_PREFIX
+    reason: "Provider registry loader exposes load verbs without prefixes"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/config/loader.py
+    rule_id: FUNC_PREFIX
+    reason: "Config loader functions keep load_* verbs for compatibility"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/config/provider_registry_loader.py
+    rule_id: FUNC_PREFIX
+    reason: "Registry cache helper uses clear verb without prefix"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/config/sources.py
+    rule_id: FUNC_PREFIX
+    reason: "YAML readers use read_* verbs preserved for compatibility"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/output/impl/base_writer.py
+    rule_id: FUNC_PREFIX
+    reason: "Base writer implements write verb from contract"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/transform/impl/hash_service_impl.py
+    rule_id: FUNC_PREFIX
+    reason: "Hash service impl exposes add_* verbs matching domain service contract"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/validation/impl/pandera_validator.py
+    rule_id: FUNC_PREFIX
+    reason: "Validator implements validate verb from contract"
     owner: infra
     expiry: permanent
 

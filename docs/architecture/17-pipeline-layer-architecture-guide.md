@@ -1,4 +1,4 @@
-# 17 Pipeline Layer Architecture Guide
+# Pipeline Layer Architecture Guide
 
 ## Purpose
 This guide clarifies how the four core layers map to the codebase, how dependencies flow between them, and how manual dependency injection (DI) assembles a runnable pipeline. It complements the existing ETL and system-design overviews and keeps terminology aligned with the naming and documentation standards in the styleguide ([naming](../00-styleguide/00-naming-conventions.md), [documentation rules](../00-styleguide/10-documentation-standards.md)).

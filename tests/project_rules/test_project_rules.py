@@ -2,19 +2,19 @@ from __future__ import annotations
 
 import ast
 import re
+import tomllib
 from pathlib import Path
 from typing import Iterable
 
 import pytest
-import tomllib
 import yaml
 
 from bioetl.domain.configs import HashingConfig, NormalizationConfig
 from bioetl.infrastructure.config.provider_registry_loader import (
+    ProviderNotConfiguredError,
+    ProviderRegistryFormatError,
     ProviderRegistryModel,
     ProviderRegistryNotFoundError,
-    ProviderRegistryFormatError,
-    ProviderNotConfiguredError,
     ensure_provider_known,
 )
 
@@ -41,7 +41,9 @@ def test_style_tooling_is_configured(pyproject: dict) -> None:
     tools = pyproject.get("tool", {})
     missing = [name for name in ("black", "isort", "ruff") if name not in tools]
     if missing:
-        pytest.fail(f"Missing formatter/linter configuration sections: {', '.join(missing)}")
+        pytest.fail(
+            f"Missing formatter/linter configuration sections: {', '.join(missing)}"
+        )
 
 
 def test_mypy_strict_options_enabled(pyproject: dict) -> None:
@@ -52,15 +54,22 @@ def test_mypy_strict_options_enabled(pyproject: dict) -> None:
         "check_untyped_defs": True,
         "no_implicit_optional": True,
     }
-    missing = [key for key, expected in required_flags.items() if mypy_cfg.get(key) != expected]
+    missing = [
+        key
+        for key, expected in required_flags.items()
+        if mypy_cfg.get(key) != expected
+    ]
     if missing:
         pytest.fail(
-            "Mypy strict configuration is incomplete for keys: " + ", ".join(sorted(missing))
+            "Mypy strict configuration is incomplete for keys: "
+            + ", ".join(sorted(missing))
         )
 
 
 def test_abcs_from_registry_have_docstrings() -> None:
-    registry_path = BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
+    registry_path = (
+        BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
+    )
     registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
 
     missing: list[str] = []
@@ -86,9 +95,10 @@ def test_module_and_function_naming_conventions() -> None:
 
     for path in _iter_python_files(BIOETL_ROOT):
         filename = path.name
-        if filename not in {"__init__.py", "__main__.py"} and not MODULE_NAME_PATTERN.match(
-            filename
-        ):
+        if filename not in {
+            "__init__.py",
+            "__main__.py",
+        } and not MODULE_NAME_PATTERN.match(filename):
             violations.append(f"Invalid module name: {filename}")
 
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -98,14 +108,16 @@ def test_module_and_function_naming_conventions() -> None:
                     continue
                 if not CLASS_NAME_PATTERN.match(node.name):
                     violations.append(
-                        f"{path}:{node.lineno} class name '{node.name}' violates convention"
+                        f"{path}:{node.lineno} class name "
+                        f"'{node.name}' violates convention"
                     )
             if isinstance(node, ast.FunctionDef):
                 if node.name.startswith("_"):
                     continue
                 if not FUNCTION_NAME_PATTERN.match(node.name):
                     violations.append(
-                        f"{path}:{node.lineno} function name '{node.name}' violates snake_case"
+                        f"{path}:{node.lineno} function name "
+                        f"'{node.name}' violates snake_case"
                     )
 
     if violations:
@@ -149,7 +161,8 @@ def test_pandera_schemas_defined_for_entities() -> None:
                     for base in node.bases
                 )
                 or any(
-                    isinstance(base, ast.Name) and base.id in {"DataFrameModel", "DataFrameSchema"}
+                    isinstance(base, ast.Name)
+                    and base.id in {"DataFrameModel", "DataFrameSchema"}
                     for base in node.bases
                 )
             )
@@ -163,11 +176,15 @@ def test_pandera_schemas_defined_for_entities() -> None:
 
 
 def test_configs_validate_against_models() -> None:
-    hashing_data = yaml.safe_load((Path("configs") / "hashing.yaml").read_text(encoding="utf-8"))
+    hashing_data = yaml.safe_load(
+        (Path("configs") / "hashing.yaml").read_text(encoding="utf-8")
+    )
     normalization_data = yaml.safe_load(
         (Path("configs") / "normalization.yaml").read_text(encoding="utf-8")
     )
-    providers_data = yaml.safe_load((Path("configs") / "providers.yaml").read_text(encoding="utf-8"))
+    providers_data = yaml.safe_load(
+        (Path("configs") / "providers.yaml").read_text(encoding="utf-8")
+    )
 
     HashingConfig.model_validate(hashing_data.get("hashing", {}))
     NormalizationConfig.model_validate(normalization_data.get("normalization", {}))
@@ -181,7 +198,9 @@ def test_provider_registry_fail_fast_on_unknown_provider() -> None:
         ensure_provider_known("nonexistent", registry_path=registry_path)
 
     with pytest.raises(ProviderRegistryNotFoundError):
-        ensure_provider_known("chembl", registry_path=registry_path.parent / "missing.yaml")
+        ensure_provider_known(
+            "chembl", registry_path=registry_path.parent / "missing.yaml"
+        )
 
     with pytest.raises(ProviderRegistryFormatError):
         bad_path = registry_path.parent / "_invalid_provider.yaml"
@@ -190,4 +209,3 @@ def test_provider_registry_fail_fast_on_unknown_provider() -> None:
             ensure_provider_known("chembl", registry_path=bad_path)
         finally:
             bad_path.unlink(missing_ok=True)
-

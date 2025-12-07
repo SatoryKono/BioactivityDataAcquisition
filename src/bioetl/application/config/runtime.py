@@ -6,10 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.configs import PipelineConfig
-from bioetl.infrastructure.config.loader import (
-    load_pipeline_config,
-    load_pipeline_config_from_path,
-)
+from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 
 
 def build_runtime_config(
@@ -20,6 +17,7 @@ def build_runtime_config(
     cli_overrides: dict[str, Any] | None = None,
     env_overrides: dict[str, Any] | None = None,
     configs_root: str | Path | None = None,
+    loader: PipelineConfigLoaderProtocol | None = None,
 ) -> PipelineConfig:
     """
     Загружает конфигурацию пайплайна через инфраструктурный слой.
@@ -27,8 +25,11 @@ def build_runtime_config(
     Приоритет значений: CLI overrides → ENV overrides → YAML.
     """
 
+    if loader is None:
+        raise ValueError("PipelineConfigLoader is required")
+
     if config_path is not None:
-        return load_pipeline_config_from_path(
+        return loader.get_from_path(
             config_path,
             profile=profile,
             profiles_root=Path(configs_root) / "profiles" if configs_root else None,
@@ -39,7 +40,7 @@ def build_runtime_config(
     if pipeline_id is None:
         raise ValueError("pipeline_id or config_path must be provided")
 
-    return load_pipeline_config(
+    return loader.get_by_id(
         pipeline_id,
         profile=profile,
         cli_overrides=cli_overrides,

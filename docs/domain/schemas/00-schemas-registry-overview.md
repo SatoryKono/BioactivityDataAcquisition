@@ -1,4 +1,4 @@
-# 00 Schemas Registry Overview
+# Schemas Registry Overview
 
 BioETL uses Pandera schemas as a central mechanism to validate all datasets before they are written.
 

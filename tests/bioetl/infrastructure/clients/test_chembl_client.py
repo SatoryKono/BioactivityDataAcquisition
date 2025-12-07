@@ -49,9 +49,7 @@ def test_request_activity_with_middleware(client, mock_components):
     mock_components["http_middleware"].request.return_value = mock_response
 
     # Configure response parser to return the data pass-through or processed
-    mock_components["response_parser"].parse_response.return_value = {
-        "data": "test"
-    }
+    mock_components["response_parser"].parse_response.return_value = {"data": "test"}
 
     # Act
     result = client.request_activity(molecule_chembl_id="CHEMBL123")

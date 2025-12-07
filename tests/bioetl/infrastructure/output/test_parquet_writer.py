@@ -24,7 +24,6 @@ def test_parquet_write():
         patch("pandas.DataFrame.to_parquet") as mock_to_parquet,
         patch("time.monotonic", side_effect=[0.0, 0.1]),
     ):
-
         result = writer.write(df, path)
 
         # Check result

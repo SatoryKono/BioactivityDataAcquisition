@@ -35,7 +35,9 @@ def test_fulldate_transformer_localizes_naive_timestamp_once() -> None:
     first = transformer.apply(df)
     second = transformer.apply(df)
 
-    expected_ts = (base_ts + timedelta(seconds=1)).replace(tzinfo=timezone.utc).isoformat()
+    expected_ts = (
+        (base_ts + timedelta(seconds=1)).replace(tzinfo=timezone.utc).isoformat()
+    )
 
     assert first["extracted_at"].tolist() == [expected_ts]
     assert second["extracted_at"].tolist() == [expected_ts]

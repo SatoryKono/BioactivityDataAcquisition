@@ -115,7 +115,7 @@ def test_pipeline_outputs(
         provider_registry = None
     else:
         provider_loader = None
-        provider_registry = provider_loader_factory().load_registry()
+        provider_registry = provider_loader_factory().get_registry()
 
     orchestrator = PipelineOrchestrator(
         pipeline_name,
@@ -132,9 +132,9 @@ def test_pipeline_outputs(
         if "Network access disabled" in cause_text:
             pytest.xfail(f"Network blocked for {pipeline_name}: {cause_text}")
         raise
-    assert (
-        run_result.success
-    ), f"Pipeline {pipeline_name} failed: {run_result.error_message}"
+    assert run_result.success, (
+        f"Pipeline {pipeline_name} failed: {run_result.error_message}"
+    )
 
     output_csv = output_dir / f"{entity_name}.csv"
     if not output_csv.exists():

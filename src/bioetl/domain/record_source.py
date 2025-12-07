@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Any, Protocol, TypedDict, cast
 
 import pandas as pd
@@ -88,3 +89,34 @@ class ApiRecordSource(RecordSource):
         raise TypeError(
             "iter_extract must yield DataFrame, mapping, or iterable of mappings."
         )
+
+
+class FileRecordSourceFactoryABC(Protocol):
+    """Factory for file-based record sources (CSV and ID list)."""
+
+    def create_csv_source(
+        self,
+        *,
+        input_path: Path,
+        csv_options: Any,
+        limit: int | None,
+        chunk_size: int | None,
+        logger: Any,
+    ) -> RecordSource:
+        """Create CSV-backed record source."""
+
+    def create_id_list_source(
+        self,
+        *,
+        input_path: Path,
+        id_column: str,
+        csv_options: Any,
+        limit: int | None,
+        chunk_size: int | None,
+        extraction_service: ExtractionServiceABC,
+        source_config: Any,
+        entity: str,
+        filter_key: str,
+        logger: Any,
+    ) -> RecordSource:
+        """Create ID-list-backed record source."""

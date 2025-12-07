@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from tests.architecture.test_layer_dependencies import _collect_imports
 from tests.project_rules.conftest import iter_python_files
 
@@ -29,7 +28,9 @@ def test_domain_has_no_external_side_effects(bioetl_root) -> None:
         for reference in _collect_imports(file_path):
             module = reference.module
 
-            if module.startswith(("bioetl.infrastructure", "bioetl.application", "bioetl.interfaces")):
+            if module.startswith(
+                ("bioetl.infrastructure", "bioetl.application", "bioetl.interfaces")
+            ):
                 violations.append(
                     f"{file_path.as_posix()}:{reference.lineno}: "
                     f"domain must not depend on outer layers ({module})"
@@ -43,4 +44,3 @@ def test_domain_has_no_external_side_effects(bioetl_root) -> None:
                 )
 
     _assert_no_violations(violations)
-

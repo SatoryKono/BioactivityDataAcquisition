@@ -70,14 +70,14 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
 class ProviderRegistryLoaderABC(Protocol):
     """Loader contract for provider registry definitions."""
 
-    def load(
+    def get_providers(
         self,
         *,
         registry: MutableProviderRegistryABC | None = None,
     ) -> list[ProviderDefinition]:
-        """Load provider definitions into registry and return them."""
+        """Get provider definitions into registry and return them."""
 
-    def load_registry(
+    def get_registry(
         self, *, registry: MutableProviderRegistryABC | None = None
     ) -> MutableProviderRegistryABC:
         """Populate registry and return it (compatibility helper)."""
@@ -117,5 +117,3 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition
-
-

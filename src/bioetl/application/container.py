@@ -10,17 +10,19 @@ from bioetl.application.pipelines.hooks_impl import (
     MetricsPipelineHookImpl,
 )
 from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
     OutputWriterABC,
-    QualityReportABC,
-    WriterABC,
+    RunMetadataBuilderProtocol,
 )
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.record_source import (
+    ApiRecordSource,
+    FileRecordSourceFactoryABC,
+    RecordSource,
+)
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -29,17 +31,6 @@ from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
-from bioetl.infrastructure.observability.factories import default_logging_port
-from bioetl.infrastructure.output.factories import (
-    default_metadata_writer,
-    default_output_writer,
-    default_quality_reporter,
-    default_writer,
-)
 
 
 class PipelineContainer(PipelineContainerABC):
@@ -51,10 +42,12 @@ class PipelineContainer(PipelineContainerABC):
         self,
         config: PipelineConfig,
         *,
-        logger: LoggingPortABC | None = None,
-        writer: WriterABC | None = None,
-        metadata_writer: MetadataWriterABC | None = None,
-        quality_reporter: QualityReportABC | None = None,
+        logger: LoggingPortABC,
+        output_writer: OutputWriterABC,
+        validator_factory: ValidatorFactoryABC,
+        record_source_factory: FileRecordSourceFactoryABC,
+        metadata_builder: RunMetadataBuilderProtocol,
+        metrics_port: PipelineMetricsPortABC,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashServiceABC | None = None,
@@ -62,39 +55,28 @@ class PipelineContainer(PipelineContainerABC):
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
         schema_provider: SchemaProviderABC | None = None,
-        validator_factory: ValidatorFactoryABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
         self._schema_provider: SchemaProviderABC = schema_provider or SchemaRegistry()
-        self._validator_factory: ValidatorFactoryABC = (
-            validator_factory or self._default_validator_factory()
-        )
-        self._logger: LoggingPortABC = logger or default_logging_port()
-        self._writer: WriterABC = writer or default_writer()
-        self._metadata_writer: MetadataWriterABC = (
-            metadata_writer or default_metadata_writer()
-        )
-        self._quality_reporter: QualityReportABC = (
-            quality_reporter or default_quality_reporter()
-        )
+        if validator_factory is None:
+            raise ValueError("Validator factory must be provided")
+        self._validator_factory: ValidatorFactoryABC = validator_factory
+        self._logger: LoggingPortABC = logger
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy: ErrorPolicyABC | None = error_policy
         self._hash_service: HashServiceABC | None = hash_service
         self._post_transformer: TransformerABC | None = post_transformer
+        self._record_source_factory = record_source_factory
+        self._metadata_builder = metadata_builder
+        self._metrics_port = metrics_port
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
         if self._provider_registry is None and self._provider_registry_provider is None:
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
             )
-        self._output_writer: OutputWriterABC = default_output_writer(
-            config=self._config.determinism,
-            qc_config=self._config.qc,
-            writer=self._writer,
-            metadata_writer=self._metadata_writer,
-            quality_reporter=self._quality_reporter,
-        )
+        self._output_writer: OutputWriterABC = output_writer
         register_schemas(self._schema_provider)
 
     @property
@@ -116,6 +98,14 @@ class PipelineContainer(PipelineContainerABC):
     def get_output_writer(self) -> OutputWriterABC:
         """Get the unified output writer."""
         return self._output_writer
+
+    def get_record_source_factory(self) -> FileRecordSourceFactoryABC:
+        """Expose record source factory port."""
+        return self._record_source_factory
+
+    def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
+        """Get metadata builder port."""
+        return self._metadata_builder
 
     def get_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
@@ -153,10 +143,11 @@ class PipelineContainer(PipelineContainerABC):
         if mode == "csv":
             if path is None:
                 raise ValueError("input_path is required for CSV mode")
-            return CsvRecordSourceImpl(
+            return self._record_source_factory.create_csv_source(
                 input_path=Path(path),
                 csv_options=self._config.csv_options,
                 limit=limit,
+                chunk_size=None,
                 logger=effective_logger,
             )
 
@@ -167,11 +158,12 @@ class PipelineContainer(PipelineContainerABC):
             source_config = self._resolve_provider_config(definition)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
-            return IdListRecordSourceImpl(
+            return self._record_source_factory.create_id_list_source(
                 input_path=Path(path),
                 id_column=id_column,
                 csv_options=self._config.csv_options,
                 limit=limit,
+                chunk_size=None,
                 extraction_service=extraction_service,
                 source_config=source_config,
                 entity=self._config.entity_name,
@@ -189,14 +181,6 @@ class PipelineContainer(PipelineContainerABC):
             filters=filters,
             chunk_size=self._config.batch_size,
         )
-
-    @staticmethod
-    def _default_validator_factory() -> ValidatorFactoryABC:
-        from bioetl.infrastructure.validation.factories import (
-            default_validator_factory,
-        )
-
-        return default_validator_factory()
 
     def get_extraction_service(self) -> Any:
         """Get the extraction service based on provider configuration."""
@@ -235,6 +219,7 @@ class PipelineContainer(PipelineContainerABC):
                     pipeline_id=self._config.id,
                     provider=self._provider_id.value,
                     entity_name=self._config.entity_name,
+                    metrics_port=self._metrics_port,
                 ),
             ]
         return list(self._hooks)
@@ -285,28 +270,34 @@ class PipelineContainer(PipelineContainerABC):
 def build_pipeline_dependencies(
     config: PipelineConfig,
     *,
-    logger: LoggingPortABC | None = None,
-    writer: WriterABC | None = None,
-    metadata_writer: MetadataWriterABC | None = None,
-    quality_reporter: QualityReportABC | None = None,
+    logger: LoggingPortABC,
+    output_writer: OutputWriterABC,
+    validator_factory: ValidatorFactoryABC,
+    record_source_factory: FileRecordSourceFactoryABC,
+    metadata_builder: RunMetadataBuilderProtocol,
+    metrics_port: PipelineMetricsPortABC,
     hooks: list[PipelineHookABC] | None = None,
     error_policy: ErrorPolicyABC | None = None,
     hash_service: HashServiceABC | None = None,
     post_transformer: TransformerABC | None = None,
     provider_registry: ProviderRegistryABC | None = None,
     provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+    schema_provider: SchemaProviderABC | None = None,
 ) -> PipelineContainerABC:
     """Factory for the container."""
     return PipelineContainer(
         config,
         logger=logger,
-        writer=writer,
-        metadata_writer=metadata_writer,
-        quality_reporter=quality_reporter,
+        output_writer=output_writer,
+        validator_factory=validator_factory,
+        record_source_factory=record_source_factory,
+        metadata_builder=metadata_builder,
+        metrics_port=metrics_port,
         hooks=hooks,
         error_policy=error_policy,
         hash_service=hash_service,
         post_transformer=post_transformer,
         provider_registry=provider_registry,
         provider_registry_provider=provider_registry_provider,
+        schema_provider=schema_provider,
     )

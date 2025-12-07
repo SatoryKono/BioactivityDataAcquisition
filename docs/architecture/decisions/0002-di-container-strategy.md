@@ -1,4 +1,4 @@
-# 0002 Di Container Strategy
+# DI Container Strategy
 
 ## Status
 Accepted

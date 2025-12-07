@@ -1,4 +1,4 @@
-# 02 Adding New Pipeline
+# Adding New Pipeline
 
 ## Шаги
 1. **Клиент источника**: реализуйте ABC/Default/Impl для нового API (contracts.py, factories.py, impl/*), добавьте в abc реестры.

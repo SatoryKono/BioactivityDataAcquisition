@@ -39,7 +39,7 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     config.storage.output_path = str(tmp_path / "output")
 
     provider_loader_factory = partial(create_provider_loader)
-    registry = provider_loader_factory().load_registry()
+    registry = provider_loader_factory().get_registry()
     container = build_pipeline_dependencies(
         config,
         provider_registry=registry,

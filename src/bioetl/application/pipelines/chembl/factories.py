@@ -23,6 +23,8 @@ def create_chembl_pipeline(container: PipelineContainerABC) -> ChemblEntityPipel
         output_writer=container.get_output_writer(),
         extraction_service=container.get_extraction_service(),
         hash_service=container.get_hash_service(),
+        metadata_builder=container.get_metadata_builder(),
+        file_record_source_factory=container.get_record_source_factory(),
         record_source=None,  # Pipeline resolves source based on config
         normalization_service=container.get_normalization_service(),
         hooks=container.get_hooks(),

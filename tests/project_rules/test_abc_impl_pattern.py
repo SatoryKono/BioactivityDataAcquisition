@@ -70,4 +70,3 @@ def test_impls_subclass_their_abcs() -> None:
 
     if violations:
         pytest.fail("\n".join(sorted(set(violations))))
-

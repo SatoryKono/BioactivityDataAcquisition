@@ -1,4 +1,4 @@
-# 00 Clients Overview
+# Clients Overview
 
 ## Hexagonal layout
 
