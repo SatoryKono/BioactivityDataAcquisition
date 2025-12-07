@@ -212,6 +212,18 @@ exceptions:
     owner: infra
     expiry: permanent
 
+  - path: src/bioetl/infrastructure/transform/impl/chembl_normalization_service_impl.py
+    rule_id: CLASS_SUFFIX
+    reason: "NormalizedRecord is TypedDict DTO, not Pydantic Model; no suffix required per policy"
+    owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/domain/clients/base/output/contracts.py
+    rule_id: CLASS_SUFFIX
+    reason: "WriteResult is plain dataclass DTO; no Model suffix required per policy"
+    owner: domain
+    expiry: permanent
+
   - path: src/bioetl/infrastructure/output/unified_writer.py
     rule_id: CLASS_SUFFIX
     reason: "Writer pattern"

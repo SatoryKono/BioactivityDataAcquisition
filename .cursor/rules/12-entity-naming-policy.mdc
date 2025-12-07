@@ -23,10 +23,21 @@ globs: ["src/**/*.py", "tests/**/*.py", "configs/**/*.yaml"]
 - `Facade` — top-level facades
 - `Registry` — registries
 - `Adapter`/`Transport` — low-level adapters/transports
-- `Protocol`/`ABC` — contracts
-- `Config`/`Model`/`Params` — configuration/model types
+- `Protocol` — structural contracts (`typing.Protocol`)
+- `ABC` — abstract base classes (`abc.ABC`)
+- `Port` — interface ports (ABC-based, e.g., `LoggingPortABC`)
+- `Config` — configuration types
+- `Model` — **Pydantic models only** (not plain dataclasses)
+- `Params` — parameter objects
 - `Error` — exceptions
 - `Impl` — implementations (e.g., `ChemblDataClientHTTPImpl`)
+
+### Clarifications
+
+- **Plain `dataclass`** and **`TypedDict`** — NO suffix required (e.g., `WriteResult`, `NormalizedRecord`, `StageResult`)
+- **Pydantic `BaseModel`** — use `Model` suffix (e.g., `ProviderRegistryEntryModel`)
+- **`abc.ABC` subclasses** — use `ABC` suffix (e.g., `TransformerABC`, `LoggingPortABC`)
+- **`typing.Protocol`** — use `Protocol` suffix (e.g., `NormalizationConfigProviderProtocol`)
 
 ## Function Prefixes
 
