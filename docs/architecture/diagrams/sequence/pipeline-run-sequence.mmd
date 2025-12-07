@@ -19,7 +19,7 @@ sequenceDiagram
     participant User as CLI/User
     participant Pipe as Pipeline (ChemblEntityPipeline)
     participant Hooks as Hooks (Logging + Metrics)
-    participant Stage as StageRunner/ErrorPolicy
+    participant Stage as StageRunnerFacade/ErrorPolicy
     participant Extr as Extractor (ChemblExtractorImpl)
     participant Source as RecordSource (API/CSV/ID list)
     participant Trans as Transformer (ChemblTransformerImpl)

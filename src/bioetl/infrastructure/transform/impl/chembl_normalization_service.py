@@ -17,7 +17,7 @@ from bioetl.domain.transform.normalizers import (
 )
 from bioetl.infrastructure.transform.impl import normalize as normalize_impl
 from bioetl.infrastructure.transform.impl.base_normalizer import (
-    BaseNormalizationService,
+    BaseNormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.serializer import (
     serialize_dict,
@@ -50,7 +50,7 @@ class NormalizationService(Protocol):
 
 
 class ChemblNormalizationService(
-    BaseNormalizationService, NormalizationServiceABC, NormalizationService
+    BaseNormalizationServiceImpl, NormalizationServiceABC, NormalizationService
 ):
     """Normalization service for ChEMBL records."""
 

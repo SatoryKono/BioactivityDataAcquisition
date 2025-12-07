@@ -8,7 +8,7 @@ import pytest
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.hooks_manager import HooksManager
-from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
@@ -20,7 +20,7 @@ def _build_context() -> RunContext:
 
 
 @pytest.mark.unit
-def test_hooks_manager_notifies_hooks(mock_logger):
+def test_hooks_registry_notifies_hooks(mock_logger):
     hook = MagicMock(spec=PipelineHookABC)
     manager = HooksManager(
         logger=mock_logger,
@@ -47,7 +47,7 @@ def test_hooks_manager_notifies_hooks(mock_logger):
 
 
 @pytest.mark.unit
-def test_error_policy_manager_retry_and_skip(mock_logger):
+def test_error_policy_facade_retry_and_skip(mock_logger):
     hooks_manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
@@ -91,9 +91,9 @@ def test_stage_runner_process_and_failure(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: f"skipped-{stage}",
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
-        error_policy_manager=manager,
+        error_policy_facade=manager,
         entity_name="entity",
         provider_id=ProviderId("chembl"),
     )
@@ -163,9 +163,9 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: pd.DataFrame(),
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
-        error_policy_manager=manager,
+        error_policy_facade=manager,
         entity_name="entity",
         provider_id=ProviderId("chembl"),
     )
@@ -203,12 +203,12 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runner_raises_on_missing_result(mock_logger):
-    hooks_manager = HooksManager(
+    hooks_manager = HooksRegistry(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyManager(
+    manager = ErrorPolicyFacade(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -216,9 +216,9 @@ def test_stage_runner_raises_on_missing_result(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: pd.DataFrame(),
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
-        error_policy_manager=manager,
+        error_policy_facade=manager,
         entity_name="entity",
         provider_id=ProviderId("chembl"),
     )

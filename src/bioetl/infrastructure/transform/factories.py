@@ -1,6 +1,7 @@
 """Factories for transform infrastructure components."""
 
 from bioetl.domain.transform.contracts import (
+    BaseNormalizationServiceABC,
     HasherABC,
     HashServiceABC,
     NormalizationConfigProvider,
@@ -8,6 +9,9 @@ from bioetl.domain.transform.contracts import (
 )
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
 from bioetl.infrastructure.transform.impl.hash_service_impl import HashServiceImpl
+from bioetl.infrastructure.transform.impl.base_normalizer import (
+    BaseNormalizationServiceImpl,
+)
 from bioetl.infrastructure.transform.impl.normalization_service_impl import (
     NormalizationServiceImpl,
 )
@@ -25,6 +29,14 @@ def default_hash_service() -> HashServiceABC:
     return HashServiceImpl(hasher=default_hasher())
 
 
+def default_base_normalization_service(
+    config: NormalizationConfigProvider,
+) -> BaseNormalizationServiceABC:
+    """Создает базовый сервис нормализации."""
+
+    return BaseNormalizationServiceImpl(config)
+
+
 def default_normalization_service(
     config: NormalizationConfigProvider,
 ) -> NormalizationServiceABC:
@@ -33,4 +45,9 @@ def default_normalization_service(
     return NormalizationServiceImpl(config)
 
 
-__all__ = ["default_hasher", "default_hash_service", "default_normalization_service"]
+__all__ = [
+    "default_hasher",
+    "default_hash_service",
+    "default_base_normalization_service",
+    "default_normalization_service",
+]

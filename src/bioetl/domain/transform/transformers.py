@@ -23,7 +23,7 @@ class TransformerABC(ABC):
         """Выполняет преобразование DataFrame."""
 
 
-class TransformerChain(TransformerABC):
+class TransformerChainImpl(TransformerABC):
     """Комбинирует несколько трансформеров в последовательность."""
 
     def __init__(self, transformers: list[TransformerABC]) -> None:
@@ -38,7 +38,7 @@ class TransformerChain(TransformerABC):
         return result
 
 
-class HashColumnsTransformer(TransformerABC):
+class HashColumnsTransformerImpl(TransformerABC):
     """Добавляет hash_business_key и hash_row."""
 
     def __init__(
@@ -58,8 +58,8 @@ class HashColumnsTransformer(TransformerABC):
         )
 
 
-class LocalIndexColumnTransformer(TransformerABC):
-    """Добавляет локальную индексную колонку."""
+class IndexColumnTransformerImpl(TransformerABC):
+    """Добавляет индексную колонку."""
 
     def __init__(self, hash_service: HashServiceABC) -> None:
         self._hash_service = hash_service
@@ -70,7 +70,7 @@ class LocalIndexColumnTransformer(TransformerABC):
         return self._hash_service.add_index_column(df)
 
 
-class DatabaseVersionTransformer(TransformerABC):
+class DatabaseVersionTransformerImpl(TransformerABC):
     """Добавляет колонку с версией базы данных."""
 
     def __init__(
@@ -90,7 +90,7 @@ class DatabaseVersionTransformer(TransformerABC):
         return self._hash_service.add_database_version_column(df, version)
 
 
-class FulldateTransformer(TransformerABC):
+class FulldateTransformerImpl(TransformerABC):
     """Добавляет колонку extracted_at с таймстампом."""
 
     def __init__(self, hash_service: HashServiceABC) -> None:
@@ -104,9 +104,9 @@ class FulldateTransformer(TransformerABC):
 
 __all__ = [
     "TransformerABC",
-    "TransformerChain",
-    "HashColumnsTransformer",
-    "LocalIndexColumnTransformer",
-    "DatabaseVersionTransformer",
-    "FulldateTransformer",
+    "TransformerChainImpl",
+    "HashColumnsTransformerImpl",
+    "IndexColumnTransformerImpl",
+    "DatabaseVersionTransformerImpl",
+    "FulldateTransformerImpl",
 ]

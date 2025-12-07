@@ -16,7 +16,7 @@ from pydantic import (
 
 from bioetl.domain.configs.base import (
     ClientConfig,
-    CsvInputOptions,
+    CsvInputConfig,
     DeterminismConfig,
     HashingConfig,
     InterfaceFeaturesConfig,
@@ -45,7 +45,7 @@ class PipelineConfig(BaseModel):
     dry_run: bool = False
     provider_config: ProviderConfigUnion
 
-    csv_options: CsvInputOptions = Field(default_factory=CsvInputOptions)
+    csv_options: CsvInputConfig = Field(default_factory=CsvInputConfig)
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
     client: ClientConfig = Field(default_factory=ClientConfig)
     storage: StorageConfig = Field(default_factory=StorageConfig)

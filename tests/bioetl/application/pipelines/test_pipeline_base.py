@@ -19,12 +19,12 @@ from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
-    FulldateTransformer,
-    HashColumnsTransformer,
-    LocalIndexColumnTransformer,
+    DatabaseVersionTransformerImpl,
+    FulldateTransformerImpl,
+    HashColumnsTransformerImpl,
+    IndexColumnTransformerImpl,
     TransformerABC,
-    TransformerChain,
+    TransformerChainImpl,
 )
 from bioetl.infrastructure.transform.factories import default_hash_service
 
@@ -311,7 +311,7 @@ def test_error_policy_retry_callback_and_skip(
         provider=pipeline._provider_id.value,  # noqa: SLF001
     )
 
-    result_df = pipeline._error_policy_manager.execute(  # noqa: SLF001
+    result_df = pipeline._error_policy_facade.execute(  # noqa: SLF001
         "extract",
         context,
         failing_action,
@@ -322,7 +322,7 @@ def test_error_policy_retry_callback_and_skip(
     assert result_df.empty
     assert attempts["count"] == 2
     on_retry.assert_called_once()
-    last_error = pipeline._error_policy_manager.last_error  # noqa: SLF001
+    last_error = pipeline._error_policy_facade.last_error  # noqa: SLF001
     assert last_error is not None
     assert last_error.attempt == 2
 
@@ -369,18 +369,18 @@ def test_hashing_logic(
         mock_validation_service,
         mock_output_writer,
     )
-    transformer = HashColumnsTransformer(hash_service, ["id"])
+    transformer = HashColumnsTransformerImpl(hash_service, ["id"])
     df = pd.DataFrame({"id": [1], "val": ["x"]})
     res = transformer.apply(df)
     assert "hash_row" in res.columns
     assert "hash_business_key" in res.columns
     assert res["hash_business_key"].iloc[0] is not None
 
-    transformer_missing = HashColumnsTransformer(hash_service, ["missing_col"])
+    transformer_missing = HashColumnsTransformerImpl(hash_service, ["missing_col"])
     res_missing = transformer_missing.apply(df)
     assert res_missing["hash_business_key"].iloc[0] is None
 
-    transformer_empty = HashColumnsTransformer(hash_service, [])
+    transformer_empty = HashColumnsTransformerImpl(hash_service, [])
     res_empty = transformer_empty.apply(df)
     assert res_empty["hash_business_key"].iloc[0] is None
 
@@ -483,11 +483,11 @@ def _assert_dry_run_meta(
 
 
 def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
-    assert isinstance(transformer, TransformerChain)
+    assert isinstance(transformer, TransformerChainImpl)
 
     signature: list[tuple] = []
     for component in transformer._transformers:  # type: ignore[attr-defined]
-        if isinstance(component, HashColumnsTransformer):
+        if isinstance(component, HashColumnsTransformerImpl):
             signature.append(
                 (
                     component.__class__.__name__,
@@ -497,7 +497,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, LocalIndexColumnTransformer):
+        if isinstance(component, IndexColumnTransformerImpl):
             signature.append(
                 (
                     component.__class__.__name__,
@@ -506,7 +506,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, DatabaseVersionTransformer):
+        if isinstance(component, DatabaseVersionTransformerImpl):
             signature.append(
                 (
                     component.__class__.__name__,
@@ -516,7 +516,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, FulldateTransformer):
+        if isinstance(component, FulldateTransformerImpl):
             signature.append(
                 (
                     component.__class__.__name__,

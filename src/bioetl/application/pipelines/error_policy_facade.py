@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 
-from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.application.pipelines.hooks_registry import HooksRegistry
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
@@ -11,14 +11,14 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC
 from bioetl.domain.providers import ProviderId
 
 
-class ErrorPolicyManager:
+class ErrorPolicyFacade:
     """Делегат для применения политики ошибок и вызова хуков."""
 
     def __init__(
         self,
         *,
         error_policy: ErrorPolicyABC,
-        hooks_manager: HooksManager,
+        hooks_manager: HooksRegistry,
         logger: LoggingPort,
         provider_id: ProviderId,
         entity_name: str,
