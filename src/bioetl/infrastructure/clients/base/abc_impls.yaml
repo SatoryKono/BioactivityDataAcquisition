@@ -88,3 +88,63 @@ OutputWriterABC:
   default_factory: bioetl.infrastructure.output.factories.default_output_writer
   implementations:
     Unified: bioetl.infrastructure.output.unified_writer.UnifiedOutputWriter
+
+SourceClientABC:
+  default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
+  implementations:
+    ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.http_client.ChemblDataClientHTTPImpl
+
+RequestBuilderABC:
+  implementations:
+    Chembl: bioetl.infrastructure.clients.chembl.request_builder.ChemblRequestBuilderImpl
+
+ResponseParserABC:
+  implementations:
+    Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblResponseParserImpl
+
+PaginatorABC:
+  implementations:
+    Chembl: bioetl.infrastructure.clients.chembl.paginator.ChemblPaginatorImpl
+
+SecretProviderABC:
+  default_factory: bioetl.infrastructure.clients.base.factories.default_secret_provider
+  implementations:
+    Env: bioetl.infrastructure.clients.base.factories.EnvSecretProvider
+
+SideInputProviderABC:
+  implementations: {}
+
+PipelineContainerABC:
+  implementations:
+    Default: bioetl.application.container.PipelineContainer
+
+StageABC:
+  implementations: {}
+
+PipelineHookABC:
+  implementations:
+    Logging: bioetl.application.pipelines.hooks_impl.LoggingPipelineHookImpl
+    Metrics: bioetl.application.pipelines.hooks_impl.MetricsPipelineHookImpl
+
+ErrorPolicyABC:
+  implementations:
+    FailFast: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
+    ContinueOnError: bioetl.application.pipelines.hooks_impl.ContinueOnErrorPolicyImpl
+
+CLICommandABC:
+  implementations: {}
+
+ProviderRegistryABC:
+  implementations:
+    InMemory: bioetl.domain.provider_registry.InMemoryProviderRegistry
+
+MutableProviderRegistryABC:
+  implementations:
+    InMemory: bioetl.domain.provider_registry.InMemoryProviderRegistry
+
+TracerABC:
+  implementations: {}
+
+SchemaProviderABC:
+  implementations:
+    Default: bioetl.domain.schemas.registry.SchemaRegistry

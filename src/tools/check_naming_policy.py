@@ -78,9 +78,10 @@ LAYER_SUFFIXES = {
         # Providers and registries
         "Provider",
         "Registry",
-        # Interfaces / contracts
+        # Interfaces / contracts / ports
         "ABC",
         "Protocol",
+        "Port",  # Interface ports (ABC-based, e.g., LoggingPort → LoggingPortABC)
         "Impl",
         "Config",
     },
@@ -122,6 +123,7 @@ LAYER_SUFFIXES = {
     "interfaces": {
         "ABC",
         "Protocol",
+        "Port",  # Interface ports (ABC-based)
         "Adapter",
         "Factory",
         "Config",
