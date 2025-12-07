@@ -1,0 +1,28 @@
+checksum: 0de1408fd0a740829cb8e53d19b0d793a200e15f2a3fd627986382f46d6c45ad
+checksums:
+  assay.csv: 0de1408fd0a740829cb8e53d19b0d793a200e15f2a3fd627986382f46d6c45ad
+  correlation_report_table.csv: 73485c2f650c6b32d212266464deea93ce8a7bfb14ea1db5796aec674b3fcf3a
+  quality_report_table.csv: 999d096120fe3fec4963cb263c20a1a4c44981ac50346ffaa6d85908587f95da
+chembl_release: unknown
+entity: assay
+files:
+- assay.csv
+- correlation_report_table.csv
+- quality_report_table.csv
+hash: 0de1408fd0a740829cb8e53d19b0d793a200e15f2a3fd627986382f46d6c45ad
+hash_version: v1_blake2b_256
+provider: chembl
+qc_artifacts:
+  correlation_report_table.csv:
+    checksum: 73485c2f650c6b32d212266464deea93ce8a7bfb14ea1db5796aec674b3fcf3a
+    path: correlation_report_table.csv
+  quality_report_table.csv:
+    checksum: 999d096120fe3fec4963cb263c20a1a4c44981ac50346ffaa6d85908587f95da
+    path: quality_report_table.csv
+qc_config:
+  enable_correlation_report: true
+  enable_quality_report: true
+  min_coverage: 0.85
+row_count: 0
+run_id: 2a91e607-08f3-4c2e-b993-a00b500b462a
+timestamp: '2025-12-07T15:34:16.837054+00:00'
