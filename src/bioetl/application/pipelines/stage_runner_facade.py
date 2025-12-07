@@ -1,4 +1,4 @@
-"""Компонент, отвечающий за выполнение стадий пайплайна."""
+"""Фасад, отвечающий за выполнение стадий пайплайна."""
 
 from collections.abc import Callable
 from datetime import datetime, timezone
@@ -12,7 +12,7 @@ from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.providers import ProviderId
 
 
-class StageRunner:
+class StageRunnerFacade:
     """Оркеструет обработку чанков и сбор результатов стадий."""
 
     def __init__(
