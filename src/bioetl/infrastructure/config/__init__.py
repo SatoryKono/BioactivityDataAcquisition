@@ -1,5 +1,11 @@
 """Configuration management (infrastructure layer)."""
 
+from bioetl.infrastructure.config.defaults_loader import (
+    DefaultsConfigError,
+    DefaultsFileNotFoundError,
+    DefaultsValidationError,
+    get_defaults_config,
+)
 from bioetl.infrastructure.config.loader import (
     ConfigError,
     ConfigFileNotFoundError,
@@ -30,4 +36,8 @@ __all__ = [
     "resolve_pipeline_config_path",
     "get_pipeline_config",
     "get_pipeline_config_from_path",
+    "get_defaults_config",
+    "DefaultsConfigError",
+    "DefaultsFileNotFoundError",
+    "DefaultsValidationError",
 ]
