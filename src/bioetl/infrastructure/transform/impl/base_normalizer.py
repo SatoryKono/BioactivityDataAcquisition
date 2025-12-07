@@ -33,7 +33,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
     def coerce_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Cast configured numeric columns to nullable pandas dtypes."""
 
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg.get("name")
             dtype = field_cfg.get("data_type")
 
@@ -50,7 +50,9 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         return df
 
     def _resolve_mode(self, field_name: str) -> str:
-        if field_name in self._config.normalization.case_sensitive_fields:
+        normalization_config = self._config.get_normalization()
+
+        if field_name in normalization_config.case_sensitive_fields:
             return "sensitive"
         if self._is_id_field(field_name):
             return "id"
@@ -265,7 +267,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         return normalizer(item)
 
     def _is_id_field(self, field_name: str) -> bool:
-        if field_name in self._config.normalization.id_fields:
+        if field_name in self._config.get_normalization().id_fields:
             return True
         if field_name.endswith("_id") or field_name.endswith("_chembl_id"):
             return True
