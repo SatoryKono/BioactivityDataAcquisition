@@ -181,15 +181,15 @@ def test_pandera_schemas_defined_for_entities() -> None:
 
 
 def test_configs_validate_against_models() -> None:
-    hashing_data = yaml.safe_load(
-        (Path("configs") / "hashing.yaml").read_text(encoding="utf-8")
-    )
+    hashing_path = Path("configs") / "hashing.yaml"
+    normalization_path = Path("configs") / "normalization.yaml"
+    providers_path = Path("configs") / "providers.yaml"
+
+    hashing_data = yaml.safe_load(hashing_path.read_text(encoding="utf-8"))
     normalization_data = yaml.safe_load(
-        (Path("configs") / "normalization.yaml").read_text(encoding="utf-8")
+        normalization_path.read_text(encoding="utf-8")
     )
-    providers_data = yaml.safe_load(
-        (Path("configs") / "providers.yaml").read_text(encoding="utf-8")
-    )
+    providers_data = yaml.safe_load(providers_path.read_text(encoding="utf-8"))
 
     HashingConfig.model_validate(hashing_data.get("hashing", {}))
     NormalizationConfig.model_validate(normalization_data.get("normalization", {}))
