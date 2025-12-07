@@ -11,7 +11,7 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC
 from bioetl.domain.providers import ProviderId
 
 
-class ErrorPolicyManager:
+class ErrorPolicyFacade:
     """Делегат для применения политики ошибок и вызова хуков."""
 
     def __init__(
