@@ -1,3 +1,5 @@
+"""Contracts for CLI command implementations."""
+
 from abc import ABC, abstractmethod
 from typing import Any
 

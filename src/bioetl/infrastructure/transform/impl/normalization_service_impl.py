@@ -81,6 +81,7 @@ class NormalizationServiceImpl(
         return self.coerce_numeric_columns(df)
 
     def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+        """Normalize a raw record into a dict using configured field rules."""
         normalized: dict[str, Any] = {}
 
         for field_cfg in self._config.fields:
@@ -118,6 +119,7 @@ class NormalizationServiceImpl(
         return normalized
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize configured columns in the provided dataframe."""
         normalized_df = df.copy()
 
         for field_cfg in self._config.fields:
@@ -132,12 +134,14 @@ class NormalizationServiceImpl(
         return self.coerce_numeric_columns(normalized_df)
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize a batch dataframe and coerce numeric columns."""
         normalized = self.normalize_dataframe(df)
         return self.coerce_numeric_columns(normalized)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
     ) -> pd.Series:
+        """Normalize a single series according to field configuration."""
         name = cast(str, field_cfg.get("name"))
         dtype = field_cfg.get("data_type")
         mode = self._resolve_mode(name)
@@ -175,6 +179,7 @@ class NormalizationServiceImpl(
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
     ) -> Any:
+        """Normalize nested container items preserving structure."""
         if isinstance(item, dict):
             normalized_dict = normalize_record(item, value_normalizer=normalizer)
             return normalized_dict if normalized_dict is not None else {}
@@ -188,6 +193,7 @@ class NormalizationServiceImpl(
         *,
         serialize_with_value_normalizer: bool = False,
     ) -> Any:
+        """Normalize list values and serialize deterministically."""
         try:
 
             def _smart_normalizer(item: Any) -> Any:

@@ -38,6 +38,7 @@ class MQJobHandler:
     """Обрабатывает задания, инициируя запуск пайплайна."""
 
     def handle(self, job: MQJob) -> RunResult:
+        """Execute pipeline run for a queued MQ job."""
         pipeline_id = _to_pipeline_id(job.pipeline_name)
         config = build_runtime_config(pipeline_id=pipeline_id, profile=job.profile)
         if not config.features.mq_interface_enabled:

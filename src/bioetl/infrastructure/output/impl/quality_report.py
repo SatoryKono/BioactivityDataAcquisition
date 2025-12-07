@@ -13,6 +13,7 @@ class QualityReportImpl(QualityReportABC):
     def build_quality_report(
         self, df: pd.DataFrame, *, min_coverage: float
     ) -> pd.DataFrame:
+        """Compute null/coverage metrics per column with coverage threshold."""
         row_count = len(df.index)
         nulls = df.isnull().sum()
         non_nulls = df.notnull().sum()
@@ -40,6 +41,7 @@ class QualityReportImpl(QualityReportABC):
         return report.sort_values(by="column", ignore_index=True)
 
     def build_correlation_report(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Calculate numeric correlation matrix with stable ordering."""
         numeric_columns = sorted(
             c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])
         )

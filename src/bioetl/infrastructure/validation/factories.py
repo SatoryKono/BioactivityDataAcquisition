@@ -17,6 +17,7 @@ class PanderaValidatorFactory(ValidatorFactoryABC):
     """Фабрика валидаторов Pandera."""
 
     def create_validator(self, schema: schema_type) -> ValidatorABC:
+        """Instantiate a Pandera-backed validator for given schema."""
         return PanderaValidatorImpl(schema)
 
 
@@ -24,6 +25,7 @@ class PanderaSchemaProviderFactory(SchemaProviderFactoryABC):
     """Фабрика провайдеров схем для Pandera."""
 
     def create_schema_provider(self) -> SchemaProviderABC:
+        """Create schema provider backed by in-memory registry."""
         return SchemaRegistry()
 
 

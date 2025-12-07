@@ -18,6 +18,7 @@ class PanderaValidatorImpl(ValidatorABC):
         self._schema = schema
 
     def validate(self, df: pd.DataFrame) -> ValidationResult:
+        """Validate dataframe using Pandera schema returning rich result."""
         try:
             validated_df = self._schema.validate(df, lazy=True)
             return ValidationResult(
@@ -40,4 +41,5 @@ class PanderaValidatorImpl(ValidatorABC):
             )
 
     def is_valid(self, df: pd.DataFrame) -> bool:
+        """Return True if dataframe passes validation."""
         return self.validate(df).is_valid

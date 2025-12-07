@@ -96,6 +96,7 @@ class NormalizationServiceImpl(
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
     def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+        """Normalize a single raw record into dictionary form."""
         df = pd.DataFrame([raw])
         normalized = self.normalize_dataframe(df)
         return cast(dict[str, Any], normalized.iloc[0].to_dict())
@@ -151,14 +152,17 @@ class NormalizationServiceImpl(
         return self.coerce_numeric_columns(df)
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize dataframe using configured field rules."""
         return self.normalize_fields(df)
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize a batch dataframe (alias for normalize_dataframe)."""
         return self.normalize_dataframe(df)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
     ) -> pd.Series:
+        """Normalize a single pandas Series according to field config."""
         name = cast(str, field_cfg.get("name"))
         dtype = field_cfg.get("data_type")
         mode = self._resolve_mode(name)
@@ -196,6 +200,7 @@ class NormalizationServiceImpl(
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
     ) -> Any:
+        """Normalize nested container item preserving deterministic shape."""
         if isinstance(item, dict):
             normalized_dict = normalize_record(item, value_normalizer=normalizer)
             return normalized_dict if normalized_dict is not None else {}

@@ -96,6 +96,7 @@ def create_rest_app() -> FastAPI:
 
     @app.post("/pipelines/run", response_model=PipelineRunResponse)
     async def run_pipeline(request: PipelineRunRequest) -> PipelineRunResponse:
+        """Run a pipeline asynchronously and return execution result."""
         orchestrator = _create_orchestrator(
             pipeline_name=request.pipeline_name,
             profile=request.profile,
