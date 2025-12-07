@@ -1,7 +1,7 @@
 # 00 Activity Chembl Overview
 
 ## Pipeline
-- Используется универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) с базой `ChemblPipelineBase`.
+- Используется универсальный `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`).
 - Схема и контракт: `domain/schemas/chembl/activity.py`.
 
 ## Компоненты

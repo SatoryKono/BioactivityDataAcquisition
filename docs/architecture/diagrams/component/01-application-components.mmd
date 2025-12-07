@@ -22,7 +22,7 @@ subgraph Application["Application Layer"]
     StageRunnerFacade["StageRunnerFacade\napplication.pipelines.stage_runner_facade"]:::componentSecondary
     Hooks["Hooks (Logging + Metrics)\nLoggingPipelineHookImpl\nMetricsPipelineHookImpl"]:::componentSecondary
     ErrorPolicy["ErrorPolicyFacade\nFailFast/ContinueOnError"]:::componentSecondary
-    Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
+    Pipelines["PipelineBase / ChemblPipelineBase\napplication.pipelines.*"]:::componentSecondary
 end
 class Application group;
 

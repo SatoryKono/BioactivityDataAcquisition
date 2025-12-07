@@ -39,6 +39,8 @@ class ChemblPipelineBase(PipelineBase):
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
 
+        self.ID_COLUMN, self.API_FILTER_KEY = self._resolve_primary_key(config)
+
         norm_service = normalization_service or default_normalization_service(config)
 
         # Create Extractor
@@ -73,6 +75,29 @@ class ChemblPipelineBase(PipelineBase):
             post_transformer=post_transformer,
         )
 
+    @staticmethod
+    def _resolve_primary_key(config: PipelineConfig) -> tuple[str, str]:
+        """Resolve entity primary key and API filter key based on config."""
+
+        pk = config.primary_key
+
+        if not pk and config.pipeline and "primary_key" in config.pipeline:
+            pk = config.pipeline["primary_key"]
+
+        if not pk:
+            pk = f"{config.entity_name}_id"
+
+        if not pk:
+            raise ValueError(
+                (
+                    "Could not resolve ID_COLUMN for entity "
+                    f"'{config.entity_name}'. Please set 'primary_key' "
+                    "in config or pipeline options."
+                )
+            )
+
+        return pk, f"{pk}__in"
+
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
         if self._chembl_release is None:
@@ -86,16 +111,3 @@ class ChemblPipelineBase(PipelineBase):
     def _enrich_context(self, context: RunContext) -> None:
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
-
-    # Extract/transform/write implemented by base; hook methods reside in components.
-    # Now ChemblTransformerImpl.apply calls its own hooks.
-    # If subclasses override pre_transform/_do_transform on THIS class,
-    # they won't be called by ChemblTransformerImpl.
-
-    # To support inheritance overriding, ChemblTransformerImpl should call back
-    # or we should subclass ChemblTransformerImpl for specific pipelines.
-    # Or we pass 'self' to transformer? No.
-
-    # Most ChEMBL pipelines (Activity, Assay) didn't override them.
-    # If they did, I'd need to check.
-    # ChemblEntityPipeline might override?

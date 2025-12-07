@@ -8,7 +8,6 @@ class PipelineBase {
   <<Abstract>>
 }
 class ChemblPipelineBase
-class ChemblEntityPipeline
 class ChemblExtractorImpl
 class ChemblTransformerImpl
 class ChemblExtractionServiceImpl
@@ -27,7 +26,6 @@ class TransformerABC
 class ExtractionServiceABC
 
 ChemblPipelineBase --|> PipelineBase
-ChemblEntityPipeline --|> ChemblPipelineBase
 ChemblPipelineBase --> ChemblExtractorImpl : extractor
 ChemblPipelineBase --> ChemblTransformerImpl : transformer
 ChemblPipelineBase --> ChemblExtractionServiceImpl : extraction_service

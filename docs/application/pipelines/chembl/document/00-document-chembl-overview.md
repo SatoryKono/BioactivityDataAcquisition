@@ -2,7 +2,7 @@
 
 ## Pipeline
 
-- Универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) с базой `ChemblPipelineBase`.
+- Универсальный `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`).
 - Схема: `domain/schemas/chembl/document.py`.
 
 ## Компоненты

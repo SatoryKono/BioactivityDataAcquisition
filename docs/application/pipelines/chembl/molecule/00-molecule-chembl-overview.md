@@ -2,7 +2,7 @@
 
 ## Pipeline
 
-- Использует универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) c базой `ChemblPipelineBase`.
+- Использует универсальный `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`).
 - Схема и контракт: `domain/schemas/chembl/molecule.py` + `domain/schemas/pipeline_contracts.py` (entity `molecule`).
 
 ## Компоненты

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 
 
 @pytest.fixture
@@ -15,6 +15,12 @@ def common_dependencies():
     config.provider = "chembl"
     config.hashing = MagicMock()
     config.hashing.business_key_fields = []
+    config.fields = []
+    config.normalization = MagicMock()
+    config.normalization.case_sensitive_fields = []
+    config.normalization.id_fields = []
+    config.get_fields.side_effect = lambda: config.fields
+    config.get_normalization.side_effect = lambda: config.normalization
 
     return {
         "config": config,
@@ -45,7 +51,7 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
     config.provider = "chembl"
     config.primary_key = id_col
 
-    pipeline = ChemblEntityPipeline(
+    pipeline = ChemblPipelineBase(
         config=config,
         logger=common_dependencies["logger"],
         validation_service=common_dependencies["validation_service"],
