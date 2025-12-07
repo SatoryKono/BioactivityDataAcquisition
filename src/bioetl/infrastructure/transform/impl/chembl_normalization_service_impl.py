@@ -1,8 +1,8 @@
-"""Domain-level normalization service interfaces."""
+"""ChEMBL-specific normalization service implementation."""
 
 from __future__ import annotations
 
-from typing import Any, Protocol, TypedDict, cast
+from typing import Any, TypedDict, cast
 
 import pandas as pd
 
@@ -31,26 +31,8 @@ class NormalizedRecord(TypedDict, total=False):
     ...
 
 
-class NormalizationService(Protocol):
-    """Protocol for record normalization."""
-
-    def normalize(self, raw: RawRecord) -> NormalizedRecord:
-        """Normalize a single raw record."""
-
-    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Normalize an entire DataFrame chunk."""
-
-    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Normalize a DataFrame with ChEMBL field rules."""
-
-    def normalize_series(
-        self, series: pd.Series, field_cfg: dict[str, Any]
-    ) -> pd.Series:
-        """Normalize a Series using field configuration."""
-
-
-class ChemblNormalizationService(
-    BaseNormalizationServiceImpl, NormalizationServiceABC, NormalizationService
+class ChemblNormalizationServiceImpl(
+    BaseNormalizationServiceImpl, NormalizationServiceABC
 ):
     """Normalization service for ChEMBL records."""
 
