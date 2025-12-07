@@ -74,7 +74,7 @@ def test_transform_chembl_release(pipeline):
             return val.get("chembl_release")
         return val
 
-    # Patch get_normalizer in the module used by ChemblNormalizationService
+    # Patch get_normalizer in the module used by ChemblNormalizationServiceImpl
     with patch(
         "bioetl.infrastructure.transform.impl.normalization_service_impl.get_normalizer"
     ) as mock_get:
