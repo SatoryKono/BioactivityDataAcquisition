@@ -27,7 +27,7 @@ class BaseWriterImpl(WriterABC):
         self._checksum_fn = checksum_fn
 
     @property
-    def atomic(self) -> bool:
+    def is_atomic(self) -> bool:
         return self._atomic
 
     def write(

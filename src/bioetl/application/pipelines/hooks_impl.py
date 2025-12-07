@@ -54,7 +54,7 @@ class FailFastErrorPolicyImpl(ErrorPolicyABC):
     def handle(self, error: PipelineStageError, context: Any) -> ErrorAction:
         return ErrorAction.FAIL
 
-    def should_retry(
+    def can_retry(
         self, error: PipelineStageError
     ) -> bool:  # noqa: ARG002 - интерфейс
         return False
@@ -71,7 +71,7 @@ class ContinueOnErrorPolicyImpl(ErrorPolicyABC):
             return ErrorAction.RETRY
         return ErrorAction.SKIP
 
-    def should_retry(self, error: PipelineStageError) -> bool:
+    def can_retry(self, error: PipelineStageError) -> bool:
         return error.attempt <= self._max_retries
 
 

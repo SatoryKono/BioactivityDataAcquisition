@@ -75,14 +75,14 @@ class ErrorPolicyFacade:
                 run_id=context.run_id,
                 error=str(exc),
             )
-            for hook in self._hooks_manager.hooks:
+            for hook in self._hooks_manager.get_hooks():
                 hook.on_error(stage, error)
 
             action_on_error = self._error_policy.handle(error, context)
             self._last_stage_action[stage] = action_on_error
             if (
                 action_on_error == ErrorAction.RETRY
-                and self._error_policy.should_retry(error)
+                and self._error_policy.can_retry(error)
             ):
                 if on_retry:
                     on_retry()

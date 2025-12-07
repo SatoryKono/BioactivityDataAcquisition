@@ -6,7 +6,7 @@ from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.validation import (
     SchemaProviderABC,
     SchemaProviderFactoryABC,
-    SchemaType,
+    schema_type,
     ValidatorABC,
     ValidatorFactoryABC,
 )
@@ -16,7 +16,7 @@ from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValid
 class PanderaValidatorFactory(ValidatorFactoryABC):
     """Фабрика валидаторов Pandera."""
 
-    def create_validator(self, schema: SchemaType) -> ValidatorABC:
+    def create_validator(self, schema: schema_type) -> ValidatorABC:
         return PanderaValidatorImpl(schema)
 
 

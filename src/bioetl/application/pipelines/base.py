@@ -455,13 +455,13 @@ class PipelineBase(ABC):
 
     # === Hooks ===
 
-    def add_hook(self, hook: PipelineHookABC) -> None:
+    def register_hook(self, hook: PipelineHookABC) -> None:
         """Добавляет хук выполнения."""
-        self._hooks_manager.add_hook(hook)
+        self._hooks_manager.register_hook(hook)
 
-    def add_hooks(self, hooks: list[PipelineHookABC]) -> None:
+    def register_hooks(self, hooks: list[PipelineHookABC]) -> None:
         """Добавляет список хуков выполнения."""
-        self._hooks_manager.add_hooks(hooks)
+        self._hooks_manager.register_hooks(hooks)
 
     def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
         """Устанавливает политику обработки ошибок."""
