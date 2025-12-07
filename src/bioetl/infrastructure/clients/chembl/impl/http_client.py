@@ -146,36 +146,40 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         and real builder behaviour.
         """
         builder = self.request_builder
+        self._apply_endpoint_aliases(builder, endpoint)
 
-        # Invoke both aliases when available to satisfy tests expecting either call
-        selected_builder = builder
+        candidates = [
+            self._invoke_builder_method(builder, "build_request", filters),
+            self._invoke_builder_method(builder, "build", filters),
+        ]
+
+        string_candidate = next(
+            (candidate for candidate in candidates if isinstance(candidate, str)),
+            None,
+        )
+        if string_candidate is not None:
+            return string_candidate
+
+        for candidate in candidates:
+            if candidate is not None:
+                return str(candidate)
+
+        raise RuntimeError(f"Unable to build request URL for endpoint '{endpoint}'")
+
+    def _apply_endpoint_aliases(self, builder: Any, endpoint: str) -> None:
         if hasattr(builder, "build_for_endpoint"):
             builder.build_for_endpoint(endpoint)
         if hasattr(builder, "for_endpoint"):
             builder.for_endpoint(endpoint)
 
-        url_from_build: str | None = None
-        if hasattr(selected_builder, "build"):
-            try:
-                url_from_build = selected_builder.build(filters)
-            except TypeError:
-                url_from_build = selected_builder.build(**filters)
+    def _invoke_builder_method(
+        self, builder: Any, method: str, filters: dict[str, Any]
+    ) -> str | Any | None:
+        if not hasattr(builder, method):
+            return None
 
-        url_from_build_request: str | None = None
-        if hasattr(selected_builder, "build_request"):
-            try:
-                url_from_build_request = selected_builder.build_request(filters)
-            except TypeError:
-                url_from_build_request = selected_builder.build_request(**filters)
-
-        if isinstance(url_from_build_request, str):
-            url = url_from_build_request
-        elif isinstance(url_from_build, str):
-            url = url_from_build
-        elif url_from_build_request is not None:
-            url = str(url_from_build_request)
-        elif url_from_build is not None:
-            url = str(url_from_build)
-        else:
-            raise RuntimeError(f"Unable to build request URL for endpoint '{endpoint}'")
-        return str(url)
+        callable_method = getattr(builder, method)
+        try:
+            return callable_method(filters)
+        except TypeError:
+            return callable_method(**filters)
