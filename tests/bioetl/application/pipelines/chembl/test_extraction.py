@@ -42,7 +42,7 @@ def test_extract_all_single_page(service, mock_client):
 
     # Setup mock responses
     mock_client.request_activity.return_value = {"data": "page1"}
-    mock_parser.parse.return_value = [{"id": 1}, {"id": 2}]
+    mock_parser.parse_response.return_value = [{"id": 1}, {"id": 2}]
     mock_paginator.has_more.return_value = False
 
     # Act
@@ -68,7 +68,7 @@ def test_extract_all_pagination(service, mock_client):
     # Call 2: returns 1 item, has_more=False
 
     mock_client.request_activity.side_effect = [{"data": "page1"}, {"data": "page2"}]
-    mock_parser.parse.side_effect = [[{"id": 1}, {"id": 2}], [{"id": 3}]]
+    mock_parser.parse_response.side_effect = [[{"id": 1}, {"id": 2}], [{"id": 3}]]
     mock_paginator.has_more.side_effect = [True, False]
 
     # Act
@@ -92,7 +92,7 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
     service.paginator = mock_paginator
 
     mock_client.request_activity.return_value = {"data": "page"}
-    mock_parser.parse.return_value = [
+    mock_parser.parse_response.return_value = [
         {
             "id": 1,
             "activity_properties": [{"k1": "v1"}, {"k2": "v2"}],
@@ -116,7 +116,7 @@ def test_extract_all_limit(service, mock_client):
     service.paginator = mock_paginator
 
     # Returns 10 items per call
-    mock_parser.parse.return_value = [{"id": i} for i in range(10)]
+    mock_parser.parse_response.return_value = [{"id": i} for i in range(10)]
     mock_paginator.has_more.return_value = False
 
     # Act - request limit 5
@@ -137,7 +137,7 @@ def test_iter_extract_stops_on_empty_page(service, mock_client):
     service.paginator = mock_paginator
 
     mock_client.request_activity.return_value = {"data": []}
-    mock_parser.parse.return_value = []
+    mock_parser.parse_response.return_value = []
     mock_paginator.has_more.return_value = False
 
     chunks = list(service.iter_extract("activity", chunk_size=5))
@@ -158,7 +158,7 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
         {"data": "page1"},
         {"data": "page2"},
     ]
-    mock_parser.parse.side_effect = [
+    mock_parser.parse_response.side_effect = [
         [{"id": 1}, {"id": 2}],
         [{"id": 3}],
     ]
@@ -194,7 +194,7 @@ def test_extract_entities_dispatch(service, mock_client, entity, method):
     mock_parser = MagicMock()
     service.parser = mock_parser
 
-    mock_parser.parse.return_value = []
+    mock_parser.parse_response.return_value = []
 
     service.extract_all(entity)
 

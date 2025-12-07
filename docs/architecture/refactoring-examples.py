@@ -19,7 +19,7 @@ from dependency_injector import containers, providers
 class OldNormalizer:
     """Текущая реализация с множеством if-else и смешанной логикой"""
     
-    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         for field_cfg in self._config.fields:
             name = field_cfg["name"]
             dtype = field_cfg.get("data_type")
@@ -209,7 +209,7 @@ class OptimizedNormalizer:
     def __init__(self, factory: NormalizerFactory):
         self.factory = factory
         
-    def normalize_dataframe(self, df: pd.DataFrame, fields: List[FieldConfig]) -> pd.DataFrame:
+    def apply_normalize_dataframe(self, df: pd.DataFrame, fields: List[FieldConfig]) -> pd.DataFrame:
         """Нормализует DataFrame используя векторизованные операции"""
         df = df.copy()
         

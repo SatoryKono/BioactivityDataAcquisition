@@ -97,7 +97,7 @@ def test_transform_max_phase(pipeline):
     # or be converted to NaN if using robust casting.
     # Generic normalize_scalar raises error for invalid int strings?
     # Or does pandas/pandera handle it?
-    # Actually, NormalizationService.normalize_fields iterates
+    # Actually, NormalizationService.apply_normalize_fields iterates
     # rows for scalars.
     # '3' -> 3. 'invalid' -> ValueError?
     # Let's check normalize_scalar implementation
