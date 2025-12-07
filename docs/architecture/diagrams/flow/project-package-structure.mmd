@@ -1,6 +1,4 @@
----
-id: e68c4503-315d-4046-98fd-934e38b85e98
----
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
 flowchart LR
 
 classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
@@ -10,50 +8,50 @@ classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#1
 linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 
 subgraph Interfaces["Interfaces (Driving Ports)"]
-  CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
-  REST["REST server\ninterfaces.rest.server"]:::componentSecondary
-  MQ["MQ listener\ninterfaces.mq.listener/handler"]:::componentSecondary
+    CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
+    REST["REST server\ninterfaces.rest.server"]:::componentSecondary
+    MQ["MQ listener\ninterfaces.mq.listener/handler"]:::componentSecondary
 end
-class Interfaces group;
+class Interfaces group
 
 subgraph Application["Application Layer"]
-  Orchestrator["PipelineOrchestrator\napplication.orchestrator"]:::componentPrimary
-  ConfigLoader["Config Loader\napplication.config_loader"]:::componentSecondary
-  PipelineRegistry["Pipeline registry\napplication.pipelines.registry"]:::componentSecondary
-  Container["PipelineContainer\napplication.container"]:::componentSecondary
-  Pipelines["PipelineBase / ChemblPipelineBase\napplication.pipelines.*"]:::componentSecondary
-  StageRunnerFacade["StageRunnerFacade\napplication.pipelines.stage_runner_facade"]:::componentSecondary
-  HooksManager["HooksManager\napplication.pipelines.hooks_manager"]:::componentSecondary
-  ErrorPolicyMgr["ErrorPolicyManager\napplication.pipelines.error_policy_manager"]:::componentSecondary
-  HooksImpl["Logging + Metrics hooks\napplication.pipelines.hooks_impl"]:::componentSecondary
+    Orchestrator["PipelineOrchestrator\napplication.orchestrator"]:::componentPrimary
+    ConfigLoader["Config Loader\napplication.config_loader"]:::componentSecondary
+    PipelineRegistry["Pipeline registry\napplication.pipelines.registry"]:::componentSecondary
+    Container["PipelineContainer\napplication.container"]:::componentSecondary
+    Pipelines["PipelineBase / ChemblPipelineBase\napplication.pipelines.*"]:::componentSecondary
+    StageRunnerFacade["StageRunnerFacade\napplication.pipelines.stage_runner_facade"]:::componentSecondary
+    HooksManager["HooksManager\napplication.pipelines.hooks_manager"]:::componentSecondary
+    ErrorPolicyMgr["ErrorPolicyManager\napplication.pipelines.error_policy_manager"]:::componentSecondary
+    HooksImpl["Logging + Metrics hooks\napplication.pipelines.hooks_impl"]:::componentSecondary
 end
-class Application group;
+class Application group
 
 subgraph Domain["Domain Layer"]
-  ProviderRegistry["ProviderRegistry\ndomain.provider_registry"]:::componentSecondary
-  Providers["ProviderDefinition / Components\ndomain.providers"]:::componentSecondary
-  RecordSource["ApiRecordSource\ndomain.record_source"]:::componentSecondary
-  Validation["ValidationService + PanderaValidator\ndomain.validation.*"]:::componentPrimary
-  Schemas["SchemaRegistry + PipelineContracts\ndomain.schemas.*"]:::componentSecondary
-  Transform["HashService / TransformerChain\ndomain.transform.*"]:::componentPrimary
-  Normalization["NormalizationServiceImpl\n(infrastructure.transform.impl.normalize)"]:::componentSecondary
-  Hashing["HasherImpl\n(infrastructure.transform.impl.hasher)"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry\ndomain.provider_registry"]:::componentSecondary
+    Providers["ProviderDefinition / Components\ndomain.providers"]:::componentSecondary
+    RecordSource["ApiRecordSource\ndomain.record_source"]:::componentSecondary
+    Validation["ValidationService + PanderaValidator\ndomain.validation.*"]:::componentPrimary
+    Schemas["SchemaRegistry + PipelineContracts\ndomain.schemas.*"]:::componentSecondary
+    Transform["HashService / TransformerChain\ndomain.transform.*"]:::componentPrimary
+    Normalization["NormalizationServiceImpl\n(infrastructure.transform.impl.normalize)"]:::componentSecondary
+    Hashing["HasherImpl\n(infrastructure.transform.impl.hasher)"]:::componentSecondary
 end
-class Domain group;
+class Domain group
 
 subgraph Infrastructure["Infrastructure Layer (Driven Adapters)"]
-  ProviderLoader["ProviderRegistryLoader\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
-  ClientsBase["UnifiedAPIClient + rate/retry/cache/circuit\ninfrastructure.clients.base.*"]:::componentSecondary
-  ChemblClient["ChemblDataClientHTTPImpl\n+ RequestBuilder/ResponseParser/Paginator\ninfrastructure.clients.chembl.*"]:::componentPrimary
-  Extraction["ChemblExtractionServiceImpl\ninfrastructure.clients.chembl.impl"]:::componentSecondary
-  RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
-  Output["UnifiedOutputWriter + CsvWriter + MetadataWriter + QualityReporter\ninfrastructure.output.*"]:::componentPrimary
-  AtomicIO["AtomicFileOperation + Checksum\ninfrastructure.files.*"]:::componentSecondary
-  Logging["UnifiedLogger\ninfrastructure.logging.*"]:::componentSecondary
-  Observability["Prometheus metrics server\ninfrastructure.observability.*"]:::componentSecondary
-  Config["Config models/resolver\ninfrastructure.config.*"]:::componentSecondary
+    ProviderLoader["ProviderRegistryLoader\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
+    ClientsBase["UnifiedAPIClient + rate/retry/cache/circuit\ninfrastructure.clients.base.*"]:::componentSecondary
+    ChemblClient["ChemblDataClientHTTPImpl\n+ RequestBuilder/ResponseParser/Paginator\ninfrastructure.clients.chembl.*"]:::componentPrimary
+    Extraction["ChemblExtractionServiceImpl\ninfrastructure.clients.chembl.impl"]:::componentSecondary
+    RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
+    Output["UnifiedOutputWriter + CsvWriter + MetadataWriter + QualityReporter\ninfrastructure.output.*"]:::componentPrimary
+    AtomicIO["AtomicFileOperation + Checksum\ninfrastructure.files.*"]:::componentSecondary
+    Logging["UnifiedLogger\ninfrastructure.logging.*"]:::componentSecondary
+    Observability["Prometheus metrics server\ninfrastructure.observability.*"]:::componentSecondary
+    Config["Config models/resolver\ninfrastructure.config.*"]:::componentSecondary
 end
-class Infrastructure group;
+class Infrastructure group
 
 ChEMBL_API[(ChEMBL REST API)]:::external
 Storage[(Filesystem: CSV/Parquet, meta, QC)]:::external

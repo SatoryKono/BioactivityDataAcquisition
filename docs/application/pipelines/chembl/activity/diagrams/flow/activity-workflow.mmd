@@ -1,14 +1,26 @@
+%%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
 flowchart TD
-    Start([Start activity_chembl run]) --> Extract[Extract activity pages]
-    Extract --> Transform[Transform & normalize]
-    Transform --> Validate[Validate with Pandera schema]
-    Validate --> Decision{Dry run?}
-    Decision -- No --> Write[Stable sort + write outputs]
-    Write --> Meta[Generate meta.yaml]
-    Decision -- Yes --> SkipWrite[Skip write; produce summary]
-    Meta --> End([Success])
-    SkipWrite --> End
-    Extract -->|Error| Retry{Retry/Skip/Fail per policy}
-    Retry --> Extract
-    Retry --> End
+    start([Start activity chembl run])
+    extract(["Extract activity pages"])
+    transform(["Transform and normalize"])
+    validate(["Validate with Pandera schema"])
+    decision{Dry run?}
+    write(["Stable sort + write outputs"])
+    meta(["Generate meta.yaml"])
+    skip_write(["Skip write; produce summary"])
+    retry{Retry / Skip / Fail per policy}
+    success_state([Success])
+
+    start --> extract
+    extract --> transform
+    transform --> validate
+    validate --> decision
+    decision -- No --> write
+    decision -- Yes --> skip_write
+    write --> meta
+    meta --> success_state
+    skip_write --> success_state
+    extract -->|Error| retry
+    retry --> extract
+    retry --> success_state
 
