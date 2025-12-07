@@ -311,7 +311,7 @@ def test_error_policy_retry_callback_and_skip(
         provider=pipeline._provider_id.value,  # noqa: SLF001
     )
 
-    result_df = pipeline._error_policy_manager.execute(  # noqa: SLF001
+    result_df = pipeline._runtime_manager.execute_stage(  # noqa: SLF001
         "extract",
         context,
         failing_action,
@@ -322,7 +322,7 @@ def test_error_policy_retry_callback_and_skip(
     assert result_df.empty
     assert attempts["count"] == 2
     on_retry.assert_called_once()
-    last_error = pipeline._error_policy_manager.last_error  # noqa: SLF001
+    last_error = pipeline._runtime_manager.last_error  # noqa: SLF001
     assert last_error is not None
     assert last_error.attempt == 2
 

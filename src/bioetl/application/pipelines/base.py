@@ -10,9 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
-from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
-from bioetl.application.pipelines.hooks_registry import HooksRegistry
-from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
+from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManager
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
@@ -84,27 +82,15 @@ class PipelineBase(ABC):
             FailFastErrorPolicyImpl,
         )
 
-        self._hooks_manager = HooksRegistry(
+        self._error_policy = error_policy or FailFastErrorPolicyImpl()
+        self._runtime_manager = StageRuntimeManager(
             logger=self._logger,
             provider_id=self._provider_id,
             entity_name=self._config.entity_name,
+            error_policy=self._error_policy,
+            default_on_skip=self._default_on_skip,
             hooks=hooks,
             pipeline_id=self._config.id,
-        )
-        self._error_policy = error_policy or FailFastErrorPolicyImpl()
-        self._error_policy_manager = ErrorPolicyFacade(
-            error_policy=self._error_policy,
-            hooks_manager=self._hooks_manager,
-            logger=self._logger,
-            provider_id=self._provider_id,
-            entity_name=self._config.entity_name,
-            default_on_skip=self._default_on_skip,
-        )
-        self._stage_runner = StageRunnerFacade(
-            hooks_manager=self._hooks_manager,
-            error_policy_facade=self._error_policy_manager,
-            entity_name=self._config.entity_name,
-            provider_id=self._provider_id,
         )
         self._instrument_extract_calls()
 
@@ -120,22 +106,20 @@ class PipelineBase(ABC):
         """
         Запускает полный цикл ETL-пайплайна.
         """
-        self._hooks_manager.reset()
-        self._error_policy_manager.reset()
+        self._runtime_manager.reset()
         if hasattr(self._hash_service, "reset_state"):
             self._hash_service.reset_state()
 
         context = self._build_context(dry_run)
         self._logger = self._logger.apply_bind(run_id=context.run_id)
-        self._hooks_manager.set_logger(self._logger)
-        self._error_policy_manager.set_logger(self._logger)
+        self._runtime_manager.set_logger(self._logger)
         self._logger.info("Pipeline started", run_id=context.run_id)
         stages_results: list[StageResult] = []
         counters = self._init_stage_counters()
         validated_chunks: list[pd.DataFrame] = []
 
         try:
-            self._hooks_manager.notify_stage_start("extract", context)
+            self._runtime_manager.notify_stage_start("extract", context)
             counters, validated_chunks = self._process_extract_stage(
                 context, counters, validated_chunks, dry_run, kwargs
             )
@@ -167,7 +151,7 @@ class PipelineBase(ABC):
                     context, validated_chunks, output_path, counters, stages_results
                 )
                 if write_result is None:
-                    run_result = self._stage_runner.handle_stage_failure(
+                    run_result = self._runtime_manager.handle_stage_failure(
                         "write", stages_results, context
                     )
                     return run_result
@@ -192,14 +176,14 @@ class PipelineBase(ABC):
                 meta=meta,
             )
         except PipelineStageError as error:
-            stage_result = self._stage_runner.make_stage_result(
+            stage_result = self._runtime_manager.make_stage_result(
                 error.stage,
                 0,
                 success=False,
-                errors=self._error_policy_manager.get_last_error_messages(),
+                errors=self._runtime_manager.get_last_error_messages(),
             )
             stages_results.append(stage_result)
-            self._hooks_manager.notify_stage_end(error.stage, stage_result)
+            self._runtime_manager.notify_stage_end(error.stage, stage_result)
             self._logger.error(
                 "Pipeline failed",
                 stage=error.stage,
@@ -252,7 +236,7 @@ class PipelineBase(ABC):
         reset_iterator()
         while True:
             try:
-                raw_chunk_obj = self._error_policy_manager.execute(
+                raw_chunk_obj = self._runtime_manager.execute_stage(
                     "extract",
                     context,
                     lambda: next(chunk_iterator),  # type: ignore
@@ -277,7 +261,7 @@ class PipelineBase(ABC):
                 validate_started,
                 counters["validate_chunks"],
                 counters["validate_count"],
-            ) = self._stage_runner.process_chunk(
+            ) = self._runtime_manager.process_chunk(
                 raw_chunk,
                 context,
                 transform_started=transform_started,
@@ -301,7 +285,7 @@ class PipelineBase(ABC):
                 validate_started,
                 counters["validate_chunks"],
                 counters["validate_count"],
-            ) = self._stage_runner.process_chunk(
+            ) = self._runtime_manager.process_chunk(
                 pd.DataFrame(),
                 context,
                 transform_started=transform_started,
@@ -327,13 +311,13 @@ class PipelineBase(ABC):
         chunks: int,
     ) -> None:
         stages_results.append(
-            self._stage_runner.make_stage_result(
+            self._runtime_manager.make_stage_result(
                 stage,
                 count,
                 chunks=chunks,
             )
         )
-        self._hooks_manager.notify_stage_end(stage, stages_results[-1])
+        self._runtime_manager.notify_stage_end(stage, stages_results[-1])
 
     def _perform_write_stage(
         self,
@@ -343,8 +327,8 @@ class PipelineBase(ABC):
         counters: dict[str, int],
         stages_results: list[StageResult],
     ) -> tuple[WriteResult | None, dict[str, int]]:
-        if not self._hooks_manager.get_stage_start("write"):
-            self._hooks_manager.notify_stage_start("write", context)
+        if not self._runtime_manager.get_stage_start("write"):
+            self._runtime_manager.notify_stage_start("write", context)
 
         df_to_write = (
             pd.concat(validated_chunks, ignore_index=True)
@@ -352,7 +336,7 @@ class PipelineBase(ABC):
             else pd.DataFrame()
         )
 
-        write_result_obj = self._error_policy_manager.execute(
+        write_result_obj = self._runtime_manager.execute_stage(
             "write",
             context,
             lambda: self.write(
@@ -461,29 +445,16 @@ class PipelineBase(ABC):
 
     def register_hook(self, hook: PipelineHookABC) -> None:
         """Добавляет хук выполнения."""
-        self._hooks_manager.register_hook(hook)
+        self._runtime_manager.register_hook(hook)
 
     def register_hooks(self, hooks: list[PipelineHookABC]) -> None:
         """Добавляет список хуков выполнения."""
-        self._hooks_manager.register_hooks(hooks)
+        self._runtime_manager.register_hooks(hooks)
 
     def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
         """Устанавливает политику обработки ошибок."""
         self._error_policy = error_policy
-        self._error_policy_manager = ErrorPolicyFacade(
-            error_policy=error_policy,
-            hooks_manager=self._hooks_manager,
-            logger=self._logger,
-            provider_id=self._provider_id,
-            entity_name=self._config.entity_name,
-            default_on_skip=self._default_on_skip,
-        )
-        self._stage_runner = StageRunnerFacade(
-            hooks_manager=self._hooks_manager,
-            error_policy_facade=self._error_policy_manager,
-            entity_name=self._config.entity_name,
-            provider_id=self._provider_id,
-        )
+        self._runtime_manager.set_error_policy(error_policy)
 
     def set_post_transformer(self, transformer: TransformerABC) -> None:
         """Позволяет заменить пост-обработчик трансформации."""
@@ -503,7 +474,7 @@ class PipelineBase(ABC):
     def _create_chunk_iterator(
         self, context: RunContext, **kwargs: Any
     ) -> Iterable[pd.DataFrame]:
-        iterator = self._error_policy_manager.execute(
+        iterator = self._runtime_manager.execute_stage(
             "extract",
             context,
             lambda: self.iter_chunks(**kwargs),
@@ -524,8 +495,8 @@ class PipelineBase(ABC):
         *,
         attempt: int = 1,
     ) -> Any:
-        self._hooks_manager.notify_stage_start(stage, context)
-        return self._error_policy_manager.execute(
+        self._runtime_manager.notify_stage_start(stage, context)
+        return self._runtime_manager.execute_stage(
             stage,
             context,
             action,
@@ -595,8 +566,3 @@ class PipelineBase(ABC):
         """
         Хук для обогащения контекста (например, добавления версии релиза).
         """
-
-
-# Алиасы для совместимости с новой структурой
-ErrorPolicyManager = ErrorPolicyFacade
-HooksManager = HooksRegistry
