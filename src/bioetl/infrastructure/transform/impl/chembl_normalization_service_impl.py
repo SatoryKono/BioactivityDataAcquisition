@@ -43,7 +43,7 @@ class ChemblNormalizationServiceImpl(
         """Normalize single raw ChEMBL record into flat dict."""
         normalized: dict[str, Any] = {}
 
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg.get("name")
             if not isinstance(name, str) or name not in raw:
                 continue
@@ -81,7 +81,7 @@ class ChemblNormalizationServiceImpl(
         """Normalize configured fields across dataframe columns."""
         normalized_df = df.copy()
 
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg.get("name")
             if not name or name not in normalized_df.columns:
                 continue

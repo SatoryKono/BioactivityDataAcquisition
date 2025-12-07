@@ -105,7 +105,7 @@ class NormalizationServiceImpl(
         """
         Проходит по полям конфигурации и применяет нормализацию.
         """
-        for field_cfg in self._config.fields:
+        for field_cfg in self._config.get_fields():
             name = field_cfg["name"]
             dtype = field_cfg.get("data_type")
 

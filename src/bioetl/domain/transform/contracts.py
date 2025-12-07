@@ -28,13 +28,11 @@ class NormalizationConfigProviderProtocol(Protocol):
     PipelineConfig from bioetl.domain.configs implements this implicitly.
     """
 
-    @property
-    def normalization(self) -> Any:
+    def get_normalization(self) -> Any:
         """Return normalization section."""
         ...
 
-    @property
-    def fields(self) -> list[dict[str, Any]]:
+    def get_fields(self) -> list[dict[str, Any]]:
         """Return fields configuration."""
         ...
 

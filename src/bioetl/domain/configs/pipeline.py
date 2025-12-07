@@ -67,6 +67,16 @@ class PipelineConfig(BaseModel):
         """Return canonical entity name."""
         return self.entity
 
+    def get_normalization(self) -> NormalizationConfig:
+        """Return normalization configuration section."""
+
+        return self.normalization
+
+    def get_fields(self) -> list[dict[str, Any]]:
+        """Return fields configuration."""
+
+        return self.fields
+
     def get_normalization_config_provider(self) -> NormalizationConfigProviderProtocol:
         """Return self to satisfy NormalizationConfigProviderProtocol."""
 
