@@ -24,7 +24,7 @@ subgraph Application["Application Layer"]
   Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
   StageRunner["StageRunner\napplication.pipelines.stage_runner"]:::componentSecondary
   HooksManager["HooksManager\napplication.pipelines.hooks_manager"]:::componentSecondary
-  ErrorPolicyMgr["ErrorPolicyManager\napplication.pipelines.error_policy_manager"]:::componentSecondary
+  ErrorPolicyMgr["ErrorPolicyFacade\napplication.pipelines.error_policy_facade"]:::componentSecondary
   HooksImpl["Logging + Metrics hooks\napplication.pipelines.hooks_impl"]:::componentSecondary
 end
 class Application group;

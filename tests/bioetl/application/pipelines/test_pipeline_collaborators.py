@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
+from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.hooks_manager import HooksManager
 from bioetl.application.pipelines.stage_runner import StageRunner
@@ -47,14 +47,14 @@ def test_hooks_manager_notifies_hooks(mock_logger):
 
 
 @pytest.mark.unit
-def test_error_policy_manager_retry_and_skip(mock_logger):
+def test_error_policy_facade_retry_and_skip(mock_logger):
     hooks_manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
     policy = ContinueOnErrorPolicyImpl(max_retries=1)
-    manager = ErrorPolicyManager(
+    manager = ErrorPolicyFacade(
         error_policy=policy,
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -83,7 +83,7 @@ def test_stage_runner_process_and_failure(mock_logger):
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyManager(
+    manager = ErrorPolicyFacade(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -93,7 +93,7 @@ def test_stage_runner_process_and_failure(mock_logger):
     )
     runner = StageRunner(
         hooks_manager=hooks_manager,
-        error_policy_manager=manager,
+        error_policy_facade=manager,
         entity_name="entity",
         provider_id=ProviderId("chembl"),
     )
@@ -155,7 +155,7 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyManager(
+    manager = ErrorPolicyFacade(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -165,7 +165,7 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
     )
     runner = StageRunner(
         hooks_manager=hooks_manager,
-        error_policy_manager=manager,
+        error_policy_facade=manager,
         entity_name="entity",
         provider_id=ProviderId("chembl"),
     )
@@ -208,7 +208,7 @@ def test_stage_runner_raises_on_missing_result(mock_logger):
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyManager(
+    manager = ErrorPolicyFacade(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -218,7 +218,7 @@ def test_stage_runner_raises_on_missing_result(mock_logger):
     )
     runner = StageRunner(
         hooks_manager=hooks_manager,
-        error_policy_manager=manager,
+        error_policy_facade=manager,
         entity_name="entity",
         provider_id=ProviderId("chembl"),
     )
