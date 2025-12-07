@@ -266,7 +266,7 @@ def test_run_dry_run_pipeline_metadata(
             return result
 
     logger = MagicMock()
-    logger.bind.return_value = logger
+    logger.apply_bind.return_value = logger
     validation_service = MagicMock()
     validation_service.validate.side_effect = lambda df, **__: df
     output_writer = MagicMock()

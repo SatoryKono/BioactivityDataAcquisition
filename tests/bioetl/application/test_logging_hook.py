@@ -24,7 +24,7 @@ class _DummyLogger(LoggingPortABC):
     def warning(self, msg: str, **ctx: object) -> None:
         self.calls.append(("warning", msg, ctx))
 
-    def bind(
+    def apply_bind(
         self, **ctx: object
     ) -> Self:  # pragma: no cover - не используется в тестах
         return self
