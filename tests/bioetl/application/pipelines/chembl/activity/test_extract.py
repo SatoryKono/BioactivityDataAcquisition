@@ -14,7 +14,7 @@ from bioetl.application.pipelines.chembl.pipeline import (
 from bioetl.domain.observability import LoggingPort
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
-    CsvInputOptions,
+    CsvInputConfig,
 )
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
@@ -51,7 +51,7 @@ def mock_config(source_config):
     config.primary_key = "activity_id"
     config.input_mode = "auto_detect"
     config.input_path = None
-    config.csv_options = CsvInputOptions()
+    config.csv_options = CsvInputConfig()
     config.model_dump.return_value = {}
     return config
 
