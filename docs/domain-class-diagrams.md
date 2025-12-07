@@ -116,16 +116,24 @@ classDiagram
     class RawRecord { <<TypedDict>> ... }
     class NormalizedRecord { <<TypedDict>> ... }
     class NormalizationConfigProvider { <<protocol>> normalization; fields }
-    class NormalizationService { <<protocol>> normalize(); normalize_batch(); normalize_dataframe(); normalize_series() }
-    class ChemblNormalizationService
+    class NormalizationServiceABC { <<ABC>> normalize(); normalize_batch(); normalize_dataframe(); normalize_series() }
+    class BaseNormalizationServiceABC { <<ABC>> }
+    class BaseNormalizationServiceImpl
+    class NormalizationServiceImpl
+    class ChemblNormalizationServiceImpl
 
     RecordSource <|.. InMemoryRecordSource
     RecordSource <|.. ApiRecordSource
     ApiRecordSource --> ExtractionServiceABC
-    ChemblNormalizationService ..|> NormalizationService
-    ChemblNormalizationService --> NormalizationConfigProvider
-    ChemblNormalizationService --> RawRecord
-    ChemblNormalizationService --> NormalizedRecord
+    BaseNormalizationServiceImpl ..|> BaseNormalizationServiceABC
+    NormalizationServiceImpl --|> BaseNormalizationServiceImpl
+    ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
+    NormalizationServiceImpl ..|> NormalizationServiceABC
+    ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
+    NormalizationServiceImpl --> NormalizationConfigProvider
+    ChemblNormalizationServiceImpl --> NormalizationConfigProvider
+    ChemblNormalizationServiceImpl --> RawRecord
+    ChemblNormalizationServiceImpl --> NormalizedRecord
 ```
 
 ## Transformations and Hashing

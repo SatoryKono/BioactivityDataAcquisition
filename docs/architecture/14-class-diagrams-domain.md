@@ -142,31 +142,34 @@ classDiagram
 id: 94ef3597-e183-4cc2-a707-ab005656c990
 ---
 classDiagram
-    class NormalizationService {
-        <<Protocol>>
-        +normalize_record(record, config) NormalizedRecord
-    }
-
-    class ChemblNormalizationService {
-        +normalize_record(record, config) NormalizedRecord
-        -_normalize_field(field_name, value, config)
-    }
-
     class NormalizationServiceABC {
-        <<abstract>>
-        +normalize_record(record, config)* NormalizedRecord
+        <<ABC>>
+        +normalize_record(record, config) NormalizedRecord
     }
 
-    class NormalizationService {
-        -_normalizers: dict[str, Callable]
+    class BaseNormalizationServiceABC { <<ABC>> }
+    class BaseNormalizationServiceImpl {
         +normalize_record(record, config) NormalizedRecord
         -_normalize_scalar(value, mode)
         -_normalize_array(value)
         -_normalize_record(value)
     }
 
-    NormalizationService <|.. ChemblNormalizationService
-    NormalizationServiceABC <|-- NormalizationService
+    class NormalizationServiceImpl {
+        +normalize_record(record, config) NormalizedRecord
+        -_normalize_field(field_name, value, config)
+    }
+
+    class ChemblNormalizationServiceImpl {
+        +normalize_record(record, config) NormalizedRecord
+        -_normalize_field(field_name, value, config)
+    }
+
+    BaseNormalizationServiceImpl ..|> BaseNormalizationServiceABC
+    NormalizationServiceImpl --|> BaseNormalizationServiceImpl
+    ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
+    NormalizationServiceImpl ..|> NormalizationServiceABC
+    ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
 ```
 
 ## 5. Schema Models
