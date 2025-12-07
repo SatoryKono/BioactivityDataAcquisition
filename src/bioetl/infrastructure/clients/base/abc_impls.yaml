@@ -47,6 +47,11 @@ ValidatorABC:
   implementations:
     Pandera: bioetl.infrastructure.validation.impl.pandera_validator.PanderaValidatorImpl
 
+BaseNormalizationServiceABC:
+  default_factory: bioetl.infrastructure.transform.factories.default_base_normalization_service
+  implementations:
+    Base: bioetl.infrastructure.transform.impl.base_normalizer.BaseNormalizationServiceImpl
+
 NormalizationServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
   implementations:
