@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 import pandas as pd
 
@@ -57,6 +57,7 @@ class SchemaProviderABC(ABC):
         """Регистрирует новую схему."""
 
 
+@runtime_checkable
 class ValidatorFactoryABC(Protocol):
     """Фабрика валидаторов под конкретную схему."""
 
@@ -64,6 +65,7 @@ class ValidatorFactoryABC(Protocol):
         """Создает валидатор для указанной схемы."""
 
 
+@runtime_checkable
 class SchemaProviderFactoryABC(Protocol):
     """Фабрика провайдеров схем."""
 

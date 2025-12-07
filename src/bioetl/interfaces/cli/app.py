@@ -50,7 +50,7 @@ def _resolve_config_path(pipeline_name: str) -> Path:
 
 
 @app.command()
-def list_pipelines():
+def list_pipelines() -> None:
     """
     Lists available pipelines.
     """
@@ -65,7 +65,7 @@ def list_pipelines():
 
 
 @app.command()
-def validate_config(config_path: Path):
+def validate_config(config_path: Path) -> None:
     """
     Validates a configuration file.
     """
@@ -127,7 +127,7 @@ def run(
         "--background",
         help="Run pipeline in a background process",
     ),
-):
+) -> None:
     """
     Runs an ETL pipeline.
     """
@@ -199,7 +199,7 @@ def run(
 
 
 @app.command()
-def smoke_run(pipeline_name: str):
+def smoke_run(pipeline_name: str) -> None:
     """
     Runs a smoke test (development profile, dry-run).
     """

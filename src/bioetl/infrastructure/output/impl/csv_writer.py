@@ -25,4 +25,5 @@ class CsvWriterImpl(BaseWriterImpl):
         df.to_csv(path, index=False, encoding="utf-8")
 
     def has_format_support(self, fmt: str) -> bool:
+        """Return True if writer can handle the requested format."""
         return fmt.lower() == "csv"

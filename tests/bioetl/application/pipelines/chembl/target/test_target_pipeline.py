@@ -39,7 +39,7 @@ def pipeline():
     )
 
 
-def test_transform_nested_fields(pipeline):
+def test_transform_nested_fields_target_components(pipeline):
     """Test transformation of nested fields (serialization)."""
     pipeline._config.fields = [
         {"name": "target_components", "data_type": "array"},
