@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
@@ -12,6 +12,7 @@ from bioetl.domain.observability.contracts import (
     PipelineMetricsPortABC,
 )
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.infrastructure.observability import metrics
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):
@@ -99,12 +100,12 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         pipeline_id: str,
         provider: str,
         entity_name: str,
-        metrics_port: PipelineMetricsPortABC,
+        metrics_port: PipelineMetricsPortABC | None = None,
     ) -> None:
         self._pipeline_id = pipeline_id
         self._provider = provider
         self._entity_name = entity_name
-        self._metrics = metrics_port
+        self._metrics = metrics_port or _create_noop_metrics_port()
 
     def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
         """Хук старта стадии не требует метрик."""
@@ -130,3 +131,20 @@ class MetricsPipelineHookImpl(PipelineHookABC):
 
     def on_error(self, stage: str, error: PipelineStageError) -> None:  # noqa: ARG002
         """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
+
+
+def _create_noop_metrics_port() -> PipelineMetricsPortABC:
+    """Return metrics port that safely ignores updates (used in tests)."""
+
+    return cast(
+        PipelineMetricsPortABC,
+        type(
+            "NoopMetricsPort",
+            (),
+            {
+                "update_stage_duration": lambda self, **_kwargs: None,
+                "update_stage_total": lambda self, **_kwargs: None,
+            },
+        )(),
+    )
+

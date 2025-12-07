@@ -11,8 +11,11 @@ from bioetl.application.pipelines.hooks_impl import (
     MetricsPipelineHookImpl,
 )
 from bioetl.domain.clients.base.output.contracts import (
+    MetadataWriterABC,
     OutputWriterABC,
+    QualityReportABC,
     RunMetadataBuilderProtocol,
+    WriterABC,
     WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
@@ -35,6 +38,12 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.output.factories import (
+    default_metadata_writer,
+    default_output_writer,
+    default_quality_reporter,
+    default_writer,
+)
 
 
 class PipelineContainer(PipelineContainerABC):
@@ -48,6 +57,9 @@ class PipelineContainer(PipelineContainerABC):
         *,
         logger: LoggingPortABC | None = None,
         output_writer: OutputWriterABC | None = None,
+        writer: WriterABC | None = None,
+        metadata_writer: MetadataWriterABC | None = None,
+        quality_reporter: QualityReportABC | None = None,
         validator_factory: ValidatorFactoryABC | None = None,
         record_source_factory: FileRecordSourceFactoryABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
@@ -82,8 +94,12 @@ class PipelineContainer(PipelineContainerABC):
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
             )
-        self._output_writer: OutputWriterABC = (
-            output_writer or _create_noop_output_writer()
+        self._output_writer: OutputWriterABC = output_writer or default_output_writer(
+            config=self._config.determinism,
+            qc_config=self._config.qc,
+            writer=writer or default_writer(),
+            metadata_writer=metadata_writer or default_metadata_writer(),
+            quality_reporter=quality_reporter or default_quality_reporter(),
         )
         register_schemas(self._schema_provider)
 

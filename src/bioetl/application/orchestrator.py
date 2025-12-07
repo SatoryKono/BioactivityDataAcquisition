@@ -6,6 +6,7 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
 from typing import Callable, cast
 
+from bioetl.application.container import build_pipeline_dependencies
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_pipeline_class
@@ -38,9 +39,9 @@ class PipelineOrchestrator:
         self._config = config
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
-        if container_factory is None:
-            raise ValueError("container_factory must be provided")
-        self._container_factory = container_factory
+        self._container_factory = (
+            container_factory or build_pipeline_dependencies  # pragma: no cover - fallback
+        )
         self._provider_loader = provider_loader
         self._provider_loader_factory = provider_loader_factory
         self._use_provider_loader_port = use_provider_loader_port or False
