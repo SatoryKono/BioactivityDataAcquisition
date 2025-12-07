@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 import pandas as pd
 
@@ -34,6 +34,62 @@ class NormalizationConfigProvider(Protocol):
     def fields(self) -> list[dict[str, Any]]:
         """Return fields configuration."""
         ...
+
+
+class BaseNormalizationServiceABC(ABC):
+    """
+    Базовый контракт сервисов нормализации.
+
+    Предоставляет вспомогательные методы для нормализации скалярных и
+    контейнерных значений, а также принудительного приведения типов
+    числовых столбцов. Default factory:
+    ``bioetl.infrastructure.transform.factories.default_base_normalization_service``.
+    Реализации: ``BaseNormalizationServiceImpl``.
+    """
+
+    @abstractmethod
+    def coerce_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Приводит числовые столбцы к nullable pandas dtypes."""
+
+    @abstractmethod
+    def _resolve_mode(self, field_name: str) -> str:
+        """Определяет режим нормализации для поля."""
+
+    @abstractmethod
+    def _normalize_value(
+        self,
+        value: Any,
+        dtype: str | None,
+        normalizer: Callable[[Any], Any],
+        field_name: str,
+        *,
+        allow_container_normalizer: bool = False,
+        serialize_with_value_normalizer: bool = True,
+    ) -> Any:
+        """Нормализует значение с учетом типа и стратегии сериализации."""
+
+    @abstractmethod
+    def _process_list(
+        self,
+        value: Any,
+        normalizer: Callable[[Any], Any],
+        field_name: str,
+        *,
+        serialize_with_value_normalizer: bool = True,
+    ) -> Any:
+        """Нормализует список значений согласно конфигурации поля."""
+
+    @abstractmethod
+    def _process_dict(
+        self, value: Any, normalizer: Callable[[Any], Any], field_name: str
+    ) -> Any:
+        """Нормализует словарь значений согласно конфигурации поля."""
+
+    @abstractmethod
+    def _normalize_container_item(
+        self, item: Any, normalizer: Callable[[Any], Any]
+    ) -> Any:
+        """Нормализует элемент контейнера (dict/list/tuple)."""
 
 
 class HasherABC(ABC):
@@ -122,6 +178,7 @@ class HashServiceABC(ABC):
 
 
 __all__ = [
+    "BaseNormalizationServiceABC",
     "NormalizationConfig",
     "NormalizationConfigProvider",
     "HasherABC",

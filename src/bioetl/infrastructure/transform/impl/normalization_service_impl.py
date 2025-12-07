@@ -10,7 +10,7 @@ from bioetl.domain.transform.contracts import (
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.infrastructure.transform.impl.base_normalizer import (
-    BaseNormalizationService,
+    BaseNormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.serializer import (
@@ -19,7 +19,9 @@ from bioetl.infrastructure.transform.impl.serializer import (
 )
 
 
-class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService):
+class NormalizationServiceImpl(
+    NormalizationServiceABC, BaseNormalizationServiceImpl
+):
     """
     Сервис нормализации данных.
     Выполняет:
@@ -28,7 +30,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
     """
 
     def __init__(self, config: NormalizationConfigProvider):
-        BaseNormalizationService.__init__(self, config, empty_value=pd.NA)
+        BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
