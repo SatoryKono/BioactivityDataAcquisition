@@ -11,7 +11,7 @@ import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
-from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.application.pipelines.hooks_registry import HooksRegistry
 from bioetl.application.pipelines.stage_runner import StageRunner
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.configs import PipelineConfig
@@ -83,7 +83,7 @@ class PipelineBase(ABC):
             FailFastErrorPolicyImpl,
         )
 
-        self._hooks_manager = HooksManager(
+        self._hooks_manager = HooksRegistry(
             logger=self._logger,
             provider_id=self._provider_id,
             entity_name=self._config.entity_name,

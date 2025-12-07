@@ -15,7 +15,7 @@ classDiagram-v2
         +transform()* DataFrame
         +validate(df) DataFrame
         +write(df, path, context) WriteResult
-        #_hooks_manager: HooksManager
+        #_hooks_manager: HooksRegistry
         #_error_policy_facade: ErrorPolicyFacade
         #_stage_runner: StageRunner
         #_extractor: ExtractorABC
@@ -42,7 +42,7 @@ classDiagram-v2
         +handle_stage_failure(stage, results, context)
     }
 
-    class HooksManager {
+    class HooksRegistry {
         +notify_stage_start(stage, context)
         +notify_stage_end(stage, result)
         +reset()
@@ -109,7 +109,7 @@ classDiagram-v2
     PipelineBase o-- ValidationService : uses
     PipelineBase o-- HashService : uses
     PipelineBase o-- UnifiedOutputWriter : uses
-    PipelineBase o-- HooksManager : uses
+    PipelineBase o-- HooksRegistry : uses
     PipelineBase o-- ErrorPolicyFacade : uses
     PipelineBase o-- StageRunner : uses
     PipelineBase o-- PipelineHookABC : has many
@@ -122,9 +122,9 @@ classDiagram-v2
     UnifiedOutputWriter ..> WriterABC : delegates
     UnifiedOutputWriter ..> MetadataWriterABC : writes meta
     UnifiedOutputWriter ..> AtomicFileOperation : atomic IO
-    HooksManager ..> PipelineHookABC : notifies
+    HooksRegistry ..> PipelineHookABC : notifies
     ErrorPolicyFacade ..> ErrorPolicyABC : delegates
-    StageRunner ..> HooksManager : coordinates
+    StageRunner ..> HooksRegistry : coordinates
     StageRunner ..> ErrorPolicyFacade
 
     ChemblPipelineBase o-- ChemblExtractorImpl : builds
@@ -139,7 +139,7 @@ classDiagram-v2
     class HashService domainSecondary
     class UnifiedOutputWriter domainSecondary
     class StageRunner domainSecondary
-    class HooksManager domainSecondary
+    class HooksRegistry domainSecondary
     class ErrorPolicyFacade domainSecondary
     class ChemblExtractorImpl domainSecondary
     class ChemblTransformerImpl domainSecondary
