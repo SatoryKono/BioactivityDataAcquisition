@@ -6,7 +6,7 @@ import pandas as pd
 
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaContract
+from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
@@ -23,7 +23,7 @@ class ChemblTransformerImpl(TransformerABC):
     def __init__(
         self,
         validation_service: ValidationService,
-        schema_contract: PipelineSchemaContract,
+        schema_contract: PipelineSchemaModel,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
     ) -> None:
