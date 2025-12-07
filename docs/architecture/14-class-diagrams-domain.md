@@ -86,7 +86,7 @@ classDiagram
         +apply(df, context) DataFrame
     }
 
-    class FulldateTransformer {
+    class FulldateTransformerImpl {
         -_hash_service: HashService
         +apply(df, context) DataFrame
     }
@@ -95,7 +95,7 @@ classDiagram
     TransformerABC <|-- HashColumnsTransformer
     TransformerABC <|-- LocalIndexColumnTransformer
     TransformerABC <|-- DatabaseVersionTransformer
-    TransformerABC <|-- FulldateTransformer
+    TransformerABC <|-- FulldateTransformerImpl
 ```
 
 ## 3. Hash Service

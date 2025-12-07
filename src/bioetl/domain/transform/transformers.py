@@ -99,7 +99,8 @@ class FulldateTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        return self._hash_service.add_fulldate_column(df)
+        timestamp = context.started_at if context else None
+        return self._hash_service.add_fulldate_column(df, timestamp=timestamp)
 
 
 __all__ = [

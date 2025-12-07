@@ -24,7 +24,7 @@ class TransformerChain {
 class HashColumnsTransformer
 class LocalIndexColumnTransformer
 class DatabaseVersionTransformer
-class FulldateTransformer
+class FulldateTransformerImpl
 
 class BaseNormalizationService
 class NormalizationServiceABC
@@ -38,11 +38,11 @@ TransformerChain --> TransformerABC : components
 HashColumnsTransformer ..|> TransformerABC
 LocalIndexColumnTransformer ..|> TransformerABC
 DatabaseVersionTransformer ..|> TransformerABC
-FulldateTransformer ..|> TransformerABC
+FulldateTransformerImpl ..|> TransformerABC
 TransformerChain --> HashColumnsTransformer
 TransformerChain --> LocalIndexColumnTransformer
 TransformerChain --> DatabaseVersionTransformer
-TransformerChain --> FulldateTransformer
+TransformerChain --> FulldateTransformerImpl
 ChemblNormalizationService --|> BaseNormalizationService
 NormalizationServiceImpl --|> BaseNormalizationService
 ChemblNormalizationService ..|> NormalizationServiceABC
@@ -52,5 +52,5 @@ NormalizationServiceImpl --> NormalizationConfigProvider
 HashColumnsTransformer --> HashService
 LocalIndexColumnTransformer --> HashService
 DatabaseVersionTransformer --> HashService
-FulldateTransformer --> HashService
+FulldateTransformerImpl --> HashService
 
