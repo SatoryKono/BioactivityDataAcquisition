@@ -7,7 +7,10 @@ from typing import Any, Callable, cast
 import pandas as pd
 from pandas._typing import DtypeArg
 
-from bioetl.domain.transform.contracts import NormalizationConfigProvider
+from bioetl.domain.transform.contracts import (
+    BaseNormalizationServiceABC,
+    NormalizationConfigProvider,
+)
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.infrastructure.transform.impl.serializer import (
     serialize_dict,
@@ -15,8 +18,8 @@ from bioetl.infrastructure.transform.impl.serializer import (
 )
 
 
-class BaseNormalizationService:
-    """Provide reusable normalization helpers for services."""
+class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
+    """Provide reusable normalization helpers for normalization services."""
 
     _NUMERIC_DTYPES: dict[str, DtypeArg] = {
         "number": "Float64",
@@ -269,3 +272,6 @@ class BaseNormalizationService:
         if field_name.startswith("id_"):
             return True
         return False
+
+
+__all__ = ["BaseNormalizationServiceImpl"]

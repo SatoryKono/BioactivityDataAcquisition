@@ -19,7 +19,7 @@ from bioetl.domain.transform.normalizers import (
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 from bioetl.infrastructure.transform.impl.base_normalizer import (
-    BaseNormalizationService,
+    BaseNormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.serializer import (
     serialize_dict,
@@ -82,7 +82,9 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
     return val.lower()
 
 
-class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService):
+class NormalizationServiceImpl(
+    NormalizationServiceABC, BaseNormalizationServiceImpl
+):
     """
     Сервис нормализации данных.
     Выполняет:
@@ -91,7 +93,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
     """
 
     def __init__(self, config: NormalizationConfigProvider):
-        BaseNormalizationService.__init__(self, config, empty_value=pd.NA)
+        BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
     def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame([raw])
