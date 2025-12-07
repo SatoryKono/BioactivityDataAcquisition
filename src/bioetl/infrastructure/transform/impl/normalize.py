@@ -95,13 +95,13 @@ class NormalizationServiceImpl(
     def __init__(self, config: NormalizationConfigProviderProtocol):
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
-    def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+    def apply_normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         """Normalize a single raw record into dictionary form."""
         df = pd.DataFrame([raw])
-        normalized = self.normalize_dataframe(df)
+        normalized = self.apply_normalize_dataframe(df)
         return cast(dict[str, Any], normalized.iloc[0].to_dict())
 
-    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Проходит по полям конфигурации и применяет нормализацию.
         """
@@ -149,17 +149,17 @@ class NormalizationServiceImpl(
             if dtype in ("array", "object"):
                 df[name] = df[name].astype("string").replace({pd.NA: None})
 
-        return self.coerce_numeric_columns(df)
+        return self.ensure_numeric_columns(df)
 
-    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize dataframe using configured field rules."""
-        return self.normalize_fields(df)
+        return self.apply_normalize_fields(df)
 
-    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Normalize a batch dataframe (alias for normalize_dataframe)."""
-        return self.normalize_dataframe(df)
+    def apply_normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize a batch dataframe (alias for apply_normalize_dataframe)."""
+        return self.apply_normalize_dataframe(df)
 
-    def normalize_series(
+    def apply_normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
     ) -> pd.Series:
         """Normalize a single pandas Series according to field config."""

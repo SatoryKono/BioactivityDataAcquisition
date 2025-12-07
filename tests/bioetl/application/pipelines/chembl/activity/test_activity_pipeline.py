@@ -104,9 +104,9 @@ def test_transform_drops_invalid_rows(pipeline):
     )
 
     pipeline._normalization_service = MagicMock()
-    pipeline._normalization_service.normalize_fields.side_effect = lambda x: x
-    pipeline._normalization_service.normalize.side_effect = lambda record: record
-    pipeline._normalization_service.normalize_dataframe.side_effect = (
+    pipeline._normalization_service.apply_normalize_fields.side_effect = lambda x: x
+    pipeline._normalization_service.apply_normalize.side_effect = lambda record: record
+    pipeline._normalization_service.apply_normalize_dataframe.side_effect = (
         lambda df: df.copy()
     )
 

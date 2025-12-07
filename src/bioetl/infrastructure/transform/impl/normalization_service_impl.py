@@ -32,7 +32,7 @@ class NormalizationServiceImpl(
     def __init__(self, config: NormalizationConfigProviderProtocol):
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
-    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
         for field_cfg in self._config.fields:
             name = field_cfg["name"]
@@ -78,9 +78,9 @@ class NormalizationServiceImpl(
             if dtype in ("array", "object"):
                 df[name] = df[name].astype("string").replace({pd.NA: None})
 
-        return self.coerce_numeric_columns(df)
+        return self.ensure_numeric_columns(df)
 
-    def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+    def apply_normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         """Normalize a raw record into a dict using configured field rules."""
         normalized: dict[str, Any] = {}
 
@@ -118,7 +118,7 @@ class NormalizationServiceImpl(
 
         return normalized
 
-    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize configured columns in the provided dataframe."""
         normalized_df = df.copy()
 
@@ -127,18 +127,18 @@ class NormalizationServiceImpl(
             if not name or name not in normalized_df.columns:
                 continue
 
-            normalized_df[name] = self.normalize_series(
+            normalized_df[name] = self.apply_normalize_series(
                 normalized_df[name], cast(dict[str, Any], field_cfg)
             )
 
-        return self.coerce_numeric_columns(normalized_df)
+        return self.ensure_numeric_columns(normalized_df)
 
-    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize a batch dataframe and coerce numeric columns."""
-        normalized = self.normalize_dataframe(df)
-        return self.coerce_numeric_columns(normalized)
+        normalized = self.apply_normalize_dataframe(df)
+        return self.ensure_numeric_columns(normalized)
 
-    def normalize_series(
+    def apply_normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
     ) -> pd.Series:
         """Normalize a single series according to field configuration."""

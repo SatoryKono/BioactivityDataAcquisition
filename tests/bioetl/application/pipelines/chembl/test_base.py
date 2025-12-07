@@ -182,7 +182,7 @@ def _assert_normalized_row(
 def test_transform_uses_batch_normalization(mock_dependencies_fixture):
     """Ensure transform delegates batch normalization to the service."""
     normalization_service = MagicMock()
-    normalization_service.normalize_dataframe.return_value = pd.DataFrame(
+    normalization_service.apply_normalize_dataframe.return_value = pd.DataFrame(
         {"a": [1, 2], "transformed": [True, True]}
     )
 
@@ -200,11 +200,11 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
 
     result = pipeline.transform(df)
 
-    normalization_service.normalize_dataframe.assert_called_once()
+    normalization_service.apply_normalize_dataframe.assert_called_once()
 
     # Verify result matches normalization output
     pd.testing.assert_frame_equal(
-        result, normalization_service.normalize_dataframe.return_value
+        result, normalization_service.apply_normalize_dataframe.return_value
     )
 
 
@@ -218,7 +218,7 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
     record_source.iter_records.return_value = raw_chunks
 
     normalization_service = MagicMock()
-    normalization_service.normalize_batch.side_effect = lambda df: df.assign(
+    normalization_service.apply_normalize_batch.side_effect = lambda df: df.assign(
         processed=True
     )
 
@@ -235,7 +235,7 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
 
     result = pipeline.extract()
 
-    assert normalization_service.normalize_batch.call_count == 2
+    assert normalization_service.apply_normalize_batch.call_count == 2
 
     expected = pd.concat(
         [
