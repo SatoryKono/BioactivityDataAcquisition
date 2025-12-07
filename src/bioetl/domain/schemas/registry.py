@@ -8,7 +8,7 @@ from bioetl.domain.validation import SchemaProviderABC, schema_type
 
 
 @dataclass
-class _SchemaEntry:
+class _SchemaEntryModel:
     schema: schema_type
     column_order: list[str] | None = None
 
@@ -19,7 +19,7 @@ class SchemaRegistry(SchemaProviderABC):
     """
 
     def __init__(self) -> None:
-        self._schemas: dict[str, _SchemaEntry] = {}
+        self._schemas: dict[str, _SchemaEntryModel] = {}
 
     def register(
         self,
@@ -29,7 +29,7 @@ class SchemaRegistry(SchemaProviderABC):
         column_order: list[str] | None = None,
     ) -> None:
         """Register a schema by name."""
-        self._schemas[name] = _SchemaEntry(schema=schema, column_order=column_order)
+        self._schemas[name] = _SchemaEntryModel(schema=schema, column_order=column_order)
 
     def get_schema(self, name: str) -> schema_type:
         """Get schema by name, raises ValueError if not found."""
