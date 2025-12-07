@@ -2,7 +2,7 @@
 <!-- generated -->
 
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
-  - Normalization service contract for DataFrame/record pipelines. Default factory: `bioetl.infrastructure.transform.factories.default_normalization_service`. Implementations: `NormalizationServiceImpl`, `ChemblNormalizationService`.
+  - Normalization service contract for DataFrame/record pipelines. Default factory: `bioetl.infrastructure.transform.factories.default_normalization_service`. Implementations: `NormalizationServiceImpl`, `ChemblNormalizationServiceImpl`.
 - `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
   - Facade for deterministic hash columns; default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.infrastructure.transform.impl.hash_service_impl.HashServiceImpl`.
 - `ProviderRegistryABC` — `bioetl.domain.provider_registry.ProviderRegistryABC`
