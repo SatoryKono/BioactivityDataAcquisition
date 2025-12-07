@@ -28,6 +28,7 @@ class BaseWriterImpl(WriterABC):
 
     @property
     def atomic(self) -> bool:
+        """Indicate whether writer performs atomic file replacement."""
         return self._atomic
 
     def write(
@@ -37,6 +38,7 @@ class BaseWriterImpl(WriterABC):
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
+        """Write DataFrame applying column order and return metadata."""
         start_time = time.monotonic()
 
         df_to_write = apply_column_order(df, column_order)
