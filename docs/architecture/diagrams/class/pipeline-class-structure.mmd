@@ -15,9 +15,9 @@ classDiagram-v2
         +transform()* DataFrame
         +validate(df) DataFrame
         +write(df, path, context) WriteResult
-        #_hooks_manager: HooksRegistry
-        #_error_policy_facade: ErrorPolicyFacade
-        #_stage_runner: StageRunner
+        #_hooks_manager: HooksManager
+        #_error_policy_manager: ErrorPolicyManager
+        #_stage_runner: StageRunnerFacade
         #_extractor: ExtractorABC
         #_transformer: TransformerABC
         #_post_transformer: TransformerABC
@@ -36,7 +36,7 @@ classDiagram-v2
         +get_database_version()
     }
 
-    class StageRunner {
+    class StageRunnerFacade {
         +process_chunk(raw_chunk, context, ...)
         +make_stage_result(stage, count, chunks)
         +handle_stage_failure(stage, results, context)
@@ -109,9 +109,9 @@ classDiagram-v2
     PipelineBase o-- ValidationService : uses
     PipelineBase o-- HashService : uses
     PipelineBase o-- UnifiedOutputWriter : uses
-    PipelineBase o-- HooksRegistry : uses
-    PipelineBase o-- ErrorPolicyFacade : uses
-    PipelineBase o-- StageRunner : uses
+    PipelineBase o-- HooksManager : uses
+    PipelineBase o-- ErrorPolicyManager : uses
+    PipelineBase o-- StageRunnerFacade : uses
     PipelineBase o-- PipelineHookABC : has many
     PipelineBase o-- ErrorPolicyABC : uses
     PipelineBase o-- TransformerABC : uses
@@ -122,10 +122,10 @@ classDiagram-v2
     UnifiedOutputWriter ..> WriterABC : delegates
     UnifiedOutputWriter ..> MetadataWriterABC : writes meta
     UnifiedOutputWriter ..> AtomicFileOperation : atomic IO
-    HooksRegistry ..> PipelineHookABC : notifies
-    ErrorPolicyFacade ..> ErrorPolicyABC : delegates
-    StageRunner ..> HooksRegistry : coordinates
-    StageRunner ..> ErrorPolicyFacade
+    HooksManager ..> PipelineHookABC : notifies
+    ErrorPolicyManager ..> ErrorPolicyABC : delegates
+    StageRunnerFacade ..> HooksManager : coordinates
+    StageRunnerFacade ..> ErrorPolicyManager
 
     ChemblPipelineBase o-- ChemblExtractorImpl : builds
     ChemblPipelineBase o-- ChemblTransformerImpl : builds
@@ -138,9 +138,9 @@ classDiagram-v2
     class ValidationService domainSecondary
     class HashService domainSecondary
     class UnifiedOutputWriter domainSecondary
-    class StageRunner domainSecondary
-    class HooksRegistry domainSecondary
-    class ErrorPolicyFacade domainSecondary
+    class StageRunnerFacade domainSecondary
+    class HooksManager domainSecondary
+    class ErrorPolicyManager domainSecondary
     class ChemblExtractorImpl domainSecondary
     class ChemblTransformerImpl domainSecondary
     class NormalizationServiceABC interface

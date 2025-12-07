@@ -5,10 +5,10 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
+from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
-from bioetl.application.pipelines.hooks_registry import HooksRegistry
-from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
@@ -22,7 +22,7 @@ def _build_context() -> RunContext:
 @pytest.mark.unit
 def test_hooks_registry_notifies_hooks(mock_logger):
     hook = MagicMock(spec=PipelineHookABC)
-    manager = HooksRegistry(
+    manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
@@ -48,13 +48,13 @@ def test_hooks_registry_notifies_hooks(mock_logger):
 
 @pytest.mark.unit
 def test_error_policy_facade_retry_and_skip(mock_logger):
-    hooks_manager = HooksRegistry(
+    hooks_manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
     policy = ContinueOnErrorPolicyImpl(max_retries=1)
-    manager = ErrorPolicyFacade(
+    manager = ErrorPolicyManager(
         error_policy=policy,
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -78,12 +78,12 @@ def test_error_policy_facade_retry_and_skip(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runner_process_and_failure(mock_logger):
-    hooks_manager = HooksRegistry(
+    hooks_manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyFacade(
+    manager = ErrorPolicyManager(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -91,7 +91,7 @@ def test_stage_runner_process_and_failure(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: f"skipped-{stage}",
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
         error_policy_facade=manager,
         entity_name="entity",
@@ -150,12 +150,12 @@ def test_stage_runner_process_and_failure(mock_logger):
 
 @pytest.mark.unit
 def test_stage_runner_handles_skip_and_counts(mock_logger):
-    hooks_manager = HooksRegistry(
+    hooks_manager = HooksManager(
         logger=mock_logger,
         provider_id=ProviderId("chembl"),
         entity_name="entity",
     )
-    manager = ErrorPolicyFacade(
+    manager = ErrorPolicyManager(
         error_policy=ContinueOnErrorPolicyImpl(),
         hooks_manager=hooks_manager,
         logger=mock_logger,
@@ -163,7 +163,7 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: pd.DataFrame(),
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
         error_policy_facade=manager,
         entity_name="entity",
@@ -216,7 +216,7 @@ def test_stage_runner_raises_on_missing_result(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: pd.DataFrame(),
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
         error_policy_facade=manager,
         entity_name="entity",

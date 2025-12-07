@@ -10,9 +10,9 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
-from bioetl.application.pipelines.error_policy_facade import ErrorPolicyFacade
-from bioetl.application.pipelines.hooks_registry import HooksRegistry
-from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
+from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
@@ -83,7 +83,7 @@ class PipelineBase(ABC):
             FailFastErrorPolicyImpl,
         )
 
-        self._hooks_manager = HooksRegistry(
+        self._hooks_manager = HooksManager(
             logger=self._logger,
             provider_id=self._provider_id,
             entity_name=self._config.entity_name,
@@ -91,7 +91,7 @@ class PipelineBase(ABC):
             pipeline_id=self._config.id,
         )
         self._error_policy = error_policy or FailFastErrorPolicyImpl()
-        self._error_policy_facade = ErrorPolicyFacade(
+        self._error_policy_manager = ErrorPolicyManager(
             error_policy=self._error_policy,
             hooks_manager=self._hooks_manager,
             logger=self._logger,
@@ -99,9 +99,9 @@ class PipelineBase(ABC):
             entity_name=self._config.entity_name,
             default_on_skip=self._default_on_skip,
         )
-        self._stage_runner = StageRunner(
+        self._stage_runner = StageRunnerFacade(
             hooks_manager=self._hooks_manager,
-            error_policy_facade=self._error_policy_facade,
+            error_policy_manager=self._error_policy_manager,
             entity_name=self._config.entity_name,
             provider_id=self._provider_id,
         )
@@ -120,14 +120,14 @@ class PipelineBase(ABC):
         Запускает полный цикл ETL-пайплайна.
         """
         self._hooks_manager.reset()
-        self._error_policy_facade.reset()
+        self._error_policy_manager.reset()
         if hasattr(self._hash_service, "reset_state"):
             self._hash_service.reset_state()
 
         context = self._build_context(dry_run)
         self._logger = self._logger.bind(run_id=context.run_id)
         self._hooks_manager.set_logger(self._logger)
-        self._error_policy_facade.set_logger(self._logger)
+        self._error_policy_manager.set_logger(self._logger)
         self._logger.info("Pipeline started", run_id=context.run_id)
         stages_results: list[StageResult] = []
         counters = self._init_stage_counters()
@@ -193,7 +193,7 @@ class PipelineBase(ABC):
                 error.stage,
                 0,
                 success=False,
-                errors=self._error_policy_facade.get_last_error_messages(),
+                errors=self._error_policy_manager.get_last_error_messages(),
             )
             stages_results.append(stage_result)
             self._hooks_manager.notify_stage_end(error.stage, stage_result)
@@ -248,7 +248,7 @@ class PipelineBase(ABC):
         reset_iterator()
         while True:
             try:
-                raw_chunk_obj = self._error_policy_facade.execute(
+                raw_chunk_obj = self._error_policy_manager.execute(
                     "extract",
                     context,
                     lambda: next(chunk_iterator),  # type: ignore
@@ -348,7 +348,7 @@ class PipelineBase(ABC):
             else pd.DataFrame()
         )
 
-        write_result_obj = self._error_policy_facade.execute(
+        write_result_obj = self._error_policy_manager.execute(
             "write",
             context,
             lambda: self.write(
@@ -466,7 +466,7 @@ class PipelineBase(ABC):
     def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
         """Устанавливает политику обработки ошибок."""
         self._error_policy = error_policy
-        self._error_policy_facade = ErrorPolicyFacade(
+        self._error_policy_manager = ErrorPolicyManager(
             error_policy=error_policy,
             hooks_manager=self._hooks_manager,
             logger=self._logger,
@@ -474,9 +474,9 @@ class PipelineBase(ABC):
             entity_name=self._config.entity_name,
             default_on_skip=self._default_on_skip,
         )
-        self._stage_runner = StageRunner(
+        self._stage_runner = StageRunnerFacade(
             hooks_manager=self._hooks_manager,
-            error_policy_facade=self._error_policy_facade,
+            error_policy_manager=self._error_policy_manager,
             entity_name=self._config.entity_name,
             provider_id=self._provider_id,
         )
@@ -499,7 +499,7 @@ class PipelineBase(ABC):
     def _create_chunk_iterator(
         self, context: RunContext, **kwargs: Any
     ) -> Iterable[pd.DataFrame]:
-        iterator = self._error_policy_facade.execute(
+        iterator = self._error_policy_manager.execute(
             "extract",
             context,
             lambda: self.iter_chunks(**kwargs),
@@ -521,7 +521,7 @@ class PipelineBase(ABC):
         attempt: int = 1,
     ) -> Any:
         self._hooks_manager.notify_stage_start(stage, context)
-        return self._error_policy_facade.execute(
+        return self._error_policy_manager.execute(
             stage,
             context,
             action,

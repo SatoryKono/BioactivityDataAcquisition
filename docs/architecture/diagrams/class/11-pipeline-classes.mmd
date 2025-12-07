@@ -12,9 +12,9 @@ class ChemblEntityPipeline
 class ChemblExtractorImpl
 class ChemblTransformerImpl
 class ChemblExtractionServiceImpl
-class StageRunner
-class HooksRegistry
-class ErrorPolicyFacade
+class StageRunnerFacade
+class HooksManager
+class ErrorPolicyManager
 class RecordSource
 class ValidationService
 class NormalizationServiceABC
@@ -36,16 +36,16 @@ ChemblPipelineBase --> ValidationService
 ChemblPipelineBase --> NormalizationServiceABC
 ChemblPipelineBase --> HashService
 ChemblPipelineBase --> UnifiedOutputWriter
-PipelineBase --> StageRunner
-PipelineBase --> HooksRegistry
-PipelineBase --> ErrorPolicyFacade
+PipelineBase --> StageRunnerFacade
+PipelineBase --> HooksManager
+PipelineBase --> ErrorPolicyManager
 PipelineBase --> TransformerABC : post_transformer
 PipelineBase --> ExtractorABC
 ChemblExtractorImpl --> ExtractionServiceABC
 ChemblExtractorImpl --> RecordSource
 ChemblTransformerImpl --> TransformerABC
-HooksRegistry --> PipelineHookABC
-ErrorPolicyFacade --> ErrorPolicyABC
-StageRunner --> HooksRegistry
-StageRunner --> ErrorPolicyFacade
+HooksManager --> PipelineHookABC
+ErrorPolicyManager --> ErrorPolicyABC
+StageRunnerFacade --> HooksManager
+StageRunnerFacade --> ErrorPolicyManager
 

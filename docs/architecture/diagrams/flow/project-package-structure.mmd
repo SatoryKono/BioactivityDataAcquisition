@@ -22,9 +22,9 @@ subgraph Application["Application Layer"]
   PipelineRegistry["Pipeline registry\napplication.pipelines.registry"]:::componentSecondary
   Container["PipelineContainer\napplication.container"]:::componentSecondary
   Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
-  StageRunner["StageRunner\napplication.pipelines.stage_runner"]:::componentSecondary
-  HooksRegistry["HooksRegistry\napplication.pipelines.hooks_registry"]:::componentSecondary
-  ErrorPolicyMgr["ErrorPolicyFacade\napplication.pipelines.error_policy_facade"]:::componentSecondary
+  StageRunnerFacade["StageRunnerFacade\napplication.pipelines.stage_runner_facade"]:::componentSecondary
+  HooksManager["HooksManager\napplication.pipelines.hooks_manager"]:::componentSecondary
+  ErrorPolicyMgr["ErrorPolicyManager\napplication.pipelines.error_policy_manager"]:::componentSecondary
   HooksImpl["Logging + Metrics hooks\napplication.pipelines.hooks_impl"]:::componentSecondary
 end
 class Application group;
@@ -65,10 +65,10 @@ Orchestrator --> ConfigLoader
 Orchestrator --> PipelineRegistry
 Orchestrator --> Container
 Container --> Pipelines
-Container --> StageRunner
-Container --> HooksRegistry
+Container --> StageRunnerFacade
+Container --> HooksManager
 Container --> ErrorPolicyMgr
-HooksRegistry --> HooksImpl
+HooksManager --> HooksImpl
 Container --> Validation
 Container --> Normalization
 Container --> Transform
