@@ -51,8 +51,22 @@ def _strip_front_matter(content: str) -> str:
     return content[match.end() :]
 
 
+def _cleanup_temp(root: Path) -> None:
+    for pattern in ("*.render.mmd", "*.render.png"):
+        for temp_path in root.rglob(pattern):
+            if temp_path.is_file():
+                temp_path.unlink(missing_ok=True)
+
+
 def _find_diagrams(root: Path) -> list[Path]:
-    return sorted(path.resolve() for path in root.rglob("*.mmd") if path.is_file())
+    diagrams: list[Path] = []
+    for path in root.rglob("*.mmd"):
+        if not path.is_file():
+            continue
+        if ".render." in path.name:
+            continue
+        diagrams.append(path.resolve())
+    return sorted(diagrams)
 
 
 def _render_diagram(path: Path, background: str, scale: float) -> None:
@@ -67,6 +81,8 @@ def _render_diagram(path: Path, background: str, scale: float) -> None:
     tmp_out_path = base_dir / f"{target.stem}.render.png"
 
     tmp_in_path.write_text(content, encoding="utf-8")
+
+    print(f"[render] {path} -> {target} (tmp_in={tmp_in_path}, tmp_out={tmp_out_path})")
 
     cmd = [
         _npx_command(),
@@ -88,7 +104,10 @@ def _render_diagram(path: Path, background: str, scale: float) -> None:
         if not tmp_out_path.exists():
             raise FileNotFoundError(f"Rendered file missing: {tmp_out_path}")
         tmp_out_path.replace(target)
-    finally:
+    except Exception:
+        # Keep temp files for debugging
+        raise
+    else:
         tmp_in_path.unlink(missing_ok=True)
         if tmp_out_path.exists():
             tmp_out_path.unlink()
@@ -101,6 +120,7 @@ def _render_all(paths: Iterable[Path], background: str, scale: float) -> None:
 
 def main() -> int:
     args = _parse_args()
+    _cleanup_temp(args.root)
     diagrams = _find_diagrams(args.root)
     if not diagrams:
         print(f"Диаграммы (*.mmd) не найдены в {args.root}", file=sys.stderr)
