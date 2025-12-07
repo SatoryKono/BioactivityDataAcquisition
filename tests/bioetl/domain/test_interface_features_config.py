@@ -1,4 +1,4 @@
-from bioetl.domain.configs.base import InterfaceFeaturesConfig
+from bioetl.domain.configs import InterfaceFeaturesConfig
 
 
 def test_provider_loader_port_flag_defaults_to_false() -> None:
