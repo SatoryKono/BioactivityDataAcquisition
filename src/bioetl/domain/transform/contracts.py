@@ -49,7 +49,7 @@ class BaseNormalizationServiceABC(ABC):
     """
 
     @abstractmethod
-    def coerce_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+    def ensure_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Приводит числовые столбцы к nullable pandas dtypes."""
 
     @abstractmethod
@@ -117,31 +117,31 @@ class NormalizationServiceABC(ABC):
     Сервис нормализации данных в DataFrame.
 
     Обязательные операции:
-    - normalize: нормализация единичной записи
-    - normalize_fields: пакетная нормализация DataFrame по конфигурации
-    - normalize_dataframe: совместимый алиас для normalize_fields
-    - normalize_batch: пакетная нормализация чанка
-    - normalize_series: нормализация столбца по конфигурации
+    - apply_normalize: нормализация единичной записи
+    - apply_normalize_fields: пакетная нормализация DataFrame по конфигурации
+    - apply_normalize_dataframe: совместимый алиас для apply_normalize_fields
+    - apply_normalize_batch: пакетная нормализация чанка
+    - apply_normalize_series: нормализация столбца по конфигурации
     """
 
     @abstractmethod
-    def normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
+    def apply_normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         """Нормализует одиночную запись или Series."""
 
     @abstractmethod
-    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Нормализует поля DataFrame согласно конфигурации."""
 
     @abstractmethod
-    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Алиас для normalize_fields для обратной совместимости."""
+    def apply_normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Алиас для apply_normalize_fields для обратной совместимости."""
 
     @abstractmethod
-    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         """Нормализует DataFrame чанками или целиком."""
 
     @abstractmethod
-    def normalize_series(
+    def apply_normalize_series(
         self,
         series: pd.Series,
         field_cfg: dict[str, Any],

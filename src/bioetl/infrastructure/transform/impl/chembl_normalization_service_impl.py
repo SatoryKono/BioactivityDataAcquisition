@@ -39,7 +39,7 @@ class ChemblNormalizationServiceImpl(
     def __init__(self, config: NormalizationConfigProviderProtocol):
         super().__init__(config)
 
-    def normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
+    def apply_normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
         """Normalize single raw ChEMBL record into flat dict."""
         normalized: dict[str, Any] = {}
 
@@ -77,7 +77,7 @@ class ChemblNormalizationServiceImpl(
 
         return cast(NormalizedRecord, normalized)
 
-    def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize configured fields across dataframe columns."""
         normalized_df = df.copy()
 
@@ -86,21 +86,23 @@ class ChemblNormalizationServiceImpl(
             if not name or name not in normalized_df.columns:
                 continue
 
-            normalized_df[name] = self.normalize_series(normalized_df[name], field_cfg)
+            normalized_df[name] = self.apply_normalize_series(
+                normalized_df[name], field_cfg
+            )
 
-        return self.coerce_numeric_columns(normalized_df)
+        return self.ensure_numeric_columns(normalized_df)
 
-    def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+    def apply_normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize an entire batch DataFrame."""
-        normalized = self.normalize_dataframe(df)
-        return self.coerce_numeric_columns(normalized)
+        normalized = self.apply_normalize_dataframe(df)
+        return self.ensure_numeric_columns(normalized)
 
-    def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Alias for normalize_dataframe retained for compatibility."""
-        normalized = self.normalize_dataframe(df)
-        return self.coerce_numeric_columns(normalized)
+    def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Alias for apply_normalize_dataframe retained for compatibility."""
+        normalized = self.apply_normalize_dataframe(df)
+        return self.ensure_numeric_columns(normalized)
 
-    def normalize_series(
+    def apply_normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
     ) -> pd.Series:
         """Normalize a single column according to field configuration."""

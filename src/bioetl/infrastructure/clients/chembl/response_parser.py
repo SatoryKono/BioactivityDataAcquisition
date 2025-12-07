@@ -10,7 +10,7 @@ class ChemblResponseParserImpl(ResponseParserABC):
     Парсер ответов ChEMBL API.
     """
 
-    def parse(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
+    def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract main payload list from ChEMBL response."""
         # ChEMBL responses are usually { "activities": [...], "page_meta": ... }
         # We need to find the list key.

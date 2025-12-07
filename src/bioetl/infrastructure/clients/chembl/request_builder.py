@@ -18,12 +18,12 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         self._endpoint: str = ""
         self._params: dict[str, Any] = {}
 
-    def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
+    def build_for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
         """Select API endpoint (e.g., activity, assay, target)."""
         self._endpoint = endpoint.strip("/")
         return self
 
-    def build(self, params: dict[str, Any]) -> str:
+    def build_request(self, params: dict[str, Any]) -> str:
         """
         Строит URL с параметрами.
         Возвращает полный URL (строка; в реальности может быть Request object).
@@ -50,7 +50,9 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
 
         return url
 
-    def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilderImpl":
+    def build_with_pagination(
+        self, offset: int, limit: int
+    ) -> "ChemblRequestBuilderImpl":
         """Attach pagination parameters for subsequent requests."""
         self._params["offset"] = offset
         self._params["limit"] = limit

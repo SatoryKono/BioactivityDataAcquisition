@@ -23,8 +23,8 @@ from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 def fixture_request_builder():
     """Mock ChemblRequestBuilderImpl."""
     builder = Mock(spec=ChemblRequestBuilderImpl)
-    builder.for_endpoint.return_value = builder
-    builder.build.return_value = "http://test-url"
+    builder.build_for_endpoint.return_value = builder
+    builder.build_request.return_value = "http://test-url"
     return builder
 
 
@@ -76,7 +76,7 @@ def test_metadata(client, mock_request_builder):
     result = client.metadata()
 
     # Verify
-    mock_request_builder.for_endpoint.assert_called_with("status")
+    mock_request_builder.build_for_endpoint.assert_called_with("status")
     client.http.request.assert_called_with("GET", "http://test-url")
     assert result == {"status": "UP"}
 
@@ -92,8 +92,10 @@ def test_request_activity(client, mock_request_builder):
     result = client.request_activity(molecule_chembl_id="CHEMBL1")
 
     # Verify
-    mock_request_builder.for_endpoint.assert_called_with("activity")
-    mock_request_builder.build.assert_called_with({"molecule_chembl_id": "CHEMBL1"})
+    mock_request_builder.build_for_endpoint.assert_called_with("activity")
+    mock_request_builder.build_request.assert_called_with(
+        {"molecule_chembl_id": "CHEMBL1"}
+    )
     assert result == {"activities": []}
 
 
