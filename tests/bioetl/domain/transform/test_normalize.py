@@ -67,7 +67,7 @@ def test_normalization_service_full():
         }
     )
 
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
 
     # Simple: lower + trim
     assert res["simple"].iloc[0] == "value"
@@ -105,7 +105,7 @@ def test_normalization_service_raises_on_invalid_custom_value():
         df = pd.DataFrame({"fail_field": ["any"]})
 
         with pytest.raises(ValueError) as excinfo:
-            service.normalize_fields(df)
+            service.apply_normalize_fields(df)
         assert "fail_field" in str(excinfo.value)
 
 
@@ -145,7 +145,7 @@ def test_normalization_service_id_detection():
         }
     )
 
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
 
     # _chembl_id -> ID mode (upper)
     assert res["some_chembl_id"].iloc[0] == "LOWER"
@@ -164,7 +164,7 @@ def test_normalization_service_case_sensitive():
     service = default_normalization_service(config)
 
     df = pd.DataFrame({"secret_code": ["  MixEd  "]})
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
 
     # Sensitive -> trim only, preserve case
     assert res["secret_code"].iloc[0] == "MixEd"
@@ -181,7 +181,7 @@ def test_normalization_service_missing_field():
 
     df = pd.DataFrame({"exists": ["A"]})
     # Should not raise error
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
     assert "exists" in res.columns
     assert "missing" not in res.columns
 
@@ -200,7 +200,7 @@ def test_normalization_service_nested_fallback_error():
         df = pd.DataFrame({"bad_nested": ["scalar_val"]})
 
         with pytest.raises(ValueError) as excinfo:
-            service.normalize_fields(df)
+            service.apply_normalize_fields(df)
         assert "bad_nested" in str(excinfo.value)
         assert "Scalar fail" in str(excinfo.value)
 
@@ -212,7 +212,7 @@ def test_normalization_service_nested_na():
     service = default_normalization_service(config)
 
     df = pd.DataFrame({"list_col": [pd.NA, None]})
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
 
     assert pd.isna(res["list_col"].iloc[0])
     assert pd.isna(res["list_col"].iloc[1])
@@ -226,7 +226,7 @@ def test_normalization_service_nested_scalar_success():
 
     # Pass a scalar string to an array field
     df = pd.DataFrame({"arr_col": ["  Value  "]})
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
 
     # Should normalize string (default) and return it
     assert res["arr_col"].iloc[0] == "value"
@@ -242,7 +242,7 @@ def test_normalization_service_nested_complex_structures():
     data = [[{"k1": " V1 "}, {"k2": " V2 "}]]
     df = pd.DataFrame({"complex_col": data})
 
-    res = service.normalize_fields(df)
+    res = service.apply_normalize_fields(df)
 
     # Default scalar normalizer: V1 -> v1, V2 -> v2
     # serialize_list([serialize_dict(d1), serialize_dict(d2)])
@@ -268,7 +268,7 @@ def test_normalization_service_nested_errors_list():
     with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"err_list": fail_on_x}):
         df = pd.DataFrame({"err_list": [["A", "X"]]})
         with pytest.raises(ValueError) as excinfo:
-            service.normalize_fields(df)
+            service.apply_normalize_fields(df)
         assert "err_list" in str(excinfo.value)
         assert "Cannot process X" in str(excinfo.value)
 
@@ -284,6 +284,6 @@ def test_normalization_service_custom_container_normalizer():
 
     with patch.dict(CUSTOM_FIELD_NORMALIZERS, {"custom_container": list_producer}):
         df = pd.DataFrame({"custom_container": ["input"]})
-        res = service.normalize_fields(df)
+        res = service.apply_normalize_fields(df)
         # Should be serialized list "a|b"
         assert res["custom_container"].iloc[0] == "a|b"

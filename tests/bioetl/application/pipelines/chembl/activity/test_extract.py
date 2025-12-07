@@ -69,8 +69,8 @@ def mock_extraction_service():
 def mock_normalization_service():
     """Create mock normalization service."""
     service = MagicMock()
-    service.normalize_batch.side_effect = lambda df: df
-    service.normalize_dataframe.side_effect = lambda df: df
+    service.apply_normalize_batch.side_effect = lambda df: df
+    service.apply_normalize_dataframe.side_effect = lambda df: df
     return service
 
 

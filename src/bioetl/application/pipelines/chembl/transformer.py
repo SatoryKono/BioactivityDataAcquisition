@@ -38,7 +38,7 @@ class ChemblTransformerImpl(TransformerABC):
         """Apply ChEMBL pipeline transforms to the dataframe."""
         df = self.pre_transform(df)
         df = self.do_transform(df)
-        df = self.normalization_service.normalize_dataframe(df)
+        df = self.normalization_service.apply_normalize_dataframe(df)
         df = self._enforce_schema(df)
         df = self._drop_nulls_in_required_columns(df)
         return df

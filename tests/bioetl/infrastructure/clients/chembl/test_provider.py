@@ -11,19 +11,19 @@ from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
 class _NormalizationServiceStub(NormalizationServiceABC):
-    def normalize(self, raw):
+    def apply_normalize(self, raw):
         return {"raw": raw}
 
-    def normalize_fields(self, df):
+    def apply_normalize_fields(self, df):
         return df
 
-    def normalize_dataframe(self, df):
+    def apply_normalize_dataframe(self, df):
         return df
 
-    def normalize_batch(self, df):
+    def apply_normalize_batch(self, df):
         return df
 
-    def normalize_series(self, series, field_cfg):
+    def apply_normalize_series(self, series, field_cfg):
         return series
 
 
