@@ -8,10 +8,10 @@ from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
 
 def test_parquet_writer_properties():
     writer = ParquetWriterImpl()
-    assert writer.atomic is True
-    assert writer.supports_format("parquet")
-    assert writer.supports_format("PARQUET")
-    assert not writer.supports_format("csv")
+    assert writer.is_atomic is True
+    assert writer.has_format_support("parquet")
+    assert writer.has_format_support("PARQUET")
+    assert not writer.has_format_support("csv")
 
 
 def test_parquet_write():

@@ -71,7 +71,7 @@ class DummyPipeline:
     def set_post_transformer(self, transformer: Any) -> None:
         self.post_transformer = transformer
 
-    def add_hooks(self, hooks: list[Any]) -> None:
+    def register_hooks(self, hooks: list[Any]) -> None:
         self.hooks.extend(hooks)
 
     def set_error_policy(self, error_policy: Any) -> None:

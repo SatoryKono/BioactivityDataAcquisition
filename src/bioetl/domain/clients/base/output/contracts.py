@@ -25,7 +25,7 @@ class WriterABC(ABC):
 
     @property
     @abstractmethod
-    def atomic(self) -> bool:
+    def is_atomic(self) -> bool:
         """Поддерживает ли атомарную запись."""
 
     @abstractmethod
@@ -39,7 +39,7 @@ class WriterABC(ABC):
         """Записывает DataFrame с учетом порядка колонок."""
 
     @abstractmethod
-    def supports_format(self, fmt: str) -> bool:
+    def has_format_support(self, fmt: str) -> bool:
         """Поддерживает ли формат (csv, parquet)."""
 
 
@@ -61,7 +61,7 @@ class MetadataWriterABC(ABC):
         """Записывает отчет качества."""
 
     @abstractmethod
-    def generate_checksums(self, paths: list[Path]) -> dict[str, str]:
+    def build_checksums(self, paths: list[Path]) -> dict[str, str]:
         """Генерирует контрольные суммы файлов."""
 
 

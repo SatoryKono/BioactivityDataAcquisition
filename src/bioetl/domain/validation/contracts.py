@@ -4,7 +4,7 @@ from typing import Any, Protocol
 
 import pandas as pd
 
-SchemaType = Any
+schema_type = Any
 
 
 @dataclass
@@ -33,7 +33,7 @@ class SchemaProviderABC(ABC):
     """Провайдер схем данных (без привязки к конкретной технологии)."""
 
     @abstractmethod
-    def get_schema(self, name: str) -> SchemaType:
+    def get_schema(self, name: str) -> schema_type:
         """Возвращает схему по имени."""
 
     @abstractmethod
@@ -48,7 +48,7 @@ class SchemaProviderABC(ABC):
     def register(
         self,
         name: str,
-        schema: SchemaType,
+        schema: schema_type,
         *,
         column_order: list[str] | None = None,
     ) -> None:
@@ -58,7 +58,7 @@ class SchemaProviderABC(ABC):
 class ValidatorFactoryABC(Protocol):
     """Фабрика валидаторов под конкретную схему."""
 
-    def create_validator(self, schema: SchemaType) -> ValidatorABC:
+    def create_validator(self, schema: schema_type) -> ValidatorABC:
         """Создает валидатор для указанной схемы."""
 
 

@@ -2,7 +2,7 @@ import pandas as pd
 
 from bioetl.domain.validation.contracts import (
     SchemaProviderABC,
-    SchemaType,
+    schema_type,
     ValidationResult,
     ValidatorFactoryABC,
 )
@@ -22,7 +22,7 @@ class ValidationService:
         self._schema_provider = schema_provider
         self._validator_factory = validator_factory
 
-    def get_schema(self, entity_name: str) -> SchemaType:
+    def get_schema(self, entity_name: str) -> schema_type:
         """Возвращает схему для сущности."""
         return self._schema_provider.get_schema(entity_name)
 

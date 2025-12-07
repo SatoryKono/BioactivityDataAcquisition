@@ -29,8 +29,7 @@ class HooksRegistry:
         self._pipeline_id = pipeline_id
         self._current_run_id: str | None = None
 
-    @property
-    def hooks(self) -> list[PipelineHookABC]:
+    def get_hooks(self) -> list[PipelineHookABC]:
         """Возвращает список зарегистрированных хуков."""
 
         return self._hooks
@@ -41,16 +40,16 @@ class HooksRegistry:
         self._stage_starts.clear()
         self._current_run_id = None
 
-    def add_hook(self, hook: PipelineHookABC) -> None:
+    def register_hook(self, hook: PipelineHookABC) -> None:
         """Добавляет хук выполнения."""
 
         self._hooks.append(hook)
 
-    def add_hooks(self, hooks: Iterable[PipelineHookABC]) -> None:
+    def register_hooks(self, hooks: Iterable[PipelineHookABC]) -> None:
         """Добавляет список хуков выполнения."""
 
         for hook in hooks:
-            self.add_hook(hook)
+            self.register_hook(hook)
 
     def notify_stage_start(self, stage: str, context: RunContext) -> None:
         """Уведомляет о старте стадии и логирует событие."""
