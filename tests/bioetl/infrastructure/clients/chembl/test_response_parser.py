@@ -6,7 +6,7 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 def test_parse_activities():
     parser = ChemblResponseParserImpl()
     response = {"activities": [{"id": 1}, {"id": 2}], "page_meta": {"limit": 20}}
-    records = parser.parse(response)
+    records = parser.parse_response(response)
     assert len(records) == 2
     assert records[0]["id"] == 1
 
@@ -14,7 +14,7 @@ def test_parse_activities():
 def test_parse_empty():
     parser = ChemblResponseParserImpl()
     response = {"page_meta": {}}
-    records = parser.parse(response)
+    records = parser.parse_response(response)
     assert records == []
 
 

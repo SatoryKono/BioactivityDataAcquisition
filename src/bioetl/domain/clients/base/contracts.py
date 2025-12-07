@@ -38,7 +38,7 @@ class ResponseParserABC(ABC):
     """
 
     @abstractmethod
-    def parse(self, raw_response: Any) -> list[Record]:
+    def parse_response(self, raw_response: Any) -> list[Record]:
         """Парсит сырой ответ в список записей."""
 
     @abstractmethod
