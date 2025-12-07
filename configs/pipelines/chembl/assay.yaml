@@ -4,7 +4,7 @@ id: assay_chembl
 provider: chembl
 entity: assay
 primary_key: "${CHEMBL_ASSAY_PRIMARY_KEY:-assay_chembl_id}"
-input_mode: id_only
+input_mode: csv
 input_path: data/input/assay.csv
 output_path: ./data/output/chembl/assay
 batch_size: 20

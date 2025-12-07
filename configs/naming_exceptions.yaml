@@ -314,6 +314,26 @@ exceptions:
     reason: "Runtime manager lifecycle helpers (reset/notify) follow contract naming"
     owner: core
     expiry: permanent
+  - path: src/bioetl/application/pipelines/extract.py
+    rule_id: FUNC_PREFIX
+    reason: "Stage contract methods use canonical pipeline verbs"
+    owner: core
+    expiry: permanent
+  - path: src/bioetl/application/pipelines/transform.py
+    rule_id: FUNC_PREFIX
+    reason: "Stage contract methods use canonical pipeline verbs"
+    owner: core
+    expiry: permanent
+  - path: src/bioetl/application/pipelines/validate.py
+    rule_id: FUNC_PREFIX
+    reason: "Stage contract methods use canonical pipeline verbs"
+    owner: core
+    expiry: permanent
+  - path: src/bioetl/application/pipelines/write.py
+    rule_id: FUNC_PREFIX
+    reason: "Stage contract methods use canonical pipeline verbs"
+    owner: core
+    expiry: permanent
 
   - path: src/bioetl/application/services/chembl_extraction.py
     rule_id: FUNC_PREFIX

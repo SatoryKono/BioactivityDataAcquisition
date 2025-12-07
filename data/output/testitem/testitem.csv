@@ -1,0 +1,6 @@
+molecule_chembl_id,pref_name,molecule_type,max_phase,structure_type,molecule_properties,molecule_structures,molecule_hierarchy,atc_classifications,molecule_synonyms,cross_references,pubchem_cid,helm_notation,hash_row,hash_business_key,index,database_version,extracted_at
+CHEMBL129530,,small molecule,,,,,,,,,,,2d21d0add0c3be2a0e4ef0c8df51ecc8e8105c018ee62245eff8fa52c5b78bde,d0202973dcde92c9cadfd5aba64339f72aa74942c32c848aa746d903df727c2e,0,unknown,2025-12-07T15:43:01.667026+00:00
+CHEMBL81421,,small molecule,,,,,,,,,,,0064494903f9f11a92a1e9361049fa668964ffcd4d7c4eb50dcd0272329b67d0,45507a9f64ddca5464e854116eb1b5937d989e916e079bfc1887ce471d0f7cde,1,unknown,2025-12-07T15:43:01.667026+00:00
+CHEMBL283509,,small molecule,,,,,,,,,,,80d29430ed66d86bff1ffa8307f093b4223662525c73a07a2d5e6e6d461a27f0,a718afa7f5535cc4b8450f987994c77cb26639b22685b73889f6e1401afd0150,2,unknown,2025-12-07T15:43:01.667026+00:00
+CHEMBL508781,,small molecule,,,,,,,,,,,300daad07d7819a6ddcbbe93201c1e66726edfd24af48c8625d4b6fe48f3ebe0,fd630eb3e9abb494054bb82b29c9db1767d0042c57cf1f6b35f0435f51fce43c,3,unknown,2025-12-07T15:43:01.667026+00:00
+CHEMBL1255588,,small molecule,,,,,,,,,,,9254e47df338cb4ff8ac07ba7fd9f3e06aa3f09b4999888566feaef3202ed7b8,d77c7e76c71ee98c757ebb4999fc47e6e63189c0cf8b20af9e4198116db3c19c,4,unknown,2025-12-07T15:43:01.667026+00:00
