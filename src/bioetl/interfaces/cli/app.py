@@ -4,6 +4,8 @@ from functools import partial
 import os
 from pathlib import Path
 import sys
+import time
+import traceback
 from typing import Any, Literal, Optional
 
 from rich.console import Console
@@ -14,11 +16,13 @@ from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import MetricsConfig
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
 from bioetl.infrastructure.observability.server import start_metrics_server_once
+from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.interfaces.wiring import (
     create_config_loader,
     create_container_factory,
@@ -30,6 +34,7 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
+logger = default_logging_port()
 
 
 def _get_config_base_dir() -> Path:
@@ -138,15 +143,37 @@ def run(
     """
     config_loader = create_config_loader()
     container_factory = create_container_factory()
+    bound_logger = logger.apply_bind(
+        pipeline_name=pipeline_name,
+        profile=profile,
+        limit=limit,
+        background=background,
+    )
+    start_time = time.perf_counter()
+    config_context: dict[str, Any] = {
+        "pipeline_name": pipeline_name,
+        "profile": profile,
+        "limit": limit,
+        "background": background,
+        "dry_run": dry_run,
+    }
     try:
         base_dir = _get_config_base_dir()
+        requested_config_path = config_path or _resolve_config_path(pipeline_name)
         resolved_config_path = _resolve_config_location(
             config_path=config_path,
             pipeline_name=pipeline_name,
             base_dir=base_dir,
         )
         if not resolved_config_path:
+            bound_logger.error(
+                "config_not_found",
+                config_path=str(requested_config_path),
+                **config_context,
+            )
             sys.exit(1)
+
+        config_context["config_path"] = str(resolved_config_path)
 
         cli_overrides = _collect_cli_overrides(
             output=output,
@@ -162,7 +189,9 @@ def run(
             cli_overrides=cli_overrides,
             loader=config_loader,
         )
-        _start_metrics_exporter(config.metrics, dry_run=dry_run)
+        _start_metrics_exporter(
+            config.metrics, dry_run=dry_run, logger=bound_logger
+        )
         provider_config_path = base_dir / "providers.yaml"
         provider_loader_factory = partial(
             create_provider_loader, config_path=provider_config_path
@@ -194,6 +223,7 @@ def run(
         )
 
         console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")
+        bound_logger.info("pipeline_start", **config_context)
 
         if background:
             future = orchestrator.run_in_background(dry_run=dry_run, limit=limit)
@@ -206,11 +236,31 @@ def run(
             console.print("[bold green]Pipeline finished successfully![/bold green]")
             console.print(f"Rows processed: {result.row_count}")
             console.print(f"Duration: {result.duration_sec:.2f}s")
+            bound_logger.info(
+                "pipeline_completed",
+                duration_sec=result.duration_sec,
+                row_count=result.row_count,
+                **config_context,
+            )
         else:
             console.print("[bold red]Pipeline failed![/bold red]")
+            bound_logger.error(
+                "pipeline_failed",
+                duration_sec=result.duration_sec,
+                row_count=result.row_count,
+                **config_context,
+            )
             sys.exit(1)
 
     except Exception:
+        elapsed = time.perf_counter() - start_time
+        bound_logger.error(
+            "pipeline_exception",
+            duration_sec=elapsed,
+            row_count=None,
+            stacktrace=traceback.format_exc(),
+            **config_context,
+        )
         console.print_exception()
         sys.exit(1)
 
@@ -246,7 +296,10 @@ def _resolve_config_location(
 
 
 def _start_metrics_exporter(
-    metrics_config: MetricsConfig, *, dry_run: bool = False
+    metrics_config: MetricsConfig,
+    *,
+    dry_run: bool = False,
+    logger: LoggingPortABC | None = None,
 ) -> None:
     """
     Запускает экспортер метрик, пропуская запуск для dry-run и не валит CLI
@@ -254,6 +307,14 @@ def _start_metrics_exporter(
     """
 
     if dry_run or not metrics_config.enabled:
+        if logger:
+            logger.info(
+                "metrics_exporter_skipped",
+                dry_run=dry_run,
+                enabled=metrics_config.enabled,
+                address=metrics_config.address,
+                port=metrics_config.port,
+            )
         return
 
     try:
@@ -266,12 +327,31 @@ def _start_metrics_exporter(
         console.print(
             f"[yellow]Prometheus metrics exporter not started: {exc}[/yellow]"
         )
+        if logger:
+            logger.error(
+                "metrics_exporter_failed",
+                address=metrics_config.address,
+                port=metrics_config.port,
+                stacktrace=traceback.format_exc(),
+            )
         return
 
     if started:
         console.print(
             f"[green]Prometheus metrics exporter started on"
             f" {metrics_config.address}:{metrics_config.port}[/green]"
+        )
+        if logger:
+            logger.info(
+                "metrics_exporter_started",
+                address=metrics_config.address,
+                port=metrics_config.port,
+            )
+    elif logger:
+        logger.warning(
+            "metrics_exporter_already_running",
+            address=metrics_config.address,
+            port=metrics_config.port,
         )
 
 
