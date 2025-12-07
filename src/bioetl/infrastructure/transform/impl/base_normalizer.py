@@ -9,7 +9,7 @@ from pandas._typing import DtypeArg
 
 from bioetl.domain.transform.contracts import (
     BaseNormalizationServiceABC,
-    NormalizationConfigProvider,
+    NormalizationConfigProviderProtocol,
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.infrastructure.transform.impl.serializer import (
@@ -26,7 +26,9 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         "integer": "Int64",
     }
 
-    def __init__(self, config: NormalizationConfigProvider, empty_value: Any = None):
+    def __init__(
+        self, config: NormalizationConfigProviderProtocol, empty_value: Any = None
+    ):
         self._config = config
         self._empty_value = empty_value
 

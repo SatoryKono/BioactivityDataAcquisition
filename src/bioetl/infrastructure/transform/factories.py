@@ -4,7 +4,7 @@ from bioetl.domain.transform.contracts import (
     BaseNormalizationServiceABC,
     HasherABC,
     HashServiceABC,
-    NormalizationConfigProvider,
+    NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
@@ -33,7 +33,7 @@ def default_hash_service() -> HashServiceABC:
 
 
 def default_base_normalization_service(
-    config: NormalizationConfigProvider,
+    config: NormalizationConfigProviderProtocol,
 ) -> BaseNormalizationServiceABC:
     """Создает базовый сервис нормализации."""
 
@@ -41,7 +41,7 @@ def default_base_normalization_service(
 
 
 def default_normalization_service(
-    config: NormalizationConfigProvider,
+    config: NormalizationConfigProviderProtocol,
 ) -> NormalizationServiceABC:
     """Создает сервис нормализации по умолчанию."""
 
@@ -49,7 +49,7 @@ def default_normalization_service(
 
 
 def default_chembl_normalization_service(
-    config: NormalizationConfigProvider,
+    config: NormalizationConfigProviderProtocol,
 ) -> NormalizationServiceABC:
     """Создает сервис нормализации ChEMBL."""
 
