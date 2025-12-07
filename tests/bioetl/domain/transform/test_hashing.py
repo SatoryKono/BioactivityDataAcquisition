@@ -75,7 +75,7 @@ def test_hasher_impl_business_key():
 
     # Hash columns
     # Should produce hash of canonical json of [100, "assay"]
-    hashes = hasher.hash_columns(df, fields)
+    hashes = hasher.compute_hash_columns(df, fields)
     h = hashes.iloc[0]
 
     assert len(h) == 64
@@ -86,7 +86,7 @@ def test_hasher_impl_business_key():
     assert h == manual_hash
 
     # Order matters
-    h_rev_series = hasher.hash_columns(df, ["type", "id"])
+    h_rev_series = hasher.compute_hash_columns(df, ["type", "id"])
     h_rev = h_rev_series.iloc[0]
     assert h != h_rev
 
@@ -99,8 +99,8 @@ def test_hasher_impl_row_hash():
 
     # Hash row
     # We have to apply it manually or check logic
-    # HashService uses: df.apply(hasher.hash_row, axis=1)
-    h = hasher.hash_row(df.iloc[0])
+    # HashService uses: df.apply(hasher.compute_hash_row, axis=1)
+    h = hasher.compute_hash_row(df.iloc[0])
 
     assert len(h) == 64
 
@@ -139,10 +139,10 @@ def test_golden_examples():
         bk_fields = ex["business_key_fields"]
 
         # Calculate BK Hash manually to match old logic (list of values)
-        # Simulate what hash_columns does for a single row
+        # Simulate what compute_hash_columns does for a single row
         bk_values = []
         # Note: compute_hash_business_key returns None if field missing.
-        # HasherImpl.hash_columns behavior: if we use df, we get columns.
+        # HasherImpl.compute_hash_columns behavior: if we use df, we get columns.
         # If record is missing key, and we make DF, we get NaN?
         # Golden examples are well formed.
         bk_values = [record.get(f) for f in bk_fields]
@@ -154,9 +154,9 @@ def test_golden_examples():
         record_with_hash["hash_business_key"] = bk_hash
 
         # Calculate Row Hash
-        # Use HasherImpl.hash_row
+        # Use HasherImpl.compute_hash_row
         row_series = pd.Series(record_with_hash)
-        row_hash = hasher.hash_row(row_series)
+        row_hash = hasher.compute_hash_row(row_series)
 
         # Assertions if expected provided
         expected_bk = ex.get("expected_hash_business_key")

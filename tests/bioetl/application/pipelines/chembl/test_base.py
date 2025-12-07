@@ -26,14 +26,13 @@ class ConcreteChemblPipeline(ChemblPipelineBase):
 def mock_dependencies_fixture():
     """Fixture for pipeline dependencies."""
     class _DummyHasher(HasherABC):
-        @property
-        def algorithm(self):
+        def get_algorithm(self):
             return "sha256"
 
-        def hash_row(self, _row):
+        def compute_hash_row(self, _row):
             return "hash_row"
 
-        def hash_columns(self, df, _columns):
+        def compute_hash_columns(self, df, _columns):
             return pd.Series(["hash_business_key"] * len(df))
 
     config = MagicMock()

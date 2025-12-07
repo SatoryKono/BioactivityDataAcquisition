@@ -277,10 +277,10 @@ def test_run_dry_run_pipeline_metadata(
     )
 
     class _DummyHasher:
-        def hash_row(self, _row):
+        def compute_hash_row(self, _row):
             return "hash_row"
 
-        def hash_columns(self, df, _columns):
+        def compute_hash_columns(self, df, _columns):
             return pd.Series(["hash_business_key"] * len(df))
 
     # Mock orchestrator to build and run our pipeline

@@ -41,17 +41,19 @@ class HashServiceImpl(HashServiceABC):
             # Ensure columns exist before hashing
             cols_to_hash = [c for c in business_key_cols if c in df.columns]
             if cols_to_hash:
-                # Uses hash_columns -> list hashing (canonical list)
-                df["hash_business_key"] = self._hasher.hash_columns(df, cols_to_hash)
+                # Uses compute_hash_columns -> list hashing (canonical list)
+                df["hash_business_key"] = self._hasher.compute_hash_columns(
+                    df, cols_to_hash
+                )
             else:
                 df["hash_business_key"] = None
         else:
             df["hash_business_key"] = None
 
         # 2. hash_row
-        # Uses hash_row -> dict hashing (canonical object) of the full row
+        # Uses compute_hash_row -> dict hashing (canonical object) of the full row
         # Note: This includes 'hash_business_key' which was just added/set.
-        df["hash_row"] = df.apply(self._hasher.hash_row, axis=1)
+        df["hash_row"] = df.apply(self._hasher.compute_hash_row, axis=1)
 
         return df
 
