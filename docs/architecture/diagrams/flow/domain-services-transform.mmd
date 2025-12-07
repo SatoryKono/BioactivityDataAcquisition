@@ -9,10 +9,10 @@ classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#1
 classDef group           fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
 
 subgraph Transformers
-    T_Chain[TransformerChain]:::domainPrimary
-    T_Hash[HashColumnsTransformer]:::domainSecondary
-    T_Index[LocalIndexColumnTransformer]:::domainSecondary
-    T_Date[FulldateTransformer]:::domainSecondary
+    T_Chain[TransformerChainImpl]:::domainPrimary
+    T_Hash[HashColumnsTransformerImpl]:::domainSecondary
+    T_Index[IndexColumnTransformerImpl]:::domainSecondary
+    T_Date[FulldateTransformerImpl]:::domainSecondary
     T_ABC[<<TransformerABC>>]:::interface
 end
 class Transformers group;

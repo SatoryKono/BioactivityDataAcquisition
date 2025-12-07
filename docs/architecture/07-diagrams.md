@@ -342,10 +342,10 @@ id: 55f41c2b-cfd6-431b-9a93-85e8bffc9a9c
 ---
 graph TD
     subgraph "Transformers"
-        T_Chain[TransformerChain]
-        T_Hash[HashColumnsTransformer]
-        T_Index[LocalIndexColumnTransformer]
-        T_Date[FulldateTransformer]
+        T_Chain[TransformerChainImpl]
+        T_Hash[HashColumnsTransformerImpl]
+        T_Index[IndexColumnTransformerImpl]
+        T_Date[FulldateTransformerImpl]
         T_ABC[<<TransformerABC>>]
     end
 

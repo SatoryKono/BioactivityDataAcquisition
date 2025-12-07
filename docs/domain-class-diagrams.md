@@ -135,23 +135,23 @@ classDiagram
     class HasherImpl
     class HashService { +add_hash_columns(); +add_index_column(); +add_database_version_column(); +add_fulldate_column(); +reset_state() }
     class TransformerABC { <<ABC>> +apply(df, context) }
-    class TransformerChain
-    class HashColumnsTransformer
-    class LocalIndexColumnTransformer
-    class DatabaseVersionTransformer
-    class FulldateTransformer
+    class TransformerChainImpl
+    class HashColumnsTransformerImpl
+    class IndexColumnTransformerImpl
+    class DatabaseVersionTransformerImpl
+    class FulldateTransformerImpl
 
     HasherABC <|-- HasherImpl
     HashService --> HasherABC
-    TransformerABC <|-- TransformerChain
-    TransformerABC <|-- HashColumnsTransformer
-    TransformerABC <|-- LocalIndexColumnTransformer
-    TransformerABC <|-- DatabaseVersionTransformer
-    TransformerABC <|-- FulldateTransformer
-    HashColumnsTransformer --> HashService
-    LocalIndexColumnTransformer --> HashService
-    DatabaseVersionTransformer --> HashService
-    FulldateTransformer --> HashService
+    TransformerABC <|-- TransformerChainImpl
+    TransformerABC <|-- HashColumnsTransformerImpl
+    TransformerABC <|-- IndexColumnTransformerImpl
+    TransformerABC <|-- DatabaseVersionTransformerImpl
+    TransformerABC <|-- FulldateTransformerImpl
+    HashColumnsTransformerImpl --> HashService
+    IndexColumnTransformerImpl --> HashService
+    DatabaseVersionTransformerImpl --> HashService
+    FulldateTransformerImpl --> HashService
 ```
 
 ## Validation and Schemas
