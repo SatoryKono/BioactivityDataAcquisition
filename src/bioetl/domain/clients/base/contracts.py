@@ -102,17 +102,49 @@ class CacheABC(ABC, Generic[T]):
     Интерфейс кэширования.
     """
 
+    def get(self, key: str) -> T | None:
+        """
+        Возвращает значение из кэша или ``None``.
+        Делегирует в ``get_value``.
+        """
+
+        return self.get_value(key)
+
     @abstractmethod
     def get_value(self, key: str) -> T | None:
         """Получает значение из кэша или ``None``, если его нет или оно истекло."""
+
+    def set(self, key: str, value: T, ttl: int | None = None) -> None:
+        """
+        Сохраняет значение в кэш с опциональным TTL.
+        Делегирует в ``apply_set``.
+        """
+
+        self.apply_set(key, value, ttl)
 
     @abstractmethod
     def apply_set(self, key: str, value: T, ttl: int | None = None) -> None:
         """Сохраняет значение в кэш с опциональным TTL в секундах."""
 
+    def invalidate(self, key: str) -> None:
+        """
+        Удаляет значение из кэша.
+        Делегирует в ``apply_invalidate``.
+        """
+
+        self.apply_invalidate(key)
+
     @abstractmethod
     def apply_invalidate(self, key: str) -> None:
         """Удаляет значение из кэша."""
+
+    def clear(self) -> None:
+        """
+        Полностью очищает кэш.
+        Делегирует в ``apply_clear``.
+        """
+
+        self.apply_clear()
 
     @abstractmethod
     def apply_clear(self) -> None:

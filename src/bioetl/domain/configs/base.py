@@ -19,9 +19,9 @@ from bioetl.domain.configs.pipeline import (
     PaginationConfig,
     PipelineConfig,
     ProviderConfigUnion,
+    QcConfig,
     QualityConfig,
     RuntimeConfig,
-    QcConfig,
     StorageConfig,
 )
 

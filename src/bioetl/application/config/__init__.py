@@ -21,9 +21,9 @@ from bioetl.domain.configs import (  # noqa: F401
     PipelineConfig,
     ProfileConfig,
     ProviderConfigUnion,
+    QcConfig,
     QualityConfig,
     RuntimeConfig,
-    QcConfig,
     StorageConfig,
 )
 
