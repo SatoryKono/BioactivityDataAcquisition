@@ -143,6 +143,8 @@ def test_pipeline_outputs(
     actual_records = _normalize_records(pd.read_csv(output_csv), sort_key=sort_key)
 
     golden = importlib.import_module(golden_module)
-    expected_records = getattr(golden, expected_attr)
+    expected_records = _normalize_records(
+        pd.DataFrame(getattr(golden, expected_attr)), sort_key=sort_key
+    )
 
     assert actual_records == expected_records
