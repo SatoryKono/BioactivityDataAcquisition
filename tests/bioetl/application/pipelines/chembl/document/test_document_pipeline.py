@@ -13,6 +13,7 @@ from bioetl.domain.schemas.chembl.document import DocumentSchema
 def pipeline():
     """Create a configured ChemblPipelineBase for testing."""
     config = MagicMock()
+    config.id = "chembl_document"
     config.provider = "chembl"
     config.entity_name = "document"
     config.primary_key = "document_chembl_id"
@@ -28,9 +29,12 @@ def pipeline():
         {"name": "pubmed_id", "data_type": "integer"},
         {"name": "other", "data_type": "string"},
     ]
+    config.normalization = MagicMock()
     config.normalization.case_sensitive_fields = []
     config.normalization.id_fields = []
     config.normalization.custom_normalizers = {}
+    config.hashing = MagicMock()
+    config.hashing.business_key_fields = []
     config.get_fields.side_effect = lambda: config.fields
     config.get_normalization.side_effect = lambda: config.normalization
 
@@ -48,6 +52,8 @@ def pipeline():
         output_writer=MagicMock(),
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
+        metadata_builder=MagicMock(),
+        file_record_source_factory=MagicMock(),
     )
 
 
