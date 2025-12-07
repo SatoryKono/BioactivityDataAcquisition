@@ -402,7 +402,7 @@ classDiagram
         +create_normalization_service(config) NormalizationService
     }
 
-    class ChemblProviderComponents {
+    class ChemblProviderComponentsFactory {
         +create_client(config) ChemblDataClientABC
         +create_normalization_service(config) NormalizationService
     }
@@ -423,7 +423,7 @@ classDiagram
         +provider: str
     }
 
-    ProviderComponents <|.. ChemblProviderComponents
+    ProviderComponents <|.. ChemblProviderComponentsFactory
     ProviderDefinition --> ProviderComponents : contains
     ProviderDefinition --> BaseProviderConfig : uses
     ChemblSourceConfig --|> BaseProviderConfig
