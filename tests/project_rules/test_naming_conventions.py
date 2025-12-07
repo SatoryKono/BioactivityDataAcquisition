@@ -345,10 +345,8 @@ def test_t05_function_prefix_rules() -> None:
         for node in tree.body:
             if isinstance(node, ast.FunctionDef):
                 name = node.name
-                if (
-                    name.startswith("__")
-                    or name.startswith("test_")
-                    or name.startswith("_")
+                if name.startswith("__") or name.startswith("test_") or name.startswith(
+                    "_"
                 ):
                     continue
                 if _is_pytest_fixture(node):
@@ -361,7 +359,9 @@ def test_t05_function_prefix_rules() -> None:
                     violations.append(f"{file.as_posix()}: {name}")
             elif isinstance(node, ast.ClassDef):
                 for method in (
-                    item for item in node.body if isinstance(item, ast.FunctionDef)
+                    item
+                    for item in node.body
+                    if isinstance(item, ast.FunctionDef)
                 ):
                     name = method.name
                     if name.startswith("__") or name.startswith("_"):
@@ -371,9 +371,12 @@ def test_t05_function_prefix_rules() -> None:
                     if exceptions.is_excepted(file, "FUNC_PREFIX"):
                         continue
                     if not _has_allowed_prefix(name):
-                        violations.append(f"{file.as_posix()}: {node.name}.{name}")
+                        violations.append(
+                            f"{file.as_posix()}: {node.name}.{name}"
+                        )
     assert not violations, (
-        f"Функции/методы без разрешённых префиксов: {sorted(violations)}"
+        "Функции/методы без разрешённых префиксов: "
+        f"{sorted(violations)}"
     )
 
 
@@ -414,7 +417,10 @@ def test_t07_pipeline_stage_filenames() -> None:
                 f"{entity_dir.as_posix()}: "
                 f"missing={sorted(missing)}, unexpected={sorted(unexpected)}"
             )
-    assert not violations, f"Нарушения в именах файлов этапов: {sorted(violations)}"
+    assert not violations, (
+        "Нарушения в именах файлов этапов: "
+        f"{sorted(violations)}"
+    )
 
 
 def test_t08_test_filename_conventions() -> None:
@@ -429,7 +435,8 @@ def test_t08_test_filename_conventions() -> None:
         if "golden" in file.stem and not file.name.endswith("_golden.py"):
             violations.append(f"{file.as_posix()}: golden без суффикса _golden")
     assert not violations, (
-        f"Нарушены правила именования тестовых файлов: {sorted(violations)}"
+        "Нарушены правила именования тестовых файлов: "
+        f"{sorted(violations)}"
     )
 
 
@@ -442,7 +449,8 @@ def test_t09_doc_filename_case() -> None:
         if not KEBAB_CASE_PATTERN.match(stem):
             violations.append(file.as_posix())
     assert not violations, (
-        f"Файлы документации нарушают kebab-case/англ.названия: {sorted(violations)}"
+        "Файлы документации нарушают kebab-case/англ.названия: "
+        f"{sorted(violations)}"
     )
 
 

@@ -1,10 +1,10 @@
 """Golden records for pipeline output regression tests."""
 
-from .activity_chembl_golden import expected_activity_records
-from .assay_chembl_golden import expected_assay_records
-from .document_chembl_golden import expected_document_records
-from .target_chembl_golden import expected_target_records
-from .testitem_chembl_golden import expected_testitem_records
+from .test_activity_chembl_golden import expected_activity_records
+from .test_assay_chembl_golden import expected_assay_records
+from .test_document_chembl_golden import expected_document_records
+from .test_target_chembl_golden import expected_target_records
+from .test_testitem_chembl_golden import expected_testitem_records
 
 __all__ = [
     "expected_activity_records",
