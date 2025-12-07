@@ -1,4 +1,4 @@
-# 02 Pipeline Core Provider Registry
+# Pipeline Core Provider Registry
 
 ## Provider registry ports
 

@@ -1,4 +1,4 @@
-# 00 Assay Chembl Overview
+# Assay Chembl Overview
 
 ## Pipeline
 **ChemblAssayPipeline** строится на ChemblCommonPipeline и отвечает за нормализацию описаний ассеев.

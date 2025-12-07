@@ -1,4 +1,4 @@
-# 04 Duplication Reduction
+# Duplication Reduction
 
 ## Паттерн ABC / Default / Impl
 - ABC фиксирует контракт слоя (клиент, трансформер, валидатор, писатель).

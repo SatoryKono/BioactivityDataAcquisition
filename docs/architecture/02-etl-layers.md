@@ -1,4 +1,4 @@
-# 02 Etl Layers
+# ETL Layers
 
 ## Orchestration
 Ответственность: управление жизненным циклом запуска (`run` метод в `PipelineBase`), инициализация контейнера зависимостей (`build_pipeline_dependencies`), выбор профилей конфигураций.
