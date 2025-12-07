@@ -11,7 +11,7 @@ from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.observability import LoggingPort
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
-    CsvInputOptions,
+    CsvInputConfig,
 )
 from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
@@ -65,7 +65,7 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
 
     source = CsvRecordSourceImpl(
         input_path=csv_path,
-        csv_options=CsvInputOptions(),
+        csv_options=CsvInputConfig(),
         limit=1,
         logger=cast(LoggingPort, _DummyLogger()),
     )
@@ -95,7 +95,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     source = IdListRecordSourceImpl(
         input_path=csv_path,
         id_column="activity_id",
-        csv_options=CsvInputOptions(),
+        csv_options=CsvInputConfig(),
         limit=3,
         extraction_service=cast(ExtractionServiceABC, extraction),
         source_config=source_config,

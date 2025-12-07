@@ -162,8 +162,8 @@ class InterfaceFeaturesConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class CsvInputOptions(BaseModel):
-    """Опции CSV-ввода."""
+class CsvInputConfig(BaseModel):
+    """Конфигурация CSV-ввода."""
 
     delimiter: str = ","
     header: bool = True
