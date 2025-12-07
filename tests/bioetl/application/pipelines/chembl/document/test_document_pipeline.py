@@ -76,7 +76,7 @@ def test_transform_chembl_release(pipeline):
 
     # Patch get_normalizer in the module used by ChemblNormalizationService
     with patch(
-        "bioetl.infrastructure.transform.impl.normalize.get_normalizer"
+        "bioetl.infrastructure.transform.impl.normalization_service_impl.get_normalizer"
     ) as mock_get:
         # Return extractor only for 'chembl_release', None for others
         mock_get.side_effect = lambda name: (

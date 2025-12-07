@@ -18,7 +18,6 @@ from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.transform.factories import default_post_transformer
-from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformer,
     FulldateTransformer,
@@ -27,6 +26,7 @@ from bioetl.domain.transform.transformers import (
     TransformerABC,
     TransformerChain,
 )
+from bioetl.infrastructure.transform.factories import default_hash_service
 
 
 class ConcretePipeline(PipelineBase):
@@ -58,7 +58,7 @@ class DatasetPipeline(PipelineBase):
 
 @pytest.fixture
 def hash_service():
-    return HashService()
+    return default_hash_service()
 
 
 @pytest.fixture

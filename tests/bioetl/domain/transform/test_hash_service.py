@@ -2,11 +2,11 @@ import re
 
 import pandas as pd
 
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.infrastructure.transform.factories import default_hash_service
 
 
 def test_add_index_column_and_immutability():
-    svc = HashService()
+    svc = default_hash_service()
     src = pd.DataFrame({"a": [1, 2, 3]})
     out = svc.add_index_column(src)
     assert "index" in out.columns
@@ -16,7 +16,7 @@ def test_add_index_column_and_immutability():
 
 
 def test_add_database_version_column_and_empty_df():
-    svc = HashService()
+    svc = default_hash_service()
     src = pd.DataFrame({"a": []})
     out = svc.add_database_version_column(src, "v1.2.3")
     assert "database_version" in out.columns
@@ -29,7 +29,7 @@ def test_add_database_version_column_and_empty_df():
 
 
 def test_add_fulldate_column_format_and_consistency():
-    svc = HashService()
+    svc = default_hash_service()
     src = pd.DataFrame({"a": [1, 2, 3]})
     out = svc.add_fulldate_column(src)
     assert "extracted_at" in out.columns

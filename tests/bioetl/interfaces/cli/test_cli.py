@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
@@ -15,7 +16,10 @@ sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
 from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig  # noqa: E402
-from bioetl.domain.transform.hash_service import HashService  # noqa: E402
+from bioetl.domain.transform.contracts import HashServiceABC  # noqa: E402
+from bioetl.infrastructure.transform.impl.hash_service_impl import (  # noqa: E402
+    HashServiceImpl,
+)
 from bioetl.interfaces.cli import app  # noqa: E402
 
 runner = CliRunner()
@@ -236,7 +240,7 @@ def test_run_dry_run_pipeline_metadata(
             logger,
             validation_service,
             output_writer,
-            hash_service: HashService,
+            hash_service: HashServiceABC,
             extraction_service=None,
         ):
             super().__init__(
@@ -272,8 +276,15 @@ def test_run_dry_run_pipeline_metadata(
         path=MagicMock(name="dummy.parquet"),
     )
 
+    class _DummyHasher:
+        def hash_row(self, _row):
+            return "hash_row"
+
+        def hash_columns(self, df, _columns):
+            return pd.Series(["hash_business_key"] * len(df))
+
     # Mock orchestrator to build and run our pipeline
-    hash_service = HashService()
+    hash_service = HashServiceImpl(hasher=_DummyHasher())
 
     def build_pipeline_side_effect(*args, **kwargs):
         pipeline_instance = DryRunPipeline(
