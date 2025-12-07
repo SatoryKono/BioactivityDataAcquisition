@@ -11,7 +11,7 @@ classDef group           fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,
 subgraph Transformers
     T_Chain[TransformerChain]:::domainPrimary
     T_Hash[HashColumnsTransformer]:::domainSecondary
-    T_Index[IndexColumnTransformer]:::domainSecondary
+    T_Index[LocalIndexColumnTransformer]:::domainSecondary
     T_Date[FulldateTransformer]:::domainSecondary
     T_ABC[<<TransformerABC>>]:::interface
 end

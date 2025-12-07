@@ -344,7 +344,7 @@ graph TD
     subgraph "Transformers"
         T_Chain[TransformerChain]
         T_Hash[HashColumnsTransformer]
-        T_Index[IndexColumnTransformer]
+        T_Index[LocalIndexColumnTransformer]
         T_Date[FulldateTransformer]
         T_ABC[<<TransformerABC>>]
     end

@@ -75,7 +75,7 @@ classDiagram
         +apply(df, context) DataFrame
     }
 
-    class IndexColumnTransformer {
+    class LocalIndexColumnTransformer {
         -_hash_service: HashService
         +apply(df, context) DataFrame
     }
@@ -93,7 +93,7 @@ classDiagram
 
     TransformerABC <|-- TransformerChain
     TransformerABC <|-- HashColumnsTransformer
-    TransformerABC <|-- IndexColumnTransformer
+    TransformerABC <|-- LocalIndexColumnTransformer
     TransformerABC <|-- DatabaseVersionTransformer
     TransformerABC <|-- FulldateTransformer
 ```
