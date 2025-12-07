@@ -93,37 +93,31 @@ class HasherImpl(HasherABC):
     Реализация хеширования (BLAKE2b-256) с канонической JSON сериализацией.
     """
 
-    @property
-    def algorithm(self) -> str:
+    def get_algorithm(self) -> str:
         """Return hash algorithm identifier."""
         return "blake2b_256"
 
-    def hash_row(self, row: pd.Series) -> str:
+    def compute_hash_row(self, row: pd.Series) -> str:
         """
         Хеширует строку Series как полный объект (hash_row).
         """
-        # Convert to dict
         record = row.to_dict()
-        # Serialize canonical
         serialized = _serialize_canonical(record)
-        # Hash
         return blake2b_hash_hex(serialized.encode("utf-8"))
 
-    def hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
+    def compute_hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
         """
         Хеширует выбранные колонки DataFrame (как список значений в заданном порядке).
         Используется для hash_business_key.
         Если columns пуст -> возвращает None (в Series).
         """
         if not columns:
-            # Return series of None
             return pd.Series([None] * len(df), index=df.index, dtype=object)
 
         def _hash_vals(row: pd.Series) -> str | None:
             values = []
             for col in columns:
                 val = row.get(col)
-                # Columns exist in DF; None/NaN handled by serializer.
                 values.append(val)
 
             serialized = _serialize_canonical(values)
