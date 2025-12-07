@@ -1,6 +1,6 @@
 """Domain configuration models (pure, without I/O)."""
 
-from bioetl.domain.configs.base import (
+from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,
     CanonicalizationConfig,
@@ -9,18 +9,21 @@ from bioetl.domain.configs.base import (
     CsvInputConfig,
     DeterminismConfig,
     DummyProviderConfig,
+    FeatureFlagsConfig,
     HashingConfig,
     InterfaceFeaturesConfig,
     LoggingConfig,
     MetricsConfig,
     NormalizationConfig,
+    ObservabilityConfig,
     PaginationConfig,
+    PipelineConfig,
     ProviderConfigUnion,
+    QualityConfig,
+    RuntimeConfig,
     QcConfig,
     StorageConfig,
 )
-from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
-from bioetl.domain.configs.pipeline import PipelineConfig
 from bioetl.domain.configs.profile import ProfileConfig
 
 __all__ = [
@@ -32,14 +35,18 @@ __all__ = [
     "CsvInputConfig",
     "DeterminismConfig",
     "DummyProviderConfig",
+    "FeatureFlagsConfig",
     "HashingConfig",
     "InterfaceFeaturesConfig",
     "LoggingConfig",
     "MetricsConfig",
     "NormalizationConfig",
+    "ObservabilityConfig",
     "PaginationConfig",
     "ProfileConfig",
     "ProviderConfigUnion",
+    "QualityConfig",
+    "RuntimeConfig",
     "QcConfig",
     "StorageConfig",
     "PipelineConfig",
