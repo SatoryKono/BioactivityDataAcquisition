@@ -129,6 +129,7 @@ def _resolve_profile(
     if parent:
         parent_data = _resolve_profile(parent, profiles_root=profiles_root)
         profile_data = apply_deep_merge(parent_data, profile_data)
+    profile_data.pop("extends", None)
     return profile_data
 
 

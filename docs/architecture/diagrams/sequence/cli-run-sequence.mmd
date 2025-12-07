@@ -1,0 +1,31 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorFontSize": "18px",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant User as Operator
+    participant CLI as Typer command
+    participant Config as ConfigLoader
+    participant Orchestrator as PipelineOrchestrator
+    participant Pipeline as PipelineBase
+
+    User->>CLI: bioetl run activity_chembl --profile dev --limit 100 --dry-run
+    CLI->>Config: load_pipeline_yaml(activity)
+    Config-->>CLI: pipeline config dict
+    CLI->>Config: load_profile_yaml(dev)
+    Config-->>CLI: profile overrides
+    CLI->>CLI: merge overrides (limit, dry_run, output)
+    CLI->>Orchestrator: run(pipeline_name, merged_config)
+    Orchestrator->>Pipeline: build + run
+    Pipeline-->>Orchestrator: RunResult(meta)
+    Orchestrator-->>CLI: status + summary
+    CLI-->>User: exit code + printed metrics
+

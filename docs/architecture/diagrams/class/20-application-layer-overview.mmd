@@ -1,0 +1,55 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class PipelineOrchestrator {
+        +run(pipeline_name, cli_args)
+        +build_pipeline(name, config) -> PipelineBase
+    }
+    class PipelineContainer {
+        +build_pipeline_dependencies(config) -> Dependencies
+        +load_provider_registry(profile) -> ProviderRegistryABC
+    }
+    class PipelineRegistry {
+        +register(name, pipeline_cls)
+        +get(name) -> type[PipelineBase]
+    }
+    class PipelineBase {
+        <<abstract>>
+        +run()
+        +extract()
+        +transform(df)
+        +validate(df)
+        +write(df)
+        -hooks : list[PipelineHookABC]
+        -error_policy : ErrorPolicyABC
+    }
+    class ChemblPipelineBase {
+        +entity : str
+        +stages : PipelineStagesConfig
+    }
+    class PipelineHooksManager {
+        +attach(hooks)
+        +emit(event, ctx)
+    }
+    class ErrorPolicyManager {
+        +handle(stage, exc)
+    }
+    class ValidationAppService {
+        +validate(schema_name, df)
+    }
+    class PipelineStagesConfig {
+        +extract : bool
+        +transform : bool
+        +validate : bool
+        +write : bool
+    }
+
+    PipelineOrchestrator --> PipelineRegistry : resolves pipeline class
+    PipelineOrchestrator --> PipelineContainer : builds dependencies
+    PipelineContainer --> PipelineHooksManager
+    PipelineContainer --> ErrorPolicyManager
+    PipelineContainer --> ValidationAppService
+    PipelineContainer --> PipelineBase : instantiate with deps
+    PipelineBase <|-- ChemblPipelineBase
+    PipelineBase --> PipelineHooksManager : notifies events
+    PipelineBase --> ErrorPolicyManager : delegates failures
+

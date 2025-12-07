@@ -1,0 +1,48 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart LR
+    classDef componentPrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef group fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    subgraph Domain["Domain layer -> `src/bioetl/domain/`"]
+        domainSchemas["schemas/\nPandera + Pydantic models"]:::componentPrimary
+        domainContracts["clients/*/contracts.py\nABC ports"]:::componentSecondary
+        domainServices["transform/* + services/\n(Hash, Normalization, Validation)"]:::componentSecondary
+        domainEnums["constants.py / enums.py\nRegex + naming policies"]:::componentSecondary
+    end
+    class Domain group
+
+    subgraph Application["Application layer -> `src/bioetl/application/`"]
+        applicationPipelines["pipelines/\nPipelineBase, ChemblPipeline"]:::componentPrimary
+        orchestrator["orchestrator.py\nbuild/run pipelines"]:::componentSecondary
+        container["container.py\nmanual DI composition"]:::componentSecondary
+        registry["pipelines/registry.py\nentity -> class mapping"]:::componentSecondary
+        services["services/\nValidationService wrapper, hooks"]:::componentSecondary
+    end
+    class Application group
+
+    subgraph Infrastructure["Infrastructure layer -> `src/bioetl/infrastructure/`"]
+        infraClients["clients/\nUnifiedAPIClient, Chembl adapters"]:::componentPrimary
+        infraOutput["output/\nUnifiedOutputWriter + QC writers"]:::componentSecondary
+        infraFiles["files/\nAtomic IO, checksum utilities"]:::componentSecondary
+        infraConfig["config/\nYAML loader, profile resolver"]:::componentSecondary
+        infraLogging["logging/\nUnifiedLogger, hooks impl"]:::componentSecondary
+        infraObservability["observability/\nMetrics exporters"]:::componentSecondary
+    end
+    class Infrastructure group
+
+    subgraph Interfaces["Interfaces layer -> `src/bioetl/interfaces/`"]
+        cli["cli/\nTyper app + commands"]:::componentPrimary
+        rest["rest/\nFastAPI skeleton server"]:::componentSecondary
+        mq["mq/\nmessage consumers"]:::componentSecondary
+        entrypoint["`run_bioetl.py` / `python -m bioetl`\nentrypoints"]:::componentSecondary
+    end
+    class Interfaces group
+
+    Domain --> Application
+    Application --> Infrastructure
+    Interfaces --> Application
+    Infrastructure --> External[(External systems)]
+    class External componentSecondary
+

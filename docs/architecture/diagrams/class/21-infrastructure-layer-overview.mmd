@@ -1,0 +1,73 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class UnifiedAPIClient {
+        +get(url, params, headers)
+        +with_retry()
+        +with_rate_limit()
+    }
+    class RateLimiter {
+        +acquire()
+    }
+    class RetryPolicy {
+        +execute(callable)
+    }
+    class CircuitBreaker {
+        +call(callable)
+    }
+    class ChemblDataClientHTTPImpl {
+        +request_activity(filters) -> dict
+        +request_assay(filters) -> dict
+        +request_target(filters) -> dict
+        +request_document(filters) -> dict
+        +request_molecule(filters) -> dict
+        -http : UnifiedAPIClient
+    }
+    class ChemblRequestBuilder {
+        +build(endpoint, filters, offset, limit) -> URL
+    }
+    class ChemblResponseParser {
+        +parse(response) -> dict
+    }
+    class ChemblPaginatorImpl {
+        +has_more(page_meta) -> bool
+        +next_offset(page_meta) -> int
+    }
+    class ChemblExtractionServiceImpl {
+        +extract_all(entity_config) -> Iterable[dict]
+    }
+    class CsvRecordSourceImpl {
+        +iter_rows(path) -> Iterator[dict]
+    }
+    class UnifiedOutputWriter {
+        +write(df, output_cfg)
+        -csv_writer : CsvWriter
+        -metadata_writer : MetadataWriter
+    }
+    class MetadataWriter {
+        +write_meta(meta, path)
+    }
+    class AtomicFileOperation {
+        +write_atomic(path, payload)
+    }
+    class UnifiedLogger {
+        +info(event, **fields)
+        +error(event, **fields)
+    }
+    class PrometheusMetrics {
+        +record_pipeline_event(**labels)
+    }
+
+    UnifiedAPIClient --> RateLimiter
+    UnifiedAPIClient --> RetryPolicy
+    UnifiedAPIClient --> CircuitBreaker
+    ChemblDataClientHTTPImpl --> UnifiedAPIClient
+    ChemblDataClientHTTPImpl --> ChemblRequestBuilder
+    ChemblDataClientHTTPImpl --> ChemblResponseParser
+    ChemblExtractionServiceImpl --> ChemblDataClientHTTPImpl
+    ChemblExtractionServiceImpl --> ChemblPaginatorImpl
+    ChemblExtractionServiceImpl --> CsvRecordSourceImpl
+    UnifiedOutputWriter --> MetadataWriter
+    UnifiedOutputWriter --> AtomicFileOperation
+    UnifiedOutputWriter --> UnifiedLogger
+    UnifiedOutputWriter --> PrometheusMetrics
+

@@ -39,12 +39,34 @@ class ChemblRecordModel(BaseModel):
     """Base Pydantic model for raw ChEMBL payloads with flattening serializer."""
 
     model_config = ConfigDict(extra="allow")
+    # Контейнерные поля, которые нельзя сплющивать: их сериализует нормализатор
+    _BYPASS_FLATTEN_FIELDS: set[str] = {
+        "assay_classifications",
+        "assay_parameters",
+        "atc_classifications",
+        "target_components",
+        "cross_references",
+        "molecule_structures",
+        "molecule_properties",
+        "molecule_hierarchy",
+        "molecule_synonyms",
+        "activity_properties",
+        "ligand_efficiency",
+    }
 
     @model_serializer(mode="wrap")
     def serialize(self, handler: Any) -> dict[str, Any]:
         """Flatten nested structures into string-friendly values."""
         data = handler(self)
-        return {key: _flatten_value(value) for key, value in data.items()}
+        serialized: dict[str, Any] = {}
+        for key, value in data.items():
+            if key in self._BYPASS_FLATTEN_FIELDS and isinstance(
+                value, (list, dict)
+            ):
+                serialized[key] = value
+            else:
+                serialized[key] = _flatten_value(value)
+        return serialized
 
 
 class ActivityModel(ChemblRecordModel):

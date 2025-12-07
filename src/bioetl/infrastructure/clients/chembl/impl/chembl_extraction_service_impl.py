@@ -81,7 +81,9 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     ) -> dict[str, Any]:
         """Request a batch of records by IDs from the API."""
         str_ids = ",".join(batch_ids)
-        filter_kwargs = {filter_key: str_ids}
+        filter_kwargs = self._attach_entity_fields(
+            entity, {filter_key: str_ids}
+        )
         return self._request_entity(entity, **filter_kwargs)
 
     def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
@@ -116,6 +118,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         self, entity: str, *, chunk_size: int | None = None, **filters: Any
     ) -> Iterable[list[dict[str, Any]]]:
         """Stream records for an entity respecting pagination and limits."""
+        filters = self._attach_entity_fields(entity, dict(filters))
         offset = int(filters.pop("offset", 0))
         remaining = filters.pop("limit", None)
         model_cls = self._get_model_cls(entity)
@@ -173,6 +176,37 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         return [
             model_cls(**batch_record).model_dump() for batch_record in batch_records
         ]
+
+    def _attach_entity_fields(
+        self, entity: str, filters: dict[str, Any]
+    ) -> dict[str, Any]:
+        """
+        Ensure critical fields are requested from ChEMBL API.
+
+        Assay endpoint не возвращает все колонки без параметра fields.
+        Если пользователь не задал fields/only, добавляем список из схемы.
+        """
+        if entity != "assay":
+            return filters
+
+        if "fields" in filters or "only" in filters:
+            return filters
+
+        try:
+            from bioetl.domain.schemas.chembl.assay import OUTPUT_COLUMN_ORDER
+        except Exception:
+            return filters
+
+        skip_meta = {
+            "hash_row",
+            "hash_business_key",
+            "index",
+            "database_version",
+            "extracted_at",
+        }
+        field_names = [col for col in OUTPUT_COLUMN_ORDER if col not in skip_meta]
+        filters["fields"] = ",".join(field_names)
+        return filters
 
 
 __all__ = ["ChemblExtractionServiceImpl"]

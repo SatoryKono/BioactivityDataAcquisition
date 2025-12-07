@@ -19,9 +19,7 @@ from bioetl.domain.transform.normalizers.base import (
 )
 from bioetl.domain.transform.normalizers.collections import (
     normalize_array,
-    normalize_cross_references,
     normalize_record,
-    normalize_target_components,
 )
 from bioetl.domain.transform.normalizers.identifiers import (
     normalize_bao_id,
@@ -57,8 +55,6 @@ __all__ = [
     # Collections
     "normalize_array",
     "normalize_record",
-    "normalize_target_components",
-    "normalize_cross_references",
     # Registry
     "CUSTOM_FIELD_NORMALIZERS",
 ]

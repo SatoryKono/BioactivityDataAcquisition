@@ -2,10 +2,6 @@
 
 from typing import Any, Callable
 
-from bioetl.domain.transform.normalizers.collections import (
-    normalize_cross_references,
-    normalize_target_components,
-)
 from bioetl.domain.transform.normalizers.identifiers import (
     normalize_bao_id,
     normalize_bao_label,
@@ -39,9 +35,6 @@ CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
     "bao_endpoint": normalize_bao_id,
     "bao_format": normalize_bao_id,
     "bao_label": normalize_bao_label,
-    # Complex types
-    "target_components": normalize_target_components,
-    "cross_references": normalize_cross_references,
 }
 
 

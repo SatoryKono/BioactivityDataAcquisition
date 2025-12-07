@@ -1,24 +1,33 @@
 sequenceDiagram
     autonumber
     participant CLI as CLI
+    participant Orchestrator as PipelineOrchestrator
     participant Pipeline as ActivityPipeline
-    participant Client as Chembl Client
-    participant Validator as ValidationService
+    participant Extraction as ChemblExtractionServiceImpl
+    participant DataClient as ChemblDataClientHTTPImpl
+    participant Transformer as ChemblTransformerImpl
+    participant Validator as ValidationService(ActivitySchema)
     participant Writer as UnifiedOutputWriter
 
-    CLI->>Pipeline: run(output_path, dry_run)
-    Pipeline->>Client: iter_pages(activity)
+    CLI->>Orchestrator: run("activity_chembl", args)
+    Orchestrator->>Pipeline: instantiate + run()
+    Pipeline->>Extraction: extract_all("activity")
     loop pages
-        Client-->>Pipeline: raw_page
-        Pipeline->>Pipeline: transform(raw_page)
-        Pipeline->>Validator: validate(chunk, activity_schema)
-        Validator-->>Pipeline: validated_chunk
+        Extraction->>DataClient: request_activity(filters, offset, limit)
+        DataClient-->>Extraction: page (records + page_meta)
+        Extraction-->>Pipeline: batch (flattened dict list)
+        Pipeline->>Transformer: apply(batch_df)
+        Transformer-->>Pipeline: normalized_df (serialized nested fields)
+        Pipeline->>Validator: validate("chembl.activity", normalized_df)
+        Validator-->>Pipeline: validated_df
+        Pipeline->>Pipeline: append(validated_df)
     end
-    alt not dry_run
-        Pipeline->>Writer: write_result(all_chunks)
-        Writer-->>Pipeline: write_summary
+    alt dry_run == False
+        Pipeline->>Writer: write(all_validated_df, output_cfg)
+        Writer-->>Pipeline: result(meta.yaml, checksums)
     else dry_run
-        Pipeline->>Pipeline: skip write
+        Pipeline->>Pipeline: skip write but log stats
     end
-    Pipeline-->>CLI: RunResult
+    Pipeline-->>Orchestrator: RunResult(meta, duration)
+    Orchestrator-->>CLI: success / error
 

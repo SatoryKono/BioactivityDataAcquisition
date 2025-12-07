@@ -330,8 +330,6 @@ classDiagram
     class CollectionNormalizers {
         +normalize_array(value) list | None
         +normalize_record(value) dict | None
-        +normalize_target_components(value) list[dict] | None
-        +normalize_cross_references(value) list[dict] | None
     }
 
     class NormalizerRegistry {

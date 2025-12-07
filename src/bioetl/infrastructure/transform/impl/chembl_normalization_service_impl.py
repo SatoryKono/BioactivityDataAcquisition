@@ -121,15 +121,6 @@ class ChemblNormalizationServiceImpl(
             base_normalizer = _default_normalizer
 
         def _normalize_value_from_series(val: Any) -> Any:
-            if (
-                custom_normalizer
-                and dtype == "array"
-                and isinstance(val, (list, tuple))
-            ):
-                normalized = custom_normalizer(val)
-                if normalized is None or not normalized:
-                    return None
-                return serialize_list(normalized, value_normalizer=None)
             return self._normalize_value(
                 val,
                 dtype,
@@ -151,7 +142,7 @@ class ChemblNormalizationServiceImpl(
         """Normalize list container and serialize deterministically."""
         try:
             normalized_list = normalize_array(
-                list(value),
+                value,
                 item_normalizer=lambda item: self._normalize_container_item(
                     item, normalizer
                 ),

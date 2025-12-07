@@ -1,0 +1,41 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class Activity {
+        +activity_id : int
+        +assay_chembl_id : str
+        +molecule_chembl_id : str
+        +target_chembl_id : str?
+        +document_chembl_id : str
+        +standard_type/value/units
+    }
+    class Assay {
+        +assay_chembl_id : str
+        +assay_type : str
+        +target_chembl_id : str?
+        +bao_endpoint/format
+    }
+    class Target {
+        +target_chembl_id : str
+        +target_pref_name : str?
+        +target_organism : str?
+        +target_tax_id : int?
+    }
+    class Document {
+        +document_chembl_id : str
+        +doi : str?
+        +document_journal/year
+    }
+    class TestItem {
+        +molecule_chembl_id : str
+        +parent_molecule_chembl_id : str?
+        +canonical_smiles : str?
+        +max_phase : int?
+    }
+
+    Activity --> Assay : many-to-one\nassay_chembl_id
+    Activity --> Target : many-to-one\n(target inferred)
+    Activity --> Document : many-to-one\n(document_chembl_id)
+    Activity --> TestItem : many-to-one\nmolecule_chembl_id
+    Assay --> Target : zero-or-one target per assay
+    TestItem --> TestItem : parent-child (salt/base)
+

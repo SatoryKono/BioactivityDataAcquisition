@@ -1,26 +1,42 @@
 classDiagram
-    class ChemblPipelineBase {
-        +ID_COLUMN: str
-        +API_FILTER_KEY: str
-        +run(output_path, dry_run) RunResult
+    class MoleculePipeline {
+        <<ChemblPipelineBase>>
+        +entity = "molecule"
+        -extraction_service : ChemblExtractionServiceImpl
+        -transformer : ChemblTransformerImpl
+        -validation_service : ValidationService
+        -hash_service : HashService
+        -output_writer : UnifiedOutputWriter
+    }
+
+    class ChemblExtractionServiceImpl {
+        +extract_all("molecule")
+        -client : ChemblDataClientHTTPImpl
+        -csv_source : CsvRecordSourceImpl
+    }
+
+    class ChemblTransformerImpl {
+        +apply(df) -> DataFrame
+        -_serialize_nested_fields()
+        -_ensure_required_columns()
     }
 
     class ValidationService {
-        +validate(df, entity_name) DataFrame
+        +validate("chembl.testitem", df)
     }
 
     class HashService {
-        +add_hash_columns(df, keys) DataFrame
+        +hash_row()
+        +hash_business_key()
     }
 
     class UnifiedOutputWriter {
-        +write_result(df, path, context) WriteResult
+        +write(df, cfg)
     }
 
-    class ChemblExtractorImpl
-
-    ChemblPipelineBase o-- ValidationService
-    ChemblPipelineBase o-- HashService
-    ChemblPipelineBase o-- UnifiedOutputWriter
-    ChemblPipelineBase o-- ChemblExtractorImpl : id_only / api / csv
+    MoleculePipeline o-- ChemblExtractionServiceImpl
+    MoleculePipeline o-- ChemblTransformerImpl
+    MoleculePipeline o-- ValidationService
+    MoleculePipeline o-- HashService
+    MoleculePipeline o-- UnifiedOutputWriter
 

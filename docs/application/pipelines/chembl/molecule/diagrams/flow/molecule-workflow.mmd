@@ -1,26 +1,18 @@
 %%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
 flowchart TD
-    start([Start molecule chembl run])
-    extract(["Extract molecule chunks (id only, api, csv)"])
-    transform(["Transform and normalize"])
-    validate(["Validate with Pandera schema"])
-    decision{Dry run?}
-    write(["Stable sort + write outputs"])
-    meta(["Generate meta.yaml + QC"])
-    skip_write(["Skip write; produce summary"])
-    retry{Retry / Skip / Fail per policy}
-    success_state([Success])
+    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef stepDecision  fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepTerminal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 
-    start --> extract
-    extract --> transform
-    transform --> validate
-    validate --> decision
-    decision -- No --> write
-    decision -- Yes --> skip_write
-    write --> meta
-    meta --> success_state
-    skip_write --> success_state
-    extract -->|Error| retry
-    retry --> extract
-    retry --> success_state
+    Start([Start molecule_chembl run]):::stepTerminal --> Extract["Extract molecule/test item records\n- /molecule endpoint\n- modes: api/csv/id_only"]:::stepPrimary
+    Extract --> Transform["ChemblTransformerImpl\n- serialize atc_classifications, molecule_properties, synonyms\n- ensure parent-child links"]:::stepPrimary
+    Transform --> Hash["Add hash_row/hash_business_key/index/extracted_at"]:::stepSecondary
+    Hash --> Validate["TestItem/Molecule schema validation\n- molecule_chembl_id mandatory\n- canonical_smiles nullable"]:::stepPrimary
+    Validate --> Decision{Dry run?}:::stepDecision
+    Decision -- No --> Write["UnifiedOutputWriter\nstable sort by molecule_chembl_id\natomic CSV/Parquet"]:::stepPrimary
+    Write --> Meta["meta.yaml + QC"]:::stepSecondary --> Success([Success]):::stepTerminal
+    Decision -- Yes --> SkipWrite["Skip write but log stats"]:::stepSecondary --> Success
+    Extract -->|API/CSV error| Fail([FailFast]):::stepTerminal
 

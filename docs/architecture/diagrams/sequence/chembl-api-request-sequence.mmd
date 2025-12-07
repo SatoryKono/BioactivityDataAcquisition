@@ -1,0 +1,42 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorFontSize": "18px",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant Extraction as ChemblExtractionServiceImpl
+    participant Client as ChemblDataClientHTTPImpl
+    participant HTTP as UnifiedAPIClient
+    participant Rate as RateLimiter
+    participant Retry as RetryPolicy
+    participant API as ChEMBL REST API
+
+    Extraction->>Client: request_activity(filters, offset, limit)
+    Client->>HTTP: GET /api/data/activity
+    HTTP->>Rate: acquire()
+    Rate-->>HTTP: ok (sleep if needed)
+    loop retry ≤ max_retries
+        HTTP->>API: HTTPS request
+        alt success 2xx
+            API-->>HTTP: JSON payload
+            HTTP-->>Client: response
+            Client->>Client: parse via ResponseParser
+            Client-->>Extraction: page dict (records + page_meta)
+            break
+        else transient error >=500/timeout
+            API--xHTTP: error
+            HTTP->>Retry: schedule_retry()
+            Retry-->>HTTP: wait(backoff)
+        end
+    end
+    alt all retries failed
+        Retry-->>Extraction: raise RequestFailedError
+    end
+

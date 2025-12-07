@@ -1,0 +1,46 @@
+%%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
+classDiagram
+    class ChemblDataClientABC {
+        +request(endpoint, filters, offset, limit) -> dict
+    }
+    class ChemblDataClientHTTPImpl {
+        -http : UnifiedAPIClient
+        -request_builder : ChemblRequestBuilder
+        -response_parser : ChemblResponseParser
+        +request_activity(...)
+        +request_assay(...)
+        +request_target(...)
+        +request_document(...)
+        +request_molecule(...)
+    }
+    class ChemblRequestBuilder {
+        +build(endpoint, filters, offset, limit) -> URL
+        +inject_profile(profile_config)
+    }
+    class ChemblResponseParser {
+        +parse(json_response) -> dict
+        +extract_page_meta(data) -> PageMeta
+    }
+    class ChemblPaginatorImpl {
+        +has_more(page_meta) -> bool
+        +next_offset(page_meta) -> int
+    }
+    class UnifiedAPIClient {
+        +get(url, params, headers) -> HTTPResponse
+        -rate_limiter : RateLimiter
+        -retry_policy : RetryPolicy
+        -circuit_breaker : CircuitBreaker
+    }
+    class RateLimiter
+    class RetryPolicy
+    class CircuitBreaker
+
+    ChemblDataClientABC <|.. ChemblDataClientHTTPImpl
+    ChemblDataClientHTTPImpl --> ChemblRequestBuilder
+    ChemblDataClientHTTPImpl --> ChemblResponseParser
+    ChemblDataClientHTTPImpl --> ChemblPaginatorImpl
+    ChemblDataClientHTTPImpl --> UnifiedAPIClient
+    UnifiedAPIClient --> RateLimiter
+    UnifiedAPIClient --> RetryPolicy
+    UnifiedAPIClient --> CircuitBreaker
+

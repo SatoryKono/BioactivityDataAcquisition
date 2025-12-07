@@ -9,12 +9,10 @@ from bioetl.domain.transform.normalizers import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
     normalize_chembl_id,
-    normalize_cross_references,
     normalize_doi,
     normalize_pcid,
     normalize_pmid,
     normalize_record,
-    normalize_target_components,
     normalize_uniprot,
 )
 
@@ -198,37 +196,50 @@ class TestCustomFieldNormalizers:
             "uniprot_accession",
             "uniprot_id",
             "accession",
-            "target_components",
-            "cross_references",
         }
         assert expected_keys.issubset(CUSTOM_FIELD_NORMALIZERS.keys())
 
 
-class TestNormalizeCrossReferences:
-    def test_normalize_cross_references(self):
-        data = [
-            {"xref_src": "PubChem", "xref_id": "CID123"},
-            {"xref_src": "UniProt", "xref_id": "p12345"},
-            {"xref_src": "Other", "xref_id": "unknown"},
-        ]
-        result = normalize_cross_references(data)
+class TestNormalizeRecordSpecialCases:
+    def test_normalize_record_normalizes_accession(self):
+        record = {"accession": "p12345", "type": "PROTEIN"}
+        result = normalize_record(record)
+        assert result == {"accession": "P12345", "type": "PROTEIN"}
 
-        assert result[0]["xref_id"] == 123  # PCID is int
-        assert result[1]["xref_id"] == "P12345"  # UniProt is upper
-        assert result[2]["xref_id"] == "unknown"  # Unchanged
+    def test_normalize_record_normalizes_xref_id_with_source(self):
+        record = {"xref_src": "PubChem", "xref_id": "CID123"}
+        result = normalize_record(record)
+        assert result == {"xref_src": "PubChem", "xref_id": 123}
 
-    def test_handles_empty_or_invalid(self):
-        assert normalize_cross_references(None) is None
-        assert normalize_cross_references([]) is None
+    def test_normalize_record_normalizes_xref_id_uniprot(self):
+        record = {"xref_src": "UniProt", "xref_id": "p12345"}
+        result = normalize_record(record)
+        assert result == {"xref_src": "UniProt", "xref_id": "P12345"}
 
+    def test_normalize_record_normalizes_component_synonyms_list(self):
+        record = {
+            "target_component_synonyms": [" beta ", "alpha", None],
+        }
+        result = normalize_record(record)
+        assert result == {"target_component_synonyms": "alpha|beta"}
 
-class TestNormalizeTargetComponents:
-    def test_normalize_target_components(self):
-        data = [
-            {"accession": "p12345", "type": "PROTEIN"},
-            {"accession": None},
-        ]
-        result = normalize_target_components(data)
+    def test_normalize_record_normalizes_component_synonyms_json_string(self):
+        record = {
+            "target_component_synonyms": '["gamma","Alpha"]',
+        }
+        result = normalize_record(record)
+        assert result == {"target_component_synonyms": "Alpha|gamma"}
 
-        assert result[0]["accession"] == "P12345"
-        assert result[1]["accession"] is None
+    def test_normalize_record_normalizes_component_xrefs(self):
+        record = {
+            "target_component_xrefs": [
+                {"xref_src": "UniProt", "xref_id": "p12345"},
+                {"xref_src": "PubChem", "xref_id": "CID42"},
+            ]
+        }
+        result = normalize_record(record)
+        assert result == {
+            "target_component_xrefs": (
+                "xref_id:P12345|xref_src:UniProt|xref_id:42|xref_src:PubChem"
+            )
+        }

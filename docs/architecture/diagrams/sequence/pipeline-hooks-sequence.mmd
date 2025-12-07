@@ -1,0 +1,47 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorFontSize": "18px",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant Pipeline as PipelineBase
+    participant Logging as LoggingPipelineHookImpl
+    participant Metrics as MetricsPipelineHookImpl
+    participant Logger as UnifiedLogger
+    participant Prom as PrometheusCollector
+
+    Pipeline->>Logging: on_start(run_ctx)
+    Logging->>Logger: info("pipeline.start", ctx)
+    Pipeline->>Metrics: on_start(run_ctx)
+    Metrics->>Prom: observe("pipeline_runs_total", labels={status:"start"})
+
+    loop stages
+        Pipeline->>Logging: on_stage_start(stage, ctx)
+        Logging->>Logger: info("stage.start", stage, entity, run_id)
+        Pipeline->>Metrics: on_stage_start(stage, ctx)
+        Metrics->>Prom: observe("pipeline_stage_active", labels={stage})
+        Pipeline->>Logging: on_stage_end(stage, ctx)
+        Logging->>Logger: info("stage.finish", duration, records)
+        Pipeline->>Metrics: on_stage_end(stage, ctx)
+        Metrics->>Prom: observe("pipeline_stage_duration_seconds", value=duration)
+    end
+
+    alt error occurs
+        Pipeline->>Logging: on_error(stage, exc, ctx)
+        Logging->>Logger: error("pipeline.error", stage, exc)
+        Pipeline->>Metrics: on_error(stage, ctx)
+        Metrics->>Prom: observe("pipeline_runs_total", labels={status:"error"})
+    else success
+        Pipeline->>Logging: on_finish(success=True, stats)
+        Logging->>Logger: info("pipeline.finish", duration, rows)
+        Pipeline->>Metrics: on_finish(success=True)
+        Metrics->>Prom: observe("pipeline_runs_total", labels={status:"success"})
+    end
+

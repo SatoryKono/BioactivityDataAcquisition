@@ -176,15 +176,6 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             base_normalizer = _default_normalizer
 
         def _normalize_value_from_series(val: Any) -> Any:
-            if (
-                custom_normalizer
-                and dtype == "array"
-                and isinstance(val, (list, tuple))
-            ):
-                normalized = custom_normalizer(val)
-                if normalized is None or not normalized:
-                    return None
-                return serialize_list(normalized, value_normalizer=None)
             return self._normalize_value(
                 val,
                 dtype,
@@ -218,7 +209,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
                 return self._normalize_container_item(item, norm)
 
             normalized_list = normalize_array(
-                list(val), item_normalizer=_smart_normalizer
+                val, item_normalizer=_smart_normalizer
             )
         except ValueError as exc:
             raise ValueError(

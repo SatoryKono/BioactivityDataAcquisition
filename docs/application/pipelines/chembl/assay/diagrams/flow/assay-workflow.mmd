@@ -1,26 +1,28 @@
 %%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
 flowchart TD
-    start([Start assay chembl run])
-    extract(["Extract assay pages"])
-    transform(["Transform and normalize"])
-    validate(["Validate with Pandera schema"])
-    decision{Dry run?}
-    write(["Stable sort + write outputs"])
-    meta(["Generate meta.yaml"])
-    skip_write(["Skip write; produce summary"])
-    retry{Retry / Skip / Fail per policy}
-    success_state([Success])
+    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    classDef stepDecision  fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef stepTerminal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 
-    start --> extract
-    extract --> transform
-    transform --> validate
-    validate --> decision
-    decision -- No --> write
-    decision -- Yes --> skip_write
-    write --> meta
-    meta --> success_state
-    skip_write --> success_state
-    extract -->|Error| retry
-    retry --> extract
-    retry --> success_state
+    start([Start assay_chembl pipeline]):::stepTerminal
+    extract["Extract assay records\n- /assay endpoint via API\n- optional CSV mode\n- supports filters (bao_endpoint, organism)"]:::stepPrimary
+    classify["Normalize assay_classifications + assay_parameters\n- flatten list-of-dicts\n- ensure deterministic ordering"]:::stepSecondary
+    transform["AssayTransformer (ChemblTransformerImpl override)\n- derive target_chembl_id fallback\n- normalize assay_type + BAO identifiers"]:::stepPrimary
+    hash["Post-transform: hash/index/database_version/extracted_at"]:::stepSecondary
+    validate["AssaySchema validation\n- assay_chembl_id regex\n- assay_type in {B,F,b,f}\n- BAO IDs validated"]:::stepPrimary
+    dry{Dry run?}:::stepDecision
+    write["UnifiedOutputWriter\n- stable sort by assay_chembl_id\n- atomic CSV + meta.yaml"]:::stepPrimary
+    drySkip["Skip write but emit metrics/meta preview"]:::stepSecondary
+    success([Success]):::stepTerminal
+    fail([FailFast]):::stepTerminal
+
+    start --> extract --> classify --> transform --> hash --> validate --> dry
+    dry -- No --> write --> success
+    dry -- Yes --> drySkip --> success
+    extract -->|HTTP/CSV error| fail
+    transform -->|missing required data| fail
+    validate -->|Schema error| fail
+    write -->|IO error| fail
 

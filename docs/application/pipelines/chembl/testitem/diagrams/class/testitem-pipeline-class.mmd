@@ -1,23 +1,40 @@
 classDiagram
-    class ChemblPipelineBase {
-        +ID_COLUMN: str
-        +API_FILTER_KEY: str
-        +run(output_path, dry_run) RunResult
+    class TestItemPipeline {
+        <<ChemblPipelineBase>>
+        +entity = "testitem"
+        -extraction_service : ChemblExtractionServiceImpl
+        -transformer : ChemblTransformerImpl
+        -validation_service : ValidationService
+        -hash_service : HashService
+        -output_writer : UnifiedOutputWriter
+    }
+
+    class ChemblExtractionServiceImpl {
+        +extract_all("molecule")
+    }
+
+    class ChemblTransformerImpl {
+        +apply(df) -> DataFrame
+        -_serialize_nested_fields()
+        -_enforce_schema(order)
     }
 
     class ValidationService {
-        +validate(df, entity_name) DataFrame
+        +validate("chembl.testitem", df)
     }
 
     class HashService {
-        +add_hash_columns(df, keys) DataFrame
+        +hash_row()
+        +hash_business_key()
     }
 
     class UnifiedOutputWriter {
-        +write_result(df, path, context) WriteResult
+        +write(df, cfg)
     }
 
-    ChemblPipelineBase o-- ValidationService
-    ChemblPipelineBase o-- HashService
-    ChemblPipelineBase o-- UnifiedOutputWriter
+    TestItemPipeline o-- ChemblExtractionServiceImpl
+    TestItemPipeline o-- ChemblTransformerImpl
+    TestItemPipeline o-- ValidationService
+    TestItemPipeline o-- HashService
+    TestItemPipeline o-- UnifiedOutputWriter
 

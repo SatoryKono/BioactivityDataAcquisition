@@ -1,23 +1,31 @@
 classDiagram
-    class ChemblPipelineBase {
-        +ID_COLUMN: str
-        +API_FILTER_KEY: str
-        +run(output_path, dry_run) RunResult
+    class TargetPipeline {
+        <<ChemblPipelineBase>>
+        +entity = "target"
+        -extraction_service : ChemblExtractionServiceImpl
+        -transformer : TargetTransformer
+        -enrichment_service : TargetEnrichmentService
+        -validation_service : ValidationService
+        -output_writer : UnifiedOutputWriter
     }
 
-    class ValidationService {
-        +validate(df, entity_name) DataFrame
+    class TargetEnrichmentService {
+        +fetch_uniprot(batch) -> dict
+        +fetch_iuphar(batch) -> dict
+        -client : UnifiedAPIClient
+        -rate_limit : RateLimiter
     }
 
-    class HashService {
-        +add_hash_columns(df, keys) DataFrame
+    class TargetTransformer {
+        <<ChemblTransformerImpl>>
+        +do_transform(df, enrichment) -> DataFrame
+        -_merge_synonyms()
+        -_normalize_components()
     }
 
-    class UnifiedOutputWriter {
-        +write_result(df, path, context) WriteResult
-    }
-
-    ChemblPipelineBase o-- ValidationService
-    ChemblPipelineBase o-- HashService
-    ChemblPipelineBase o-- UnifiedOutputWriter
+    TargetPipeline o-- ChemblExtractionServiceImpl
+    TargetPipeline o-- TargetEnrichmentService
+    TargetPipeline o-- TargetTransformer
+    TargetPipeline o-- ValidationService
+    TargetPipeline o-- UnifiedOutputWriter
 

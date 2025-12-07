@@ -1,0 +1,24 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart TB
+    classDef layer fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+    classDef note fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+    interfaces["Interfaces\n(CLI, REST, MQ)"]:::layer
+    application["Application\n(PipelineOrchestrator, PipelineContainer, PipelineBase)"]:::layer
+    domain["Domain\n(Contracts, Schemas, Services)"]:::layer
+    infrastructure["Infrastructure\n(HTTP clients, writers, logging, config)"]:::layer
+
+    interfaces -->|Invokes| application
+    application -->|Calls ports| domain
+    application -->|Requests adapters| infrastructure
+    infrastructure -->|Implements| domain
+
+    domain -.->|Defines ABC + schema| infrastructure
+    interfaces -.->|No direct access| domain
+    interfaces -.x-|Forbidden| infrastructure
+    application -.x-|Forbidden| interfaces
+
+    note1(["Allowed dependency direction only ↓"]):::note
+    interfaces --> note1
+
