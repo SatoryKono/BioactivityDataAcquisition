@@ -23,5 +23,5 @@
 
 ## Usage in pipelines
 
-- Pipelines consume only domain ports. `ChemblEntityPipeline` receives `ExtractionServiceABC`, which internally uses the ChEMBL client adapter chain.
+- Pipelines consume only domain ports. `ChemblPipelineBase` receives `ExtractionServiceABC`, which internally uses the ChEMBL client adapter chain.
 - Input source is selected by config (`input_mode=api|csv|id_only`); when `api`, the pipeline uses the stack above via the factory.

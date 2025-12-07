@@ -26,14 +26,10 @@ classDiagram-v2
     class ChemblPipelineBase {
         +_extraction_service
         +_chembl_release
-        +get_version()
-        +get_chembl_release()
-    }
-
-    class ChemblEntityPipeline {
         +ID_COLUMN: str
         +API_FILTER_KEY: str
-        +get_database_version()
+        +get_version()
+        +get_chembl_release()
     }
 
     class StageRunnerFacade {
@@ -104,7 +100,6 @@ classDiagram-v2
     }
 
     PipelineBase <|-- ChemblPipelineBase
-    ChemblPipelineBase <|-- ChemblEntityPipeline
 
     PipelineBase o-- ValidationService : uses
     PipelineBase o-- HashService : uses
@@ -134,7 +129,6 @@ classDiagram-v2
 
     class PipelineBase domainPrimary
     class ChemblPipelineBase domainPrimary
-    class ChemblEntityPipeline domainPrimary
     class ValidationService domainSecondary
     class HashService domainSecondary
     class UnifiedOutputWriter domainSecondary

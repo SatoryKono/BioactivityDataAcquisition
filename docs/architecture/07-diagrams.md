@@ -97,7 +97,7 @@ classDiagram
         #_execute_with_error_policy()
     }
 
-    class ChemblEntityPipeline {
+    class ChemblPipelineBase {
         +ID_COLUMN: str
         +API_FILTER_KEY: str
         +get_database_version()
@@ -143,7 +143,7 @@ classDiagram
     }
 
     %% Relations
-    PipelineBase <|-- ChemblEntityPipeline
+    PipelineBase <|-- ChemblPipelineBase
     PipelineBase o-- ValidationService : uses
     PipelineBase o-- HashService : uses
     PipelineBase o-- UnifiedOutputWriter : uses

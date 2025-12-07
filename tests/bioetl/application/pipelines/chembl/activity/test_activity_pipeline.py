@@ -4,9 +4,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.application.pipelines.chembl.pipeline import (
-    ChemblEntityPipeline,
-)
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 
 
@@ -20,6 +18,11 @@ def pipeline():
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []
+    config.normalization = MagicMock()
+    config.normalization.case_sensitive_fields = []
+    config.normalization.id_fields = []
+    config.get_fields.side_effect = lambda: config.fields
+    config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
     validation_service.get_schema.return_value = ActivitySchema
@@ -27,7 +30,7 @@ def pipeline():
         ActivitySchema.to_schema().columns.keys()
     )
 
-    return ChemblEntityPipeline(
+    return ChemblPipelineBase(
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,

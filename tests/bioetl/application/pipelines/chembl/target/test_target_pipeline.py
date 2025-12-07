@@ -1,11 +1,11 @@
-"""Tests for ChemblEntityPipeline (Target context)."""
+"""Tests for ChemblPipelineBase (Target context)."""
 
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.schemas.chembl.target import TargetSchema
 
 
@@ -22,6 +22,8 @@ def pipeline():
     config.normalization = MagicMock()
     config.normalization.case_sensitive_fields = []
     config.normalization.id_fields = []
+    config.get_fields.side_effect = lambda: config.fields
+    config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
     validation_service.get_schema.return_value = TargetSchema
@@ -29,7 +31,7 @@ def pipeline():
         TargetSchema.to_schema().columns.keys()
     )
 
-    return ChemblEntityPipeline(
+    return ChemblPipelineBase(
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,

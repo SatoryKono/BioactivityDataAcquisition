@@ -21,7 +21,7 @@ subgraph Application["Application Layer"]
   ConfigLoader["Config Loader\napplication.config_loader"]:::componentSecondary
   PipelineRegistry["Pipeline registry\napplication.pipelines.registry"]:::componentSecondary
   Container["PipelineContainer\napplication.container"]:::componentSecondary
-  Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
+  Pipelines["PipelineBase / ChemblPipelineBase\napplication.pipelines.*"]:::componentSecondary
   StageRunnerFacade["StageRunnerFacade\napplication.pipelines.stage_runner_facade"]:::componentSecondary
   HooksManager["HooksManager\napplication.pipelines.hooks_manager"]:::componentSecondary
   ErrorPolicyMgr["ErrorPolicyManager\napplication.pipelines.error_policy_manager"]:::componentSecondary

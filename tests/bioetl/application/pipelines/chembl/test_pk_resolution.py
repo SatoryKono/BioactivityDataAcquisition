@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.pipelines.chembl.pipeline import ChemblEntityPipeline
+from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
 
 
@@ -36,7 +36,7 @@ def test_pk_resolution_from_field(dependencies):
         ),
     )
 
-    pipeline = ChemblEntityPipeline(config=config, **dependencies)
+    pipeline = ChemblPipelineBase(config=config, **dependencies)
     assert pipeline.ID_COLUMN == "custom_pk_id"
     assert pipeline.API_FILTER_KEY == "custom_pk_id__in"
 
@@ -61,7 +61,7 @@ def test_pk_resolution_from_pipeline_dict(dependencies):
         ),
     )
 
-    pipeline = ChemblEntityPipeline(config=config, **dependencies)
+    pipeline = ChemblPipelineBase(config=config, **dependencies)
     assert pipeline.ID_COLUMN == "legacy_pk_id"
     assert pipeline.API_FILTER_KEY == "legacy_pk_id__in"
 
@@ -85,6 +85,6 @@ def test_pk_resolution_default(dependencies):
         ),
     )
 
-    pipeline = ChemblEntityPipeline(config=config, **dependencies)
+    pipeline = ChemblPipelineBase(config=config, **dependencies)
     assert pipeline.ID_COLUMN == "my_entity_id"
     assert pipeline.API_FILTER_KEY == "my_entity_id__in"
