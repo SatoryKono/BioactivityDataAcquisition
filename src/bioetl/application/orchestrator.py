@@ -85,7 +85,7 @@ class PipelineOrchestrator:
             container.get_post_transformer(version_provider=pipeline.get_version)
         )
 
-        pipeline.add_hooks(hooks)
+        pipeline.register_hooks(hooks)
         pipeline.set_error_policy(error_policy)
 
         return pipeline

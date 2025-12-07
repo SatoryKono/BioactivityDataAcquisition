@@ -10,7 +10,7 @@ import pandas as pd
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.record_source import RawRecord, RecordSource
 
 
@@ -27,7 +27,7 @@ class CsvRecordSourceImpl(RecordSource):
         input_path: Path,
         csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
-        logger: LoggingPort,
+        logger: LoggingPortABC,
         chunk_size: int | None = None,
     ) -> None:
         self._input_path = input_path
@@ -76,7 +76,7 @@ class IdListRecordSourceImpl(RecordSource):
         source_config: ChemblSourceConfig,
         entity: str,
         filter_key: str,
-        logger: LoggingPort,
+        logger: LoggingPortABC,
         chunk_size: int | None = None,
     ) -> None:
         if not id_column:

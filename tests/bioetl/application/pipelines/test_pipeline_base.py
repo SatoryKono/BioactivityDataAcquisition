@@ -19,7 +19,7 @@ from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
+    DatabaseVersionTransformerImpl,
     FulldateTransformerImpl,
     HashColumnsTransformerImpl,
     IndexColumnTransformerImpl,
@@ -162,7 +162,7 @@ def test_pipeline_hooks(
         extractor=default_extractor,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
-    pipeline.add_hook(mock_hook)
+    pipeline.register_hook(mock_hook)
 
     # Act
     pipeline.run(Path("dummy"), dry_run=True)
@@ -196,7 +196,7 @@ def test_pipeline_error_hooks(
         extractor=default_extractor,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
-    pipeline.add_hook(mock_hook)
+    pipeline.register_hook(mock_hook)
 
     # Mock extract to fail
     pipeline._extractor.extract = MagicMock(side_effect=ValueError("Extraction failed"))
@@ -506,7 +506,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             )
             continue
 
-        if isinstance(component, DatabaseVersionTransformer):
+        if isinstance(component, DatabaseVersionTransformerImpl):
             signature.append(
                 (
                     component.__class__.__name__,

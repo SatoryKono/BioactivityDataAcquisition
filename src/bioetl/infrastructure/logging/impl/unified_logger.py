@@ -8,10 +8,10 @@ import structlog
 from structlog.stdlib import BoundLogger
 
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
-from bioetl.domain.observability import LoggingPort
+from bioetl.domain.observability import LoggingPortABC
 
 
-class UnifiedLoggerImpl(LoggerAdapterABC, LoggingPort):
+class UnifiedLoggerImpl(LoggerAdapterABC, LoggingPortABC):
     """Реализация структурированного логгера на базе structlog."""
 
     def __init__(self, logger: BoundLogger | None = None) -> None:
