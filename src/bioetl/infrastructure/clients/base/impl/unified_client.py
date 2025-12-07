@@ -42,7 +42,7 @@ class UnifiedAPIClient:
             circuit_breaker_recovery_time=config.circuit_breaker_recovery_time,
         )
 
-    def request(self, method: str, url: str, **kwargs: Any) -> Any:
+    def request_call(self, method: str, url: str, **kwargs: Any) -> Any:
         """Выполнить HTTP-запрос с учетом политик."""
         method_upper = method.upper()
         if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
@@ -52,13 +52,13 @@ class UnifiedAPIClient:
 
         return self.middleware.request(method, url, **kwargs)
 
-    def get(self, url: str, **kwargs: Any) -> Any:
+    def get_response(self, url: str, **kwargs: Any) -> Any:
         """GET запрос."""
-        return self.request("GET", url, **kwargs)
+        return self.request_call("GET", url, **kwargs)
 
-    def post(self, url: str, **kwargs: Any) -> Any:
+    def request_post(self, url: str, **kwargs: Any) -> Any:
         """POST запрос."""
-        return self.request("POST", url, **kwargs)
+        return self.request_call("POST", url, **kwargs)
 
     def close(self) -> None:
         """Закрыть соединение."""
