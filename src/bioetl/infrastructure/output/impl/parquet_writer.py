@@ -19,5 +19,5 @@ class ParquetWriterImpl(BaseWriterImpl):
     def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
         df.to_parquet(path, index=False)
 
-    def supports_format(self, fmt: str) -> bool:
+    def has_format_support(self, fmt: str) -> bool:
         return fmt.lower() == "parquet"

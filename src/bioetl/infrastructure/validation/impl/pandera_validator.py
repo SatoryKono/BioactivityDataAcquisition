@@ -8,13 +8,13 @@ import pandas as pd
 from pandera.errors import SchemaErrors
 
 from bioetl.domain.validation import ValidationResult, ValidatorABC
-from bioetl.domain.validation.contracts import SchemaType
+from bioetl.domain.validation.contracts import schema_type
 
 
 class PanderaValidatorImpl(ValidatorABC):
     """Реализация валидатора на основе Pandera."""
 
-    def __init__(self, schema: SchemaType) -> None:
+    def __init__(self, schema: schema_type) -> None:
         self._schema = schema
 
     def validate(self, df: pd.DataFrame) -> ValidationResult:
