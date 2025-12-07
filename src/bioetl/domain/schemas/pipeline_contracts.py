@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class PipelineSchemaContract:
+class PipelineSchemaModel:
     """Описание схем для пайплайна."""
 
     pipeline_code: str
@@ -20,9 +20,9 @@ class PipelineSchemaContract:
         return self.output_schema or self.schema_out
 
 
-def _default_contract(code: str, entity: str | None) -> PipelineSchemaContract:
+def _default_contract(code: str, entity: str | None) -> PipelineSchemaModel:
     schema_name = entity or code
-    return PipelineSchemaContract(
+    return PipelineSchemaModel(
         pipeline_code=code,
         schema_out=schema_name,
         schema_in=schema_name,
@@ -30,38 +30,38 @@ def _default_contract(code: str, entity: str | None) -> PipelineSchemaContract:
     )
 
 
-PIPELINE_CONTRACTS: dict[str, PipelineSchemaContract] = {
-    "chembl.activity": PipelineSchemaContract(
+PIPELINE_CONTRACTS: dict[str, PipelineSchemaModel] = {
+    "chembl.activity": PipelineSchemaModel(
         pipeline_code="chembl.activity",
         schema_out="activity",
         schema_in="activity_input",
         output_schema="activity_output",
     ),
-    "chembl.assay": PipelineSchemaContract(
+    "chembl.assay": PipelineSchemaModel(
         pipeline_code="chembl.assay",
         schema_out="assay",
         schema_in="assay_input",
         output_schema="assay_output",
     ),
-    "chembl.document": PipelineSchemaContract(
+    "chembl.document": PipelineSchemaModel(
         pipeline_code="chembl.document",
         schema_out="document",
         schema_in="document_input",
         output_schema="document_output",
     ),
-    "chembl.target": PipelineSchemaContract(
+    "chembl.target": PipelineSchemaModel(
         pipeline_code="chembl.target",
         schema_out="target",
         schema_in="target_input",
         output_schema="target_output",
     ),
-    "chembl.testitem": PipelineSchemaContract(
+    "chembl.testitem": PipelineSchemaModel(
         pipeline_code="chembl.testitem",
         schema_out="testitem",
         schema_in="testitem_input",
         output_schema="testitem_output",
     ),
-    "chembl.molecule": PipelineSchemaContract(
+    "chembl.molecule": PipelineSchemaModel(
         pipeline_code="chembl.molecule",
         schema_out="molecule",
         schema_in="molecule_input",
@@ -72,7 +72,7 @@ PIPELINE_CONTRACTS: dict[str, PipelineSchemaContract] = {
 
 def get_pipeline_contract(
     pipeline_code: str, *, default_entity: str | None = None
-) -> PipelineSchemaContract:
+) -> PipelineSchemaModel:
     """Возвращает контракт схем для пайплайна."""
 
     if pipeline_code in PIPELINE_CONTRACTS:
