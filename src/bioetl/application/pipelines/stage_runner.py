@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import pandas as pd
 
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
-from bioetl.application.pipelines.hooks_manager import HooksManager
+from bioetl.application.pipelines.hooks_registry import HooksRegistry
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.providers import ProviderId
@@ -18,7 +18,7 @@ class StageRunner:
     def __init__(
         self,
         *,
-        hooks_manager: HooksManager,
+        hooks_manager: HooksRegistry,
         error_policy_manager: ErrorPolicyManager,
         entity_name: str,
         provider_id: ProviderId,

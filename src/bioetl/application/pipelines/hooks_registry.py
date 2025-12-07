@@ -9,7 +9,7 @@ from bioetl.domain.observability import LoggingPort
 from bioetl.domain.providers import ProviderId
 
 
-class HooksManager:
+class HooksRegistry:
     """Отвечает за вызовы хуков и измерение времени стадий."""
 
     def __init__(
