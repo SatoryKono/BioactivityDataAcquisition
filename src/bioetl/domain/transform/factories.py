@@ -4,7 +4,7 @@ from typing import Callable
 
 from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformerImpl,
+    DatabaseVersionTransformer,
     FulldateTransformerImpl,
     HashColumnsTransformerImpl,
     IndexColumnTransformerImpl,
@@ -30,7 +30,7 @@ def default_post_transformer(
                 hash_service=hash_service, business_key_fields=business_key_fields
             ),
             IndexColumnTransformerImpl(hash_service=hash_service),
-            DatabaseVersionTransformerImpl(
+            DatabaseVersionTransformer(
                 hash_service=hash_service,
                 database_version_provider=provider,
             ),
