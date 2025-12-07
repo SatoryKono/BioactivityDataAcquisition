@@ -44,6 +44,12 @@ class StubContainer(PipelineContainerABC):
         self.record_source_calls.append({"limit": limit, "logger": logger})
         return "record_source"
 
+    def get_metadata_builder(self) -> str:
+        return "metadata_builder"
+
+    def get_record_source_factory(self) -> str:
+        return "file_record_source_factory"
+
     def get_hash_service(self) -> str:
         return "hash"
 

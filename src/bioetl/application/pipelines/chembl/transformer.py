@@ -2,6 +2,8 @@
 ChEMBL data transformer implementation.
 """
 
+from typing import Any, Sequence
+
 import pandas as pd
 
 from bioetl.domain.models import RunContext
@@ -10,6 +12,44 @@ from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
+
+
+def _serialize_dict(value: dict[str, Any]) -> Any:
+    """Детерминированно сериализует словарь в строку key:value|key:value."""
+    if not value:
+        return pd.NA
+
+    parts: list[str] = []
+    for key in sorted(value.keys()):
+        val = value[key]
+        if val is None or isinstance(val, (list, dict)):
+            continue
+        if val is pd.NA:
+            continue
+        parts.append(f"{key}:{val}")
+
+    return pd.NA if not parts else "|".join(parts)
+
+
+def _serialize_list(value: Sequence[Any]) -> Any:
+    """Детерминированно сериализует список или список словарей."""
+    if not value:
+        return pd.NA
+
+    if value and isinstance(value[0], dict):
+        parts = [
+            serialized
+            for serialized in (_serialize_dict(item) for item in value if isinstance(item, dict))
+            if serialized is not pd.NA and serialized is not None
+        ]
+    else:
+        parts = [
+            str(item)
+            for item in value
+            if not isinstance(item, (list, dict)) and item is not pd.NA and item is not None
+        ]
+
+    return pd.NA if not parts else "|".join(parts)
 
 
 class ChemblTransformerImpl(TransformerABC):
@@ -39,6 +79,7 @@ class ChemblTransformerImpl(TransformerABC):
         df = self.pre_transform(df)
         df = self.do_transform(df)
         df = self.normalization_service.apply_normalize_dataframe(df)
+        df = self._serialize_nested_fields(df)
         df = self._enforce_schema(df)
         df = self._drop_nulls_in_required_columns(df)
         return df
@@ -50,6 +91,30 @@ class ChemblTransformerImpl(TransformerABC):
     def do_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Main transformation logic."""
         return df
+
+    def _serialize_nested_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Serialize list/dict fields deterministically to match schema expectations.
+        """
+
+        def _serialize_value(value: object) -> object:
+            if value is None or value is pd.NA:
+                return pd.NA
+            if isinstance(value, dict):
+                return _serialize_dict(value)
+            if isinstance(value, (list, tuple)):
+                return _serialize_list(list(value))
+            return value
+
+        serialized = df.copy()
+        for column in serialized.columns:
+            sample = next(
+                (v for v in serialized[column].values if v is not None and v is not pd.NA),
+                None,
+            )
+            if isinstance(sample, (dict, list, tuple)):
+                serialized[column] = serialized[column].map(_serialize_value)
+        return serialized
 
     def _enforce_schema(self, df: pd.DataFrame) -> pd.DataFrame:
         """

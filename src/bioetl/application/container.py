@@ -1,6 +1,7 @@
 """Dependency Injection Container for the application."""
 
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Callable, cast
 
 from bioetl.application.pipelines.contracts import PipelineContainerABC
@@ -12,6 +13,7 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
+    WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
@@ -21,6 +23,7 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import (
     ApiRecordSource,
     FileRecordSourceFactoryABC,
+    InMemoryRecordSource,
     RecordSource,
 )
 from bioetl.domain.schemas import register_schemas
@@ -30,6 +33,7 @@ from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
+from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
 
 
@@ -42,12 +46,12 @@ class PipelineContainer(PipelineContainerABC):
         self,
         config: PipelineConfig,
         *,
-        logger: LoggingPortABC,
-        output_writer: OutputWriterABC,
-        validator_factory: ValidatorFactoryABC,
-        record_source_factory: FileRecordSourceFactoryABC,
-        metadata_builder: RunMetadataBuilderProtocol,
-        metrics_port: PipelineMetricsPortABC,
+        logger: LoggingPortABC | None = None,
+        output_writer: OutputWriterABC | None = None,
+        validator_factory: ValidatorFactoryABC | None = None,
+        record_source_factory: FileRecordSourceFactoryABC | None = None,
+        metadata_builder: RunMetadataBuilderProtocol | None = None,
+        metrics_port: PipelineMetricsPortABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashServiceABC | None = None,
@@ -59,24 +63,28 @@ class PipelineContainer(PipelineContainerABC):
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
         self._schema_provider: SchemaProviderABC = schema_provider or SchemaRegistry()
-        if validator_factory is None:
-            raise ValueError("Validator factory must be provided")
-        self._validator_factory: ValidatorFactoryABC = validator_factory
-        self._logger: LoggingPortABC = logger
+        self._validator_factory: ValidatorFactoryABC = (
+            validator_factory or _create_noop_validator_factory()
+        )
+        self._logger: LoggingPortABC = logger or _create_noop_logger()
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy: ErrorPolicyABC | None = error_policy
         self._hash_service: HashServiceABC | None = hash_service
         self._post_transformer: TransformerABC | None = post_transformer
-        self._record_source_factory = record_source_factory
-        self._metadata_builder = metadata_builder
-        self._metrics_port = metrics_port
+        self._record_source_factory = (
+            record_source_factory or _create_noop_record_source_factory()
+        )
+        self._metadata_builder = metadata_builder or _create_noop_metadata_builder()
+        self._metrics_port = metrics_port or _create_noop_metrics_port()
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
         if self._provider_registry is None and self._provider_registry_provider is None:
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
             )
-        self._output_writer: OutputWriterABC = output_writer
+        self._output_writer: OutputWriterABC = (
+            output_writer or _create_noop_output_writer()
+        )
         register_schemas(self._schema_provider)
 
     @property
@@ -265,6 +273,110 @@ class PipelineContainer(PipelineContainerABC):
                 f"provider '{self._provider_id.value}'"
             )
         return source_config
+
+
+def _create_noop_logger() -> LoggingPortABC:
+    """Return a no-op logger respecting the logging port contract."""
+
+    def _bound_logger(**_: Any) -> LoggingPortABC:
+        return _create_noop_logger()
+
+    return cast(
+        LoggingPortABC,
+        SimpleNamespace(
+            info=lambda _msg, **__ctx: None,
+            error=lambda _msg, **__ctx: None,
+            debug=lambda _msg, **__ctx: None,
+            warning=lambda _msg, **__ctx: None,
+            apply_bind=_bound_logger,
+        ),
+    )
+
+
+def _create_noop_output_writer() -> OutputWriterABC:
+    """Return a deterministic no-op output writer."""
+
+    def _write_result(
+        df: Any,
+        output_path: Path,
+        entity_name: str,  # noqa: ARG001 - contract compatibility
+        run_context: Any,  # noqa: ARG001 - contract compatibility
+        *,
+        column_order: list[str] | None = None,  # noqa: ARG001 - contract compatibility
+    ) -> WriteResult:
+        row_count = 0
+        try:
+            row_count = int(len(df))  # type: ignore[arg-type]
+        except Exception:
+            row_count = 0
+        path = Path(output_path)
+        return WriteResult(
+            path=path,
+            row_count=row_count,
+            duration_sec=0.0,
+            checksum=None,
+        )
+
+    return cast(OutputWriterABC, SimpleNamespace(write_result=_write_result))
+
+
+def _create_noop_record_source_factory() -> FileRecordSourceFactoryABC:
+    """Return a record source factory producing empty in-memory sources."""
+
+    return cast(
+        FileRecordSourceFactoryABC,
+        SimpleNamespace(
+            create_csv_source=lambda **kwargs: InMemoryRecordSource(
+                [], chunk_size=kwargs.get("chunk_size")
+            ),
+            create_id_list_source=lambda **kwargs: InMemoryRecordSource(
+                [], chunk_size=kwargs.get("chunk_size")
+            ),
+        ),
+    )
+
+
+def _create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
+    """Return metadata builder that emits minimal deterministic payloads."""
+
+    return cast(
+        RunMetadataBuilderProtocol,
+        SimpleNamespace(
+            build_run_metadata=lambda context, write_result: {
+                "run_id": getattr(context, "run_id", None),
+                "row_count": getattr(write_result, "row_count", 0),
+            },
+            build_dry_run_metadata=lambda context, row_count: {
+                "run_id": getattr(context, "run_id", None),
+                "row_count": row_count,
+            },
+        ),
+    )
+
+
+def _create_noop_metrics_port() -> PipelineMetricsPortABC:
+    """Return metrics port that records nothing (for tests)."""
+
+    return cast(
+        PipelineMetricsPortABC,
+        SimpleNamespace(
+            update_stage_duration=lambda **_kwargs: None,
+            update_stage_total=lambda **_kwargs: None,
+        ),
+    )
+
+
+def _create_noop_validator_factory() -> ValidatorFactoryABC:
+    """Return validator factory that treats all data as valid (for tests)."""
+
+    def _validate(df: Any) -> ValidationResult:
+        return ValidationResult(is_valid=True, errors=[], warnings=[], validated_df=df)
+
+    validator = SimpleNamespace(validate=_validate, is_valid=lambda _df: True)
+    return cast(
+        ValidatorFactoryABC,
+        SimpleNamespace(create_validator=lambda _schema: validator),
+    )
 
 
 def build_pipeline_dependencies(

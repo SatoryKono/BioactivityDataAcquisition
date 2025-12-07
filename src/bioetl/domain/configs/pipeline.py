@@ -290,7 +290,11 @@ class FeatureFlagsConfig(BaseModel):
     def migrate_inline_flags(cls, data: Any) -> Any:
         """Позволяет передавать плоские фиче-флаги без обёртки."""
 
-        if isinstance(data, dict) and "interfaces" not in data and "features" not in data:
+        if (
+            isinstance(data, dict)
+            and "interfaces" not in data
+            and "features" not in data
+        ):
             return {"interfaces": data}
         return data
 

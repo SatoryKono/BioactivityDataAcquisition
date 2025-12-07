@@ -2,7 +2,7 @@
 Примеры рефакторинга ключевых компонентов BioETL
 """
 
-# ruff: noqa=E402,F821,F841
+# ruff: noqa: E402, F821, F841
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
