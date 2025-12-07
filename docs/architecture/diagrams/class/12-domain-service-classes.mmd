@@ -14,8 +14,9 @@ class PanderaValidator
 class SchemaRegistry
 
 class NormalizationServiceABC
-class BaseNormalizationService
-class ChemblNormalizationService
+class BaseNormalizationServiceABC
+class BaseNormalizationServiceImpl
+class ChemblNormalizationServiceImpl
 class NormalizationServiceImpl
 class NormalizationConfigProvider
 class NormalizationConfig
@@ -25,11 +26,12 @@ SchemaRegistry ..|> SchemaProviderABC
 PanderaValidator ..|> ValidatorABC
 SchemaRegistry --> PanderaValidator : validator
 
-ChemblNormalizationService --|> BaseNormalizationService
-NormalizationServiceImpl --|> BaseNormalizationService
-ChemblNormalizationService ..|> NormalizationServiceABC
+BaseNormalizationServiceImpl ..|> BaseNormalizationServiceABC
+ChemblNormalizationServiceImpl --|> BaseNormalizationServiceImpl
+NormalizationServiceImpl --|> BaseNormalizationServiceImpl
+ChemblNormalizationServiceImpl ..|> NormalizationServiceABC
 NormalizationServiceImpl ..|> NormalizationServiceABC
-ChemblNormalizationService --> NormalizationConfigProvider
+ChemblNormalizationServiceImpl --> NormalizationConfigProvider
 NormalizationServiceImpl --> NormalizationConfigProvider
 NormalizationConfigProvider --> NormalizationConfig
 
