@@ -19,12 +19,12 @@ class TqdmProgressReporterImpl(ProgressReporterABC):
             self._pbar.close()
         self._pbar = tqdm(total=total, desc=description)
 
-    def update(self, n: int = 1) -> None:
+    def apply_update(self, n: int = 1) -> None:
         """Advance the progress bar by n steps."""
         if self._pbar is not None:
             self._pbar.update(n)
 
-    def finish(self) -> None:
+    def stop_reporting(self) -> None:
         """Close the progress bar and release resources."""
         if self._pbar is not None:
             self._pbar.close()
