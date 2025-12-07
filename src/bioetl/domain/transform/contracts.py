@@ -106,9 +106,7 @@ class HasherABC(ABC):
         """Хеширует строку Series."""
 
     @abstractmethod
-    def compute_hash_columns(
-        self, df: pd.DataFrame, columns: list[str]
-    ) -> pd.Series:
+    def compute_hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
         """Хеширует выбранные колонки DataFrame."""
 
 
@@ -181,6 +179,15 @@ class HashServiceABC(ABC):
         """Сбрасывает внутреннее состояние между запусками."""
 
 
+class NormalizationServiceFactoryABC(Protocol):
+    """Factory for producing normalization services for pipelines."""
+
+    def create_normalization_service(
+        self, config: Any, *, provider_id: str | None = None
+    ) -> NormalizationServiceABC:
+        """Return normalization service configured for provider/pipeline."""
+
+
 __all__ = [
     "BaseNormalizationServiceABC",
     "NormalizationConfig",
@@ -188,4 +195,5 @@ __all__ = [
     "HasherABC",
     "NormalizationServiceABC",
     "HashServiceABC",
+    "NormalizationServiceFactoryABC",
 ]

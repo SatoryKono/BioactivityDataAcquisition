@@ -1,4 +1,4 @@
-# 01 Pipeline Core Normalization
+# Pipeline Core Normalization
 
 ## Overview
 

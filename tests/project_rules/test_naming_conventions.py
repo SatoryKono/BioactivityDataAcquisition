@@ -4,16 +4,14 @@ import ast
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Iterator, Mapping, Sequence
+from typing import Iterable, Iterator, Mapping
 
-import yaml
 import pytest
-
+import yaml
 from src.tools.check_naming_policy import (
     check_file_content,
     check_file_naming,
 )
-
 
 ROOT_SRC = Path("src/bioetl")
 ROOT_TESTS = Path("tests")
@@ -261,7 +259,9 @@ def test_t02_global_name_conventions() -> None:
                             continue
                         if not SNAKE_CASE_PATTERN.match(name):
                             violations.append(f"{file.as_posix()}: variable {name}")
-    assert not violations, f"Нарушения в именах глобальных переменных/функций: {sorted(violations)}"
+    assert not violations, (
+        f"Нарушения в именах глобальных переменных/функций: {sorted(violations)}"
+    )
 
 
 def test_t03_class_suffix_pascal_case() -> None:
@@ -326,7 +326,9 @@ def test_t04_no_camelcase_or_hyphen_names() -> None:
                     continue
                 if "-" in name or " " in name:
                     violations.append(f"{file.as_posix()}: класс {name}")
-    assert not violations, f"Выявлены camelCase/дефис/пробел в именах: {sorted(violations)}"
+    assert not violations, (
+        f"Выявлены camelCase/дефис/пробел в именах: {sorted(violations)}"
+    )
 
 
 def _has_allowed_prefix(name: str) -> bool:
@@ -343,7 +345,9 @@ def test_t05_function_prefix_rules() -> None:
         for node in tree.body:
             if isinstance(node, ast.FunctionDef):
                 name = node.name
-                if name.startswith("__") or name.startswith("test_") or name.startswith("_"):
+                if name.startswith("__") or name.startswith("test_") or name.startswith(
+                    "_"
+                ):
                     continue
                 if _is_pytest_fixture(node):
                     continue
@@ -354,7 +358,11 @@ def test_t05_function_prefix_rules() -> None:
                 if not _has_allowed_prefix(name):
                     violations.append(f"{file.as_posix()}: {name}")
             elif isinstance(node, ast.ClassDef):
-                for method in (item for item in node.body if isinstance(item, ast.FunctionDef)):
+                for method in (
+                    item
+                    for item in node.body
+                    if isinstance(item, ast.FunctionDef)
+                ):
                     name = method.name
                     if name.startswith("__") or name.startswith("_"):
                         continue
@@ -363,8 +371,13 @@ def test_t05_function_prefix_rules() -> None:
                     if exceptions.is_excepted(file, "FUNC_PREFIX"):
                         continue
                     if not _has_allowed_prefix(name):
-                        violations.append(f"{file.as_posix()}: {node.name}.{name}")
-    assert not violations, f"Функции/методы без разрешённых префиксов: {sorted(violations)}"
+                        violations.append(
+                            f"{file.as_posix()}: {node.name}.{name}"
+                        )
+    assert not violations, (
+        "Функции/методы без разрешённых префиксов: "
+        f"{sorted(violations)}"
+    )
 
 
 def _iter_pipeline_configs() -> Iterable[Path]:
@@ -394,12 +407,20 @@ def test_t07_pipeline_stage_filenames() -> None:
     for entity_dir in _iter_pipeline_entity_dirs():
         actual = {file.name for file in entity_dir.iterdir() if file.is_file()}
         missing = PIPELINE_STAGE_FILES - actual
-        unexpected = {name for name in actual if name.lower() in PIPELINE_STAGE_FILES and name not in PIPELINE_STAGE_FILES}
+        unexpected = {
+            name
+            for name in actual
+            if name.lower() in PIPELINE_STAGE_FILES and name not in PIPELINE_STAGE_FILES
+        }
         if missing or unexpected:
             violations.append(
-                f"{entity_dir.as_posix()}: missing={sorted(missing)}, unexpected={sorted(unexpected)}"
+                f"{entity_dir.as_posix()}: "
+                f"missing={sorted(missing)}, unexpected={sorted(unexpected)}"
             )
-    assert not violations, f"Нарушения в именах файлов этапов: {sorted(violations)}"
+    assert not violations, (
+        "Нарушения в именах файлов этапов: "
+        f"{sorted(violations)}"
+    )
 
 
 def test_t08_test_filename_conventions() -> None:
@@ -407,11 +428,16 @@ def test_t08_test_filename_conventions() -> None:
     for file in ROOT_TESTS.rglob("*.py"):
         if "__pycache__" in file.parts:
             continue
+        if file.name in {"__init__.py", "conftest.py"}:
+            continue
         if not file.name.startswith("test_"):
             violations.append(f"{file.as_posix()}: не начинается с test_")
         if "golden" in file.stem and not file.name.endswith("_golden.py"):
             violations.append(f"{file.as_posix()}: golden без суффикса _golden")
-    assert not violations, f"Нарушены правила именования тестовых файлов: {sorted(violations)}"
+    assert not violations, (
+        "Нарушены правила именования тестовых файлов: "
+        f"{sorted(violations)}"
+    )
 
 
 def test_t09_doc_filename_case() -> None:
@@ -422,7 +448,10 @@ def test_t09_doc_filename_case() -> None:
         stem = file.stem
         if not KEBAB_CASE_PATTERN.match(stem):
             violations.append(file.as_posix())
-    assert not violations, f"Файлы документации нарушают kebab-case/англ.названия: {sorted(violations)}"
+    assert not violations, (
+        "Файлы документации нарушают kebab-case/англ.названия: "
+        f"{sorted(violations)}"
+    )
 
 
 def test_t10_doc_header_match_filename() -> None:
@@ -440,4 +469,3 @@ def test_t10_doc_header_match_filename() -> None:
         if header_slug != file_slug:
             violations.append(f"{file.as_posix()}: '{header}' vs '{file.stem}'")
     assert not violations, f"Несоответствие заголовка имени файла: {sorted(violations)}"
-

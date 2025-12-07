@@ -1,4 +1,4 @@
-# Архитектурные диаграммы BioETL
+# Architecture Diagrams
 
 Устаревшие inline-диаграммы удалены. Актуальные версии находятся в текстовых исходниках по политике диаграмм:
 - High-level, class, sequence, flow: `docs/architecture/diagrams/`

@@ -1,4 +1,4 @@
-# Class Diagrams — Application Layer
+# Class Diagrams Application
 
 Устаревшие inline-диаграммы удалены. Храните актуальные схемы application-слоя в `docs/architecture/diagrams/class/` (текстовые Mermaid/PlantUML по политике `docs/architecture/diagrams/00-diagramming-policy.md`).
 # Class Diagrams - Application Layer

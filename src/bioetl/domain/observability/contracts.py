@@ -54,7 +54,37 @@ class TracingPortABC(ABC):
         """Inject tracing context into headers."""
 
 
+class PipelineMetricsPortABC(ABC):
+    """Port for recording pipeline stage metrics."""
+
+    @abstractmethod
+    def update_stage_duration(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+        duration_sec: float,
+    ) -> None:
+        """Record duration metric for a stage."""
+
+    @abstractmethod
+    def update_stage_total(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+    ) -> None:
+        """Increment counter for a stage outcome."""
+
+
 __all__ = [
     "LoggingPortABC",
     "TracingPortABC",
+    "PipelineMetricsPortABC",
 ]

@@ -12,7 +12,9 @@ ALLOWED_LAYERS = {"domain", "application", "infrastructure", "interfaces"}
 
 
 def _iter_python_files(root: Path) -> Iterable[Path]:
-    return (path for path in root.rglob("*.py") if "/__pycache__/" not in path.as_posix())
+    return (
+        path for path in root.rglob("*.py") if "/__pycache__/" not in path.as_posix()
+    )
 
 
 def _collect_import_modules(path: Path) -> list[str]:
@@ -71,7 +73,9 @@ def test_sources_reside_in_layers() -> None:
         )
 
 
-def test_domain_isolation_has_no_forbidden_imports(domain_python_files: list[Path]) -> None:
+def test_domain_isolation_has_no_forbidden_imports(
+    domain_python_files: list[Path],
+) -> None:
     """Ensure domain code avoids infrastructure, application and heavy I/O deps."""
 
     forbidden_prefixes = ("bioetl.infrastructure", "bioetl.application")
@@ -105,7 +109,9 @@ def test_abc_impl_pairs_align(
     for path in domain_python_files:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and node.name.endswith(("ABC", "Protocol")):
+            if isinstance(node, ast.ClassDef) and node.name.endswith(
+                ("ABC", "Protocol")
+            ):
                 domain_abcs[node.name] = path.as_posix()
 
     impls: dict[str, tuple[str, set[str]]] = {}
@@ -138,7 +144,9 @@ def test_pipeline_stage_layout_respects_convention() -> None:
 
     pipelines_root = PACKAGE_ROOT / "application" / "pipelines"
     provider_dirs = [
-        path for path in pipelines_root.iterdir() if path.is_dir() and path.name != "__pycache__"
+        path
+        for path in pipelines_root.iterdir()
+        if path.is_dir() and path.name != "__pycache__"
     ]
 
     entity_dirs: list[Path] = []
@@ -192,6 +200,7 @@ def test_duplicate_class_names_are_allowlisted() -> None:
 
     if unexpected_duplicates:
         formatted = "; ".join(
-            f"{name}: {', '.join(locations)}" for name, locations in sorted(unexpected_duplicates.items())
+            f"{name}: {', '.join(locations)}"
+            for name, locations in sorted(unexpected_duplicates.items())
         )
         pytest.fail(f"Unexpected duplicate class names detected: {formatted}")

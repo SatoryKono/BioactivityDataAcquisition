@@ -4,7 +4,6 @@ import ast
 from pathlib import Path
 
 import pytest
-
 from tests.project_rules.conftest import iter_python_files
 
 
@@ -27,4 +26,3 @@ def test_no_print_in_production(bioetl_root: Path) -> None:
 
     if violations:
         pytest.fail("\n".join(sorted(set(violations))))
-

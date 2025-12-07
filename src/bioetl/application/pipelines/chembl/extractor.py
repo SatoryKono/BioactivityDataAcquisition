@@ -9,16 +9,14 @@ import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.clients.ports import ChemblExtractionPortABC
-from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
-from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.infrastructure.config.models import ChemblSourceConfig, CsvInputConfig
-from bioetl.infrastructure.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
+from bioetl.domain.record_source import (
+    ApiRecordSource,
+    FileRecordSourceFactoryABC,
+    RecordSource,
 )
+from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -33,12 +31,14 @@ class ChemblExtractorImpl(ExtractorABC):
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
         record_source: RecordSource | None = None,
+        file_record_source_factory: FileRecordSourceFactoryABC | None = None,
     ) -> None:
         self.config = config
         self.extraction_service = extraction_service
         self.normalization_service = normalization_service
         self.logger = logger
         self.record_source = record_source
+        self.file_record_source_factory = file_record_source_factory
 
     def extract(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
         """
@@ -138,7 +138,9 @@ class ChemblExtractorImpl(ExtractorABC):
     ) -> RecordSource:
         if not input_path:
             raise ValueError("input_path is required for CSV mode")
-        return CsvRecordSourceImpl(
+        if self.file_record_source_factory is None:
+            raise ValueError("FileRecordSourceFactory is required for CSV mode")
+        return self.file_record_source_factory.create_csv_source(
             input_path=Path(input_path),
             csv_options=csv_options,
             limit=limit,
@@ -166,17 +168,19 @@ class ChemblExtractorImpl(ExtractorABC):
                 f"'{self.config.provider}', got "
                 f"{type(source_config).__name__}"
             )
-        return IdListRecordSourceImpl(
+        if self.file_record_source_factory is None:
+            raise ValueError("FileRecordSourceFactory is required for ID-only mode")
+        return self.file_record_source_factory.create_id_list_source(
             input_path=Path(input_path),
             id_column=id_column,
             csv_options=csv_options,
             limit=limit,
+            chunk_size=chunk_size,
             extraction_service=self.extraction_service,
             source_config=source_config,
             entity=self.config.entity_name,
             filter_key=filter_key,
             logger=self.logger,
-            chunk_size=chunk_size,
         )
 
     def _build_api_source(

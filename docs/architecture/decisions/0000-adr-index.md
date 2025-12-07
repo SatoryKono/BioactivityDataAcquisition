@@ -1,4 +1,4 @@
-# 0000 Adr Index
+# ADR Index
 
 | ID | Title | Status | Summary |
 | --- | --- | --- | --- |

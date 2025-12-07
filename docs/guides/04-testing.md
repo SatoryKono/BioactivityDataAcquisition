@@ -1,4 +1,4 @@
-# 04 Testing
+# Testing
 
 ## Типы тестов
 - Юнит: изолированные проверки без сети (мокаем HTTP/FS), напр. `tests/bioetl/infrastructure/clients/chembl/test_http_client.py`.

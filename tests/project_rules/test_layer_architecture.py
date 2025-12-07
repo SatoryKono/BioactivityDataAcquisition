@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Iterable
 
 import pytest
-
 from tests.architecture.test_layer_dependencies import (
     _collect_imports,
     _module_from_path,
@@ -33,7 +32,10 @@ def test_sources_reside_in_known_layers(bioetl_root: Path) -> None:
     violations: list[str] = []
     for path in iter_python_files(bioetl_root):
         layer = _first_layer(path, bioetl_root=bioetl_root)
-        if layer not in ALLOWED_LAYERS and path.name not in {"__init__.py", "__main__.py"}:
+        if layer not in ALLOWED_LAYERS and path.name not in {
+            "__init__.py",
+            "__main__.py",
+        }:
             violations.append(f"{path.as_posix()}: unexpected layer '{layer}'")
 
     _assert_no_violations(violations)
@@ -49,7 +51,9 @@ def test_layer_dependencies(bioetl_root: Path) -> None:
             ref = reference.module
 
             if module.startswith("bioetl.domain"):
-                if ref.startswith(("bioetl.infrastructure", "bioetl.application", "bioetl.interfaces")):
+                if ref.startswith(
+                    ("bioetl.infrastructure", "bioetl.application", "bioetl.interfaces")
+                ):
                     violations.append(
                         f"{file_path.as_posix()}:{reference.lineno}: "
                         f"domain must not depend on outer layers ({ref})"
@@ -59,7 +63,8 @@ def test_layer_dependencies(bioetl_root: Path) -> None:
                 if ref.startswith(("bioetl.infrastructure", "bioetl.interfaces")):
                     violations.append(
                         f"{file_path.as_posix()}:{reference.lineno}: "
-                        f"application must not depend on infrastructure/interfaces ({ref})"
+                        "application must not depend on "
+                        f"infrastructure/interfaces ({ref})"
                     )
 
             if module.startswith("bioetl.infrastructure"):
@@ -73,12 +78,12 @@ def test_layer_dependencies(bioetl_root: Path) -> None:
                 # Interfaces can depend on others; no restriction.
                 continue
 
-            # Relative imports that resolve outside the current package are handled in _collect_imports,
-            # but guard against accidental empty module names.
+            # Relative imports that resolve outside the current package are
+            # handled in _collect_imports, but guard against accidental empty
+            # module names.
             if not ref:
                 violations.append(
                     f"{file_path.as_posix()}:{reference.lineno}: unresolved import target"
                 )
 
     _assert_no_violations(violations)
-

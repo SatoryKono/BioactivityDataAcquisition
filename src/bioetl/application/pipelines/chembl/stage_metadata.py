@@ -4,10 +4,14 @@
 
 from typing import Callable, Final
 
-STAGE_NAMES: Final[frozenset[str]] = frozenset({"extract", "transform", "validate", "export"})
+STAGE_NAMES: Final[frozenset[str]] = frozenset(
+    {"extract", "transform", "validate", "export"}
+)
 
 
-def get_stage_metadata(provider: str, entity: str, pipeline_id: str, stage: str) -> dict[str, str]:
+def get_stage_metadata(
+    provider: str, entity: str, pipeline_id: str, stage: str
+) -> dict[str, str]:
     """
     Возвращает минимальные метаданные стадии пайплайна.
 
@@ -41,4 +45,3 @@ def build_stage_descriptor(
 
 
 __all__ = ["get_stage_metadata", "build_stage_descriptor", "STAGE_NAMES"]
-

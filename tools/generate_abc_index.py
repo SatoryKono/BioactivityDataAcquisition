@@ -28,7 +28,9 @@ def load_class(target: str) -> type:
     try:
         return getattr(module, class_name)
     except AttributeError as exc:  # pragma: no cover - explicit failure path
-        raise ImportError(f"Class {class_name} not found in module {module_name}") from exc
+        raise ImportError(
+            f"Class {class_name} not found in module {module_name}"
+        ) from exc
 
 
 def normalize_docstring(docstring: str | None) -> str:

@@ -1,4 +1,4 @@
-# 00 Rules Summary
+# Rules Summary
 
 ## 1. Архитектура и структура
 - Hexagonal (Ports & Adapters) + DDD.

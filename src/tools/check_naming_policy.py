@@ -2,6 +2,7 @@
 """
 Script to check naming conventions in the project against defined rules.
 """
+
 import ast
 import re
 import sys
@@ -312,11 +313,13 @@ def _resolve_exception_predicate(exceptions: Any) -> Callable[[str, str], bool]:
     """Unify exception checks for list-based config and ExceptionIndex."""
 
     if hasattr(exceptions, "is_excepted"):
+
         def _from_index(path: str, rule_id: str) -> bool:
             try:
                 return bool(exceptions.is_excepted(Path(path), rule_id))
             except Exception:
                 return False
+
         return _from_index
 
     if isinstance(exceptions, list):
@@ -457,8 +460,7 @@ class NamingValidator(ast.NodeVisitor):
                     if not CONST_REGEX.match(target.id):
                         if not self.is_excepted("CONST_FORMAT", target.id):
                             self.violations.append(
-                                f"Constant '{target.id}' contains invalid "
-                                "characters."
+                                f"Constant '{target.id}' contains invalid characters."
                             )
         self.generic_visit(node)
 
@@ -489,7 +491,9 @@ def check_file_naming(file_path: Path, exceptions: Any) -> List[str]:
         violations.append(f"File '{filename}' does not match snake_case.")
 
     if "tests" in str_path and not filename.startswith(("conftest.py", "__init__.py")):
-        if not TEST_FILE_REGEX.match(filename) and not is_excepted(str_path, "TEST_NAME"):
+        if not TEST_FILE_REGEX.match(filename) and not is_excepted(
+            str_path, "TEST_NAME"
+        ):
             # Violations muted by policy; keep placeholder for future reporting.
             pass
 

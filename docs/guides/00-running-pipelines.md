@@ -1,4 +1,4 @@
-# 00 Running Pipelines
+# Running Pipelines
 
 ## Запуск через CLI
 

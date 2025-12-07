@@ -1,4 +1,4 @@
-# 03 Adding New Abc
+# Adding New ABC
 
 ## Процесс
 1. Определите контракт в `src/bioetl/clients/<domain>/contracts.py` (или base/contracts.py) с подробным докстрингом.

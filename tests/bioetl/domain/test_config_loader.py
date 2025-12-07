@@ -13,8 +13,8 @@ from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
     UnknownProviderError,
-    load_pipeline_config,
-    load_pipeline_config_from_path,
+    get_pipeline_config,
+    get_pipeline_config_from_path,
 )
 
 
@@ -25,9 +25,9 @@ def _reset_provider_registry() -> None:
     provider_registry_loader.clear_provider_registry_cache()
 
 
-def test_load_pipeline_config_from_path_valid():
+def test_get_pipeline_config_from_path_valid():
     path = Path("tests/fixtures/configs/chembl_activity_valid.yaml")
-    config = load_pipeline_config_from_path(path)
+    config = get_pipeline_config_from_path(path)
 
     assert config.id == "chembl.activity"
     assert config.provider == "chembl"
@@ -50,15 +50,15 @@ def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):
     )
     provider_registry_loader.clear_provider_registry_cache()
     with pytest.raises(ConfigValidationError):
-        load_pipeline_config_from_path(path)
+        get_pipeline_config_from_path(path)
 
 
 def test_missing_config_file_raises():
     with pytest.raises(ConfigFileNotFoundError):
-        load_pipeline_config_from_path(Path("tests/fixtures/configs/missing.yaml"))
+        get_pipeline_config_from_path(Path("tests/fixtures/configs/missing.yaml"))
 
 
-def test_load_pipeline_config_from_path_missing_input_path(tmp_path: Path) -> None:
+def test_get_pipeline_config_from_path_missing_input_path(tmp_path: Path) -> None:
     config_path = tmp_path / "chembl_activity.yaml"
     config_path.write_text(
         """id: chembl.activity
@@ -79,7 +79,7 @@ provider_config:
     )
 
     with pytest.raises(ConfigValidationError):
-        load_pipeline_config_from_path(config_path)
+        get_pipeline_config_from_path(config_path)
 
 
 def test_unknown_provider_raises_config_loader(
@@ -111,7 +111,7 @@ provider_config:
     )
 
     with pytest.raises(UnknownProviderError):
-        load_pipeline_config("unknown.entity", base_dir=base_dir)
+        get_pipeline_config("unknown.entity", base_dir=base_dir)
 
 
 def test_provider_registry_allows_known_provider(
@@ -162,7 +162,7 @@ provider_config:
     )
     provider_registry_loader.clear_provider_registry_cache()
 
-    config = load_pipeline_config("chembl.activity", base_dir=base_dir)
+    config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
     assert config.provider == "chembl"
 
@@ -216,7 +216,7 @@ provider_config:
     provider_registry_loader.clear_provider_registry_cache()
 
     with pytest.raises(UnknownProviderError):
-        load_pipeline_config("chembl.activity", base_dir=base_dir)
+        get_pipeline_config("chembl.activity", base_dir=base_dir)
 
 
 def test_profile_merge_applied(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
@@ -274,7 +274,7 @@ batch_size: 25
     )
     provider_registry_loader.clear_provider_registry_cache()
 
-    config = load_pipeline_config("chembl.activity", base_dir=base_dir)
+    config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
     assert config.output_path == "/tmp/out"  # pipeline overrides profile
     assert config.batch_size == 10

@@ -79,7 +79,9 @@ def test_register_and_get_provider_contract(
 ) -> None:
     registry.register_provider(dummy_provider_definition)
 
-    assert registry.get_provider(dummy_provider_definition.id) is dummy_provider_definition
+    assert (
+        registry.get_provider(dummy_provider_definition.id) is dummy_provider_definition
+    )
     assert registry.list_providers() == [dummy_provider_definition]
 
 

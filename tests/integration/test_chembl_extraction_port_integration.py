@@ -33,7 +33,7 @@ def test_chembl_extraction_port_is_resolved(monkeypatch: pytest.MonkeyPatch) -> 
     )
 
     provider_loader_factory = partial(create_provider_loader)
-    registry = provider_loader_factory().load_registry()
+    registry = provider_loader_factory().get_registry()
     container = build_pipeline_dependencies(config, provider_registry=registry)
 
     service = container.get_extraction_service()

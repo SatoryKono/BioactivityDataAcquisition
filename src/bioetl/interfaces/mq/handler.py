@@ -13,6 +13,10 @@ from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.interfaces.wiring import (
+    create_config_loader,
+    create_container_factory,
+)
 
 
 @dataclass
@@ -40,7 +44,10 @@ class MQJobHandler:
     def handle(self, job: MQJob) -> RunResult:
         """Execute pipeline run for a queued MQ job."""
         pipeline_id = _to_pipeline_id(job.pipeline_name)
-        config = build_runtime_config(pipeline_id=pipeline_id, profile=job.profile)
+        config_loader = create_config_loader()
+        config = build_runtime_config(
+            pipeline_id=pipeline_id, profile=job.profile, loader=config_loader
+        )
         if not config.features.mq_interface_enabled:
             raise RuntimeError("MQ interface is disabled by configuration")
 
@@ -54,9 +61,10 @@ class MQJobHandler:
             provider_registry = None
         else:
             provider_loader = None
-            provider_registry = provider_loader_factory().load_registry(
+            provider_registry = provider_loader_factory().get_registry(
                 registry=InMemoryProviderRegistry()
             )
+        container_factory = create_container_factory()
         orchestrator = PipelineOrchestrator(
             pipeline_name=job.pipeline_name,
             config=config,
@@ -64,6 +72,7 @@ class MQJobHandler:
             provider_loader=provider_loader,
             provider_loader_factory=provider_loader_factory,
             use_provider_loader_port=feature_flag,
+            container_factory=container_factory,
         )
         return orchestrator.run_pipeline(dry_run=job.dry_run, limit=job.limit)
 

@@ -29,7 +29,7 @@ def test_run_in_background_dry_run(tmp_path):
     )
 
     provider_loader_factory = partial(create_provider_loader)
-    registry = provider_loader_factory().load_registry()
+    registry = provider_loader_factory().get_registry()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,

@@ -1,4 +1,4 @@
-# Data Schemas
+# Index
 
 This section describes the Pandera schemas used by BioETL to validate all tabular datasets before writing them.
 

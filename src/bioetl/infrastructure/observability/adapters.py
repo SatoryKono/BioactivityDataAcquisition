@@ -48,7 +48,9 @@ class TracingAdapterImpl(TracingPortABC):
         """Finish a tracing span (no-op)."""
         _ = span
 
-    def inject_context(self, headers: dict[str, str]) -> None:  # pragma: no cover - no-op
+    def inject_context(
+        self, headers: dict[str, str]
+    ) -> None:  # pragma: no cover - no-op
         """Inject tracing context into headers (no-op stub)."""
         headers.update({"trace": "noop"})
 

@@ -42,4 +42,3 @@ def iter_python_files(root: Path) -> Iterator[Path]:
 def load_yaml(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as fp:
         return yaml.safe_load(fp) or {}
-

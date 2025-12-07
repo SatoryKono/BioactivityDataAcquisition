@@ -26,7 +26,9 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         "integer": "Int64",
     }
 
-    def __init__(self, config: NormalizationConfigProviderProtocol, empty_value: Any = None):
+    def __init__(
+        self, config: NormalizationConfigProviderProtocol, empty_value: Any = None
+    ):
         self._config = config
         self._empty_value = empty_value
 

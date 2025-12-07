@@ -35,10 +35,11 @@ def test_misc_configs_parse(configs_root: Path) -> None:
         try:
             loaded = _load_yaml(path)
             if not isinstance(loaded, dict):
-                errors.append(f"{path.as_posix()}: ожидается словарь, получено {type(loaded)}")
+                errors.append(
+                    f"{path.as_posix()}: ожидается словарь, получено {type(loaded)}"
+                )
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{path.as_posix()}: {exc}")
 
     if errors:
         pytest.fail("Ошибки разбора YAML конфигов:\n" + "\n".join(errors))
-

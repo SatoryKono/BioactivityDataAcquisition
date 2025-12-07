@@ -1,4 +1,4 @@
-# 01 Pandera Validation Rules
+# Pandera Validation Rules
 
 ## Purpose and Scope
 

@@ -1,4 +1,4 @@
-# Domain Contracts (ABC)
+# Index
 
 Catalog актуальных ABC и их реализаций.
 

@@ -310,7 +310,7 @@ def test_run_dry_run_pipeline_metadata(
 
     mock_loader.return_value = pipeline_test_config
     provider_loader = MagicMock()
-    provider_loader.load_registry.return_value = MagicMock()
+    provider_loader.get_registry.return_value = MagicMock()
     mock_create_provider_loader.return_value = provider_loader
 
     with runner.isolated_filesystem():

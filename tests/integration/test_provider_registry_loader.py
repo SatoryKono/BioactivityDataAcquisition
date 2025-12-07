@@ -9,8 +9,8 @@ import pytest
 import yaml
 
 from bioetl.domain.configs import DummyProviderConfig
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.provider_registry_loader import (
     ProviderRegistryLoader,

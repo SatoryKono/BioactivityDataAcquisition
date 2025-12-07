@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import pandas as pd
 
@@ -104,10 +104,23 @@ class OutputWriterABC(ABC):
         """
 
 
+class RunMetadataBuilderProtocol(Protocol):
+    """Port for building deterministic run metadata payloads."""
+
+    def build_run_metadata(
+        self, context: Any, write_result: WriteResult
+    ) -> dict[str, Any]:
+        """Build metadata for a completed run."""
+
+    def build_dry_run_metadata(self, context: Any, row_count: int) -> dict[str, Any]:
+        """Build metadata for a dry-run execution."""
+
+
 __all__ = [
     "WriteResult",
     "WriterABC",
     "MetadataWriterABC",
     "QualityReportABC",
     "OutputWriterABC",
+    "RunMetadataBuilderProtocol",
 ]

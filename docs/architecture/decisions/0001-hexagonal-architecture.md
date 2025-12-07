@@ -1,4 +1,4 @@
-# 0001 Hexagonal Architecture
+# Hexagonal Architecture
 
 ## Status
 Accepted
