@@ -125,8 +125,22 @@ class ChemblPipelineBase(PipelineBase):
 
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
-        if self._chembl_release is None:
+        if self._chembl_release is not None:
+            return self._chembl_release
+
+        if self._should_skip_release_lookup():
+            self._chembl_release = "unknown"
+            return self._chembl_release
+
+        try:
             self._chembl_release = self._extraction_service.get_release_version()
+        except Exception as exc:  # pragma: no cover - защитный контур
+            self._logger.warning(
+                "Failed to fetch ChEMBL release; using 'unknown'",
+                error=str(exc),
+            )
+            self._chembl_release = "unknown"
+
         return self._chembl_release
 
     def get_chembl_release(self) -> str:
@@ -136,6 +150,14 @@ class ChemblPipelineBase(PipelineBase):
     def _enrich_context(self, context: RunContext) -> None:
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
+
+    def _should_skip_release_lookup(self) -> bool:
+        """Возвращает True, если получение версии ChEMBL нужно пропустить (офлайн/CSV режим)."""
+        input_mode = getattr(self._config, "input_mode", None)
+        pipeline_cfg = getattr(self._config, "pipeline", {}) or {}
+        if input_mode == "csv":
+            return True
+        return bool(pipeline_cfg.get("skip_release_lookup"))
 
 
 def _create_default_record_source_factory() -> FileRecordSourceFactoryABC:
