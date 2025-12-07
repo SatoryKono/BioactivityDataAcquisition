@@ -1,11 +1,14 @@
 from pathlib import Path
 from typing import cast
 
+from pathlib import Path
+from typing import cast
+
 import pandas as pd
 from pydantic import AnyHttpUrl
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputOptions,
@@ -37,8 +40,14 @@ class _StubExtractionService:
         return records
 
 
-class _DummyLogger:
+class _DummyLogger(LoggingPort):
     def info(self, *args, **kwargs):  # pragma: no cover
+        return None
+
+    def error(self, *args, **kwargs):  # pragma: no cover
+        return None
+
+    def debug(self, *args, **kwargs):  # pragma: no cover
         return None
 
     def warning(self, *args, **kwargs):  # pragma: no cover
@@ -58,7 +67,7 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
         input_path=csv_path,
         csv_options=CsvInputOptions(),
         limit=1,
-        logger=cast(LoggerAdapterABC, _DummyLogger()),
+        logger=cast(LoggingPort, _DummyLogger()),
     )
 
     chunks = list(source.iter_records())
@@ -92,7 +101,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
         source_config=source_config,
         entity="activity",
         filter_key="activity_id__in",
-        logger=cast(LoggerAdapterABC, _DummyLogger()),
+        logger=cast(LoggingPort, _DummyLogger()),
     )
 
     records = list(source.iter_records())

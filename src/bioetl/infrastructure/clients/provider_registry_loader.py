@@ -9,7 +9,7 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     MutableProviderRegistryABC,
@@ -18,7 +18,7 @@ from bioetl.domain.provider_registry import (
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.logging.factories import default_logger
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")
 
@@ -70,12 +70,12 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         self,
         config_path: str | Path | None = None,
         *,
-        logger: LoggerAdapterABC | None = None,
+        logger: LoggingPort | None = None,
     ) -> None:
         self._config_path = (
             Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
         )
-        self._logger = logger or default_logger()
+        self._logger = logger or default_logging_port()
 
     def load(
         self,
@@ -202,7 +202,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
 def load_provider_registry(
     *,
     config_path: str | Path | None = None,
-    logger: LoggerAdapterABC | None = None,
+    logger: LoggingPort | None = None,
     registry: MutableProviderRegistryABC | None = None,
 ) -> MutableProviderRegistryABC:
     """Utility to load provider registry and return the populated instance."""
@@ -218,7 +218,7 @@ def load_provider_registry(
 def create_provider_loader(
     *,
     config_path: str | Path | None = None,
-    logger: LoggerAdapterABC | None = None,
+    logger: LoggingPort | None = None,
 ) -> ProviderRegistryLoaderABC:
     """Factory for ProviderLoaderProtocol implementations."""
 
@@ -231,7 +231,7 @@ ProviderRegistryLoader = ProviderLoaderImpl
 def default_provider_registry_loader(
     *,
     config_path: str | Path | None = None,
-    logger: LoggerAdapterABC | None = None,
+    logger: LoggingPort | None = None,
 ) -> ProviderRegistryLoaderABC:
     """Default factory for provider registry loader."""
 

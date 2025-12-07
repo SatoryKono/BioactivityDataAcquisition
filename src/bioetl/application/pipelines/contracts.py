@@ -7,10 +7,10 @@ from typing import Any, Callable, Iterable
 
 import pandas as pd
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.clients.base.output.contracts import OutputWriterABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
@@ -56,7 +56,7 @@ class PipelineContainerABC(ABC):
         """Pipeline configuration associated with the container."""
 
     @abstractmethod
-    def get_logger(self) -> LoggerAdapterABC:
+    def get_logger(self) -> LoggingPort:
         """Return configured logger adapter for pipeline run."""
 
     @abstractmethod
@@ -81,7 +81,7 @@ class PipelineContainerABC(ABC):
         extraction_service: Any,
         *,
         limit: int | None = None,
-        logger: LoggerAdapterABC | None = None,
+        logger: LoggingPort | None = None,
     ) -> RecordSource:
         """Return record source for pipeline input according to config."""
 

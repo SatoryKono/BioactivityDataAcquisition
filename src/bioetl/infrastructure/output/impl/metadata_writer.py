@@ -17,6 +17,8 @@ def build_quality_report_table(
     min_coverage: float,
     quality_reporter: QualityReportABC | None = None,
 ) -> pd.DataFrame:
+    """Build a QC summary table for the provided dataframe using Pandera reporter."""
+
     reporter = quality_reporter or QualityReportImpl()
     return reporter.build_quality_report(df, min_coverage=min_coverage)
 

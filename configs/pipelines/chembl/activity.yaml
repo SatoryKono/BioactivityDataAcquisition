@@ -32,7 +32,7 @@ csv_options:
 
 fields:
   - name: action_type
-    data_type: object
+    data_type: string
     is_nullable: true
     is_filterable: false
     description: Тип действия (agonist, antagonist и т.п.)

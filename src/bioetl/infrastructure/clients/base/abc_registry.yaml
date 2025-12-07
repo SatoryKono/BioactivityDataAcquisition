@@ -25,6 +25,8 @@ MutableProviderRegistryABC: bioetl.domain.provider_registry.MutableProviderRegis
 LoggerAdapterABC: bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC
 ProgressReporterABC: bioetl.domain.clients.base.logging.contracts.ProgressReporterABC
 TracerABC: bioetl.domain.clients.base.logging.contracts.TracerABC
+LoggingPort: bioetl.domain.observability.contracts.LoggingPort
+TracingPort: bioetl.domain.observability.contracts.TracingPort
 
 HasherABC: bioetl.domain.transform.contracts.HasherABC
 HashServiceABC: bioetl.domain.transform.contracts.HashServiceABC

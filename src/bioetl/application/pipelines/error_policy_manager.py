@@ -3,10 +3,10 @@
 from collections.abc import Callable
 
 from bioetl.application.pipelines.hooks_manager import HooksManager
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
+from bioetl.domain.observability import LoggingPort
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC
 from bioetl.domain.providers import ProviderId
 
@@ -19,7 +19,7 @@ class ErrorPolicyManager:
         *,
         error_policy: ErrorPolicyABC,
         hooks_manager: HooksManager,
-        logger: LoggerAdapterABC,
+        logger: LoggingPort,
         provider_id: ProviderId,
         entity_name: str,
         default_on_skip: Callable[[str], object],
@@ -128,7 +128,7 @@ class ErrorPolicyManager:
         self._last_error = None
         self._last_stage_action.clear()
 
-    def set_logger(self, logger: LoggerAdapterABC) -> None:
+    def set_logger(self, logger: LoggingPort) -> None:
         """Обновляет логгер для дальнейших сообщений."""
 
         self._logger = logger

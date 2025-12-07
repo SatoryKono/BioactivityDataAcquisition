@@ -3,6 +3,8 @@ from enum import Enum
 
 
 class CircuitState(Enum):
+    """Circuit breaker states indicating request allowance level."""
+
     CLOSED = "closed"  # Normal operation
     OPEN = "open"  # Failing, blocking requests
     HALF_OPEN = "half_open"  # Testing if service is back
