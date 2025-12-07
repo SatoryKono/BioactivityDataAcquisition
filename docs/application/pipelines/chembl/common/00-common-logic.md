@@ -4,7 +4,7 @@
 
 - Базовый класс: `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`) — собирает `ChemblExtractorImpl`, `ChemblTransformerImpl`, `HashService`, `ValidationService`, `UnifiedOutputWriter`.
 - DI и провайдеры: `PipelineContainer` + `ProviderRegistryLoader` (`configs/providers.yaml`) регистрируют `ChemblProviderComponentsFactory` и создают клиента/сервис экстракции/нормализации.
-- Универсальный пайплайн: `ChemblEntityPipeline` (`pipeline.py`) — использует тот же стек для любой сущности; `primary_key` берётся из `PipelineConfig` (`primary_key` или `pipeline.primary_key`, иначе `<entity>_id`).
+- Универсальный пайплайн: `ChemblPipelineBase` (`base.py`) используется напрямую для любой сущности; `primary_key` берётся из `PipelineConfig` (`primary_key` или `pipeline.primary_key`, иначе `<entity>_id`).
 - Экстрактор: `ChemblExtractorImpl` (`extractor.py`) — режимы `input_mode`: `api` (по умолчанию), `csv`, `id_only`; использует `CsvRecordSourceImpl`/`IdListRecordSourceImpl` без эвристик колонок.
 - Трансформер: `ChemblTransformerImpl` (`transformer.py`) — последовательность `pre_transform -> do_transform -> normalize -> enforce_schema -> drop_nulls(required)`; обязательные столбцы подтягиваются из `PipelineSchemaModel`.
 - Хуки: `LoggingPipelineHookImpl` + `MetricsPipelineHookImpl` (Prometheus метрики стадий) через `HooksManager`/`StageRunnerFacade`; политика ошибок по умолчанию `FailFastErrorPolicyImpl`.

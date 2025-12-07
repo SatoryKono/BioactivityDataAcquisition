@@ -1,7 +1,7 @@
 # Target Chembl Overview
 
 ## Pipeline
-- Универсальный `ChemblEntityPipeline` (`src/bioetl/application/pipelines/chembl/pipeline.py`) поверх `ChemblPipelineBase`.
+- Универсальный `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`) используется напрямую.
 - Схема: `domain/schemas/chembl/target.py`.
 
 ## Компоненты
