@@ -68,31 +68,66 @@ class PipelineContainer(PipelineContainerABC):
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
-        self._schema_provider: SchemaProviderABC = schema_provider or SchemaRegistry()
-        self._validator_factory: ValidatorFactoryABC = (
-            validator_factory or _create_noop_validator_factory()
+        self._schema_provider: SchemaProviderABC = self._resolve_schema_provider(
+            schema_provider
         )
-        self._logger: LoggingPortABC = logger or _create_noop_logger()
+        self._validator_factory = self._resolve_validator_factory(validator_factory)
+        self._logger = self._resolve_logger(logger)
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
-        self._error_policy: ErrorPolicyABC | None = error_policy
-        self._hash_service: HashServiceABC | None = hash_service
-        self._post_transformer: TransformerABC | None = post_transformer
-        self._record_source_factory = (
-            record_source_factory or _create_noop_record_source_factory()
+        self._error_policy = error_policy
+        self._hash_service = hash_service
+        self._post_transformer = post_transformer
+        self._record_source_factory = self._resolve_record_source_factory(
+            record_source_factory
         )
-        self._metadata_builder = metadata_builder or _create_noop_metadata_builder()
-        self._metrics_port = metrics_port or _create_noop_metrics_port()
-        self._provider_registry = provider_registry
-        self._provider_registry_provider = provider_registry_provider
-        if self._provider_registry is None and self._provider_registry_provider is None:
+        self._metadata_builder = self._resolve_metadata_builder(metadata_builder)
+        self._metrics_port = self._resolve_metrics_port(metrics_port)
+        self._provider_registry, self._provider_registry_provider = (
+            self._resolve_provider_registry(
+                provider_registry, provider_registry_provider
+            )
+        )
+        self._output_writer = output_writer or _create_noop_output_writer()
+        register_schemas(self._schema_provider)
+
+    def _resolve_schema_provider(
+        self, schema_provider: SchemaProviderABC | None
+    ) -> SchemaProviderABC:
+        return schema_provider or SchemaRegistry()
+
+    def _resolve_validator_factory(
+        self, validator_factory: ValidatorFactoryABC | None
+    ) -> ValidatorFactoryABC:
+        return validator_factory or _create_noop_validator_factory()
+
+    def _resolve_logger(self, logger: LoggingPortABC | None) -> LoggingPortABC:
+        return logger or _create_noop_logger()
+
+    def _resolve_record_source_factory(
+        self, record_source_factory: FileRecordSourceFactoryABC | None
+    ) -> FileRecordSourceFactoryABC:
+        return record_source_factory or _create_noop_record_source_factory()
+
+    def _resolve_metadata_builder(
+        self, metadata_builder: RunMetadataBuilderProtocol | None
+    ) -> RunMetadataBuilderProtocol:
+        return metadata_builder or _create_noop_metadata_builder()
+
+    def _resolve_metrics_port(
+        self, metrics_port: PipelineMetricsPortABC | None
+    ) -> PipelineMetricsPortABC:
+        return metrics_port or _create_noop_metrics_port()
+
+    def _resolve_provider_registry(
+        self,
+        provider_registry: ProviderRegistryABC | None,
+        provider_registry_provider: Callable[[], ProviderRegistryABC] | None,
+    ) -> tuple[ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None]:
+        if provider_registry is None and provider_registry_provider is None:
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
             )
-        if output_writer is None:
-            self._output_writer = _create_noop_output_writer()
-        else:
-            self._output_writer = output_writer
-        register_schemas(self._schema_provider)
+        return provider_registry, provider_registry_provider
 
     @property
     def config(self) -> PipelineConfig:
