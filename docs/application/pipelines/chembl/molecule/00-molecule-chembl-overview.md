@@ -1,4 +1,4 @@
-# 00 Molecule Chembl Overview
+# Molecule Chembl Overview
 
 ## Pipeline
 

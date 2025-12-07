@@ -1,4 +1,4 @@
-# 00 Document Chembl Overview
+# Document Chembl Overview
 
 ## Pipeline
 

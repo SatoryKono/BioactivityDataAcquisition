@@ -1,4 +1,4 @@
-# 00 Index
+# Index
 <!-- generated -->
 
 - [01 Pipeline Core Normalization](01-pipeline-core-normalization.md) — normalization service contracts, factories, and provider-specific implementations.
