@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.domain.clients.ports.chembl_extraction_port import ChemblExtractionPort
+from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.domain.transform.contracts import (
@@ -20,7 +20,7 @@ from bioetl.infrastructure.transform.factories import default_normalization_serv
 class ChemblProviderComponents(
     ProviderComponents[
         ChemblDataClientABC,
-        ChemblExtractionPort,
+        ChemblExtractionPortABC,
         NormalizationServiceABC,
         object,
     ]
@@ -35,7 +35,7 @@ class ChemblProviderComponents(
         config: ChemblSourceConfig,
         *,
         client: ChemblDataClientABC | None = None,
-    ) -> ChemblExtractionPort:
+    ) -> ChemblExtractionPortABC:
         return create_extraction_service(config, client=client)
 
     def create_normalization_service(
