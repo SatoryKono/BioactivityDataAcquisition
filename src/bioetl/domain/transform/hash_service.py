@@ -84,7 +84,7 @@ def _blake2b_hash_hex(data_bytes: bytes, digest_size: int = 32) -> str:
     return hashlib.blake2b(data_bytes, digest_size=digest_size).hexdigest()
 
 
-class _DefaultHasher(HasherABC):
+class _DefaultHasherImpl(HasherABC):
     """Доменная реализация HasherABC с канонической сериализацией."""
 
     @property
@@ -120,7 +120,7 @@ class HashService(HashServiceABC):
         hasher: HasherABC | None = None,
         now_provider: Callable[[], datetime] | None = None,
     ) -> None:
-        self._hasher = hasher or _DefaultHasher()
+        self._hasher = hasher or _DefaultHasherImpl()
         self._index_counter = 0
         self._now_provider = now_provider or (lambda: datetime.now(timezone.utc))
         self._extracted_at: str | None = None
