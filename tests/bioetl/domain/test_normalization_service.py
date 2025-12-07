@@ -45,7 +45,7 @@ def test_chembl_normalization_service_normalizes_scalars_and_ids() -> None:
         "extra": "keep",
     }
 
-    normalized = service.normalize(raw)
+    normalized = service.apply_normalize(raw)
 
     assert normalized["name"] == "alpha"
     assert normalized["activity_id"] == "ACT1"
@@ -61,7 +61,7 @@ def test_chembl_normalization_service_serializes_nested_values() -> None:
         "label": "MiXeD",
     }
 
-    normalized = service.normalize(raw)
+    normalized = service.apply_normalize(raw)
 
     assert normalized["tags"] == "a|b"
     assert normalized["metadata"] == "key:value"
@@ -72,7 +72,7 @@ def test_chembl_normalization_service_handles_empty_collections() -> None:
     service = ChemblNormalizationServiceImpl(_ConfigStub())
     raw = {"tags": [], "metadata": {}, "label": "  NoChange "}
 
-    normalized = service.normalize(raw)
+    normalized = service.apply_normalize(raw)
 
     assert normalized["tags"] is None
     assert normalized["metadata"] is None
@@ -94,7 +94,7 @@ def test_chembl_normalization_service_normalizes_dataframe_batch() -> None:
         }
     )
 
-    normalized_df = service.normalize_dataframe(df)
+    normalized_df = service.apply_normalize_dataframe(df)
 
     assert normalized_df["name"].tolist() == ["alpha", "beta"]
     assert normalized_df["activity_id"].tolist() == ["ACT1", "ACT2"]
@@ -112,7 +112,7 @@ def test_chembl_normalization_service_coerces_numeric_columns() -> None:
         }
     )
 
-    normalized_df = service.normalize_dataframe(df)
+    normalized_df = service.apply_normalize_dataframe(df)
 
     assert str(normalized_df["score"].dtype) == "Float64"
     assert str(normalized_df["count"].dtype) == "Int64"
