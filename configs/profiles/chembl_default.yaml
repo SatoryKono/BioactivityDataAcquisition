@@ -73,6 +73,8 @@ normalization:
     - cross_references
     - standard_type
     - type
+    - assay_type
+    - standard_type
 
   id_fields:
     - doi

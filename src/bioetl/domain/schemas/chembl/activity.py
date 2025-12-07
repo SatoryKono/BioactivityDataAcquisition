@@ -82,7 +82,7 @@ class ActivitySchema(pa.DataFrameModel):
         nullable=True, description="Текстовое описание ассая"
     )
     assay_type: Series[str] = pa.Field(
-        isin=["B", "F", "A", "T", "P", "U"], description="Тип ассая (B/F/A/T/P/U)"
+        isin=["B", "F", "b", "f"], description="Тип ассая (B/F/b/f)"
     )
     assay_variant_accession: Series[str] = pa.Field(
         nullable=True, description="Accession варианта белка"
@@ -145,8 +145,8 @@ class ActivitySchema(pa.DataFrameModel):
     )
     relation: Series[str] = pa.Field(
         nullable=True,
-        isin=["=", ">", "<", ">=", "<=", "~"],
-        description="Исходное отношение (=, >, <, >=, <=, ~)",
+        isin=["="],
+        description="Исходное отношение (=)",
     )
     src_id: Series[float] = pa.Field(nullable=True, description="Источник данных (ID)")
     standard_flag: Series[bool] = pa.Field(
@@ -154,7 +154,7 @@ class ActivitySchema(pa.DataFrameModel):
     )
     standard_relation: Series[str] = pa.Field(
         nullable=True,
-        isin=["=", ">", "<", ">=", "<=", "~"],
+        isin=["="],
         description="Нормализованное отношение",
     )
     standard_text_value: Series[str] = pa.Field(
