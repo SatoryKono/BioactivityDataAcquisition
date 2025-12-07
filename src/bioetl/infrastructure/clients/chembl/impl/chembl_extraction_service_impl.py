@@ -86,7 +86,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
 
     def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
         """Parse raw API response into list of records."""
-        return self.parser.parse(raw_response)
+        return self.parser.parse_response(raw_response)
 
     def serialize_records(
         self, entity: str, records: list[dict[str, Any]]
@@ -130,7 +130,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             )
 
             response = self._request_entity(entity, **request_filters)
-            batch_records = self.parser.parse(response)
+            batch_records = self.parser.parse_response(response)
             if not batch_records:
                 break
 
