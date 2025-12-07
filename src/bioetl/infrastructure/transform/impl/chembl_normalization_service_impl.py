@@ -40,6 +40,7 @@ class ChemblNormalizationServiceImpl(
         super().__init__(config)
 
     def normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
+        """Normalize single raw ChEMBL record into flat dict."""
         normalized: dict[str, Any] = {}
 
         for field_cfg in self._config.fields:
@@ -77,6 +78,7 @@ class ChemblNormalizationServiceImpl(
         return cast(NormalizedRecord, normalized)
 
     def normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize configured fields across dataframe columns."""
         normalized_df = df.copy()
 
         for field_cfg in self._config.fields:
@@ -89,16 +91,19 @@ class ChemblNormalizationServiceImpl(
         return self.coerce_numeric_columns(normalized_df)
 
     def normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize an entire batch DataFrame."""
         normalized = self.normalize_dataframe(df)
         return self.coerce_numeric_columns(normalized)
 
     def normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Alias for normalize_dataframe retained for compatibility."""
         normalized = self.normalize_dataframe(df)
         return self.coerce_numeric_columns(normalized)
 
     def normalize_series(
         self, series: pd.Series, field_cfg: dict[str, Any]
     ) -> pd.Series:
+        """Normalize a single column according to field configuration."""
         name = cast(str, field_cfg.get("name"))
         dtype = field_cfg.get("data_type")
         mode = self._resolve_mode(name)
@@ -141,6 +146,7 @@ class ChemblNormalizationServiceImpl(
         *,
         serialize_with_value_normalizer: bool = True,
     ) -> Any:
+        """Normalize list container and serialize deterministically."""
         try:
             normalized_list = normalize_array(
                 list(value),
@@ -161,6 +167,7 @@ class ChemblNormalizationServiceImpl(
         )
 
     def _process_dict(self, value: Any, normalizer: Any, field_name: str) -> Any:
+        """Normalize mapping container and serialize deterministically."""
         try:
             dict_value = cast(dict[str, Any], value)
             normalized_dict = normalize_record(dict_value, value_normalizer=normalizer)
@@ -174,6 +181,7 @@ class ChemblNormalizationServiceImpl(
         return serialize_dict(dict(normalized_dict))
 
     def _normalize_container_item(self, item: Any, normalizer: Any) -> Any:
+        """Normalize individual item inside container preserving type rules."""
         if isinstance(item, dict):
             normalized_dict = normalize_record(
                 cast(dict[str, Any], item), value_normalizer=normalizer

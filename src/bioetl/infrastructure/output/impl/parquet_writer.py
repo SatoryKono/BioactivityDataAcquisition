@@ -1,3 +1,5 @@
+"""Parquet writer implementation with atomic writes."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -20,4 +22,5 @@ class ParquetWriterImpl(BaseWriterImpl):
         df.to_parquet(path, index=False)
 
     def has_format_support(self, fmt: str) -> bool:
+        """Return True if parquet format is requested."""
         return fmt.lower() == "parquet"

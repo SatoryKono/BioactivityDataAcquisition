@@ -1,3 +1,5 @@
+"""Hasher implementation with canonical JSON serialization (BLAKE2b-256)."""
+
 import hashlib
 import json
 import unicodedata
@@ -93,6 +95,7 @@ class HasherImpl(HasherABC):
 
     @property
     def algorithm(self) -> str:
+        """Return hash algorithm identifier."""
         return "blake2b_256"
 
     def hash_row(self, row: pd.Series) -> str:

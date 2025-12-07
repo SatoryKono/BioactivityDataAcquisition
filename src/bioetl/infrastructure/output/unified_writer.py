@@ -75,6 +75,7 @@ class UnifiedOutputWriter(OutputWriterABC):
 
         def write_wrapper(path: Path) -> None:
             nonlocal inner_result
+            """Write dataset to the provided path via underlying writer."""
             inner_result = self._writer.write(
                 df_prepared, path, column_order=column_order
             )
@@ -164,6 +165,7 @@ class UnifiedOutputWriter(OutputWriterABC):
 
     def _write_qc_csv(self, path: Path, df: pd.DataFrame) -> Path:
         def write_wrapper(temp_path: Path) -> None:
+            """Write QC dataframe to a CSV atomically."""
             path.parent.mkdir(parents=True, exist_ok=True)
             df.to_csv(temp_path, index=False)
 

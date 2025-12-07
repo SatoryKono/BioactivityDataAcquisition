@@ -1,3 +1,5 @@
+"""Infrastructure hash service implementation wiring domain hasher."""
+
 from datetime import datetime, timezone
 from typing import Callable
 

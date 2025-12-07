@@ -1,3 +1,5 @@
+"""Typer-based CLI for BioETL pipelines."""
+
 import os
 import sys
 from functools import partial
