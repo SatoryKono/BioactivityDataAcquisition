@@ -8,7 +8,7 @@ import pytest
 from bioetl.application.pipelines.error_policy_manager import ErrorPolicyManager
 from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.hooks_manager import HooksManager
-from bioetl.application.pipelines.stage_runner import StageRunner
+from bioetl.application.pipelines.stage_runner_facade import StageRunnerFacade
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult
 from bioetl.domain.pipelines.contracts import PipelineHookABC
@@ -91,7 +91,7 @@ def test_stage_runner_process_and_failure(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: f"skipped-{stage}",
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
         error_policy_manager=manager,
         entity_name="entity",
@@ -163,7 +163,7 @@ def test_stage_runner_handles_skip_and_counts(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: pd.DataFrame(),
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
         error_policy_manager=manager,
         entity_name="entity",
@@ -216,7 +216,7 @@ def test_stage_runner_raises_on_missing_result(mock_logger):
         entity_name="entity",
         default_on_skip=lambda stage: pd.DataFrame(),
     )
-    runner = StageRunner(
+    runner = StageRunnerFacade(
         hooks_manager=hooks_manager,
         error_policy_manager=manager,
         entity_name="entity",

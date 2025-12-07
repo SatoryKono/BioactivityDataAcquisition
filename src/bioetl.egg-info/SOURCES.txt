@@ -22,7 +22,7 @@ src/bioetl/application/pipelines/error_policy_manager.py
 src/bioetl/application/pipelines/hooks_impl.py
 src/bioetl/application/pipelines/hooks_manager.py
 src/bioetl/application/pipelines/registry.py
-src/bioetl/application/pipelines/stage_runner.py
+src/bioetl/application/pipelines/stage_runner_facade.py
 src/bioetl/application/pipelines/chembl/__init__.py
 src/bioetl/application/pipelines/chembl/base.py
 src/bioetl/application/pipelines/chembl/extractor.py
