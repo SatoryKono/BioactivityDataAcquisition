@@ -4,7 +4,7 @@ id: target_chembl
 provider: chembl
 entity: target
 primary_key: "${CHEMBL_TARGET_PRIMARY_KEY:-target_chembl_id}"
-input_mode: id_only
+input_mode: csv
 input_path: data/input/target.csv
 output_path: ./data/output/chembl/target
 batch_size: 20

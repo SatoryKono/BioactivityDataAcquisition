@@ -4,7 +4,7 @@ id: document_chembl
 provider: chembl
 entity: document
 primary_key: "${CHEMBL_DOCUMENT_PRIMARY_KEY:-document_chembl_id}"
-input_mode: id_only
+input_mode: csv
 input_path: data/input/document.csv
 output_path: ./data/output/chembl/document
 batch_size: 10
