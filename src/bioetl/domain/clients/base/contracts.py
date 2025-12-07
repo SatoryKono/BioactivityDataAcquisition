@@ -24,11 +24,11 @@ class RequestBuilderABC(ABC):
     """
 
     @abstractmethod
-    def build(self, params: dict[str, Any]) -> Any:
+    def build_request(self, params: dict[str, Any]) -> Any:
         """Создает объект запроса из параметров."""
 
     @abstractmethod
-    def with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
+    def build_with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
         """Добавляет параметры пагинации."""
 
 
