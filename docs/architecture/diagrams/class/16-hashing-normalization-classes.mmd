@@ -18,13 +18,13 @@ class HashService {
 }
 
 class TransformerABC
-class TransformerChain {
+class TransformerChainImpl {
   +apply(df, context)
 }
-class HashColumnsTransformer
-class LocalIndexColumnTransformer
-class DatabaseVersionTransformer
-class FulldateTransformer
+class HashColumnsTransformerImpl
+class IndexColumnTransformerImpl
+class DatabaseVersionTransformerImpl
+class FulldateTransformerImpl
 
 class BaseNormalizationService
 class NormalizationServiceABC
@@ -34,23 +34,23 @@ class NormalizationConfigProvider
 
 HasherImpl ..|> HasherABC
 HashService --> HasherABC
-TransformerChain --> TransformerABC : components
-HashColumnsTransformer ..|> TransformerABC
-LocalIndexColumnTransformer ..|> TransformerABC
-DatabaseVersionTransformer ..|> TransformerABC
-FulldateTransformer ..|> TransformerABC
-TransformerChain --> HashColumnsTransformer
-TransformerChain --> LocalIndexColumnTransformer
-TransformerChain --> DatabaseVersionTransformer
-TransformerChain --> FulldateTransformer
+TransformerChainImpl --> TransformerABC : components
+HashColumnsTransformerImpl ..|> TransformerABC
+IndexColumnTransformerImpl ..|> TransformerABC
+DatabaseVersionTransformerImpl ..|> TransformerABC
+FulldateTransformerImpl ..|> TransformerABC
+TransformerChainImpl --> HashColumnsTransformerImpl
+TransformerChainImpl --> IndexColumnTransformerImpl
+TransformerChainImpl --> DatabaseVersionTransformerImpl
+TransformerChainImpl --> FulldateTransformerImpl
 ChemblNormalizationService --|> BaseNormalizationService
 NormalizationServiceImpl --|> BaseNormalizationService
 ChemblNormalizationService ..|> NormalizationServiceABC
 NormalizationServiceImpl ..|> NormalizationServiceABC
 ChemblNormalizationService --> NormalizationConfigProvider
 NormalizationServiceImpl --> NormalizationConfigProvider
-HashColumnsTransformer --> HashService
-LocalIndexColumnTransformer --> HashService
-DatabaseVersionTransformer --> HashService
-FulldateTransformer --> HashService
+HashColumnsTransformerImpl --> HashService
+IndexColumnTransformerImpl --> HashService
+DatabaseVersionTransformerImpl --> HashService
+FulldateTransformerImpl --> HashService
 
