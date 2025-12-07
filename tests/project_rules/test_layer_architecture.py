@@ -83,7 +83,8 @@ def test_layer_dependencies(bioetl_root: Path) -> None:
             # module names.
             if not ref:
                 violations.append(
-                    f"{file_path.as_posix()}:{reference.lineno}: unresolved import target"
+                f"{file_path.as_posix()}:{reference.lineno}: "
+                "unresolved import target"
                 )
 
     _assert_no_violations(violations)
