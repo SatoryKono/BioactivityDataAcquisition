@@ -77,12 +77,12 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         )
         self._logger = logger or default_logging_port()
 
-    def load(
+    def get_providers(
         self,
         *,
         registry: MutableProviderRegistryABC | None = None,
     ) -> list[ProviderDefinition]:
-        """Load providers from YAML and register active entries."""
+        """Get providers from YAML and register active entries."""
 
         registry_to_use = registry or InMemoryProviderRegistry()
         raw_config = self._load_config(self._config_path)
@@ -122,13 +122,13 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
                 registered.append(builtin)
         return registered
 
-    def load_registry(
+    def get_registry(
         self, *, registry: MutableProviderRegistryABC | None = None
     ) -> MutableProviderRegistryABC:
-        """Load providers and return populated registry (Protocol compatibility)."""
+        """Get providers and return populated registry (Protocol compatibility)."""
 
         registry_to_use = registry or InMemoryProviderRegistry()
-        self.load(registry=registry_to_use)
+        self.get_providers(registry=registry_to_use)
         return registry_to_use
 
     def _register_entry(
@@ -199,20 +199,20 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         return data
 
 
-def load_provider_registry(
+def get_provider_registry(
     *,
     config_path: str | Path | None = None,
     logger: LoggingPortABC | None = None,
     registry: MutableProviderRegistryABC | None = None,
 ) -> MutableProviderRegistryABC:
-    """Utility to load provider registry and return the populated instance."""
+    """Utility to return populated provider registry."""
 
     loader = default_provider_registry_loader(
         config_path=config_path,
         logger=logger,
     )
     registry_to_use = registry or InMemoryProviderRegistry()
-    return loader.load_registry(registry=registry_to_use)
+    return loader.get_registry(registry=registry_to_use)
 
 
 def create_provider_loader(
@@ -243,7 +243,7 @@ __all__ = [
     "ProviderRegistryLoader",
     "default_provider_registry_loader",
     "create_provider_loader",
-    "load_provider_registry",
+    "get_provider_registry",
     "ProviderRegistryLoaderError",
     "ProviderRegistryConfigNotFoundError",
     "ProviderRegistryValidationError",

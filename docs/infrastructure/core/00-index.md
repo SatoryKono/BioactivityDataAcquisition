@@ -1,4 +1,4 @@
-# Core Infrastructure
+# Index
 
 This directory contains documentation for core infrastructure components.
 

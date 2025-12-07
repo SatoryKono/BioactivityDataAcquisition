@@ -10,12 +10,12 @@ from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
-    load_pipeline_config_from_path,
+    get_pipeline_config_from_path,
 )
 from bioetl.infrastructure.config.provider_registry_loader import (
     clear_provider_registry_cache,
 )
-from bioetl.infrastructure.config.sources import read_yaml_from_path
+from bioetl.infrastructure.config.sources import get_yaml_from_path
 
 
 @pytest.fixture(autouse=True)
@@ -38,7 +38,7 @@ def _write_providers(
     path.write_text(content, encoding="utf-8")
 
 
-def test_load_with_profile_and_extends(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_get_with_profile_and_extends(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     providers_file = tmp_path / "providers.yaml"
     _write_providers(providers_file)
     monkeypatch.setattr(
@@ -73,7 +73,7 @@ provider_config:
         encoding="utf-8",
     )
 
-    config = load_pipeline_config_from_path(
+    config = get_pipeline_config_from_path(
         config_path,
         profile="prod",
         profiles_root=profiles_root,
@@ -116,7 +116,7 @@ def test_profile_not_found_raises(tmp_path: Path):
     _write_providers(providers_file)
 
     with pytest.raises(ConfigFileNotFoundError):
-        load_pipeline_config_from_path(
+        get_pipeline_config_from_path(
             config_path,
             profile="missing",
             profiles_root=tmp_path / "profiles",
@@ -151,7 +151,7 @@ provider_config:
     )
 
     with pytest.raises(ConfigValidationError):
-        load_pipeline_config_from_path(config_path)
+        get_pipeline_config_from_path(config_path)
 
 
 def test_empty_yaml(tmp_path: Path):
@@ -159,6 +159,6 @@ def test_empty_yaml(tmp_path: Path):
     empty_file = tmp_path / "empty.yaml"
     empty_file.touch()
 
-    path, data = read_yaml_from_path(empty_file, profile=None, profiles_root=tmp_path)
+    path, data = get_yaml_from_path(empty_file, profile=None, profiles_root=tmp_path)
     assert data == {}
     assert path == empty_file

@@ -1,4 +1,4 @@
-# 04 Extending Bioetl
+# Extending BioETL
 
 This guide provides step-by-step recipes for adding new providers, pipelines, and services without modifying core code. Follow the naming and placement rules in `docs/00-styleguide` to stay compliant.
 

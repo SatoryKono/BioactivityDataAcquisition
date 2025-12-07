@@ -19,6 +19,10 @@ from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
 from bioetl.infrastructure.observability.server import start_metrics_server_once
+from bioetl.interfaces.wiring import (
+    create_config_loader,
+    create_container_factory,
+)
 
 app = typer.Typer(
     name="bioetl",
@@ -69,8 +73,9 @@ def validate_config(config_path: Path) -> None:
     """
     Validates a configuration file.
     """
+    config_loader = create_config_loader()
     try:
-        config = build_runtime_config(config_path=config_path)
+        config = build_runtime_config(config_path=config_path, loader=config_loader)
         console.print(f"[green]Config {config_path} is valid![/green]")
         console.print(f"Entity: {config.entity_name}")
         console.print(f"Provider: {config.provider}")
@@ -131,6 +136,8 @@ def run(
     """
     Runs an ETL pipeline.
     """
+    config_loader = create_config_loader()
+    container_factory = create_container_factory()
     try:
         base_dir = _get_config_base_dir()
         resolved_config_path = _resolve_config_location(
@@ -153,6 +160,7 @@ def run(
             profile=profile,
             configs_root=base_dir,
             cli_overrides=cli_overrides,
+            loader=config_loader,
         )
         _start_metrics_exporter(config.metrics, dry_run=dry_run)
         provider_loader_factory = partial(
@@ -164,7 +172,7 @@ def run(
             provider_registry = None
         else:
             provider_loader = None
-            provider_registry = provider_loader_factory().load_registry(
+            provider_registry = provider_loader_factory().get_registry(
                 registry=InMemoryProviderRegistry()
             )
         orchestrator = PipelineOrchestrator(
@@ -174,6 +182,7 @@ def run(
             provider_loader=provider_loader,
             provider_loader_factory=provider_loader_factory,
             use_provider_loader_port=feature_flag,
+            container_factory=container_factory,
         )
 
         console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")

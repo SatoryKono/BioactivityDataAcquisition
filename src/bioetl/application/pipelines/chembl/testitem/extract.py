@@ -18,5 +18,10 @@ get_stage_descriptor = build_stage_descriptor(
 )
 
 
-__all__ = ["get_stage_descriptor", "PROVIDER_NAME", "ENTITY_NAME", "PIPELINE_ID", "STAGE_NAME"]
-
+__all__ = [
+    "get_stage_descriptor",
+    "PROVIDER_NAME",
+    "ENTITY_NAME",
+    "PIPELINE_ID",
+    "STAGE_NAME",
+]

@@ -89,7 +89,9 @@ def test_domain_imports_avoid_infrastructure_and_io_clients() -> None:
                 for alias in node.names:
                     for module in forbidden_modules:
                         if alias.name.startswith(module):
-                            violations.append(f"{file_path}:{node.lineno}: import {alias.name}")
+                            violations.append(
+                                f"{file_path}:{node.lineno}: import {alias.name}"
+                            )
             elif isinstance(node, ast.ImportFrom):
                 if node.module is None:
                     continue
@@ -108,7 +110,9 @@ def test_domain_imports_avoid_infrastructure_and_io_clients() -> None:
 
 @pytest.fixture(scope="module")
 def abc_registry() -> dict[str, str]:
-    registry_path = BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
+    registry_path = (
+        BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_registry.yaml"
+    )
     return yaml.safe_load(registry_path.read_text(encoding="utf-8"))
 
 
@@ -145,7 +149,8 @@ def test_abcs_have_documented_implementations(
 
     if missing_impl:
         pytest.fail(
-            "Implementations are missing for ABCs: " + ", ".join(sorted(set(missing_impl)))
+            "Implementations are missing for ABCs: "
+            + ", ".join(sorted(set(missing_impl)))
         )
 
     if missing_files:
@@ -171,12 +176,18 @@ def test_pipeline_docs_and_stage_structure() -> None:
                 f"docs/application/pipelines/{provider_dir.name}/00-index.md is missing"
             )
 
-        entity_dirs = [d for d in provider_dir.iterdir() if d.is_dir() and not d.name.startswith("__")]
+        entity_dirs = [
+            d
+            for d in provider_dir.iterdir()
+            if d.is_dir() and not d.name.startswith("__")
+        ]
         if not entity_dirs:
             continue
 
         for entity_dir in entity_dirs:
-            stage_files = {child.name for child in entity_dir.iterdir() if child.is_file()}
+            stage_files = {
+                child.name for child in entity_dir.iterdir() if child.is_file()
+            }
             missing = [name for name in STAGE_FILES if name not in stage_files]
             if missing:
                 violations.append(
@@ -184,7 +195,9 @@ def test_pipeline_docs_and_stage_structure() -> None:
                 )
 
     if violations:
-        pytest.fail("Pipeline structure violations:\n" + "\n".join(sorted(set(violations))))
+        pytest.fail(
+            "Pipeline structure violations:\n" + "\n".join(sorted(set(violations)))
+        )
 
 
 def test_no_untracked_duplicate_class_names() -> None:
@@ -203,5 +216,7 @@ def test_no_untracked_duplicate_class_names() -> None:
     }
 
     if duplicates:
-        formatted = [f"{name}: {sorted(paths)}" for name, paths in sorted(duplicates.items())]
+        formatted = [
+            f"{name}: {sorted(paths)}" for name, paths in sorted(duplicates.items())
+        ]
         pytest.fail("Potential duplicate classes detected:\n" + "\n".join(formatted))

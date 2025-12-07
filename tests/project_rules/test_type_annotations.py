@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Iterable
 
 import pytest
-
 from tests.project_rules.conftest import iter_python_files
 
 SKIP_ARGS = {"self", "cls"}
@@ -67,4 +66,3 @@ def test_mypy_strict_available() -> None:
             f"mypy завершился с кодом {result.returncode}\n"
             f"{result.stdout}\n{result.stderr}"
         )
-

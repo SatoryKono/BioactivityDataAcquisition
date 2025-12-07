@@ -9,19 +9,17 @@ from bioetl.domain.transform.contracts import (
     NormalizationServiceABC,
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
+from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationServiceImpl,
 )
-from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.serializer import (
     serialize_dict,
     serialize_list,
 )
 
 
-class NormalizationServiceImpl(
-    NormalizationServiceABC, BaseNormalizationServiceImpl
-):
+class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationServiceImpl):
     """
     Сервис нормализации данных.
     Выполняет:

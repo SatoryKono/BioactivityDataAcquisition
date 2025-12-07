@@ -21,7 +21,7 @@ from bioetl.infrastructure.config.provider_registry_loader import (
 )
 from bioetl.infrastructure.config.sources import (
     get_configs_root,
-    read_yaml_from_path,
+    get_yaml_from_path,
     resolve_pipeline_config_path,
 )
 
@@ -56,7 +56,7 @@ class UnknownProviderError(ConfigError):
         self.registry_path = registry_path
 
 
-def load_pipeline_config(
+def get_pipeline_config(
     pipeline_id: str,
     *,
     profile: str | None = None,
@@ -64,11 +64,11 @@ def load_pipeline_config(
     env_overrides: dict[str, Any] | None = None,
     base_dir: str | Path | None = None,
 ) -> PipelineConfig:
-    """Загружает конфиг по идентификатору вида '<provider>.<entity>'."""
+    """Возвращает конфиг по идентификатору вида '<provider>.<entity>'."""
 
     config_path = resolve_pipeline_config_path(pipeline_id, base_dir=base_dir)
     try:
-        config_path, merged_config = read_yaml_from_path(
+        config_path, merged_config = get_yaml_from_path(
             config_path,
             profile=profile,
             profiles_root=get_configs_root(base_dir) / "profiles",
@@ -88,7 +88,7 @@ def load_pipeline_config(
     )
 
 
-def load_pipeline_config_from_path(
+def get_pipeline_config_from_path(
     config_path: str | Path,
     *,
     profile: str | None = None,
@@ -96,10 +96,10 @@ def load_pipeline_config_from_path(
     cli_overrides: dict[str, Any] | None = None,
     env_overrides: dict[str, Any] | None = None,
 ) -> PipelineConfig:
-    """Загружает и валидирует конфигурацию из файла."""
+    """Возвращает и валидирует конфигурацию из файла."""
 
     try:
-        path, merged_config = read_yaml_from_path(
+        path, merged_config = get_yaml_from_path(
             config_path,
             profile=profile,
             profiles_root=profiles_root,
@@ -360,6 +360,6 @@ __all__ = [
     "ConfigFileNotFoundError",
     "ConfigValidationError",
     "UnknownProviderError",
-    "load_pipeline_config",
-    "load_pipeline_config_from_path",
+    "get_pipeline_config",
+    "get_pipeline_config_from_path",
 ]

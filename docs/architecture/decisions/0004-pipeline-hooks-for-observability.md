@@ -1,4 +1,4 @@
-# 0004 Pipeline Hooks For Observability
+# Pipeline Hooks For Observability
 
 ## Status
 Accepted

@@ -7,11 +7,14 @@ from typing import Any, Callable, Iterable
 
 import pandas as pd
 
-from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+from bioetl.domain.clients.base.output.contracts import (
+    OutputWriterABC,
+    RunMetadataBuilderProtocol,
+)
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.record_source import FileRecordSourceFactoryABC, RecordSource
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
@@ -102,6 +105,14 @@ class PipelineContainerABC(ABC):
     @abstractmethod
     def get_error_policy(self) -> ErrorPolicyABC:
         """Return error handling policy for pipeline stages."""
+
+    @abstractmethod
+    def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
+        """Return builder for run metadata artifacts."""
+
+    @abstractmethod
+    def get_record_source_factory(self) -> FileRecordSourceFactoryABC:
+        """Return factory for constructing record sources."""
 
 
 __all__ = [

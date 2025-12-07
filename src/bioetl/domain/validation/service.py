@@ -4,9 +4,9 @@ import pandas as pd
 
 from bioetl.domain.validation.contracts import (
     SchemaProviderABC,
-    schema_type,
     ValidationResult,
     ValidatorFactoryABC,
+    schema_type,
 )
 
 

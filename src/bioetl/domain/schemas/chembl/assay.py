@@ -168,6 +168,7 @@ class AssaySchema(pa.DataFrameModel):
 
     class Config:
         """Pandera config enforcing strict, ordered validation."""
+
         strict = True
         coerce = True
         ordered = True

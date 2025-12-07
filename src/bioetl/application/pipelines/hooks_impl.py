@@ -7,9 +7,11 @@ from typing import Any
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.observability.contracts import (
+    LoggingPortABC,
+    PipelineMetricsPortABC,
+)
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.infrastructure.observability import metrics
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):
@@ -58,9 +60,7 @@ class FailFastErrorPolicyImpl(ErrorPolicyABC):
         """Always fail the pipeline on first error."""
         return ErrorAction.FAIL
 
-    def can_retry(
-        self, error: PipelineStageError
-    ) -> bool:  # noqa: ARG002 - интерфейс
+    def can_retry(self, error: PipelineStageError) -> bool:  # noqa: ARG002 - интерфейс
         """Fail-fast policy never retries."""
         return False
 
@@ -93,10 +93,18 @@ __all__ = [
 class MetricsPipelineHookImpl(PipelineHookABC):
     """Хук, фиксирующий метрики завершения стадий."""
 
-    def __init__(self, *, pipeline_id: str, provider: str, entity_name: str) -> None:
+    def __init__(
+        self,
+        *,
+        pipeline_id: str,
+        provider: str,
+        entity_name: str,
+        metrics_port: PipelineMetricsPortABC,
+    ) -> None:
         self._pipeline_id = pipeline_id
         self._provider = provider
         self._entity_name = entity_name
+        self._metrics = metrics_port
 
     def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
         """Хук старта стадии не требует метрик."""
@@ -104,20 +112,21 @@ class MetricsPipelineHookImpl(PipelineHookABC):
     def on_stage_end(self, stage: str, result: StageResult) -> None:
         """Record Prometheus metrics for stage completion."""
         outcome = "success" if result.success else "error"
-        metrics.STAGE_DURATION_SECONDS.labels(
+        self._metrics.update_stage_duration(
             pipeline=self._pipeline_id,
             provider=self._provider,
             entity=self._entity_name,
             stage=stage,
             outcome=outcome,
-        ).observe(result.duration_sec)
-        metrics.STAGE_TOTAL.labels(
+            duration_sec=result.duration_sec,
+        )
+        self._metrics.update_stage_total(
             pipeline=self._pipeline_id,
             provider=self._provider,
             entity=self._entity_name,
             stage=stage,
             outcome=outcome,
-        ).inc()
+        )
 
     def on_error(self, stage: str, error: PipelineStageError) -> None:  # noqa: ARG002
         """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""

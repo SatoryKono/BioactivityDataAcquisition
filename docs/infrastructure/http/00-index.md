@@ -1,4 +1,4 @@
-# 00 Index
+# Index
 
 ## Компоненты
 - **TokenBucketRateLimiter** — ограничение RPS с настраиваемой скоростью и burst.
