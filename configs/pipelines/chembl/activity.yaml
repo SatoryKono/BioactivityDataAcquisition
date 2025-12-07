@@ -4,7 +4,7 @@ id: activity_chembl
 provider: chembl
 entity: activity
 primary_key: "${CHEMBL_ACTIVITY_PRIMARY_KEY:-activity_id}"
-input_mode: id_only
+input_mode: csv
 input_path: data/input/activity.csv
 output_path: ./data/output/chembl/activity
 batch_size: 20
