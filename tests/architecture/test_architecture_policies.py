@@ -126,13 +126,15 @@ def test_abc_impl_pairs_align(
         impl_name = abc_name.replace("ABC", "Impl").replace("Protocol", "Impl")
         impl_info = impls.get(impl_name)
         if impl_info is None:
-            # No implementation yet; the rule is enforced only when a matching Impl exists.
+            # No implementation yet; the rule is enforced only when a matching
+            # Impl exists.
             continue
 
         impl_path, bases = impl_info
         if abc_name not in bases:
             violations.append(
-                f"{impl_path}: {impl_name} must inherit from {abc_name} (defined in {abc_path})"
+                f"{impl_path}: {impl_name} must inherit from {abc_name} "
+                f"(defined in {abc_path})"
             )
 
     if violations:

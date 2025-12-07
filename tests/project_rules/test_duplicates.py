@@ -166,7 +166,8 @@ def test_yaml_pipeline_ids_unique(configs_root: Path) -> None:
         pipe_id = data.get("id")
         if pipe_id:
             assert pipe_id not in ids, (
-                f"Дублирующийся id '{pipe_id}' в {file_path} и {ids[pipe_id]}"
+                "Дублирующийся id "
+                f"'{pipe_id}' в {file_path} и {ids[pipe_id]}"
             )
             ids[pipe_id] = file_path
 
@@ -201,7 +202,8 @@ def test_cli_commands_unique(project_root: Path) -> None:
                         if cmd_name in command_names:
                             raise AssertionError(
                                 "Дублирующаяся CLI‑команда "
-                                f"'{cmd_name}' в {file_path} и {command_names[cmd_name]}"
+                                f"'{cmd_name}' в {file_path} и "
+                                f"{command_names[cmd_name]}"
                             )
                         command_names[cmd_name] = file_path
 
@@ -247,6 +249,7 @@ def test_test_function_names_unique(project_root: Path) -> None:
                 if node.name in seen_names:
                     raise AssertionError(
                         "Имя тестовой функции "
-                        f"'{node.name}' повторяется в {file_path} и {seen_names[node.name]}"
+                        f"'{node.name}' повторяется в {file_path} и "
+                        f"{seen_names[node.name]}"
                     )
                 seen_names[node.name] = file_path
