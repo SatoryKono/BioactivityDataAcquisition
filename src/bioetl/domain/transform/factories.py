@@ -4,12 +4,12 @@ from typing import Callable
 
 from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.transformers import (
-    DatabaseVersionTransformer,
-    FulldateTransformer,
-    HashColumnsTransformer,
-    IndexColumnTransformer,
+    DatabaseVersionTransformerImpl,
+    FulldateTransformerImpl,
+    HashColumnsTransformerImpl,
+    IndexColumnTransformerImpl,
     TransformerABC,
-    TransformerChain,
+    TransformerChainImpl,
 )
 
 __all__ = ["default_post_transformer"]
@@ -24,16 +24,16 @@ def default_post_transformer(
     """Create a default chain of post-transformers."""
 
     provider = version_provider or (lambda: "unknown")
-    return TransformerChain(
+    return TransformerChainImpl(
         [
-            HashColumnsTransformer(
+            HashColumnsTransformerImpl(
                 hash_service=hash_service, business_key_fields=business_key_fields
             ),
-            IndexColumnTransformer(hash_service=hash_service),
-            DatabaseVersionTransformer(
+            IndexColumnTransformerImpl(hash_service=hash_service),
+            DatabaseVersionTransformerImpl(
                 hash_service=hash_service,
                 database_version_provider=provider,
             ),
-            FulldateTransformer(hash_service=hash_service),
+            FulldateTransformerImpl(hash_service=hash_service),
         ]
     )

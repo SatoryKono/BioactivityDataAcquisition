@@ -1,5 +1,5 @@
 """Domain ports for client-facing services."""
 
-from bioetl.domain.clients.ports.chembl_extraction_port import ChemblExtractionPort
+from bioetl.domain.clients.ports.contracts import ChemblExtractionPortABC
 
-__all__ = ["ChemblExtractionPort"]
+__all__ = ["ChemblExtractionPortABC"]
