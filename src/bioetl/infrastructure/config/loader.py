@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
-import re
+from pathlib import Path
 from typing import Any
 
 from pydantic import ValidationError
 
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.transform.merge import apply_deep_merge
+from bioetl.config import load_defaults
+from bioetl.infrastructure.config.env import resolve_env_placeholders
 from bioetl.infrastructure.config.provider_registry_loader import (
     DEFAULT_PROVIDERS_REGISTRY_PATH,
     ProviderNotConfiguredError,
@@ -137,15 +138,21 @@ def _finalize_config(
     env_overrides: dict[str, Any] | None,
     registry_path: Path,
 ) -> PipelineConfig:
+    defaults = load_defaults(
+        base_dir=config_path.parents[2] if len(config_path.parents) >= 3 else None
+    )
     _validate_provider(merged_config, config_path, registry_path=registry_path)
 
-    merged_config = _transform_legacy_config(merged_config, config_path)
+    merged_config = _transform_legacy_config(
+        merged_config, config_path, defaults=defaults
+    )
     merged_config = _apply_overrides(
         merged_config,
         env_overrides=env_overrides,
         cli_overrides=cli_overrides,
     )
-    merged_config = _resolve_env_placeholders(merged_config)
+    merged_config = resolve_env_placeholders(merged_config)
+    merged_config = _apply_defaults(merged_config, defaults)
     _validate_input_path_exists(merged_config, config_path)
 
     try:
@@ -165,6 +172,19 @@ def _apply_overrides(
         merged = apply_deep_merge(merged, env_overrides)
     if cli_overrides:
         merged = apply_deep_merge(merged, cli_overrides)
+    return merged
+
+
+def _apply_defaults(config: dict[str, Any], defaults: Any) -> dict[str, Any]:
+    merged = dict(config)
+    quality_section = merged.get("quality")
+    if not isinstance(quality_section, dict):
+        quality_section = {}
+    quality_section.setdefault("hashing", defaults.hashing.hashing.model_dump())
+    quality_section.setdefault(
+        "normalization", defaults.normalization.normalization.model_dump()
+    )
+    merged["quality"] = quality_section
     return merged
 
 
@@ -197,47 +217,17 @@ def _validate_provider(
         raise ConfigValidationError(path, str(exc)) from exc
 
 
-ENV_PATTERN = re.compile(r"\$\{([A-Z0-9_]+)(:-([^}]*))?\}")
-
-
-def _resolve_env_placeholders(value: Any) -> Any:
-    """Recursively resolve ${ENV[:-default]} placeholders in config mappings."""
-
-    if isinstance(value, dict):
-        return {key: _resolve_env_placeholders(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_resolve_env_placeholders(item) for item in value]
-    if isinstance(value, str):
-        return _substitute_env(value)
-    return value
-
-
-def _substitute_env(raw: str) -> str:
-    """Replace env placeholders with OS values, falling back to defaults."""
-
-    def _replace_env_placeholder(match: re.Match[str]) -> str:
-        """Resolve one ${ENV[:-default]} placeholder using env or default."""
-        var_name = match.group(1)
-        default_value = match.group(3)
-        env_value = os.environ.get(var_name)
-        if env_value is not None:
-            return env_value
-        if default_value is not None:
-            return default_value
-        return match.group(0)
-
-    return ENV_PATTERN.sub(_replace_env_placeholder, raw)
-
-
-def _transform_legacy_config(config: dict[str, Any], path: Path) -> dict[str, Any]:
+def _transform_legacy_config(
+    config: dict[str, Any], path: Path, *, defaults: Any
+) -> dict[str, Any]:
     """Преобразует старый формат конфигурации в новый."""
     transformed = config.copy()
     provider = transformed.get("provider", "chembl")
 
     _ensure_entity_fields(transformed, provider)
     _ensure_id(transformed, provider)
-    _hydrate_provider_config(transformed, provider)
-    _ensure_batch_size(transformed)
+    _hydrate_provider_config(transformed, provider, defaults=defaults)
+    _ensure_batch_size(transformed, defaults=defaults)
     _ensure_output_settings(transformed)
     _ensure_input_settings(transformed)
     _drop_legacy_fields(transformed)
@@ -258,16 +248,21 @@ def _ensure_id(transformed: dict[str, Any], provider: str) -> None:
     transformed["id"] = f"{provider}.{entity}"
 
 
-def _hydrate_provider_config(transformed: dict[str, Any], provider: str) -> None:
+def _hydrate_provider_config(
+    transformed: dict[str, Any], provider: str, *, defaults: Any
+) -> None:
     if "sources" in transformed and "provider_config" not in transformed:
         transformed["provider_config"] = _build_provider_config_from_sources(
             transformed.pop("sources", {}),
             transformed,
             provider,
+            defaults=defaults,
         )
 
     if "provider_config" not in transformed:
-        transformed["provider_config"] = _default_provider_config(provider)
+        transformed["provider_config"] = _default_provider_config(
+            provider, defaults=defaults
+        )
 
     provider_cfg = transformed.get("provider_config")
     if (
@@ -282,6 +277,8 @@ def _build_provider_config_from_sources(
     sources: dict[str, Any],
     transformed: dict[str, Any],
     provider: str,
+    *,
+    defaults: Any,
 ) -> dict[str, Any]:
     chembl_source = sources.get("chembl", {})
     api_base_url = chembl_source.get("base_url") or transformed.pop(
@@ -298,14 +295,24 @@ def _build_provider_config_from_sources(
         "rate_limit_per_sec": transformed.get("client", {}).get("rate_limit", 10.0),
     }
 
+    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
+        provider
+    )
+
+    if provider_defaults is not None:
+        provider_config = apply_deep_merge(
+            provider_config,
+            provider_defaults.model_dump(exclude_none=True),
+        )
+
     for optional_key in ("max_url_length", "batch_size"):
         if optional_key in chembl_source:
             provider_config[optional_key] = chembl_source[optional_key]
     return provider_config
 
 
-def _default_provider_config(provider: str) -> dict[str, Any]:
-    return {
+def _default_provider_config(provider: str, *, defaults: Any) -> dict[str, Any]:
+    provider_config = {
         "provider": provider,
         "base_url": "https://www.ebi.ac.uk/chembl/api/data",
         "timeout_sec": 30.0,
@@ -313,9 +320,38 @@ def _default_provider_config(provider: str) -> dict[str, Any]:
         "rate_limit_per_sec": 10.0,
     }
 
+    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
+        provider
+    )
+    if provider_defaults is not None:
+        provider_config = apply_deep_merge(
+            provider_config,
+            provider_defaults.model_dump(exclude_none=True),
+        )
 
-def _ensure_batch_size(transformed: dict[str, Any]) -> None:
-    transformed.setdefault("batch_size", 20)
+    if (
+        provider_config.get("max_url_length") is None
+        and getattr(defaults, "network", None) is not None
+    ):
+        http_defaults = getattr(defaults.network, "http", None)
+        if http_defaults and http_defaults.default.max_url_length is not None:
+            provider_config["max_url_length"] = http_defaults.default.max_url_length
+
+    return provider_config
+
+
+def _ensure_batch_size(transformed: dict[str, Any], *, defaults: Any) -> None:
+    if "batch_size" in transformed:
+        return
+
+    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
+        transformed.get("provider", "")
+    )
+    if provider_defaults and provider_defaults.batch_size is not None:
+        transformed["batch_size"] = provider_defaults.batch_size
+        return
+
+    transformed["batch_size"] = 20
 
 
 def _ensure_output_settings(transformed: dict[str, Any]) -> None:
