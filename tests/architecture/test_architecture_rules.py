@@ -191,7 +191,8 @@ def test_pipeline_docs_and_stage_structure() -> None:
             missing = [name for name in STAGE_FILES if name not in stage_files]
             if missing:
                 violations.append(
-                    f"{entity_dir.as_posix()} is missing stage files: {', '.join(sorted(missing))}"
+                    f"{entity_dir.as_posix()} is missing stage files: "
+                    f"{', '.join(sorted(missing))}"
                 )
 
     if violations:
