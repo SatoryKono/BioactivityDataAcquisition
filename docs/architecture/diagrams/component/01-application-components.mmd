@@ -19,7 +19,7 @@ subgraph Application["Application Layer"]
     PipelineRegistry["Pipeline Registry\nbioetl.application.pipelines.registry"]:::componentSecondary
     ConfigLoader["Config Loader\napplication.config_loader"]:::componentSecondary
     PipelineConfig["PipelineConfig\nconfig.pipeline_config_schema"]:::componentSecondary
-    StageRunner["StageRunner\napplication.pipelines.stage_runner"]:::componentSecondary
+    StageRunnerFacade["StageRunnerFacade\napplication.pipelines.stage_runner_facade"]:::componentSecondary
     Hooks["Hooks (Logging + Metrics)\nLoggingPipelineHookImpl\nMetricsPipelineHookImpl"]:::componentSecondary
     ErrorPolicy["ErrorPolicyFacade\nFailFast/ContinueOnError"]:::componentSecondary
     Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
@@ -50,7 +50,7 @@ CLI --> Orchestrator
 ConfigLoader --> PipelineConfig
 Orchestrator --> PipelineRegistry
 Orchestrator --> Container
-Orchestrator --> StageRunner
+Orchestrator --> StageRunnerFacade
 Container --> Pipelines
 Container --> Validation
 Container --> Normalization
@@ -64,15 +64,15 @@ Container --> RecordSources
 Container --> Output
 Container --> Logging
 Container --> Observability
-Pipelines --> StageRunner
+Pipelines --> StageRunnerFacade
 Pipelines --> Validation
 Pipelines --> Normalization
 Pipelines --> Hashing
 Pipelines --> Output
 Pipelines --> Logging
 Pipelines --> Hooks
-StageRunner --> Hooks
-StageRunner --> ErrorPolicy
+StageRunnerFacade --> Hooks
+StageRunnerFacade --> ErrorPolicy
 Validation --> Schemas
 Normalization --> Contracts
 RecordSources --> Clients
