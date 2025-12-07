@@ -36,14 +36,14 @@ def test_log_methods(mock_structlog):
     mock_structlog.warning.assert_called_once_with("warn msg")
 
 
-def test_bind(mock_structlog):
+def test_apply_bind(mock_structlog):
     # Arrange
     bound_mock = MagicMock()
     mock_structlog.bind.return_value = bound_mock
     logger = UnifiedLoggerImpl(mock_structlog)
 
     # Act
-    new_logger = logger.bind(ctx_key="ctx_val")
+    new_logger = logger.apply_bind(ctx_key="ctx_val")
 
     # Assert
     assert isinstance(new_logger, UnifiedLoggerImpl)
