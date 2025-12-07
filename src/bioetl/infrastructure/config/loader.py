@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from pathlib import Path
 from typing import Any
 
 from pydantic import ValidationError
 
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.transform.merge import apply_deep_merge
-from bioetl.config import load_defaults
+from bioetl.infrastructure.config.defaults_loader import get_defaults_config
 from bioetl.infrastructure.config.env import resolve_env_placeholders
 from bioetl.infrastructure.config.provider_registry_loader import (
     DEFAULT_PROVIDERS_REGISTRY_PATH,
@@ -138,7 +137,7 @@ def _finalize_config(
     env_overrides: dict[str, Any] | None,
     registry_path: Path,
 ) -> PipelineConfig:
-    defaults = load_defaults(
+    defaults = get_defaults_config(
         base_dir=config_path.parents[2] if len(config_path.parents) >= 3 else None
     )
     _validate_provider(merged_config, config_path, registry_path=registry_path)
@@ -230,6 +229,7 @@ def _transform_legacy_config(
     _ensure_batch_size(transformed, defaults=defaults)
     _ensure_output_settings(transformed)
     _ensure_input_settings(transformed)
+    _fold_quality_sections(transformed)
     _drop_legacy_fields(transformed)
 
     return transformed
@@ -372,8 +372,33 @@ def _ensure_input_settings(transformed: dict[str, Any]) -> None:
     transformed.setdefault("input_path", None)
 
 
+def _fold_quality_sections(transformed: dict[str, Any]) -> None:
+    quality_section = transformed.get("quality")
+    if not isinstance(quality_section, dict):
+        quality_section = {}
+
+    for key in ("determinism", "hashing", "normalization"):
+        if key not in transformed:
+            continue
+        value = transformed.pop(key)
+        if isinstance(value, dict) and isinstance(quality_section.get(key), dict):
+            quality_section[key] = apply_deep_merge(quality_section[key], value)
+        else:
+            quality_section[key] = value
+
+    if quality_section:
+        transformed["quality"] = quality_section
+
+
 def _drop_legacy_fields(transformed: dict[str, Any]) -> None:
-    for field in ("endpoint", "api_base_url", "sources"):
+    for field in (
+        "endpoint",
+        "api_base_url",
+        "sources",
+        "determinism",
+        "hashing",
+        "normalization",
+    ):
         transformed.pop(field, None)
 
 

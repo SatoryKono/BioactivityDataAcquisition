@@ -6,7 +6,6 @@ import os
 import re
 from typing import Any
 
-
 ENV_PATTERN = re.compile(r"\$\{([A-Z0-9_]+)(:-([^}]*))?\}")
 
 
