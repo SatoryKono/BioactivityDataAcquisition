@@ -18,7 +18,7 @@ src/bioetl/config/pipeline_config_schema.py
 src/bioetl/application/pipelines/__init__.py
 src/bioetl/application/pipelines/base.py
 src/bioetl/application/pipelines/contracts.py
-src/bioetl/application/pipelines/error_policy_manager.py
+src/bioetl/application/pipelines/error_policy_facade.py
 src/bioetl/application/pipelines/hooks_impl.py
 src/bioetl/application/pipelines/hooks_manager.py
 src/bioetl/application/pipelines/registry.py

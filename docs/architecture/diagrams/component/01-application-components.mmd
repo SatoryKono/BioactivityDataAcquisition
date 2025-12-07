@@ -21,7 +21,7 @@ subgraph Application["Application Layer"]
     PipelineConfig["PipelineConfig\nconfig.pipeline_config_schema"]:::componentSecondary
     StageRunner["StageRunner\napplication.pipelines.stage_runner"]:::componentSecondary
     Hooks["Hooks (Logging + Metrics)\nLoggingPipelineHookImpl\nMetricsPipelineHookImpl"]:::componentSecondary
-    ErrorPolicy["ErrorPolicyManager\nFailFast/ContinueOnError"]:::componentSecondary
+    ErrorPolicy["ErrorPolicyFacade\nFailFast/ContinueOnError"]:::componentSecondary
     Pipelines["PipelineBase / ChemblPipelineBase /\nChemblEntityPipeline\napplication.pipelines.*"]:::componentSecondary
 end
 class Application group;
