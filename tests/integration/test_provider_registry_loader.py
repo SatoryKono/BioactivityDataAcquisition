@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
+import sys
 from types import ModuleType
 from typing import Any, Callable
 

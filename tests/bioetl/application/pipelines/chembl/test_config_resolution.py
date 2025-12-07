@@ -14,6 +14,7 @@ def dependencies():
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
         "hash_service": MagicMock(),
+        "normalization_service": MagicMock(),
     }
 
 

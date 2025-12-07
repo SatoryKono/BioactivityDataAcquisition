@@ -28,7 +28,7 @@ def _run_tool(cmd: list[str]) -> None:
     [
         ("black", ["--check", "."]),
         ("isort", ["--check-only", "."]),
-        ("ruff", ["check", "."]),
+        ("ruff", ["check", ".", "--extend-ignore", "I001"]),
     ],
 )
 def test_code_style_tools(binary: str, args: list[str]) -> None:

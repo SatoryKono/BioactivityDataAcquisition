@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+
 from tests.architecture.test_layer_dependencies import _collect_imports
 from tests.project_rules.conftest import iter_python_files
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 from bioetl.domain.configs import PipelineConfig
@@ -27,14 +26,9 @@ def build_runtime_config(
     """
 
     if loader is None:
-        from bioetl.infrastructure.config.loader import (
-            get_pipeline_config,
-            get_pipeline_config_from_path,
-        )
-
-        loader = SimpleNamespace(
-            get_by_id=get_pipeline_config,
-            get_from_path=get_pipeline_config_from_path,
+        raise ValueError(
+            "PipelineConfigLoaderProtocol is required. "
+            "Provide loader (e.g., interfaces.wiring.create_config_loader())."
         )
 
     if config_path is not None:

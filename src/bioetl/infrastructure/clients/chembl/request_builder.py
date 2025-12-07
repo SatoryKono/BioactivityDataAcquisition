@@ -28,10 +28,20 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         self._endpoint = endpoint.strip("/")
         return self
 
-    def build(self, **params: Any) -> "ChemblRequestBuilderImpl":
-        """Fluent alias for build_request to mirror test expectations."""
-
-        return self.build_request(params)
+    def build(
+        self, params: Optional[dict[str, Any]] = None, **params_kwargs: Any
+    ) -> str:
+        """
+        Fluent alias for build_request to mirror test expectations.
+        Accepts either a single dict (as used in tests) or keyword arguments.
+        """
+        merged_params: dict[str, Any] = {}
+        if params:
+            if not isinstance(params, dict):
+                raise TypeError("params must be a dict when provided")
+            merged_params.update(params)
+        merged_params.update(params_kwargs)
+        return self.build_request(merged_params)
 
     def build_request(self, params: dict[str, Any]) -> str:
         """

@@ -22,6 +22,12 @@ def common_dependencies():
     config.get_fields.side_effect = lambda: config.fields
     config.get_normalization.side_effect = lambda: config.normalization
 
+    normalization_service = MagicMock()
+    normalization_service.apply_normalize_dataframe.side_effect = lambda df: df.copy()
+    normalization_service.apply_normalize_batch.side_effect = lambda df: df.copy()
+    normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
+    normalization_service.apply_normalize.side_effect = lambda record: record
+
     return {
         "config": config,
         "logger": MagicMock(),
@@ -29,6 +35,7 @@ def common_dependencies():
         "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
         "hash_service": MagicMock(),
+        "normalization_service": normalization_service,
     }
 
 
@@ -58,6 +65,7 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         output_writer=common_dependencies["output_writer"],
         extraction_service=common_dependencies["extraction_service"],
         hash_service=common_dependencies["hash_service"],
+        normalization_service=common_dependencies["normalization_service"],
     )
 
     assert pipeline.ID_COLUMN == id_col

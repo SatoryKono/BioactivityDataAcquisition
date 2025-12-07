@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any, cast
 
 from bioetl.domain.enums import ErrorAction
@@ -12,7 +13,6 @@ from bioetl.domain.observability.contracts import (
     PipelineMetricsPortABC,
 )
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.infrastructure.observability import metrics
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):
@@ -105,7 +105,7 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         self._pipeline_id = pipeline_id
         self._provider = provider
         self._entity_name = entity_name
-        self._metrics = metrics_port or _create_metrics_port()
+        self._metrics = metrics_port or _create_noop_metrics_port()
 
     def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
         """Хук старта стадии не требует метрик."""
@@ -133,30 +133,13 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
 
 
-def _create_metrics_port() -> PipelineMetricsPortABC:
-    """Return metrics port backed by Prometheus collectors."""
+def _create_noop_metrics_port() -> PipelineMetricsPortABC:
+    """Return no-op metrics port."""
 
     return cast(
         PipelineMetricsPortABC,
-        type(
-            "PromMetricsPort",
-            (),
-            {
-                "update_stage_duration": lambda self, **kwargs: metrics.STAGE_DURATION_SECONDS.labels(
-                    pipeline=kwargs["pipeline"],
-                    provider=kwargs["provider"],
-                    entity=kwargs["entity"],
-                    stage=kwargs["stage"],
-                    outcome=kwargs["outcome"],
-                ).observe(kwargs["duration_sec"]),
-                "update_stage_total": lambda self, **kwargs: metrics.STAGE_TOTAL.labels(
-                    pipeline=kwargs["pipeline"],
-                    provider=kwargs["provider"],
-                    entity=kwargs["entity"],
-                    stage=kwargs["stage"],
-                    outcome=kwargs["outcome"],
-                ).inc(),
-            },
-        )(),
+        SimpleNamespace(
+            update_stage_duration=lambda **_kwargs: None,
+            update_stage_total=lambda **_kwargs: None,
+        ),
     )
-

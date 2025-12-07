@@ -10,6 +10,7 @@ from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.interfaces.wiring import create_config_loader, create_container_factory
 
 
 @pytest.mark.integration
@@ -21,21 +22,25 @@ def test_run_in_background_dry_run(tmp_path):
             Path("tests/fixtures/input/chembl_activity_small.csv").resolve()
         ),
     }
+    config_loader = create_config_loader()
     config_copy = build_runtime_config(
         config_path=config_path,
         profile="default",
         configs_root=Path("tests/fixtures/configs"),
         cli_overrides=cli_overrides,
+        loader=config_loader,
     )
 
     provider_loader_factory = partial(create_provider_loader)
     registry = provider_loader_factory().get_registry()
+    container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,
         provider_registry=registry,
         provider_loader_factory=provider_loader_factory,
         use_provider_loader_port=False,
+        container_factory=container_factory,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)
@@ -55,16 +60,19 @@ def test_run_in_background_with_port_enabled(tmp_path):
             Path("tests/fixtures/input/chembl_activity_small.csv").resolve()
         ),
     }
+    config_loader = create_config_loader()
     config_copy = build_runtime_config(
         config_path=config_path,
         profile="default",
         configs_root=Path("tests/fixtures/configs"),
         cli_overrides=cli_overrides,
+        loader=config_loader,
     )
     config_copy.features.enable_provider_loader_port = True
 
     provider_loader_factory = partial(create_provider_loader)
     provider_loader = provider_loader_factory()
+    container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,
@@ -72,6 +80,7 @@ def test_run_in_background_with_port_enabled(tmp_path):
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
         use_provider_loader_port=True,
+        container_factory=container_factory,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)

@@ -545,9 +545,7 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
         if isinstance(component, DatabaseVersionTransformerImpl):
             hash_service = component._hash_service  # type: ignore[attr-defined]
             version = component._database_version_provider()  # type: ignore[attr-defined]
-            signature.append(
-                (component.__class__.__name__, hash_service, version)
-            )
+            signature.append((component.__class__.__name__, hash_service, version))
             continue
 
         if isinstance(component, FulldateTransformerImpl):

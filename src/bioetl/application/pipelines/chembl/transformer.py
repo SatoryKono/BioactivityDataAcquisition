@@ -39,14 +39,18 @@ def _serialize_list(value: Sequence[Any]) -> Any:
     if value and isinstance(value[0], dict):
         parts = [
             serialized
-            for serialized in (_serialize_dict(item) for item in value if isinstance(item, dict))
+            for serialized in (
+                _serialize_dict(item) for item in value if isinstance(item, dict)
+            )
             if serialized is not pd.NA and serialized is not None
         ]
     else:
         parts = [
             str(item)
             for item in value
-            if not isinstance(item, (list, dict)) and item is not pd.NA and item is not None
+            if not isinstance(item, (list, dict))
+            and item is not pd.NA
+            and item is not None
         ]
 
     return pd.NA if not parts else "|".join(parts)
@@ -109,7 +113,11 @@ class ChemblTransformerImpl(TransformerABC):
         serialized = df.copy()
         for column in serialized.columns:
             sample = next(
-                (v for v in serialized[column].values if v is not None and v is not pd.NA),
+                (
+                    v
+                    for v in serialized[column].values
+                    if v is not None and v is not pd.NA
+                ),
                 None,
             )
             if isinstance(sample, (dict, list, tuple)):

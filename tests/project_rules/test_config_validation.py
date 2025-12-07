@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import ValidationError
 import pytest
 import yaml
-from pydantic import ValidationError
 
 from bioetl.domain.configs.pipeline import PipelineConfig
 

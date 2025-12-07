@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
-import unicodedata
 from datetime import datetime, timezone
 from decimal import Decimal
+import hashlib
+import json
 from typing import Any, Callable, Iterable
+import unicodedata
 
 import pandas as pd
 

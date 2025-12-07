@@ -38,12 +38,6 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.output.factories import (
-    default_metadata_writer,
-    default_output_writer,
-    default_quality_reporter,
-    default_writer,
-)
 
 
 class PipelineContainer(PipelineContainerABC):
@@ -94,13 +88,10 @@ class PipelineContainer(PipelineContainerABC):
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
             )
-        self._output_writer: OutputWriterABC = output_writer or default_output_writer(
-            config=self._config.determinism,
-            qc_config=self._config.qc,
-            writer=writer or default_writer(),
-            metadata_writer=metadata_writer or default_metadata_writer(),
-            quality_reporter=quality_reporter or default_quality_reporter(),
-        )
+        if output_writer is None:
+            self._output_writer = _create_noop_output_writer()
+        else:
+            self._output_writer = output_writer
         register_schemas(self._schema_provider)
 
     @property
@@ -322,7 +313,7 @@ def _create_noop_output_writer() -> OutputWriterABC:
     ) -> WriteResult:
         row_count = 0
         try:
-            row_count = int(len(df))  # type: ignore[arg-type]
+            row_count = int(len(df))
         except Exception:
             row_count = 0
         path = Path(output_path)
@@ -398,12 +389,12 @@ def _create_noop_validator_factory() -> ValidatorFactoryABC:
 def build_pipeline_dependencies(
     config: PipelineConfig,
     *,
-    logger: LoggingPortABC,
-    output_writer: OutputWriterABC,
-    validator_factory: ValidatorFactoryABC,
-    record_source_factory: FileRecordSourceFactoryABC,
-    metadata_builder: RunMetadataBuilderProtocol,
-    metrics_port: PipelineMetricsPortABC,
+    logger: LoggingPortABC | None = None,
+    output_writer: OutputWriterABC | None = None,
+    validator_factory: ValidatorFactoryABC | None = None,
+    record_source_factory: FileRecordSourceFactoryABC | None = None,
+    metadata_builder: RunMetadataBuilderProtocol | None = None,
+    metrics_port: PipelineMetricsPortABC | None = None,
     hooks: list[PipelineHookABC] | None = None,
     error_policy: ErrorPolicyABC | None = None,
     hash_service: HashServiceABC | None = None,

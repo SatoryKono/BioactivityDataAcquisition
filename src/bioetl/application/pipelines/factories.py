@@ -1,12 +1,7 @@
 """Stub factories for pipeline abstractions."""
 
-from bioetl.domain.pipelines.contracts import (
-    ErrorPolicyABC,
-    PipelineHookABC,
-    PipelineHookABC as _PipelineHookABC,
-    StageABC,
-)
 from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC, StageABC
 
 
 def default_pipeline_container() -> PipelineContainerABC:
@@ -39,4 +34,3 @@ __all__ = [
     "default_error_policy",
     "default_stage",
 ]
-

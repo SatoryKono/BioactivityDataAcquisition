@@ -34,6 +34,6 @@ def test_class_inventory_zero_sum(bioetl_root: Path) -> None:
 
     current_total = _count_classes(bioetl_root)
 
-    assert current_total == expected_total, (
-        f"Изменилось число классов: было {expected_total}, стало {current_total}"
-    )
+    assert (
+        current_total == expected_total
+    ), f"Изменилось число классов: было {expected_total}, стало {current_total}"

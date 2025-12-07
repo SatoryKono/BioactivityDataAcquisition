@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Iterable
 
 import pytest
+
 from tests.architecture.test_layer_dependencies import (
     _collect_imports,
     _module_from_path,
@@ -83,8 +84,8 @@ def test_layer_dependencies(bioetl_root: Path) -> None:
             # module names.
             if not ref:
                 violations.append(
-                f"{file_path.as_posix()}:{reference.lineno}: "
-                "unresolved import target"
+                    f"{file_path.as_posix()}:{reference.lineno}: "
+                    "unresolved import target"
                 )
 
     _assert_no_violations(violations)

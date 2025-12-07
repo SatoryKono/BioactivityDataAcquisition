@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from pathlib import Path
 import re
 import textwrap
-from pathlib import Path
 
 BASE = Path("docs/architecture/diagrams")
 TARGETS = [

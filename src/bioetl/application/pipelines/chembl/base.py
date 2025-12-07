@@ -5,7 +5,10 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import cast
 
-from bioetl.application.pipelines.base import PipelineBase, _create_default_metadata_builder
+from bioetl.application.pipelines.base import (
+    PipelineBase,
+    _create_default_metadata_builder,
+)
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.domain.clients.base.output.contracts import (
@@ -26,7 +29,6 @@ from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.transform.factories import default_normalization_service
 
 
 class ChemblPipelineBase(PipelineBase):
@@ -53,7 +55,12 @@ class ChemblPipelineBase(PipelineBase):
 
         self.ID_COLUMN, self.API_FILTER_KEY = self._resolve_primary_key(config)
 
-        norm_service = normalization_service or default_normalization_service(config)
+        if normalization_service is None:
+            raise ValueError(
+                "Normalization service is required. "
+                "Inject NormalizationServiceABC from container."
+            )
+        norm_service = normalization_service
 
         # Create Extractor
         record_source_factory = (
