@@ -4,7 +4,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.infrastructure.clients.chembl.provider import ChemblProviderComponents
+from bioetl.infrastructure.clients.chembl.provider import (
+    ChemblProviderComponentsFactory,
+)
 from bioetl.infrastructure.config.models import ChemblSourceConfig
 
 
@@ -36,7 +38,7 @@ def chembl_config() -> ChemblSourceConfig:
 
 
 def test_create_normalization_service_uses_factory(monkeypatch, chembl_config):
-    components = ChemblProviderComponents()
+    components = ChemblProviderComponentsFactory()
     pipeline_config = SimpleNamespace(normalization={}, fields=[])
     stub_service = _NormalizationServiceStub()
 
@@ -55,7 +57,7 @@ def test_create_normalization_service_uses_factory(monkeypatch, chembl_config):
 
 
 def test_create_normalization_service_requires_pipeline_config(chembl_config):
-    components = ChemblProviderComponents()
+    components = ChemblProviderComponentsFactory()
 
     with pytest.raises(ValueError):
         components.create_normalization_service(chembl_config)

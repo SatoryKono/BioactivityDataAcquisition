@@ -17,7 +17,7 @@ from bioetl.infrastructure.chembl_client import (
 from bioetl.infrastructure.transform.factories import default_normalization_service
 
 
-class ChemblProviderComponents(
+class ChemblProviderComponentsFactory(
     ProviderComponents[
         ChemblDataClientABC,
         ChemblExtractionPortABC,
@@ -65,13 +65,13 @@ def register_chembl_provider() -> ProviderDefinition:
     definition = ProviderDefinition(
         id=ProviderId.CHEMBL,
         config_type=ChemblSourceConfig,
-        components=ChemblProviderComponents(),
+        components=ChemblProviderComponentsFactory(),
         description="ChEMBL data provider",
     )
     return definition
 
 
 __all__ = [
-    "ChemblProviderComponents",
+    "ChemblProviderComponentsFactory",
     "register_chembl_provider",
 ]
