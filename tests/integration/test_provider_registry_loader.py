@@ -45,7 +45,7 @@ class RecordingLogger(LoggingPortABC):
     def warning(self, msg: str, **ctx: Any) -> None:
         self.records.append(("warning", msg, ctx))
 
-    def bind(self, **ctx: Any) -> RecordingLogger:
+    def apply_bind(self, **ctx: Any) -> RecordingLogger:
         self.records.append(("bind", "", ctx))
         return self
 

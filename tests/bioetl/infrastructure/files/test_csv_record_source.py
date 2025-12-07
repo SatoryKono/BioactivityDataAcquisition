@@ -53,7 +53,7 @@ class _DummyLogger(LoggingPortABC):
     def warning(self, *args, **kwargs):  # pragma: no cover
         return None
 
-    def bind(self, **kwargs):  # pragma: no cover
+    def apply_bind(self, **kwargs):  # pragma: no cover
         return self
 
 

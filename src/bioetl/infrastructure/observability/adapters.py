@@ -32,7 +32,7 @@ class StructuredLoggerImpl(LoggingPortABC):
         """Log warning message with structured context."""
         self._logger.warning(msg, **ctx)
 
-    def bind(self, **ctx: Any) -> Self:
+    def apply_bind(self, **ctx: Any) -> Self:
         """Return logger bound with additional context."""
         return self.__class__(self._logger.bind(**ctx))
 
