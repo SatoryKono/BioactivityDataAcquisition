@@ -169,11 +169,11 @@ classDiagram
     class ValidatorABC { <<ABC>> validate(df); is_valid(df) }
     class SchemaProviderABC { <<ABC>> get_schema(name); list_schemas(); get_schema_columns(name); register(name, schema, column_order) }
     class ValidationService { +validate(df, entity_name); +get_schema(); +get_schema_columns() }
-    class _SchemaEntry { <<dataclass>> schema: pa.DataFrameModel; column_order: list[str]? }
+    class _SchemaEntryModel { <<dataclass>> schema: pa.DataFrameModel; column_order: list[str]? }
     class SchemaRegistry
 
     SchemaProviderABC <|.. SchemaRegistry
-    SchemaRegistry --> _SchemaEntry
+    SchemaRegistry --> _SchemaEntryModel
     ValidationService --> SchemaProviderABC
 ```
 
