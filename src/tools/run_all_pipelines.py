@@ -1,11 +1,11 @@
-import json
 from datetime import datetime, timezone
+import json
 from pathlib import Path
 import sys
 
 from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
-from bioetl.interfaces.cli.app import app
 from bioetl.infrastructure.logging.factories import default_logger
+from bioetl.interfaces.cli.app import app
 
 # Pipeline dependency order
 PIPELINES = [
@@ -90,7 +90,9 @@ def main():
     results = []
     batch_start = datetime.now(timezone.utc)
 
-    logger.info("Running all ChEMBL pipelines", limit=limit, started_at=batch_start.isoformat())
+    logger.info(
+        "Running all ChEMBL pipelines", limit=limit, started_at=batch_start.isoformat()
+    )
 
     for name in PIPELINES:
         res = run_pipeline(name, limit, logger)
