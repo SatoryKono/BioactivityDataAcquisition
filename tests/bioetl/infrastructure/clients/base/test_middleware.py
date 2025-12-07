@@ -342,7 +342,7 @@ def test_idempotency_key_reused_across_retries(monkeypatch, base_client):
         base_client=base_client,
     )
 
-    result = client.request("POST", "http://example.com/resource")
+    result = client.request_call("POST", "http://example.com/resource")
 
     assert result.status_code == 200
     assert base_client.request.call_count == 3
@@ -365,8 +365,8 @@ def test_get_requests_do_not_add_idempotency_key(base_client):
         base_client=base_client,
     )
 
-    client.request("GET", "http://example.com/resource")
-    client.request("HEAD", "http://example.com/resource")
+    client.request_call("GET", "http://example.com/resource")
+    client.request_call("HEAD", "http://example.com/resource")
 
     for call in base_client.request.call_args_list:
         headers = call.kwargs.get("headers")
