@@ -1,5 +1,16 @@
 """Domain configuration models (pure, without I/O)."""
 
+from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
+from bioetl.domain.configs.defaults import (
+    DefaultsConfig,
+    HashingDefaultsConfig,
+    HttpDefaultsConfig,
+    NetworkDefaultsConfig,
+    NetworkHttpDefaultsConfig,
+    NormalizationDefaultsConfig,
+    SourceDefaultsConfig,
+    SourcesDefaultsConfig,
+)
 from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,
@@ -41,14 +52,22 @@ __all__ = [
     "LoggingConfig",
     "MetricsConfig",
     "NormalizationConfig",
+    "DefaultsConfig",
+    "HashingDefaultsConfig",
+    "HttpDefaultsConfig",
+    "NetworkDefaultsConfig",
+    "NetworkHttpDefaultsConfig",
+    "NormalizationDefaultsConfig",
     "ObservabilityConfig",
     "PaginationConfig",
     "ProfileConfig",
     "ProviderConfigUnion",
+    "PipelineConfigLoaderProtocol",
     "QualityConfig",
     "RuntimeConfig",
     "QcConfig",
     "StorageConfig",
     "PipelineConfig",
-    "PipelineConfigLoaderProtocol",
+    "SourceDefaultsConfig",
+    "SourcesDefaultsConfig",
 ]
