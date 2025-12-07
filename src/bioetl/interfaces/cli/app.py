@@ -21,8 +21,8 @@ from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.infrastructure.observability.server import start_metrics_server_once
 from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.server import start_metrics_server_once
 from bioetl.interfaces.wiring import (
     create_config_loader,
     create_container_factory,
@@ -189,9 +189,7 @@ def run(
             cli_overrides=cli_overrides,
             loader=config_loader,
         )
-        _start_metrics_exporter(
-            config.metrics, dry_run=dry_run, logger=bound_logger
-        )
+        _start_metrics_exporter(config.metrics, dry_run=dry_run, logger=bound_logger)
         provider_config_path = base_dir / "providers.yaml"
         provider_loader_factory = partial(
             create_provider_loader, config_path=provider_config_path
