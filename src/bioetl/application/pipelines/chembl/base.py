@@ -152,7 +152,7 @@ class ChemblPipelineBase(PipelineBase):
         context.metadata["chembl_release"] = self.get_version()
 
     def _should_skip_release_lookup(self) -> bool:
-        """Возвращает True, если получение версии ChEMBL нужно пропустить (офлайн/CSV режим)."""
+        """True, если версию ChEMBL нужно пропустить (офлайн/CSV режим)."""
         input_mode = getattr(self._config, "input_mode", None)
         pipeline_cfg = getattr(self._config, "pipeline", {}) or {}
         if input_mode == "csv":
