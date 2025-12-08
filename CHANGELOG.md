@@ -11,7 +11,9 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - Удалена заглушка `assay_enrichment` из `ChemblSourceConfig`.
 - Помечены deprecated несуществующие клиенты (PubChem, PubMed, Crossref, UniProt, SemanticScholar) в документации.
+- Удалены устаревшие интерфейсы (`default_provider_registry()`, `bioetl.application.services.chembl_extraction`) и middleware-шимы.
 
 ### Breaking Changes
 - Поле `assay_enrichment` удалено из конфигурации. Если использовалось в YAML-конфигах — удалить.
+- Флаг `features.enable_provider_loader_port` больше не поддерживается: порт загрузчика провайдеров активен всегда, а CLI/REST/MQ требуют валидного `providers.yaml` или явного `ProviderRegistry`.
 

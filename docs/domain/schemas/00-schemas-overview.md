@@ -1,10 +1,11 @@
 # Schemas Overview
 
 ## Pandera-схемы
-- **ActivityTableSchema** — бизнес-ключ активности, числовые поля значений, идентификаторы Assay/Target/TestItem, контроль типов единиц.
+- **ActivityTableSchema** — бизнес-ключ активности, числовые поля значений, идентификаторы Assay/Target/Molecule, контроль типов единиц.
 - **AssayTableSchema** — идентификаторы ассеев, тип эксперимента, организм, ссылки на публикации.
 - **TargetTableSchema** — идентификаторы таргетов (ChEMBL, UniProt), типы мишеней и классификации.
-- **TestitemSchema** — идентификаторы соединений (ChEMBL, PubChem), структуры (SMILES/InChI), связи родитель/потомок.
+- **MoleculeTableSchema** — идентификаторы соединений (ChEMBL, PubChem), структуры (SMILES/InChI), связи родитель/потомок.
+- **CellTableSchema / TissueTableSchema** — stub-схемы для справочников клеток/тканей; данные пока доступны только в `data/input/*.csv`.
 - **DocumentTableSchema** — метаданные публикаций (DOI/PMID), ссылки на источники, статусы обогащения.
 
 ## Использование

@@ -3,7 +3,7 @@
 - **Assay** — описание биологического эксперимента; детали полей и схем см. `docs/architecture/01-domain-objects.md`.
 - **Activity** — запись о результатах эксперимента с бизнес-ключом и хешами; подробности в `docs/architecture/01-domain-objects.md` и `docs/domain/schemas/00-schemas-overview.md`.
 - **Target** — биологическая мишень, связанная с Assay/Activity; см. `docs/architecture/01-domain-objects.md`.
-- **TestItem** — тестируемый объект (соединение, препарат), см. `docs/architecture/01-domain-objects.md`.
+- **Molecule** — тестируемый объект (соединение, препарат), см. `docs/architecture/01-domain-objects.md`.
 - **Pipeline** — инстанс `PipelineBase`, реализующий цепочку extract → transform → validate → write.
 - **Stage** — этап пайплайна (extract/transform/validate/write) с отдельной ответственностью.
 - **RunResult** — агрегированное состояние выполнения пайплайна, включая счётчики, метаданные и пути артефактов.

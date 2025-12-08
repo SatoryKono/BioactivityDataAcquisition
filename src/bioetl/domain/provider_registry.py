@@ -63,7 +63,9 @@ class ProviderRegistryABC(Protocol):
 
 @runtime_checkable
 class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
-    """Mutable provider registry port (default implementation: InMemoryProviderRegistry).
+    """Mutable provider registry port.
+
+    Default implementation: InMemoryProviderRegistry.
 
     Public interface:
         register_provider(definition) -> None

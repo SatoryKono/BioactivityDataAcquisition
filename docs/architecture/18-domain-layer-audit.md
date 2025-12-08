@@ -31,35 +31,35 @@
 | Activity | `src/bioetl/domain/schemas/chembl/activity.py` | `configs/pipelines/chembl/activity.yaml` | 45+ ������� (assay/document/molecule �����, ���������, hash) | CSV �������� `data/input/activity.csv` |
 | Assay | `src/bioetl/domain/schemas/chembl/assay.py` | `configs/pipelines/chembl/assay.yaml` | Organism, BAO id/label, �������������, target ������ | Config ��������� schema |
 | Document | `src/bioetl/domain/schemas/chembl/document.py` | `configs/pipelines/chembl/document.yaml` | DOI/PMID, ������, ���, score | ��� ������ ������������ |
-| Molecule / �TestItem� | `src/bioetl/domain/schemas/chembl/molecule.py` | `configs/pipelines/chembl/molecule.yaml` | ChEMBL/PubChem ID, ����������� ������, parent-child, �������� | Docs ���������� ��� `TestItem`, ��� � ������ `Molecule` |
+| Molecule | `src/bioetl/domain/schemas/chembl/molecule.py` | `configs/pipelines/chembl/molecule.yaml` | ChEMBL/PubChem ID, ����������� ������, parent-child, �������� | Docs ������������ � Molecule (glossary, domain objects, diagrams) |
 | Target | `src/bioetl/domain/schemas/chembl/target.py` | `configs/pipelines/chembl/target.yaml` | Taxonomy, organism, UniProt, ����� � assay/activity | ����������� ��������� �������� |
-| Cell / Tissue | � | � | ���� `data/input/cell.csv`, `data/input/tissue.csv` ��� ���� � �������� | ����� ����, �������� ������ ��� |
+| Cell / Tissue | `src/bioetl/domain/schemas/chembl/{cell,tissue}.py` | � | ���� `data/input/cell.csv`, `data/input/tissue.csv` ��� ���� � �������� | Stub Pandera-�����, pipeline/config TBD |
 
 ### 1.3 ���������
 
 - �� �������� �������� ������������ Pandera-�������; ���������/dataclass��� ��� Activity/Assay/etc ���.
-- ����������� (`docs/domain/01-glossary.md`, `docs/domain/schemas/00-schemas-overview.md`, `docs/architecture/01-domain-objects.md`, ��������� � `docs/architecture/diagrams/class/*.mmd`) ���������� ��������� `TestItem`, �������� ��� � ����.
-- CSV `cell/tissue` ������������ �� ������� ������, �� �� ������������ � �� ��������������� � ������.
+- ����������� (`docs/domain/01-glossary.md`, `docs/domain/schemas/00-schemas-overview.md`, `docs/architecture/01-domain-objects.md`, ��������� � `docs/architecture/diagrams/class/*.mmd`) ������������ � Molecule; ����������� файл `28-molecule-schema.mmd` �������� `TestItem`.
+- CSV `cell/tissue` ������������ �� ������� ������; ������ ������ Pandera-����� (`cell.py`, `tissue.py`), �� pipeline/config ������ �������.
 
 ## 2. �������� � �����������
 
 | ��� | ���� | ������� | ��� |
 | --- | --- | --- | --- |
-| �� `HashService` | `src/bioetl/domain/transform/hash_service.py`, `src/bioetl/infrastructure/transform/impl/hash_service_impl.py` | ����������� ������ `HashServiceABC` | ���������� ���������, ������ ������� |
-| �����-��� | `src/bioetl/domain/clients/base/logging/contracts.py` vs `src/bioetl/domain/observability/contracts.py` | Deprecated ������ �� ��� ������������� � ������ `DeprecationWarning` | �������� �������� UnifiedLogger |
-| ���������� �������� | `src/bioetl/domain/configs/base.py` | ����� re-export `pipeline.py` | �������� ������������ �������� ������, ������ tooling |
-| Extraction shim | `src/bioetl/domain/contracts.py` | Alias �� `domain.ports.extraction` | ����������� ������-������� |
-| Docs vs ��� | `docs/domain/*`, `docs/architecture/14-class-diagrams-domain.md` | Docs ������� `TestItem/TestitemSchema`, � ���� ���� ������ `MoleculeTableSchema` | ������ ���������� ������ �������� ��������� |
-| ���������� ����� | `data/input/cell.csv`, `data/input/tissue.csv` | ����� ����, ����/�������� ��� | ���� Pandera/������������ |
+| �� `HashService` | `src/bioetl/domain/transform/hash_service.py`, `src/bioetl/infrastructure/transform/impl/hasher.py` | HashService ���������� ������ `HashServiceABC` | ✅ ��������: ������� infra-�������, HashService �������� только инжектируемый `HasherABC` |
+| �����-��� | `src/bioetl/domain/observability/contracts.py` | `ProgressReporterABC` теперь живёт рядом с logging/tracing портами | ✅ ��������: shim удалён, импорты ведут на observability |
+| ���������� �������� | `src/bioetl/domain/configs/base.py` | ����� re-export `pipeline.py` | ✅ ��������: файл удалён, импорты используют `domain.configs.pipeline` |
+| Extraction shim | `src/bioetl/domain/contracts.py` | Alias �� `domain.ports.extraction` | ✅ ��������: shim удалён, прямые импорты из `domain.ports.extraction` |
+| Docs vs ��� | `docs/domain/*`, `docs/architecture/14-class-diagrams-domain.md` | Docs ������� `TestItem/TestitemSchema`, � ���� ���� ������ `MoleculeTableSchema` | ✅ ��������: все ссылки обновлены на Molecule, диаграмма `28-molecule-schema.mmd` |
+| ���������� ����� | `data/input/cell.csv`, `data/input/tissue.csv` | ����� ����, ����/�������� ��� | ✅ ��������: добавлены stub-схемы, но pipeline/config ещё не описаны |
 
 ### 2.1 �������
 
-- [ ] **HashService**: ���������� ����������, �������� �������� ����� + ������������� `Hasher`.
-- [ ] **Logging shim**: ������� `domain.clients.base.logging`, �������� ������� �� `domain.observability`.
-- [ ] **Configs/base**: ������� re-export, ������������� breaking change.
-- [ ] **`domain.contracts`**: ������ shim, �������� ���������/����.
-- [ ] **Docs TestItem**: ���������������� glossary/��������� � ����������� `Molecule` ��� �������� �������� ��������.
-- [ ] **Cell/Tissue**: ���� ������� �������/���������, ���� ������� ������� CSV.
+- [x] **HashService**: ���������� ����������, �������� �������� ����� + ������������� `Hasher`.
+- [x] **Logging shim**: ������� `domain.clients.base.logging`, �������� ������� �� `domain.observability`.
+- [x] **Configs/base**: ������� re-export, ������������� breaking change.
+- [x] **`domain.contracts`**: ������ shim, �������� ���������/����.
+- [x] **Docs TestItem**: ���������������� glossary/��������� � ����������� `Molecule` ��� �������� �������� ��������.
+- [x] **Cell/Tissue**: ���� ������� �������/���������, ���� ������� ������� CSV.
 
 ## 3. ���� ���������� (ABC/Protocol)
 
@@ -75,7 +75,7 @@
 | `BatchAdapterABC` | `domain/ports/extraction.py` | 1 (`PandasBatchAdapter`) | ������ `ApiRecordSource` | ������� �� `Callable[[Any], list[RawRecord]]` |
 | `DataClientABC` / `ChemblDataClientABC` | `domain/clients/*.py` | 1 (`ChemblDataClientHTTPImpl`) | �� ������ ����������� | ��� ������� ���������� ������ |
 | `ExtractionServiceABC` | `domain/ports/extraction.py` | 1 (`ChemblExtractionServiceImpl`) | ��� ��������� | ���������� �������������� � ChemBL ������ |
-| `HashServiceABC` / `HasherABC` | `domain/transform/contracts.py` | 2 (domain � infra) | ���-����������� | ������� ������������ canonical ���������� |
+| `HashServiceABC` / `HasherABC` | `domain/transform/contracts.py` | 1 (domain facade + HasherImpl) | ���-����������� | ������� ������������ canonical ���������� |
 | `NormalizationServiceABC` | `domain/transform/contracts.py` | 2 (generic, ChemBL) | ���� ������������� | ���������, �� ������� ������� |
 | `SchemaProviderABC` / `ValidatorABC` | `domain/validation/contracts.py` | 1 (SchemaRegistry / Pandera) | ���� ������� | ������������ roadmap ����������� |
 | `WriterABC` / `MetadataWriterABC` / `QualityReportABC` / `OutputWriterABC` | `domain/clients/base/output/contracts.py` | 1�2 | ������ �� `Path` � `pd.DataFrame` | ������ � ��������������, �������� DTO-���� |
@@ -89,7 +89,7 @@
 2. **����� ��������� ����** � `PipelineConfig` �������� HTTP ��������, ���� �, ��������� ����������� � ������. > �������� �� �������� �������� � ���������������� �������.
 3. **`ApiRecordSource` ������������ ��������** � `src/bioetl/domain/record_source.py` ��������� ���������� � batch adapter. > �������� ����� � application ����, � ������ �������� ������ Protocol.
 4. **IO-����� ����� ��� `Path` � �����������** � `WriterABC`/`OutputWriterABC` ������� `Path` � ��������� �������� ���������. > ������� ���� ��������� DTO; ������ ������ � ��������������.
-5. **����������� vs ���** � docs ���������� ��������� �� `TestItem/TestitemSchema`, ������������� � ����. > ���������������� ������������ � �����.
+5. **����������� vs ���**: docs ������������� � MoleculeTableSchema; `TestItem` ���������� ����������� (glossary, diagrams, README). > ����������� ������������� выполнена.
 6. **Metrics port ��� ����������** � `PipelineMetricsPortABC` ���������� `types.SimpleNamespace` � `src/bioetl/interfaces/wiring.py`. > ������� ��������� ������� (Prometheus) � ���������������� ��� � ABC registry.
 
 ## 5. ������ �����
@@ -106,13 +106,13 @@
 
 | ������� | ���� | ������� �������� |
 | --- | --- | --- |
-| ������ ������ (?1 ������) | ������ | ����� `HashService`, ������� logging/config/extraction shim��, �������� docs (TestItem > Molecule), ����������������� ���������� cell/tissue |
+| ������ ������ (?1 ������) | ������ | ✅ Done: HashService объединён, logging/config/extraction shim'ы удалены, docs → Molecule, stub-схемы cell/tissue |
 | ������� ���� (1�3 �������) | ������������ | ����� dataclass/TypedDict ��� Activity/Assay/Document/Target/Molecule, �������� �������, ��������� `ApiRecordSource` � application ����, ��������� pipeline config |
 | ����� ���� (3+ �������) | ������ ������� | ������� �������� metrics/writer ��������, ����������� ���������� ��� ����� �����������, ������� ����� �������� ������� |
 
 ### 6.2 ������� �������
 
-- [ ] �������� �������� �� ������� 2.1 (���������, ������������).
+- [x] �������� �������� �� ������� 2.1 (���������, ������������).
 - [ ] ��������� ABC �� ������ �� ������� 3.
 - [ ] ������������ ���������� �������� � ������� ���������������� ������������ (������ 4).
 - [ ] ������� `docs/architecture/14-class-diagrams-domain.md` � ��������� ��������� ����� ��������������/��������.
