@@ -40,7 +40,7 @@
 Ответственность: проверка данных по Pandera-схемам.
 Ключевые компоненты: `ValidationService`, `SchemaRegistry`, Pandera Models
 (например, `ActivityTableSchema`, `AssayTableSchema`, `MoleculeTableSchema`,
-`TargetTableSchema`, `DocumentTableSchema` в `bioetl.domain.schemas.chembl.*`).
+`TargetTableSchema`, `PublicationTableSchema` в `bioetl.domain.schemas.chembl.*`).
 Взаимодействие: Получает DataFrame после трансформации, возвращает валидированный
 DataFrame и `ValidationResult`. Блокирует запись некорректных данных.
 
@@ -53,7 +53,7 @@ ChEMBL-данные разделены на несколько предметн�
 - Assay: `AssayTableSchema` в `bioetl.domain.schemas.chembl.assay`.
 - Molecule: `MoleculeTableSchema` в `bioetl.domain.schemas.chembl.molecule`.
 - Target: `TargetTableSchema` в `bioetl.domain.schemas.chembl.target`.
-- Document: `DocumentTableSchema` в `bioetl.domain.schemas.chembl.document`.
+- Publication: `PublicationTableSchema` в `bioetl.domain.schemas.chembl.publication`.
 
 Каждый bounded context может эволюционировать независимо (добавление полей,
 ограничений, специфической логики), при этом общий каркас валидации (`ValidationService`,

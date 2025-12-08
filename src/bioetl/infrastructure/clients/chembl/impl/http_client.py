@@ -161,7 +161,7 @@ class ChemblApiPortImpl(DataClientABC):
             "activity": "activity",
             "assay": "assay",
             "target": "target",
-            "document": "document",
+            "publication": "document",
             "molecule": "molecule",
         }
         if entity not in aliases:

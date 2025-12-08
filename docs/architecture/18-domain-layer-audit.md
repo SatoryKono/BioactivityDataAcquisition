@@ -19,7 +19,7 @@
 | `InMemoryProviderRegistry` | `src/bioetl/domain/provider_registry.py` | ������ | Register/list/restore �����������, �������� ���������� | ����� ����������� |
 | `RawRecord` / `RecordSource` | `src/bioetl/domain/record_source.py` | TypedDict + Protocol | �������������� raw ������ � �������� ��������� ������ | ��� Extraction |
 | `ApiRecordSource` | `src/bioetl/domain/record_source.py` | ������ | ��� �� `ExtractionServiceABC.iter_extract`, �������, chunking, optional `batch_adapter` | � ���� application-����������� |
-| `ValidationResult` | `src/bioetl/domain/validation/contracts.py` | dataclass | `is_valid`, `errors`, `warnings`, `validated_df: pd.DataFrame | None` | �������� |
+| `ValidationResult` | `src/bioetl/domain/validation/contracts.py` | dataclass | `is_valid`, `errors`, `warnings`, `validated_df: pd.DataFrame \| None` | �������� |
 | `WriteResult` | `src/bioetl/domain/clients/base/output/contracts.py` | dataclass | `path: Path`, `row_count`, `duration_sec`, `checksum` | IO-���� |
 | `HashService` | `src/bioetl/domain/transform/hash_service.py` | ������ | �������� `hash_row`, `hash_business_key`, `index`, `database_version`, `extracted_at` | ���-���������� ������ |
 | `SchemaRegistry` | `src/bioetl/domain/schemas/registry.py` | ������ | ���������� Pandera-����, �������� `column_order`, `list/get` API | ��������� ������� |
@@ -30,8 +30,8 @@
 | --- | --- | --- | --- | --- |
 | Activity | `src/bioetl/domain/schemas/chembl/activity.py` | `configs/pipelines/chembl/activity.yaml` | 45+ ������� (assay/document/molecule �����, ���������, hash) | CSV �������� `data/input/activity.csv` |
 | Assay | `src/bioetl/domain/schemas/chembl/assay.py` | `configs/pipelines/chembl/assay.yaml` | Organism, BAO id/label, �������������, target ������ | Config ��������� schema |
-| Document | `src/bioetl/domain/schemas/chembl/document.py` | `configs/pipelines/chembl/document.yaml` | DOI/PMID, ������, ���, score | ��� ������ ������������ |
-| Molecule | `src/bioetl/domain/schemas/chembl/molecule.py` | `configs/pipelines/chembl/molecule.yaml` | ChEMBL/PubChem ID, ����������� ������, parent-child, �������� | Docs ������������ � Molecule (glossary, domain objects, diagrams) |
+| Publication | `src/bioetl/domain/schemas/chembl/publication.py` | `configs/pipelines/chembl/publication.yaml` | DOI/PMID, ������, ���, score | ��� ������ ������������ |
+| Molecule / �TestItem� | `src/bioetl/domain/schemas/chembl/molecule.py` | `configs/pipelines/chembl/molecule.yaml` | ChEMBL/PubChem ID, ����������� ������, parent-child, �������� | Docs ���������� ��� `TestItem`, ��� � ������ `Molecule` |
 | Target | `src/bioetl/domain/schemas/chembl/target.py` | `configs/pipelines/chembl/target.yaml` | Taxonomy, organism, UniProt, ����� � assay/activity | ����������� ��������� �������� |
 | Cell / Tissue | `src/bioetl/domain/schemas/chembl/{cell,tissue}.py` | � | ���� `data/input/cell.csv`, `data/input/tissue.csv` ��� ���� � �������� | Stub Pandera-�����, pipeline/config TBD |
 
@@ -96,7 +96,7 @@
 
 - ����������� ������������ ������ (schema/dataclass) �� ������ ������-��������.
 - ������� ������� �������� � ��������������� ����������/DTO; DataFrame ������� ����������� �� ��������.
--  ������ ������ ����������� ����� (������ ABC ����� ?2 ���������� ��� roadmap).
+- ������ ������ ����������� ����� (������ ABC ����� ?2 ���������� ��� roadmap).
 - ������ ���������: ����� ����� �� ��������������� � ��������, �������������� � ��� HTTP/storage/logging/metrics.
 - ����������� � ��������� ���������������� � �����; ����� `cell/tissue` ���� �������, ���� �������.
 

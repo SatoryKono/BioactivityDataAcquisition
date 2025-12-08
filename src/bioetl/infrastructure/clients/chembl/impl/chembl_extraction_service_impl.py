@@ -67,7 +67,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             "activity",
             "assay",
             "target",
-            "document",
+            "publication",
             "molecule",
         }
         if entity not in supported_entities:
@@ -102,7 +102,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         Extract all records for an entity.
 
         Args:
-            entity: Entity name (activity, assay, target, document, molecule)
+            entity: Entity name (activity, assay, target, publication, molecule)
             **filters: API filters including optional 'limit'
 
         Returns:

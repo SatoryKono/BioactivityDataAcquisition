@@ -181,7 +181,7 @@ def test_extract_unknown_entity(service):
         service.extract_all("unknown_entity")
 
 
-@pytest.mark.parametrize("entity", ["assay", "target", "document", "molecule"])
+@pytest.mark.parametrize("entity", ["assay", "target", "publication", "molecule"])
 def test_extract_entities_dispatch(service, mock_client, entity):
     """Test correct client dispatch for entities."""
     mock_parser = MagicMock()
