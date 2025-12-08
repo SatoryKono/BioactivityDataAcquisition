@@ -10,7 +10,9 @@ from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
-from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
+from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
+    UnifiedAPIClientImpl,
+)
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
@@ -52,7 +54,7 @@ def default_chembl_client(
         )
 
     # Create Unified Client
-    unified_client = UnifiedAPIClient(
+    unified_client = UnifiedAPIClientImpl(
         provider="chembl",
         config=client_config,
     )
