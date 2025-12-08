@@ -282,7 +282,7 @@ classDiagram
 
     class ProviderDefinition {
         +provider_id: ProviderId
-        +config_class: Type[BaseProviderConfig]
+        +config_type: Type[BaseProviderConfig]
         +components: ProviderComponents
     }
 
@@ -303,6 +303,12 @@ classDiagram
     ProviderRegistry --> ProviderDefinition : stores
     ProviderDefinition --> ProviderId : uses
     ProviderDefinition --> ProviderComponents : contains
+    note right of BaseProviderConfig
+      Canonical provider config lives in
+      bioetl.domain.configs.pipeline and
+      defines provider/base_url/timeouts
+      with strict validation.
+    end note
 ```
 
 ## 8. Normalizers

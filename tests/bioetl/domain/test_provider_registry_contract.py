@@ -1,15 +1,11 @@
 import pytest
 
+from bioetl.domain.configs.pipeline import BaseProviderConfig
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     ProviderAlreadyRegisteredError,
 )
-from bioetl.domain.providers import (
-    BaseProviderConfig,
-    ProviderComponents,
-    ProviderDefinition,
-    ProviderId,
-)
+from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 
 
 class DummyProviderConfig(BaseProviderConfig):

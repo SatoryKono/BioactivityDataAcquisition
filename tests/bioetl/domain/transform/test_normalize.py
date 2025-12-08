@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
+from bioetl.domain.configs.normalization import NormalizationConfig
 from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 from bioetl.domain.transform.normalizers.registry import CUSTOM_FIELD_NORMALIZERS
 from bioetl.infrastructure.transform.factories import default_normalization_service
@@ -24,31 +25,19 @@ def test_normalize_scalar():
     assert normalize_scalar("  AbC  ", mode="sensitive") == "AbC"
 
 
-class MockNormalizationConfig:
-    def __init__(
-        self,
-        case_sensitive_fields: list[str] | None = None,
-        id_fields: list[str] | None = None,
-        custom_normalizers: dict[str, Any] | None = None,
-    ):
-        self.case_sensitive_fields = case_sensitive_fields or []
-        self.id_fields = id_fields or []
-        self.custom_normalizers = custom_normalizers or {}
-
-
 class MockConfig(NormalizationConfigProviderProtocol):
     def __init__(
         self,
         fields: list[dict[str, Any]],
-        normalization: MockNormalizationConfig | None = None,
+        normalization: NormalizationConfig | None = None,
     ):
         self._fields = fields
-        self.normalization = normalization or MockNormalizationConfig()
+        self.normalization = normalization or NormalizationConfig()
 
     def get_fields(self) -> list[dict[str, Any]]:
         return self._fields
 
-    def get_normalization(self) -> MockNormalizationConfig:
+    def get_normalization(self) -> NormalizationConfig:
         return self.normalization
 
 
@@ -62,7 +51,7 @@ def test_normalization_service_full():
         {"name": "doi", "data_type": "string"},
     ]
 
-    norm_config = MockNormalizationConfig(id_fields=["id_col"])
+    norm_config = NormalizationConfig(id_fields=["id_col"])
     config = MockConfig(fields, normalization=norm_config)
 
     # Note: 'doi' is registered globally in
@@ -104,7 +93,7 @@ def test_normalization_service_full():
 
 
 def test_normalization_service_raises_on_invalid_custom_value():
-    norm_config = MockNormalizationConfig()
+    norm_config = NormalizationConfig()
     config = MockConfig(
         [{"name": "fail_field", "data_type": "string"}], normalization=norm_config
     )
@@ -173,7 +162,7 @@ def test_normalization_service_id_detection():
 def test_normalization_service_case_sensitive():
     """Test case sensitive field normalization."""
     fields = [{"name": "secret_code", "data_type": "string"}]
-    norm_config = MockNormalizationConfig(case_sensitive_fields=["secret_code"])
+    norm_config = NormalizationConfig(case_sensitive_fields=["secret_code"])
     config = MockConfig(fields, normalization=norm_config)
 
     service = default_normalization_service(config)

@@ -6,9 +6,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict
-
 if TYPE_CHECKING:
+    from bioetl.domain.configs.pipeline import BaseProviderConfig
     from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 client_t = TypeVar("client_t")
@@ -31,12 +30,6 @@ class ProviderId(str, Enum):
     DUMMY = "dummy"
 
 
-class BaseProviderConfig(BaseModel):
-    """Base provider configuration model."""
-
-    model_config = ConfigDict(extra="forbid")
-
-
 @runtime_checkable
 class ProviderComponents(
     Protocol[
@@ -48,12 +41,12 @@ class ProviderComponents(
 ):
     """Protocol describing provider component factories with consistent signatures."""
 
-    def create_client(self, config: BaseProviderConfig) -> client_t:
+    def create_client(self, config: "BaseProviderConfig") -> client_t:
         """Create provider client instance."""
 
     def create_extraction_service(
         self,
-        config: BaseProviderConfig,
+        config: "BaseProviderConfig",
         *,
         client: client_t | None = None,
     ) -> extraction_service_t:
@@ -62,7 +55,7 @@ class ProviderComponents(
     # Optional factories
     def create_normalization_service(
         self,
-        config: BaseProviderConfig,
+        config: "BaseProviderConfig",
         *,
         client: client_t | None = None,
         pipeline_config: object | None = None,
@@ -71,7 +64,7 @@ class ProviderComponents(
 
     def create_writer(
         self,
-        config: BaseProviderConfig,
+        config: "BaseProviderConfig",
         *,
         client: client_t | None = None,
     ) -> writer_t:  # pragma: no cover - optional
@@ -83,13 +76,12 @@ class ProviderDefinition:
     """Provider metadata and factory entry points."""
 
     id: ProviderId
-    config_type: type[BaseProviderConfig]
+    config_type: type["BaseProviderConfig"]
     components: ProviderComponents
     description: str | None = None
 
 
 __all__ = [
-    "BaseProviderConfig",
     "ProviderComponents",
     "ProviderDefinition",
     "ProviderId",

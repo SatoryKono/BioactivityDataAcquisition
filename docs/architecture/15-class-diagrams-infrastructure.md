@@ -409,7 +409,7 @@ classDiagram
 
     class ProviderDefinition {
         +provider_id: ProviderId
-        +config_class: Type[BaseProviderConfig]
+        +config_type: Type[BaseProviderConfig]
         +components: ProviderComponents
     }
 
@@ -420,7 +420,11 @@ classDiagram
     }
 
     class BaseProviderConfig {
-        +provider: str
+        +provider: Literal["chembl", "pubchem", "uniprot", "dummy"]
+        +base_url: AnyHttpUrl
+        +timeout_sec: PositiveFloat
+        +max_retries: NonNegativeInt
+        +rate_limit_per_sec: PositiveFloat?
     }
 
     ProviderComponents <|.. ChemblProviderComponentsFactory
