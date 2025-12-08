@@ -4,12 +4,14 @@ Tests for the PipelineBase class.
 
 # pylint: disable=redefined-outer-name, protected-access
 from pathlib import Path
+from typing import Callable, Iterable
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
@@ -17,6 +19,7 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
+from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformerImpl,
@@ -29,39 +32,106 @@ from bioetl.domain.transform.transformers import (
 from bioetl.infrastructure.transform.factories import default_hash_service
 
 
+class CallableExtractor(ExtractorABC):
+    """Extractor stub that delegates to a callable."""
+
+    def __init__(self, action: Callable[..., Iterable[pd.DataFrame] | pd.DataFrame]):
+        self._action = action
+        self.call_count = 0
+
+    def extract(self, **kwargs):
+        self.call_count += 1
+        return self._action(**kwargs)
+
+
+class RecordingLoader(LoaderABC):
+    """Loader stub that records calls and returns a WriteResult."""
+
+    def __init__(self):
+        self.calls: list[tuple[pd.DataFrame, Path, RunContext, list[str] | None]] = []
+
+    def load(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        self.calls.append((df.copy(), output_path, context, column_order))
+        return WriteResult(path=output_path, row_count=len(df), duration_sec=0.0)
+
+
+class SimpleTransformer(TransformerABC):
+    """Transformer stub that annotates processed rows."""
+
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
+        return df.assign(transformed=True)
+
+
 class ConcretePipeline(PipelineBase):
     """A concrete implementation of PipelineBase for testing."""
 
-    def extract(self, **_):
+    def __init__(
+        self,
+        *args,
+        extractor: ExtractorABC | None = None,
+        transformer: TransformerABC | None = None,
+        loader: LoaderABC | None = None,
+        **kwargs,
+    ):
+        super().__init__(*args, extractor=extractor, transformer=transformer, loader=loader, **kwargs)
+
+    def extract(self, **kwargs):
         """Mock extraction returning sample data."""
         if self._extractor is not None:
-            return self._extractor.extract()
+            return self._extractor.extract(**kwargs)
         return pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Mock transformation adding a column."""
+        if self._transformer is not None:
+            return self._transformer.apply(df)
         df["transformed"] = True
         return df
 
     def write(self, df: pd.DataFrame, output_path: Path, context: RunContext):
-        return self._write_output(df, output_path, context)
+        return super().write(df, output_path, context)
 
 
 class DatasetPipeline(PipelineBase):
     """Pipeline that operates on a provided in-memory dataset."""
 
-    def __init__(self, *args, dataset: pd.DataFrame, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        *args,
+        dataset: pd.DataFrame,
+        extractor: ExtractorABC | None = None,
+        transformer: TransformerABC | None = None,
+        loader: LoaderABC | None = None,
+        **kwargs,
+    ):
         self._dataset = dataset
+        extractor_impl = extractor or CallableExtractor(lambda **_: [dataset.copy()])
+        transformer_impl = transformer or SimpleTransformer()
+        super().__init__(
+            *args,
+            extractor=extractor_impl,
+            transformer=transformer_impl,
+            loader=loader,
+            **kwargs,
+        )
 
-    def extract(self, **_):
-        return self._dataset.copy()
+    def extract(self, **kwargs):
+        _ = kwargs
+        return self._extractor.extract(**kwargs)
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.assign(processed=True)
+        return self._transformer.apply(df)
 
     def write(self, df: pd.DataFrame, output_path: Path, context: RunContext):
-        return self._write_output(df, output_path, context)
+        return super().write(df, output_path, context)
 
 
 @pytest.fixture
@@ -71,11 +141,14 @@ def hash_service():
 
 @pytest.fixture
 def default_extractor():
-    extractor = MagicMock()
-    extractor.extract.return_value = [
-        pd.DataFrame({"id": [1, 2], "val": ["x", "y"]}),
-    ]
-    return extractor
+    return CallableExtractor(
+        lambda **_: [pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})]
+    )
+
+
+@pytest.fixture
+def mock_loader():
+    return RecordingLoader()
 
 
 @pytest.mark.unit
@@ -115,7 +188,7 @@ def test_pipeline_run_success(
     mock_logger.info.assert_any_call("Pipeline started", run_id=result.run_id)
 
     # Verify write called
-    mock_loader.load.assert_called_once()
+    assert len(mock_loader.calls) == 1
 
 
 @pytest.mark.unit
@@ -132,11 +205,11 @@ def test_pipeline_dry_run(
     """Test a dry run of the pipeline."""
     # Arrange
     pipeline = ConcretePipeline(
-        mock_config,
-        mock_logger,
-        mock_validation_service,
-        mock_loader,
-        hash_service,
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        loader=mock_loader,
+        hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
@@ -153,7 +226,7 @@ def test_pipeline_dry_run(
     assert "validate" in stage_names
     assert "write" not in stage_names
 
-    mock_loader.load.assert_not_called()
+    assert mock_loader.calls == []
 
 
 @pytest.mark.unit
@@ -169,11 +242,11 @@ def test_pipeline_hooks(
     """Test that hooks are called correctly."""
     # Arrange
     pipeline = ConcretePipeline(
-        mock_config,
-        mock_logger,
-        mock_validation_service,
-        mock_loader,
-        hash_service,
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        loader=mock_loader,
+        hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
@@ -205,11 +278,11 @@ def test_pipeline_error_hooks(
     """Test that error hooks are called on failure."""
     # Arrange
     pipeline = ConcretePipeline(
-        mock_config,
-        mock_logger,
-        mock_validation_service,
-        mock_loader,
-        hash_service,
+        config=mock_config,
+        logger=mock_logger,
+        validation_service=mock_validation_service,
+        loader=mock_loader,
+        hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
@@ -217,8 +290,8 @@ def test_pipeline_error_hooks(
     pipeline.register_hook(mock_hook)
 
     # Mock extract to fail
-    pipeline._extractor.extract = MagicMock(
-        side_effect=ValueError("Extraction failed"),
+    pipeline._extractor = CallableExtractor(
+        lambda **_: (_ for _ in ()).throw(ValueError("Extraction failed"))
     )
 
     # Act & Assert
@@ -260,7 +333,7 @@ def test_error_policy_skip_stage(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
-    pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
+    pipeline._extractor = CallableExtractor(lambda **_: (_ for _ in ()).throw(ValueError("boom")))
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)
 
@@ -292,17 +365,21 @@ def test_error_policy_retry(
         extractor=default_extractor,
     )
 
-    pipeline._extractor.extract = MagicMock(
-        side_effect=[ValueError("temporary"), pd.DataFrame({"id": [1]})]
-    )
+    outcomes = iter([ValueError("temporary"), pd.DataFrame({"id": [1]})])
+
+    def flaky_extract(**_):
+        result = next(outcomes)
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    pipeline._extractor = CallableExtractor(flaky_extract)
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)
 
     assert result.success
     assert result.row_count == 1
-    mock_extract = pipeline._extractor.extract
-    assert isinstance(mock_extract, MagicMock)
-    assert mock_extract.call_count == 2
+    assert pipeline._extractor.call_count == 2
 
 
 @pytest.mark.unit
@@ -377,13 +454,13 @@ def test_error_policy_failfast_raises(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
     )
-    pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
+    pipeline._extractor = CallableExtractor(
+        lambda **_: (_ for _ in ()).throw(ValueError("boom"))
+    )
 
     with pytest.raises(PipelineStageError):
         pipeline.run(output_path=tmp_path, dry_run=True)
-    mock_extract = pipeline._extractor.extract
-    assert isinstance(mock_extract, MagicMock)
-    assert mock_extract.call_count == 1
+    assert pipeline._extractor.call_count == 1
 
 
 @pytest.mark.unit
@@ -435,8 +512,7 @@ def test_pipeline_dry_run_metadata_and_stages(
     hash_service,
 ):
     """Dry-run returns accurate stage info and metadata."""
-    extractor = MagicMock()
-    extractor.extract.return_value = [small_pipeline_df.copy()]
+    extractor = CallableExtractor(lambda **_: [small_pipeline_df.copy()])
     pipeline = DatasetPipeline(
         config=pipeline_test_config,
         logger=mock_logger,
