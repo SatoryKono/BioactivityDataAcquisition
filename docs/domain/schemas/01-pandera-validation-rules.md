@@ -22,7 +22,7 @@ This document defines the mandatory rules and extended guidance for validating t
 
 ### Naming and placement
 
-- Class name: `<Entity>Schema` (e.g., `ActivitySchema`, `TargetSchema`).
+- Class name: `<Entity>TableSchema` (e.g., `ActivityTableSchema`, `TargetSchema`).
 - One file per entity under `src/bioetl/domain/schemas/<provider>/<entity>.py`.
 - Each module must export the schema class and `OUTPUT_COLUMN_ORDER`.
 - Follow project naming policies (snake_case modules, PascalCase classes, kebab-case docs).
@@ -106,7 +106,7 @@ These columns are part of the lineage and determinism chain defined in project r
 
   registry.register(
       "activity",
-      ActivitySchema,
+      ActivityTableSchema,
       column_order=ACTIVITY_OUTPUT_COLUMNS,
   )
   ```

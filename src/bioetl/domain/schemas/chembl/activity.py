@@ -1,6 +1,4 @@
-"""
-Activity Schema (Pandera).
-"""
+"""Pandera schema for normalized ChEMBL activity table."""
 
 import pandera as pa
 from pandera.typing import Series
@@ -65,8 +63,8 @@ OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(
 )
 
 
-class ActivitySchema(BaseGeneratedColumnsSchema):
-    """Схема данных для таблицы Activity."""
+class ActivityTableSchema(BaseGeneratedColumnsSchema):
+    """Pandera schema describing the normalized Activity table."""
 
     action_type: Series[str] = pa.Field(
         nullable=True, description="Тип действия (agonist, antagonist)"

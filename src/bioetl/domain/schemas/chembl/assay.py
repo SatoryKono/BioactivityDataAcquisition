@@ -1,4 +1,4 @@
-"""Pandera schemas for normalized ChEMBL assay datasets."""
+"""Pandera schema for normalized ChEMBL assay table."""
 
 import pandera as pa
 from pandera.typing import Series
@@ -45,7 +45,7 @@ _ASSAY_BUSINESS_COLUMNS: list[str] = [
 OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_ASSAY_BUSINESS_COLUMNS)
 
 
-class AssaySchema(BaseGeneratedColumnsSchema):
+class AssayTableSchema(BaseGeneratedColumnsSchema):
     """Pandera schema describing normalized ChEMBL assay records."""
 
     aidx: Series[str] = pa.Field(
