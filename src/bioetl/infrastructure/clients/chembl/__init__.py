@@ -4,4 +4,6 @@ from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl im
     ChemblExtractionServiceImpl,
 )
 
-__all__ = ["ChemblExtractionServiceImpl"]
+ChemblExtractionClientImpl = ChemblExtractionServiceImpl
+
+__all__ = ["ChemblExtractionServiceImpl", "ChemblExtractionClientImpl"]

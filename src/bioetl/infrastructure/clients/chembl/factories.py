@@ -4,7 +4,7 @@ Factories for ChEMBL clients.
 
 from typing import Any
 
-from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
@@ -29,7 +29,7 @@ def default_chembl_client(
     source_config: ChemblSourceConfig,
     client_config: ClientConfig | None = None,
     **options: Any,
-) -> ChemblDataClientABC:
+) -> DataClientABC:
     """
     Создает клиент ChEMBL по умолчанию.
 
@@ -84,7 +84,7 @@ def default_chembl_extraction_service(
     config: ChemblSourceConfig,
     client_config: ClientConfig | None = None,
     *,
-    client: ChemblDataClientABC | None = None,
+    client: DataClientABC | None = None,
 ) -> ExtractionServiceABC:
     """
     Создает сервис экстракции ChEMBL.

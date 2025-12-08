@@ -7,14 +7,14 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 
 
 @pytest.fixture
 def mock_client():
     """Mock ChEMBL client."""
-    return MagicMock(spec=ChemblDataClientABC)
+    return MagicMock(spec=DataClientABC)
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def test_extract_all_single_page(service, mock_client):
     service.parser = mock_parser
 
     # Setup mock responses
-    mock_client.request_activity.return_value = {"data": "page1"}
+    mock_client.fetch.return_value = {"data": "page1"}
     mock_parser.parse_response.return_value = [{"id": 1}, {"id": 2}]
     mock_paginator.has_more.return_value = False
 
@@ -51,7 +51,7 @@ def test_extract_all_single_page(service, mock_client):
     # Assert
     assert len(records) == 2
     assert records[0]["id"] == 1
-    mock_client.request_activity.assert_called_with(offset=0, limit=10)
+    mock_client.fetch.assert_called_with("activity", offset=0, limit=10)
 
 
 def test_extract_all_pagination(service, mock_client):
@@ -67,7 +67,7 @@ def test_extract_all_pagination(service, mock_client):
     # Call 1: returns 2 items, has_more=True
     # Call 2: returns 1 item, has_more=False
 
-    mock_client.request_activity.side_effect = [{"data": "page1"}, {"data": "page2"}]
+    mock_client.fetch.side_effect = [{"data": "page1"}, {"data": "page2"}]
     mock_parser.parse_response.side_effect = [[{"id": 1}, {"id": 2}], [{"id": 3}]]
     mock_paginator.has_more.side_effect = [True, False]
 
@@ -76,9 +76,10 @@ def test_extract_all_pagination(service, mock_client):
 
     # Assert
     assert len(records) == 3
-    assert mock_client.request_activity.call_count == 2
+    assert mock_client.fetch.call_count == 2
     # Check call args
-    calls = mock_client.request_activity.call_args_list
+    calls = mock_client.fetch.call_args_list
+    assert calls[0].args[0] == "activity"
     assert calls[0].kwargs["offset"] == 0
     assert calls[1].kwargs["offset"] == 10
 
@@ -91,7 +92,7 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
     service.parser = mock_parser
     service.paginator = mock_paginator
 
-    mock_client.request_activity.return_value = {"data": "page"}
+    mock_client.fetch.return_value = {"data": "page"}
     mock_parser.parse_response.return_value = [
         {
             "id": 1,
@@ -125,7 +126,7 @@ def test_extract_all_limit(service, mock_client):
     # Assert
     assert len(records) == 5
     # Should call client with limit=5
-    mock_client.request_activity.assert_called_with(offset=0, limit=5)
+    mock_client.fetch.assert_called_with("activity", offset=0, limit=5)
 
 
 def test_iter_extract_stops_on_empty_page(service, mock_client):
@@ -136,14 +137,14 @@ def test_iter_extract_stops_on_empty_page(service, mock_client):
     service.parser = mock_parser
     service.paginator = mock_paginator
 
-    mock_client.request_activity.return_value = {"data": []}
+    mock_client.fetch.return_value = {"data": []}
     mock_parser.parse_response.return_value = []
     mock_paginator.has_more.return_value = False
 
     chunks = list(service.iter_extract("activity", chunk_size=5))
 
     assert chunks == []
-    mock_client.request_activity.assert_called_once_with(offset=0, limit=5)
+    mock_client.fetch.assert_called_once_with("activity", offset=0, limit=5)
 
 
 def test_iter_extract_respects_limit_with_pagination(service, mock_client):
@@ -154,7 +155,7 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
     service.parser = mock_parser
     service.paginator = mock_paginator
 
-    mock_client.request_activity.side_effect = [
+    mock_client.fetch.side_effect = [
         {"data": "page1"},
         {"data": "page2"},
     ]
@@ -168,7 +169,8 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
 
     assert len(chunks) == 2
     assert sum(len(chunk) for chunk in chunks) == 3
-    calls = mock_client.request_activity.call_args_list
+    calls = mock_client.fetch.call_args_list
+    assert calls[0].args[0] == "activity"
     assert calls[0].kwargs == {"offset": 0, "limit": 2}
     assert calls[1].kwargs == {"offset": 2, "limit": 1}
 
@@ -179,18 +181,9 @@ def test_extract_unknown_entity(service):
         service.extract_all("unknown_entity")
 
 
-@pytest.mark.parametrize(
-    "entity,method",
-    [
-        ("assay", "request_assay"),
-        ("target", "request_target"),
-        ("document", "request_document"),
-        ("molecule", "request_molecule"),
-    ],
-)
-def test_extract_entities_dispatch(service, mock_client, entity, method):
-    """Test correct client method dispatch for entities."""
-    # Mock parser - paginator not strictly needed as we return empty list
+@pytest.mark.parametrize("entity", ["assay", "target", "document", "molecule"])
+def test_extract_entities_dispatch(service, mock_client, entity):
+    """Test correct client dispatch for entities."""
     mock_parser = MagicMock()
     service.parser = mock_parser
 
@@ -198,5 +191,5 @@ def test_extract_entities_dispatch(service, mock_client, entity, method):
 
     service.extract_all(entity)
 
-    # Check corresponding method called
-    getattr(mock_client, method).assert_called_once()
+    mock_client.fetch.assert_called_once()
+    assert mock_client.fetch.call_args.args[0] == entity
