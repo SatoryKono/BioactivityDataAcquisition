@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Iterable, cast
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
 
 import pandas as pd
 
@@ -136,6 +136,8 @@ class PipelineBase(ABC):
             hooks=hooks,
             pipeline_id=self._config.id,
         )
+        if self._extractor is not None:
+            self.extract = self._extractor.extract  # type: ignore[method-assign]
         self._instrument_extract_calls()
 
     # === Public API ===
@@ -310,14 +312,23 @@ class PipelineBase(ABC):
         dry_run: bool,
         kwargs: dict[str, Any],
     ) -> tuple[dict[str, int], list[pd.DataFrame]]:
-        chunk_iterator: Iterable[pd.DataFrame] | None = None
+        chunk_iterator: Iterator[pd.DataFrame] | None = None
         transform_started = False
         validate_started = False
+
+        extract_stage = self._get_extract_callable()
+        transform_stage = self._get_transform_callable(context)
+        validate_stage = self.validate
 
         def reset_iterator() -> None:
             """Recreate extractor iterator for retries."""
             nonlocal chunk_iterator
-            chunk_iterator = self._create_chunk_iterator(context, **kwargs)
+            extract_result = self._runtime_manager.execute_stage(
+                "extract",
+                context,
+                lambda: extract_stage(**kwargs),
+            )
+            chunk_iterator = self._normalize_extract_result(extract_result)
 
         reset_iterator()
         while True:
@@ -325,7 +336,7 @@ class PipelineBase(ABC):
                 raw_chunk_obj = self._runtime_manager.execute_stage(
                     "extract",
                     context,
-                    lambda: next(chunk_iterator),  # type: ignore
+                    lambda: next(cast(Iterator[pd.DataFrame], chunk_iterator)),
                     on_retry=reset_iterator,
                 )
             except StopIteration:
@@ -358,9 +369,9 @@ class PipelineBase(ABC):
                 validate_count=counters["validate_count"],
                 validated_chunks=validated_chunks,
                 dry_run=dry_run,
-                transform_fn=self.transform,
+                transform_fn=transform_stage,
                 apply_transformers=self._apply_transformers,
-                validate_fn=self.validate,
+                validate_fn=validate_stage,
             )
 
         if not transform_started:
@@ -382,9 +393,9 @@ class PipelineBase(ABC):
                 validate_count=counters["validate_count"],
                 validated_chunks=validated_chunks,
                 dry_run=dry_run,
-                transform_fn=self.transform,
+                transform_fn=transform_stage,
                 apply_transformers=self._apply_transformers,
-                validate_fn=self.validate,
+                validate_fn=validate_stage,
             )
 
         return counters, validated_chunks
@@ -422,14 +433,11 @@ class PipelineBase(ABC):
             else pd.DataFrame()
         )
 
+        write_stage = self._get_write_callable(context)
         write_result_obj = self._runtime_manager.execute_stage(
             "write",
             context,
-            lambda: self.write(
-                df_to_write,
-                output_path,
-                context,
-            ),
+            lambda: write_stage(df_to_write, output_path, context),
         )
         if write_result_obj is None:
             return None, counters
@@ -533,22 +541,6 @@ class PipelineBase(ABC):
             return df
         return self._post_transformer.apply(df, context)
 
-    def _create_chunk_iterator(
-        self, context: RunContext, **kwargs: Any
-    ) -> Iterable[pd.DataFrame]:
-        iterator = self._runtime_manager.execute_stage(
-            "extract",
-            context,
-            lambda: self.extract(**kwargs),
-        )
-        if iterator is None:
-            return iter([])
-        if isinstance(iterator, pd.DataFrame):
-            return iter([iterator])
-        if not isinstance(iterator, Iterable):
-            return iter([])
-        return iter(iterator)
-
     def _run_stage(
         self,
         stage: str,
@@ -593,6 +585,41 @@ class PipelineBase(ABC):
         setattr(_wrapped_extract, "call_count", 0)
         self.extract = _wrapped_extract  # type: ignore[method-assign]
 
+    def _increment_extract_call_count(self) -> None:
+        """Helper to bump extract.call_count when using external extractor."""
+        call_count = getattr(self.extract, "call_count", None)
+        if isinstance(call_count, int):
+            setattr(self.extract, "call_count", call_count + 1)
+
+    def _get_extract_callable(
+        self,
+    ) -> Callable[..., pd.DataFrame | Iterable[pd.DataFrame] | None]:
+        return self.extract
+
+    def _get_transform_callable(
+        self, context: RunContext
+    ) -> Callable[[pd.DataFrame], pd.DataFrame]:
+        if self._transformer:
+            return lambda df: self._transformer.apply(df, context)
+        return self.transform
+
+    def _get_write_callable(
+        self, context: RunContext
+    ) -> Callable[[pd.DataFrame, Path, RunContext], WriteResult]:
+        return lambda df, output_path, run_context: self.write(
+            df, output_path, run_context
+        )
+
+    def _normalize_extract_result(
+        self, result: Any
+    ) -> Iterator[pd.DataFrame]:
+        if result is None:
+            return iter([])
+        if isinstance(result, pd.DataFrame):
+            return iter([result])
+        if isinstance(result, Iterable):
+            return iter(result)
+        raise TypeError("Extractor must return a DataFrame or iterable of DataFrames.")
     def _enrich_context(self, context: RunContext) -> None:
         """
         Хук для обогащения контекста (например, добавления версии релиза).
