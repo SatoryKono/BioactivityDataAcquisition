@@ -32,7 +32,7 @@
 
 ## Validation (Domain)
 Ответственность: проверка данных по Pandera-схемам.
-Ключевые компоненты: `ValidationService`, `SchemaRegistry`, Pandera Models (например, `ActivitySchema`).
+Ключевые компоненты: `ValidationService`, `SchemaRegistry`, Pandera Models (например, `ActivityTableSchema`).
 Взаимодействие: Получает DataFrame после трансформации, возвращает валидированный DataFrame и `ValidationResult`. Блокирует запись некорректных данных.
 
 ## Output (Infrastructure)

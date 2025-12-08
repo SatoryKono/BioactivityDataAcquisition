@@ -16,7 +16,7 @@ subgraph Interfaces["Interfaces Layer (Ports)"]
     PipelinePorts["PipelineBase / ChemblPipelineBase\napplication.pipelines.base"]:::componentSecondary
     PipelineRegistry["Pipeline Registry\napplication.pipelines.registry"]:::componentSecondary
     ConfigLoader["Pipeline Config Loader\napplication.config_loader"]:::componentSecondary
-    ClientPorts["SourceClientABC\ninterfaces.clients / domain.clients.base"]:::componentSecondary
+    ClientPorts["DataClientABC / ChemblDataClientABC\ninterfaces.clients / domain.clients.base"]:::componentSecondary
     WriterPorts["WriterABC / UnifiedOutputWriterABC\ninterfaces.output"]:::componentSecondary
     ValidatorPorts["ValidatorABC\ninterfaces.validation"]:::componentSecondary
     LoggerPorts["LoggerAdapterABC\ninterfaces.logging"]:::componentSecondary

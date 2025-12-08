@@ -6,7 +6,7 @@ sequenceDiagram
     participant Extraction as ChemblExtractionService
     participant DataClient as ChemblDataClientHTTPImpl
     participant Transformer as AssayTransformer
-    participant Validator as ValidationService(AssaySchema)
+    participant Validator as ValidationService(AssayTableSchema)
     participant Writer as UnifiedOutputWriter
 
     CLI->>Orchestrator: run("assay_chembl", args)
@@ -15,7 +15,7 @@ sequenceDiagram
     loop for each page
         Extraction->>DataClient: request_assay(filters, offset)
         DataClient-->>Extraction: page dict
-        Extraction-->>Pipeline: batch_df
+        Extraction-->>Pipeline: batch_df (RawAssayPayload normalized)
         Pipeline->>Transformer: do_transform(batch_df)
         Transformer->>Transformer: normalize assay_classifications & parameters
         Transformer-->>Pipeline: normalized_df

@@ -38,6 +38,7 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.transform.pandas_batch_adapter import PandasBatchAdapter
 
 
 class PipelineContainer(PipelineContainerABC):
@@ -230,6 +231,7 @@ class PipelineContainer(PipelineContainerABC):
             entity=self._config.entity_name,
             filters=filters,
             chunk_size=self._config.batch_size,
+            batch_adapter=PandasBatchAdapter().adapt_batch,
         )
 
     def get_extraction_service(self) -> Any:
