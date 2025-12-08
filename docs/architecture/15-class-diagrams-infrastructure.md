@@ -237,13 +237,13 @@ classDiagram
 
 ```mermaid
 classDiagram
-    class LoggerAdapterABC {
+    class LoggingPortABC {
         <<abstract>>
         +info(msg, **ctx)*
         +error(msg, **ctx)*
         +debug(msg, **ctx)*
         +warning(msg, **ctx)*
-        +bind(**ctx)* LoggerAdapterABC
+        +bind(**ctx)* LoggingPortABC
     }
 
     class UnifiedLoggerImpl {
@@ -269,7 +269,7 @@ classDiagram
         +finish()
     }
 
-    LoggerAdapterABC <|-- UnifiedLoggerImpl
+    LoggingPortABC <|-- UnifiedLoggerImpl
     ProgressReporterABC <|-- TqdmProgressReporterImpl
 ```
 

@@ -111,13 +111,8 @@ def test_pipeline_outputs(
     provider_loader_factory = partial(
         create_provider_loader, config_path=Path("configs/providers.yaml")
     )
-    feature_flag = config.features.enable_provider_loader_port
-    if feature_flag:
-        provider_loader = provider_loader_factory()
-        provider_registry = None
-    else:
-        provider_loader = None
-        provider_registry = provider_loader_factory().get_registry()
+    provider_loader = provider_loader_factory()
+    provider_registry = None
 
     container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
@@ -126,7 +121,6 @@ def test_pipeline_outputs(
         provider_registry=provider_registry,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
-        use_provider_loader_port=feature_flag,
         container_factory=container_factory,
     )
     golden = importlib.import_module(golden_module)

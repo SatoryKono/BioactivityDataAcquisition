@@ -32,14 +32,14 @@ def test_run_in_background_dry_run(tmp_path):
     )
 
     provider_loader_factory = partial(create_provider_loader)
-    registry = provider_loader_factory().get_registry()
+    provider_loader = provider_loader_factory()
     container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,
-        provider_registry=registry,
+        provider_registry=None,
+        provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
-        use_provider_loader_port=False,
         container_factory=container_factory,
     )
 
@@ -68,18 +68,14 @@ def test_run_in_background_with_port_enabled(tmp_path):
         cli_overrides=cli_overrides,
         loader=config_loader,
     )
-    config_copy.features.enable_provider_loader_port = True
-
-    provider_loader_factory = partial(create_provider_loader)
-    provider_loader = provider_loader_factory()
+    registry = create_provider_loader().get_registry()
     container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,
-        provider_registry=None,
-        provider_loader=provider_loader,
-        provider_loader_factory=provider_loader_factory,
-        use_provider_loader_port=True,
+        provider_registry=registry,
+        provider_loader=None,
+        provider_loader_factory=None,
         container_factory=container_factory,
     )
 

@@ -81,7 +81,7 @@ classDiagram
     class PipelineBase {
         <<Abstract>>
         +_config: PipelineConfig
-        +_logger: LoggerAdapterABC
+        +_logger: LoggingPortABC
         +_validation_service: ValidationService
         +_hash_service: HashService
         +_output_writer: UnifiedOutputWriter
@@ -412,7 +412,7 @@ flowchart LR
   subgraph Interfaces["**Interfaces (Ports)**"]
     IF_Pipeline["**PipelineBase**, **ChemblPipelineBase** *bioetl.application.pipelines.base*"]
     IF_Client["**BaseClient**, **DataClientABC**, **ChemblDataClientABC** *bioetl.interfaces.clients*"]
-    IF_Logger["**LoggerAdapterABC** *bioetl.interfaces.logging*"]
+    IF_Logger["**LoggingPortABC** *bioetl.interfaces.logging*"]
     IF_Writer["**WriterABC**, **UnifiedOutputWriterABC** *bioetl.interfaces.output*"]
     IF_Validator["**ValidatorABC** *bioetl.interfaces.validation*"]
   end

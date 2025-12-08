@@ -19,7 +19,7 @@ subgraph Interfaces["Interfaces Layer (Ports)"]
     ClientPorts["DataClientABC / ChemblDataClientABC\ninterfaces.clients / domain.clients.base"]:::componentSecondary
     WriterPorts["WriterABC / UnifiedOutputWriterABC\ninterfaces.output"]:::componentSecondary
     ValidatorPorts["ValidatorABC\ninterfaces.validation"]:::componentSecondary
-    LoggerPorts["LoggerAdapterABC\ninterfaces.logging"]:::componentSecondary
+    LoggerPorts["LoggingPortABC\ninterfaces.logging"]:::componentSecondary
     MetricsPort["Metrics endpoint\ninfrastructure.observability.server"]:::componentSecondary
 end
 class Interfaces group;

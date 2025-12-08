@@ -4,16 +4,20 @@ Pandera Schemas.
 
 from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 from bioetl.domain.schemas.chembl.assay import AssayTableSchema
+from bioetl.domain.schemas.chembl.cell import CellTableSchema
 from bioetl.domain.schemas.chembl.document import DocumentTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
+    CELL_OUTPUT_COLUMNS,
     DOCUMENT_OUTPUT_COLUMNS,
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
+    TISSUE_OUTPUT_COLUMNS,
 )
 from bioetl.domain.schemas.chembl.target import TargetTableSchema
+from bioetl.domain.schemas.chembl.tissue import TissueTableSchema
 from bioetl.domain.validation.contracts import SchemaProviderABC
 
 
@@ -34,6 +38,11 @@ def register_schemas(registry: SchemaProviderABC) -> None:
     registry.register(
         "document_output", DocumentTableSchema, column_order=DOCUMENT_OUTPUT_COLUMNS
     )
+    registry.register("cell", CellTableSchema)
+    registry.register("cell_input", CellTableSchema)
+    registry.register(
+        "cell_output", CellTableSchema, column_order=CELL_OUTPUT_COLUMNS
+    )
     registry.register("molecule", MoleculeTableSchema)
     registry.register("molecule_input", MoleculeTableSchema)
     registry.register(
@@ -43,4 +52,9 @@ def register_schemas(registry: SchemaProviderABC) -> None:
     registry.register("target_input", TargetTableSchema)
     registry.register(
         "target_output", TargetTableSchema, column_order=TARGET_OUTPUT_COLUMNS
+    )
+    registry.register("tissue", TissueTableSchema)
+    registry.register("tissue_input", TissueTableSchema)
+    registry.register(
+        "tissue_output", TissueTableSchema, column_order=TISSUE_OUTPUT_COLUMNS
     )
