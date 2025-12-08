@@ -3,9 +3,13 @@
 import pandera as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    build_output_column_order,
+)
 from bioetl.domain.transform.normalizers import BAO_ID_REGEX, CHEMBL_ID_REGEX
 
-OUTPUT_COLUMN_ORDER: list[str] = [
+_ASSAY_BUSINESS_COLUMNS: list[str] = [
     "aidx",
     "assay_category",
     "assay_cell_type",
@@ -36,15 +40,12 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "target_chembl_id",
     "tissue_chembl_id",
     "variant_sequence",
-    "hash_row",
-    "hash_business_key",
-    "index",
-    "database_version",
-    "extracted_at",
 ]
 
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_ASSAY_BUSINESS_COLUMNS)
 
-class AssaySchema(pa.DataFrameModel):
+
+class AssaySchema(BaseGeneratedColumnsSchema):
     """Pandera schema describing normalized ChEMBL assay records."""
 
     aidx: Series[str] = pa.Field(
@@ -149,26 +150,3 @@ class AssaySchema(pa.DataFrameModel):
         nullable=True, description="Последовательность варианта (если таргет – белок)"
     )
 
-    # Generated columns
-    hash_row: Series[str] = pa.Field(
-        str_matches=r"^[a-f0-9]{64}$", description="Хэш всей строки (64 hex)"
-    )
-    hash_business_key: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^[a-f0-9]{64}$",
-        description="Хэш бизнес-идентификатора ассая",
-    )
-    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
-    database_version: Series[str] = pa.Field(
-        nullable=True, description="Версия базы данных"
-    )
-    extracted_at: Series[str] = pa.Field(
-        nullable=True, description="Дата и время извлечения"
-    )
-
-    class Config:
-        """Pandera config enforcing strict, ordered validation."""
-
-        strict = True
-        coerce = True
-        ordered = True
