@@ -11,9 +11,10 @@ batch_size: 20
 provider_config:
   provider: chembl
   base_url: https://www.ebi.ac.uk/chembl/api/data
-  timeout_sec: 30.0
-  max_retries: 3
-  rate_limit_per_sec: 10.0
+  client:
+    timeout_sec: 30.0
+    max_retries: 3
+    rate_limit_per_sec: 10.0
   max_url_length: 2000
   batch_size: 20
   page_size: 1000

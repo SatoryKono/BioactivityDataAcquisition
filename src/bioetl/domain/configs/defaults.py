@@ -6,7 +6,7 @@ from typing import Annotated
 
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, PositiveInt
 
-from bioetl.domain.configs.pipeline import HashingConfig, NormalizationConfig
+from bioetl.domain.configs.pipeline import ClientConfig, HashingConfig, NormalizationConfig
 
 
 class HashingDefaultsConfig(BaseModel):
@@ -25,6 +25,12 @@ class NormalizationDefaultsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class ClientDefaultsConfig(ClientConfig):
+    """Default HTTP client limits shared across providers."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class HttpDefaultsConfig(BaseModel):
     """Default HTTP constraints shared across clients."""
 
@@ -37,6 +43,7 @@ class NetworkHttpDefaultsConfig(BaseModel):
     """HTTP defaults section containing canonical defaults."""
 
     default: HttpDefaultsConfig
+    client: ClientDefaultsConfig | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -88,6 +95,7 @@ __all__ = [
     "DefaultsConfig",
     "HashingDefaultsConfig",
     "NormalizationDefaultsConfig",
+    "ClientDefaultsConfig",
     "HttpDefaultsConfig",
     "NetworkDefaultsConfig",
     "NetworkHttpDefaultsConfig",

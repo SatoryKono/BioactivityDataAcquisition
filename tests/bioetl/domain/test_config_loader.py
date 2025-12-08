@@ -30,7 +30,7 @@ def test_get_pipeline_config_from_path_valid():
     assert config.id == "chembl.activity"
     assert config.provider == "chembl"
     assert isinstance(config.provider_config, ChemblSourceConfig)
-    assert config.provider_config.timeout_sec == 30
+    assert config.provider_config.client.timeout_sec == 30
 
 
 def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):
@@ -69,9 +69,10 @@ batch_size: 5
 provider_config:
   provider: chembl
   base_url: https://www.ebi.ac.uk/chembl/api/data
-  timeout_sec: 30
-  max_retries: 3
-  rate_limit_per_sec: 10.0
+  client:
+    timeout_sec: 30
+    max_retries: 3
+    rate_limit_per_sec: 10.0
 """,
         encoding="utf-8",
     )
@@ -101,9 +102,10 @@ batch_size: 5
 provider_config:
   provider: chembl
   base_url: https://www.ebi.ac.uk/chembl/api/data
-  timeout_sec: 30
-  max_retries: 3
-  rate_limit_per_sec: 10.0
+  client:
+    timeout_sec: 30
+    max_retries: 3
+    rate_limit_per_sec: 10.0
 """,
         encoding="utf-8",
     )
@@ -276,7 +278,7 @@ batch_size: 25
 
     assert config.output_path == "/tmp/out"  # pipeline overrides profile
     assert config.batch_size == 10
-    assert config.provider_config.timeout_sec == 10
+    assert config.provider_config.client.timeout_sec == 10
 
 
 def test_fields_populated_from_schema_when_missing(

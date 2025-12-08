@@ -37,9 +37,9 @@ class PaginationConfig(BaseModel):
 class ClientConfig(BaseModel):
     """Конфигурация HTTP-клиента."""
 
-    timeout: float = 30.0
-    max_retries: int = 3
-    rate_limit: float = 10.0
+    timeout_sec: PositiveFloat = 30.0
+    max_retries: NonNegativeInt = 3
+    rate_limit_per_sec: PositiveFloat = 10.0
     backoff_factor: float = 2.0
     circuit_breaker_threshold: int = 5
     circuit_breaker_recovery_time: float = 60.0
@@ -183,9 +183,7 @@ class BaseProviderConfig(BaseModel):
 
     provider: Literal["chembl", "pubchem", "uniprot", "dummy"]
     base_url: AnyHttpUrl
-    timeout_sec: PositiveFloat
-    max_retries: NonNegativeInt
-    rate_limit_per_sec: PositiveFloat | None = None
+    client: ClientConfig = Field(default_factory=ClientConfig)
 
     model_config = ConfigDict(extra="forbid")
 
