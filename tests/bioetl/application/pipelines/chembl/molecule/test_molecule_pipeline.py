@@ -34,10 +34,18 @@ def pipeline():  # pylint: disable=redefined-outer-name
     )
 
     normalization_service = MagicMock()
-    normalization_service.apply_normalize_dataframe.side_effect = lambda df: df.copy()
-    normalization_service.apply_normalize_batch.side_effect = lambda df: df.copy()
-    normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
-    normalization_service.apply_normalize.side_effect = lambda record: record
+    normalization_service.apply_normalize_dataframe.side_effect = (
+        lambda df: df.copy()
+    )
+    normalization_service.apply_normalize_batch.side_effect = (
+        lambda df: df.copy()
+    )
+    normalization_service.apply_normalize_fields.side_effect = (
+        lambda df, *_: df
+    )
+    normalization_service.apply_normalize.side_effect = (
+        lambda record: record
+    )
 
     return ChemblPipelineBase(
         config=config,
