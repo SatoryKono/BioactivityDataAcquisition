@@ -46,7 +46,7 @@ def common_dependencies():
         ("assay", "assay_chembl_id"),
         ("document", "document_chembl_id"),
         ("target", "target_chembl_id"),
-        ("testitem", "molecule_chembl_id"),
+        ("molecule", "molecule_chembl_id"),
     ],
 )
 def test_pipeline_instantiation(pipeline_info, common_dependencies):

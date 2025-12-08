@@ -9,19 +9,19 @@ flowchart LR
     assay["Assay pipeline\nassay.csv"]:::pipeline
     target["Target pipeline\ntarget.csv (with UniProt/IUPHAR enrichment)"]:::pipeline
     document["Document pipeline\ndocument.csv (OpenAlex/Semantic Scholar)"]:::pipeline
-    testitem["TestItem pipeline\n(testitem.csv aka molecule.csv)"]:::pipeline
+    molecule["Molecule pipeline\n(molecule.csv)"]:::pipeline
 
     assay -->|assay_chembl_id referenced by| activity
     target -->|target_chembl_id referenced by| activity
     document -->|document_chembl_id referenced by| activity
-    testitem -->|molecule_chembl_id referenced by| activity
+    molecule -->|molecule_chembl_id referenced by| activity
 
-    testitem -.->|optionally seed ID list| assay
+    molecule -.->|optionally seed ID list| assay
     document -.->|metadata for assays| assay
     target -.->|component linking to assays| assay
 
     subgraph Recommended order
-        testitem --> assay
+        molecule --> assay
         assay --> target
         target --> document
         document --> activity

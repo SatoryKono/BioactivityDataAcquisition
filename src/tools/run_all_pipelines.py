@@ -13,7 +13,7 @@ PIPELINES = [
     "activity_chembl",
     "target_chembl",
     "document_chembl",
-    "testitem_chembl",
+    "molecule_chembl",
 ]
 
 

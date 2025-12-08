@@ -185,7 +185,7 @@ def test_extract_unknown_entity(service):
         ("assay", "request_assay"),
         ("target", "request_target"),
         ("document", "request_document"),
-        ("testitem", "request_molecule"),
+        ("molecule", "request_molecule"),
     ],
 )
 def test_extract_entities_dispatch(service, mock_client, entity, method):

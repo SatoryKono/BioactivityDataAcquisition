@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema as SchemaTestitem
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.infrastructure.transform.impl.normalize import NormalizationServiceImpl
 
 
@@ -15,7 +15,7 @@ def pipeline():  # pylint: disable=redefined-outer-name
     """Create pipeline fixture with mocked dependencies."""
     config = MagicMock()
     config.provider = "chembl"
-    config.entity_name = "testitem"
+    config.entity_name = "molecule"
     config.primary_key = "molecule_chembl_id"
     config.model_dump.return_value = {}
     config.pipeline = {}
@@ -28,9 +28,9 @@ def pipeline():  # pylint: disable=redefined-outer-name
     config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
-    validation_service.get_schema.return_value = SchemaTestitem
+    validation_service.get_schema.return_value = MoleculeSchema
     validation_service.get_schema_columns.return_value = list(
-        SchemaTestitem.to_schema().columns.keys()
+        MoleculeSchema.to_schema().columns.keys()
     )
 
     normalization_service = NormalizationServiceImpl(config)
@@ -135,8 +135,8 @@ def test_transform_max_phase(pipeline):
     assert len(result) == 4
 
 
-def test_transform_nested_fields_testitem(pipeline):
-    """Test nested field normalization for testitem."""
+def test_transform_nested_fields_molecule(pipeline):
+    """Test nested field normalization for molecule."""
     # Treat atc_classifications as ID field to preserve/enforce uppercase
     pipeline._config.normalization.id_fields = ["atc_classifications"]
     pipeline._config.fields = [

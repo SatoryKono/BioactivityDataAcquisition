@@ -52,7 +52,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         """Get Pydantic model class for entity."""
         if entity == "activity":
             return ActivityModel
-        if entity in {"assay", "target", "document", "testitem"}:
+        if entity in {"assay", "target", "document", "molecule"}:
             return ChemblRecordModel
         raise ValueError(f"Unknown entity: {entity}")
 
@@ -67,7 +67,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             "assay": self.client.request_assay,
             "target": self.client.request_target,
             "document": self.client.request_document,
-            "testitem": self.client.request_molecule,
+            "molecule": self.client.request_molecule,
         }
         if entity not in dispatch:
             raise ValueError(f"Unknown entity: {entity}")
@@ -102,7 +102,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         Extract all records for an entity.
 
         Args:
-            entity: Entity name (activity, assay, target, document, testitem)
+            entity: Entity name (activity, assay, target, document, molecule)
             **filters: API filters including optional 'limit'
 
         Returns:

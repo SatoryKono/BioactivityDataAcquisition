@@ -11,7 +11,6 @@ from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
 _OUTPUT_METADATA_COLUMNS = [
     "hash_row",
@@ -34,7 +33,6 @@ ASSAY_OUTPUT_COLUMNS = _metadata_last(AssaySchema)
 DOCUMENT_OUTPUT_COLUMNS = _metadata_last(DocumentSchema)
 MOLECULE_OUTPUT_COLUMNS = _metadata_last(MoleculeSchema)
 TARGET_OUTPUT_COLUMNS = _metadata_last(TargetSchema)
-TESTITEM_OUTPUT_COLUMNS = _metadata_last(TestitemSchema)
 
 __all__ = [
     "ACTIVITY_OUTPUT_COLUMNS",
@@ -42,5 +40,4 @@ __all__ = [
     "DOCUMENT_OUTPUT_COLUMNS",
     "MOLECULE_OUTPUT_COLUMNS",
     "TARGET_OUTPUT_COLUMNS",
-    "TESTITEM_OUTPUT_COLUMNS",
 ]

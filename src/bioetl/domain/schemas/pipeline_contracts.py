@@ -55,12 +55,6 @@ PIPELINE_CONTRACTS: dict[str, PipelineSchemaModel] = {
         schema_in="target_input",
         output_schema="target_output",
     ),
-    "chembl.testitem": PipelineSchemaModel(
-        pipeline_code="chembl.testitem",
-        schema_out="testitem",
-        schema_in="testitem_input",
-        output_schema="testitem_output",
-    ),
     "chembl.molecule": PipelineSchemaModel(
         pipeline_code="chembl.molecule",
         schema_out="molecule",
