@@ -6,13 +6,11 @@ from bioetl.application.pipelines.base import (
     PipelineBase,
     _create_default_metadata_builder,
 )
+from bioetl.application.pipelines.contracts import LoaderABC
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
-from bioetl.domain.clients.base.output.contracts import (
-    OutputWriterABC,
-    RunMetadataBuilderProtocol,
-)
+from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
@@ -33,7 +31,7 @@ class ChemblPipelineBase(PipelineBase):
         config: PipelineConfig,
         logger: LoggingPortABC,
         validation_service: ValidationService,
-        output_writer: OutputWriterABC,
+        loader: LoaderABC,
         extraction_service: ExtractionServiceABC,
         hash_service: HashServiceABC,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
@@ -78,7 +76,7 @@ class ChemblPipelineBase(PipelineBase):
             config=config,
             logger=logger,
             validation_service=validation_service,
-            output_writer=output_writer,
+            loader=loader,
             hash_service=hash_service,
             metadata_builder=metadata_builder or _create_default_metadata_builder(),
             extractor=extractor,
