@@ -2,15 +2,19 @@ from pathlib import Path
 import sys
 from unittest.mock import patch
 
+from bioetl.infrastructure.observability.factories import default_logging_port
+
 # Ensure output dir exists
 Path("data/output/target").mkdir(parents=True, exist_ok=True)
+
+logger = default_logging_port().apply_bind(tool="run_cmd")
 
 try:
     # print(f"Container module: {bioetl.application.container.__file__}")
     from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
     from bioetl.interfaces.cli.app import app
 except ImportError as e:
-    print(f"ImportError: {e}")
+    logger.error("Failed to import CLI dependencies", error=str(e))
     sys.exit(1)
 
 
@@ -29,7 +33,7 @@ def main():
         "10",
     ]
 
-    print("Running CLI app via wrapper...")
+    logger.info("Running CLI app via wrapper")
 
     # Patch get_release_version to avoid /status call
     with patch.object(
@@ -40,11 +44,11 @@ def main():
         try:
             app()
         except SystemExit as e:
-            print(f"SystemExit: {e}")
+            logger.error("CLI exited", error=str(e))
         except Exception as e:
-            print(f"Exception: {e}")
+            logger.error("Wrapper error", error=str(e))
         finally:
-            print("Wrapper finished.")
+            logger.info("Wrapper finished")
 
 
 if __name__ == "__main__":
