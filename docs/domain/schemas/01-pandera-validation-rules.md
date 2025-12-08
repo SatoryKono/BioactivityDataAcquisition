@@ -65,9 +65,11 @@ Every ChEMBL and most internal schemas must include the following service column
 
 These columns are part of the lineage and determinism chain defined in project rules (deterministic I/O, hashing, lineage metadata).
 
+- Reuse `BaseGeneratedColumnsSchema` from `bioetl.domain.schemas.chembl.base` to inherit these fields and the strict Pandera `Config`.
+
 ### Column order
 
-- Preserve a dedicated constant `OUTPUT_COLUMN_ORDER` that lists all business columns first, followed by the system columns above.
+- Preserve a dedicated constant `OUTPUT_COLUMN_ORDER` that lists all business columns first, followed by the system columns above (use `build_output_column_order` helper to append generated columns consistently).
 - Writers must respect `OUTPUT_COLUMN_ORDER` to guarantee deterministic files and stable hashes.
 - Schema definitions should match this order; avoid ad-hoc column sorting inside pipelines.
 
