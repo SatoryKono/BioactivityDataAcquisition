@@ -3,6 +3,7 @@
 import pandera as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
 from bioetl.domain.transform.normalizers import (
     CHEMBL_ID_REGEX,
     DOI_REGEX,
@@ -10,7 +11,7 @@ from bioetl.domain.transform.normalizers import (
 )
 
 
-class DocumentSchema(pa.DataFrameModel):
+class DocumentSchema(BaseGeneratedColumnsSchema):
     """Schema for document/publication data."""
 
     abstract: Series[str] = pa.Field(nullable=True, description="Аннотация документа")
@@ -65,26 +66,3 @@ class DocumentSchema(pa.DataFrameModel):
     volume: Series[str] = pa.Field(nullable=True, description="Том выпуска")
     year: Series[float] = pa.Field(nullable=True, description="Год публикации")
 
-    # Generated columns
-    hash_row: Series[str] = pa.Field(
-        str_matches=r"^[a-f0-9]{64}$", description="Хэш всей строки (64 hex)"
-    )
-    hash_business_key: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^[a-f0-9]{64}$",
-        description="Хэш бизнес-ключа",
-    )
-    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
-    database_version: Series[str] = pa.Field(
-        nullable=True, description="Версия базы данных"
-    )
-    extracted_at: Series[str] = pa.Field(
-        nullable=True, description="Дата и время извлечения"
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        coerce = True
-        ordered = True

@@ -3,13 +3,14 @@
 import pandera as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
 from bioetl.domain.transform.normalizers import (
     CHEMBL_ID_REGEX,
     PUBCHEM_CID_REGEX,
 )
 
 
-class TestitemSchema(pa.DataFrameModel):
+class TestitemSchema(BaseGeneratedColumnsSchema):
     """Schema for molecule/test item data."""
 
     __test__ = False
@@ -57,28 +58,3 @@ class TestitemSchema(pa.DataFrameModel):
         nullable=True, description="HELM-нотация биотерапевтической молекулы"
     )
 
-    # Generated columns
-    hash_row: Series[str] = pa.Field(
-        str_matches=r"^[a-f0-9]{64}$", description="Хэш всей строки (64 hex)"
-    )
-    hash_business_key: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^[a-f0-9]{64}$",
-        description="Хэш бизнес-ключа",
-    )
-    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
-    database_version: Series[str] = pa.Field(
-        nullable=True,
-        description="Версия базы данных",
-    )
-    extracted_at: Series[str] = pa.Field(
-        nullable=True,
-        description="Дата и время извлечения",
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        coerce = True
-        ordered = True
