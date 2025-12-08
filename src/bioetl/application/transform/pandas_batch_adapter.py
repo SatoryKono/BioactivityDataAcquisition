@@ -1,8 +1,7 @@
-"""Adapters for normalizing pandas batches into raw record lists."""
+"""Адаптер для конвертации pandas DataFrame и других батчей в RawRecord."""
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import Any, cast
 
 import pandas as pd
@@ -12,53 +11,36 @@ from bioetl.domain.record_source import RawRecord
 
 
 class PandasBatchAdapter(BatchAdapterABC):
-    """Adapter to convert pandas DataFrame batches to raw record lists."""
+    """Конвертирует сырые батчи в список записей RawRecord."""
 
     def process_batch(self, raw_batch: Any) -> list[RawRecord]:
-        """Normalize a batch into a list of raw record mappings."""
+        """Нормализует батч провайдера в список словарей."""
         if raw_batch is None:
             return []
 
         if isinstance(raw_batch, pd.DataFrame):
-            return cast(
-                list[RawRecord], raw_batch.to_dict(orient="records")
-            )
-
-        if isinstance(raw_batch, dict):
-            return [cast(RawRecord, raw_batch)]
+            return [
+                cast(RawRecord, dict(record))
+                for record in raw_batch.to_dict("records")
+            ]
 
         if isinstance(raw_batch, list):
-            return cast(list[RawRecord], raw_batch)
+            normalized: list[RawRecord] = []
+            for item in raw_batch:
+                normalized.append(cast(RawRecord, dict(item)))
+            return normalized
 
-        if (
-            isinstance(raw_batch, Iterable)
-            and not isinstance(raw_batch, (str, bytes))
-        ):
-            return cast(list[RawRecord], list(raw_batch))
+        if isinstance(raw_batch, dict):
+            return [cast(RawRecord, dict(raw_batch))]
 
         raise TypeError(
-            "iter_extract must yield DataFrame, mapping, "
-            "or iterable of mappings."
+            "Unsupported batch type "
+            f"'{type(raw_batch).__name__}' for PandasBatchAdapter"
         )
 
-    def process_batches(
-        self, batches: Iterable[Any]
-    ) -> Iterable[list[RawRecord]]:
-        """Process an iterable of batches lazily."""
-        for batch in batches:
-            yield self.process_batch(batch)
-
-    # Compatibility with legacy naming used in tests and callers.
     def adapt_batch(self, raw_batch: Any) -> list[RawRecord]:
-        """Backward-compatible alias for process_batch."""
+        """Alias для process_batch для обратной совместимости."""
         return self.process_batch(raw_batch)
-
-    def adapt_batches(
-        self, batches: Iterable[Any]
-    ) -> Iterable[list[RawRecord]]:
-        """Backward-compatible alias for process_batches."""
-        for batch in batches:
-            yield self.process_batch(batch)
 
 
 __all__ = ["PandasBatchAdapter"]

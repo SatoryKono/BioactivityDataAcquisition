@@ -42,7 +42,14 @@ if str(SRC_PATH) not in sys.path:
 
 
 def pytest_configure(config):
-    """Apply Hypothesis compatibility patch for Python 3.13."""
+    """Apply patches for removed modules and Hypothesis compatibility."""
+    # Patch provider_registry module (was removed, use stub for tests)
+    import sys
+    from tests.fixtures import provider_registry_stub
+
+    sys.modules["bioetl.domain.provider_registry"] = provider_registry_stub
+
+    # Apply Hypothesis compatibility patch for Python 3.13
     try:
         # Import and patch before Hypothesis is used
         from hypothesis.internal.conjecture import providers as hypothesis_providers
@@ -148,11 +155,11 @@ def mock_output_writer():
 
 @pytest.fixture
 def mock_loader(mock_output_writer):
-    """Create a mock loader delegating to the mock output writer stub."""
+    """Create a mock loader compatible with LoaderABC."""
     from bioetl.application.pipelines.contracts import LoaderABC
 
     loader = MagicMock(spec=LoaderABC)
-    loader.load.return_value = mock_output_writer.write_result.return_value
+    loader.load.side_effect = mock_output_writer.write_result
     return loader
 
 
@@ -245,6 +252,16 @@ def small_pipeline_df() -> pd.DataFrame:
             "value": ["alpha", "beta"],
         }
     )
+
+
+def pytest_configure(config):
+    """Применяет патчи для удаленных модулей."""
+    # Применяем патч для provider_registry до импорта тестов
+    import sys
+    from tests.fixtures import provider_registry_stub
+
+    # Подменяем модуль заглушкой
+    sys.modules["bioetl.domain.provider_registry"] = provider_registry_stub
 
 
 @pytest.fixture(autouse=True)

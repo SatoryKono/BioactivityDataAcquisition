@@ -41,7 +41,11 @@ def test_impls_subclass_their_abcs() -> None:
 
     violations: list[str] = []
     for role, abc_path in registry.items():
-        abc_cls = _import_object(abc_path)
+        try:
+            abc_cls = _import_object(abc_path)
+        except (AttributeError, ModuleNotFoundError) as e:
+            violations.append(f"Не удалось импортировать {abc_path}: {e}")
+            continue
         role_entry = impls.get(role, {})
 
         for impl_path in (role_entry.get("implementations") or {}).values():

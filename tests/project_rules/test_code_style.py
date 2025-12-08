@@ -14,14 +14,18 @@ def _run_tool(module: str, args: list[str]) -> None:
         text=True,
         encoding="utf-8",
         errors="replace",
+        check=False,
     )
     if result.returncode != 0:
         stdout = (result.stdout or "").strip()
         stderr = (result.stderr or "").strip()
-        pytest.fail(
-            f"Команда {' '.join(cmd)} завершилась с кодом {result.returncode}\n"
+        message = (
+            "Команда "
+            f"{' '.join(cmd)} "
+            f"завершилась с кодом {result.returncode}\n"
             f"stdout:\n{stdout}\n\nstderr:\n{stderr}"
         )
+        pytest.fail(message)
 
 
 @pytest.mark.parametrize(
