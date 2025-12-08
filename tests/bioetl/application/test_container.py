@@ -29,6 +29,7 @@ from bioetl.infrastructure.config import (
 )
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
+    ClientConfig,
     DummyProviderConfig,
     PipelineConfig,
 )
@@ -133,9 +134,11 @@ def test_get_extraction_service_for_registered_providers_container() -> None:
             batch_size=10,
             provider_config=ChemblSourceConfig(
                 base_url="https://www.ebi.ac.uk/chembl/api/data",
-                timeout_sec=30,
-                max_retries=3,
-                rate_limit_per_sec=10.0,
+                client=ClientConfig(
+                    timeout_sec=30,
+                    max_retries=3,
+                    rate_limit_per_sec=10.0,
+                ),
             ),
         ),
         provider_registry=registry,
@@ -144,9 +147,11 @@ def test_get_extraction_service_for_registered_providers_container() -> None:
         _build_dummy_pipeline_config(
             DummyProviderConfig(
                 base_url="https://example.com",  # type: ignore[arg-type]
-                timeout_sec=1,
-                max_retries=0,
-                rate_limit_per_sec=1.0,
+                client=ClientConfig(
+                    timeout_sec=1,
+                    max_retries=0,
+                    rate_limit_per_sec=1.0,
+                ),
             )
         ),
         provider_registry=registry,
@@ -168,9 +173,11 @@ def test_unknown_provider_raises_container(
         _build_dummy_pipeline_config(
             DummyProviderConfig(
                 base_url="https://example.com",  # type: ignore[arg-type]
-                timeout_sec=1,
-                max_retries=0,
-                rate_limit_per_sec=1.0,
+                client=ClientConfig(
+                    timeout_sec=1,
+                    max_retries=0,
+                    rate_limit_per_sec=1.0,
+                ),
             )
         ),
         provider_registry=provider_registry,
@@ -192,9 +199,11 @@ def test_config_validation_error_is_propagated_container() -> None:
             batch_size=10,
             provider_config=ChemblSourceConfig(
                 base_url="https://www.ebi.ac.uk/chembl/api/data",
-                timeout_sec=30,
-                max_retries=3,
-                rate_limit_per_sec=10.0,
+                client=ClientConfig(
+                    timeout_sec=30,
+                    max_retries=3,
+                    rate_limit_per_sec=10.0,
+                ),
                 max_url_length=0,
             ),
         )
@@ -207,9 +216,11 @@ def test_type_mismatch_raises_type_error_container(
 
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
-        timeout_sec=1,
-        max_retries=0,
-        rate_limit_per_sec=1.0,
+        client=ClientConfig(
+            timeout_sec=1,
+            max_retries=0,
+            rate_limit_per_sec=1.0,
+        ),
     )
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
@@ -225,9 +236,11 @@ def test_container_provides_hooks_and_error_policy_container(
 ) -> None:
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
-        timeout_sec=1,
-        max_retries=0,
-        rate_limit_per_sec=1.0,
+        client=ClientConfig(
+            timeout_sec=1,
+            max_retries=0,
+            rate_limit_per_sec=1.0,
+        ),
     )
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
@@ -254,9 +267,11 @@ def test_hash_service_singleton_scope_container(
 ) -> None:
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
-        timeout_sec=1,
-        max_retries=0,
-        rate_limit_per_sec=1.0,
+        client=ClientConfig(
+            timeout_sec=1,
+            max_retries=0,
+            rate_limit_per_sec=1.0,
+        ),
     )
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
@@ -274,9 +289,11 @@ def test_hash_service_override_propagates_to_transformers_container(
 ) -> None:
     dummy_config = DummyProviderConfig(
         base_url="https://example.com",  # type: ignore[arg-type]
-        timeout_sec=1,
-        max_retries=0,
-        rate_limit_per_sec=1.0,
+        client=ClientConfig(
+            timeout_sec=1,
+            max_retries=0,
+            rate_limit_per_sec=1.0,
+        ),
     )
     custom_hash_service = MagicMock()
     container = PipelineContainer(
