@@ -12,7 +12,7 @@
 
 ## Управление ошибками и мониторинг
 - ErrorPolicyABC определяет, когда остановить пайплайн или пропустить записи при валидации/IO.
-- Логирование и метрики (UnifiedLogger, TracerABC, ProgressReporterABC) сопровождают каждую стадию, фиксируя контекст run_id/pipeline_name.
+- Логирование и метрики (UnifiedLogger, TracingPortABC, ProgressReporterABC) сопровождают каждую стадию, фиксируя контекст run_id/pipeline_name.
 
 ## End-to-end сценарий (ChEMBL)
 1. CLI-команда `bioetl run --pipeline chembl_activity` создаёт контекст запуска и загружает конфиг.

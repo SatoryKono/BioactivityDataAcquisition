@@ -5,13 +5,13 @@
 ```mermaid
 graph TB
     subgraph "ABC Contracts"
-        LA[LoggerAdapterABC<br/>+info<br/>+error<br/>+debug<br/>+warning<br/>+bind]
+        LA[LoggingPortABC<br/>+info<br/>+error<br/>+debug<br/>+warning<br/>+bind]
         PA[ProgressReporterABC<br/>+start<br/>+update<br/>+finish<br/>+create_bar]
-        TA[TracerABC<br/>+start_span<br/>+end_span<br/>+inject_context]
+        TA[TracingPortABC<br/>+start_span<br/>+end_span<br/>+inject_context]
     end
     
     subgraph "Implementations"
-        UL[UnifiedLoggerImpl<br/>-_logger: BoundLogger<br/>implements LoggerAdapterABC]
+        UL[UnifiedLoggerImpl<br/>-_logger: BoundLogger<br/>implements LoggingPortABC]
         TP[TqdmProgressReporterImpl<br/>-_pbar: tqdm<br/>implements ProgressReporterABC]
     end
     
@@ -30,9 +30,9 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Contracts"
-        LA[LoggerAdapterABC]
+        LA[LoggingPortABC]
         PA[ProgressReporterABC]
-        TA[TracerABC]
+        TA[TracingPortABC]
     end
     
     subgraph "Factories"
@@ -64,7 +64,7 @@ src/bioetl/infrastructure/logging/
 ├── contracts.py          # ABC interfaces
 ├── factories.py         # Default factory functions
 └── impl/
-    ├── unified_logger.py        # LoggerAdapterABC implementation
+    ├── unified_logger.py        # LoggingPortABC implementation
     └── progress_reporter.py     # ProgressReporterABC implementation
 ```
 

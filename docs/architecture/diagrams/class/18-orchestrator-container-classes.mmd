@@ -32,7 +32,7 @@ class ExtractionServiceABC
 class TransformerABC
 class PipelineHookABC
 class ErrorPolicyABC
-class LoggerAdapterABC
+class LoggingPortABC
 class MetricsPipelineHookImpl
 class LoggingPipelineHookImpl
 class ProviderRegistryABC
@@ -42,7 +42,7 @@ class ProviderDefinition
 PipelineOrchestrator --> PipelineContainer
 PipelineOrchestrator --> PipelineBase : build_pipeline()
 PipelineOrchestrator --> PipelineConfig
-PipelineContainer --> LoggerAdapterABC
+PipelineContainer --> LoggingPortABC
 PipelineContainer --> ValidationService
 PipelineContainer --> UnifiedOutputWriter
 PipelineContainer --> NormalizationService

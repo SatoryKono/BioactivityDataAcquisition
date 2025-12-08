@@ -15,7 +15,7 @@ classDiagram
     class PipelineBase {
         <<abstract>>
         -_config: PipelineConfig
-        -_logger: LoggerAdapterABC
+        -_logger: LoggingPortABC
         -_validation_service: ValidationService
         -_hash_service: HashService
         -_output_writer: UnifiedOutputWriter
@@ -50,10 +50,10 @@ classDiagram
     class PipelineContainer {
         -config: PipelineConfig
         -_schema_registry: SchemaRegistry
-        -_logger: LoggerAdapterABC
+        -_logger: LoggingPortABC
         -_hooks: list[PipelineHookABC]
         -_error_policy: ErrorPolicyABC
-        +get_logger() LoggerAdapterABC
+        +get_logger() LoggingPortABC
         +get_validation_service() ValidationService
         +get_output_writer() UnifiedOutputWriter
         +get_normalization_service() NormalizationService
@@ -97,7 +97,7 @@ classDiagram
     }
 
     class PipelineContainer {
-        +get_logger() LoggerAdapterABC
+        +get_logger() LoggingPortABC
         +get_validation_service() ValidationService
     }
 
@@ -128,7 +128,7 @@ classDiagram
     }
 
     class LoggingPipelineHookImpl {
-        -_logger: LoggerAdapterABC
+        -_logger: LoggingPortABC
         +on_stage_start(stage, context)
         +on_stage_end(stage, result)
         +on_error(stage, error)
@@ -249,7 +249,7 @@ classDiagram
 ```mermaid
 classDiagram
     class StageRuntimeManagerImpl {
-        -_logger: LoggerAdapterABC
+        -_logger: LoggingPortABC
         -_error_policy: ErrorPolicyABC
         -_hooks: list[PipelineHookABC]
         +run_stage(stage, func) StageResult
@@ -288,7 +288,7 @@ classDiagram
     }
 
     class PipelineContainer {
-        +get_logger() LoggerAdapterABC
+        +get_logger() LoggingPortABC
         +get_validation_service() ValidationService
     }
 
