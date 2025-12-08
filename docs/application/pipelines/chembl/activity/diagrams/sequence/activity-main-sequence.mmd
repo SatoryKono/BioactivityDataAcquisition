@@ -6,7 +6,7 @@ sequenceDiagram
     participant Extraction as ChemblExtractionServiceImpl
     participant DataClient as ChemblDataClientHTTPImpl
     participant Transformer as ChemblTransformerImpl
-    participant Validator as ValidationService(ActivitySchema)
+    participant Validator as ValidationService(ActivityTableSchema)
     participant Writer as UnifiedOutputWriter
 
     CLI->>Orchestrator: run("activity_chembl", args)
@@ -15,7 +15,7 @@ sequenceDiagram
     loop pages
         Extraction->>DataClient: request_activity(filters, offset, limit)
         DataClient-->>Extraction: page (records + page_meta)
-        Extraction-->>Pipeline: batch (flattened dict list)
+        Extraction-->>Pipeline: batch (RawActivityPayload serialized)
         Pipeline->>Transformer: apply(batch_df)
         Transformer-->>Pipeline: normalized_df (serialized nested fields)
         Pipeline->>Validator: validate("chembl.activity", normalized_df)
