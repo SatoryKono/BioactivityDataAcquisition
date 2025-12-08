@@ -10,7 +10,7 @@ import pandas as pd
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.record_source import RawRecord, RecordSource
 
 

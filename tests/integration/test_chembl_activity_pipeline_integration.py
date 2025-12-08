@@ -58,7 +58,6 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         extraction_service=extraction_service,
         hash_service=container.get_hash_service(),
         metadata_builder=container.get_metadata_builder(),
-        file_record_source_factory=container.get_record_source_factory(),
         record_source=record_source,
         normalization_service=container.get_normalization_service(),
         hooks=container.get_hooks(),

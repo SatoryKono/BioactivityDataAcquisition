@@ -13,10 +13,10 @@ from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
 )
-from bioetl.domain.clients.ports import ChemblExtractionPortABC
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
@@ -34,7 +34,7 @@ class ChemblPipelineBase(PipelineBase):
         logger: LoggingPortABC,
         validation_service: ValidationService,
         output_writer: OutputWriterABC,
-        extraction_service: ChemblExtractionPortABC,
+        extraction_service: ExtractionServiceABC,
         hash_service: HashServiceABC,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         record_source: RecordSource | None = None,

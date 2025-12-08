@@ -10,7 +10,7 @@ from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
 )
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -108,5 +108,4 @@ class PipelineContainerABC(ABC):
     def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
         """Return builder for run metadata artifacts."""
 
-    @abstractmethod
 __all__ = ["ExtractorABC", "LoaderABC", "PipelineContainerABC"]

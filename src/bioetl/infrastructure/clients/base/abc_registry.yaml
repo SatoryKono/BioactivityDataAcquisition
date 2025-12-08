@@ -22,11 +22,9 @@ CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
 ProviderRegistryABC: bioetl.domain.provider_registry.ProviderRegistryABC
 MutableProviderRegistryABC: bioetl.domain.provider_registry.MutableProviderRegistryABC
 
-LoggerAdapterABC: bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC
 ProgressReporterABC: bioetl.domain.clients.base.logging.contracts.ProgressReporterABC
-TracerABC: bioetl.domain.clients.base.logging.contracts.TracerABC
-LoggingPortABC: bioetl.domain.observability.contracts.LoggingPortABC
-TracingPortABC: bioetl.domain.observability.contracts.TracingPortABC
+LoggingPortABC: bioetl.interfaces.observability.contracts.LoggingPortABC
+TracingPortABC: bioetl.interfaces.observability.contracts.TracingPortABC
 
 HasherABC: bioetl.domain.transform.contracts.HasherABC
 HashServiceABC: bioetl.domain.transform.contracts.HashServiceABC

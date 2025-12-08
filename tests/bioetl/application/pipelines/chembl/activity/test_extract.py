@@ -84,7 +84,6 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     validation_service = MagicMock()
     output_writer = MagicMock()
     metadata_builder = MagicMock()
-    file_record_source_factory = MagicMock()
 
     return ChemblPipelineBase(
         config=mock_config,
@@ -95,7 +94,6 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
         hash_service=MagicMock(),
         normalization_service=mock_normalization_service,
         metadata_builder=metadata_builder,
-        file_record_source_factory=file_record_source_factory,
     )
 
 

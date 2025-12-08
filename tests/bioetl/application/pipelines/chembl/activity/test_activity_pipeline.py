@@ -31,7 +31,6 @@ def pipeline():
     )
 
     metadata_builder = MagicMock()
-    file_record_source_factory = MagicMock()
     normalization_service = MagicMock()
     normalization_service.apply_normalize_dataframe.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
@@ -45,7 +44,6 @@ def pipeline():
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
         metadata_builder=metadata_builder,
-        file_record_source_factory=file_record_source_factory,
         normalization_service=normalization_service,
     )
 

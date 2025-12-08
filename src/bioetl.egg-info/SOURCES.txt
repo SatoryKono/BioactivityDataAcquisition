@@ -54,6 +54,8 @@ src/bioetl/application/pipelines/chembl/target/transform.py
 src/bioetl/application/pipelines/chembl/target/validate.py
 src/bioetl/application/services/__init__.py
 src/bioetl/application/services/chembl_extraction.py
+src/bioetl/application/transform/__init__.py
+src/bioetl/application/transform/pandas_batch_adapter.py
 src/bioetl/domain/__init__.py
 src/bioetl/domain/contracts.py
 src/bioetl/domain/enums.py
@@ -79,6 +81,8 @@ src/bioetl/domain/clients/ports/contracts.py
 src/bioetl/domain/configs/__init__.py
 src/bioetl/domain/configs/base.py
 src/bioetl/domain/configs/contracts.py
+src/bioetl/domain/configs/defaults.py
+src/bioetl/domain/configs/normalization.py
 src/bioetl/domain/configs/pipeline.py
 src/bioetl/domain/configs/profile.py
 src/bioetl/domain/observability/__init__.py
@@ -91,8 +95,8 @@ src/bioetl/domain/schemas/registry.py
 src/bioetl/domain/schemas/chembl/__init__.py
 src/bioetl/domain/schemas/chembl/activity.py
 src/bioetl/domain/schemas/chembl/assay.py
+src/bioetl/domain/schemas/chembl/base.py
 src/bioetl/domain/schemas/chembl/document.py
-src/bioetl/domain/schemas/chembl/models.py
 src/bioetl/domain/schemas/chembl/molecule.py
 src/bioetl/domain/schemas/chembl/output_views.py
 src/bioetl/domain/schemas/chembl/target.py
@@ -116,6 +120,7 @@ src/bioetl/infrastructure/constants.py
 src/bioetl/infrastructure/clients/middleware.py
 src/bioetl/infrastructure/clients/provider_registry_loader.py
 src/bioetl/infrastructure/clients/base/__init__.py
+src/bioetl/infrastructure/clients/base/abc_registry_resolver.py
 src/bioetl/infrastructure/clients/base/factories.py
 src/bioetl/infrastructure/clients/base/middleware.py
 src/bioetl/infrastructure/clients/base/impl/__init__.py
@@ -131,10 +136,13 @@ src/bioetl/infrastructure/clients/chembl/paginator.py
 src/bioetl/infrastructure/clients/chembl/provider.py
 src/bioetl/infrastructure/clients/chembl/request_builder.py
 src/bioetl/infrastructure/clients/chembl/response_parser.py
+src/bioetl/infrastructure/clients/chembl/serializers.py
 src/bioetl/infrastructure/clients/chembl/impl/__init__.py
 src/bioetl/infrastructure/clients/chembl/impl/chembl_extraction_service_impl.py
 src/bioetl/infrastructure/clients/chembl/impl/http_client.py
 src/bioetl/infrastructure/config/__init__.py
+src/bioetl/infrastructure/config/defaults_loader.py
+src/bioetl/infrastructure/config/env.py
 src/bioetl/infrastructure/config/loader.py
 src/bioetl/infrastructure/config/models.py
 src/bioetl/infrastructure/config/provider_registry_loader.py
@@ -201,8 +209,4 @@ src/tools/run_all_pipelines.py
 src/tools/run_cmd.py
 src/tools/run_pipeline.py
 src/tools/update_golden_columns.py
-tests/test_assay_chembl_golden.py
-tests/test_document_chembl_golden.py
 tests/test_pipeline_outputs.py
-tests/test_target_chembl_golden.py
-tests/test_molecule_chembl_golden.py

@@ -10,7 +10,7 @@ from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
-from bioetl.domain.observability import PipelineMetricsPortABC
+from bioetl.interfaces.observability import PipelineMetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.abc_registry_resolver import (

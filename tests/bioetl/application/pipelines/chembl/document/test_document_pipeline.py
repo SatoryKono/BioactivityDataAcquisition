@@ -56,7 +56,6 @@ def pipeline():
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
         metadata_builder=MagicMock(),
-        file_record_source_factory=MagicMock(),
         normalization_service=normalization_service,
     )
 
