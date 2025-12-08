@@ -11,8 +11,7 @@ PIPELINE_REGISTRY: dict[str, Type[PipelineBase]] = {
     "assay_chembl": ChemblPipelineBase,
     "document_chembl": ChemblPipelineBase,
     "target_chembl": ChemblPipelineBase,
-    "testitem_chembl": ChemblPipelineBase,
-    "molecule_chembl": ChemblPipelineBase,  # Separate pipeline for /molecule endpoint
+    "molecule_chembl": ChemblPipelineBase,
 }
 
 
