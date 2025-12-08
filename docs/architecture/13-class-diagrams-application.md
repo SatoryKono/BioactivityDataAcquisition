@@ -244,41 +244,38 @@ classDiagram
     ChemblExtractionServiceImpl --> DataClientABC : uses
 ```
 
-## 8. Pipeline Stages
+## 8. Pipeline Stage Execution
 
 ```mermaid
 classDiagram
-    class StageABC {
-        <<abstract>>
-        +execute(context)* StageResult
-        +validate(context)* bool
+    class StageRuntimeManagerImpl {
+        -_logger: LoggerAdapterABC
+        -_error_policy: ErrorPolicyABC
+        -_hooks: list[PipelineHookABC]
+        +run_stage(stage, func) StageResult
     }
 
-    class ExtractStage {
-        -_extractor: ExtractorABC
-        +execute(context) StageResult
+    class PipelineBase {
+        -_runtime_manager: StageRuntimeManagerImpl
+        +_execute_stage(stage, func) StageResult
     }
 
-    class TransformStage {
-        -_transformer: TransformerABC
-        +execute(context) StageResult
+    class StageResult {
+        +stage: str
+        +success: bool
+        +row_count: int
+        +duration_sec: float
     }
 
-    class ValidateStage {
-        -_validation_service: ValidationService
-        +execute(context) StageResult
-    }
-
-    class WriteStage {
-        -_writer: UnifiedOutputWriter
-        +execute(context) StageResult
-    }
-
-    StageABC <|-- ExtractStage
-    StageABC <|-- TransformStage
-    StageABC <|-- ValidateStage
-    StageABC <|-- WriteStage
+    PipelineBase --> StageRuntimeManagerImpl : uses
+    StageRuntimeManagerImpl --> StageResult : produces
 ```
+
+В актуальной архитектуре нет отдельного абстрактного класса `StageABC`. Логические
+стадии (extract, transform, validate, write) представлены методами `PipelineBase`,
+а управление их выполнением, хуками (`PipelineHookABC`) и политикой ошибок
+(`ErrorPolicyABC`) сосредоточено в `StageRuntimeManagerImpl`, который возвращает
+доменный `StageResult`.
 
 ## 9. Pipeline Factory
 
