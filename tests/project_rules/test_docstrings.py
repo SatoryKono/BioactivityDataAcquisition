@@ -11,7 +11,6 @@ from tests.project_rules.conftest import iter_python_files
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ALLOWED_MISSING_DOCSTRINGS: Mapping[str, Set[str]] = {
     "src/bioetl/domain/configs/pipeline.py": {
-        "enable_provider_loader_port",
         "rest_interface_enabled",
         "mq_interface_enabled",
     },

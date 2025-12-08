@@ -55,15 +55,8 @@ class MQJobHandler:
         provider_loader_factory = partial(
             create_provider_loader, config_path=providers_path
         )
-        feature_flag = config.features.enable_provider_loader_port
-        if feature_flag:
-            provider_loader = provider_loader_factory()
-            provider_registry = None
-        else:
-            provider_loader = None
-            provider_registry = provider_loader_factory().get_registry(
-                registry=InMemoryProviderRegistry()
-            )
+        provider_loader = provider_loader_factory()
+        provider_registry = None
         container_factory = create_container_factory()
         orchestrator = PipelineOrchestrator(
             pipeline_name=job.pipeline_name,
@@ -71,7 +64,6 @@ class MQJobHandler:
             provider_registry=provider_registry,
             provider_loader=provider_loader,
             provider_loader_factory=provider_loader_factory,
-            use_provider_loader_port=feature_flag,
             container_factory=container_factory,
         )
         return orchestrator.run_pipeline(dry_run=job.dry_run, limit=job.limit)
