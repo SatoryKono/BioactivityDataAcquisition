@@ -210,14 +210,14 @@ fields:
     is_filterable: false
     description: Последовательность варианта белка
 
-hashing:
+quality:
+  hashing:
     business_key_fields:
       - assay_chembl_id
       - document_chembl_id
       - target_chembl_id
-
-normalization:
-  id_fields:
-    - assay_type
+  normalization:
+    id_fields:
+      - assay_type
 
 # pagination задаётся провайдером и batch_size по умолчанию 20

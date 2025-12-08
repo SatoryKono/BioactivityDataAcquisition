@@ -28,6 +28,7 @@ pipeline:
   version: "1.0.0"
   owner: "Data Acquisition Team"
   description: "Extract biological activity records from ChEMBL API"
+  enable_denormalization: false
 
 fields:
   - name: action_type
@@ -307,9 +308,6 @@ fields:
     description: Исходное числовое значение
 
 # Специфичные параметры пайплайна (общие параметры наследуются из профиля)
-pipeline:
-  enable_denormalization: false
-
 quality:
   hashing:
     business_key_fields:
