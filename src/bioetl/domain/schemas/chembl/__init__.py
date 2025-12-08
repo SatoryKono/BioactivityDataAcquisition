@@ -4,6 +4,11 @@ ChEMBL specific schemas.
 
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    GENERATED_COLUMN_ORDER,
+    build_output_column_order,
+)
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.models import (
     ActivityModel,
@@ -16,12 +21,15 @@ from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
 __all__ = [
+    "BaseGeneratedColumnsSchema",
     "ActivitySchema",
     "AssaySchema",
     "DocumentSchema",
     "MoleculeSchema",
     "TargetSchema",
     "TestitemSchema",
+    "GENERATED_COLUMN_ORDER",
+    "build_output_column_order",
     "ActivityModel",
     "AssayModel",
     "ChemblRecordModel",

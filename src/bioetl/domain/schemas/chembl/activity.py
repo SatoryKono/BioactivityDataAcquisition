@@ -5,9 +5,13 @@ Activity Schema (Pandera).
 import pandera as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    build_output_column_order,
+)
 from bioetl.domain.transform.normalizers import BAO_ID_REGEX, CHEMBL_ID_REGEX
 
-OUTPUT_COLUMN_ORDER: list[str] = [
+_ACTIVITY_BUSINESS_COLUMNS: list[str] = [
     "action_type",
     "activity_comment",
     "activity_id",
@@ -54,15 +58,14 @@ OUTPUT_COLUMN_ORDER: list[str] = [
     "uo_units",
     "upper_value",
     "value",
-    "hash_row",
-    "hash_business_key",
-    "index",
-    "database_version",
-    "extracted_at",
 ]
 
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(
+    _ACTIVITY_BUSINESS_COLUMNS
+)
 
-class ActivitySchema(pa.DataFrameModel):
+
+class ActivitySchema(BaseGeneratedColumnsSchema):
     """Схема данных для таблицы Activity."""
 
     action_type: Series[str] = pa.Field(
@@ -206,26 +209,3 @@ class ActivitySchema(pa.DataFrameModel):
         nullable=True, description="Исходное числовое значение"
     )
 
-    # Generated columns
-    hash_row: Series[str] = pa.Field(
-        str_matches=r"^[a-f0-9]{64}$", description="Хэш всей строки (64 hex символа)"
-    )
-    hash_business_key: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^[a-f0-9]{64}$",
-        description="Хэш бизнес-ключа (для идентификации дубликатов)",
-    )
-    index: Series[int] = pa.Field(ge=0, description="Порядковый номер строки")
-    database_version: Series[str] = pa.Field(
-        nullable=True, description="Версия базы данных"
-    )
-    extracted_at: Series[str] = pa.Field(
-        nullable=True, description="Дата и время извлечения"
-    )
-
-    class Config:
-        """Pandera configuration enforcing strict ordered validation."""
-
-        strict = True
-        coerce = True
-        ordered = True

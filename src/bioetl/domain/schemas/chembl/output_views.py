@@ -8,24 +8,17 @@ import pandera.pandas as pa
 
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
-_OUTPUT_METADATA_COLUMNS = [
-    "hash_row",
-    "hash_business_key",
-    "index",
-    "database_version",
-    "extracted_at",
-]
-
 
 def _metadata_last(schema_cls: Type[pa.DataFrameModel]) -> list[str]:
     columns = list(schema_cls.to_schema().columns.keys())
-    ordered = [col for col in columns if col not in _OUTPUT_METADATA_COLUMNS]
-    ordered.extend(col for col in _OUTPUT_METADATA_COLUMNS if col in columns)
+    ordered = [col for col in columns if col not in GENERATED_COLUMN_ORDER]
+    ordered.extend(col for col in GENERATED_COLUMN_ORDER if col in columns)
     return ordered
 
 
