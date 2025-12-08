@@ -27,6 +27,7 @@ from bioetl.infrastructure.clients.chembl.provider import register_chembl_provid
 from bioetl.infrastructure.config import (
     provider_registry_loader as config_provider_registry,
 )
+from bioetl.infrastructure.transform.factories import default_hash_service
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     ClientConfig,
@@ -141,6 +142,7 @@ def test_get_extraction_service_for_registered_providers_container() -> None:
                 ),
             ),
         ),
+        hash_service=default_hash_service(),
         provider_registry=registry,
     )
     dummy_container = PipelineContainer(
@@ -180,6 +182,7 @@ def test_unknown_provider_raises_container(
                 ),
             )
         ),
+        hash_service=default_hash_service(),
         provider_registry=provider_registry,
     )
 
@@ -225,6 +228,7 @@ def test_type_mismatch_raises_type_error_container(
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
         provider_registry=provider_registry,
+        hash_service=default_hash_service(),
     )
 
     with pytest.raises(TypeError):
