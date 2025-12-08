@@ -186,6 +186,29 @@ class BaseProviderConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_flat_client_fields(cls, data: Any) -> Any:
+        """Поддерживает старый формат с плоскими клиентскими настройками."""
+
+        if not isinstance(data, dict):
+            return data
+
+        if "client" in data:
+            return data
+
+        client_field_names = set(ClientConfig.model_fields)
+        flattened = {
+            key: value for key, value in data.items() if key in client_field_names
+        }
+
+        if not flattened:
+            return data
+
+        cleaned = {key: value for key, value in data.items() if key not in flattened}
+        cleaned["client"] = flattened
+        return cleaned
+
     @field_validator("provider")
     @classmethod
     def validate_provider_known(cls, value: str) -> str:

@@ -8,8 +8,9 @@ from typing import Any
 import pytest
 import yaml
 
-ABC_REGISTRY_PATH = Path("src/bioetl/infrastructure/clients/base/abc_registry.yaml")
-ABC_IMPLS_PATH = Path("src/bioetl/infrastructure/clients/base/abc_impls.yaml")
+ABC_BASE_DIR = Path("src/bioetl/infrastructure/clients/base")
+ABC_REGISTRY_PATH = ABC_BASE_DIR / "abc_registry.yaml"
+ABC_IMPLS_PATH = ABC_BASE_DIR / "abc_impls.yaml"
 
 
 def _import_object(dotted_path: str) -> Any:
@@ -50,14 +51,16 @@ def test_impls_subclass_their_abcs() -> None:
 
         for impl_path in (role_entry.get("implementations") or {}).values():
             impl_cls = _import_object(impl_path)
-            if not inspect.isclass(impl_cls) or not issubclass(impl_cls, abc_cls):
+            if not inspect.isclass(impl_cls) or not issubclass(
+                impl_cls, abc_cls
+            ):
                 violations.append(f"{impl_path} не наследует {abc_path}")
 
         factory_path = role_entry.get("default_factory")
         if factory_path:
             factory_obj = _import_object(factory_path)
             if not callable(factory_obj):
-                violations.append(f"Фабрика {factory_path} не является callable")
+                violations.append(f"{factory_path} not callable")
             else:
                 sig = inspect.signature(factory_obj)
                 ret = sig.return_annotation
@@ -65,8 +68,8 @@ def test_impls_subclass_their_abcs() -> None:
                     try:
                         if not issubclass(ret, abc_cls):
                             violations.append(
-                                f"Фабрика {factory_path} аннотирована типом {ret} "
-                                f"не совместимым с {abc_path}"
+                                f"{factory_path}: {ret} incompatible with "
+                                f"{abc_path}"
                             )
                     except TypeError:
                         # ignore non-class annotations (e.g., typing.Any)
