@@ -14,7 +14,7 @@ from bioetl.domain.record_source import RawRecord
 class PandasBatchAdapter(BatchAdapterABC):
     """Adapter to convert pandas DataFrame batches to raw record lists."""
 
-    def adapt_batch(self, raw_batch: Any) -> list[RawRecord]:
+    def process_batch(self, raw_batch: Any) -> list[RawRecord]:
         """Normalize a batch into a list of raw record mappings."""
         if raw_batch is None:
             return []
@@ -35,10 +35,10 @@ class PandasBatchAdapter(BatchAdapterABC):
             "iter_extract must yield DataFrame, mapping, or iterable of mappings."
         )
 
-    def adapt_batches(self, batches: Iterable[Any]) -> Iterable[list[RawRecord]]:
-        """Adapt an iterable of batches lazily."""
+    def process_batches(self, batches: Iterable[Any]) -> Iterable[list[RawRecord]]:
+        """Process an iterable of batches lazily."""
         for batch in batches:
-            yield self.adapt_batch(batch)
+            yield self.process_batch(batch)
 
 
 __all__ = ["PandasBatchAdapter"]

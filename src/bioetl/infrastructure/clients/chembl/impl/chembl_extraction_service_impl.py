@@ -14,7 +14,7 @@ from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
-from bioetl.infrastructure.clients.chembl.serializers import flatten_chembl_payload
+from bioetl.infrastructure.clients.chembl.serializers import serialize_chembl_payload
 
 
 class ChemblExtractionServiceImpl(ExtractionServiceABC):
@@ -86,7 +86,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         """Serialize records using flatten helper."""
         if not self.flatten_enabled:
             return records
-        return [flatten_chembl_payload(record) for record in records]
+        return [serialize_chembl_payload(record) for record in records]
 
     def extract_all(self, entity: str, **filters: Any) -> list[dict[str, Any]]:
         """

@@ -7,15 +7,14 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
-from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.application.pipelines.contracts import (
+    ExtractorABC,
+    FileRecordSourceFactoryABC,
+)
 from bioetl.domain.clients.ports import ChemblExtractionPortABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.record_source import (
-    ApiRecordSource,
-    FileRecordSourceFactoryABC,
-    RecordSource,
-)
+from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.contracts import BatchAdapterABC
 
@@ -197,5 +196,5 @@ class ChemblExtractorImpl(ExtractorABC):
             entity=self.config.entity_name,
             filters=filters,
             chunk_size=chunk_size,
-            batch_adapter=self.batch_adapter.adapt_batch,
+            batch_adapter=self.batch_adapter.process_batch,
         )

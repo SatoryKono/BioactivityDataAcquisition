@@ -65,7 +65,7 @@ Every ChEMBL and most internal schemas must include the following service column
 
 These columns are part of the lineage and determinism chain defined in project rules (deterministic I/O, hashing, lineage metadata).
 
-- Reuse `BaseGeneratedColumnsSchema` from `bioetl.domain.schemas.chembl.base` to inherit these fields and the strict Pandera `Config`.
+- Reuse `BaseGeneratedColumnsModel` (alias `BaseGeneratedColumnsSchema`) from `bioetl.domain.schemas.chembl.base` to inherit these fields and the strict Pandera `Config`.
 
 ### Column order
 

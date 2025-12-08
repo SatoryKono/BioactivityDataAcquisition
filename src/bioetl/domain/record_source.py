@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from pathlib import Path
-from typing import Any, Callable, Protocol, TypedDict, cast
+from typing import Any, Callable, TypedDict, cast
 
 from bioetl.domain.contracts import ExtractionServiceABC
 
@@ -74,34 +73,3 @@ class ApiRecordSource(RecordSource):
                 )
 
             yield cast(list[RawRecord], raw_batch)
-
-
-class FileRecordSourceFactoryABC(Protocol):
-    """Factory for file-based record sources (CSV and ID list)."""
-
-    def create_csv_source(
-        self,
-        *,
-        input_path: Path,
-        csv_options: Any,
-        limit: int | None,
-        chunk_size: int | None,
-        logger: Any,
-    ) -> RecordSource:
-        """Create CSV-backed record source."""
-
-    def create_id_list_source(
-        self,
-        *,
-        input_path: Path,
-        id_column: str,
-        csv_options: Any,
-        limit: int | None,
-        chunk_size: int | None,
-        extraction_service: ExtractionServiceABC,
-        source_config: Any,
-        entity: str,
-        filter_key: str,
-        logger: Any,
-    ) -> RecordSource:
-        """Create ID-list-backed record source."""

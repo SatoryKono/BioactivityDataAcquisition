@@ -15,7 +15,6 @@ SideInputProviderABC: bioetl.domain.clients.base.contracts.SideInputProviderABC
 ProviderRegistryLoaderABC: bioetl.domain.provider_registry.ProviderRegistryLoaderABC
 
 PipelineContainerABC: bioetl.application.pipelines.contracts.PipelineContainerABC
-StageABC: bioetl.domain.pipelines.contracts.StageABC
 PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
 ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
 CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC

@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Helpers to deterministically flatten ChEMBL payloads for serialization."""
 
-"""Helpers to deterministically flatten raw ChEMBL payloads."""
+from __future__ import annotations
 
 from typing import Any, Mapping, MutableMapping, Set
 
@@ -50,7 +50,7 @@ def _scalar_to_str(value: Any) -> str:
     return str(value)
 
 
-def flatten_chembl_payload(
+def serialize_chembl_payload(
     payload: MutableMapping[str, Any],
     bypass_fields: Set[str] | frozenset[str] = DEFAULT_BYPASS_FIELDS,
 ) -> dict[str, Any]:
@@ -69,8 +69,22 @@ def flatten_chembl_payload(
     return serialized
 
 
+def flatten_chembl_payload(
+    payload: MutableMapping[str, Any],
+    bypass_fields: Set[str] | frozenset[str] = DEFAULT_BYPASS_FIELDS,
+) -> dict[str, Any]:
+    """
+    Backwards-compatible alias for serialize_chembl_payload.
+
+    Tests and docs refer to this helper as flatten_chembl_payload.
+    """
+
+    return serialize_chembl_payload(payload, bypass_fields=bypass_fields)
+
+
 __all__ = [
     "DEFAULT_BYPASS_FIELDS",
+    "serialize_chembl_payload",
     "flatten_chembl_payload",
 ]
 

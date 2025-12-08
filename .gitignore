@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 *.pyo
 /.hypothesis
+/data/output
+*.png

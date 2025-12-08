@@ -19,7 +19,7 @@ def build_output_column_order(business_columns: list[str]) -> list[str]:
     return [*business_columns, *GENERATED_COLUMN_ORDER]
 
 
-class BaseGeneratedColumnsSchema(pa.DataFrameModel):
+class BaseGeneratedColumnsModel(pa.DataFrameModel):
     """Базовая схема с едиными служебными колонками и Config."""
 
     hash_row: Series[str] = pa.Field(
@@ -45,3 +45,7 @@ class BaseGeneratedColumnsSchema(pa.DataFrameModel):
         strict = True
         coerce = True
         ordered = True
+
+
+# Backward compatibility alias for existing imports.
+BaseGeneratedColumnsSchema = BaseGeneratedColumnsModel

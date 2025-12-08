@@ -7,19 +7,7 @@ from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
 
-__all__ = ["StageABC", "PipelineHookABC", "ErrorPolicyABC"]
-
-
-class StageABC(ABC):
-    """Абстракция стадии пайплайна."""
-
-    @abstractmethod
-    def run(self, context: Any) -> StageResult:
-        """Запускает стадию."""
-
-    @abstractmethod
-    def close(self) -> None:
-        """Освобождает ресурсы стадии."""
+__all__ = ["PipelineHookABC", "ErrorPolicyABC"]
 
 
 class PipelineHookABC(ABC):
