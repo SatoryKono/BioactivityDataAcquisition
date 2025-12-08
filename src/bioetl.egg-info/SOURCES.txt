@@ -55,7 +55,6 @@ src/bioetl/application/pipelines/chembl/target/extract.py
 src/bioetl/application/pipelines/chembl/target/transform.py
 src/bioetl/application/pipelines/chembl/target/validate.py
 src/bioetl/application/services/__init__.py
-src/bioetl/application/services/chembl_extraction.py
 src/bioetl/application/transform/__init__.py
 src/bioetl/application/transform/pandas_batch_adapter.py
 src/bioetl/domain/__init__.py

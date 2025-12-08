@@ -13,8 +13,7 @@ from bioetl.infrastructure.clients.provider_registry_loader import (
 from bioetl.interfaces.wiring import create_config_loader, create_container_factory
 
 
-@pytest.mark.integration
-def test_run_in_background_dry_run(tmp_path):
+def _build_config(tmp_path: Path) -> tuple[Path, dict[str, str], Path]:
     config_path = Path("tests/fixtures/configs/chembl_activity_test.yaml")
     cli_overrides = {
         "output_path": str(tmp_path / "out"),
@@ -22,11 +21,18 @@ def test_run_in_background_dry_run(tmp_path):
             Path("tests/fixtures/input/chembl_activity_small.csv").resolve()
         ),
     }
+    configs_root = Path("tests/fixtures/configs")
+    return config_path, cli_overrides, configs_root
+
+
+@pytest.mark.integration
+def test_run_in_background_with_loader(tmp_path: Path) -> None:
+    config_path, cli_overrides, configs_root = _build_config(tmp_path)
     config_loader = create_config_loader()
     config_copy = build_runtime_config(
         config_path=config_path,
         profile="default",
-        configs_root=Path("tests/fixtures/configs"),
+        configs_root=configs_root,
         cli_overrides=cli_overrides,
         loader=config_loader,
     )
@@ -52,22 +58,17 @@ def test_run_in_background_dry_run(tmp_path):
 
 
 @pytest.mark.integration
-def test_run_in_background_with_port_enabled(tmp_path):
-    config_path = Path("tests/fixtures/configs/chembl_activity_test.yaml")
-    cli_overrides = {
-        "output_path": str(tmp_path / "out"),
-        "input_path": str(
-            Path("tests/fixtures/input/chembl_activity_small.csv").resolve()
-        ),
-    }
+def test_run_in_background_with_preloaded_registry(tmp_path: Path) -> None:
+    config_path, cli_overrides, configs_root = _build_config(tmp_path)
     config_loader = create_config_loader()
     config_copy = build_runtime_config(
         config_path=config_path,
         profile="default",
-        configs_root=Path("tests/fixtures/configs"),
+        configs_root=configs_root,
         cli_overrides=cli_overrides,
         loader=config_loader,
     )
+
     registry = create_provider_loader().get_registry()
     container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(

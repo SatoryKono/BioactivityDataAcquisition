@@ -13,4 +13,4 @@
 
 ## Orchestrator flow
 
-`PipelineOrchestrator` (`src/bioetl/application/orchestrator.py`) всегда пытается загрузить реестр через `ProviderRegistryLoaderABC`, если загрузчик или фабрика переданы из composition root. Реестр создаётся как `InMemoryProviderRegistry`, заполняется на месте и передаётся контейнеру пайплайна без глобальных синглтонов. Если загрузчик недоступен (например, отсутствует `configs/providers.yaml`), orchestrator ожидает, что вызывающая сторона предоставит предсконфигурированный `ProviderRegistryABC`.
+`PipelineOrchestrator` (`src/bioetl/application/orchestrator.py`) всегда пытается загрузить реестр через `ProviderRegistryLoaderABC`, если загрузчик или фабрика переданы из composition root. Реестр создаётся как `InMemoryProviderRegistry`, заполняется на месте и передаётся контейнеру пайплайна без глобальных синглтонов. Если загрузчик недоступен (например, отсутствует `configs/providers.yaml`), orchestrator ожидает, что вызывающая сторона предоставит предсконфигурированный `ProviderRegistryABC`. Legacy toggle для обхода порта удалён; зависимости должны передаваться явно.
