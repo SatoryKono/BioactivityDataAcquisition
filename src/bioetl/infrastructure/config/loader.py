@@ -110,6 +110,8 @@ def _build_config(
     if cli_overrides:
         merged = apply_deep_merge(merged, cli_overrides)
 
+    _ensure_input_path_exists(merged, config_path=config_path)
+
     provider_id = merged.get("provider")
     if isinstance(provider_id, str):
         _ensure_provider_registered(provider_id)
@@ -133,6 +135,31 @@ def _ensure_provider_registered(provider_id: str) -> None:
         raise ConfigError(
             f"Failed to verify provider '{provider_id}' against registry: {exc}"
         ) from exc
+
+
+def _ensure_input_path_exists(
+    merged_config: dict[str, Any],
+    *,
+    config_path: Path,
+) -> None:
+    """Проверяет существование локального входного файла для режимов CSV/ID."""
+
+    input_mode = merged_config.get("input_mode")
+    if input_mode not in {"csv", "id_only"}:
+        return
+
+    raw_input_path = merged_config.get("input_path")
+    if not raw_input_path:
+        return
+
+    candidate = Path(str(raw_input_path)).expanduser()
+    if not candidate.exists():
+        raise ConfigValidationError(
+            (
+                f"Input path '{raw_input_path}' referenced by {config_path} does not "
+                f"exist; required for input_mode '{input_mode}'."
+            )
+        )
 
 
 __all__ = [
