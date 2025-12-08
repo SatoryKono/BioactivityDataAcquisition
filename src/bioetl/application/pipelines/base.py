@@ -139,8 +139,6 @@ class PipelineBase(ABC):
             hooks=hooks,
             pipeline_id=self._config.id,
         )
-        if self._extractor is not None:
-            self.extract = self._extractor.extract  # type: ignore[method-assign]
         self._instrument_extract_calls()
 
     # === Public API ===
@@ -489,14 +487,20 @@ class PipelineBase(ABC):
             entity_name=self._schema_contract.schema_out,
         )
 
-    @abstractmethod
     def write(
         self,
         df: pd.DataFrame,
         output_path: Path,
         context: RunContext,
     ) -> WriteResult:
-        """Записывает валидированный DataFrame."""
+        """
+        Записывает валидированный DataFrame с помощью предоставленного Loader.
+
+        Наследники могут переопределить метод, если нужно расширить поведение,
+        но по умолчанию используется loader, переданный через конструктор.
+        """
+
+        return self._write_with_loader(df=df, output_path=output_path, context=context)
 
     def _write_with_loader(
         self,
@@ -596,6 +600,8 @@ class PipelineBase(ABC):
     def _get_extract_callable(
         self,
     ) -> Callable[..., pd.DataFrame | Iterable[pd.DataFrame] | None]:
+        if self._extractor is not None:
+            return lambda **kwargs: self._extractor.extract(**kwargs)
         return self.extract
 
     def _get_transform_callable(
