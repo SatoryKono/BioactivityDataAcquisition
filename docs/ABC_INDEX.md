@@ -1,8 +1,11 @@
 # ABC Index
 <!-- generated -->
 
-- `SourceClientABC` — `bioetl.domain.clients.base.contracts.SourceClientABC`
-  - Основной контракт клиента источника данных. Наследует доменный контракт DataClientABC.
+- `DataClientABC` — `bioetl.domain.clients.contracts.DataClientABC`
+  - Базовый контракт клиента источника данных.
+
+- `ChemblDataClientABC` — `bioetl.domain.clients.chembl.contracts.ChemblDataClientABC`
+  - Контракт клиента ChEMBL.
 
 - `RequestBuilderABC` — `bioetl.domain.clients.base.contracts.RequestBuilderABC`
   - Паттерн Builder для создания запросов.

@@ -2,12 +2,15 @@
 classDiagram-v2
 
     %% Contracts (Ports)
-    class SourceClientABC {
+    class DataClientABC {
         <<Interface>>
         +fetch_one(id)
         +fetch_many(ids)
         +iter_pages(request)
         +metadata()
+    }
+    class ChemblDataClientABC {
+        <<Interface>>
     }
     class RequestBuilderABC {
         <<Interface>>
@@ -38,8 +41,8 @@ classDiagram-v2
       +default_secret_provider()
     }
     class ChemblClientFactory {
-      +create_client(config) SourceClientABC
-      +create_default() SourceClientABC
+      +create_client(config) ChemblDataClientABC
+      +create_default() ChemblDataClientABC
     }
     class ChemblExtractionServiceFactory {
       +create_extraction_service(config, client)
@@ -58,7 +61,8 @@ classDiagram-v2
     class EnvSecretProvider
     class ChemblExtractionServiceImpl
 
-    SourceClientABC <|-- ChemblDataClientHTTPImpl
+    DataClientABC <|-- ChemblDataClientABC
+    ChemblDataClientABC <|-- ChemblDataClientHTTPImpl
     RequestBuilderABC <|-- ChemblRequestBuilderImpl
     ResponseParserABC <|-- ChemblResponseParserImpl
     PaginatorABC <|-- OffsetPaginator
@@ -89,7 +93,8 @@ classDiagram-v2
     class ChemblClientFactory domainSecondary
     class ChemblExtractionServiceFactory domainSecondary
     class BaseClientFactories domainSecondary
-    class SourceClientABC interface
+    class DataClientABC interface
+    class ChemblDataClientABC interface
     class RequestBuilderABC interface
     class ResponseParserABC interface
     class PaginatorABC interface
