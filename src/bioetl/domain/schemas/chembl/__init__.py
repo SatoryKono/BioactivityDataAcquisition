@@ -10,8 +10,8 @@ from bioetl.domain.schemas.chembl.base import (
     BaseGeneratedColumnsSchema,
     build_output_column_order,
 )
-from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
+from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
 from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
 __all__ = [

@@ -6,7 +6,11 @@ from typing import Annotated
 
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, PositiveInt
 
-from bioetl.domain.configs.pipeline import ClientConfig, HashingConfig, NormalizationConfig
+from bioetl.domain.configs.pipeline import (
+    ClientConfig,
+    HashingConfig,
+    NormalizationConfig,
+)
 
 
 class HashingDefaultsConfig(BaseModel):
@@ -85,7 +89,10 @@ class DefaultsConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    def get_source_default(self, provider: str) -> SourceDefaultsConfig | None:
+    def get_source_default(
+        self,
+        provider: str,
+    ) -> SourceDefaultsConfig | None:
         """Return provider defaults if present."""
 
         return self.sources.get(provider)

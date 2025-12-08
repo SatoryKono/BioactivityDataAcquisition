@@ -10,13 +10,13 @@ from typing import Any
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
 from bioetl.infrastructure.clients.chembl.serializers import serialize_chembl_payload
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 
 class ChemblExtractionServiceImpl(ExtractionServiceABC):

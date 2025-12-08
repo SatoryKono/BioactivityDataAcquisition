@@ -383,7 +383,7 @@ def test_idempotency_key_reused_across_retries(monkeypatch, base_client):
 
     client = UnifiedAPIClientImpl(
         provider="chembl",
-        config=ClientConfig(max_retries=3, backoff_factor=1.0, timeout=0.1),
+        config=ClientConfig(max_retries=3, backoff_factor=1.0, timeout_sec=0.1),
         base_client=base_client,
     )
 

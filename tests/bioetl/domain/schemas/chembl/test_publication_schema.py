@@ -50,7 +50,9 @@ def test_publication_schema_rejects_bad_doc_type(
     assert "REPORT" in failure_cases["failure_case"].astype(str).tolist()
 
 
-def test_publication_schema_rejects_bad_regex(valid_publication_df: pd.DataFrame) -> None:
+def test_publication_schema_rejects_bad_regex(
+    valid_publication_df: pd.DataFrame,
+) -> None:
     invalid = valid_publication_df.copy()
     invalid["document_chembl_id"] = ["bad"]
 
@@ -62,7 +64,9 @@ def test_publication_schema_rejects_bad_regex(valid_publication_df: pd.DataFrame
     assert "bad" in failure_cases["failure_case"].astype(str).tolist()
 
 
-def test_publication_schema_rejects_null_required(valid_publication_df: pd.DataFrame) -> None:
+def test_publication_schema_rejects_null_required(
+    valid_publication_df: pd.DataFrame,
+) -> None:
     invalid = valid_publication_df.copy()
     invalid["doc_type"] = [None]
 
@@ -70,9 +74,11 @@ def test_publication_schema_rejects_null_required(valid_publication_df: pd.DataF
         PublicationTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
-    assert pd.isna(
-        failure_cases.loc[failure_cases["column"] == "doc_type", "failure_case"].iloc[0]
-    )
+    doc_type_failure = failure_cases.loc[
+        failure_cases["column"] == "doc_type",
+        "failure_case",
+    ].iloc[0]
+    assert pd.isna(doc_type_failure)
 
 
 def test_publication_schema_checks_metadata(valid_publication_df: pd.DataFrame) -> None:
@@ -84,10 +90,14 @@ def test_publication_schema_checks_metadata(valid_publication_df: pd.DataFrame) 
 
     failure_cases = exc.value.failure_cases
     assert "hash_row" in failure_cases["column"].tolist()
-    assert "zzz" in failure_cases["failure_case"].astype(str).tolist()
+    assert (
+        "zzz" in failure_cases["failure_case"].astype(str).tolist()
+    )
 
 
-def test_publication_schema_rejects_non_coercible(valid_publication_df: pd.DataFrame) -> None:
+def test_publication_schema_rejects_non_coercible(
+    valid_publication_df: pd.DataFrame,
+) -> None:
     invalid = valid_publication_df.copy()
     invalid["src_id"] = ["src"]
 
