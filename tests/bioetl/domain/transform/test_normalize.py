@@ -60,6 +60,7 @@ def test_normalization_service_full():
         {"name": "nested_list", "data_type": "array"},
         {"name": "nested_obj", "data_type": "object"},
         {"name": "doi", "data_type": "string"},
+        {"name": "max_phase", "data_type": "integer"},
     ]
 
     norm_config = MockNormalizationConfig(id_fields=["id_col"])
@@ -79,6 +80,7 @@ def test_normalization_service_full():
             "nested_list": [["A", "B"], ["C"]],
             "nested_obj": [{"K": "V"}, {"X": "Y"}],
             "doi": ["https://doi.org/10.1000/ABC", None],
+            "max_phase": [4, -1],
         }
     )
 
@@ -101,6 +103,10 @@ def test_normalization_service_full():
 
     # DOI normalized via custom normalizer
     assert res["doi"].iloc[0] == "10.1000/abc"
+
+    # max_phase clamped to valid domain (invalid sentinel becomes NA)
+    assert res["max_phase"].iloc[0] == 4
+    assert pd.isna(res["max_phase"].iloc[1])
 
 
 def test_normalization_service_raises_on_invalid_custom_value():

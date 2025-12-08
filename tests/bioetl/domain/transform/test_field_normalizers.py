@@ -8,6 +8,7 @@ import pytest
 from bioetl.domain.transform.normalizers import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
+    normalize_clinical_phase,
     normalize_chembl_id,
     normalize_doi,
     normalize_pcid,
@@ -106,6 +107,37 @@ class TestNormalizePcid:
             normalize_pcid(value)
 
 
+class TestNormalizeClinicalPhase:
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            (0, 0),
+            (4, 4),
+            (" 2 ", 2),
+            (3.0, 3),
+            (-1, None),
+            (5, None),
+            ("", None),
+            (None, None),
+            (pd.NA, None),
+        ],
+    )
+    def test_valid_values(self, value, expected):
+        assert normalize_clinical_phase(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            1.5,
+            "phase2",
+            object(),
+        ],
+    )
+    def test_invalid_values(self, value):
+        with pytest.raises(ValueError):
+            normalize_clinical_phase(value)
+
+
 class TestNormalizeUniprot:
     @pytest.mark.parametrize(
         "value, expected",
@@ -196,6 +228,7 @@ class TestCustomFieldNormalizers:
             "uniprot_accession",
             "uniprot_id",
             "accession",
+            "max_phase",
         }
         assert expected_keys.issubset(CUSTOM_FIELD_NORMALIZERS.keys())
 

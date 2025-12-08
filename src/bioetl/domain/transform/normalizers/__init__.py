@@ -30,6 +30,7 @@ from bioetl.domain.transform.normalizers.identifiers import (
     normalize_pmid,
     normalize_uniprot,
 )
+from bioetl.domain.transform.normalizers.numeric import normalize_clinical_phase
 from bioetl.domain.transform.normalizers.registry import (
     CUSTOM_FIELD_NORMALIZERS,
 )
@@ -52,6 +53,7 @@ __all__ = [
     "normalize_uniprot",
     "normalize_bao_id",
     "normalize_bao_label",
+    "normalize_clinical_phase",
     # Collections
     "normalize_array",
     "normalize_record",
