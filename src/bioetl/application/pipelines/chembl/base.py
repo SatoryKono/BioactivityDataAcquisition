@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from typing import Any, Iterable
+
+import pandas as pd
+
 from bioetl.application.pipelines.base import (
     PipelineBase,
     _create_default_metadata_builder,
@@ -11,6 +16,7 @@ from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImp
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
+    WriteResult,
     RunMetadataBuilderProtocol,
 )
 from bioetl.domain.configs import PipelineConfig
@@ -146,3 +152,14 @@ class ChemblPipelineBase(PipelineBase):
         if input_mode == "csv":
             return True
         return bool(pipeline_cfg.get("skip_release_lookup"))
+
+    def extract(self, **kwargs: Any) -> Iterable[pd.DataFrame] | pd.DataFrame:  # type: ignore[override]
+        return self._extractor.extract(**kwargs)
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:  # type: ignore[override]
+        return self._transformer.apply(df)
+
+    def write(
+        self, df: pd.DataFrame, output_path: Path, context: RunContext
+    ) -> WriteResult:  # type: ignore[override]
+        return self._write_output(df, output_path, context)
