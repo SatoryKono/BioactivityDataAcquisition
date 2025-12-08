@@ -270,6 +270,9 @@ def test_run_dry_run_pipeline_metadata(
         def transform(self, df):
             return df.assign(cli_processed=True)
 
+        def write(self, df, output_path, context):
+            return self._write_output(df, output_path, context)
+
         def run(self, *args, **kwargs):  # type: ignore[override]
             result = super().run(*args, **kwargs)
             self.last_result = result
