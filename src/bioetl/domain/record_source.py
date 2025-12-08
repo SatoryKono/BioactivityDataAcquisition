@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Protocol, TypedDict, cast
-
-import pandas as pd
+from typing import Any, Callable, Protocol, TypedDict, cast
 
 from bioetl.domain.contracts import ExtractionServiceABC
 
@@ -51,11 +49,13 @@ class ApiRecordSource(RecordSource):
         entity: str,
         filters: dict[str, Any] | None = None,
         chunk_size: int | None = None,
+        batch_adapter: Callable[[Any], list[RawRecord]] | None = None,
     ) -> None:
         self._extraction_service = extraction_service
         self._entity = entity
         self._filters = filters or {}
         self._chunk_size = chunk_size
+        self._batch_adapter = batch_adapter
 
     def iter_records(self) -> Iterable[list[RawRecord]]:
         """Iterate over extracted provider batches as normalized records."""
@@ -63,32 +63,16 @@ class ApiRecordSource(RecordSource):
         for raw_batch in self._extraction_service.iter_extract(
             self._entity, chunk_size=self._chunk_size, **filters
         ):
-            yield self._coerce_batch(raw_batch)
+            if self._batch_adapter is not None:
+                yield self._batch_adapter(raw_batch)
+                continue
 
-    def _coerce_batch(self, raw_batch: Any) -> list[RawRecord]:
-        """
-        Normalize provider batches to a list of raw records.
+            if not isinstance(raw_batch, list):
+                raise TypeError(
+                    "iter_extract must yield list[RawRecord] when no batch_adapter is set."
+                )
 
-        Supports DataFrame, mapping, iterable of mappings, and None.
-        """
-        if raw_batch is None:
-            return []
-
-        if isinstance(raw_batch, pd.DataFrame):
-            return cast(list[RawRecord], raw_batch.to_dict(orient="records"))
-
-        if isinstance(raw_batch, dict):
-            return [cast(RawRecord, raw_batch)]
-
-        if isinstance(raw_batch, list):
-            return cast(list[RawRecord], raw_batch)
-
-        if isinstance(raw_batch, Iterable) and not isinstance(raw_batch, (str, bytes)):
-            return cast(list[RawRecord], list(raw_batch))
-
-        raise TypeError(
-            "iter_extract must yield DataFrame, mapping, or iterable of mappings."
-        )
+            yield cast(list[RawRecord], raw_batch)
 
 
 class FileRecordSourceFactoryABC(Protocol):
