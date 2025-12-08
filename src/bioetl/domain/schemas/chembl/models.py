@@ -60,9 +60,7 @@ class ChemblRecordModel(BaseModel):
         data = handler(self)
         serialized: dict[str, Any] = {}
         for key, value in data.items():
-            if key in self._BYPASS_FLATTEN_FIELDS and isinstance(
-                value, (list, dict)
-            ):
+            if key in self._BYPASS_FLATTEN_FIELDS and isinstance(value, (list, dict)):
                 serialized[key] = value
             else:
                 serialized[key] = _flatten_value(value)

@@ -38,9 +38,7 @@ def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
     assert output_columns, "Список с колонками не должен быть пустым"
     assert len(output_columns) == len(set(output_columns)), "Повторы недопустимы"
     assert set(output_columns).issubset(schema_columns)
-    assert set(business_columns).issubset(
-        schema_columns - set(GENERATED_COLUMN_ORDER)
-    )
+    assert set(business_columns).issubset(schema_columns - set(GENERATED_COLUMN_ORDER))
 
 
 @pytest.mark.parametrize(

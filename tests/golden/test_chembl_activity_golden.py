@@ -84,6 +84,9 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         ),
         hash_service=container.get_hash_service(),
     )
+    monkeypatch.setattr(
+        pipeline, "_should_skip_release_lookup", lambda: False, raising=False
+    )
 
     pipeline.run(output_path=Path(config.storage.output_path))
 

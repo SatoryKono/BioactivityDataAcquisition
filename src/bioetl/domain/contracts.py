@@ -1,18 +1,14 @@
 """
-Domain contracts (ABCs) for extraction services.
-
-These interfaces define the contract that extraction services must implement,
-allowing application layer to depend on abstractions rather than concrete
-implementations.
+Domain extraction service contracts.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
 
 
@@ -34,7 +30,7 @@ class ExtractionServiceABC(ABC):
         """
 
     @abstractmethod
-    def extract_all(self, entity: str, **filters: Any) -> list[RawRecord]:
+    def extract_all(self, entity: str, **filters: Any) -> list["RawRecord"]:
         """
         Extract all records for an entity with optional filters.
 
@@ -49,7 +45,7 @@ class ExtractionServiceABC(ABC):
     @abstractmethod
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: Any
-    ) -> Iterable[list[RawRecord]]:
+    ) -> Iterable[list["RawRecord"]]:
         """
         Stream records for an entity in raw record batches.
 
@@ -107,3 +103,24 @@ class ExtractionServiceABC(ABC):
         Returns:
             List of serialized records
         """
+
+
+class BatchAdapterABC(Protocol):
+    """
+    Protocol for adapting raw batches to list of RawRecord.
+
+    Used to normalize different batch formats from extraction services
+    into the expected list[RawRecord] format.
+    """
+
+    def adapt_batch(self, raw_batch: Any) -> list["RawRecord"]:
+        """
+        Normalize a batch into a list of raw record mappings.
+
+        Args:
+            raw_batch: Raw batch from extraction service (DataFrame, dict, list, etc.)
+
+        Returns:
+            List of RawRecord dictionaries
+        """
+        ...

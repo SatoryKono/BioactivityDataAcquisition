@@ -97,10 +97,13 @@ def pipeline_fixture(mock_dependencies_fixture):
     )
 
 
-def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
+def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
     """Test ChEMBL release version retrieval."""
     mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
         "chembl_34"
+    )
+    monkeypatch.setattr(
+        pipeline_fixture, "_should_skip_release_lookup", lambda: False, raising=False
     )
 
     release1 = pipeline_fixture.get_chembl_release()
@@ -115,10 +118,13 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture):
     )
 
 
-def test_enrich_context(pipeline_fixture, mock_dependencies_fixture):
+def test_enrich_context(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
     """Test context enrichment with ChEMBL release."""
     mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
         "chembl_99"
+    )
+    monkeypatch.setattr(
+        pipeline_fixture, "_should_skip_release_lookup", lambda: False, raising=False
     )
     context = RunContext(
         entity_name="test", provider="chembl", started_at=datetime.now(timezone.utc)

@@ -101,8 +101,12 @@ def build_default_container(
     registry_loader = ABCRegistryLoader()
     logger_factory = registry_loader.resolve_default_factory("LoggingPortABC")
     writer_factory = registry_loader.resolve_default_factory("WriterABC")
-    metadata_writer_factory = registry_loader.resolve_default_factory("MetadataWriterABC")
-    quality_reporter_factory = registry_loader.resolve_default_factory("QualityReportABC")
+    metadata_writer_factory = registry_loader.resolve_default_factory(
+        "MetadataWriterABC"
+    )
+    quality_reporter_factory = registry_loader.resolve_default_factory(
+        "QualityReportABC"
+    )
     output_writer_factory = registry_loader.resolve_default_factory("OutputWriterABC")
 
     logger = logger_factory()

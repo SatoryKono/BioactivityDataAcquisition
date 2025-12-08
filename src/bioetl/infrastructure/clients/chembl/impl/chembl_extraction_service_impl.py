@@ -87,9 +87,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     ) -> dict[str, Any]:
         """Request a batch of records by IDs from the API."""
         str_ids = ",".join(batch_ids)
-        filter_kwargs = self._attach_entity_fields(
-            entity, {filter_key: str_ids}
-        )
+        filter_kwargs = self._attach_entity_fields(entity, {filter_key: str_ids})
         return self._request_entity(entity, **filter_kwargs)
 
     def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:

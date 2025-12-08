@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import (
     AnyHttpUrl,
@@ -18,7 +18,12 @@ from pydantic import (
 )
 
 from bioetl.domain.providers import ProviderId
-from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
+
+if TYPE_CHECKING:
+    from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
+
+# Import NormalizationConfig from the dedicated normalization module
+from bioetl.domain.configs.normalization import NormalizationConfig
 
 
 class PaginationConfig(BaseModel):
@@ -143,16 +148,6 @@ class HashingConfig(BaseModel):
     business_key: BusinessKeyConfig = Field(default_factory=BusinessKeyConfig)
 
     business_key_fields: list[str] = Field(default_factory=list)
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class NormalizationConfig(BaseModel):
-    """Конфигурация нормализации данных."""
-
-    case_sensitive_fields: list[str] = Field(default_factory=list)
-    id_fields: list[str] = Field(default_factory=list)
-    custom_normalizers: dict[str, str] = Field(default_factory=dict)
 
     model_config = ConfigDict(extra="forbid")
 
@@ -321,11 +316,14 @@ class FeatureFlagsConfig(BaseModel):
     def migrate_inline_flags(cls, data: Any) -> Any:
         """Позволяет передавать плоские фиче-флаги без обёртки."""
 
-        if (
-            isinstance(data, dict)
-            and "interfaces" not in data
-            and "features" not in data
-        ):
+        if not isinstance(data, dict):
+            return data
+
+        if "features" in data and isinstance(data["features"], dict):
+            merged = {k: v for k, v in data.items() if k != "features"}
+            data = {**data["features"], **merged}
+
+        if "interfaces" not in data and "features" not in data:
             return {"interfaces": data}
         return data
 
@@ -574,17 +572,38 @@ class PipelineConfig(BaseModel):
         migrated = dict(data)
 
         def _pack(section_key: str, keys: list[str]) -> None:
-            collected = {key: migrated.pop(key) for key in keys if key in migrated}
-            if not collected:
+            existing_section = (
+                migrated.get(section_key)
+                if isinstance(migrated.get(section_key), dict)
+                else None
+            )
+            keys_to_collect = list(keys)
+            if section_key in keys_to_collect and existing_section is not None:
+                keys_to_collect.remove(section_key)
+
+            collected = {
+                key: migrated.pop(key) for key in keys_to_collect if key in migrated
+            }
+            if not collected and existing_section is None:
                 return
 
-            if section_key not in migrated or not isinstance(
-                migrated.get(section_key), dict
-            ):
-                migrated[section_key] = collected
-                return
+            target_section: dict[str, Any] = dict(existing_section or {})
+            nested_from_collected = collected.pop(section_key, None)
+            if isinstance(nested_from_collected, dict):
+                target_section |= nested_from_collected
 
-            migrated[section_key] = {**migrated[section_key], **collected}
+            for key, value in collected.items():
+                if (
+                    key in target_section
+                    and isinstance(target_section[key], dict)
+                    and isinstance(value, dict)
+                ):
+                    target_section[key] = {**target_section[key], **value}
+                else:
+                    target_section[key] = value
+
+            if target_section:
+                migrated[section_key] = target_section
 
         _pack(
             "runtime",

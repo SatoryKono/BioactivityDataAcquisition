@@ -1,24 +1,13 @@
 """Domain-level transform contracts and DTOs."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Protocol
 
 import pandas as pd
 
-
-@dataclass
-class NormalizationConfig:
-    """
-    Domain-level configuration for normalization.
-
-    This is a pure domain object with no infrastructure dependencies.
-    """
-
-    case_sensitive_fields: list[str] = field(default_factory=list)
-    id_fields: list[str] = field(default_factory=list)
-    fields: list[dict[str, Any]] = field(default_factory=list)
+# Import the canonical NormalizationConfig from configs.normalization
+from bioetl.domain.configs.normalization import NormalizationConfig
 
 
 class NormalizationConfigProviderProtocol(Protocol):

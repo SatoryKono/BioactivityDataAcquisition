@@ -118,7 +118,7 @@ class PipelineOrchestrator:
         future = executor_to_use.submit(
             self._execute_in_subprocess,
             self._pipeline_name,
-            self._config.model_dump(),
+            self._config.model_dump(by_alias=False),
             dry_run,
             limit,
             self._use_provider_loader_port,

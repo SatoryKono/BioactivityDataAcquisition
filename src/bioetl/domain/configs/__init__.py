@@ -11,6 +11,7 @@ from bioetl.domain.configs.defaults import (
     SourceDefaultsConfig,
     SourcesDefaultsConfig,
 )
+from bioetl.domain.configs.normalization import NormalizationConfig
 from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,
@@ -25,7 +26,6 @@ from bioetl.domain.configs.pipeline import (
     InterfaceFeaturesConfig,
     LoggingConfig,
     MetricsConfig,
-    NormalizationConfig,
     ObservabilityConfig,
     PaginationConfig,
     PipelineConfig,

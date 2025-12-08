@@ -4,17 +4,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Protocol, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
-from bioetl.domain.transform.contracts import NormalizationServiceABC
+if TYPE_CHECKING:
+    from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 client_t = TypeVar("client_t")
 extraction_service_t = TypeVar("extraction_service_t", covariant=True)
 normalization_service_t = TypeVar(
     "normalization_service_t",
-    bound=NormalizationServiceABC | None,
+    bound="NormalizationServiceABC | None",
     covariant=True,
 )
 writer_t = TypeVar("writer_t", covariant=True)
