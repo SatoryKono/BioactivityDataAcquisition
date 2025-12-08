@@ -35,7 +35,7 @@ def test_orchestrator_uses_provider_loader_when_flag_enabled() -> None:
             self, *, registry: InMemoryProviderRegistry | None = None
         ) -> InMemoryProviderRegistry:
             self.calls += 1
-            return registry or self.registry
+            return self.registry
 
     loader = StubLoader()
     orchestrator = PipelineOrchestrator(
@@ -44,7 +44,6 @@ def test_orchestrator_uses_provider_loader_when_flag_enabled() -> None:
         provider_registry=None,
         provider_loader=loader,
         provider_loader_factory=lambda: loader,
-        use_provider_loader_port=True,
         container_factory=lambda *args, **kwargs: None,  # type: ignore[arg-type]
     )
 

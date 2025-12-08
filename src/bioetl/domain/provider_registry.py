@@ -70,8 +70,8 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
         reset_provider_registry() -> None
         restore_provider_registry(definitions) -> None
 
-    This ABC resides in ``bioetl.domain.provider_registry`` and defaults to
-    ``default_provider_registry`` which returns ``InMemoryProviderRegistry``.
+    This ABC resides in ``bioetl.domain.provider_registry`` and is typically
+    wired with ``InMemoryProviderRegistry`` for tests.
     """
 
     def register_provider(self, definition: ProviderDefinition) -> None:
@@ -142,9 +142,3 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition
-
-
-def default_provider_registry() -> ProviderRegistryABC:
-    """Return default provider registry implementation."""
-
-    return InMemoryProviderRegistry()

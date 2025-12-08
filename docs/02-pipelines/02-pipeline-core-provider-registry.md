@@ -13,4 +13,4 @@
 
 ## Orchestrator flow
 
-`PipelineOrchestrator` (`src/bioetl/application/orchestrator.py`) optionally enables the loader port for background execution. When `use_provider_loader_port` is set, the orchestrator resolves a `ProviderRegistryLoaderABC` instance, loads registry definitions into an `InMemoryProviderRegistry`, and injects it into the pipeline container for consistent provider resolution across processes.
+`PipelineOrchestrator` (`src/bioetl/application/orchestrator.py`) resolves a `ProviderRegistryLoaderABC` when provided, loads registry definitions into an `InMemoryProviderRegistry`, and injects it into the pipeline container for consistent provider resolution across processes. The legacy toggle for bypassing the port has been removed; dependencies must be supplied explicitly.
