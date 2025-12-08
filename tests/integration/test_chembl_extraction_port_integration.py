@@ -7,7 +7,7 @@ import pytest
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
+from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
@@ -22,7 +22,7 @@ def test_chembl_extraction_port_is_resolved(monkeypatch: pytest.MonkeyPatch) -> 
         "BIOETL_CONFIG_DIR", str(Path("tests/fixtures/configs").resolve())
     )
     monkeypatch.setattr(
-        ChemblExtractionClientImpl,
+        ChemblExtractionServiceImpl,
         "get_release_version",
         lambda self: "chembl_port_integration",
     )
@@ -41,5 +41,5 @@ def test_chembl_extraction_port_is_resolved(monkeypatch: pytest.MonkeyPatch) -> 
     service = container.get_extraction_service()
 
     assert isinstance(service, ExtractionServiceABC)
-    assert isinstance(service, ChemblExtractionClientImpl)
+    assert isinstance(service, ChemblExtractionServiceImpl)
     assert service.get_release_version() == "chembl_port_integration"

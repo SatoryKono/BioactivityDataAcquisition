@@ -1,5 +1,5 @@
 """
-Tests for ChemblExtractionClientImpl.
+Tests for ChemblExtractionServiceImpl.
 """
 
 # pylint: disable=redefined-outer-name
@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
+from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 
 
 @pytest.fixture
@@ -19,8 +19,8 @@ def mock_client():
 
 @pytest.fixture
 def service(mock_client):
-    """ChemblExtractionClientImpl instance with mock client."""
-    return ChemblExtractionClientImpl(client=mock_client, batch_size=10)
+    """ChemblExtractionServiceImpl instance with mock client."""
+    return ChemblExtractionServiceImpl(client=mock_client, batch_size=10)
 
 
 def test_get_release_version(service, mock_client):
