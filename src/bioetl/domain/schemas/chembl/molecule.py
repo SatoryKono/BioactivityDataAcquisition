@@ -1,4 +1,4 @@
-"""Pandera schema for ChEMBL molecule data."""
+"""Pandera schema for normalized ChEMBL molecule table."""
 
 import pandera as pa
 from pandera.typing import Series
@@ -7,8 +7,8 @@ from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
 
 
-class MoleculeSchema(BaseGeneratedColumnsSchema):
-    """Schema for molecule data."""
+class MoleculeTableSchema(BaseGeneratedColumnsSchema):
+    """Pandera schema describing normalized molecule data."""
 
     atc_classifications: Series[str] = pa.Field(
         nullable=True, description="ATC-коды и описания"

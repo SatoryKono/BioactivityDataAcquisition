@@ -183,7 +183,7 @@ classDiagram
         <<Pandera>>
     }
 
-    class ActivitySchema {
+    class ActivityTableSchema {
         +activity_id: int
         +assay_id: int
         +molecule_id: int
@@ -192,7 +192,7 @@ classDiagram
         +unit: str
     }
 
-    class AssaySchema {
+    class AssayTableSchema {
         +assay_id: int
         +assay_type: str
         +assay_category: str
@@ -212,17 +212,17 @@ classDiagram
         +pref_name: str
     }
 
-    class MoleculeSchema {
+    class MoleculeTableSchema {
         +molecule_id: int
         +molecular_formula: str
         +molecular_weight: float
     }
 
-    DataFrameModel <|-- ActivitySchema
-    DataFrameModel <|-- AssaySchema
+    DataFrameModel <|-- ActivityTableSchema
+    DataFrameModel <|-- AssayTableSchema
     DataFrameModel <|-- DocumentSchema
     DataFrameModel <|-- TargetSchema
-    DataFrameModel <|-- MoleculeSchema
+    DataFrameModel <|-- MoleculeTableSchema
 ```
 
 ## 6. Domain Models

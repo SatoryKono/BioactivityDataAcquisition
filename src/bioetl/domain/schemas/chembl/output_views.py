@@ -6,11 +6,11 @@ from typing import Type
 
 import pandera.pandas as pa
 
-from bioetl.domain.schemas.chembl.activity import ActivitySchema
-from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
+from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
 from bioetl.domain.schemas.chembl.document import DocumentSchema
-from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 
 
@@ -21,10 +21,10 @@ def _metadata_last(schema_cls: Type[pa.DataFrameModel]) -> list[str]:
     return ordered
 
 
-ACTIVITY_OUTPUT_COLUMNS = _metadata_last(ActivitySchema)
-ASSAY_OUTPUT_COLUMNS = _metadata_last(AssaySchema)
+ACTIVITY_OUTPUT_COLUMNS = _metadata_last(ActivityTableSchema)
+ASSAY_OUTPUT_COLUMNS = _metadata_last(AssayTableSchema)
 DOCUMENT_OUTPUT_COLUMNS = _metadata_last(DocumentSchema)
-MOLECULE_OUTPUT_COLUMNS = _metadata_last(MoleculeSchema)
+MOLECULE_OUTPUT_COLUMNS = _metadata_last(MoleculeTableSchema)
 TARGET_OUTPUT_COLUMNS = _metadata_last(TargetSchema)
 
 __all__ = [

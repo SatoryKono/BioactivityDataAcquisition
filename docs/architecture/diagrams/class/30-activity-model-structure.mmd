@@ -1,6 +1,6 @@
 %%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
 classDiagram
-    class ActivityModel {
+    class RawActivityPayload {
         <<ChemblRecordModel>>
         activity_properties : list[Any] | dict[str, Any] | None
         ligand_efficiency : dict[str, Any] | None
@@ -11,5 +11,5 @@ classDiagram
         _scalar_to_str(value) -> str
     }
 
-    ActivityModel --> FlatteningHelpers : uses
+    RawActivityPayload --> FlatteningHelpers : uses
 

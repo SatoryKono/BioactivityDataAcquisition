@@ -69,22 +69,22 @@ class ChemblRecordModel(BaseModel):
         return serialized
 
 
-class ActivityModel(ChemblRecordModel):
-    """Container for ChEMBL activity records before normalization."""
+class RawActivityPayload(ChemblRecordModel):
+    """Container for raw ChEMBL activity records before normalization."""
 
     activity_properties: list[Any] | dict[str, Any] | None = None
     ligand_efficiency: dict[str, Any] | None = None
 
 
-class AssayModel(ChemblRecordModel):
-    """Container for assay payloads coming from ChEMBL."""
+class RawAssayPayload(ChemblRecordModel):
+    """Container for raw assay payloads coming from ChEMBL."""
 
     assay_classifications: list[Any] | None = None
     assay_parameters: list[Any] | None = None
 
 
-class MoleculeModel(ChemblRecordModel):
-    """Container for molecule payloads originating from ChEMBL."""
+class RawMoleculePayload(ChemblRecordModel):
+    """Container for raw molecule payloads originating from ChEMBL."""
 
     atc_classifications: list[Any] | None = None
     cross_references: list[Any] | None = None

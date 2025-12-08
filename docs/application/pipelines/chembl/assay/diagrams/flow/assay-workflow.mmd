@@ -11,7 +11,7 @@ flowchart TD
     classify["Normalize assay_classifications + assay_parameters\n- flatten list-of-dicts\n- ensure deterministic ordering"]:::stepSecondary
     transform["AssayTransformer (ChemblTransformerImpl override)\n- derive target_chembl_id fallback\n- normalize assay_type + BAO identifiers"]:::stepPrimary
     hash["Post-transform: hash/index/database_version/extracted_at"]:::stepSecondary
-    validate["AssaySchema validation\n- assay_chembl_id regex\n- assay_type in {B,F,b,f}\n- BAO IDs validated"]:::stepPrimary
+    validate["AssayTableSchema validation\n- assay_chembl_id regex\n- assay_type in {B,F,b,f}\n- BAO IDs validated"]:::stepPrimary
     dry{Dry run?}:::stepDecision
     write["UnifiedOutputWriter\n- stable sort by assay_chembl_id\n- atomic CSV + meta.yaml"]:::stepPrimary
     drySkip["Skip write but emit metrics/meta preview"]:::stepSecondary

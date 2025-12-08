@@ -36,18 +36,18 @@ classDiagram
     }
     class Schemas {
         <<module>>
-        activity.ActivitySchema
-        assay.AssaySchema
+        activity.ActivityTableSchema
+        assay.AssayTableSchema
         target.TargetSchema
         document.DocumentSchema
-        molecule.MoleculeSchema
+        molecule.MoleculeTableSchema
     }
     class Models {
         <<module>>
         ChemblRecordModel
-        ActivityModel
-        AssayModel
-        MoleculeModel
+        RawActivityPayload
+        RawAssayPayload
+        RawMoleculePayload
     }
     class DomainErrors {
         <<module>>

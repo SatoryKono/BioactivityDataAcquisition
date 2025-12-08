@@ -2,10 +2,10 @@
 Pandera Schemas.
 """
 
-from bioetl.domain.schemas.chembl.activity import ActivitySchema
-from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
+from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.document import DocumentSchema
-from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
@@ -19,23 +19,25 @@ from bioetl.domain.validation.contracts import SchemaProviderABC
 
 def register_schemas(registry: SchemaProviderABC) -> None:
     """Register all schemas to the provided registry."""
-    registry.register("activity", ActivitySchema)
-    registry.register("activity_input", ActivitySchema)
+    registry.register("activity", ActivityTableSchema)
+    registry.register("activity_input", ActivityTableSchema)
     registry.register(
-        "activity_output", ActivitySchema, column_order=ACTIVITY_OUTPUT_COLUMNS
+        "activity_output", ActivityTableSchema, column_order=ACTIVITY_OUTPUT_COLUMNS
     )
-    registry.register("assay", AssaySchema)
-    registry.register("assay_input", AssaySchema)
-    registry.register("assay_output", AssaySchema, column_order=ASSAY_OUTPUT_COLUMNS)
+    registry.register("assay", AssayTableSchema)
+    registry.register("assay_input", AssayTableSchema)
+    registry.register(
+        "assay_output", AssayTableSchema, column_order=ASSAY_OUTPUT_COLUMNS
+    )
     registry.register("document", DocumentSchema)
     registry.register("document_input", DocumentSchema)
     registry.register(
         "document_output", DocumentSchema, column_order=DOCUMENT_OUTPUT_COLUMNS
     )
-    registry.register("molecule", MoleculeSchema)
-    registry.register("molecule_input", MoleculeSchema)
+    registry.register("molecule", MoleculeTableSchema)
+    registry.register("molecule_input", MoleculeTableSchema)
     registry.register(
-        "molecule_output", MoleculeSchema, column_order=MOLECULE_OUTPUT_COLUMNS
+        "molecule_output", MoleculeTableSchema, column_order=MOLECULE_OUTPUT_COLUMNS
     )
     registry.register("target", TargetSchema)
     registry.register("target_input", TargetSchema)
