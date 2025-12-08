@@ -81,15 +81,15 @@ def test_metadata(client, mock_request_builder):
     assert result == {"status": "UP"}
 
 
-def test_request_activity(client, mock_request_builder):
-    """Test request_activity delegates to request_builder and execute."""
+def test_fetch_activity(client, mock_request_builder):
+    """Test fetch delegates to request_builder and execute."""
     # Setup
     mock_response = Mock()
     mock_response.json.return_value = {"activities": []}
     client.http.request.return_value = mock_response
 
     # Execute
-    result = client.request_activity(molecule_chembl_id="CHEMBL1")
+    result = client.fetch("activity", molecule_chembl_id="CHEMBL1")
 
     # Verify
     mock_request_builder.build_for_endpoint.assert_called_with("activity")
@@ -107,7 +107,7 @@ def test_execute_request_json_error(client):
     client.http.request.return_value = mock_response
 
     with pytest.raises(ClientResponseError):
-        client.request_activity()
+        client.fetch("activity")
 
 
 def test_rate_limiter_called(client):
