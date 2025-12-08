@@ -63,7 +63,6 @@ class PipelineOrchestrator:
         )
         hash_service = container.get_hash_service()
         metadata_builder = container.get_metadata_builder()
-        file_record_source_factory = container.get_record_source_factory()
         hooks = container.get_hooks()
         error_policy = container.get_error_policy()
 
@@ -80,7 +79,6 @@ class PipelineOrchestrator:
             normalization_service=normalization_service,
             hash_service=hash_service,
             metadata_builder=metadata_builder,
-            file_record_source_factory=file_record_source_factory,
             hooks=hooks,
             error_policy=error_policy,
         )
