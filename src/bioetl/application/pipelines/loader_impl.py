@@ -24,6 +24,7 @@ class FileLoaderImpl(LoaderABC):
         context: Any,
         column_order: list[str] | None = None,
     ) -> WriteResult:
+        """Write dataframe to disk via OutputWriter with supplied context."""
         return self._output_writer.write_result(
             df=df,
             output_path=output_path,

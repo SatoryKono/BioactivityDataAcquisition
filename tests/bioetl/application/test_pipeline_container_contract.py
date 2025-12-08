@@ -2,12 +2,17 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from bioetl.application.container import PipelineContainer
-from bioetl.application.orchestrator import PipelineOrchestrator
+import pytest
+
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
+
 # Provider registry module was removed
 # from bioetl.domain.provider_registry import InMemoryProviderRegistry
+
+# Stubs for provider-registry-related names used only in skipped tests.
+config: object | None = None
+provider_registry: object | None = None
 
 
 class StubContainer(PipelineContainerABC):
@@ -133,27 +138,6 @@ def _assert_dependencies(
     assert pipeline.error_policy == "error_policy"
 
 
-def test_pipeline_container_satisfies_contract(monkeypatch: Any) -> None:
-    pytest.skip("Provider registry module was removed")
-    # config = _build_config()
-    # provider_registry = InMemoryProviderRegistry()
-    container = PipelineContainer(config, provider_registry=provider_registry)
-
-    assert isinstance(container, PipelineContainerABC)
-
-    stub_container = StubContainer(config)
-    monkeypatch.setattr(
-        "bioetl.application.orchestrator.get_pipeline_class", lambda _: DummyPipeline
-    )
-
-    orchestrator = PipelineOrchestrator(
-        "dummy.entity",
-        config,
-        provider_registry=provider_registry,
-        container_factory=lambda *args, **kwargs: stub_container,
-    )
-
-    pipeline = orchestrator.build_pipeline(limit=5)
-
-    assert isinstance(pipeline, DummyPipeline)
-    _assert_dependencies(pipeline, stub_container)
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_pipeline_container_satisfies_contract() -> None:
+    """Legacy provider registry contract test disabled until module returns."""

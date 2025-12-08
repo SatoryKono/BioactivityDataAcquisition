@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 
@@ -48,12 +48,11 @@ class ProviderRegistryABC(ABC):
         """Очищает реестр провайдеров."""
 
     @abstractmethod
-    def restore_provider_registry(
-        self, definitions: list[ProviderDefinition]
-    ) -> None:
+    def restore_provider_registry(self, definitions: list[ProviderDefinition]) -> None:
         """Восстанавливает реестр из списка определений."""
 
 
+@runtime_checkable
 class ProviderRegistryLoaderABC(Protocol):
     """Протокол для загрузчика реестра провайдеров."""
 
@@ -94,13 +93,17 @@ class InMemoryProviderRegistry(ProviderRegistryABC):
         """Очищает реестр провайдеров."""
         self._providers.clear()
 
-    def restore_provider_registry(
-        self, definitions: list[ProviderDefinition]
-    ) -> None:
+    def restore_provider_registry(self, definitions: list[ProviderDefinition]) -> None:
         """Восстанавливает реестр из списка определений."""
         self._providers.clear()
         for definition in definitions:
             self._providers[definition.id] = definition
+
+
+def default_provider_registry() -> ProviderRegistryABC:
+    """Возвращает in-memory реализацию реестра провайдеров по умолчанию."""
+
+    return InMemoryProviderRegistry()
 
 
 __all__ = [
@@ -110,5 +113,5 @@ __all__ = [
     "ProviderRegistryABC",
     "ProviderRegistryLoaderABC",
     "InMemoryProviderRegistry",
+    "default_provider_registry",
 ]
-

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, SupportsIndex
 
 __all__ = [
     "BioetlError",
@@ -58,7 +58,7 @@ class ClientError(ProviderError):
         self.status_code = status_code
         self.details = details or {}
 
-    def __str__(self) -> str:  # pragma: no cover - представление исключения
+    def __str__(self) -> str:
         base = f"{self.__class__.__name__} for provider '{self.provider}'"
         if self.endpoint:
             base += f" endpoint '{self.endpoint}'"
@@ -104,10 +104,49 @@ class PipelineStageError(BioetlError):
         self.run_id = run_id
         self.cause = cause
 
-    def __str__(self) -> str:  # pragma: no cover - представление исключения
+    def __str__(self) -> str:
         base = (
             f"PipelineStageError(provider='{self.provider}', "
             f"entity='{self.entity}', stage='{self.stage}', "
             f"attempt={self.attempt}, run_id='{self.run_id}')"
         )
         return base + f": {self.args[0]}"
+
+    def __reduce_ex__(self, protocol: SupportsIndex) -> tuple[Any, tuple[Any, ...]]:
+        """Delegate to custom __reduce__ for all pickle protocols."""
+
+        return self.__reduce__()
+
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        """Делает исключение сериализуемым для multiprocessing."""
+
+        return (
+            _rebuild_pipeline_stage_error,
+            (
+                self.provider,
+                self.entity,
+                self.stage,
+                self.attempt,
+                self.run_id,
+                self.cause,
+            ),
+        )
+
+
+def _rebuild_pipeline_stage_error(
+    provider: str,
+    entity: str,
+    stage: str,
+    attempt: int,
+    run_id: str,
+    cause: Exception | None,
+) -> PipelineStageError:
+    """Восстанавливает PipelineStageError после unpickle."""
+    return PipelineStageError(
+        provider=provider,
+        entity=entity,
+        stage=stage,
+        attempt=attempt,
+        run_id=run_id,
+        cause=cause,
+    )

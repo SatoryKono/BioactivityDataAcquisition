@@ -1,16 +1,17 @@
 """Утилиты регистрации Pandera-схем домена."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any
 
 from bioetl.domain.schemas.chembl.activity import (
-    ActivityTableSchema,
     OUTPUT_COLUMN_ORDER as ACTIVITY_OUTPUT_COLUMNS,
+    ActivityTableSchema,
 )
 from bioetl.domain.schemas.chembl.assay import (
-    AssayTableSchema,
     OUTPUT_COLUMN_ORDER as ASSAY_OUTPUT_COLUMNS,
+    AssayTableSchema,
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
@@ -91,4 +92,3 @@ def register_schemas(schema_provider: SchemaProviderABC) -> SchemaProviderABC:
         _register_with_variants(schema_provider, alias, schema_cls, column_order)
 
     return schema_provider
-

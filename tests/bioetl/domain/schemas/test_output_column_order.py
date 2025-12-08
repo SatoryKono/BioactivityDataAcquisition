@@ -30,7 +30,8 @@ from bioetl.domain.schemas.chembl.target import TargetTableSchema
 def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
     """Порядок колонок совпадает с колонками схемы без дубликатов."""
 
-    schema_columns = set(schema_cls.to_schema().columns.keys())
+    schema_order = list(schema_cls.to_schema().columns.keys())
+    schema_columns = set(schema_order)
     business_columns = [
         col for col in output_columns if col not in GENERATED_COLUMN_ORDER
     ]
@@ -39,6 +40,7 @@ def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
     assert len(output_columns) == len(set(output_columns)), "Повторы недопустимы"
     assert set(output_columns).issubset(schema_columns)
     assert set(business_columns).issubset(schema_columns - set(GENERATED_COLUMN_ORDER))
+    assert schema_order == output_columns
 
 
 @pytest.mark.parametrize(

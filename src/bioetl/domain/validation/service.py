@@ -44,9 +44,55 @@ class ValidationService:
         """
         schema = self._schema_provider.get_schema(entity_name)
         validator = self._validator_factory.create_validator(schema)
-        result: ValidationResult = validator.validate(df)
+
+        validation_columns = self._extract_validator_columns(schema)
+        df_for_validation = df.loc[:, validation_columns] if validation_columns else df
+
+        result: ValidationResult = validator.validate(df_for_validation)
 
         if not result.is_valid:
             raise ValueError(f"Validation failed for {entity_name}: {result.errors}")
 
-        return result.validated_df if result.validated_df is not None else df
+        validated_df = (
+            result.validated_df
+            if result.validated_df is not None
+            else df_for_validation
+        )
+
+        output_columns = self._safe_schema_columns(entity_name)
+        if output_columns:
+            missing = [col for col in output_columns if col not in validated_df.columns]
+            if missing:
+                raise ValueError(
+                    f"Validated dataframe for {entity_name} is missing columns: "
+                    f"{missing}"
+                )
+            validated_df = validated_df.loc[:, output_columns]
+
+        return validated_df
+
+    def _safe_schema_columns(self, entity_name: str) -> list[str] | None:
+        """
+        Best-effort lookup of desired output column order.
+        """
+
+        try:
+            return self._schema_provider.get_schema_columns(entity_name)
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _extract_validator_columns(schema: schema_type) -> list[str] | None:
+        """
+        Returns the column order enforced by the underlying schema, if available.
+        """
+
+        schema_obj = schema
+        if hasattr(schema, "to_schema"):
+            schema_obj = schema.to_schema()
+
+        columns = getattr(schema_obj, "columns", None)
+        if columns is None or not hasattr(columns, "keys"):
+            return None
+
+        return list(columns.keys())

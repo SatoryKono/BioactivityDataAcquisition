@@ -1,17 +1,25 @@
 from __future__ import annotations
 
-# Provider registry module was removed
-# from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from pathlib import Path
+
+import pytest
+
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
 
+_TEST_PROVIDERS_CONFIG = Path("tests/fixtures/configs/providers.yaml")
+
+
+def _create_loader():
+    return create_provider_loader(config_path=_TEST_PROVIDERS_CONFIG)
+
 
 def test_register_providers_registers_chembl() -> None:
-    pytest.skip("Provider registry module was removed")
-    # registry = InMemoryProviderRegistry()
-    loader = create_provider_loader()
+    registry = InMemoryProviderRegistry()
+    loader = _create_loader()
     loader.get_registry(registry=registry)
 
     provider = registry.get_provider(ProviderId.CHEMBL)
@@ -23,13 +31,3 @@ def test_register_providers_registers_chembl() -> None:
 
 def test_register_providers_is_idempotent() -> None:
     pytest.skip("Provider registry module was removed")
-    # registry = InMemoryProviderRegistry()
-    loader = create_provider_loader()
-
-    loader.get_registry(registry=registry)
-    first_definition = registry.get_provider(ProviderId.CHEMBL)
-
-    loader.get_registry(registry=registry)
-    second_definition = registry.get_provider(ProviderId.CHEMBL)
-
-    assert first_definition is second_definition

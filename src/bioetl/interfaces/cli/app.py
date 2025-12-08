@@ -36,7 +36,6 @@ from bioetl.interfaces.wiring import (
     create_container_factory,
 )
 
-
 app = typer.Typer(
     name="bioetl",
     help="Bioactivity Data Acquisition ETL CLI",
@@ -131,15 +130,10 @@ def run(
         "--input-path",
         help="Path to CSV input file",
     ),
-    input_mode: Optional[
-        Literal["csv", "id_only", "auto_detect"]
-    ] = typer.Option(
+    input_mode: Optional[Literal["csv", "id_only", "auto_detect"]] = typer.Option(
         None,
         "--input-mode",
-        help=(
-            "Record source: csv (full dataset) | "
-            "id_only (ID list) | auto_detect"
-        ),
+        help=("Record source: csv (full dataset) | " "id_only (ID list) | auto_detect"),
     ),
     csv_delimiter: Optional[str] = typer.Option(
         None,
@@ -216,10 +210,13 @@ def run(
             logger=bound_logger,
         )
         provider_config_path = base_dir / "providers.yaml"
-        provider_loader_factory: Callable[
-            [],
-            ProviderRegistryLoaderABC,
-        ] | None = partial(
+        provider_loader_factory: (
+            Callable[
+                [],
+                ProviderRegistryLoaderABC,
+            ]
+            | None
+        ) = partial(
             create_provider_loader,
             config_path=provider_config_path,
         )
@@ -229,8 +226,7 @@ def run(
             provider_loader = provider_loader_factory()
         except FileNotFoundError:
             console.print(
-                "[yellow]Providers config not found; "
-                "using empty registry[/yellow]",
+                "[yellow]Providers config not found; " "using empty registry[/yellow]",
             )
             provider_registry = InMemoryProviderRegistry()
             provider_loader_factory = None
@@ -255,8 +251,7 @@ def run(
                 limit=limit,
             )
             console.print(
-                "[yellow]Pipeline submitted to background "
-                "executor[/yellow]",
+                "[yellow]Pipeline submitted to background " "executor[/yellow]",
             )
             result = future.result()
         else:
@@ -427,4 +422,3 @@ def _collect_cli_overrides(
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation
     app()
-

@@ -16,10 +16,10 @@ from bioetl.application.pipelines.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
+from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
-from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformerImpl,
@@ -81,7 +81,13 @@ class ConcretePipeline(PipelineBase):
         loader: LoaderABC | None = None,
         **kwargs,
     ):
-        super().__init__(*args, extractor=extractor, transformer=transformer, loader=loader, **kwargs)
+        super().__init__(
+            *args,
+            extractor=extractor,
+            transformer=transformer,
+            loader=loader,
+            **kwargs,
+        )
 
     def extract(self, **kwargs):
         """Mock extraction returning sample data."""
@@ -348,7 +354,9 @@ def test_error_policy_skip_stage(
         extractor=default_extractor,
         transformer=default_transformer,
     )
-    pipeline._extractor = CallableExtractor(lambda **_: (_ for _ in ()).throw(ValueError("boom")))
+    pipeline._extractor = CallableExtractor(
+        lambda **_: (_ for _ in ()).throw(ValueError("boom"))
+    )
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)
 

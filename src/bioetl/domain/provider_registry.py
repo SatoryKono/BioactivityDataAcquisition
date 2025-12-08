@@ -15,6 +15,7 @@ try:
     ProviderRegistryABC = stub.ProviderRegistryABC
     ProviderRegistryLoaderABC = stub.ProviderRegistryLoaderABC
     InMemoryProviderRegistry = stub.InMemoryProviderRegistry
+    default_provider_registry = stub.default_provider_registry
 except ImportError as exc:
     # If stub is not available, raise informative error
     raise ImportError(
@@ -28,5 +29,6 @@ __all__ = [
     "ProviderAlreadyRegisteredError",
     "ProviderRegistryABC",
     "ProviderRegistryLoaderABC",
-    "InMemoryProviderRegistry"
+    "InMemoryProviderRegistry",
+    "default_provider_registry",
 ]

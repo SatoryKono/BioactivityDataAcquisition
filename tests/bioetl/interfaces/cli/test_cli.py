@@ -2,6 +2,7 @@
 Tests for the CLI entry point.
 """
 
+import importlib
 from pathlib import Path
 import sys
 from unittest.mock import MagicMock, patch
@@ -10,20 +11,23 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-# Avoid optional dependency import errors during tests
-# Must be before importing bioetl modules that may use tqdm
+# Avoid optional dependency import errors during tests.
+# Must be executed before loading modules importing tqdm.
 sys.modules.setdefault("tqdm", MagicMock())
 
-from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
-from bioetl.application.pipelines.contracts import LoaderABC
-from bioetl.domain.configs import (  # noqa: E402
-    ChemblSourceConfig,
-    ClientConfig,
-    PipelineConfig,
-)
-from bioetl.domain.transform.contracts import HashServiceABC  # noqa: E402
-from bioetl.domain.transform.hash_service import HashService  # noqa: E402
-from bioetl.interfaces.cli import app  # noqa: E402
+PipelineBase = importlib.import_module("bioetl.application.pipelines.base").PipelineBase
+LoaderABC = importlib.import_module("bioetl.application.pipelines.contracts").LoaderABC
+_configs = importlib.import_module("bioetl.domain.configs")
+ChemblSourceConfig = _configs.ChemblSourceConfig
+ClientConfig = _configs.ClientConfig
+PipelineConfig = _configs.PipelineConfig
+HashServiceABC = importlib.import_module(
+    "bioetl.domain.transform.contracts"
+).HashServiceABC
+HashService = importlib.import_module(
+    "bioetl.domain.transform.hash_service"
+).HashService
+app = importlib.import_module("bioetl.interfaces.cli").app
 
 runner = CliRunner()
 

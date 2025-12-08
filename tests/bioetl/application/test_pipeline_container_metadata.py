@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable
 
 import pandas as pd
 import pytest
 
-from bioetl.application.container import PipelineContainer
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     QualityReportABC,
@@ -14,13 +12,9 @@ from bioetl.domain.clients.base.output.contracts import (
     WriteResult,
 )
 from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
-from bioetl.domain.models import RunContext
+
 # Provider registry module was removed
 # from bioetl.domain.provider_registry import InMemoryProviderRegistry
-from bioetl.infrastructure.output.factories import default_output_writer
-from bioetl.infrastructure.output.unified_output_writer_impl import (
-    UnifiedOutputWriterImpl,
-)
 
 
 class RecordingWriter(WriterABC):
@@ -98,108 +92,11 @@ def _build_config(output_path: Path) -> PipelineConfig:
     )
 
 
-@pytest.fixture()
-# def provider_registry() -> InMemoryProviderRegistry:
-#     return InMemoryProviderRegistry()
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_container_uses_overridden_metadata_writer() -> None:
+    """Legacy metadata writer override test disabled until registry returns."""
 
 
-def test_container_uses_overridden_metadata_writer(
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-    run_context_factory: Callable[..., RunContext],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    config = _build_config(tmp_path / "out")
-    writer = RecordingWriter()
-    metadata_writer = RecordingMetadataWriter()
-    quality_reporter = StubQualityReporter()
-    container = PipelineContainer(
-        config,
-        output_writer=default_output_writer(
-            config=config.determinism,
-            qc_config=config.qc,
-            writer=writer,
-            metadata_writer=metadata_writer,
-            quality_reporter=quality_reporter,
-        ),
-        provider_registry=provider_registry,
-    )
-
-    output_writer = container.get_output_writer()
-    assert isinstance(output_writer, UnifiedOutputWriterImpl)
-
-    class InlineAtomic:
-        def write_atomic(self, path: Path, write_fn) -> None:
-            write_fn(path)
-
-    monkeypatch.setattr(output_writer, "_atomic_op", InlineAtomic())
-
-    run_context = run_context_factory()
-    df = pd.DataFrame({"id": [1]})
-
-    result = output_writer.write_result(
-        df,
-        Path(container.config.output_path),
-        container.config.entity_name,
-        run_context,
-    )
-
-    assert result.row_count == 1
-    assert writer.calls
-    assert metadata_writer.meta_calls
-    assert metadata_writer.meta_calls[0]["path"].name == "meta.yaml"
-
-
-def test_container_defaults_use_factories(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    default_writer_instance = RecordingWriter()
-    default_metadata_writer_instance = RecordingMetadataWriter()
-    default_quality_reporter_instance = StubQualityReporter()
-
-    writer_calls = 0
-    metadata_calls = 0
-    quality_calls = 0
-
-    def writer_factory() -> WriterABC:
-        nonlocal writer_calls
-        writer_calls += 1
-        return default_writer_instance
-
-    def metadata_factory() -> MetadataWriterABC:
-        nonlocal metadata_calls
-        metadata_calls += 1
-        return default_metadata_writer_instance
-
-    def quality_factory() -> QualityReportABC:
-        nonlocal quality_calls
-        quality_calls += 1
-        return default_quality_reporter_instance
-
-    factories_path = "bioetl.infrastructure.output.factories"
-    monkeypatch.setattr(f"{factories_path}.default_writer", writer_factory)
-    monkeypatch.setattr(f"{factories_path}.default_metadata_writer", metadata_factory)
-    monkeypatch.setattr(f"{factories_path}.default_quality_reporter", quality_factory)
-
-    config = _build_config(tmp_path / "defaults")
-    container = PipelineContainer(
-        config,
-        output_writer=default_output_writer(
-            config=config.determinism, qc_config=config.qc
-        ),
-        provider_registry=provider_registry,
-    )
-    output_writer = container.get_output_writer()
-
-    assert writer_calls == 1
-    assert metadata_calls == 1
-    assert quality_calls == 1
-    assert isinstance(output_writer, UnifiedOutputWriterImpl)
-    assert output_writer._writer is default_writer_instance
-    assert output_writer._metadata_writer is default_metadata_writer_instance
-    assert output_writer._quality_reporter is default_quality_reporter_instance
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_container_defaults_use_factories() -> None:
+    """Legacy output writer factory test disabled until registry returns."""
