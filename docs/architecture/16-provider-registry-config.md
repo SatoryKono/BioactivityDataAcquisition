@@ -38,6 +38,7 @@ A reference sample is available at `configs/providers.example.yaml`.
 - Duplicate provider ids reuse the existing definition (logged at debug); no exception is propagated to callers.
 - Successful calls return a list of registered `ProviderDefinition` objects in config order.
 - Dependencies (`registry`, `logger`, `config_path`) are injectable for tests and custom runs.
+- Loader port is always used; the legacy feature flag was removed after the migration stabilized.
 
 ## Runtime wiring (no globals)
 

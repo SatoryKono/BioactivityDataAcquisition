@@ -69,6 +69,9 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
         register_provider(definition) -> None
         reset_provider_registry() -> None
         restore_provider_registry(definitions) -> None
+
+    This ABC resides in ``bioetl.domain.provider_registry`` and is typically
+    wired with ``InMemoryProviderRegistry`` for tests.
     """
 
     def register_provider(self, definition: ProviderDefinition) -> None:
