@@ -14,6 +14,7 @@ from bioetl.domain.observability import PipelineMetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.record_source import FileRecordSourceFactoryABC
 from bioetl.domain.validation import ValidatorFactoryABC
+from bioetl.infrastructure.clients.base.abc_registry_loader import ABCRegistryLoader
 from bioetl.infrastructure.config.loader import (
     get_pipeline_config,
     get_pipeline_config_from_path,
@@ -23,18 +24,10 @@ from bioetl.infrastructure.files.csv_record_source import (
     IdListRecordSourceImpl,
 )
 from bioetl.infrastructure.observability import metrics
-from bioetl.infrastructure.observability.factories import default_logging_port
-from bioetl.infrastructure.output.factories import (
-    default_metadata_writer,
-    default_output_writer,
-    default_quality_reporter,
-    default_writer,
-)
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
 )
-from bioetl.infrastructure.validation.factories import default_validator_factory
 
 
 def create_config_loader() -> PipelineConfigLoaderProtocol:
@@ -92,7 +85,9 @@ def _create_metrics_port() -> PipelineMetricsPortABC:
 def _create_validator_factory() -> ValidatorFactoryABC:
     """Return validator factory backed by infrastructure implementation."""
 
-    return default_validator_factory()
+    loader = ABCRegistryLoader()
+    factory = loader.resolve_default_factory("ValidatorFactoryABC")
+    return factory()
 
 
 def build_default_container(
@@ -103,11 +98,18 @@ def build_default_container(
 ) -> PipelineContainerABC:
     """Construct application container with infrastructure defaults."""
 
-    logger = default_logging_port()
-    writer = default_writer()
-    metadata_writer = default_metadata_writer()
-    quality_reporter = default_quality_reporter()
-    output_writer = default_output_writer(
+    registry_loader = ABCRegistryLoader()
+    logger_factory = registry_loader.resolve_default_factory("LoggingPortABC")
+    writer_factory = registry_loader.resolve_default_factory("WriterABC")
+    metadata_writer_factory = registry_loader.resolve_default_factory("MetadataWriterABC")
+    quality_reporter_factory = registry_loader.resolve_default_factory("QualityReportABC")
+    output_writer_factory = registry_loader.resolve_default_factory("OutputWriterABC")
+
+    logger = logger_factory()
+    writer = writer_factory()
+    metadata_writer = metadata_writer_factory()
+    quality_reporter = quality_reporter_factory()
+    output_writer = output_writer_factory(
         config=config.determinism,
         qc_config=config.qc,
         writer=writer,
