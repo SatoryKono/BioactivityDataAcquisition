@@ -9,6 +9,8 @@ from collections.abc import Iterable
 from typing import Any
 
 from bioetl.domain.clients.contracts import DataClientABC
+from bioetl.domain.observability.contracts import LoggingPortABC
+from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
@@ -30,12 +32,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         batch_size: int = 1000,
         *,
         flatten_enabled: bool = True,
+        logger: LoggingPortABC | None = None,
     ) -> None:
         self.client = client
         self.batch_size = batch_size
         self.paginator = ChemblPaginatorImpl()
         self.parser = ChemblResponseParserImpl()
         self.flatten_enabled = flatten_enabled
+        provider = getattr(client, "provider", "chembl")
+        base_logger = logger or default_logging_port()
+        self._logger = base_logger.apply_bind(provider=provider)
 
     def get_release_version(self) -> str:
         """Get ChEMBL release version from API metadata."""
@@ -44,8 +50,11 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             return meta.get("chembl_release") or meta.get(
                 "chembl_db_version", "unknown"
             )
-        except Exception:
-            # Fallback if metadata endpoint fails (e.g. timeout or bad response)
+        except Exception as exc:
+            self._logger.warning(
+                "Failed to fetch ChEMBL release metadata; using fallback",
+                error=str(exc),
+            )
             return "unknown"
 
     def _request_entity(
@@ -177,7 +186,11 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
 
         try:
             from bioetl.domain.schemas.chembl.assay import OUTPUT_COLUMN_ORDER
-        except Exception:
+        except Exception as exc:
+            self._logger.warning(
+                "Failed to import assay schema; skipping field enrichment",
+                error=str(exc),
+            )
             return filters
 
         skip_meta = {

@@ -10,6 +10,10 @@ import sys
 from typing import Any, Callable, Dict, List
 
 import yaml
+from bioetl.infrastructure.observability.factories import default_logging_port
+
+# Initialize logger early to capture any tool errors
+LOGGER = default_logging_port().apply_bind(tool="check_naming_policy")
 
 # Configuration
 CONFIG_PATH = Path("configs/naming_exceptions.yaml")
@@ -474,7 +478,7 @@ def load_exceptions() -> List[Dict[str, Any]]:
             data = yaml.safe_load(f)
             return data.get("exceptions", []) if data else []
     except (OSError, yaml.YAMLError) as e:
-        print(f"Error loading exceptions: {e}")
+        LOGGER.error("Error loading naming exceptions", error=str(e))
         return []
 
 
@@ -518,7 +522,7 @@ def main():
     exceptions = load_exceptions()
     all_violations = {}
 
-    print("Checking naming policy...")
+    LOGGER.info("Checking naming policy")
 
     for root_dir in ROOT_DIRS:
         root_path = Path(root_dir)
@@ -538,15 +542,16 @@ def main():
                 all_violations[str_path] = total
 
     if all_violations:
-        print(f"\nFound violations in {len(all_violations)} files:\n")
+        LOGGER.error(
+            "Found naming policy violations", count=len(all_violations)
+        )
         for path, violations in sorted(all_violations.items()):
-            print(f"File: {path}")
+            LOGGER.error("File violations", path=path)
             for v in violations:
-                print(f"  - {v}")
-            print("")
+                LOGGER.error("Violation detail", detail=v)
         sys.exit(1)
     else:
-        print("\nNo violations found.")
+        LOGGER.info("No violations found")
         sys.exit(0)
 
 

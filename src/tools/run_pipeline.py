@@ -1,5 +1,6 @@
 import sys
 
+from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.interfaces.cli.app import app
 
 # Mock sys.argv
@@ -16,8 +17,9 @@ sys.argv = [
 ]
 
 if __name__ == "__main__":
-    print("Starting pipeline via wrapper script...")
+    logger = default_logging_port().apply_bind(tool="run_pipeline")
+    logger.info("Starting pipeline via wrapper script")
     try:
         app()
     except SystemExit as e:
-        print(f"SystemExit: {e}")
+        logger.error("Pipeline exited", error=str(e))

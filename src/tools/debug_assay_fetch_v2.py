@@ -1,10 +1,14 @@
 from pathlib import Path
 import sys
+import sys
+import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
 
 from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
+from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.interfaces.cli.app import app
 
 # Force unbuffered stdout
@@ -12,14 +16,16 @@ sys.stdout.reconfigure(line_buffering=True)
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
 
+LOGGER = default_logging_port().apply_bind(tool="debug_assay_fetch_v2")
+
 
 def debug_fetch():
-    print("DEBUG: Inspecting input file...", flush=True)
+    LOGGER.info("Inspecting input file")
     try:
         df = pd.read_csv("data/input/assay.csv", nrows=10)
-        print(f"First 10 IDs: {df['assay_chembl_id'].tolist()}", flush=True)
+        LOGGER.info("Loaded assay IDs", ids=df["assay_chembl_id"].tolist())
 
-        print("\nDEBUG: Testing single ID fetch...", flush=True)
+        LOGGER.info("Testing single ID fetch")
         test_id = df["assay_chembl_id"].iloc[0]
 
         from bioetl.domain.configs import ChemblSourceConfig
@@ -30,20 +36,20 @@ def debug_fetch():
         config = ChemblSourceConfig(base_url="https://www.ebi.ac.uk/chembl/api/data")
         service = default_chembl_extraction_service(config)
 
-        print(f"Requesting batch for ID: {test_id}", flush=True)
+        LOGGER.info("Requesting batch", test_id=test_id)
         response = service.request_batch("assay", [test_id], "assay_chembl_id__in")
-        print(f"Response keys: {list(response.keys())}", flush=True)
+        LOGGER.info("Response received", keys=list(response.keys()))
         parsed = service.parse_response(response)
-        print(f"Parsed records: {len(parsed)}", flush=True)
+        LOGGER.info("Parsed records", count=len(parsed))
         if parsed:
-            print(f"First record keys: {list(parsed[0].keys())}", flush=True)
+            LOGGER.debug("First record keys", keys=list(parsed[0].keys()))
     except Exception as e:
-        print(f"Fetch error: {e}", flush=True)
+        LOGGER.error("Fetch error", error=str(e))
 
 
 if __name__ == "__main__":
     debug_fetch()
-    print("\n--- Running Pipeline ---", flush=True)
+    LOGGER.info("Running pipeline")
     sys.argv = [
         "bioetl",
         "run",
@@ -61,6 +67,6 @@ if __name__ == "__main__":
         try:
             app()
         except SystemExit as e:
-            print(f"SystemExit: {e}", flush=True)
+            LOGGER.error("Pipeline exited", error=str(e))
         except Exception as e:
-            print(f"Error: {e}", flush=True)
+            LOGGER.error("Pipeline error", error=str(e))
