@@ -8,6 +8,10 @@ from typing import Any
 from pydantic import ValidationError
 
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.schemas import register_schemas
+from bioetl.domain.schemas.fields import build_field_configs_from_schema
+from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.infrastructure.config.defaults_loader import get_defaults_config
 from bioetl.infrastructure.config.env import resolve_env_placeholders
@@ -152,6 +156,7 @@ def _finalize_config(
     )
     merged_config = resolve_env_placeholders(merged_config)
     merged_config = _apply_defaults(merged_config, defaults)
+    merged_config = _populate_fields_from_schema(merged_config)
     _validate_input_path_exists(merged_config, config_path)
 
     try:
@@ -185,6 +190,30 @@ def _apply_defaults(config: dict[str, Any], defaults: Any) -> dict[str, Any]:
     )
     merged["quality"] = quality_section
     return merged
+
+
+def _populate_fields_from_schema(config: dict[str, Any]) -> dict[str, Any]:
+    if config.get("fields"):
+        return config
+
+    provider = config.get("provider")
+    entity = config.get("entity")
+    if not provider or not entity:
+        return config
+
+    contract = get_pipeline_contract(f"{provider}.{entity}", default_entity=str(entity))
+    schema_name = contract.get_output_schema()
+
+    registry = SchemaRegistry()
+    register_schemas(registry)
+    try:
+        schema = registry.get_schema(schema_name)
+    except ValueError:
+        return config
+
+    config = dict(config)
+    config["fields"] = build_field_configs_from_schema(schema)
+    return config
 
 
 def _validate_provider(
