@@ -17,9 +17,7 @@ from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
-from bioetl.infrastructure.clients.chembl.impl.http_client import (
-    ChemblDataClientHTTPImpl,
-)
+from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
@@ -64,7 +62,7 @@ def default_chembl_client(
         capacity=max(1.0, client_config.rate_limit_per_sec),
     )
 
-    return ChemblDataClientHTTPImpl(
+    return ChemblApiPortImpl(
         request_builder=ChemblRequestBuilderImpl(
             base_url=base_url,
             max_url_length=max_url_length,

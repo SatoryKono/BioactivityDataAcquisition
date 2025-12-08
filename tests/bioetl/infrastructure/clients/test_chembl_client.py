@@ -1,13 +1,11 @@
-"""Integration-style tests for ChemblDataClientHTTPImpl wiring."""
+"""Integration-style tests for ChemblApiPortImpl wiring."""
 
 from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
-from bioetl.infrastructure.clients.chembl.impl.http_client import (
-    ChemblDataClientHTTPImpl,
-)
+from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
@@ -31,7 +29,7 @@ def mock_components():
 
 @pytest.fixture
 def client(mock_components):
-    client = ChemblDataClientHTTPImpl(
+    client = ChemblApiPortImpl(
         request_builder=mock_components["request_builder"],
         response_parser=mock_components["response_parser"],
         rate_limiter=mock_components["rate_limiter"],

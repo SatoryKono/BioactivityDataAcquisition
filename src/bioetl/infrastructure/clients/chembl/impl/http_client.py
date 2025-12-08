@@ -1,5 +1,5 @@
 """
-Implementation of ChEMBL HTTP client.
+HTTP implementation of ChEMBL API port.
 """
 
 from __future__ import annotations
@@ -23,9 +23,9 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
-class ChemblDataClientHTTPImpl(DataClientABC):
+class ChemblApiPortImpl(DataClientABC):
     """
-    HTTP implementation of ChEMBL client.
+    ChEMBL API port implemented over HTTP.
     Uses UnifiedAPIClientImpl for requests and RateLimiter for proactive throttling.
     """
 
