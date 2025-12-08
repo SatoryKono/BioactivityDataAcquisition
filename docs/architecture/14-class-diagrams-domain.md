@@ -281,8 +281,8 @@ classDiagram
     }
 
     class ProviderDefinition {
-        +provider_id: ProviderId
-        +config_class: Type[BaseProviderConfig]
+        +id: ProviderId
+        +config_type: type[BaseProviderConfig]
         +components: ProviderComponents
     }
 
@@ -303,6 +303,7 @@ classDiagram
     ProviderRegistry --> ProviderDefinition : stores
     ProviderDefinition --> ProviderId : uses
     ProviderDefinition --> ProviderComponents : contains
+    note "BaseProviderConfig lives in bioetl.domain.configs.pipeline"
 ```
 
 ## 8. Normalizers

@@ -1,4 +1,4 @@
-# Adding a New ETL Pipeline to BioETL
+# Adding New Pipeline
 
 This document describes how to introduce a new ETL pipeline into BioETL, from code placement and configuration to testing and documentation. It consolidates project rules from `docs/project`, schema guidelines, CLI contracts, and existing pipeline examples.
 

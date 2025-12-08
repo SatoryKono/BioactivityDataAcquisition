@@ -36,8 +36,8 @@ classDiagram
         document_year : float?
     }
     class HashingFields {
-        hash_row : ^[a-f0-9]{64}$
-        hash_business_key : ^[a-f0-9]{64}?$
+        hash_row : hex64
+        hash_business_key : hex64?
         index : int
     }
 

@@ -13,7 +13,7 @@ flowchart LR
     overrides["CLI overrides (--limit, --output, --dry-run)\nmerged into config"]:::componentSecondary
     orchestrator["PipelineOrchestrator\n(application.orchestrator)"]:::componentPrimary
     feedback["Structured CLI feedback\ninfo/error logs via UnifiedLogger"]:::componentSecondary
-    scripts["`bioetl` console script / `python -m bioetl`\nentrypoints"]:::external
+    scripts["bioetl console script / python -m bioetl\nentrypoints"]:::external
 
     scripts --> typer
     typer --> commandRegistry

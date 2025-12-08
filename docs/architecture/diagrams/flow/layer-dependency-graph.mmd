@@ -35,5 +35,5 @@ flowchart LR
     validationPort --> validationSvc
     writerPort --> unifiedWriter
     registryPort --> chemblClient
-    validationPort -.x-|no back-depend| pipeline
+    validationPort -.->|no back-depend| pipeline
 

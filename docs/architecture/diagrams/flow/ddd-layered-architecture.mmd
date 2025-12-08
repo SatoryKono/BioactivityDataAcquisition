@@ -16,8 +16,8 @@ flowchart TB
 
     domain -.->|Defines ABC + schema| infrastructure
     interfaces -.->|No direct access| domain
-    interfaces -.x-|Forbidden| infrastructure
-    application -.x-|Forbidden| interfaces
+    interfaces -.->|Forbidden| infrastructure
+    application -.->|Forbidden| interfaces
 
     note1(["Allowed dependency direction only ↓"]):::note
     interfaces --> note1

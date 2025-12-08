@@ -394,6 +394,12 @@ exceptions:
     owner: domain
     expiry: permanent
 
+  - path: src/bioetl/infrastructure/transform/pandas_batch_adapter.py
+    rule_id: FUNC_PREFIX
+    reason: "BatchAdapter contract uses adapt_* methods for normalization"
+    owner: infra
+    expiry: permanent
+
   - path: src/bioetl/domain/transform/merge.py
     rule_id: FUNC_PREFIX
     reason: "Utility function (apply_deep_merge)"

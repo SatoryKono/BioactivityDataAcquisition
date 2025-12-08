@@ -12,13 +12,17 @@ classDiagram
         chembl_release : str?
         dry_run : bool
         stages : dict[str, bool]
-        hashing : {
-            business_key_fields : list[str]
-        }
-        quality : {
-            checksum : str
-            qc_report_path : str
-        }
+        hashing : HashingMetadata
+        quality : QualityMetadata
         error : str?
+    }
+
+    class HashingMetadata {
+        business_key_fields : list[str]
+    }
+
+    class QualityMetadata {
+        checksum : str
+        qc_report_path : str
     }
 

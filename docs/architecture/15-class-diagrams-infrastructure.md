@@ -408,23 +408,28 @@ classDiagram
     }
 
     class ProviderDefinition {
-        +provider_id: ProviderId
-        +config_class: Type[BaseProviderConfig]
+        +id: ProviderId
+        +config_type: type[BaseProviderConfig]
         +components: ProviderComponents
     }
 
     class ChemblSourceConfig {
-        +base_url: str
-        +timeout: float
-        +rate_limit: float
+        +provider: "chembl"
+        +base_url: AnyHttpUrl
+        +timeout_sec: float
+        +max_retries: int
+        +rate_limit_per_sec: float?
     }
 
     class BaseProviderConfig {
         +provider: str
+        +base_url: AnyHttpUrl
+        +timeout_sec: float
+        +max_retries: int
+        +rate_limit_per_sec: float?
     }
 
     ProviderComponents <|.. ChemblProviderComponentsFactory
     ProviderDefinition --> ProviderComponents : contains
     ProviderDefinition --> BaseProviderConfig : uses
-    ChemblSourceConfig --|> BaseProviderConfig
-```
+    

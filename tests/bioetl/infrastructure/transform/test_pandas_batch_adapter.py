@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from bioetl.infrastructure.transform.pandas_batch_adapter import PandasBatchAdapter
+from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 
 
 def test_pandas_batch_adapter_converts_dataframe_to_records() -> None:

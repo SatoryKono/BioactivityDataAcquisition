@@ -14,11 +14,9 @@ flowchart LR
     class Unit group
 
     subgraph Golden["tests/golden/"]
-        goldenActivity["test_activity_chembl_golden.py\nfixtures: tests/fixtures/input/activity.csv"]:::suite
-        goldenAssay["test_assay_chembl_golden.py"]:::suite
-        goldenTarget["test_target_chembl_golden.py"]:::suite
-        goldenDocument["test_document_chembl_golden.py"]:::suite
-        goldenMolecule["test_molecule_chembl_golden.py"]:::suite
+        goldenActivity["tests/golden/test_chembl_activity_golden.py\nfixtures: tests/fixtures/input/chembl_activity_small.csv"]:::suite
+        goldenNormalization["tests/golden/test_normalization_golden.py\nuses golden_examples.json"]:::suite
+        pipelineOutputs["tests/test_pipeline_outputs.py\nuses tests/golden/pipeline_outputs data"]:::suite
     end
     class Golden group
 
