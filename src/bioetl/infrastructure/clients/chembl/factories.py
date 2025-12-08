@@ -11,8 +11,8 @@ from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
-from bioetl.infrastructure.clients.chembl.chembl_extraction_client_impl import (
-    ChemblExtractionClientImpl,
+from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
+    ChemblExtractionServiceImpl,
 )
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
@@ -100,7 +100,7 @@ def default_chembl_extraction_service(
     if client is None:
         client = default_chembl_client(config, client_config=client_config)
 
-    return ChemblExtractionClientImpl(
+    return ChemblExtractionServiceImpl(
         client=client,
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
