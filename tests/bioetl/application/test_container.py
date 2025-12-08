@@ -4,16 +4,10 @@ from pathlib import Path
 import sys
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import MagicMock
 
 from pydantic import ValidationError
 import pytest
 
-from bioetl.application.container import PipelineContainer
-from bioetl.application.pipelines.hooks_impl import (
-    FailFastErrorPolicyImpl,
-    LoggingPipelineHookImpl,
-)
 # Provider registry module was removed
 # from bioetl.domain.provider_registry import (
 #     InMemoryProviderRegistry,
@@ -24,7 +18,6 @@ from bioetl.domain.providers import (
     ProviderDefinition,
     ProviderId,
 )
-from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.config import (
     provider_registry_loader as config_provider_registry,
 )
@@ -34,7 +27,6 @@ from bioetl.infrastructure.config.models import (
     DummyProviderConfig,
     PipelineConfig,
 )
-from bioetl.infrastructure.transform.factories import default_hash_service
 
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
 
@@ -120,78 +112,14 @@ def _build_dummy_pipeline_config(
     )
 
 
+@pytest.mark.skip(reason="Provider registry module was removed")
 def test_get_extraction_service_for_registered_providers_container() -> None:
-    # Provider registry module was removed - test skipped
-    pytest.skip("Provider registry module was removed")
-    # registry = InMemoryProviderRegistry()
-    # registry.register_provider(register_chembl_provider())
-    # _register_dummy_provider(registry=registry)
-
-    chembl_container = PipelineContainer(
-        PipelineConfig(
-            id="chembl.activity",
-            provider="chembl",
-            entity="activity",
-            input_mode="auto_detect",
-            input_path=None,
-            output_path="/tmp/out",
-            batch_size=10,
-            provider_config=ChemblSourceConfig(
-                base_url="https://www.ebi.ac.uk/chembl/api/data",
-                client=ClientConfig(
-                    timeout_sec=30,
-                    max_retries=3,
-                    rate_limit_per_sec=10.0,
-                ),
-            ),
-        ),
-        hash_service=default_hash_service(),
-        provider_registry=registry,
-    )
-    dummy_container = PipelineContainer(
-        _build_dummy_pipeline_config(
-            DummyProviderConfig(
-                base_url="https://example.com",  # type: ignore[arg-type]
-                client=ClientConfig(
-                    timeout_sec=1,
-                    max_retries=0,
-                    rate_limit_per_sec=1.0,
-                ),
-            )
-        ),
-        provider_registry=registry,
-    )
-
-    chembl_service = chembl_container.get_extraction_service()
-    dummy_service = dummy_container.get_extraction_service()
-
-    from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
-
-    assert isinstance(chembl_service, ChemblExtractionServiceImpl)
-    assert dummy_service == ("dummy", "https://example.com/")
+    """Legacy provider registry integration test is disabled until module returns."""
 
 
-def test_unknown_provider_raises_container(
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    dummy_container = PipelineContainer(
-        _build_dummy_pipeline_config(
-            DummyProviderConfig(
-                base_url="https://example.com",  # type: ignore[arg-type]
-                client=ClientConfig(
-                    timeout_sec=1,
-                    max_retries=0,
-                    rate_limit_per_sec=1.0,
-                ),
-            )
-        ),
-        hash_service=default_hash_service(),
-        provider_registry=provider_registry,
-    )
-
-    with pytest.raises(ProviderNotRegisteredError):
-        dummy_container.get_extraction_service()
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_unknown_provider_raises_container() -> None:
+    """Legacy provider lookup test disabled until registry layer is restored."""
 
 
 def test_config_validation_error_is_propagated_container() -> None:
@@ -216,113 +144,21 @@ def test_config_validation_error_is_propagated_container() -> None:
         )
 
 
-def test_type_mismatch_raises_type_error_container(
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    _register_dummy_provider(config_type=ChemblSourceConfig, registry=provider_registry)
-
-    dummy_config = DummyProviderConfig(
-        base_url="https://example.com",  # type: ignore[arg-type]
-        client=ClientConfig(
-            timeout_sec=1,
-            max_retries=0,
-            rate_limit_per_sec=1.0,
-        ),
-    )
-    container = PipelineContainer(
-        _build_dummy_pipeline_config(dummy_config),
-        provider_registry=provider_registry,
-        hash_service=default_hash_service(),
-    )
-
-    with pytest.raises(TypeError):
-        container.get_extraction_service()
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_type_mismatch_raises_type_error_container() -> None:
+    """Legacy registry schema test disabled until registry layer is restored."""
 
 
-def test_container_provides_hooks_and_error_policy_container(
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    dummy_config = DummyProviderConfig(
-        base_url="https://example.com",  # type: ignore[arg-type]
-        client=ClientConfig(
-            timeout_sec=1,
-            max_retries=0,
-            rate_limit_per_sec=1.0,
-        ),
-    )
-    container = PipelineContainer(
-        _build_dummy_pipeline_config(dummy_config),
-        provider_registry=provider_registry,
-        hash_service=default_hash_service(),
-    )
-
-    logger = container.get_logger()
-    hooks = container.get_hooks()
-    policy = container.get_error_policy()
-
-    assert hooks
-    assert any(isinstance(hook, LoggingPipelineHookImpl) for hook in hooks)
-    assert isinstance(policy, FailFastErrorPolicyImpl)
-    hook_logger = next(
-        hook._logger  # type: ignore[attr-defined]
-        for hook in hooks
-        if isinstance(hook, LoggingPipelineHookImpl)
-    )
-    assert hook_logger is logger
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_container_provides_hooks_and_error_policy_container() -> None:
+    """Legacy hook-provision test disabled until registry layer is restored."""
 
 
-def test_hash_service_singleton_scope_container(
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    dummy_config = DummyProviderConfig(
-        base_url="https://example.com",  # type: ignore[arg-type]
-        client=ClientConfig(
-            timeout_sec=1,
-            max_retries=0,
-            rate_limit_per_sec=1.0,
-        ),
-    )
-    container = PipelineContainer(
-        _build_dummy_pipeline_config(dummy_config),
-        provider_registry=provider_registry,
-        hash_service=default_hash_service(),
-    )
-
-    first_instance = container.get_hash_service()
-    second_instance = container.get_hash_service()
-
-    assert first_instance is second_instance
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_hash_service_singleton_scope_container() -> None:
+    """Legacy hash service scoping test disabled until registry layer is restored."""
 
 
-def test_hash_service_override_propagates_to_transformers_container(
-    # provider_registry: InMemoryProviderRegistry,  # Module was removed
-) -> None:
-    pytest.skip("Provider registry module was removed")
-    dummy_config = DummyProviderConfig(
-        base_url="https://example.com",  # type: ignore[arg-type]
-        client=ClientConfig(
-            timeout_sec=1,
-            max_retries=0,
-            rate_limit_per_sec=1.0,
-        ),
-    )
-    custom_hash_service = MagicMock()
-    container = PipelineContainer(
-        _build_dummy_pipeline_config(dummy_config),
-        hash_service=custom_hash_service,
-        provider_registry=provider_registry,
-    )
-
-    post_transformer = container.get_post_transformer(version_provider=lambda: "v1")
-    transformer_hashes = {
-        transformer.__class__.__name__: getattr(transformer, "_hash_service", None)
-        for transformer in post_transformer._transformers  # type: ignore[attr-defined] # noqa: E501
-    }
-
-    assert transformer_hashes
-    assert all(
-        service is custom_hash_service for service in transformer_hashes.values()
-    )
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_hash_service_override_propagates_to_transformers_container() -> None:
+    """Legacy hash service override test disabled until registry layer is restored."""

@@ -6,15 +6,12 @@ from types import ModuleType
 from typing import Any, Callable
 
 import pytest
-import yaml
 
 from bioetl.domain.configs import DummyProviderConfig
+
 # Provider registry module was removed
 # from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
-from bioetl.infrastructure.clients.provider_registry_loader import (
-    ProviderRegistryLoader,
-)
 from bioetl.interfaces.observability import LoggingPortABC
 
 
@@ -80,118 +77,11 @@ def _register_module(
     sys.modules[module_name] = module
 
 
-def test_loader_handles_disabled_and_faulty_entries(
-    tmp_path: Any,
-    provider_definition_factory: Callable[[ProviderId], ProviderDefinition],
-) -> None:
-    valid_module = "tests.integration.providers.active"
-    valid_factory_name = "build_provider"
-    valid_definition = provider_definition_factory(ProviderId.DUMMY)
-    _register_module(valid_module, valid_factory_name, lambda: valid_definition)
-
-    broken_module = "tests.integration.providers.broken"
-    broken_factory_name = "broken_factory"
-
-    def _broken_factory() -> None:
-        raise RuntimeError("boom")
-
-    _register_module(broken_module, broken_factory_name, _broken_factory)
-
-    config_path = tmp_path / "providers.yaml"
-    config_path.write_text(
-        yaml.safe_dump(
-            {
-                "providers": [
-                    {
-                        "id": ProviderId.DUMMY.value,
-                        "module": valid_module,
-                        "factory": valid_factory_name,
-                        "active": True,
-                    },
-                    {
-                        "id": ProviderId.DUMMY.value,
-                        "module": valid_module,
-                        "factory": valid_factory_name,
-                        "active": False,
-                    },
-                    {
-                        "id": ProviderId.PUBCHEM.value,
-                        "module": "non.existent.module",
-                        "factory": "missing_factory",
-                        "active": True,
-                    },
-                    {
-                        "id": ProviderId.UNIPROT.value,
-                        "module": broken_module,
-                        "factory": broken_factory_name,
-                        "active": True,
-                    },
-                ]
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    pytest.skip("Provider registry module was removed")
-    # registry = InMemoryProviderRegistry()
-    logger = RecordingLogger()
-    loader = ProviderRegistryLoader(config_path=config_path, logger=logger)
-
-    registered = loader.load(registry=registry)
-
-    assert registered == [valid_definition]
-    assert registry.list_providers() == [valid_definition]
-    assert any(
-        message == "Failed to import provider module" for _, message, _ in logger.errors
-    )
-    assert any(
-        message == "Provider factory invocation failed"
-        for _, message, _ in logger.errors
-    )
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_loader_handles_disabled_and_faulty_entries() -> None:
+    """Legacy provider registry loader test disabled until module returns."""
 
 
-def test_loader_reuses_existing_definition_on_duplicate_entries(
-    tmp_path: Any,
-    provider_definition_factory: Callable[[ProviderId], ProviderDefinition],
-) -> None:
-    duplicate_module = "tests.integration.providers.duplicate"
-    factory_name = "build_provider"
-    definition = provider_definition_factory(ProviderId.DUMMY)
-    _register_module(duplicate_module, factory_name, lambda: definition)
-
-    config_path = tmp_path / "providers.yaml"
-    config_path.write_text(
-        yaml.safe_dump(
-            {
-                "providers": [
-                    {
-                        "id": ProviderId.DUMMY.value,
-                        "module": duplicate_module,
-                        "factory": factory_name,
-                        "active": True,
-                    },
-                    {
-                        "id": ProviderId.DUMMY.value,
-                        "module": duplicate_module,
-                        "factory": factory_name,
-                        "active": True,
-                    },
-                ]
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    pytest.skip("Provider registry module was removed")
-    # registry = InMemoryProviderRegistry()
-    logger = RecordingLogger()
-    loader = ProviderRegistryLoader(config_path=config_path, logger=logger)
-
-    registered = loader.load(registry=registry)
-
-    assert registered == [definition, definition]
-    assert registry.list_providers() == [definition]
-    assert any(
-        message == "Provider already registered; reusing existing definition"
-        for level, message, _ in logger.debugs
-    )
+@pytest.mark.skip(reason="Provider registry module was removed")
+def test_loader_reuses_existing_definition_on_duplicate_entries() -> None:
+    """Legacy provider registry loader test disabled until module returns."""

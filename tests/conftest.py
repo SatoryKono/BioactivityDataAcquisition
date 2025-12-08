@@ -45,6 +45,7 @@ def pytest_configure(config):
     """Apply patches for removed modules and Hypothesis compatibility."""
     # Patch provider_registry module (was removed, use stub for tests)
     import sys
+
     from tests.fixtures import provider_registry_stub
 
     sys.modules["bioetl.domain.provider_registry"] = provider_registry_stub
@@ -252,16 +253,6 @@ def small_pipeline_df() -> pd.DataFrame:
             "value": ["alpha", "beta"],
         }
     )
-
-
-def pytest_configure(config):
-    """Применяет патчи для удаленных модулей."""
-    # Применяем патч для provider_registry до импорта тестов
-    import sys
-    from tests.fixtures import provider_registry_stub
-
-    # Подменяем модуль заглушкой
-    sys.modules["bioetl.domain.provider_registry"] = provider_registry_stub
 
 
 @pytest.fixture(autouse=True)

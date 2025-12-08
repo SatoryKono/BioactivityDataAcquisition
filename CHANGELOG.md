@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - ChEMBL pipeline теперь выбирает источник записей явно (API/CSV/id-only) без колонковой эвристики; CLI умеет переопределять режим и CSV-опции.
 - `HashService` больше не содержит собственной реализации `Hasher`: доменный фасад требует инжектируемый `HasherABC`, а фабрика по умолчанию использует `HasherImpl`.
 - Документация и диаграммы ChEMBL переименованы (`TestItem` → `Molecule`), добавлены stub-схемы `CellTableSchema`/`TissueTableSchema`.
+- Пересчитан `tests/project_rules/class_inventory_baseline.json`: текущее число классов 184 после удаления устаревших реализаций.
 
 ### Removed
 

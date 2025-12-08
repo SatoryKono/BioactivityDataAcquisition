@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
 from bioetl.application.pipelines.base import (
     OutputWriterLoaderAdapter,
     PipelineBase,
@@ -14,6 +19,7 @@ from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
+    WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
@@ -160,11 +166,58 @@ class ChemblPipelineBase(PipelineBase):
             return True
         return bool(pipeline_cfg.get("skip_release_lookup"))
 
-    def extract(self, **kwargs):  # type: ignore[override]
-        return self._extractor.extract(**kwargs)
+    def extract(self, **kwargs: Any) -> pd.DataFrame:
+        """
+        Возвращает единый DataFrame для удобства unit-тестов и локальных проверок.
 
-    def transform(self, df):  # type: ignore[override]
-        return self._transformer.apply(df)
+        Основной run-процесс использует self._extractor напрямую, поэтому
+        материализация чанков в этой обёртке не влияет на боевой поток.
+        """
+        extractor = self._extractor
+        if extractor is None:
+            raise RuntimeError("Chembl extractor is not initialized.")
 
-    def write(self, df, output_path, context):  # type: ignore[override]
+        extract_result = extractor.extract(**kwargs)
+        if extract_result is None:
+            return pd.DataFrame()
+
+        if isinstance(extract_result, pd.DataFrame):
+            return extract_result
+
+        try:
+            iterator = iter(extract_result)
+        except TypeError as exc:  # pragma: no cover - защитный контур
+            raise TypeError(
+                "ChemblExtractor.extract() должен возвращать DataFrame или Iterable."
+            ) from exc
+
+        chunks: list[pd.DataFrame] = []
+        for chunk in iterator:
+            if chunk is None:
+                continue
+            if not isinstance(chunk, pd.DataFrame):
+                raise TypeError("Extractor chunks должны быть pandas.DataFrame.")
+            if chunk.empty:
+                continue
+            chunks.append(chunk)
+
+        if not chunks:
+            return pd.DataFrame()
+
+        return pd.concat(chunks, ignore_index=True, copy=False)
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Runs Chembl-specific transformer pipeline on dataframe."""
+        transformer = self._transformer
+        if transformer is None:
+            raise RuntimeError("Chembl transformer is not initialized.")
+        return transformer.apply(df)
+
+    def write(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+    ) -> WriteResult:
+        """Persists transformed dataframe using the resolved loader."""
         return self._write_with_loader(df, output_path, context)

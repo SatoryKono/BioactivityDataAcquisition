@@ -21,6 +21,18 @@ from bioetl.infrastructure.files.csv_record_source import (
 from bioetl.interfaces.observability import LoggingPortABC
 
 
+def _extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
+    """Вспомогательный сбор всех чанков в единый DataFrame."""
+    extract_result = pipeline.extract()
+    if isinstance(extract_result, pd.DataFrame):
+        chunks = [extract_result]
+    else:
+        chunks = list(extract_result)
+    if not chunks:
+        return pd.DataFrame()
+    return pd.concat(chunks, ignore_index=True)
+
+
 @pytest.fixture
 def source_config():
     """Create test ChemblSourceConfig with flat structure."""
@@ -105,7 +117,7 @@ def test_extract_no_input_file(pipeline, mock_extraction_service):
     pipeline._config.input_mode = "auto_detect"
     pipeline._config.input_path = None
 
-    df = pipeline.extract()
+    df = _extract_dataframe(pipeline)
 
     mock_extraction_service.iter_extract.assert_called_once()
     assert not df.empty
@@ -135,7 +147,7 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
     )
     pipeline._extractor.record_source = csv_record_source
 
-    df = pipeline.extract()
+    df = _extract_dataframe(pipeline)
 
     assert len(df) == 2
     assert "standard_value" in df.columns
@@ -181,7 +193,7 @@ def test_extract_ids_only_csv(
     # Mock serialize_records to return input
     mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs
 
-    df = pipeline.extract()
+    df = _extract_dataframe(pipeline)
 
     assert len(df) == 3
     mock_extraction_service.request_batch.assert_called()
@@ -232,7 +244,7 @@ def test_extract_batch_size_from_config(
     mock_extraction_service.parse_response.return_value = []
     mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs
 
-    pipeline.extract()
+    list(pipeline.extract())
 
     # Expect 3 calls: [1,2], [3,4], [5]
     assert mock_extraction_service.request_batch.call_count == 3
@@ -270,4 +282,4 @@ def test_extract_missing_column(
     pipeline._extractor.record_source = id_list_record_source
 
     with pytest.raises(ValueError):
-        pipeline.extract()
+        list(pipeline.extract())

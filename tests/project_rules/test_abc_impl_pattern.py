@@ -51,9 +51,7 @@ def test_impls_subclass_their_abcs() -> None:
 
         for impl_path in (role_entry.get("implementations") or {}).values():
             impl_cls = _import_object(impl_path)
-            if not inspect.isclass(impl_cls) or not issubclass(
-                impl_cls, abc_cls
-            ):
+            if not inspect.isclass(impl_cls) or not issubclass(impl_cls, abc_cls):
                 violations.append(f"{impl_path} не наследует {abc_path}")
 
         factory_path = role_entry.get("default_factory")

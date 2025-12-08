@@ -17,6 +17,9 @@ PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
 ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
 CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
 
+ProviderRegistryLoaderABC: bioetl.domain.provider_registry.ProviderRegistryLoaderABC
+ProviderRegistryABC: bioetl.domain.provider_registry.ProviderRegistryABC
+
 ProgressReporterABC: bioetl.domain.observability.contracts.ProgressReporterABC
 LoggingPortABC: bioetl.domain.observability.contracts.LoggingPortABC
 TracingPortABC: bioetl.domain.observability.contracts.TracingPortABC

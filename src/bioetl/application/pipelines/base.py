@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, cast
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias, cast
 
 import pandas as pd
 
@@ -28,6 +28,8 @@ from bioetl.domain.validation.service import ValidationService
 
 if TYPE_CHECKING:
     from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+
+ExtractResult: TypeAlias = Iterable[pd.DataFrame] | pd.DataFrame | None
 
 
 def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
@@ -68,6 +70,7 @@ class OutputWriterLoaderAdapter(LoaderABC):
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
+        """Persist dataframe via wrapped OutputWriter keeping context metadata."""
         return self._output_writer.write_result(
             df=df,
             output_path=output_path,
@@ -473,7 +476,7 @@ class PipelineBase(ABC):
         return "unknown"
 
     @abstractmethod
-    def extract(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
+    def extract(self, **kwargs: Any) -> ExtractResult:
         """Возвращает итератор чанков исходных данных."""
 
     @abstractmethod
@@ -481,10 +484,25 @@ class PipelineBase(ABC):
         """Преобразует сырые данные."""
 
     def validate(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Валидирует DataFrame по Pandera-схеме."""
+        """Валидирует DataFrame по Pandera-схеме, соблюдая порядок колонок схемы."""
+        schema_name = self._schema_contract.schema_out
+        schema = self._validation_service.get_schema(schema_name)
+        schema_columns = self._resolve_validator_columns(schema)
+
+        df_for_validation = df
+        missing_columns = [
+            column for column in schema_columns if column not in df.columns
+        ]
+        if missing_columns:
+            df_for_validation = df_for_validation.copy()
+            for column in missing_columns:
+                df_for_validation[column] = None
+
+        df_for_validation = df_for_validation.loc[:, schema_columns]
+
         return self._validation_service.validate(
-            df=df,
-            entity_name=self._schema_contract.schema_out,
+            df=df_for_validation,
+            entity_name=schema_name,
         )
 
     def write(
@@ -547,6 +565,18 @@ class PipelineBase(ABC):
         if not self._post_transformer:
             return df
         return self._post_transformer.apply(df, context)
+
+    @staticmethod
+    def _resolve_validator_columns(schema: Any) -> list[str]:
+        """Возвращает порядок колонок, объявленный в Pandera-схеме."""
+        schema_obj = schema
+        if hasattr(schema_obj, "to_schema"):
+            schema_obj = schema_obj.to_schema()
+        columns = getattr(schema_obj, "columns", None)
+        if columns is None or not hasattr(columns, "keys"):
+            raise ValueError("Schema does not expose ordered columns.")
+        return list(columns.keys())
+
     def _run_stage(
         self,
         stage: str,
@@ -583,7 +613,7 @@ class PipelineBase(ABC):
 
         original_extract = self.extract
 
-        def _wrapped_extract(*args: Any, **kwargs: Any) -> pd.DataFrame:
+        def _wrapped_extract(*args: Any, **kwargs: Any) -> ExtractResult:
             call_count = getattr(_wrapped_extract, "call_count", 0)
             setattr(_wrapped_extract, "call_count", call_count + 1)
             return original_extract(*args, **kwargs)
@@ -599,16 +629,18 @@ class PipelineBase(ABC):
 
     def _get_extract_callable(
         self,
-    ) -> Callable[..., pd.DataFrame | Iterable[pd.DataFrame] | None]:
-        if self._extractor is not None:
-            return lambda **kwargs: self._extractor.extract(**kwargs)
+    ) -> Callable[..., ExtractResult]:
+        extractor = self._extractor
+        if extractor is not None:
+            return extractor.extract
         return self.extract
 
     def _get_transform_callable(
         self, context: RunContext
     ) -> Callable[[pd.DataFrame], pd.DataFrame]:
-        if self._transformer:
-            return lambda df: self._transformer.apply(df, context)
+        transformer = self._transformer
+        if transformer is not None:
+            return lambda df: transformer.apply(df, context)
         return self.transform
 
     def _get_write_callable(
@@ -618,9 +650,7 @@ class PipelineBase(ABC):
             df, output_path, run_context
         )
 
-    def _normalize_extract_result(
-        self, result: Any
-    ) -> Iterator[pd.DataFrame]:
+    def _normalize_extract_result(self, result: Any) -> Iterator[pd.DataFrame]:
         if result is None:
             return iter([])
         if isinstance(result, pd.DataFrame):

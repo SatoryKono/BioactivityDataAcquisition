@@ -1,7 +1,5 @@
 from unittest.mock import MagicMock
 
-from unittest.mock import MagicMock
-
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase

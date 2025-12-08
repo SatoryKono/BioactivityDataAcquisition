@@ -1,5 +1,7 @@
 """Shared mixins and helpers for ChEMBL Pandera schemas."""
 
+from typing import Any
+
 import pandera as pa
 from pandera.typing import Series
 
@@ -17,6 +19,10 @@ def build_output_column_order(business_columns: list[str]) -> list[str]:
     """Append generated columns to business column order."""
 
     return [*business_columns, *GENERATED_COLUMN_ORDER]
+
+
+_FieldDefinition = tuple[Any, Any]
+_FieldMapping = dict[str, _FieldDefinition]
 
 
 class BaseGeneratedColumnsModel(pa.DataFrameModel):
@@ -45,6 +51,38 @@ class BaseGeneratedColumnsModel(pa.DataFrameModel):
         strict = True
         coerce = True
         ordered = True
+
+    @classmethod
+    def _collect_fields(cls) -> _FieldMapping:
+        """Упорядочивает служебные колонки в конце списка."""
+
+        fields = super()._collect_fields()
+        if cls is BaseGeneratedColumnsModel or not fields:
+            return fields
+
+        return cls._append_generated_columns(fields)
+
+    @staticmethod
+    def _append_generated_columns(fields: _FieldMapping) -> _FieldMapping:
+        """Возвращает копию мапы полей с hash/index-колонками в конце."""
+
+        generated = {
+            name: fields[name] for name in GENERATED_COLUMN_ORDER if name in fields
+        }
+        ordered_fields: _FieldMapping = {}
+
+        for name, value in fields.items():
+            if name in generated:
+                continue
+            ordered_fields[name] = value
+
+        for name in GENERATED_COLUMN_ORDER:
+            definition = generated.get(name)
+            if definition is None:
+                continue
+            ordered_fields[name] = definition
+
+        return ordered_fields
 
 
 # Backward compatibility alias for existing imports.

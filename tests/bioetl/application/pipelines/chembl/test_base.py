@@ -17,6 +17,18 @@ from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl impo
 )
 
 
+def _collect_extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
+    """Собирает все чанки extract в единый DataFrame для тестов."""
+    extract_result = pipeline.extract()
+    if isinstance(extract_result, pd.DataFrame):
+        chunks = [extract_result]
+    else:
+        chunks = list(extract_result)
+    if not chunks:
+        return pd.DataFrame()
+    return pd.concat(chunks, ignore_index=True)
+
+
 class ConcreteChemblPipeline(ChemblPipelineBase):
     """Concrete implementation for testing."""
 
@@ -260,7 +272,7 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
     )
 
-    result = pipeline.extract()
+    result = _collect_extract_dataframe(pipeline)
 
     assert normalization_service.apply_normalize_batch.call_count == 2
 
@@ -272,6 +284,4 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         ignore_index=True,
     )
 
-    pd.testing.assert_frame_equal(
-        result.reset_index(drop=True), expected.reset_index(drop=True)
-    )
+    pd.testing.assert_frame_equal(result, expected.reset_index(drop=True))

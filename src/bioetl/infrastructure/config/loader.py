@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from pydantic import ValidationError
 
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import ConfigError, ConfigValidationError
+from bioetl.domain.schemas import register_schemas
+from bioetl.domain.schemas.fields import build_field_configs_from_schema
+from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.schemas.registry import default_schema_provider
 from bioetl.domain.transform.merge import apply_deep_merge
+from bioetl.domain.validation import SchemaProviderABC
 from bioetl.infrastructure.config.provider_registry_loader import (
     ProviderNotConfiguredError,
     ProviderRegistryError,
@@ -62,6 +67,7 @@ def get_pipeline_config(
         config_path=config_path,
         cli_overrides=cli_overrides,
         env_overrides=env_overrides,
+        base_dir=Path(base_dir) if base_dir is not None else None,
     )
 
 
@@ -90,6 +96,7 @@ def get_pipeline_config_from_path(
         config_path=path,
         cli_overrides=cli_overrides,
         env_overrides=env_overrides,
+        base_dir=None,
     )
 
 
@@ -99,6 +106,7 @@ def _build_config(
     config_path: Path,
     cli_overrides: dict[str, Any] | None = None,
     env_overrides: dict[str, Any] | None = None,
+    base_dir: Path | None = None,
 ) -> PipelineConfig:
     """Собирает PipelineConfig из сырых данных с применением overrides."""
 
@@ -109,19 +117,21 @@ def _build_config(
         merged = apply_deep_merge(merged, env_overrides)
     if cli_overrides:
         merged = apply_deep_merge(merged, cli_overrides)
-
-    _ensure_input_path_exists(merged, config_path=config_path)
+    _migrate_legacy_pipeline_config(merged)
 
     provider_id = merged.get("provider")
     if isinstance(provider_id, str):
         _ensure_provider_registered(provider_id)
 
     try:
-        return PipelineConfig.model_validate(merged)
+        config = PipelineConfig.model_validate(merged)
     except ValidationError as exc:
         raise ConfigValidationError(
             f"Validation failed for {config_path}: {exc}"
         ) from exc
+    _ensure_input_source_valid(config, config_path=config_path, base_dir=base_dir)
+    _populate_fields_from_schema(config)
+    return config
 
 
 def _ensure_provider_registered(provider_id: str) -> None:
@@ -137,29 +147,199 @@ def _ensure_provider_registered(provider_id: str) -> None:
         ) from exc
 
 
-def _ensure_input_path_exists(
-    merged_config: dict[str, Any],
+_SCHEMA_PROVIDER: SchemaProviderABC | None = None
+_SCHEMAS_REGISTERED = False
+
+
+def _get_schema_provider() -> SchemaProviderABC:
+    """Возвращает провайдера схем, гарантируя регистрацию стандартных сущностей."""
+
+    global _SCHEMA_PROVIDER, _SCHEMAS_REGISTERED  # noqa: PLW0603
+
+    if _SCHEMA_PROVIDER is None:
+        _SCHEMA_PROVIDER = default_schema_provider()
+    if not _SCHEMAS_REGISTERED:
+        register_schemas(_SCHEMA_PROVIDER)
+        _SCHEMAS_REGISTERED = True
+    return _SCHEMA_PROVIDER
+
+
+def _populate_fields_from_schema(config: PipelineConfig) -> None:
+    """Автоматически заполняет config.fields, если секция отсутствует в YAML."""
+
+    if config.fields:
+        return
+
+    contract = get_pipeline_contract(config.id, default_entity=config.entity_name)
+    schema_name = contract.get_output_schema()
+    provider = _get_schema_provider()
+
+    try:
+        schema = provider.get_schema(schema_name)
+    except ValueError as exc:
+        raise ConfigValidationError(
+            f"Schema '{schema_name}' is not registered for pipeline '{config.id}'"
+        ) from exc
+
+    try:
+        fields = build_field_configs_from_schema(schema)
+    except Exception as exc:  # pragma: no cover - защитный контур
+        raise ConfigValidationError(
+            f"Failed to derive fields from schema '{schema_name}' "
+            f"for pipeline '{config.id}': {exc}"
+        ) from exc
+
+    if not fields:
+        raise ConfigValidationError(
+            f"Schema '{schema_name}' produced empty field list "
+            f"for pipeline '{config.id}'"
+        )
+
+    config.fields = fields
+
+
+def _ensure_input_source_valid(
+    config: PipelineConfig,
     *,
     config_path: Path,
+    base_dir: Path | None,
 ) -> None:
-    """Проверяет существование локального входного файла для режимов CSV/ID."""
+    """Проверяет доступность локальных файлов для CSV/id-only режимов."""
 
-    input_mode = merged_config.get("input_mode")
-    if input_mode not in {"csv", "id_only"}:
+    if config.input_mode not in {"csv", "id_only"}:
         return
 
-    raw_input_path = merged_config.get("input_path")
-    if not raw_input_path:
-        return
-
-    candidate = Path(str(raw_input_path)).expanduser()
-    if not candidate.exists():
+    input_path = config.input_path
+    if not input_path:
         raise ConfigValidationError(
-            (
-                f"Input path '{raw_input_path}' referenced by {config_path} does not "
-                f"exist; required for input_mode '{input_mode}'."
-            )
+            "input_path must be provided when input_mode is 'csv' or 'id_only'"
         )
+
+    resolved = _resolve_existing_input_path(
+        input_path,
+        config_path=config_path,
+        base_dir=base_dir,
+    )
+    if resolved is None:
+        raise ConfigValidationError(
+            f"input_path '{input_path}' for pipeline '{config.id}' "
+            "does not exist or is not accessible"
+        )
+
+
+def _resolve_existing_input_path(
+    path_str: str,
+    *,
+    config_path: Path,
+    base_dir: Path | None,
+) -> Path | None:
+    """Пытается разрешить относительный путь к существующему файлу."""
+
+    candidate = Path(path_str).expanduser()
+    if candidate.is_absolute():
+        return candidate if candidate.exists() else None
+
+    for root in _iter_candidate_roots(config_path=config_path, base_dir=base_dir):
+        resolved = (root / candidate).resolve()
+        if resolved.exists():
+            return resolved
+    return None
+
+
+def _iter_candidate_roots(
+    *,
+    config_path: Path,
+    base_dir: Path | None,
+) -> Iterable[Path]:
+    """Генерирует директории, относительно которых ищем входной файл."""
+
+    bases: list[Path] = []
+    if base_dir is not None:
+        bases.append(base_dir.resolve())
+    bases.append(Path.cwd().resolve())
+    bases.append(config_path.parent.resolve())
+    bases.extend(parent.resolve() for parent in config_path.parents)
+
+    seen: set[Path] = set()
+    for base in bases:
+        if base in seen:
+            continue
+        seen.add(base)
+        yield base
+
+
+def _migrate_legacy_pipeline_config(config: dict[str, Any]) -> None:
+    """Приводит устаревшие конфиги (entity_name, sources и т.д.) к актуальной схеме."""
+
+    entity_alias = config.get("entity") or config.get("entity_name")
+    if "entity" not in config and entity_alias:
+        config["entity"] = entity_alias
+    config.pop("entity_name", None)
+
+    provider = config.get("provider")
+    pipeline_section = config.get("pipeline")
+    if "id" not in config:
+        if isinstance(pipeline_section, dict) and pipeline_section.get("name"):
+            config["id"] = pipeline_section["name"]
+        elif provider and config.get("entity"):
+            config["id"] = f"{provider}.{config['entity']}"
+
+    if "output_path" not in config:
+        storage_section = config.get("storage")
+        if isinstance(storage_section, dict) and "output_path" in storage_section:
+            config["output_path"] = storage_section["output_path"]
+
+    if "batch_size" not in config:
+        batch_size = _resolve_batch_size_from_sources(config)
+        if batch_size is not None:
+            config["batch_size"] = batch_size
+
+    if "provider_config" not in config:
+        provider_config = _extract_provider_config(config)
+        if provider_config is not None:
+            config["provider_config"] = provider_config
+
+    config.pop("sources", None)
+
+
+def _resolve_batch_size_from_sources(config: dict[str, Any]) -> int | None:
+    sources_section = config.get("sources")
+    if not isinstance(sources_section, dict):
+        return None
+
+    provider = config.get("provider")
+    source_entry: Any | None = None
+    if provider and provider in sources_section:
+        source_entry = sources_section[provider]
+    elif len(sources_section) == 1:
+        source_entry = next(iter(sources_section.values()))
+
+    if isinstance(source_entry, dict):
+        batch_size = source_entry.get("batch_size")
+        if isinstance(batch_size, int):
+            return batch_size
+    return None
+
+
+def _extract_provider_config(config: dict[str, Any]) -> dict[str, Any] | None:
+    sources_section = config.get("sources")
+    if not isinstance(sources_section, dict):
+        return None
+
+    provider = config.get("provider")
+    source_entry: Any | None = None
+    if provider and provider in sources_section:
+        source_entry = sources_section[provider]
+    elif len(sources_section) == 1:
+        source_entry = next(iter(sources_section.values()))
+
+    if not isinstance(source_entry, dict):
+        return None
+
+    provider_config = dict(source_entry)
+    if "provider" not in provider_config and provider:
+        provider_config["provider"] = provider
+    return provider_config
 
 
 __all__ = [

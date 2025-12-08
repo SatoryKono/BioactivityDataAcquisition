@@ -20,8 +20,7 @@ class PandasBatchAdapter(BatchAdapterABC):
 
         if isinstance(raw_batch, pd.DataFrame):
             return [
-                cast(RawRecord, dict(record))
-                for record in raw_batch.to_dict("records")
+                cast(RawRecord, dict(record)) for record in raw_batch.to_dict("records")
             ]
 
         if isinstance(raw_batch, list):
