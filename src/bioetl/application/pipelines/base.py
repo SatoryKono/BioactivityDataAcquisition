@@ -530,11 +530,10 @@ class PipelineBase(ABC):
         output_schema_name = self._schema_contract.get_output_schema()
         output_columns = self._validation_service.get_schema_columns(output_schema_name)
 
-        return self._output_writer.write_result(
+        return self._loader.load(
             df=df,
             output_path=output_path,
-            entity_name=self._config.entity_name,
-            run_context=context,
+            context=context,
             column_order=output_columns,
         )
 
