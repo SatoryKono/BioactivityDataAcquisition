@@ -1,7 +1,7 @@
 """ChEMBL client implementations and factories."""
 
-from bioetl.infrastructure.clients.chembl.chembl_extraction_client_impl import (
-    ChemblExtractionClientImpl,
+from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
+    ChemblExtractionServiceImpl,
 )
 
-__all__ = ["ChemblExtractionClientImpl"]
+__all__ = ["ChemblExtractionServiceImpl"]
