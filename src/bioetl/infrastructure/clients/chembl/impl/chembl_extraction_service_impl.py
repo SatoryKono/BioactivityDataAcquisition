@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,

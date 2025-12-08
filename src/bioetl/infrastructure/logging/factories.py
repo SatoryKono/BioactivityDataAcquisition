@@ -2,13 +2,13 @@
 
 import structlog
 
-from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.clients.base.logging.contracts import ProgressReporterABC
 from bioetl.infrastructure.logging.impl.progress_reporter import (
     TqdmProgressReporterImpl,
 )
 from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
 from bioetl.infrastructure.observability import factories as observability_factories
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 def default_logger() -> LoggingPortABC:

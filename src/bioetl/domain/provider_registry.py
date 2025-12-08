@@ -13,7 +13,6 @@ __all__ = [
     "ProviderAlreadyRegisteredError",
     "ProviderRegistryABC",
     "MutableProviderRegistryABC",
-    "ProviderRegistryLoaderABC",
     "InMemoryProviderRegistry",
 ]
 
@@ -64,23 +63,6 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
         self, definitions: Iterable[ProviderDefinition]
     ) -> None:
         """Restore registry from supplied definitions."""
-
-
-@runtime_checkable
-class ProviderRegistryLoaderABC(Protocol):
-    """Loader contract for provider registry definitions."""
-
-    def get_providers(
-        self,
-        *,
-        registry: MutableProviderRegistryABC | None = None,
-    ) -> list[ProviderDefinition]:
-        """Get provider definitions into registry and return them."""
-
-    def get_registry(
-        self, *, registry: MutableProviderRegistryABC | None = None
-    ) -> MutableProviderRegistryABC:
-        """Populate registry and return it (compatibility helper)."""
 
 
 class InMemoryProviderRegistry(MutableProviderRegistryABC):

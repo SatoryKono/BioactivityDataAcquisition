@@ -9,7 +9,7 @@ from typing import Any
 import pandas as pd
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import RawRecord, RecordSource
 from bioetl.interfaces.observability import LoggingPortABC
 
@@ -174,4 +174,3 @@ __all__ = [
     "CsvRecordSourceImpl",
     "IdListRecordSourceImpl",
 ]
-

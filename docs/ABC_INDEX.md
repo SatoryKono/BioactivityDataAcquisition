@@ -31,7 +31,7 @@
 - `SideInputProviderABC` — `bioetl.domain.clients.base.contracts.SideInputProviderABC`
   - Провайдер побочных данных (справочников).
 
-- `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
+- `ProviderRegistryLoaderABC` — `bioetl.interfaces.provider_registry.contracts.ProviderRegistryLoaderABC`
   - Загрузчик реестра провайдеров из конфигурации. Default factory: ``bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader``. Implementations: ``ProviderRegistryLoader``.
 
 - `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
@@ -55,7 +55,7 @@
 - `LoggerAdapterABC` — `bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC`
   - Интерфейс структурированного логгера. Default factory: ``bioetl.infrastructure.logging.factories.default_logger``. Implementations: ``UnifiedLoggerImpl``.
 
-- `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
+- `LoggingPortABC` — `bioetl.interfaces.observability.contracts.LoggingPortABC`
   - Порт структурированного логгирования. Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``. Implementations: ``StructuredLoggerImpl``.
 
 - `ProgressReporterABC` — `bioetl.domain.clients.base.logging.contracts.ProgressReporterABC`
@@ -64,7 +64,7 @@
 - `TracerABC` — `bioetl.domain.clients.base.logging.contracts.TracerABC`
   - Интерфейс распределенной трассировки. Implementations expected to be provided by infrastructure tracing backends.
 
-- `TracingPortABC` — `bioetl.domain.observability.contracts.TracingPortABC`
+- `TracingPortABC` — `bioetl.interfaces.observability.contracts.TracingPortABC`
   - Порт для распределенной трассировки. Default factory: ``bioetl.infrastructure.observability.factories.default_tracing_port``. Implementations: ``TracingAdapterImpl``.
 
 - `HasherABC` — `bioetl.domain.transform.contracts.HasherABC`

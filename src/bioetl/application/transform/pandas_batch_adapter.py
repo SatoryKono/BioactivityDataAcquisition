@@ -42,12 +42,13 @@ class PandasBatchAdapter(BatchAdapterABC):
 
     # Compatibility with legacy naming used in tests and callers.
     def adapt_batch(self, raw_batch: Any) -> list[RawRecord]:
+        """Backward-compatible alias for process_batch."""
         return self.process_batch(raw_batch)
 
     def adapt_batches(self, batches: Iterable[Any]) -> Iterable[list[RawRecord]]:
+        """Backward-compatible alias for process_batches."""
         for batch in batches:
             yield self.process_batch(batch)
 
 
 __all__ = ["PandasBatchAdapter"]
-

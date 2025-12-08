@@ -4,7 +4,7 @@ from typing import Self
 from bioetl.application.pipelines.hooks_impl import LoggingPipelineHookImpl
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 class _DummyLogger(LoggingPortABC):

@@ -4,6 +4,10 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, cast
 
+from bioetl.application.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
+)
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
@@ -20,7 +24,6 @@ from bioetl.domain.clients.base.output.contracts import (
     WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
-from bioetl.interfaces.observability import LoggingPortABC, PipelineMetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
@@ -34,10 +37,7 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
+from bioetl.interfaces.observability import LoggingPortABC, PipelineMetricsPortABC
 
 
 class PipelineContainer(PipelineContainerABC):

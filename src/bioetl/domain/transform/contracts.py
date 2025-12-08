@@ -8,22 +8,9 @@ import pandas as pd
 
 # Import the canonical NormalizationConfig from configs.normalization
 from bioetl.domain.configs.normalization import NormalizationConfig
-
-
-class NormalizationConfigProviderProtocol(Protocol):
-    """
-    Protocol for objects that can provide normalization configuration.
-
-    PipelineConfig from bioetl.domain.configs implements this implicitly.
-    """
-
-    def get_normalization(self) -> Any:
-        """Return normalization section."""
-        ...
-
-    def get_fields(self) -> list[dict[str, Any]]:
-        """Return fields configuration."""
-        ...
+from bioetl.interfaces.normalization.contracts import (
+    NormalizationConfigProviderProtocol,
+)
 
 
 class BaseNormalizationServiceABC(ABC):

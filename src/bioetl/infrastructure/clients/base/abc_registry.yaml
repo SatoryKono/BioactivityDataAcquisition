@@ -12,7 +12,7 @@ RetryPolicyABC: bioetl.domain.clients.base.contracts.RetryPolicyABC
 CacheABC: bioetl.domain.clients.base.contracts.CacheABC
 SecretProviderABC: bioetl.domain.clients.base.contracts.SecretProviderABC
 SideInputProviderABC: bioetl.domain.clients.base.contracts.SideInputProviderABC
-ProviderRegistryLoaderABC: bioetl.domain.provider_registry.ProviderRegistryLoaderABC
+ProviderRegistryLoaderABC: bioetl.interfaces.provider_registry.contracts.ProviderRegistryLoaderABC
 
 PipelineContainerABC: bioetl.application.pipelines.contracts.PipelineContainerABC
 PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC

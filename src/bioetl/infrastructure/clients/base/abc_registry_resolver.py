@@ -34,7 +34,9 @@ class ImplementationNotFoundError(ABCRegistryError):
     """Raised when implementation is missing for a role."""
 
     def __init__(self, role: str, implementation: str) -> None:
-        super().__init__(f"Implementation '{implementation}' not found for role: {role}")
+        super().__init__(
+            f"Implementation '{implementation}' not found for role: {role}"
+        )
         self.role = role
         self.implementation = implementation
 
@@ -54,7 +56,7 @@ def _import_from_path(dotted_path: str) -> Any:
 
 
 @dataclass
-class ABCRegistryResolver:
+class ABCRegistryResolverImpl:
     """Resolves ABC registry definitions and factories/implementations."""
 
     registry_path: Path = Path(__file__).with_name("abc_registry.yaml")
@@ -100,11 +102,13 @@ class ABCRegistryResolver:
             return yaml.safe_load(file) or {}
 
 
+ABCRegistryResolver = ABCRegistryResolverImpl
+
 __all__ = [
     "ABCRegistryError",
     "RoleNotFoundError",
     "DefaultFactoryNotFoundError",
     "ImplementationNotFoundError",
+    "ABCRegistryResolverImpl",
     "ABCRegistryResolver",
 ]
-
