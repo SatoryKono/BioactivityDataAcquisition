@@ -1,4 +1,4 @@
-"""Интеграционный тест UnifiedOutputWriter с реальными зависимостями."""
+"""Интеграционный тест UnifiedOutputWriterImpl с реальными зависимостями."""
 
 from __future__ import annotations
 
@@ -14,7 +14,9 @@ from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.output.unified_output_writer_impl import (
+    UnifiedOutputWriterImpl,
+)
 
 
 @pytest.mark.integration
@@ -31,7 +33,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
         config={"hashing": {"business_key_fields": ["id"]}},
     )
 
-    unified_writer = UnifiedOutputWriter(
+    unified_writer = UnifiedOutputWriterImpl(
         writer,
         metadata_writer,
         quality_reporter,

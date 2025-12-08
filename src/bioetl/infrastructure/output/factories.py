@@ -10,7 +10,9 @@ from bioetl.domain.configs import DeterminismConfig, QcConfig
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.output.unified_output_writer_impl import (
+    UnifiedOutputWriterImpl,
+)
 
 
 def default_writer() -> WriterABC:
@@ -41,7 +43,7 @@ def default_output_writer(
 ) -> OutputWriterABC:
     """Compose the unified output writer with optional overrides."""
 
-    return UnifiedOutputWriter(
+    return UnifiedOutputWriterImpl(
         writer=writer or default_writer(),
         metadata_writer=metadata_writer or default_metadata_writer(),
         quality_reporter=quality_reporter or default_quality_reporter(),

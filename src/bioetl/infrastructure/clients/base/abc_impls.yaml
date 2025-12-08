@@ -97,7 +97,7 @@ QualityReportABC:
 OutputWriterABC:
   default_factory: bioetl.infrastructure.output.factories.default_output_writer
   implementations:
-    Unified: bioetl.infrastructure.output.unified_writer.UnifiedOutputWriter
+    Unified: bioetl.infrastructure.output.unified_output_writer_impl.UnifiedOutputWriterImpl
 
 DataClientABC:
   default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
@@ -122,7 +122,7 @@ PaginatorABC:
 SecretProviderABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_secret_provider
   implementations:
-    Env: bioetl.infrastructure.clients.base.factories.EnvSecretProvider
+    Env: bioetl.infrastructure.clients.base.factories.EnvSecretProviderImpl
 
 SideInputProviderABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_side_input_provider

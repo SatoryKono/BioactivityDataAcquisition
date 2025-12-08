@@ -9,7 +9,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.errors import ClientNetworkError, ClientResponseError
-from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
+from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
+    UnifiedAPIClientImpl,
+)
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.infrastructure.config.models import ClientConfig
 from bioetl.interfaces.observability import LoggingPortABC
@@ -379,7 +381,7 @@ def test_idempotency_key_reused_across_retries(monkeypatch, base_client):
         _response(200),
     ]
 
-    client = UnifiedAPIClient(
+    client = UnifiedAPIClientImpl(
         provider="chembl",
         config=ClientConfig(max_retries=3, backoff_factor=1.0, timeout=0.1),
         base_client=base_client,
@@ -402,7 +404,7 @@ def test_get_requests_do_not_add_idempotency_key(base_client):
     """GET/HEAD запросы не получают автоматический Idempotency-Key."""
     base_client.request.return_value = _response(200)
 
-    client = UnifiedAPIClient(
+    client = UnifiedAPIClientImpl(
         provider="chembl",
         config=ClientConfig(),
         base_client=base_client,

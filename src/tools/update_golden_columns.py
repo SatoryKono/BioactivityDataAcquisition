@@ -7,45 +7,50 @@ import pandas as pd
 # Add src to python path
 sys.path.append(os.path.abspath("src"))
 
-print("Script started")
+from bioetl.infrastructure.observability.factories import default_logging_port
+
+
+LOGGER = default_logging_port().apply_bind(tool="update_golden_columns")
+
+LOGGER.info("Script started")
 
 try:
     from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 
-    print("Schema imported")
+    LOGGER.info("Schema imported")
 except ImportError as e:
-    print(f"ImportError: {e}")
+    LOGGER.error("Failed to import schema", error=str(e))
     sys.exit(1)
 
 
 def main():
     path = Path("qc/golden/chembl_activity/expected_output.csv")
     if not path.exists():
-        print(f"File not found: {path}")
+        LOGGER.error("Golden file not found", path=str(path))
         # Try absolute path just in case
         path = Path(os.getcwd()) / "qc/golden/chembl_activity/expected_output.csv"
         if not path.exists():
-            print(f"File still not found at {path}")
+            LOGGER.error("Golden file still missing after fallback", path=str(path))
             return
 
-    print(f"Reading {path}")
+    LOGGER.info("Reading golden file", path=str(path))
     df = pd.read_csv(path)
 
     # Get columns from schema to ensure correct order
     schema = ActivityTableSchema.to_schema()
     expected_columns = list(schema.columns.keys())
 
-    print("Reordering columns...")
+    LOGGER.info("Reordering columns to match schema")
     missing = [c for c in expected_columns if c not in df.columns]
     if missing:
-        print(f"Error: Missing columns in CSV: {missing}")
+        LOGGER.error("Missing columns in CSV", missing_columns=missing)
         return
 
     df = df[expected_columns]
 
-    print(f"Writing back to {path}")
+    LOGGER.info("Writing reordered CSV", path=str(path))
     df.to_csv(path, index=False)
-    print("Done.")
+    LOGGER.info("Column update completed")
 
 
 if __name__ == "__main__":

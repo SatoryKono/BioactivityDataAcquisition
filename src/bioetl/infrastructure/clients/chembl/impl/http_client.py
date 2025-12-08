@@ -10,7 +10,9 @@ from typing import Any, Iterator
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
+from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
+    UnifiedAPIClientImpl,
+)
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
@@ -24,7 +26,7 @@ from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 class ChemblDataClientHTTPImpl(DataClientABC):
     """
     HTTP implementation of ChEMBL client.
-    Uses UnifiedAPIClient for requests and RateLimiter for proactive throttling.
+    Uses UnifiedAPIClientImpl for requests and RateLimiter for proactive throttling.
     """
 
     def __init__(
@@ -32,7 +34,7 @@ class ChemblDataClientHTTPImpl(DataClientABC):
         request_builder: ChemblRequestBuilderImpl,
         response_parser: ChemblResponseParserImpl,
         rate_limiter: RateLimiterABC,
-        client: UnifiedAPIClient | None = None,
+        client: UnifiedAPIClientImpl | None = None,
         *,
         http_middleware: HttpClientMiddleware | None = None,
         provider: str = "chembl",

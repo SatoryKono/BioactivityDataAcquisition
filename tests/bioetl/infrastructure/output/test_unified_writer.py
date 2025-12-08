@@ -1,5 +1,5 @@
 """
-Tests for the UnifiedOutputWriter.
+Tests for the UnifiedOutputWriterImpl.
 """
 
 # pylint: disable=redefined-outer-name, protected-access
@@ -9,7 +9,9 @@ import pandas as pd
 import pytest
 
 from bioetl.domain.clients.base.output.contracts import WriteResult
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.output.unified_output_writer_impl import (
+    UnifiedOutputWriterImpl,
+)
 
 
 @pytest.fixture
@@ -67,7 +69,7 @@ def unified_writer(
     mock_atomic_op,
 ):
     """Fixture for unified writer."""
-    return UnifiedOutputWriter(
+    return UnifiedOutputWriterImpl(
         mock_writer_fixture,
         mock_metadata_writer_fixture,
         mock_quality_reporter,
@@ -102,7 +104,7 @@ def test_write_result_success(
 
     # Patch checksum function
     with patch(
-        "bioetl.infrastructure.output.unified_writer.compute_file_sha256"
+        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256"
     ) as mock_checksum:
         mock_checksum.side_effect = [
             "real_checksum",
@@ -133,7 +135,7 @@ def test_unified_writer_delegates_atomicity(
     run_context_factory,
     tmp_path,
 ):
-    """Test that UnifiedOutputWriter delegates to AtomicFileOperation."""
+    """Test that UnifiedOutputWriterImpl delegates to AtomicFileOperation."""
     # Arrange
     run_context = run_context_factory()
     df = pd.DataFrame({"a": [1]})
@@ -144,7 +146,7 @@ def test_unified_writer_delegates_atomicity(
     )
 
     with patch(
-        "bioetl.infrastructure.output.unified_writer.compute_file_sha256"
+        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256"
     ) as mock_checksum:
         mock_checksum.side_effect = ["abc", "qc1", "qc2"]
 
@@ -187,7 +189,7 @@ def test_unified_writer_column_order_and_fill(
     mock_writer_fixture.write.side_effect = capture_df
 
     with patch(
-        "bioetl.infrastructure.output.unified_writer.compute_file_sha256",
+        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
         return_value="chk",
     ):
         result = unified_writer.write_result(
