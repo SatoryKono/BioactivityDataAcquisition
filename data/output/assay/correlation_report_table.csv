@@ -1,6 +1,0 @@
-column,assay_tax_id,confidence_score,index,score,src_id
-assay_tax_id,1.0,,0.026742320229666508,,-0.0007123327018344093
-confidence_score,,,,,
-index,0.026742320229666508,,1.0,,0.015792228023070315
-score,,,,,
-src_id,-0.0007123327018344093,,0.015792228023070315,,1.0
