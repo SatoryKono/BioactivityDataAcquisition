@@ -44,7 +44,7 @@
   - Интерфейс команды CLI.
 
 - `ProviderRegistryABC` — `bioetl.domain.provider_registry.ProviderRegistryABC`
-  - Порт для чтения и регистрации определений провайдеров.
+  - Порт для чтения и регистрации определений провайдеров (подключается явно без глобального singleton).
 
 - `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
   - Порт структурированного логгирования. Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``. Implementations: ``StructuredLoggerImpl``.
