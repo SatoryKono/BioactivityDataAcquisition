@@ -17,6 +17,7 @@ from bioetl.domain.record_source import (
     RecordSource,
 )
 from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.infrastructure.transform.pandas_batch_adapter import PandasBatchAdapter
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -194,4 +195,5 @@ class ChemblExtractorImpl(ExtractorABC):
             entity=self.config.entity_name,
             filters=filters,
             chunk_size=chunk_size,
+            batch_adapter=PandasBatchAdapter().adapt_batch,
         )
