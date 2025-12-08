@@ -2,17 +2,17 @@ sequenceDiagram
     autonumber
     participant CLI as CLI
     participant Orchestrator as PipelineOrchestrator
-    participant Pipeline as DocumentPipeline
+    participant Pipeline as PublicationPipeline
     participant Extraction as ChemblExtractionService
     participant DataClient as ChemblDataClientHTTPImpl
     participant Enrich as OpenAlex/SemanticScholar Client
-    participant Transformer as DocumentTransformer
-    participant Validator as ValidationService(DocumentTableSchema)
+    participant Transformer as PublicationTransformer
+    participant Validator as ValidationService(PublicationTableSchema)
     participant Writer as UnifiedOutputWriter
 
-    CLI->>Orchestrator: run("document_chembl")
+    CLI->>Orchestrator: run("publication_chembl")
     Orchestrator->>Pipeline: build + run
-    Pipeline->>Extraction: extract_all("document")
+    Pipeline->>Extraction: extract_all("publication")
     loop for each page
         Extraction->>DataClient: request_document(offset)
         DataClient-->>Extraction: document page
@@ -25,7 +25,7 @@ sequenceDiagram
         end
         Pipeline->>Transformer: merge enrichment + normalize
         Transformer-->>Pipeline: normalized_df
-        Pipeline->>Validator: validate("chembl.document", normalized_df)
+        Pipeline->>Validator: validate("chembl.publication", normalized_df)
         Validator-->>Pipeline: validated_df
         Pipeline->>Pipeline: append(validated_df)
     end

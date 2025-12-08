@@ -20,7 +20,7 @@ classDiagram
         +target_organism : str?
         +target_tax_id : int?
     }
-    class Document {
+    class Publication {
         +document_chembl_id : str
         +doi : str?
         +document_journal/year
@@ -34,7 +34,7 @@ classDiagram
 
     Activity --> Assay : many-to-one\nassay_chembl_id
     Activity --> Target : many-to-one\n(target inferred)
-    Activity --> Document : many-to-one\n(document_chembl_id)
+    Activity --> Publication : many-to-one\n(document_chembl_id)
     Activity --> TestItem : many-to-one\nmolecule_chembl_id
     Assay --> Target : zero-or-one target per assay
     TestItem --> TestItem : parent-child (salt/base)

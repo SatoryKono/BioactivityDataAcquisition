@@ -5,11 +5,11 @@ from bioetl.infrastructure.logging.factories import default_logger
 
 def main():
     logger = default_logger().apply_bind(
-        pipeline="document_chembl", entity="document", stage="debug_fetch"
+        pipeline="publication_chembl", entity="publication", stage="debug_fetch"
     )
 
     url = "https://www.ebi.ac.uk/chembl/api/data/document.json?limit=1"
-    logger.info("Fetching document endpoint", url=url)
+    logger.info("Fetching publication endpoint", url=url)
     try:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()

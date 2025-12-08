@@ -42,10 +42,10 @@ _PIPELINE_CASES = [
         "target_chembl_id",
     ),
     (
-        "document_chembl",
-        "document",
-        "tests.golden.pipeline_outputs.test_document_chembl_golden",
-        "expected_document_records",
+        "publication_chembl",
+        "publication",
+        "tests.golden.pipeline_outputs.test_publication_chembl_golden",
+        "expected_publication_records",
         "document_chembl_id",
     ),
     (
