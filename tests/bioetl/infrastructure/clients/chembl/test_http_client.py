@@ -1,4 +1,4 @@
-"""Tests for ChemblDataClientHTTPImpl."""
+"""Tests for ChemblApiPortImpl."""
 
 # pylint: disable=redefined-outer-name
 from unittest.mock import Mock
@@ -7,9 +7,7 @@ import pytest
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.chembl.impl.http_client import (
-    ChemblDataClientHTTPImpl,
-)
+from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
@@ -47,8 +45,8 @@ def fixture_client(
     mock_rate_limiter,
     mock_http_middleware,
 ):
-    """Create ChemblDataClientHTTPImpl instance with mocks."""
-    client = ChemblDataClientHTTPImpl(
+    """Create ChemblApiPortImpl instance with mocks."""
+    client = ChemblApiPortImpl(
         request_builder=mock_request_builder,
         response_parser=mock_response_parser,
         rate_limiter=mock_rate_limiter,

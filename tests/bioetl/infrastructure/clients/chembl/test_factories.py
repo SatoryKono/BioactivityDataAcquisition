@@ -9,9 +9,7 @@ from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
     default_chembl_extraction_service,
 )
-from bioetl.infrastructure.clients.chembl.impl.http_client import (
-    ChemblDataClientHTTPImpl,
-)
+from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
 from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
 
 
@@ -32,7 +30,7 @@ def source_config():
 def test_default_chembl_client_success(source_config):
     """Test default ChEMBL client factory with valid config."""
     client = default_chembl_client(source_config)
-    assert isinstance(client, ChemblDataClientHTTPImpl)
+    assert isinstance(client, ChemblApiPortImpl)
     # Check that parameters propagated to request_builder
     assert client.request_builder.base_url == "https://example.com"
     assert client.request_builder.max_url_length == 1000
@@ -53,7 +51,7 @@ def test_default_chembl_extraction_service(source_config):
     source_config.batch_size = 50
     service = default_chembl_extraction_service(source_config)
     assert isinstance(service, ChemblExtractionServiceImpl)
-    assert isinstance(service.client, ChemblDataClientHTTPImpl)
+    assert isinstance(service.client, ChemblApiPortImpl)
     assert service.batch_size == 50
 
 

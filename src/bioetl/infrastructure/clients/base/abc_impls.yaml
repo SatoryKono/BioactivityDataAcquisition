@@ -102,7 +102,7 @@ OutputWriterABC:
 DataClientABC:
   default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
   implementations:
-    ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.http_client.ChemblDataClientHTTPImpl
+    ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.http_client.ChemblApiPortImpl
 
 RequestBuilderABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_request_builder
