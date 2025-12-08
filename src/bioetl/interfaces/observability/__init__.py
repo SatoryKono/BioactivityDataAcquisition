@@ -7,4 +7,3 @@ from bioetl.interfaces.observability.contracts import (
 )
 
 __all__ = ["LoggingPortABC", "PipelineMetricsPortABC", "TracingPortABC"]
-

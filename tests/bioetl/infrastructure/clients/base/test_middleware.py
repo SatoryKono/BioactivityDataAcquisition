@@ -9,10 +9,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.errors import ClientNetworkError, ClientResponseError
-from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 from bioetl.infrastructure.config.models import ClientConfig
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 class _FakeTime:

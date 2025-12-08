@@ -7,11 +7,11 @@ from typing import Any, Sequence
 import pandas as pd
 
 from bioetl.domain.models import RunContext
-from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 def _serialize_dict(value: dict[str, Any]) -> Any:

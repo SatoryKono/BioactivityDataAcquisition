@@ -87,4 +87,3 @@ __all__ = [
     "serialize_chembl_payload",
     "flatten_chembl_payload",
 ]
-

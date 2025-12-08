@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import structlog
 
-from bioetl.interfaces.observability import LoggingPortABC, TracingPortABC
 from bioetl.infrastructure.observability.adapters import (
     StructuredLoggerImpl,
     TracingAdapterImpl,
 )
+from bioetl.interfaces.observability import LoggingPortABC, TracingPortABC
 
 
 def _configure_structlog() -> None:

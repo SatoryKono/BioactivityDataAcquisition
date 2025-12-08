@@ -7,17 +7,16 @@ from typing import Any, Iterable, cast
 
 import pandas as pd
 
-from bioetl.application.pipelines.contracts import ExtractorABC
-from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
-from bioetl.interfaces.observability import LoggingPortABC
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
-from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.domain.contracts import BatchAdapterABC
-from bioetl.infrastructure.files.csv_record_source import (
+from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
+from bioetl.domain.ports.extraction import BatchAdapterABC, ExtractionServiceABC
+from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 class ChemblExtractorImpl(ExtractorABC):

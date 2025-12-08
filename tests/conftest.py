@@ -22,9 +22,9 @@ from bioetl.domain.configs import (
     StorageConfig,
 )
 from bioetl.domain.models import RunContext
-from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.validation.service import ValidationService
 from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.interfaces.observability import LoggingPortABC
 
 # Ensure src is on sys.path even if pytest pythonpath is ignored by runners
 PROJECT_ROOT = Path(__file__).resolve().parents[1]

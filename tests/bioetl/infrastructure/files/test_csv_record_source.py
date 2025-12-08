@@ -4,8 +4,7 @@ from typing import cast
 import pandas as pd
 from pydantic import AnyHttpUrl
 
-from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputConfig,
@@ -14,6 +13,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 class _StubExtractionService:

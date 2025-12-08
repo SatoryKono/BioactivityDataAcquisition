@@ -6,7 +6,7 @@ from typing import Any
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )

@@ -9,7 +9,6 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     CsvInputConfig,
@@ -18,6 +17,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.interfaces.observability import LoggingPortABC
 
 
 @pytest.fixture

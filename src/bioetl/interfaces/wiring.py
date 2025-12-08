@@ -10,7 +10,6 @@ from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
-from bioetl.interfaces.observability import PipelineMetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.abc_registry_resolver import (
@@ -25,6 +24,7 @@ from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
 )
+from bioetl.interfaces.observability import PipelineMetricsPortABC
 
 
 def create_config_loader() -> PipelineConfigLoaderProtocol:

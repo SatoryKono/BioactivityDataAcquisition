@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.application.config.runtime import build_runtime_config
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,

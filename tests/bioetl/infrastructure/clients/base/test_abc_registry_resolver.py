@@ -21,9 +21,7 @@ def test_resolve_default_factory(registry_resolver: ABCRegistryResolver) -> None
 
 
 def test_resolve_implementation(registry_resolver: ABCRegistryResolver) -> None:
-    implementation_class = registry_resolver.resolve_implementation(
-        "WriterABC", "Csv"
-    )
+    implementation_class = registry_resolver.resolve_implementation("WriterABC", "Csv")
 
     assert implementation_class is CsvWriterImpl
 
@@ -36,4 +34,3 @@ def test_missing_role_raises(registry_resolver: ABCRegistryResolver) -> None:
 def test_missing_implementation_raises(registry_resolver: ABCRegistryResolver) -> None:
     with pytest.raises(ImplementationNotFoundError):
         registry_resolver.resolve_implementation("WriterABC", "UnknownImpl")
-

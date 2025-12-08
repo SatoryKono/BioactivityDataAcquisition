@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from typing import cast
 
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, InMemoryRecordSource, RawRecord
 
 

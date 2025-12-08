@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.provider_registry import ProviderRegistryLoaderABC
+from bioetl.interfaces.provider_registry.contracts import ProviderRegistryLoaderABC
 
 # Backward-compatible alias.
 ProviderLoaderProtocol = ProviderRegistryLoaderABC

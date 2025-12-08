@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Callable, TypedDict, cast
+from typing import Any, Callable, TypedDict
 
 from typing_extensions import Protocol
 
-from bioetl.domain.contracts import ExtractionServiceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 
 
 class RawRecord(TypedDict, total=False):
@@ -74,4 +74,4 @@ class ApiRecordSource(RecordSource):
                     "is set."
                 )
 
-            yield cast(list[RawRecord], raw_batch)
+            yield raw_batch

@@ -3,4 +3,3 @@
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 
 __all__ = ["PandasBatchAdapter"]
-
