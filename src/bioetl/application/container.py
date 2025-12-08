@@ -34,7 +34,6 @@ from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
-from bioetl.infrastructure.transform.factories import default_hash_service
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
@@ -231,9 +230,15 @@ class PipelineContainer(PipelineContainerABC):
         )
 
     def get_hash_service(self) -> HashServiceABC:
-        """Get the hash service."""
+        """Get the hash service.
+
+        The concrete implementation must be injected from outer layers
+        (e.g. interfaces wiring or tests) to avoid application →
+        infrastructure dependencies.
+        """
+
         if self._hash_service is None:
-            self._hash_service = default_hash_service()
+            raise RuntimeError("Hash service is not configured for this container")
         return self._hash_service
 
     def get_post_transformer(
