@@ -20,6 +20,28 @@ def _reset_provider_registry() -> None:
     provider_registry_loader.clear_provider_registry_cache()
 
 
+def _write_pipeline_with_env_placeholder(config_path: Path) -> None:
+    config_path.write_text(
+        """id: chembl.molecule
+provider: chembl
+entity: molecule
+primary_key: "${CHEMBL_MOLECULE_PRIMARY_KEY:-molecule_chembl_id}"
+input_mode: auto_detect
+input_path: null
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  client:
+    timeout_sec: 30
+    max_retries: 3
+    rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+
 def test_get_pipeline_config_from_path_valid():
     path = Path("tests/fixtures/configs/chembl_activity_valid.yaml")
     config = get_pipeline_config_from_path(path)
@@ -28,6 +50,46 @@ def test_get_pipeline_config_from_path_valid():
     assert config.provider == "chembl"
     assert isinstance(config.provider_config, ChemblSourceConfig)
     assert config.provider_config.client.timeout_sec == 30
+
+
+def test_env_placeholder_resolved_from_env(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    providers_file = Path("tests/fixtures/configs/providers.yaml")
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
+
+    config_path = tmp_path / "chembl_molecule.yaml"
+    _write_pipeline_with_env_placeholder(config_path)
+    monkeypatch.setenv("CHEMBL_MOLECULE_PRIMARY_KEY", "custom_pk")
+
+    config = get_pipeline_config_from_path(config_path)
+
+    assert config.primary_key == "custom_pk"
+
+
+def test_env_placeholder_falls_back_to_default(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    providers_file = Path("tests/fixtures/configs/providers.yaml")
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    provider_registry_loader.clear_provider_registry_cache()
+
+    config_path = tmp_path / "chembl_molecule.yaml"
+    _write_pipeline_with_env_placeholder(config_path)
+    monkeypatch.delenv("CHEMBL_MOLECULE_PRIMARY_KEY", raising=False)
+
+    config = get_pipeline_config_from_path(config_path)
+
+    assert config.primary_key == "molecule_chembl_id"
 
 
 def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):

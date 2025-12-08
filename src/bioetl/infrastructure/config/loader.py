@@ -15,6 +15,7 @@ from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.schemas.registry import default_schema_provider
 from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.domain.validation import SchemaProviderABC
+from bioetl.infrastructure.config.env import resolve_env_placeholders
 from bioetl.infrastructure.config.provider_registry_loader import (
     ProviderNotConfiguredError,
     ProviderRegistryError,
@@ -110,13 +111,15 @@ def _build_config(
 ) -> PipelineConfig:
     """Собирает PipelineConfig из сырых данных с применением overrides."""
 
-    merged = dict(raw_config)
+    merged = resolve_env_placeholders(dict(raw_config))
 
     # Применяем overrides в порядке приоритета: env → CLI
     if env_overrides:
-        merged = apply_deep_merge(merged, env_overrides)
+        env_values = resolve_env_placeholders(env_overrides)
+        merged = apply_deep_merge(merged, env_values)
     if cli_overrides:
-        merged = apply_deep_merge(merged, cli_overrides)
+        cli_values = resolve_env_placeholders(cli_overrides)
+        merged = apply_deep_merge(merged, cli_values)
     _migrate_legacy_pipeline_config(merged)
 
     provider_id = merged.get("provider")
