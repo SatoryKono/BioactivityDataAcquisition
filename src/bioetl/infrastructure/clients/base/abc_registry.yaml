@@ -3,7 +3,6 @@
 # Format: Role: Module.ClassName
 
 DataClientABC: bioetl.domain.clients.contracts.DataClientABC
-ChemblDataClientABC: bioetl.domain.clients.chembl.contracts.ChemblDataClientABC
 RequestBuilderABC: bioetl.domain.clients.base.contracts.RequestBuilderABC
 ResponseParserABC: bioetl.domain.clients.base.contracts.ResponseParserABC
 PaginatorABC: bioetl.domain.clients.base.contracts.PaginatorABC

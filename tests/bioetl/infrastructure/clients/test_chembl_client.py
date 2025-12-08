@@ -40,7 +40,7 @@ def client(mock_components):
     yield client
 
 
-def test_request_activity_with_middleware(client, mock_components):
+def test_fetch_activity_with_middleware(client, mock_components):
     # Arrange
     mock_builder = mock_components["request_builder"]
     mock_builder.for_endpoint.return_value = mock_builder
@@ -54,7 +54,7 @@ def test_request_activity_with_middleware(client, mock_components):
     mock_components["response_parser"].parse_response.return_value = {"data": "test"}
 
     # Act
-    result = client.request_activity(molecule_chembl_id="CHEMBL123")
+    result = client.fetch("activity", molecule_chembl_id="CHEMBL123")
 
     # Assert
     mock_builder.for_endpoint.assert_called_with("activity")

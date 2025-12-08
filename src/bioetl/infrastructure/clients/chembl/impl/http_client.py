@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from typing import Any, Iterator
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
-from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.errors import ClientResponseError
 from bioetl.infrastructure.clients.base.impl.unified_client import UnifiedAPIClient
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
@@ -21,7 +21,7 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
-class ChemblDataClientHTTPImpl(ChemblDataClientABC):
+class ChemblDataClientHTTPImpl(DataClientABC):
     """
     HTTP implementation of ChEMBL client.
     Uses UnifiedAPIClient for requests and RateLimiter for proactive throttling.
@@ -57,17 +57,6 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
             self.http = SimpleNamespace(request=_missing_http_request)
         self.provider = provider
 
-    # pylint: disable=redefined-builtin
-    def fetch_one(self, id: str) -> dict[str, Any]:
-        """Not implemented: ChEMBL requires entity-specific endpoints."""
-        # Generic fetch not fully supported by ChEMBL generic endpoint
-        # unless we know entity
-        raise NotImplementedError("Use specific request methods")
-
-    def fetch_many(self, ids: list[str]) -> list[dict[str, Any]]:
-        """Not implemented: use entity-specific request helpers instead."""
-        raise NotImplementedError("Use specific request methods")
-
     def iter_pages(self, request: Any) -> Iterator[Any]:
         """Iterate over paginated responses for a built request."""
         url = str(request)
@@ -102,29 +91,10 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         ):
             self.http.base_client.close()
 
-    def request_activity(self, **filters: Any) -> Any:
-        """Request activity endpoint with provided filters."""
-        url = self._build_request_url("activity", filters)
-        return self._execute_request(url)
-
-    def request_assay(self, **filters: Any) -> Any:
-        """Request assay endpoint with provided filters."""
-        url = self._build_request_url("assay", filters)
-        return self._execute_request(url)
-
-    def request_target(self, **filters: Any) -> Any:
-        """Request target endpoint with provided filters."""
-        url = self._build_request_url("target", filters)
-        return self._execute_request(url)
-
-    def request_document(self, **filters: Any) -> Any:
-        """Request document endpoint with provided filters."""
-        url = self._build_request_url("document", filters)
-        return self._execute_request(url)
-
-    def request_molecule(self, **filters: Any) -> Any:
-        """Request molecule endpoint with provided filters."""
-        url = self._build_request_url("molecule", filters)
+    def fetch(self, entity: str, **filters: Any) -> Any:
+        """Request specific entity endpoint with provided filters."""
+        endpoint = self._resolve_endpoint(entity)
+        url = self._build_request_url(endpoint, filters)
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
@@ -183,3 +153,15 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
             return callable_method(filters)
         except TypeError:
             return callable_method(**filters)
+
+    def _resolve_endpoint(self, entity: str) -> str:
+        aliases = {
+            "activity": "activity",
+            "assay": "assay",
+            "target": "target",
+            "document": "document",
+            "molecule": "molecule",
+        }
+        if entity not in aliases:
+            raise ValueError(f"Unknown entity: {entity}")
+        return aliases[entity]
