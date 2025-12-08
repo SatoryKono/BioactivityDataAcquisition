@@ -8,7 +8,7 @@ flowchart LR
 
     chembl[(ChEMBL REST API JSON)]:::external
     httpClient["UnifiedAPIClient\n+ retry + rate-limit + circuit breaker"]:::stepPrimary
-    recordModel["ChemblRecordModel (Pydantic)\nflatten nested payloads"]:::stepSecondary
+    recordModel["flatten_chembl_payload (utility)\nnormalize nested payloads to strings\nbypass configured fields"]:::stepSecondary
     batches["Batch buffer / generator\nlist of dicts"]:::stepSecondary
     dataframe["Pandas DataFrame\nconstructed from flattened dicts"]:::stepPrimary
     normalize["Normalization chain\n(serialization, unit normalization, enrichment)"]:::stepPrimary

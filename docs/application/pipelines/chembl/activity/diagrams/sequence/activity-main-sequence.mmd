@@ -15,7 +15,7 @@ sequenceDiagram
     loop pages
         Extraction->>DataClient: request_activity(filters, offset, limit)
         DataClient-->>Extraction: page (records + page_meta)
-        Extraction-->>Pipeline: batch (RawActivityPayload serialized)
+        Extraction-->>Pipeline: batch (flattened dicts)
         Pipeline->>Transformer: apply(batch_df)
         Transformer-->>Pipeline: normalized_df (serialized nested fields)
         Pipeline->>Validator: validate("chembl.activity", normalized_df)

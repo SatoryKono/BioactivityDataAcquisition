@@ -15,7 +15,7 @@ sequenceDiagram
     loop for each page
         Extraction->>DataClient: request_assay(filters, offset)
         DataClient-->>Extraction: page dict
-        Extraction-->>Pipeline: batch_df (RawAssayPayload normalized)
+        Extraction-->>Pipeline: batch_df (flattened dicts)
         Pipeline->>Transformer: do_transform(batch_df)
         Transformer->>Transformer: normalize assay_classifications & parameters
         Transformer-->>Pipeline: normalized_df

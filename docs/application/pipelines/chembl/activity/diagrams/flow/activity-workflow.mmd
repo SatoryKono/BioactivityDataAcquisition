@@ -7,7 +7,7 @@ flowchart TD
     linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
     start([Start activity_chembl pipeline]):::stepTerminal
     inputMode{Input mode?}:::stepDecision
-    apiExtract["ChemblExtractionService\nAPI mode:\n- pagination via offset\n- UnifiedAPIClient (retry/rate-limit)\n- RawActivityPayload flatten"]:::stepPrimary
+    apiExtract["ChemblExtractionService\nAPI mode:\n- pagination via offset\n- UnifiedAPIClient (retry/rate-limit)\n- flatten_chembl_payload (bypass nested fields)"]:::stepPrimary
     csvExtract["CsvRecordSourceImpl\nCSV mode:\n- deterministic read\n- add missing columns"]:::stepPrimary
     idExtract["ChemblExtractionService\nID-only mode:\n- fetch limited list of IDs\n- ensures missing IDs skipped"]:::stepPrimary
     concat["Concatenate batches\n-> pandas DataFrame"]:::stepSecondary

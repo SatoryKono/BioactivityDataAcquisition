@@ -6,20 +6,15 @@ domain contracts.
 """
 
 from collections.abc import Iterable
-from typing import Any, Type
+from typing import Any
 
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.contracts import ExtractionServiceABC
-from bioetl.domain.schemas.chembl.models import (
-    ChemblRecordModel,
-    RawActivityPayload,
-    RawAssayPayload,
-    RawMoleculePayload,
-)
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
+from bioetl.infrastructure.clients.chembl.serializers import flatten_chembl_payload
 
 
 class ChemblExtractionServiceImpl(ExtractionServiceABC):
@@ -33,11 +28,14 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         self,
         client: ChemblDataClientABC,
         batch_size: int = 1000,
+        *,
+        flatten_enabled: bool = True,
     ) -> None:
         self.client = client
         self.batch_size = batch_size
         self.paginator = ChemblPaginatorImpl()
         self.parser = ChemblResponseParserImpl()
+        self.flatten_enabled = flatten_enabled
 
     def get_release_version(self) -> str:
         """Get ChEMBL release version from API metadata."""
@@ -49,18 +47,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         except Exception:
             # Fallback if metadata endpoint fails (e.g. timeout or bad response)
             return "unknown"
-
-    def _get_model_cls(self, entity: str) -> Type[ChemblRecordModel]:
-        """Get Pydantic model class for entity."""
-        if entity == "activity":
-            return RawActivityPayload
-        if entity == "assay":
-            return RawAssayPayload
-        if entity == "molecule":
-            return RawMoleculePayload
-        if entity in {"target", "document"}:
-            return ChemblRecordModel
-        raise ValueError(f"Unknown entity: {entity}")
 
     def _request_entity(
         self,
@@ -97,9 +83,10 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     def serialize_records(
         self, entity: str, records: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Serialize records using the entity's Pydantic model."""
-        model_cls = self._get_model_cls(entity)
-        return [model_cls(**record).model_dump() for record in records]
+        """Serialize records using flatten helper."""
+        if not self.flatten_enabled:
+            return records
+        return [flatten_chembl_payload(record) for record in records]
 
     def extract_all(self, entity: str, **filters: Any) -> list[dict[str, Any]]:
         """
@@ -125,7 +112,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         filters = self._attach_entity_fields(entity, dict(filters))
         offset = int(filters.pop("offset", 0))
         remaining = filters.pop("limit", None)
-        model_cls = self._get_model_cls(entity)
         page_size = chunk_size or self.batch_size
 
         while remaining is None or remaining > 0:
@@ -141,7 +127,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             if not batch_records:
                 break
 
-            serialized_records = self._serialize_records(model_cls, batch_records)
+            serialized_records = self.serialize_records(entity, batch_records)
             if remaining is not None:
                 serialized_records = serialized_records[:remaining]
 
@@ -173,13 +159,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
             "limit": current_limit,
         }
         return current_limit, request_filters
-
-    def _serialize_records(
-        self, model_cls: Type[ChemblRecordModel], batch_records: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
-        return [
-            model_cls(**batch_record).model_dump() for batch_record in batch_records
-        ]
 
     def _attach_entity_fields(
         self, entity: str, filters: dict[str, Any]
