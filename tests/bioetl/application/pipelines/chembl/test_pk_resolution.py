@@ -3,7 +3,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.infrastructure.config.models import ChemblSourceConfig, PipelineConfig
+from bioetl.infrastructure.config.models import (
+    ChemblSourceConfig,
+    ClientConfig,
+    PipelineConfig,
+)
 
 
 @pytest.fixture
@@ -40,9 +44,11 @@ def test_pk_resolution_from_field(dependencies):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
 
@@ -65,9 +71,11 @@ def test_pk_resolution_from_pipeline_dict(dependencies):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
 
@@ -89,9 +97,11 @@ def test_pk_resolution_default(dependencies):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
 

@@ -11,6 +11,7 @@ import pytest
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
+    ClientConfig,
     CsvInputConfig,
 )
 from bioetl.infrastructure.files.csv_record_source import (
@@ -26,9 +27,11 @@ def source_config():
     return ChemblSourceConfig(
         base_url="https://test.com",
         batch_size=100,
-        timeout_sec=30,
-        max_retries=3,
-        rate_limit_per_sec=5.0,
+        client=ClientConfig(
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=5.0,
+        ),
     )
 
 
@@ -204,9 +207,7 @@ def test_extract_batch_size_from_config(
     new_source_config = ChemblSourceConfig(
         base_url=source_config.base_url,
         batch_size=2,
-        timeout_sec=source_config.timeout_sec,
-        max_retries=source_config.max_retries,
-        rate_limit_per_sec=source_config.rate_limit_per_sec,
+        client=source_config.client.model_copy(deep=True),
     )
     pipeline._config.provider_config = new_source_config
     # Ensure get_source_config returns the updated object

@@ -7,6 +7,7 @@ from pydantic import AnyHttpUrl
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
+    ClientConfig,
     CsvInputConfig,
 )
 from bioetl.infrastructure.files.csv_record_source import (
@@ -84,9 +85,11 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     source_config = ChemblSourceConfig(
         provider="chembl",
         base_url=cast(AnyHttpUrl, "https://example.org"),
-        timeout_sec=1,
-        max_retries=0,
-        rate_limit_per_sec=1.0,
+        client=ClientConfig(
+            timeout_sec=1,
+            max_retries=0,
+            rate_limit_per_sec=1.0,
+        ),
         batch_size=2,
     )
     source = IdListRecordSourceImpl(

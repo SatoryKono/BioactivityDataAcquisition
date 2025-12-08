@@ -13,7 +13,7 @@ from bioetl.domain.clients.base.output.contracts import (
     WriterABC,
     WriteResult,
 )
-from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
+from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.output.factories import default_output_writer
@@ -86,9 +86,11 @@ def _build_config(output_path: Path) -> PipelineConfig:
         batch_size=10,
         provider_config=DummyProviderConfig(
             base_url="https://example.com",  # type: ignore[arg-type]
-            timeout_sec=1,
-            max_retries=0,
-            rate_limit_per_sec=1.0,
+            client=ClientConfig(
+                timeout_sec=1,
+                max_retries=0,
+                rate_limit_per_sec=1.0,
+            ),
         ),
     )
 

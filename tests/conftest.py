@@ -16,6 +16,7 @@ import pytest
 
 from bioetl.domain.configs import (
     ChemblSourceConfig,
+    ClientConfig,
     HashingConfig,
     LoggingConfig,
     PipelineConfig,
@@ -95,9 +96,11 @@ def mock_config():
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url=cast(AnyHttpUrl, "https://www.ebi.ac.uk/chembl/api/data"),
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path="./test_out"),
@@ -208,9 +211,11 @@ def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineCo
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url=cast(AnyHttpUrl, "https://www.ebi.ac.uk/chembl/api/data"),
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
         logging=LoggingConfig(level="DEBUG"),
         storage=StorageConfig(output_path=str(output_dir)),
