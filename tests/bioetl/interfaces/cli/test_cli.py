@@ -15,7 +15,11 @@ from typer.testing import CliRunner
 sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
-from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig  # noqa: E402
+from bioetl.domain.configs import (  # noqa: E402
+    ChemblSourceConfig,
+    ClientConfig,
+    PipelineConfig,
+)
 from bioetl.domain.transform.contracts import HashServiceABC  # noqa: E402
 from bioetl.domain.transform.hash_service import HashService  # noqa: E402
 from bioetl.interfaces.cli import app  # noqa: E402
@@ -53,9 +57,11 @@ def test_validate_config_success(mock_loader):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
 
@@ -90,9 +96,11 @@ def test_run_command(mock_loader, mock_orchestrator_cls):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
     mock_loader.return_value = mock_config
@@ -152,9 +160,11 @@ def test_run_with_limit_and_dry_run(mock_loader, mock_orchestrator_cls):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
     mock_loader.return_value = mock_config
@@ -190,9 +200,11 @@ def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
         batch_size=10,
         provider_config=ChemblSourceConfig(
             base_url="https://www.ebi.ac.uk/chembl/api/data",
-            timeout_sec=30,
-            max_retries=3,
-            rate_limit_per_sec=10.0,
+            client=ClientConfig(
+                timeout_sec=30,
+                max_retries=3,
+                rate_limit_per_sec=10.0,
+            ),
         ),
     )
 

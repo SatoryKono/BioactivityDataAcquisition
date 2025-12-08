@@ -13,6 +13,7 @@ normalization:
     - target_components
     - cross_references
     - standard_type
+    - standard_units
     - type
     - assay_type
 

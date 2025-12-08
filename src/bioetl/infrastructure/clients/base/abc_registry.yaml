@@ -20,7 +20,7 @@ CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
 
 ProviderRegistryABC: bioetl.domain.provider_registry.ProviderRegistryABC
 
-ProgressReporterABC: bioetl.domain.clients.base.logging.contracts.ProgressReporterABC
+ProgressReporterABC: bioetl.domain.observability.contracts.ProgressReporterABC
 LoggingPortABC: bioetl.domain.observability.contracts.LoggingPortABC
 TracingPortABC: bioetl.domain.observability.contracts.TracingPortABC
 

@@ -8,7 +8,8 @@ infrastructure and interface layers provide concrete implementations.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Self
+from contextlib import contextmanager
+from typing import Any, Iterator, Self
 
 
 class LoggingPortABC(ABC):
@@ -80,4 +81,42 @@ class PipelineMetricsPortABC(ABC):
         """Increment counter for a stage outcome."""
 
 
-__all__ = ["LoggingPortABC", "TracingPortABC", "PipelineMetricsPortABC"]
+class ProgressReporterABC(ABC):
+    """
+    Интерфейс отчетности о прогрессе.
+
+    Реализация выбирается инфраструктурой и связывается с контейнером.
+    """
+
+    @abstractmethod
+    def start(self, total: int, description: str = "") -> None:
+        """Начинает отслеживание прогресса."""
+
+    @abstractmethod
+    def apply_update(self, n: int = 1) -> None:
+        """Обновляет прогресс на n единиц."""
+
+    @abstractmethod
+    def stop_reporting(self) -> None:
+        """Завершает отслеживание."""
+
+    @contextmanager
+    def create_bar(self, total: int, desc: str = "") -> Iterator[Any]:
+        """
+        Context manager for progress bar.
+        Default implementation delegates to start/stop.
+        """
+
+        self.start(total, description=desc)
+        try:
+            yield self
+        finally:
+            self.stop_reporting()
+
+
+__all__ = [
+    "LoggingPortABC",
+    "TracingPortABC",
+    "PipelineMetricsPortABC",
+    "ProgressReporterABC",
+]

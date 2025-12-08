@@ -33,7 +33,6 @@ class PipelineOrchestrator:
         container_factory: Callable[..., PipelineContainerABC] | None = None,
         provider_loader: ProviderLoaderProtocol | None = None,
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None = None,
-        use_provider_loader_port: bool | None = None,
     ) -> None:
         self._pipeline_name = pipeline_name
         self._config = config
@@ -42,7 +41,6 @@ class PipelineOrchestrator:
         self._container_factory = self._resolve_container_factory(container_factory)
         self._provider_loader = provider_loader
         self._provider_loader_factory = provider_loader_factory
-        self._use_provider_loader_port = use_provider_loader_port or False
 
     def build_pipeline(self, *, limit: int | None = None) -> PipelineBase:
         """Создает экземпляр пайплайна с зависимостями."""
@@ -120,7 +118,6 @@ class PipelineOrchestrator:
             self._config.model_dump(by_alias=False),
             dry_run,
             limit,
-            self._use_provider_loader_port,
             self._provider_loader_factory,
             self._container_factory,
         )
@@ -136,16 +133,11 @@ class PipelineOrchestrator:
         config_payload: dict,
         dry_run: bool,
         limit: int | None,
-        use_provider_loader_port: bool,
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None,
         container_factory: Callable[..., PipelineContainerABC] | None,
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
-        if provider_loader_factory is None:
-            raise RuntimeError(
-                "Provider loader factory is required for background runs"
-            )
-        loader = provider_loader_factory()
+        loader = provider_loader_factory() if provider_loader_factory else None
         registry = (
             loader.get_registry(registry=InMemoryProviderRegistry())
             if loader
@@ -157,7 +149,6 @@ class PipelineOrchestrator:
             provider_registry=registry,
             provider_loader=loader,
             provider_loader_factory=provider_loader_factory,
-            use_provider_loader_port=use_provider_loader_port,
             container_factory=container_factory,
         )
         return orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
@@ -184,10 +175,7 @@ class PipelineOrchestrator:
         return self._resolve_registry_from_provider()
 
     def _load_registry_via_loader(self) -> ProviderRegistryABC | None:
-        """Попытаться загрузить реестр через loader (если включён порт)."""
-        if not self._use_provider_loader_port:
-            return None
-
+        """Попытаться загрузить реестр через loader."""
         loader = self._provider_loader
         if loader is None and self._provider_loader_factory is not None:
             loader = self._provider_loader_factory()
@@ -196,8 +184,9 @@ class PipelineOrchestrator:
         if loader is None:
             return None
 
-        self._provider_registry = loader.get_registry(registry=self._provider_registry)
-        return self._provider_registry
+        registry = loader.get_registry(registry=InMemoryProviderRegistry())
+        self._provider_registry = registry
+        return registry
 
     def _resolve_registry_from_provider(self) -> ProviderRegistryABC:
         """Получить реестр через provider (fallback)."""

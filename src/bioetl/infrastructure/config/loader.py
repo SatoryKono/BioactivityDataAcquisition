@@ -301,6 +301,8 @@ def _hydrate_provider_config(
     ):
         transformed["batch_size"] = provider_cfg["batch_size"]
 
+    _normalize_provider_config_layout(transformed, provider)
+
 
 def _build_provider_config_from_sources(
     sources: dict[str, Any],
@@ -338,6 +340,65 @@ def _build_provider_config_from_sources(
         if optional_key in chembl_source:
             provider_config[optional_key] = chembl_source[optional_key]
     return provider_config
+
+
+def _normalize_provider_config_layout(
+    transformed: dict[str, Any], provider: str
+) -> None:
+    """Normalize legacy provider_config layouts to the strict model shape.
+
+    Supports:
+    - Mapping-of-providers layout::
+
+        provider_config:
+          chembl: { provider: chembl, base_url: ..., timeout_sec: ... }
+
+      which is flattened to a single ChemblSourceConfig dict.
+
+    - Flat HTTP client fields defined directly under provider_config::
+
+        provider_config:
+          provider: chembl
+          base_url: ...
+          timeout_sec: 30
+          max_retries: 3
+
+      which are moved under provider_config.client.* so they validate
+      against ClientConfig.
+    """
+
+    provider_cfg = transformed.get("provider_config")
+    if not isinstance(provider_cfg, dict):
+        return
+
+    # Legacy mapping-of-providers: {"chembl": { ... }}
+    if "provider" not in provider_cfg and provider in provider_cfg:
+        nested = provider_cfg.get(provider)
+        if isinstance(nested, dict):
+            transformed["provider_config"] = nested
+            provider_cfg = nested
+
+    http_keys = (
+        "timeout_sec",
+        "max_retries",
+        "rate_limit_per_sec",
+        "backoff_factor",
+        "circuit_breaker_threshold",
+        "circuit_breaker_recovery_time",
+    )
+
+    if not any(key in provider_cfg for key in http_keys):
+        return
+
+    client_cfg = provider_cfg.get("client")
+    if not isinstance(client_cfg, dict):
+        client_cfg = {}
+
+    for key in http_keys:
+        if key in provider_cfg and key not in client_cfg:
+            client_cfg[key] = provider_cfg.pop(key)
+
+    provider_cfg["client"] = client_cfg
 
 
 def _default_provider_config(provider: str, *, defaults: Any) -> dict[str, Any]:
