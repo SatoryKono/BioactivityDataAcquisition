@@ -1,6 +1,7 @@
 """Contracts for pipeline components."""
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import pandas as pd
@@ -36,7 +37,13 @@ class LoaderABC(ABC):
     """
 
     @abstractmethod
-    def load(self, df: pd.DataFrame, **kwargs: Any) -> None:
+    def load(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: Any,
+        column_order: list[str] | None = None,
+    ) -> Any:
         """
         Loads data to destination.
         """
@@ -67,6 +74,10 @@ class PipelineContainerABC(ABC):
     @abstractmethod
     def get_output_writer(self) -> OutputWriterABC:
         """Return unified writer for data, metadata and QC outputs."""
+
+    @abstractmethod
+    def get_loader(self) -> LoaderABC:
+        """Return loader responsible for write stage."""
 
     @abstractmethod
     def get_extraction_service(self) -> Any:
