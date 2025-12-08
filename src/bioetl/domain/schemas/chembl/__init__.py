@@ -13,7 +13,6 @@ from bioetl.domain.schemas.chembl.models import (
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
 __all__ = [
     "ActivitySchema",
@@ -21,7 +20,6 @@ __all__ = [
     "DocumentSchema",
     "MoleculeSchema",
     "TargetSchema",
-    "TestitemSchema",
     "ActivityModel",
     "AssayModel",
     "ChemblRecordModel",

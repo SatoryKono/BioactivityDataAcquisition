@@ -52,11 +52,6 @@ src/bioetl/application/pipelines/chembl/target/export.py
 src/bioetl/application/pipelines/chembl/target/extract.py
 src/bioetl/application/pipelines/chembl/target/transform.py
 src/bioetl/application/pipelines/chembl/target/validate.py
-src/bioetl/application/pipelines/chembl/testitem/__init__.py
-src/bioetl/application/pipelines/chembl/testitem/export.py
-src/bioetl/application/pipelines/chembl/testitem/extract.py
-src/bioetl/application/pipelines/chembl/testitem/transform.py
-src/bioetl/application/pipelines/chembl/testitem/validate.py
 src/bioetl/application/services/__init__.py
 src/bioetl/application/services/chembl_extraction.py
 src/bioetl/domain/__init__.py
@@ -101,7 +96,6 @@ src/bioetl/domain/schemas/chembl/models.py
 src/bioetl/domain/schemas/chembl/molecule.py
 src/bioetl/domain/schemas/chembl/output_views.py
 src/bioetl/domain/schemas/chembl/target.py
-src/bioetl/domain/schemas/chembl/testitem.py
 src/bioetl/domain/transform/__init__.py
 src/bioetl/domain/transform/contracts.py
 src/bioetl/domain/transform/factories.py
@@ -211,4 +205,4 @@ tests/test_assay_chembl_golden.py
 tests/test_document_chembl_golden.py
 tests/test_pipeline_outputs.py
 tests/test_target_chembl_golden.py
-tests/test_testitem_chembl_golden.py
+tests/test_molecule_chembl_golden.py

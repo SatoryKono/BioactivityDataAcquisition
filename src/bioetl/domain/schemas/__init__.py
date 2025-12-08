@@ -12,10 +12,8 @@ from bioetl.domain.schemas.chembl.output_views import (
     DOCUMENT_OUTPUT_COLUMNS,
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
-    TESTITEM_OUTPUT_COLUMNS,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 from bioetl.domain.validation.contracts import SchemaProviderABC
 
 
@@ -42,8 +40,3 @@ def register_schemas(registry: SchemaProviderABC) -> None:
     registry.register("target", TargetSchema)
     registry.register("target_input", TargetSchema)
     registry.register("target_output", TargetSchema, column_order=TARGET_OUTPUT_COLUMNS)
-    registry.register("testitem", TestitemSchema)
-    registry.register("testitem_input", TestitemSchema)
-    registry.register(
-        "testitem_output", TestitemSchema, column_order=TESTITEM_OUTPUT_COLUMNS
-    )

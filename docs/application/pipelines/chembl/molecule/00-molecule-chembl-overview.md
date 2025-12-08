@@ -16,7 +16,7 @@
 ## Особенности
 
 - `primary_key`: `PipelineConfig.primary_key` или `pipeline.primary_key`, по умолчанию `molecule_chembl_id`.
-- `input_mode`: `id_only` с путём по умолчанию `data/input/testitem.csv`; поддерживает `api` и `csv` режимы без изменения кода.
+- `input_mode`: `id_only` с путём по умолчанию `data/input/molecule.csv`; поддерживает `api` и `csv` режимы без изменения кода.
 - Хеши рассчитываются на нормализованных данных; ключи — `hashing.business_key_fields`.
 - Метрики стадий публикуются хуком `MetricsPipelineHookImpl`.
 

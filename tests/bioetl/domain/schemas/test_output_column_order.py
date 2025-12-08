@@ -12,10 +12,8 @@ from bioetl.domain.schemas.chembl.output_views import (
     DOCUMENT_OUTPUT_COLUMNS,
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
-    TESTITEM_OUTPUT_COLUMNS,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
 METADATA_COLUMNS = [
     "hash_row",
@@ -34,7 +32,6 @@ METADATA_COLUMNS = [
         (DOCUMENT_OUTPUT_COLUMNS, DocumentSchema),
         (MOLECULE_OUTPUT_COLUMNS, MoleculeSchema),
         (TARGET_OUTPUT_COLUMNS, TargetSchema),
-        (TESTITEM_OUTPUT_COLUMNS, TestitemSchema),
     ],
 )
 def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
@@ -57,7 +54,6 @@ def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
         DOCUMENT_OUTPUT_COLUMNS,
         MOLECULE_OUTPUT_COLUMNS,
         TARGET_OUTPUT_COLUMNS,
-        TESTITEM_OUTPUT_COLUMNS,
     ],
 )
 def test_metadata_columns_last(output_columns) -> None:
