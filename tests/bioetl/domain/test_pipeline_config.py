@@ -13,8 +13,10 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
         provider_config={
             "provider": "dummy",
             "base_url": "http://example.com",
-            "timeout_sec": 1.0,
-            "max_retries": 0,
+            "client": {
+                "timeout_sec": 1.0,
+                "max_retries": 0,
+            },
         },
         logging={"level": "DEBUG"},
         metrics={"enabled": False},

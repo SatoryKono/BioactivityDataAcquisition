@@ -2,7 +2,7 @@
 
 from tqdm import tqdm
 
-from bioetl.domain.clients.base.logging.contracts import ProgressReporterABC
+from bioetl.domain.observability import ProgressReporterABC
 
 
 class TqdmProgressReporterImpl(ProgressReporterABC):

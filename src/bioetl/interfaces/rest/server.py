@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from functools import partial
 from pathlib import Path
+from typing import Callable
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -12,7 +13,11 @@ from pydantic import BaseModel, Field
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.models import RunResult
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.domain.provider_registry import (
+    InMemoryProviderRegistry,
+    ProviderRegistryABC,
+    ProviderRegistryLoaderABC,
+)
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
@@ -68,18 +73,16 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
             detail="REST interface is disabled by configuration",
         )
     providers_path = Path("configs") / "providers.yaml"
-    provider_loader_factory = partial(
+    provider_loader_factory: Callable[[], ProviderRegistryLoaderABC] | None = partial(
         create_provider_loader, config_path=providers_path
     )
-    feature_flag = config.features.enable_provider_loader_port
-    if feature_flag:
+    provider_loader: ProviderRegistryLoaderABC | None = None
+    provider_registry: ProviderRegistryABC | None = None
+    try:
         provider_loader = provider_loader_factory()
-        provider_registry = None
-    else:
-        provider_loader = None
-        provider_registry = provider_loader_factory().get_registry(
-            registry=InMemoryProviderRegistry()
-        )
+    except FileNotFoundError:
+        provider_registry = InMemoryProviderRegistry()
+        provider_loader_factory = None
     container_factory = create_container_factory()
     return PipelineOrchestrator(
         pipeline_name=pipeline_name,
@@ -87,7 +90,6 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
         provider_registry=provider_registry,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
-        use_provider_loader_port=feature_flag,
         container_factory=container_factory,
     )
 

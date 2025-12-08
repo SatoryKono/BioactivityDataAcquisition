@@ -66,9 +66,10 @@ batch_size: 10
 provider_config:
   provider: chembl
   base_url: https://www.ebi.ac.uk/chembl/api/data
-  timeout_sec: 30
-  max_retries: 3
-  rate_limit_per_sec: 10.0
+  client:
+    timeout_sec: 30
+    max_retries: 3
+    rate_limit_per_sec: 10.0
 """,
         encoding="utf-8",
     )
@@ -107,9 +108,10 @@ def test_profile_not_found_raises(tmp_path: Path):
         "provider_config:\n"
         "  provider: chembl\n"
         "  base_url: https://www.ebi.ac.uk/chembl/api/data\n"
-        "  timeout_sec: 30\n"
-        "  max_retries: 3\n"
-        "  rate_limit_per_sec: 10.0\n"
+    "  client:\n"
+    "    timeout_sec: 30\n"
+    "    max_retries: 3\n"
+    "    rate_limit_per_sec: 10.0\n"
     )
     config_path.write_text(config_content, encoding="utf-8")
     providers_file = tmp_path / "providers.yaml"
@@ -143,9 +145,10 @@ batch_size: 5
 provider_config:
   provider: chembl
   base_url: https://www.ebi.ac.uk/chembl/api/data
-  timeout_sec: 30
-  max_retries: 3
-  rate_limit_per_sec: 10.0
+  client:
+    timeout_sec: 30
+    max_retries: 3
+    rate_limit_per_sec: 10.0
 """,
         encoding="utf-8",
     )

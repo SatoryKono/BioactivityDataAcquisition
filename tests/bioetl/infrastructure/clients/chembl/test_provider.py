@@ -7,7 +7,7 @@ from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.infrastructure.clients.chembl.provider import (
     ChemblProviderComponentsFactory,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
 
 
 class _NormalizationServiceStub(NormalizationServiceABC):
@@ -31,9 +31,11 @@ class _NormalizationServiceStub(NormalizationServiceABC):
 def chembl_config() -> ChemblSourceConfig:
     return ChemblSourceConfig(
         base_url="https://example.com/api",
-        timeout_sec=30,
-        max_retries=1,
-        rate_limit_per_sec=1.0,
+        client=ClientConfig(
+            timeout_sec=30,
+            max_retries=1,
+            rate_limit_per_sec=1.0,
+        ),
     )
 
 

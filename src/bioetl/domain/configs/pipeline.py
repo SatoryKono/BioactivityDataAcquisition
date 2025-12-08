@@ -155,7 +155,6 @@ class InterfaceFeaturesConfig(BaseModel):
 
     rest_interface_enabled: bool = False
     mq_interface_enabled: bool = False
-    enable_provider_loader_port: bool = False
 
     model_config = ConfigDict(extra="forbid")
 
@@ -277,16 +276,6 @@ class FeatureFlagsConfig(BaseModel):
     )
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
-
-    @property
-    def enable_provider_loader_port(self) -> bool:
-        """Backwards-compatible access to provider loader flag."""
-
-        return self.interfaces.enable_provider_loader_port
-
-    @enable_provider_loader_port.setter
-    def enable_provider_loader_port(self, value: bool) -> None:
-        self.interfaces.enable_provider_loader_port = value
 
     @property
     def rest_interface_enabled(self) -> bool:

@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 import time
 import traceback
-from typing import Any, Literal, Optional
+from typing import Any, Callable, Literal, Optional
 
 from rich.console import Console
 from rich.table import Table
@@ -16,7 +16,11 @@ from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import MetricsConfig
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.domain.provider_registry import (
+    InMemoryProviderRegistry,
+    ProviderRegistryABC,
+    ProviderRegistryLoaderABC,
+)
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
@@ -191,32 +195,25 @@ def run(
         )
         _start_metrics_exporter(config.metrics, dry_run=dry_run, logger=bound_logger)
         provider_config_path = base_dir / "providers.yaml"
-        provider_loader_factory = partial(
+        provider_loader_factory: Callable[[], ProviderRegistryLoaderABC] | None = partial(
             create_provider_loader, config_path=provider_config_path
         )
-        interface_features = getattr(config.features, "interfaces", config.features)
-        feature_flag = getattr(interface_features, "enable_provider_loader_port", False)
-        provider_loader = None
-        provider_registry = None
+        provider_loader: ProviderRegistryLoaderABC | None = None
+        provider_registry: ProviderRegistryABC | None = None
         try:
-            if feature_flag:
-                provider_loader = provider_loader_factory()
-            else:
-                provider_registry = provider_loader_factory().get_registry(
-                    registry=InMemoryProviderRegistry()
-                )
+            provider_loader = provider_loader_factory()
         except FileNotFoundError:
             console.print(
                 "[yellow]Providers config not found; using empty registry[/yellow]"
             )
             provider_registry = InMemoryProviderRegistry()
+            provider_loader_factory = None
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
             provider_registry=provider_registry,
             provider_loader=provider_loader,
             provider_loader_factory=provider_loader_factory,
-            use_provider_loader_port=feature_flag,
             container_factory=container_factory,
         )
 

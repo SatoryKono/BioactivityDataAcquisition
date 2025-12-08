@@ -46,17 +46,11 @@
 - `ProviderRegistryABC` — `bioetl.domain.provider_registry.ProviderRegistryABC`
   - Порт для чтения и регистрации определений провайдеров.
 
-- `LoggerAdapterABC` — `bioetl.domain.clients.base.logging.contracts.LoggerAdapterABC`
-  - Интерфейс структурированного логгера. Default factory: ``bioetl.infrastructure.logging.factories.default_logger``. Implementations: ``UnifiedLoggerImpl``.
-
 - `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
   - Порт структурированного логгирования. Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``. Implementations: ``StructuredLoggerImpl``.
 
-- `ProgressReporterABC` — `bioetl.domain.clients.base.logging.contracts.ProgressReporterABC`
+- `ProgressReporterABC` — `bioetl.domain.observability.contracts.ProgressReporterABC`
   - Интерфейс отчетности о прогрессе. Default factory: ``bioetl.infrastructure.logging.factories.default_progress_reporter``. Implementations: ``TqdmProgressReporterImpl``.
-
-- `TracerABC` — `bioetl.domain.clients.base.logging.contracts.TracerABC`
-  - Интерфейс распределенной трассировки. Implementations expected to be provided by infrastructure tracing backends.
 
 - `TracingPortABC` — `bioetl.domain.observability.contracts.TracingPortABC`
   - Порт для распределенной трассировки. Default factory: ``bioetl.infrastructure.observability.factories.default_tracing_port``. Implementations: ``TracingAdapterImpl``.
@@ -65,7 +59,7 @@
   - Хеширование строк.
 
 - `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
-  - Фасад для вычисления hash_row/hash_business_key и служебных колонок. Default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.infrastructure.transform.impl.hash_service_impl.HashServiceImpl`.
+  - Фасад для вычисления hash_row/hash_business_key и служебных колонок. Default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.domain.transform.hash_service.HashService`.
 
 - `BaseNormalizationServiceABC` — `bioetl.domain.transform.contracts.BaseNormalizationServiceABC`
   - Базовый контракт сервисов нормализации. Default factory: ``bioetl.infrastructure.transform.factories.default_base_normalization_service``. Implementations: ``BaseNormalizationServiceImpl``.
