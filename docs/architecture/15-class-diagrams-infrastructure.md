@@ -11,7 +11,7 @@
 id: 9f5e7de8-3350-47cb-8b63-8ec00ddc9944
 ---
 classDiagram
-    class SourceClientABC {
+    class DataClientABC {
         <<abstract>>
         +fetch_one(id)*
         +fetch_many(ids)*
@@ -48,7 +48,7 @@ classDiagram
         +close()
     }
 
-    SourceClientABC <|-- ChemblDataClientABC
+    DataClientABC <|-- ChemblDataClientABC
     ChemblDataClientABC <|-- ChemblDataClientHTTPImpl
     ChemblDataClientHTTPImpl --> UnifiedAPIClient : uses
 ```

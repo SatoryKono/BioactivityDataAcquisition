@@ -3,10 +3,10 @@
 from abc import abstractmethod
 from typing import Any
 
-from bioetl.domain.clients.base.contracts import SourceClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 
 
-class ChemblDataClientABC(SourceClientABC):
+class ChemblDataClientABC(DataClientABC):
     """
     Контракт клиента ChEMBL.
     """

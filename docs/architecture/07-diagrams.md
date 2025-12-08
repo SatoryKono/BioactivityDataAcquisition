@@ -288,12 +288,16 @@ flowchart TD
 
 ```mermaid
 classDiagram
-    class SourceClientABC {
+    class DataClientABC {
         <<Interface>>
         +fetch_one(id)
         +fetch_many(ids)
         +iter_pages(request)
         +metadata()
+    }
+
+    class ChemblDataClientABC {
+        <<Interface>>
     }
 
     class RequestBuilderABC {
@@ -318,12 +322,13 @@ classDiagram
     }
 
     class ChemblClientFactory {
-        +create_client(config) SourceClientABC
-        +create_default() SourceClientABC
+        +create_client(config) ChemblDataClientABC
+        +create_default() ChemblDataClientABC
     }
 
-    SourceClientABC <|-- ChemblClientHTTPImpl
-    ChemblClientFactory ..> SourceClientABC : creates
+    DataClientABC <|-- ChemblDataClientABC
+    ChemblDataClientABC <|-- ChemblClientHTTPImpl
+    ChemblClientFactory ..> ChemblDataClientABC : creates
     ChemblClientFactory ..> ChemblClientHTTPImpl : instantiates
 
     ChemblClientHTTPImpl *-- RequestBuilderABC : uses
@@ -406,7 +411,7 @@ flowchart LR
   end
   subgraph Interfaces["**Interfaces (Ports)**"]
     IF_Pipeline["**PipelineBase**, **ChemblPipelineBase** *bioetl.application.pipelines.base*"]
-    IF_Client["**BaseClient**, **SourceClientABC** *bioetl.interfaces.clients*"]
+    IF_Client["**BaseClient**, **DataClientABC**, **ChemblDataClientABC** *bioetl.interfaces.clients*"]
     IF_Logger["**LoggerAdapterABC** *bioetl.interfaces.logging*"]
     IF_Writer["**WriterABC**, **UnifiedOutputWriterABC** *bioetl.interfaces.output*"]
     IF_Validator["**ValidatorABC** *bioetl.interfaces.validation*"]
