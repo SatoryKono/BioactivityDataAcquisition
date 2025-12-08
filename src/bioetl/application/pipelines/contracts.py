@@ -1,8 +1,7 @@
 """Contracts for pipeline components."""
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Callable, Iterable, Protocol
+from typing import Any, Callable, Iterable
 
 import pandas as pd
 
@@ -11,44 +10,12 @@ from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
 )
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-
-
-class FileRecordSourceFactoryABC(Protocol):
-    """Factory for file-based record sources (CSV and ID list)."""
-
-    def create_csv_source(
-        self,
-        *,
-        input_path: Path,
-        csv_options: Any,
-        limit: int | None,
-        chunk_size: int | None,
-        logger: Any,
-    ) -> RecordSource:
-        """Create CSV-backed record source."""
-
-    def create_id_list_source(
-        self,
-        *,
-        input_path: Path,
-        id_column: str,
-        csv_options: Any,
-        limit: int | None,
-        chunk_size: int | None,
-        extraction_service: ExtractionServiceABC,
-        source_config: Any,
-        entity: str,
-        filter_key: str,
-        logger: Any,
-    ) -> RecordSource:
-        """Create ID-list-backed record source."""
 
 
 class ExtractorABC(ABC):
@@ -142,13 +109,4 @@ class PipelineContainerABC(ABC):
         """Return builder for run metadata artifacts."""
 
     @abstractmethod
-    def get_record_source_factory(self) -> FileRecordSourceFactoryABC:
-        """Return factory for constructing record sources."""
-
-
-__all__ = [
-    "FileRecordSourceFactoryABC",
-    "ExtractorABC",
-    "LoaderABC",
-    "PipelineContainerABC",
-]
+__all__ = ["ExtractorABC", "LoaderABC", "PipelineContainerABC"]

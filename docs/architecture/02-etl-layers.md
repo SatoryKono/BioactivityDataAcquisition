@@ -7,8 +7,14 @@
 
 ## Monitoring
 Ответственность: логирование, метрики, прогресс.
-Ключевые компоненты: `UnifiedLogger`, `LoggerAdapterABC`.
-Взаимодействие: Пронизывает все слои; контекстный логгер передается в каждый сервис при инициализации.
+Ключевые компоненты: `UnifiedLogger`, доменный порт `LoggingPortABC`, порт метрик
+`PipelineMetricsPortABC`, а также конфигурация наблюдаемости
+(`LoggingConfig`, `MetricsConfig`, `ObservabilityConfig`) внутри `PipelineConfig`.
+Взаимодействие: Пронизывает все слои; контекстный логгер и метрики передаются в
+каждый сервис при инициализации. Домен описывает **что** нужно логировать и
+какие параметры мониторинга заданы в конфигурации пайплайна, а конкретные
+реализации логгера и экспорта метрик находятся в инфраструктурном слое и
+выбираются через DI/wiring.
 
 ## Client (Infrastructure)
 Ответственность: получение данных из внешних API.
@@ -32,8 +38,26 @@
 
 ## Validation (Domain)
 Ответственность: проверка данных по Pandera-схемам.
-Ключевые компоненты: `ValidationService`, `SchemaRegistry`, Pandera Models (например, `ActivityTableSchema`).
-Взаимодействие: Получает DataFrame после трансформации, возвращает валидированный DataFrame и `ValidationResult`. Блокирует запись некорректных данных.
+Ключевые компоненты: `ValidationService`, `SchemaRegistry`, Pandera Models
+(например, `ActivityTableSchema`, `AssayTableSchema`, `MoleculeTableSchema`,
+`TargetTableSchema`, `DocumentTableSchema` в `bioetl.domain.schemas.chembl.*`).
+Взаимодействие: Получает DataFrame после трансформации, возвращает валидированный
+DataFrame и `ValidationResult`. Блокирует запись некорректных данных.
+
+## Bounded Contexts (ChEMBL)
+
+ChEMBL-данные разделены на несколько предметных контекстов, каждый из которых
+имеет собственные таблицы, схемы и правила валидации:
+
+- Activity: `ActivityTableSchema` в `bioetl.domain.schemas.chembl.activity`.
+- Assay: `AssayTableSchema` в `bioetl.domain.schemas.chembl.assay`.
+- Molecule: `MoleculeTableSchema` в `bioetl.domain.schemas.chembl.molecule`.
+- Target: `TargetTableSchema` в `bioetl.domain.schemas.chembl.target`.
+- Document: `DocumentTableSchema` в `bioetl.domain.schemas.chembl.document`.
+
+Каждый bounded context может эволюционировать независимо (добавление полей,
+ограничений, специфической логики), при этом общий каркас валидации (`ValidationService`,
+`SchemaRegistry`) остаётся общим для всего доменного слоя.
 
 ## Output (Infrastructure)
 Ответственность: атомарная запись таблиц, метаданных и QC-отчётов.

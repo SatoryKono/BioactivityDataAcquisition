@@ -6,10 +6,7 @@ from types import SimpleNamespace
 from typing import Any, Callable
 
 from bioetl.application.container import build_pipeline_dependencies
-from bioetl.application.pipelines.contracts import (
-    FileRecordSourceFactoryABC,
-    PipelineContainerABC,
-)
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
@@ -22,10 +19,6 @@ from bioetl.infrastructure.clients.base.abc_registry_resolver import (
 from bioetl.infrastructure.config.loader import (
     get_pipeline_config,
     get_pipeline_config_from_path,
-)
-from bioetl.infrastructure.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
 )
 from bioetl.infrastructure.observability import metrics
 from bioetl.infrastructure.output.metadata import (
@@ -40,19 +33,6 @@ def create_config_loader() -> PipelineConfigLoaderProtocol:
     return SimpleNamespace(
         get_by_id=get_pipeline_config,
         get_from_path=get_pipeline_config_from_path,
-    )
-
-
-def _create_record_source_factory() -> FileRecordSourceFactoryABC:
-    """Return factory producing CSV/ID list record sources."""
-
-    return SimpleNamespace(
-        create_csv_source=(
-            lambda **kwargs: CsvRecordSourceImpl(**kwargs)  # type: ignore[arg-type]
-        ),
-        create_id_list_source=(
-            lambda **kwargs: IdListRecordSourceImpl(**kwargs)  # type: ignore[arg-type]
-        ),
     )
 
 
@@ -124,7 +104,6 @@ def build_default_container(
         metadata_writer=metadata_writer,
         quality_reporter=quality_reporter,
     )
-    record_source_factory = _create_record_source_factory()
     metadata_builder = _create_metadata_builder()
     metrics_port = _create_metrics_port()
     validator_factory = _create_validator_factory()
@@ -134,7 +113,6 @@ def build_default_container(
         logger=logger,
         output_writer=output_writer,
         validator_factory=validator_factory,
-        record_source_factory=record_source_factory,
         metadata_builder=metadata_builder,
         metrics_port=metrics_port,
         provider_registry=provider_registry,

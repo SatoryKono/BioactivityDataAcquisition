@@ -271,7 +271,7 @@ classDiagram
     StageRuntimeManagerImpl --> StageResult : produces
 ```
 
-В актуальной архитектуре нет отдельного абстрактного класса `StageABC`. Логические
+В актуальной архитектуре нет отдельного абстрактного класса для стадий. Логические
 стадии (extract, transform, validate, write) представлены методами `PipelineBase`,
 а управление их выполнением, хуками (`PipelineHookABC`) и политикой ошибок
 (`ErrorPolicyABC`) сосредоточено в `StageRuntimeManagerImpl`, который возвращает
