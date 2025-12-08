@@ -29,9 +29,11 @@ def _missing_annotations(func: ast.AST) -> list[str]:
             continue
         if arg.annotation is None:
             missing.append(f"param:{arg.arg}")
-    if getattr(func.args, "vararg", None) and func.args.vararg.annotation is None:
+    vararg = getattr(func.args, "vararg", None)
+    if vararg is not None and vararg.annotation is None:
         missing.append("param:*args")
-    if getattr(func.args, "kwarg", None) and func.args.kwarg.annotation is None:
+    kwarg = getattr(func.args, "kwarg", None)
+    if kwarg is not None and kwarg.annotation is None:
         missing.append("param:**kwargs")
     if getattr(func, "returns", None) is None:
         missing.append("return")
@@ -50,7 +52,8 @@ def test_public_functions_are_annotated(bioetl_root: Path) -> None:
             missing = _missing_annotations(func)
             if missing:
                 violations.append(
-                    f"{path.as_posix()}:{func.lineno}: отсутствуют аннотации {missing}"
+                    f"{path.as_posix()}:{func.lineno}: "
+                    f"отсутствуют аннотации {missing}"
                 )
     if violations:
         pytest.fail("\n".join(sorted(set(violations))))
@@ -74,13 +77,18 @@ def test_mypy_strict_available() -> None:
             env=env,
             encoding="utf-8",
             errors="replace",
+            check=False,
         )
     if result.returncode != 0:
         output = (result.stdout + "\n" + result.stderr).strip()
         if "No module named mypy" in output or "mypy: command not found" in output:
-            pytest.fail("mypy не найден. Установите зависимость: pip install mypy")
+            pytest.fail(
+                "mypy не найден. "
+                "Установите зависимость: pip install mypy"
+            )
         pytest.fail(
-            f"mypy завершился с кодом {result.returncode}\n"
+            "mypy завершился с кодом "
+            f"{result.returncode}\n"
             f"{result.stdout}\n"
             f"{result.stderr}"
         )
