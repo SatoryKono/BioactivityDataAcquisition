@@ -540,7 +540,6 @@ class PipelineBase(ABC):
         if not self._post_transformer:
             return df
         return self._post_transformer.apply(df, context)
-
     def _run_stage(
         self,
         stage: str,
@@ -620,6 +619,7 @@ class PipelineBase(ABC):
         if isinstance(result, Iterable):
             return iter(result)
         raise TypeError("Extractor must return a DataFrame or iterable of DataFrames.")
+
     def _enrich_context(self, context: RunContext) -> None:
         """
         Хук для обогащения контекста (например, добавления версии релиза).
