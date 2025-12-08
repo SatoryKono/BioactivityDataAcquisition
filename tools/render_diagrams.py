@@ -51,6 +51,24 @@ def _strip_front_matter(content: str) -> str:
     return content[match.end() :]
 
 
+def _sanitize_mermaid(content: str) -> str:
+    """Remove style fragments that trigger bugs in specific mermaid-cli versions.
+
+    In particular, some combinations of `color:#...` and `font-size:...` in classDef/
+    linkStyle definitions cause parse errors on Windows when rendered via mermaid-cli
+    10.9.x. We strip these attributes, сохраняя остальную разметку диаграммы.
+    """
+
+    def _sanitize_line(line: str) -> str:
+        # remove `, color:#xxxxxx`-like fragments
+        line = re.sub(r",\s*color:#(?:[0-9a-fA-F]{3,6})", "", line)
+        # remove `, font-size:22px`-like fragments
+        line = re.sub(r",\s*font-size:\d+px", "", line)
+        return line
+
+    return "\n".join(_sanitize_line(l) for l in content.splitlines())
+
+
 def _cleanup_temp(root: Path) -> None:
     for pattern in ("*.render.mmd", "*.render.png"):
         for temp_path in root.rglob(pattern):
@@ -75,7 +93,7 @@ def _render_diagram(path: Path, background: str, scale: float) -> tuple[bool, st
     except FileNotFoundError as exc:
         return False, f"missing input: {exc}"
 
-    content = _strip_front_matter(raw_content)
+    content = _sanitize_mermaid(_strip_front_matter(raw_content))
 
     target = path.with_suffix(".png").resolve()
     base_dir = target.parent

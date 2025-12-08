@@ -2,6 +2,9 @@
 
 ## Errors and Providers
 ```mermaid
+---
+id: fb5394b3-f796-4565-9117-445649e83ff4
+---
 classDiagram
     class BioetlError
     class ConfigError

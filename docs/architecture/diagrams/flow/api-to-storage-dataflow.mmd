@@ -1,10 +1,10 @@
 %%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
 flowchart LR
-    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-    classDef external      fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-    classDef storage       fill:#f0f4d4,stroke:#596235,stroke-width:1.5px,color:#111,font-size:22px;
-    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px;
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px;
+    classDef external      fill:#dde7f2,stroke:#44546a,stroke-width:1.5px;
+    classDef storage       fill:#f0f4d4,stroke:#596235,stroke-width:1.5px;
+    linkStyle default stroke:#666,stroke-width:1.2px;
 
     chembl[(ChEMBL REST API JSON)]:::external
     httpClient["UnifiedAPIClient\n+ retry + rate-limit + circuit breaker"]:::stepPrimary
