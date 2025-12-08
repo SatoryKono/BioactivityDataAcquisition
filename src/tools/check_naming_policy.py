@@ -10,6 +10,7 @@ import sys
 from typing import Any, Callable, Dict, List
 
 import yaml
+
 from bioetl.infrastructure.observability.factories import default_logging_port
 
 # Initialize logger early to capture any tool errors

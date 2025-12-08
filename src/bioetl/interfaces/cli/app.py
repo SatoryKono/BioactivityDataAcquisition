@@ -25,7 +25,9 @@ from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
 from bioetl.infrastructure.observability.factories import default_logging_port
-from bioetl.infrastructure.observability.server import start_metrics_server_once
+from bioetl.infrastructure.observability.server import (
+    start_metrics_server_once,
+)
 from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.interfaces.wiring import (
     create_config_loader,
@@ -84,7 +86,10 @@ def validate_config(config_path: Path) -> None:
     """
     config_loader = create_config_loader()
     try:
-        config = build_runtime_config(config_path=config_path, loader=config_loader)
+        config = build_runtime_config(
+            config_path=config_path,
+            loader=config_loader,
+        )
         console.print(f"[green]Config {config_path} is valid![/green]")
         console.print(f"Entity: {config.entity_name}")
         console.print(f"Provider: {config.provider}")
@@ -123,10 +128,15 @@ def run(
         "--input-path",
         help="Path to CSV input file",
     ),
-    input_mode: Optional[Literal["csv", "id_only", "auto_detect"]] = typer.Option(
+    input_mode: Optional[
+        Literal["csv", "id_only", "auto_detect"]
+    ] = typer.Option(
         None,
         "--input-mode",
-        help="Record source: csv (full dataset) | id_only (ID list) | auto_detect",
+        help=(
+            "Record source: csv (full dataset) | "
+            "id_only (ID list) | auto_detect"
+        ),
     ),
     csv_delimiter: Optional[str] = typer.Option(
         None, "--csv-delimiter", help="Delimiter for CSV input"
@@ -163,7 +173,9 @@ def run(
     }
     try:
         base_dir = _get_config_base_dir()
-        requested_config_path = config_path or _resolve_config_path(pipeline_name)
+        requested_config_path = config_path or _resolve_config_path(
+            pipeline_name,
+        )
         resolved_config_path = _resolve_config_location(
             config_path=config_path,
             pipeline_name=pipeline_name,
@@ -193,10 +205,18 @@ def run(
             cli_overrides=cli_overrides,
             loader=config_loader,
         )
-        _start_metrics_exporter(config.metrics, dry_run=dry_run, logger=bound_logger)
+        _start_metrics_exporter(
+            config.metrics,
+            dry_run=dry_run,
+            logger=bound_logger,
+        )
         provider_config_path = base_dir / "providers.yaml"
-        provider_loader_factory: Callable[[], ProviderRegistryLoaderABC] | None = partial(
-            create_provider_loader, config_path=provider_config_path
+        provider_loader_factory: Callable[
+            [],
+            ProviderRegistryLoaderABC,
+        ] | None = partial(
+            create_provider_loader,
+            config_path=provider_config_path,
         )
         provider_loader: ProviderRegistryLoaderABC | None = None
         provider_registry: ProviderRegistryABC | None = None
@@ -204,7 +224,8 @@ def run(
             provider_loader = provider_loader_factory()
         except FileNotFoundError:
             console.print(
-                "[yellow]Providers config not found; using empty registry[/yellow]"
+                "[yellow]Providers config not found; "
+                "using empty registry[/yellow]"
             )
             provider_registry = InMemoryProviderRegistry()
             provider_loader_factory = None
@@ -221,16 +242,31 @@ def run(
         bound_logger.info("pipeline_start", **config_context)
 
         if background:
-            future = orchestrator.run_in_background(dry_run=dry_run, limit=limit)
-            console.print("[yellow]Pipeline submitted to background executor[/yellow]")
+            future = orchestrator.run_in_background(
+                dry_run=dry_run,
+                limit=limit,
+            )
+            console.print(
+                "[yellow]Pipeline submitted to background "
+                "executor[/yellow]"
+            )
             result = future.result()
         else:
-            result = orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
+            result = orchestrator.run_pipeline(
+                dry_run=dry_run,
+                limit=limit,
+            )
 
         if result.success:
-            console.print("[bold green]Pipeline finished successfully![/bold green]")
-            console.print(f"Rows processed: {result.row_count}")
-            console.print(f"Duration: {result.duration_sec:.2f}s")
+            console.print(
+                "[bold green]Pipeline finished successfully!" "[/bold green]"
+            )
+            console.print(
+                f"Rows processed: {result.row_count}",
+            )
+            console.print(
+                f"Duration: {result.duration_sec:.2f}s",
+            )
             bound_logger.info(
                 "pipeline_completed",
                 duration_sec=result.duration_sec,

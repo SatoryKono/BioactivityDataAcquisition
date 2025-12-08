@@ -1,13 +1,12 @@
 from pathlib import Path
 import sys
-import sys
-import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
 
-from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
+from bioetl.infrastructure.clients.chembl.impl import (
+    ChemblExtractionServiceImpl,
+)
 from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.interfaces.cli.app import app
 
@@ -33,11 +32,17 @@ def debug_fetch():
             default_chembl_extraction_service,
         )
 
-        config = ChemblSourceConfig(base_url="https://www.ebi.ac.uk/chembl/api/data")
+        config = ChemblSourceConfig(
+            base_url="https://www.ebi.ac.uk/chembl/api/data",
+        )
         service = default_chembl_extraction_service(config)
 
         LOGGER.info("Requesting batch", test_id=test_id)
-        response = service.request_batch("assay", [test_id], "assay_chembl_id__in")
+        response = service.request_batch(
+            "assay",
+            [test_id],
+            "assay_chembl_id__in",
+        )
         LOGGER.info("Response received", keys=list(response.keys()))
         parsed = service.parse_response(response)
         LOGGER.info("Parsed records", count=len(parsed))

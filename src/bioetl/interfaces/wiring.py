@@ -92,6 +92,7 @@ def build_default_container(
         "QualityReportABC"
     )
     output_writer_factory = registry_loader.resolve_default_factory("OutputWriterABC")
+    hash_service_factory = registry_loader.resolve_default_factory("HashServiceABC")
 
     logger = logger_factory()
     writer = writer_factory()
@@ -107,6 +108,7 @@ def build_default_container(
     metadata_builder = _create_metadata_builder()
     metrics_port = _create_metrics_port()
     validator_factory = _create_validator_factory()
+    hash_service = hash_service_factory()
 
     return build_pipeline_dependencies(
         config,
@@ -115,6 +117,7 @@ def build_default_container(
         validator_factory=validator_factory,
         metadata_builder=metadata_builder,
         metrics_port=metrics_port,
+        hash_service=hash_service,
         provider_registry=provider_registry,
         provider_registry_provider=provider_registry_provider,
     )

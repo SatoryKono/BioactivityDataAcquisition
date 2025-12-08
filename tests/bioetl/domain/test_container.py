@@ -33,6 +33,7 @@ from bioetl.infrastructure.clients.chembl.provider import register_chembl_provid
 from bioetl.infrastructure.config import (
     provider_registry_loader as config_provider_registry,
 )
+from bioetl.infrastructure.transform.factories import default_hash_service
 
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))
 
@@ -276,6 +277,7 @@ def test_hash_service_singleton_scope(
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
         provider_registry=provider_registry,
+        hash_service=default_hash_service(),
     )
 
     first_instance = container.get_hash_service()

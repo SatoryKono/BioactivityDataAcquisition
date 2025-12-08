@@ -15,6 +15,7 @@ __all__ = [
     "MutableProviderRegistryABC",
     "ProviderRegistryLoaderABC",
     "InMemoryProviderRegistry",
+    "default_provider_registry",
 ]
 
 
@@ -144,3 +145,8 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
         self.reset_provider_registry()
         for definition in definitions:
             self._providers[definition.id] = definition
+
+
+def default_provider_registry() -> ProviderRegistryABC:
+    """Default factory for provider registry."""
+    return InMemoryProviderRegistry()

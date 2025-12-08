@@ -16,6 +16,7 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
+from bioetl.domain.providers import ProviderDefinition
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
@@ -112,6 +113,7 @@ class PipelineOrchestrator:
         """Запускает пайплайн в отдельном процессе."""
         executor_to_use = executor or ProcessPoolExecutor(max_workers=1)
         created_executor = executor is None
+        registry_snapshot = self._serialize_provider_registry()
         future = executor_to_use.submit(
             self._execute_in_subprocess,
             self._pipeline_name,
@@ -120,6 +122,7 @@ class PipelineOrchestrator:
             limit,
             self._provider_loader_factory,
             self._container_factory,
+            registry_snapshot,
         )
 
         if created_executor:
@@ -135,13 +138,12 @@ class PipelineOrchestrator:
         limit: int | None,
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None,
         container_factory: Callable[..., PipelineContainerABC] | None,
+        registry_payload: list[ProviderDefinition] | None,
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
         loader = provider_loader_factory() if provider_loader_factory else None
-        registry = (
-            loader.get_registry(registry=InMemoryProviderRegistry())
-            if loader
-            else InMemoryProviderRegistry()
+        registry = PipelineOrchestrator._build_registry_for_subprocess(
+            loader=loader, registry_payload=registry_payload
         )
         orchestrator = PipelineOrchestrator(
             pipeline_name,
@@ -174,6 +176,12 @@ class PipelineOrchestrator:
 
         return self._resolve_registry_from_provider()
 
+    def _serialize_provider_registry(self) -> list[ProviderDefinition] | None:
+        """Снимок реестра провайдеров для передачи в подпроцесс."""
+        if self._provider_registry is None:
+            return None
+        return list(self._provider_registry.list_providers())
+
     def _load_registry_via_loader(self) -> ProviderRegistryABC | None:
         """Попытаться загрузить реестр через loader."""
         loader = self._provider_loader
@@ -199,6 +207,22 @@ class PipelineOrchestrator:
 
         self._provider_registry = registry
         return registry
+
+    @staticmethod
+    def _build_registry_for_subprocess(
+        *,
+        loader: ProviderLoaderProtocol | None,
+        registry_payload: list[ProviderDefinition] | None,
+    ) -> ProviderRegistryABC:
+        if registry_payload is not None:
+            registry = InMemoryProviderRegistry()
+            registry.restore_provider_registry(registry_payload)
+            return registry
+
+        if loader is not None:
+            return loader.get_registry(registry=InMemoryProviderRegistry())
+
+        return InMemoryProviderRegistry()
 
 
 __all__ = ["PipelineOrchestrator"]
