@@ -165,7 +165,7 @@ src/bioetl/infrastructure/output/__init__.py
 src/bioetl/infrastructure/output/column_order.py
 src/bioetl/infrastructure/output/factories.py
 src/bioetl/infrastructure/output/metadata.py
-src/bioetl/infrastructure/output/unified_writer.py
+src/bioetl/infrastructure/output/unified_output_writer_impl.py
 src/bioetl/infrastructure/output/impl/__init__.py
 src/bioetl/infrastructure/output/impl/base_writer.py
 src/bioetl/infrastructure/output/impl/csv_writer.py

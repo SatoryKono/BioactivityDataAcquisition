@@ -17,7 +17,9 @@ from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.output.factories import default_output_writer
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.output.unified_output_writer_impl import (
+    UnifiedOutputWriterImpl,
+)
 
 
 class RecordingWriter(WriterABC):
@@ -121,7 +123,7 @@ def test_container_uses_overridden_metadata_writer(
     )
 
     output_writer = container.get_output_writer()
-    assert isinstance(output_writer, UnifiedOutputWriter)
+    assert isinstance(output_writer, UnifiedOutputWriterImpl)
 
     class InlineAtomic:
         def write_atomic(self, path: Path, write_fn) -> None:
@@ -191,7 +193,7 @@ def test_container_defaults_use_factories(
     assert writer_calls == 1
     assert metadata_calls == 1
     assert quality_calls == 1
-    assert isinstance(output_writer, UnifiedOutputWriter)
+    assert isinstance(output_writer, UnifiedOutputWriterImpl)
     assert output_writer._writer is default_writer_instance
     assert output_writer._metadata_writer is default_metadata_writer_instance
     assert output_writer._quality_reporter is default_quality_reporter_instance
