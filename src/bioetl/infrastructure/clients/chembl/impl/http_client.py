@@ -4,6 +4,7 @@ Implementation of ChEMBL HTTP client.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any, Iterator
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
@@ -47,14 +48,13 @@ class ChemblDataClientHTTPImpl(ChemblDataClientABC):
         else:
             # Fallback stub to keep attribute accessible in tests;
             # real runs must inject middleware.
-            class _NullHttpMiddleware:
-                def request(
-                    self, method: str, url: str, **_: Any
-                ) -> Any:  # pragma: no cover
-                    """Fail fast when HTTP middleware is not configured."""
-                    raise RuntimeError("HTTP middleware is not configured")
+            def _missing_http_request(
+                method: str, url: str, **_: Any
+            ) -> Any:  # pragma: no cover
+                """Fail fast when HTTP middleware is not configured."""
+                raise RuntimeError("HTTP middleware is not configured")
 
-            self.http = _NullHttpMiddleware()
+            self.http = SimpleNamespace(request=_missing_http_request)
         self.provider = provider
 
     # pylint: disable=redefined-builtin

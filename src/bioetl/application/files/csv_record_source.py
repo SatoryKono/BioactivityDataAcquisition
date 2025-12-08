@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import RawRecord, RecordSource
-from bioetl.interfaces.observability import LoggingPortABC
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
@@ -47,7 +47,8 @@ class CsvRecordSourceImpl(RecordSource):
         )
         if self._limit is not None:
             df = df.head(self._limit)
-        records: list[RawRecord] = df.to_dict(orient="records")
+        records_dicts = df.to_dict(orient="records")
+        records: list[RawRecord] = cast(list[RawRecord], records_dicts)
         if self._chunk_size is None or self._chunk_size <= 0:
             yield records
             return
@@ -152,9 +153,10 @@ class IdListRecordSourceImpl(RecordSource):
                 self._entity, batch_ids, self._filter_key
             )
             batch_records = self._extraction_service.parse_response(response)
-            serialized_records = self._extraction_service.serialize_records(
+            serialized = self._extraction_service.serialize_records(
                 self._entity, batch_records
             )
+            serialized_records: list[RawRecord] = cast(list[RawRecord], serialized)
             if self._chunk_size is None or self._chunk_size <= 0:
                 yield serialized_records
                 continue

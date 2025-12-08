@@ -3,7 +3,7 @@
 ## Provider registry ports
 
 - `ProviderRegistryABC` / `MutableProviderRegistryABC` (`bioetl.domain.provider_registry`) expose read/write access to provider definitions consumed across pipelines.
-- `ProviderRegistryLoaderABC` (`bioetl.interfaces.provider_registry.contracts`) acts as the orchestrator-facing loader port so background runs can resolve registry content without global state.
+- `ProviderRegistryLoaderABC` (`bioetl.domain.provider_registry`) acts as the orchestrator-facing loader port so background runs can resolve registry content without global state.
 
 ## Factories and implementations
 

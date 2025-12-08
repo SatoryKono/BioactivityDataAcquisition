@@ -1,6 +1,6 @@
-"""Observability ports (logging, tracing) public exports."""
+"""Observability ports (logging, tracing, metrics) for the domain layer."""
 
-from bioetl.interfaces.observability import (
+from bioetl.domain.observability.contracts import (
     LoggingPortABC,
     PipelineMetricsPortABC,
     TracingPortABC,
