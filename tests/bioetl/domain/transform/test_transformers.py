@@ -3,8 +3,24 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 
 from bioetl.domain.models import RunContext
+from bioetl.domain.transform.contracts import HasherABC
 from bioetl.domain.transform.hash_service import HashService
 from bioetl.domain.transform.transformers import FulldateTransformerImpl
+
+
+class _StubHasher(HasherABC):
+    """Simple hasher stub for transformer tests."""
+
+    def get_algorithm(self) -> str:
+        return "stub"
+
+    def compute_hash_row(self, _row: pd.Series) -> str:
+        return "row"
+
+    def compute_hash_columns(
+        self, df: pd.DataFrame, _columns: list[str]
+    ) -> pd.Series:
+        return pd.Series(["business"] * len(df))
 
 
 def test_fulldate_transformer_uses_run_context_timestamp() -> None:
@@ -12,7 +28,7 @@ def test_fulldate_transformer_uses_run_context_timestamp() -> None:
     started_at = datetime(2024, 5, 6, 7, 8, 9, tzinfo=timezone.utc)
     context = RunContext(started_at=started_at)
 
-    transformer = FulldateTransformerImpl(HashService())
+    transformer = FulldateTransformerImpl(HashService(hasher=_StubHasher()))
 
     result = transformer.apply(df, context)
 
@@ -30,7 +46,9 @@ def test_fulldate_transformer_localizes_naive_timestamp_once() -> None:
         call_count += 1
         return base_ts + timedelta(seconds=call_count)
 
-    transformer = FulldateTransformerImpl(HashService(now_provider=_now_provider))
+    transformer = FulldateTransformerImpl(
+        HashService(hasher=_StubHasher(), now_provider=_now_provider)
+    )
 
     first = transformer.apply(df)
     second = transformer.apply(df)

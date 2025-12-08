@@ -3,7 +3,6 @@
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,
 )
-from bioetl.infrastructure.transform.impl.hash_service_impl import HashServiceImpl
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
 from bioetl.infrastructure.transform.impl.normalization_service_impl import (
     NormalizationServiceImpl,
@@ -11,7 +10,6 @@ from bioetl.infrastructure.transform.impl.normalization_service_impl import (
 
 __all__ = [
     "HasherImpl",
-    "HashServiceImpl",
     "NormalizationServiceImpl",
     "ChemblNormalizationServiceImpl",
 ]

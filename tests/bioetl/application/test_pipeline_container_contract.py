@@ -5,7 +5,7 @@ from typing import Any, Callable
 from bioetl.application.container import PipelineContainer
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.contracts import PipelineContainerABC
-from bioetl.domain.configs import DummyProviderConfig, PipelineConfig
+from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
 from bioetl.domain.provider_registry import InMemoryProviderRegistry
 
 
@@ -95,9 +95,11 @@ def _build_config() -> PipelineConfig:
         batch_size=10,
         provider_config=DummyProviderConfig(
             base_url="https://example.com",  # type: ignore[arg-type]
-            timeout_sec=1,
-            max_retries=0,
-            rate_limit_per_sec=1.0,
+            client=ClientConfig(
+                timeout_sec=1,
+                max_retries=0,
+                rate_limit_per_sec=1.0,
+            ),
         ),
     )
 

@@ -17,9 +17,7 @@ sys.modules.setdefault("tqdm", MagicMock())
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
 from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig  # noqa: E402
 from bioetl.domain.transform.contracts import HashServiceABC  # noqa: E402
-from bioetl.infrastructure.transform.impl.hash_service_impl import (  # noqa: E402
-    HashServiceImpl,
-)
+from bioetl.domain.transform.hash_service import HashService  # noqa: E402
 from bioetl.interfaces.cli import app  # noqa: E402
 
 runner = CliRunner()
@@ -284,7 +282,7 @@ def test_run_dry_run_pipeline_metadata(
             return pd.Series(["hash_business_key"] * len(df))
 
     # Mock orchestrator to build and run our pipeline
-    hash_service = HashServiceImpl(hasher=_DummyHasher())
+    hash_service = HashService(hasher=_DummyHasher())
 
     def build_pipeline_side_effect(*args, **kwargs):
         pipeline_instance = DryRunPipeline(
