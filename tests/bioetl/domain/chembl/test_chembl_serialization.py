@@ -1,4 +1,4 @@
-from bioetl.domain.schemas.chembl.models import ActivityModel, _flatten_value
+from bioetl.domain.schemas.chembl.models import RawActivityPayload, _flatten_value
 
 
 def test_flatten_dict_to_pipe_string():
@@ -16,7 +16,7 @@ def test_flatten_empty_or_none_returns_none():
 
 
 def test_activity_model_serializes_nested_fields():
-    model = ActivityModel(
+    model = RawActivityPayload(
         activity_properties=[{"potency": 5, "unit": "uM"}, {"ignored": None}],
         ligand_efficiency={"le": 0.5, "note": None},
         standard_value=7.0,
@@ -24,15 +24,18 @@ def test_activity_model_serializes_nested_fields():
 
     payload = model.model_dump()
 
-    assert payload["activity_properties"] == "potency:5|unit:uM"
-    assert payload["ligand_efficiency"] == "le:0.5"
+    # activity_properties and ligand_efficiency are in _BYPASS_FLATTEN_FIELDS
+    # so they are not flattened by the model serializer
+    assert payload["activity_properties"] == [{"potency": 5, "unit": "uM"}, {"ignored": None}]
+    assert payload["ligand_efficiency"] == {"le": 0.5, "note": None}
     assert payload["standard_value"] == 7.0
 
 
 def test_activity_model_keeps_none_for_empty_nested():
-    model = ActivityModel(activity_properties=[], ligand_efficiency=None)
+    model = RawActivityPayload(activity_properties=[], ligand_efficiency=None)
 
     payload = model.model_dump()
 
-    assert payload["activity_properties"] is None
+    # Empty list is kept as-is for bypass fields
+    assert payload["activity_properties"] == []
     assert payload["ligand_efficiency"] is None

@@ -2,12 +2,12 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 
 
 @pytest.fixture
 def valid_activity_df() -> pd.DataFrame:
-    schema = ActivitySchema.to_schema()
+    schema = ActivityTableSchema.to_schema()
     data = {column: [None] for column in schema.columns}
     data.update(
         {
@@ -30,7 +30,7 @@ def valid_activity_df() -> pd.DataFrame:
 
 
 def test_activity_schema_accepts_valid_frame(valid_activity_df: pd.DataFrame) -> None:
-    validated = ActivitySchema.validate(valid_activity_df)
+    validated = ActivityTableSchema.validate(valid_activity_df)
     for column in [
         "action_type",
         "activity_comment",
@@ -58,7 +58,7 @@ def test_activity_schema_rejects_bad_chembl(valid_activity_df: pd.DataFrame) -> 
     invalid["assay_chembl_id"] = ["BAD"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        ActivitySchema.validate(invalid, lazy=True)
+        ActivityTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "assay_chembl_id" in failure_cases["column"].unique()
@@ -72,7 +72,7 @@ def test_activity_schema_rejects_out_of_range_value(
     invalid["pchembl_value"] = [16.5]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        ActivitySchema.validate(invalid, lazy=True)
+        ActivityTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert (
@@ -88,7 +88,7 @@ def test_activity_schema_blocks_null_required(valid_activity_df: pd.DataFrame) -
     invalid["activity_id"] = [None]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        ActivitySchema.validate(invalid, lazy=True)
+        ActivityTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert set(failure_cases["column"]) == {"activity_id"}
@@ -99,7 +99,7 @@ def test_activity_schema_validates_categories(valid_activity_df: pd.DataFrame) -
     invalid["assay_type"] = ["X"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        ActivitySchema.validate(invalid, lazy=True)
+        ActivityTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "assay_type" in failure_cases["column"].tolist()
@@ -111,7 +111,7 @@ def test_activity_schema_checks_metadata_hash(valid_activity_df: pd.DataFrame) -
     invalid["hash_row"] = ["short"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        ActivitySchema.validate(invalid, lazy=True)
+        ActivityTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "hash_row" in failure_cases["column"].unique()
@@ -123,7 +123,7 @@ def test_activity_schema_rejects_non_coercible(valid_activity_df: pd.DataFrame) 
     invalid["activity_id"] = ["abc"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        ActivitySchema.validate(invalid, lazy=True)
+        ActivityTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "activity_id" in failure_cases["column"].unique()

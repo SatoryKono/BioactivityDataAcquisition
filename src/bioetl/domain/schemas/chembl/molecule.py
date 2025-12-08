@@ -99,4 +99,3 @@ class MoleculeTableSchema(BaseGeneratedColumnsSchema):
     withdrawn_flag: Series[bool] = pa.Field(
         nullable=True, description="Снят ли с рынка"
     )
-
