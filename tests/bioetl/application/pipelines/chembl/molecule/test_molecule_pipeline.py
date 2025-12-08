@@ -7,7 +7,7 @@ import pandera as pa
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 
 
 @pytest.fixture
@@ -28,9 +28,9 @@ def pipeline():  # pylint: disable=redefined-outer-name
     config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
-    validation_service.get_schema.return_value = MoleculeSchema
+    validation_service.get_schema.return_value = MoleculeTableSchema
     validation_service.get_schema_columns.return_value = list(
-        MoleculeSchema.to_schema().columns.keys()
+        MoleculeTableSchema.to_schema().columns.keys()
     )
 
     normalization_service = MagicMock()

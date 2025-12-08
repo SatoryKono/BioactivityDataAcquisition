@@ -2,12 +2,12 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 
 
 @pytest.fixture
 def valid_assay_df() -> pd.DataFrame:
-    schema = AssaySchema.to_schema()
+    schema = AssayTableSchema.to_schema()
     data = {column: [None] for column in schema.columns}
     data.update(
         {
@@ -26,7 +26,7 @@ def valid_assay_df() -> pd.DataFrame:
 
 
 def test_assay_schema_accepts_valid_frame(valid_assay_df: pd.DataFrame) -> None:
-    validated = AssaySchema.validate(valid_assay_df)
+    validated = AssayTableSchema.validate(valid_assay_df)
     pd.testing.assert_frame_equal(
         validated,
         valid_assay_df,
@@ -39,7 +39,7 @@ def test_assay_schema_rejects_bad_enum(valid_assay_df: pd.DataFrame) -> None:
     invalid["assay_type"] = ["X"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        AssaySchema.validate(invalid, lazy=True)
+        AssayTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "assay_type" in failure_cases["column"].tolist()
@@ -51,7 +51,7 @@ def test_assay_schema_rejects_bad_regex(valid_assay_df: pd.DataFrame) -> None:
     invalid["assay_chembl_id"] = ["chembl-1"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        AssaySchema.validate(invalid, lazy=True)
+        AssayTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "assay_chembl_id" in failure_cases["column"].unique()
@@ -63,7 +63,7 @@ def test_assay_schema_rejects_out_of_range(valid_assay_df: pd.DataFrame) -> None
     invalid["confidence_score"] = [15]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        AssaySchema.validate(invalid, lazy=True)
+        AssayTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert (
@@ -79,7 +79,7 @@ def test_assay_schema_requires_hash(valid_assay_df: pd.DataFrame) -> None:
     invalid["hash_row"] = ["abc"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        AssaySchema.validate(invalid, lazy=True)
+        AssayTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "hash_row" in failure_cases["column"].tolist()
@@ -91,7 +91,7 @@ def test_assay_schema_rejects_null_required(valid_assay_df: pd.DataFrame) -> Non
     invalid["assay_chembl_id"] = [None]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        AssaySchema.validate(invalid, lazy=True)
+        AssayTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert pd.isna(

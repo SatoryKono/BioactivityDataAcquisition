@@ -2,12 +2,12 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 
 
 @pytest.fixture
 def valid_molecule_df() -> pd.DataFrame:
-    schema = MoleculeSchema.to_schema()
+    schema = MoleculeTableSchema.to_schema()
     data = {column: [None] for column in schema.columns}
     data.update(
         {
@@ -25,7 +25,7 @@ def valid_molecule_df() -> pd.DataFrame:
 
 
 def test_molecule_schema_accepts_valid_frame(valid_molecule_df: pd.DataFrame) -> None:
-    validated = MoleculeSchema.validate(valid_molecule_df)
+    validated = MoleculeTableSchema.validate(valid_molecule_df)
     for column in [
         "molecule_chembl_id",
         "max_phase",
@@ -48,7 +48,7 @@ def test_molecule_schema_rejects_bad_chembl(valid_molecule_df: pd.DataFrame) -> 
     invalid["molecule_chembl_id"] = ["chembl42"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        MoleculeSchema.validate(invalid, lazy=True)
+        MoleculeTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "molecule_chembl_id" in failure_cases["column"].unique()
@@ -60,7 +60,7 @@ def test_molecule_schema_rejects_out_of_range(valid_molecule_df: pd.DataFrame) -
     invalid["max_phase"] = [10]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        MoleculeSchema.validate(invalid, lazy=True)
+        MoleculeTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert (
@@ -76,7 +76,7 @@ def test_molecule_schema_rejects_non_nullable(valid_molecule_df: pd.DataFrame) -
     invalid["molecule_chembl_id"] = [None]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        MoleculeSchema.validate(invalid, lazy=True)
+        MoleculeTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert pd.isna(
@@ -91,7 +91,7 @@ def test_molecule_schema_checks_metadata(valid_molecule_df: pd.DataFrame) -> Non
     invalid["index"] = [-1]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        MoleculeSchema.validate(invalid, lazy=True)
+        MoleculeTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "index" in failure_cases["column"].tolist()
@@ -103,7 +103,7 @@ def test_molecule_schema_rejects_non_coercible(valid_molecule_df: pd.DataFrame) 
     invalid["max_phase"] = ["definitely"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        MoleculeSchema.validate(invalid, lazy=True)
+        MoleculeTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "max_phase" in failure_cases["column"].unique()

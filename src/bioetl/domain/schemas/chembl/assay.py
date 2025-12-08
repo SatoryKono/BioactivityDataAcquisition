@@ -149,4 +149,3 @@ class AssayTableSchema(BaseGeneratedColumnsSchema):
     variant_sequence: Series[str] = pa.Field(
         nullable=True, description="Последовательность варианта (если таргет – белок)"
     )
-

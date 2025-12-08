@@ -2,11 +2,11 @@
 
 import pytest
 
-from bioetl.domain.schemas.chembl.activity import ActivitySchema
-from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
+from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
 from bioetl.domain.schemas.chembl.document import DocumentSchema
-from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
@@ -20,10 +20,10 @@ from bioetl.domain.schemas.chembl.target import TargetSchema
 @pytest.mark.parametrize(
     ("output_columns", "schema_cls"),
     [
-        (ACTIVITY_OUTPUT_COLUMNS, ActivitySchema),
-        (ASSAY_OUTPUT_COLUMNS, AssaySchema),
+        (ACTIVITY_OUTPUT_COLUMNS, ActivityTableSchema),
+        (ASSAY_OUTPUT_COLUMNS, AssayTableSchema),
         (DOCUMENT_OUTPUT_COLUMNS, DocumentSchema),
-        (MOLECULE_OUTPUT_COLUMNS, MoleculeSchema),
+        (MOLECULE_OUTPUT_COLUMNS, MoleculeTableSchema),
         (TARGET_OUTPUT_COLUMNS, TargetSchema),
     ],
 )

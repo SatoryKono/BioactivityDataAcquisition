@@ -206,4 +206,3 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     value: Series[float] = pa.Field(
         nullable=True, description="Исходное числовое значение"
     )
-
