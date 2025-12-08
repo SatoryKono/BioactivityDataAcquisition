@@ -11,8 +11,10 @@ from typing import Any, Type
 from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
 from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.schemas.chembl.models import (
-    ActivityModel,
     ChemblRecordModel,
+    RawActivityPayload,
+    RawAssayPayload,
+    RawMoleculePayload,
 )
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
@@ -51,8 +53,12 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     def _get_model_cls(self, entity: str) -> Type[ChemblRecordModel]:
         """Get Pydantic model class for entity."""
         if entity == "activity":
-            return ActivityModel
-        if entity in {"assay", "target", "document", "molecule"}:
+            return RawActivityPayload
+        if entity == "assay":
+            return RawAssayPayload
+        if entity == "molecule":
+            return RawMoleculePayload
+        if entity in {"target", "document"}:
             return ChemblRecordModel
         raise ValueError(f"Unknown entity: {entity}")
 
