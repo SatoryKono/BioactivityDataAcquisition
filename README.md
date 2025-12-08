@@ -27,6 +27,13 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 | QC | [docs/qc/INDEX.md](docs/qc/INDEX.md) | Артефакты контроля качества |
 | Clients | [docs/clients/INDEX.md](docs/clients/INDEX.md) | Клиентский слой |
 
+## Representations of ChEMBL data
+
+- Единственный источник правды для сущностей — Pandera-схемы (`ActivityTableSchema`, `AssayTableSchema`, `MoleculeTableSchema` и др.).
+- Сырые JSON-ответы ChEMBL сплющиваются утилитой `flatten_chembl_payload` (`src/bioetl/infrastructure/clients/chembl/serializers.py`) с набором bypass-полей для вложенных структур.
+- Pydantic Raw* модели удалены; нормализация и валидация работают с dict → DataFrame → Pandera.
+- В `ChemblExtractionServiceImpl` flatten включён по умолчанию, при необходимости может быть отключён параметром `flatten_enabled`.
+
 ### Core компоненты
 
 Документация по базовым компонентам находится в `docs/02-pipelines/`:

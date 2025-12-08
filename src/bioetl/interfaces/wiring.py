@@ -6,15 +6,19 @@ from types import SimpleNamespace
 from typing import Any, Callable
 
 from bioetl.application.container import build_pipeline_dependencies
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.application.pipelines.contracts import (
+    FileRecordSourceFactoryABC,
+    PipelineContainerABC,
+)
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.observability import PipelineMetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
-from bioetl.domain.record_source import FileRecordSourceFactoryABC
 from bioetl.domain.validation import ValidatorFactoryABC
-from bioetl.infrastructure.clients.base.abc_registry_loader import ABCRegistryLoader
+from bioetl.infrastructure.clients.base.abc_registry_resolver import (
+    ABCRegistryResolver,
+)
 from bioetl.infrastructure.config.loader import (
     get_pipeline_config,
     get_pipeline_config_from_path,
@@ -85,7 +89,7 @@ def _create_metrics_port() -> PipelineMetricsPortABC:
 def _create_validator_factory() -> ValidatorFactoryABC:
     """Return validator factory backed by infrastructure implementation."""
 
-    loader = ABCRegistryLoader()
+    loader = ABCRegistryResolver()
     factory = loader.resolve_default_factory("ValidatorFactoryABC")
     return factory()
 
@@ -98,7 +102,7 @@ def build_default_container(
 ) -> PipelineContainerABC:
     """Construct application container with infrastructure defaults."""
 
-    registry_loader = ABCRegistryLoader()
+    registry_loader = ABCRegistryResolver()
     logger_factory = registry_loader.resolve_default_factory("LoggingPortABC")
     writer_factory = registry_loader.resolve_default_factory("WriterABC")
     metadata_writer_factory = registry_loader.resolve_default_factory(

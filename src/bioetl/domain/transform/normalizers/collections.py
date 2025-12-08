@@ -82,7 +82,7 @@ def _coerce_record_mapping(value: Any) -> Mapping[str, Any]:
     return dict(value)
 
 
-_NO_OVERRIDE = object()
+NO_OVERRIDE_SENTINEL = object()
 
 
 def _normalize_record_value(
@@ -94,7 +94,7 @@ def _normalize_record_value(
 ) -> Any:
     try:
         override = _normalize_special_record_value(str_key, item, mapping)
-        if override is not _NO_OVERRIDE:
+        if override is not NO_OVERRIDE_SENTINEL:
             return override
         return value_normalizer(item) if value_normalizer else item
     except ValueError as exc:
@@ -151,7 +151,7 @@ def _normalize_special_record_value(
         return _normalize_synonyms(item)
     if str_key == "target_component_xrefs":
         return _normalize_component_xrefs(item)
-    return _NO_OVERRIDE
+    return NO_OVERRIDE_SENTINEL
 
 
 def _normalize_xref_id(source: str, xref_id: Any) -> Any:

@@ -7,8 +7,8 @@ flowchart TD
     linkStyle default stroke:#666,stroke-width:1.2px;
 
     start([Request attempt 1]):::stepTerminal
-    call["HTTP call via UnifiedAPIClient"]:::stepPrimary
-    status{Success (2xx) and no timeout?}:::stepDecision
+    httpCall["HTTP call via UnifiedAPIClient"]:::stepPrimary
+    status{"Success?"}:::stepDecision
     handle(["Return response"]):::stepPrimary
     error["Capture exception / 5xx response"]:::stepSecondary
     retryCount["Increment attempt counter"]:::stepSecondary
@@ -16,9 +16,10 @@ flowchart TD
     backoff["Sleep backoff (exponential + jitter)\nrespect rate limits"]:::stepSecondary
     fail([Raise error to caller]):::stepTerminal
 
-    start --> call --> status
+    start --> httpCall
+    httpCall --> status
     status -- Yes --> handle
     status -- No --> error --> retryCount --> limit
-    limit -- Yes --> backoff --> call
+    limit -- Yes --> backoff --> httpCall
     limit -- No --> fail
 

@@ -144,11 +144,6 @@ PipelineContainerABC:
   implementations:
     Default: bioetl.application.container.PipelineContainer
 
-StageABC:
-  default_factory: bioetl.application.pipelines.factories.default_stage
-  implementations:
-    Stub: bioetl.domain.pipelines.contracts.StageABC
-
 PipelineHookABC:
   default_factory: bioetl.application.pipelines.factories.default_pipeline_hook
   implementations:

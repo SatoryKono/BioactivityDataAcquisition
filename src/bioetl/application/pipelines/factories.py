@@ -1,7 +1,7 @@
 """Stub factories for pipeline abstractions."""
 
 from bioetl.application.pipelines.contracts import PipelineContainerABC
-from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC, StageABC
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 
 
 def default_pipeline_container() -> PipelineContainerABC:
@@ -22,15 +22,8 @@ def default_error_policy() -> ErrorPolicyABC:
     raise NotImplementedError("ErrorPolicyABC default factory is not configured")
 
 
-def default_stage() -> StageABC:
-    """Provide a placeholder stage implementation."""
-
-    raise NotImplementedError("StageABC default factory is not configured")
-
-
 __all__ = [
     "default_pipeline_container",
     "default_pipeline_hook",
     "default_error_policy",
-    "default_stage",
 ]

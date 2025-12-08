@@ -4,7 +4,10 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, cast
 
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.application.pipelines.contracts import (
+    FileRecordSourceFactoryABC,
+    PipelineContainerABC,
+)
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
@@ -24,12 +27,7 @@ from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.record_source import (
-    ApiRecordSource,
-    FileRecordSourceFactoryABC,
-    InMemoryRecordSource,
-    RecordSource,
-)
+from bioetl.domain.record_source import ApiRecordSource, InMemoryRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -231,7 +229,7 @@ class PipelineContainer(PipelineContainerABC):
             entity=self._config.entity_name,
             filters=filters,
             chunk_size=self._config.batch_size,
-            batch_adapter=PandasBatchAdapter().adapt_batch,
+            batch_adapter=PandasBatchAdapter().process_batch,
         )
 
     def get_extraction_service(self) -> Any:

@@ -104,6 +104,12 @@ exceptions:
     owner: chembl
     expiry: permanent
 
+  - path: src/bioetl/domain/schemas/chembl/base.py
+    rule_id: CLASS_SUFFIX
+    reason: "Base schema class retains Schema suffix for Pandera models"
+    owner: chembl
+    expiry: permanent
+
 
   - path: src/bioetl/domain/schemas/pipeline_contracts.py
     rule_id: CLASS_SUFFIX
@@ -394,10 +400,16 @@ exceptions:
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/transform/pandas_batch_adapter.py
+  - path: src/bioetl/application/transform/pandas_batch_adapter.py
     rule_id: FUNC_PREFIX
     reason: "BatchAdapter contract uses adapt_* methods for normalization"
     owner: infra
+    expiry: permanent
+
+  - path: src/bioetl/infrastructure/clients/chembl/serializers.py
+    rule_id: FUNC_PREFIX
+    reason: "Serializer keeps flatten_* verb for backward-compatible helper name"
+    owner: chembl
     expiry: permanent
 
   - path: src/bioetl/domain/transform/merge.py

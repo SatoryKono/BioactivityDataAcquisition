@@ -1,4 +1,4 @@
-"""Loader for ABC registry and implementation mappings."""
+"""Resolver for ABC registry and implementation mappings."""
 
 from __future__ import annotations
 
@@ -34,9 +34,7 @@ class ImplementationNotFoundError(ABCRegistryError):
     """Raised when implementation is missing for a role."""
 
     def __init__(self, role: str, implementation: str) -> None:
-        super().__init__(
-            f"Implementation '{implementation}' not found for role: {role}"
-        )
+        super().__init__(f"Implementation '{implementation}' not found for role: {role}")
         self.role = role
         self.implementation = implementation
 
@@ -56,8 +54,8 @@ def _import_from_path(dotted_path: str) -> Any:
 
 
 @dataclass
-class ABCRegistryLoader:
-    """Loads ABC registry definitions and resolves factories/implementations."""
+class ABCRegistryResolver:
+    """Resolves ABC registry definitions and factories/implementations."""
 
     registry_path: Path = Path(__file__).with_name("abc_registry.yaml")
     impls_path: Path = Path(__file__).with_name("abc_impls.yaml")
@@ -68,7 +66,6 @@ class ABCRegistryLoader:
 
     def resolve_default_factory(self, role: str) -> Callable[..., Any]:
         """Return default factory callable for the given role."""
-
         data = self._impls.get(role)
         if data is None:
             raise RoleNotFoundError(role)
@@ -82,7 +79,6 @@ class ABCRegistryLoader:
 
     def resolve_implementation(self, role: str, implementation: str) -> type[Any]:
         """Return implementation class for the given role and name."""
-
         data = self._impls.get(role)
         if data is None:
             raise RoleNotFoundError(role)
@@ -93,7 +89,6 @@ class ABCRegistryLoader:
 
     def resolve_role(self, role: str) -> type[Any]:
         """Return ABC class for given role from registry mapping."""
-
         role_path = self._registry.get(role)
         if role_path is None:
             raise RoleNotFoundError(role)
@@ -103,3 +98,13 @@ class ABCRegistryLoader:
     def _load_yaml(path: Path) -> dict[str, Any]:
         with path.open("r", encoding="utf-8") as file:
             return yaml.safe_load(file) or {}
+
+
+__all__ = [
+    "ABCRegistryError",
+    "RoleNotFoundError",
+    "DefaultFactoryNotFoundError",
+    "ImplementationNotFoundError",
+    "ABCRegistryResolver",
+]
+

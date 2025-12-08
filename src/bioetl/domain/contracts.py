@@ -113,7 +113,7 @@ class BatchAdapterABC(Protocol):
     into the expected list[RawRecord] format.
     """
 
-    def adapt_batch(self, raw_batch: Any) -> list["RawRecord"]:
+    def process_batch(self, raw_batch: Any) -> list["RawRecord"]:
         """
         Normalize a batch into a list of raw record mappings.
 
