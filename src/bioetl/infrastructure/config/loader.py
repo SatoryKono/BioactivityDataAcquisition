@@ -53,7 +53,12 @@ class ConfigValidationError(ConfigError):
 class UnknownProviderError(ConfigError):
     """Указан неизвестный провайдер."""
 
-    def __init__(self, provider: str, *, registry_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        provider: str,
+        *,
+        registry_path: Path | None = None,
+    ) -> None:
         suffix = f" in registry {registry_path}" if registry_path else ""
         super().__init__(f"Unknown provider: {provider}{suffix}")
         self.provider = provider
@@ -142,7 +147,11 @@ def _finalize_config(
     registry_path: Path,
 ) -> PipelineConfig:
     defaults = get_defaults_config(
-        base_dir=config_path.parents[2] if len(config_path.parents) >= 3 else None
+        base_dir=(
+            config_path.parents[2]
+            if len(config_path.parents) >= 3
+            else None
+        ),
     )
     _validate_provider(merged_config, config_path, registry_path=registry_path)
 
@@ -162,7 +171,7 @@ def _finalize_config(
     try:
         return PipelineConfig.model_validate(merged_config)
     except ValidationError as exc:
-        raise ConfigValidationError(config_path, exc.__str__()) from exc
+        raise ConfigValidationError(config_path, str(exc)) from exc
 
 
 def _apply_overrides(
@@ -184,7 +193,10 @@ def _apply_defaults(config: dict[str, Any], defaults: Any) -> dict[str, Any]:
     quality_section = merged.get("quality")
     if not isinstance(quality_section, dict):
         quality_section = {}
-    quality_section.setdefault("hashing", defaults.hashing.hashing.model_dump())
+    quality_section.setdefault(
+        "hashing",
+        defaults.hashing.hashing.model_dump(),
+    )
     quality_section.setdefault(
         "normalization", defaults.normalization.normalization.model_dump()
     )
@@ -201,7 +213,10 @@ def _populate_fields_from_schema(config: dict[str, Any]) -> dict[str, Any]:
     if not provider or not entity:
         return config
 
-    contract = get_pipeline_contract(f"{provider}.{entity}", default_entity=str(entity))
+    contract = get_pipeline_contract(
+        f"{provider}.{entity}",
+        default_entity=str(entity),
+    )
     schema_name = contract.get_output_schema()
 
     registry = SchemaRegistry()
@@ -246,7 +261,7 @@ def _validate_provider(
 
 
 def _transform_legacy_config(
-    config: dict[str, Any], path: Path, *, defaults: Any
+    config: dict[str, Any], _path: Path, *, defaults: Any
 ) -> dict[str, Any]:
     """Преобразует старый формат конфигурации в новый."""
     transformed = config.copy()
@@ -273,7 +288,10 @@ def _ensure_entity_fields(transformed: dict[str, Any], provider: str) -> None:
 def _ensure_id(transformed: dict[str, Any], provider: str) -> None:
     if "id" in transformed:
         return
-    entity = transformed.get("entity", transformed.get("entity_name", "unknown"))
+    entity = transformed.get(
+        "entity",
+        transformed.get("entity_name", "unknown"),
+    )
     transformed["id"] = f"{provider}.{entity}"
 
 
@@ -323,12 +341,18 @@ def _build_provider_config_from_sources(
     provider_config: dict[str, Any] = {
         "provider": provider,
         "base_url": api_base_url,
-        "client": _compose_client_config(runtime_client, source_client, defaults=defaults),
+        "client": _compose_client_config(
+            runtime_client,
+            source_client,
+            defaults=defaults,
+        ),
     }
 
-    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
-        provider
-    )
+    provider_defaults = getattr(
+        defaults,
+        "get_source_default",
+        lambda *_: None,
+    )(provider)
 
     if provider_defaults is not None:
         provider_config = apply_deep_merge(
@@ -401,16 +425,29 @@ def _normalize_provider_config_layout(
     provider_cfg["client"] = client_cfg
 
 
-def _default_provider_config(provider: str, *, defaults: Any) -> dict[str, Any]:
+def _default_provider_config(
+    provider: str,
+    *,
+    defaults: Any,
+) -> dict[str, Any]:
     provider_config = {
         "provider": provider,
-        "base_url": _resolve_base_url(provider, defaults=defaults),
-        "client": _compose_client_config({}, {}, defaults=defaults),
+        "base_url": _resolve_base_url(
+            provider,
+            defaults=defaults,
+        ),
+        "client": _compose_client_config(
+            {},
+            {},
+            defaults=defaults,
+        ),
     }
 
-    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
-        provider
-    )
+    provider_defaults = getattr(
+        defaults,
+        "get_source_default",
+        lambda *_: None,
+    )(provider)
     if provider_defaults is not None:
         provider_config = apply_deep_merge(
             provider_config,
@@ -422,8 +459,9 @@ def _default_provider_config(provider: str, *, defaults: Any) -> dict[str, Any]:
         and getattr(defaults, "network", None) is not None
     ):
         http_defaults = getattr(defaults.network, "http", None)
-        if http_defaults and http_defaults.default.max_url_length is not None:
-            provider_config["max_url_length"] = http_defaults.default.max_url_length
+        default_http = getattr(http_defaults, "default", None)
+        if default_http and default_http.max_url_length is not None:
+            provider_config["max_url_length"] = default_http.max_url_length
 
     return provider_config
 
@@ -444,17 +482,23 @@ def _compose_client_config(
 
 def _resolve_http_client_defaults(defaults: Any) -> dict[str, Any]:
     network_defaults = getattr(defaults, "network", None)
-    http_defaults = getattr(network_defaults, "http", None) if network_defaults else None
-    client_defaults = getattr(http_defaults, "client", None) if http_defaults else None
+    http_defaults = (
+        getattr(network_defaults, "http", None) if network_defaults else None
+    )
+    client_defaults = (
+        getattr(http_defaults, "client", None) if http_defaults else None
+    )
     if client_defaults is not None:
         return client_defaults.model_dump()
     return ClientConfig().model_dump()
 
 
 def _resolve_base_url(provider: str, *, defaults: Any) -> str:
-    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
-        provider
-    )
+    provider_defaults = getattr(
+        defaults,
+        "get_source_default",
+        lambda *_: None,
+    )(provider)
     if provider_defaults and provider_defaults.base_url:
         return str(provider_defaults.base_url)
     # Fallback to known Chembl URL for backwards compatibility
@@ -465,9 +509,11 @@ def _ensure_batch_size(transformed: dict[str, Any], *, defaults: Any) -> None:
     if "batch_size" in transformed:
         return
 
-    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
-        transformed.get("provider", "")
-    )
+    provider_defaults = getattr(
+        defaults,
+        "get_source_default",
+        lambda *_: None,
+    )(transformed.get("provider", ""))
     if provider_defaults and provider_defaults.batch_size is not None:
         transformed["batch_size"] = provider_defaults.batch_size
         return
@@ -502,8 +548,13 @@ def _fold_quality_sections(transformed: dict[str, Any]) -> None:
         if key not in transformed:
             continue
         value = transformed.pop(key)
-        if isinstance(value, dict) and isinstance(quality_section.get(key), dict):
-            quality_section[key] = apply_deep_merge(quality_section[key], value)
+        if isinstance(value, dict) and isinstance(
+            quality_section.get(key), dict
+        ):
+            quality_section[key] = apply_deep_merge(
+                quality_section[key],
+                value,
+            )
         else:
             quality_section[key] = value
 
@@ -523,7 +574,10 @@ def _drop_legacy_fields(transformed: dict[str, Any]) -> None:
         transformed.pop(field, None)
 
 
-def _validate_input_path_exists(config: dict[str, Any], config_path: Path) -> None:
+def _validate_input_path_exists(
+    config: dict[str, Any],
+    config_path: Path,
+) -> None:
     input_path = config.get("input_path")
     if input_path is None or input_path == "":
         return

@@ -232,7 +232,9 @@ def test_t01_module_name_format() -> None:
             continue
         if not MODULE_NAME_PATTERN.match(file.name):
             bad.append(file.as_posix())
-    assert not bad, f"Нарушение snake_case в модулях: {sorted(bad)}"
+    assert not bad, (
+        "Нарушение snake_case в модулях: " f"{sorted(bad)}"
+    )
 
 
 def test_t02_global_name_conventions() -> None:
@@ -266,9 +268,10 @@ def test_t02_global_name_conventions() -> None:
                             continue
                         if not SNAKE_CASE_PATTERN.match(name):
                             violations.append(f"{file.as_posix()}: variable {name}")
-    assert (
-        not violations
-    ), f"Нарушения в именах глобальных переменных/функций: {sorted(violations)}"
+    assert not violations, (
+        "Нарушения в именах глобальных переменных/функций: "
+        f"{sorted(violations)}"
+    )
 
 
 def test_t03_class_suffix_pascal_case() -> None:
@@ -291,7 +294,9 @@ def test_t03_class_suffix_pascal_case() -> None:
             if not any(name.endswith(suffix) for suffix in ALLOWED_CLASS_SUFFIXES):
                 if not exceptions.is_excepted(file, "CLASS_SUFFIX"):
                     violations.append(f"{file.as_posix()}: {name} суффикс")
-    assert not violations, f"Классы с неправильным именованием: {sorted(violations)}"
+    assert not violations, (
+        "Классы с неправильным именованием: " f"{sorted(violations)}"
+    )
 
 
 def test_t04_no_camelcase_or_hyphen_names() -> None:
@@ -333,9 +338,9 @@ def test_t04_no_camelcase_or_hyphen_names() -> None:
                     continue
                 if "-" in name or " " in name:
                     violations.append(f"{file.as_posix()}: класс {name}")
-    assert (
-        not violations
-    ), f"Выявлены camelCase/дефис/пробел в именах: {sorted(violations)}"
+    assert not violations, (
+        "Выявлены camelCase/дефис/пробел в именах: " f"{sorted(violations)}"
+    )
 
 
 def _has_allowed_prefix(name: str) -> bool:
@@ -380,7 +385,8 @@ def test_t05_function_prefix_rules() -> None:
                     if not _has_allowed_prefix(name):
                         violations.append(f"{file.as_posix()}: {node.name}.{name}")
     assert not violations, (
-        "Функции/методы без разрешённых префиксов: " f"{sorted(violations)}"
+        "Функции/методы без разрешённых префиксов: "
+        f"{sorted(violations)}"
     )
 
 
@@ -403,7 +409,9 @@ def test_t06_pipeline_id_pattern() -> None:
             continue
         if not PIPELINE_ID_PATTERN.match(pipeline_id):
             bad.append(f"{file.as_posix()}: id {pipeline_id}")
-    assert not bad, f"Идентификаторы пайплайнов нарушают формат: {sorted(bad)}"
+    assert not bad, (
+        "Идентификаторы пайплайнов нарушают формат: " f"{sorted(bad)}"
+    )
 
 
 def test_t07_pipeline_stage_filenames() -> None:
@@ -421,7 +429,9 @@ def test_t07_pipeline_stage_filenames() -> None:
                 f"{entity_dir.as_posix()}: "
                 f"missing={sorted(missing)}, unexpected={sorted(unexpected)}"
             )
-    assert not violations, "Нарушения в именах файлов этапов: " f"{sorted(violations)}"
+    assert not violations, (
+        "Нарушения в именах файлов этапов: " f"{sorted(violations)}"
+    )
 
 
 def test_t08_test_filename_conventions() -> None:
@@ -436,7 +446,8 @@ def test_t08_test_filename_conventions() -> None:
         if "golden" in file.stem and not file.name.endswith("_golden.py"):
             violations.append(f"{file.as_posix()}: golden без суффикса _golden")
     assert not violations, (
-        "Нарушены правила именования тестовых файлов: " f"{sorted(violations)}"
+        "Нарушены правила именования тестовых файлов: "
+        f"{sorted(violations)}"
     )
 
 
@@ -449,7 +460,8 @@ def test_t09_doc_filename_case() -> None:
         if not KEBAB_CASE_PATTERN.match(stem):
             violations.append(file.as_posix())
     assert not violations, (
-        "Файлы документации нарушают kebab-case/англ.названия: " f"{sorted(violations)}"
+        "Файлы документации нарушают kebab-case/англ.названия: "
+        f"{sorted(violations)}"
     )
 
 
@@ -467,4 +479,6 @@ def test_t10_doc_header_match_filename() -> None:
         file_slug = re.sub(r"^\d+-", "", file_slug)
         if header_slug != file_slug:
             violations.append(f"{file.as_posix()}: '{header}' vs '{file.stem}'")
-    assert not violations, f"Несоответствие заголовка имени файла: {sorted(violations)}"
+    assert not violations, (
+        "Несоответствие заголовка имени файла: " f"{sorted(violations)}"
+    )
