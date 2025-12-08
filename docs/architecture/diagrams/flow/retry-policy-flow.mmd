@@ -8,7 +8,7 @@ flowchart TD
 
     start([Request attempt 1]):::stepTerminal
     call["HTTP call via UnifiedAPIClient"]:::stepPrimary
-    status{Success?\n(status < 500 and no timeout)}:::stepDecision
+    status{Success (2xx) and no timeout?}:::stepDecision
     handle(["Return response"]):::stepPrimary
     error["Capture exception / 5xx response"]:::stepSecondary
     retryCount["Increment attempt counter"]:::stepSecondary

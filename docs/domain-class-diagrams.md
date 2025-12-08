@@ -33,7 +33,14 @@ classDiagram
     class ProviderNotRegisteredError
     class ProviderAlreadyRegisteredError
     class ProviderId { <<enum>> CHEMBL PUBCHEM UNIPROT PUBMED DUMMY }
-    class BaseProviderConfig { <<pydantic.BaseModel>> model_config: ConfigDict(extra="forbid") }
+    class BaseProviderConfig {
+        <<pydantic.BaseModel>>
+        +provider: str
+        +base_url: AnyHttpUrl
+        +timeout_sec: float
+        +max_retries: int
+        +rate_limit_per_sec: float?
+    }
     class ProviderComponents { <<protocol>> create_client(); create_extraction_service(); create_normalization_service()*; create_writer()* }
     class ProviderDefinition { <<dataclass frozen>> id: ProviderId; config_type: type[BaseProviderConfig]; components: ProviderComponents; description: str? }
 

@@ -9,7 +9,7 @@ flowchart LR
     chembl[(ChEMBL REST API JSON)]:::external
     httpClient["UnifiedAPIClient\n+ retry + rate-limit + circuit breaker"]:::stepPrimary
     recordModel["ChemblRecordModel (Pydantic)\nflatten nested payloads"]:::stepSecondary
-    batches["Batch buffer / generator\nlist[dict]]:::stepSecondary
+    batches["Batch buffer / generator\nlist of dicts"]:::stepSecondary
     dataframe["Pandas DataFrame\nconstructed from flattened dicts"]:::stepPrimary
     normalize["Normalization chain\n(serialization, unit normalization, enrichment)"]:::stepPrimary
     validate["Pandera schema validation\n(strict order + coerce)"]:::stepPrimary

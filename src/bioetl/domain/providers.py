@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict
+from bioetl.domain.configs import BaseProviderConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.transform.contracts import NormalizationServiceABC
@@ -29,12 +29,6 @@ class ProviderId(str, Enum):
     UNIPROT = "uniprot"
     PUBMED = "pubmed"
     DUMMY = "dummy"
-
-
-class BaseProviderConfig(BaseModel):
-    """Base provider configuration model."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 @runtime_checkable
@@ -89,7 +83,6 @@ class ProviderDefinition:
 
 
 __all__ = [
-    "BaseProviderConfig",
     "ProviderComponents",
     "ProviderDefinition",
     "ProviderId",

@@ -42,3 +42,4 @@ class PandasBatchAdapter(BatchAdapterABC):
 
 
 __all__ = ["PandasBatchAdapter"]
+

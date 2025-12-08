@@ -34,8 +34,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--scale",
         type=float,
-        default=1.0,
-        help="Scale factor for mermaid-cli (default: 1.0)",
+        default=10.0,
+        help="Scale factor for mermaid-cli (default: 10.0)",
     )
     return parser.parse_args()
 
@@ -52,11 +52,12 @@ def _strip_front_matter(content: str) -> str:
 
 
 def _sanitize_mermaid(content: str) -> str:
-    """Remove style fragments that trigger bugs in specific mermaid-cli versions.
+    """Remove style fragments that trigger mermaid-cli parser bugs.
 
-    In particular, some combinations of `color:#...` and `font-size:...` in classDef/
-    linkStyle definitions cause parse errors on Windows when rendered via mermaid-cli
-    10.9.x. We strip these attributes, сохраняя остальную разметку диаграммы.
+    Some combinations of ``color:#...`` and ``font-size:...`` in ``classDef`` and
+    ``linkStyle`` definitions cause parse errors on Windows when rendered via
+    mermaid-cli 10.9.x. We strip these attributes, сохраняя остальную разметку
+    диаграммы.
     """
 
     def _sanitize_line(line: str) -> str:
@@ -66,7 +67,7 @@ def _sanitize_mermaid(content: str) -> str:
         line = re.sub(r",\s*font-size:\d+px", "", line)
         return line
 
-    return "\n".join(_sanitize_line(l) for l in content.splitlines())
+    return "\n".join(_sanitize_line(line) for line in content.splitlines())
 
 
 def _cleanup_temp(root: Path) -> None:

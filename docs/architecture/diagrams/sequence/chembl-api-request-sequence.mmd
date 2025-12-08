@@ -29,7 +29,6 @@ sequenceDiagram
             HTTP-->>Client: response
             Client->>Client: parse via ResponseParser
             Client-->>Extraction: page dict (records + page_meta)
-            break
         else transient error >=500/timeout
             API--xHTTP: error
             HTTP->>Retry: schedule_retry()

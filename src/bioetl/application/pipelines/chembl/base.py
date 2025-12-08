@@ -11,7 +11,7 @@ from bioetl.application.pipelines.base import (
 )
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.infrastructure.transform.pandas_batch_adapter import PandasBatchAdapter
+from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,

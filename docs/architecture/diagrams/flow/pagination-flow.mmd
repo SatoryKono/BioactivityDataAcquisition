@@ -10,7 +10,7 @@ flowchart TD
     parse["ResponseParser -> dict"]:::stepSecondary
     serialize["Pydantic model -> flattened dict list"]:::stepSecondary
     accumulate["Yield batch or append to buffer"]:::stepSecondary
-    checkNext{Has next page\n(`page_meta.next` or len == limit)}:::stepDecision
+    checkNext{Has next page?}:::stepDecision
     updateOffset["Increment offset & track limit from config"]:::stepSecondary
     limitCheck{Global limit reached?}:::stepDecision
     finish([Return iterator / list to transformer]):::stepPrimary
