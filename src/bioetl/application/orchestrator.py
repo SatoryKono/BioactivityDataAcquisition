@@ -54,7 +54,7 @@ class PipelineOrchestrator:
 
         logger = container.get_logger()
         validation_service = container.get_validation_service()
-        output_writer = container.get_output_writer()
+        loader = container.get_loader()
         extraction_service = container.get_extraction_service()
         normalization_service = container.get_normalization_service()
         record_source = container.get_record_source(
@@ -72,7 +72,7 @@ class PipelineOrchestrator:
             config=self._config,
             logger=logger,
             validation_service=validation_service,
-            output_writer=output_writer,
+            loader=loader,
             extraction_service=extraction_service,
             record_source=record_source,
             normalization_service=normalization_service,
