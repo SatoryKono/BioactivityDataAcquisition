@@ -54,7 +54,7 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         config=config,
         logger=logger,
         validation_service=container.get_validation_service(),
-        loader=container.get_loader(),
+        output_writer=container.get_output_writer(),
         extraction_service=extraction_service,
         hash_service=container.get_hash_service(),
         metadata_builder=container.get_metadata_builder(),

@@ -15,7 +15,7 @@ def dependencies():
     return {
         "logger": MagicMock(),
         "validation_service": MagicMock(),
-        "loader": MagicMock(),
+        "output_writer": MagicMock(),
         "extraction_service": MagicMock(),
         "hash_service": MagicMock(),
         "normalization_service": _build_normalization_service(),

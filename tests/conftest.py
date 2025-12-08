@@ -155,11 +155,11 @@ def mock_output_writer():
 
 @pytest.fixture
 def mock_loader(mock_output_writer):
-    """Create a mock loader delegating to the mock output writer stub."""
+    """Create a mock loader compatible with LoaderABC."""
     from bioetl.application.pipelines.contracts import LoaderABC
 
     loader = MagicMock(spec=LoaderABC)
-    loader.load.return_value = mock_output_writer.write_result.return_value
+    loader.load.side_effect = mock_output_writer.write_result
     return loader
 
 

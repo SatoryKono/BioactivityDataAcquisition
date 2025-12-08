@@ -9,8 +9,10 @@ import pandas as pd
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
+    WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
@@ -41,9 +43,10 @@ class LoaderABC(ABC):
         self,
         df: pd.DataFrame,
         output_path: Path,
-        context: Any,
+        context: RunContext,
+        *,
         column_order: list[str] | None = None,
-    ) -> Any:
+    ) -> WriteResult:
         """
         Loads data to destination.
         """
@@ -74,10 +77,6 @@ class PipelineContainerABC(ABC):
     @abstractmethod
     def get_output_writer(self) -> OutputWriterABC:
         """Return unified writer for data, metadata and QC outputs."""
-
-    @abstractmethod
-    def get_loader(self) -> LoaderABC:
-        """Return loader responsible for write stage."""
 
     @abstractmethod
     def get_extraction_service(self) -> Any:

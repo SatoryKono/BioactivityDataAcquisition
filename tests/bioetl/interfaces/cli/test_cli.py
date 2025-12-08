@@ -15,6 +15,7 @@ from typer.testing import CliRunner
 sys.modules.setdefault("tqdm", MagicMock())
 
 from bioetl.application.pipelines.base import PipelineBase  # noqa: E402
+from bioetl.application.pipelines.contracts import LoaderABC
 from bioetl.domain.configs import (  # noqa: E402
     ChemblSourceConfig,
     ClientConfig,
@@ -249,7 +250,7 @@ def test_run_dry_run_pipeline_metadata(
             config,
             logger,
             validation_service,
-            output_writer,
+            loader,
             hash_service: HashServiceABC,
             extraction_service=None,
         ):
@@ -257,11 +258,12 @@ def test_run_dry_run_pipeline_metadata(
                 config,
                 logger,
                 validation_service,
-                output_writer,
+                loader,
                 hash_service,
             )
             self._dataset = small_pipeline_df
             self.last_result = None
+            self._loader = loader
             created_instances.append(self)
 
         def extract(self, **_):
@@ -271,7 +273,7 @@ def test_run_dry_run_pipeline_metadata(
             return df.assign(cli_processed=True)
 
         def write(self, df, output_path, context):
-            return self._write_output(df, output_path, context)
+            return self._loader.load(df, output_path, context)
 
         def run(self, *args, **kwargs):  # type: ignore[override]
             result = super().run(*args, **kwargs)
@@ -282,8 +284,8 @@ def test_run_dry_run_pipeline_metadata(
     logger.apply_bind.return_value = logger
     validation_service = MagicMock()
     validation_service.validate.side_effect = lambda df, **__: df
-    output_writer = MagicMock()
-    output_writer.write_result.return_value = MagicMock(
+    loader = MagicMock(spec=LoaderABC)
+    loader.load.return_value = MagicMock(
         row_count=len(small_pipeline_df),
         checksum="checksum",
         path=MagicMock(name="dummy.parquet"),
@@ -304,7 +306,7 @@ def test_run_dry_run_pipeline_metadata(
             config=pipeline_test_config,
             logger=logger,
             validation_service=validation_service,
-            output_writer=output_writer,
+            loader=loader,
             hash_service=hash_service,
         )
         return pipeline_instance
