@@ -4,7 +4,7 @@ Tests for ChEMBL factories.
 
 import pytest
 
-from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
+from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
     default_chembl_extraction_service,
@@ -50,7 +50,7 @@ def test_default_chembl_extraction_service(source_config):
     """Test default extraction service factory."""
     source_config.batch_size = 50
     service = default_chembl_extraction_service(source_config)
-    assert isinstance(service, ChemblExtractionClientImpl)
+    assert isinstance(service, ChemblExtractionServiceImpl)
     assert isinstance(service.client, ChemblDataClientHTTPImpl)
     assert service.batch_size == 50
 

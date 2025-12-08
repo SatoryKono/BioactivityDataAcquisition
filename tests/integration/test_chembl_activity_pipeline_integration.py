@@ -10,7 +10,7 @@ import pytest
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.pipelines.registry import get_pipeline_class
-from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
+from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
@@ -27,7 +27,7 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         str(Path("tests/fixtures/configs").resolve()),
     )
     monkeypatch.setattr(
-        ChemblExtractionClientImpl,
+        ChemblExtractionServiceImpl,
         "get_release_version",
         lambda self: "chembl_integration",
     )
