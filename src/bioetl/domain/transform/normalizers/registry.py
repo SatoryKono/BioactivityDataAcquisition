@@ -11,6 +11,7 @@ from bioetl.domain.transform.normalizers.identifiers import (
     normalize_pmid,
     normalize_uniprot,
 )
+from bioetl.domain.transform.normalizers.numeric import normalize_clinical_phase
 
 CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
     # DOI variants
@@ -35,6 +36,8 @@ CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
     "bao_endpoint": normalize_bao_id,
     "bao_format": normalize_bao_id,
     "bao_label": normalize_bao_label,
+    # Clinical development metadata
+    "max_phase": normalize_clinical_phase,
 }
 
 
