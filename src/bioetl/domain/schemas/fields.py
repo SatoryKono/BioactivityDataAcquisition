@@ -6,7 +6,7 @@ from typing import Any
 
 import pandera as pa
 
-_DEFAULT_FILTERABLE = False
+DEFAULT_FILTERABLE = False
 
 
 def _map_dtype_to_field_type(dtype: Any) -> str:
@@ -41,7 +41,7 @@ def build_field_configs_from_schema(
                 "name": name,
                 "data_type": _map_dtype_to_field_type(column.dtype),
                 "is_nullable": bool(column.nullable),
-                "is_filterable": _DEFAULT_FILTERABLE,
+                "is_filterable": DEFAULT_FILTERABLE,
                 "description": column.description or "",
             }
         )

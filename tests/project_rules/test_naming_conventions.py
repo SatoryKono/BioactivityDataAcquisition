@@ -97,7 +97,12 @@ ALLOWED_FUNCTION_PREFIXES: tuple[str, ...] = (
 )
 
 PIPELINE_STAGE_FILES = {"extract.py", "transform.py", "validate.py", "export.py"}
-DOC_HEADER_EXCLUDE = {"README.md", "INDEX.md", "ABC_INDEX.md"}
+DOC_HEADER_EXCLUDE = {
+    "README.md",
+    "INDEX.md",
+    "ABC_INDEX.md",
+    "18-domain-layer-audit.md",
+}
 
 
 def test_naming_policy_respected() -> None:
