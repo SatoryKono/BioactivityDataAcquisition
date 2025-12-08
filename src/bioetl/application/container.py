@@ -4,10 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, cast
 
-from bioetl.application.pipelines.contracts import (
-    FileRecordSourceFactoryABC,
-    PipelineContainerABC,
-)
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
@@ -27,7 +24,7 @@ from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.record_source import ApiRecordSource, InMemoryRecordSource, RecordSource
+from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -37,6 +34,10 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
+from bioetl.infrastructure.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
+)
 
 
 class PipelineContainer(PipelineContainerABC):
@@ -54,7 +55,6 @@ class PipelineContainer(PipelineContainerABC):
         metadata_writer: MetadataWriterABC | None = None,
         quality_reporter: QualityReportABC | None = None,
         validator_factory: ValidatorFactoryABC | None = None,
-        record_source_factory: FileRecordSourceFactoryABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         metrics_port: PipelineMetricsPortABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
@@ -76,9 +76,6 @@ class PipelineContainer(PipelineContainerABC):
         self._error_policy = error_policy
         self._hash_service = hash_service
         self._post_transformer = post_transformer
-        self._record_source_factory = self._resolve_record_source_factory(
-            record_source_factory
-        )
         self._metadata_builder = self._resolve_metadata_builder(metadata_builder)
         self._metrics_port = self._resolve_metrics_port(metrics_port)
         self._provider_registry, self._provider_registry_provider = (
@@ -101,11 +98,6 @@ class PipelineContainer(PipelineContainerABC):
 
     def _resolve_logger(self, logger: LoggingPortABC | None) -> LoggingPortABC:
         return logger or _create_noop_logger()
-
-    def _resolve_record_source_factory(
-        self, record_source_factory: FileRecordSourceFactoryABC | None
-    ) -> FileRecordSourceFactoryABC:
-        return record_source_factory or _create_noop_record_source_factory()
 
     def _resolve_metadata_builder(
         self, metadata_builder: RunMetadataBuilderProtocol | None
@@ -148,10 +140,6 @@ class PipelineContainer(PipelineContainerABC):
         """Get the unified output writer."""
         return self._output_writer
 
-    def get_record_source_factory(self) -> FileRecordSourceFactoryABC:
-        """Expose record source factory port."""
-        return self._record_source_factory
-
     def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
         """Get metadata builder port."""
         return self._metadata_builder
@@ -192,12 +180,12 @@ class PipelineContainer(PipelineContainerABC):
         if mode == "csv":
             if path is None:
                 raise ValueError("input_path is required for CSV mode")
-            return self._record_source_factory.create_csv_source(
+            return CsvRecordSourceImpl(
                 input_path=Path(path),
                 csv_options=self._config.csv_options,
                 limit=limit,
-                chunk_size=None,
                 logger=effective_logger,
+                chunk_size=None,
             )
 
         if mode == "id_only":
@@ -207,17 +195,17 @@ class PipelineContainer(PipelineContainerABC):
             source_config = self._resolve_provider_config(definition)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
-            return self._record_source_factory.create_id_list_source(
+            return IdListRecordSourceImpl(
                 input_path=Path(path),
                 id_column=id_column,
                 csv_options=self._config.csv_options,
                 limit=limit,
-                chunk_size=None,
                 extraction_service=extraction_service,
                 source_config=source_config,
                 entity=self._config.entity_name,
                 filter_key=filter_key,
                 logger=effective_logger,
+                chunk_size=None,
             )
 
         filters = self._config.pipeline.copy()
@@ -362,22 +350,6 @@ def _create_noop_output_writer() -> OutputWriterABC:
     return cast(OutputWriterABC, SimpleNamespace(write_result=_write_result))
 
 
-def _create_noop_record_source_factory() -> FileRecordSourceFactoryABC:
-    """Return a record source factory producing empty in-memory sources."""
-
-    return cast(
-        FileRecordSourceFactoryABC,
-        SimpleNamespace(
-            create_csv_source=lambda **kwargs: InMemoryRecordSource(
-                [], chunk_size=kwargs.get("chunk_size")
-            ),
-            create_id_list_source=lambda **kwargs: InMemoryRecordSource(
-                [], chunk_size=kwargs.get("chunk_size")
-            ),
-        ),
-    )
-
-
 def _create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
     """Return metadata builder that emits minimal deterministic payloads."""
 
@@ -427,7 +399,6 @@ def build_pipeline_dependencies(
     logger: LoggingPortABC | None = None,
     output_writer: OutputWriterABC | None = None,
     validator_factory: ValidatorFactoryABC | None = None,
-    record_source_factory: FileRecordSourceFactoryABC | None = None,
     metadata_builder: RunMetadataBuilderProtocol | None = None,
     metrics_port: PipelineMetricsPortABC | None = None,
     hooks: list[PipelineHookABC] | None = None,
@@ -444,7 +415,6 @@ def build_pipeline_dependencies(
         logger=logger,
         output_writer=output_writer,
         validator_factory=validator_factory,
-        record_source_factory=record_source_factory,
         metadata_builder=metadata_builder,
         metrics_port=metrics_port,
         hooks=hooks,

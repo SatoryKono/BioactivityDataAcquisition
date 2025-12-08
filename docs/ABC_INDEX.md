@@ -37,9 +37,6 @@
 - `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
   - Контейнер пайплайна.
 
-- `StageABC` — `bioetl.domain.pipelines.contracts.StageABC`
-  - Абстракция стадии пайплайна.
-
 - `PipelineHookABC` — `bioetl.domain.pipelines.contracts.PipelineHookABC`
   - Хуки жизненного цикла пайплайна.
 
