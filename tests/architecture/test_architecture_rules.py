@@ -37,7 +37,6 @@ ALLOWED_ABCS_WITHOUT_IMPL = {
     "SchemaProviderABC",
     "SecretProviderABC",
     "SideInputProviderABC",
-    "TracerABC",
 }
 
 

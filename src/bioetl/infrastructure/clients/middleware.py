@@ -14,7 +14,7 @@ from bioetl.domain.errors import (
     ClientRateLimitError,
     ClientResponseError,
 )
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.infrastructure.observability import metrics
 from bioetl.infrastructure.observability.factories import default_logging_port
 

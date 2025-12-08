@@ -8,9 +8,9 @@ from typing import Any, Iterable, cast
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC
-from bioetl.domain.clients.ports import ChemblExtractionPortABC
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.contracts import BatchAdapterABC
@@ -28,7 +28,7 @@ class ChemblExtractorImpl(ExtractorABC):
     def __init__(
         self,
         config: PipelineConfig,
-        extraction_service: ChemblExtractionPortABC,
+        extraction_service: ExtractionServiceABC,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
         batch_adapter: BatchAdapterABC,

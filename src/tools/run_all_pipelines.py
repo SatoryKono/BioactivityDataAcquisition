@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import sys
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.interfaces.cli.app import app
 
@@ -17,7 +17,7 @@ PIPELINES = [
 ]
 
 
-def run_pipeline(name: str, limit: int, logger: LoggerAdapterABC) -> dict:
+def run_pipeline(name: str, limit: int, logger: LoggingPortABC) -> dict:
     start_time = datetime.now(timezone.utc)
     entity = name.split("_")[0]
     pipeline_logger = logger.apply_bind(pipeline=name, entity=entity, stage="run")

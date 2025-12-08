@@ -22,11 +22,6 @@ ProviderRegistryLoaderABC:
   implementations:
     Default: bioetl.infrastructure.clients.provider_registry_loader.ProviderRegistryLoader
 
-LoggerAdapterABC:
-  default_factory: bioetl.infrastructure.logging.factories.default_logger
-  implementations:
-    Unified: bioetl.infrastructure.logging.impl.unified_logger.UnifiedLoggerImpl
-
 LoggingPortABC:
   default_factory: bioetl.infrastructure.observability.factories.default_logging_port
   implementations:
@@ -170,8 +165,3 @@ MutableProviderRegistryABC:
   default_factory: bioetl.domain.provider_registry.default_mutable_provider_registry
   implementations:
     InMemory: bioetl.domain.provider_registry.InMemoryProviderRegistry
-
-TracerABC:
-  default_factory: bioetl.domain.clients.base.logging.factories.default_tracer
-  implementations:
-    Stub: bioetl.domain.clients.base.logging.contracts.TracerABC

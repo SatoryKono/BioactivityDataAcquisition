@@ -7,7 +7,7 @@ from typing import Any, Self
 import structlog
 from structlog.stdlib import BoundLogger
 
-from bioetl.domain.observability import LoggingPortABC, TracingPortABC
+from bioetl.interfaces.observability import LoggingPortABC, TracingPortABC
 
 
 class StructuredLoggerImpl(LoggingPortABC):

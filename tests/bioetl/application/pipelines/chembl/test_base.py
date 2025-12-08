@@ -60,8 +60,6 @@ def mock_dependencies_fixture():
     metadata_builder.build_run_metadata.return_value = {}
     metadata_builder.build_dry_run_metadata.return_value = {}
 
-    file_record_source_factory = MagicMock()
-
     normalization_service = ChemblNormalizationServiceImpl(config=config)
 
     return {
@@ -72,7 +70,6 @@ def mock_dependencies_fixture():
         "extraction_service": MagicMock(),
         "hash_service": HashServiceImpl(hasher=_DummyHasher()),
         "metadata_builder": metadata_builder,
-        "file_record_source_factory": file_record_source_factory,
         "normalization_service": normalization_service,
     }
 
@@ -91,9 +88,6 @@ def pipeline_fixture(mock_dependencies_fixture):
         normalization_service=mock_dependencies_fixture["normalization_service"],
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
-        file_record_source_factory=mock_dependencies_fixture[
-            "file_record_source_factory"
-        ],
     )
 
 
@@ -226,9 +220,6 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
-        file_record_source_factory=mock_dependencies_fixture[
-            "file_record_source_factory"
-        ],
     )
 
     df = pd.DataFrame({"a": [1, 2]})
@@ -267,9 +258,6 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
-        file_record_source_factory=mock_dependencies_fixture[
-            "file_record_source_factory"
-        ],
     )
 
     result = pipeline.extract()

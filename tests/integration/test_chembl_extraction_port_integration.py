@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.application.config.runtime import build_runtime_config
-from bioetl.domain.clients.ports import ChemblExtractionPortABC
+from bioetl.domain.contracts import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl import ChemblExtractionClientImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
@@ -40,6 +40,6 @@ def test_chembl_extraction_port_is_resolved(monkeypatch: pytest.MonkeyPatch) -> 
 
     service = container.get_extraction_service()
 
-    assert isinstance(service, ChemblExtractionPortABC)
+    assert isinstance(service, ExtractionServiceABC)
     assert isinstance(service, ChemblExtractionClientImpl)
     assert service.get_release_version() == "chembl_port_integration"

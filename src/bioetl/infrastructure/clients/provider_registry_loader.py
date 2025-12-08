@@ -9,7 +9,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError
 import yaml
 
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     MutableProviderRegistryABC,
