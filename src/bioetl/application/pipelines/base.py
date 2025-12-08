@@ -1,6 +1,6 @@
 """Базовый класс пайплайна."""
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -439,21 +439,15 @@ class PipelineBase(ABC):
         """Возвращает версию источника данных. По умолчанию 'unknown'."""
         return "unknown"
 
-    def extract(self, **kwargs: Any) -> pd.DataFrame:
-        """Deprecated: used only if not iterating chunks."""
-        if not self._extractor:
-            return pd.DataFrame()
+    @abstractmethod
+    def extract(
+        self, **kwargs: Any
+    ) -> pd.DataFrame | Iterable[pd.DataFrame] | None:
+        """Извлекает сырые данные."""
 
-        chunks = list(self._extractor.extract(**kwargs))
-        if not chunks:
-            return pd.DataFrame()
-        return pd.concat(chunks, ignore_index=True)
-
+    @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Преобразует сырые данные используя injected transformer."""  # noqa: E501
-        if self._transformer:
-            return self._transformer.apply(df)
-        return df
+        """Преобразует сырые данные."""
 
     def validate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Валидирует DataFrame по Pandera-схеме."""
@@ -462,6 +456,7 @@ class PipelineBase(ABC):
             entity_name=self._schema_contract.schema_out,
         )
 
+    @abstractmethod
     def write(
         self,
         df: pd.DataFrame,
@@ -481,26 +476,23 @@ class PipelineBase(ABC):
 
     def iter_chunks(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
         """Возвращает итератор по чанкам данных после extract."""
-        if self._extractor is not None:
-            extractor = self._extractor
 
-            def _extractor_generator() -> Iterable[pd.DataFrame]:
-                self._increment_extract_call_count()
-                result = extractor.extract(**kwargs)
-                if isinstance(result, pd.DataFrame):
-                    yield result
-                    return
-                if isinstance(result, Iterable):
-                    yield from result
-                    return
-                raise TypeError(
-                    "Extractor.extract() must return DataFrame or iterable of "
-                    "DataFrames."
-                )
+        def _extractor_generator() -> Iterable[pd.DataFrame]:
+            self._increment_extract_call_count()
+            result = self.extract(**kwargs)
+            if result is None:
+                return
+            if isinstance(result, pd.DataFrame):
+                yield result
+                return
+            if isinstance(result, Iterable):
+                yield from result
+                return
+            raise TypeError(
+                "extract() must return a DataFrame or iterable of DataFrames."
+            )
 
-            return _extractor_generator()
-
-        return self._iter_chunks_without_extractor(**kwargs)
+        return _extractor_generator()
 
     # === Hooks ===
 
@@ -531,6 +523,20 @@ class PipelineBase(ABC):
         if not self._post_transformer:
             return df
         return self._post_transformer.apply(df, context)
+
+    def _write_output(
+        self, df: pd.DataFrame, output_path: Path, context: RunContext
+    ) -> WriteResult:
+        output_schema_name = self._schema_contract.get_output_schema()
+        output_columns = self._validation_service.get_schema_columns(output_schema_name)
+
+        return self._output_writer.write_result(
+            df=df,
+            output_path=output_path,
+            entity_name=self._config.entity_name,
+            run_context=context,
+            column_order=output_columns,
+        )
 
     def _create_chunk_iterator(
         self, context: RunContext, **kwargs: Any
@@ -572,31 +578,6 @@ class PipelineBase(ABC):
         if stage in {"extract", "transform", "validate"}:
             return pd.DataFrame()
         return None
-
-    def _iter_chunks_without_extractor(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
-        """
-        Fallback chunk iterator when external extractor is not provided.
-
-        Uses subclass extract() implementation; raises if not overridden.
-        """
-        if self.__class__.extract is PipelineBase.extract:
-            raise ValueError("Extractor is required when extract() is not overridden.")
-
-        def _generator() -> Iterable[pd.DataFrame]:
-            result = self.extract(**kwargs)
-            if result is None:
-                return
-            if isinstance(result, pd.DataFrame):
-                yield result
-                return
-            if isinstance(result, Iterable):
-                yield from result
-                return
-            raise TypeError(
-                "extract() must return a DataFrame or iterable of DataFrames."
-            )
-
-        return _generator()
 
     def _instrument_extract_calls(self) -> None:
         """
