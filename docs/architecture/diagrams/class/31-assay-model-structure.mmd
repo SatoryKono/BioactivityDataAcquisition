@@ -1,21 +1,15 @@
 %%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
 classDiagram
-    class RawAssayPayload {
-        <<ChemblRecordModel>>
-        assay_classifications : list[Any] | None
-        assay_parameters : list[Any] | None
-        extra payload fields preserved
+    class FlattenChemblPayload {
+        <<function>>
+        +flatten_chembl_payload(payload: dict) -> dict
     }
-    class ClassificationEntry {
-        bao_label : str?
-        relationship_type : str?
-    }
-    class ParameterEntry {
-        parameter : str
-        value : str
-        relation : str?
+    class AssayTableSchema {
+        <<Pandera Schema>>
+        assay_classifications : str?
+        assay_parameters : str?
+        other assay fields : str/float/bool
     }
 
-    RawAssayPayload --> ClassificationEntry : flatten list entries
-    RawAssayPayload --> ParameterEntry : flatten list entries
+    FlattenChemblPayload --> AssayTableSchema : keeps nested assay fields for serialization
 

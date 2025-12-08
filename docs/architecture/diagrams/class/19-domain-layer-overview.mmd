@@ -45,12 +45,10 @@ classDiagram
         document.DocumentSchema
         molecule.MoleculeTableSchema
     }
-    class Models {
+    class Serializers {
         <<module>>
-        ChemblRecordModel
-        RawActivityPayload
-        RawAssayPayload
-        RawMoleculePayload
+        flatten_chembl_payload
+        DEFAULT_BYPASS_FIELDS
     }
     class DomainErrors {
         <<module>>
@@ -65,4 +63,4 @@ classDiagram
     HashService --> Schemas
     OutputWriterABC --> Schemas : fixed column order
     PipelineHookABC --> DomainErrors : reports
-    ProviderRegistryABC --> Models : typed payloads
+    ProviderRegistryABC --> Serializers : prepares raw payloads
