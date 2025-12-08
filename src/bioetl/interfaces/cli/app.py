@@ -1,5 +1,7 @@
 """Typer-based CLI for BioETL pipelines."""
 
+from __future__ import annotations
+
 from functools import partial
 import os
 from pathlib import Path
@@ -34,6 +36,7 @@ from bioetl.interfaces.wiring import (
     create_container_factory,
 )
 
+
 app = typer.Typer(
     name="bioetl",
     help="Bioactivity Data Acquisition ETL CLI",
@@ -48,27 +51,25 @@ def _get_config_base_dir() -> Path:
 
 
 def _resolve_config_path(pipeline_name: str) -> Path:
+    """Resolve default config path from a pipeline name.
+
+    Expects pipeline name in the form "{entity}_{provider}".
     """
-    Resolves the default configuration path for a pipeline.
-    Assumes pipeline name format: {entity}_{provider}
-    """
+
     try:
         entity, provider = pipeline_name.rsplit("_", 1)
     except ValueError:
-        # Fallback if naming doesn't match, assume chembl
+        # Fallback if naming does not match, assume chembl
         entity = pipeline_name
         provider = "chembl"
 
-    # Standard path: configs/pipelines/{provider}/{entity}.yaml
-    path = _get_config_base_dir() / "pipelines" / provider / f"{entity}.yaml"
-    return path
+    return _get_config_base_dir() / "pipelines" / provider / f"{entity}.yaml"
 
 
 @app.command()
 def list_pipelines() -> None:
-    """
-    Lists available pipelines.
-    """
+    """List available pipelines from the registry."""
+
     table = Table(title="Available Pipelines")
     table.add_column("Name", style="cyan")
     table.add_column("Class", style="green")
@@ -81,9 +82,8 @@ def list_pipelines() -> None:
 
 @app.command()
 def validate_config(config_path: Path) -> None:
-    """
-    Validates a configuration file.
-    """
+    """Validate a configuration file and print basic info."""
+
     config_loader = create_config_loader()
     try:
         config = build_runtime_config(
@@ -93,15 +93,18 @@ def validate_config(config_path: Path) -> None:
         console.print(f"[green]Config {config_path} is valid![/green]")
         console.print(f"Entity: {config.entity_name}")
         console.print(f"Provider: {config.provider}")
-    except Exception as e:
-        console.print(f"[red]Config validation failed:[/red] {e}")
+    except Exception as exc:  # pragma: no cover - CLI safety
+        console.print(f"[red]Config validation failed:[/red] {exc}")
         sys.exit(1)
 
 
 @app.command()
 def run(
     pipeline_name: str,
-    profile: str = typer.Option("default", help="Configuration profile"),
+    profile: str = typer.Option(
+        "default",
+        help="Configuration profile",
+    ),
     output: Optional[Path] = typer.Option(
         None,
         "--output",
@@ -139,7 +142,9 @@ def run(
         ),
     ),
     csv_delimiter: Optional[str] = typer.Option(
-        None, "--csv-delimiter", help="Delimiter for CSV input"
+        None,
+        "--csv-delimiter",
+        help="Delimiter for CSV input",
     ),
     csv_header: Optional[bool] = typer.Option(
         None,
@@ -152,9 +157,8 @@ def run(
         help="Run pipeline in a background process",
     ),
 ) -> None:
-    """
-    Runs an ETL pipeline.
-    """
+    """Run an ETL pipeline for the given name and profile."""
+
     config_loader = create_config_loader()
     container_factory = create_container_factory()
     bound_logger = logger.apply_bind(
@@ -171,6 +175,7 @@ def run(
         "background": background,
         "dry_run": dry_run,
     }
+
     try:
         base_dir = _get_config_base_dir()
         requested_config_path = config_path or _resolve_config_path(
@@ -225,10 +230,11 @@ def run(
         except FileNotFoundError:
             console.print(
                 "[yellow]Providers config not found; "
-                "using empty registry[/yellow]"
+                "using empty registry[/yellow]",
             )
             provider_registry = InMemoryProviderRegistry()
             provider_loader_factory = None
+
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
@@ -238,7 +244,9 @@ def run(
             container_factory=container_factory,
         )
 
-        console.print(f"[bold green]Starting pipeline: {pipeline_name}[/bold green]")
+        console.print(
+            f"[bold green]Starting pipeline: {pipeline_name}[/bold green]",
+        )
         bound_logger.info("pipeline_start", **config_context)
 
         if background:
@@ -248,7 +256,7 @@ def run(
             )
             console.print(
                 "[yellow]Pipeline submitted to background "
-                "executor[/yellow]"
+                "executor[/yellow]",
             )
             result = future.result()
         else:
@@ -259,7 +267,7 @@ def run(
 
         if result.success:
             console.print(
-                "[bold green]Pipeline finished successfully!" "[/bold green]"
+                "[bold green]Pipeline finished successfully!" "[/bold green]",
             )
             console.print(
                 f"Rows processed: {result.row_count}",
@@ -283,7 +291,7 @@ def run(
             )
             sys.exit(1)
 
-    except Exception:
+    except Exception:  # pragma: no cover - CLI safety
         elapsed = time.perf_counter() - start_time
         bound_logger.error(
             "pipeline_exception",
@@ -298,9 +306,8 @@ def run(
 
 @app.command()
 def smoke_run(pipeline_name: str) -> None:
-    """
-    Runs a smoke test (development profile, dry-run).
-    """
+    """Run a development dry-run with a small record limit."""
+
     run(pipeline_name, profile="development", dry_run=True, limit=10)
 
 
@@ -310,6 +317,8 @@ def _resolve_config_location(
     pipeline_name: str,
     base_dir: Path,
 ) -> Optional[Path]:
+    """Resolve config path relative to base_dir if needed."""
+
     candidate_path = config_path or _resolve_config_path(pipeline_name)
     path = Path(candidate_path)
 
@@ -332,9 +341,10 @@ def _start_metrics_exporter(
     dry_run: bool = False,
     logger: LoggingPortABC | None = None,
 ) -> None:
-    """
-    Запускает экспортер метрик, пропуская запуск для dry-run и не валит CLI
-    при ошибке биндинга сокета.
+    """Start Prometheus metrics exporter if enabled.
+
+    Skips in dry-run or when metrics are disabled, and avoids failing CLI
+    on socket binding errors.
     """
 
     if dry_run or not metrics_config.enabled:
@@ -354,9 +364,10 @@ def _start_metrics_exporter(
             port=metrics_config.port,
             address=metrics_config.address,
         )
-    except Exception as exc:  # pragma: no cover - защитный контур
+    except Exception:  # pragma: no cover - defensive
         console.print(
-            f"[yellow]Prometheus metrics exporter not started: {exc}[/yellow]"
+            "[yellow]Prometheus metrics exporter not started: "
+            f"{traceback.format_exc()}[/yellow]",
         )
         if logger:
             logger.error(
@@ -369,8 +380,8 @@ def _start_metrics_exporter(
 
     if started:
         console.print(
-            f"[green]Prometheus metrics exporter started on"
-            f" {metrics_config.address}:{metrics_config.port}[/green]"
+            "[green]Prometheus metrics exporter started on "
+            f"{metrics_config.address}:{metrics_config.port}[/green]",
         )
         if logger:
             logger.info(
@@ -394,6 +405,8 @@ def _collect_cli_overrides(
     csv_delimiter: Optional[str],
     csv_header: Optional[bool],
 ) -> dict[str, Any]:
+    """Collect CLI overrides into a config overrides mapping."""
+
     overrides: dict[str, Any] = {}
     if output:
         overrides["output_path"] = str(output)
@@ -412,5 +425,6 @@ def _collect_cli_overrides(
     return overrides
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - manual invocation
     app()
+
