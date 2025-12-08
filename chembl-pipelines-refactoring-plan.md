@@ -24,7 +24,7 @@
    - Existing tests cover shared base, extraction, PK-resolution, and some pipelines, but not assay/molecule-specific behaviour.
 
 4. **Confusing alias comment in registry**
-   - In `src/bioetl/application/pipelines/registry.py`, `"molecule_chembl"` is commented as `# Alias for testitem`, while in fact it is a separate pipeline with its own schema and config.
+   - In `src/bioetl/application/pipelines/registry.py`, `"molecule_chembl"` is still commented as `# Alias for molecule`, although это полноценный pipeline со своей схемой/config.
 
 ---
 
@@ -37,7 +37,6 @@
   - `configs/pipelines/chembl/assay.yaml`
   - `configs/pipelines/chembl/molecule.yaml`
   - `configs/pipelines/chembl/target.yaml`
-  - `configs/pipelines/chembl/testitem.yaml`
   - `configs/pipelines/chembl/activity.yaml`
 
 ### 3.2. Move `hashing` and `normalization` under `quality`
@@ -47,7 +46,6 @@ For each of:
 - `configs/pipelines/chembl/assay.yaml`
 - `configs/pipelines/chembl/molecule.yaml`
 - `configs/pipelines/chembl/target.yaml`
-- `configs/pipelines/chembl/testitem.yaml`
 
 Steps:
 
@@ -130,7 +128,6 @@ Mirror existing patterns from:
 - `activity/test_activity_pipeline.py`
 - `document/test_document_pipeline.py`
 - `target/test_target_pipeline.py`
-- `testitem/test_testitem_pipeline.py`
 
 ### 4.2. Minimal test cases per entity
 
@@ -178,7 +175,7 @@ File: `src/bioetl/application/pipelines/registry.py`.
 - Current:
 
   ```python
-  "molecule_chembl": ChemblPipelineBase,  # Alias for testitem
+  "molecule_chembl": ChemblPipelineBase,  # Molecule pipeline
   ```
 
 - Proposed:
@@ -191,8 +188,8 @@ or simply remove the comment.
 
 ### 5.2. Ensure docs reflect actual semantics
 
-- Verify that overview docs for `molecule` and `testitem` do not claim they are the same pipeline.
-- If necessary, clarify in docs that both use the `/molecule` endpoint but differ in schema and output shape.
+- Verify that overview docs for `molecule` do not reference legacy `testitem` terminology.
+- If necessary, clarify that all `/molecule` pipelines share the same schema naming (MoleculeTableSchema).
 
 ---
 
@@ -207,7 +204,6 @@ bioetl validate-config --config configs/pipelines/chembl/activity.yaml
 bioetl validate-config --config configs/pipelines/chembl/assay.yaml
 bioetl validate-config --config configs/pipelines/chembl/document.yaml
 bioetl validate-config --config configs/pipelines/chembl/target.yaml
-bioetl validate-config --config configs/pipelines/chembl/testitem.yaml
 bioetl validate-config --config configs/pipelines/chembl/molecule.yaml
 ```
 
