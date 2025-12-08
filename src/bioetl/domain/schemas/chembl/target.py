@@ -10,8 +10,8 @@ from bioetl.domain.transform.normalizers import (
 )
 
 
-class TargetSchema(BaseGeneratedColumnsSchema):
-    """Schema for biological target data."""
+class TargetTableSchema(BaseGeneratedColumnsSchema):
+    """Schema for biological target table (pipeline output)."""
 
     target_chembl_id: Series[str] = pa.Field(
         str_matches=CHEMBL_ID_REGEX.pattern, description="ChEMBL ID таргета"

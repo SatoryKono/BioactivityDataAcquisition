@@ -5,7 +5,7 @@ import pytest
 from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
-from bioetl.domain.schemas.chembl.document import DocumentSchema
+from bioetl.domain.schemas.chembl.document import DocumentTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
@@ -14,7 +14,7 @@ from bioetl.domain.schemas.chembl.output_views import (
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
 )
-from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
 
 @pytest.mark.parametrize(
@@ -22,9 +22,9 @@ from bioetl.domain.schemas.chembl.target import TargetSchema
     [
         (ACTIVITY_OUTPUT_COLUMNS, ActivityTableSchema),
         (ASSAY_OUTPUT_COLUMNS, AssayTableSchema),
-        (DOCUMENT_OUTPUT_COLUMNS, DocumentSchema),
+        (DOCUMENT_OUTPUT_COLUMNS, DocumentTableSchema),
         (MOLECULE_OUTPUT_COLUMNS, MoleculeTableSchema),
-        (TARGET_OUTPUT_COLUMNS, TargetSchema),
+        (TARGET_OUTPUT_COLUMNS, TargetTableSchema),
     ],
 )
 def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:

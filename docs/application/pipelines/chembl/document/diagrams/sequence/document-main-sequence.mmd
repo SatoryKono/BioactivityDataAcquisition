@@ -7,7 +7,7 @@ sequenceDiagram
     participant DataClient as ChemblDataClientHTTPImpl
     participant Enrich as OpenAlex/SemanticScholar Client
     participant Transformer as DocumentTransformer
-    participant Validator as ValidationService(DocumentSchema)
+    participant Validator as ValidationService(DocumentTableSchema)
     participant Writer as UnifiedOutputWriter
 
     CLI->>Orchestrator: run("document_chembl")

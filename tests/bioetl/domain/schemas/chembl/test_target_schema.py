@@ -2,12 +2,12 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
 
 @pytest.fixture
 def valid_target_df() -> pd.DataFrame:
-    schema = TargetSchema.to_schema()
+    schema = TargetTableSchema.to_schema()
     data = {column: [None] for column in schema.columns}
     data.update(
         {
@@ -25,7 +25,7 @@ def valid_target_df() -> pd.DataFrame:
 
 
 def test_target_schema_accepts_valid_frame(valid_target_df: pd.DataFrame) -> None:
-    validated = TargetSchema.validate(valid_target_df)
+    validated = TargetTableSchema.validate(valid_target_df)
     for column in [
         "target_chembl_id",
         "target_type",
@@ -48,7 +48,7 @@ def test_target_schema_rejects_bad_chembl(valid_target_df: pd.DataFrame) -> None
     invalid["target_chembl_id"] = ["TARGET-1"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        TargetSchema.validate(invalid, lazy=True)
+        TargetTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "target_chembl_id" in failure_cases["column"].unique()
@@ -60,7 +60,7 @@ def test_target_schema_rejects_bad_uniprot(valid_target_df: pd.DataFrame) -> Non
     invalid["uniprot_id"] = ["123"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        TargetSchema.validate(invalid, lazy=True)
+        TargetTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "uniprot_id" in failure_cases["column"].tolist()
@@ -72,7 +72,7 @@ def test_target_schema_requires_type(valid_target_df: pd.DataFrame) -> None:
     invalid["target_type"] = [None]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        TargetSchema.validate(invalid, lazy=True)
+        TargetTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert pd.isna(
@@ -87,7 +87,7 @@ def test_target_schema_checks_metadata(valid_target_df: pd.DataFrame) -> None:
     invalid["hash_row"] = ["short"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        TargetSchema.validate(invalid, lazy=True)
+        TargetTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "hash_row" in failure_cases["column"].tolist()
@@ -99,7 +99,7 @@ def test_target_schema_rejects_non_coercible(valid_target_df: pd.DataFrame) -> N
     invalid["index"] = ["bad"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        TargetSchema.validate(invalid, lazy=True)
+        TargetTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "index" in failure_cases["column"].unique()

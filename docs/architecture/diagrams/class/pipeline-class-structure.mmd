@@ -8,9 +8,7 @@ class PipelineBase {
     +transform()* DataFrame
     +validate(df) DataFrame
     +write(df, path, context) WriteResult
-    #_hooks_manager: HooksManager
-    #_error_policy_manager: ErrorPolicyManager
-    #_stage_runner: StageRunnerFacade
+    #_runtime_manager: StageRuntimeManagerImpl
     #_extractor: ExtractorABC
     #_transformer: TransformerABC
     #_post_transformer: TransformerABC
@@ -25,22 +23,13 @@ class ChemblPipelineBase {
     +get_chembl_release()
 }
 
-class StageRunnerFacade {
+class StageRuntimeManagerImpl {
+    +notify_stage_start(stage, context)
+    +notify_stage_end(stage, result)
+    +execute_stage(stage, context, fn, on_retry)
     +process_chunk(raw_chunk, context, ...)
     +make_stage_result(stage, count, chunks)
     +handle_stage_failure(stage, results, context)
-}
-
-class HooksRegistry {
-    +notify_stage_start(stage, context)
-    +notify_stage_end(stage, result)
-    +reset()
-}
-
-class ErrorPolicyFacade {
-    +execute(stage, context, fn, on_retry)
-    +get_last_error_messages()
-    +reset()
 }
 
 class ValidationService {
@@ -97,9 +86,7 @@ PipelineBase <|-- ChemblPipelineBase
 PipelineBase o-- ValidationService : uses
 PipelineBase o-- HashService : uses
 PipelineBase o-- UnifiedOutputWriter : uses
-PipelineBase o-- HooksManager : uses
-PipelineBase o-- ErrorPolicyManager : uses
-PipelineBase o-- StageRunnerFacade : uses
+PipelineBase o-- StageRuntimeManagerImpl : uses
 PipelineBase o-- PipelineHookABC : has many
 PipelineBase o-- ErrorPolicyABC : uses
 PipelineBase o-- TransformerABC : uses
@@ -110,10 +97,8 @@ HashService ..> HasherABC : delegates
 UnifiedOutputWriter ..> WriterABC : delegates
 UnifiedOutputWriter ..> MetadataWriterABC : writes meta
 UnifiedOutputWriter ..> AtomicFileOperation : atomic IO
-HooksManager ..> PipelineHookABC : notifies
-ErrorPolicyManager ..> ErrorPolicyABC : delegates
-StageRunnerFacade ..> HooksManager : coordinates
-StageRunnerFacade ..> ErrorPolicyManager
+StageRuntimeManagerImpl ..> PipelineHookABC : notifies
+StageRuntimeManagerImpl ..> ErrorPolicyABC : delegates
 
 ChemblPipelineBase o-- ChemblExtractorImpl : builds
 ChemblPipelineBase o-- ChemblTransformerImpl : builds
@@ -125,9 +110,7 @@ class ChemblPipelineBase domainPrimary
 class ValidationService domainSecondary
 class HashService domainSecondary
 class UnifiedOutputWriter domainSecondary
-class StageRunnerFacade domainSecondary
-class HooksManager domainSecondary
-class ErrorPolicyManager domainSecondary
+class StageRuntimeManagerImpl domainSecondary
 class ChemblExtractorImpl domainSecondary
 class ChemblTransformerImpl domainSecondary
 class NormalizationServiceABC interface

@@ -74,42 +74,6 @@ exceptions:
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/domain/schemas/chembl/activity.py
-    rule_id: CLASS_SUFFIX
-    reason: "Schema classes end with Schema, not in strict list (Config/Model?)"
-    owner: chembl
-    expiry: permanent
-
-  - path: src/bioetl/domain/schemas/chembl/assay.py
-    rule_id: CLASS_SUFFIX
-    reason: "Schema classes end with Schema"
-    owner: chembl
-    expiry: permanent
-
-  - path: src/bioetl/domain/schemas/chembl/document.py
-    rule_id: CLASS_SUFFIX
-    reason: "Schema classes end with Schema"
-    owner: chembl
-    expiry: permanent
-
-  - path: src/bioetl/domain/schemas/chembl/molecule.py
-    rule_id: CLASS_SUFFIX
-    reason: "Schema classes end with Schema"
-    owner: chembl
-    expiry: permanent
-
-  - path: src/bioetl/domain/schemas/chembl/target.py
-    rule_id: CLASS_SUFFIX
-    reason: "Schema classes end with Schema"
-    owner: chembl
-    expiry: permanent
-
-  - path: src/bioetl/domain/schemas/chembl/base.py
-    rule_id: CLASS_SUFFIX
-    reason: "Base schema class retains Schema suffix for Pandera models"
-    owner: chembl
-    expiry: permanent
-
 
   - path: src/bioetl/domain/schemas/pipeline_contracts.py
     rule_id: CLASS_SUFFIX
@@ -425,6 +389,12 @@ exceptions:
     expiry: permanent
 
   - path: src/bioetl/domain/transform/normalizers/identifiers.py
+    rule_id: FUNC_PREFIX
+    reason: "Normalize methods"
+    owner: domain
+    expiry: permanent
+
+  - path: src/bioetl/domain/transform/normalizers/numeric.py
     rule_id: FUNC_PREFIX
     reason: "Normalize methods"
     owner: domain

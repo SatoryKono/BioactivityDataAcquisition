@@ -4,7 +4,7 @@ Pandera Schemas.
 
 from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 from bioetl.domain.schemas.chembl.assay import AssayTableSchema
-from bioetl.domain.schemas.chembl.document import DocumentSchema
+from bioetl.domain.schemas.chembl.document import DocumentTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
@@ -13,7 +13,7 @@ from bioetl.domain.schemas.chembl.output_views import (
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
 )
-from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 from bioetl.domain.validation.contracts import SchemaProviderABC
 
 
@@ -29,16 +29,18 @@ def register_schemas(registry: SchemaProviderABC) -> None:
     registry.register(
         "assay_output", AssayTableSchema, column_order=ASSAY_OUTPUT_COLUMNS
     )
-    registry.register("document", DocumentSchema)
-    registry.register("document_input", DocumentSchema)
+    registry.register("document", DocumentTableSchema)
+    registry.register("document_input", DocumentTableSchema)
     registry.register(
-        "document_output", DocumentSchema, column_order=DOCUMENT_OUTPUT_COLUMNS
+        "document_output", DocumentTableSchema, column_order=DOCUMENT_OUTPUT_COLUMNS
     )
     registry.register("molecule", MoleculeTableSchema)
     registry.register("molecule_input", MoleculeTableSchema)
     registry.register(
         "molecule_output", MoleculeTableSchema, column_order=MOLECULE_OUTPUT_COLUMNS
     )
-    registry.register("target", TargetSchema)
-    registry.register("target_input", TargetSchema)
-    registry.register("target_output", TargetSchema, column_order=TARGET_OUTPUT_COLUMNS)
+    registry.register("target", TargetTableSchema)
+    registry.register("target_input", TargetTableSchema)
+    registry.register(
+        "target_output", TargetTableSchema, column_order=TARGET_OUTPUT_COLUMNS
+    )

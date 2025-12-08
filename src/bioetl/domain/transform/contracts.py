@@ -162,15 +162,6 @@ class HashServiceABC(ABC):
         """Сбрасывает внутреннее состояние между запусками."""
 
 
-class NormalizationServiceFactoryABC(Protocol):
-    """Factory for producing normalization services for pipelines."""
-
-    def create_normalization_service(
-        self, config: Any, *, provider_id: str | None = None
-    ) -> NormalizationServiceABC:
-        """Return normalization service configured for provider/pipeline."""
-
-
 __all__ = [
     "BaseNormalizationServiceABC",
     "NormalizationConfig",
@@ -178,5 +169,4 @@ __all__ = [
     "HasherABC",
     "NormalizationServiceABC",
     "HashServiceABC",
-    "NormalizationServiceFactoryABC",
 ]

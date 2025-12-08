@@ -8,8 +8,8 @@ import pytest
 from bioetl.domain.transform.normalizers import (
     CUSTOM_FIELD_NORMALIZERS,
     normalize_array,
-    normalize_clinical_phase,
     normalize_chembl_id,
+    normalize_clinical_phase,
     normalize_doi,
     normalize_pcid,
     normalize_pmid,
@@ -117,6 +117,7 @@ class TestNormalizeClinicalPhase:
             (3.0, 3),
             (-1, None),
             (5, None),
+            (1.5, None),
             ("", None),
             (None, None),
             (pd.NA, None),
@@ -128,7 +129,6 @@ class TestNormalizeClinicalPhase:
     @pytest.mark.parametrize(
         "value",
         [
-            1.5,
             "phase2",
             object(),
         ],

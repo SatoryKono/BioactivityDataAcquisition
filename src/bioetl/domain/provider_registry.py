@@ -41,18 +41,13 @@ class ProviderAlreadyRegisteredError(ProviderRegistryError):
 
 @runtime_checkable
 class ProviderRegistryABC(Protocol):
-    """Port defining read access to provider definitions."""
+    """Port defining read/write access to provider definitions."""
 
     def get_provider(self, provider_id: ProviderId) -> ProviderDefinition:
         """Fetch provider definition by id."""
 
     def list_providers(self) -> list[ProviderDefinition]:
         """Return all registered provider definitions."""
-
-
-@runtime_checkable
-class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
-    """Mutable port for registering provider definitions."""
 
     def register_provider(self, definition: ProviderDefinition) -> None:
         """Register a provider definition."""
@@ -67,21 +62,49 @@ class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
 
 
 @runtime_checkable
+class MutableProviderRegistryABC(ProviderRegistryABC, Protocol):
+    """Mutable provider registry port (default: InMemoryProviderRegistry).
+
+    Public interface:
+        register_provider(definition) -> None
+        reset_provider_registry() -> None
+        restore_provider_registry(definitions) -> None
+
+    This ABC resides in ``bioetl.domain.provider_registry`` and defaults to
+    ``default_provider_registry`` which returns ``InMemoryProviderRegistry``.
+    """
+
+    def register_provider(self, definition: ProviderDefinition) -> None:
+        """Register or replace provider definition."""
+
+    def reset_provider_registry(self) -> None:
+        """Clear registry contents."""
+
+    def restore_provider_registry(
+        self, definitions: Iterable[ProviderDefinition]
+    ) -> None:
+        """Restore registry from supplied definitions."""
+
+
+@runtime_checkable
 class ProviderRegistryLoaderABC(Protocol):
-    """Loader contract for provider registry definitions (domain-level port)."""
+    """Loader contract for provider registry definitions.
+
+    This is a domain-level port used by infrastructure loaders.
+    """
 
     def get_providers(
         self,
         *,
-        registry: MutableProviderRegistryABC | None = None,
+        registry: ProviderRegistryABC | None = None,
     ) -> list[ProviderDefinition]:
-        """Return provider definitions, optionally populating supplied registry."""
+        """Return provider definitions, optionally populating registry."""
 
     def get_registry(
         self,
         *,
-        registry: MutableProviderRegistryABC | None = None,
-    ) -> MutableProviderRegistryABC:
+        registry: ProviderRegistryABC | None = None,
+    ) -> ProviderRegistryABC:
         """Populate registry and return it (compatibility helper)."""
 
 
@@ -123,11 +146,5 @@ class InMemoryProviderRegistry(MutableProviderRegistryABC):
 
 def default_provider_registry() -> ProviderRegistryABC:
     """Return default provider registry implementation."""
-
-    return InMemoryProviderRegistry()
-
-
-def default_mutable_provider_registry() -> MutableProviderRegistryABC:
-    """Return default mutable provider registry implementation."""
 
     return InMemoryProviderRegistry()

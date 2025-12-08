@@ -13,7 +13,9 @@
 - **Request builder:** `ChemblRequestBuilderImpl` (`infrastructure/clients/chembl/request_builder.py`).
 - **Response parser:** `ChemblResponseParserImpl` (`infrastructure/clients/chembl/response_parser.py`).
 - **Paginator:** `ChemblPaginatorImpl` (`infrastructure/clients/chembl/paginator.py`).
-- **Factory:** `ChemblClientFactory` (`infrastructure/clients/chembl/factories.py`) wires transport, middleware, and components.
+- **Factories:**
+  - `default_chembl_client` / `default_chembl_extraction_service` (`infrastructure/clients/chembl/factories.py`) — собирают HTTP‑клиент и сервис экстракции.
+  - Публичные точки входа `create_client` / `create_extraction_service` (`infrastructure/chembl_client.py`) используют фабрики по умолчанию.
 
 ## Policies
 

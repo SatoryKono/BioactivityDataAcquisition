@@ -12,8 +12,8 @@ import yaml
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
-    MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,
+    ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
@@ -80,7 +80,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
     def get_providers(
         self,
         *,
-        registry: MutableProviderRegistryABC | None = None,
+        registry: ProviderRegistryABC | None = None,
     ) -> list[ProviderDefinition]:
         """Get providers from YAML and register active entries."""
 
@@ -123,7 +123,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         return registered
 
     def load(
-        self, *, registry: MutableProviderRegistryABC | None = None
+        self, *, registry: ProviderRegistryABC | None = None
     ) -> list[ProviderDefinition]:
         """
         Backward-compatible alias for get_providers expected by tests and callers.
@@ -132,8 +132,8 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         return self.get_providers(registry=registry)
 
     def get_registry(
-        self, *, registry: MutableProviderRegistryABC | None = None
-    ) -> MutableProviderRegistryABC:
+        self, *, registry: ProviderRegistryABC | None = None
+    ) -> ProviderRegistryABC:
         """Get providers and return populated registry (Protocol compatibility)."""
 
         registry_to_use = registry or InMemoryProviderRegistry()
@@ -143,7 +143,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
     def _register_entry(
         self,
         entry: ProviderRegistryEntryModel,
-        registry: MutableProviderRegistryABC,
+        registry: ProviderRegistryABC,
     ) -> ProviderDefinition | None:
         try:
             module = importlib.import_module(entry.module)
@@ -212,8 +212,8 @@ def get_provider_registry(
     *,
     config_path: str | Path | None = None,
     logger: LoggingPortABC | None = None,
-    registry: MutableProviderRegistryABC | None = None,
-) -> MutableProviderRegistryABC:
+    registry: ProviderRegistryABC | None = None,
+) -> ProviderRegistryABC:
     """Utility to return populated provider registry."""
 
     loader = default_provider_registry_loader(

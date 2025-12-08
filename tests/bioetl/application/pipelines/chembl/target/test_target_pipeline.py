@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
 
 @pytest.fixture
@@ -26,9 +26,9 @@ def pipeline():
     config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
-    validation_service.get_schema.return_value = TargetSchema
+    validation_service.get_schema.return_value = TargetTableSchema
     validation_service.get_schema_columns.return_value = list(
-        TargetSchema.to_schema().columns.keys()
+        TargetTableSchema.to_schema().columns.keys()
     )
 
     normalization_service = MagicMock()

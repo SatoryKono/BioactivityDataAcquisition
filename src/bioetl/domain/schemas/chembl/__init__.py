@@ -10,18 +10,18 @@ from bioetl.domain.schemas.chembl.base import (
     BaseGeneratedColumnsSchema,
     build_output_column_order,
 )
-from bioetl.domain.schemas.chembl.document import DocumentSchema
+from bioetl.domain.schemas.chembl.document import DocumentTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
-from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
 __all__ = [
     "BaseGeneratedColumnsModel",
     "BaseGeneratedColumnsSchema",
     "ActivityTableSchema",
     "AssayTableSchema",
-    "DocumentSchema",
+    "DocumentTableSchema",
     "MoleculeTableSchema",
-    "TargetSchema",
+    "TargetTableSchema",
     "GENERATED_COLUMN_ORDER",
     "build_output_column_order",
 ]

@@ -42,6 +42,7 @@ ALLOWED_CLASS_SUFFIXES: tuple[str, ...] = (
     "Params",
     "Error",
     "Impl",
+    "Schema",
 )
 
 ALLOWED_FUNCTION_PREFIXES: tuple[str, ...] = (

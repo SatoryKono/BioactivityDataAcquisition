@@ -7,7 +7,7 @@ from typing import Any, cast
 
 import pandas as pd
 
-from bioetl.domain.contracts import BatchAdapterABC
+from bioetl.domain.ports.extraction import BatchAdapterABC
 from bioetl.domain.record_source import RawRecord
 
 

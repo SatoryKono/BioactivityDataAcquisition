@@ -13,7 +13,6 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunResult
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
-    MutableProviderRegistryABC,
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
@@ -197,11 +196,7 @@ class PipelineOrchestrator:
         if loader is None:
             return None
 
-        registry_input: MutableProviderRegistryABC | None = None
-        if isinstance(self._provider_registry, MutableProviderRegistryABC):
-            registry_input = self._provider_registry
-
-        self._provider_registry = loader.get_registry(registry=registry_input)
+        self._provider_registry = loader.get_registry(registry=self._provider_registry)
         return self._provider_registry
 
     def _resolve_registry_from_provider(self) -> ProviderRegistryABC:

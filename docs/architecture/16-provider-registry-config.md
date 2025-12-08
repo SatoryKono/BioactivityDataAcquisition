@@ -44,7 +44,7 @@ A reference sample is available at `configs/providers.example.yaml`.
 
 - Глобальный синглтон реестра удалён: `ProviderRegistryABC` должен передаваться явно в `PipelineOrchestrator`/контейнер.
 - Типовой путь: через `ProviderLoaderProtocol` (`create_provider_loader(...).load_registry(...)`) или helper `load_provider_registry`, затем передать `provider_registry` или `provider_loader` в оркестратор через контейнер.
-- В тестах и интеграциях реестр создаётся/очищается через `MutableProviderRegistryABC`; скрытые глобальные состояния не используются.
+- В тестах и интеграциях реестр создаётся/очищается через `ProviderRegistryABC`; скрытые глобальные состояния не используются.
 
 ## Error handling
 

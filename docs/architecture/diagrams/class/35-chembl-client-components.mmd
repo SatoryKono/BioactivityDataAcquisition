@@ -13,11 +13,11 @@ classDiagram
         +request_document(...)
         +request_molecule(...)
     }
-    class ChemblRequestBuilder {
+    class ChemblRequestBuilderImpl {
         +build(endpoint, filters, offset, limit) -> URL
         +inject_profile(profile_config)
     }
-    class ChemblResponseParser {
+    class ChemblResponseParserImpl {
         +parse(json_response) -> dict
         +extract_page_meta(data) -> PageMeta
     }
@@ -36,8 +36,8 @@ classDiagram
     class CircuitBreaker
 
     ChemblDataClientABC <|.. ChemblDataClientHTTPImpl
-    ChemblDataClientHTTPImpl --> ChemblRequestBuilder
-    ChemblDataClientHTTPImpl --> ChemblResponseParser
+    ChemblDataClientHTTPImpl --> ChemblRequestBuilderImpl
+    ChemblDataClientHTTPImpl --> ChemblResponseParserImpl
     ChemblDataClientHTTPImpl --> ChemblPaginatorImpl
     ChemblDataClientHTTPImpl --> UnifiedAPIClient
     UnifiedAPIClient --> RateLimiter

@@ -27,7 +27,6 @@ ALLOWED_DUPLICATE_CLASSES = {
 ALLOWED_ABCS_WITHOUT_IMPL = {
     "CLICommandABC",
     "ErrorPolicyABC",
-    "MutableProviderRegistryABC",
     "PaginatorABC",
     "PipelineContainerABC",
     "PipelineHookABC",

@@ -9,9 +9,9 @@ import pandera.pandas as pa
 from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
-from bioetl.domain.schemas.chembl.document import DocumentSchema
+from bioetl.domain.schemas.chembl.document import DocumentTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
-from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
 
 def _metadata_last(schema_cls: Type[pa.DataFrameModel]) -> list[str]:
@@ -23,9 +23,9 @@ def _metadata_last(schema_cls: Type[pa.DataFrameModel]) -> list[str]:
 
 ACTIVITY_OUTPUT_COLUMNS = _metadata_last(ActivityTableSchema)
 ASSAY_OUTPUT_COLUMNS = _metadata_last(AssayTableSchema)
-DOCUMENT_OUTPUT_COLUMNS = _metadata_last(DocumentSchema)
+DOCUMENT_OUTPUT_COLUMNS = _metadata_last(DocumentTableSchema)
 MOLECULE_OUTPUT_COLUMNS = _metadata_last(MoleculeTableSchema)
-TARGET_OUTPUT_COLUMNS = _metadata_last(TargetSchema)
+TARGET_OUTPUT_COLUMNS = _metadata_last(TargetTableSchema)
 
 __all__ = [
     "ACTIVITY_OUTPUT_COLUMNS",
