@@ -41,15 +41,8 @@ def default_chembl_client(
     Returns:
         Настроенный экземпляр клиента.
     """
-    # If client_config is not provided, create a default one
-    # Note: ChemblSourceConfig doesn't have client params directly in recent schema?
-    # We might need to extract them or use defaults.
     if client_config is None:
-        client_config = ClientConfig(
-            timeout=source_config.timeout_sec,
-            max_retries=source_config.max_retries,
-            rate_limit=source_config.rate_limit_per_sec or 10.0,
-        )
+        client_config = source_config.client.model_copy(deep=True)
 
     # Create Unified Client
     unified_client = UnifiedAPIClient(
@@ -64,8 +57,8 @@ def default_chembl_client(
     # Rate limiter for proactive limiting (in addition to middleware backoff)
     # Using explicit rate limiter in client logic
     rate_limiter = TokenBucketRateLimiterImpl(
-        rate=client_config.rate_limit,
-        capacity=max(1.0, client_config.rate_limit),
+        rate=client_config.rate_limit_per_sec,
+        capacity=max(1.0, client_config.rate_limit_per_sec),
     )
 
     return ChemblDataClientHTTPImpl(

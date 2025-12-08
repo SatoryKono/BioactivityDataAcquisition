@@ -37,7 +37,7 @@ class UnifiedAPIClient:
             base_client=self.base_client,
             max_attempts=config.max_retries,
             backoff_factor=config.backoff_factor,
-            timeout=config.timeout,
+            timeout=config.timeout_sec,
             circuit_breaker_threshold=config.circuit_breaker_threshold,
             circuit_breaker_recovery_time=config.circuit_breaker_recovery_time,
         )

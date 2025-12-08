@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import ClientConfig, PipelineConfig
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.fields import build_field_configs_from_schema
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
@@ -314,14 +314,14 @@ def _build_provider_config_from_sources(
         "api_base_url", None
     )
     if not api_base_url:
-        api_base_url = "https://www.ebi.ac.uk/chembl/api/data"
+        api_base_url = _resolve_base_url(provider, defaults=defaults)
 
+    runtime_client = transformed.get("client", {})
+    source_client = chembl_source.get("client", {})
     provider_config: dict[str, Any] = {
         "provider": provider,
         "base_url": api_base_url,
-        "timeout_sec": transformed.get("client", {}).get("timeout", 30.0),
-        "max_retries": transformed.get("client", {}).get("max_retries", 3),
-        "rate_limit_per_sec": transformed.get("client", {}).get("rate_limit", 10.0),
+        "client": _compose_client_config(runtime_client, source_client, defaults=defaults),
     }
 
     provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
@@ -343,10 +343,8 @@ def _build_provider_config_from_sources(
 def _default_provider_config(provider: str, *, defaults: Any) -> dict[str, Any]:
     provider_config = {
         "provider": provider,
-        "base_url": "https://www.ebi.ac.uk/chembl/api/data",
-        "timeout_sec": 30.0,
-        "max_retries": 3,
-        "rate_limit_per_sec": 10.0,
+        "base_url": _resolve_base_url(provider, defaults=defaults),
+        "client": _compose_client_config({}, {}, defaults=defaults),
     }
 
     provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
@@ -367,6 +365,39 @@ def _default_provider_config(provider: str, *, defaults: Any) -> dict[str, Any]:
             provider_config["max_url_length"] = http_defaults.default.max_url_length
 
     return provider_config
+
+
+def _compose_client_config(
+    runtime_client: dict[str, Any],
+    source_client: dict[str, Any],
+    *,
+    defaults: Any,
+) -> dict[str, Any]:
+    client_config = _resolve_http_client_defaults(defaults)
+    if runtime_client:
+        client_config = apply_deep_merge(client_config, runtime_client)
+    if source_client:
+        client_config = apply_deep_merge(client_config, source_client)
+    return client_config
+
+
+def _resolve_http_client_defaults(defaults: Any) -> dict[str, Any]:
+    network_defaults = getattr(defaults, "network", None)
+    http_defaults = getattr(network_defaults, "http", None) if network_defaults else None
+    client_defaults = getattr(http_defaults, "client", None) if http_defaults else None
+    if client_defaults is not None:
+        return client_defaults.model_dump()
+    return ClientConfig().model_dump()
+
+
+def _resolve_base_url(provider: str, *, defaults: Any) -> str:
+    provider_defaults = getattr(defaults, "get_source_default", lambda *_: None)(
+        provider
+    )
+    if provider_defaults and provider_defaults.base_url:
+        return str(provider_defaults.base_url)
+    # Fallback to known Chembl URL for backwards compatibility
+    return "https://www.ebi.ac.uk/chembl/api/data"
 
 
 def _ensure_batch_size(transformed: dict[str, Any], *, defaults: Any) -> None:
