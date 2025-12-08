@@ -71,7 +71,7 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         config=config,
         logger=container.get_logger(),
         validation_service=container.get_validation_service(),
-        loader=container.get_loader(),
+        output_writer=container.get_output_writer(),
         extraction_service=container.get_extraction_service(),
         normalization_service=container.get_normalization_service(),
         record_source=container.get_record_source(

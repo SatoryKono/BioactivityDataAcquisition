@@ -8,13 +8,12 @@ from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.application.pipelines.contracts import LoaderABC, PipelineContainerABC
+from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.hooks_impl import (
     FailFastErrorPolicyImpl,
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
-from bioetl.application.pipelines.loader_impl import FileLoaderImpl
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
@@ -51,7 +50,6 @@ class PipelineContainer(PipelineContainerABC):
         *,
         logger: LoggingPortABC | None = None,
         output_writer: OutputWriterABC | None = None,
-        loader: LoaderABC | None = None,
         writer: WriterABC | None = None,
         metadata_writer: MetadataWriterABC | None = None,
         quality_reporter: QualityReportABC | None = None,
@@ -85,7 +83,6 @@ class PipelineContainer(PipelineContainerABC):
             )
         )
         self._output_writer = output_writer or _create_noop_output_writer()
-        self._loader = loader or FileLoaderImpl(self._output_writer)
         register_schemas(self._schema_provider)
 
     def _resolve_schema_provider(
@@ -141,10 +138,6 @@ class PipelineContainer(PipelineContainerABC):
     def get_output_writer(self) -> OutputWriterABC:
         """Get the unified output writer."""
         return self._output_writer
-
-    def get_loader(self) -> LoaderABC:
-        """Get the loader component."""
-        return self._loader
 
     def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
         """Get metadata builder port."""
@@ -410,7 +403,6 @@ def build_pipeline_dependencies(
     *,
     logger: LoggingPortABC | None = None,
     output_writer: OutputWriterABC | None = None,
-    loader: LoaderABC | None = None,
     validator_factory: ValidatorFactoryABC | None = None,
     metadata_builder: RunMetadataBuilderProtocol | None = None,
     metrics_port: PipelineMetricsPortABC | None = None,
@@ -427,7 +419,6 @@ def build_pipeline_dependencies(
         config,
         logger=logger,
         output_writer=output_writer,
-        loader=loader,
         validator_factory=validator_factory,
         metadata_builder=metadata_builder,
         metrics_port=metrics_port,

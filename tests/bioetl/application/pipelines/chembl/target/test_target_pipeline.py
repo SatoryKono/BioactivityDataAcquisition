@@ -41,7 +41,7 @@ def pipeline():
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,
-        loader=MagicMock(),
+        output_writer=MagicMock(),
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
         normalization_service=normalization_service,
