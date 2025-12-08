@@ -20,7 +20,6 @@ ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
 CLICommandABC: bioetl.interfaces.cli.contracts.CLICommandABC
 
 ProviderRegistryABC: bioetl.domain.provider_registry.ProviderRegistryABC
-MutableProviderRegistryABC: bioetl.domain.provider_registry.MutableProviderRegistryABC
 
 ProgressReporterABC: bioetl.domain.clients.base.logging.contracts.ProgressReporterABC
 LoggingPortABC: bioetl.domain.observability.contracts.LoggingPortABC

@@ -2,12 +2,12 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.document import DocumentSchema
+from bioetl.domain.schemas.chembl.document import DocumentTableSchema
 
 
 @pytest.fixture
 def valid_document_df() -> pd.DataFrame:
-    schema = DocumentSchema.to_schema()
+    schema = DocumentTableSchema.to_schema()
     data = {column: [None] for column in schema.columns}
     data.update(
         {
@@ -26,7 +26,7 @@ def valid_document_df() -> pd.DataFrame:
 
 
 def test_document_schema_accepts_valid_frame(valid_document_df: pd.DataFrame) -> None:
-    validated = DocumentSchema.validate(valid_document_df)
+    validated = DocumentTableSchema.validate(valid_document_df)
     pd.testing.assert_frame_equal(
         validated,
         valid_document_df,
@@ -39,7 +39,7 @@ def test_document_schema_rejects_bad_doc_type(valid_document_df: pd.DataFrame) -
     invalid["doc_type"] = ["REPORT"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        DocumentSchema.validate(invalid, lazy=True)
+        DocumentTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "doc_type" in failure_cases["column"].tolist()
@@ -51,7 +51,7 @@ def test_document_schema_rejects_bad_regex(valid_document_df: pd.DataFrame) -> N
     invalid["document_chembl_id"] = ["bad"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        DocumentSchema.validate(invalid, lazy=True)
+        DocumentTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "document_chembl_id" in failure_cases["column"].unique()
@@ -63,7 +63,7 @@ def test_document_schema_rejects_null_required(valid_document_df: pd.DataFrame) 
     invalid["doc_type"] = [None]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        DocumentSchema.validate(invalid, lazy=True)
+        DocumentTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert pd.isna(
@@ -76,7 +76,7 @@ def test_document_schema_checks_metadata(valid_document_df: pd.DataFrame) -> Non
     invalid["hash_row"] = ["zzz"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        DocumentSchema.validate(invalid, lazy=True)
+        DocumentTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "hash_row" in failure_cases["column"].tolist()
@@ -88,7 +88,7 @@ def test_document_schema_rejects_non_coercible(valid_document_df: pd.DataFrame) 
     invalid["src_id"] = ["src"]
 
     with pytest.raises(pa.errors.SchemaErrors) as exc:
-        DocumentSchema.validate(invalid, lazy=True)
+        DocumentTableSchema.validate(invalid, lazy=True)
 
     failure_cases = exc.value.failure_cases
     assert "src_id" in failure_cases["column"].unique()

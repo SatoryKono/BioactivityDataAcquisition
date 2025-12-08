@@ -7,7 +7,7 @@ sequenceDiagram
     participant DataClient as ChemblDataClientHTTPImpl
     participant Enrich as UniProt/IUPHAR Client
     participant Transformer as TargetTransformer
-    participant Validator as ValidationService(TargetSchema)
+    participant Validator as ValidationService(TargetTableSchema)
     participant Writer as UnifiedOutputWriter
 
     CLI->>Orchestrator: run("target_chembl")

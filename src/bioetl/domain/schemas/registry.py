@@ -2,15 +2,7 @@
 Registry implementation for schema objects (technology-agnostic).
 """
 
-from dataclasses import dataclass
-
 from bioetl.domain.validation import SchemaProviderABC, schema_type
-
-
-@dataclass
-class _SchemaEntryModel:
-    schema: schema_type
-    column_order: list[str] | None = None
 
 
 class SchemaRegistry(SchemaProviderABC):
@@ -19,7 +11,8 @@ class SchemaRegistry(SchemaProviderABC):
     """
 
     def __init__(self) -> None:
-        self._schemas: dict[str, _SchemaEntryModel] = {}
+        self._schemas: dict[str, schema_type] = {}
+        self._schema_columns: dict[str, list[str] | None] = {}
 
     def register(
         self,
@@ -29,25 +22,24 @@ class SchemaRegistry(SchemaProviderABC):
         column_order: list[str] | None = None,
     ) -> None:
         """Register a schema by name."""
-        self._schemas[name] = _SchemaEntryModel(
-            schema=schema, column_order=column_order
-        )
+        self._schemas[name] = schema
+        self._schema_columns[name] = list(column_order) if column_order else None
 
     def get_schema(self, name: str) -> schema_type:
         """Get schema by name, raises ValueError if not found."""
         if name not in self._schemas:
             raise ValueError(f"Schema for '{name}' not found in registry.")
-        return self._schemas[name].schema
+        return self._schemas[name]
 
     def get_schema_columns(self, name: str) -> list[str]:
         """Return column order for schema."""
         if name not in self._schemas:
             raise ValueError(f"Schema for '{name}' not found in registry.")
-        entry = self._schemas[name]
-        if entry.column_order:
-            return list(entry.column_order)
+        column_order = self._schema_columns.get(name)
+        if column_order:
+            return list(column_order)
         # Best-effort extraction of column order if schema exposes to_schema
-        schema = entry.schema
+        schema = self._schemas[name]
         if hasattr(schema, "to_schema"):
             columns = getattr(schema, "to_schema")().columns
             if hasattr(columns, "keys"):

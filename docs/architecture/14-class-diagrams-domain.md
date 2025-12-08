@@ -199,14 +199,14 @@ classDiagram
         +description: str
     }
 
-    class DocumentSchema {
+    class DocumentTableSchema {
         +document_id: int
         +pubmed_id: int
         +doi: str
         +title: str
     }
 
-    class TargetSchema {
+    class TargetTableSchema {
         +target_id: int
         +target_type: str
         +pref_name: str
@@ -220,8 +220,8 @@ classDiagram
 
     DataFrameModel <|-- ActivityTableSchema
     DataFrameModel <|-- AssayTableSchema
-    DataFrameModel <|-- DocumentSchema
-    DataFrameModel <|-- TargetSchema
+    DataFrameModel <|-- DocumentTableSchema
+    DataFrameModel <|-- TargetTableSchema
     DataFrameModel <|-- MoleculeTableSchema
 ```
 

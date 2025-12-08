@@ -18,7 +18,6 @@ class ProviderDefinition {
   +components: ProviderComponents
 }
 class ProviderRegistryABC
-class MutableProviderRegistryABC
 class InMemoryProviderRegistry {
   +register_provider(definition)
   +get_provider(provider_id)
@@ -48,15 +47,14 @@ class ProviderRegistryEntryConfig {
 ProviderDefinition --> ProviderId
 ProviderDefinition --> BaseProviderConfig
 ProviderDefinition --> ProviderComponents
-ProviderRegistryABC <|-- MutableProviderRegistryABC
-MutableProviderRegistryABC <|-- InMemoryProviderRegistry
+ProviderRegistryABC <|-- InMemoryProviderRegistry
 ProviderRegistryError <|-- ProviderNotRegisteredError
 ProviderRegistryError <|-- ProviderAlreadyRegisteredError
 ProviderRegistryLoaderError <|-- ProviderRegistryConfigNotFoundError
 ProviderRegistryLoaderError <|-- ProviderRegistryValidationError
 ProviderRegistryLoader --> ProviderRegistryConfig
 ProviderRegistryConfig --> ProviderRegistryEntryConfig
-ProviderRegistryLoader --> MutableProviderRegistryABC : load()
+ProviderRegistryLoader --> ProviderRegistryABC : load()
 ProviderRegistryEntryConfig --> ProviderDefinition : factory()
 
 class ProviderId domainPrimary
@@ -64,7 +62,6 @@ class ProviderDefinition domainPrimary
 class BaseProviderConfig domainSecondary
 class ProviderComponents domainSecondary
 class ProviderRegistryABC interface
-class MutableProviderRegistryABC interface
 class InMemoryProviderRegistry domainSecondary
 class ProviderRegistryError domainSecondary
 class ProviderNotRegisteredError domainSecondary

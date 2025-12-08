@@ -11,9 +11,7 @@ class ChemblPipelineBase
 class ChemblExtractorImpl
 class ChemblTransformerImpl
 class ChemblExtractionServiceImpl
-class StageRunnerFacade
-class HooksManager
-class ErrorPolicyManager
+class StageRuntimeManagerImpl
 class RecordSource
 class ValidationService
 class NormalizationServiceABC
@@ -34,16 +32,12 @@ ChemblPipelineBase --> ValidationService
 ChemblPipelineBase --> NormalizationServiceABC
 ChemblPipelineBase --> HashService
 ChemblPipelineBase --> UnifiedOutputWriter
-PipelineBase --> StageRunnerFacade
-PipelineBase --> HooksManager
-PipelineBase --> ErrorPolicyManager
+PipelineBase --> StageRuntimeManagerImpl : runtime_manager
 PipelineBase --> TransformerABC : post_transformer
 PipelineBase --> ExtractorABC
 ChemblExtractorImpl --> ExtractionServiceABC
 ChemblExtractorImpl --> RecordSource
 ChemblTransformerImpl --> TransformerABC
-HooksManager --> PipelineHookABC
-ErrorPolicyManager --> ErrorPolicyABC
-StageRunnerFacade --> HooksManager
-StageRunnerFacade --> ErrorPolicyManager
+StageRuntimeManagerImpl --> PipelineHookABC
+StageRuntimeManagerImpl --> ErrorPolicyABC
 

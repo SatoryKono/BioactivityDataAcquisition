@@ -1,3 +1,5 @@
+"""CLI tool to render Mermaid diagrams to PNG using mermaid-cli."""
+
 from __future__ import annotations
 
 import argparse
@@ -18,7 +20,7 @@ _FRONT_MATTER_PATTERN = re.compile(
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Render all Mermaid (*.mmd) diagrams under the given root to PNG."
+        description="Render Mermaid (*.mmd) diagrams under root to PNG.",
     )
     parser.add_argument(
         "--root",
@@ -54,10 +56,11 @@ def _strip_front_matter(content: str) -> str:
 def _sanitize_mermaid(content: str) -> str:
     """Remove style fragments that trigger mermaid-cli parser bugs.
 
-    Some combinations of ``color:#...`` and ``font-size:...`` in ``classDef`` and
-    ``linkStyle`` definitions cause parse errors on Windows when rendered via
-    mermaid-cli 10.9.x. We strip these attributes, сохраняя остальную разметку
-    диаграммы.
+    Some combinations of ``color:#...`` and ``font-size:...`` in ``classDef``
+    and ``linkStyle`` definitions cause parse errors on Windows when rendered
+    via mermaid-cli 10.9.x.
+
+    We strip these attributes, сохраняя остальную разметку диаграммы.
     """
 
     def _sanitize_line(line: str) -> str:
@@ -88,7 +91,11 @@ def _find_diagrams(root: Path) -> list[Path]:
     return sorted(diagrams)
 
 
-def _render_diagram(path: Path, background: str, scale: float) -> tuple[bool, str]:
+def _render_diagram(
+    path: Path,
+    background: str,
+    scale: float,
+) -> tuple[bool, str]:
     try:
         raw_content = path.read_text(encoding="utf-8")
     except FileNotFoundError as exc:
@@ -105,7 +112,7 @@ def _render_diagram(path: Path, background: str, scale: float) -> tuple[bool, st
 
     tmp_in_path.write_text(content, encoding="utf-8")
 
-    print(f"[render] {path} -> {target} (tmp_in={tmp_in_path}, tmp_out={tmp_out_path})")
+    print(f"[render] {path} -> {target}")
 
     cmd = [
         _npx_command(),
@@ -130,12 +137,13 @@ def _render_diagram(path: Path, background: str, scale: float) -> tuple[bool, st
             text=True,
         )
         if not tmp_out_path.exists():
-            raise FileNotFoundError(f"rendered file missing: {tmp_out_path}")
+            msg = f"rendered file missing: {tmp_out_path}"
+            raise FileNotFoundError(msg)
         tmp_out_path.replace(target)
     except subprocess.CalledProcessError as exc:
         detail = exc.stderr or exc.stdout or str(exc)
         return False, f"mermaid-cli exit {exc.returncode}: {detail}".strip()
-    except Exception as exc:  # noqa: BLE001
+    except OSError as exc:
         return False, str(exc)
     finally:
         tmp_in_path.unlink(missing_ok=True)
@@ -148,7 +156,11 @@ def _render_diagram(path: Path, background: str, scale: float) -> tuple[bool, st
 def _render_all(paths: Iterable[Path], background: str, scale: float) -> None:
     errors: list[tuple[Path, str]] = []
     for diagram_path in paths:
-        ok, message = _render_diagram(diagram_path, background=background, scale=scale)
+        ok, message = _render_diagram(
+            diagram_path,
+            background=background,
+            scale=scale,
+        )
         if ok:
             continue
         errors.append((diagram_path, message))
@@ -159,22 +171,19 @@ def _render_all(paths: Iterable[Path], background: str, scale: float) -> None:
 
 
 def main() -> int:
+    """CLI entry point for rendering diagrams under the given root."""
+
     args = _parse_args()
     _cleanup_temp(args.root)
     diagrams = _find_diagrams(args.root)
     if not diagrams:
-        print(f"Диаграммы (*.mmd) не найдены в {args.root}", file=sys.stderr)
+        msg = f"Диаграммы (*.mmd) не найдены в {args.root}"
+        print(msg, file=sys.stderr)
         return 1
 
     try:
         _render_all(diagrams, background=args.background, scale=args.scale)
-    except subprocess.CalledProcessError as exc:
-        print(
-            f"mermaid-cli завершилась с ошибкой {exc.returncode} для {exc.cmd}",
-            file=sys.stderr,
-        )
-        return exc.returncode
-    except Exception as exc:  # noqa: BLE001
+    except RuntimeError as exc:
         print(f"Ошибка рендеринга: {exc}", file=sys.stderr)
         return 1
 

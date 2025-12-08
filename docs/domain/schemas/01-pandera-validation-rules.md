@@ -22,7 +22,7 @@ This document defines the mandatory rules and extended guidance for validating t
 
 ### Naming and placement
 
-- Class name: `<Entity>TableSchema` (e.g., `ActivityTableSchema`, `TargetSchema`).
+- Class name: `<Entity>TableSchema` (e.g., `ActivityTableSchema`, `TargetTableSchema`).
 - One file per entity under `src/bioetl/domain/schemas/<provider>/<entity>.py`.
 - Each module must export the schema class and `OUTPUT_COLUMN_ORDER`.
 - Follow project naming policies (snake_case modules, PascalCase classes, kebab-case docs).
@@ -34,7 +34,7 @@ This document defines the mandatory rules and extended guidance for validating t
 - Example:
 
   ```python
-  class TargetSchema(pa.DataFrameModel):
+  class TargetTableSchema(pa.DataFrameModel):
       target_chembl_id: Series[str] = pa.Field(
           str_matches=CHEMBL_ID_REGEX.pattern,
           description="ChEMBL ID"

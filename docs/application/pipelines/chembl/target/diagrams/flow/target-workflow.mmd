@@ -9,7 +9,7 @@ flowchart TD
     Extract --> Enrich["External enrichment\n- fetch UniProt/IUPHAR by accession\n- merge gene_name / sequence metadata"]:::stepPrimary
     Enrich --> Transform["TargetTransformer\n- normalize identifiers\n- explode multi-component families\n- enforce CHEMBL regex"]:::stepPrimary
     Transform --> Hash["Post-transform hash/index/extracted_at"]:::stepSecondary
-    Hash --> Validate["TargetSchema validation\n- target_chembl_id required\n- gene/taxonomy optional"]:::stepPrimary
+    Hash --> Validate["TargetTableSchema validation\n- target_chembl_id required\n- gene/taxonomy optional"]:::stepPrimary
     Validate --> Decision{Dry run?}:::stepDecision
     Decision -- No --> Write["UnifiedOutputWriter\nstable sort by target_chembl_id"]:::stepPrimary
     Write --> Meta["meta.yaml + QC"]:::stepSecondary

@@ -9,7 +9,7 @@ flowchart TD
     Extract --> Enrich["Literature enrichment\n- query OpenAlex/Semantic Scholar by DOI\n- capture citation_count, topics, external IDs"]:::stepPrimary
     Enrich --> Transform["DocumentTransformer\n- normalize DOI format\n- coerce year to int\n- ensure deterministic serialization"]:::stepPrimary
     Transform --> Hash["Add hash_row/hash_business_key/index/extracted_at"]:::stepSecondary
-    Hash --> Validate["DocumentSchema validation\n- document_chembl_id regex\n- year numeric\n- DOI optional"]:::stepPrimary
+    Hash --> Validate["DocumentTableSchema validation\n- document_chembl_id regex\n- year numeric\n- DOI optional"]:::stepPrimary
     Validate --> Decision{Dry run?}:::stepDecision
     Decision -- No --> Write["UnifiedOutputWriter\nstable sort by document_chembl_id\natomic CSV/Parquet"]:::stepPrimary
     Write --> Meta["meta.yaml + QC"]:::stepSecondary --> End([Success]):::stepTerminal

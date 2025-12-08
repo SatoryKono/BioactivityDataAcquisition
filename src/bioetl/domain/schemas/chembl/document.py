@@ -11,8 +11,8 @@ from bioetl.domain.transform.normalizers import (
 )
 
 
-class DocumentSchema(BaseGeneratedColumnsSchema):
-    """Schema for document/publication data."""
+class DocumentTableSchema(BaseGeneratedColumnsSchema):
+    """Schema for document/publication table (pipeline output)."""
 
     abstract: Series[str] = pa.Field(nullable=True, description="Аннотация документа")
     authors: Series[str] = pa.Field(nullable=True, description="Список авторов")
