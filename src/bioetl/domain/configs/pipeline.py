@@ -17,8 +17,6 @@ from pydantic import (
     model_validator,
 )
 
-from bioetl.domain.providers import ProviderId
-
 if TYPE_CHECKING:
     from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 
@@ -195,6 +193,10 @@ class BaseProviderConfig(BaseModel):
     @classmethod
     def validate_provider_known(cls, value: str) -> str:
         """Ensure provider identifier is known to the registry."""
+
+        # Local import avoids a hard dependency at module import time and
+        # prevents circular imports between configs and providers.
+        from bioetl.domain.providers import ProviderId
 
         known = {provider.value for provider in ProviderId}
         if value not in known:
