@@ -4,7 +4,7 @@ This guide provides step-by-step recipes for adding new providers, pipelines, an
 
 ## Adding a new provider via configs and registries
 
-1. **Define the ABC** in `src/bioetl/domain/clients/<provider>/contracts.py` using the three-layer pattern demonstrated by `ChemblDataClientABC` in `src/bioetl/domain/clients/chembl/contracts.py`. Keep the docstring structured and list the public interface.
+1. **Define the ABC** in `src/bioetl/domain/clients/<provider>/contracts.py` using the three-layer pattern demonstrated by `DataClientABC` in `src/bioetl/domain/clients/contracts.py`. Keep the docstring structured and list the public interface.
 2. **Create a default factory** in `src/bioetl/infrastructure/clients/<provider>/factories.py` that exposes `default_<provider>_<entity>()`, mirroring `src/bioetl/infrastructure/clients/chembl/factories.py`.
 3. **Implement the client** under `src/bioetl/infrastructure/clients/<provider>/impl/` with classes suffixed `Impl`. Reuse the ABC methods as in the Chembl HTTP implementations.
 4. **Register the ABC and default** in `src/bioetl/infrastructure/clients/base/abc_registry.yaml`, and map the default to the concrete Impl in `src/bioetl/infrastructure/clients/base/abc_impls.yaml`. Keep keys in `lower_snake_case`.

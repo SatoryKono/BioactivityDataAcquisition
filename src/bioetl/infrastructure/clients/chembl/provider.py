@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
@@ -19,7 +19,7 @@ from bioetl.infrastructure.transform.factories import default_normalization_serv
 
 class ChemblProviderComponentsFactory(
     ProviderComponents[
-        ChemblDataClientABC,
+        DataClientABC,
         ExtractionServiceABC,
         NormalizationServiceABC,
         object,
@@ -27,7 +27,7 @@ class ChemblProviderComponentsFactory(
 ):
     """Factory set for building ChEMBL provider components."""
 
-    def create_client(self, config: ChemblSourceConfig) -> ChemblDataClientABC:
+    def create_client(self, config: ChemblSourceConfig) -> DataClientABC:
         """Build configured ChEMBL data client."""
         return create_client(config)
 
@@ -35,7 +35,7 @@ class ChemblProviderComponentsFactory(
         self,
         config: ChemblSourceConfig,
         *,
-        client: ChemblDataClientABC | None = None,
+        client: DataClientABC | None = None,
     ) -> ExtractionServiceABC:
         """Construct extraction service with optional prebuilt client."""
         return create_extraction_service(config, client=client)
@@ -44,7 +44,7 @@ class ChemblProviderComponentsFactory(
         self,
         config: ChemblSourceConfig,
         *,
-        client: ChemblDataClientABC | None = None,
+        client: DataClientABC | None = None,
         pipeline_config: NormalizationConfigProviderProtocol | None = None,
     ) -> NormalizationServiceABC:
         """Create normalization service using pipeline configuration."""
