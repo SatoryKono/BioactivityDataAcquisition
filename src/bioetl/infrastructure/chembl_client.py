@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl.factories import (
@@ -13,14 +13,14 @@ from bioetl.infrastructure.clients.chembl.factories import (
 __all__ = ["create_client", "create_extraction_service"]
 
 
-def create_client(config: ChemblSourceConfig) -> ChemblDataClientABC:
+def create_client(config: ChemblSourceConfig) -> DataClientABC:
     """Create a fully configured ChEMBL client from source config."""
 
     return default_chembl_client(config)
 
 
 def create_extraction_service(
-    config: ChemblSourceConfig, *, client: ChemblDataClientABC | None = None
+    config: ChemblSourceConfig, *, client: DataClientABC | None = None
 ) -> ExtractionServiceABC:
     """Create extraction service using provided or default ChEMBL client."""
 

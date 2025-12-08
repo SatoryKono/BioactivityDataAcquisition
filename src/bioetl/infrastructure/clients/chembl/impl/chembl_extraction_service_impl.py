@@ -8,7 +8,7 @@ domain contracts.
 from collections.abc import Iterable
 from typing import Any
 
-from bioetl.domain.clients.chembl.contracts import ChemblDataClientABC
+from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.response_parser import (
@@ -26,7 +26,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
 
     def __init__(
         self,
-        client: ChemblDataClientABC,
+        client: DataClientABC,
         batch_size: int = 1000,
         *,
         flatten_enabled: bool = True,
@@ -54,16 +54,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         **filters: Any,
     ) -> dict[str, Any]:
         """Dispatch request to appropriate client method."""
-        dispatch = {
-            "activity": self.client.request_activity,
-            "assay": self.client.request_assay,
-            "target": self.client.request_target,
-            "document": self.client.request_document,
-            "molecule": self.client.request_molecule,
+        supported_entities = {
+            "activity",
+            "assay",
+            "target",
+            "document",
+            "molecule",
         }
-        if entity not in dispatch:
+        if entity not in supported_entities:
             raise ValueError(f"Unknown entity: {entity}")
-        return dispatch[entity](**filters)
+        return self.client.fetch(entity, **filters)
 
     def request_batch(
         self,
