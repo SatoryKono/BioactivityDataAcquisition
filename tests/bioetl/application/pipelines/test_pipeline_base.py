@@ -83,7 +83,7 @@ def test_pipeline_run_success(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     tmp_path,
     hash_service,
@@ -95,7 +95,7 @@ def test_pipeline_run_success(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
@@ -115,7 +115,7 @@ def test_pipeline_run_success(
     mock_logger.info.assert_any_call("Pipeline started", run_id=result.run_id)
 
     # Verify write called
-    mock_output_writer.write_result.assert_called_once()
+    mock_loader.load.assert_called_once()
 
 
 @pytest.mark.unit
@@ -123,7 +123,7 @@ def test_pipeline_dry_run(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     tmp_path,
     hash_service,
@@ -135,7 +135,7 @@ def test_pipeline_dry_run(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer,
+        mock_loader,
         hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
@@ -153,7 +153,7 @@ def test_pipeline_dry_run(
     assert "validate" in stage_names
     assert "write" not in stage_names
 
-    mock_output_writer.write_result.assert_not_called()
+    mock_loader.load.assert_not_called()
 
 
 @pytest.mark.unit
@@ -161,7 +161,7 @@ def test_pipeline_hooks(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     hash_service,
     default_extractor,
@@ -172,7 +172,7 @@ def test_pipeline_hooks(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer,
+        mock_loader,
         hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
@@ -197,7 +197,7 @@ def test_pipeline_error_hooks(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     hash_service,
     default_extractor,
@@ -208,7 +208,7 @@ def test_pipeline_error_hooks(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer,
+        mock_loader,
         hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
@@ -242,7 +242,7 @@ def test_error_policy_skip_stage(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     tmp_path,
     hash_service,
@@ -254,7 +254,7 @@ def test_error_policy_skip_stage(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         error_policy=ContinueOnErrorPolicyImpl(),
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
@@ -273,7 +273,7 @@ def test_error_policy_retry(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     tmp_path,
     hash_service,
@@ -285,7 +285,7 @@ def test_error_policy_retry(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
@@ -310,7 +310,7 @@ def test_error_policy_retry_callback_and_skip(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     hash_service,
     default_extractor,
@@ -320,7 +320,7 @@ def test_error_policy_retry_callback_and_skip(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         error_policy=ContinueOnErrorPolicyImpl(max_retries=1),
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
@@ -360,7 +360,7 @@ def test_error_policy_failfast_raises(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     tmp_path,
     hash_service,
@@ -371,7 +371,7 @@ def test_error_policy_failfast_raises(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         error_policy=FailFastErrorPolicyImpl(),
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
@@ -391,7 +391,7 @@ def test_hashing_logic(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     hash_service,
 ):
     """Test different scenarios for business key hashing."""
@@ -399,7 +399,7 @@ def test_hashing_logic(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_output_writer,
+        mock_loader,
     )
     transformer = HashColumnsTransformerImpl(hash_service, ["id"])
     df = pd.DataFrame({"id": [1], "val": ["x"]})
@@ -428,7 +428,7 @@ def test_pipeline_dry_run_metadata_and_stages(
     pipeline_test_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     small_pipeline_df,
     tmp_path,
@@ -441,7 +441,7 @@ def test_pipeline_dry_run_metadata_and_stages(
         config=pipeline_test_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         dataset=small_pipeline_df,
@@ -468,7 +468,7 @@ def test_post_transformer_factory_alignment(
     mock_config,
     mock_logger,
     mock_validation_service,
-    mock_output_writer,
+    mock_loader,
     mock_metadata_builder,
     hash_service,
     default_extractor,
@@ -480,7 +480,7 @@ def test_post_transformer_factory_alignment(
         config=mock_config,
         logger=mock_logger,
         validation_service=mock_validation_service,
-        output_writer=mock_output_writer,
+        loader=mock_loader,
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,

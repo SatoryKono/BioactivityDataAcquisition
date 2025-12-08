@@ -42,7 +42,7 @@ def pipeline():
         config=config,
         logger=MagicMock(),
         validation_service=validation_service,
-        output_writer=MagicMock(),
+        loader=MagicMock(),
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
         normalization_service=normalization_service,
