@@ -277,3 +277,46 @@ batch_size: 25
     assert config.output_path == "/tmp/out"  # pipeline overrides profile
     assert config.batch_size == 10
     assert config.provider_config.timeout_sec == 10
+
+
+def test_fields_populated_from_schema_when_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    providers_file = Path("tests/fixtures/configs/providers.yaml")
+    monkeypatch.setattr(
+        provider_registry_loader,
+        "DEFAULT_PROVIDERS_REGISTRY_PATH",
+        providers_file,
+    )
+    monkeypatch.setattr(
+        config_loader, "DEFAULT_PROVIDERS_REGISTRY_PATH", providers_file
+    )
+    provider_registry_loader.clear_provider_registry_cache()
+
+    pipelines_root = tmp_path / "pipelines" / "chembl"
+    pipelines_root.mkdir(parents=True)
+    config_path = pipelines_root / "activity.yaml"
+    config_path.write_text(
+        """id: chembl.activity
+provider: chembl
+entity: activity
+input_mode: auto_detect
+input_path: null
+output_path: /tmp/out
+batch_size: 5
+provider_config:
+  provider: chembl
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 30
+  max_retries: 3
+  rate_limit_per_sec: 10.0
+""",
+        encoding="utf-8",
+    )
+
+    config = get_pipeline_config_from_path(config_path)
+
+    field_names = [field["name"] for field in config.fields]
+    assert len(field_names) > 5
+    assert "action_type" in field_names
+    assert "extracted_at" in field_names
