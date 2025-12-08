@@ -1,90 +1,94 @@
 """Утилиты регистрации Pandera-схем домена."""
-
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 from typing import Any
 
-from bioetl.domain.schemas.chembl import (
-    ActivityTableSchema,
-    AssayTableSchema,
-    MoleculeTableSchema,
-    PublicationTableSchema,
-    TargetTableSchema,
-)
 from bioetl.domain.schemas.chembl.activity import (
-    OUTPUT_COLUMN_ORDER as ACTIVITY_COLUMNS,
+    ActivityTableSchema,
+    OUTPUT_COLUMN_ORDER as ACTIVITY_OUTPUT_COLUMNS,
 )
 from bioetl.domain.schemas.chembl.assay import (
-    OUTPUT_COLUMN_ORDER as ASSAY_COLUMNS,
+    AssayTableSchema,
+    OUTPUT_COLUMN_ORDER as ASSAY_OUTPUT_COLUMNS,
 )
-from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
-from bioetl.domain.schemas.registry import default_schema_provider
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
+from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
+from bioetl.domain.schemas.chembl.target import TargetTableSchema
 from bioetl.domain.validation import SchemaProviderABC
 
+__all__ = ["register_schemas"]
 
-SchemaType = type[Any]
+_SchemaDef = tuple[type[Any], Sequence[str] | None]
 
+_SCHEMA_DEFINITIONS: dict[str, _SchemaDef] = {
+    "activity": (ActivityTableSchema, ACTIVITY_OUTPUT_COLUMNS),
+    "assay": (AssayTableSchema, ASSAY_OUTPUT_COLUMNS),
+    "molecule": (MoleculeTableSchema, None),
+    "publication": (PublicationTableSchema, None),
+    "target": (TargetTableSchema, None),
+}
 
-@dataclass(frozen=True)
-class _EntitySchemaSpec:
-    """Описание схемы и её алиасов."""
-
-    entity: str
-    schema: SchemaType
-    column_order: Sequence[str] | None = None
-
-
-_ENTITY_SCHEMAS: tuple[_EntitySchemaSpec, ...] = (
-    _EntitySchemaSpec("activity", ActivityTableSchema, ACTIVITY_COLUMNS),
-    _EntitySchemaSpec("assay", AssayTableSchema, ASSAY_COLUMNS),
-    _EntitySchemaSpec("molecule", MoleculeTableSchema, None),
-    _EntitySchemaSpec("publication", PublicationTableSchema, None),
-    _EntitySchemaSpec("document", PublicationTableSchema, None),
-    _EntitySchemaSpec("target", TargetTableSchema, None),
-)
+_SCHEMA_ALIASES: dict[str, str] = {
+    "document": "publication",
+}
 
 
 def _resolve_column_order(
-    schema_cls: SchemaType, column_order: Sequence[str] | None
+    schema_cls: type[Any],
+    declared_order: Sequence[str] | None,
 ) -> list[str]:
-    if column_order is not None:
-        return list(column_order)
+    """Return column order for schema, preserving declared ordering when available."""
+    if declared_order is not None:
+        return list(declared_order)
 
     schema = schema_cls.to_schema()
     columns = getattr(schema, "columns", None)
-    if columns is None:
-        raise TypeError(f"Schema {schema_cls.__name__} does not expose columns.")
-
-    column_names = list(columns.keys())
-    metadata = [col for col in GENERATED_COLUMN_ORDER if col in column_names]
-    business = [col for col in column_names if col not in metadata]
-    return [*business, *metadata]
+    if columns is None or not hasattr(columns, "keys"):
+        raise ValueError(
+            f"Schema '{schema_cls.__name__}' does not expose ordered columns."
+        )
+    return list(columns.keys())
 
 
-def _iter_schema_aliases(entity: str) -> tuple[str, str, str]:
-    return entity, f"{entity}_input", f"{entity}_output"
+def _iter_variants(base_name: str) -> tuple[str, str, str]:
+    """Return canonical schema name aliases for pipeline stages."""
+    return base_name, f"{base_name}_input", f"{base_name}_output"
 
 
-def register_schemas(
-    schema_provider: SchemaProviderABC | None = None,
-) -> SchemaProviderABC:
+def _register_with_variants(
+    schema_provider: SchemaProviderABC,
+    schema_name: str,
+    schema_cls: type[Any],
+    column_order: list[str],
+) -> None:
+    for variant in _iter_variants(schema_name):
+        schema_provider.register(
+            variant,
+            schema_cls,
+            column_order=list(column_order),
+        )
+
+
+def register_schemas(schema_provider: SchemaProviderABC) -> SchemaProviderABC:
     """
-    Регистрирует все доступные Pandera-схемы в переданном провайдере.
+    Register all supported Pandera schemas in the provided registry.
 
-    Возвращает провайдер, в котором зарегистрированы базовые и стадиальные алиасы
-    (entity, entity_input, entity_output) для каждого пайплайна.
+    Ensures each entity name exposes schema, *_input, and *_output aliases.
     """
 
-    provider = schema_provider or default_schema_provider()
+    for entity_name in sorted(_SCHEMA_DEFINITIONS):
+        schema_cls, declared_order = _SCHEMA_DEFINITIONS[entity_name]
+        column_order = _resolve_column_order(schema_cls, declared_order)
+        _register_with_variants(schema_provider, entity_name, schema_cls, column_order)
 
-    for spec in _ENTITY_SCHEMAS:
-        column_order = _resolve_column_order(spec.schema, spec.column_order)
-        for alias in _iter_schema_aliases(spec.entity):
-            provider.register(alias, spec.schema, column_order=column_order)
+    for alias, target in sorted(_SCHEMA_ALIASES.items()):
+        if target not in _SCHEMA_DEFINITIONS:
+            msg = f"Schema alias '{alias}' references unknown target '{target}'."
+            raise ValueError(msg)
+        schema_cls, declared_order = _SCHEMA_DEFINITIONS[target]
+        column_order = _resolve_column_order(schema_cls, declared_order)
+        _register_with_variants(schema_provider, alias, schema_cls, column_order)
 
-    return provider
+    return schema_provider
 
-
-__all__ = ["register_schemas"]

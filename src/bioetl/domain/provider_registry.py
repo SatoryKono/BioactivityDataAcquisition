@@ -18,11 +18,8 @@ try:
 except ImportError as exc:
     # If stub is not available, raise informative error
     raise ImportError(
-        "bioetl.domain.provider_registry module was removed. "
-        "For tests, ensure tests.fixtures.provider_registry_stub "
-        "is available. "
-        "The stub is automatically patched via pytest_configure in "
-        "tests/conftest.py"
+        "Missing tests.fixtures.provider_registry_stub; "
+        "pytest_configure must patch provider_registry."
     ) from exc
 
 __all__ = [
