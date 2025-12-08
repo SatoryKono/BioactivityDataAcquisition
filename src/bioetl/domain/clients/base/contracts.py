@@ -1,21 +1,10 @@
-"""Base contracts for data source clients and helpers."""
+"""Base contracts for data source helpers."""
 
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from bioetl.domain.clients.contracts import DataClientABC
-
 T = TypeVar("T")
 Record = dict[str, Any]
-
-
-class SourceClientABC(DataClientABC):
-    """
-    Основной контракт клиента источника данных.
-    Наследует доменный контракт DataClientABC.
-    """
-
-    pass
 
 
 class RequestBuilderABC(ABC):
