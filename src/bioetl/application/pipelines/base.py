@@ -10,7 +10,10 @@ import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
-from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol, WriteResult
+from bioetl.domain.clients.base.output.contracts import (
+    RunMetadataBuilderProtocol,
+    WriteResult,
+)
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
