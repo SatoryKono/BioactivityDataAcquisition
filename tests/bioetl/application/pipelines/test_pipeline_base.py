@@ -34,12 +34,17 @@ class ConcretePipeline(PipelineBase):
 
     def extract(self, **_):
         """Mock extraction returning sample data."""
+        if self._extractor is not None:
+            return self._extractor.extract()
         return pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Mock transformation adding a column."""
         df["transformed"] = True
         return df
+
+    def write(self, df: pd.DataFrame, output_path: Path, context: RunContext):
+        return self._write_output(df, output_path, context)
 
 
 class DatasetPipeline(PipelineBase):
@@ -54,6 +59,9 @@ class DatasetPipeline(PipelineBase):
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.assign(processed=True)
+
+    def write(self, df: pd.DataFrame, output_path: Path, context: RunContext):
+        return self._write_output(df, output_path, context)
 
 
 @pytest.fixture
