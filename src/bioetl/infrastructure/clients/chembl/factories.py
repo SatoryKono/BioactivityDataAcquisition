@@ -6,6 +6,7 @@ from typing import Any
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
+from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
@@ -87,6 +88,7 @@ def default_chembl_extraction_service(
     client_config: ClientConfig | None = None,
     *,
     client: DataClientABC | None = None,
+    logger: LoggingPortABC | None = None,
 ) -> ExtractionServiceABC:
     """
     Создает сервис экстракции ChEMBL.
@@ -106,4 +108,5 @@ def default_chembl_extraction_service(
         client=client,
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
+        logger=logger,
     )
