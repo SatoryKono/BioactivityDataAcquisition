@@ -85,14 +85,14 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     """Create pipeline with mocked dependencies."""
     logger = MagicMock()
     validation_service = MagicMock()
-    output_writer = MagicMock()
+    loader = MagicMock()
     metadata_builder = MagicMock()
 
     return ChemblPipelineBase(
         config=mock_config,
         logger=logger,
         validation_service=validation_service,
-        output_writer=output_writer,
+        loader=loader,
         extraction_service=mock_extraction_service,
         hash_service=MagicMock(),
         normalization_service=mock_normalization_service,
