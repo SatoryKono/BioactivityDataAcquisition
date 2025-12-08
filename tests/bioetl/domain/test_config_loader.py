@@ -41,11 +41,6 @@ def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    monkeypatch.setattr(
-        config_loader,
-        "DEFAULT_PROVIDERS_REGISTRY_PATH",
-        providers_file,
-    )
     provider_registry_loader.clear_provider_registry_cache()
     with pytest.raises(ConfigValidationError):
         get_pipeline_config_from_path(path)
@@ -290,9 +285,7 @@ def test_fields_populated_from_schema_when_missing(
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    monkeypatch.setattr(
-        config_loader, "DEFAULT_PROVIDERS_REGISTRY_PATH", providers_file
-    )
+    # config_loader.DEFAULT_PROVIDERS_REGISTRY_PATH doesn't exist, removed
     provider_registry_loader.clear_provider_registry_cache()
 
     pipelines_root = tmp_path / "pipelines" / "chembl"

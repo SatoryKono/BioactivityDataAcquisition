@@ -85,7 +85,10 @@ class DefaultsConfig(BaseModel):
     hashing: HashingDefaultsConfig
     normalization: NormalizationDefaultsConfig
     network: NetworkDefaultsConfig | None = None
-    sources: Annotated[dict[str, SourceDefaultsConfig], Field(default_factory=dict)]
+    sources: Annotated[
+        dict[str, SourceDefaultsConfig],
+        Field(default_factory=dict),
+    ]
 
     model_config = ConfigDict(extra="forbid")
 

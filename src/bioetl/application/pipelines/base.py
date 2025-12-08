@@ -4,16 +4,13 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Callable, Iterable, Iterator, cast
+from typing import TYPE_CHECKING, Any, Callable, Iterable, cast
 
 import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
-from bioetl.domain.clients.base.output.contracts import (
-    RunMetadataBuilderProtocol,
-    WriteResult,
-)
+from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol, WriteResult
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
@@ -25,6 +22,10 @@ from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
+
+if TYPE_CHECKING:
+    from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+
 
 def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
     """Fallback metadata builder for cases when container is not provided."""
@@ -48,6 +49,29 @@ def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
             },
         ),
     )
+
+
+class OutputWriterLoaderAdapter(LoaderABC):
+    """Adapter that bridges legacy OutputWriterABC to LoaderABC."""
+
+    def __init__(self, output_writer: "OutputWriterABC") -> None:
+        self._output_writer = output_writer
+
+    def load(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        return self._output_writer.write_result(
+            df=df,
+            output_path=output_path,
+            entity_name=context.entity_name,
+            run_context=context,
+            column_order=column_order or [],
+        )
 
 
 class PipelineBase(ABC):
@@ -448,10 +472,8 @@ class PipelineBase(ABC):
         return "unknown"
 
     @abstractmethod
-    def extract(
-        self, **kwargs: Any
-    ) -> pd.DataFrame | Iterable[pd.DataFrame] | None:
-        """Извлекает сырые данные."""
+    def extract(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
+        """Возвращает итератор чанков исходных данных."""
 
     @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -472,6 +494,13 @@ class PipelineBase(ABC):
         context: RunContext,
     ) -> WriteResult:
         """Записывает валидированный DataFrame."""
+
+    def _write_with_loader(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+    ) -> WriteResult:
         output_schema_name = self._schema_contract.get_output_schema()
         output_columns = self._validation_service.get_schema_columns(output_schema_name)
 
@@ -481,26 +510,6 @@ class PipelineBase(ABC):
             context=context,
             column_order=output_columns,
         )
-
-    def iter_chunks(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
-        """Возвращает итератор по чанкам данных после extract."""
-
-        def _extractor_generator() -> Iterable[pd.DataFrame]:
-            self._increment_extract_call_count()
-            result = self.extract(**kwargs)
-            if result is None:
-                return
-            if isinstance(result, pd.DataFrame):
-                yield result
-                return
-            if isinstance(result, Iterable):
-                yield from result
-                return
-            raise TypeError(
-                "extract() must return a DataFrame or iterable of DataFrames."
-            )
-
-        return _extractor_generator()
 
     # === Hooks ===
 
@@ -544,6 +553,21 @@ class PipelineBase(ABC):
             context=context,
             column_order=output_columns,
         )
+    def _create_chunk_iterator(
+        self, context: RunContext, **kwargs: Any
+    ) -> Iterable[pd.DataFrame]:
+        iterator = self._runtime_manager.execute_stage(
+            "extract",
+            context,
+            lambda: self.extract(**kwargs),
+        )
+        if iterator is None:
+            return iter([])
+        if isinstance(iterator, pd.DataFrame):
+            return iter([iterator])
+        if not isinstance(iterator, Iterable):
+            return iter([])
+        return iter(iterator)
 
     def _run_stage(
         self,

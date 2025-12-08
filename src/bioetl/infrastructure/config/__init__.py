@@ -1,5 +1,6 @@
 """Configuration management (infrastructure layer)."""
 
+from bioetl.domain.errors import ConfigError, ConfigValidationError
 from bioetl.infrastructure.config.defaults_loader import (
     DefaultsConfigError,
     DefaultsFileNotFoundError,
@@ -7,9 +8,7 @@ from bioetl.infrastructure.config.defaults_loader import (
     get_defaults_config,
 )
 from bioetl.infrastructure.config.loader import (
-    ConfigError,
     ConfigFileNotFoundError,
-    ConfigValidationError,
     UnknownProviderError,
     get_pipeline_config,
     get_pipeline_config_from_path,

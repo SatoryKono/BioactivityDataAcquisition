@@ -4,6 +4,7 @@ Tests for the PipelineBase class.
 
 # pylint: disable=redefined-outer-name, protected-access
 from pathlib import Path
+from typing import Callable
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -14,6 +15,7 @@ from bioetl.application.pipelines.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
+from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import PipelineHookABC
@@ -29,39 +31,87 @@ from bioetl.domain.transform.transformers import (
 from bioetl.infrastructure.transform.factories import default_hash_service
 
 
+class ListExtractor(ExtractorABC):
+    """Extractor stub returning predefined chunks."""
+
+    def __init__(self, chunks: list[pd.DataFrame]):
+        self._chunks = chunks
+
+    def extract(self, **kwargs):  # type: ignore[override]
+        _ = kwargs
+        return list(self._chunks)
+
+
+class FunctionTransformer(TransformerABC):
+    """Transformer stub applying provided callable."""
+
+    def __init__(self, fn: Callable[[pd.DataFrame], pd.DataFrame]):
+        self._fn = fn
+
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:  # noqa: D401
+        _ = context
+        return self._fn(df)
+
+
 class ConcretePipeline(PipelineBase):
     """A concrete implementation of PipelineBase for testing."""
 
-    def extract(self, **_):
-        """Mock extraction returning sample data."""
-        if self._extractor is not None:
-            return self._extractor.extract()
-        return pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})
+    def __init__(
+        self,
+        *args,
+        extractor: ExtractorABC,
+        transformer: TransformerABC,
+        loader: LoaderABC,
+        **kwargs,
+    ):
+        super().__init__(
+            *args,
+            extractor=extractor,
+            transformer=transformer,
+            loader=loader,
+            **kwargs,
+        )
+        self._extractor = extractor
+        self._transformer = transformer
+        self._loader = loader
+
+    def extract(self, **kwargs):  # type: ignore[override]
+        return self._extractor.extract(**kwargs)
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Mock transformation adding a column."""
-        df["transformed"] = True
-        return df
+        return self._transformer.apply(df)
 
     def write(self, df: pd.DataFrame, output_path: Path, context: RunContext):
-        return self._write_output(df, output_path, context)
+        return self._loader.load(df, output_path, context)
 
 
 class DatasetPipeline(PipelineBase):
     """Pipeline that operates on a provided in-memory dataset."""
 
-    def __init__(self, *args, dataset: pd.DataFrame, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, dataset: pd.DataFrame, loader: LoaderABC, **kwargs):
+        extractor = ListExtractor([dataset.copy()])
+        transformer = FunctionTransformer(lambda frame: frame.assign(processed=True))
+        super().__init__(
+            *args,
+            extractor=extractor,
+            transformer=transformer,
+            loader=loader,
+            **kwargs,
+        )
+        self._loader = loader
         self._dataset = dataset
 
-    def extract(self, **_):
-        return self._dataset.copy()
+    def extract(self, **kwargs):  # type: ignore[override]
+        _ = kwargs
+        return [self._dataset.copy()]
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         return df.assign(processed=True)
 
     def write(self, df: pd.DataFrame, output_path: Path, context: RunContext):
-        return self._write_output(df, output_path, context)
+        return self._loader.load(df, output_path, context)
 
 
 @pytest.fixture
@@ -71,11 +121,12 @@ def hash_service():
 
 @pytest.fixture
 def default_extractor():
-    extractor = MagicMock()
-    extractor.extract.return_value = [
-        pd.DataFrame({"id": [1, 2], "val": ["x", "y"]}),
-    ]
-    return extractor
+    return ListExtractor([pd.DataFrame({"id": [1, 2], "val": ["x", "y"]})])
+
+
+@pytest.fixture
+def default_transformer():
+    return FunctionTransformer(lambda df: df.assign(transformed=True))
 
 
 @pytest.mark.unit
@@ -88,6 +139,7 @@ def test_pipeline_run_success(
     tmp_path,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Test a successful pipeline run."""
     # Arrange
@@ -99,6 +151,7 @@ def test_pipeline_run_success(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
 
     output_path = tmp_path / "output.parquet"
@@ -128,6 +181,7 @@ def test_pipeline_dry_run(
     tmp_path,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Test a dry run of the pipeline."""
     # Arrange
@@ -135,10 +189,11 @@ def test_pipeline_dry_run(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_loader,
-        hash_service,
+        loader=mock_loader,
+        hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
 
     # Act
@@ -165,6 +220,7 @@ def test_pipeline_hooks(
     mock_metadata_builder,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Test that hooks are called correctly."""
     # Arrange
@@ -172,10 +228,11 @@ def test_pipeline_hooks(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_loader,
-        hash_service,
+        loader=mock_loader,
+        hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.register_hook(mock_hook)
@@ -201,6 +258,7 @@ def test_pipeline_error_hooks(
     mock_metadata_builder,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Test that error hooks are called on failure."""
     # Arrange
@@ -208,10 +266,11 @@ def test_pipeline_error_hooks(
         mock_config,
         mock_logger,
         mock_validation_service,
-        mock_loader,
-        hash_service,
+        loader=mock_loader,
+        hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.register_hook(mock_hook)
@@ -247,6 +306,7 @@ def test_error_policy_skip_stage(
     tmp_path,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Пайплайн продолжает работу при политике SKIP."""
 
@@ -259,6 +319,7 @@ def test_error_policy_skip_stage(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
     pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
 
@@ -278,6 +339,7 @@ def test_error_policy_retry(
     tmp_path,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Пайплайн повторяет стадию при политике RETRY."""
 
@@ -290,6 +352,7 @@ def test_error_policy_retry(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
 
     pipeline._extractor.extract = MagicMock(
@@ -314,6 +377,7 @@ def test_error_policy_retry_callback_and_skip(
     mock_metadata_builder,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Политика RETRY вызывает on_retry и пропускает стадию после лимита."""
     pipeline = ConcretePipeline(
@@ -325,6 +389,7 @@ def test_error_policy_retry_callback_and_skip(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
 
     attempts = {"count": 0}
@@ -365,6 +430,7 @@ def test_error_policy_failfast_raises(
     tmp_path,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """FailFast останавливает пайплайн при первой ошибке."""
     pipeline = ConcretePipeline(
@@ -376,6 +442,7 @@ def test_error_policy_failfast_raises(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
     pipeline._extractor.extract = MagicMock(side_effect=ValueError("boom"))
 
@@ -435,8 +502,6 @@ def test_pipeline_dry_run_metadata_and_stages(
     hash_service,
 ):
     """Dry-run returns accurate stage info and metadata."""
-    extractor = MagicMock()
-    extractor.extract.return_value = [small_pipeline_df.copy()]
     pipeline = DatasetPipeline(
         config=pipeline_test_config,
         logger=mock_logger,
@@ -445,7 +510,6 @@ def test_pipeline_dry_run_metadata_and_stages(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         dataset=small_pipeline_df,
-        extractor=extractor,
     )
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)
@@ -472,6 +536,7 @@ def test_post_transformer_factory_alignment(
     mock_metadata_builder,
     hash_service,
     default_extractor,
+    default_transformer,
 ):
     """Container и PipelineBase собирают идентичную цепочку
     пост-трансформеров."""
@@ -484,6 +549,7 @@ def test_post_transformer_factory_alignment(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
+        transformer=default_transformer,
     )
 
     factory_transformer = default_post_transformer(
