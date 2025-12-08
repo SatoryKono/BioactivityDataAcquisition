@@ -6,7 +6,7 @@ import os
 from unittest.mock import patch
 
 from bioetl.infrastructure.clients.base.factories import (
-    EnvSecretProvider,
+    EnvSecretProviderImpl,
     default_cache,
     default_rate_limiter,
     default_retry_policy,
@@ -31,7 +31,7 @@ def test_default_factories():
 def test_env_secret_provider():
     """Test environment secret provider."""
     provider = default_secret_provider()
-    assert isinstance(provider, EnvSecretProvider)
+    assert isinstance(provider, EnvSecretProviderImpl)
 
     with patch.dict(os.environ, {"TEST_SECRET": "s3cret"}):
         assert provider.get_secret("TEST_SECRET") == "s3cret"

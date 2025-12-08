@@ -29,7 +29,7 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 )
 
 
-class EnvSecretProvider(SecretProviderABC):
+class EnvSecretProviderImpl(SecretProviderABC):
     """Resolve secrets from environment variables."""
 
     def get_secret(self, name: str) -> str | None:
@@ -58,7 +58,7 @@ def default_cache() -> CacheABC[Any]:
 def default_secret_provider() -> SecretProviderABC:
     """Expose the environment-backed secret provider implementation."""
 
-    return EnvSecretProvider()
+    return EnvSecretProviderImpl()
 
 
 def default_request_builder(*, base_url: str | None = None) -> RequestBuilderABC:
