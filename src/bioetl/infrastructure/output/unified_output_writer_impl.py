@@ -21,7 +21,7 @@ from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.infrastructure.output.metadata import build_run_metadata
 
 
-class UnifiedOutputWriter(OutputWriterABC):
+class UnifiedOutputWriterImpl(OutputWriterABC):
     """
     Фасад для записи результатов пайплайна.
 

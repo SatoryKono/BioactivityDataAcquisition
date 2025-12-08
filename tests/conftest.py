@@ -24,7 +24,9 @@ from bioetl.domain.configs import (
 )
 from bioetl.domain.models import RunContext
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.output.unified_writer import UnifiedOutputWriter
+from bioetl.infrastructure.output.unified_output_writer_impl import (
+    UnifiedOutputWriterImpl,
+)
 from bioetl.interfaces.observability import LoggingPortABC
 
 # Ensure src is on sys.path even if pytest pythonpath is ignored by runners
@@ -134,7 +136,7 @@ def mock_output_writer():
 
     from bioetl.domain.clients.base.output.contracts import WriteResult
 
-    writer = MagicMock(spec=UnifiedOutputWriter)
+    writer = MagicMock(spec=UnifiedOutputWriterImpl)
     writer.write_result.return_value = WriteResult(
         path=Path("/tmp/test_output.csv"),
         row_count=2,  # Default for most tests

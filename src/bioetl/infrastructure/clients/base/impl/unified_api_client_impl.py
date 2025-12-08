@@ -13,7 +13,7 @@ from bioetl.domain.configs import ClientConfig
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
-class UnifiedAPIClient:
+class UnifiedAPIClientImpl:
     """
     Унифицированный HTTP-клиент.
     Обертка над HttpClientMiddleware с конфигурацией через Pydantic.
