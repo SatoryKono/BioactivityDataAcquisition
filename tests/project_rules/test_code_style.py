@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import shutil
 import subprocess
+import sys
 
 import pytest
 
 
-def _run_tool(cmd: list[str]) -> None:
+def _run_tool(module: str, args: list[str]) -> None:
+    cmd = [sys.executable, "-m", module, *args]
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -24,14 +25,12 @@ def _run_tool(cmd: list[str]) -> None:
 
 
 @pytest.mark.parametrize(
-    "binary, args",
+    "module, args",
     [
         ("black", ["--check", "."]),
         ("isort", ["--check-only", "."]),
         ("ruff", ["check", ".", "--extend-ignore", "I001"]),
     ],
 )
-def test_code_style_tools(binary: str, args: list[str]) -> None:
-    if shutil.which(binary) is None:
-        pytest.skip(f"{binary} не установлен в окружении")
-    _run_tool([binary, *args])
+def test_code_style_tools(module: str, args: list[str]) -> None:
+    _run_tool(module, args)

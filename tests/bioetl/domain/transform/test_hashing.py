@@ -127,7 +127,7 @@ def test_golden_examples():
     """
     golden_path = Path(__file__).parent / "golden_examples.json"
     if not golden_path.exists():
-        pytest.skip("Golden examples file not found")
+        pytest.fail("Golden examples file not found")
 
     with open(golden_path, "r", encoding="utf-8") as f:
         examples = json.load(f)
@@ -137,6 +137,13 @@ def test_golden_examples():
     for ex in examples:
         record = ex["input_record"]
         bk_fields = ex["business_key_fields"]
+        expected_keys = ex["expected_canonical_json_keys"]
+        expected_bk = ex["expected_hash_business_key"]
+        expected_row = ex["expected_hash_row"]
+
+        assert expected_bk, f"Не указан expected_hash_business_key для {ex['description']}"
+        assert expected_row, f"Не указан expected_hash_row для {ex['description']}"
+        assert expected_keys, f"Не указан порядок ключей для {ex['description']}"
 
         # Calculate BK Hash manually to match old logic (list of values)
         # Simulate what compute_hash_columns does for a single row
@@ -149,6 +156,11 @@ def test_golden_examples():
         bk_serialized = canonical_json_from_record(bk_values)
         bk_hash = blake2b_hash_hex(bk_serialized.encode("utf-8"))
 
+        # Проверяем порядок ключей канонического JSON записи
+        record_canonical = canonical_json_from_record(record)
+        loaded = json.loads(record_canonical)
+        assert list(loaded.keys()) == expected_keys, f"Порядок ключей не совпадает для {ex['description']}"
+
         # Inject bk hash for row hash calculation
         record_with_hash = record.copy()
         record_with_hash["hash_business_key"] = bk_hash
@@ -158,13 +170,5 @@ def test_golden_examples():
         row_series = pd.Series(record_with_hash)
         row_hash = hasher.compute_hash_row(row_series)
 
-        # Assertions if expected provided
-        expected_bk = ex.get("expected_hash_business_key")
-        if expected_bk and "TO BE FILLED" not in expected_bk:
-            assert bk_hash == expected_bk, f"BK Hash mismatch for {ex['description']}"
-
-        expected_row = ex.get("expected_hash_row")
-        if expected_row and "TO BE FILLED" not in expected_row:
-            assert (
-                row_hash == expected_row
-            ), f"Row Hash mismatch for {ex['description']}"
+        assert bk_hash == expected_bk, f"BK Hash mismatch for {ex['description']}"
+        assert row_hash == expected_row, f"Row Hash mismatch for {ex['description']}"

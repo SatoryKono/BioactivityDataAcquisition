@@ -18,6 +18,7 @@
 - **Pipeline Base**: `src/bioetl/application/pipelines/base.py`
 - **Validation Service**: `src/bioetl/domain/validation/service.py`
 - **Unified Logger**: `src/bioetl/infrastructure/logging/impl/unified_logger.py`
+ - **Pipeline Review Checklist**: `docs/templates/pipeline-review-checklist.md`
 
 ## Легенда
 
