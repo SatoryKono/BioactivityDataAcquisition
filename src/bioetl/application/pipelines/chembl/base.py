@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from bioetl.application.pipelines.base import (
+    OutputWriterLoaderAdapter,
     PipelineBase,
     _create_default_metadata_builder,
 )
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
+from bioetl.application.pipelines.contracts import LoaderABC
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
@@ -33,7 +35,7 @@ class ChemblPipelineBase(PipelineBase):
         config: PipelineConfig,
         logger: LoggingPortABC,
         validation_service: ValidationService,
-        output_writer: OutputWriterABC,
+        loader: LoaderABC | None = None,
         extraction_service: ExtractionServiceABC,
         hash_service: HashServiceABC,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
@@ -42,6 +44,7 @@ class ChemblPipelineBase(PipelineBase):
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         post_transformer: TransformerABC | None = None,
+        output_writer: OutputWriterABC | None = None,
     ) -> None:
         self._extraction_service = extraction_service
         self._chembl_release: str | None = None
@@ -74,11 +77,17 @@ class ChemblPipelineBase(PipelineBase):
             logger=logger,
         )
 
+        resolved_loader = loader
+        if resolved_loader is None:
+            if output_writer is None:
+                raise ValueError("Loader or output_writer must be provided.")
+            resolved_loader = OutputWriterLoaderAdapter(output_writer)
+
         super().__init__(
             config=config,
             logger=logger,
             validation_service=validation_service,
-            output_writer=output_writer,
+            loader=resolved_loader,
             hash_service=hash_service,
             metadata_builder=metadata_builder or _create_default_metadata_builder(),
             extractor=extractor,
@@ -87,6 +96,10 @@ class ChemblPipelineBase(PipelineBase):
             transformer=transformer,
             post_transformer=post_transformer,
         )
+
+        self._loader = resolved_loader
+        self._extractor = extractor
+        self._transformer = transformer
 
     @staticmethod
     def _resolve_primary_key(config: PipelineConfig) -> tuple[str, str]:
@@ -146,3 +159,12 @@ class ChemblPipelineBase(PipelineBase):
         if input_mode == "csv":
             return True
         return bool(pipeline_cfg.get("skip_release_lookup"))
+
+    def extract(self, **kwargs):  # type: ignore[override]
+        return self._extractor.extract(**kwargs)
+
+    def transform(self, df):  # type: ignore[override]
+        return self._transformer.apply(df)
+
+    def write(self, df, output_path, context):  # type: ignore[override]
+        return self._write_with_loader(df, output_path, context)

@@ -1,6 +1,7 @@
 """Contracts for pipeline components."""
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import pandas as pd
@@ -8,8 +9,10 @@ import pandas as pd
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
+    WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
@@ -36,7 +39,14 @@ class LoaderABC(ABC):
     """
 
     @abstractmethod
-    def load(self, df: pd.DataFrame, **kwargs: Any) -> None:
+    def load(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
         """
         Loads data to destination.
         """
