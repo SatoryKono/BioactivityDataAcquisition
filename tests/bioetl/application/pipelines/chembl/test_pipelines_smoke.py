@@ -44,7 +44,7 @@ def common_dependencies():
     [
         ("activity", "activity_id"),
         ("assay", "assay_chembl_id"),
-        ("document", "document_chembl_id"),
+        ("publication", "document_chembl_id"),
         ("target", "target_chembl_id"),
         ("molecule", "molecule_chembl_id"),
     ],

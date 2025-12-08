@@ -12,7 +12,7 @@ PIPELINES = [
     "assay_chembl",
     "activity_chembl",
     "target_chembl",
-    "document_chembl",
+    "publication_chembl",
     "molecule_chembl",
 ]
 

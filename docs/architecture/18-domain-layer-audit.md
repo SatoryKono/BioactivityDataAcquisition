@@ -30,7 +30,7 @@
 | --- | --- | --- | --- | --- |
 | Activity | `src/bioetl/domain/schemas/chembl/activity.py` | `configs/pipelines/chembl/activity.yaml` | 45+ ������� (assay/document/molecule �����, ���������, hash) | CSV �������� `data/input/activity.csv` |
 | Assay | `src/bioetl/domain/schemas/chembl/assay.py` | `configs/pipelines/chembl/assay.yaml` | Organism, BAO id/label, �������������, target ������ | Config ��������� schema |
-| Document | `src/bioetl/domain/schemas/chembl/document.py` | `configs/pipelines/chembl/document.yaml` | DOI/PMID, ������, ���, score | ��� ������ ������������ |
+| Publication | `src/bioetl/domain/schemas/chembl/publication.py` | `configs/pipelines/chembl/publication.yaml` | DOI/PMID, ������, ���, score | ��� ������ ������������ |
 | Molecule / �TestItem� | `src/bioetl/domain/schemas/chembl/molecule.py` | `configs/pipelines/chembl/molecule.yaml` | ChEMBL/PubChem ID, ����������� ������, parent-child, �������� | Docs ���������� ��� `TestItem`, ��� � ������ `Molecule` |
 | Target | `src/bioetl/domain/schemas/chembl/target.py` | `configs/pipelines/chembl/target.yaml` | Taxonomy, organism, UniProt, ����� � assay/activity | ����������� ��������� �������� |
 | Cell / Tissue | � | � | ���� `data/input/cell.csv`, `data/input/tissue.csv` ��� ���� � �������� | ����� ����, �������� ������ ��� |

@@ -4,12 +4,12 @@ Pandera Schemas.
 
 from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 from bioetl.domain.schemas.chembl.assay import AssayTableSchema
-from bioetl.domain.schemas.chembl.document import DocumentTableSchema
+from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
-    DOCUMENT_OUTPUT_COLUMNS,
+    PUBLICATION_OUTPUT_COLUMNS,
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
 )
@@ -29,10 +29,12 @@ def register_schemas(registry: SchemaProviderABC) -> None:
     registry.register(
         "assay_output", AssayTableSchema, column_order=ASSAY_OUTPUT_COLUMNS
     )
-    registry.register("document", DocumentTableSchema)
-    registry.register("document_input", DocumentTableSchema)
+    registry.register("publication", PublicationTableSchema)
+    registry.register("publication_input", PublicationTableSchema)
     registry.register(
-        "document_output", DocumentTableSchema, column_order=DOCUMENT_OUTPUT_COLUMNS
+        "publication_output",
+        PublicationTableSchema,
+        column_order=PUBLICATION_OUTPUT_COLUMNS,
     )
     registry.register("molecule", MoleculeTableSchema)
     registry.register("molecule_input", MoleculeTableSchema)

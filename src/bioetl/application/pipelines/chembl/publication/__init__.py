@@ -1,15 +1,15 @@
-"""Stage descriptors wiring for the ChEMBL document pipeline."""
+"""Stage descriptors wiring for the ChEMBL publication pipeline."""
 
-from bioetl.application.pipelines.chembl.document.export import (
+from bioetl.application.pipelines.chembl.publication.export import (
     get_stage_descriptor as get_export_stage_descriptor,
 )
-from bioetl.application.pipelines.chembl.document.extract import (
+from bioetl.application.pipelines.chembl.publication.extract import (
     get_stage_descriptor as get_extract_stage_descriptor,
 )
-from bioetl.application.pipelines.chembl.document.transform import (
+from bioetl.application.pipelines.chembl.publication.transform import (
     get_stage_descriptor as get_transform_stage_descriptor,
 )
-from bioetl.application.pipelines.chembl.document.validate import (
+from bioetl.application.pipelines.chembl.publication.validate import (
     get_stage_descriptor as get_validate_stage_descriptor,
 )
 

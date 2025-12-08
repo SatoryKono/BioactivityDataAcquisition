@@ -10,7 +10,7 @@ from bioetl.domain.schemas.chembl.base import (
     BaseGeneratedColumnsSchema,
     build_output_column_order,
 )
-from bioetl.domain.schemas.chembl.document import DocumentTableSchema
+from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.target import TargetTableSchema
 
@@ -19,7 +19,7 @@ __all__ = [
     "BaseGeneratedColumnsSchema",
     "ActivityTableSchema",
     "AssayTableSchema",
-    "DocumentTableSchema",
+    "PublicationTableSchema",
     "MoleculeTableSchema",
     "TargetTableSchema",
     "GENERATED_COLUMN_ORDER",

@@ -1,13 +1,13 @@
-"""Заглушка стадии validate для ChEMBL Document."""
+"""Заглушка стадии export для ChEMBL Publication."""
 
 from typing import Final
 
 from bioetl.application.pipelines.chembl.stage_metadata import build_stage_descriptor
 
 PROVIDER_NAME: Final[str] = "chembl"
-ENTITY_NAME: Final[str] = "document"
-PIPELINE_ID: Final[str] = "document_chembl"
-STAGE_NAME: Final[str] = "validate"
+ENTITY_NAME: Final[str] = "publication"
+PIPELINE_ID: Final[str] = "publication_chembl"
+STAGE_NAME: Final[str] = "export"
 
 
 get_stage_descriptor = build_stage_descriptor(

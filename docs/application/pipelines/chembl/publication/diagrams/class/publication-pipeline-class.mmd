@@ -1,9 +1,9 @@
 classDiagram
-    class DocumentPipeline {
+    class PublicationPipeline {
         <<ChemblPipelineBase>>
-        +entity = "document"
+        +entity = "publication"
         -extraction_service : ChemblExtractionServiceImpl
-        -transformer : DocumentTransformer
+        -transformer : PublicationTransformer
         -enrichment_service : LiteratureEnrichmentService
         -validation_service : ValidationService
         -output_writer : UnifiedOutputWriter
@@ -16,16 +16,16 @@ classDiagram
         -semantic_client : UnifiedAPIClient
     }
 
-    class DocumentTransformer {
+    class PublicationTransformer {
         <<ChemblTransformerImpl>>
         +merge_enrichment(df, enrichment) -> DataFrame
         -_normalize_doi()
         -_coerce_year()
     }
 
-    DocumentPipeline o-- ChemblExtractionServiceImpl
-    DocumentPipeline o-- LiteratureEnrichmentService
-    DocumentPipeline o-- DocumentTransformer
-    DocumentPipeline o-- ValidationService
-    DocumentPipeline o-- UnifiedOutputWriter
+    PublicationPipeline o-- ChemblExtractionServiceImpl
+    PublicationPipeline o-- LiteratureEnrichmentService
+    PublicationPipeline o-- PublicationTransformer
+    PublicationPipeline o-- ValidationService
+    PublicationPipeline o-- UnifiedOutputWriter
 
