@@ -25,6 +25,9 @@ class StubContainer(PipelineContainerABC):
     def get_validation_service(self) -> str:
         return "validation"
 
+    def get_loader(self) -> str:
+        return "loader"
+
     def get_output_writer(self) -> str:
         return "writer"
 
@@ -111,7 +114,7 @@ def _assert_dependencies(
     expected_deps = {
         "logger": "logger",
         "validation_service": "validation",
-        "output_writer": "writer",
+        "loader": "loader",
         "extraction_service": "extraction",
         "normalization_service": "normalization",
         "record_source": "record_source",

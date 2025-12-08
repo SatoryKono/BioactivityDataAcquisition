@@ -4,11 +4,11 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Iterable, cast
+from typing import Any, Callable, Iterable, cast
 
 import pandas as pd
 
-from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
@@ -25,10 +25,6 @@ from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-
-if TYPE_CHECKING:
-    from bioetl.domain.clients.base.output.contracts import OutputWriterABC
-
 
 def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
     """Fallback metadata builder for cases when container is not provided."""
@@ -69,7 +65,7 @@ class PipelineBase(ABC):
         config: PipelineConfig,
         logger: LoggingPortABC,
         validation_service: ValidationService,
-        output_writer: "OutputWriterABC",
+        loader: LoaderABC,
         hash_service: HashServiceABC,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         extractor: ExtractorABC | None = None,
@@ -86,7 +82,7 @@ class PipelineBase(ABC):
             pipeline=config.id,
         )
         self._validation_service = validation_service
-        self._output_writer = output_writer
+        self._loader = loader
         self._hash_service = hash_service
         self._metadata_builder = metadata_builder or _create_default_metadata_builder()
         self._extractor = extractor
@@ -468,6 +464,15 @@ class PipelineBase(ABC):
         context: RunContext,
     ) -> WriteResult:
         """Записывает валидированный DataFrame."""
+        output_schema_name = self._schema_contract.get_output_schema()
+        output_columns = self._validation_service.get_schema_columns(output_schema_name)
+
+        return self._loader.load(
+            df=df,
+            output_path=output_path,
+            context=context,
+            column_order=output_columns,
+        )
 
     def iter_chunks(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
         """Возвращает итератор по чанкам данных после extract."""
