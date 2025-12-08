@@ -16,8 +16,8 @@
 
 ## End-to-end сценарий (ChEMBL)
 1. CLI-команда `bioetl run --pipeline chembl_activity` создаёт контекст запуска и загружает конфиг.
-2. ChemblClient извлекает данные по дескриптору (release, фильтры), пагинирует и передаёт батчи в ActivityTransformer.
+2. ChemblClient извлекает сырые данные (RawActivityPayload) по дескриптору (release, фильтры), пагинирует и передаёт батчи в ActivityTransformer.
 3. Transformer нормализует значения, считает `hash_business_key` и `hash_row`, сопоставляет TestItem/Target идентификаторы.
-4. ValidationService применяет ActivitySchema, формирует QC-отчёты и метрики валидации.
+4. ValidationService применяет ActivityTableSchema, формирует QC-отчёты и метрики валидации.
 5. UnifiedOutputWriter записывает таблицы в `tables/`, создаёт `meta.yaml`, формирует `quality_report_table.csv` и `correlation_report_table.csv` атомарно и вычисляет контрольные суммы.
 6. finalize_run закрывает ресурсы клиента и публикует финальное состояние RunResult.

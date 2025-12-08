@@ -11,14 +11,14 @@ classDiagram
         +validate(name, df) -> DataFrame
         +get_schema_columns(name) -> list[str]
     }
-    class ActivitySchema
-    class AssaySchema
+    class ActivityTableSchema
+    class AssayTableSchema
     class TargetSchema
     class DocumentSchema
     class TestItemSchema
 
-    SchemaRegistry --> ActivitySchema
-    SchemaRegistry --> AssaySchema
+    SchemaRegistry --> ActivityTableSchema
+    SchemaRegistry --> AssayTableSchema
     SchemaRegistry --> TargetSchema
     SchemaRegistry --> DocumentSchema
     SchemaRegistry --> TestItemSchema

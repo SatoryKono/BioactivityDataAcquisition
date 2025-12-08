@@ -2,8 +2,8 @@
 ChEMBL specific schemas.
 """
 
-from bioetl.domain.schemas.chembl.activity import ActivitySchema
-from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
+from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.base import (
     BaseGeneratedColumnsSchema,
     GENERATED_COLUMN_ORDER,
@@ -11,25 +11,25 @@ from bioetl.domain.schemas.chembl.base import (
 )
 from bioetl.domain.schemas.chembl.document import DocumentSchema
 from bioetl.domain.schemas.chembl.models import (
-    ActivityModel,
-    AssayModel,
+    RawActivityPayload,
+    RawAssayPayload,
     ChemblRecordModel,
-    MoleculeModel,
+    RawMoleculePayload,
 )
-from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 
 __all__ = [
     "BaseGeneratedColumnsSchema",
-    "ActivitySchema",
-    "AssaySchema",
+    "ActivityTableSchema",
+    "AssayTableSchema",
     "DocumentSchema",
-    "MoleculeSchema",
+    "MoleculeTableSchema",
     "TargetSchema",
     "GENERATED_COLUMN_ORDER",
     "build_output_column_order",
-    "ActivityModel",
-    "AssayModel",
+    "RawActivityPayload",
+    "RawAssayPayload",
     "ChemblRecordModel",
-    "MoleculeModel",
+    "RawMoleculePayload",
 ]

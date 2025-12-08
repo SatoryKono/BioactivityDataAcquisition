@@ -7,15 +7,15 @@ classDiagram
         -_flatten_value(value) -> Any
         -_scalar_to_str(value) -> str
     }
-    class ActivityModel {
+    class RawActivityPayload {
         +activity_properties : list|dict|None
         +ligand_efficiency : dict|None
     }
-    class AssayModel {
+    class RawAssayPayload {
         +assay_classifications : list|None
         +assay_parameters : list|None
     }
-    class MoleculeModel {
+    class RawMoleculePayload {
         +atc_classifications : list|None
         +cross_references : list|None
         +molecule_hierarchy : dict|None
@@ -24,7 +24,7 @@ classDiagram
         +molecule_synonyms : list|None
     }
 
-    ChemblRecordModel <|-- ActivityModel
-    ChemblRecordModel <|-- AssayModel
-    ChemblRecordModel <|-- MoleculeModel
+    ChemblRecordModel <|-- RawActivityPayload
+    ChemblRecordModel <|-- RawAssayPayload
+    ChemblRecordModel <|-- RawMoleculePayload
 

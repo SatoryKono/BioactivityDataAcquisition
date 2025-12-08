@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath("src"))
 print("Script started")
 
 try:
-    from bioetl.domain.schemas.chembl.activity import ActivitySchema
+    from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 
     print("Schema imported")
 except ImportError as e:
@@ -32,7 +32,7 @@ def main():
     df = pd.read_csv(path)
 
     # Get columns from schema to ensure correct order
-    schema = ActivitySchema.to_schema()
+    schema = ActivityTableSchema.to_schema()
     expected_columns = list(schema.columns.keys())
 
     print("Reordering columns...")
