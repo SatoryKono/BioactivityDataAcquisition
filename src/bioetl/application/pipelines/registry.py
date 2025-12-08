@@ -9,7 +9,7 @@ from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 PIPELINE_REGISTRY: dict[str, Type[PipelineBase]] = {
     "activity_chembl": ChemblPipelineBase,
     "assay_chembl": ChemblPipelineBase,
-    "document_chembl": ChemblPipelineBase,
+    "publication_chembl": ChemblPipelineBase,
     "target_chembl": ChemblPipelineBase,
     "molecule_chembl": ChemblPipelineBase,
 }

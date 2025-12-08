@@ -1,9 +1,9 @@
-# Document Chembl Overview
+# Publication Chembl Overview
 
 ## Pipeline
 
 - Универсальный `ChemblPipelineBase` (`src/bioetl/application/pipelines/chembl/base.py`).
-- Схема: `domain/schemas/chembl/document.py`.
+- Схема: `domain/schemas/chembl/publication.py`.
 
 ## Компоненты
 
@@ -19,9 +19,9 @@
 
 ## Связи
 
-- Документы нужны Activity/Assay для ссылок на публикации. Запись: `document.csv` + `meta.yaml` через `UnifiedOutputWriter` (атомарно, checksum).
+- Публикации нужны Activity/Assay для ссылок на источники. Запись: `document.csv` + `meta.yaml` через `UnifiedOutputWriter` (атомарно, checksum).
 
 ## Диаграммы
-- Flowchart: `docs/application/pipelines/chembl/document/diagrams/flow/document-workflow.mmd`
-- Sequence: `docs/application/pipelines/chembl/document/diagrams/sequence/document-main-sequence.mmd`
-- Class: `docs/application/pipelines/chembl/document/diagrams/class/document-pipeline-class.mmd`
+- Flowchart: `docs/application/pipelines/chembl/publication/diagrams/flow/publication-workflow.mmd`
+- Sequence: `docs/application/pipelines/chembl/publication/diagrams/sequence/publication-main-sequence.mmd`
+- Class: `docs/application/pipelines/chembl/publication/diagrams/class/publication-pipeline-class.mmd`

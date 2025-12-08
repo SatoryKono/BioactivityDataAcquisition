@@ -5,12 +5,12 @@ import pytest
 from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
 from bioetl.domain.schemas.chembl.assay import AssayTableSchema
 from bioetl.domain.schemas.chembl.base import GENERATED_COLUMN_ORDER
-from bioetl.domain.schemas.chembl.document import DocumentTableSchema
+from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
 from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
-    DOCUMENT_OUTPUT_COLUMNS,
+    PUBLICATION_OUTPUT_COLUMNS,
     MOLECULE_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
 )
@@ -22,7 +22,7 @@ from bioetl.domain.schemas.chembl.target import TargetTableSchema
     [
         (ACTIVITY_OUTPUT_COLUMNS, ActivityTableSchema),
         (ASSAY_OUTPUT_COLUMNS, AssayTableSchema),
-        (DOCUMENT_OUTPUT_COLUMNS, DocumentTableSchema),
+        (PUBLICATION_OUTPUT_COLUMNS, PublicationTableSchema),
         (MOLECULE_OUTPUT_COLUMNS, MoleculeTableSchema),
         (TARGET_OUTPUT_COLUMNS, TargetTableSchema),
     ],
@@ -46,7 +46,7 @@ def test_output_column_order_matches_schema(output_columns, schema_cls) -> None:
     [
         ACTIVITY_OUTPUT_COLUMNS,
         ASSAY_OUTPUT_COLUMNS,
-        DOCUMENT_OUTPUT_COLUMNS,
+        PUBLICATION_OUTPUT_COLUMNS,
         MOLECULE_OUTPUT_COLUMNS,
         TARGET_OUTPUT_COLUMNS,
     ],

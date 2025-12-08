@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.schemas.chembl.document import DocumentTableSchema
+from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
 from bioetl.infrastructure.transform.impl.normalize import NormalizationServiceImpl
 
 
@@ -14,9 +14,9 @@ from bioetl.infrastructure.transform.impl.normalize import NormalizationServiceI
 def pipeline():
     """Create a configured ChemblPipelineBase for testing."""
     config = MagicMock()
-    config.id = "chembl_document"
+    config.id = "chembl_publication"
     config.provider = "chembl"
-    config.entity_name = "document"
+    config.entity_name = "publication"
     config.primary_key = "document_chembl_id"
     # Mock model_dump to return dict representation if needed
     config.model_dump.return_value = {}
@@ -40,10 +40,10 @@ def pipeline():
     config.get_normalization.side_effect = lambda: config.normalization
 
     validation_service = MagicMock()
-    validation_service.get_schema.return_value = DocumentTableSchema
+    validation_service.get_schema.return_value = PublicationTableSchema
     # Default to full schema columns
     validation_service.get_schema_columns.return_value = list(
-        DocumentTableSchema.to_schema().columns.keys()
+        PublicationTableSchema.to_schema().columns.keys()
     )
 
     normalization_service = NormalizationServiceImpl(config)

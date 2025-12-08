@@ -1,4 +1,4 @@
-"""Pandera schema for ChEMBL document data."""
+"""Pandera schema for ChEMBL publication data."""
 
 import pandera as pa
 from pandera.typing import Series
@@ -11,8 +11,8 @@ from bioetl.domain.transform.normalizers import (
 )
 
 
-class DocumentTableSchema(BaseGeneratedColumnsSchema):
-    """Schema for document/publication table (pipeline output)."""
+class PublicationTableSchema(BaseGeneratedColumnsSchema):
+    """Schema for publication table (pipeline output)."""
 
     abstract: Series[str] = pa.Field(nullable=True, description="Аннотация документа")
     authors: Series[str] = pa.Field(nullable=True, description="Список авторов")

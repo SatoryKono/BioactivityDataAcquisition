@@ -1,12 +1,12 @@
-# Document Pipeline Configuration
+# Publication Pipeline Configuration
 
-id: document_chembl
+id: publication_chembl
 provider: chembl
-entity: document
-primary_key: "${CHEMBL_DOCUMENT_PRIMARY_KEY:-document_chembl_id}"
+entity: publication
+primary_key: "${CHEMBL_PUBLICATION_PRIMARY_KEY:-document_chembl_id}"
 input_mode: id_only
-input_path: data/input/document.csv
-output_path: ./data/output/chembl/document
+input_path: data/input/publication.csv
+output_path: ./data/output/chembl/publication
 batch_size: 10
 provider_config:
   provider: chembl
@@ -25,10 +25,10 @@ csv_options:
   header: true
 
 pipeline:
-  name: document_chembl
+  name: publication_chembl
   version: "1.0.0"
   owner: "Data Acquisition Team"
-  description: "Extract document records from ChEMBL API"
+  description: "Extract publication records from ChEMBL API"
 
 fields:
   - name: abstract
@@ -53,13 +53,13 @@ fields:
     data_type: string
     is_nullable: false
     is_filterable: true
-    description: Тип документа (PUBLICATION, DATASET, PATENT и т.п.)
+    description: Тип публикации (PUBLICATION, DATASET, PATENT и т.п.)
 
   - name: document_chembl_id
     data_type: string
     is_nullable: false
     is_filterable: true
-    description: ChEMBL ID документа
+    description: ChEMBL ID публикации
 
   - name: doi
     data_type: string
@@ -131,7 +131,7 @@ fields:
     data_type: string
     is_nullable: false
     is_filterable: true
-    description: Заголовок статьи/документа
+    description: Заголовок статьи/публикации
 
   - name: volume
     data_type: string
@@ -149,7 +149,7 @@ fields:
     data_type: integer
     is_nullable: true
     is_filterable: false
-    description: ID релиза ChEMBL, в котором документ появился
+    description: ID релиза ChEMBL, в котором публикация появилась
 
 quality:
   hashing:

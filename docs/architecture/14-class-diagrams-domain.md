@@ -199,7 +199,7 @@ classDiagram
         +description: str
     }
 
-    class DocumentTableSchema {
+    class PublicationTableSchema {
         +document_id: int
         +pubmed_id: int
         +doi: str
@@ -220,7 +220,7 @@ classDiagram
 
     DataFrameModel <|-- ActivityTableSchema
     DataFrameModel <|-- AssayTableSchema
-    DataFrameModel <|-- DocumentTableSchema
+    DataFrameModel <|-- PublicationTableSchema
     DataFrameModel <|-- TargetTableSchema
     DataFrameModel <|-- MoleculeTableSchema
 ```
