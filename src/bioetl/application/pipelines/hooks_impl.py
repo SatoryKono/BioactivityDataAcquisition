@@ -8,11 +8,8 @@ from typing import Any, cast
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
+from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
-from bioetl.interfaces.observability.contracts import (
-    LoggingPortABC,
-    PipelineMetricsPortABC,
-)
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):

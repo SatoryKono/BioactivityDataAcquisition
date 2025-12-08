@@ -10,12 +10,12 @@ from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
 )
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.interfaces.observability import LoggingPortABC
 
 
 class ExtractorABC(ABC):

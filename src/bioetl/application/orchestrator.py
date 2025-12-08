@@ -11,12 +11,14 @@ from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunResult
-from bioetl.domain.provider_loader import ProviderLoaderProtocol
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     MutableProviderRegistryABC,
     ProviderRegistryABC,
+    ProviderRegistryLoaderABC,
 )
+
+ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
 
 class PipelineOrchestrator:

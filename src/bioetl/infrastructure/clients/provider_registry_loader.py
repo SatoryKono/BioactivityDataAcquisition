@@ -9,16 +9,16 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError
 import yaml
 
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     MutableProviderRegistryABC,
     ProviderAlreadyRegisteredError,
+    ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.observability.factories import default_logging_port
-from bioetl.interfaces.observability import LoggingPortABC
-from bioetl.interfaces.provider_registry.contracts import ProviderRegistryLoaderABC
 
 DEFAULT_PROVIDERS_CONFIG_PATH = Path("configs/providers.yaml")
 

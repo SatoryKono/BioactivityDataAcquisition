@@ -6,12 +6,13 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Protocol
 
-if TYPE_CHECKING:  # pragma: no cover - type checking only
+if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
 
 
 class ExtractionServiceABC(ABC):
-    """Abstract base class for data extraction services.
+    """
+    Abstract base class for data extraction services.
 
     Defines the contract for services that extract data from external sources
     and return raw record dictionaries.
@@ -19,21 +20,41 @@ class ExtractionServiceABC(ABC):
 
     @abstractmethod
     def get_release_version(self) -> str:
-        """Get the version/release identifier of the data source."""
+        """
+        Get the version/release identifier of the data source.
+
+        Returns:
+            String identifier (e.g., 'chembl_34', 'v2.1.0')
+        """
 
     @abstractmethod
     def extract_all(self, entity: str, **filters: Any) -> list["RawRecord"]:
-        """Extract all records for an entity with optional filters."""
+        """
+        Extract all records for an entity with optional filters.
+
+        Args:
+            entity: Entity name to extract (e.g., 'activity', 'assay')
+            **filters: Provider-specific filters (e.g., limit, offset)
+
+        Returns:
+            List of raw record dictionaries
+        """
 
     @abstractmethod
     def iter_extract(
-        self,
-        entity: str,
-        *,
-        chunk_size: int | None = None,
-        **filters: Any,
+        self, entity: str, *, chunk_size: int | None = None, **filters: Any
     ) -> Iterable[list["RawRecord"]]:
-        """Stream records for an entity in raw record batches."""
+        """
+        Stream records for an entity in raw record batches.
+
+        Args:
+            entity: Entity name to extract (e.g., 'activity', 'assay')
+            chunk_size: Preferred chunk size for each page/batch
+            **filters: Provider-specific filters (e.g., limit, offset)
+
+        Returns:
+            Iterable of raw record lists
+        """
 
     @abstractmethod
     def request_batch(
@@ -42,33 +63,65 @@ class ExtractionServiceABC(ABC):
         batch_ids: list[str],
         filter_key: str,
     ) -> dict[str, Any]:
-        """Request a batch of records by IDs."""
+        """
+        Request a batch of records by IDs.
+
+        Args:
+            entity: Entity name
+            batch_ids: List of IDs to fetch
+            filter_key: API filter key (e.g., 'activity_id__in')
+
+        Returns:
+            Raw API response dict
+        """
 
     @abstractmethod
     def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
-        """Parse raw API response into list of records."""
+        """
+        Parse raw API response into list of records.
+
+        Args:
+            raw_response: Raw response from API
+
+        Returns:
+            List of record dictionaries
+        """
 
     @abstractmethod
     def serialize_records(
-        self,
-        entity: str,
-        records: list[dict[str, Any]],
+        self, entity: str, records: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Serialize records before DataFrame creation."""
+        """
+        Serialize records (flattening, type conversion) before DataFrame creation.
+
+        Args:
+            entity: Entity name
+            records: List of raw records
+
+        Returns:
+            List of serialized records
+        """
 
 
 class BatchAdapterABC(Protocol):
-    """Protocol for adapting raw batches to list of RawRecord.
+    """
+    Protocol for adapting raw batches to list of RawRecord.
 
     Used to normalize different batch formats from extraction services
-    into the expected ``list[RawRecord]`` format.
+    into the expected list[RawRecord] format.
     """
 
     def process_batch(self, raw_batch: Any) -> list["RawRecord"]:
-        """Normalize a batch into a list of raw record mappings."""
+        """
+        Normalize a batch into a list of raw record mappings.
+
+        Args:
+            raw_batch: Raw batch from extraction service (DataFrame, dict, list, etc.)
+
+        Returns:
+            List of RawRecord dictionaries
+        """
+        ...
 
 
-__all__ = [
-    "ExtractionServiceABC",
-    "BatchAdapterABC",
-]
+__all__ = ["ExtractionServiceABC", "BatchAdapterABC"]

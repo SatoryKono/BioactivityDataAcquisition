@@ -13,10 +13,10 @@ from bioetl.application.files.csv_record_source import (
 )
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import BatchAdapterABC, ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.interfaces.observability import LoggingPortABC
 
 
 class ChemblExtractorImpl(ExtractorABC):

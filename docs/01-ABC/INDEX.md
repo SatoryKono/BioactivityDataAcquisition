@@ -9,7 +9,7 @@
   - Read port for provider definitions consumed by orchestrator and containers.
 - `MutableProviderRegistryABC` — `bioetl.domain.provider_registry.MutableProviderRegistryABC`
   - Registry with mutation helpers for loading providers from configs and tests.
-- `ProviderRegistryLoaderABC` — `bioetl.interfaces.provider_registry.contracts.ProviderRegistryLoaderABC`
+- `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
   - Loader port for provider registries used by `PipelineOrchestrator` background execution. Default factory: `bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader`. Implementation: `ProviderRegistryLoader`.
 - `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
   - Dependency container port for orchestrating pipeline assembly (logger, validation, output writer, extractor, normalization, hash, hooks, error policy).
