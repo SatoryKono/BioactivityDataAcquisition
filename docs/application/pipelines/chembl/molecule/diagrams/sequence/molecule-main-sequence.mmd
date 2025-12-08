@@ -18,7 +18,7 @@ sequenceDiagram
         Extraction-->>Pipeline: batch_df
         Pipeline->>Transformer: apply(batch_df)
         Transformer-->>Pipeline: normalized_df
-        Pipeline->>Validator: validate("chembl.testitem", normalized_df)
+        Pipeline->>Validator: validate("chembl.molecule", normalized_df)
         Validator-->>Pipeline: validated_df
         Pipeline->>Pipeline: append(validated_df)
     end

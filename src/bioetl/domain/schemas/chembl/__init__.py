@@ -18,7 +18,6 @@ from bioetl.domain.schemas.chembl.models import (
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.chembl.testitem import TestitemSchema
 
 __all__ = [
     "BaseGeneratedColumnsSchema",
@@ -27,7 +26,6 @@ __all__ = [
     "DocumentSchema",
     "MoleculeSchema",
     "TargetSchema",
-    "TestitemSchema",
     "GENERATED_COLUMN_ORDER",
     "build_output_column_order",
     "ActivityModel",

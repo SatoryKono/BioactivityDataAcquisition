@@ -104,11 +104,6 @@ exceptions:
     owner: chembl
     expiry: permanent
 
-  - path: src/bioetl/domain/schemas/chembl/testitem.py
-    rule_id: CLASS_SUFFIX
-    reason: "Schema classes end with Schema"
-    owner: chembl
-    expiry: permanent
 
   - path: src/bioetl/domain/schemas/pipeline_contracts.py
     rule_id: CLASS_SUFFIX
@@ -846,7 +841,7 @@ exceptions:
     owner: tests
     expiry: permanent
 
-  - path: tests/bioetl/application/pipelines/chembl/testitem/test_testitem_pipeline.py
+  - path: tests/bioetl/application/pipelines/chembl/molecule/test_molecule_pipeline.py
     rule_id: FUNC_PREFIX
     reason: "Test helper (pipeline)"
     owner: tests
@@ -882,11 +877,6 @@ exceptions:
     owner: tests
     expiry: permanent
 
-  - path: tests/bioetl/domain/schemas/test_testitem_schema.py
-    rule_id: FUNC_PREFIX
-    reason: "Test helper (valid_testitem_data)"
-    owner: tests
-    expiry: permanent
 
   - path: tests/bioetl/domain/test_errors.py
     rule_id: FUNC_PREFIX

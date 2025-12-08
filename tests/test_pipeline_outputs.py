@@ -48,10 +48,10 @@ _PIPELINE_CASES = [
         "document_chembl_id",
     ),
     (
-        "testitem_chembl",
-        "testitem",
-        "tests.golden.pipeline_outputs.testitem_chembl_golden",
-        "expected_testitem_records",
+        "molecule_chembl",
+        "molecule",
+        "tests.golden.pipeline_outputs.test_molecule_chembl_golden",
+        "expected_molecule_records",
         "molecule_chembl_id",
     ),
 ]
