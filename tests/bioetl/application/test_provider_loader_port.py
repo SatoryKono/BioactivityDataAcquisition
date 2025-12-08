@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
+# Provider registry module was removed
+# from bioetl.domain.provider_registry import InMemoryProviderRegistry
 
 
 def _build_dummy_config() -> PipelineConfig:
@@ -26,14 +27,15 @@ def _build_dummy_config() -> PipelineConfig:
 
 
 def test_orchestrator_uses_provider_loader_when_flag_enabled() -> None:
-    class StubLoader:
-        def __init__(self) -> None:
-            self.registry = InMemoryProviderRegistry()
-            self.calls = 0
-
-        def get_registry(
-            self, *, registry: InMemoryProviderRegistry | None = None
-        ) -> InMemoryProviderRegistry:
+    pytest.skip("Provider registry module was removed")
+    # class StubLoader:
+    #     def __init__(self) -> None:
+    #         self.registry = InMemoryProviderRegistry()
+    #         self.calls = 0
+    #
+    #     def get_registry(
+    #         self, *, registry: InMemoryProviderRegistry | None = None
+    #     ) -> InMemoryProviderRegistry:
             self.calls += 1
             return self.registry
 

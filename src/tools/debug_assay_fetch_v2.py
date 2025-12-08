@@ -3,22 +3,24 @@ import sys
 from unittest.mock import patch
 
 import pandas as pd
+from pydantic import AnyHttpUrl
 
-from bioetl.infrastructure.clients.chembl.impl import (
-    ChemblExtractionServiceImpl,
-)
+from bioetl.infrastructure.clients.chembl import impl as chembl_impl
 from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.interfaces.cli.app import app
 
-# Force unbuffered stdout
-sys.stdout.reconfigure(line_buffering=True)
+# Force unbuffered stdout when supported by the runtime
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
+
+ChemblExtractionServiceImpl = chembl_impl.ChemblExtractionServiceImpl
 
 LOGGER = default_logging_port().apply_bind(tool="debug_assay_fetch_v2")
 
 
-def debug_fetch():
+def debug_fetch() -> None:
     LOGGER.info("Inspecting input file")
     try:
         df = pd.read_csv("data/input/assay.csv", nrows=10)
@@ -33,7 +35,9 @@ def debug_fetch():
         )
 
         config = ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
+            base_url=AnyHttpUrl(
+                "https://www.ebi.ac.uk/chembl/api/data",
+            ),
         )
         service = default_chembl_extraction_service(config)
 
