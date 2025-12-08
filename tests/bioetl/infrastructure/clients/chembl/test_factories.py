@@ -12,7 +12,7 @@ from bioetl.infrastructure.clients.chembl.factories import (
 from bioetl.infrastructure.clients.chembl.impl.http_client import (
     ChemblDataClientHTTPImpl,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig
+from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
 
 
 @pytest.fixture
@@ -21,9 +21,11 @@ def source_config():
     return ChemblSourceConfig(
         base_url="https://example.com",
         max_url_length=1000,
-        timeout_sec=30,
-        max_retries=3,
-        rate_limit_per_sec=5.0,
+        client=ClientConfig(
+            timeout_sec=30,
+            max_retries=3,
+            rate_limit_per_sec=5.0,
+        ),
     )
 
 
