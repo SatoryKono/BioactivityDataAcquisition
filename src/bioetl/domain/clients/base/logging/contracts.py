@@ -2,40 +2,33 @@
 Logging contracts for the application.
 
 Defines ABCs for logging, progress reporting, and tracing.
+
+DEPRECATED: This module is deprecated. Use bioetl.domain.observability.contracts
+instead. This module provides backward compatibility aliases.
 """
 
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
-from typing import Any, Iterator, Self
+from typing import Any, Iterator
+import warnings
 
+# Import the canonical contracts from observability
+from bioetl.domain.observability.contracts import (
+    LoggingPortABC,
+    TracingPortABC,
+)
 
-class LoggerAdapterABC(ABC):
-    """
-    Интерфейс структурированного логгера.
+# Issue deprecation warning for the entire module
+warnings.warn(
+    "bioetl.domain.clients.base.logging.contracts is deprecated. "
+    "Use bioetl.domain.observability.contracts instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-    Реализация должна предоставляться инфраструктурой через DI-контейнер
-    по контракту доменного слоя.
-    """
-
-    @abstractmethod
-    def info(self, msg: str, **ctx: Any) -> None:
-        """Log info message."""
-
-    @abstractmethod
-    def error(self, msg: str, **ctx: Any) -> None:
-        """Log error message."""
-
-    @abstractmethod
-    def debug(self, msg: str, **ctx: Any) -> None:
-        """Log debug message."""
-
-    @abstractmethod
-    def warning(self, msg: str, **ctx: Any) -> None:
-        """Log warning message."""
-
-    @abstractmethod
-    def apply_bind(self, **ctx: Any) -> Self:
-        """Возвращает логгер с привязанным контекстом."""
+# Provide backward compatibility aliases
+LoggerAdapterABC = LoggingPortABC
+TracerABC = TracingPortABC
 
 
 class ProgressReporterABC(ABC):
@@ -68,26 +61,6 @@ class ProgressReporterABC(ABC):
             yield self
         finally:
             self.stop_reporting()
-
-
-class TracerABC(ABC):
-    """
-    Интерфейс распределенной трассировки.
-
-    Реализации предоставляются адаптерами инфраструктуры (трассировка).
-    """
-
-    @abstractmethod
-    def start_span(self, name: str) -> Any:
-        """Начинает спан."""
-
-    @abstractmethod
-    def end_span(self, span: Any) -> None:
-        """Завершает спан."""
-
-    @abstractmethod
-    def inject_context(self, headers: dict[str, str]) -> None:
-        """Внедряет контекст трассировки в заголовки."""
 
 
 __all__ = [

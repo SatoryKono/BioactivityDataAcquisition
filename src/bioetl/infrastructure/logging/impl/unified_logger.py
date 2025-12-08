@@ -7,11 +7,10 @@ from typing import Any, Self
 import structlog
 from structlog.stdlib import BoundLogger
 
-from bioetl.domain.clients.base.logging.contracts import LoggerAdapterABC
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.observability.contracts import LoggingPortABC
 
 
-class UnifiedLoggerImpl(LoggerAdapterABC, LoggingPortABC):
+class UnifiedLoggerImpl(LoggingPortABC):
     """Реализация структурированного логгера на базе structlog."""
 
     def __init__(self, logger: BoundLogger | None = None) -> None:

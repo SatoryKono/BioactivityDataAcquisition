@@ -11,6 +11,7 @@ from bioetl.application.pipelines.base import (
 )
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
+from bioetl.infrastructure.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
@@ -72,6 +73,7 @@ class ChemblPipelineBase(PipelineBase):
             extraction_service=extraction_service,
             normalization_service=norm_service,
             logger=logger,
+            batch_adapter=PandasBatchAdapter(),
             record_source=record_source,
             file_record_source_factory=record_source_factory,
         )

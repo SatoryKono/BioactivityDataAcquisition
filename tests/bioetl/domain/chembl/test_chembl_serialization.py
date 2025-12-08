@@ -26,7 +26,10 @@ def test_activity_model_serializes_nested_fields():
 
     # activity_properties and ligand_efficiency are in _BYPASS_FLATTEN_FIELDS
     # so they are not flattened by the model serializer
-    assert payload["activity_properties"] == [{"potency": 5, "unit": "uM"}, {"ignored": None}]
+    assert payload["activity_properties"] == [
+        {"potency": 5, "unit": "uM"},
+        {"ignored": None},
+    ]
     assert payload["ligand_efficiency"] == {"le": 0.5, "note": None}
     assert payload["standard_value"] == 7.0
 

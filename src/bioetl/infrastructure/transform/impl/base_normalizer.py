@@ -153,7 +153,10 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
             if not container_value:
                 return self._empty_value
 
-        if isinstance(container_value, (list, tuple, dict)) and allow_container_normalizer:
+        if (
+            isinstance(container_value, (list, tuple, dict))
+            and allow_container_normalizer
+        ):
             handled, direct_result = self._apply_container_normalizer(
                 container_value,
                 normalizer,

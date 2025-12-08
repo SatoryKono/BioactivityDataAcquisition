@@ -65,4 +65,3 @@ class DocumentSchema(BaseGeneratedColumnsSchema):
     title: Series[str] = pa.Field(nullable=True, description="Заголовок документа")
     volume: Series[str] = pa.Field(nullable=True, description="Том выпуска")
     year: Series[float] = pa.Field(nullable=True, description="Год публикации")
-

@@ -7,10 +7,11 @@ from typing import Any, cast
 
 import pandas as pd
 
+from bioetl.domain.contracts import BatchAdapterABC
 from bioetl.domain.record_source import RawRecord
 
 
-class PandasBatchAdapter:
+class PandasBatchAdapter(BatchAdapterABC):
     """Adapter to convert pandas DataFrame batches to raw record lists."""
 
     def adapt_batch(self, raw_batch: Any) -> list[RawRecord]:

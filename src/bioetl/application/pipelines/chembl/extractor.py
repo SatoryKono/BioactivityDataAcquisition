@@ -17,7 +17,7 @@ from bioetl.domain.record_source import (
     RecordSource,
 )
 from bioetl.domain.transform.contracts import NormalizationServiceABC
-from bioetl.infrastructure.transform.pandas_batch_adapter import PandasBatchAdapter
+from bioetl.domain.contracts import BatchAdapterABC
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -31,6 +31,7 @@ class ChemblExtractorImpl(ExtractorABC):
         extraction_service: ChemblExtractionPortABC,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
+        batch_adapter: BatchAdapterABC,
         record_source: RecordSource | None = None,
         file_record_source_factory: FileRecordSourceFactoryABC | None = None,
     ) -> None:
@@ -38,6 +39,7 @@ class ChemblExtractorImpl(ExtractorABC):
         self.extraction_service = extraction_service
         self.normalization_service = normalization_service
         self.logger = logger
+        self.batch_adapter = batch_adapter
         self.record_source = record_source
         self.file_record_source_factory = file_record_source_factory
 
@@ -195,5 +197,5 @@ class ChemblExtractorImpl(ExtractorABC):
             entity=self.config.entity_name,
             filters=filters,
             chunk_size=chunk_size,
-            batch_adapter=PandasBatchAdapter().adapt_batch,
+            batch_adapter=self.batch_adapter.adapt_batch,
         )

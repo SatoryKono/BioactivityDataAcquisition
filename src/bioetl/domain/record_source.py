@@ -69,7 +69,8 @@ class ApiRecordSource(RecordSource):
 
             if not isinstance(raw_batch, list):
                 raise TypeError(
-                    "iter_extract must yield list[RawRecord] when no batch_adapter is set."
+                    "iter_extract must yield list[RawRecord] when no batch_adapter "
+                    "is set."
                 )
 
             yield cast(list[RawRecord], raw_batch)

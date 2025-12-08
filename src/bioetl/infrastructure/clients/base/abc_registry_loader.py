@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import importlib
 from dataclasses import dataclass
+import importlib
 from pathlib import Path
 from typing import Any, Callable
 
@@ -103,4 +103,3 @@ class ABCRegistryLoader:
     def _load_yaml(path: Path) -> dict[str, Any]:
         with path.open("r", encoding="utf-8") as file:
             return yaml.safe_load(file) or {}
-

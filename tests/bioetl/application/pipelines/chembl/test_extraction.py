@@ -103,8 +103,8 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
 
     records = service.extract_all("activity")
 
-    assert records[0]["activity_properties"] == "k1:v1|k2:v2"
-    assert records[0]["ligand_efficiency"] == "le:1.1"
+    assert records[0]["activity_properties"] == [{"k1": "v1"}, {"k2": "v2"}]
+    assert records[0]["ligand_efficiency"] == {"le": 1.1}
 
 
 def test_extract_all_limit(service, mock_client):

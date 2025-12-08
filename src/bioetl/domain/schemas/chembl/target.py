@@ -39,4 +39,3 @@ class TargetSchema(BaseGeneratedColumnsSchema):
         str_matches=UNIPROT_ID_REGEX.pattern,
         description="Основной UniProt ID",
     )
-

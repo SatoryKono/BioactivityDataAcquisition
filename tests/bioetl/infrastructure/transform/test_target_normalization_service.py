@@ -57,4 +57,3 @@ def test_normalization_service_handles_target_arrays():
 
     xref_value = normalized.loc[0, "cross_references"]
     assert xref_value == "xref_id:P12345|xref_src:UniProt"
-

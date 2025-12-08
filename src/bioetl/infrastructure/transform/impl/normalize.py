@@ -208,9 +208,7 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             def _smart_normalizer(item: Any) -> Any:
                 return self._normalize_container_item(item, norm)
 
-            normalized_list = normalize_array(
-                val, item_normalizer=_smart_normalizer
-            )
+            normalized_list = normalize_array(val, item_normalizer=_smart_normalizer)
         except ValueError as exc:
             raise ValueError(
                 f"Ошибка нормализации списка в поле '{field_name}': {exc}"

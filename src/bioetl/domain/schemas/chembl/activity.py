@@ -58,9 +58,7 @@ _ACTIVITY_BUSINESS_COLUMNS: list[str] = [
     "value",
 ]
 
-OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(
-    _ACTIVITY_BUSINESS_COLUMNS
-)
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_ACTIVITY_BUSINESS_COLUMNS)
 
 
 class ActivityTableSchema(BaseGeneratedColumnsSchema):

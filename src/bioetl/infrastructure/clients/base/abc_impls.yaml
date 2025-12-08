@@ -105,6 +105,7 @@ OutputWriterABC:
     Unified: bioetl.infrastructure.output.unified_writer.UnifiedOutputWriter
 
 DataClientABC:
+  default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
   implementations:
     ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.http_client.ChemblDataClientHTTPImpl
 

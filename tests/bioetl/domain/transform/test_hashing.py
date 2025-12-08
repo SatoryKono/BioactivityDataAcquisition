@@ -141,7 +141,9 @@ def test_golden_examples():
         expected_bk = ex["expected_hash_business_key"]
         expected_row = ex["expected_hash_row"]
 
-        assert expected_bk, f"Не указан expected_hash_business_key для {ex['description']}"
+        assert (
+            expected_bk
+        ), f"Не указан expected_hash_business_key для {ex['description']}"
         assert expected_row, f"Не указан expected_hash_row для {ex['description']}"
         assert expected_keys, f"Не указан порядок ключей для {ex['description']}"
 
@@ -159,7 +161,9 @@ def test_golden_examples():
         # Проверяем порядок ключей канонического JSON записи
         record_canonical = canonical_json_from_record(record)
         loaded = json.loads(record_canonical)
-        assert list(loaded.keys()) == expected_keys, f"Порядок ключей не совпадает для {ex['description']}"
+        assert (
+            list(loaded.keys()) == expected_keys
+        ), f"Порядок ключей не совпадает для {ex['description']}"
 
         # Inject bk hash for row hash calculation
         record_with_hash = record.copy()
