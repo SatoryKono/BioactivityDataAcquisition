@@ -6,7 +6,7 @@ sequenceDiagram
     participant Extraction as ChemblExtractionService
     participant DataClient as ChemblDataClientHTTPImpl
     participant Transformer as ChemblTransformerImpl
-    participant Validator as ValidationService(TestItemSchema)
+    participant Validator as ValidationService(MoleculeTableSchema)
     participant Writer as UnifiedOutputWriter
 
     CLI->>Orchestrator: run("molecule_chembl")

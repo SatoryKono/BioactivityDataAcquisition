@@ -9,7 +9,7 @@ flowchart TD
     Start([Start molecule_chembl run]):::stepTerminal --> Extract["Extract molecule/test item records\n- /molecule endpoint\n- modes: api/csv/id_only"]:::stepPrimary
     Extract --> Transform["ChemblTransformerImpl\n- serialize atc_classifications, molecule_properties, synonyms\n- ensure parent-child links"]:::stepPrimary
     Transform --> Hash["Add hash_row/hash_business_key/index/extracted_at"]:::stepSecondary
-    Hash --> Validate["TestItem/Molecule schema validation\n- molecule_chembl_id mandatory\n- canonical_smiles nullable"]:::stepPrimary
+    Hash --> Validate["Molecule schema validation\n- molecule_chembl_id mandatory\n- canonical_smiles nullable"]:::stepPrimary
     Validate --> Decision{Dry run?}:::stepDecision
     Decision -- No --> Write["UnifiedOutputWriter\nstable sort by molecule_chembl_id\natomic CSV/Parquet"]:::stepPrimary
     Write --> Meta["meta.yaml + QC"]:::stepSecondary --> Success([Success]):::stepTerminal

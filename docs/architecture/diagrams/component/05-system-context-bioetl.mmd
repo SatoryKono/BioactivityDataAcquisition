@@ -17,7 +17,7 @@ flowchart LR
 
     subgraph BioETL["BioETL platform"]
         orchestrator["PipelineOrchestrator"]:::componentPrimary
-        pipelines["Entity-specific pipelines\nActivity/Assay/Target/Document/TestItem"]:::componentSecondary
+        pipelines["Entity-specific pipelines\nActivity/Assay/Target/Document/Molecule"]:::componentSecondary
         hooks["Logging & Metrics Hooks\n(Structured logs, Prometheus)"]:::componentSecondary
         writer["UnifiedOutputWriter\n(CSV/Parquet + meta)"]:::componentPrimary
         registry["ProviderRegistry + UnifiedAPIClient\n(rate-limit, retry)"]:::componentSecondary

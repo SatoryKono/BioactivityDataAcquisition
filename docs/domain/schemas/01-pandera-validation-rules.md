@@ -2,7 +2,7 @@
 
 ## Purpose and Scope
 
-This document defines the mandatory rules and extended guidance for validating tabular data in BioETL using Pandera 0.27+ on Python 3.14. It standardises how schemas are authored, registered, and executed through the unified `ValidationService` and the global `SchemaRegistry`. The rules apply to every pipeline and entity (Activity, Assay, Target, Document, TestItem, etc.) across all environments (development, CI, production). Objectives:
+This document defines the mandatory rules and extended guidance for validating tabular data in BioETL using Pandera 0.27+ on Python 3.14. It standardises how schemas are authored, registered, and executed through the unified `ValidationService` and the global `SchemaRegistry`. The rules apply to every pipeline and entity (Activity, Assay, Target, Document, Molecule, etc.) across all environments (development, CI, production). Objectives:
 
 - Provide an executable specification of table structure via Pandera schemas.
 - Increase resilience to upstream data defects.

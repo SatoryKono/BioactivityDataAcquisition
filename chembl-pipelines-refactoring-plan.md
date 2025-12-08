@@ -2,7 +2,7 @@
 
 ## 1. Goals
 
-- Align all ChEMBL pipelines (`activity`, `assay`, `document`, `target`, `testitem`, `molecule`) with:
+- Align all ChEMBL pipelines (`activity`, `assay`, `document`, `target`, `molecule`) with:
   - `PipelineConfig` contracts (`quality.*`, `extra="forbid"`).
   - Pandera schema & `SchemaRegistry` contracts.
   - Project rules in `docs/project/01-project-rules.md` and `00-rules-summary.md`.
@@ -13,7 +13,7 @@
 ## 2. Current Issues (Summary)
 
 1. **YAML quality section mismatch**
-   - `assay.yaml`, `molecule.yaml`, `target.yaml`, `testitem.yaml` use legacy top-level `hashing`/`normalization` instead of `quality.hashing` / `quality.normalization`.
+   - `assay.yaml`, `molecule.yaml`, `target.yaml` use legacy top-level `hashing`/`normalization` instead of `quality.hashing` / `quality.normalization`.
    - This conflicts with `PipelineConfig` (`quality: QualityConfig`, `extra="forbid"`), so these fields may be ignored or rejected.
 
 2. **Duplicate `pipeline` section in `activity.yaml`**

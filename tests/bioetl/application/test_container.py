@@ -249,6 +249,7 @@ def test_container_provides_hooks_and_error_policy_container(
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
         provider_registry=provider_registry,
+        hash_service=default_hash_service(),
     )
 
     logger = container.get_logger()
@@ -280,6 +281,7 @@ def test_hash_service_singleton_scope_container(
     container = PipelineContainer(
         _build_dummy_pipeline_config(dummy_config),
         provider_registry=provider_registry,
+        hash_service=default_hash_service(),
     )
 
     first_instance = container.get_hash_service()

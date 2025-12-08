@@ -20,7 +20,9 @@ class PandasBatchAdapter(BatchAdapterABC):
             return []
 
         if isinstance(raw_batch, pd.DataFrame):
-            return cast(list[RawRecord], raw_batch.to_dict(orient="records"))
+            return cast(
+                list[RawRecord], raw_batch.to_dict(orient="records")
+            )
 
         if isinstance(raw_batch, dict):
             return [cast(RawRecord, raw_batch)]
@@ -28,14 +30,20 @@ class PandasBatchAdapter(BatchAdapterABC):
         if isinstance(raw_batch, list):
             return cast(list[RawRecord], raw_batch)
 
-        if isinstance(raw_batch, Iterable) and not isinstance(raw_batch, (str, bytes)):
+        if (
+            isinstance(raw_batch, Iterable)
+            and not isinstance(raw_batch, (str, bytes))
+        ):
             return cast(list[RawRecord], list(raw_batch))
 
         raise TypeError(
-            "iter_extract must yield DataFrame, mapping, or iterable of mappings."
+            "iter_extract must yield DataFrame, mapping, "
+            "or iterable of mappings."
         )
 
-    def process_batches(self, batches: Iterable[Any]) -> Iterable[list[RawRecord]]:
+    def process_batches(
+        self, batches: Iterable[Any]
+    ) -> Iterable[list[RawRecord]]:
         """Process an iterable of batches lazily."""
         for batch in batches:
             yield self.process_batch(batch)
@@ -45,7 +53,9 @@ class PandasBatchAdapter(BatchAdapterABC):
         """Backward-compatible alias for process_batch."""
         return self.process_batch(raw_batch)
 
-    def adapt_batches(self, batches: Iterable[Any]) -> Iterable[list[RawRecord]]:
+    def adapt_batches(
+        self, batches: Iterable[Any]
+    ) -> Iterable[list[RawRecord]]:
         """Backward-compatible alias for process_batches."""
         for batch in batches:
             yield self.process_batch(batch)
