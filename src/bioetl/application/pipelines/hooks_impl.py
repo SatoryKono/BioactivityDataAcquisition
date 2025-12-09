@@ -136,6 +136,8 @@ def _create_noop_metrics_port() -> PipelineMetricsPortABC:
     return cast(
         PipelineMetricsPortABC,
         SimpleNamespace(
+            inc_counter=lambda *_args, **_kwargs: None,
+            observe_histogram=lambda *_args, **_kwargs: None,
             update_stage_duration=lambda **_kwargs: None,
             update_stage_total=lambda **_kwargs: None,
         ),
