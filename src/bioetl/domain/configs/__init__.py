@@ -37,6 +37,7 @@ from bioetl.domain.configs.pipeline import (
     QualityConfig,
     RuntimeConfig,
     StorageConfig,
+    TransformConfig,
 )
 from bioetl.domain.configs.profile import ProfileConfig
 
@@ -72,6 +73,7 @@ __all__ = [
     "QualityConfig",
     "RuntimeConfig",
     "QcConfig",
+    "TransformConfig",
     "StorageConfig",
     "PipelineConfig",
     "SourceDefaultsConfig",

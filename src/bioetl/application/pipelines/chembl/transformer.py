@@ -2,7 +2,7 @@
 ChEMBL data transformer implementation.
 """
 
-from typing import Any, Sequence
+from typing import Any
 
 import pandas as pd
 
@@ -12,48 +12,7 @@ from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-
-
-def _serialize_dict(value: dict[str, Any]) -> Any:
-    """Детерминированно сериализует словарь в строку key:value|key:value."""
-    if not value:
-        return pd.NA
-
-    parts: list[str] = []
-    for key in sorted(value.keys()):
-        val = value[key]
-        if val is None or isinstance(val, (list, dict)):
-            continue
-        if val is pd.NA:
-            continue
-        parts.append(f"{key}:{val}")
-
-    return pd.NA if not parts else "|".join(parts)
-
-
-def _serialize_list(value: Sequence[Any]) -> Any:
-    """Детерминированно сериализует список или список словарей."""
-    if not value:
-        return pd.NA
-
-    if value and isinstance(value[0], dict):
-        parts = [
-            serialized
-            for serialized in (
-                _serialize_dict(item) for item in value if isinstance(item, dict)
-            )
-            if serialized is not pd.NA and serialized is not None
-        ]
-    else:
-        parts = [
-            str(item)
-            for item in value
-            if not isinstance(item, (list, dict))
-            and item is not pd.NA
-            and item is not None
-        ]
-
-    return pd.NA if not parts else "|".join(parts)
+from bioetl.infrastructure.transform.impl.serializer import serialize_nested
 
 
 class ChemblTransformerImpl(TransformerABC):
@@ -70,11 +29,14 @@ class ChemblTransformerImpl(TransformerABC):
         schema_contract: PipelineSchemaModel,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
+        *,
+        serialization_mode: str = "json",
     ) -> None:
         self.validation_service = validation_service
         self.schema_contract = schema_contract
         self.normalization_service = normalization_service
         self.logger = logger
+        self._serialization_mode = serialization_mode
 
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
@@ -105,9 +67,11 @@ class ChemblTransformerImpl(TransformerABC):
             if value is None or value is pd.NA:
                 return pd.NA
             if isinstance(value, dict):
-                return _serialize_dict(value)
+                serialized = serialize_nested(value, mode=self._serialization_mode)
+                return pd.NA if serialized == "" else serialized
             if isinstance(value, (list, tuple)):
-                return _serialize_list(list(value))
+                serialized = serialize_nested(value, mode=self._serialization_mode)
+                return pd.NA if serialized == "" else serialized
             return value
 
         serialized = df.copy()

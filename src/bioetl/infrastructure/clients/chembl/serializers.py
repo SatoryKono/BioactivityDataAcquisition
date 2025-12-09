@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping, MutableMapping, Set
 
+from bioetl.infrastructure.transform.impl.serializer import serialize_nested
+
 # Container fields that should not be flattened; they are handled later by normalizers.
 DEFAULT_BYPASS_FIELDS: Set[str] = {
     "assay_classifications",
@@ -20,34 +22,15 @@ DEFAULT_BYPASS_FIELDS: Set[str] = {
 }
 
 
-def _flatten_value(value: Any) -> Any:
+def _flatten_value(value: Any, *, mode: str = "pipe") -> Any:
     if value is None:
         return None
 
-    if isinstance(value, Mapping):
-        dict_parts = [
-            f"{key}:{_scalar_to_str(val)}"
-            for key, val in value.items()
-            if val not in (None, "")
-        ]
-        return "|".join(dict_parts) if dict_parts else None
-
-    if isinstance(value, list):
-        parts: list[str] = []
-        for item in value:
-            flattened = _flatten_value(item)
-            if flattened not in (None, ""):
-                parts.append(str(flattened))
-        return "|".join(parts) if parts else None
+    if isinstance(value, (Mapping, list)):
+        serialized = serialize_nested(value, mode=mode)
+        return None if serialized == "" else serialized
 
     return value
-
-
-def _scalar_to_str(value: Any) -> str:
-    if isinstance(value, (Mapping, list)):
-        nested = _flatten_value(value)
-        return "" if nested is None else str(nested)
-    return str(value)
 
 
 def serialize_chembl_payload(
