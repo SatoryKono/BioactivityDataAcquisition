@@ -7,6 +7,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
 from bioetl.domain.configs import BaseProviderConfig
+from bioetl.domain.ports.providers import DefaultFieldProviderABC
 
 if TYPE_CHECKING:
     from bioetl.domain.transform.contracts import NormalizationServiceABC
@@ -50,6 +51,7 @@ class ProviderComponents(
         config: BaseProviderConfig,
         *,
         client: client_t | None = None,
+        field_provider: DefaultFieldProviderABC | None = None,
     ) -> extraction_service_t:
         """Create provider-specific extraction service."""
 
