@@ -11,7 +11,6 @@ from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_extraction_service,
 )
 
-
 __all__ = ["create_client", "create_extraction_service"]
 
 

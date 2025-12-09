@@ -137,7 +137,6 @@ src/bioetl/infrastructure/clients/chembl/provider.py
 src/bioetl/infrastructure/clients/chembl/request_builder.py
 src/bioetl/infrastructure/clients/chembl/response_parser.py
 src/bioetl/infrastructure/clients/chembl/serializers.py
-src/bioetl/infrastructure/clients/chembl/impl/__init__.py
 src/bioetl/infrastructure/clients/chembl/impl/chembl_extraction_service_impl.py
 src/bioetl/infrastructure/clients/chembl/impl/http_client.py
 src/bioetl/infrastructure/config/__init__.py

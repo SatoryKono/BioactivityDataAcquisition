@@ -241,10 +241,10 @@ class PipelineContainer(PipelineContainerABC):
         source_config = self._resolve_provider_config(definition)
 
         client = definition.components.create_client(source_config)
-        
+
         # Inject application-level defaults
         field_provider = ApplicationFieldProvider()
-        
+
         return definition.components.create_extraction_service(
             source_config, client=client, field_provider=field_provider
         )
