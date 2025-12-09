@@ -101,9 +101,7 @@ def default_rate_limiter(
     """Create the default rate limiter with token bucket semantics."""
 
     resolved_capacity = capacity if capacity is not None else max(1.0, rate)
-    return TokenBucketRateLimiterImpl(
-        rate, resolved_capacity, logger=logger
-    )
+    return TokenBucketRateLimiterImpl(rate, resolved_capacity, logger=logger)
 
 
 def default_cache() -> CacheABC[Any]:

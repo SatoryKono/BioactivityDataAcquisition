@@ -22,9 +22,7 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
         self._last_refill = time.monotonic()
         self._lock = Lock()
         self._logger = logger or default_logging_port()
-        self._logger.info(
-            "rate_limiter_initialized", rate=rate, capacity=capacity
-        )
+        self._logger.info("rate_limiter_initialized", rate=rate, capacity=capacity)
 
     @property
     def rate(self) -> float:

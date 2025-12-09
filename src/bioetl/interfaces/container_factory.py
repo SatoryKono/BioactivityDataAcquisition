@@ -4,8 +4,8 @@ Factory for creating PipelineContainer with default infrastructure implementatio
 
 from __future__ import annotations
 
-from typing import Any, Callable, cast
 from types import SimpleNamespace
+from typing import Any, Callable, cast
 
 from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.contracts import PipelineContainerABC
@@ -21,6 +21,7 @@ from bioetl.infrastructure.output.metadata import (
     build_run_metadata,
 )
 
+
 def _create_metadata_builder() -> RunMetadataBuilderProtocol:
     """Return metadata builder port using infrastructure helpers."""
     return cast(
@@ -28,22 +29,25 @@ def _create_metadata_builder() -> RunMetadataBuilderProtocol:
         SimpleNamespace(
             build_run_metadata=build_run_metadata,
             build_dry_run_metadata=build_dry_run_metadata,
-        )
+        ),
     )
 
 
 def _create_metrics_port() -> PipelineMetricsPortABC:
     """Return metrics port backed by Prometheus collectors."""
+    def _update_duration(**kwargs: Any) -> None:
+        metrics.STAGE_DURATION_SECONDS.labels(
+            pipeline=kwargs["pipeline"],
+            provider=kwargs["provider"],
+            entity=kwargs["entity"],
+            stage=kwargs["stage"],
+            outcome=kwargs["outcome"],
+        ).observe(kwargs["duration_sec"])
+
     return cast(
         PipelineMetricsPortABC,
         SimpleNamespace(
-            update_stage_duration=lambda **kwargs: metrics.STAGE_DURATION_SECONDS.labels(
-                pipeline=kwargs["pipeline"],
-                provider=kwargs["provider"],
-                entity=kwargs["entity"],
-                stage=kwargs["stage"],
-                outcome=kwargs["outcome"],
-            ).observe(kwargs["duration_sec"]),
+            update_stage_duration=_update_duration,
             update_stage_total=lambda **kwargs: metrics.STAGE_TOTAL.labels(
                 pipeline=kwargs["pipeline"],
                 provider=kwargs["provider"],
@@ -51,7 +55,7 @@ def _create_metrics_port() -> PipelineMetricsPortABC:
                 stage=kwargs["stage"],
                 outcome=kwargs["outcome"],
             ).inc(),
-        )
+        ),
     )
 
 

@@ -55,5 +55,4 @@ def test_attach_entity_fields_no_provider():
 
     assert "fields" not in result
 
-
     pass

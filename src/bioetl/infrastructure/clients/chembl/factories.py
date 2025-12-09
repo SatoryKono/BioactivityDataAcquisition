@@ -59,9 +59,7 @@ def default_chembl_client(
 
     # Rate limiter for proactive limiting (in addition to middleware backoff)
     # Using explicit rate limiter in client logic
-    rate_limiter = build_rate_limiter(
-        client_config=client_config, logger=logger
-    )
+    rate_limiter = build_rate_limiter(client_config=client_config, logger=logger)
 
     return ChemblApiPortImpl(
         request_builder=ChemblRequestBuilderImpl(

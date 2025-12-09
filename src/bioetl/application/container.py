@@ -409,3 +409,7 @@ def _create_noop_validator_factory() -> ValidatorFactoryABC:
         SimpleNamespace(create_validator=lambda _schema: validator),
     )
 
+
+def create_default_container_factory() -> Callable[..., PipelineContainerABC]:
+    """Return the default container factory."""
+    return PipelineContainer

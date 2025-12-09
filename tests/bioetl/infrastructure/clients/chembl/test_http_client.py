@@ -63,6 +63,7 @@ def test_metadata(client, mock_request_builder):
     """Test metadata request."""
     # Setup
     mock_response = Mock()
+    mock_response.status_code = 200
     mock_response.json.return_value = {"status": "UP"}
     client.http.request.return_value = mock_response
 
@@ -79,6 +80,7 @@ def test_fetch_activity(client, mock_request_builder):
     """Test fetch delegates to request_builder and execute."""
     # Setup
     mock_response = Mock()
+    mock_response.status_code = 200
     mock_response.json.return_value = {"activities": []}
     client.http.request.return_value = mock_response
 
