@@ -1,7 +1,7 @@
 """ChEMBL client implementations and factories."""
 
-from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
-    ChemblExtractionServiceImpl,
-)
+# Avoid importing implementation classes directly here to prevent circular imports
+# caused by those classes importing siblings (like paginator) which triggers
+# this __init__.py to run again.
 
-__all__ = ["ChemblExtractionServiceImpl"]
+__all__ = []

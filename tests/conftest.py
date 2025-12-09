@@ -32,8 +32,14 @@ from bioetl.interfaces.observability import LoggingPortABC
 # Ensure src is on sys.path even if pytest pythonpath is ignored by runners
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "src"
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
+
+# Aggressively clean sys.path
+sys.path = [p for p in sys.path if "bioactivity_data_acquisition1" not in p.lower()]
+
+src_str = str(SRC_PATH)
+if src_str in sys.path:
+    sys.path.remove(src_str)
+sys.path.insert(0, src_str)
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
