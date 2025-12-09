@@ -17,5 +17,7 @@
         "--ignore=tests/services"
     ],
     "workbench.editor.enablePreviewFromQuickOpen": false,
-    "workbench.editor.enablePreviewFromCodeNavigation": false
+    "workbench.editor.enablePreviewFromCodeNavigation": false,
+    "chatgpt.openOnStartup": false,
+    "chatgpt.commentCodeLensEnabled": false
 }

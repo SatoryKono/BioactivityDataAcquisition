@@ -175,33 +175,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         """
         Ensure critical fields are requested from ChEMBL API.
 
-        Assay endpoint не возвращает все колонки без параметра fields.
-        Если пользователь не задал fields/only, добавляем список из схемы.
+        Uses injected field_provider to get default fields for the entity.
         """
-        if entity != "assay":
-            return filters
-
         if "fields" in filters or "only" in filters:
             return filters
 
-        try:
-            from bioetl.domain.schemas.chembl.assay import OUTPUT_COLUMN_ORDER
-        except Exception as exc:
-            self._logger.warning(
-                "Failed to import assay schema; skipping field enrichment",
-                error=str(exc),
-            )
-            return filters
+        if self.field_provider:
+            default_fields = self.field_provider.get_default_fields(entity)
+            if default_fields:
+                filters["fields"] = ",".join(default_fields)
 
-        skip_meta = {
-            "hash_row",
-            "hash_business_key",
-            "index",
-            "database_version",
-            "extracted_at",
-        }
-        field_names = [col for col in OUTPUT_COLUMN_ORDER if col not in skip_meta]
-        filters["fields"] = ",".join(field_names)
         return filters
 
 

@@ -95,9 +95,19 @@ def default_chembl_extraction_service(
     if client is None:
         client = default_chembl_client(config, client_config=client_config)
 
+    # Local import to avoid circular dependency with application layer
+    # Infrastructure factory needs to provide application-level defaults
+    try:
+        from bioetl.application.providers import ApplicationFieldProvider
+
+        field_provider = ApplicationFieldProvider()
+    except ImportError:
+        field_provider = None
+
     return ChemblExtractionServiceImpl(
         client=client,
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
         logger=logger,
+        field_provider=field_provider,
     )
