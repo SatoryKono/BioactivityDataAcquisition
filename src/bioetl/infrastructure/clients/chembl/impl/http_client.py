@@ -97,7 +97,11 @@ class ChemblApiPortImpl(DataClientABC):
         response = self.http.request("GET", url)
         latency = time.monotonic() - start
         status_code = getattr(response, "status_code", None)
-        log_level = self.logger.error if status_code and status_code >= 400 else self.logger.info
+        log_level = (
+            self.logger.error
+            if status_code and status_code >= 400
+            else self.logger.info
+        )
         log_level(
             "http_request_completed",
             provider=self.provider,
