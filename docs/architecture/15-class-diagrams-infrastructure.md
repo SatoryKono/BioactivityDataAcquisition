@@ -39,16 +39,25 @@ classDiagram
         -_execute_request(url)
     }
 
-    class UnifiedAPIClient {
-        -base_client: ClientSession
-        -circuit_breaker: CircuitBreakerImpl
+    class UnifiedAPIClientImpl {
+        -provider: str
+        -config: ClientConfig
+        -base_client: Any
+        -logger: LoggingPortABC
+        -metrics: MetricsPortABC
+        +request_call(method, url, **kwargs)
         +request(method, url, **kwargs)
+        +get_response(url, **kwargs)
+        +request_post(url, **kwargs)
         +close()
+        -_record_total(endpoint, status)
+        -_observe_latency(endpoint, latency, status)
+        -_record_error(endpoint, status)
     }
 
     DataClientABC <|-- ChemblDataClientABC
-    ChemblDataClientABC <|-- ChemblDataClientHTTPImpl
-    ChemblDataClientHTTPImpl --> UnifiedAPIClient : uses
+    ChemblDataClientABC <|-- ChemblHttpClientImpl
+    ChemblHttpClientImpl --> UnifiedAPIClientImpl : uses
 ```
 
 ## 2. Request/Response Processing
@@ -355,31 +364,27 @@ classDiagram
     CacheABC <|-- FileCacheImpl
 ```
 
-## 9. HTTP Middleware
+## 9. HTTP Client Internals
 
 ```mermaid
 classDiagram
+    class UnifiedAPIClientImpl {
+        -provider: str
         -base_client: ClientSession
-        -circuit_breaker: CircuitBreakerImpl
-        -rate_limiter: RateLimiterABC
-        +request(method, url, **kwargs) Response
-        -_apply_retry(func)
-        -_apply_circuit_breaker(func)
-        -_apply_rate_limit()
-    }
-
-    class UnifiedAPIClient {
-        -base_client: ClientSession
-        +request(method, url, **kwargs) Response
-        +close()
+        -logger: LoggingPortABC
+        -metrics: MetricsPortABC
+        +request_call(method, url, **kwargs) Response
+        -_normalize_status(code) str
+        -_record_total(endpoint, status)
+        -_observe_latency(endpoint, latency, status)
     }
 
     class ClientSession {
-        +get(url, **kwargs) Response
-        +post(url, **kwargs) Response
+        +request(method, url, **kwargs) Response
         +close()
     }
 
+    UnifiedAPIClientImpl --> ClientSession : delegates
 ```
 
 ## 10. Provider Components

@@ -352,3 +352,29 @@ classDiagram
     RequestProcessor --> ResponseBuilder : uses
 ```
 
+## 11. Dependency Injection & Wiring
+
+```mermaid
+classDiagram
+    class ContainerFactory {
+        +build_default_container(config) PipelineContainer
+        +create_default_container_factory() Factory
+        -_create_metrics_port()
+        -_create_metadata_builder()
+    }
+
+    class PipelineContainer {
+        +get_service()
+        +get_client()
+        +get_validator()
+    }
+
+    class Wiring {
+        +create_config_loader()
+        +build_default_container()
+    }
+
+    Wiring --> ContainerFactory : delegates
+    ContainerFactory --> PipelineContainer : creates
+```
+
