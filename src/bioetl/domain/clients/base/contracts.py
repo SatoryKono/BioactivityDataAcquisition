@@ -36,10 +36,15 @@ class ResponseParserABC(ABC):
 
 
 class ApiClientABC(ABC):
-    """Transport-agnostic API client abstraction with request lifecycle hooks.
+    """
+    Абстракция API-клиента, не зависящая от транспорта.
+    Поддерживает хуки жизненного цикла запросов.
 
-    Default factory: ``bioetl.infrastructure.clients.base.factories.default_api_client``.
-    Common implementation: ``bioetl.infrastructure.clients.base.impl.unified_api_client_impl.UnifiedAPIClientImpl``.
+    Default factory:
+    ``bioetl.infrastructure.clients.base.factories.default_api_client``.
+
+    Common implementation:
+    ``bioetl.infrastructure.clients.base.impl.unified_api_client_impl.UnifiedAPIClientImpl``.
     """
 
     @abstractmethod

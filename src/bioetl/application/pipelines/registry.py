@@ -18,6 +18,9 @@ _PIPELINE_REGISTRY: dict[str, PipelineFactory] = {
     "molecule_chembl": ChemblPipelineBase,
 }
 
+# Backwards-compatible export for tests expecting PIPELINE_REGISTRY
+PIPELINE_REGISTRY = _PIPELINE_REGISTRY
+
 
 def get_pipeline_factory(name: str) -> PipelineFactory:
     """Return factory callable for the given pipeline name."""

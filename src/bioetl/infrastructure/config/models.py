@@ -6,6 +6,7 @@ these re-exports in sync with ``bioetl.domain.configs``.
 """
 
 from bioetl.domain.configs import (  # noqa: F401
+    HTTP_CLIENT_DEFAULTS,
     BaseProviderConfig,
     BusinessKeyConfig,
     CanonicalizationConfig,
@@ -16,10 +17,9 @@ from bioetl.domain.configs import (  # noqa: F401
     DeterminismConfig,
     DummyProviderConfig,
     FeatureFlagsConfig,
-    HTTP_CLIENT_DEFAULTS,
-    HttpClientDefaults,
     HashingConfig,
     HashingDefaultsConfig,
+    HttpClientDefaults,
     HttpDefaultsConfig,
     InterfaceFeaturesConfig,
     LoggingConfig,

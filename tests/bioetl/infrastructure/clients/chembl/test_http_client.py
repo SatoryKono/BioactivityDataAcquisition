@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
 from bioetl.domain.errors import ClientResponseError

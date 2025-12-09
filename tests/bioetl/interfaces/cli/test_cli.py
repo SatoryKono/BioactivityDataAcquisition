@@ -112,7 +112,7 @@ def test_run_command(mock_loader, mock_orchestrator_cls):
 
     # We need to mock file existence for config
     with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(app, ["run", "test_pipeline", "--config", "test.yaml"])
+        result = runner.invoke(app, ["run", "activity_chembl", "--config", "test.yaml"])
 
     assert result.exit_code == 0
     assert "Pipeline finished successfully" in result.stdout
@@ -123,10 +123,10 @@ def test_run_command(mock_loader, mock_orchestrator_cls):
 @patch("bioetl.interfaces.cli.app.run")
 def test_smoke_run(mock_run):
     """Test smoke-run command."""
-    result = runner.invoke(app, ["smoke-run", "test_pipeline"])
+    result = runner.invoke(app, ["smoke-run", "activity_chembl"])
     assert result.exit_code == 0
     mock_run.assert_called_with(
-        "test_pipeline", profile="development", dry_run=True, limit=10
+        "activity_chembl", profile="development", dry_run=True, limit=10
     )
 
 
@@ -137,7 +137,7 @@ def test_run_config_not_found_explicit(mock_loader):
     mock_loader.side_effect = FileNotFoundError("No such file or directory")
 
     result = runner.invoke(
-        app, ["run", "test_pipeline", "--config", "nonexistent.yaml"]
+        app, ["run", "activity_chembl", "--config", "nonexistent.yaml"]
     )
 
     assert result.exit_code == 1
@@ -176,7 +176,7 @@ def test_run_with_limit_and_dry_run(mock_loader, mock_orchestrator_cls):
 
     with patch("pathlib.Path.exists", return_value=True):
         result = runner.invoke(
-            app, ["run", "test_pipeline", "--limit", "5", "--dry-run"]
+            app, ["run", "activity_chembl", "--limit", "5", "--dry-run"]
         )
 
     assert result.exit_code == 0
@@ -214,7 +214,7 @@ def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
     )
 
     with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(app, ["run", "test_pipeline"])
+        result = runner.invoke(app, ["run", "activity_chembl"])
 
     assert result.exit_code == 1
     assert "Pipeline failed!" in result.stdout
@@ -227,7 +227,7 @@ def test_run_exception(mock_loader):
     mock_loader.side_effect = RuntimeError("Unexpected error")
 
     with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(app, ["run", "test_pipeline"])
+        result = runner.invoke(app, ["run", "activity_chembl"])
 
     assert result.exit_code == 1
     assert "Unexpected error" in result.stdout
@@ -336,7 +336,7 @@ def test_run_dry_run_pipeline_metadata(
         Path("config.yaml").write_text("dummy", encoding="utf-8")
         result = runner.invoke(
             app,
-            ["run", "test_pipeline", "--config", "config.yaml", "--dry-run"],
+            ["run", "activity_chembl", "--config", "config.yaml", "--dry-run"],
         )
 
     assert result.exit_code == 0
