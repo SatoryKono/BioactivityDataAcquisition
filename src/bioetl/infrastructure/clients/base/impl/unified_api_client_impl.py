@@ -10,10 +10,11 @@ from uuid import uuid4
 import requests
 
 from bioetl.domain.configs import ClientConfig
+from bioetl.domain.clients.base.contracts import ApiClientABC
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
-class UnifiedAPIClientImpl:
+class UnifiedAPIClientImpl(ApiClientABC):
     """
     Унифицированный HTTP-клиент.
     Обертка над HttpClientMiddleware с конфигурацией через Pydantic.
@@ -51,6 +52,11 @@ class UnifiedAPIClientImpl:
             kwargs["headers"] = headers
 
         return self.middleware.request(method, url, **kwargs)
+
+    def request(self, method: str, url: str, **kwargs: Any) -> Any:
+        """Execute a request via the configured middleware."""
+
+        return self.request_call(method, url, **kwargs)
 
     def get_response(self, url: str, **kwargs: Any) -> Any:
         """GET запрос."""
