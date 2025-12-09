@@ -8,7 +8,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
+from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
+    ChemblExtractionServiceImpl,
+)
 
 
 @pytest.fixture
