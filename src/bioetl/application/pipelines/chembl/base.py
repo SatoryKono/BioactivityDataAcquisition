@@ -82,6 +82,7 @@ class ChemblPipelineBase(PipelineBase):
             schema_contract=contract,
             normalization_service=norm_service,
             logger=logger,
+            serialization_mode=config.serialization_mode,
         )
 
         resolved_loader = loader

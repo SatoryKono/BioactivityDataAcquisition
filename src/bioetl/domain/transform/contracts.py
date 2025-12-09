@@ -19,6 +19,10 @@ class NormalizationConfigProviderProtocol(Protocol):
     def get_fields(self) -> list[dict[str, Any]]:
         """Return field configuration for normalization."""
 
+    @property
+    def serialization_mode(self) -> str:
+        """Return configured serialization mode for nested structures."""
+
 
 class BaseNormalizationServiceABC(ABC):
     """
