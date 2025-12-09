@@ -15,9 +15,12 @@ from bioetl.domain.clients.base.contracts import (
     ResponseParserABC,
 )
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.errors import ClientResponseError
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
+from bioetl.infrastructure.errors import (
+    ApiUnexpectedStatusError,
+    wrap_http_errors,
+)
 from bioetl.infrastructure.observability.factories import default_logging_port
 
 
@@ -93,40 +96,42 @@ class ChemblHttpClientImpl(DataClientABC):
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
-        start = time.monotonic()
-        response = self.http.request("GET", url)
-        latency = time.monotonic() - start
-        status_code = getattr(response, "status_code", None)
-        log_level = (
-            self.logger.error
-            if status_code and status_code >= 400
-            else self.logger.info
-        )
-        log_level(
-            "http_request_completed",
-            provider=self.provider,
-            method="GET",
-            url=url,
-            status_code=status_code,
-            latency_sec=latency,
-        )
-        try:
-            return response.json()
-        except ValueError as exc:
-            self.logger.error(
-                "response_deserialization_failed",
+        with wrap_http_errors(
+            provider=self.provider, endpoint=url, logger=self.logger
+        ) as context:
+            start = time.monotonic()
+            response = self.http.request("GET", url)
+            latency = time.monotonic() - start
+            raw_status = getattr(response, "status_code", None)
+            status_code = raw_status if isinstance(raw_status, int) else None
+            context["status_code"] = status_code
+            log_level = (
+                self.logger.error
+                if status_code is not None and status_code >= 400
+                else self.logger.info
+            )
+            log_level(
+                "http_request_completed",
                 provider=self.provider,
+                method="GET",
                 url=url,
                 status_code=status_code,
-                error=str(exc),
+                latency_sec=latency,
             )
-            raise ClientResponseError(
-                provider=self.provider,
-                endpoint=url,
-                status_code=getattr(response, "status_code", None),
-                message="Failed to parse response JSON",
-                cause=exc,
-            ) from exc
+            if status_code is not None and status_code >= 400:
+                self.logger.error(
+                    "api_unexpected_status",
+                    provider=self.provider,
+                    url=url,
+                    status_code=status_code,
+                )
+                raise ApiUnexpectedStatusError(
+                    f"Unexpected status code: {status_code}",
+                    provider=self.provider,
+                    endpoint=url,
+                    status_code=status_code,
+                )
+            return response.json()
 
     def _build_request_url(self, endpoint: str, filters: dict[str, Any]) -> str:
         """
