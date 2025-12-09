@@ -105,7 +105,6 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/middleware.py
     rule_id: CLASS_FORMAT
     reason: "Retry decision tuple is private helper with leading underscore"
     owner: infra
@@ -165,7 +164,6 @@ exceptions:
     owner: chembl
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/middleware.py
     rule_id: CLASS_SUFFIX
     reason: "Middleware pattern"
     owner: infra
@@ -436,7 +434,6 @@ exceptions:
     owner: infra
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/base/impl/retry_policy.py
     rule_id: FUNC_PREFIX
     reason: "Retry methods (max_attempts, should_retry)"
     owner: infra
@@ -472,7 +469,6 @@ exceptions:
     owner: chembl
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/middleware.py
     rule_id: FUNC_PREFIX
     reason: "Middleware request method"
     owner: infra

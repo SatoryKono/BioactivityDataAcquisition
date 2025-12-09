@@ -315,7 +315,6 @@ classDiagram
     class ChemblClientHTTPImpl {
         -http_session: ClientSession
         -rate_limiter: RateLimiterABC
-        -retry_policy: RetryPolicyABC
         +fetch_one(id)
         +fetch_many(ids)
         +iter_pages(request)
@@ -334,7 +333,6 @@ classDiagram
     ChemblClientHTTPImpl *-- RequestBuilderABC : uses
     ChemblClientHTTPImpl *-- ResponseParserABC : uses
     ChemblClientHTTPImpl *-- RateLimiterABC : uses
-    ChemblClientHTTPImpl *-- RetryPolicyABC : uses
 ```
 
 ## 6. Domain Services & Transform

@@ -10,7 +10,6 @@ from bioetl.domain.clients.base.contracts import (
     RateLimiterABC,
     RequestBuilderABC,
     ResponseParserABC,
-    RetryPolicyABC,
     SecretProviderABC,
     SideInputProviderABC,
 )
@@ -18,9 +17,6 @@ from bioetl.domain.configs import ClientConfig, HTTP_CLIENT_DEFAULTS, HttpClient
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
-)
-from bioetl.infrastructure.clients.base.impl.retry_policy import (
-    ExponentialBackoffRetryImpl,
 )
 from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
     UnifiedAPIClientImpl,
@@ -104,28 +100,6 @@ def default_rate_limiter(
     return TokenBucketRateLimiterImpl(rate, resolved_capacity)
 
 
-def build_retry_policy(
-    *,
-    client_config: ClientConfig | None = None,
-    defaults: HttpClientDefaults | None = None,
-) -> RetryPolicyABC:
-    """Build retry policy based on centralized HTTP defaults."""
-
-    resolved_defaults = _resolve_http_defaults(
-        client_config=client_config, defaults=defaults
-    )
-    return ExponentialBackoffRetryImpl(
-        max_attempts=resolved_defaults.retries,
-        backoff_factor=resolved_defaults.backoff_factor,
-    )
-
-
-def default_retry_policy() -> RetryPolicyABC:
-    """Provide a resilient retry policy with exponential backoff."""
-
-    return build_retry_policy()
-
-
 def default_cache() -> CacheABC[Any]:
     """Return the in-memory cache implementation."""
 
@@ -165,7 +139,7 @@ def default_paginator() -> PaginatorABC:
 def default_api_client(
     provider: str, config: ClientConfig, *, base_client: Any | None = None
 ) -> ApiClientABC:
-    """Create the default API client with retry/backoff middleware."""
+    """Create the default API client without middleware indirection."""
 
     return build_http_client(provider, client_config=config, base_client=base_client)
 
@@ -177,7 +151,7 @@ def build_http_client(
     defaults: HttpClientDefaults | None = None,
     base_client: Any | None = None,
 ) -> ApiClientABC:
-    """Construct HTTP client using centralized defaults and unified middleware."""
+    """Construct HTTP client using centralized defaults."""
 
     resolved_config = _ensure_client_config(
         client_config=client_config, defaults=defaults
