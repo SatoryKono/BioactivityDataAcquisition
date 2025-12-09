@@ -1,11 +1,7 @@
-"""Tests for ChemblApiPortImpl."""
-
-# pylint: disable=redefined-outer-name
+import pytest
 from unittest.mock import Mock
 
-import pytest
-
-from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
 from bioetl.domain.errors import ClientResponseError
 from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
@@ -14,7 +10,6 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
-from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 @pytest.fixture(name="mock_request_builder")
@@ -43,24 +38,24 @@ def fixture_client(
     mock_request_builder,
     mock_response_parser,
     mock_rate_limiter,
-    mock_http_middleware,
+    mock_http_client,
 ):
     """Create ChemblApiPortImpl instance with mocks."""
     client = ChemblApiPortImpl(
         request_builder=mock_request_builder,
         response_parser=mock_response_parser,
         rate_limiter=mock_rate_limiter,
-        http_middleware=mock_http_middleware,
+        client=mock_http_client,
     )
     return client
 
 
-@pytest.fixture(name="mock_http_middleware")
-def fixture_http_middleware():
-    """Mock HttpClientMiddleware."""
-    middleware = Mock(spec=HttpClientMiddleware)
-    middleware.request = Mock()
-    return middleware
+@pytest.fixture(name="mock_http_client")
+def fixture_http_client():
+    """Mock ApiClientABC."""
+    http_client = Mock(spec=ApiClientABC)
+    http_client.request = Mock()
+    return http_client
 
 
 def test_metadata(client, mock_request_builder):
@@ -110,15 +105,9 @@ def test_execute_request_json_error(client):
 
 def test_rate_limiter_called(client):
     """Test rate limiter is called during iteration."""
-    # This tests iter_pages which uses rate limiter
-    # iter_pages yields results from execute_request
     mock_response = Mock()
     mock_response.json.return_value = {}
     client.http.request.return_value = mock_response
-
-    # We need to mock execute_request logic inside iter_pages
-    # or ensure it works
-    # In current impl, iter_pages calls execute_request
 
     gen = client.iter_pages("http://test")
     next(gen)
