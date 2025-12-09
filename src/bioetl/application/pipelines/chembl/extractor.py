@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Iterable, cast
 
 import pandas as pd
+from pydantic import BaseModel
 
 from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
@@ -17,6 +18,7 @@ from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import BatchAdapterABC, ExtractionServiceABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 
 
 class ChemblExtractorImpl(ExtractorABC):
@@ -57,7 +59,12 @@ class ChemblExtractorImpl(ExtractorABC):
             if remaining is not None:
                 chunk_records = raw_chunk[:remaining]
 
-            working_chunk = pd.DataFrame(chunk_records)
+            normalized_input = [
+                record.model_dump() if isinstance(record, BaseModel) else record
+                for record in chunk_records
+            ]
+
+            working_chunk = pd.DataFrame(normalized_input)
 
             normalized_chunk = self.normalization_service.apply_normalize_batch(
                 working_chunk
@@ -144,6 +151,7 @@ class ChemblExtractorImpl(ExtractorABC):
             limit=limit,
             chunk_size=chunk_size,
             logger=self.logger,
+            model_cls=ActivityRawModel,
         )
 
     def _build_id_list_source(

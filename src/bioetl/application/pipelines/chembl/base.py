@@ -29,6 +29,7 @@ from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
+from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 
@@ -69,7 +70,7 @@ class ChemblPipelineBase(PipelineBase):
             extraction_service=extraction_service,
             normalization_service=norm_service,
             logger=logger,
-            batch_adapter=PandasBatchAdapter(),
+            batch_adapter=PandasBatchAdapter(model_cls=ActivityRawModel),
             record_source=record_source,
         )
 

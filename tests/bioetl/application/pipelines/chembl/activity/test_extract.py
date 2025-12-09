@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     ClientConfig,
@@ -185,9 +186,9 @@ def test_extract_ids_only_csv(
     # Mock parse_response to return records only once
     # One batch covers all ids (batch_size=25 > 3), parse called once
     mock_extraction_service.parse_response.return_value = [
-        {"activity_id": 100},
-        {"activity_id": 101},
-        {"activity_id": 102},
+        ActivityRawModel(activity_id="100", standard_flag=True),
+        ActivityRawModel(activity_id="101", standard_flag=True),
+        ActivityRawModel(activity_id="102", standard_flag=True),
     ]
 
     # Mock serialize_records to return input

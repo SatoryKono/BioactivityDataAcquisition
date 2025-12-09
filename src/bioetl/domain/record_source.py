@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Callable, TypedDict
+from typing import Any, Callable
 
+from pydantic import BaseModel, ConfigDict
 from typing_extensions import Protocol
 
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 
 
-class RawRecord(TypedDict, total=False):
-    """Raw record type before normalization."""
+class RawRecord(BaseModel):
+    """Raw record model before normalization."""
 
-    # Arbitrary key/value mapping for raw provider payloads
-    ...
+    model_config = ConfigDict(extra="allow")
 
 
 class RecordSource(Protocol):

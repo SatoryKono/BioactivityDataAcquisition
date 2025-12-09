@@ -21,8 +21,8 @@ class _DummyExtractionService:
     ) -> Iterable[list[RawRecord]]:  # type: ignore[override]
         self.called_with = {"entity": entity, **filters, "chunk_size": chunk_size}
         records = [
-            {"id": "1", "name": "alpha"},
-            {"id": "2", "name": "beta"},
+            RawRecord.model_validate({"id": "1", "name": "alpha"}),
+            RawRecord.model_validate({"id": "2", "name": "beta"}),
         ]
         if chunk_size is None or chunk_size <= 0:
             yield records
@@ -50,8 +50,8 @@ class _DummyExtractionService:
 
 def test_in_memory_record_source_iterates_stably() -> None:
     records: list[RawRecord] = [
-        cast(RawRecord, {"id": "1", "value": "a"}),
-        cast(RawRecord, {"id": "2", "value": "b"}),
+        RawRecord.model_validate({"id": "1", "value": "a"}),
+        RawRecord.model_validate({"id": "2", "value": "b"}),
     ]
     source = InMemoryRecordSource(records)
 
@@ -80,7 +80,7 @@ def test_api_record_source_returns_serialized_records() -> None:
     }
     assert len(records) == 1
     expected_records = [
-        {"id": "1", "name": "alpha"},
-        {"id": "2", "name": "beta"},
+        RawRecord.model_validate({"id": "1", "name": "alpha"}),
+        RawRecord.model_validate({"id": "2", "name": "beta"}),
     ]
     assert records[0] == expected_records
