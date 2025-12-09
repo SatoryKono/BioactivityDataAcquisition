@@ -10,7 +10,7 @@ from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.wiring import create_config_loader, create_container_factory
+from bioetl.interfaces.wiring import create_config_loader
 
 
 def _build_config(tmp_path: Path) -> tuple[Path, dict[str, str], Path]:
@@ -39,14 +39,12 @@ def test_run_in_background_with_loader(tmp_path: Path) -> None:
 
     provider_loader_factory = partial(create_provider_loader)
     provider_loader = provider_loader_factory()
-    container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,
         provider_registry=None,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
-        container_factory=container_factory,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)
@@ -70,14 +68,12 @@ def test_run_in_background_with_preloaded_registry(tmp_path: Path) -> None:
     )
 
     registry = create_provider_loader().get_registry()
-    container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         "activity_chembl",
         config_copy,
         provider_registry=registry,
         provider_loader=None,
         provider_loader_factory=None,
-        container_factory=container_factory,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)
