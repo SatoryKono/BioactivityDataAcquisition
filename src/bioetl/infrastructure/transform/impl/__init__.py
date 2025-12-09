@@ -4,8 +4,10 @@ from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl impo
     ChemblNormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
-    DefaultNormalizationTransformerImpl,
+    DefaultNormalizationTransformerImpl as DefaultNormImpl,
 )
+
+DefaultNormalizationTransformerImpl = DefaultNormImpl
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
 
 __all__ = [
