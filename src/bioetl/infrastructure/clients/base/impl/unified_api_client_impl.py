@@ -13,7 +13,13 @@ import requests
 from bioetl.domain.clients.base.contracts import ApiClientABC
 from bioetl.domain.configs import ClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
-from bioetl.infrastructure.errors import ApiTimeoutError, wrap_http_errors
+from bioetl.infrastructure.errors import (
+    ApiClientError,
+    ApiTimeoutError,
+    ApiUnexpectedStatusError,
+    wrap_http_errors,
+)
+from bioetl.infrastructure.http import ExponentialRetryPolicy
 from bioetl.infrastructure.observability.factories import (
     default_logging_port,
     default_metrics_port,
@@ -40,6 +46,15 @@ class UnifiedAPIClientImpl(ApiClientABC):
         self.base_client = base_client or requests.Session()
         self.logger = logger or default_logging_port()
         self.metrics = metrics or default_metrics_port()
+        attempts = max(1, int(config.max_retries) + 1)
+        self.retry_policy = (
+            ExponentialRetryPolicy(
+                max_attempts=attempts,
+                backoff_factor=float(config.backoff_factor),
+            )
+            if config.retry_enabled
+            else None
+        )
         self.logger.info(
             "http_client_initialized",
             provider=self.provider,
@@ -73,7 +88,13 @@ class UnifiedAPIClientImpl(ApiClientABC):
                     raw_status if isinstance(raw_status, int) else None
                 )
                 status_label = self._normalize_status(context["status_code"])
-                self.logger.info(
+                log_method = (
+                    self.logger.error
+                    if context["status_code"] is not None
+                    and context["status_code"] >= 500
+                    else self.logger.info
+                )
+                log_method(
                     "http_request_completed",
                     provider=self.provider,
                     method=method_upper,
@@ -81,6 +102,16 @@ class UnifiedAPIClientImpl(ApiClientABC):
                     status_code=context["status_code"],
                     latency_sec=time.monotonic() - start,
                 )
+                if (
+                    context["status_code"] is not None
+                    and context["status_code"] >= 500
+                ):
+                    raise ApiUnexpectedStatusError(
+                        f"Unexpected status code: {context['status_code']}",
+                        provider=self.provider,
+                        endpoint=url,
+                        status_code=context["status_code"],
+                    )
                 return response
         except Exception as exc:
             status_label = self._status_from_exception(status_label, exc)
@@ -93,15 +124,38 @@ class UnifiedAPIClientImpl(ApiClientABC):
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         """Execute a request using the configured HTTP client."""
-        return self.request_call(method, url, **kwargs)
+        return self._request_with_retry(method, url, **kwargs)
 
     def get_response(self, url: str, **kwargs: Any) -> Any:
         """GET запрос."""
-        return self.request_call("GET", url, **kwargs)
+        return self._request_with_retry("GET", url, **kwargs)
 
     def request_post(self, url: str, **kwargs: Any) -> Any:
         """POST запрос."""
-        return self.request_call("POST", url, **kwargs)
+        return self._request_with_retry("POST", url, **kwargs)
+
+    def _request_with_retry(self, method: str, url: str, **kwargs: Any) -> Any:
+        attempt = 1
+        while True:
+            try:
+                return self.request_call(method, url, **kwargs)
+            except Exception as exc:
+                if self.retry_policy is None or not self.retry_policy.should_retry(
+                    exc, attempt
+                ):
+                    raise
+
+                backoff = self.retry_policy.get_backoff(attempt)
+                self.logger.warning(
+                    "http_request_retry",
+                    provider=self.provider,
+                    url=url,
+                    attempt=attempt,
+                    backoff_sec=backoff,
+                    error=str(exc),
+                )
+                time.sleep(backoff)
+                attempt += 1
 
     def close(self) -> None:
         """Закрыть соединение."""
@@ -144,4 +198,8 @@ class UnifiedAPIClientImpl(ApiClientABC):
     def _status_from_exception(self, current_status: str, exc: Exception) -> str:
         if isinstance(exc, ApiTimeoutError) or isinstance(exc, requests.Timeout):
             return "timeout"
+        if isinstance(exc, ApiClientError):
+            status_code = getattr(exc, "status_code", None)
+            if status_code is not None:
+                return str(status_code)
         return exc.__class__.__name__ or current_status
