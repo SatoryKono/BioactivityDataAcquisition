@@ -1,14 +1,4 @@
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "actorLineColor": "#444",
-    "actorTextColor": "#111",
-    "actorBkg": "#f5f5f5",
-    "actorFontSize": "18px",
-    "activationBkgColor": "#e3e7ec",
-    "activationBorderColor": "#444"
-  }
-}}%%
+%%{init: { "theme": "base", "themeVariables": { "actorLineColor": "#444", "actorTextColor": "#111", "actorBkg": "#f5f5f5", "actorFontSize": "18px", "activationBkgColor": "#e3e7ec", "activationBorderColor": "#444" } }}%%
 sequenceDiagram
     autonumber
     participant Extraction as ChemblExtractionServiceImpl
@@ -22,7 +12,7 @@ sequenceDiagram
     Client->>HTTP: GET /api/data/activity
     HTTP->>Rate: acquire()
     Rate-->>HTTP: ok (sleep if needed)
-    loop retry ≤ max_retries
+    loop retry <= max_retries
         HTTP->>API: HTTPS request
         alt success 2xx
             API-->>HTTP: JSON payload
