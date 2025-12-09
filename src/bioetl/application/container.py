@@ -15,6 +15,7 @@ from bioetl.application.pipelines.hooks_impl import (
     MetricsPipelineHookImpl,
 )
 from bioetl.application.pipelines.loader_impl import FileLoaderImpl
+from bioetl.application.providers import ApplicationFieldProvider
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
@@ -240,8 +241,12 @@ class PipelineContainer(PipelineContainerABC):
         source_config = self._resolve_provider_config(definition)
 
         client = definition.components.create_client(source_config)
+        
+        # Inject application-level defaults
+        field_provider = ApplicationFieldProvider()
+        
         return definition.components.create_extraction_service(
-            source_config, client=client
+            source_config, client=client, field_provider=field_provider
         )
 
     def get_hash_service(self) -> HashServiceABC:
