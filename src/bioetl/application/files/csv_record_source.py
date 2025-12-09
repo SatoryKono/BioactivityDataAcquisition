@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.record_source import RawRecord, RecordSource
+from bioetl.domain.record_source import RawRecord, RecordSourceABC as RecordSource
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:

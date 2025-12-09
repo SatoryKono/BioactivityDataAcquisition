@@ -27,7 +27,7 @@ from bioetl.infrastructure.observability.factories import (
 from bioetl.infrastructure.observability.tracing import with_tracing_span
 
 
-class UnifiedOutputWriterImpl(OutputWriterABC):
+class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
     """
     Фасад для записи результатов пайплайна.
 
@@ -58,6 +58,23 @@ class UnifiedOutputWriterImpl(OutputWriterABC):
         self._metrics = metrics
         self._logger = logger or default_logging_port()
         self._tracer = tracer or default_tracing_port()
+
+    def load(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        """Alias for write_result to implement LoaderABC."""
+        return self.write_result(
+            df=df,
+            output_path=output_path,
+            entity_name=context.entity_name,
+            run_context=context,
+            column_order=column_order,
+        )
 
     def write_result(
         self,

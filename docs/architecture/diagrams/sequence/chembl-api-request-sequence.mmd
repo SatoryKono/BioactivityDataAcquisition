@@ -12,30 +12,31 @@
 sequenceDiagram
     autonumber
     participant Extraction as ChemblExtractionServiceImpl
-    participant Client as ChemblDataClientHTTPImpl
-    participant HTTP as UnifiedAPIClient
+    participant Client as ChemblHttpClientImpl
     participant Rate as RateLimiter
-    participant Retry as RetryPolicy
+    participant HTTP as UnifiedAPIClientImpl
     participant API as "ChEMBL REST API"
 
     Extraction->>Client: request_activity(filters, offset, limit)
-    Client->>HTTP: GET /api/data/activity
-    HTTP->>Rate: acquire()
-    Rate-->>HTTP: ok (sleep if needed)
-    loop retry <= max_retries
+    Client->>Rate: acquire()
+    Rate-->>Client: ok (sleep if needed)
+    Client->>HTTP: request_call(method, url, timeout, ...)
+    activate HTTP
+    loop retry logic (internal)
         HTTP->>API: HTTPS request
         alt success 2xx
             API-->>HTTP: JSON payload
             HTTP-->>Client: response
-            Client->>Client: parse via ResponseParser
-            Client-->>Extraction: page dict (records + page_meta)
-        else transient error >=500/timeout
-            API--x HTTP: error
-            HTTP->>Retry: schedule_retry()
-            Retry-->>HTTP: wait(backoff)
+        else retryable error
+            API--x HTTP: error/timeout
+            HTTP->>HTTP: wait(backoff)
         end
     end
     alt all retries failed
-        Retry-->>Extraction: raise RequestFailedError
+        HTTP-->>Client: raise ApiError
+        Client-->>Extraction: propagate error
     end
+    deactivate HTTP
+    Client->>Client: parse via ResponseParser
+    Client-->>Extraction: page dict (records + page_meta)
 

@@ -9,6 +9,77 @@ from typing import Any, Literal
 import pandas as pd
 
 
+def serialize_list(value: Any) -> Any:
+    """Serialize a list of primitives or dicts into a pipe-delimited string.
+
+    - Primitives are converted to strings and joined with '|'
+    - Dict items are serialized via `serialize_dict`
+    - Nested lists/tuples/sequences are skipped
+    - None or empty lists yield `pd.NA`
+    """
+    if value is None:
+        return pd.NA
+
+    if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
+        value, (str, bytes, bytearray)
+    ):
+        parts: list[str] = []
+        for item in value:
+            if item is None or _is_missing(item):
+                continue
+            if isinstance(item, Mapping):
+                dict_str = serialize_dict(item)
+                if not pd.isna(dict_str) and dict_str:
+                    parts.append(dict_str)
+                continue
+            if isinstance(item, (list, tuple, set, frozenset, Sequence)) and not isinstance(
+                item, (str, bytes, bytearray)
+            ):
+                # Explicitly skip nested sequences
+                continue
+            parts.append(str(item))
+
+        return "|".join(parts) if parts else pd.NA
+
+    # Non-sequence values: treat None as NA, otherwise convert to string
+    return pd.NA if _is_missing(value) else str(value)
+
+
+def serialize_dict(value: Any) -> Any:
+    """Serialize a dict of primitives into a pipe-delimited 'k:v' string.
+
+    - Keys are sorted for determinism
+    - Values that are None, NaN or nested structures are skipped
+    - None or empty dict yields `pd.NA`
+    """
+    if value is None:
+        return pd.NA
+
+    if not isinstance(value, Mapping):
+        # Non-dict values are not supported here; fall back to NA if missing
+        return pd.NA if _is_missing(value) else str(value)
+
+    if not value:
+        return pd.NA
+
+    parts: list[str] = []
+    for key in sorted(value.keys()):
+        v = value[key]
+        if v is None or _is_missing(v):
+            continue
+        if isinstance(v, Mapping):
+            # Skip nested mappings for this serializer
+            continue
+        if isinstance(v, (list, tuple, set, frozenset, Sequence)) and not isinstance(
+            v, (str, bytes, bytearray)
+        ):
+            # Skip nested sequences
+            continue
+        parts.append(f"{key}:{str(v)}")
+
+    return "|".join(parts) if parts else pd.NA
+
+
 def serialize_nested(
     value: Any, *, mode: Literal["json", "flat", "pipe"] = "json"
 ) -> str:
@@ -95,4 +166,4 @@ def _is_missing(value: Any) -> bool:
         return False
 
 
-__all__ = ["serialize_nested"]
+__all__ = ["serialize_list", "serialize_dict", "serialize_nested"]
