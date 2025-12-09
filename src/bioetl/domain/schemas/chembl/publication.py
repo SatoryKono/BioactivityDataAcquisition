@@ -3,12 +3,40 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    build_output_column_order,
+)
 from bioetl.domain.transform.normalizers import (
     CHEMBL_ID_REGEX,
     DOI_REGEX,
     PUBMED_ID_REGEX,
 )
+
+_PUBLICATION_BUSINESS_COLUMNS: list[str] = [
+    "abstract",
+    "authors",
+    "chembl_release",
+    "contact",
+    "doc_type",
+    "document_chembl_id",
+    "doi",
+    "doi_chembl",
+    "first_page",
+    "issue",
+    "journal",
+    "journal_full_title",
+    "last_page",
+    "patent_id",
+    "pubmed_id",
+    "score",
+    "src_id",
+    "title",
+    "volume",
+    "year",
+]
+
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_PUBLICATION_BUSINESS_COLUMNS)
 
 
 class PublicationTableSchema(BaseGeneratedColumnsSchema):
@@ -65,3 +93,6 @@ class PublicationTableSchema(BaseGeneratedColumnsSchema):
     title: Series[str] = pa.Field(nullable=True, description="Заголовок документа")
     volume: Series[str] = pa.Field(nullable=True, description="Том выпуска")
     year: Series[float] = pa.Field(nullable=True, description="Год публикации")
+
+
+__all__ = ["PublicationTableSchema", "OUTPUT_COLUMN_ORDER"]

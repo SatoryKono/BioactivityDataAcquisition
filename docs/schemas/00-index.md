@@ -10,5 +10,6 @@ Start with the overview document for the schema registry and then follow links t
 
 ## Entity Schemas
 
-Entity-specific schema notes live next to the corresponding pipeline documentation under `docs/application/pipelines`. Current
-ChEMBL coverage includes publication, molecule, target, assay, and activity entities.
+Entity-specific schema notes live next to the corresponding pipeline documentation under `docs/application/pipelines`. Use the consolidated ChEMBL reference below for column order:
+
+- **01-chembl-schema-columns.md** — canonical column order for activity, assay, molecule, publication, target, cell, and tissue tables (business columns first, then generated metadata).

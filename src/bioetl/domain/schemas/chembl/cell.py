@@ -5,8 +5,21 @@ from __future__ import annotations
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    build_output_column_order,
+)
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
+
+_CELL_BUSINESS_COLUMNS: list[str] = [
+    "cell_chembl_id",
+    "cell_name",
+    "cell_source_organism",
+    "cell_type",
+    "cell_description",
+]
+
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_CELL_BUSINESS_COLUMNS)
 
 
 class CellTableSchema(BaseGeneratedColumnsSchema):
@@ -30,4 +43,4 @@ class CellTableSchema(BaseGeneratedColumnsSchema):
     )
 
 
-__all__ = ["CellTableSchema"]
+__all__ = ["CellTableSchema", "OUTPUT_COLUMN_ORDER"]

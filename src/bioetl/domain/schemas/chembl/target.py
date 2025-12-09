@@ -3,11 +3,29 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    build_output_column_order,
+)
 from bioetl.domain.transform.normalizers import (
     CHEMBL_ID_REGEX,
     UNIPROT_ID_REGEX,
 )
+
+_TARGET_BUSINESS_COLUMNS: list[str] = [
+    "target_chembl_id",
+    "pref_name",
+    "score",
+    "organism",
+    "target_type",
+    "tax_id",
+    "species_group_flag",
+    "target_components",
+    "cross_references",
+    "uniprot_id",
+]
+
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_TARGET_BUSINESS_COLUMNS)
 
 
 class TargetTableSchema(BaseGeneratedColumnsSchema):
@@ -39,3 +57,6 @@ class TargetTableSchema(BaseGeneratedColumnsSchema):
         str_matches=UNIPROT_ID_REGEX.pattern,
         description="Основной UniProt ID",
     )
+
+
+__all__ = ["TargetTableSchema", "OUTPUT_COLUMN_ORDER"]

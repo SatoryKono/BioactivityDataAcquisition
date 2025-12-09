@@ -5,7 +5,7 @@ from pathlib import Path
 from .test_pipeline_outputs_helpers import load_expected_records
 
 expected_assay_records = load_expected_records(
-    Path("data/output/assay/assay.csv"), sort_key="assay_chembl_id"
+    Path("data/_output/assay/assay.csv"), sort_key="assay_chembl_id"
 )
 
 __all__ = ["expected_assay_records"]

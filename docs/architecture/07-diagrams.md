@@ -399,7 +399,7 @@ flowchart LR
   end
   subgraph Domain["**Domain Layer**"]
     DomainCore["**Domain Models & Transformations** *bioetl.domain.***"]
-    Schemas["**Pandera Schemas** *bioetl.schemas.***"]
+    Schemas["**Pandera Schemas** *bioetl.domain.schemas.***"]
     Services["**Domain Services** *Normalization, Validation Facades*"]
   end
   subgraph Infrastructure["**Infrastructure Layer**"]

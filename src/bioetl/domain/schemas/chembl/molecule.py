@@ -3,8 +3,50 @@
 import pandera as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.chembl.base import BaseGeneratedColumnsSchema
+from bioetl.domain.schemas.chembl.base import (
+    BaseGeneratedColumnsSchema,
+    build_output_column_order,
+)
 from bioetl.domain.transform.normalizers import CHEMBL_ID_REGEX
+
+_MOLECULE_BUSINESS_COLUMNS: list[str] = [
+    "atc_classifications",
+    "availability_type",
+    "black_box_warning",
+    "chemical_probe",
+    "chirality",
+    "cross_references",
+    "dosed_ingredient",
+    "first_approval",
+    "first_in_class",
+    "helm_notation",
+    "inorganic_flag",
+    "max_phase",
+    "molecule_chembl_id",
+    "molecule_hierarchy",
+    "molecule_properties",
+    "molecule_structures",
+    "molecule_synonyms",
+    "molecule_type",
+    "natural_product",
+    "oral",
+    "orphan",
+    "parenteral",
+    "polymer_flag",
+    "pref_name",
+    "prodrug",
+    "structure_type",
+    "therapeutic_flag",
+    "topical",
+    "usan_stem",
+    "usan_stem_definition",
+    "usan_substem",
+    "usan_year",
+    "veterinary",
+    "withdrawn_flag",
+]
+
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_MOLECULE_BUSINESS_COLUMNS)
 
 
 class MoleculeTableSchema(BaseGeneratedColumnsSchema):
@@ -99,3 +141,6 @@ class MoleculeTableSchema(BaseGeneratedColumnsSchema):
     withdrawn_flag: Series[bool] = pa.Field(
         nullable=True, description="Снят ли с рынка"
     )
+
+
+__all__ = ["MoleculeTableSchema", "OUTPUT_COLUMN_ORDER"]
