@@ -1,5 +1,5 @@
 """
-HTTP implementation of ChEMBL API port.
+HTTP client implementation for ChEMBL API.
 """
 
 from __future__ import annotations
@@ -21,9 +21,9 @@ from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.observability.factories import default_logging_port
 
 
-class ChemblApiPortImpl(DataClientABC):
+class ChemblHttpClientImpl(DataClientABC):
     """
-    ChEMBL API port implemented over HTTP.
+    ChEMBL API client implemented over HTTP.
     Uses UnifiedAPIClientImpl for requests and RateLimiter for proactive throttling.
     """
 

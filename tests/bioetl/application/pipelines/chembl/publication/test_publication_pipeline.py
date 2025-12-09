@@ -7,7 +7,9 @@ import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
-from bioetl.infrastructure.transform.impl.normalize import NormalizationServiceImpl
+from bioetl.infrastructure.transform.impl.normalize import (
+    DefaultNormalizationTransformerImpl,
+)
 
 
 @pytest.fixture
@@ -46,7 +48,7 @@ def pipeline():
         PublicationTableSchema.to_schema().columns.keys()
     )
 
-    normalization_service = NormalizationServiceImpl(config)
+    normalization_service = DefaultNormalizationTransformerImpl(config)
 
     return ChemblPipelineBase(
         config=config,

@@ -4,7 +4,9 @@ import pytest
 
 from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
+from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
+    ChemblHttpClientImpl,
+)
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
@@ -41,8 +43,8 @@ def fixture_client(
     mock_rate_limiter,
     mock_http_client,
 ):
-    """Create ChemblApiPortImpl instance with mocks."""
-    client = ChemblApiPortImpl(
+    """Create ChemblHttpClientImpl instance with mocks."""
+    client = ChemblHttpClientImpl(
         request_builder=mock_request_builder,
         response_parser=mock_response_parser,
         rate_limiter=mock_rate_limiter,
