@@ -9,8 +9,8 @@ from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.infrastructure.clients.base.factories import (
-    default_api_client,
-    default_rate_limiter,
+    build_http_client,
+    build_rate_limiter,
 )
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
@@ -44,9 +44,9 @@ def default_chembl_client(
         client_config = source_config.client.model_copy(deep=True)
 
     # Create Unified Client
-    unified_client = default_api_client(
+    unified_client = build_http_client(
         provider="chembl",
-        config=client_config,
+        client_config=client_config,
     )
 
     # Allow explicit overrides via kwargs (used in tests and manual runs)
@@ -55,10 +55,7 @@ def default_chembl_client(
 
     # Rate limiter for proactive limiting (in addition to middleware backoff)
     # Using explicit rate limiter in client logic
-    rate_limiter = default_rate_limiter(
-        rate=client_config.rate_limit_per_sec,
-        capacity=max(1.0, client_config.rate_limit_per_sec),
-    )
+    rate_limiter = build_rate_limiter(client_config=client_config)
 
     return ChemblApiPortImpl(
         request_builder=ChemblRequestBuilderImpl(
