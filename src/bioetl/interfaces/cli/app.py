@@ -16,7 +16,10 @@ import typer
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.application.pipelines.registry import (
+    get_pipeline_factory,
+    get_registered_pipelines,
+)
 from bioetl.domain.configs import MetricsConfig
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
@@ -73,8 +76,8 @@ def list_pipelines() -> None:
     table.add_column("Name", style="cyan")
     table.add_column("Class", style="green")
 
-    for name, cls in PIPELINE_REGISTRY.items():
-        table.add_row(name, cls.__name__)
+    for name, factory in get_registered_pipelines().items():
+        table.add_row(name, _get_pipeline_factory_name(factory))
 
     console.print(table)
 
@@ -171,6 +174,10 @@ def run(
     }
 
     try:
+        pipeline_factory = get_pipeline_factory(pipeline_name)
+        config_context["pipeline_factory"] = _get_pipeline_factory_name(
+            pipeline_factory
+        )
         base_dir = _get_config_base_dir()
         requested_config_path = config_path or _resolve_config_path(
             pipeline_name,
@@ -285,6 +292,10 @@ def run(
                 **config_context,
             )
             sys.exit(1)
+
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        sys.exit(1)
 
     except Exception:  # pragma: no cover - CLI safety
         elapsed = time.perf_counter() - start_time
@@ -418,6 +429,14 @@ def _collect_cli_overrides(
     if csv_options:
         overrides["csv_options"] = csv_options
     return overrides
+
+
+def _get_pipeline_factory_name(factory: Any) -> str:
+    """Return a human-readable name for a pipeline factory."""
+
+    if hasattr(factory, "__name__"):
+        return str(getattr(factory, "__name__"))
+    return factory.__class__.__name__
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation
