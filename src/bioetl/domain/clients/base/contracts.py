@@ -35,6 +35,22 @@ class ResponseParserABC(ABC):
         """Извлекает метаданные из ответа (например, общее кол-во)."""
 
 
+class ApiClientABC(ABC):
+    """Transport-agnostic API client abstraction with request lifecycle hooks.
+
+    Default factory: ``bioetl.infrastructure.clients.base.factories.default_api_client``.
+    Common implementation: ``bioetl.infrastructure.clients.base.impl.unified_api_client_impl.UnifiedAPIClientImpl``.
+    """
+
+    @abstractmethod
+    def request(self, method: str, url: str, **kwargs: Any) -> Any:
+        """Execute an HTTP-style request and return the raw response object."""
+
+    @abstractmethod
+    def close(self) -> None:
+        """Release underlying resources (sessions, pools)."""
+
+
 class PaginatorABC(ABC):
     """
     Стратегия пагинации.

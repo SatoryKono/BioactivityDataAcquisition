@@ -4,6 +4,7 @@ import os
 from typing import Any
 
 from bioetl.domain.clients.base.contracts import (
+    ApiClientABC,
     CacheABC,
     PaginatorABC,
     RateLimiterABC,
@@ -13,12 +14,16 @@ from bioetl.domain.clients.base.contracts import (
     SecretProviderABC,
     SideInputProviderABC,
 )
+from bioetl.domain.configs import ClientConfig
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
 from bioetl.infrastructure.clients.base.impl.retry_policy import (
     ExponentialBackoffRetryImpl,
+)
+from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
+    UnifiedAPIClientImpl,
 )
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
@@ -83,6 +88,14 @@ def default_paginator() -> PaginatorABC:
     """Return the default paginator implementation."""
 
     return ChemblPaginatorImpl()
+
+
+def default_api_client(
+    provider: str, config: ClientConfig, *, base_client: Any | None = None
+) -> ApiClientABC:
+    """Create the default API client with retry/backoff middleware."""
+
+    return UnifiedAPIClientImpl(provider=provider, config=config, base_client=base_client)
 
 
 def default_side_input_provider() -> SideInputProviderABC:
