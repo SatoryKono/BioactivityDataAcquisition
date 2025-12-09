@@ -3,7 +3,7 @@
 from pydantic import TypeAdapter
 
 from bioetl.domain.clients.base.contracts import ResponseParserABC
-from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 
 
 class ChemblResponseParserImpl(ResponseParserABC[ActivityRawModel]):
@@ -21,7 +21,9 @@ class ChemblResponseParserImpl(ResponseParserABC[ActivityRawModel]):
                 return [ActivityRawModel.model_validate(item) for item in value]
         return []
 
-    def extract_metadata(self, raw_response: dict[str, object]) -> dict[str, int | str | None]:
+    def extract_metadata(
+        self, raw_response: dict[str, object]
+    ) -> dict[str, int | str | None]:
         """Return pagination metadata section from response."""
         adapter: TypeAdapter[dict[str, int | str | None]] = TypeAdapter(
             dict[str, int | str | None]

@@ -2,7 +2,7 @@
 ChEMBL data transformer implementation.
 """
 
-from typing import Any
+from typing import Literal, cast
 
 import pandas as pd
 
@@ -10,9 +10,9 @@ from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
+from bioetl.domain.transform.serializers import serialize_nested
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.transform.impl.serializer import serialize_nested
 
 
 class ChemblTransformerImpl(TransformerABC):
@@ -62,15 +62,16 @@ class ChemblTransformerImpl(TransformerABC):
         """
         Serialize list/dict fields deterministically to match schema expectations.
         """
+        mode = cast(Literal["json", "flat", "pipe"], self._serialization_mode)
 
         def _serialize_value(value: object) -> object:
             if value is None or value is pd.NA:
                 return pd.NA
             if isinstance(value, dict):
-                serialized = serialize_nested(value, mode=self._serialization_mode)
+                serialized = serialize_nested(value, mode=mode)
                 return pd.NA if serialized == "" else serialized
             if isinstance(value, (list, tuple)):
-                serialized = serialize_nested(value, mode=self._serialization_mode)
+                serialized = serialize_nested(value, mode=mode)
                 return pd.NA if serialized == "" else serialized
             return value
 

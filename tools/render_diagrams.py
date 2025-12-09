@@ -39,11 +39,58 @@ def _parse_args() -> argparse.Namespace:
         default=10.0,
         help="Scale factor for mermaid-cli (default: 10.0)",
     )
+    parser.add_argument(
+        "--theme",
+        type=str,
+        default="default",
+        help="Mermaid theme name",
+    )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to mermaid config JSON",
+    )
     return parser.parse_args()
 
 
 def _npx_command() -> str:
     return "npx.cmd" if os.name == "nt" else "npx"
+
+
+def _local_mmdc() -> Path | None:
+    base = Path("node_modules") / ".bin"
+    for name in ("mmdc.cmd", "mmdc"):
+        p = base / name
+        if p.exists():
+            return p.resolve()
+    return None
+
+
+def _find_chromium_exe() -> Path | None:
+    candidates = []
+    if os.name == "nt":
+        candidates.extend(
+            [
+                Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
+                Path(r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"),
+                Path(r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"),
+                Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),
+            ]
+        )
+    else:
+        candidates.extend(
+            [
+                Path("/usr/bin/chromium"),
+                Path("/usr/bin/chromium-browser"),
+                Path("/usr/bin/google-chrome"),
+                Path("/opt/google/chrome/chrome"),
+            ]
+        )
+    for p in candidates:
+        if p.exists():
+            return p
+    return None
 
 
 def _strip_front_matter(content: str) -> str:
@@ -95,6 +142,8 @@ def _render_diagram(
     path: Path,
     background: str,
     scale: float,
+    theme: str,
+    config: Path | None,
 ) -> tuple[bool, str]:
     try:
         raw_content = path.read_text(encoding="utf-8")
@@ -114,27 +163,53 @@ def _render_diagram(
 
     print(f"[render] {path} -> {target}")
 
-    cmd = [
-        _npx_command(),
-        "--yes",
-        MERMAID_CLI_PACKAGE,
-        "--input",
-        str(tmp_in_path),
-        "--output",
-        str(tmp_out_path),
-        "--backgroundColor",
-        background,
-        "--scale",
-        str(scale),
-        "--quiet",
-    ]
+    local_mmdc = _local_mmdc()
+    if local_mmdc is not None:
+        cmd = [
+            str(local_mmdc),
+            "--input",
+            str(tmp_in_path),
+            "--output",
+            str(tmp_out_path),
+            "--backgroundColor",
+            background,
+            "--scale",
+            str(scale),
+            "--theme",
+            theme,
+            "--quiet",
+        ]
+    else:
+        cmd = [
+            _npx_command(),
+            "--yes",
+            MERMAID_CLI_PACKAGE,
+            "--input",
+            str(tmp_in_path),
+            "--output",
+            str(tmp_out_path),
+            "--backgroundColor",
+            background,
+            "--scale",
+            str(scale),
+            "--theme",
+            theme,
+            "--quiet",
+        ]
+    if config is not None:
+        cmd.extend(["--configFile", str(config)])
 
     try:
+        env = os.environ.copy()
+        chromium = _find_chromium_exe()
+        if chromium is not None:
+            env["PUPPETEER_EXECUTABLE_PATH"] = str(chromium)
         result = subprocess.run(
             cmd,
             check=True,
             capture_output=True,
             text=True,
+            env=env,
         )
         if not tmp_out_path.exists():
             msg = f"rendered file missing: {tmp_out_path}"
@@ -153,13 +228,21 @@ def _render_diagram(
     return True, result.stderr or result.stdout or ""
 
 
-def _render_all(paths: Iterable[Path], background: str, scale: float) -> None:
+def _render_all(
+    paths: Iterable[Path],
+    background: str,
+    scale: float,
+    theme: str,
+    config: Path | None,
+) -> None:
     errors: list[tuple[Path, str]] = []
     for diagram_path in paths:
         ok, message = _render_diagram(
             diagram_path,
             background=background,
             scale=scale,
+            theme=theme,
+            config=config,
         )
         if ok:
             continue
@@ -182,7 +265,13 @@ def main() -> int:
         return 1
 
     try:
-        _render_all(diagrams, background=args.background, scale=args.scale)
+        _render_all(
+            diagrams,
+            background=args.background,
+            scale=args.scale,
+            theme=args.theme,
+            config=args.config,
+        )
     except RuntimeError as exc:
         print(f"Ошибка рендеринга: {exc}", file=sys.stderr)
         return 1

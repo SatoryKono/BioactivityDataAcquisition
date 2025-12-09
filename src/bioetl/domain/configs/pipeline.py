@@ -315,18 +315,6 @@ class BaseProviderConfig(BaseModel):
 
         return self.http_client.base_url
 
-        client_field_names = set(ClientConfig.model_fields)
-        flattened = {
-            key: value for key, value in data.items() if key in client_field_names
-        }
-
-        if not flattened:
-            return data
-
-        cleaned = {key: value for key, value in data.items() if key not in flattened}
-        cleaned["client"] = flattened
-        return cleaned
-
     @field_validator("provider")
     @classmethod
     def validate_provider_known(cls, value: str) -> str:
@@ -347,6 +335,7 @@ class ChemblSourceConfig(BaseProviderConfig):
     max_url_length: PositiveInt | None = None
     page_size: PositiveInt | None = None
     batch_size: PositiveInt | None = None
+    fallbacks: dict[str, list[str]] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -364,6 +353,15 @@ class ChemblSourceConfig(BaseProviderConfig):
             effective_batch = min(effective_batch, limit)
 
         return effective_batch
+
+
+class OutputOptionsConfig(BaseModel):
+    """Опции финальной записи артефактов."""
+
+    converter: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
 
 
 class DummyProviderConfig(BaseProviderConfig):
@@ -474,6 +472,7 @@ class PipelineConfig(BaseModel):
     quality: QualityConfig = Field(default_factory=QualityConfig)
     features: FeatureFlagsConfig = Field(default_factory=FeatureFlagsConfig)
     transform: TransformConfig = Field(default_factory=TransformConfig)
+    output: OutputOptionsConfig = Field(default_factory=OutputOptionsConfig)
 
     pipeline: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
@@ -746,6 +745,7 @@ class PipelineConfig(BaseModel):
         _pack("observability", ["logging", "metrics"])
         _pack("quality", ["determinism", "qc", "hashing", "normalization"])
         _pack("features", ["features", "interface_features", "interfaces"])
+        _pack("output", ["output"])
 
         return migrated
 

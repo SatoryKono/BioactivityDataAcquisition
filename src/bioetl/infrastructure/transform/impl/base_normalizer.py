@@ -12,7 +12,7 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
-from bioetl.infrastructure.transform.impl.serializer import serialize_nested
+from bioetl.domain.transform.serializers import serialize_nested
 
 
 class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
@@ -207,9 +207,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         if not normalized_list:
             return self._empty_value
 
-        serialized = serialize_nested(
-            normalized_list, mode=self._serialization_mode
-        )
+        serialized = serialize_nested(normalized_list, mode=self._serialization_mode)
         return self._empty_value if serialized == "" else serialized
 
     def _process_dict(
@@ -226,7 +224,9 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         if normalized_dict is None:
             return self._empty_value
 
-        serialized = serialize_nested(dict(normalized_dict), mode=self._serialization_mode)
+        serialized = serialize_nested(
+            dict(normalized_dict), mode=self._serialization_mode
+        )
         return self._empty_value if serialized == "" else serialized
 
     def _apply_normalizer(

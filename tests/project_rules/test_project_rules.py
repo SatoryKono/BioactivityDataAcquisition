@@ -141,6 +141,7 @@ def test_pandera_schemas_defined_for_entities() -> None:
     allow_missing = {
         (SCHEMAS_ROOT / "models.py").as_posix(),
         (SCHEMAS_ROOT / "output_views.py").as_posix(),
+        (SCHEMAS_ROOT / "raw_models.py").as_posix(),
     }
 
     for schema_file in sorted(SCHEMAS_ROOT.glob("*.py")):

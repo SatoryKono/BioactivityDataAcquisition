@@ -3,6 +3,7 @@
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     OutputWriterABC,
+    OutputFrameConverterABC,
     QualityReportABC,
     WriterABC,
 )
@@ -42,6 +43,7 @@ def default_output_writer(
     metadata_writer: MetadataWriterABC | None = None,
     quality_reporter: QualityReportABC | None = None,
     metrics_port: MetricsPortABC | None = None,
+    converter: OutputFrameConverterABC | None = None,
 ) -> OutputWriterABC:
     """Compose the unified output writer with optional overrides."""
 
@@ -52,4 +54,5 @@ def default_output_writer(
         config=config,
         qc_config=qc_config,
         metrics=metrics_port,
+        converter=converter,
     )

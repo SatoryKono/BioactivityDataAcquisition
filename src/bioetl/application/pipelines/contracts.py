@@ -1,55 +1,24 @@
 """Contracts for pipeline components."""
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Callable, Iterable
-
-import pandas as pd
+from typing import Any, Callable
 
 from bioetl.domain.clients.base.output.contracts import (
     OutputWriterABC,
     RunMetadataBuilderProtocol,
-    WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.pipelines.contracts import (
+    ErrorPolicyABC,
+    ExtractorABC,
+    LoaderABC,
+    PipelineHookABC,
+)
 from bioetl.domain.record_source import RecordSource
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
-
-
-class ExtractorABC(ABC):
-    """
-    Component responsible for extracting data from source.
-    """
-
-    @abstractmethod
-    def extract(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
-        """
-        Yields chunks of data.
-        """
-
-
-class LoaderABC(ABC):
-    """
-    Component responsible for loading data to destination.
-    """
-
-    @abstractmethod
-    def load(
-        self,
-        df: pd.DataFrame,
-        output_path: Path,
-        context: RunContext,
-        *,
-        column_order: list[str] | None = None,
-    ) -> WriteResult:
-        """
-        Loads data to destination.
-        """
 
 
 class PipelineContainerABC(ABC):

@@ -9,24 +9,19 @@ import pandas as pd
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
     OutputWriterABC,
+    OutputFrameConverterABC,
     QualityReportABC,
     WriterABC,
     WriteResult,
 )
-from bioetl.domain.observability import MetricsPortABC
 from bioetl.domain.configs import DeterminismConfig, QcConfig
 from bioetl.domain.models import RunContext
+from bioetl.domain.observability import MetricsPortABC
+from bioetl.domain.pipelines.contracts import LoaderABC
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.column_order import apply_column_order
-from bioetl.application.pipelines.contracts import LoaderABC
-from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
-    OutputWriterABC,
-    QualityReportABC,
-    WriterABC,
-    WriteResult,
-)
+from bioetl.infrastructure.output.metadata import build_run_metadata
 
 
 class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
@@ -48,6 +43,7 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
         qc_config: QcConfig | None = None,
         atomic_op: AtomicFileOperation | None = None,
         metrics: MetricsPortABC | None = None,
+        converter: OutputFrameConverterABC | None = None,
     ) -> None:
         self._writer = writer
         self._metadata_writer = metadata_writer
@@ -56,6 +52,7 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
         self._qc_config = qc_config or QcConfig()
         self._atomic_op = atomic_op or AtomicFileOperation()
         self._metrics = metrics
+        self._converter = converter
 
     def load(
         self,
@@ -95,6 +92,14 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
             # 2. Сортировка (Determinism)
             df_prepared = self._stable_sort(df_prepared, run_context, column_order)
 
+            # 2.5. Конвертация кадра перед записью (если задан конвертер)
+            if self._converter is not None:
+                df_prepared = self._converter.convert(df_prepared)
+
+            # Порядок колонок для записи — фактический после конвертации,
+            # чтобы не потерять переименованные/переставленные колонки
+            column_order_to_write = list(df_prepared.columns)
+
             # 3. Атомарная запись
             data_path = output_path / f"{entity_name}.csv"
 
@@ -105,7 +110,7 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
                 """Write dataset to the provided path via underlying writer."""
                 nonlocal inner_result
                 inner_result = self._writer.write(
-                    df_prepared, path, column_order=column_order
+                    df_prepared, path, column_order=column_order_to_write
                 )
 
             self._atomic_op.write_atomic(data_path, _write_wrapper)
@@ -124,7 +129,9 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
             )
 
             qc_artifacts = self._generate_qc_artifacts(df_prepared, output_path)
-            qc_checksums = {path.name: compute_file_sha256(path) for path in qc_artifacts}
+            qc_checksums = {
+                path.name: compute_file_sha256(path) for path in qc_artifacts
+            }
 
             # 5. Запись метаданных
             meta = build_run_metadata(

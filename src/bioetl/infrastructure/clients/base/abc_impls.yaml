@@ -94,6 +94,13 @@ OutputWriterABC:
   implementations:
     Unified: bioetl.infrastructure.output.unified_output_writer_impl.UnifiedOutputWriterImpl
 
+OutputFrameConverterABC:
+  default_factory: bioetl.infrastructure.output.converters.factories.default_output_frame_converter
+  implementations:
+    Noop: bioetl.infrastructure.output.converters.noop_converter.NoopConverter
+    RenameColumns: bioetl.infrastructure.output.converters.rename_columns_converter.RenameColumnsConverter
+    DropNaRows: bioetl.infrastructure.output.converters.dropna_rows_converter.DropNaRowsConverter
+
 DataClientABC:
   default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
   implementations:

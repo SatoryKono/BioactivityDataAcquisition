@@ -54,7 +54,11 @@ def test_request_call_wraps_request_exception() -> None:
     assert err.value.endpoint == "https://example.org"
     metrics.inc_counter.assert_any_call(
         "client_request_errors",
-        {"provider": "chembl", "endpoint": "https://example.org", "status": "ApiClientError"},
+        {
+            "provider": "chembl",
+            "endpoint": "https://example.org",
+            "status": "ApiClientError",
+        },
     )
 
 
@@ -65,7 +69,10 @@ def test_request_records_metrics_on_success() -> None:
     base_client.request.return_value = response
     metrics = Mock(spec=MetricsPortABC)
     client = UnifiedAPIClientImpl(
-        provider="chembl", config=ClientConfig(), base_client=base_client, metrics=metrics
+        provider="chembl",
+        config=ClientConfig(),
+        base_client=base_client,
+        metrics=metrics,
     )
 
     result = client.request("GET", "https://example.org")
@@ -78,7 +85,9 @@ def test_request_records_metrics_on_success() -> None:
     metrics.observe_histogram.assert_called_once()
 
 
-def test_request_retries_on_timeout_until_success(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_request_retries_on_timeout_until_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     base_client = Mock()
     response = Mock()
     response.status_code = 200

@@ -49,7 +49,7 @@ sys.path.insert(0, src_str)
 
 def pytest_configure(config):
     """Apply patches for removed modules and Hypothesis compatibility."""
-    
+
     # Apply Hypothesis compatibility patch for Python 3.13
     try:
         # Import and patch before Hypothesis is used

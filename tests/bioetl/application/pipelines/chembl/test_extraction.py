@@ -8,10 +8,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.contracts import DataClientABC
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
-from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 
 
 @pytest.fixture

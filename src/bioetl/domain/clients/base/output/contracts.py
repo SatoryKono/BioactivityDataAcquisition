@@ -116,6 +116,13 @@ class RunMetadataBuilderProtocol(Protocol):
         """Build metadata for a dry-run execution."""
 
 
+class OutputFrameConverterABC(Protocol):
+    """DataFrame → DataFrame конвертер для пост-обработки перед записью."""
+
+    def convert(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Преобразует DataFrame (rename/reorder/drop/enrich)."""
+        
+
 __all__ = [
     "WriteResult",
     "WriterABC",
@@ -123,4 +130,5 @@ __all__ = [
     "QualityReportABC",
     "OutputWriterABC",
     "RunMetadataBuilderProtocol",
+    "OutputFrameConverterABC",
 ]

@@ -27,9 +27,9 @@ from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import RecordSource
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
-from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 
@@ -159,6 +159,15 @@ class ChemblPipelineBase(PipelineBase):
     def _enrich_context(self, context: RunContext) -> None:
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
+        # Enrich with actual endpoint used if provided by extraction service
+        try:
+            getter = getattr(self._extraction_service, "get_last_endpoint_used", None)
+            if callable(getter):
+                endpoint_used = getter()
+                if endpoint_used:
+                    context.metadata["endpoint_used"] = endpoint_used
+        except Exception:
+            pass
 
     def _should_skip_release_lookup(self) -> bool:
         """True, если версию ChEMBL нужно пропустить (офлайн/CSV режим)."""

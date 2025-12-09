@@ -9,6 +9,7 @@ from bioetl.infrastructure.transform.impl.normalize import (
 
 class _DummyConfig:
     def __init__(self) -> None:
+        self.serialization_mode = "pipe"
         self.fields = [
             {"name": "target_components", "data_type": "array"},
             {"name": "cross_references", "data_type": "array"},

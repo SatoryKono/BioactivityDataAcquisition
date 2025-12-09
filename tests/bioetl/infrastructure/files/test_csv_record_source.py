@@ -5,7 +5,7 @@ import pandas as pd
 from pydantic import AnyHttpUrl
 
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     ClientConfig,
@@ -32,13 +32,14 @@ class _StubExtractionService:
         self.batches.append(batch_ids)
         return {
             "records": [
-                {"activity_id": value, "standard_flag": True}
-                for value in batch_ids
+                {"activity_id": value, "standard_flag": True} for value in batch_ids
             ]
         }
 
     def parse_response(self, raw_response: dict[str, list[dict[str, str]]]):
-        return [ActivityRawModel.model_validate(item) for item in raw_response["records"]]
+        return [
+            ActivityRawModel.model_validate(item) for item in raw_response["records"]
+        ]
 
     def serialize_records(
         self, entity: str, records: list[ActivityRawModel]

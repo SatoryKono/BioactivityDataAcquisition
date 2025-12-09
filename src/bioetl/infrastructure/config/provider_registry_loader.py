@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 import yaml
 
 from bioetl.domain.configs import HttpClientSettings
+
 DEFAULT_CONFIGS_ROOT = Path("configs")
 DEFAULT_PROVIDERS_REGISTRY_PATH = DEFAULT_CONFIGS_ROOT / "providers.yaml"
 

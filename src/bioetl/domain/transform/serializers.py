@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping, Sequence
+import json
 from typing import Any, Literal
 
 import pandas as pd
@@ -32,9 +32,9 @@ def serialize_list(value: Any) -> Any:
                 if not pd.isna(dict_str) and dict_str:
                     parts.append(dict_str)
                 continue
-            if isinstance(item, (list, tuple, set, frozenset, Sequence)) and not isinstance(
-                item, (str, bytes, bytearray)
-            ):
+            if isinstance(
+                item, (list, tuple, set, frozenset, Sequence)
+            ) and not isinstance(item, (str, bytes, bytearray)):
                 # Explicitly skip nested sequences
                 continue
             parts.append(str(item))
@@ -97,7 +97,14 @@ def serialize_nested(
     if isinstance(value, Mapping):
         return _serialize_mapping(value, mode)
 
-    if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
+    if isinstance(value, (set, frozenset)):
+        try:
+            sorted_value = sorted(value)
+        except TypeError:
+            sorted_value = sorted(value, key=str)
+        return _serialize_sequence(sorted_value, mode)
+
+    if isinstance(value, (list, tuple, Sequence)) and not isinstance(
         value, (str, bytes, bytearray)
     ):
         return _serialize_sequence(value, mode)
@@ -130,7 +137,9 @@ def _json_default(value: Any) -> Any:
     return str(value)
 
 
-def _serialize_mapping(mapping: Mapping[str, Any], mode: str) -> str:
+def _serialize_mapping(
+    mapping: Mapping[str, Any], mode: Literal["json", "flat", "pipe"]
+) -> str:
     delimiter = "|" if mode == "pipe" else ","
     kv_separator = ":" if mode == "pipe" else "="
     parts: list[str] = []
@@ -144,7 +153,9 @@ def _serialize_mapping(mapping: Mapping[str, Any], mode: str) -> str:
     return delimiter.join(parts)
 
 
-def _serialize_sequence(seq: Sequence[Any], mode: str) -> str:
+def _serialize_sequence(
+    seq: Sequence[Any], mode: Literal["json", "flat", "pipe"]
+) -> str:
     delimiter = "|" if mode == "pipe" else ","
     parts: list[str] = []
 
