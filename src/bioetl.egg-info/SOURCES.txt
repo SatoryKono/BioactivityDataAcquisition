@@ -119,7 +119,6 @@ src/bioetl/domain/validation/service.py
 src/bioetl/domain/validation/impl/__init__.py
 src/bioetl/infrastructure/chembl_client.py
 src/bioetl/infrastructure/constants.py
-src/bioetl/infrastructure/clients/middleware.py
 src/bioetl/infrastructure/clients/provider_registry_loader.py
 src/bioetl/infrastructure/clients/base/__init__.py
 src/bioetl/infrastructure/clients/base/abc_registry_resolver.py
@@ -128,7 +127,6 @@ src/bioetl/infrastructure/clients/base/impl/__init__.py
 src/bioetl/infrastructure/clients/base/impl/cache.py
 src/bioetl/infrastructure/clients/base/impl/circuit_breaker.py
 src/bioetl/infrastructure/clients/base/impl/rate_limiter.py
-src/bioetl/infrastructure/clients/base/impl/retry_policy.py
 src/bioetl/infrastructure/clients/base/impl/unified_api_client_impl.py
 src/bioetl/infrastructure/clients/chembl/__init__.py
 src/bioetl/infrastructure/clients/chembl/factories.py

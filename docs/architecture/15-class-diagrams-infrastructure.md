@@ -32,7 +32,6 @@ classDiagram
         -request_builder: ChemblRequestBuilderImpl
         -response_parser: ChemblResponseParserImpl
         -rate_limiter: RateLimiterABC
-        -http: HttpClientMiddleware
         +request_activity(filters)
         +request_assay(filters)
         +iter_pages(request)
@@ -42,7 +41,6 @@ classDiagram
 
     class UnifiedAPIClient {
         -base_client: ClientSession
-        -retry_policy: RetryPolicyABC
         -circuit_breaker: CircuitBreakerImpl
         +request(method, url, **kwargs)
         +close()
@@ -118,14 +116,12 @@ classDiagram
         +wait_if_needed()
     }
 
-    class RetryPolicyABC {
         <<abstract>>
         +max_attempts: int
         +should_retry(error, attempt)* bool
         +get_delay(attempt)* float
     }
 
-    class ExponentialBackoffRetryImpl {
         -max_attempts: int
         -base_delay: float
         -max_delay: float
@@ -150,7 +146,6 @@ classDiagram
     }
 
     RateLimiterABC <|-- TokenBucketRateLimiterImpl
-    RetryPolicyABC <|-- ExponentialBackoffRetryImpl
     CircuitBreakerImpl --> CircuitState : uses
 ```
 
@@ -364,9 +359,7 @@ classDiagram
 
 ```mermaid
 classDiagram
-    class HttpClientMiddleware {
         -base_client: ClientSession
-        -retry_policy: RetryPolicyABC
         -circuit_breaker: CircuitBreakerImpl
         -rate_limiter: RateLimiterABC
         +request(method, url, **kwargs) Response
@@ -377,7 +370,6 @@ classDiagram
 
     class UnifiedAPIClient {
         -base_client: ClientSession
-        -middleware: HttpClientMiddleware
         +request(method, url, **kwargs) Response
         +close()
     }
@@ -388,8 +380,6 @@ classDiagram
         +close()
     }
 
-    HttpClientMiddleware --> ClientSession : uses
-    UnifiedAPIClient --> HttpClientMiddleware : uses
 ```
 
 ## 10. Provider Components

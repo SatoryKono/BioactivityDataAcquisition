@@ -25,7 +25,6 @@ This guide provides step-by-step recipes for adding new providers, pipelines, an
 
 ## Leveraging DI and container factories
 
-1. Prefer factory functions (for example, `default_cache`, `default_retry_policy`, `default_rate_limiter`) to instantiate dependencies; keep them in the `factories.py` files alongside the domain they serve.
 2. Bind implementations through YAML registries rather than editing application code. The DI loader reads `abc_registry.yaml` and `abc_impls.yaml` to compose clients at runtime.
 3. When adding provider-specific factories, inject them via configuration rather than patching `run_bioetl.py` or shared modules. Use Chembl factories as a blueprint for how to separate request builders, paginators, and response parsers.
 4. Keep new configs deterministic: specify timeouts, retries, and ordering explicitly, and store secrets only via environment variables resolved by the secret provider.
