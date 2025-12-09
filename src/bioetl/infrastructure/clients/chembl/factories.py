@@ -112,6 +112,7 @@ def default_chembl_extraction_service(
                 "retries": client_config.max_retries,
                 "backoff": float(client_config.backoff_factor),
                 "rate_limit": float(client_config.rate_limit_per_sec),
+                "retry_enabled": bool(client_config.retry_enabled),
             }
         )
 
