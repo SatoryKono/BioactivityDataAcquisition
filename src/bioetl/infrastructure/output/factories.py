@@ -7,6 +7,7 @@ from bioetl.domain.clients.base.output.contracts import (
     WriterABC,
 )
 from bioetl.domain.configs import DeterminismConfig, QcConfig
+from bioetl.domain.observability import MetricsPortABC
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
@@ -40,6 +41,7 @@ def default_output_writer(
     writer: WriterABC | None = None,
     metadata_writer: MetadataWriterABC | None = None,
     quality_reporter: QualityReportABC | None = None,
+    metrics_port: MetricsPortABC | None = None,
 ) -> OutputWriterABC:
     """Compose the unified output writer with optional overrides."""
 
@@ -49,4 +51,5 @@ def default_output_writer(
         quality_reporter=quality_reporter or default_quality_reporter(),
         config=config,
         qc_config=qc_config,
+        metrics=metrics_port,
     )
