@@ -45,9 +45,12 @@ def default_chembl_client(
         client_config = source_config.client.model_copy(deep=True)
 
     # Create Unified Client
+    logger: LoggingPortABC | None = options.get("logger")
+
     unified_client = build_http_client(
         provider="chembl",
         client_config=client_config,
+        logger=logger,
     )
 
     # Allow explicit overrides via kwargs (used in tests and manual runs)
@@ -56,7 +59,9 @@ def default_chembl_client(
 
     # Rate limiter for proactive limiting (in addition to middleware backoff)
     # Using explicit rate limiter in client logic
-    rate_limiter = build_rate_limiter(client_config=client_config)
+    rate_limiter = build_rate_limiter(
+        client_config=client_config, logger=logger
+    )
 
     return ChemblApiPortImpl(
         request_builder=ChemblRequestBuilderImpl(
@@ -67,6 +72,7 @@ def default_chembl_client(
         rate_limiter=rate_limiter,
         client=unified_client,
         provider="chembl",
+        logger=logger,
     )
 
 
@@ -90,7 +96,9 @@ def default_chembl_extraction_service(
         Сервис экстракции.
     """
     if client is None:
-        client = default_chembl_client(config, client_config=client_config)
+        client = default_chembl_client(
+            config, client_config=client_config, logger=logger
+        )
 
     return ChemblExtractionServiceImpl(
         client=client,
