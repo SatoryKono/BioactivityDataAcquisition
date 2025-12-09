@@ -1,10 +1,8 @@
-"""Integration-style tests for ChemblApiPortImpl wiring."""
-
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
 from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
@@ -12,7 +10,6 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
-from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 @pytest.fixture
@@ -23,7 +20,7 @@ def mock_components():
         "request_builder": request_builder,
         "response_parser": MagicMock(spec=ChemblResponseParserImpl),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
-        "http_middleware": MagicMock(spec=HttpClientMiddleware),
+        "http_client": MagicMock(spec=ApiClientABC),
     }
 
 
@@ -33,12 +30,12 @@ def client(mock_components):
         request_builder=mock_components["request_builder"],
         response_parser=mock_components["response_parser"],
         rate_limiter=mock_components["rate_limiter"],
-        http_middleware=mock_components["http_middleware"],
+        client=mock_components["http_client"],
     )
     yield client
 
 
-def test_fetch_activity_with_middleware(client, mock_components):
+def test_fetch_activity_with_http_client(client, mock_components):
     # Arrange
     mock_builder = mock_components["request_builder"]
     mock_builder.for_endpoint.return_value = mock_builder
@@ -46,9 +43,8 @@ def test_fetch_activity_with_middleware(client, mock_components):
 
     mock_response = MagicMock()
     mock_response.json.return_value = {"data": "test"}
-    mock_components["http_middleware"].request.return_value = mock_response
+    mock_components["http_client"].request.return_value = mock_response
 
-    # Configure response parser to return the data pass-through or processed
     mock_components["response_parser"].parse_response.return_value = {"data": "test"}
 
     # Act
@@ -57,7 +53,7 @@ def test_fetch_activity_with_middleware(client, mock_components):
     # Assert
     mock_builder.for_endpoint.assert_called_with("activity")
     mock_builder.build.assert_called_with({"molecule_chembl_id": "CHEMBL123"})
-    mock_components["http_middleware"].request.assert_called_with(
+    mock_components["http_client"].request.assert_called_with(
         "GET", "http://chembl/activity"
     )
     assert result == {"data": "test"}
@@ -66,12 +62,11 @@ def test_fetch_activity_with_middleware(client, mock_components):
 def test_rate_limiter_usage(client, mock_components):
     # Arrange
     mock_limiter = mock_components["rate_limiter"]
-    mock_components["http_middleware"].request.return_value = MagicMock(
+    mock_components["http_client"].request.return_value = MagicMock(
         json=lambda: {}, raise_for_status=lambda: None
     )
 
     # Act
-    # iter_pages uses the rate limiter
     list(client.iter_pages("http://test"))
 
     # Assert

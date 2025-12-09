@@ -10,7 +10,6 @@ class RequestBuilderABC
 class ResponseParserABC
 class PaginatorABC
 class RateLimiterABC
-class RetryPolicyABC
 class CacheABC
 class SecretProviderABC
 class CircuitBreakerABC
@@ -18,7 +17,6 @@ class ExtractionServiceABC
 
 class BaseClientFactories {
   +default_rate_limiter()
-  +default_retry_policy()
   +default_cache()
   +default_secret_provider()
 }
@@ -29,7 +27,6 @@ class ChemblRequestBuilder
 class ChemblResponseParser
 class OffsetPaginator
 class TokenBucketRateLimiterImpl
-class ExponentialBackoffRetryImpl
 class MemoryCacheImpl
 class EnvSecretProvider
 class CircuitBreakerImpl
@@ -41,13 +38,11 @@ ChemblRequestBuilder ..|> RequestBuilderABC
 ChemblResponseParser ..|> ResponseParserABC
 OffsetPaginator ..|> PaginatorABC
 TokenBucketRateLimiterImpl ..|> RateLimiterABC
-ExponentialBackoffRetryImpl ..|> RetryPolicyABC
 MemoryCacheImpl ..|> CacheABC
 EnvSecretProvider ..|> SecretProviderABC
 ChemblExtractionServiceImpl ..|> ExtractionServiceABC
 CircuitBreakerImpl ..|> CircuitBreakerABC
 UnifiedAPIClient --> RateLimiterABC
-UnifiedAPIClient --> RetryPolicyABC
 UnifiedAPIClient --> CacheABC
 UnifiedAPIClient --> CircuitBreakerABC
 UnifiedAPIClient --> SecretProviderABC
@@ -57,7 +52,6 @@ ChemblHttpClientImpl --> ChemblResponseParser
 ChemblHttpClientImpl --> OffsetPaginator
 ChemblExtractionServiceImpl --> ChemblHttpClientImpl
 BaseClientFactories --> TokenBucketRateLimiterImpl
-BaseClientFactories --> ExponentialBackoffRetryImpl
 BaseClientFactories --> MemoryCacheImpl
 BaseClientFactories --> EnvSecretProvider
 BaseClientFactories --> CircuitBreakerImpl
@@ -69,7 +63,6 @@ class ChemblResponseParser domainSecondary
 class OffsetPaginator domainSecondary
 class UnifiedAPIClient domainSecondary
 class TokenBucketRateLimiterImpl domainSecondary
-class ExponentialBackoffRetryImpl domainSecondary
 class MemoryCacheImpl domainSecondary
 class EnvSecretProvider domainSecondary
 class CircuitBreakerImpl domainSecondary
@@ -80,7 +73,6 @@ class RequestBuilderABC interface
 class ResponseParserABC interface
 class PaginatorABC interface
 class RateLimiterABC interface
-class RetryPolicyABC interface
 class CacheABC interface
 class SecretProviderABC interface
 class CircuitBreakerABC interface

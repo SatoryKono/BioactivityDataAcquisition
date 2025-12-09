@@ -69,7 +69,6 @@
 | `ResponseParserABC` | `domain/clients/base/contracts.py` | 1 | ������ ChemBL | �������� |
 | `PaginatorABC` | `domain/clients/base/contracts.py` | 1 | ������ ChemBL | �������� �� enum/��������� |
 | `RateLimiterABC` | `domain/clients/base/contracts.py` | 1 (`TokenBucket`) | �� ������������� | ������� `Noop` ��� �������� �� config |
-| `RetryPolicyABC` | `domain/clients/base/contracts.py` | 1 (`ExponentialBackoff`) | �� ����������� | ��������� rate limiter |
 | `SecretProviderABC` | `domain/clients/base/contracts.py` | 1 (`EnvSecretProvider`) | ����������� �������� ������� | �������� � �������������� ��� �������� Vault |
 | `SideInputProviderABC` | `domain/clients/base/contracts.py` | 0 | ���� �� ��������� | ������ |
 | `BatchAdapterABC` | `domain/ports/extraction.py` | 1 (`PandasBatchAdapter`) | ������ `ApiRecordSource` | ������� �� `Callable[[Any], list[RawRecord]]` |
