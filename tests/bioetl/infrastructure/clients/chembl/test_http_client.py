@@ -1,9 +1,9 @@
 from unittest.mock import Mock
 
 import pytest
+import requests
 
 from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
-from bioetl.domain.errors import ClientResponseError
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -12,6 +12,11 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
+)
+from bioetl.infrastructure.errors import (
+    ApiParseError,
+    ApiTimeoutError,
+    ApiUnexpectedStatusError,
 )
 
 
@@ -98,14 +103,18 @@ def test_fetch_activity(client, mock_request_builder):
 
 
 def test_execute_request_json_error(client):
-    """Test JSON parse error is mapped to ClientResponseError."""
+    """Test JSON parse error is mapped to ApiParseError."""
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.side_effect = ValueError("bad json")
     client.http.request.return_value = mock_response
 
-    with pytest.raises(ClientResponseError):
+    with pytest.raises(ApiParseError) as err:
         client.fetch("activity")
+
+    assert err.value.provider == "chembl"
+    assert err.value.endpoint == "http://test-url"
+    assert err.value.status_code == 200
 
 
 def test_rate_limiter_called(client):
@@ -175,3 +184,26 @@ def test_iter_pages_without_next_stops_after_first(client):
 
     assert pages == [response.json.return_value]
     client.http.request.assert_called_once_with("GET", "https://example.org/page1")
+
+
+def test_execute_request_wraps_timeout(client):
+    client.http.request.side_effect = requests.Timeout("timeout")
+
+    with pytest.raises(ApiTimeoutError) as err:
+        client.fetch("activity")
+
+    assert err.value.provider == "chembl"
+    assert err.value.endpoint == "http://test-url"
+
+
+def test_execute_request_unexpected_status(client):
+    response = Mock()
+    response.status_code = 503
+    response.json.return_value = {}
+    client.http.request.return_value = response
+
+    with pytest.raises(ApiUnexpectedStatusError) as err:
+        client.fetch("activity")
+
+    assert err.value.status_code == 503
+    assert err.value.endpoint == "http://test-url"
