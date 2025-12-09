@@ -34,13 +34,35 @@ class PaginationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class HttpClientDefaults(BaseModel):
+    """Shared HTTP client defaults to centralize timeouts and limits."""
+
+    timeout: int = 30
+    retries: int = 3
+    backoff_factor: float = 2.0
+    rate_limit: float = 2.5
+
+    model_config = ConfigDict(extra="forbid")
+
+
+HTTP_CLIENT_DEFAULTS = HttpClientDefaults()
+
+
 class ClientConfig(BaseModel):
     """Конфигурация HTTP-клиента."""
 
-    timeout_sec: PositiveFloat = 30.0
-    max_retries: NonNegativeInt = 3
-    rate_limit_per_sec: PositiveFloat = 10.0
-    backoff_factor: float = 2.0
+    timeout_sec: PositiveFloat = Field(
+        default_factory=lambda: float(HTTP_CLIENT_DEFAULTS.timeout)
+    )
+    max_retries: NonNegativeInt = Field(
+        default_factory=lambda: HTTP_CLIENT_DEFAULTS.retries
+    )
+    rate_limit_per_sec: PositiveFloat = Field(
+        default_factory=lambda: float(HTTP_CLIENT_DEFAULTS.rate_limit)
+    )
+    backoff_factor: float = Field(
+        default_factory=lambda: HTTP_CLIENT_DEFAULTS.backoff_factor
+    )
     circuit_breaker_threshold: int = 5
     circuit_breaker_recovery_time: float = 60.0
 
