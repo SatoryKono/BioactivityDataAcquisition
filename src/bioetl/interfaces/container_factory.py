@@ -35,6 +35,7 @@ def _create_metadata_builder() -> RunMetadataBuilderProtocol:
 
 def _create_metrics_port() -> PipelineMetricsPortABC:
     """Return metrics port backed by Prometheus collectors."""
+
     def _update_duration(**kwargs: Any) -> None:
         metrics.STAGE_DURATION_SECONDS.labels(
             pipeline=kwargs["pipeline"],

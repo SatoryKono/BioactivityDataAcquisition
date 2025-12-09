@@ -162,6 +162,7 @@ def test_iter_pages_fetches_all_pages(client):
 def test_iter_pages_without_next_stops_after_first(client):
     """iter_pages yields single page when pagination metadata lacks next link."""
     response = Mock()
+    response.status_code = 200
     response.json.return_value = {
         "page_meta": {"next": None, "limit": 20, "offset": 0, "total_count": 20},
         "results": [1],
