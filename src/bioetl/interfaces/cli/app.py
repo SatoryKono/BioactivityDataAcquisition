@@ -16,6 +16,7 @@ import typer
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
+from bioetl.domain.pipelines.types import PipelineType
 from bioetl.application.pipelines.registry import (
     get_pipeline_factory,
     get_registered_pipelines,
@@ -151,6 +152,11 @@ def run(
         "--background",
         help="Run pipeline in a background process",
     ),
+    type: Optional[Literal["extract", "transform", "full"]] = typer.Option(
+        None,
+        "--type",
+        help="Stage selection: extract | transform | full",
+    ),
 ) -> None:
     """Run an ETL pipeline for the given name and profile."""
 
@@ -259,9 +265,13 @@ def run(
             )
             result = future.result()
         else:
+            pipeline_type = (
+                PipelineType(type) if type else None
+            )
             result = orchestrator.run_pipeline(
                 dry_run=dry_run,
                 limit=limit,
+                pipeline_type=pipeline_type,
             )
 
         if result.success:
