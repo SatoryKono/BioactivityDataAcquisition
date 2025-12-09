@@ -21,10 +21,7 @@ from bioetl.domain.provider_registry import (
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.wiring import (
-    create_config_loader,
-    create_container_factory,
-)
+from bioetl.interfaces.wiring import create_config_loader
 
 
 class PipelineRunRequest(BaseModel):
@@ -83,14 +80,12 @@ def _create_orchestrator(pipeline_name: str, profile: str) -> PipelineOrchestrat
     except FileNotFoundError:
         provider_registry = InMemoryProviderRegistry()
         provider_loader_factory = None
-    container_factory = create_container_factory()
     return PipelineOrchestrator(
         pipeline_name=pipeline_name,
         config=config,
         provider_registry=provider_registry,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
-        container_factory=container_factory,
     )
 
 
