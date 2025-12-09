@@ -17,7 +17,7 @@ from bioetl.domain.models import RunResult
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.wiring import create_config_loader, create_container_factory
+from bioetl.interfaces.wiring import create_config_loader
 
 _PIPELINE_CASES = [
     (
@@ -114,14 +114,12 @@ def test_pipeline_outputs(
     provider_loader = provider_loader_factory()
     provider_registry = None
 
-    container_factory = create_container_factory()
     orchestrator = PipelineOrchestrator(
         pipeline_name,
         config,
         provider_registry=provider_registry,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
-        container_factory=container_factory,
     )
     golden = importlib.import_module(golden_module)
     expected_df = pd.DataFrame(getattr(golden, expected_attr))
