@@ -11,21 +11,6 @@ from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl im
 
 def test_attach_entity_fields_uses_provider():
     """Test that field provider is used to populate fields."""
-    import inspect
-    import sys
-
-    import bioetl
-    from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
-        ChemblExtractionServiceImpl,
-    )
-
-    print(f"\nDEBUG: sys.path: {sys.path}")
-    print(f"DEBUG: bioetl file: {bioetl.__file__}")
-    print(f"DEBUG: Service file: {inspect.getfile(ChemblExtractionServiceImpl)}")
-    print(
-        f"DEBUG: Init signature: "
-        f"{inspect.signature(ChemblExtractionServiceImpl.__init__)}"
-    )
 
     client = Mock(spec=DataClientABC)
     client.provider = "chembl"
@@ -71,33 +56,4 @@ def test_attach_entity_fields_no_provider():
     assert "fields" not in result
 
 
-if __name__ == "__main__":
-    import os
-    import sys
-
-    # Add src to sys.path
-    src_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../../../../src")
-    )
-    if src_path not in sys.path:
-        sys.path.insert(0, src_path)
-
-    print(f"DEBUG: sys.path[0]: {sys.path[0]}")
-
-    import inspect
-
-    from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
-        ChemblExtractionServiceImpl,
-    )
-
-    print(f"DEBUG: Service file: {inspect.getfile(ChemblExtractionServiceImpl)}")
-    print(
-        f"DEBUG: Init signature: "
-        f"{inspect.signature(ChemblExtractionServiceImpl.__init__)}"
-    )
-
-    try:
-        test_attach_entity_fields_uses_provider()
-        print("Test passed!")
-    except Exception as e:
-        print(f"Test failed: {e}")
+    pass

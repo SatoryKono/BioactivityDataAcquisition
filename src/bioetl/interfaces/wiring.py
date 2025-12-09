@@ -5,15 +5,15 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any, Callable
 
-from bioetl.application.container import (
-    build_default_container as application_build_default_container,
-    create_default_container_factory,
-)
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.infrastructure.config.loader import (
     get_pipeline_config,
     get_pipeline_config_from_path,
+)
+from bioetl.infrastructure.container_factory import (
+    build_default_container as application_build_default_container,
+    create_default_container_factory,
 )
 
 
