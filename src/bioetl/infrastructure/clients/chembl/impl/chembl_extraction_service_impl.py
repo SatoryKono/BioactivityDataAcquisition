@@ -4,13 +4,14 @@ Implementation of ChemblExtractionService.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Iterable
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 
 if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
@@ -60,8 +61,8 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         return self._version_cache
 
     def _attach_entity_fields(
-        self, entity: str, filters: dict[str, Any]
-    ) -> dict[str, Any]:
+        self, entity: str, filters: dict[str, object]
+    ) -> dict[str, object]:
         """Attach default fields to filters if configured."""
         if not self.field_provider:
             return filters
@@ -79,7 +80,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
 
         return new_filters
 
-    def extract_all(self, entity: str, **filters: Any) -> list[RawRecord]:
+    def extract_all(self, entity: str, **filters: object) -> list[RawRecord]:
         """
         Extract all records for an entity matching the filters.
 
@@ -96,7 +97,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         return records
 
     def iter_extract(
-        self, entity: str, *, chunk_size: int | None = None, **filters: Any
+        self, entity: str, *, chunk_size: int | None = None, **filters: object
     ) -> Iterable[list[RawRecord]]:
         """Stream records from ChEMBL."""
         if chunk_size is None:
@@ -160,7 +161,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         filters = {filter_key: ",".join(batch_ids), "limit": len(batch_ids)}
         return self.client.fetch(entity, **filters)
 
-    def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
+    def parse_response(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
         """
         Parse raw response into a list of records.
 
@@ -177,12 +178,12 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         # Fallback simple parsing
         for value in raw_response.values():
             if isinstance(value, list):
-                return value
+                return [ActivityRawModel.model_validate(item) for item in value]
         return []
 
     def serialize_records(
-        self, entity: str, records: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+        self, entity: str, records: list[ActivityRawModel]
+    ) -> list[ActivityRawModel]:
         """
         Serialize records for storage.
 

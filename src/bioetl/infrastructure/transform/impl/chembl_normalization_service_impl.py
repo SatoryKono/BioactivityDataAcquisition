@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, TypedDict, cast
 
 import pandas as pd
+from pydantic import BaseModel
 
 from bioetl.domain.record_source import RawRecord
 from bioetl.domain.transform.contracts import (
@@ -34,10 +35,17 @@ class ChemblNormalizationServiceImpl(
     def apply_normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
         """Normalize single raw ChEMBL record into flat dict."""
         normalized: dict[str, Any] = {}
+        raw_data: dict[str, Any]
+        if isinstance(raw, BaseModel):
+            raw_data = raw.model_dump()
+        elif isinstance(raw, pd.Series):
+            raw_data = raw.to_dict()
+        else:
+            raw_data = cast(dict[str, Any], raw.model_dump())
 
         for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
-            if not isinstance(name, str) or name not in raw:
+            if not isinstance(name, str) or name not in raw_data:
                 continue
 
             dtype = field_cfg.get("data_type")
@@ -53,7 +61,7 @@ class ChemblNormalizationServiceImpl(
 
                 base_normalizer = _default_normalizer
 
-            value = raw.get(name)
+            value = raw_data.get(name)
             normalized[name] = self._normalize_value(
                 value,
                 dtype,
@@ -62,7 +70,7 @@ class ChemblNormalizationServiceImpl(
                 allow_container_normalizer=True,
             )
 
-        for key, value in raw.items():
+        for key, value in raw_data.items():
             key_str = cast(str, key)
             if key_str not in normalized:
                 normalized[key_str] = value

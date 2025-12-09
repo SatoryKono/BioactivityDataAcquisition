@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import pandas as pd
+from pydantic import BaseModel
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
@@ -29,12 +30,14 @@ class CsvRecordSourceImpl(RecordSource):
         limit: int | None,
         logger: LoggingPortABC,
         chunk_size: int | None = None,
+        model_cls: type[BaseModel] | None = None,
     ) -> None:
         self._input_path = input_path
         self._csv_options = self._ensure_csv_options(csv_options)
         self._limit = limit
         self._logger = logger
         self._chunk_size = chunk_size
+        self._model_cls: type[BaseModel] = model_cls or RawRecord
 
     def iter_records(self) -> Iterable[list[RawRecord]]:
         """Read CSV dataset and yield records respecting limits and chunking."""
@@ -48,7 +51,10 @@ class CsvRecordSourceImpl(RecordSource):
         if self._limit is not None:
             df = df.head(self._limit)
         records_dicts = df.to_dict(orient="records")
-        records: list[RawRecord] = cast(list[RawRecord], records_dicts)
+        records: list[RawRecord] = [
+            cast(RawRecord, self._model_cls.model_validate(item))
+            for item in records_dicts
+        ]
         if self._chunk_size is None or self._chunk_size <= 0:
             yield records
             return
