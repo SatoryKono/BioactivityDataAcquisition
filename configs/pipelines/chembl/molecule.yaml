@@ -30,6 +30,9 @@ pipeline:
   owner: bioetl-team
   description: "ChEMBL Molecules (/molecule) pipeline"
 
+transform:
+  serialization_mode: pipe
+
 fields:
   - name: atc_classifications
     data_type: array

@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 # Import NormalizationConfig from the dedicated normalization module
 from bioetl.domain.configs.normalization import NormalizationConfig
+from bioetl.domain.configs.transform import TransformConfig
 
 
 class PaginationConfig(BaseModel):
@@ -448,6 +449,7 @@ class PipelineConfig(BaseModel):
     observability: ObservabilityConfig = Field(default_factory=ObservabilityConfig)
     quality: QualityConfig = Field(default_factory=QualityConfig)
     features: FeatureFlagsConfig = Field(default_factory=FeatureFlagsConfig)
+    transform: TransformConfig = Field(default_factory=TransformConfig)
 
     pipeline: dict[str, Any] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
@@ -597,6 +599,12 @@ class PipelineConfig(BaseModel):
         """Return normalization configuration section."""
 
         return self.quality.normalization
+
+    @property
+    def serialization_mode(self) -> str:
+        """Shortcut for transform.serialization_mode."""
+
+        return self.transform.serialization_mode
 
     def get_fields(self) -> list[dict[str, Any]]:
         """Return fields configuration."""

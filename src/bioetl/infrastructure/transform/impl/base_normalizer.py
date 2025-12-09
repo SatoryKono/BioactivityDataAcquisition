@@ -12,10 +12,7 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
-from bioetl.infrastructure.transform.impl.serializer import (
-    serialize_dict,
-    serialize_list,
-)
+from bioetl.infrastructure.transform.impl.serializer import serialize_nested
 
 
 class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
@@ -31,6 +28,8 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
     ):
         self._config = config
         self._empty_value = empty_value
+        mode = getattr(config, "serialization_mode", "json")
+        self._serialization_mode = mode if mode in {"json", "flat", "pipe"} else "json"
 
     def _iter_fields(self) -> list[dict[str, Any]]:
         """Return field configs from provider, supporting legacy shapes."""
@@ -167,23 +166,14 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
                 return direct_result
 
         if isinstance(container_value, (list, tuple)):
-            return self._process_list(
-                container_value,
-                normalizer,
-                field_name,
-                serialize_with_value_normalizer=serialize_with_value_normalizer,
-            )
+            return self._process_list(container_value, normalizer, field_name)
 
         if isinstance(container_value, dict):
             return self._process_dict(container_value, normalizer, field_name)
 
         normalized = self._apply_normalizer(container_value, normalizer, field_name)
         if isinstance(normalized, (list, tuple, dict)):
-            return self._serialize_container_result(
-                normalized,
-                normalizer,
-                serialize_with_value_normalizer=serialize_with_value_normalizer,
-            )
+            return self._serialize_container_result(normalized)
         return normalized
 
     def _is_empty_value(self, value: Any) -> bool:
@@ -201,8 +191,6 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         value: Any,
         normalizer: Callable[[Any], Any],
         field_name: str,
-        *,
-        serialize_with_value_normalizer: bool = True,
     ) -> Any:
         try:
             normalized_list = normalize_array(
@@ -219,10 +207,10 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         if not normalized_list:
             return self._empty_value
 
-        return serialize_list(
-            normalized_list,
-            value_normalizer=normalizer if serialize_with_value_normalizer else None,
+        serialized = serialize_nested(
+            normalized_list, mode=self._serialization_mode
         )
+        return self._empty_value if serialized == "" else serialized
 
     def _process_dict(
         self, value: Any, normalizer: Callable[[Any], Any], field_name: str
@@ -238,7 +226,8 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         if normalized_dict is None:
             return self._empty_value
 
-        return serialize_dict(dict(normalized_dict))
+        serialized = serialize_nested(dict(normalized_dict), mode=self._serialization_mode)
+        return self._empty_value if serialized == "" else serialized
 
     def _apply_normalizer(
         self, value: Any, normalizer: Callable[[Any], Any], field_name: str
@@ -253,27 +242,18 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         value: Any,
         normalizer: Callable[[Any], Any],
         field_name: str,
-        *,
-        serialize_with_value_normalizer: bool = True,
     ) -> tuple[bool, Any]:
         try:
             result = normalizer(value)
         except (ValueError, TypeError):
             return False, None
 
-        serialized = self._serialize_container_result(
-            result,
-            normalizer,
-            serialize_with_value_normalizer=serialize_with_value_normalizer,
-        )
+        serialized = self._serialize_container_result(result)
         return True, serialized
 
     def _serialize_container_result(
         self,
         result: Any,
-        normalizer: Callable[[Any], Any],
-        *,
-        serialize_with_value_normalizer: bool = True,
     ) -> Any:
         if result is None or result is pd.NA:
             return self._empty_value
@@ -281,18 +261,17 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         if isinstance(result, (list, tuple)):
             if not result:
                 return self._empty_value
-            return serialize_list(
-                list(result),
-                value_normalizer=(
-                    normalizer if serialize_with_value_normalizer else None
-                ),
-            )
+            serialized = serialize_nested(result, mode=self._serialization_mode)
+            return self._empty_value if serialized == "" else serialized
 
         if isinstance(result, dict):
-            serialized_dict = serialize_dict(cast(dict[str, Any], result))
-            return self._empty_value if serialized_dict is pd.NA else serialized_dict
+            serialized_dict = serialize_nested(
+                cast(dict[str, Any], result), mode=self._serialization_mode
+            )
+            return self._empty_value if serialized_dict == "" else serialized_dict
 
-        return str(result)
+        serialized_scalar = serialize_nested(result, mode=self._serialization_mode)
+        return self._empty_value if serialized_scalar == "" else serialized_scalar
 
     def _normalize_container_item(
         self, item: Any, normalizer: Callable[[Any], Any]
