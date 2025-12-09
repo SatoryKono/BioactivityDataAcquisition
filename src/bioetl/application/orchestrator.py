@@ -163,9 +163,9 @@ class PipelineOrchestrator:
         if container_factory is not None:
             return container_factory
 
-        raise RuntimeError(
-            "Container factory is required. Supply Callable[..., PipelineContainerABC]."
-        )
+        from bioetl.application.container import create_default_container_factory
+
+        return create_default_container_factory()
 
     def _get_provider_registry(self) -> ProviderRegistryABC:
         if self._provider_registry is not None:
