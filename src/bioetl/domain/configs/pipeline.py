@@ -479,6 +479,36 @@ class PipelineConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    @property
+    def pipeline_type(self) -> PipelineType:
+        """Автоопределение типа пайплайна по заполненности стадий и флагам."""
+
+        # Явные флаги имеют приоритет
+        pipeline_flags: dict[str, Any] = self.pipeline or {}
+        flag_extract = pipeline_flags.get("extract")
+        flag_transform = pipeline_flags.get("transform")
+        flag_load = pipeline_flags.get("load")
+
+        def _as_bool(v: Any | None, default: bool) -> bool:
+            if isinstance(v, bool):
+                return v
+            return default
+
+        # Автоопределение
+        extract_active_auto = bool(self.input_mode or self.input_path or self.provider_config)
+        transform_active_auto = True  # по умолчанию трансформация включена
+        load_active_auto = not self.dry_run and bool(self.output_path)
+
+        extract_active = _as_bool(flag_extract, extract_active_auto)
+        transform_active = _as_bool(flag_transform, transform_active_auto)
+        load_active = _as_bool(flag_load, load_active_auto)
+
+        if extract_active and not transform_active and not load_active:
+            return PipelineType.EXTRACT_ONLY
+        if transform_active and not extract_active:
+            return PipelineType.TRANSFORM_ONLY
+        return PipelineType.FULL
+
     def get_entity_name(self) -> str:
         """Return canonical entity name."""
 
@@ -774,3 +804,4 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
 ]
+from bioetl.domain.pipelines.types import PipelineType

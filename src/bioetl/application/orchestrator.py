@@ -10,7 +10,8 @@ from bioetl.application.pipelines.base import OutputWriterLoaderAdapter, Pipelin
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.models import RunResult
+from bioetl.domain.models import RunContext, RunResult, StageResult
+from bioetl.domain.pipelines.types import PipelineType
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
     ProviderRegistryABC,
@@ -94,10 +95,66 @@ class PipelineOrchestrator:
         return pipeline
 
     def run_pipeline(
-        self, *, dry_run: bool = False, limit: int | None = None
+        self,
+        *,
+        dry_run: bool = False,
+        limit: int | None = None,
+        pipeline_type: PipelineType | None = None,
     ) -> RunResult:
         """Запускает пайплайн в текущем процессе."""
+        effective_type = pipeline_type or self._config.pipeline_type
         pipeline = self.build_pipeline(limit=limit)
+
+        if effective_type == PipelineType.TRANSFORM_ONLY:
+            # Выполнить трансформацию и валидацию, пропустив запись
+            return pipeline.run(
+                output_path=Path(self._config.output_path),
+                dry_run=True,
+                limit=limit,
+            )
+
+        if effective_type == PipelineType.EXTRACT_ONLY:
+            # Только извлечение
+            context = self._build_simple_context()
+            extract_callable = pipeline._get_extract_callable()  # noqa: SLF001
+            iterator = pipeline._normalize_extract_result(extract_callable())  # noqa: SLF001
+
+            total_rows = 0
+            total_chunks = 0
+            for chunk in iterator:
+                if chunk is None:
+                    continue
+                total_rows += len(chunk)
+                total_chunks += 1
+
+            stage = StageResult(
+                stage_name="extract",
+                success=True,
+                records_processed=total_rows,
+                chunks_processed=max(total_chunks, 1),
+                duration_sec=0.0,
+                errors=[],
+            )
+
+            return RunResult(
+                run_id=context.run_id,
+                success=True,
+                entity_name=self._config.entity_name,
+                row_count=total_rows,
+                output_path=None,
+                duration_sec=0.0,
+                stages=[stage],
+                errors=[],
+                meta={
+                    "run_id": context.run_id,
+                    "provider": self._config.provider,
+                    "entity": self._config.entity_name,
+                    "row_count": total_rows,
+                    "dry_run": True,
+                },
+            )
+
+        # FULL (по умолчанию)
         return pipeline.run(
             output_path=Path(self._config.output_path),
             dry_run=dry_run,
@@ -154,7 +211,19 @@ class PipelineOrchestrator:
             provider_loader_factory=provider_loader_factory,
             container_factory=container_factory,
         )
-        return orchestrator.run_pipeline(dry_run=dry_run, limit=limit)
+        return orchestrator.run_pipeline(
+            dry_run=dry_run,
+            limit=limit,
+            pipeline_type=config.pipeline_type,
+        )
+
+    def _build_simple_context(self) -> RunContext:
+        return RunContext(
+            entity_name=self._config.entity_name,
+            provider=self._config.provider,
+            config=self._config.model_dump(),
+            dry_run=True,
+        )
 
     @staticmethod
     def _resolve_container_factory(
