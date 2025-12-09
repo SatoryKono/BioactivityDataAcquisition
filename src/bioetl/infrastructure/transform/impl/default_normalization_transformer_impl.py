@@ -12,7 +12,7 @@ from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationServiceImpl,
 )
-from bioetl.infrastructure.transform.impl.serializer import serialize_list
+from bioetl.infrastructure.transform.impl.serializer import serialize_nested
 
 
 class DefaultNormalizationTransformerImpl(
@@ -161,7 +161,10 @@ class DefaultNormalizationTransformerImpl(
                 normalized_value = custom_normalizer(val)
                 if normalized_value is None or not normalized_value:
                     return pd.NA
-                return serialize_list(normalized_value, value_normalizer=None)
+                serialized = serialize_nested(
+                    normalized_value, mode=self._serialization_mode
+                )
+                return pd.NA if serialized == "" else serialized
             return self._normalize_value(
                 val,
                 dtype,

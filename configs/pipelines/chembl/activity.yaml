@@ -31,6 +31,9 @@ pipeline:
   description: "Extract biological activity records from ChEMBL API"
   enable_denormalization: false
 
+transform:
+  serialization_mode: pipe
+
 fields:
   - name: action_type
     data_type: string
