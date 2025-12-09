@@ -106,7 +106,7 @@ class RetryPolicyABC(ABC):
         """Определяет, нужно ли повторять попытку."""
 
     @abstractmethod
-    def get_delay(self, attempt: int) -> float:
+    def get_backoff(self, attempt: int) -> float:
         """Возвращает задержку перед следующей попыткой (в секундах)."""
 
 

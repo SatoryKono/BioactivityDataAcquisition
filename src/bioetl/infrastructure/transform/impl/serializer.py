@@ -1,87 +1,98 @@
-"""
-Serialization utilities for domain entities.
-"""
+"""Serialization utilities for domain entities."""
 
-from typing import Any, Callable, Optional, Sequence
+from __future__ import annotations
+
+import json
+from collections.abc import Mapping, Sequence
+from typing import Any, Literal
 
 import pandas as pd
 
 
-def serialize_dict(
-    value: dict[str, Any], value_normalizer: Optional[Callable[[Any], Any]] = None
-) -> Any:
-    """
-    Преобразует словарь в строку key:value|key:value.
-    Пропускает вложенные списки и словари (глубина 1).
-    """
-    if not value:
-        return pd.NA
+def serialize_nested(
+    value: Any, *, mode: Literal["json", "flat", "pipe"] = "json"
+) -> str:
+    """Serialize nested structures deterministically to a string."""
 
-    parts = []
-    norm_func = value_normalizer if value_normalizer else (lambda x: x)
+    if _is_missing(value):
+        return ""
 
-    # Sort keys for determinism
-    for k in sorted(value.keys()):
-        v = value[k]
-        if v is None:
-            continue
-        if isinstance(v, (list, dict)):
-            continue
+    if mode not in {"json", "flat", "pipe"}:
+        raise ValueError(f"Unsupported serialization mode: {mode}")
 
-        # Normalize value
-        val_norm = norm_func(v)
-        if val_norm is not pd.NA and val_norm is not None:
-            parts.append(f"{k}:{val_norm}")
+    if mode == "json":
+        return _serialize_json(value)
 
-    if not parts:
-        return pd.NA
+    if isinstance(value, Mapping):
+        return _serialize_mapping(value, mode)
 
-    return "|".join(parts)
+    if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
+        value, (str, bytes, bytearray)
+    ):
+        return _serialize_sequence(value, mode)
+
+    return str(value)
 
 
-def serialize_list(
-    value: Sequence[Any], value_normalizer: Optional[Callable[[Any], Any]] = None
-) -> Any:
-    """
-    Преобразует список в строку, соединяя элементы через |.
-    Для списка словарей объединяет их сериализованные представления.
-    """
-    if not value:
-        return pd.NA
-    norm_func = value_normalizer if value_normalizer else (lambda x: x)
-
-    if value and isinstance(value[0], dict):
-        parts = _serialize_dict_items(value, norm_func)
-    else:
-        parts = _serialize_flat_items(value, norm_func)
-
-    return pd.NA if not parts else "|".join(parts)
+def _serialize_json(value: Any) -> str:
+    try:
+        return json.dumps(
+            value,
+            default=_json_default,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    except TypeError:
+        return json.dumps(str(value), ensure_ascii=False)
 
 
-def _serialize_dict_items(
-    value: Sequence[Any], norm_func: Callable[[Any], Any]
-) -> list[str]:
+def _json_default(value: Any) -> Any:
+    if isinstance(value, (set, frozenset)):
+        return sorted(value)
+    if isinstance(value, Mapping):
+        return dict(sorted(value.items()))
+    if isinstance(value, (list, tuple, Sequence)) and not isinstance(
+        value, (str, bytes, bytearray)
+    ):
+        return list(value)
+    return str(value)
+
+
+def _serialize_mapping(mapping: Mapping[str, Any], mode: str) -> str:
+    delimiter = "|" if mode == "pipe" else ","
+    kv_separator = ":" if mode == "pipe" else "="
     parts: list[str] = []
-    for item in value:
-        if not isinstance(item, dict):
+
+    for key in sorted(mapping.keys()):
+        serialized_value = serialize_nested(mapping[key], mode=mode)
+        if serialized_value == "":
             continue
-        serialized = serialize_dict(item, value_normalizer=norm_func)
-        if serialized is not pd.NA and serialized is not None:
-            parts.append(serialized)
-    return parts
+        parts.append(f"{key}{kv_separator}{serialized_value}")
+
+    return delimiter.join(parts)
 
 
-def _serialize_flat_items(
-    value: Sequence[Any], norm_func: Callable[[Any], Any]
-) -> list[str]:
+def _serialize_sequence(seq: Sequence[Any], mode: str) -> str:
+    delimiter = "|" if mode == "pipe" else ","
     parts: list[str] = []
-    for item in value:
-        if isinstance(item, (list, dict)):
+
+    for item in seq:
+        serialized_value = serialize_nested(item, mode=mode)
+        if serialized_value == "":
             continue
-        val_norm = norm_func(item)
-        if val_norm is not pd.NA and val_norm is not None:
-            parts.append(str(val_norm))
-    return parts
+        parts.append(serialized_value)
+
+    return delimiter.join(parts)
 
 
-__all__ = ["serialize_dict", "serialize_list"]
+def _is_missing(value: Any) -> bool:
+    if value is None:
+        return True
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):
+        return False
+
+
+__all__ = ["serialize_nested"]

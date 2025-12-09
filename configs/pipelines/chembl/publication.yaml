@@ -30,6 +30,9 @@ pipeline:
   owner: "Data Acquisition Team"
   description: "Extract publication records from ChEMBL API"
 
+transform:
+  serialization_mode: pipe
+
 fields:
   - name: abstract
     data_type: string
