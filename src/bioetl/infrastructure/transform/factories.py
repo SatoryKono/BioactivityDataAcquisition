@@ -14,10 +14,10 @@ from bioetl.infrastructure.transform.impl.base_normalizer import (
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,
 )
-from bioetl.infrastructure.transform.impl.hasher import HasherImpl
 from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
-    DefaultNormalizationTransformerImpl,
+    DefaultNormalizationTransformerImpl as DefaultNormImpl,
 )
+from bioetl.infrastructure.transform.impl.hasher import HasherImpl
 
 
 def default_hasher() -> HasherABC:
@@ -45,7 +45,7 @@ def default_normalization_service(
 ) -> NormalizationServiceABC:
     """Создает сервис нормализации по умолчанию."""
 
-    return DefaultNormalizationTransformerImpl(config)
+    return DefaultNormImpl(config)
 
 
 def default_chembl_normalization_service(
