@@ -6,11 +6,6 @@ RateLimiterABC:
   implementations:
     TokenBucket: bioetl.infrastructure.clients.base.impl.rate_limiter.TokenBucketRateLimiterImpl
 
-RetryPolicyABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_retry_policy
-  implementations:
-    ExponentialBackoff: bioetl.infrastructure.clients.base.impl.retry_policy.ExponentialBackoffRetryImpl
-
 CacheABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_cache
   implementations:

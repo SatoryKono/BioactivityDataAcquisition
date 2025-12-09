@@ -27,7 +27,6 @@ classDiagram-v2
         +paginate(request)
     }
     class RateLimiterABC
-    class RetryPolicyABC
     class CacheABC
     class CircuitBreakerABC
     class SecretProviderABC
@@ -36,7 +35,6 @@ classDiagram-v2
     %% Default factories
     class BaseClientFactories {
       +default_rate_limiter()
-      +default_retry_policy()
       +default_cache()
       +default_secret_provider()
     }
@@ -55,7 +53,6 @@ classDiagram-v2
     class ChemblResponseParserImpl
     class OffsetPaginator
     class TokenBucketRateLimiterImpl
-    class ExponentialBackoffRetryImpl
     class MemoryCacheImpl
     class CircuitBreakerImpl
     class EnvSecretProvider
@@ -67,7 +64,6 @@ classDiagram-v2
     ResponseParserABC <|-- ChemblResponseParserImpl
     PaginatorABC <|-- OffsetPaginator
     RateLimiterABC <|-- TokenBucketRateLimiterImpl
-    RetryPolicyABC <|-- ExponentialBackoffRetryImpl
     CacheABC <|-- MemoryCacheImpl
     SecretProviderABC <|-- EnvSecretProvider
     CircuitBreakerABC <|-- CircuitBreakerImpl
@@ -82,7 +78,6 @@ classDiagram-v2
     ChemblDataClientHTTPImpl *-- OffsetPaginator
     ChemblDataClientHTTPImpl *-- UnifiedAPIClient
     UnifiedAPIClient --> RateLimiterABC
-    UnifiedAPIClient --> RetryPolicyABC
     UnifiedAPIClient --> CacheABC
     UnifiedAPIClient --> CircuitBreakerABC
     UnifiedAPIClient --> SecretProviderABC
@@ -99,7 +94,6 @@ classDiagram-v2
     class ResponseParserABC interface
     class PaginatorABC interface
     class RateLimiterABC interface
-    class RetryPolicyABC interface
     class CacheABC interface
     class CircuitBreakerABC interface
     class SecretProviderABC interface

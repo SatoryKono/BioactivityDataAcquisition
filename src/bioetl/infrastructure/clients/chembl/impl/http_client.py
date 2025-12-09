@@ -16,7 +16,6 @@ from bioetl.domain.clients.base.contracts import (
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.errors import ClientResponseError
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
-from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 class ChemblApiPortImpl(DataClientABC):
@@ -32,25 +31,22 @@ class ChemblApiPortImpl(DataClientABC):
         rate_limiter: RateLimiterABC,
         client: ApiClientABC | None = None,
         *,
-        http_middleware: HttpClientMiddleware | None = None,
         provider: str = "chembl",
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
         self.client = client
-        if http_middleware is not None:
-            self.http = http_middleware
-        elif client is not None:
+        if client is not None:
             self.http = client
         else:
             # Fallback stub to keep attribute accessible in tests;
-            # real runs must inject middleware.
+            # real runs must inject a concrete client.
             def _missing_http_request(
                 method: str, url: str, **_: Any
             ) -> Any:  # pragma: no cover
-                """Fail fast when HTTP middleware is not configured."""
-                raise RuntimeError("HTTP middleware is not configured")
+                """Fail fast when HTTP client is not configured."""
+                raise RuntimeError("HTTP client is not configured")
 
             self.http = SimpleNamespace(request=_missing_http_request)
         self.provider = provider
@@ -84,10 +80,6 @@ class ChemblApiPortImpl(DataClientABC):
         """Close underlying HTTP client if present."""
         if self.client is not None:
             self.client.close()
-        elif hasattr(self.http, "base_client") and hasattr(
-            self.http.base_client, "close"
-        ):
-            self.http.base_client.close()
 
     def fetch(self, entity: str, **filters: Any) -> Any:
         """Request specific entity endpoint with provided filters."""

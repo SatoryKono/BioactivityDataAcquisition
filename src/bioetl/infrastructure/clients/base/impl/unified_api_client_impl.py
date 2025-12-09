@@ -11,13 +11,12 @@ import requests
 
 from bioetl.domain.configs import ClientConfig
 from bioetl.domain.clients.base.contracts import ApiClientABC
-from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
 class UnifiedAPIClientImpl(ApiClientABC):
     """
-    Унифицированный HTTP-клиент.
-    Обертка над HttpClientMiddleware с конфигурацией через Pydantic.
+    Унифицированный HTTP-клиент без промежуточных middleware-слоев.
+    Делегирует вызовы напрямую базовому HTTP-клиенту.
     """
 
     def __init__(
@@ -30,32 +29,19 @@ class UnifiedAPIClientImpl(ApiClientABC):
         self.config = config
         self.base_client = base_client or requests.Session()
 
-        # Map config to middleware params
-        # Note: HttpClientMiddleware might expect slightly different param names
-        # We map them here.
-        self.middleware = HttpClientMiddleware(
-            provider=provider,
-            base_client=self.base_client,
-            max_attempts=config.max_retries,
-            backoff_factor=config.backoff_factor,
-            timeout=config.timeout_sec,
-            circuit_breaker_threshold=config.circuit_breaker_threshold,
-            circuit_breaker_recovery_time=config.circuit_breaker_recovery_time,
-        )
-
     def request_call(self, method: str, url: str, **kwargs: Any) -> Any:
-        """Выполнить HTTP-запрос с учетом политик."""
+        """Выполнить HTTP-запрос с настройками клиента."""
         method_upper = method.upper()
         if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
             headers = dict(kwargs.get("headers") or {})
             headers.setdefault("Idempotency-Key", str(uuid4()))
             kwargs["headers"] = headers
 
-        return self.middleware.request(method, url, **kwargs)
+        timeout = kwargs.pop("timeout", self.config.timeout_sec)
+        return self.base_client.request(method=method, url=url, timeout=timeout, **kwargs)
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        """Execute a request via the configured middleware."""
-
+        """Execute a request using the configured HTTP client."""
         return self.request_call(method, url, **kwargs)
 
     def get_response(self, url: str, **kwargs: Any) -> Any:
