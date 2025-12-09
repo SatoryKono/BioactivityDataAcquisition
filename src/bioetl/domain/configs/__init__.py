@@ -13,6 +13,7 @@ from bioetl.domain.configs.defaults import (
 )
 from bioetl.domain.configs.normalization import NormalizationConfig
 from bioetl.domain.configs.pipeline import (
+    HTTP_CLIENT_DEFAULTS,
     BaseProviderConfig,
     BusinessKeyConfig,
     CanonicalizationConfig,
@@ -23,11 +24,10 @@ from bioetl.domain.configs.pipeline import (
     DummyProviderConfig,
     FeatureFlagsConfig,
     HashingConfig,
+    HttpClientDefaults,
     InterfaceFeaturesConfig,
     LoggingConfig,
     MetricsConfig,
-    HTTP_CLIENT_DEFAULTS,
-    HttpClientDefaults,
     ObservabilityConfig,
     PaginationConfig,
     PipelineConfig,

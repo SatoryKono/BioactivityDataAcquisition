@@ -1,7 +1,8 @@
-"""ChEMBL client implementations and factories."""
+"""ChEMBL client public exports."""
 
-# Avoid importing implementation classes directly here to prevent circular imports
-# caused by those classes importing siblings (like paginator) which triggers
-# this __init__.py to run again.
+# Re-export commonly used implementation for test and user imports
+from .impl.chembl_extraction_service_impl import ChemblExtractionServiceImpl
 
-__all__ = []
+__all__ = [
+    "ChemblExtractionServiceImpl",
+]

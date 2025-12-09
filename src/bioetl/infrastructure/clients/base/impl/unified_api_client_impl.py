@@ -9,8 +9,8 @@ from uuid import uuid4
 
 import requests
 
-from bioetl.domain.configs import ClientConfig
 from bioetl.domain.clients.base.contracts import ApiClientABC
+from bioetl.domain.configs import ClientConfig
 
 
 class UnifiedAPIClientImpl(ApiClientABC):
@@ -38,7 +38,9 @@ class UnifiedAPIClientImpl(ApiClientABC):
             kwargs["headers"] = headers
 
         timeout = kwargs.pop("timeout", self.config.timeout_sec)
-        return self.base_client.request(method=method, url=url, timeout=timeout, **kwargs)
+        return self.base_client.request(
+            method=method, url=url, timeout=timeout, **kwargs
+        )
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         """Execute a request using the configured HTTP client."""

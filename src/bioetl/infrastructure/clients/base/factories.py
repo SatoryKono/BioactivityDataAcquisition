@@ -13,7 +13,7 @@ from bioetl.domain.clients.base.contracts import (
     SecretProviderABC,
     SideInputProviderABC,
 )
-from bioetl.domain.configs import ClientConfig, HTTP_CLIENT_DEFAULTS, HttpClientDefaults
+from bioetl.domain.configs import HTTP_CLIENT_DEFAULTS, ClientConfig, HttpClientDefaults
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,

@@ -39,14 +39,6 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
-from bioetl.infrastructure.clients.base.abc_registry_resolver import (
-    ABCRegistryResolver,
-)
-from bioetl.infrastructure.observability import metrics
-from bioetl.infrastructure.output.metadata import (
-    build_dry_run_metadata,
-    build_run_metadata,
-)
 
 
 class PipelineContainer(PipelineContainerABC):

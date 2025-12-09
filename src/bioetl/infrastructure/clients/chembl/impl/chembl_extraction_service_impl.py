@@ -35,6 +35,12 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         self._version_cache: str | None = None
 
     def get_release_version(self) -> str:
+        """
+        Get the ChEMBL release version from metadata.
+
+        Returns:
+            str: The release version string (e.g., 'chembl_34').
+        """
         if self._version_cache:
             return self._version_cache
 
@@ -52,7 +58,37 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
 
         return self._version_cache
 
+    def _attach_entity_fields(
+        self, entity: str, filters: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Attach default fields to filters if configured."""
+        if not self.field_provider:
+            return filters
+
+        # Skip if fields already specified
+        if "fields" in filters:
+            return filters
+
+        new_filters = filters.copy()
+
+        # Use get_default_fields as expected by tests/contracts
+        fields = self.field_provider.get_default_fields(entity)
+        if fields:
+            new_filters["fields"] = ",".join(fields)
+
+        return new_filters
+
     def extract_all(self, entity: str, **filters: Any) -> list[RawRecord]:
+        """
+        Extract all records for an entity matching the filters.
+
+        Args:
+            entity: The entity name.
+            **filters: Query filters.
+
+        Returns:
+            list[RawRecord]: List of extracted records.
+        """
         records = []
         for batch in self.iter_extract(entity, **filters):
             records.extend(batch)
@@ -61,6 +97,14 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: Any
     ) -> Iterable[list[RawRecord]]:
+        """Stream records from ChEMBL."""
+        if chunk_size is None:
+            chunk_size = filters.get("limit", self.batch_size)
+        filters["limit"] = chunk_size
+
+        # Attach default fields if applicable
+        filters = self._attach_entity_fields(entity, filters)
+
         # Ensure client has request_builder (runtime check)
         if not hasattr(self.client, "request_builder"):
             raise TypeError("Client must have request_builder (ChemblApiPortImpl)")
@@ -101,12 +145,33 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         batch_ids: list[str],
         filter_key: str,
     ) -> dict[str, Any]:
+        """
+        Request a batch of records by IDs.
+
+        Args:
+            entity: Entity name.
+            batch_ids: List of IDs.
+            filter_key: Filter parameter key.
+
+        Returns:
+            dict[str, Any]: Raw API response.
+        """
         filters = {filter_key: ",".join(batch_ids), "limit": len(batch_ids)}
         return self.client.fetch(entity, **filters)
 
     def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
+        """
+        Parse raw response into a list of records.
+
+        Args:
+            raw_response: The raw API response.
+
+        Returns:
+            list[dict[str, Any]]: List of parsed records.
+        """
         if hasattr(self.client, "response_parser"):
-            return getattr(self.client, "response_parser").parse(raw_response)
+            parser = getattr(self.client, "response_parser")
+            return parser.parse_response(raw_response)
 
         # Fallback simple parsing
         for value in raw_response.values():
@@ -117,4 +182,14 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     def serialize_records(
         self, entity: str, records: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
+        """
+        Serialize records for storage.
+
+        Args:
+            entity: Entity name.
+            records: List of records.
+
+        Returns:
+            list[dict[str, Any]]: Serialized records.
+        """
         return records
