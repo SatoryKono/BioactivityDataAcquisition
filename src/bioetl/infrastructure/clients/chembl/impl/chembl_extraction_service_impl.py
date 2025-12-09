@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class ChemblExtractionServiceImpl(ExtractionServiceABC):
     """
     Implementation of ExtractionServiceABC for ChEMBL.
-    Uses DataClientABC (expected to be ChemblApiPortImpl) to fetch data.
+    Uses DataClientABC (expected to be ChemblHttpClientImpl) to fetch data.
     """
 
     def __init__(
@@ -63,7 +63,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     ) -> Iterable[list[RawRecord]]:
         # Ensure client has request_builder (runtime check)
         if not hasattr(self.client, "request_builder"):
-            raise TypeError("Client must have request_builder (ChemblApiPortImpl)")
+            raise TypeError("Client must have request_builder (ChemblHttpClientImpl)")
 
         # Prepare limit
         limit = chunk_size or self.batch_size
@@ -71,7 +71,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
 
         builder = getattr(self.client, "request_builder")
 
-        # Resolve entity alias manually if needed (matches ChemblApiPortImpl)
+        # Resolve entity alias manually if needed (matches ChemblHttpClientImpl)
         aliases = {
             "publication": "document",
             "molecule": "molecule",

@@ -3,7 +3,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
-from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
+from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
+    ChemblHttpClientImpl,
+)
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
@@ -26,7 +28,7 @@ def mock_components():
 
 @pytest.fixture
 def client(mock_components):
-    client = ChemblApiPortImpl(
+    client = ChemblHttpClientImpl(
         request_builder=mock_components["request_builder"],
         response_parser=mock_components["response_parser"],
         rate_limiter=mock_components["rate_limiter"],
