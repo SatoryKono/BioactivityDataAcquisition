@@ -13,9 +13,26 @@ from bioetl.domain.schemas.chembl.assay import (
     OUTPUT_COLUMN_ORDER as ASSAY_OUTPUT_COLUMNS,
     AssayTableSchema,
 )
-from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
-from bioetl.domain.schemas.chembl.publication import PublicationTableSchema
-from bioetl.domain.schemas.chembl.target import TargetTableSchema
+from bioetl.domain.schemas.chembl.cell import (
+    OUTPUT_COLUMN_ORDER as CELL_OUTPUT_COLUMNS,
+    CellTableSchema,
+)
+from bioetl.domain.schemas.chembl.molecule import (
+    OUTPUT_COLUMN_ORDER as MOLECULE_OUTPUT_COLUMNS,
+    MoleculeTableSchema,
+)
+from bioetl.domain.schemas.chembl.publication import (
+    OUTPUT_COLUMN_ORDER as PUBLICATION_OUTPUT_COLUMNS,
+    PublicationTableSchema,
+)
+from bioetl.domain.schemas.chembl.target import (
+    OUTPUT_COLUMN_ORDER as TARGET_OUTPUT_COLUMNS,
+    TargetTableSchema,
+)
+from bioetl.domain.schemas.chembl.tissue import (
+    OUTPUT_COLUMN_ORDER as TISSUE_OUTPUT_COLUMNS,
+    TissueTableSchema,
+)
 from bioetl.domain.validation import SchemaProviderABC
 
 __all__ = ["register_schemas"]
@@ -25,9 +42,11 @@ _SchemaDef = tuple[type[Any], Sequence[str] | None]
 _SCHEMA_DEFINITIONS: dict[str, _SchemaDef] = {
     "activity": (ActivityTableSchema, ACTIVITY_OUTPUT_COLUMNS),
     "assay": (AssayTableSchema, ASSAY_OUTPUT_COLUMNS),
-    "molecule": (MoleculeTableSchema, None),
-    "publication": (PublicationTableSchema, None),
-    "target": (TargetTableSchema, None),
+    "cell": (CellTableSchema, CELL_OUTPUT_COLUMNS),
+    "molecule": (MoleculeTableSchema, MOLECULE_OUTPUT_COLUMNS),
+    "publication": (PublicationTableSchema, PUBLICATION_OUTPUT_COLUMNS),
+    "target": (TargetTableSchema, TARGET_OUTPUT_COLUMNS),
+    "tissue": (TissueTableSchema, TISSUE_OUTPUT_COLUMNS),
 }
 
 _SCHEMA_ALIASES: dict[str, str] = {

@@ -145,11 +145,11 @@ fields:
     is_filterable: true
     description: Год публикации
 
-  - name: chembl_release_id
-    data_type: integer
+  - name: chembl_release
+    data_type: string
     is_nullable: true
     is_filterable: false
-    description: ID релиза ChEMBL, в котором публикация появилась
+    description: Идентификатор релиза ChEMBL, в котором публикация появилась
 
 quality:
   hashing:
