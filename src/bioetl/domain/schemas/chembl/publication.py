@@ -36,7 +36,9 @@ _PUBLICATION_BUSINESS_COLUMNS: list[str] = [
     "year",
 ]
 
-OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(_PUBLICATION_BUSINESS_COLUMNS)
+OUTPUT_COLUMN_ORDER: list[str] = build_output_column_order(
+    _PUBLICATION_BUSINESS_COLUMNS
+)
 
 
 class PublicationTableSchema(BaseGeneratedColumnsSchema):
