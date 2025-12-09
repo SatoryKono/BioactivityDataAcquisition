@@ -5,10 +5,15 @@ from __future__ import annotations
 import structlog
 
 from bioetl.infrastructure.observability.adapters import (
+    PrometheusMetricsPortImpl,
     StructuredLoggerImpl,
     TracingAdapterImpl,
 )
-from bioetl.interfaces.observability import LoggingPortABC, TracingPortABC
+from bioetl.interfaces.observability import (
+    LoggingPortABC,
+    MetricsPortABC,
+    TracingPortABC,
+)
 
 
 def _configure_structlog() -> None:
@@ -34,7 +39,14 @@ def default_tracing_port() -> TracingPortABC:
     return TracingAdapterImpl()
 
 
+def default_metrics_port() -> MetricsPortABC:
+    """Create Prometheus-backed metrics port."""
+
+    return PrometheusMetricsPortImpl()
+
+
 __all__ = [
     "default_logging_port",
+    "default_metrics_port",
     "default_tracing_port",
 ]

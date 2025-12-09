@@ -12,9 +12,12 @@ import requests
 
 from bioetl.domain.clients.base.contracts import ApiClientABC
 from bioetl.domain.configs import ClientConfig
-from bioetl.domain.observability import LoggingPortABC
-from bioetl.infrastructure.errors import wrap_http_errors
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
+from bioetl.infrastructure.errors import ApiTimeoutError, wrap_http_errors
+from bioetl.infrastructure.observability.factories import (
+    default_logging_port,
+    default_metrics_port,
+)
 
 
 class UnifiedAPIClientImpl(ApiClientABC):
@@ -30,11 +33,13 @@ class UnifiedAPIClientImpl(ApiClientABC):
         base_client: Any | None = None,
         *,
         logger: LoggingPortABC | None = None,
+        metrics: MetricsPortABC | None = None,
     ) -> None:
         self.provider = provider
         self.config = config
         self.base_client = base_client or requests.Session()
         self.logger = logger or default_logging_port()
+        self.metrics = metrics or default_metrics_port()
         self.logger.info(
             "http_client_initialized",
             provider=self.provider,
@@ -46,32 +51,45 @@ class UnifiedAPIClientImpl(ApiClientABC):
 
     def request_call(self, method: str, url: str, **kwargs: Any) -> Any:
         """Выполнить HTTP-запрос с настройками клиента."""
-        with wrap_http_errors(
-            provider=self.provider, endpoint=url, logger=self.logger
-        ) as context:
-            method_upper = method.upper()
-            if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
-                headers = dict(kwargs.get("headers") or {})
-                headers.setdefault("Idempotency-Key", str(uuid4()))
-                kwargs["headers"] = headers
+        start = time.monotonic()
+        status_label = "unknown"
 
-            timeout = kwargs.pop("timeout", self.config.timeout_sec)
-            start = time.monotonic()
-            response = self.base_client.request(
-                method=method, url=url, timeout=timeout, **kwargs
-            )
+        try:
+            with wrap_http_errors(
+                provider=self.provider, endpoint=url, logger=self.logger
+            ) as context:
+                method_upper = method.upper()
+                if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
+                    headers = dict(kwargs.get("headers") or {})
+                    headers.setdefault("Idempotency-Key", str(uuid4()))
+                    kwargs["headers"] = headers
+
+                timeout = kwargs.pop("timeout", self.config.timeout_sec)
+                response = self.base_client.request(
+                    method=method, url=url, timeout=timeout, **kwargs
+                )
+                raw_status = getattr(response, "status_code", None)
+                context["status_code"] = (
+                    raw_status if isinstance(raw_status, int) else None
+                )
+                status_label = self._normalize_status(context["status_code"])
+                self.logger.info(
+                    "http_request_completed",
+                    provider=self.provider,
+                    method=method_upper,
+                    url=url,
+                    status_code=context["status_code"],
+                    latency_sec=time.monotonic() - start,
+                )
+                return response
+        except Exception as exc:
+            status_label = self._status_from_exception(status_label, exc)
+            self._record_error(url, status_label)
+            raise
+        finally:
             latency = time.monotonic() - start
-            raw_status = getattr(response, "status_code", None)
-            context["status_code"] = raw_status if isinstance(raw_status, int) else None
-            self.logger.info(
-                "http_request_completed",
-                provider=self.provider,
-                method=method_upper,
-                url=url,
-                status_code=context["status_code"],
-                latency_sec=latency,
-            )
-            return response
+            self._observe_latency(url, latency, status_label)
+            self._record_total(url, status_label)
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         """Execute a request using the configured HTTP client."""
@@ -89,3 +107,41 @@ class UnifiedAPIClientImpl(ApiClientABC):
         """Закрыть соединение."""
         if hasattr(self.base_client, "close"):
             self.base_client.close()
+
+    def _record_total(self, endpoint: str, status: str) -> None:
+        if not self.metrics:
+            return
+
+        self.metrics.inc_counter(
+            "client_request_total",
+            {"provider": self.provider, "endpoint": endpoint, "status": status},
+        )
+
+    def _observe_latency(self, endpoint: str, latency: float, status: str) -> None:
+        if not self.metrics:
+            return
+
+        self.metrics.observe_histogram(
+            "client_request_duration_seconds",
+            latency,
+            {"provider": self.provider, "endpoint": endpoint, "status": status},
+        )
+
+    def _record_error(self, endpoint: str, status: str) -> None:
+        if not self.metrics:
+            return
+
+        self.metrics.inc_counter(
+            "client_request_errors",
+            {"provider": self.provider, "endpoint": endpoint, "status": status},
+        )
+
+    def _normalize_status(self, status_code: int | None) -> str:
+        if status_code is None:
+            return "unknown"
+        return str(status_code)
+
+    def _status_from_exception(self, current_status: str, exc: Exception) -> str:
+        if isinstance(exc, ApiTimeoutError) or isinstance(exc, requests.Timeout):
+            return "timeout"
+        return exc.__class__.__name__ or current_status

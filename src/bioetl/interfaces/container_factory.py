@@ -15,11 +15,11 @@ from bioetl.domain.observability import PipelineMetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.abc_registry_resolver import ABCRegistryResolver
-from bioetl.infrastructure.observability import metrics
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
 )
+from bioetl.interfaces.monitoring import create_prometheus_metrics_port
 
 
 def _create_metadata_builder() -> RunMetadataBuilderProtocol:
@@ -36,28 +36,7 @@ def _create_metadata_builder() -> RunMetadataBuilderProtocol:
 def _create_metrics_port() -> PipelineMetricsPortABC:
     """Return metrics port backed by Prometheus collectors."""
 
-    def _update_duration(**kwargs: Any) -> None:
-        metrics.STAGE_DURATION_SECONDS.labels(
-            pipeline=kwargs["pipeline"],
-            provider=kwargs["provider"],
-            entity=kwargs["entity"],
-            stage=kwargs["stage"],
-            outcome=kwargs["outcome"],
-        ).observe(kwargs["duration_sec"])
-
-    return cast(
-        PipelineMetricsPortABC,
-        SimpleNamespace(
-            update_stage_duration=_update_duration,
-            update_stage_total=lambda **kwargs: metrics.STAGE_TOTAL.labels(
-                pipeline=kwargs["pipeline"],
-                provider=kwargs["provider"],
-                entity=kwargs["entity"],
-                stage=kwargs["stage"],
-                outcome=kwargs["outcome"],
-            ).inc(),
-        ),
-    )
+    return create_prometheus_metrics_port()
 
 
 def _create_validator_factory() -> ValidatorFactoryABC:
@@ -91,15 +70,16 @@ def build_default_container(
     writer = writer_factory()
     metadata_writer = metadata_writer_factory()
     quality_reporter = quality_reporter_factory()
+    metrics_port = _create_metrics_port()
     output_writer = output_writer_factory(
         config=config.determinism,
         qc_config=config.qc,
         writer=writer,
         metadata_writer=metadata_writer,
         quality_reporter=quality_reporter,
+        metrics_port=metrics_port,
     )
     metadata_builder = _create_metadata_builder()
-    metrics_port = _create_metrics_port()
     validator_factory = _create_validator_factory()
     hash_service = hash_service_factory()
 
