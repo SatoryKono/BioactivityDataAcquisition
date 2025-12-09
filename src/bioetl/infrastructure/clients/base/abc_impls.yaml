@@ -114,6 +114,11 @@ ResponseParserABC:
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblResponseParserImpl
 
+ApiClientABC:
+  default_factory: bioetl.infrastructure.clients.base.factories.default_api_client
+  implementations:
+    Unified: bioetl.infrastructure.clients.base.impl.unified_api_client_impl.UnifiedAPIClientImpl
+
 PaginatorABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_paginator
   implementations:

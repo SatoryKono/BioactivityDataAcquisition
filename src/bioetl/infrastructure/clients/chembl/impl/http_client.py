@@ -7,19 +7,15 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any, Iterator
 
-from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.clients.base.contracts import (
+    ApiClientABC,
+    RateLimiterABC,
+    RequestBuilderABC,
+    ResponseParserABC,
+)
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.errors import ClientResponseError
-from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
-    UnifiedAPIClientImpl,
-)
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
-from bioetl.infrastructure.clients.chembl.request_builder import (
-    ChemblRequestBuilderImpl,
-)
-from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParserImpl,
-)
 from bioetl.infrastructure.clients.middleware import HttpClientMiddleware
 
 
@@ -31,10 +27,10 @@ class ChemblApiPortImpl(DataClientABC):
 
     def __init__(
         self,
-        request_builder: ChemblRequestBuilderImpl,
-        response_parser: ChemblResponseParserImpl,
+        request_builder: RequestBuilderABC,
+        response_parser: ResponseParserABC,
         rate_limiter: RateLimiterABC,
-        client: UnifiedAPIClientImpl | None = None,
+        client: ApiClientABC | None = None,
         *,
         http_middleware: HttpClientMiddleware | None = None,
         provider: str = "chembl",
@@ -46,7 +42,7 @@ class ChemblApiPortImpl(DataClientABC):
         if http_middleware is not None:
             self.http = http_middleware
         elif client is not None:
-            self.http = client.middleware
+            self.http = client
         else:
             # Fallback stub to keep attribute accessible in tests;
             # real runs must inject middleware.
