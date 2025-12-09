@@ -3,6 +3,6 @@ ChEMBL client implementations.
 """
 
 from .chembl_extraction_service_impl import ChemblExtractionServiceImpl
-from .http_client import ChemblApiPortImpl
+from .chembl_http_client_impl import ChemblHttpClientImpl
 
-__all__ = ["ChemblExtractionServiceImpl", "ChemblApiPortImpl"]
+__all__ = ["ChemblExtractionServiceImpl", "ChemblHttpClientImpl"]
