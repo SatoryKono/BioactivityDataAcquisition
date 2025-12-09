@@ -11,17 +11,9 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
-from bioetl.domain.transform.normalizers import (
-    normalize_array,
-    normalize_record,
-)
 from bioetl.infrastructure.transform.impl import normalize as normalize_impl
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationServiceImpl,
-)
-from bioetl.infrastructure.transform.impl.serializer import (
-    serialize_dict,
-    serialize_list,
 )
 
 
@@ -43,7 +35,7 @@ class ChemblNormalizationServiceImpl(
         """Normalize single raw ChEMBL record into flat dict."""
         normalized: dict[str, Any] = {}
 
-        for field_cfg in self._config.get_fields():
+        for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
             if not isinstance(name, str) or name not in raw:
                 continue
@@ -81,7 +73,7 @@ class ChemblNormalizationServiceImpl(
         """Normalize configured fields across dataframe columns."""
         normalized_df = df.copy()
 
-        for field_cfg in self._config.get_fields():
+        for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
             if not name or name not in normalized_df.columns:
                 continue
@@ -130,54 +122,3 @@ class ChemblNormalizationServiceImpl(
             )
 
         return cast(pd.Series, series.apply(_normalize_value_from_series))
-
-    def _process_list(
-        self,
-        value: Any,
-        normalizer: Any,
-        field_name: str,
-        *,
-        serialize_with_value_normalizer: bool = True,
-    ) -> Any:
-        """Normalize list container and serialize deterministically."""
-        try:
-            normalized_list = normalize_array(
-                value,
-                item_normalizer=lambda item: self._normalize_container_item(
-                    item, normalizer
-                ),
-            )
-        except ValueError as exc:
-            raise ValueError(
-                f"Ошибка нормализации списка в поле '{field_name}': {exc}"
-            ) from exc
-
-        if not normalized_list:
-            return None
-        return serialize_list(
-            normalized_list,
-            value_normalizer=normalizer if serialize_with_value_normalizer else None,
-        )
-
-    def _process_dict(self, value: Any, normalizer: Any, field_name: str) -> Any:
-        """Normalize mapping container and serialize deterministically."""
-        try:
-            dict_value = cast(dict[str, Any], value)
-            normalized_dict = normalize_record(dict_value, value_normalizer=normalizer)
-        except ValueError as exc:
-            raise ValueError(
-                f"Ошибка нормализации записи в поле '{field_name}': {exc}"
-            ) from exc
-
-        if normalized_dict is None:
-            return None
-        return serialize_dict(dict(normalized_dict))
-
-    def _normalize_container_item(self, item: Any, normalizer: Any) -> Any:
-        """Normalize individual item inside container preserving type rules."""
-        if isinstance(item, dict):
-            normalized_dict = normalize_record(
-                cast(dict[str, Any], item), value_normalizer=normalizer
-            )
-            return normalized_dict if normalized_dict is not None else {}
-        return normalizer(item)
