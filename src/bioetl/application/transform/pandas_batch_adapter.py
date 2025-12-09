@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 import pandas as pd
+from pydantic import BaseModel
 
 from bioetl.domain.ports.extraction import BatchAdapterABC
 from bioetl.domain.record_source import RawRecord
@@ -13,24 +14,28 @@ from bioetl.domain.record_source import RawRecord
 class PandasBatchAdapter(BatchAdapterABC):
     """Конвертирует сырые батчи в список записей RawRecord."""
 
+    def __init__(self, model_cls: type[BaseModel] | None = None) -> None:
+        self._model_cls: type[BaseModel] = model_cls or RawRecord
+
     def process_batch(self, raw_batch: Any) -> list[RawRecord]:
-        """Нормализует батч провайдера в список словарей."""
+        """Нормализует батч провайдера в список моделей."""
         if raw_batch is None:
             return []
 
         if isinstance(raw_batch, pd.DataFrame):
             return [
-                cast(RawRecord, dict(record)) for record in raw_batch.to_dict("records")
+                cast(RawRecord, self._model_cls.model_validate(record))
+                for record in raw_batch.to_dict("records")
             ]
 
         if isinstance(raw_batch, list):
             normalized: list[RawRecord] = []
             for item in raw_batch:
-                normalized.append(cast(RawRecord, dict(item)))
+                normalized.append(self._convert_record(item))
             return normalized
 
         if isinstance(raw_batch, dict):
-            return [cast(RawRecord, dict(raw_batch))]
+            return [self._convert_record(raw_batch)]
 
         raise TypeError(
             "Unsupported batch type "
@@ -40,6 +45,11 @@ class PandasBatchAdapter(BatchAdapterABC):
     def adapt_batch(self, raw_batch: Any) -> list[RawRecord]:
         """Alias для process_batch для обратной совместимости."""
         return self.process_batch(raw_batch)
+
+    def _convert_record(self, item: Any) -> RawRecord:
+        if isinstance(item, BaseModel):
+            return cast(RawRecord, item)
+        return cast(RawRecord, self._model_cls.model_validate(item))
 
 
 __all__ = ["PandasBatchAdapter"]

@@ -5,7 +5,7 @@ Factories for ChEMBL clients.
 from typing import Any
 
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
+from bioetl.domain.configs import ChemblSourceConfig, ClientConfig, HttpClientSettings
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
@@ -29,7 +29,7 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 
 def default_chembl_client(
     source_config: ChemblSourceConfig,
-    client_config: ClientConfig | None = None,
+    http_client: HttpClientSettings | None = None,
     **options: Any,
 ) -> DataClientABC:
     """
@@ -43,8 +43,10 @@ def default_chembl_client(
     Returns:
         Настроенный экземпляр клиента.
     """
-    if client_config is None:
-        client_config = source_config.client.model_copy(deep=True)
+    resolved_http = http_client or source_config.http_client
+    client_config = ClientConfig.from_http_settings(
+        resolved_http, existing=source_config.client
+    )
 
     # Create Unified Client
     logger: LoggingPortABC | None = options.get("logger")
@@ -52,16 +54,22 @@ def default_chembl_client(
     unified_client = build_http_client(
         provider="chembl",
         client_config=client_config,
+        http_settings=resolved_http,
         logger=logger,
     )
 
     # Allow explicit overrides via kwargs (used in tests and manual runs)
-    base_url = str(options.get("base_url", source_config.base_url))
+    override_base_url = options.get("base_url")
+    base_url = str(override_base_url or resolved_http.base_url)
+    if override_base_url:
+        resolved_http = resolved_http.model_copy(update={"base_url": base_url})
     max_url_length = options.get("max_url_length", source_config.max_url_length)
 
     # Rate limiter for proactive limiting (in addition to middleware backoff)
     # Using explicit rate limiter in client logic
-    rate_limiter = build_rate_limiter(client_config=client_config, logger=logger)
+    rate_limiter = build_rate_limiter(
+        client_config=client_config, http_settings=resolved_http, logger=logger
+    )
 
     return ChemblHttpClientImpl(
         request_builder=ChemblRequestBuilderImpl(
@@ -78,6 +86,7 @@ def default_chembl_client(
 
 def default_chembl_extraction_service(
     config: ChemblSourceConfig,
+    http_client: HttpClientSettings | None = None,
     client_config: ClientConfig | None = None,
     *,
     client: DataClientABC | None = None,
@@ -95,9 +104,20 @@ def default_chembl_extraction_service(
     Returns:
         Сервис экстракции.
     """
+    resolved_http = http_client or config.http_client
+    if client_config is not None:
+        resolved_http = resolved_http.model_copy(
+            update={
+                "timeout": int(client_config.timeout_sec),
+                "retries": client_config.max_retries,
+                "backoff": float(client_config.backoff_factor),
+                "rate_limit": float(client_config.rate_limit_per_sec),
+            }
+        )
+
     if client is None:
         client = default_chembl_client(
-            config, client_config=client_config, logger=logger
+            config, http_client=resolved_http, logger=logger
         )
 
     return ChemblExtractionServiceImpl(

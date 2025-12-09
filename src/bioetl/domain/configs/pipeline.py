@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import (
-    AnyHttpUrl,
     BaseModel,
     ConfigDict,
     Field,
@@ -30,6 +29,18 @@ class PaginationConfig(BaseModel):
     limit: int = 1000
     offset: int = 0
     max_pages: int | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class HttpClientSettings(BaseModel):
+    """Унифицированные настройки HTTP-клиента."""
+
+    base_url: str
+    timeout: int = 30
+    retries: int = 3
+    backoff: float = 2.0
+    rate_limit: float = 2.5
 
     model_config = ConfigDict(extra="forbid")
 
@@ -67,6 +78,25 @@ class ClientConfig(BaseModel):
     circuit_breaker_recovery_time: float = 60.0
 
     model_config = ConfigDict(extra="forbid")
+
+    @classmethod
+    def from_http_settings(
+        cls,
+        http_client: HttpClientSettings,
+        *,
+        existing: ClientConfig | None = None,
+    ) -> ClientConfig:
+        """Создает ClientConfig на основе HttpClientSettings."""
+
+        base = existing.model_copy(deep=True) if existing is not None else cls()
+        return base.model_copy(
+            update={
+                "timeout_sec": float(http_client.timeout),
+                "max_retries": http_client.retries,
+                "rate_limit_per_sec": float(http_client.rate_limit),
+                "backoff_factor": http_client.backoff,
+            }
+        )
 
 
 class StorageConfig(BaseModel):
@@ -203,7 +233,7 @@ class BaseProviderConfig(BaseModel):
     """Базовая строгая конфигурация провайдера."""
 
     provider: Literal["chembl", "pubchem", "uniprot", "dummy"]
-    base_url: AnyHttpUrl
+    http_client: HttpClientSettings
     client: ClientConfig = Field(default_factory=ClientConfig)
 
     model_config = ConfigDict(extra="forbid")
@@ -216,8 +246,49 @@ class BaseProviderConfig(BaseModel):
         if not isinstance(data, dict):
             return data
 
-        if "client" in data:
+        if "http_client" in data:
             return data
+
+        base_url = data.get("base_url")
+        client_data = data.get("client") or {}
+
+        client_payload: dict[str, Any] = {}
+        for legacy_field in ("timeout_sec", "max_retries", "rate_limit_per_sec", "backoff_factor"):
+            if legacy_field in data:
+                client_payload[legacy_field] = data[legacy_field]
+        client_payload.update(client_data if isinstance(client_data, dict) else {})
+
+        if base_url is None:
+            return data
+
+        client_config = ClientConfig.model_validate(client_payload or {})
+        http_client = HttpClientSettings(
+            base_url=str(base_url),
+            timeout=int(client_config.timeout_sec),
+            retries=client_config.max_retries,
+            backoff=float(client_config.backoff_factor),
+            rate_limit=float(client_config.rate_limit_per_sec),
+        )
+
+        cleaned = {key: value for key, value in data.items() if key not in {"base_url", "client", "timeout_sec", "max_retries", "rate_limit_per_sec", "backoff_factor"}}
+        cleaned["http_client"] = http_client
+        return cleaned
+
+    @model_validator(mode="after")
+    def sync_client_config(self) -> "BaseProviderConfig":
+        """Гарантирует, что client отражает http_client."""
+
+        synced_client = ClientConfig.from_http_settings(
+            self.http_client, existing=self.client
+        )
+        object.__setattr__(self, "client", synced_client)
+        return self
+
+    @property
+    def base_url(self) -> str:
+        """Совместимость с прежним интерфейсом base_url."""
+
+        return self.http_client.base_url
 
         client_field_names = set(ClientConfig.model_fields)
         flattened = {

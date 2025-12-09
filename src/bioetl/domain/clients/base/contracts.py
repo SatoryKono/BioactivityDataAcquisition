@@ -3,8 +3,11 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
+from pydantic import BaseModel
+
 T = TypeVar("T")
-Record = dict[str, Any]
+RecordT = TypeVar("RecordT", bound=BaseModel)
+RecordModel = BaseModel
 
 
 class RequestBuilderABC(ABC):
@@ -21,17 +24,17 @@ class RequestBuilderABC(ABC):
         """Добавляет параметры пагинации."""
 
 
-class ResponseParserABC(ABC):
+class ResponseParserABC(ABC, Generic[RecordT]):
     """
     Разбор ответов API.
     """
 
     @abstractmethod
-    def parse_response(self, raw_response: Any) -> list[Record]:
-        """Парсит сырой ответ в список записей."""
+    def parse_response(self, raw_response: dict[str, object]) -> list[RecordT]:
+        """Парсит сырой ответ в список типизированных записей."""
 
     @abstractmethod
-    def extract_metadata(self, raw_response: Any) -> dict[str, Any]:
+    def extract_metadata(self, raw_response: dict[str, object]) -> dict[str, int | str | None]:
         """Извлекает метаданные из ответа (например, общее кол-во)."""
 
 
@@ -62,7 +65,7 @@ class PaginatorABC(ABC):
     """
 
     @abstractmethod
-    def get_items(self, response: Any) -> list[Record]:
+    def get_items(self, response: Any) -> list[RecordModel]:
         """Извлекает элементы из ответа."""
 
     @abstractmethod

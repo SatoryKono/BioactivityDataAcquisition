@@ -9,6 +9,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError
 import yaml
 
+from bioetl.domain.configs import HttpClientSettings
 DEFAULT_CONFIGS_ROOT = Path("configs")
 DEFAULT_PROVIDERS_REGISTRY_PATH = DEFAULT_CONFIGS_ROOT / "providers.yaml"
 
@@ -67,6 +68,7 @@ class ProviderRegistryEntryConfig(BaseModel):
     factory: str
     active: bool = True
     description: str | None = None
+    http_client: HttpClientSettings | None = None
 
 
 class ProviderRegistryModel(BaseModel):

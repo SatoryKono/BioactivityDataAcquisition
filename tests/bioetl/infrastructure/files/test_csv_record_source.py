@@ -5,6 +5,7 @@ import pandas as pd
 from pydantic import AnyHttpUrl
 
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     ClientConfig,
@@ -29,12 +30,19 @@ class _StubExtractionService:
 
     def request_batch(self, entity: str, batch_ids: list[str], filter_key: str):
         self.batches.append(batch_ids)
-        return {"records": [{"id": value} for value in batch_ids]}
+        return {
+            "records": [
+                {"activity_id": value, "standard_flag": True}
+                for value in batch_ids
+            ]
+        }
 
     def parse_response(self, raw_response: dict[str, list[dict[str, str]]]):
-        return raw_response["records"]
+        return [ActivityRawModel.model_validate(item) for item in raw_response["records"]]
 
-    def serialize_records(self, entity: str, records: list[dict[str, str]]):
+    def serialize_records(
+        self, entity: str, records: list[ActivityRawModel]
+    ) -> list[ActivityRawModel]:
         return records
 
 
@@ -57,21 +65,25 @@ class _DummyLogger(LoggingPortABC):
 
 def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
     csv_path = tmp_path / "dataset.csv"
-    pd.DataFrame([{"id": 1, "name": "alpha"}, {"id": 2, "name": "beta"}]).to_csv(
-        csv_path, index=False
-    )
+    pd.DataFrame(
+        [
+            {"activity_id": "1", "standard_flag": True},
+            {"activity_id": "2", "standard_flag": False},
+        ]
+    ).to_csv(csv_path, index=False)
 
     source = CsvRecordSourceImpl(
         input_path=csv_path,
         csv_options=CsvInputConfig(),
         limit=1,
         logger=cast(LoggingPortABC, _DummyLogger()),
+        model_cls=ActivityRawModel,
     )
 
     chunks = list(source.iter_records())
 
     assert len(chunks) == 1
-    expected = [{"id": 1, "name": "alpha"}]
+    expected = [ActivityRawModel(activity_id="1", standard_flag=True)]
     assert chunks[0] == expected
 
 
@@ -109,5 +121,9 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     assert extraction.batches == [["A1", "A2"], ["A3"]]
     assert len(records) == 2
     combined = [record for batch in records for record in batch]
-    expected = [{"id": "A1"}, {"id": "A2"}, {"id": "A3"}]
+    expected = [
+        ActivityRawModel(activity_id="A1", standard_flag=True),
+        ActivityRawModel(activity_id="A2", standard_flag=True),
+        ActivityRawModel(activity_id="A3", standard_flag=True),
+    ]
     assert combined == expected
