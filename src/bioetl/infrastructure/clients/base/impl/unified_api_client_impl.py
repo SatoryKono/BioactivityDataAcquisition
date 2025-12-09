@@ -13,6 +13,7 @@ import requests
 from bioetl.domain.clients.base.contracts import ApiClientABC
 from bioetl.domain.configs import ClientConfig
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.infrastructure.errors import wrap_http_errors
 from bioetl.infrastructure.observability.factories import default_logging_port
 
 
@@ -45,27 +46,32 @@ class UnifiedAPIClientImpl(ApiClientABC):
 
     def request_call(self, method: str, url: str, **kwargs: Any) -> Any:
         """Выполнить HTTP-запрос с настройками клиента."""
-        method_upper = method.upper()
-        if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
-            headers = dict(kwargs.get("headers") or {})
-            headers.setdefault("Idempotency-Key", str(uuid4()))
-            kwargs["headers"] = headers
+        with wrap_http_errors(
+            provider=self.provider, endpoint=url, logger=self.logger
+        ) as context:
+            method_upper = method.upper()
+            if method_upper in {"POST", "PUT", "PATCH", "DELETE"}:
+                headers = dict(kwargs.get("headers") or {})
+                headers.setdefault("Idempotency-Key", str(uuid4()))
+                kwargs["headers"] = headers
 
-        timeout = kwargs.pop("timeout", self.config.timeout_sec)
-        start = time.monotonic()
-        response = self.base_client.request(
-            method=method, url=url, timeout=timeout, **kwargs
-        )
-        latency = time.monotonic() - start
-        self.logger.info(
-            "http_request_completed",
-            provider=self.provider,
-            method=method_upper,
-            url=url,
-            status_code=getattr(response, "status_code", None),
-            latency_sec=latency,
-        )
-        return response
+            timeout = kwargs.pop("timeout", self.config.timeout_sec)
+            start = time.monotonic()
+            response = self.base_client.request(
+                method=method, url=url, timeout=timeout, **kwargs
+            )
+            latency = time.monotonic() - start
+            raw_status = getattr(response, "status_code", None)
+            context["status_code"] = raw_status if isinstance(raw_status, int) else None
+            self.logger.info(
+                "http_request_completed",
+                provider=self.provider,
+                method=method_upper,
+                url=url,
+                status_code=context["status_code"],
+                latency_sec=latency,
+            )
+            return response
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
         """Execute a request using the configured HTTP client."""
