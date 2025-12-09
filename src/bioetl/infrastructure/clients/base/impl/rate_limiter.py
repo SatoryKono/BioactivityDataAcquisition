@@ -4,6 +4,8 @@ from threading import Lock
 import time
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.observability import LoggingPortABC
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 
 class TokenBucketRateLimiterImpl(RateLimiterABC):
@@ -11,12 +13,18 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
     Реализация алгоритма Token Bucket.
     """
 
-    def __init__(self, rate: float, capacity: float) -> None:
+    def __init__(
+        self, rate: float, capacity: float, *, logger: LoggingPortABC | None = None
+    ) -> None:
         self._rate = rate  # tokens per second
         self._capacity = capacity
         self._tokens = capacity
         self._last_refill = time.monotonic()
         self._lock = Lock()
+        self._logger = logger or default_logging_port()
+        self._logger.info(
+            "rate_limiter_initialized", rate=rate, capacity=capacity
+        )
 
     @property
     def rate(self) -> float:

@@ -10,6 +10,7 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
@@ -30,7 +31,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
     ) -> None:
         self.client = client
         self.batch_size = batch_size
-        self.logger = logger
+        self.logger = logger or default_logging_port()
         self.field_provider = field_provider
         self._version_cache: str | None = None
 

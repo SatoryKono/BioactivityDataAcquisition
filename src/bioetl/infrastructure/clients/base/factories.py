@@ -13,6 +13,7 @@ from bioetl.domain.clients.base.contracts import (
     SecretProviderABC,
     SideInputProviderABC,
 )
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.configs import ClientConfig, HTTP_CLIENT_DEFAULTS, HttpClientDefaults
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
@@ -79,6 +80,7 @@ def build_rate_limiter(
     *,
     client_config: ClientConfig | None = None,
     defaults: HttpClientDefaults | None = None,
+    logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
     """Create a rate limiter using unified HTTP defaults."""
 
@@ -87,17 +89,21 @@ def build_rate_limiter(
     )
     rate = resolved_defaults.rate_limit
     capacity = max(1.0, rate)
-    return TokenBucketRateLimiterImpl(rate, capacity)
+    return TokenBucketRateLimiterImpl(rate, capacity, logger=logger)
 
 
 def default_rate_limiter(
     rate: float = HTTP_CLIENT_DEFAULTS.rate_limit,
     capacity: float | None = None,
+    *,
+    logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
     """Create the default rate limiter with token bucket semantics."""
 
     resolved_capacity = capacity if capacity is not None else max(1.0, rate)
-    return TokenBucketRateLimiterImpl(rate, resolved_capacity)
+    return TokenBucketRateLimiterImpl(
+        rate, resolved_capacity, logger=logger
+    )
 
 
 def default_cache() -> CacheABC[Any]:
@@ -137,11 +143,20 @@ def default_paginator() -> PaginatorABC:
 
 
 def default_api_client(
-    provider: str, config: ClientConfig, *, base_client: Any | None = None
+    provider: str,
+    config: ClientConfig,
+    *,
+    base_client: Any | None = None,
+    logger: LoggingPortABC | None = None,
 ) -> ApiClientABC:
     """Create the default API client without middleware indirection."""
 
-    return build_http_client(provider, client_config=config, base_client=base_client)
+    return build_http_client(
+        provider,
+        client_config=config,
+        base_client=base_client,
+        logger=logger,
+    )
 
 
 def build_http_client(
@@ -150,6 +165,7 @@ def build_http_client(
     client_config: ClientConfig | None = None,
     defaults: HttpClientDefaults | None = None,
     base_client: Any | None = None,
+    logger: LoggingPortABC | None = None,
 ) -> ApiClientABC:
     """Construct HTTP client using centralized defaults."""
 
@@ -157,7 +173,10 @@ def build_http_client(
         client_config=client_config, defaults=defaults
     )
     return UnifiedAPIClientImpl(
-        provider=provider, config=resolved_config, base_client=base_client
+        provider=provider,
+        config=resolved_config,
+        base_client=base_client,
+        logger=logger,
     )
 
 
