@@ -12,7 +12,7 @@ from bioetl.domain.transform.normalizers import (
     normalize_uniprot,
 )
 from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
-    DefaultNormalizationTransformerImpl,
+    DefaultNormalizationTransformerImpl as DefaultNormImpl,
 )
 
 # Aliases for backward compatibility or convenience
@@ -71,9 +71,10 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
     return val.lower()
 
 
-NormalizationTransformer = DefaultNormalizationTransformerImpl
-NormalizationServiceImpl = DefaultNormalizationTransformerImpl
-NormalizationService = DefaultNormalizationTransformerImpl
+DefaultNormalizationTransformerImpl = DefaultNormImpl
+NormalizationTransformer = DefaultNormImpl
+NormalizationServiceImpl = DefaultNormImpl
+NormalizationService = DefaultNormImpl
 
 
 __all__ = [
