@@ -42,6 +42,7 @@ def test_fetch_activity_with_http_client(client, mock_components):
     mock_builder.build.return_value = "http://chembl/activity"
 
     mock_response = MagicMock()
+    mock_response.status_code = 200
     mock_response.json.return_value = {"data": "test"}
     mock_components["http_client"].request.return_value = mock_response
 
@@ -62,9 +63,10 @@ def test_fetch_activity_with_http_client(client, mock_components):
 def test_rate_limiter_usage(client, mock_components):
     # Arrange
     mock_limiter = mock_components["rate_limiter"]
-    mock_components["http_client"].request.return_value = MagicMock(
-        json=lambda: {}, raise_for_status=lambda: None
-    )
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {}
+    mock_components["http_client"].request.return_value = mock_response
 
     # Act
     list(client.iter_pages("http://test"))

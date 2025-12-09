@@ -35,6 +35,7 @@ from bioetl.infrastructure.observability.server import (
 )
 from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.interfaces.wiring import create_config_loader
+from bioetl.interfaces.container_factory import build_default_container
 
 app = typer.Typer(
     name="bioetl",
@@ -240,6 +241,7 @@ def run(
             provider_registry=provider_registry,
             provider_loader=provider_loader,
             provider_loader_factory=provider_loader_factory,
+            container_factory=build_default_container,
         )
 
         console.print(

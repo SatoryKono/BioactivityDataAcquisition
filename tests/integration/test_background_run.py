@@ -10,6 +10,7 @@ from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.interfaces.container_factory import build_default_container
 from bioetl.interfaces.wiring import create_config_loader
 
 
@@ -45,6 +46,7 @@ def test_run_in_background_with_loader(tmp_path: Path) -> None:
         provider_registry=None,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
+        container_factory=build_default_container,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)
@@ -74,6 +76,7 @@ def test_run_in_background_with_preloaded_registry(tmp_path: Path) -> None:
         provider_registry=registry,
         provider_loader=None,
         provider_loader_factory=None,
+        container_factory=build_default_container,
     )
 
     future = orchestrator.run_in_background(dry_run=True, limit=5)
