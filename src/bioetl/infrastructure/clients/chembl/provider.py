@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
@@ -36,9 +37,12 @@ class ChemblProviderComponentsFactory(
         config: ChemblSourceConfig,
         *,
         client: DataClientABC | None = None,
+        field_provider: DefaultFieldProviderABC | None = None,
     ) -> ExtractionServiceABC:
         """Construct extraction service with optional prebuilt client."""
-        return create_extraction_service(config, client=client)
+        return create_extraction_service(
+            config, client=client, field_provider=field_provider
+        )
 
     def create_normalization_service(
         self,
