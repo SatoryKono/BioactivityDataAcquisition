@@ -19,10 +19,17 @@ from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.column_order import apply_column_order
-from bioetl.infrastructure.output.metadata import build_run_metadata
+from bioetl.application.pipelines.contracts import LoaderABC
+from bioetl.domain.clients.base.output.contracts import (
+    MetadataWriterABC,
+    OutputWriterABC,
+    QualityReportABC,
+    WriterABC,
+    WriteResult,
+)
 
 
-class UnifiedOutputWriterImpl(OutputWriterABC):
+class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
     """
     Фасад для записи результатов пайплайна.
 
@@ -49,6 +56,23 @@ class UnifiedOutputWriterImpl(OutputWriterABC):
         self._qc_config = qc_config or QcConfig()
         self._atomic_op = atomic_op or AtomicFileOperation()
         self._metrics = metrics
+
+    def load(
+        self,
+        df: pd.DataFrame,
+        output_path: Path,
+        context: RunContext,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        """Alias for write_result to implement LoaderABC."""
+        return self.write_result(
+            df=df,
+            output_path=output_path,
+            entity_name=context.entity_name,
+            run_context=context,
+            column_order=column_order,
+        )
 
     def write_result(
         self,

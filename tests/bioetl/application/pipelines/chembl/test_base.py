@@ -152,6 +152,11 @@ def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixt
         {"name": "references", "data_type": "array"},
         {"name": "doi", "data_type": "string"},
     ]
+    # Explicitly set serialization mode to pipe to match expected output
+    mock_dependencies_fixture["config"].serialization_mode = "pipe"
+    # Also update the already initialized service
+    mock_dependencies_fixture["normalization_service"]._serialization_mode = "pipe"
+
     norm = MagicMock()
     norm.case_sensitive_fields = []
     norm.id_fields = []

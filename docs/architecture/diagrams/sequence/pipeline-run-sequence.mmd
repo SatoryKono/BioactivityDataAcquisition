@@ -18,6 +18,7 @@ sequenceDiagram
     autonumber
     participant CLI as CLI (Typer)
     participant Orchestrator as PipelineOrchestrator
+    participant Wiring as Wiring/Interfaces
     participant Container as PipelineContainer
     participant Pipeline as PipelineBase/ChemblPipeline
     participant Hooks as PipelineHooks (Logging+Metrics)
@@ -29,9 +30,9 @@ sequenceDiagram
     participant Storage as Deterministic Storage
 
     CLI->>Orchestrator: run(pipeline_name, cli_args)
-    Orchestrator->>Container: build_pipeline_dependencies(config)
-    Container-->>Orchestrator: Dependencies (extraction, transformer, validator, writer, hooks, error policy)
-    Orchestrator->>Pipeline: instantiate(config, deps)
+    Orchestrator->>Wiring: build_default_container(config)
+    Wiring-->>Orchestrator: PipelineContainer (extraction, transformer, validator, writer, hooks)
+    Orchestrator->>Pipeline: instantiate(config, container)
     Orchestrator->>Pipeline: run()
     activate Pipeline
     Pipeline->>Hooks: on_start(run_ctx)
