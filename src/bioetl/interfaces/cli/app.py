@@ -33,9 +33,9 @@ from bioetl.infrastructure.observability.factories import default_logging_port
 from bioetl.infrastructure.observability.server import (
     start_metrics_server_once,
 )
+from bioetl.interfaces.container_factory import build_default_container
 from bioetl.interfaces.observability import LoggingPortABC
 from bioetl.interfaces.wiring import create_config_loader
-from bioetl.interfaces.container_factory import build_default_container
 
 app = typer.Typer(
     name="bioetl",

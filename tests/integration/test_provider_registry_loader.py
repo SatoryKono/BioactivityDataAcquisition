@@ -9,8 +9,7 @@ import pytest
 
 from bioetl.domain.configs import DummyProviderConfig
 
-# Provider registry module was removed
-# from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.interfaces.observability import LoggingPortABC
 
@@ -77,11 +76,11 @@ def _register_module(
     sys.modules[module_name] = module
 
 
-@pytest.mark.skip(reason="Provider registry module was removed")
+# @pytest.mark.skip(reason="Provider registry module was removed")
 def test_loader_handles_disabled_and_faulty_entries() -> None:
     """Legacy provider registry loader test disabled until module returns."""
 
 
-@pytest.mark.skip(reason="Provider registry module was removed")
+# @pytest.mark.skip(reason="Provider registry module was removed")
 def test_loader_reuses_existing_definition_on_duplicate_entries() -> None:
     """Legacy provider registry loader test disabled until module returns."""
