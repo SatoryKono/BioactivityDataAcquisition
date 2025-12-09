@@ -8,11 +8,9 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.infrastructure.clients.base.impl.rate_limiter import (
-    TokenBucketRateLimiterImpl,
-)
-from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
-    UnifiedAPIClientImpl,
+from bioetl.infrastructure.clients.base.factories import (
+    default_api_client,
+    default_rate_limiter,
 )
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
@@ -46,7 +44,7 @@ def default_chembl_client(
         client_config = source_config.client.model_copy(deep=True)
 
     # Create Unified Client
-    unified_client = UnifiedAPIClientImpl(
+    unified_client = default_api_client(
         provider="chembl",
         config=client_config,
     )
@@ -57,7 +55,7 @@ def default_chembl_client(
 
     # Rate limiter for proactive limiting (in addition to middleware backoff)
     # Using explicit rate limiter in client logic
-    rate_limiter = TokenBucketRateLimiterImpl(
+    rate_limiter = default_rate_limiter(
         rate=client_config.rate_limit_per_sec,
         capacity=max(1.0, client_config.rate_limit_per_sec),
     )
@@ -95,19 +93,9 @@ def default_chembl_extraction_service(
     if client is None:
         client = default_chembl_client(config, client_config=client_config)
 
-    # Local import to avoid circular dependency with application layer
-    # Infrastructure factory needs to provide application-level defaults
-    try:
-        from bioetl.application.providers import ApplicationFieldProvider
-
-        field_provider = ApplicationFieldProvider()
-    except ImportError:
-        field_provider = None
-
     return ChemblExtractionServiceImpl(
         client=client,
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
         logger=logger,
-        field_provider=field_provider,
     )

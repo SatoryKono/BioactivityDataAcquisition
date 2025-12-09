@@ -5,6 +5,7 @@
 DataClientABC: bioetl.domain.clients.contracts.DataClientABC
 RequestBuilderABC: bioetl.domain.clients.base.contracts.RequestBuilderABC
 ResponseParserABC: bioetl.domain.clients.base.contracts.ResponseParserABC
+ApiClientABC: bioetl.domain.clients.base.contracts.ApiClientABC
 PaginatorABC: bioetl.domain.clients.base.contracts.PaginatorABC
 RateLimiterABC: bioetl.domain.clients.base.contracts.RateLimiterABC
 RetryPolicyABC: bioetl.domain.clients.base.contracts.RetryPolicyABC

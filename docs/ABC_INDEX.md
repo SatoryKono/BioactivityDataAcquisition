@@ -10,6 +10,9 @@
 - `ResponseParserABC` — `bioetl.domain.clients.base.contracts.ResponseParserABC`
   - Разбор ответов API.
 
+- `ApiClientABC` — `bioetl.domain.clients.base.contracts.ApiClientABC`
+  - Transport-agnostic API client abstraction with lifecycle hooks.
+
 - `PaginatorABC` — `bioetl.domain.clients.base.contracts.PaginatorABC`
   - Стратегия пагинации.
 
