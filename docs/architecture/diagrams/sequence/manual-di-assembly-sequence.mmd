@@ -13,19 +13,21 @@ sequenceDiagram
     autonumber
     participant CLI as CLI command
     participant Orchestrator as PipelineOrchestrator
+    participant Wiring as Wiring/Interfaces
+    participant Factory as ContainerFactory
+    participant Registry as ABCRegistryResolver
     participant Container as PipelineContainer
-    participant Registry as ProviderRegistryLoader
-    participant Factories as Provider factories (clients, writers, hooks)
     participant Pipeline as Pipeline class
 
     CLI->>Orchestrator: run(pipeline_name, cli_args)
-    Orchestrator->>Container: build_pipeline_dependencies(config)
-    Container->>Registry: load_provider_registry(profile)
-    Registry-->>Container: ProviderRegistryABC
-    Container->>Factories: resolve default_xxx_factory()
-    Factories-->>Container: concrete implementations (ExtractionServiceImpl, OutputWriter, Hooks...)
-    Container->>Container: compose Dependencies dataclass
-    Container-->>Orchestrator: Dependencies
-    Orchestrator->>Pipeline: instantiate(pipeline_cls, config, deps)
+    Orchestrator->>Wiring: build_default_container(config)
+    Wiring->>Factory: build_default_container(config)
+    Factory->>Registry: resolve_default_factory("LoggingPortABC")
+    Registry-->>Factory: UnifiedLogger factory
+    Factory->>Registry: resolve_default_factory("OutputWriterABC")
+    Registry-->>Factory: OutputWriter factory
+    Factory->>Container: instantiate(logger, output_writer, ...)
+    Container-->>Orchestrator: ready container
+    Orchestrator->>Pipeline: instantiate(pipeline_cls, config, container)
     Orchestrator-->>CLI: ready Pipeline -> run()
 

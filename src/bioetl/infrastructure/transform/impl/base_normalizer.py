@@ -242,6 +242,7 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
         value: Any,
         normalizer: Callable[[Any], Any],
         field_name: str,
+        **kwargs: Any,
     ) -> tuple[bool, Any]:
         try:
             result = normalizer(value)

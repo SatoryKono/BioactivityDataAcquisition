@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Any, Callable
 
 from pydantic import BaseModel, ConfigDict
-from typing_extensions import Protocol
 
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 
@@ -17,14 +17,19 @@ class RawRecord(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class RecordSource(Protocol):
-    """Protocol for record sources returning record batches."""
+class RecordSourceABC(ABC):
+    """Abstract base class for record sources returning record batches."""
 
+    @abstractmethod
     def iter_records(self) -> Iterable[list[RawRecord]]:
         """Return iterable over raw record batches as lists of mappings."""
 
 
-class InMemoryRecordSource(RecordSource):
+# Alias for backward compatibility during migration
+RecordSource = RecordSourceABC
+
+
+class InMemoryRecordSource(RecordSourceABC):
     """Simple record source backed by an in-memory list."""
 
     def __init__(self, records: list[RawRecord], chunk_size: int | None = None):
@@ -41,7 +46,7 @@ class InMemoryRecordSource(RecordSource):
             yield self._records[start : start + self._chunk_size]
 
 
-class ApiRecordSource(RecordSource):
+class ApiRecordSource(RecordSourceABC):
     """Record source that fetches data from an extraction service."""
 
     def __init__(

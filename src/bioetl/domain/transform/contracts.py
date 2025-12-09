@@ -115,11 +115,14 @@ class NormalizationServiceABC(ABC):
 
     @abstractmethod
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Нормализует поля DataFrame согласно конфигурации."""
+        """
+        Нормализует поля DataFrame согласно конфигурации.
+        Deprecated: use apply_normalize_dataframe instead.
+        """
 
-    @abstractmethod
     def apply_normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Алиас для apply_normalize_fields для обратной совместимости."""
+        """Нормализует поля DataFrame (alias to apply_normalize_fields)."""
+        return self.apply_normalize_fields(df)
 
     @abstractmethod
     def apply_normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
