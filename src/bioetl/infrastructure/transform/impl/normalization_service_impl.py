@@ -8,15 +8,11 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
-from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationServiceImpl,
 )
-from bioetl.infrastructure.transform.impl.serializer import (
-    serialize_dict,
-    serialize_list,
-)
+from bioetl.infrastructure.transform.impl.serializer import serialize_list
 
 
 class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationServiceImpl):
@@ -29,16 +25,6 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
 
     def __init__(self, config: NormalizationConfigProviderProtocol):
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
-
-    def _iter_fields(self) -> list[dict[str, Any]]:
-        """Safely iterate over field configs from various config shapes."""
-
-        if hasattr(self._config, "get_fields"):
-            fields = cast(list[dict[str, Any]], self._config.get_fields())
-            return fields
-        if hasattr(self._config, "fields"):
-            return list(cast(list[dict[str, Any]], self._config.fields))
-        raise AttributeError("Normalization config must expose fields")
 
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
@@ -183,56 +169,6 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
             )
 
         return cast(pd.Series, series.apply(_normalize_value_from_series))
-
-    def _normalize_container_item(
-        self, item: Any, normalizer: Callable[[Any], Any]
-    ) -> Any:
-        """Normalize nested container items preserving structure."""
-        if isinstance(item, dict):
-            normalized_dict = normalize_record(item, value_normalizer=normalizer)
-            return normalized_dict if normalized_dict is not None else {}
-        return normalizer(item)
-
-    def _process_list(
-        self,
-        val: Any,
-        norm: Callable[[Any], Any],
-        field_name: str,
-        *,
-        serialize_with_value_normalizer: bool = False,
-    ) -> Any:
-        """Normalize list values and serialize deterministically."""
-        try:
-
-            def _smart_normalizer(item: Any) -> Any:
-                return self._normalize_container_item(item, norm)
-
-            normalized_list = normalize_array(
-                list(val), item_normalizer=_smart_normalizer
-            )
-        except ValueError as exc:
-            raise ValueError(
-                f"Ошибка нормализации списка в поле '{field_name}': {exc}"
-            ) from exc
-        if not normalized_list:
-            return pd.NA
-        return serialize_list(
-            normalized_list,
-            value_normalizer=norm if serialize_with_value_normalizer else None,
-        )
-
-    def _process_dict(
-        self, val: Any, norm: Callable[[Any], Any], field_name: str
-    ) -> Any:
-        try:
-            normalized_dict = normalize_record(val, value_normalizer=norm)
-        except ValueError as exc:
-            raise ValueError(
-                f"Ошибка нормализации записи в поле '{field_name}': {exc}"
-            ) from exc
-        if normalized_dict is None:
-            return pd.NA
-        return serialize_dict(normalized_dict)
 
 
 __all__ = ["NormalizationServiceImpl"]
