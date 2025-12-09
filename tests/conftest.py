@@ -49,13 +49,7 @@ sys.path.insert(0, src_str)
 
 def pytest_configure(config):
     """Apply patches for removed modules and Hypothesis compatibility."""
-    # Patch provider_registry module (was removed, use stub for tests)
-    import sys
-
-    from tests.fixtures import provider_registry_stub
-
-    sys.modules["bioetl.domain.provider_registry"] = provider_registry_stub
-
+    
     # Apply Hypothesis compatibility patch for Python 3.13
     try:
         # Import and patch before Hypothesis is used

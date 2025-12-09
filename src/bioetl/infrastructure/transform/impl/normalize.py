@@ -11,7 +11,8 @@ from bioetl.domain.transform.normalizers import (
     normalize_pmid,
     normalize_uniprot,
 )
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.domain.transform.normalizers.registry import get_normalizer
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     DefaultNormalizationTransformerImpl as DefaultNormImpl,
 )
 
@@ -82,6 +83,7 @@ __all__ = [
     "normalize_pubmed_id",
     "normalize_pubchem_cid",
     "normalize_uniprot_id",
+    "get_normalizer",
     "DefaultNormalizationTransformerImpl",
     "NormalizationTransformer",
     "NormalizationService",
