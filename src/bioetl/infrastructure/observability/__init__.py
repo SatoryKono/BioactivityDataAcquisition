@@ -10,6 +10,7 @@ from bioetl.infrastructure.observability.factories import (
     default_metrics_port,
     default_tracing_port,
 )
+from bioetl.infrastructure.observability.tracing import with_tracing_span
 
 __all__ = [
     "StructuredLoggerImpl",
@@ -18,4 +19,5 @@ __all__ = [
     "default_logging_port",
     "default_metrics_port",
     "default_tracing_port",
+    "with_tracing_span",
 ]

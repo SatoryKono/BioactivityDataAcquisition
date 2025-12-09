@@ -15,13 +15,18 @@ from bioetl.domain.clients.base.contracts import (
     ResponseParserABC,
 )
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.observability import LoggingPortABC, MetricsPortABC, TracingPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.errors import (
     ApiUnexpectedStatusError,
     wrap_http_errors,
 )
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import (
+    default_logging_port,
+    default_metrics_port,
+    default_tracing_port,
+)
+from bioetl.infrastructure.observability.tracing import with_tracing_span
 
 
 class ChemblHttpClientImpl(DataClientABC):
@@ -39,12 +44,16 @@ class ChemblHttpClientImpl(DataClientABC):
         *,
         provider: str = "chembl",
         logger: LoggingPortABC | None = None,
+        metrics: MetricsPortABC | None = None,
+        tracer: TracingPortABC | None = None,
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
         self.client = client
         self.logger = logger or default_logging_port()
+        self.metrics = metrics or default_metrics_port()
+        self.tracer = tracer or default_tracing_port()
         if client is not None:
             self.http = client
         else:
@@ -96,42 +105,48 @@ class ChemblHttpClientImpl(DataClientABC):
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
-        with wrap_http_errors(
-            provider=self.provider, endpoint=url, logger=self.logger
-        ) as context:
-            start = time.monotonic()
-            response = self.http.request("GET", url)
-            latency = time.monotonic() - start
-            raw_status = getattr(response, "status_code", None)
-            status_code = raw_status if isinstance(raw_status, int) else None
-            context["status_code"] = status_code
-            log_level = (
-                self.logger.error
-                if status_code is not None and status_code >= 400
-                else self.logger.info
-            )
-            log_level(
-                "http_request_completed",
-                provider=self.provider,
-                method="GET",
-                url=url,
-                status_code=status_code,
-                latency_sec=latency,
-            )
-            if status_code is not None and status_code >= 400:
-                self.logger.error(
-                    "api_unexpected_status",
+        with with_tracing_span(
+            "execute_request",
+            logger=self.logger,
+            tracer=self.tracer,
+            metrics=self.metrics,
+        ):
+            with wrap_http_errors(
+                provider=self.provider, endpoint=url, logger=self.logger
+            ) as context:
+                start = time.monotonic()
+                response = self.http.request("GET", url)
+                latency = time.monotonic() - start
+                raw_status = getattr(response, "status_code", None)
+                status_code = raw_status if isinstance(raw_status, int) else None
+                context["status_code"] = status_code
+                log_level = (
+                    self.logger.error
+                    if status_code is not None and status_code >= 400
+                    else self.logger.info
+                )
+                log_level(
+                    "http_request_completed",
                     provider=self.provider,
+                    method="GET",
                     url=url,
                     status_code=status_code,
+                    latency_sec=latency,
                 )
-                raise ApiUnexpectedStatusError(
-                    f"Unexpected status code: {status_code}",
-                    provider=self.provider,
-                    endpoint=url,
-                    status_code=status_code,
-                )
-            return response.json()
+                if status_code is not None and status_code >= 400:
+                    self.logger.error(
+                        "api_unexpected_status",
+                        provider=self.provider,
+                        url=url,
+                        status_code=status_code,
+                    )
+                    raise ApiUnexpectedStatusError(
+                        f"Unexpected status code: {status_code}",
+                        provider=self.provider,
+                        endpoint=url,
+                        status_code=status_code,
+                    )
+                return response.json()
 
     def _build_request_url(self, endpoint: str, filters: dict[str, Any]) -> str:
         """

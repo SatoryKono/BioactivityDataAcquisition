@@ -5,6 +5,7 @@ from prometheus_client import Counter, Histogram
 __all__ = [
     "STAGE_DURATION_SECONDS",
     "STAGE_TOTAL",
+    "STAGE_SPAN_DURATION_SECONDS",
     "HTTP_REQUESTS_TOTAL",
     "HTTP_LATENCY_SECONDS",
     "CLIENT_REQUEST_TOTAL",
@@ -17,6 +18,12 @@ STAGE_DURATION_SECONDS = Histogram(
     "bioetl_stage_duration_seconds",
     "Duration of pipeline stages in seconds.",
     ["pipeline", "provider", "entity", "stage", "outcome"],
+)
+
+STAGE_SPAN_DURATION_SECONDS = Histogram(
+    "stage_duration_seconds",
+    "Duration of traced spans in seconds.",
+    ["stage"],
 )
 
 STAGE_TOTAL = Counter(

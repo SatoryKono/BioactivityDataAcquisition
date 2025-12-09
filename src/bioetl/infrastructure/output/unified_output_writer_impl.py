@@ -13,13 +13,18 @@ from bioetl.domain.clients.base.output.contracts import (
     WriterABC,
     WriteResult,
 )
-from bioetl.domain.observability import MetricsPortABC
+from bioetl.domain.observability import LoggingPortABC, MetricsPortABC, TracingPortABC
 from bioetl.domain.configs import DeterminismConfig, QcConfig
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.infrastructure.output.metadata import build_run_metadata
+from bioetl.infrastructure.observability.factories import (
+    default_logging_port,
+    default_tracing_port,
+)
+from bioetl.infrastructure.observability.tracing import with_tracing_span
 
 
 class UnifiedOutputWriterImpl(OutputWriterABC):
@@ -41,6 +46,8 @@ class UnifiedOutputWriterImpl(OutputWriterABC):
         qc_config: QcConfig | None = None,
         atomic_op: AtomicFileOperation | None = None,
         metrics: MetricsPortABC | None = None,
+        logger: LoggingPortABC | None = None,
+        tracer: TracingPortABC | None = None,
     ) -> None:
         self._writer = writer
         self._metadata_writer = metadata_writer
@@ -49,6 +56,8 @@ class UnifiedOutputWriterImpl(OutputWriterABC):
         self._qc_config = qc_config or QcConfig()
         self._atomic_op = atomic_op or AtomicFileOperation()
         self._metrics = metrics
+        self._logger = logger or default_logging_port()
+        self._tracer = tracer or default_tracing_port()
 
     def write_result(
         self,
@@ -60,62 +69,73 @@ class UnifiedOutputWriterImpl(OutputWriterABC):
         column_order: list[str] | None = None,
     ) -> WriteResult:
         """Основной метод записи."""
-        try:
-            output_path.mkdir(parents=True, exist_ok=True)
+        with with_tracing_span(
+            "write_result",
+            logger=self._logger,
+            tracer=self._tracer,
+            metrics=self._metrics,
+            trace_id=getattr(run_context, "run_id", None),
+        ):
+            try:
+                output_path.mkdir(parents=True, exist_ok=True)
 
-            # 1. Валидация колонок (Check if strictly matches order if provided)
-            # Note: Actual schema validation happens in PipelineBase.validate()
-            # Here we ensure output structure and determinism.
-            df_prepared = apply_column_order(df, column_order)
+                # 1. Валидация колонок (Check if strictly matches order if provided)
+                # Note: Actual schema validation happens in PipelineBase.validate()
+                # Here we ensure output structure and determinism.
+                df_prepared = apply_column_order(df, column_order)
 
-            # 2. Сортировка (Determinism)
-            df_prepared = self._stable_sort(df_prepared, run_context, column_order)
-
-            # 3. Атомарная запись
-            data_path = output_path / f"{entity_name}.csv"
-
-            # Wrapper to capture inner write result
-            inner_result: WriteResult | None = None
-
-            def _write_wrapper(path: Path) -> None:
-                """Write dataset to the provided path via underlying writer."""
-                nonlocal inner_result
-                inner_result = self._writer.write(
-                    df_prepared, path, column_order=column_order
+                # 2. Сортировка (Determinism)
+                df_prepared = self._stable_sort(
+                    df_prepared, run_context, column_order
                 )
 
-            self._atomic_op.write_atomic(data_path, _write_wrapper)
+                # 3. Атомарная запись
+                data_path = output_path / f"{entity_name}.csv"
 
-            if inner_result is None:
-                raise RuntimeError("Inner writer did not return result")
+                # Wrapper to capture inner write result
+                inner_result: WriteResult | None = None
 
-            # 4. Вычисление checksum (после записи)
-            checksum = compute_file_sha256(data_path)
+                def _write_wrapper(path: Path) -> None:
+                    """Write dataset to the provided path via underlying writer."""
+                    nonlocal inner_result
+                    inner_result = self._writer.write(
+                        df_prepared, path, column_order=column_order
+                    )
 
-            final_result = WriteResult(
-                path=data_path,
-                row_count=inner_result.row_count,
-                duration_sec=inner_result.duration_sec,
-                checksum=checksum,
-            )
+                self._atomic_op.write_atomic(data_path, _write_wrapper)
 
-            qc_artifacts = self._generate_qc_artifacts(df_prepared, output_path)
-            qc_checksums = {path.name: compute_file_sha256(path) for path in qc_artifacts}
+                if inner_result is None:
+                    raise RuntimeError("Inner writer did not return result")
 
-            # 5. Запись метаданных
-            meta = build_run_metadata(
-                run_context,
-                final_result,
-                qc_artifacts=qc_artifacts,
-                qc_checksums=qc_checksums,
-                qc_config=self._qc_config,
-            )
-            self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
+                # 4. Вычисление checksum (после записи)
+                checksum = compute_file_sha256(data_path)
 
-            return final_result
-        except Exception as exc:
-            self._record_write_error(entity_name, exc)
-            raise
+                final_result = WriteResult(
+                    path=data_path,
+                    row_count=inner_result.row_count,
+                    duration_sec=inner_result.duration_sec,
+                    checksum=checksum,
+                )
+
+                qc_artifacts = self._generate_qc_artifacts(df_prepared, output_path)
+                qc_checksums = {
+                    path.name: compute_file_sha256(path) for path in qc_artifacts
+                }
+
+                # 5. Запись метаданных
+                meta = build_run_metadata(
+                    run_context,
+                    final_result,
+                    qc_artifacts=qc_artifacts,
+                    qc_checksums=qc_checksums,
+                    qc_config=self._qc_config,
+                )
+                self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
+
+                return final_result
+            except Exception as exc:
+                self._record_write_error(entity_name, exc)
+                raise
 
     def _stable_sort(
         self,

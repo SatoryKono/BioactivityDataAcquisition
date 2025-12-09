@@ -7,10 +7,19 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.observability.contracts import LoggingPortABC
+from bioetl.domain.observability.contracts import (
+    LoggingPortABC,
+    MetricsPortABC,
+    TracingPortABC,
+)
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import (
+    default_logging_port,
+    default_metrics_port,
+    default_tracing_port,
+)
+from bioetl.infrastructure.observability.tracing import with_tracing_span
 from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 
 if TYPE_CHECKING:
@@ -29,11 +38,15 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         batch_size: int = 1000,
         logger: LoggingPortABC | None = None,
         field_provider: DefaultFieldProviderABC | None = None,
+        metrics: MetricsPortABC | None = None,
+        tracer: TracingPortABC | None = None,
     ) -> None:
         self.client = client
         self.batch_size = batch_size
         self.logger = logger or default_logging_port()
         self.field_provider = field_provider
+        self.metrics = metrics or default_metrics_port()
+        self.tracer = tracer or default_tracing_port()
         self._version_cache: str | None = None
 
     def get_release_version(self) -> str:
@@ -171,15 +184,21 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         Returns:
             list[dict[str, Any]]: List of parsed records.
         """
-        if hasattr(self.client, "response_parser"):
-            parser = getattr(self.client, "response_parser")
-            return parser.parse_response(raw_response)
+        with with_tracing_span(
+            "parse_response",
+            logger=self.logger,
+            tracer=self.tracer,
+            metrics=self.metrics,
+        ):
+            if hasattr(self.client, "response_parser"):
+                parser = getattr(self.client, "response_parser")
+                return parser.parse_response(raw_response)
 
-        # Fallback simple parsing
-        for value in raw_response.values():
-            if isinstance(value, list):
-                return [ActivityRawModel.model_validate(item) for item in value]
-        return []
+            # Fallback simple parsing
+            for value in raw_response.values():
+                if isinstance(value, list):
+                    return [ActivityRawModel.model_validate(item) for item in value]
+            return []
 
     def serialize_records(
         self, entity: str, records: list[ActivityRawModel]
@@ -194,4 +213,10 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         Returns:
             list[dict[str, Any]]: Serialized records.
         """
-        return records
+        with with_tracing_span(
+            "serialize_records",
+            logger=self.logger,
+            tracer=self.tracer,
+            metrics=self.metrics,
+        ):
+            return records

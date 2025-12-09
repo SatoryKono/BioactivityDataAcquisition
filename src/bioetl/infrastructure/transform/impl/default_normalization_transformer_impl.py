@@ -8,6 +8,7 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
+from bioetl.infrastructure.observability.tracing import with_tracing_span
 from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationServiceImpl,
@@ -116,18 +117,24 @@ class DefaultNormalizationTransformerImpl(
 
     def apply_normalize_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize configured columns in the provided dataframe."""
-        normalized_df = df.copy()
+        with with_tracing_span(
+            "normalize_dataframe",
+            logger=self._logger,
+            tracer=self._tracer,
+            metrics=self._metrics,
+        ):
+            normalized_df = df.copy()
 
-        for field_cfg in self._iter_fields():
-            name = field_cfg.get("name")
-            if not name or name not in normalized_df.columns:
-                continue
+            for field_cfg in self._iter_fields():
+                name = field_cfg.get("name")
+                if not name or name not in normalized_df.columns:
+                    continue
 
-            normalized_df[name] = self.apply_normalize_series(
-                normalized_df[name], cast(dict[str, Any], field_cfg)
-            )
+                normalized_df[name] = self.apply_normalize_series(
+                    normalized_df[name], cast(dict[str, Any], field_cfg)
+                )
 
-        return self.ensure_numeric_columns(normalized_df)
+            return self.ensure_numeric_columns(normalized_df)
 
     def apply_normalize_batch(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize a batch dataframe and coerce numeric columns."""

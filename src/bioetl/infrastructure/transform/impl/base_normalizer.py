@@ -12,7 +12,13 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
 )
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
+from bioetl.interfaces.observability import LoggingPortABC, MetricsPortABC, TracingPortABC
 from bioetl.infrastructure.transform.impl.serializer import serialize_nested
+from bioetl.infrastructure.observability.factories import (
+    default_logging_port,
+    default_metrics_port,
+    default_tracing_port,
+)
 
 
 class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
@@ -24,12 +30,21 @@ class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
     }
 
     def __init__(
-        self, config: NormalizationConfigProviderProtocol, empty_value: Any = None
+        self,
+        config: NormalizationConfigProviderProtocol,
+        empty_value: Any = None,
+        *,
+        logger: LoggingPortABC | None = None,
+        metrics: MetricsPortABC | None = None,
+        tracer: TracingPortABC | None = None,
     ):
         self._config = config
         self._empty_value = empty_value
         mode = getattr(config, "serialization_mode", "json")
         self._serialization_mode = mode if mode in {"json", "flat", "pipe"} else "json"
+        self._logger = logger or default_logging_port()
+        self._metrics = metrics or default_metrics_port()
+        self._tracer = tracer or default_tracing_port()
 
     def _iter_fields(self) -> list[dict[str, Any]]:
         """Return field configs from provider, supporting legacy shapes."""

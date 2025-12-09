@@ -79,6 +79,7 @@ class PrometheusMetricsPortImpl(PipelineMetricsPortABC):
         }
         self._histograms: dict[str, Any] = {
             "client_request_duration_seconds": metrics.CLIENT_REQUEST_DURATION_SECONDS,
+            "stage_duration_seconds": metrics.STAGE_SPAN_DURATION_SECONDS,
         }
 
     def inc_counter(self, name: str, labels: dict[str, str]) -> None:
