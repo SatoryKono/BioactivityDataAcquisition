@@ -12,6 +12,9 @@ from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.unified_output_writer_impl import (
     UnifiedOutputWriterImpl,
 )
+from bioetl.infrastructure.output.converters.factories import (
+    default_output_frame_converter,
+)
 
 
 @pytest.fixture
@@ -292,3 +295,81 @@ def test_write_result_records_metric_on_failure(
     metrics.inc_counter.assert_called_once_with(
         "output_write_errors_total", {"entity": "entity", "error_type": "ValueError"}
     )
+
+
+def test_unified_writer_applies_converter_rename(
+    mock_metadata_writer_fixture,
+    mock_quality_reporter,
+    mock_config_fixture,
+    mock_atomic_op,
+    run_context_factory,
+    tmp_path,
+):
+    writer = MagicMock()
+    captured_df: pd.DataFrame | None = None
+
+    def capture_df(df_to_write, path, **kwargs):
+        nonlocal captured_df
+        captured_df = df_to_write.copy()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+        return WriteResult(path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0)
+
+    writer.write.side_effect = capture_df
+
+    converter = default_output_frame_converter("rename_columns")
+    writer_impl = UnifiedOutputWriterImpl(
+        writer,
+        mock_metadata_writer_fixture,
+        mock_quality_reporter,
+        mock_config_fixture,
+        atomic_op=mock_atomic_op,
+        converter=converter,
+    )
+
+    df = pd.DataFrame({"a_col": [1], "b_col": [2]})
+    with patch(
+        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
+        return_value="chk",
+    ):
+        writer_impl.write_result(df, tmp_path / "out", "entity", run_context_factory(), column_order=["a_col", "b_col"])
+
+    assert captured_df is not None
+    assert list(captured_df.columns) == ["a-col", "b-col"]
+
+
+def test_unified_writer_applies_converter_dropna(
+    mock_metadata_writer_fixture,
+    mock_quality_reporter,
+    mock_config_fixture,
+    mock_atomic_op,
+    run_context_factory,
+    tmp_path,
+):
+    writer = MagicMock()
+
+    def create_file(df_to_write, path, **kwargs):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+        return WriteResult(path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0)
+
+    writer.write.side_effect = create_file
+
+    converter = default_output_frame_converter("dropna")
+    writer_impl = UnifiedOutputWriterImpl(
+        writer,
+        mock_metadata_writer_fixture,
+        mock_quality_reporter,
+        mock_config_fixture,
+        atomic_op=mock_atomic_op,
+        converter=converter,
+    )
+
+    df = pd.DataFrame({"a": [None], "b": [None]})
+    with patch(
+        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
+        return_value="chk",
+    ):
+        result = writer_impl.write_result(df, tmp_path / "out", "entity", run_context_factory(), column_order=["a", "b"])
+
+    assert result.row_count == 0

@@ -41,7 +41,7 @@ def test_default_chembl_client_success(source_config):
     # Check that parameters propagated to request_builder
     assert client.request_builder.base_url == "https://example.com"
     assert client.request_builder.max_url_length == 1000
-    assert client.rate_limiter.rate == 5.0
+    assert client.rate_limiter.rate == 2.5
 
 
 def test_default_chembl_client_overrides(source_config):

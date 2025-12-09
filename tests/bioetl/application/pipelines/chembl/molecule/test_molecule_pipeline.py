@@ -17,6 +17,7 @@ def pipeline():  # pylint: disable=redefined-outer-name
     config.provider = "chembl"
     config.entity_name = "molecule"
     config.primary_key = "molecule_chembl_id"
+    config.serialization_mode = "pipe"
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []

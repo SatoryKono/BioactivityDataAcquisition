@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
     ClientConfig,
@@ -78,9 +78,15 @@ def mock_config(source_config):
 @pytest.fixture
 def mock_extraction_service():
     service = MagicMock()
-    service.extract_all.return_value = pd.DataFrame({"activity_id": [1, 2, 3]})
-    service.iter_extract.return_value = iter([pd.DataFrame({"activity_id": [1, 2, 3]})])
-    service.request_batch.return_value = {"activities": [{"activity_id": 1}]}
+    service.extract_all.return_value = pd.DataFrame(
+        {"activity_id": [1, 2, 3], "standard_flag": [1, 1, 1]}
+    )
+    service.iter_extract.return_value = iter(
+        [pd.DataFrame({"activity_id": [1, 2, 3], "standard_flag": [1, 1, 1]})]
+    )
+    service.request_batch.return_value = {
+        "activities": [{"activity_id": 1, "standard_flag": 1}]
+    }
     return service
 
 

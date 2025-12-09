@@ -60,7 +60,9 @@ class MetricsPortABC(ABC):
         """Increment a named counter with provided labels."""
 
     @abstractmethod
-    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None:
+    def observe_histogram(
+        self, name: str, value: float, labels: dict[str, str]
+    ) -> None:
         """Observe a numeric value for a named histogram metric."""
 
 

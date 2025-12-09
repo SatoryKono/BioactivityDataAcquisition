@@ -10,7 +10,6 @@ from structlog.stdlib import BoundLogger
 from bioetl.infrastructure.observability import metrics
 from bioetl.interfaces.observability import (
     LoggingPortABC,
-    MetricsPortABC,
     PipelineMetricsPortABC,
     TracingPortABC,
 )
@@ -89,7 +88,9 @@ class PrometheusMetricsPortImpl(PipelineMetricsPortABC):
             raise KeyError(f"Unknown counter metric '{name}'")
         counter.labels(**labels).inc()
 
-    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None:
+    def observe_histogram(
+        self, name: str, value: float, labels: dict[str, str]
+    ) -> None:
         """Record observation for histogram by name."""
 
         histogram = self._histograms.get(name)
@@ -107,6 +108,7 @@ class PrometheusMetricsPortImpl(PipelineMetricsPortABC):
         outcome: str,
         duration_sec: float,
     ) -> None:
+        """Update stage duration histogram."""
         metrics.STAGE_DURATION_SECONDS.labels(
             pipeline=pipeline,
             provider=provider,
@@ -124,6 +126,7 @@ class PrometheusMetricsPortImpl(PipelineMetricsPortABC):
         stage: str,
         outcome: str,
     ) -> None:
+        """Increment stage execution counter."""
         metrics.STAGE_TOTAL.labels(
             pipeline=pipeline,
             provider=provider,

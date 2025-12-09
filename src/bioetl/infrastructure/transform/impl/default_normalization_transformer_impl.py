@@ -8,11 +8,11 @@ from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
     NormalizationServiceABC,
 )
+from bioetl.domain.transform.serializers import serialize_nested
 from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.base_normalizer import (
     BaseNormalizationServiceImpl,
 )
-from bioetl.infrastructure.transform.impl.serializer import serialize_nested
 
 
 class DefaultNormalizationTransformerImpl(

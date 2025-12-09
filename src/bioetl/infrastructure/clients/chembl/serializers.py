@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, MutableMapping, Set
 
-from bioetl.infrastructure.transform.impl.serializer import serialize_nested
+from bioetl.domain.transform.serializers import serialize_nested
 
 # Container fields that should not be flattened; they are handled later by normalizers.
 DEFAULT_BYPASS_FIELDS: Set[str] = {

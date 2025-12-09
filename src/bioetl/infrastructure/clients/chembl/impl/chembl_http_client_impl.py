@@ -39,12 +39,15 @@ class ChemblHttpClientImpl(DataClientABC):
         *,
         provider: str = "chembl",
         logger: LoggingPortABC | None = None,
+        fallbacks: dict[str, list[str]] | None = None,
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
         self.client = client
         self.logger = logger or default_logging_port()
+        self._fallbacks = fallbacks or {}
+        self._last_endpoint_used: str | None = None
         if client is not None:
             self.http = client
         else:
@@ -90,10 +93,40 @@ class ChemblHttpClientImpl(DataClientABC):
             self.client.close()
 
     def fetch(self, entity: str, **filters: Any) -> Any:
-        """Request specific entity endpoint with provided filters."""
-        endpoint = self._resolve_endpoint(entity)
-        url = self._build_request_url(endpoint, filters)
-        return self._execute_request(url)
+        """
+        Request specific entity endpoint with provided filters with fallback support.
+        """
+        primary = self._resolve_endpoint(entity)
+        candidates = [primary]
+        extra = self._fallbacks.get(entity) or []
+        for e in extra:
+            if e and e not in candidates:
+                candidates.append(e)
+
+        attempt = 0
+        last_error: Exception | None = None
+        for endpoint in candidates:
+            attempt += 1
+            try:
+                url = self._build_request_url(endpoint, filters)
+                result = self._execute_request(url)
+                self._last_endpoint_used = endpoint
+                return result
+            except Exception as exc:
+                last_error = exc
+                self.logger.warning(
+                    "http_fallback_attempt",
+                    provider=self.provider,
+                    entity=entity,
+                    from_endpoint=primary if attempt == 1 else candidates[attempt - 2],
+                    to_endpoint=endpoint,
+                    attempt=attempt,
+                    error=str(exc),
+                )
+                continue
+        if last_error:
+            raise last_error
+        raise RuntimeError("No endpoint candidates configured")
 
     def _execute_request(self, url: str) -> dict[str, Any]:
         with wrap_http_errors(
@@ -188,3 +221,8 @@ class ChemblHttpClientImpl(DataClientABC):
         if entity not in aliases:
             raise ValueError(f"Unknown entity: {entity}")
         return aliases[entity]
+
+    # Optional accessor for metadata enrichment
+    def get_last_endpoint_used(self) -> str | None:
+        """Return the last endpoint used by the client."""
+        return self._last_endpoint_used

@@ -102,10 +102,7 @@ class UnifiedAPIClientImpl(ApiClientABC):
                     status_code=context["status_code"],
                     latency_sec=time.monotonic() - start,
                 )
-                if (
-                    context["status_code"] is not None
-                    and context["status_code"] >= 500
-                ):
+                if context["status_code"] is not None and context["status_code"] >= 500:
                     raise ApiUnexpectedStatusError(
                         f"Unexpected status code: {context['status_code']}",
                         provider=self.provider,

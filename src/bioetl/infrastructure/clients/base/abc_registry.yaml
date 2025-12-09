@@ -38,3 +38,4 @@ WriterABC: bioetl.domain.clients.base.output.contracts.WriterABC
 MetadataWriterABC: bioetl.domain.clients.base.output.contracts.MetadataWriterABC
 QualityReportABC: bioetl.domain.clients.base.output.contracts.QualityReportABC
 OutputWriterABC: bioetl.domain.clients.base.output.contracts.OutputWriterABC
+OutputFrameConverterABC: bioetl.domain.clients.base.output.contracts.OutputFrameConverterABC

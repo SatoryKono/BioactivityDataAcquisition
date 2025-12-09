@@ -40,6 +40,8 @@ class ChemblNormalizationServiceImpl(
             raw_data = raw.model_dump()
         elif isinstance(raw, pd.Series):
             raw_data = raw.to_dict()
+        elif isinstance(raw, dict):
+            raw_data = raw
         else:
             raw_data = cast(dict[str, Any], raw.model_dump())
 

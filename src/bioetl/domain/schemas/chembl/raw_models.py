@@ -4,15 +4,19 @@ from __future__ import annotations
 
 from typing import TypeAlias
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import ConfigDict, field_validator
 
 from bioetl.domain.record_source import RawRecord
 
 ScalarValue: TypeAlias = str | int | float | bool | None
-JsonValue: TypeAlias = ScalarValue | dict[str, ScalarValue | list[ScalarValue]] | list[
-    ScalarValue | dict[str, ScalarValue]
+JsonValue: TypeAlias = (
+    ScalarValue
+    | dict[str, ScalarValue | list[ScalarValue]]
+    | list[ScalarValue | dict[str, ScalarValue]]
+)
+JsonObject: TypeAlias = dict[
+    str, ScalarValue | list[ScalarValue] | dict[str, ScalarValue]
 ]
-JsonObject: TypeAlias = dict[str, ScalarValue | list[ScalarValue] | dict[str, ScalarValue]]
 
 
 class ActivityRawModel(RawRecord):

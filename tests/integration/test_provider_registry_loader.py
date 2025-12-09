@@ -8,8 +8,6 @@ from typing import Any, Callable
 import pytest
 
 from bioetl.domain.configs import DummyProviderConfig
-
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.interfaces.observability import LoggingPortABC
 

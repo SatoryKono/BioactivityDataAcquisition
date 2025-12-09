@@ -4,7 +4,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 from bioetl.domain.transform.normalizers.registry import CUSTOM_FIELD_NORMALIZERS
 from bioetl.infrastructure.transform.factories import default_normalization_service
 from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
@@ -36,14 +35,16 @@ class MockNormalizationConfig:
         self.custom_normalizers = custom_normalizers or {}
 
 
-class MockConfig(NormalizationConfigProviderProtocol):
+class MockConfig:
     def __init__(
         self,
         fields: list[dict[str, Any]],
         normalization: MockNormalizationConfig | None = None,
+        serialization_mode: str = "pipe",
     ):
         self._fields = fields
         self.normalization = normalization or MockNormalizationConfig()
+        self.serialization_mode = serialization_mode
 
     def get_fields(self) -> list[dict[str, Any]]:
         return self._fields

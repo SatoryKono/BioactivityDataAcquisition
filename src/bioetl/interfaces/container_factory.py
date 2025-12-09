@@ -64,6 +64,9 @@ def build_default_container(
         "QualityReportABC"
     )
     output_writer_factory = registry_loader.resolve_default_factory("OutputWriterABC")
+    frame_converter_factory = registry_loader.resolve_default_factory(
+        "OutputFrameConverterABC"
+    )
     hash_service_factory = registry_loader.resolve_default_factory("HashServiceABC")
 
     logger = logger_factory()
@@ -71,6 +74,9 @@ def build_default_container(
     metadata_writer = metadata_writer_factory()
     quality_reporter = quality_reporter_factory()
     metrics_port = _create_metrics_port()
+    converter_id = getattr(getattr(config, "output", SimpleNamespace()), "converter", None)
+    frame_converter = frame_converter_factory(converter_id)
+
     output_writer = output_writer_factory(
         config=config.determinism,
         qc_config=config.qc,
@@ -78,6 +84,7 @@ def build_default_container(
         metadata_writer=metadata_writer,
         quality_reporter=quality_reporter,
         metrics_port=metrics_port,
+        converter=frame_converter,
     )
     metadata_builder = _create_metadata_builder()
     validator_factory = _create_validator_factory()

@@ -10,7 +10,6 @@ import pytest
 
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
-    ProviderNotRegisteredError,
 )
 from bioetl.domain.providers import (
     ProviderComponents,

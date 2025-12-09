@@ -1,8 +1,7 @@
+from pydantic import ValidationError
 import pytest
 
-from pydantic import ValidationError
-
-from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )

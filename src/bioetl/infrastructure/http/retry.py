@@ -38,17 +38,19 @@ class ExponentialRetryPolicy(RetryPolicyABC):
 
         self._max_attempts = int(max_attempts)
         self._backoff_factor = float(backoff_factor)
-        self.retry_statuses = set(retry_statuses) if retry_statuses else set(
-            DEFAULT_RETRY_STATUSES
+        self.retry_statuses = (
+            set(retry_statuses) if retry_statuses else set(DEFAULT_RETRY_STATUSES)
         )
         self.retry_exceptions = retry_exceptions or DEFAULT_RETRY_EXCEPTIONS
 
     @property
     def max_attempts(self) -> int:
+        """Максимальное количество попыток."""
         return self._max_attempts
 
     @property
     def backoff_factor(self) -> float:
+        """Множитель задержки между попытками."""
         return self._backoff_factor
 
     def should_retry(self, exception: Exception, attempt: int) -> bool:

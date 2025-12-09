@@ -8,11 +8,11 @@ pytest.importorskip("hypothesis")
 from hypothesis import given, settings, strategies as st
 import pandas as pd
 
-from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
-from bioetl.infrastructure.transform.impl.serializer import (
+from bioetl.domain.transform.serializers import (
     serialize_dict,
     serialize_list,
 )
+from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
 
 
 @settings(suppress_health_check=[], database=None)

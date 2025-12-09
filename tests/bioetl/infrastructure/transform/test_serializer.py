@@ -1,6 +1,6 @@
 import pandas as pd
 
-from bioetl.infrastructure.transform.impl.serializer import serialize_nested
+from bioetl.domain.transform.serializers import serialize_nested
 
 
 def test_serialize_list_pipe_mode():

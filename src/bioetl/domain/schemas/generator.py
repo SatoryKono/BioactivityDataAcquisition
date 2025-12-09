@@ -27,7 +27,9 @@ def load_column_order_from_yaml(path: str | Path) -> list[str]:
     raw = Path(path).read_text(encoding="utf-8")
     loaded = yaml.safe_load(raw)
 
-    if not isinstance(loaded, list) or not all(isinstance(item, str) for item in loaded):
+    if not isinstance(loaded, list) or not all(
+        isinstance(item, str) for item in loaded
+    ):
         msg = "columns.yaml must contain a list of strings"
         raise ValueError(msg)
 

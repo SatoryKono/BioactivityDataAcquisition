@@ -57,6 +57,7 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
     config.entity_name = entity_name
     config.provider = "chembl"
     config.primary_key = id_col
+    config.serialization_mode = "pipe"
 
     pipeline = ChemblPipelineBase(
         config=config,

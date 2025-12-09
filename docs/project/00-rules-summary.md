@@ -6,6 +6,7 @@
 - Слои: domain, application, infrastructure, interfaces.
 - Пайплайны: `src/bioetl/application/pipelines/<provider>/<entity>/`.
 - Документация: kebab-case с NN- префиксом, синхронизирована с кодом; пайплайны описываются в `docs/application/pipelines/<provider>/<entity>/`.
+ - Инварианты: одна сущность → один публичный пайплайн; строгая последовательность `extract→transform→validate→export`.
 
 ## 2. Именование
 
@@ -13,6 +14,8 @@
 - Модули: `snake_case`.
 - Функции: `snake_case` + префикс (get, fetch, create, etc.).
 - Доки: `kebab-case`.
+ - Pipeline docs: `NN-<entity>-<provider>-<topic>.md`.
+ - Naming‑linter в CI, исключения — через `configs/naming_exceptions.yaml`.
 
 ## 3. Данные и Схемы
 
@@ -22,6 +25,7 @@
 - Валидация перед записью.
 - Детерминизм: сортировка, атомарная запись, чек-суммы.
 - `input_mode`/`input_path`/`csv_options` в конфиге ChEMBL выбирают источник данных (api|csv|id_only).
+ - UTC‑время, каноническая сериализация JSON; неизменяемые артефакты.
 
 ## 4. Код и Качество
 
@@ -30,9 +34,17 @@
 - Тесты: Unit (mock net), Integration, Golden. Coverage ≥85%.
 - Zero-sum class count при дублировании.
 - Чек-лист ревью пайплайнов: `docs/templates/pipeline-review-checklist.md`.
+ - Запрет `print()`, секреты не логируются; pre‑commit/CI блокируют нарушения.
 
 ## 5. API и Инфраструктура
 
 - `UnifiedAPIClient` для всех запросов (retry, backoff).
 - Секреты в ENV.
 - CLI на Typer.
+ - Rate limit и circuit breaker при необходимости; корректная пагинация и частичные сбои.
+ - Стандартизированные sidecar‑файлы `meta.yaml`, QC‑отчёты при экспорте.
+
+## 6. Документация
+
+- Автогенерируемые секции помечаются `<!-- generated -->` и не редактируются вручную.
+- Синхронизация docs ↔ код ↔ схемы обязательна; breaking changes фиксируются в `CHANGELOG.md` и ADR.

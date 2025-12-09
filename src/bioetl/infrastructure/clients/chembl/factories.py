@@ -13,7 +13,7 @@ from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
     build_rate_limiter,
 )
-from bioetl.infrastructure.clients.chembl.impl import (
+from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
@@ -81,6 +81,7 @@ def default_chembl_client(
         client=unified_client,
         provider="chembl",
         logger=logger,
+        fallbacks=source_config.fallbacks or {},
     )
 
 
@@ -117,9 +118,7 @@ def default_chembl_extraction_service(
         )
 
     if client is None:
-        client = default_chembl_client(
-            config, http_client=resolved_http, logger=logger
-        )
+        client = default_chembl_client(config, http_client=resolved_http, logger=logger)
 
     return ChemblExtractionServiceImpl(
         client=client,

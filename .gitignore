@@ -6,3 +6,4 @@ __pycache__/
 *.png
 /data/output
 /data/_output
+node_modules

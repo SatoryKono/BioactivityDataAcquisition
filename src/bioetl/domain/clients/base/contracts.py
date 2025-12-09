@@ -34,7 +34,9 @@ class ResponseParserABC(ABC, Generic[RecordT]):
         """Парсит сырой ответ в список типизированных записей."""
 
     @abstractmethod
-    def extract_metadata(self, raw_response: dict[str, object]) -> dict[str, int | str | None]:
+    def extract_metadata(
+        self, raw_response: dict[str, object]
+    ) -> dict[str, int | str | None]:
         """Извлекает метаданные из ответа (например, общее кол-во)."""
 
 

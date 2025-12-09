@@ -10,6 +10,7 @@ from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl impo
 
 @dataclass
 class _ConfigStub:
+    serialization_mode: str = "pipe"
     normalization: NormalizationConfig = field(
         default_factory=lambda: NormalizationConfig(
             case_sensitive_fields=["label"],

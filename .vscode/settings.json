@@ -19,5 +19,10 @@
     "workbench.editor.enablePreviewFromQuickOpen": false,
     "workbench.editor.enablePreviewFromCodeNavigation": false,
     "chatgpt.openOnStartup": false,
-    "chatgpt.commentCodeLensEnabled": false
+    "chatgpt.commentCodeLensEnabled": false,
+    "mermaid-editor.generate.quality": 5,
+    "mermaid-editor.generate.scale": 5,
+    "mermaid.startOnLoad": true,
+    "markdown-mermaid.lightModeTheme": "default",
+    "markdown-mermaid.darkModeTheme": "dark"
 }

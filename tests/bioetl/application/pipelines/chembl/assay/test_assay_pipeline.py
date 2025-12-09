@@ -17,6 +17,7 @@ def pipeline():
     config.provider = "chembl"
     config.entity_name = "assay"
     config.primary_key = "assay_chembl_id"
+    config.serialization_mode = "pipe"
     config.model_dump.return_value = {}
     config.pipeline = {}
     config.fields = []
