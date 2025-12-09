@@ -4,6 +4,7 @@ HTTP implementation of ChEMBL API port.
 
 from __future__ import annotations
 
+import time
 from types import SimpleNamespace
 from typing import Any, Iterator
 
@@ -15,7 +16,9 @@ from bioetl.domain.clients.base.contracts import (
 )
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.errors import ClientResponseError
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
+from bioetl.infrastructure.observability.factories import default_logging_port
 
 
 class ChemblApiPortImpl(DataClientABC):
@@ -32,11 +35,13 @@ class ChemblApiPortImpl(DataClientABC):
         client: ApiClientABC | None = None,
         *,
         provider: str = "chembl",
+        logger: LoggingPortABC | None = None,
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
         self.client = client
+        self.logger = logger or default_logging_port()
         if client is not None:
             self.http = client
         else:
@@ -88,10 +93,29 @@ class ChemblApiPortImpl(DataClientABC):
         return self._execute_request(url)
 
     def _execute_request(self, url: str) -> dict[str, Any]:
+        start = time.monotonic()
         response = self.http.request("GET", url)
+        latency = time.monotonic() - start
+        status_code = getattr(response, "status_code", None)
+        log_level = self.logger.error if status_code and status_code >= 400 else self.logger.info
+        log_level(
+            "http_request_completed",
+            provider=self.provider,
+            method="GET",
+            url=url,
+            status_code=status_code,
+            latency_sec=latency,
+        )
         try:
             return response.json()
         except ValueError as exc:
+            self.logger.error(
+                "response_deserialization_failed",
+                provider=self.provider,
+                url=url,
+                status_code=status_code,
+                error=str(exc),
+            )
             raise ClientResponseError(
                 provider=self.provider,
                 endpoint=url,
