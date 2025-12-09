@@ -9,6 +9,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError
 import yaml
 
+from bioetl.domain.configs import HttpClientSettings
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
@@ -53,6 +54,7 @@ class ProviderRegistryEntryModel(BaseModel):
     factory: str
     active: bool = True
     description: str | None = None
+    http_client: HttpClientSettings | None = None
 
 
 class ProviderRegistryConfig(BaseModel):
@@ -167,7 +169,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
             return None
 
         try:
-            definition = factory()
+            definition = factory(http_client=entry.http_client)
         except Exception as exc:  # pragma: no cover - defensive logging
             self._logger.error(
                 "Provider factory invocation failed",
