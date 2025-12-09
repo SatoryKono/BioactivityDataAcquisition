@@ -109,6 +109,7 @@ def test_execute_request_json_error(client):
 def test_rate_limiter_called(client):
     """Test rate limiter is called during iteration."""
     mock_response = Mock()
+    mock_response.status_code = 200
     mock_response.json.return_value = {}
     client.http.request.return_value = mock_response
 
@@ -122,6 +123,7 @@ def test_rate_limiter_called(client):
 def test_iter_pages_fetches_all_pages(client):
     """iter_pages should continue requesting while next link exists."""
     first_response = Mock()
+    first_response.status_code = 200
     first_response.json.return_value = {
         "page_meta": {
             "next": "/page2",
@@ -132,6 +134,7 @@ def test_iter_pages_fetches_all_pages(client):
         "results": [1],
     }
     second_response = Mock()
+    second_response.status_code = 200
     second_response.json.return_value = {
         "page_meta": {
             "next": None,
