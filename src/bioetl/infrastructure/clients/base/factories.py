@@ -19,7 +19,7 @@ from bioetl.domain.configs import (
     HttpClientDefaults,
     HttpClientSettings,
 )
-from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
@@ -165,6 +165,7 @@ def default_api_client(
     *,
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
+    metrics: MetricsPortABC | None = None,
 ) -> ApiClientABC:
     """Create the default API client without middleware indirection."""
 
@@ -173,6 +174,7 @@ def default_api_client(
         client_config=config,
         base_client=base_client,
         logger=logger,
+        metrics=metrics,
     )
 
 
@@ -184,6 +186,7 @@ def build_http_client(
     defaults: HttpClientDefaults | None = None,
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
+    metrics: MetricsPortABC | None = None,
 ) -> ApiClientABC:
     """Construct HTTP client using centralized defaults."""
 
@@ -197,6 +200,7 @@ def build_http_client(
         config=resolved_config,
         base_client=base_client,
         logger=logger,
+        metrics=metrics,
     )
 
 

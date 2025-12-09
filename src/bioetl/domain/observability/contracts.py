@@ -52,7 +52,19 @@ class TracingPortABC(ABC):
         """Inject tracing context into headers."""
 
 
-class PipelineMetricsPortABC(ABC):
+class MetricsPortABC(ABC):
+    """Port for recording generic metrics across infrastructure components."""
+
+    @abstractmethod
+    def inc_counter(self, name: str, labels: dict[str, str]) -> None:
+        """Increment a named counter with provided labels."""
+
+    @abstractmethod
+    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Observe a numeric value for a named histogram metric."""
+
+
+class PipelineMetricsPortABC(MetricsPortABC):
     """Port for recording pipeline stage metrics."""
 
     @abstractmethod
@@ -117,6 +129,7 @@ class ProgressReporterABC(ABC):
 __all__ = [
     "LoggingPortABC",
     "TracingPortABC",
+    "MetricsPortABC",
     "PipelineMetricsPortABC",
     "ProgressReporterABC",
 ]
