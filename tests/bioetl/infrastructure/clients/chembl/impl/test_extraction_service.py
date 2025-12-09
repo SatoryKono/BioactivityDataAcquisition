@@ -11,6 +11,9 @@ from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl im
 
 def test_attach_entity_fields_uses_provider():
     """Test that field provider is used to populate fields."""
+    import inspect
+    print(f"DEBUG: ChemblExtractionServiceImpl file: {inspect.getfile(ChemblExtractionServiceImpl)}")
+    
     client = Mock(spec=DataClientABC)
     client.provider = "chembl"
 
