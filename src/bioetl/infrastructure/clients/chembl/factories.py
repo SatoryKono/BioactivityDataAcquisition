@@ -8,6 +8,7 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
@@ -80,6 +81,7 @@ def default_chembl_extraction_service(
     *,
     client: DataClientABC | None = None,
     logger: LoggingPortABC | None = None,
+    field_provider: DefaultFieldProviderABC | None = None,
 ) -> ExtractionServiceABC:
     """
     Создает сервис экстракции ChEMBL.
@@ -94,15 +96,6 @@ def default_chembl_extraction_service(
     """
     if client is None:
         client = default_chembl_client(config, client_config=client_config)
-
-    # Local import to avoid circular dependency with application layer
-    # Infrastructure factory needs to provide application-level defaults
-    try:
-        from bioetl.application.providers import ApplicationFieldProvider
-
-        field_provider = ApplicationFieldProvider()
-    except ImportError:
-        field_provider = None
 
     return ChemblExtractionServiceImpl(
         client=client,
