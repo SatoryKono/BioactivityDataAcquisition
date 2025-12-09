@@ -4,4 +4,10 @@ providers:
     factory: register_chembl_provider
     active: true
     description: "ChEMBL data provider"
+    http_client:
+      base_url: https://www.ebi.ac.uk/chembl/api/data
+      timeout: 30
+      retries: 3
+      backoff: 2.0
+      rate_limit: 10.0
 

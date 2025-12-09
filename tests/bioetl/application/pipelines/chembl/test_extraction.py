@@ -11,6 +11,7 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
+from bioetl.infrastructure.clients.chembl.models import ActivityRawModel
 
 
 @pytest.fixture
@@ -50,14 +51,17 @@ def test_extract_all_single_page(service, mock_client):
     # Setup mock responses
     # iter_pages yields raw page data
     mock_client.iter_pages.return_value = [{"data": "page1"}]
-    mock_parser.parse_response.return_value = [{"id": 1}, {"id": 2}]
+    mock_parser.parse_response.return_value = [
+        ActivityRawModel(activity_id="1", standard_flag=True),
+        ActivityRawModel(activity_id="2", standard_flag=False),
+    ]
 
     # Act
     records = service.extract_all("activity")
 
     # Assert
     assert len(records) == 2
-    assert records[0]["id"] == 1
+    assert records[0].activity_id == "1"
     # Verify iter_pages called with URL from builder
     mock_client.iter_pages.assert_called_once_with("http://mock-url")
     # Verify builder used correct limit
@@ -75,7 +79,13 @@ def test_extract_all_pagination(service, mock_client):
 
     # Setup iteration
     mock_client.iter_pages.return_value = [{"data": "page1"}, {"data": "page2"}]
-    mock_parser.parse_response.side_effect = [[{"id": 1}, {"id": 2}], [{"id": 3}]]
+    mock_parser.parse_response.side_effect = [
+        [
+            ActivityRawModel(activity_id="1", standard_flag=True),
+            ActivityRawModel(activity_id="2", standard_flag=True),
+        ],
+        [ActivityRawModel(activity_id="3", standard_flag=True)],
+    ]
 
     # Act
     records = service.extract_all("activity")
@@ -95,17 +105,18 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
 
     mock_client.iter_pages.return_value = [{"data": "page"}]
     mock_parser.parse_response.return_value = [
-        {
-            "id": 1,
-            "activity_properties": [{"k1": "v1"}, {"k2": "v2"}],
-            "ligand_efficiency": {"le": 1.1},
-        }
+        ActivityRawModel(
+            activity_id="1",
+            standard_flag=True,
+            activity_properties=[{"k1": "v1"}, {"k2": "v2"}],
+            ligand_efficiency={"le": 1.1},
+        )
     ]
 
     records = service.extract_all("activity")
 
-    assert records[0]["activity_properties"] == [{"k1": "v1"}, {"k2": "v2"}]
-    assert records[0]["ligand_efficiency"] == {"le": 1.1}
+    assert records[0].activity_properties == [{"k1": "v1"}, {"k2": "v2"}]
+    assert records[0].ligand_efficiency == {"le": 1.1}
 
 
 def test_extract_all_limit(service, mock_client):
@@ -118,7 +129,9 @@ def test_extract_all_limit(service, mock_client):
 
     # Returns 10 items per call
     mock_client.iter_pages.return_value = [{"data": "page"}]
-    mock_parser.parse_response.return_value = [{"id": i} for i in range(10)]
+    mock_parser.parse_response.return_value = [
+        ActivityRawModel(activity_id=str(i), standard_flag=True) for i in range(10)
+    ]
 
     # Act - request limit 5 (which acts as chunk_size in current impl)
     records = service.extract_all("activity", limit=5)
@@ -160,8 +173,11 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
         {"data": "page2"},
     ]
     mock_parser.parse_response.side_effect = [
-        [{"id": 1}, {"id": 2}],
-        [{"id": 3}],
+        [
+            ActivityRawModel(activity_id="1", standard_flag=True),
+            ActivityRawModel(activity_id="2", standard_flag=True),
+        ],
+        [ActivityRawModel(activity_id="3", standard_flag=True)],
     ]
 
     # chunk_size=2 used for limit
