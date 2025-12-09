@@ -82,10 +82,7 @@ def test_mypy_strict_available() -> None:
     if result.returncode != 0:
         output = (result.stdout + "\n" + result.stderr).strip()
         if "No module named mypy" in output or "mypy: command not found" in output:
-            pytest.fail(
-                "mypy не найден. "
-                "Установите зависимость: pip install mypy"
-            )
+            pytest.fail("mypy не найден. " "Установите зависимость: pip install mypy")
         pytest.fail(
             "mypy завершился с кодом "
             f"{result.returncode}\n"
