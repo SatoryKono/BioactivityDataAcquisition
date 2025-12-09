@@ -13,7 +13,12 @@ from bioetl.domain.clients.base.contracts import (
     SecretProviderABC,
     SideInputProviderABC,
 )
-from bioetl.domain.configs import HTTP_CLIENT_DEFAULTS, ClientConfig, HttpClientDefaults
+from bioetl.domain.configs import (
+    HTTP_CLIENT_DEFAULTS,
+    ClientConfig,
+    HttpClientDefaults,
+    HttpClientSettings,
+)
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
@@ -43,8 +48,17 @@ def _resolve_http_defaults(
     *,
     client_config: ClientConfig | None = None,
     defaults: HttpClientDefaults | None = None,
+    http_settings: HttpClientSettings | None = None,
 ) -> HttpClientDefaults:
     """Return explicit defaults or fall back to canonical HTTP defaults."""
+
+    if http_settings is not None:
+        return HttpClientDefaults(
+            timeout=http_settings.timeout,
+            retries=http_settings.retries,
+            backoff_factor=http_settings.backoff,
+            rate_limit=http_settings.rate_limit,
+        )
 
     if client_config is None:
         return defaults or HTTP_CLIENT_DEFAULTS
@@ -60,9 +74,13 @@ def _resolve_http_defaults(
 def _ensure_client_config(
     *,
     client_config: ClientConfig | None = None,
+    http_settings: HttpClientSettings | None = None,
     defaults: HttpClientDefaults | None = None,
 ) -> ClientConfig:
     """Return provided client config or build one from defaults."""
+
+    if http_settings is not None:
+        return ClientConfig.from_http_settings(http_settings, existing=client_config)
 
     if client_config is not None:
         return client_config
@@ -79,13 +97,14 @@ def _ensure_client_config(
 def build_rate_limiter(
     *,
     client_config: ClientConfig | None = None,
+    http_settings: HttpClientSettings | None = None,
     defaults: HttpClientDefaults | None = None,
     logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
     """Create a rate limiter using unified HTTP defaults."""
 
     resolved_defaults = _resolve_http_defaults(
-        client_config=client_config, defaults=defaults
+        client_config=client_config, defaults=defaults, http_settings=http_settings
     )
     rate = resolved_defaults.rate_limit
     capacity = max(1.0, rate)
@@ -161,6 +180,7 @@ def build_http_client(
     provider: str,
     *,
     client_config: ClientConfig | None = None,
+    http_settings: HttpClientSettings | None = None,
     defaults: HttpClientDefaults | None = None,
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
@@ -168,7 +188,9 @@ def build_http_client(
     """Construct HTTP client using centralized defaults."""
 
     resolved_config = _ensure_client_config(
-        client_config=client_config, defaults=defaults
+        client_config=client_config,
+        http_settings=http_settings,
+        defaults=defaults,
     )
     return UnifiedAPIClientImpl(
         provider=provider,
