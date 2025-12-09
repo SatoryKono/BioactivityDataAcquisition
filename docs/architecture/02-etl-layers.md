@@ -1,16 +1,15 @@
 # ETL Layers
 
 ## Orchestration
-Ответственность: управление жизненным циклом запуска (`run` метод в `PipelineBase`), инициализация контейнера зависимостей (`build_pipeline_dependencies`), выбор профилей конфигураций.
-Ключевые компоненты: `PipelineBase`, `ConfigResolver`.
+Ответственность: управление жизненным циклом запуска (`run` метод в `PipelineBase`), инициализация контейнера зависимостей (через `bioetl.interfaces.container_factory`), выбор профилей конфигураций.
+Ключевые компоненты: `PipelineBase`, `ConfigResolver`, `PipelineContainer`.
 Взаимодействие: Связывает сервисы (Extraction, Validation, Output) в единый поток выполнения.
 
 ## Monitoring
 Ответственность: логирование, метрики, прогресс.
-Ключевые компоненты: доменные порты `LoggingPortABC`, `PipelineMetricsPortABC`,
+Ключевые компоненты: доменные порты `LoggingPortABC`, `PipelineMetricsPortABC`, `MetricsPortABC` (для клиентов),
 адаптеры инфраструктурного логгера (например, `UnifiedLogger`) и экспорта
-метрик, а также секция `observability` в `PipelineConfig`, через которую
-передаются настройки наблюдаемости.
+метрик (Prometheus), а также секция `observability` в `PipelineConfig`.
 Взаимодействие: Пронизывает все слои; контекстный логгер и метрики передаются в
 каждый сервис при инициализации. Домен описывает **что** и **где** нужно
 логировать, но не знает форматов конфигурации, backends и протоколов экспорта —
@@ -19,10 +18,10 @@
 ## Client (Infrastructure)
 Ответственность: получение данных из внешних API.
 Реализует трёхслойный паттерн:
-1. **Contracts**: Протоколы и ABC (`src/bioetl/infrastructure/clients/<domain>/contracts.py`).
-2. **Factories**: Фабричные функции для создания клиентов (`default_<domain>_client`).
-3. **Implementation**: Конкретные реализации (`impl/http_client.py`), скрывающие детали HTTP (retry, rate limit, pagination).
-Примеры: `ChemblClient`, `ChemblPaginator`.
+1. **Contracts**: Протоколы и ABC (`src/bioetl/domain/clients/base/contracts.py`).
+2. **Factories**: Фабричные функции для создания клиентов (`src/bioetl/infrastructure/clients/base/factories.py`).
+3. **Implementation**: Конкретные реализации (`UnifiedAPIClientImpl`), скрывающие детали HTTP (retry, rate limit, metrics, logging).
+Примеры: `ChemblHttpClientImpl` (использует UnifiedAPIClient).
 
 ## Extraction (Application)
 Ответственность: Прикладная логика извлечения данных.

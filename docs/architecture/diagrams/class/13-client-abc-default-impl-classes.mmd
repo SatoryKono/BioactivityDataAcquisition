@@ -21,7 +21,7 @@ class BaseClientFactories {
   +default_secret_provider()
 }
 
-class UnifiedAPIClient
+class UnifiedAPIClientImpl
 class ChemblHttpClientImpl
 class ChemblRequestBuilder
 class ChemblResponseParser
@@ -42,11 +42,11 @@ MemoryCacheImpl ..|> CacheABC
 EnvSecretProvider ..|> SecretProviderABC
 ChemblExtractionServiceImpl ..|> ExtractionServiceABC
 CircuitBreakerImpl ..|> CircuitBreakerABC
-UnifiedAPIClient --> RateLimiterABC
-UnifiedAPIClient --> CacheABC
-UnifiedAPIClient --> CircuitBreakerABC
-UnifiedAPIClient --> SecretProviderABC
-ChemblHttpClientImpl --> UnifiedAPIClient
+UnifiedAPIClientImpl --> RateLimiterABC
+UnifiedAPIClientImpl --> CacheABC
+UnifiedAPIClientImpl --> CircuitBreakerABC
+UnifiedAPIClientImpl --> SecretProviderABC
+ChemblHttpClientImpl --> UnifiedAPIClientImpl
 ChemblHttpClientImpl --> ChemblRequestBuilder
 ChemblHttpClientImpl --> ChemblResponseParser
 ChemblHttpClientImpl --> OffsetPaginator
@@ -61,7 +61,7 @@ class ChemblExtractionServiceImpl domainPrimary
 class ChemblRequestBuilder domainSecondary
 class ChemblResponseParser domainSecondary
 class OffsetPaginator domainSecondary
-class UnifiedAPIClient domainSecondary
+class UnifiedAPIClientImpl domainSecondary
 class TokenBucketRateLimiterImpl domainSecondary
 class MemoryCacheImpl domainSecondary
 class EnvSecretProvider domainSecondary
