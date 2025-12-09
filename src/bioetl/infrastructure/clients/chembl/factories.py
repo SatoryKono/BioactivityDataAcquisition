@@ -13,7 +13,7 @@ from bioetl.infrastructure.clients.base.factories import (
     default_api_client,
     default_rate_limiter,
 )
-from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
+from bioetl.infrastructure.clients.chembl.impl import (
     ChemblExtractionServiceImpl,
 )
 from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
