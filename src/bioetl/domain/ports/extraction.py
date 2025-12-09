@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Protocol
+
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
@@ -28,7 +30,7 @@ class ExtractionServiceABC(ABC):
         """
 
     @abstractmethod
-    def extract_all(self, entity: str, **filters: Any) -> list["RawRecord"]:
+    def extract_all(self, entity: str, **filters: object) -> list["RawRecord"]:
         """
         Extract all records for an entity with optional filters.
 
@@ -42,7 +44,7 @@ class ExtractionServiceABC(ABC):
 
     @abstractmethod
     def iter_extract(
-        self, entity: str, *, chunk_size: int | None = None, **filters: Any
+        self, entity: str, *, chunk_size: int | None = None, **filters: object
     ) -> Iterable[list["RawRecord"]]:
         """
         Stream records for an entity in raw record batches.
@@ -62,7 +64,7 @@ class ExtractionServiceABC(ABC):
         entity: str,
         batch_ids: list[str],
         filter_key: str,
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """
         Request a batch of records by IDs.
 
@@ -76,7 +78,7 @@ class ExtractionServiceABC(ABC):
         """
 
     @abstractmethod
-    def parse_response(self, raw_response: dict[str, Any]) -> list[dict[str, Any]]:
+    def parse_response(self, raw_response: dict[str, object]) -> list[BaseModel]:
         """
         Parse raw API response into list of records.
 
@@ -89,8 +91,8 @@ class ExtractionServiceABC(ABC):
 
     @abstractmethod
     def serialize_records(
-        self, entity: str, records: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+        self, entity: str, records: list[BaseModel]
+    ) -> list[BaseModel]:
         """
         Serialize records (flattening, type conversion) before DataFrame creation.
 
@@ -111,7 +113,7 @@ class BatchAdapterABC(Protocol):
     into the expected list[RawRecord] format.
     """
 
-    def process_batch(self, raw_batch: Any) -> list["RawRecord"]:
+    def process_batch(self, raw_batch: object) -> list["RawRecord"]:
         """
         Normalize a batch into a list of raw record mappings.
 
