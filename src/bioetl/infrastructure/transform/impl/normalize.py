@@ -2,31 +2,17 @@
 Normalization implementation for domain entities.
 """
 
-from typing import Any, Callable, cast
+from typing import Any
 
 import pandas as pd
 
-from bioetl.domain.transform.contracts import (
-    NormalizationConfigProviderProtocol,
-    NormalizationServiceABC,
-)
 from bioetl.domain.transform.normalizers import (
-    normalize_array,
     normalize_pcid,
     normalize_pmid,
-    normalize_record,
     normalize_uniprot,
-)
-from bioetl.domain.transform.normalizers.registry import get_normalizer
-from bioetl.infrastructure.transform.impl.base_normalizer import (
-    BaseNormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
     DefaultNormalizationTransformerImpl,
-)
-from bioetl.infrastructure.transform.impl.serializer import (
-    serialize_dict,
-    serialize_list,
 )
 
 # Aliases for backward compatibility or convenience
