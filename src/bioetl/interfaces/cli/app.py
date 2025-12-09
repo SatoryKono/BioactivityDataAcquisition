@@ -34,10 +34,7 @@ from bioetl.infrastructure.observability.server import (
     start_metrics_server_once,
 )
 from bioetl.interfaces.observability import LoggingPortABC
-from bioetl.interfaces.wiring import (
-    create_config_loader,
-    create_container_factory,
-)
+from bioetl.interfaces.wiring import create_config_loader
 
 app = typer.Typer(
     name="bioetl",
@@ -157,7 +154,6 @@ def run(
     """Run an ETL pipeline for the given name and profile."""
 
     config_loader = create_config_loader()
-    container_factory = create_container_factory()
     bound_logger = logger.apply_bind(
         pipeline_name=pipeline_name,
         profile=profile,
@@ -244,7 +240,6 @@ def run(
             provider_registry=provider_registry,
             provider_loader=provider_loader,
             provider_loader_factory=provider_loader_factory,
-            container_factory=container_factory,
         )
 
         console.print(
