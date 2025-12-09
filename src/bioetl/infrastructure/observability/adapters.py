@@ -7,7 +7,13 @@ from typing import Any, Self
 import structlog
 from structlog.stdlib import BoundLogger
 
-from bioetl.interfaces.observability import LoggingPortABC, TracingPortABC
+from bioetl.infrastructure.observability import metrics
+from bioetl.interfaces.observability import (
+    LoggingPortABC,
+    MetricsPortABC,
+    PipelineMetricsPortABC,
+    TracingPortABC,
+)
 
 
 class StructuredLoggerImpl(LoggingPortABC):
@@ -57,5 +63,71 @@ class TracingAdapterImpl(TracingPortABC):
 
 __all__ = [
     "StructuredLoggerImpl",
+    "PrometheusMetricsPortImpl",
     "TracingAdapterImpl",
 ]
+
+
+class PrometheusMetricsPortImpl(PipelineMetricsPortABC):
+    """Prometheus-backed implementation of the metrics port."""
+
+    def __init__(self) -> None:
+        self._counters: dict[str, Any] = {
+            "client_request_total": metrics.CLIENT_REQUEST_TOTAL,
+            "client_request_errors": metrics.CLIENT_REQUEST_ERRORS,
+            "output_write_errors_total": metrics.OUTPUT_WRITE_ERRORS_TOTAL,
+        }
+        self._histograms: dict[str, Any] = {
+            "client_request_duration_seconds": metrics.CLIENT_REQUEST_DURATION_SECONDS,
+        }
+
+    def inc_counter(self, name: str, labels: dict[str, str]) -> None:
+        """Increment counter by name using provided labels."""
+
+        counter = self._counters.get(name)
+        if counter is None:
+            raise KeyError(f"Unknown counter metric '{name}'")
+        counter.labels(**labels).inc()
+
+    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Record observation for histogram by name."""
+
+        histogram = self._histograms.get(name)
+        if histogram is None:
+            raise KeyError(f"Unknown histogram metric '{name}'")
+        histogram.labels(**labels).observe(value)
+
+    def update_stage_duration(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+        duration_sec: float,
+    ) -> None:
+        metrics.STAGE_DURATION_SECONDS.labels(
+            pipeline=pipeline,
+            provider=provider,
+            entity=entity,
+            stage=stage,
+            outcome=outcome,
+        ).observe(duration_sec)
+
+    def update_stage_total(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+    ) -> None:
+        metrics.STAGE_TOTAL.labels(
+            pipeline=pipeline,
+            provider=provider,
+            entity=entity,
+            stage=stage,
+            outcome=outcome,
+        ).inc()

@@ -259,3 +259,36 @@ def test_write_result_raises_on_no_inner_result(
     # Act & Assert
     with pytest.raises(RuntimeError, match="Inner writer did not return result"):
         unified_writer.write_result(df, output_dir, "test_entity", run_context)
+
+
+def test_write_result_records_metric_on_failure(
+    mock_metadata_writer_fixture,
+    mock_quality_reporter,
+    mock_config_fixture,
+    mock_atomic_op,
+    run_context_factory,
+    tmp_path,
+):
+    """Failures should increment output write error metric."""
+
+    metrics = MagicMock()
+    writer = MagicMock()
+    writer.write.side_effect = ValueError("boom")
+
+    writer_impl = UnifiedOutputWriterImpl(
+        writer,
+        mock_metadata_writer_fixture,
+        mock_quality_reporter,
+        mock_config_fixture,
+        atomic_op=mock_atomic_op,
+        metrics=metrics,
+    )
+
+    with pytest.raises(ValueError):
+        writer_impl.write_result(
+            pd.DataFrame({"a": [1]}), tmp_path, "entity", run_context_factory()
+        )
+
+    metrics.inc_counter.assert_called_once_with(
+        "output_write_errors_total", {"entity": "entity", "error_type": "ValueError"}
+    )
