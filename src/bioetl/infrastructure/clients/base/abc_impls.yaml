@@ -60,7 +60,7 @@ BaseNormalizationServiceABC:
 NormalizationServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
   implementations:
-    Default: bioetl.infrastructure.transform.impl.normalization_service_impl.NormalizationServiceImpl
+    Default: bioetl.infrastructure.transform.impl.default_normalization_transformer_impl.DefaultNormalizationTransformerImpl
     Chembl: bioetl.infrastructure.transform.impl.chembl_normalization_service_impl.ChemblNormalizationServiceImpl
 
 HasherABC:
@@ -97,7 +97,7 @@ OutputWriterABC:
 DataClientABC:
   default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
   implementations:
-    ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.http_client.ChemblApiPortImpl
+    ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl.ChemblHttpClientImpl
 
 RequestBuilderABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_request_builder

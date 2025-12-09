@@ -16,7 +16,9 @@ from bioetl.infrastructure.clients.base.factories import (
 from bioetl.infrastructure.clients.chembl.impl import (
     ChemblExtractionServiceImpl,
 )
-from bioetl.infrastructure.clients.chembl.impl.http_client import ChemblApiPortImpl
+from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
+    ChemblHttpClientImpl,
+)
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
@@ -58,7 +60,7 @@ def default_chembl_client(
     # Using explicit rate limiter in client logic
     rate_limiter = build_rate_limiter(client_config=client_config)
 
-    return ChemblApiPortImpl(
+    return ChemblHttpClientImpl(
         request_builder=ChemblRequestBuilderImpl(
             base_url=base_url,
             max_url_length=max_url_length,

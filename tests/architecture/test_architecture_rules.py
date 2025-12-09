@@ -19,7 +19,7 @@ ALLOWED_DUPLICATE_CLASSES = {
     "ProviderRegistryError",
     "ConfigError",
     "ConfigValidationError",
-    "NormalizationServiceImpl",
+    "DefaultNormalizationTransformerImpl",
     "NormalizationConfig",
     "Config",
     "BaseProviderConfig",

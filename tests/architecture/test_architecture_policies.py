@@ -183,7 +183,7 @@ def test_duplicate_class_names_are_allowlisted() -> None:
         "ConfigError",
         "ConfigValidationError",
         "BaseProviderConfig",
-        "NormalizationServiceImpl",
+        "DefaultNormalizationTransformerImpl",
         "NormalizationConfig",
         "Config",
     }

@@ -10,7 +10,7 @@ classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#1
 
 subgraph Infrastructure["Infrastructure Layer"]
     UnifiedClient["UnifiedAPIClient\nclients.base.impl.unified_client"]:::componentPrimary
-    ChemblHttp["ChemblHttpClientImpl\nclients.chembl.impl.http_client"]:::componentPrimary
+    ChemblHttp["ChemblHttpClientImpl\nclients.chembl.impl.chembl_http_client_impl"]:::componentPrimary
     ExtractionService["ChemblExtractionServiceImpl\nclients.chembl.impl.chembl_extraction_service_impl"]:::componentSecondary
     RequestBuilder["RequestBuilder\nclients.chembl.request_builder"]:::componentSecondary
     ResponseParser["ResponseParser\nclients.chembl.response_parser"]:::componentSecondary

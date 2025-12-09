@@ -174,7 +174,7 @@ src/bioetl/infrastructure/transform/impl/__init__.py
 src/bioetl/infrastructure/transform/impl/base_normalizer.py
 src/bioetl/infrastructure/transform/impl/chembl_normalization_service_impl.py
 src/bioetl/infrastructure/transform/impl/hasher.py
-src/bioetl/infrastructure/transform/impl/normalization_service_impl.py
+src/bioetl/infrastructure/transform/impl/default_normalization_transformer_impl.py
 src/bioetl/infrastructure/transform/impl/normalize.py
 src/bioetl/infrastructure/transform/impl/serializer.py
 src/bioetl/infrastructure/validation/__init__.py

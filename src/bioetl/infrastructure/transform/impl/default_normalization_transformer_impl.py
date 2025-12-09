@@ -1,4 +1,4 @@
-"""Infrastructure implementation of the normalization service."""
+"""Infrastructure implementation of the default normalization transformer."""
 
 from typing import Any, Callable, cast
 
@@ -15,7 +15,9 @@ from bioetl.infrastructure.transform.impl.base_normalizer import (
 from bioetl.infrastructure.transform.impl.serializer import serialize_list
 
 
-class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationServiceImpl):
+class DefaultNormalizationTransformerImpl(
+    NormalizationServiceABC, BaseNormalizationServiceImpl
+):
     """
     Сервис нормализации данных.
     Выполняет:
@@ -171,4 +173,4 @@ class NormalizationServiceImpl(NormalizationServiceABC, BaseNormalizationService
         return cast(pd.Series, series.apply(_normalize_value_from_series))
 
 
-__all__ = ["NormalizationServiceImpl"]
+__all__ = ["DefaultNormalizationTransformerImpl"]
