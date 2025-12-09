@@ -58,6 +58,7 @@ def _resolve_http_defaults(
             retries=http_settings.retries,
             backoff_factor=http_settings.backoff,
             rate_limit=http_settings.rate_limit,
+            retry_enabled=http_settings.retry_enabled,
         )
 
     if client_config is None:
@@ -68,6 +69,7 @@ def _resolve_http_defaults(
         retries=client_config.max_retries,
         backoff_factor=client_config.backoff_factor,
         rate_limit=float(client_config.rate_limit_per_sec),
+        retry_enabled=bool(client_config.retry_enabled),
     )
 
 
@@ -91,6 +93,7 @@ def _ensure_client_config(
         max_retries=resolved.retries,
         rate_limit_per_sec=resolved.rate_limit,
         backoff_factor=resolved.backoff_factor,
+        retry_enabled=resolved.retry_enabled,
     )
 
 

@@ -41,6 +41,7 @@ class HttpClientSettings(BaseModel):
     retries: int = 3
     backoff: float = 2.0
     rate_limit: float = 2.5
+    retry_enabled: bool = True
 
     model_config = ConfigDict(extra="forbid")
 
@@ -52,6 +53,7 @@ class HttpClientDefaults(BaseModel):
     retries: int = 3
     backoff_factor: float = 2.0
     rate_limit: float = 2.5
+    retry_enabled: bool = True
 
     model_config = ConfigDict(extra="forbid")
 
@@ -74,6 +76,7 @@ class ClientConfig(BaseModel):
     backoff_factor: float = Field(
         default_factory=lambda: HTTP_CLIENT_DEFAULTS.backoff_factor
     )
+    retry_enabled: bool = True
     circuit_breaker_threshold: int = 5
     circuit_breaker_recovery_time: float = 60.0
 
@@ -95,6 +98,7 @@ class ClientConfig(BaseModel):
                 "max_retries": http_client.retries,
                 "rate_limit_per_sec": float(http_client.rate_limit),
                 "backoff_factor": http_client.backoff,
+                "retry_enabled": http_client.retry_enabled,
             }
         )
 
@@ -253,7 +257,13 @@ class BaseProviderConfig(BaseModel):
         client_data = data.get("client") or {}
 
         client_payload: dict[str, Any] = {}
-        for legacy_field in ("timeout_sec", "max_retries", "rate_limit_per_sec", "backoff_factor"):
+        for legacy_field in (
+            "timeout_sec",
+            "max_retries",
+            "rate_limit_per_sec",
+            "backoff_factor",
+            "retry_enabled",
+        ):
             if legacy_field in data:
                 client_payload[legacy_field] = data[legacy_field]
         client_payload.update(client_data if isinstance(client_data, dict) else {})
@@ -268,9 +278,23 @@ class BaseProviderConfig(BaseModel):
             retries=client_config.max_retries,
             backoff=float(client_config.backoff_factor),
             rate_limit=float(client_config.rate_limit_per_sec),
+            retry_enabled=bool(client_config.retry_enabled),
         )
 
-        cleaned = {key: value for key, value in data.items() if key not in {"base_url", "client", "timeout_sec", "max_retries", "rate_limit_per_sec", "backoff_factor"}}
+        cleaned = {
+            key: value
+            for key, value in data.items()
+            if key
+            not in {
+                "base_url",
+                "client",
+                "timeout_sec",
+                "max_retries",
+                "rate_limit_per_sec",
+                "backoff_factor",
+                "retry_enabled",
+            }
+        }
         cleaned["http_client"] = http_client
         return cleaned
 
