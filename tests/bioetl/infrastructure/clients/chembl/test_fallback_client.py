@@ -3,7 +3,12 @@ from unittest.mock import Mock
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.ports.parsing import RawPayload, RawRecordList, ResponseParserPortABC
+from bioetl.domain.ports.parsing import (
+    ApiPayload,
+    RawRecord,
+    RecordBatch,
+    ResponseParserPortABC,
+)
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -12,14 +17,14 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 )
 
 
-class DummyParser(ResponseParserPortABC):
+class DummyParser(ResponseParserPortABC[RawRecord]):
     """Test parser implementing the unified ResponseParserPortABC interface."""
 
-    def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+    def parse_to_records(self, raw_response: ApiPayload) -> RecordBatch:
         return []
 
     def extract_pagination(
-        self, raw_response: RawPayload
+        self, raw_response: ApiPayload
     ) -> dict[str, int | str | None]:
         return {}
 
