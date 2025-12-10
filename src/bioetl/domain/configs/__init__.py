@@ -28,6 +28,7 @@ from bioetl.domain.configs.defaults import (
 )
 
 # Bounded context configs
+from bioetl.domain.configs.execution import ExecutionConfig
 from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.normalization import NormalizationConfig
@@ -78,6 +79,8 @@ __all__ = [
     "OutputOptionsConfig",
     "CsvInputConfig",
     "PipelineStagesConfig",
+    # Execution aggregate (groups stages + runtime + transform)
+    "ExecutionConfig",
     # Migration utilities
     "ConfigMigrator",
     # Primary HTTP configuration (single source of truth)
