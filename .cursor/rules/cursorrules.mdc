@@ -206,3 +206,10 @@ os.replace(tmp, path)
 - `docs/00-styleguide/02-new-entity-naming-policy.md` — полная политика именования
 - `docs/00-styleguide/03-python-code-style.md` — стиль Python кода
 - `docs/00-styleguide/10-documentation-standards.md` — стандарты документации
+
+## 17. Refactoring Standards
+
+- **Dependency Mapping**: Before refactoring, map all imports, usages, and tests.
+- **Protocol**: See `.cursor/rules/14-refactoring-standards.mdc` for the detailed dependency mapping protocol.
+- **Invariants**: Must maintain Determinism, Validation, Logging, Architecture.
+- **Class Inventory**: Respect zero-sum class count invariant.
