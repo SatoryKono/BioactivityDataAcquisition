@@ -4,7 +4,7 @@ from bioetl.application.helpers import (
     resolve_primary_key,
     resolve_primary_key_with_filter,
 )
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     PipelineConfig,
