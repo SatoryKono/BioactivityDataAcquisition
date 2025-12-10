@@ -13,7 +13,7 @@ from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import PipelineConfig
-from bioetl.infrastructure.clients.provider_registry_loader import (
+from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.interfaces.container_factory import (
