@@ -18,12 +18,12 @@ from bioetl.domain.clients.base.contracts import (
 )
 from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.base.impl._http_transport import _HttpTransport
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
-from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,

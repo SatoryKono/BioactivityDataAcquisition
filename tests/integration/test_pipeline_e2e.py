@@ -4,18 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 
-from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.application.mappers.chembl import ChemblRecordMapper
-from bioetl.domain.ports.extraction import RawRecordBatch
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
-from bioetl.infrastructure.config.loader import get_pipeline_config_from_path
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 
 
 class TestPipelineDataFlow:

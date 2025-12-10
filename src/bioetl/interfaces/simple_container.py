@@ -10,8 +10,6 @@ for the new architecture. It focuses on:
 
 from __future__ import annotations
 
-from typing import Callable
-
 from bioetl.application.mappers.chembl.record_mapper import ChemblRecordMapper
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.application.services.schema_bootstrap import (

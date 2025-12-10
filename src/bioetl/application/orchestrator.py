@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from concurrent.futures import ProcessPoolExecutor
 
+from bioetl.application.memory_registry import InMemoryProviderRegistry
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_factory
@@ -20,7 +21,6 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition
-from bioetl.application.memory_registry import InMemoryProviderRegistry
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 

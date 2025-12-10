@@ -305,7 +305,8 @@ def test_infrastructure_does_not_import_domain_schemas_at_module_level() -> None
 
     Infrastructure may use domain schemas via:
     - TYPE_CHECKING blocks (for type hints only)
-    - Lazy imports inside functions (for backward compatibility with deprecation warnings)
+    - Lazy imports inside functions (for backward compatibility with
+      deprecation warnings)
 
     But MUST NOT have module-level imports from:
     - domain.schemas.chembl.raw_models
@@ -321,8 +322,9 @@ def test_infrastructure_does_not_import_domain_schemas_at_module_level() -> None
                         _format_violation(
                             file_path,
                             reference.lineno,
-                            f"infrastructure must not import {forbidden_pattern} at module level "
-                            "(use TYPE_CHECKING for type hints or lazy import for backward compat). "
+                            f"infrastructure must not import {forbidden_pattern} "
+                            "at module level (use TYPE_CHECKING for type hints "
+                            "or lazy import for backward compat). "
                             f"Found: {reference.module}",
                         )
                     )
