@@ -107,6 +107,52 @@ class EntityName:
         )
 
 
+class PipelineId:
+    """Value Object для идентификатора pipeline."""
+
+    __slots__ = ("_value",)
+    _max_length = 128
+
+    def __init__(self, value: str) -> None:
+        if not value or not value.strip():
+            raise ValueError("PipelineId must be a non-empty string")
+        normalized = value.strip()
+        if len(normalized) > self._max_length:
+            raise ValueError(
+                f"PipelineId too long: {len(normalized)} > {self._max_length}"
+            )
+        self._value = normalized
+
+    @property
+    def value(self) -> str:
+        """String representation of PipelineId."""
+        return self._value
+
+    def __str__(self) -> str:
+        return self._value
+
+    def __repr__(self) -> str:
+        return f"PipelineId({self._value!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, PipelineId):
+            return self._value == other._value
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self._value)
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: type, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        return core_schema.no_info_after_validator_function(
+            cls,
+            core_schema.str_schema(),
+            serialization=core_schema.plain_serializer_function_ser_schema(str),
+        )
+
+
 class ChemblId:
     """Value Object для ChEMBL идентификатора (формат CHEMBL123)."""
 
