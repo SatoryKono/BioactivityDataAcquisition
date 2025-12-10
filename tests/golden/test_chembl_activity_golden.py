@@ -13,12 +13,12 @@ import pytest
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
-from bioetl.infrastructure.clients.provider_registry_loader import (
-    create_provider_loader,
-)
 from bioetl.infrastructure.config.loader import (
     reset_schema_contract_provider,
     set_schema_contract_provider,
+)
+from bioetl.infrastructure.config.provider_registry import (
+    create_provider_loader,
 )
 from bioetl.interfaces.container_factory import (
     build_default_container,

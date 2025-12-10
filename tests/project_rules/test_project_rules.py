@@ -10,10 +10,10 @@ import pytest
 import yaml
 
 from bioetl.domain.configs import HashingConfig, NormalizationConfig
-from bioetl.infrastructure.config.provider_registry_loader import (
+from bioetl.infrastructure.config.provider_registry import (
     ProviderNotConfiguredError,
+    ProviderRegistryConfig,
     ProviderRegistryFormatError,
-    ProviderRegistryModel,
     ProviderRegistryNotFoundError,
     ensure_provider_known,
 )
@@ -185,7 +185,7 @@ def test_configs_validate_against_models() -> None:
 
     HashingConfig.model_validate(hashing_data.get("hashing", {}))
     NormalizationConfig.model_validate(normalization_data.get("normalization", {}))
-    ProviderRegistryModel.model_validate(providers_data)
+    ProviderRegistryConfig.model_validate(providers_data)
 
 
 def test_provider_registry_fail_fast_on_unknown_provider() -> None:

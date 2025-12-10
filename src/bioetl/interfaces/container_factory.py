@@ -114,17 +114,63 @@ def create_default_container_factory() -> Callable[..., Any]:
 
 
 def create_config_loader() -> PipelineConfigLoaderProtocol:
-    """Return config loader port backed by infrastructure loader."""
+    """Return config loader port backed by infrastructure loader.
+
+    Creates a config loader that uses explicit schema contract provider injection.
+    The provider is obtained from SimplePipelineContainer and bound to the loader
+    functions.
+
+    Returns:
+        PipelineConfigLoaderProtocol: Config loader with bound schema provider.
+    """
     from bioetl.interfaces.simple_container import SimplePipelineContainer
 
     container = SimplePipelineContainer()
     container.bootstrap()
 
+    # Get the schema contract provider from the container
+    provider = container.schema_contract_provider
+
+    # Create bound functions that pass the provider explicitly
+    def get_by_id_with_provider(
+        pipeline_id: str,
+        *,
+        profile: str | None = None,
+        cli_overrides: dict | None = None,
+        env_overrides: dict | None = None,
+        base_dir: str | Path | None = None,
+    ):
+        return get_pipeline_config(
+            pipeline_id,
+            schema_contract_provider=provider,
+            profile=profile,
+            cli_overrides=cli_overrides,
+            env_overrides=env_overrides,
+            base_dir=base_dir,
+        )
+
+    def get_from_path_with_provider(
+        config_path: str | Path,
+        *,
+        profile: str | None = None,
+        profiles_root: str | Path | None = None,
+        cli_overrides: dict | None = None,
+        env_overrides: dict | None = None,
+    ):
+        return get_pipeline_config_from_path(
+            config_path,
+            schema_contract_provider=provider,
+            profile=profile,
+            profiles_root=profiles_root,
+            cli_overrides=cli_overrides,
+            env_overrides=env_overrides,
+        )
+
     return cast(
         PipelineConfigLoaderProtocol,
         SimpleNamespace(
-            get_by_id=get_pipeline_config,
-            get_from_path=get_pipeline_config_from_path,
+            get_by_id=get_by_id_with_provider,
+            get_from_path=get_from_path_with_provider,
         ),
     )
 

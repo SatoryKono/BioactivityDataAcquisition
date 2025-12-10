@@ -32,7 +32,7 @@
   - Провайдер побочных данных (справочников).
 
 - `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
-  - Загрузчик реестра провайдеров из конфигурации. Default factory: ``bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader``. Implementations: ``ProviderRegistryLoader``.
+  - Загрузчик реестра провайдеров из конфигурации. Default factory: ``bioetl.infrastructure.config.provider_registry.default_provider_registry_loader``. Implementations: ``ProviderRegistryLoader``.
 
 - `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
   - Контейнер пайплайна.

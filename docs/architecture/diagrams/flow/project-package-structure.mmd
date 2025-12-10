@@ -40,7 +40,7 @@ end
 class Domain group
 
 subgraph Infrastructure["Infrastructure Layer (Driven Adapters)"]
-    ProviderLoader["ProviderRegistryLoader\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
+    ProviderLoader["ProviderRegistryLoader\ninfrastructure.config.provider_registry"]:::componentSecondary
     ClientsBase["UnifiedAPIClient + rate/retry/cache/circuit\ninfrastructure.clients.base.*"]:::componentSecondary
     ChemblClient["ChemblDataClientHTTPImpl\n+ RequestBuilder/ResponseParser/Paginator\ninfrastructure.clients.chembl.*"]:::componentPrimary
     Extraction["ChemblExtractionServiceImpl\ninfrastructure.clients.chembl.impl"]:::componentSecondary
