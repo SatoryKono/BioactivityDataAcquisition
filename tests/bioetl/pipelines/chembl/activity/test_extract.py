@@ -11,12 +11,12 @@ import pytest
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     CsvInputConfig,
 )
-from bioetl.infrastructure.files.csv_record_source import (
+from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
@@ -222,7 +222,7 @@ def test_extract_batch_size_from_config(
 
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
-    from bioetl.infrastructure.config.models import ChemblSourceConfig
+    from bioetl.domain.configs import ChemblSourceConfig
 
     new_source_config = ChemblSourceConfig(
         base_url=source_config.base_url,
