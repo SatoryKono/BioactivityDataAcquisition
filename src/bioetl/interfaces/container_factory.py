@@ -115,6 +115,10 @@ def create_default_container_factory() -> Callable[..., Any]:
 
 def create_config_loader() -> PipelineConfigLoaderProtocol:
     """Return config loader port backed by infrastructure loader."""
+    from bioetl.interfaces.simple_container import SimplePipelineContainer
+
+    container = SimplePipelineContainer()
+    container.bootstrap()
 
     return cast(
         PipelineConfigLoaderProtocol,
