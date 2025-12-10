@@ -1,4 +1,33 @@
-"""Pipeline orchestration utilities for BioETL."""
+"""
+Pipeline orchestration utilities for BioETL.
+
+This module provides the main entry point for assembling and executing pipelines.
+The orchestrator acts as a facade that hides the complexity of:
+    - Provider registry resolution and lifecycle
+    - Container assembly and dependency injection
+    - Pipeline factory selection and instantiation
+    - Subprocess execution for background runs
+
+Architecture notes:
+    - Orchestrator is stateless except for registry caching
+    - Uses factory pattern for container and registry creation
+    - Supports both synchronous and background (subprocess) execution
+    - Registry can be injected directly or via lazy provider callback
+
+Execution modes:
+    FULL: Extract → Transform → Validate → Write (default)
+    TRANSFORM_ONLY: Extract → Transform → Validate (dry_run=True)
+    EXTRACT_ONLY: Extract only, returns record counts
+
+Example::
+
+    orchestrator = PipelineOrchestrator(
+        "chembl_assay",
+        config,
+        provider_registry=registry,
+    )
+    result = orchestrator.run_pipeline(dry_run=False, limit=1000)
+"""
 
 from __future__ import annotations
 
@@ -79,7 +108,17 @@ class PipelineOrchestrator:
         limit: int | None = None,
         pipeline_type: PipelineType | None = None,
     ) -> RunResult:
-        """Запускает пайплайн в текущем процессе."""
+        """
+        Execute the pipeline synchronously in the current process.
+
+        Args:
+            dry_run: If True, skip the write stage (validate only).
+            limit: Optional maximum number of records to process.
+            pipeline_type: Override pipeline execution mode (FULL, TRANSFORM_ONLY, etc.).
+
+        Returns:
+            RunResult containing execution status, metrics, and metadata.
+        """
         effective_type = pipeline_type or self._config.pipeline_type
         pipeline = self.build_pipeline(limit=limit)
 
@@ -148,7 +187,20 @@ class PipelineOrchestrator:
         limit: int | None = None,
         executor: ProcessPoolExecutor | None = None,
     ) -> Future[RunResult]:
-        """Запускает пайплайн в отдельном процессе."""
+        """
+        Execute the pipeline asynchronously in a separate process.
+
+        Useful for long-running pipelines to avoid blocking the main thread.
+        The pipeline configuration is serialized and executed in a subprocess.
+
+        Args:
+            dry_run: If True, skip the write stage.
+            limit: Optional maximum number of records to process.
+            executor: Optional ProcessPoolExecutor (creates one if not provided).
+
+        Returns:
+            Future that resolves to RunResult when pipeline completes.
+        """
         from concurrent.futures import ProcessPoolExecutor
 
         executor_to_use = executor or ProcessPoolExecutor(max_workers=1)
