@@ -36,13 +36,27 @@ Infrastructure adapters implement these protocols wrapping pandas objects.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Iterator, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    pass
+
+# Type alias for a batch of records (pandas-free)
+RecordBatch = Sequence[Mapping[str, Any]]
+"""Type alias for a sequence of records.
+
+RecordBatch represents a collection of records without pandas dependency.
+Each record is a Mapping (dict-like) of field names to values.
+
+Usage:
+    def process_batch(records: RecordBatch) -> list[dict]:
+        return [dict(r) for r in records]
+"""
 
 __all__ = [
     "Record",
+    "RecordBatch",
     "RecordSet",
     "TabularData",
     "MutableTabularData",
