@@ -120,7 +120,7 @@ class TestSchemaContractProviderIntegration:
         assert len(fields) > 5
         field_names = [f["name"] for f in fields]
         assert "action_type" in field_names
-        assert "extracted_at" in field_names
+        assert "acquisition_timestamp" in field_names
 
         # Verify field structure
         sample_field = next(f for f in fields if f["name"] == "action_type")

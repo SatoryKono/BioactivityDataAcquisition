@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+from bioetl.application.services.schema_bootstrap import (
+    SchemaBootstrapService,
+    create_schema_bootstrap_service,
+)
+from bioetl.domain.validation import SchemaProviderABC
+
 
 
 class TestSchemaBootstrapService:

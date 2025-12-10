@@ -9,7 +9,7 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from bioetl.application.container import SimplePipelineContainer
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.domain.ports.extraction import RawRecordBatch
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel

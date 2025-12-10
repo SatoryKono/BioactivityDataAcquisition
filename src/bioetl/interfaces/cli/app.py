@@ -42,9 +42,14 @@ def bootstrap_application() -> None:
 
     # 1. Bootstrap schemas
     schema_service = create_schema_bootstrap_service()
+    schema_provider = schema_service.ensure_registered()
 
     # 2. Inject contract provider into infrastructure
-    contract_provider = schema_service.create_contract_provider()
+    from bioetl.application.services.schema_contract_provider import (
+        SchemaContractProviderImpl,
+    )
+
+    contract_provider = SchemaContractProviderImpl(schema_provider)
     set_schema_contract_provider(contract_provider)
 
     _application_bootstrapped = True

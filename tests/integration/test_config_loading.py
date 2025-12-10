@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from bioetl.application.container import SimplePipelineContainer
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.domain.errors import ConfigValidationError
 from bioetl.infrastructure.config.loader import (
     clear_schema_contract_provider,

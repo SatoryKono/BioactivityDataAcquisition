@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from bioetl.application.container import SimplePipelineContainer
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.domain.ports.extraction import RawRecordBatch
 from bioetl.infrastructure.clients.chembl.response_parser import (
