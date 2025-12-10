@@ -1,5 +1,9 @@
 """Simplified container for pipeline dependencies.
 
+.. deprecated::
+    This module is deprecated. Use :class:`bioetl.application.bootstrap.ApplicationBootstrap`
+    instead for application initialization.
+
 This container provides a streamlined approach to dependency injection
 for the new architecture. It focuses on:
 - SchemaBootstrapService for schema initialization
@@ -10,7 +14,7 @@ for the new architecture. It focuses on:
 
 from __future__ import annotations
 
-from typing import Callable
+import warnings
 
 from bioetl.application.mappers.chembl.record_mapper import ChemblRecordMapper
 from bioetl.application.mappers.contracts import RecordMapperABC
@@ -31,6 +35,10 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 class SimplePipelineContainer:
     """Simplified container for pipeline dependencies.
 
+    .. deprecated::
+        This class is deprecated. Use :class:`bioetl.application.bootstrap.ApplicationBootstrap`
+        instead for application initialization.
+
     This container provides a streamlined approach to dependency injection
     for the new architecture. It focuses on:
     - SchemaBootstrapService for schema initialization
@@ -39,14 +47,28 @@ class SimplePipelineContainer:
     - ResponseParser for API response parsing
 
     Example:
+        >>> # Deprecated usage:
         >>> container = SimplePipelineContainer()
         >>> container.bootstrap()
-        >>> mapper = container.record_mapper
-        >>> parser = container.response_parser
+        >>>
+        >>> # New recommended usage:
+        >>> from bioetl.application.bootstrap import ApplicationBootstrap
+        >>> bootstrap = ApplicationBootstrap()
+        >>> context = bootstrap.start()
     """
 
     def __init__(self) -> None:
-        """Initialize the container with lazy-initialized components."""
+        """Initialize the container with lazy-initialized components.
+
+        .. deprecated::
+            Use :class:`bioetl.application.bootstrap.ApplicationBootstrap` instead.
+        """
+        warnings.warn(
+            "SimplePipelineContainer is deprecated. "
+            "Use bioetl.application.bootstrap.ApplicationBootstrap instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._schema_bootstrap: SchemaBootstrapService | None = None
         self._schema_contract_provider: SchemaContractProviderABC | None = None
         self._record_mapper: RecordMapperABC | None = None
