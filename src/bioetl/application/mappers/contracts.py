@@ -1,9 +1,11 @@
 """Contracts for record mapping between layers."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
+from typing import Any
 
 from bioetl.domain.ports.parsing import RawRecordList
-from bioetl.domain.record_source import RawRecord
+from bioetl.domain.record_source import SourceRecordModel
 
 
 class RecordMapperABC(ABC):
@@ -11,8 +13,8 @@ class RecordMapperABC(ABC):
 
     This abstract base class defines the contract for mapping untyped
     record dictionaries from the infrastructure layer to typed domain
-    RawRecord models. Implementations handle source-specific mapping
-    logic and validation.
+    SourceRecordModel instances. Implementations handle source-specific
+    mapping logic and validation.
 
     Example:
         >>> class MyMapper(RecordMapperABC):
@@ -29,15 +31,15 @@ class RecordMapperABC(ABC):
         self,
         raw_records: RawRecordList,
         entity: str,
-    ) -> list[RawRecord]:
-        """Convert raw dicts to typed domain RawRecord models.
+    ) -> list[SourceRecordModel]:
+        """Convert raw dicts to typed domain SourceRecordModel instances.
 
         Args:
             raw_records: Untyped records from infrastructure parser.
             entity: Entity type (activity, assay, target, molecule, document).
 
         Returns:
-            List of validated domain RawRecord instances.
+            List of validated domain SourceRecordModel instances.
 
         Raises:
             ValueError: If entity type is unknown.

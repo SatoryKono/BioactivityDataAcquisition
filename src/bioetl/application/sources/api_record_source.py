@@ -10,11 +10,11 @@ Previous location: bioetl.domain.record_source
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any, Callable, cast
 
 from bioetl.domain.ports.extraction import RecordFetcherABC
-from bioetl.domain.record_source import RawRecord, RecordSourceABC
+from bioetl.domain.record_source import RecordSourceABC
 
 
 class ApiRecordSource(RecordSourceABC):
@@ -29,7 +29,7 @@ class ApiRecordSource(RecordSourceABC):
         entity: The entity type to fetch (e.g., 'molecule', 'activity').
         filters: Optional filters to apply during extraction.
         chunk_size: Optional batch size for chunked iteration.
-        batch_adapter: Optional callable to transform raw batches to RawRecord lists.
+        batch_adapter: Optional callable to transform raw batches.
 
     Example:
         >>> source = ApiRecordSource(
@@ -48,7 +48,7 @@ class ApiRecordSource(RecordSourceABC):
         entity: str,
         filters: dict[str, Any] | None = None,
         chunk_size: int | None = None,
-        batch_adapter: Callable[[Any], list[RawRecord]] | None = None,
+        batch_adapter: Callable[[Any], list[Mapping[str, Any]]] | None = None,
     ) -> None:
         self._extraction_service = extraction_service
         self._entity = entity
@@ -56,11 +56,11 @@ class ApiRecordSource(RecordSourceABC):
         self._chunk_size = chunk_size
         self._batch_adapter = batch_adapter
 
-    def iter_records(self) -> Iterable[list[RawRecord]]:
+    def iter_records(self) -> Iterable[Sequence[Mapping[str, Any]]]:
         """Iterate over extracted provider batches as normalized records.
 
         Yields:
-            Lists of RawRecord instances, each list representing a batch
+            Sequences of record Mappings, each representing a batch
             of records from the extraction service.
 
         Raises:
@@ -75,15 +75,11 @@ class ApiRecordSource(RecordSourceABC):
                 yield self._batch_adapter(raw_batch)
                 continue
 
-            if not isinstance(raw_batch, list):
+            if not isinstance(raw_batch, (list, tuple)):
                 raise TypeError(
-                    "iter_extract must yield list[RawRecord] when no batch_adapter "
-                    "is set."
+                    "iter_extract must yield Sequence[Mapping[str, Any]] when no "
+                    "batch_adapter is set."
                 )
 
-            # Auto-convert dicts to RawRecord models if needed
-            if raw_batch and isinstance(raw_batch[0], dict):
-                yield [RawRecord.model_validate(item) for item in raw_batch]
-                continue
-
-            yield cast(list[RawRecord], raw_batch)
+            # Raw batch is already a sequence of mappings
+            yield cast(Sequence[Mapping[str, Any]], raw_batch)

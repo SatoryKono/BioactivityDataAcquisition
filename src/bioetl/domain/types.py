@@ -21,13 +21,19 @@ Migration Guide
 ---------------
 The following type aliases have been moved or deprecated:
 
-+------------------+---------------+---------------------------------------------+
-| Old Location     | New Location  | Notes                                       |
-+==================+===============+=============================================+
-| types.RawRecord  | (removed)     | Use Mapping[str, Any] or domain.data.Record |
-+------------------+---------------+---------------------------------------------+
-| types.RecordBatch| data.RecordBatch | More general type: Sequence[Mapping]     |
-+------------------+---------------+---------------------------------------------+
++------------------+------------------+---------------------------------------------+
+| Old Location     | New Location     | Notes                                       |
++==================+==================+=============================================+
+| types.RecordBatch| data.RecordBatch | More general type: Sequence[Mapping]        |
++------------------+------------------+---------------------------------------------+
+
+Removed types (no longer available):
+
++------------------+-------------------------------------------------------------+
+| Removed Name     | Replacement                                                 |
++==================+=============================================================+
+| RawRecord        | Use ``Mapping[str, Any]`` or ``domain.data.Record`` protocol|
++------------------+-------------------------------------------------------------+
 
 Legacy deprecated aliases (will be removed in v3.0):
 
@@ -120,12 +126,9 @@ Example:
 # =============================================================================
 
 # Map of deprecated names to (new_location, deprecation_message)
+# NOTE: RawRecord has been removed completely. Do not add it here.
+# Use Mapping[str, Any] or bioetl.domain.data.Record protocol instead.
 _DEPRECATED_NAMES: dict[str, tuple[str, str]] = {
-    "RawRecord": (
-        "Mapping[str, Any]",
-        "RawRecord is deprecated. Use Mapping[str, Any] directly or "
-        "bioetl.domain.data.Record protocol for typed access.",
-    ),
     "RecordBatch": (
         "bioetl.domain.data.RecordBatch",
         "RecordBatch has moved to bioetl.domain.data. "
@@ -164,7 +167,7 @@ def __getattr__(name: str) -> TypeAlias:
             stacklevel=2,
         )
         # Return appropriate fallback types for backward compatibility
-        if name in ("RawRecord", "RawRecordDict"):
+        if name == "RawRecordDict":
             return dict[str, Any]
         elif name in ("RecordBatch", "RawRecordBatch", "RawRecordList"):
             # Import from data module for the actual type

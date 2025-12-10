@@ -14,7 +14,7 @@ from bioetl.domain.ports.extraction import (
     from_raw_records,
     to_raw_records,
 )
-from bioetl.domain.record_source import RawRecord
+from bioetl.domain.record_source import SourceRecordModel
 
 
 class TestTypeAliases:
@@ -294,7 +294,7 @@ class TestBackwardCompatibilityHelpers:
             records = to_raw_records(batch)
 
         assert len(records) == 2
-        assert all(isinstance(r, RawRecord) for r in records)
+        assert all(isinstance(r, SourceRecordModel) for r in records)
         assert records[0].id == "1"  # type: ignore[attr-defined]
         assert records[1].name == "second"  # type: ignore[attr-defined]
 
@@ -322,10 +322,10 @@ class TestBackwardCompatibilityHelpers:
         assert records[0].list == [1, 2, 3]  # type: ignore[attr-defined]
 
     def test_from_raw_records_converts_models_to_dicts(self) -> None:
-        """from_raw_records should convert RawRecord models to dicts."""
+        """from_raw_records should convert SourceRecordModel models to dicts."""
         records = [
-            RawRecord.model_validate({"id": "1", "name": "first"}),
-            RawRecord.model_validate({"id": "2", "name": "second"}),
+            SourceRecordModel.model_validate({"id": "1", "name": "first"}),
+            SourceRecordModel.model_validate({"id": "2", "name": "second"}),
         ]
 
         with pytest.warns(DeprecationWarning, match="from_raw_records is deprecated"):

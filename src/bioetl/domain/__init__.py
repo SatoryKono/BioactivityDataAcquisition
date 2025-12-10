@@ -14,11 +14,18 @@ Tabular Data Abstractions (from ``bioetl.domain.data``):
     - TabularData: Full tabular data abstraction (replaces pd.DataFrame)
     - MutableTabularData: TabularData with mutation capabilities
 
+Pydantic Models (from ``bioetl.domain.record_source``):
+    - SourceRecordModel: Pydantic model for API boundary parsing
+    - SourceRecord: Deprecated alias for SourceRecordModel
+
 Migration Notes (v3.0)
 ----------------------
-- ``RawRecord`` is deprecated. Use ``Mapping[str, Any]`` or ``Record`` protocol.
+- ``RawRecord`` has been removed. Use ``Mapping[str, Any]`` or ``Record`` protocol.
+- ``SourceRecord`` renamed to ``SourceRecordModel``. Old name available as alias.
 - ``RecordBatch`` moved from ``domain.types`` to ``domain.data``.
   The canonical definition is now ``Sequence[Mapping[str, Any]]``.
+- ``RecordSourceABC.iter_records()`` now returns ``Iterable[Sequence[Mapping[str, Any]]]``
+  instead of ``Iterable[list[SourceRecord]]``.
 """
 
 from bioetl.domain.aggregates import PipelineIdentity
@@ -43,7 +50,8 @@ from bioetl.domain.errors import (
 from bioetl.domain.record_source import (
     InMemoryRecordSource,
     RecordSourceABC,
-    SourceRecord,
+    SourceRecord,  # Deprecated alias for SourceRecordModel
+    SourceRecordModel,
 )
 from bioetl.domain.types import (
     ApiPayload,
@@ -82,5 +90,6 @@ __all__ = [
     # Record source
     "InMemoryRecordSource",
     "RecordSourceABC",
-    "SourceRecord",
+    "SourceRecordModel",
+    "SourceRecord",  # Deprecated alias for SourceRecordModel
 ]
