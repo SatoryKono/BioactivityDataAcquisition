@@ -25,8 +25,9 @@ class ConfigMigrator:
 
     This class handles backward compatibility by converting:
     - Flat fields (id, provider, entity) -> identity section
-    - Flat fields (input_mode, input_path, batch_size) -> source section
-    - Flat fields (output_path, dry_run) -> sink section
+    - Flat fields (input_mode, input_path, batch_size) -> data_flow.source section
+    - Flat fields (output_path, dry_run) -> data_flow.sink section
+    - Legacy source/sink sections -> data_flow aggregate
     - Legacy pipeline dict -> stages section
     - Flat observability fields -> observability section
     - Flat quality fields -> quality section
@@ -139,11 +140,8 @@ class ConfigMigrator:
         # Pack identity section
         cls._pack_identity(data)
 
-        # Pack source section
-        cls._pack_source(data)
-
-        # Pack sink section
-        cls._pack_sink(data)
+        # Pack data_flow section (source + sink aggregate)
+        cls._pack_data_flow(data)
 
         # Pack stages from pipeline dict
         cls._pack_stages(data)
@@ -306,12 +304,33 @@ class ConfigMigrator:
             data["identity"] = identity_fields
 
     @classmethod
-    def _pack_source(cls, data: dict[str, Any]) -> None:
-        """Pack source fields into source section."""
-        if "source" in data:
+    def _pack_data_flow(cls, data: dict[str, Any]) -> None:
+        """Pack source and sink into data_flow aggregate.
+
+        Handles migration from:
+        - Flat source/sink fields at root level
+        - Legacy source/sink sections at root level
+        - Already migrated data_flow section
+
+        The data_flow section contains:
+        - source: DataSourceConfig fields
+        - sink: DataSinkConfig fields
+        """
+        # If data_flow already exists, migrate any remaining flat fields into it
+        if "data_flow" in data:
+            cls._migrate_flat_fields_to_data_flow(data)
             return
 
+        # Build source section
         source_fields: dict[str, Any] = {}
+
+        # Use existing source section if present
+        if "source" in data:
+            existing_source = data.pop("source")
+            if isinstance(existing_source, dict):
+                source_fields.update(existing_source)
+
+        # Pack flat source fields
         for field in cls.SOURCE_FIELDS:
             if field in data:
                 source_fields[field] = data.pop(field)
@@ -323,16 +342,16 @@ class ConfigMigrator:
             # csv at root level goes to source if no runtime section
             source_fields["csv"] = data.pop("csv")
 
-        if source_fields:
-            data["source"] = source_fields
-
-    @classmethod
-    def _pack_sink(cls, data: dict[str, Any]) -> None:
-        """Pack sink fields into sink section."""
-        if "sink" in data:
-            return
-
+        # Build sink section
         sink_fields: dict[str, Any] = {}
+
+        # Use existing sink section if present
+        if "sink" in data:
+            existing_sink = data.pop("sink")
+            if isinstance(existing_sink, dict):
+                sink_fields.update(existing_sink)
+
+        # Pack flat sink fields
         for field in cls.SINK_FIELDS:
             if field in data:
                 sink_fields[field] = data.pop(field)
@@ -343,8 +362,58 @@ class ConfigMigrator:
             if isinstance(output_val, dict):
                 sink_fields["output"] = output_val
 
-        if sink_fields:
-            data["sink"] = sink_fields
+        # Create data_flow section if we have any content
+        if source_fields or sink_fields:
+            data_flow: dict[str, Any] = {}
+            if source_fields:
+                data_flow["source"] = source_fields
+            if sink_fields:
+                data_flow["sink"] = sink_fields
+            data["data_flow"] = data_flow
+
+    @classmethod
+    def _migrate_flat_fields_to_data_flow(cls, data: dict[str, Any]) -> None:
+        """Migrate any remaining flat source/sink fields into existing data_flow."""
+        data_flow = data.get("data_flow", {})
+        if not isinstance(data_flow, dict):
+            return
+
+        # Migrate flat source fields
+        source = data_flow.setdefault("source", {})
+        for field in cls.SOURCE_FIELDS:
+            if field in data and field not in source:
+                source[field] = data.pop(field)
+
+        # Handle csv_options at root
+        if "csv_options" in data and "csv" not in source:
+            source["csv"] = data.pop("csv_options")
+
+        # Migrate flat sink fields
+        sink = data_flow.setdefault("sink", {})
+        for field in cls.SINK_FIELDS:
+            if field in data and field not in sink:
+                sink[field] = data.pop(field)
+
+        # Handle output at root
+        if "output" in data and "output" not in sink:
+            output_val = data.pop("output")
+            if isinstance(output_val, dict):
+                sink["output"] = output_val
+
+        # Also handle legacy source/sink sections at root (shouldn't happen but defensive)
+        if "source" in data:
+            existing_source = data.pop("source")
+            if isinstance(existing_source, dict):
+                for k, v in existing_source.items():
+                    if k not in source:
+                        source[k] = v
+
+        if "sink" in data:
+            existing_sink = data.pop("sink")
+            if isinstance(existing_sink, dict):
+                for k, v in existing_sink.items():
+                    if k not in sink:
+                        sink[k] = v
 
     @classmethod
     def _pack_stages(cls, data: dict[str, Any]) -> None:
