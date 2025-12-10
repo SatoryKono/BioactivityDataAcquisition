@@ -625,15 +625,32 @@ def _resolve_existing_input_path(
     config_path: Path,
     base_dir: Path | None,
 ) -> Path | None:
-    """Пытается разрешить относительный путь к существующему файлу."""
+    """Пытается разрешить относительный путь к существующему файлу.
+
+    Uses PathResolver to check path existence against multiple candidate
+    root directories.
+
+    Args:
+        path_str: Input path string to resolve.
+        config_path: Path to the configuration file (for relative resolution).
+        base_dir: Optional base directory override.
+
+    Returns:
+        Resolved path if file exists, None otherwise.
+    """
+    from bioetl.infrastructure.files.path_resolver import PathResolver
 
     candidate = Path(path_str).expanduser()
     if candidate.is_absolute():
-        return candidate if candidate.exists() else None
+        # For absolute paths, just check existence
+        resolver = PathResolver(candidate.parent)
+        return resolver.resolve_existing(candidate.name)
 
+    # Try resolving against each candidate root
     for root in _iter_candidate_roots(config_path=config_path, base_dir=base_dir):
-        resolved = (root / candidate).resolve()
-        if resolved.exists():
+        resolver = PathResolver(root)
+        resolved = resolver.resolve_existing(candidate)
+        if resolved is not None:
             return resolved
     return None
 
@@ -643,8 +660,21 @@ def _iter_candidate_roots(
     config_path: Path,
     base_dir: Path | None,
 ) -> Iterable[Path]:
-    """Генерирует директории, относительно которых ищем входной файл."""
+    """Генерирует директории, относительно которых ищем входной файл.
 
+    Yields directories in priority order:
+    1. base_dir (if provided)
+    2. Current working directory
+    3. Config file's parent directory
+    4. All parent directories of config file path
+
+    Args:
+        config_path: Path to the configuration file.
+        base_dir: Optional base directory override.
+
+    Yields:
+        Unique candidate root directories for path resolution.
+    """
     bases: list[Path] = []
     if base_dir is not None:
         bases.append(base_dir.resolve())
