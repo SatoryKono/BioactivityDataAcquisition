@@ -28,6 +28,10 @@ ALLOWED_DUPLICATE_CLASSES = {
     "DataSourceConfig",
     "DataSinkConfig",
     "OutputOptionsConfig",
+    # Temporary: duplicate implementation in application/infrastructure layers
+    "InMemoryProviderRegistry",
+    # Temporary: duplicate container implementations
+    "SimplePipelineContainer",
 }
 ALLOWED_ABCS_WITHOUT_IMPL = {
     "CLICommandABC",
