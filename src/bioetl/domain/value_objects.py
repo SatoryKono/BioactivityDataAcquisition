@@ -65,6 +65,58 @@ class RunId:
         )
 
 
+class StageName:
+    """Value Object для имени стадии pipeline (snake_case).
+
+    Используется для идентификации стадий в pipeline.
+
+    Examples:
+        - "fetch"
+        - "transform"
+        - "normalize_data"
+    """
+
+    __slots__ = ("_value",)
+    _pattern = re.compile(r"^[a-z][a-z0-9_]*$")
+    _max_length = 64
+
+    def __init__(self, value: str) -> None:
+        if not self._pattern.match(value):
+            raise ValueError(f"StageName must be snake_case: {value}")
+        if len(value) > self._max_length:
+            raise ValueError(f"StageName too long: {len(value)} > {self._max_length}")
+        self._value = value
+
+    @property
+    def value(self) -> str:
+        """String representation of StageName."""
+        return self._value
+
+    def __str__(self) -> str:
+        return self._value
+
+    def __repr__(self) -> str:
+        return f"StageName({self._value!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, StageName):
+            return self._value == other._value
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self._value)
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: type, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        return core_schema.no_info_after_validator_function(
+            cls,
+            core_schema.str_schema(),
+            serialization=core_schema.plain_serializer_function_ser_schema(str),
+        )
+
+
 class EntityName:
     """Value Object для имени сущности (snake_case)."""
 

@@ -57,7 +57,14 @@ from bioetl.domain.types import (
     ApiPayload,
     FieldConfig,
 )
-from bioetl.domain.value_objects import ChemblId, EntityName, HashDigest, PipelineId, RunId
+from bioetl.domain.value_objects import (
+    ChemblId,
+    EntityName,
+    HashDigest,
+    PipelineId,
+    RunId,
+    StageName,
+)
 
 __all__ = [
     # Tabular data abstractions (from domain.data)
@@ -85,6 +92,7 @@ __all__ = [
     "HashDigest",
     "PipelineId",
     "RunId",
+    "StageName",
     # Aggregates
     "PipelineIdentity",
     # Record source
