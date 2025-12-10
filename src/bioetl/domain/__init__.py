@@ -4,6 +4,14 @@ Domain layer package.
 Terminology updates (v3.0 migration):
     - SourceRecord: Canonical name for records from data sources.
       Deprecated alias: RawRecord (will be removed in v3.0).
+
+Type Aliases (unified in v3.0):
+    - RawRecord: Single record as dict[str, Any]
+    - RecordBatch: Batch of records as list[RawRecord]
+    - ApiPayload: Raw API response as dict[str, Any]
+    - FieldConfig: Field configuration as dict[str, Any]
+
+    Import from ``bioetl.domain.types`` for type aliases.
 """
 
 from bioetl.domain.errors import (
@@ -22,22 +30,36 @@ from bioetl.domain.record_source import (
     RecordSourceABC,
     SourceRecord,
 )
+from bioetl.domain.types import (
+    ApiPayload,
+    FieldConfig,
+    RawRecord,
+    RecordBatch,
+)
 from bioetl.domain.value_objects import ChemblId, EntityName, RunId
 
 __all__ = [
+    # Type aliases
+    "ApiPayload",
+    "FieldConfig",
+    "RawRecord",
+    "RecordBatch",
+    # Errors
     "BioetlError",
-    "ChemblId",
     "ClientError",
     "ClientNetworkError",
     "ClientRateLimitError",
     "ClientResponseError",
     "ConfigError",
     "ConfigValidationError",
-    "EntityName",
-    "InMemoryRecordSource",
     "PipelineStageError",
     "ProviderError",
-    "RecordSourceABC",
+    # Value objects
+    "ChemblId",
+    "EntityName",
     "RunId",
+    # Record source
+    "InMemoryRecordSource",
+    "RecordSourceABC",
     "SourceRecord",
 ]
