@@ -23,7 +23,8 @@ from typing import Any, Iterable
 
 from pydantic import ValidationError
 
-from bioetl.domain.configs import ConfigMigrator, PipelineConfig
+from bioetl.domain.configs import PipelineConfig
+from bioetl.infrastructure.config.migration import ConfigMigrator
 from bioetl.domain.errors import ConfigError, ConfigValidationError
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.transform.merge import apply_deep_merge
