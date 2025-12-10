@@ -23,7 +23,7 @@ def build_quality_report_table(
     return reporter.build_quality_report(df, min_coverage=min_coverage)
 
 
-class MetadataWriterImpl:
+class MetadataWriter:
     """
     Запись метаданных и QC отчетов.
     """
@@ -65,3 +65,9 @@ class MetadataWriterImpl:
     def build_checksums(self, paths: list[Path]) -> dict[str, str]:
         """Calculate SHA256 checksums for a list of artifact paths."""
         return compute_files_sha256(paths)
+
+
+# Deprecated alias for backward compatibility (will be removed in next major version)
+MetadataWriterImpl = MetadataWriter
+
+__all__ = ["MetadataWriter", "MetadataWriterImpl", "build_quality_report_table"]
