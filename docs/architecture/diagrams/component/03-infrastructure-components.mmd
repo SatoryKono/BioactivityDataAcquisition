@@ -17,7 +17,6 @@ subgraph Infrastructure["Infrastructure Layer"]
     Paginator["OffsetPaginator\nclients.chembl.paginator"]:::componentSecondary
     RateLimiter["TokenBucketRateLimiterImpl\nclients.base.impl.rate_limiter"]:::componentSecondary
     Cache["MemoryCacheImpl\nclients.base.impl.cache"]:::componentSecondary
-    CircuitBreaker["CircuitBreakerImpl\nclients.base.impl.circuit_breaker"]:::componentSecondary
     Secrets["EnvSecretProvider\nclients.base.factories"]:::componentSecondary
 
     OutputWriter["UnifiedOutputWriter\ninfrastructure.output.unified_writer"]:::componentPrimary
@@ -42,7 +41,6 @@ class External group;
 UnifiedClient --> RateLimiter
 UnifiedClient --> RetryPolicy
 UnifiedClient --> Cache
-UnifiedClient --> CircuitBreaker
 UnifiedClient --> Secrets
 UnifiedClient --> Observability
 ChemblHttp --> RequestBuilder
