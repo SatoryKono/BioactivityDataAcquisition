@@ -11,10 +11,10 @@ import pytest
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
-from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,
 )
+from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 
 
 def _collect_extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:

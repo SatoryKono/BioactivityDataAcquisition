@@ -547,4 +547,3 @@ def init_provider_registry():
 
     registry = InMemoryProviderRegistry()
     set_provider_registry(registry)
-

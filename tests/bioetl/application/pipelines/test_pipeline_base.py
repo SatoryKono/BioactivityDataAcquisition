@@ -733,7 +733,8 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             continue
 
         if isinstance(component, DatabaseVersionTransformerImpl):
-            # For this transformer we just check the class name and that it has a provider
+            # For this transformer we just check the class name and
+            # that it has a provider
             has_provider = hasattr(component, "_database_version_provider")
             signature.append((component.__class__.__name__, has_provider))
             continue

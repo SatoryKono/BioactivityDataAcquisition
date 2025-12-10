@@ -7,10 +7,10 @@ Terminology:
         Deprecated alias: hash_business_key (will be removed in v3.0).
 """
 
-import warnings
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Protocol
+import warnings
 
 import pandas as pd
 

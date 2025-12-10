@@ -229,7 +229,9 @@ class PipelineContainer(PipelineContainerABC):
         infrastructure dependencies.
         """
         if self._timestamp_provider is None:
-            raise RuntimeError("Timestamp provider is not configured for this container")
+            raise RuntimeError(
+                "Timestamp provider is not configured for this container"
+            )
         return self._timestamp_provider
 
     def get_post_transformer(

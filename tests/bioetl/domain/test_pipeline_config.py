@@ -35,12 +35,12 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
 
     # Test decomposed source section (csv_options now in source.csv)
     assert config.source.input_mode == "csv"
-    assert config.source.input_path == "/tmp/input.csv"
+    assert config.source.input_path.replace("\\", "/") == "/tmp/input.csv"
     assert config.source.batch_size == 100
     assert config.source.csv.delimiter == ";"
 
     # Test decomposed sink section
-    assert config.sink.output_path == "/tmp/output"
+    assert config.sink.output_path.replace("\\", "/") == "/tmp/output"
     assert config.sink.dry_run is False
 
     # Test observability section

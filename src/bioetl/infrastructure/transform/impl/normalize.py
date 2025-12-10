@@ -15,7 +15,7 @@ from bioetl.domain.transform.normalizers import (
 from bioetl.domain.transform.normalizers.registry import get_normalizer
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
         DefaultNormalizationTransformerImpl,
     )
 
@@ -78,7 +78,7 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
 def __getattr__(name: str) -> Any:
     """Emit deprecation warnings for legacy aliases and lazy imports."""
     # Lazy import to avoid circular dependency
-    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
         DefaultNormalizationTransformerImpl as _DefaultImpl,
     )
 

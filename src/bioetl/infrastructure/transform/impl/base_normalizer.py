@@ -19,7 +19,8 @@ class BaseNormalizationService:
         config: Provider of normalization configuration.
         empty_value: Value to use for empty/missing data (default: None).
         support_base_model: If True, apply_normalize accepts pydantic BaseModel.
-        serialize_array_in_series: If True, arrays are serialized in apply_normalize_series.
+        serialize_array_in_series: If True, arrays are serialized
+            in apply_normalize_series.
     """
 
     _NUMERIC_DTYPES: dict[str, DtypeArg] = {

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import warnings
 from datetime import datetime
+import warnings
 
 from bioetl.domain.transform.contracts import (
     HasherABC,
@@ -13,12 +13,14 @@ from bioetl.domain.transform.contracts import (
     NormalizationServiceABC,
     TimestampProviderABC,
 )
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     DefaultNormalizationTransformerImpl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
-from bioetl.infrastructure.transform.impl.index_generator import SequentialIndexGenerator
+from bioetl.infrastructure.transform.impl.index_generator import (
+    SequentialIndexGenerator,
+)
 from bioetl.infrastructure.transform.impl.timestamp_provider import (
     DeterministicTimestampProvider,
 )

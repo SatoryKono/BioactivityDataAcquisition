@@ -25,10 +25,10 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
-from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
 # ---------------------------------------------------------------------------
 # Constants

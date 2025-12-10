@@ -17,10 +17,10 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
-from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.interfaces.container_factory import create_config_loader
 
 

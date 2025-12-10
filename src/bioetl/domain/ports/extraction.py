@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Protocol, TypeAlias
+import warnings
 
 # Generic types for cross-layer communication
 # These allow domain layer to define contracts without coupling to specific models
@@ -26,11 +26,7 @@ class RecordFetcherABC(ABC):
 
     @abstractmethod
     def iter_extract(
-        self,
-        entity: str,
-        *,
-        chunk_size: int | None = None,
-        **filters: object
+        self, entity: str, *, chunk_size: int | None = None, **filters: object
     ) -> Iterable[RawRecordBatch]:
         """Iterate over batches of raw records.
 
@@ -81,10 +77,7 @@ class ExtractionServiceABC(RecordFetcherABC):
 
     @abstractmethod
     def request_batch(
-        self,
-        entity: str,
-        batch_ids: list[str],
-        filter_key: str
+        self, entity: str, batch_ids: list[str], filter_key: str
     ) -> dict[str, object]:
         """Request batch by IDs, return raw API response.
 
@@ -131,6 +124,7 @@ class BatchAdapterABC(Protocol):
 # =============================================================================
 # Backward Compatibility Helpers
 # =============================================================================
+
 
 def to_raw_records(batch: RawRecordBatch) -> list["RawRecord"]:
     """Convert raw dicts to RawRecord models (migration helper).

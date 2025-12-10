@@ -46,9 +46,10 @@ class ObservabilityStack:
 
 class CompositionRoot:
     """
-    Central factory for creating application components with proper dependency injection.
+    Central factory for creating application components.
 
-    The composition root is the only place where default implementations are created.
+    Ensures proper dependency injection. The composition root is the only
+    place where default implementations are created.
     All other modules receive their dependencies explicitly.
 
     Example:
@@ -73,7 +74,8 @@ class CompositionRoot:
         Args:
             logger: Custom logger implementation (defaults to structured logger)
             metrics: Custom metrics implementation (defaults to Prometheus)
-            http_session_factory: Factory for HTTP sessions (defaults to requests.Session)
+            http_session_factory: Factory for HTTP sessions
+                (defaults to requests.Session)
         """
         self._logger = logger
         self._metrics = metrics

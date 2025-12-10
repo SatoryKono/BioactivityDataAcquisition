@@ -12,7 +12,7 @@ import warnings
 from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
 )
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     DefaultNormalizationTransformerImpl,
 )
 
