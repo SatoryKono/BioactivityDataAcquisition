@@ -4,9 +4,11 @@ Factory for creating PipelineContainer with default infrastructure implementatio
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, cast
 
+from bioetl.application.config.resolution import ConfigPathResolver
 from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
@@ -20,6 +22,7 @@ from bioetl.infrastructure.config.loader import (
     get_pipeline_config,
     get_pipeline_config_from_path,
 )
+from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
@@ -112,3 +115,21 @@ def create_config_loader() -> PipelineConfigLoaderProtocol:
             get_from_path=get_pipeline_config_from_path,
         ),
     )
+
+
+def create_config_path_resolver(
+    configs_root: Path | str | None = None,
+) -> ConfigPathResolver:
+    """Create ConfigPathResolver with default or specified configs root.
+
+    Args:
+        configs_root: Root directory for configs. If None, uses infrastructure
+            default (BIOETL_CONFIG_DIR env var or 'configs' directory).
+
+    Returns:
+        ConfigPathResolver instance.
+    """
+    effective_root = (
+        Path(configs_root) if configs_root is not None else get_configs_root(None)
+    )
+    return ConfigPathResolver(effective_root)
