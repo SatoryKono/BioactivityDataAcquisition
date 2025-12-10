@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.configs import ChemblSourceConfig
-from bioetl.infrastructure.config import provider_registry_loader
+from bioetl.infrastructure.config import provider_registry
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     ConfigValidationError,
@@ -15,9 +15,9 @@ from bioetl.infrastructure.config.loader import (
 
 @pytest.fixture(autouse=True)
 def _reset_provider_registry() -> None:
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
     yield
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
 
 def _write_pipeline_with_env_placeholder(config_path: Path) -> None:
@@ -57,11 +57,11 @@ def test_env_placeholder_resolved_from_env(
 ) -> None:
     providers_file = Path("tests/fixtures/configs/providers.yaml")
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
     config_path = tmp_path / "chembl_molecule.yaml"
     _write_pipeline_with_env_placeholder(config_path)
@@ -77,11 +77,11 @@ def test_env_placeholder_falls_back_to_default(
 ) -> None:
     providers_file = Path("tests/fixtures/configs/providers.yaml")
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
     config_path = tmp_path / "chembl_molecule.yaml"
     _write_pipeline_with_env_placeholder(config_path)
@@ -92,15 +92,17 @@ def test_env_placeholder_falls_back_to_default(
     assert config.primary_key == "molecule_chembl_id"
 
 
-def test_extra_field_triggers_validation_error(monkeypatch: pytest.MonkeyPatch):
+def test_extra_field_triggers_validation_error(
+    monkeypatch: pytest.MonkeyPatch,
+):
     path = Path("tests/fixtures/configs/chembl_activity_invalid_extra_key.yaml")
     providers_file = Path("tests/fixtures/configs/providers.yaml")
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
     with pytest.raises(ConfigValidationError):
         get_pipeline_config_from_path(path)
 
@@ -110,7 +112,9 @@ def test_missing_config_file_raises():
         get_pipeline_config_from_path(Path("tests/fixtures/configs/missing.yaml"))
 
 
-def test_get_pipeline_config_from_path_missing_input_path(tmp_path: Path) -> None:
+def test_get_pipeline_config_from_path_missing_input_path(
+    tmp_path: Path,
+) -> None:
     config_path = tmp_path / "chembl_activity.yaml"
     config_path.write_text(
         """id: chembl.activity
@@ -210,11 +214,11 @@ provider_config:
     )
 
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
     config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
@@ -263,11 +267,11 @@ provider_config:
     )
 
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
     with pytest.raises(UnknownProviderError):
         get_pipeline_config("chembl.activity", base_dir=base_dir)
@@ -322,11 +326,11 @@ batch_size: 25
     )
 
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
     config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
@@ -340,12 +344,12 @@ def test_fields_populated_from_schema_when_missing(
 ) -> None:
     providers_file = Path("tests/fixtures/configs/providers.yaml")
     monkeypatch.setattr(
-        provider_registry_loader,
+        provider_registry,
         "DEFAULT_PROVIDERS_REGISTRY_PATH",
         providers_file,
     )
     # config_loader.DEFAULT_PROVIDERS_REGISTRY_PATH doesn't exist, removed
-    provider_registry_loader.clear_provider_registry_cache()
+    provider_registry.clear_provider_registry_cache()
 
     pipelines_root = tmp_path / "pipelines" / "chembl"
     pipelines_root.mkdir(parents=True)
