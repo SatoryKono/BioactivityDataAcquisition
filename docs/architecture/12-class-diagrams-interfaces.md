@@ -66,43 +66,7 @@ classDiagram
     FastAPI --> PipelineOrchestrator : uses
 ```
 
-## 3. MQ Listener Structure
-
-```mermaid
----
-id: d0b757fd-3054-4efe-94ef-9b5cfc3f6c0d
----
-classDiagram
-    class MQListener {
-        -queue_name: str
-        -handler: MQJobHandler
-        +start()
-        +stop()
-        +listen()
-    }
-
-    class MQJob {
-        +pipeline_name: str
-        +config: dict
-        +job_id: str
-    }
-
-    class MQJobHandler {
-        +handle(job: MQJob)
-        -_to_pipeline_id(name: str)
-        -_create_orchestrator(name: str, profile: str)
-    }
-
-    class PipelineOrchestrator {
-        +run_pipeline(dry_run, limit)
-    }
-
-    MQListener --> MQJobHandler : uses
-    MQJobHandler --> MQJob : processes
-    MQJobHandler --> PipelineOrchestrator : uses
-```
-
-## 4. CLI Contracts
+## 3. CLI Contracts
 
 ```mermaid
 ---
@@ -135,7 +99,7 @@ classDiagram
     CLICommandABC <|-- ValidateCommand
 ```
 
-## 5. REST API Models
+## 4. REST API Models
 
 ```mermaid
 ---
@@ -173,46 +137,7 @@ classDiagram
     BaseModel <|-- PipelineStatusResponse
 ```
 
-## 6. MQ Job Processing
-
-```mermaid
----
-id: 2f874225-478b-4ebd-9092-97217689c9ad
----
-classDiagram
-    class MQJob {
-        +job_id: str
-        +pipeline_name: str
-        +config: dict
-        +created_at: datetime
-        +status: str
-    }
-
-    class JobProcessor {
-        +process(job: MQJob)
-        -_validate_job()
-        -_execute_pipeline()
-    }
-
-    class JobQueue {
-        +enqueue(job: MQJob)
-        +dequeue() MQJob | None
-        +get_status(job_id) JobStatus
-    }
-
-    class JobStatus {
-        +job_id: str
-        +status: str
-        +progress: float
-        +result: RunResult | None
-    }
-
-    JobProcessor --> MQJob : processes
-    JobQueue --> MQJob : manages
-    JobQueue --> JobStatus : tracks
-```
-
-## 7. Interface Adapters
+## 5. Interface Adapters
 
 ```mermaid
 classDiagram
@@ -236,19 +161,11 @@ classDiagram
         -_build_response()
     }
 
-    class MQAdapter {
-        +execute() RunResult
-        +validate() bool
-        -_deserialize_job()
-        -_serialize_result()
-    }
-
     InterfaceAdapter <|-- CLIAdapter
     InterfaceAdapter <|-- RESTAdapter
-    InterfaceAdapter <|-- MQAdapter
 ```
 
-## 8. Configuration Resolution
+## 6. Configuration Resolution
 
 ```mermaid
 classDiagram
@@ -276,7 +193,7 @@ classDiagram
     ConfigResolver --> PipelineConfig : returns
 ```
 
-## 9. Error Handling in Interfaces
+## 7. Error Handling in Interfaces
 
 ```mermaid
 classDiagram
@@ -294,25 +211,18 @@ classDiagram
         +detail: str
     }
 
-    class MQError {
-        +retryable: bool
-        +dead_letter: bool
-    }
-
     class ErrorHandler {
         +handle(error: Exception) InterfaceError
         +format_for_cli(error) str
         +format_for_rest(error) dict
-        +format_for_mq(error) dict
     }
 
     InterfaceError <|-- CLIError
     InterfaceError <|-- RESTError
-    InterfaceError <|-- MQError
     ErrorHandler --> InterfaceError : creates
 ```
 
-## 10. Request/Response Flow
+## 8. Request/Response Flow
 
 ```mermaid
 classDiagram
@@ -352,7 +262,7 @@ classDiagram
     RequestProcessor --> ResponseBuilder : uses
 ```
 
-## 11. Dependency Injection & Wiring
+## 9. Dependency Injection & Wiring
 
 ```mermaid
 classDiagram
@@ -378,3 +288,8 @@ classDiagram
     ContainerFactory --> PipelineContainer : creates
 ```
 
+## 10. Planned Features
+
+The following features are planned for future releases:
+
+- **Message Queue (MQ) Integration**: Support for asynchronous job processing via message queues (RabbitMQ, Redis, etc.). The `bioetl.interfaces.mq` module is reserved for this implementation.
