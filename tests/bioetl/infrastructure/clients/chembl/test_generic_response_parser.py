@@ -197,3 +197,48 @@ class TestNoDomainImportsAtModuleLevel:
         assert "ActivityRawModel" not in source
         assert "MoleculeRawModel" not in source
         assert "TargetRawModel" not in source
+
+
+class TestDeprecatedAlias:
+    """Tests for backward-compatible deprecated alias."""
+
+    def test_chembl_response_parser_impl_alias_emits_warning(self):
+        """Test that importing ChemblResponseParserImpl emits deprecation warning."""
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            # Import the deprecated alias
+            from bioetl.infrastructure.clients.chembl.response_parser import (
+                ChemblResponseParserImpl,
+            )
+
+            deprecation_warnings = [
+                x for x in w if issubclass(x.category, DeprecationWarning)
+            ]
+            assert len(deprecation_warnings) == 1
+            assert "ChemblResponseParserImpl is deprecated" in str(
+                deprecation_warnings[0].message
+            )
+            assert "ChemblGenericResponseParser" in str(deprecation_warnings[0].message)
+
+    def test_chembl_response_parser_impl_alias_returns_correct_class(self):
+        """Test that ChemblResponseParserImpl alias returns ChemblGenericResponseParser."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from bioetl.infrastructure.clients.chembl.response_parser import (
+                ChemblResponseParserImpl,
+            )
+
+            assert ChemblResponseParserImpl is ChemblGenericResponseParser
+
+    def test_chembl_response_parser_impl_alias_is_functional(self):
+        """Test that deprecated alias can be instantiated and used."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from bioetl.infrastructure.clients.chembl.response_parser import (
+                ChemblResponseParserImpl,
+            )
+
+            parser = ChemblResponseParserImpl()
+            response = {"activities": [{"id": "1"}]}
+            records = parser.parse_to_records(response)
+            assert records == [{"id": "1"}]
