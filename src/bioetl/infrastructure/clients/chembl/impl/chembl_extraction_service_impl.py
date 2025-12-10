@@ -172,8 +172,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         # Try client's parser first (for backward compatibility)
         if hasattr(self.client, "response_parser"):
             parser = getattr(self.client, "response_parser")
-            if hasattr(parser, "parse_response"):
-                return parser.parse_response(raw_response)
             if hasattr(parser, "parse"):
                 return parser.parse(raw_response)
 

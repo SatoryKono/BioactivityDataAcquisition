@@ -12,6 +12,9 @@ from bioetl.domain.configs.defaults import (
     SourceDefaultsConfig,
     SourcesDefaultsConfig,
 )
+
+# Bounded context configs
+from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.normalization import NormalizationConfig
 from bioetl.domain.configs.pipeline import (
     HTTP_CLIENT_DEFAULTS,
@@ -43,8 +46,19 @@ from bioetl.domain.configs.pipeline import (
     TransformConfig,
 )
 from bioetl.domain.configs.profile import ProfileConfig
+from bioetl.domain.configs.sink import DataSinkConfig, OutputOptionsConfig
+from bioetl.domain.configs.source import (
+    CsvInputConfig as CsvInputConfigNew,
+    DataSourceConfig as DataSourceConfigNew,
+)
 
 __all__ = [
+    # Bounded context configs (new modular structure)
+    "PipelineIdentityConfig",
+    "DataSourceConfigNew",
+    "DataSinkConfig",
+    "OutputOptionsConfig",
+    "CsvInputConfigNew",
     # Primary HTTP configuration (single source of truth)
     "HttpClientConfig",
     "ProviderHttpConfig",
