@@ -26,6 +26,7 @@ from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
 from bioetl.domain.record_source import RecordSourceABC
+from bioetl.domain.services.version_formatter import format_chembl_version
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
@@ -119,7 +120,11 @@ class ChemblPipelineBase(PipelineBase):
         self._transformer = transformer
 
     def get_version(self) -> str:
-        """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
+        """Возвращает версию релиза ChEMBL (например, 'chembl_34').
+
+        Extraction service возвращает сырую версию (например, '34').
+        Форматирование выполняется в application layer через domain service.
+        """
         if self._chembl_release is not None:
             return self._chembl_release
 
@@ -128,7 +133,8 @@ class ChemblPipelineBase(PipelineBase):
             return self._chembl_release
 
         try:
-            self._chembl_release = self._extraction_service.get_release_version()
+            raw_version = self._extraction_service.get_release_version()
+            self._chembl_release = format_chembl_version(raw_version)
         except Exception as exc:  # pragma: no cover - защитный контур
             self._logger.warning(
                 "Failed to fetch ChEMBL release; using 'unknown'",
