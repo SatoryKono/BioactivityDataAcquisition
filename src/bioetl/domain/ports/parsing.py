@@ -5,6 +5,11 @@ without domain model knowledge, following hexagonal architecture principles.
 Infrastructure adapters implement these ports to parse provider-specific responses
 into generic record dictionaries.
 
+Type Parameters:
+    RecordT: The type of records returned by parsers. Defaults to RawRecord
+        (dict[str, Any]) for untyped parsing. Can be parameterized with Pydantic
+        models or other types for typed parsing.
+
 Migration Guide (from ResponseParserABC):
 -----------------------------------------
 ``ResponseParserABC`` from ``bioetl.domain.clients.base.contracts`` is deprecated.
@@ -17,8 +22,8 @@ Method mapping:
     - ``extract_metadata(raw_response)`` → ``extract_pagination(raw_response)``
 
 Type changes:
-    - Generic[RecordT] (Pydantic models) → RecordBatch (untyped dicts)
-    - This change improves layer isolation (infrastructure doesn't import domain models)
+    - Both interfaces now support Generic[RecordT]
+    - Default type is RawRecord (dict[str, Any]) for backward compatibility
 
 Example migration::
 
@@ -29,11 +34,18 @@ Example migration::
         def parse(self, raw_response): ...
         def extract_metadata(self, raw_response): ...
 
-    # After (recommended)
+    # After (recommended) - untyped
     from bioetl.domain.ports.parsing import ResponseParserPortABC
 
     class MyParser(ResponseParserPortABC):
         def parse_to_records(self, raw_response): ...
+        def extract_pagination(self, raw_response): ...
+
+    # After (recommended) - typed with Pydantic model
+    from bioetl.domain.ports.parsing import ResponseParserPortABC
+
+    class MyTypedParser(ResponseParserPortABC[MyModel]):
+        def parse_to_records(self, raw_response) -> list[MyModel]: ...
         def extract_pagination(self, raw_response): ...
 """
 
@@ -42,12 +54,19 @@ from __future__ import annotations
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Generic
+
+from typing_extensions import TypeVar
 
 from bioetl.domain.types import (
     ApiPayload,
     RawRecord,
     RecordBatch,
 )
+
+# Type variable for generic parser output
+# Uses typing_extensions.TypeVar for default= support on Python < 3.13
+RecordT = TypeVar("RecordT", default=RawRecord)
 
 # =============================================================================
 # Deprecated Type Aliases (backward compatibility re-exports)
@@ -62,7 +81,7 @@ _DEPRECATED_TYPE_ALIASES = {
 }
 
 
-class ResponseParserPortABC(ABC):
+class ResponseParserPortABC(ABC, Generic[RecordT]):
     """Port for parsing raw API responses without domain model knowledge.
 
     This abstract base class defines the contract for parsing raw API responses
@@ -70,7 +89,12 @@ class ResponseParserPortABC(ABC):
     can parse provider-specific response formats while domain layer remains
     decoupled from those details.
 
+    Type Parameters:
+        RecordT: The type of records returned by parse_to_records.
+            Defaults to RawRecord (dict[str, Any]) for untyped parsing.
+
     Example:
+        >>> # Untyped parser (default)
         >>> class ChemblParserAdapter(ResponseParserPortABC):
         ...     def parse_to_records(self, raw_response):
         ...         # Extract records from ChEMBL-specific response structure
@@ -81,10 +105,18 @@ class ResponseParserPortABC(ABC):
         ...
         ...     def extract_pagination(self, raw_response):
         ...         return raw_response.get("page_meta", {})
+
+        >>> # Typed parser with Pydantic model
+        >>> class TypedParser(ResponseParserPortABC[MyModel]):
+        ...     def parse_to_records(self, raw_response) -> list[MyModel]:
+        ...         return [MyModel(**r) for r in raw_response.get("items", [])]
+        ...
+        ...     def extract_pagination(self, raw_response):
+        ...         return raw_response.get("meta", {})
     """
 
     @abstractmethod
-    def parse_to_records(self, raw_response: ApiPayload) -> RecordBatch:
+    def parse_to_records(self, raw_response: ApiPayload) -> list[RecordT]:
         """Parse raw API response into list of untyped record dicts.
 
         Args:
@@ -114,7 +146,7 @@ class ResponseParserPortABC(ABC):
     # Backward compatibility aliases (from deprecated ResponseParserABC)
     # =========================================================================
 
-    def parse(self, raw_response: ApiPayload) -> RecordBatch:
+    def parse(self, raw_response: ApiPayload) -> list[RecordT]:
         """Backward-compatible alias for :meth:`parse_to_records`.
 
         .. deprecated:: 2.0
@@ -124,7 +156,7 @@ class ResponseParserPortABC(ABC):
             raw_response: Raw dictionary payload from API response.
 
         Returns:
-            List of record dictionaries without type validation.
+            List of records (type depends on RecordT parameter).
         """
         warnings.warn(
             "parse() is deprecated, use parse_to_records() instead. "
@@ -239,6 +271,8 @@ def __getattr__(name: str) -> object:
 
 
 __all__ = [
+    # Type variable
+    "RecordT",
     # Canonical type aliases (re-exported from domain.types)
     "ApiPayload",
     "RawRecord",
