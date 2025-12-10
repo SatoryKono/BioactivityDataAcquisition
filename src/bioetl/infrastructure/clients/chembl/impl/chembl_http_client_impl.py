@@ -14,6 +14,11 @@ from bioetl.domain.clients.base.contracts import (
 from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.infrastructure.clients.base.http_error_handler import (
+    DefaultHttpErrorHandler,
+    HttpErrorHandlerABC,
+    RequestContext,
+)
 from bioetl.infrastructure.clients.chembl.constants import resolve_endpoint
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.errors import (
@@ -41,6 +46,7 @@ class ChemblHttpClientImpl(DataClientABC):
         *,
         provider: str = "chembl",
         fallbacks: dict[str, list[str]] | None = None,
+        error_handler: HttpErrorHandlerABC | None = None,
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
@@ -51,6 +57,7 @@ class ChemblHttpClientImpl(DataClientABC):
         self._fallbacks = fallbacks if fallbacks is not None else {}
         self._last_endpoint_used: str | None = None
         self.provider = provider
+        self.error_handler = error_handler or DefaultHttpErrorHandler(logger)
 
     def iter_pages(self, request: Any) -> Iterator[Any]:
         """Iterate over paginated responses for a built request."""
@@ -127,6 +134,16 @@ class ChemblHttpClientImpl(DataClientABC):
             raw_status = getattr(response, "status_code", None)
             status_code = raw_status if isinstance(raw_status, int) else None
             context["status_code"] = status_code
+
+            # Use unified error handler
+            request_context = RequestContext(
+                provider=self.provider,
+                endpoint=url,
+                status_code=status_code,
+                method="GET",
+            )
+            error = self.error_handler.handle(response, request_context)
+
             log_level = (
                 self.logger.error
                 if status_code is not None and status_code >= 400
@@ -140,19 +157,10 @@ class ChemblHttpClientImpl(DataClientABC):
                 status_code=status_code,
                 latency_sec=latency,
             )
-            if status_code is not None and status_code >= 400:
-                self.logger.error(
-                    "api_unexpected_status",
-                    provider=self.provider,
-                    url=url,
-                    status_code=status_code,
-                )
-                raise ApiUnexpectedStatusError(
-                    f"Unexpected status code: {status_code}",
-                    provider=self.provider,
-                    endpoint=url,
-                    status_code=status_code,
-                )
+
+            if error is not None:
+                raise error
+
             return response.json()
 
     def _build_request_url(self, endpoint: str, filters: dict[str, Any]) -> str:
