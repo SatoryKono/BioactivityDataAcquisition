@@ -1,9 +1,10 @@
-"""Public application configuration exports."""
+"""Public application configuration exports.
 
-from bioetl.application.config.resolution import (
-    ConfigPathResolver,
-    build_pipeline_config,
-)
+The main API for loading pipeline configurations is `build_runtime_config`.
+Use `ConfigPathResolver` for resolving config paths from pipeline names.
+"""
+
+from bioetl.application.config.resolution import ConfigPathResolver
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.domain.configs import (  # noqa: F401
     BaseProviderConfig,
@@ -32,7 +33,6 @@ from bioetl.domain.configs import (  # noqa: F401
 )
 
 __all__ = [
-    "build_pipeline_config",
     "build_runtime_config",
     "ConfigPathResolver",
     "BaseProviderConfig",
