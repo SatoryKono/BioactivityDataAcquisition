@@ -250,13 +250,13 @@ classDiagram
         +bind(**ctx)* LoggingPortABC
     }
 
-    class UnifiedLoggerImpl {
+    class StructuredLoggerImpl {
         -_logger: BoundLogger
         +info(msg, **ctx)
         +error(msg, **ctx)
         +debug(msg, **ctx)
         +warning(msg, **ctx)
-        +bind(**ctx) UnifiedLoggerImpl
+        +apply_bind(**ctx) StructuredLoggerImpl
     }
 
     class ProgressReporterABC {
@@ -273,7 +273,7 @@ classDiagram
         +finish()
     }
 
-    LoggingPortABC <|-- UnifiedLoggerImpl
+    LoggingPortABC <|-- StructuredLoggerImpl
     ProgressReporterABC <|-- TqdmProgressReporterImpl
 ```
 
