@@ -41,6 +41,9 @@ def pipeline():  # pylint: disable=redefined-outer-name
     normalization_service.normalize.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize.side_effect = lambda record: record
 
+    record_source = MagicMock()
+    record_source.iter_records.return_value = iter([])
+
     return ChemblPipelineBase(
         config=config,
         logger=MagicMock(),
@@ -49,6 +52,7 @@ def pipeline():  # pylint: disable=redefined-outer-name
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
         normalization_service=normalization_service,
+        record_source=record_source,
     )
 
 

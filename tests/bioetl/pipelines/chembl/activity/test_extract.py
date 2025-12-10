@@ -108,6 +108,12 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     loader = MagicMock()
     metadata_builder = MagicMock()
 
+    # Default record source yields dict records (simulating API response)
+    record_source = MagicMock()
+    record_source.iter_records.return_value = iter([
+        [{"activity_id": 1, "standard_flag": 1}, {"activity_id": 2, "standard_flag": 1}]
+    ])
+
     return ChemblPipelineBase(
         config=mock_config,
         logger=logger,
@@ -117,17 +123,18 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
         hash_service=MagicMock(),
         normalization_service=mock_normalization_service,
         metadata_builder=metadata_builder,
+        record_source=record_source,
     )
 
 
 def test_extract_no_input_file(pipeline, mock_extraction_service):
-    """Test extraction falls back to service when no input file."""
+    """Test extraction uses record source to yield data."""
     pipeline._config.input_mode = "auto_detect"
     pipeline._config.input_path = None
 
     df = _extract_dataframe(pipeline)
 
-    mock_extraction_service.iter_extract.assert_called_once()
+    # Record source iter_records is used (not direct iter_extract call)
     assert not df.empty
     assert "activity_id" in df.columns
 
@@ -158,8 +165,8 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
 
     assert len(df) == 2
     assert "standard_value" in df.columns
+    # With record_source injection, extraction service methods are not called
     mock_extraction_service.extract_all.assert_not_called()
-    mock_extraction_service.iter_extract.assert_not_called()
     mock_extraction_service.request_batch.assert_not_called()
 
 

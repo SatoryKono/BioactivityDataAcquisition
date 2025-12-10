@@ -12,6 +12,9 @@ from bioetl.infrastructure.config.models import (
 
 @pytest.fixture
 def dependencies():
+    record_source = MagicMock()
+    record_source.iter_records.return_value = iter([])
+
     return {
         "logger": MagicMock(),
         "validation_service": MagicMock(),
@@ -19,6 +22,7 @@ def dependencies():
         "extraction_service": MagicMock(),
         "hash_service": MagicMock(),
         "normalization_service": MagicMock(),
+        "record_source": record_source,
     }
 
 
