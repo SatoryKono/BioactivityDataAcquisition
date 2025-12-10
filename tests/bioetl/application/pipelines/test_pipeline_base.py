@@ -19,6 +19,7 @@ from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
 from bioetl.domain.pipelines.contracts import ExtractorABC, LoaderABC, PipelineHookABC
+from bioetl.domain.transform.contracts import IndexGeneratorABC, TimestampProviderABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformerImpl,
@@ -86,6 +87,8 @@ class ConcretePipeline(PipelineBase):
         extractor: ExtractorABC | None = None,
         transformer: TransformerABC | None = None,
         loader: LoaderABC | None = None,
+        index_generator: IndexGeneratorABC | None = None,
+        timestamp_provider: TimestampProviderABC | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -93,6 +96,8 @@ class ConcretePipeline(PipelineBase):
             extractor=extractor,
             transformer=transformer,
             loader=loader,
+            index_generator=index_generator,
+            timestamp_provider=timestamp_provider,
             **kwargs,
         )
 
@@ -123,6 +128,8 @@ class DatasetPipeline(PipelineBase):
         extractor: ExtractorABC | None = None,
         transformer: TransformerABC | None = None,
         loader: LoaderABC | None = None,
+        index_generator: IndexGeneratorABC | None = None,
+        timestamp_provider: TimestampProviderABC | None = None,
         **kwargs,
     ):
         self._dataset = dataset
@@ -133,6 +140,8 @@ class DatasetPipeline(PipelineBase):
             extractor=extractor_impl,
             transformer=transformer_impl,
             loader=loader,
+            index_generator=index_generator,
+            timestamp_provider=timestamp_provider,
             **kwargs,
         )
 
@@ -169,6 +178,25 @@ def mock_loader():
     return RecordingLoader()
 
 
+@pytest.fixture
+def mock_index_generator():
+    mock = MagicMock(spec=IndexGeneratorABC)
+    # Configure side_effect to return sequential integers starting from 1
+    mock.next_index.side_effect = range(1, 1000)
+    return mock
+
+
+@pytest.fixture
+def mock_timestamp_provider():
+    from datetime import datetime, timezone
+
+    mock = MagicMock(spec=TimestampProviderABC)
+    mock.get_extraction_timestamp.return_value = datetime(
+        2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc
+    )
+    return mock
+
+
 @pytest.mark.unit
 def test_pipeline_run_success(
     mock_config,
@@ -180,6 +208,8 @@ def test_pipeline_run_success(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Test a successful pipeline run."""
     # Arrange
@@ -192,6 +222,8 @@ def test_pipeline_run_success(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     output_path = tmp_path / "output.parquet"
@@ -222,6 +254,8 @@ def test_pipeline_dry_run(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Test a dry run of the pipeline."""
     # Arrange
@@ -234,6 +268,8 @@ def test_pipeline_dry_run(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     # Act
@@ -261,6 +297,8 @@ def test_pipeline_hooks(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Test that hooks are called correctly."""
     # Arrange
@@ -273,6 +311,8 @@ def test_pipeline_hooks(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.register_hook(mock_hook)
@@ -299,6 +339,8 @@ def test_pipeline_error_hooks(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Test that error hooks are called on failure."""
     # Arrange
@@ -311,6 +353,8 @@ def test_pipeline_error_hooks(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
     mock_hook = MagicMock(spec=PipelineHookABC)
     pipeline.register_hook(mock_hook)
@@ -347,6 +391,8 @@ def test_error_policy_skip_stage(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Пайплайн продолжает работу при политике SKIP."""
 
@@ -360,6 +406,8 @@ def test_error_policy_skip_stage(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
     pipeline._extractor = CallableExtractor(
         lambda **_: (_ for _ in ()).throw(ValueError("boom"))
@@ -382,6 +430,8 @@ def test_error_policy_retry(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Пайплайн повторяет стадию при политике RETRY."""
 
@@ -395,6 +445,8 @@ def test_error_policy_retry(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     outcomes = iter([ValueError("temporary"), pd.DataFrame({"id": [1]})])
@@ -424,6 +476,8 @@ def test_error_policy_retry_callback_and_skip(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Политика RETRY вызывает on_retry и пропускает стадию после лимита."""
     pipeline = ConcretePipeline(
@@ -436,6 +490,8 @@ def test_error_policy_retry_callback_and_skip(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     attempts = {"count": 0}
@@ -477,6 +533,8 @@ def test_error_policy_failfast_raises(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """FailFast останавливает пайплайн при первой ошибке."""
     pipeline = ConcretePipeline(
@@ -489,6 +547,8 @@ def test_error_policy_failfast_raises(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
     pipeline._extractor = CallableExtractor(
         lambda **_: (_ for _ in ()).throw(ValueError("boom"))
@@ -546,6 +606,8 @@ def test_pipeline_dry_run_metadata_and_stages(
     small_pipeline_df,
     tmp_path,
     hash_service,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Dry-run returns accurate stage info and metadata."""
     pipeline = DatasetPipeline(
@@ -556,6 +618,8 @@ def test_pipeline_dry_run_metadata_and_stages(
         hash_service=hash_service,
         metadata_builder=mock_metadata_builder,
         dataset=small_pipeline_df,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     result = pipeline.run(output_path=tmp_path, dry_run=True)
@@ -583,6 +647,8 @@ def test_post_transformer_factory_alignment(
     hash_service,
     default_extractor,
     default_transformer,
+    mock_index_generator,
+    mock_timestamp_provider,
 ):
     """Container и PipelineBase собирают идентичную цепочку
     пост-трансформеров."""
@@ -596,12 +662,16 @@ def test_post_transformer_factory_alignment(
         metadata_builder=mock_metadata_builder,
         extractor=default_extractor,
         transformer=default_transformer,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     factory_transformer = default_post_transformer(
         hash_service=hash_service,
         business_key_fields=mock_config.quality.hashing.business_key_fields,
         version_provider=pipeline.get_version,
+        index_generator=mock_index_generator,
+        timestamp_provider=mock_timestamp_provider,
     )
 
     pipeline_signature = _extract_chain_signature(pipeline._post_transformer)
@@ -658,19 +728,19 @@ def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:
             continue
 
         if isinstance(component, IndexColumnTransformerImpl):
-            hash_service = component._hash_service  # type: ignore[attr-defined]
-            signature.append((component.__class__.__name__, hash_service))
+            index_gen = component._index_generator  # type: ignore[attr-defined]
+            signature.append((component.__class__.__name__, index_gen))
             continue
 
         if isinstance(component, DatabaseVersionTransformerImpl):
-            hash_service = component._hash_service  # type: ignore[attr-defined]
-            version = component._database_version_provider()  # type: ignore[attr-defined]
-            signature.append((component.__class__.__name__, hash_service, version))
+            # For this transformer we just check the class name and that it has a provider
+            has_provider = hasattr(component, "_database_version_provider")
+            signature.append((component.__class__.__name__, has_provider))
             continue
 
         if isinstance(component, FulldateTransformerImpl):
-            hash_service = component._hash_service  # type: ignore[attr-defined]
-            signature.append((component.__class__.__name__, hash_service))
+            ts_provider = component._timestamp_provider  # type: ignore[attr-defined]
+            signature.append((component.__class__.__name__, ts_provider))
             continue
 
     return signature

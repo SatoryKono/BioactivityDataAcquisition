@@ -39,6 +39,8 @@ def common_dependencies():
         "hash_service": MagicMock(),
         "normalization_service": normalization_service,
         "record_source": record_source,
+        "index_generator": MagicMock(),
+        "timestamp_provider": MagicMock(),
     }
 
 
@@ -70,6 +72,8 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         loader=common_dependencies["loader"],
         extraction_service=common_dependencies["extraction_service"],
         hash_service=common_dependencies["hash_service"],
+        index_generator=common_dependencies["index_generator"],
+        timestamp_provider=common_dependencies["timestamp_provider"],
         normalization_service=common_dependencies["normalization_service"],
         record_source=common_dependencies["record_source"],
     )
