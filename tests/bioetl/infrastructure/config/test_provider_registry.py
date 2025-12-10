@@ -11,7 +11,11 @@ from typing import Any, Callable
 import pytest
 import yaml
 
-from bioetl.domain.configs import DummyProviderConfig, HttpClientConfig, ProviderHttpConfig
+from bioetl.domain.configs import (
+    DummyProviderConfig,
+    HttpClientConfig,
+    ProviderHttpConfig,
+)
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.config.provider_registry import (
