@@ -1,6 +1,7 @@
 """Базовый класс пайплайна."""
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -30,6 +31,17 @@ if TYPE_CHECKING:
     pass
 
 ExtractResult: TypeAlias = Iterable[pd.DataFrame] | pd.DataFrame | None
+
+
+@dataclass
+class _RunState:
+    """Internal state holder for a single pipeline run execution."""
+
+    context: RunContext
+    counters: dict[str, int] = field(default_factory=dict)
+    validated_chunks: list[pd.DataFrame] = field(default_factory=list)
+    stages_results: list[StageResult] = field(default_factory=list)
+    write_result: WriteResult | None = None
 
 
 def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
@@ -130,6 +142,27 @@ class PipelineBase(ABC):
         **kwargs: Any,
     ) -> RunResult:
         """Запускает полный цикл ETL-пайплайна."""
+        state = self._initialize_run(dry_run)
+
+        try:
+            self._run_extraction_phase(state, dry_run, kwargs)
+            self._record_etl_stages(state)
+
+            if not dry_run:
+                result = self._run_write_phase(state, output_path)
+                if result is not None:
+                    return result
+
+            return self._build_success_result(state, output_path, dry_run)
+
+        except PipelineStageError as error:
+            self._handle_pipeline_error(error, state)
+            raise
+
+    # === Run Phase Methods ===
+
+    def _initialize_run(self, dry_run: bool) -> _RunState:
+        """Initialize runtime state for a new pipeline run."""
         self._runtime_manager.reset()
         if hasattr(self._hash_service, "reset_state"):
             self._hash_service.reset_state()
@@ -138,88 +171,116 @@ class PipelineBase(ABC):
         self._logger = self._logger.apply_bind(run_id=context.run_id)
         self._runtime_manager.set_logger(self._logger)
         self._logger.info("Pipeline started", run_id=context.run_id)
-        stages_results: list[StageResult] = []
-        counters = self._init_stage_counters()
-        validated_chunks: list[pd.DataFrame] = []
 
-        try:
-            self._runtime_manager.notify_stage_start("extract", context)
-            counters, validated_chunks = self._process_extract_stage(
-                context, counters, validated_chunks, dry_run, kwargs
-            )
+        return _RunState(
+            context=context,
+            counters=self._init_stage_counters(),
+            validated_chunks=[],
+            stages_results=[],
+        )
 
+    def _run_extraction_phase(
+        self,
+        state: _RunState,
+        dry_run: bool,
+        kwargs: dict[str, Any],
+    ) -> None:
+        """Execute extract, transform, and validate stages."""
+        self._runtime_manager.notify_stage_start("extract", state.context)
+        state.counters, state.validated_chunks = self._process_extract_stage(
+            state.context,
+            state.counters,
+            state.validated_chunks,
+            dry_run,
+            kwargs,
+        )
+
+    def _record_etl_stages(self, state: _RunState) -> None:
+        """Record stage results for extract, transform, and validate."""
+        for stage_name in ("extract", "transform", "validate"):
             self._append_stage_result(
-                stages_results,
-                "extract",
-                counters["extract_count"],
-                counters["extract_chunks"],
+                state.stages_results,
+                stage_name,
+                state.counters[f"{stage_name}_count"],
+                state.counters[f"{stage_name}_chunks"],
             )
 
-            self._append_stage_result(
-                stages_results,
-                "transform",
-                counters["transform_count"],
-                counters["transform_chunks"],
+    def _run_write_phase(
+        self,
+        state: _RunState,
+        output_path: Path,
+    ) -> RunResult | None:
+        """Execute write stage; returns RunResult on failure, None on success."""
+        state.write_result, state.counters = self._perform_write_stage(
+            state.context,
+            state.validated_chunks,
+            output_path,
+            state.counters,
+            state.stages_results,
+        )
+        if state.write_result is None:
+            return self._runtime_manager.handle_stage_failure(
+                "write", state.stages_results, state.context
             )
+        return None
 
-            self._append_stage_result(
-                stages_results,
-                "validate",
-                counters["validate_count"],
-                counters["validate_chunks"],
-            )
+    def _build_success_result(
+        self,
+        state: _RunState,
+        output_path: Path,
+        dry_run: bool,
+    ) -> RunResult:
+        """Build and return a successful RunResult."""
+        meta = self._build_run_metadata(state, dry_run)
+        return RunResult(
+            run_id=state.context.run_id,
+            success=True,
+            entity_name=self._config.entity_name,
+            row_count=state.counters["validate_count"],
+            output_path=output_path if not dry_run else None,
+            duration_sec=self._calculate_duration(state.context),
+            stages=state.stages_results,
+            errors=[],
+            meta=meta,
+        )
 
-            write_result: WriteResult | None = None
-            if not dry_run:
-                write_result, counters = self._perform_write_stage(
-                    context, validated_chunks, output_path, counters, stages_results
-                )
-                if write_result is None:
-                    run_result = self._runtime_manager.handle_stage_failure(
-                        "write", stages_results, context
-                    )
-                    return run_result
+    def _build_run_metadata(self, state: _RunState, dry_run: bool) -> dict[str, Any]:
+        """Build metadata for the run result."""
+        meta_raw = (
+            self._metadata_builder.build_run_metadata(
+                state.context, state.write_result
+            )
+            if state.write_result
+            else self._metadata_builder.build_dry_run_metadata(
+                state.context, state.counters["validate_count"]
+            )
+        )
+        return self._normalize_meta(
+            meta_raw, state.context, state.counters["validate_count"], dry_run
+        )
 
-            meta_raw = (
-                self._metadata_builder.build_run_metadata(context, write_result)
-                if write_result
-                else self._metadata_builder.build_dry_run_metadata(
-                    context, counters["validate_count"]
-                )
-            )
-            meta = self._normalize_meta(
-                meta_raw, context, counters["validate_count"], dry_run
-            )
-
-            return RunResult(
-                run_id=context.run_id,
-                success=True,
-                entity_name=self._config.entity_name,
-                row_count=counters["validate_count"],
-                output_path=output_path if not dry_run else None,
-                duration_sec=self._calculate_duration(context),
-                stages=stages_results,
-                errors=[],
-                meta=meta,
-            )
-        except PipelineStageError as error:
-            stage_result = self._runtime_manager.make_stage_result(
-                error.stage,
-                0,
-                success=False,
-                errors=self._runtime_manager.get_last_error_messages(),
-            )
-            stages_results.append(stage_result)
-            self._runtime_manager.notify_stage_end(error.stage, stage_result)
-            self._logger.error(
-                "Pipeline failed",
-                stage=error.stage,
-                provider=error.provider,
-                entity=error.entity,
-                run_id=error.run_id,
-                error=str(error.cause) if error.cause else str(error),
-            )
-            raise
+    def _handle_pipeline_error(
+        self,
+        error: PipelineStageError,
+        state: _RunState,
+    ) -> None:
+        """Log and record stage failure for a PipelineStageError."""
+        stage_result = self._runtime_manager.make_stage_result(
+            error.stage,
+            0,
+            success=False,
+            errors=self._runtime_manager.get_last_error_messages(),
+        )
+        state.stages_results.append(stage_result)
+        self._runtime_manager.notify_stage_end(error.stage, stage_result)
+        self._logger.error(
+            "Pipeline failed",
+            stage=error.stage,
+            provider=error.provider,
+            entity=error.entity,
+            run_id=error.run_id,
+            error=str(error.cause) if error.cause else str(error),
+        )
 
     def _resolve_business_key_fields(self) -> list[str] | None:
         """Возвращает бизнес-ключи из конфига с поддержкой legacy-полей."""
