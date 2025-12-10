@@ -1,13 +1,20 @@
 """
 Pipelines package.
 
-Provides base pipeline implementation, contracts, and factory registry.
+Provides base pipeline implementation and factory registry.
+
+Public API:
+    - PipelineBase: Abstract base class for all pipelines
+    - Registry functions: get_factory, get_pipeline_factory, etc.
+
+For contracts (PipelineContainerABC, PipelineFactoryABC),
+import from bioetl.application.contracts.
 """
 
-from bioetl.application.contracts import PipelineContainerABC, PipelineFactoryABC
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import (
     get_factory,
+    get_pipeline_class,
     get_pipeline_factory,
     get_registered_factories,
     get_registered_pipelines,
@@ -15,9 +22,8 @@ from bioetl.application.pipelines.registry import (
 
 __all__ = [
     "PipelineBase",
-    "PipelineContainerABC",
-    "PipelineFactoryABC",
     "get_factory",
+    "get_pipeline_class",
     "get_pipeline_factory",
     "get_registered_factories",
     "get_registered_pipelines",
