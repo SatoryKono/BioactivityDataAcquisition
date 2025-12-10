@@ -21,9 +21,7 @@ from bioetl.infrastructure.config.provider_registry import (
 )
 from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
-from bioetl.interfaces.container_factory import (
-    build_default_container,
-)
+from bioetl.interfaces.composition_root import build_default_container
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
