@@ -11,7 +11,7 @@ import pytest
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,
 )
@@ -80,7 +80,7 @@ def mock_dependencies_fixture():
         "validation_service": validation_service,
         "loader": MagicMock(),
         "extraction_service": MagicMock(),
-        "hash_service": HashService(hasher=_DummyHasher()),
+        "hash_service": Blake2bHashService(hasher=_DummyHasher()),
         "metadata_builder": metadata_builder,
         "normalization_service": normalization_service,
     }

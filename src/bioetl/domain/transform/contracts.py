@@ -59,34 +59,53 @@ class NormalizationServiceABC(ABC):
 
 class HashServiceABC(ABC):
     """
-    Фасад для вычисления и добавления хеш-сумм и служебных колонок.
+    Stateless сервис для вычисления и добавления хеш-сумм.
+
+    Отвечает только за хеширование строк и бизнес-ключей.
+    Не содержит stateful логики (индексы, timestamps).
     """
+
+    @abstractmethod
+    def hash_row(self, row: dict) -> str:
+        """Вычисляет хеш строки как полного объекта."""
+
+    @abstractmethod
+    def hash_business_key(self, row: dict, key_columns: list[str]) -> str:
+        """Вычисляет хеш бизнес-ключа (выбранных колонок)."""
 
     @abstractmethod
     def add_hash_columns(
         self, df: pd.DataFrame, business_key_cols: list[str] | None = None
     ) -> pd.DataFrame:
-        """Добавляет hash_row и hash_business_key с учетом бизнес-ключа."""
+        """Добавляет hash_row и hash_business_key колонки к DataFrame."""
+
+
+class TimestampProviderABC(ABC):
+    """
+    Провайдер временных меток для извлечения данных.
+
+    Обеспечивает детерминированный timestamp в рамках сессии.
+    """
 
     @abstractmethod
-    def add_index_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Добавляет порядковый индекс строк (int, начиная с 0)."""
+    def get_extraction_timestamp(self) -> datetime:
+        """Возвращает timestamp извлечения данных."""
+
+
+class IndexGeneratorABC(ABC):
+    """
+    Генератор последовательных индексов для строк данных.
+
+    Stateful: сохраняет текущее значение счётчика между вызовами.
+    """
 
     @abstractmethod
-    def add_database_version_column(
-        self, df: pd.DataFrame, database_version: str
-    ) -> pd.DataFrame:
-        """Добавляет колонку database_version."""
+    def next_index(self) -> int:
+        """Возвращает следующий индекс и увеличивает счётчик."""
 
     @abstractmethod
-    def add_fulldate_column(
-        self, df: pd.DataFrame, timestamp: datetime | None = None
-    ) -> pd.DataFrame:
-        """Добавляет колонку extracted_at (UTC ISO-8601) для детерминизма."""
-
-    @abstractmethod
-    def reset_state(self) -> None:
-        """Сбрасывает внутреннее состояние между запусками."""
+    def reset(self) -> None:
+        """Сбрасывает счётчик в начальное состояние."""
 
 
 __all__ = [
@@ -95,4 +114,6 @@ __all__ = [
     "HasherABC",
     "NormalizationServiceABC",
     "HashServiceABC",
+    "TimestampProviderABC",
+    "IndexGeneratorABC",
 ]

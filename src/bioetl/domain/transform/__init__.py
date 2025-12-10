@@ -1,6 +1,10 @@
 """Data transformation logic."""
 
-from bioetl.domain.transform.hash_service import HashService
+from bioetl.domain.transform.contracts import (
+    HashServiceABC,
+    IndexGeneratorABC,
+    TimestampProviderABC,
+)
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformerImpl,
     FulldateTransformerImpl,
@@ -17,5 +21,7 @@ __all__ = [
     "IndexColumnTransformerImpl",
     "DatabaseVersionTransformerImpl",
     "FulldateTransformerImpl",
-    "HashService",
+    "HashServiceABC",
+    "IndexGeneratorABC",
+    "TimestampProviderABC",
 ]

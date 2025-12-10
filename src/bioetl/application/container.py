@@ -22,7 +22,12 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
-from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
+from bioetl.domain.transform.contracts import (
+    HashServiceABC,
+    IndexGeneratorABC,
+    NormalizationServiceABC,
+    TimestampProviderABC,
+)
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
@@ -47,6 +52,8 @@ class PipelineContainer(PipelineContainerABC):
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashServiceABC | None = None,
+        index_generator: IndexGeneratorABC | None = None,
+        timestamp_provider: TimestampProviderABC | None = None,
         post_transformer: TransformerABC | None = None,
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
@@ -62,6 +69,8 @@ class PipelineContainer(PipelineContainerABC):
         self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy = error_policy
         self._hash_service = hash_service
+        self._index_generator = index_generator
+        self._timestamp_provider = timestamp_provider
         self._post_transformer = post_transformer
         self._metadata_builder = self._resolve_metadata_builder(metadata_builder)
         self._metrics_port = self._resolve_metrics_port(metrics_port)
@@ -197,10 +206,31 @@ class PipelineContainer(PipelineContainerABC):
         (e.g. interfaces wiring or tests) to avoid application →
         infrastructure dependencies.
         """
-
         if self._hash_service is None:
             raise RuntimeError("Hash service is not configured for this container")
         return self._hash_service
+
+    def get_index_generator(self) -> IndexGeneratorABC:
+        """Get the index generator.
+
+        The concrete implementation must be injected from outer layers
+        (e.g. interfaces wiring or tests) to avoid application →
+        infrastructure dependencies.
+        """
+        if self._index_generator is None:
+            raise RuntimeError("Index generator is not configured for this container")
+        return self._index_generator
+
+    def get_timestamp_provider(self) -> TimestampProviderABC:
+        """Get the timestamp provider.
+
+        The concrete implementation must be injected from outer layers
+        (e.g. interfaces wiring or tests) to avoid application →
+        infrastructure dependencies.
+        """
+        if self._timestamp_provider is None:
+            raise RuntimeError("Timestamp provider is not configured for this container")
+        return self._timestamp_provider
 
     def get_post_transformer(
         self, *, version_provider: Callable[[], str] | None = None
@@ -209,6 +239,8 @@ class PipelineContainer(PipelineContainerABC):
         if self._post_transformer is None:
             self._post_transformer = default_post_transformer(
                 hash_service=self.get_hash_service(),
+                index_generator=self.get_index_generator(),
+                timestamp_provider=self.get_timestamp_provider(),
                 business_key_fields=self._config.quality.hashing.business_key_fields,
                 version_provider=version_provider,
             )
