@@ -170,9 +170,15 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         Returns:
             Parsed records as list[dict[str, Any]].
         """
-        if not isinstance(raw_response, dict):
-            return []
-        return self._parser.parse_to_records(raw_response)
+        # Try client's parser first (for backward compatibility)
+        if hasattr(self.client, "response_parser"):
+            parser = getattr(self.client, "response_parser")
+            if hasattr(parser, "parse"):
+                return parser.parse(raw_response)
+
+        # Use registry to get appropriate parser for entity type
+        parser = get_parser_for_entity(entity)
+        return parser.parse_to_records(raw_response)
 
     def serialize_records(
         self, entity: str, records: RawRecordBatch

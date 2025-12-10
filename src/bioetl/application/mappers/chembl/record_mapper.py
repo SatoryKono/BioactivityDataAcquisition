@@ -2,27 +2,16 @@
 
 from __future__ import annotations
 
+from bioetl.application.mappers.chembl.model_registry import (
+    ENTITY_MODEL_REGISTRY,
+    get_model_for_entity,
+)
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.domain.ports.parsing import RawRecordList
 from bioetl.domain.record_source import RawRecord
-from bioetl.domain.schemas.chembl.raw_models import (
-    ActivityRawModel,
-    AssayRawModel,
-    DocumentRawModel,
-    MoleculeRawModel,
-    TargetRawModel,
-)
 
-# Registry mapping entity type -> domain model class
-_ENTITY_MODEL_REGISTRY: dict[str, type[RawRecord]] = {
-    "activity": ActivityRawModel,
-    "molecule": MoleculeRawModel,
-    "target": TargetRawModel,
-    "assay": AssayRawModel,
-    "document": DocumentRawModel,
-}
-
-_SUPPORTED_ENTITIES: frozenset[str] = frozenset(_ENTITY_MODEL_REGISTRY.keys())
+# Supported entities derived from centralized registry
+_SUPPORTED_ENTITIES: frozenset[str] = frozenset(ENTITY_MODEL_REGISTRY.keys())
 
 
 class ChemblRecordMapper(RecordMapperABC):
@@ -79,13 +68,8 @@ class ChemblRecordMapper(RecordMapperABC):
         Raises:
             ValueError: If entity type is unknown.
         """
-        model_class = _ENTITY_MODEL_REGISTRY.get(entity)
-        if model_class is None:
-            raise ValueError(
-                f"Unknown entity type: {entity}. "
-                f"Supported entities: {sorted(_SUPPORTED_ENTITIES)}"
-            )
-        return model_class
+        # Use centralized registry from model_registry module
+        return get_model_for_entity(entity)  # type: ignore[return-value]
 
 
 __all__ = ["ChemblRecordMapper"]
