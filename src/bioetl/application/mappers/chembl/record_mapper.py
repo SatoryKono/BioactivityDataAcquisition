@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
-from bioetl.domain.ports.parsing import RawRecordList
-from bioetl.domain.record_source import RawRecord
+from bioetl.domain.ports.parsing import RecordBatch
+from bioetl.domain.record_source import SourceRecord
 from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
@@ -13,7 +13,7 @@ class ChemblRecordMapper(RecordMapperABC):
     """Maps raw ChEMBL records to typed domain models.
 
     This mapper converts untyped dictionaries from the infrastructure
-    layer to validated domain RawRecord instances using Pydantic models.
+    layer to validated domain SourceRecord instances using Pydantic models.
 
     Args:
         registry: Entity model registry for resolving entity types to models.
@@ -40,9 +40,9 @@ class ChemblRecordMapper(RecordMapperABC):
 
     def map_records(
         self,
-        raw_records: RawRecordList,
+        raw_records: RecordBatch,
         entity: str,
-    ) -> list[RawRecord]:
+    ) -> list[SourceRecord]:
         """Convert raw dicts to typed ChEMBL domain models.
 
         Args:
@@ -50,7 +50,7 @@ class ChemblRecordMapper(RecordMapperABC):
             entity: Entity type (activity, assay, target, molecule, document).
 
         Returns:
-            List of validated domain RawRecord instances.
+            List of validated domain SourceRecord instances.
 
         Raises:
             ValueError: If entity type is unknown.
