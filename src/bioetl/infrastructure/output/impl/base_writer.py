@@ -14,7 +14,7 @@ from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.column_order import apply_column_order
 
 
-class BaseWriterImpl:
+class BaseWriter:
     """Template for concrete writers with shared bookkeeping."""
 
     def __init__(
@@ -61,3 +61,9 @@ class BaseWriterImpl:
 
     def _write_frame(self, df: pd.DataFrame, path: Path) -> None:
         raise NotImplementedError
+
+
+# Deprecated alias for backward compatibility (will be removed in next major version)
+BaseWriterImpl = BaseWriter
+
+__all__ = ["BaseWriter", "BaseWriterImpl"]

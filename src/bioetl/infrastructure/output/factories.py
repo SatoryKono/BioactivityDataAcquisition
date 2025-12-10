@@ -8,24 +8,24 @@ from bioetl.domain.clients.base.output.contracts import (
 )
 from bioetl.domain.configs import DeterminismConfig, QcConfig
 from bioetl.domain.observability import MetricsPortABC
-from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
-from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
+from bioetl.infrastructure.output.impl.csv_writer import CsvWriter
+from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriter
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
 from bioetl.infrastructure.output.unified_loader_impl import (
     UnifiedLoaderImpl,
 )
 
 
-def default_writer() -> CsvWriterImpl:
+def default_writer() -> CsvWriter:
     """Create the default CSV writer implementation."""
 
-    return CsvWriterImpl()
+    return CsvWriter()
 
 
-def default_metadata_writer() -> MetadataWriterImpl:
+def default_metadata_writer() -> MetadataWriter:
     """Create the metadata writer that stores sidecar files."""
 
-    return MetadataWriterImpl()
+    return MetadataWriter()
 
 
 def default_quality_reporter() -> QualityReportABC:

@@ -17,7 +17,7 @@ from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl
 )
 
 
-class ChemblNormalizationServiceImpl(DefaultNormalizationTransformerImpl):
+class ChemblNormalizationService(DefaultNormalizationTransformerImpl):
     """Normalization service for ChEMBL records.
 
     DEPRECATED: Use DefaultNormalizationTransformerImpl directly.
@@ -29,7 +29,7 @@ class ChemblNormalizationServiceImpl(DefaultNormalizationTransformerImpl):
 
     def __init__(self, config: NormalizationConfigProviderProtocol):
         warnings.warn(
-            "ChemblNormalizationServiceImpl is deprecated. "
+            "ChemblNormalizationService is deprecated. "
             "Use DefaultNormalizationTransformerImpl(config, empty_value=None, "
             "serialize_array_in_series=False) instead.",
             DeprecationWarning,
@@ -43,8 +43,15 @@ class ChemblNormalizationServiceImpl(DefaultNormalizationTransformerImpl):
         )
 
 
+# Deprecated alias for backward compatibility (will be removed in next major version)
+ChemblNormalizationServiceImpl = ChemblNormalizationService
+
 # Type alias for backward compatibility
 NormalizedRecord = dict[str, Any]
 
 
-__all__ = ["ChemblNormalizationServiceImpl", "NormalizedRecord"]
+__all__ = [
+    "ChemblNormalizationService",
+    "ChemblNormalizationServiceImpl",
+    "NormalizedRecord",
+]

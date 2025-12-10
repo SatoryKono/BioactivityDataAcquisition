@@ -12,7 +12,7 @@ from bioetl.domain.transform.normalizers import normalize_array, normalize_recor
 from bioetl.domain.transform.serializers import serialize_nested
 
 
-class BaseNormalizationServiceImpl:
+class BaseNormalizationService:
     """Provide reusable normalization helpers for normalization services.
 
     Args:
@@ -306,4 +306,7 @@ class BaseNormalizationServiceImpl:
         return False
 
 
-__all__ = ["BaseNormalizationServiceImpl"]
+# Deprecated alias for backward compatibility (will be removed in next major version)
+BaseNormalizationServiceImpl = BaseNormalizationService
+
+__all__ = ["BaseNormalizationService", "BaseNormalizationServiceImpl"]

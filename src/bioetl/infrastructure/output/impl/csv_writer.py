@@ -9,10 +9,10 @@ from pathlib import Path
 import pandas as pd
 
 from bioetl.infrastructure.files.checksum import compute_file_sha256
-from bioetl.infrastructure.output.impl.base_writer import BaseWriterImpl
+from bioetl.infrastructure.output.impl.base_writer import BaseWriter
 
 
-class CsvWriterImpl(BaseWriterImpl):
+class CsvWriter(BaseWriter):
     """
     Запись CSV.
     Делегирует атомарность и хеширование внешнему фасаду.
@@ -27,3 +27,9 @@ class CsvWriterImpl(BaseWriterImpl):
     def has_format_support(self, fmt: str) -> bool:
         """Return True if writer can handle the requested format."""
         return fmt.lower() == "csv"
+
+
+# Deprecated alias for backward compatibility (will be removed in next major version)
+CsvWriterImpl = CsvWriter
+
+__all__ = ["CsvWriter", "CsvWriterImpl"]

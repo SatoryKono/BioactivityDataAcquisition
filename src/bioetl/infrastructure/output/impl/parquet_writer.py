@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from bioetl.infrastructure.output.impl.base_writer import BaseWriterImpl
+from bioetl.infrastructure.output.impl.base_writer import BaseWriter
 
 
-class ParquetWriterImpl(BaseWriterImpl):
+class ParquetWriter(BaseWriter):
     """
     Запись Parquet.
     """
@@ -24,3 +24,9 @@ class ParquetWriterImpl(BaseWriterImpl):
     def has_format_support(self, fmt: str) -> bool:
         """Return True if parquet format is requested."""
         return fmt.lower() == "parquet"
+
+
+# Deprecated alias for backward compatibility (will be removed in next major version)
+ParquetWriterImpl = ParquetWriter
+
+__all__ = ["ParquetWriter", "ParquetWriterImpl"]
