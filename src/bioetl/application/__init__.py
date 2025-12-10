@@ -16,6 +16,7 @@ from bioetl.application.container import (
     PipelineContainer,
     create_default_container_factory,
 )
+from bioetl.application.contracts import PipelineContainerABC, PipelineFactoryABC
 from bioetl.application.orchestrator import PipelineOrchestrator
 
 __all__ = [
@@ -23,6 +24,8 @@ __all__ = [
     "ApplicationContext",
     "ConfigLoaderFactory",
     "PipelineContainer",
+    "PipelineContainerABC",
+    "PipelineFactoryABC",
     "PipelineOrchestrator",
     "ProviderClearer",
     "ProviderInjector",

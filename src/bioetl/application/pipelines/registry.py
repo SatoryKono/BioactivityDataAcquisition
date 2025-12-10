@@ -8,7 +8,7 @@ from typing import Type
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.factories import ChemblPipelineFactory
-from bioetl.application.pipelines.contracts import PipelineFactoryABC
+from bioetl.application.contracts import PipelineFactoryABC
 
 PipelineFactory = Callable[..., PipelineBase]
 

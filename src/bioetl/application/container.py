@@ -13,7 +13,7 @@ from bioetl.application.factories.noop import (
 )
 from bioetl.application.factories.record_source import RecordSourceFactory
 from bioetl.application.factories.services import ProviderServiceFactory
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,

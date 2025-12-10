@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 import pytest
 
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
 
 # Provider registry module was removed
