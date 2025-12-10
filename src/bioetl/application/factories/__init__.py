@@ -12,6 +12,7 @@ from bioetl.application.factories.noop import (
     create_noop_validator_factory,
 )
 from bioetl.application.factories.record_source import RecordSourceFactory
+from bioetl.application.factories.runtime_factory import PipelineRuntimeFactory
 from bioetl.application.factories.service_factory import (
     ApplicationServiceFactory,
     ApplicationServiceFactoryABC,
@@ -26,6 +27,7 @@ __all__ = [
     "ApplicationServiceFactory",
     "ApplicationServiceFactoryABC",
     "PipelineHookFactory",
+    "PipelineRuntimeFactory",
     "ProviderServiceFactory",
     "RecordSourceFactory",
     "TransformComponentFactory",
