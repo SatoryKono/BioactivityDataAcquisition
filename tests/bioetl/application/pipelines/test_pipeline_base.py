@@ -49,6 +49,8 @@ class RecordingLoader(LoaderABC):
 
     def __init__(self):
         self.calls: list[tuple[pd.DataFrame, Path, RunContext, list[str] | None]] = []
+        self.meta_calls: list[tuple[dict, Path]] = []
+        self.qc_calls: list[tuple[pd.DataFrame, Path]] = []
 
     def load(
         self,
@@ -59,6 +61,12 @@ class RecordingLoader(LoaderABC):
     ) -> WriteResult:
         self.calls.append((df.copy(), output_path, context, column_order))
         return WriteResult(path=output_path, row_count=len(df), duration_sec=0.0)
+
+    def write_metadata(self, meta: dict, path: Path) -> None:
+        self.meta_calls.append((meta, path))
+
+    def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
+        self.qc_calls.append((df, path))
 
 
 class SimpleTransformer(TransformerABC):

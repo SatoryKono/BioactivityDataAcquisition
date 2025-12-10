@@ -35,7 +35,8 @@ def mock_registry():
 def container(mock_config, mock_registry):
     return PipelineContainer(
         config=mock_config,
-        provider_registry=mock_registry
+        provider_registry=mock_registry,
+        loader=Mock()
     )
 
 
