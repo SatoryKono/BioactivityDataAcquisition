@@ -26,7 +26,11 @@ from bioetl.domain.pipelines.contracts import (
 )
 from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
-from bioetl.domain.transform.contracts import HashServiceABC
+from bioetl.domain.transform.contracts import (
+    HashServiceABC,
+    IndexGeneratorABC,
+    TimestampProviderABC,
+)
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
@@ -89,6 +93,8 @@ class PipelineBase(ABC):
         validation_service: ValidationService,
         loader: LoaderABC,
         hash_service: HashServiceABC,
+        index_generator: IndexGeneratorABC,
+        timestamp_provider: TimestampProviderABC,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         extractor: ExtractorABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
@@ -106,6 +112,8 @@ class PipelineBase(ABC):
         self._validation_service = validation_service
         self._loader = loader
         self._hash_service = hash_service
+        self._index_generator = index_generator
+        self._timestamp_provider = timestamp_provider
         self._metadata_builder = metadata_builder or _create_default_metadata_builder()
         self._extractor = extractor
         self._transformer = transformer
@@ -114,6 +122,8 @@ class PipelineBase(ABC):
             business_key_fields = self._resolve_business_key_fields()
             self._post_transformer = default_post_transformer(
                 hash_service=self._hash_service,
+                index_generator=self._index_generator,
+                timestamp_provider=self._timestamp_provider,
                 business_key_fields=business_key_fields,
                 version_provider=self.get_version,
             )

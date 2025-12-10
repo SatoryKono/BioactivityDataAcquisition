@@ -26,7 +26,12 @@ from bioetl.domain.ports.extraction import (
 )
 from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
-from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
+from bioetl.domain.transform.contracts import (
+    HashServiceABC,
+    IndexGeneratorABC,
+    NormalizationServiceABC,
+    TimestampProviderABC,
+)
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 
@@ -41,6 +46,8 @@ class ChemblPipelineBase(PipelineBase):
         validation_service: ValidationService,
         extraction_service: ExtractionServiceABC,
         hash_service: HashServiceABC,
+        index_generator: IndexGeneratorABC,
+        timestamp_provider: TimestampProviderABC,
         loader: LoaderABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         record_source: RecordSourceABC | None = None,
@@ -96,6 +103,8 @@ class ChemblPipelineBase(PipelineBase):
             validation_service=validation_service,
             loader=resolved_loader,
             hash_service=hash_service,
+            index_generator=index_generator,
+            timestamp_provider=timestamp_provider,
             metadata_builder=metadata_builder or _create_default_metadata_builder(),
             extractor=extractor,
             hooks=hooks,
