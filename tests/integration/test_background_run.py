@@ -18,7 +18,7 @@ from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
-from bioetl.interfaces.container_factory import (
+from bioetl.interfaces.composition_root import (
     build_default_container,
     create_config_loader,
 )
