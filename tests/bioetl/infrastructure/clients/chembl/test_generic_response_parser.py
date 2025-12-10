@@ -199,11 +199,11 @@ class TestNoDomainImportsAtModuleLevel:
         assert "TargetRawModel" not in source
 
 
-class TestDeprecatedAlias:
-    """Tests for backward-compatible deprecated alias."""
+class TestDeprecatedAliases:
+    """Tests for deprecated backward-compatibility aliases."""
 
     def test_chembl_response_parser_impl_alias_emits_warning(self):
-        """Test that importing ChemblResponseParserImpl emits deprecation warning."""
+        """Test ChemblResponseParserImpl alias emits deprecation warning."""
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Import the deprecated alias
@@ -221,7 +221,7 @@ class TestDeprecatedAlias:
             assert "ChemblGenericResponseParser" in str(deprecation_warnings[0].message)
 
     def test_chembl_response_parser_impl_alias_returns_correct_class(self):
-        """Test that ChemblResponseParserImpl alias returns ChemblGenericResponseParser."""
+        """Test ChemblResponseParserImpl alias returns ChemblGenericResponseParser."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             from bioetl.infrastructure.clients.chembl.response_parser import (
@@ -230,8 +230,8 @@ class TestDeprecatedAlias:
 
             assert ChemblResponseParserImpl is ChemblGenericResponseParser
 
-    def test_chembl_response_parser_impl_alias_is_functional(self):
-        """Test that deprecated alias can be instantiated and used."""
+    def test_deprecated_alias_is_functional(self):
+        """Test that deprecated alias creates working parser instances."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             from bioetl.infrastructure.clients.chembl.response_parser import (
@@ -241,4 +241,6 @@ class TestDeprecatedAlias:
             parser = ChemblResponseParserImpl()
             response = {"activities": [{"id": "1"}]}
             records = parser.parse_to_records(response)
-            assert records == [{"id": "1"}]
+
+            assert len(records) == 1
+            assert records[0]["id"] == "1"

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import warnings
+from typing import Any
 
 from bioetl.domain.ports.parsing import (
     ApiPayload,
@@ -95,29 +96,24 @@ def create_generic_parser() -> ResponseParserPortABC:
 # Deprecated Aliases (Backward Compatibility)
 # =============================================================================
 
-# Legacy class name that was previously typed on ActivityRawModel.
-# Available via __getattr__ to emit deprecation warning on first access.
 _DEPRECATED_ALIASES = {
     "ChemblResponseParserImpl": "ChemblGenericResponseParser",
 }
 
 
-def __getattr__(name: str) -> object:
-    """Emit deprecation warning for legacy class name imports.
+def __getattr__(name: str) -> Any:
+    """Support deprecated class names with warnings.
 
-    Enables backward-compatible imports like:
-        from bioetl.infrastructure.clients.chembl.response_parser import (
-            ChemblResponseParserImpl
-        )
+    Allows backward-compatible imports like:
+        from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParserImpl
 
-    But emits a DeprecationWarning directing users to the new class name.
+    But emits a DeprecationWarning directing users to the new name.
     """
     if name in _DEPRECATED_ALIASES:
         new_name = _DEPRECATED_ALIASES[name]
         warnings.warn(
             f"{name} is deprecated, use {new_name} instead. "
-            "ChemblResponseParserImpl was removed in v2.0 as part of hexagonal "
-            "architecture refactoring. See docs/migration/2.0-hexagonal-architecture.md",
+            "See docs/migration/2.0-hexagonal-architecture.md for migration guide.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -128,6 +124,6 @@ def __getattr__(name: str) -> object:
 __all__ = [
     "ChemblGenericResponseParser",
     "create_generic_parser",
-    # Deprecated aliases (available via __getattr__)
+    # Deprecated (available via __getattr__)
     "ChemblResponseParserImpl",
 ]
