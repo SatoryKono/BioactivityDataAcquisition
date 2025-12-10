@@ -1,4 +1,9 @@
-"""Infrastructure implementation of HashService using BLAKE2b."""
+"""Infrastructure implementation of HashService using BLAKE2b.
+
+Terminology:
+    compute_row_fingerprint: Computes a hash fingerprint of the entire row.
+    compute_entity_key: Computes a hash of the business key columns.
+"""
 
 from __future__ import annotations
 
@@ -13,6 +18,10 @@ class Blake2bHashService(HashServiceABC):
 
     Использует HasherABC для вычисления хешей.
     Не содержит никакого состояния - чистые функции хеширования.
+
+    Methods:
+        compute_row_fingerprint: Canonical method for row hashing.
+        compute_entity_key: Canonical method for business key hashing.
     """
 
     def __init__(self, hasher: HasherABC) -> None:
@@ -22,13 +31,28 @@ class Blake2bHashService(HashServiceABC):
         """
         self._hasher = hasher
 
-    def hash_row(self, row: dict) -> str:
-        """Вычисляет хеш строки как полного объекта."""
+    def compute_row_fingerprint(self, row: dict) -> str:
+        """Вычисляет хеш-отпечаток строки как полного объекта.
+
+        Args:
+            row: Словарь с данными строки.
+
+        Returns:
+            Hex-строка с хешем строки.
+        """
         series = pd.Series(row)
         return self._hasher.compute_hash_row(series)
 
-    def hash_business_key(self, row: dict, key_columns: list[str]) -> str:
-        """Вычисляет хеш бизнес-ключа (выбранных колонок)."""
+    def compute_entity_key(self, row: dict, key_columns: list[str]) -> str:
+        """Вычисляет хеш бизнес-ключа (выбранных колонок).
+
+        Args:
+            row: Словарь с данными строки.
+            key_columns: Список колонок бизнес-ключа.
+
+        Returns:
+            Hex-строка с хешем бизнес-ключа.
+        """
         df = pd.DataFrame([row])
         result = self._hasher.compute_hash_columns(df, key_columns)
         return result.iloc[0]
