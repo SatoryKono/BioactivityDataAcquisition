@@ -13,8 +13,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Any
-import warnings
 
 from pydantic import BaseModel, ConfigDict
 
@@ -36,7 +34,11 @@ class RecordSourceABC(ABC):
 class InMemoryRecordSource(RecordSourceABC):
     """Simple record source backed by an in-memory list."""
 
-    def __init__(self, records: list[RawRecord], chunk_size: int | None = None):
+    def __init__(
+        self,
+        records: list[RawRecord],
+        chunk_size: int | None = None,
+    ):
         self._records = list(records)
         self._chunk_size = chunk_size
 
@@ -52,31 +54,3 @@ class InMemoryRecordSource(RecordSourceABC):
 
 # Type alias for backward compatibility
 RecordSource = RecordSourceABC
-
-
-def __getattr__(name: str) -> Any:
-    """Provide backward compatibility for ApiRecordSource import.
-
-    This function allows importing ApiRecordSource from the old location
-    while emitting a deprecation warning.
-
-    Args:
-        name: The attribute name being accessed.
-
-    Returns:
-        The ApiRecordSource class from its new location.
-
-    Raises:
-        AttributeError: If the requested attribute is not ApiRecordSource.
-    """
-    if name == "ApiRecordSource":
-        warnings.warn(
-            "Importing ApiRecordSource from bioetl.domain.record_source is deprecated. "
-            "Use 'from bioetl.application.sources import ApiRecordSource' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        from bioetl.application.sources import ApiRecordSource
-
-        return ApiRecordSource
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

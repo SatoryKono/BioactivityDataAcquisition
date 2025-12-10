@@ -11,7 +11,7 @@ from bioetl.domain.schemas.generator import generate_schema_from_column_order
 from bioetl.domain.validation import SchemaProviderABC, schema_type
 
 # Type alias for schema registration function
-SchemaRegisterFn = Callable[["SchemaRegistry"], "SchemaRegistry"]
+SchemaRegisterFn = Callable[["SchemaRegistry"], SchemaProviderABC]
 
 
 class SchemaRegistry(SchemaProviderABC):
@@ -101,13 +101,17 @@ def create_default_schema_registry(
     """
     reg = SchemaRegistry()
 
-    if register_fn is None:
+    if register_fn is not None:
+        fn = register_fn
+    else:
         # Import here to avoid circular dependency
         from bioetl.domain.schemas import register_schemas
 
-        register_fn = register_schemas
+        # register_schemas accepts SchemaProviderABC, which is compatible
+        # with SchemaRegistry (subtype), so we cast/ignore to satisfy mypy
+        fn = register_schemas
 
-    register_fn(reg)
+    fn(reg)
     return reg
 
 

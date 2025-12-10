@@ -19,7 +19,6 @@ from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
 )
-from bioetl.application.helpers import resolve_primary_key_with_filter
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
@@ -56,7 +55,7 @@ class ChemblPipelineBase(PipelineBase):
         self._extraction_service: ExtractionServiceABC = extraction_service
         self._chembl_release: str | None = None
 
-        self.ID_COLUMN, self.API_FILTER_KEY = resolve_primary_key_with_filter(config)
+        self.ID_COLUMN, self.API_FILTER_KEY = self._resolve_primary_key(config)
 
         if normalization_service is None:
             raise ValueError(
@@ -106,6 +105,29 @@ class ChemblPipelineBase(PipelineBase):
         self._loader = resolved_loader
         self._extractor = extractor
         self._transformer = transformer
+
+    @staticmethod
+    def _resolve_primary_key(config: PipelineConfig) -> tuple[str, str]:
+        """Resolve entity primary key and API filter key based on config."""
+
+        pk = config.primary_key
+
+        if not pk and config.pipeline and "primary_key" in config.pipeline:
+            pk = config.pipeline["primary_key"]
+
+        if not pk:
+            pk = f"{config.entity_name}_id"
+
+        if not pk:
+            raise ValueError(
+                (
+                    "Could not resolve ID_COLUMN for entity "
+                    f"'{config.entity_name}'. Please set 'primary_key' "
+                    "in config or pipeline options."
+                )
+            )
+
+        return pk, f"{pk}__in"
 
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""
