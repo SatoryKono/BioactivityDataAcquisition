@@ -18,35 +18,7 @@ import pandas as pd
 # ============================================================================
 
 
-# --- До рефакторинга (текущий код) ---
-class OldNormalizer:
-    """Текущая реализация с множеством if-else и смешанной логикой"""
-
-    def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
-        for field_cfg in self._config.fields:
-            name = field_cfg["name"]
-            dtype = field_cfg.get("data_type")
-
-            if name not in df.columns:
-                continue
-
-            # Огромная простыня if-else логики
-            mode = "default"
-            if name in CASE_SENSITIVE_FIELDS:
-                mode = "sensitive"
-            elif is_id_field(name):
-                mode = "id"
-
-            if name in CUSTOM_FIELD_NORMALIZERS:
-                base_normalizer = CUSTOM_FIELD_NORMALIZERS[name]
-            else:
-                # Еще больше if-else...
-                pass
-
-            # Row-by-row обработка - МЕДЛЕННО!
-            df[name] = df[name].apply(lambda x: self.normalize_value(x, mode))
-
-        return df
+# --- До рефакторинга (устаревший пример кода удален) ---
 
 
 # --- После рефакторинга ---
@@ -374,39 +346,19 @@ class ParallelBatchProcessor:
         return pd.concat([r[1] for r in results], ignore_index=True)
 
 
-class StreamingDataProcessor:
-    """Потоковая обработка больших файлов"""
+def process_file_streaming(
+    file_path: str, processor_fn: callable, output_path: str, *, chunk_size: int = 10000
+) -> None:
+    """Потоковая обработка больших файлов без загрузки в память."""
+    first_chunk = True
 
-    def __init__(self, chunk_size: int = 10000):
-        self.chunk_size = chunk_size
-
-    def process_file_streaming(
-        self, file_path: str, processor_fn: callable, output_path: str
-    ):
-        """
-        Обрабатывает большой файл по частям без загрузки в память
-
-        Args:
-            file_path: Путь к входному файлу
-            processor_fn: Функция обработки чанка
-            output_path: Путь к выходному файлу
-        """
-        first_chunk = True
-
-        # Читаем и обрабатываем файл чанками
-        for chunk_df in pd.read_csv(file_path, chunksize=self.chunk_size):
-            # Обрабатываем чанк
-            processed_chunk = processor_fn(chunk_df)
-
-            # Записываем результат
-            mode = "w" if first_chunk else "a"
-            header = first_chunk
-
-            processed_chunk.to_csv(output_path, mode=mode, header=header, index=False)
-
-            first_chunk = False
-
-            logger.info(f"Processed chunk with {len(chunk_df)} rows")
+    for chunk_df in pd.read_csv(file_path, chunksize=chunk_size):
+        processed_chunk = processor_fn(chunk_df)
+        mode = "w" if first_chunk else "a"
+        header = first_chunk
+        processed_chunk.to_csv(output_path, mode=mode, header=header, index=False)
+        first_chunk = False
+        logger.info(f"Processed chunk with {len(chunk_df)} rows")
 
 
 # ============================================================================
@@ -502,53 +454,37 @@ class PipelineOrchestrator:
 # ============================================================================
 
 
-class VectorizedOperations:
-    """Примеры векторизованных операций вместо apply()"""
+def normalize_ids_vectorized(series: pd.Series, id_type: str) -> pd.Series:
+    """Векторизованная нормализация идентификаторов."""
+    if id_type == "chembl":
+        result = series.str.strip().str.upper()
+        is_numeric = result.str.match(r"^\d+$", na=False)
+        result[is_numeric] = "CHEMBL" + result[is_numeric]
+        return result
 
-    @staticmethod
-    def normalize_ids_vectorized(series: pd.Series, id_type: str) -> pd.Series:
-        """Векторизованная нормализация идентификаторов"""
-        # Вместо apply() используем векторные операции
+    elif id_type == "doi":
+        result = series.str.strip().str.lower()
+        result = result.str.replace(r"^doi:", "", regex=True)
+        result = result.str.replace(r"^https?://dx\.doi\.org/", "", regex=True)
+        return result
 
-        if id_type == "chembl":
-            # Векторное преобразование строк
-            result = series.str.strip().str.upper()
 
-            # Векторная проверка и модификация
-            is_numeric = result.str.match(r"^\d+$", na=False)
-            result[is_numeric] = "CHEMBL" + result[is_numeric]
+def round_numbers_vectorized(series: pd.Series, decimals: int = 3) -> pd.Series:
+    """Векторизованное округление чисел."""
+    return pd.Series(
+        np.where(pd.isna(series), np.nan, np.round(series.values, decimals)),
+        index=series.index,
+    )
 
-            return result
 
-        elif id_type == "doi":
-            # Векторные строковые операции
-            result = series.str.strip().str.lower()
-
-            # Удаление префиксов векторно
-            result = result.str.replace(r"^doi:", "", regex=True)
-            result = result.str.replace(r"^https?://dx\.doi\.org/", "", regex=True)
-
-            return result
-
-    @staticmethod
-    def round_numbers_vectorized(series: pd.Series, decimals: int = 3) -> pd.Series:
-        """Векторизованное округление чисел"""
-        # NumPy операции намного быстрее чем apply()
-        return pd.Series(
-            np.where(pd.isna(series), np.nan, np.round(series.values, decimals)),
-            index=series.index,
-        )
-
-    @staticmethod
-    def clean_text_vectorized(series: pd.Series) -> pd.Series:
-        """Векторизованная очистка текста"""
-        # Цепочка векторных операций
-        return (
-            series.str.strip()
-            .str.lower()
-            .str.replace(r"\s+", " ", regex=True)  # Множественные пробелы
-            .str.replace(r"[^\w\s-]", "", regex=True)  # Специальные символы
-        )
+def clean_text_vectorized(series: pd.Series) -> pd.Series:
+    """Векторизованная очистка текста."""
+    return (
+        series.str.strip()
+        .str.lower()
+        .str.replace(r"\s+", " ", regex=True)
+        .str.replace(r"[^\w\s-]", "", regex=True)
+    )
 
 
 # ============================================================================

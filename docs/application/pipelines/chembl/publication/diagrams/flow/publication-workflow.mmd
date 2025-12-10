@@ -1,9 +1,9 @@
 flowchart TD
-    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-    classDef stepDecision  fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
-    classDef stepTerminal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-    linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+    classDef stepDecision  fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
+    classDef stepTerminal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111
 
     Start([Start publication_chembl run]):::stepTerminal --> Extract["Extract publication records\n- /document endpoint (API/CSV)\n- flatten base metadata (doi, journal, year)"]:::stepPrimary
     Extract --> Enrich["Literature enrichment\n- query OpenAlex/Semantic Scholar by DOI\n- capture citation_count, topics, external IDs"]:::stepPrimary

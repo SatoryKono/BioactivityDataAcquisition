@@ -3,10 +3,10 @@ id: 8f0f89c8-5cff-4b57-a4b9-b5443c28908a
 ---
 flowchart LR
 
-classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-classDef group           fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+classDef domainPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+classDef domainSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+classDef interface       fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+classDef group           fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
 subgraph Transformers
     T_Chain[TransformerChainImpl]:::domainPrimary
@@ -15,7 +15,7 @@ subgraph Transformers
     T_Date[FulldateTransformerImpl]:::domainSecondary
     T_ABC[<<TransformerABC>>]:::interface
 end
-class Transformers group;
+class Transformers group
 
 subgraph Services
     HS[HashService]:::domainSecondary
