@@ -1,1 +1,1 @@
-"""Interface layer package (CLI, REST, MQ)."""
+"""Interface layer package (CLI, REST)."""
