@@ -10,8 +10,8 @@ from typing import Any, Iterator
 from bioetl.domain.clients.base.contracts import (
     RateLimiterABC,
     RequestBuilderABC,
-    ResponseParserABC,
 )
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.constants import resolve_endpoint
@@ -34,7 +34,7 @@ class ChemblHttpClientImpl(DataClientABC):
     def __init__(
         self,
         request_builder: RequestBuilderABC,
-        response_parser: ResponseParserABC,
+        response_parser: ResponseParserPortABC,
         rate_limiter: RateLimiterABC,
         http_client: Any,
         logger: LoggingPortABC,
