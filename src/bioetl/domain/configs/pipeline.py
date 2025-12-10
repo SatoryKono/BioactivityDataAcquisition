@@ -113,30 +113,6 @@ class ProviderHttpConfig(HttpClientConfig):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
-# =============================================================================
-# DEPRECATED: Legacy aliases for backward compatibility
-# These will be removed in a future version
-# =============================================================================
-
-# Legacy alias - use HttpClientConfig instead
-HttpClientSettings = ProviderHttpConfig
-
-# Legacy alias - use HttpClientConfig instead
-ClientConfig = HttpClientConfig
-
-
-class HttpClientDefaults(HttpClientConfig):
-    """DEPRECATED: Use HttpClientConfig directly.
-
-    Shared HTTP client defaults - now just an alias for HttpClientConfig.
-    """
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-
-HTTP_CLIENT_DEFAULTS = HttpClientConfig()
-
-
 class StorageConfig(BaseModel):
     """Storage path configuration."""
 
@@ -198,31 +174,6 @@ class QualityControlConfig(BaseModel):
     min_coverage: float = 0.85
 
     model_config = ConfigDict(extra="forbid")
-
-
-def _qc_config_deprecation_warning() -> None:
-    """Emit deprecation warning for QcConfig."""
-    import warnings
-
-    warnings.warn(
-        "QcConfig is deprecated, use QualityControlConfig instead. "
-        "Will be removed in v3.0.",
-        DeprecationWarning,
-        stacklevel=3,
-    )
-
-
-# Deprecated alias for backward compatibility
-# TODO: Remove in v3.0
-class QcConfig(QualityControlConfig):
-    """Deprecated: Use QualityControlConfig instead.
-
-    Will be removed in v3.0.
-    """
-
-    def __init__(self, **data):
-        _qc_config_deprecation_warning()
-        super().__init__(**data)
 
 
 class CanonicalizationConfig(BaseModel):
@@ -737,10 +688,4 @@ __all__ = [
     "InterfaceFeaturesConfig",
     "NormalizationConfig",
     "TransformConfig",
-    # DEPRECATED: Legacy aliases (will be removed in future versions)
-    "ClientConfig",  # Use HttpClientConfig
-    "HttpClientDefaults",  # Use HttpClientConfig
-    "HttpClientSettings",  # Use ProviderHttpConfig
-    "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
-    "QcConfig",  # Use QualityControlConfig
 ]
