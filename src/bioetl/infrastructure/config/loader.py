@@ -16,7 +16,7 @@ from bioetl.domain.schemas.registry import default_schema_provider
 from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.domain.validation import SchemaProviderABC
 from bioetl.infrastructure.config.env import resolve_env_placeholders
-from bioetl.infrastructure.config.provider_registry_loader import (
+from bioetl.infrastructure.config.provider_registry import (
     ProviderNotConfiguredError,
     ProviderRegistryError,
     ensure_provider_known,

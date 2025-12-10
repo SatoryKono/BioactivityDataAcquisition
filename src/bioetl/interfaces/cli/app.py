@@ -16,7 +16,7 @@ from bioetl.application.config.resolution import (
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import PipelineConfig
-from bioetl.infrastructure.clients.provider_registry_loader import (
+from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.infrastructure.config.sources import get_configs_root
