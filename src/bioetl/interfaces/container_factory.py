@@ -69,6 +69,12 @@ def build_default_container(
         "OutputFrameConverterABC"
     )
     hash_service_factory = registry_loader.resolve_default_factory("HashServiceABC")
+    timestamp_provider_factory = registry_loader.resolve_default_factory(
+        "TimestampProviderABC"
+    )
+    index_generator_factory = registry_loader.resolve_default_factory(
+        "IndexGeneratorABC"
+    )
 
     logger = logger_factory()
     metrics_port = _create_metrics_port()
@@ -84,6 +90,8 @@ def build_default_container(
     metadata_builder = _create_metadata_builder()
     validator_factory = _create_validator_factory()
     hash_service = hash_service_factory()
+    timestamp_provider = timestamp_provider_factory()
+    index_generator = index_generator_factory()
 
     return PipelineContainer(
         config,
@@ -93,6 +101,8 @@ def build_default_container(
         metadata_builder=metadata_builder,
         metrics_port=metrics_port,
         hash_service=hash_service,
+        timestamp_provider=timestamp_provider,
+        index_generator=index_generator,
         provider_registry=provider_registry,
         provider_registry_provider=provider_registry_provider,
     )
