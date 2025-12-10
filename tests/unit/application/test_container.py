@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.application.container import SimplePipelineContainer
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.application.mappers.chembl.record_mapper import ChemblRecordMapper
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.application.services.schema_bootstrap import SchemaBootstrapService

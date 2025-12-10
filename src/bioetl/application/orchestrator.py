@@ -20,7 +20,7 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition
-from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+from bioetl.application.memory_registry import InMemoryProviderRegistry
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
