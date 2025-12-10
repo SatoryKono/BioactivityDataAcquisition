@@ -25,7 +25,7 @@ class _FakeValidator(ValidatorABC):
                 is_valid=True,
                 errors=[],
                 warnings=[],
-                validated_df=self.validated or df,
+                validated_data=self.validated or df,
             )
         return ValidationResult(is_valid=False, errors=["fail"], warnings=[])
 

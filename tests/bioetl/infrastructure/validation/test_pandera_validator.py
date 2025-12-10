@@ -23,8 +23,8 @@ def test_pandera_validator_success():
 
     assert result.is_valid
     assert result.errors == []
-    assert result.validated_df is not None
-    pd.testing.assert_frame_equal(result.validated_df, df)
+    assert result.validated_data is not None
+    pd.testing.assert_frame_equal(result.validated_data, df)
 
 
 def test_pandera_validator_failure():
@@ -35,7 +35,7 @@ def test_pandera_validator_failure():
 
     assert not result.is_valid
     assert result.errors
-    assert result.validated_df is None
+    assert result.validated_data is None
 
 
 def test_pandera_validator_exception():

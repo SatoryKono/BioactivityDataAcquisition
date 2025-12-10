@@ -25,7 +25,7 @@ class PanderaValidatorImpl(ValidatorABC):
                 is_valid=True,
                 errors=[],
                 warnings=[],
-                validated_df=validated_df,  # type: ignore[return-value]
+                validated_data=validated_df,  # type: ignore[return-value]
             )
         except SchemaErrors as exc:
             return ValidationResult(
