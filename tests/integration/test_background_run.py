@@ -18,8 +18,7 @@ from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.container_factory import build_default_container
-from bioetl.interfaces.wiring import create_config_loader
+from bioetl.interfaces.container_factory import build_default_container, create_config_loader
 
 
 def _build_config(tmp_path: Path) -> tuple[Path, dict[str, str], Path]:

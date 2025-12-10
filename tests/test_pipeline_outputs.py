@@ -17,7 +17,7 @@ from bioetl.domain.models import RunResult
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.wiring import create_config_loader
+from bioetl.interfaces.container_factory import create_config_loader
 
 _PIPELINE_CASES = [
     (
