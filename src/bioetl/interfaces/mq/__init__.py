@@ -1,0 +1,3 @@
+"""
+Message Queue Interface Module.
+"""

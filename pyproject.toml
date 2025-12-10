@@ -126,15 +126,15 @@ markers = [
     "network: Tests that require network access",
     "api: API client tests",
     "benchmark: Performance benchmark tests",
+    "architecture: Architectural rule checks",
+    "project_rules: Project rule checks",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::FutureWarning:pandera.*",
     "ignore::UserWarning:pandera.*",
 ]
-
-[tool.pytest.ini_options.console_output_style]
-progress = "multi"
+console_output_style = "count"
 
 [tool.coverage.run]
 source = ["src/bioetl"]
