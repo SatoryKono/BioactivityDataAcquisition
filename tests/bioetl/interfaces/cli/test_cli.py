@@ -330,6 +330,12 @@ def test_run_dry_run_pipeline_metadata(
     logger.apply_bind.return_value = logger
     validation_service = MagicMock()
     validation_service.validate.side_effect = lambda df, **__: df
+    
+    # Mock schema to have columns
+    mock_schema = MagicMock()
+    mock_schema.columns = {"col1": MagicMock()}
+    validation_service.get_schema.return_value = mock_schema
+    
     loader = MagicMock(spec=LoaderABC)
     loader.load.return_value = MagicMock(
         row_count=len(small_pipeline_df),
@@ -387,6 +393,10 @@ def test_run_dry_run_pipeline_metadata(
             app,
             ["run", "activity_chembl", "--config", "config.yaml", "--dry-run"],
         )
+
+    if result.exit_code != 0:
+        print(result.stdout)
+        print(result.exc_info)
 
     assert result.exit_code == 0
     assert "Pipeline finished successfully" in result.stdout
