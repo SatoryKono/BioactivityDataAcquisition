@@ -35,7 +35,6 @@ ALLOWED_ABCS_WITHOUT_IMPL = {
     "ResponseParserABC",
     "SchemaProviderABC",
     "SecretProviderABC",
-    "SideInputProviderABC",
 }
 
 

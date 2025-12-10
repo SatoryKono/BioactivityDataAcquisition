@@ -131,20 +131,6 @@ class SecretProviderABC(ABC):
         """Возвращает значение секрета."""
 
 
-class SideInputProviderABC(ABC):
-    """
-    Провайдер побочных данных (справочников).
-    """
-
-    @abstractmethod
-    def get_side_input(self, name: str) -> Any:
-        """Возвращает справочник (обычно DataFrame)."""
-
-    @abstractmethod
-    def refresh(self, name: str) -> None:
-        """Обновляет справочник."""
-
-
 class ApiClientABC(ABC):
     """
     Низкоуровневый HTTP‑клиент.

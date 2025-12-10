@@ -25,10 +25,6 @@ class RecordSourceABC(ABC):
         """Return iterable over raw record batches as lists of mappings."""
 
 
-# Alias for backward compatibility during migration
-RecordSource = RecordSourceABC
-
-
 class InMemoryRecordSource(RecordSourceABC):
     """Simple record source backed by an in-memory list."""
 
