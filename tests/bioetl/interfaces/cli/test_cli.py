@@ -17,7 +17,7 @@ from typer.testing import CliRunner
 sys.modules.setdefault("tqdm", MagicMock())
 
 PipelineBase = importlib.import_module("bioetl.application.pipelines.base").PipelineBase
-LoaderABC = importlib.import_module("bioetl.application.pipelines.contracts").LoaderABC
+LoaderABC = importlib.import_module("bioetl.domain.pipelines.contracts").LoaderABC
 _configs = importlib.import_module("bioetl.domain.configs")
 ChemblSourceConfig = _configs.ChemblSourceConfig
 ClientConfig = _configs.ClientConfig
