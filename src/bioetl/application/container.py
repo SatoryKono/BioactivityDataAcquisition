@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-from typing import Any, Callable, cast
+from typing import Any, Callable
 
 from bioetl.application.factories.hooks import PipelineHookFactory
-from bioetl.application.factories.noop import create_noop_metrics_port
+from bioetl.application.factories.noop import (
+    create_noop_logger,
+    create_noop_metadata_builder,
+    create_noop_metrics_port,
+    create_noop_validator_factory,
+)
 from bioetl.application.factories.record_source import RecordSourceFactory
 from bioetl.application.factories.services import ProviderServiceFactory
 from bioetl.application.pipelines.contracts import PipelineContainerABC
@@ -31,7 +35,6 @@ from bioetl.domain.transform.contracts import (
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
-from bioetl.domain.validation.contracts import ValidationResult
 from bioetl.domain.validation.service import ValidationService
 
 
@@ -125,15 +128,15 @@ class PipelineContainer(PipelineContainerABC):
     def _resolve_validator_factory(
         self, validator_factory: ValidatorFactoryABC | None
     ) -> ValidatorFactoryABC:
-        return validator_factory or _create_noop_validator_factory()
+        return validator_factory or create_noop_validator_factory()
 
     def _resolve_logger(self, logger: LoggingPortABC | None) -> LoggingPortABC:
-        return logger or _create_noop_logger()
+        return logger or create_noop_logger()
 
     def _resolve_metadata_builder(
         self, metadata_builder: RunMetadataBuilderProtocol | None
     ) -> RunMetadataBuilderProtocol:
-        return metadata_builder or _create_noop_metadata_builder()
+        return metadata_builder or create_noop_metadata_builder()
 
     def _resolve_metrics_port(
         self, metrics_port: MetricsPortABC | None
@@ -285,55 +288,6 @@ class PipelineContainer(PipelineContainerABC):
                 f"provider '{self._provider_id.value}'"
             )
         return source_config
-
-
-def _create_noop_logger() -> LoggingPortABC:
-    """Return a no-op logger respecting the logging port contract."""
-
-    def _bound_logger(**_: Any) -> LoggingPortABC:
-        return _create_noop_logger()
-
-    return cast(
-        LoggingPortABC,
-        SimpleNamespace(
-            info=lambda _msg, **__ctx: None,
-            error=lambda _msg, **__ctx: None,
-            debug=lambda _msg, **__ctx: None,
-            warning=lambda _msg, **__ctx: None,
-            apply_bind=_bound_logger,
-        ),
-    )
-
-
-def _create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
-    """Return metadata builder that emits minimal deterministic payloads."""
-
-    return cast(
-        RunMetadataBuilderProtocol,
-        SimpleNamespace(
-            build_run_metadata=lambda context, write_result: {
-                "run_id": getattr(context, "run_id", None),
-                "row_count": getattr(write_result, "row_count", 0),
-            },
-            build_dry_run_metadata=lambda context, row_count: {
-                "run_id": getattr(context, "run_id", None),
-                "row_count": row_count,
-            },
-        ),
-    )
-
-
-def _create_noop_validator_factory() -> ValidatorFactoryABC:
-    """Return validator factory that treats all data as valid (for tests)."""
-
-    def _validate(df: Any) -> ValidationResult:
-        return ValidationResult(is_valid=True, errors=[], warnings=[], validated_df=df)
-
-    validator = SimpleNamespace(validate=_validate, is_valid=lambda _df: True)
-    return cast(
-        ValidatorFactoryABC,
-        SimpleNamespace(create_validator=lambda _schema: validator),
-    )
 
 
 def create_default_container_factory() -> Callable[..., PipelineContainerABC]:
