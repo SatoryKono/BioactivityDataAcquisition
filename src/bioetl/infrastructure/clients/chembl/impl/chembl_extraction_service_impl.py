@@ -16,25 +16,27 @@ from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.domain.record_source import RawRecord
 from bioetl.infrastructure.clients.chembl.constants import ENTITY_ENDPOINT_ALIASES
 from bioetl.infrastructure.clients.chembl.parser_registry import get_parser_for_entity
-from bioetl.infrastructure.observability.factories import default_logging_port
 
 
 class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
     """
     Implementation of record fetcher for ChEMBL.
     Uses DataClientABC (expected to be ChemblHttpClientImpl) to fetch data.
+
+    All dependencies must be explicitly injected - no default fallbacks.
+    Use composition root or factories to create instances.
     """
 
     def __init__(
         self,
         client: DataClientABC,
+        logger: LoggingPortABC,
         batch_size: int = 1000,
-        logger: LoggingPortABC | None = None,
         field_provider: DefaultFieldProviderABC | None = None,
     ) -> None:
         self.client = client
         self.batch_size = batch_size
-        self.logger = logger or default_logging_port()
+        self.logger = logger
         self.field_provider = field_provider
         self._version_cache: str | None = None
 

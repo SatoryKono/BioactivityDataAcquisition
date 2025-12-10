@@ -4,6 +4,7 @@ import pytest
 import requests
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -41,19 +42,27 @@ def fixture_rate_limiter():
     return Mock(spec=RateLimiterABC)
 
 
+@pytest.fixture(name="mock_logger")
+def fixture_logger():
+    """Mock logger."""
+    return Mock(spec=LoggingPortABC)
+
+
 @pytest.fixture(name="client")
 def fixture_client(
     mock_request_builder,
     mock_response_parser,
     mock_rate_limiter,
     mock_http_client,
+    mock_logger,
 ):
     """Create ChemblHttpClientImpl instance with mocks."""
     client = ChemblHttpClientImpl(
         request_builder=mock_request_builder,
         response_parser=mock_response_parser,
         rate_limiter=mock_rate_limiter,
-        client=mock_http_client,
+        http_client=mock_http_client,
+        logger=mock_logger,
     )
     return client
 
