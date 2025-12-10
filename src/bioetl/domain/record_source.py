@@ -1,14 +1,22 @@
-"""Core record source interfaces and helpers."""
+"""Core record source interfaces and helpers.
+
+This module defines the abstract interface for record sources (RecordSourceABC)
+and the RawRecord value object. Concrete implementations that involve
+orchestration logic are located in the application layer.
+
+See also:
+    - bioetl.application.sources.ApiRecordSource: API-based record source
+    - bioetl.application.files: File-based record sources
+"""
 
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Any, Callable
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
-
-from bioetl.domain.ports.extraction import RecordFetcherABC
 
 
 class RawRecord(BaseModel):
@@ -42,37 +50,29 @@ class InMemoryRecordSource(RecordSourceABC):
             yield self._records[start : start + self._chunk_size]
 
 
-class ApiRecordSource(RecordSourceABC):
-    """Record source that fetches data from an extraction service."""
+def __getattr__(name: str) -> Any:
+    """Provide backward compatibility for ApiRecordSource import.
 
-    def __init__(
-        self,
-        extraction_service: RecordFetcherABC,
-        entity: str,
-        filters: dict[str, Any] | None = None,
-        chunk_size: int | None = None,
-        batch_adapter: Callable[[Any], list[RawRecord]] | None = None,
-    ) -> None:
-        self._extraction_service = extraction_service
-        self._entity = entity
-        self._filters = filters or {}
-        self._chunk_size = chunk_size
-        self._batch_adapter = batch_adapter
+    This function allows importing ApiRecordSource from the old location
+    while emitting a deprecation warning.
 
-    def iter_records(self) -> Iterable[list[RawRecord]]:
-        """Iterate over extracted provider batches as normalized records."""
-        filters = dict(self._filters)
-        for raw_batch in self._extraction_service.iter_extract(
-            self._entity, chunk_size=self._chunk_size, **filters
-        ):
-            if self._batch_adapter is not None:
-                yield self._batch_adapter(raw_batch)
-                continue
+    Args:
+        name: The attribute name being accessed.
 
-            if not isinstance(raw_batch, list):
-                raise TypeError(
-                    "iter_extract must yield list[RawRecord] when no batch_adapter "
-                    "is set."
-                )
+    Returns:
+        The ApiRecordSource class from its new location.
 
-            yield raw_batch
+    Raises:
+        AttributeError: If the requested attribute is not ApiRecordSource.
+    """
+    if name == "ApiRecordSource":
+        warnings.warn(
+            "Importing ApiRecordSource from bioetl.domain.record_source is deprecated. "
+            "Use 'from bioetl.application.sources import ApiRecordSource' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from bioetl.application.sources import ApiRecordSource
+
+        return ApiRecordSource
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

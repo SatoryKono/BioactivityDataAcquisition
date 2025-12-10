@@ -19,7 +19,8 @@ from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
     ExtractionServiceABC,
 )
-from bioetl.domain.record_source import ApiRecordSource, RecordSourceABC
+from bioetl.application.sources import ApiRecordSource
+from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
