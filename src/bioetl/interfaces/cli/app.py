@@ -9,55 +9,24 @@ from typing import Annotated
 from rich.console import Console
 import typer
 
-from bioetl.application.config.runtime import build_runtime_config
+from bioetl.application.config.resolution import (
+    ConfigPathResolver,
+    build_pipeline_config,
+)
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.domain.configs import PipelineConfig
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.interfaces.container_factory import build_default_container, create_config_loader
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
 
 
-def _infer_config_path(pipeline_name: str) -> str | None:
-    parts = pipeline_name.split("_")
-    if len(parts) >= 2:
-        entity, provider = parts[0], parts[1]
-        return f"configs/pipelines/{provider}/{entity}.yaml"
-    return None
-
-
-def _resolve_config_path(config: str) -> Path:
-    p = Path(config)
-    if p.exists():
-        return p
-    from bioetl.infrastructure.config.sources import get_configs_root
-
-    root = get_configs_root(None)
-    candidate = (root / p).resolve()
-    if candidate.exists():
-        return candidate
-    raise FileNotFoundError(f"Config file not found: {config}")
-
-
-def _build_config(config_path: Path, profile: str | None) -> "PipelineConfig":
-    config_loader = create_config_loader()
-    configs_root = (
-        config_path.parent.parent.parent
-        if config_path.parent.name == "pipelines"
-        else Path("configs")
-    )
-    return build_runtime_config(
-        config_path=config_path,
-        configs_root=configs_root,
-        loader=config_loader,
-        profile=profile,
-    )
-
-
-def _apply_output_override(pipeline_config: "PipelineConfig", output: str | None) -> None:
+def _apply_output_override(pipeline_config: PipelineConfig, output: str | None) -> None:
     if not output:
         return
     output_path = Path(output)
@@ -67,7 +36,7 @@ def _apply_output_override(pipeline_config: "PipelineConfig", output: str | None
         pipeline_config.storage.output_path = str(output_path)
 
 
-def _create_orchestrator(pipeline_name: str, pipeline_config: "PipelineConfig") -> PipelineOrchestrator:
+def _create_orchestrator(pipeline_name: str, pipeline_config: PipelineConfig) -> PipelineOrchestrator:
     def _provider_loader_factory() -> object:
         return create_provider_loader()
 
@@ -100,14 +69,8 @@ def validate_config(
 
     try:
         config_loader = create_config_loader()
-        configs_root = (
-            config_file.parent.parent.parent
-            if config_file.parent.name == "pipelines"
-            else Path("configs")
-        )
-        build_runtime_config(
-            config_path=config_file,
-            configs_root=configs_root,
+        build_pipeline_config(
+            config_file,
             loader=config_loader,
             profile=profile,
         )
@@ -138,14 +101,21 @@ def run(
 ) -> None:
     """Run a pipeline."""
     try:
-        inferred = _infer_config_path(pipeline_name) if config is None else config
-        if inferred is None:
-            console.print(
-                "[red]Error:[/red] Cannot infer config path. Use --config."
-            )
-            raise typer.Exit(1)
-        config_path = _resolve_config_path(inferred)
-        pipeline_config = _build_config(config_path, profile)
+        # Use application-layer config resolution
+        configs_root = get_configs_root(None)
+        resolver = ConfigPathResolver(configs_root)
+
+        config_path = resolver.resolve_config_path(
+            pipeline_name,
+            explicit_path=Path(config) if config else None,
+        )
+
+        config_loader = create_config_loader()
+        pipeline_config = build_pipeline_config(
+            config_path,
+            loader=config_loader,
+            profile=profile,
+        )
         _apply_output_override(pipeline_config, output)
         orchestrator = _create_orchestrator(pipeline_name, pipeline_config)
 
