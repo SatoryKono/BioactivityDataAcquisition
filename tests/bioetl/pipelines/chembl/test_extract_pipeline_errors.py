@@ -96,6 +96,8 @@ def test_extract_stage_wraps_client_error(
         hash_service=hash_service,
         normalization_service=normalization_service,
         record_source=record_source,
+        index_generator=MagicMock(),
+        timestamp_provider=MagicMock(),
     )
 
     with pytest.raises(PipelineStageError) as exc_info:

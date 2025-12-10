@@ -2,8 +2,6 @@
 
 from unittest.mock import Mock
 
-import pytest
-
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.parsing import ResponseParserPortABC
@@ -162,9 +160,7 @@ def test_extract_all_returns_list_of_dicts():
     client.request_builder = mock_builder
 
     # Mock iter_pages to return raw response
-    client.iter_pages.return_value = [
-        {"activities": [{"id": "1"}, {"id": "2"}]}
-    ]
+    client.iter_pages.return_value = [{"activities": [{"id": "1"}, {"id": "2"}]}]
 
     service = ChemblExtractionServiceImpl(client, logger=_mock_logger())
 

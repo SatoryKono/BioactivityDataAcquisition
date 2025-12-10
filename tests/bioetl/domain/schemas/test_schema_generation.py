@@ -1,5 +1,4 @@
 import pandas as pd
-import pandera as pa
 
 from bioetl.domain.schemas.generator import (
     generate_schema_from_column_order,
@@ -33,7 +32,8 @@ def test_register_schema_from_yaml(tmp_path):
     registry.register("from_yaml", None, column_order=column_order)
 
     schema = registry.get_schema("from_yaml")
-    # Check that schema can be used for validation (works with both old and new Pandera API)
+    # Check that schema can be used for validation
+    # (works with both old and new Pandera API)
     assert hasattr(schema, "validate") or hasattr(schema, "columns")
     assert registry.get_schema_columns("from_yaml") == ["id", "name"]
 

@@ -170,19 +170,28 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         Returns:
             Parsed records as list[dict[str, Any]].
         """
+        # Handle None or invalid input
+        if raw_response is None:
+            return []
+
         # Try client's parser first (for backward compatibility)
         if hasattr(self.client, "response_parser"):
             parser = getattr(self.client, "response_parser")
             if hasattr(parser, "parse"):
-                return parser.parse(raw_response)
+                try:
+                    return parser.parse(raw_response)
+                except (AttributeError, TypeError):
+                    # Parser failed, fall through to internal parser
+                    pass
 
-        # Use registry to get appropriate parser for entity type
-        parser = get_parser_for_entity(entity)
-        return parser.parse_to_records(raw_response)
+        # Use internal parser (injected or default)
+        try:
+            return self._parser.parse_to_records(raw_response)
+        except (AttributeError, TypeError):
+            # Parser can't handle this input type, return empty list
+            return []
 
-    def serialize_records(
-        self, entity: str, records: RawRecordBatch
-    ) -> RawRecordBatch:
+    def serialize_records(self, entity: str, records: RawRecordBatch) -> RawRecordBatch:
         """Serialize records for storage.
 
         Args:

@@ -19,9 +19,9 @@ ChemblEntityType: TypeAlias = Literal[
 ]
 
 # Supported entities (without model references)
-SUPPORTED_ENTITIES: frozenset[str] = frozenset({
-    "activity", "molecule", "target", "assay", "document"
-})
+SUPPORTED_ENTITIES: frozenset[str] = frozenset(
+    {"activity", "molecule", "target", "assay", "document"}
+)
 
 
 def get_parser_for_entity(entity: str) -> ResponseParserPortABC:

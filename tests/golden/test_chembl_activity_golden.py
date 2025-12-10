@@ -30,8 +30,9 @@ def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
         def now(cls, tz=None):  # type: ignore[override]
             return datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
+    # Мокируем datetime.now в timestamp_provider для детерминированных временных меток
     monkeypatch.setattr(
-        "bioetl.domain.transform.hash_service.datetime",
+        "bioetl.infrastructure.transform.impl.timestamp_provider.datetime",
         _FrozenDatetime,
     )
     # Мокируем datetime.now в models.py для фиксации started_at в RunContext
@@ -61,7 +62,16 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         configs_root=Path("tests/fixtures/configs"),
         loader=config_loader,
     )
-    config.storage.output_path = str(tmp_path / "output")
+    # Update frozen sink config using model_copy
+    output_path_str = str(tmp_path / "output")
+    new_sink = config.sink.model_copy(update={"output_path": output_path_str})
+    object.__setattr__(config, "sink", new_sink)
+    # Also update storage if it exists
+    if hasattr(config.runtime, "storage"):
+        new_storage = config.runtime.storage.model_copy(
+            update={"output_path": output_path_str}
+        )
+        object.__setattr__(config.runtime, "storage", new_storage)
 
     provider_loader_factory = partial(create_provider_loader)
     registry = provider_loader_factory().get_registry()
@@ -69,27 +79,32 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         config,
         provider_registry=registry,
     )
+    logger = container.get_logger()
+    extraction_service = container.get_extraction_service()
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,
-        logger=container.get_logger(),
+        logger=logger,
         validation_service=container.get_validation_service(),
         loader=container.get_loader(),
-        extraction_service=container.get_extraction_service(),
+        extraction_service=extraction_service,
         normalization_service=container.get_normalization_service(),
         record_source=container.get_record_source(
-            extraction_service=container.get_extraction_service(),
-            logger=container.get_logger(),
+            extraction_service=extraction_service,
+            logger=logger,
         ),
         hash_service=container.get_hash_service(),
+        index_generator=container.get_index_generator(),
+        timestamp_provider=container.get_timestamp_provider(),
     )
     monkeypatch.setattr(
         pipeline, "_should_skip_release_lookup", lambda: False, raising=False
     )
 
-    pipeline.run(output_path=Path(config.storage.output_path))
+    output_path = Path(config.sink.output_path)
+    pipeline.run(output_path=output_path)
 
-    actual_path = Path(config.storage.output_path) / "activity.csv"
+    actual_path = output_path / "activity.csv"
     expected_path = Path("qc/golden/chembl_activity/expected_output.csv")
 
     actual_df = pd.read_csv(actual_path)

@@ -8,6 +8,7 @@ from typing import Any, Callable, cast
 
 from bioetl.application.providers import ApplicationFieldProvider
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
 from bioetl.domain.providers import ProviderDefinition
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
@@ -20,10 +21,15 @@ class ProviderServiceFactory:
         config: PipelineConfig,
         provider_definition: ProviderDefinition,
         resolve_provider_config: Callable[[ProviderDefinition], Any],
+        *,
+        logger: LoggingPortABC | None = None,
+        metrics: MetricsPortABC | None = None,
     ) -> None:
         self._config = config
         self._provider_definition = provider_definition
         self._resolve_provider_config = resolve_provider_config
+        self._logger = logger
+        self._metrics = metrics
 
     def create_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
@@ -45,11 +51,14 @@ class ProviderServiceFactory:
         source_config = self._resolve_provider_config(self._provider_definition)
         components = self._provider_definition.components
 
-        client = components.create_client(source_config)
-
         # Inject application-level defaults
         field_provider = ApplicationFieldProvider()
 
+        # Pass logger and metrics to create_extraction_service
+        # It will create client internally if needed
         return components.create_extraction_service(
-            source_config, client=client, field_provider=field_provider
+            source_config,
+            field_provider=field_provider,
+            logger=self._logger,
+            metrics=self._metrics,
         )

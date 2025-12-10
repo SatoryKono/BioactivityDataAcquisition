@@ -2,6 +2,7 @@
 Tests for the CLI entry point.
 """
 
+from datetime import datetime, timezone
 import importlib
 from pathlib import Path
 import sys
@@ -330,12 +331,12 @@ def test_run_dry_run_pipeline_metadata(
     logger.apply_bind.return_value = logger
     validation_service = MagicMock()
     validation_service.validate.side_effect = lambda df, **__: df
-    
+
     # Mock schema to have columns
     mock_schema = MagicMock()
     mock_schema.columns = {"col1": MagicMock()}
     validation_service.get_schema.return_value = mock_schema
-    
+
     loader = MagicMock(spec=LoaderABC)
     loader.load.return_value = MagicMock(
         row_count=len(small_pipeline_df),
@@ -353,7 +354,11 @@ def test_run_dry_run_pipeline_metadata(
     # Mock orchestrator to build and run our pipeline
     hash_service = HashService(hasher=_DummyHasher())
     index_generator = MagicMock(spec=IndexGeneratorABC)
+    index_generator.next_index.side_effect = range(1000)
     timestamp_provider = MagicMock(spec=TimestampProviderABC)
+    timestamp_provider.get_extraction_timestamp.return_value = datetime(
+        2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc
+    )
 
     def build_pipeline_side_effect(*args, **kwargs):
         pipeline_instance = DryRunPipeline(
@@ -370,7 +375,7 @@ def test_run_dry_run_pipeline_metadata(
     def run_pipeline_side_effect(*args, **kwargs):
         pipeline_instance = build_pipeline_side_effect()
         return pipeline_instance.run(
-            output_path=Path(pipeline_test_config.output_path),
+            output_path=Path(pipeline_test_config.sink.output_path),
             dry_run=kwargs.get("dry_run", False),
         )
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
@@ -38,10 +40,16 @@ class ChemblProviderComponentsFactory(
         *,
         client: DataClientABC | None = None,
         field_provider: DefaultFieldProviderABC | None = None,
+        logger: Any | None = None,
+        metrics: Any | None = None,
     ) -> ExtractionServiceABC:
         """Construct extraction service with optional prebuilt client."""
         return create_extraction_service(
-            config, client=client, field_provider=field_provider
+            config,
+            client=client,
+            field_provider=field_provider,
+            logger=logger,
+            metrics=metrics,
         )
 
     def create_normalization_service(

@@ -61,6 +61,12 @@
 - `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
   - Фасад для вычисления hash_row/hash_business_key и служебных колонок. Default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.domain.transform.hash_service.HashService`.
 
+- `TimestampProviderABC` — `bioetl.domain.transform.contracts.TimestampProviderABC`
+  - Провайдер временных меток для детерминированных артефактов.
+
+- `IndexGeneratorABC` — `bioetl.domain.transform.contracts.IndexGeneratorABC`
+  - Генератор индексов для строк данных.
+
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
   - Сервис нормализации данных. Обязательные операции: normalize(df), normalize_record(record), ensure_numeric_columns(df). Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``DefaultNormalizationTransformerImpl``, ``ChemblNormalizationServiceImpl``.
 
