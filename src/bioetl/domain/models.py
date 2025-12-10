@@ -6,7 +6,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
-import uuid
+
+from bioetl.domain.value_objects import RunId
 
 
 @dataclass
@@ -28,7 +29,7 @@ class RunContext:
     Содержит информацию о текущем запуске, конфигурации и окружении.
     """
 
-    run_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    run_id: RunId = field(default_factory=RunId.generate)
     entity_name: str = ""
     provider: str = ""
     started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -43,7 +44,7 @@ class RunResult:
     Результат выполнения пайплайна.
     """
 
-    run_id: str
+    run_id: RunId
     success: bool
     entity_name: str
     row_count: int
