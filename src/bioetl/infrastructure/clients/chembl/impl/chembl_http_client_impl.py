@@ -200,8 +200,6 @@ class ChemblHttpClientImpl(DataClientABC):
     def _apply_endpoint_aliases(self, builder: Any, endpoint: str) -> None:
         if hasattr(builder, "build_for_endpoint"):
             builder.build_for_endpoint(endpoint)
-        if hasattr(builder, "for_endpoint"):
-            builder.for_endpoint(endpoint)
 
     def _invoke_builder_method(
         self, builder: Any, method: str, filters: dict[str, Any]

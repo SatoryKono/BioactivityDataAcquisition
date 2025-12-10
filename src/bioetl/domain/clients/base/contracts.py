@@ -1,5 +1,6 @@
 """Base contracts for data source helpers."""
 
+import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
@@ -28,7 +29,16 @@ class RequestBuilderABC(ABC):
         """Добавляет параметры пагинации."""
 
     def with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
-        """Alias for build_with_pagination."""
+        """Deprecated alias for build_with_pagination.
+
+        .. deprecated:: 1.0
+            Use :meth:`build_with_pagination` instead. Will be removed in 2.0.
+        """
+        warnings.warn(
+            "with_pagination() is deprecated, use build_with_pagination() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.build_with_pagination(offset, limit)
 
 
@@ -37,13 +47,22 @@ class ResponseParserABC(ABC, Generic[RecordT]):
     Разбор ответов API.
     """
 
-    def parse(self, raw_response: dict[str, object]) -> list[RecordT]:
-        """Alias for parse_response."""
-        return self.parse_response(raw_response)
-
     @abstractmethod
-    def parse_response(self, raw_response: dict[str, object]) -> list[RecordT]:
+    def parse(self, raw_response: dict[str, object]) -> list[RecordT]:
         """Парсит сырой ответ в список типизированных записей."""
+
+    def parse_response(self, raw_response: dict[str, object]) -> list[RecordT]:
+        """Deprecated alias for parse.
+
+        .. deprecated:: 1.0
+            Use :meth:`parse` instead. Will be removed in 2.0.
+        """
+        warnings.warn(
+            "parse_response() is deprecated, use parse() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.parse(raw_response)
 
     @abstractmethod
     def extract_metadata(
