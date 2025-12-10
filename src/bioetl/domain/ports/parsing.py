@@ -12,7 +12,8 @@ Use ``ResponseParserPortABC`` from this module instead.
 
 Method mapping:
     - ``parse(raw_response)`` → ``parse_to_records(raw_response)``
-    - ``parse_response(raw_response)`` → ``parse_to_records(raw_response)`` (was deprecated)
+    - ``parse_response(raw_response)`` → ``parse_to_records(raw_response)``
+      (was deprecated)
     - ``extract_metadata(raw_response)`` → ``extract_pagination(raw_response)``
 
 Type changes:
@@ -133,9 +134,7 @@ class ResponseParserPortABC(ABC):
         )
         return self.parse_to_records(raw_response)
 
-    def extract_metadata(
-        self, raw_response: ApiPayload
-    ) -> dict[str, int | str | None]:
+    def extract_metadata(self, raw_response: ApiPayload) -> dict[str, int | str | None]:
         """Backward-compatible alias for :meth:`extract_pagination`.
 
         .. deprecated:: 2.0
@@ -217,7 +216,7 @@ class PaginationInfo:
 # =============================================================================
 
 
-def __getattr__(name: str) -> type:
+def __getattr__(name: str) -> object:
     """Emit deprecation warning for legacy type alias imports.
 
     Enables backward-compatible imports like:
@@ -244,7 +243,7 @@ __all__ = [
     "ApiPayload",
     "RawRecord",
     "RecordBatch",
-    # Deprecated type aliases (for backward compatibility)
+    # Deprecated type aliases (for backward compatibility, available via __getattr__)
     "RawPayload",
     "RawRecordDict",
     "RawRecordList",
