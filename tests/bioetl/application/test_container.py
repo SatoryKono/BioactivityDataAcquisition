@@ -8,9 +8,7 @@ from typing import Any
 from pydantic import ValidationError
 import pytest
 
-from bioetl.domain.provider_registry import (
-    InMemoryProviderRegistry,
-)
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import (
     ProviderComponents,
     ProviderDefinition,

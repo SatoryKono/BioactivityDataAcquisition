@@ -67,51 +67,48 @@ class ProviderRegistryLoaderABC(Protocol):
         """Загружает провайдеры и возвращает заполненный реестр."""
 
 
-class InMemoryProviderRegistry(ProviderRegistryABC):
-    """Реализация реестра провайдеров в памяти."""
+def get_provider_registry() -> ProviderRegistryABC:
+    """Factory для получения registry.
 
-    def __init__(self) -> None:
-        self._providers: dict[ProviderId, ProviderDefinition] = {}
-
-    def register_provider(self, definition: ProviderDefinition) -> None:
-        """Регистрирует провайдер в реестре."""
-        if definition.id in self._providers:
-            raise ProviderAlreadyRegisteredError(definition.id)
-        self._providers[definition.id] = definition
-
-    def get_provider(self, provider_id: ProviderId) -> ProviderDefinition:
-        """Получает определение провайдера по идентификатору."""
-        if provider_id not in self._providers:
-            raise ProviderNotRegisteredError(provider_id)
-        return self._providers[provider_id]
-
-    def list_providers(self) -> list[ProviderDefinition]:
-        """Возвращает список всех зарегистрированных провайдеров."""
-        return list(self._providers.values())
-
-    def reset_provider_registry(self) -> None:
-        """Очищает реестр провайдеров."""
-        self._providers.clear()
-
-    def restore_provider_registry(self, definitions: list[ProviderDefinition]) -> None:
-        """Восстанавливает реестр из списка определений."""
-        self._providers.clear()
-        for definition in definitions:
-            self._providers[definition.id] = definition
-
-
-def default_provider_registry() -> ProviderRegistryABC:
-    """Возвращает in-memory реализацию реестра провайдеров по умолчанию."""
+    Возвращает реализацию ProviderRegistryABC из infrastructure слоя.
+    Конфигурируется через DI контейнер.
+    """
+    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
     return InMemoryProviderRegistry()
 
 
+# Backward compatibility alias
+def default_provider_registry() -> ProviderRegistryABC:
+    """DEPRECATED: Use get_provider_registry() instead.
+
+    Возвращает in-memory реализацию реестра провайдеров по умолчанию.
+    """
+    return get_provider_registry()
+
+
+# Re-export for backward compatibility (will be removed in future)
+# Import is done lazily to avoid circular imports at module load time
+def __getattr__(name: str):
+    """Lazy import for backward compatibility."""
+    if name == "InMemoryProviderRegistry":
+        from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+
+        return InMemoryProviderRegistry
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = [
+    # Domain abstractions
+    "ProviderRegistryABC",
+    "ProviderRegistryLoaderABC",
+    # Domain errors
     "ProviderRegistryError",
     "ProviderNotRegisteredError",
     "ProviderAlreadyRegisteredError",
-    "ProviderRegistryABC",
-    "ProviderRegistryLoaderABC",
+    # Factory function
+    "get_provider_registry",
+    # Backward compatibility (deprecated - use infrastructure.provider_registry)
     "InMemoryProviderRegistry",
     "default_provider_registry",
 ]

@@ -21,11 +21,11 @@ import yaml
 from bioetl.domain.configs import HttpClientConfig, ProviderHttpConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
-    InMemoryProviderRegistry,
     ProviderAlreadyRegisteredError,
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
 from bioetl.infrastructure.observability.factories import default_logging_port
