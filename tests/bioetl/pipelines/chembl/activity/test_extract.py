@@ -126,6 +126,8 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
         loader=loader,
         extraction_service=mock_extraction_service,
         hash_service=MagicMock(),
+        index_generator=index_generator,
+        timestamp_provider=timestamp_provider,
         normalization_service=mock_normalization_service,
         metadata_builder=metadata_builder,
         record_source=record_source,

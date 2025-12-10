@@ -23,6 +23,8 @@ def dependencies():
         "hash_service": MagicMock(),
         "normalization_service": MagicMock(),
         "record_source": record_source,
+        "index_generator": MagicMock(),
+        "timestamp_provider": MagicMock(),
     }
 
 

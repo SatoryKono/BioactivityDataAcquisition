@@ -48,6 +48,8 @@ def pipeline():
         loader=MagicMock(),
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
+        index_generator=MagicMock(),
+        timestamp_provider=MagicMock(),
         metadata_builder=metadata_builder,
         normalization_service=normalization_service,
         record_source=record_source,
