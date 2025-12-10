@@ -132,7 +132,7 @@ def test_hook_notifier_tracks_current_run_id(mock_logger):
         "extract", context, provider="chembl", entity_name="test"
     )
 
-    assert notifier.current_run_id == context.run_id
+    assert notifier.current_run_id == context.run_id.value
 
 
 @pytest.mark.unit

@@ -206,6 +206,11 @@ class TestExtractionServiceABC:
             def parse_response(self, raw_response: object) -> RawRecordBatch:
                 return []
 
+            def serialize_records(
+                self, entity: str, records: list[object]
+            ) -> RawRecordBatch:
+                return []
+
         service = CompleteService()
         assert isinstance(service, ExtractionServiceABC)
         assert isinstance(service, RecordFetcherABC)
@@ -235,6 +240,11 @@ class TestExtractionServiceABC:
                     items = raw_response.get("items", [])
                     if isinstance(items, list):
                         return items
+                return []
+
+            def serialize_records(
+                self, entity: str, records: list[object]
+            ) -> RawRecordBatch:
                 return []
 
         service = TestService()

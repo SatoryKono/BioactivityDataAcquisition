@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 
@@ -101,7 +101,7 @@ def default_provider_registry() -> ProviderRegistryABC:
     return get_provider_registry()
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> Any:
     """Lazy import for backward compatibility."""
     if name == "InMemoryProviderRegistry":
         raise ImportError(

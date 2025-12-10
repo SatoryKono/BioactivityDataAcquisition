@@ -1,0 +1,39 @@
+%%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
+flowchart TD
+    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px
+    classDef stepDecision  fill:#e6ecef,stroke:#333,stroke-width:1.5px
+    classDef stepTerminal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px
+    linkStyle default stroke:#666,stroke-width:1.2px
+    start([Start activity_chembl pipeline]):::stepTerminal
+    inputMode{Input mode?}:::stepDecision
+    apiExtract["ChemblExtractionService\nAPI mode:\n- pagination via offset\n- UnifiedAPIClient (retry/rate-limit)\n- flatten_chembl_payload (bypass nested fields)"]:::stepPrimary
+    csvExtract["CsvRecordSourceImpl\nCSV mode:\n- deterministic read\n- add missing columns"]:::stepPrimary
+    idExtract["ChemblExtractionService\nID-only mode:\n- fetch limited list of IDs\n- ensures missing IDs skipped"]:::stepPrimary
+    concat["Concatenate batches\n-> pandas DataFrame"]:::stepSecondary
+    transform["ChemblTransformerImpl\n- normalize units/types\n- serialize nested lists/dicts\n- drop rows missing required columns"]:::stepPrimary
+    post["Post-transform chain\n- HashColumnsTransformer\n- IndexColumnTransformer\n- DatabaseVersionTransformer\n- FulldateTransformer"]:::stepSecondary
+    enrich["Normalization service\n- enforce target/document/molecule references\n- fill default flags"]:::stepSecondary
+    validate["ValidationService.apply(ActivityTableSchema)\n- strict ordered columns\n- CHEMBL/BAO regex guards"]:::stepPrimary
+    sort["Stable sort by business_key_fields\n(assay_id + molecule_id + relation + type + value)"]:::stepSecondary
+    dryRun{Dry run?}:::stepDecision
+    write["UnifiedOutputWriter\n- atomic CSV/Parquet write\n- compute checksums\n- meta.yaml + QC sidecars"]:::stepPrimary
+    dryNote["Skip write\nbut still emit metrics/meta preview"]:::stepSecondary
+    success([Pipeline finished]):::stepTerminal
+    fail([ErrorPolicy.FailFast]):::stepTerminal
+
+    start --> inputMode
+    inputMode -- api --> apiExtract
+    inputMode -- csv --> csvExtract
+    inputMode -- id_only --> idExtract
+    apiExtract --> concat
+    csvExtract --> concat
+    idExtract --> concat
+    concat --> transform --> enrich --> post --> validate --> sort --> dryRun
+    dryRun -- No --> write --> success
+    dryRun -- Yes --> dryNote --> success
+
+    apiExtract -->|HTTP/parse error| fail
+    transform -->|data error| fail
+    validate -->|SchemaError| fail
+    write -->|IO error| fail

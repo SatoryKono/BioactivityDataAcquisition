@@ -11,7 +11,7 @@ Previous location: bioetl.domain.record_source
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from bioetl.domain.ports.extraction import RecordFetcherABC
 from bioetl.domain.record_source import RawRecord, RecordSourceABC
@@ -81,4 +81,9 @@ class ApiRecordSource(RecordSourceABC):
                     "is set."
                 )
 
-            yield raw_batch
+            # Auto-convert dicts to RawRecord models if needed
+            if raw_batch and isinstance(raw_batch[0], dict):
+                yield [RawRecord.model_validate(item) for item in raw_batch]
+                continue
+
+            yield cast(list[RawRecord], raw_batch)

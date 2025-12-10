@@ -301,7 +301,8 @@ ALLOWED_DOMAIN_PATTERNS = [
 
 
 def test_infrastructure_does_not_import_domain_schemas_at_module_level() -> None:
-    """Verify infrastructure layer doesn't directly import domain schemas at module level.
+    """Verify infrastructure layer doesn't directly import domain schemas at
+    module level.
 
     Infrastructure may use domain schemas via:
     - TYPE_CHECKING blocks (for type hints only)

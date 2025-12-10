@@ -14,7 +14,12 @@ from bioetl.domain.pipelines.contracts import (
     PipelineHookABC,
 )
 from bioetl.domain.record_source import RecordSourceABC
-from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
+from bioetl.domain.transform.contracts import (
+    HashServiceABC,
+    IndexGeneratorABC,
+    NormalizationServiceABC,
+    TimestampProviderABC,
+)
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 
@@ -71,6 +76,14 @@ class PipelineContainerABC(ABC):
     @abstractmethod
     def get_hash_service(self) -> HashServiceABC:
         """Return hash service used for checksum generation."""
+
+    @abstractmethod
+    def get_index_generator(self) -> IndexGeneratorABC:
+        """Return index generator."""
+
+    @abstractmethod
+    def get_timestamp_provider(self) -> TimestampProviderABC:
+        """Return timestamp provider."""
 
     @abstractmethod
     def get_post_transformer(
