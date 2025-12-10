@@ -9,12 +9,8 @@ from pydantic import ValidationError
 
 from bioetl.domain.configs import ConfigMigrator, PipelineConfig
 from bioetl.domain.errors import ConfigError, ConfigValidationError
-from bioetl.domain.schemas import register_schemas
-from bioetl.domain.schemas.fields import build_field_configs_from_schema
-from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
-from bioetl.domain.schemas.registry import default_schema_provider
+from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.transform.merge import apply_deep_merge
-from bioetl.domain.validation import SchemaProviderABC
 from bioetl.infrastructure.config.env import resolve_env_placeholders
 from bioetl.infrastructure.config.provider_registry import (
     ProviderNotConfiguredError,
@@ -156,42 +152,47 @@ def _ensure_provider_registered(provider_id: str) -> None:
         ) from exc
 
 
-_SCHEMA_PROVIDER: SchemaProviderABC | None = None
-_SCHEMAS_REGISTERED = False
+_schema_contract_provider: SchemaContractProviderABC | None = None
 
 
-def _get_schema_provider() -> SchemaProviderABC:
-    """Возвращает провайдера схем, гарантируя регистрацию стандартных сущностей."""
+def set_schema_contract_provider(provider: SchemaContractProviderABC) -> None:
+    """Inject schema contract provider (called from application bootstrap).
 
-    global _SCHEMA_PROVIDER, _SCHEMAS_REGISTERED  # noqa: PLW0603
+    Args:
+        provider: The schema contract provider implementation.
+    """
+    global _schema_contract_provider  # noqa: PLW0603
+    _schema_contract_provider = provider
 
-    if _SCHEMA_PROVIDER is None:
-        _SCHEMA_PROVIDER = default_schema_provider()
-    if not _SCHEMAS_REGISTERED:
-        register_schemas(_SCHEMA_PROVIDER)
-        _SCHEMAS_REGISTERED = True
-    return _SCHEMA_PROVIDER
+
+def reset_schema_contract_provider() -> None:
+    """Reset the schema contract provider (for testing purposes)."""
+    global _schema_contract_provider  # noqa: PLW0603
+    _schema_contract_provider = None
 
 
 def _populate_fields_from_schema(config: PipelineConfig) -> None:
-    """Автоматически заполняет config.fields, если секция отсутствует в YAML."""
-
+    """Populate config.fields using injected schema contract provider."""
     if config.fields:
         return
 
-    contract = get_pipeline_contract(config.id, default_entity=config.entity_name)
-    schema_name = contract.get_output_schema()
-    provider = _get_schema_provider()
+    if _schema_contract_provider is None:
+        raise RuntimeError(
+            "SchemaContractProvider not initialized. "
+            "Call application bootstrap before loading configs."
+        )
+
+    schema_name = _schema_contract_provider.get_output_schema_name(
+        config.id,
+        default_entity=config.entity_name,
+    )
 
     try:
-        schema = provider.get_schema(schema_name)
+        fields = _schema_contract_provider.get_field_configs(schema_name)
     except ValueError as exc:
         raise ConfigValidationError(
             f"Schema '{schema_name}' is not registered for pipeline '{config.id}'"
         ) from exc
-
-    try:
-        fields = build_field_configs_from_schema(schema)
     except Exception as exc:  # pragma: no cover - защитный контур
         raise ConfigValidationError(
             f"Failed to derive fields from schema '{schema_name}' "
@@ -282,4 +283,6 @@ __all__ = [
     "UnknownProviderError",
     "get_pipeline_config",
     "get_pipeline_config_from_path",
+    "reset_schema_contract_provider",
+    "set_schema_contract_provider",
 ]
