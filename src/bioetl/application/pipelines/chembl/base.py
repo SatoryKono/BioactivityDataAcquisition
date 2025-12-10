@@ -8,12 +8,13 @@ from typing import Any
 import pandas as pd
 
 from bioetl.application.helpers import resolve_primary_key_with_filter
+from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.application.pipelines.base import (
     PipelineBase,
     _create_default_metadata_builder,
 )
-from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
+from bioetl.application.pipelines.stages.extract import ExtractStage
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
@@ -25,7 +26,6 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, Pipelin
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
-from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.services.version_formatter import format_chembl_version
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import (
@@ -52,7 +52,6 @@ class ChemblPipelineBase(PipelineBase):
         timestamp_provider: TimestampProviderABC,
         loader: LoaderABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
-        record_source: RecordSourceABC | None = None,
         normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
@@ -70,18 +69,10 @@ class ChemblPipelineBase(PipelineBase):
             )
         norm_service = normalization_service
 
-        if record_source is None:
-            raise ValueError(
-                "Record source is required. "
-                "Use RecordSourceFactory via container.get_record_source()."
-            )
-
-        extractor = ChemblExtractorImpl(
-            config=config,
+        extractor = ExtractStage(
             extraction_service=extraction_service,
-            normalization_service=norm_service,
-            logger=logger,
-            record_source=record_source,
+            record_mapper=ChemblRecordMapper(),
+            entity=config.entity_name,
         )
 
         # Create Transformer
@@ -191,7 +182,7 @@ class ChemblPipelineBase(PipelineBase):
             iterator = iter(extract_result)
         except TypeError as exc:  # pragma: no cover - защитный контур
             raise TypeError(
-                "ChemblExtractor.extract() должен возвращать DataFrame или Iterable."
+                "ExtractStage.extract() должен возвращать DataFrame или Iterable."
             ) from exc
 
         chunks: list[pd.DataFrame] = []
