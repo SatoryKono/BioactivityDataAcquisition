@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from concurrent.futures import Future
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, cast
+from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from concurrent.futures import ProcessPoolExecutor
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.contracts import PipelineContainerABC
-from bioetl.application.pipelines.registry import get_pipeline_class
+from bioetl.application.pipelines.registry import get_factory
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.types import PipelineType
@@ -48,8 +48,21 @@ class PipelineOrchestrator:
         self._provider_loader_factory = provider_loader_factory
 
     def build_pipeline(self, *, limit: int | None = None) -> PipelineBase:
-        """Создает экземпляр пайплайна с зависимостями."""
-        pipeline_cls = get_pipeline_class(self._pipeline_name)
+        """
+        Create a pipeline instance by delegating to the appropriate factory.
+
+        This method is the single entry point for pipeline creation. It:
+        1. Resolves the provider registry
+        2. Creates a dependency container
+        3. Delegates pipeline creation to the registered factory
+
+        Args:
+            limit: Optional record limit for extraction.
+
+        Returns:
+            Fully configured pipeline ready to run.
+        """
+        factory = get_factory(self._pipeline_name)
         registry = self._get_provider_registry()
         container: PipelineContainerABC = self._container_factory(
             self._config,
@@ -57,44 +70,7 @@ class PipelineOrchestrator:
             provider_registry_provider=None,
         )
 
-        logger = container.get_logger()
-        validation_service = container.get_validation_service()
-        loader = container.get_loader()
-        extraction_service = container.get_extraction_service()
-        normalization_service = container.get_normalization_service()
-        record_source = container.get_record_source(
-            extraction_service, limit=limit, logger=logger
-        )
-        hash_service = container.get_hash_service()
-        metadata_builder = container.get_metadata_builder()
-        hooks = container.get_hooks()
-        error_policy = container.get_error_policy()
-
-        pipeline_factory: Callable[..., PipelineBase] = cast(
-            Callable[..., PipelineBase], pipeline_cls
-        )
-        pipeline: PipelineBase = pipeline_factory(
-            config=self._config,
-            logger=logger,
-            validation_service=validation_service,
-            loader=loader,
-            extraction_service=extraction_service,
-            record_source=record_source,
-            normalization_service=normalization_service,
-            hash_service=hash_service,
-            metadata_builder=metadata_builder,
-            hooks=hooks,
-            error_policy=error_policy,
-        )
-
-        pipeline.set_post_transformer(
-            container.get_post_transformer(version_provider=pipeline.get_version)
-        )
-
-        pipeline.register_hooks(hooks)
-        pipeline.set_error_policy(error_policy)
-
-        return pipeline
+        return factory.create(container, limit=limit)
 
     def run_pipeline(
         self,
