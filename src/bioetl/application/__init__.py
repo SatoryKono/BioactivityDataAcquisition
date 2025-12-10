@@ -2,33 +2,28 @@
 Application layer package.
 
 Provides core orchestration components for pipeline assembly and execution.
+
+Public API:
+    - PipelineContainer: Dependency injection container for pipelines
+    - PipelineOrchestrator: High-level orchestration of pipeline execution
+    - contracts: Abstract base classes (PipelineContainerABC, PipelineFactoryABC)
+
+For internal components (bootstrap, config loading), import from submodules directly:
+    - bioetl.application.bootstrap
+    - bioetl.application.config
+    - bioetl.application.factories
+    - bioetl.application.pipelines
 """
 
-from bioetl.application.bootstrap import (
-    ApplicationBootstrap,
-    ApplicationContext,
-    ConfigLoaderFactory,
-    ProviderClearer,
-    ProviderInjector,
-    create_application_bootstrap,
-)
-from bioetl.application.container import (
-    PipelineContainer,
-    create_default_container_factory,
-)
+from bioetl.application import contracts
+from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC, PipelineFactoryABC
 from bioetl.application.orchestrator import PipelineOrchestrator
 
 __all__ = [
-    "ApplicationBootstrap",
-    "ApplicationContext",
-    "ConfigLoaderFactory",
     "PipelineContainer",
     "PipelineContainerABC",
     "PipelineFactoryABC",
     "PipelineOrchestrator",
-    "ProviderClearer",
-    "ProviderInjector",
-    "create_application_bootstrap",
-    "create_default_container_factory",
+    "contracts",
 ]
