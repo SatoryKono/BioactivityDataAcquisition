@@ -14,6 +14,7 @@ from bioetl.domain.schemas.fields import build_field_configs_from_schema
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.schemas.registry import default_schema_provider
 from bioetl.domain.transform.merge import apply_deep_merge
+from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.validation import SchemaProviderABC
 from bioetl.infrastructure.config.env import resolve_env_placeholders
 from bioetl.infrastructure.config.provider_registry import (
@@ -158,6 +159,45 @@ def _ensure_provider_registered(provider_id: str) -> None:
 
 _SCHEMA_PROVIDER: SchemaProviderABC | None = None
 _SCHEMAS_REGISTERED = False
+_SCHEMA_CONTRACT_PROVIDER: SchemaContractProviderABC | None = None
+
+
+def set_schema_contract_provider(provider: SchemaContractProviderABC) -> None:
+    """Set the global schema contract provider.
+
+    This function allows the application layer to inject a configured
+    schema contract provider into the infrastructure layer. This is
+    typically called during container bootstrap.
+
+    Args:
+        provider: Configured SchemaContractProviderABC instance.
+
+    Example:
+        >>> from bioetl.application.services import SchemaContractProviderImpl
+        >>> from bioetl.domain.schemas.registry import get_default_schema_registry
+        >>> provider = SchemaContractProviderImpl(get_default_schema_registry())
+        >>> set_schema_contract_provider(provider)
+    """
+    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
+    _SCHEMA_CONTRACT_PROVIDER = provider
+
+
+def get_schema_contract_provider() -> SchemaContractProviderABC | None:
+    """Get the current schema contract provider.
+
+    Returns:
+        The configured schema contract provider, or None if not set.
+    """
+    return _SCHEMA_CONTRACT_PROVIDER
+
+
+def clear_schema_contract_provider() -> None:
+    """Clear the global schema contract provider (for testing).
+
+    This resets the provider to None, useful for test isolation.
+    """
+    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
+    _SCHEMA_CONTRACT_PROVIDER = None
 
 
 def _get_schema_provider() -> SchemaProviderABC:
@@ -282,4 +322,7 @@ __all__ = [
     "UnknownProviderError",
     "get_pipeline_config",
     "get_pipeline_config_from_path",
+    "set_schema_contract_provider",
+    "get_schema_contract_provider",
+    "clear_schema_contract_provider",
 ]
