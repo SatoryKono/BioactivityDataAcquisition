@@ -67,34 +67,47 @@ class ProviderRegistryLoaderABC(Protocol):
         """Загружает провайдеры и возвращает заполненный реестр."""
 
 
-def get_provider_registry() -> ProviderRegistryABC:
-    """Factory для получения registry.
+# Global registry instance
+_PROVIDER_REGISTRY: ProviderRegistryABC | None = None
 
-    Возвращает реализацию ProviderRegistryABC из infrastructure слоя.
-    Конфигурируется через DI контейнер.
+
+def set_provider_registry(registry: ProviderRegistryABC) -> None:
+    """Sets the global provider registry instance.
+
+    This should be called by the application entry point or configuration loader
+    to inject the concrete implementation (Dependency Injection).
     """
-    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+    global _PROVIDER_REGISTRY
+    _PROVIDER_REGISTRY = registry
 
-    return InMemoryProviderRegistry()
+
+def get_provider_registry() -> ProviderRegistryABC:
+    """Access point for the provider registry.
+
+    Returns the global registry instance.
+    Raises RuntimeError if the registry has not been initialized.
+    """
+    if _PROVIDER_REGISTRY is None:
+        raise RuntimeError(
+            "Provider registry has not been initialized. "
+            "Call set_provider_registry() with a concrete implementation first."
+        )
+    return _PROVIDER_REGISTRY
 
 
 # Backward compatibility alias
 def default_provider_registry() -> ProviderRegistryABC:
-    """DEPRECATED: Use get_provider_registry() instead.
-
-    Возвращает in-memory реализацию реестра провайдеров по умолчанию.
-    """
+    """DEPRECATED: Use get_provider_registry() instead."""
     return get_provider_registry()
 
 
-# Re-export for backward compatibility (will be removed in future)
-# Import is done lazily to avoid circular imports at module load time
 def __getattr__(name: str):
     """Lazy import for backward compatibility."""
     if name == "InMemoryProviderRegistry":
-        from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
-
-        return InMemoryProviderRegistry
+        raise ImportError(
+            "InMemoryProviderRegistry is no longer available in bioetl.domain. "
+            "Import it from bioetl.infrastructure.provider_registry instead."
+        )
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -108,7 +121,7 @@ __all__ = [
     "ProviderAlreadyRegisteredError",
     # Factory function
     "get_provider_registry",
-    # Backward compatibility (deprecated - use infrastructure.provider_registry)
-    "InMemoryProviderRegistry",
+    "set_provider_registry",
+    # Backward compatibility
     "default_provider_registry",
 ]

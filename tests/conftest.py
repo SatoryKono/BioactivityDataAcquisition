@@ -537,3 +537,14 @@ def disable_network_calls(monkeypatch, request):
 
 
 # End of conftest
+
+
+@pytest.fixture(autouse=True)
+def init_provider_registry():
+    """Initialize the provider registry for all tests."""
+    from bioetl.domain.provider_registry import set_provider_registry
+    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+
+    registry = InMemoryProviderRegistry()
+    set_provider_registry(registry)
+

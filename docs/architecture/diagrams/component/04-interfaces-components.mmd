@@ -9,56 +9,52 @@ classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color
 classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
 subgraph Interfaces["Interfaces Layer (Ports)"]
-    CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
-    REST["REST Server (FastAPI)\ninterfaces.rest.server"]:::componentPrimary
-    MQ["MQ Listener\ninterfaces.mq.listener/handler"]:::componentSecondary
-
-    PipelinePorts["PipelineBase / ChemblPipelineBase\napplication.pipelines.base"]:::componentSecondary
-    PipelineRegistry["Pipeline Registry\napplication.pipelines.registry"]:::componentSecondary
-    ConfigLoader["Pipeline Config Loader\napplication.config_loader"]:::componentSecondary
-    ClientPorts["DataClientABC / ChemblDataClientABC\ninterfaces.clients / domain.clients.base"]:::componentSecondary
-    WriterPorts["WriterABC / UnifiedOutputWriterABC\ninterfaces.output"]:::componentSecondary
-    ValidatorPorts["ValidatorABC\ninterfaces.validation"]:::componentSecondary
-    LoggerPorts["LoggingPortABC\ninterfaces.logging"]:::componentSecondary
-    MetricsPort["Metrics endpoint\ninfrastructure.observability.server"]:::componentSecondary
+    CLI["CLI (Typer)\nbioetl.interfaces.cli.app"]:::componentPrimary
+    ContainerFactory["Container Factory\nbioetl.interfaces.container_factory"]:::componentSecondary
+    REST["REST Server (FastAPI)\nbioetl.interfaces.rest.server"]:::componentPrimary
+    MQ["MQ Handler\nbioetl.interfaces.mq.handler"]:::componentSecondary
+    Monitoring["Monitoring\nbioetl.interfaces.monitoring"]:::componentSecondary
+    Observability["Observability\nbioetl.interfaces.observability"]:::componentSecondary
 end
 class Interfaces group
 
 subgraph Application["Application Layer"]
-    Orchestrator["PipelineOrchestrator"]:::external
-    Pipelines["ChemblPipelineBase"]:::external
+    Orchestrator["PipelineOrchestrator\nbioetl.application.orchestrator"]:::external
+    Container["PipelineContainer\nbioetl.application.container"]:::external
+    Pipelines["PipelineBase / ChemblPipelineBase\nbioetl.application.pipelines.*"]:::external
 end
 class Application group;
 
 subgraph Domain["Domain Layer"]
-    Validation["ValidationService"]:::external
-    Normalization["NormalizationServiceImpl\n(infrastructure.transform.impl.normalize)"]:::external
+    Validation["ValidationService\nbioetl.domain.validation.service"]:::external
+    Normalization["NormalizationServiceABC\nbioetl.domain.transform.contracts"]:::external
+    PipelineContracts["Pipeline Contracts\nbioetl.domain.pipelines.contracts"]:::external
+    ObservabilityContracts["Observability Contracts\nbioetl.domain.observability.contracts"]:::external
 end
 class Domain group;
 
 subgraph Infrastructure["Infrastructure Layer"]
-    Clients["ChemblHttpClientImpl"]:::external
-    Output["UnifiedOutputWriter"]:::external
-    Logging["Unified Logger"]:::external
+    Clients["ChemblHttpClientImpl\ninfrastructure.clients.chembl.*"]:::external
+    Output["UnifiedLoaderImpl\ninfrastructure.output.*"]:::external
+    NormalizationImpl["ChemblNormalizationServiceImpl\ninfrastructure.transform.impl.*"]:::external
+    ObservabilityImpl["Observability Impl\ninfrastructure.observability.*"]:::external
 end
 class Infrastructure group;
 
+CLI --> ContainerFactory
 CLI --> Orchestrator
 REST --> Orchestrator
 MQ --> Orchestrator
-MetricsPort --> REST
+ContainerFactory --> Container
+Orchestrator --> Container
 Orchestrator --> Pipelines
-Pipelines --> PipelinePorts
-Pipelines --> PipelineRegistry
-Pipelines --> ConfigLoader
-Pipelines --> ClientPorts
-Pipelines --> WriterPorts
-Pipelines --> ValidatorPorts
-Pipelines --> LoggerPorts
-ClientPorts --> Clients
-WriterPorts --> Output
-ValidatorPorts --> Validation
-PipelinePorts --> Normalization
-LoggerPorts --> Logging
-ConfigLoader --> PipelinePorts
+Pipelines --> PipelineContracts
+Pipelines --> Validation
+Pipelines --> Normalization
+Pipelines --> ObservabilityContracts
+Validation --> NormalizationImpl
+Normalization --> NormalizationImpl
+ObservabilityContracts --> ObservabilityImpl
+PipelineContracts --> Clients
+PipelineContracts --> Output
 
