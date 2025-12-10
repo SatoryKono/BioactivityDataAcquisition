@@ -18,10 +18,6 @@ from bioetl.domain.observability import MetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.abc_registry_resolver import ABCRegistryResolver
-from bioetl.infrastructure.config.loader import (
-    get_pipeline_config,
-    get_pipeline_config_from_path,
-)
 from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
@@ -117,62 +113,21 @@ def create_config_loader() -> PipelineConfigLoaderProtocol:
     """Return config loader port backed by infrastructure loader.
 
     Creates a config loader that uses explicit schema contract provider injection.
-    The provider is obtained from SimplePipelineContainer and bound to the loader
+    The provider is obtained from ApplicationBootstrap and bound to the loader
     functions.
 
     Returns:
         PipelineConfigLoaderProtocol: Config loader with bound schema provider.
     """
-    from bioetl.interfaces.simple_container import SimplePipelineContainer
+    from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
-    container = SimplePipelineContainer()
-    container.bootstrap()
+    bootstrap = create_default_bootstrap()
+    context = bootstrap.start()
 
-    # Get the schema contract provider from the container
-    provider = container.schema_contract_provider
+    if context.config_loader is None:
+        raise RuntimeError("Config loader not available in ApplicationContext")
 
-    # Create bound functions that pass the provider explicitly
-    def get_by_id_with_provider(
-        pipeline_id: str,
-        *,
-        profile: str | None = None,
-        cli_overrides: dict | None = None,
-        env_overrides: dict | None = None,
-        base_dir: str | Path | None = None,
-    ):
-        return get_pipeline_config(
-            pipeline_id,
-            schema_contract_provider=provider,
-            profile=profile,
-            cli_overrides=cli_overrides,
-            env_overrides=env_overrides,
-            base_dir=base_dir,
-        )
-
-    def get_from_path_with_provider(
-        config_path: str | Path,
-        *,
-        profile: str | None = None,
-        profiles_root: str | Path | None = None,
-        cli_overrides: dict | None = None,
-        env_overrides: dict | None = None,
-    ):
-        return get_pipeline_config_from_path(
-            config_path,
-            schema_contract_provider=provider,
-            profile=profile,
-            profiles_root=profiles_root,
-            cli_overrides=cli_overrides,
-            env_overrides=env_overrides,
-        )
-
-    return cast(
-        PipelineConfigLoaderProtocol,
-        SimpleNamespace(
-            get_by_id=get_by_id_with_provider,
-            get_from_path=get_from_path_with_provider,
-        ),
-    )
+    return context.config_loader
 
 
 def create_config_path_resolver(

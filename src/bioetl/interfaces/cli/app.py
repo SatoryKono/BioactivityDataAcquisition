@@ -9,59 +9,48 @@ from typing import Annotated
 from rich.console import Console
 import typer
 
+from bioetl.application.bootstrap import ApplicationBootstrap, ApplicationContext
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
-from bioetl.application.services.schema_bootstrap import create_schema_bootstrap_service
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.ports.schema import SchemaContractProviderABC
-from bioetl.infrastructure.config.loader import _set_provider_internal
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.infrastructure.config.sources import get_configs_root
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 from bioetl.interfaces.container_factory import (
     build_default_container,
-    create_config_loader,
 )
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
 
-_application_bootstrapped = False
-_contract_provider: SchemaContractProviderABC | None = None
+_bootstrap: ApplicationBootstrap | None = None
 
 
-def bootstrap_application() -> SchemaContractProviderABC:
-    """Initialize application layer before using infrastructure.
-
-    This function must be called before loading any pipeline configs.
-    It sets up the schema contract provider through dependency injection.
+def get_bootstrap() -> ApplicationBootstrap:
+    """Get the application bootstrap instance (singleton).
 
     Returns:
-        SchemaContractProviderABC: The initialized contract provider.
+        ApplicationBootstrap: The bootstrap instance.
     """
-    global _application_bootstrapped, _contract_provider  # noqa: PLW0603
-    if _application_bootstrapped and _contract_provider is not None:
-        return _contract_provider
+    global _bootstrap  # noqa: PLW0603
+    if _bootstrap is None:
+        _bootstrap = create_default_bootstrap()
+    return _bootstrap
 
-    # 1. Bootstrap schemas
-    schema_service = create_schema_bootstrap_service()
-    schema_provider = schema_service.ensure_registered()
 
-    # 2. Create contract provider
-    from bioetl.application.services.schema_contract_provider import (
-        SchemaContractProviderImpl,
-    )
+def get_application_context() -> ApplicationContext:
+    """Initialize and return the application context.
 
-    _contract_provider = SchemaContractProviderImpl(schema_provider)
+    This function must be called before using any application services.
+    It's idempotent - subsequent calls return the same context.
 
-    # 3. Inject into infrastructure for backward compatibility
-    # Using internal function to avoid deprecation warning
-    _set_provider_internal(_contract_provider)
-
-    _application_bootstrapped = True
-    return _contract_provider
+    Returns:
+        ApplicationContext: The initialized application context.
+    """
+    return get_bootstrap().start()
 
 
 def _infer_config_path(pipeline_name: str) -> str | None:
@@ -86,12 +75,11 @@ def _resolve_config_path(config: str) -> Path:
 
 
 def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
-    bootstrap_application()
-    config_loader = create_config_loader()
+    context = get_application_context()
     return build_runtime_config(
         config_path=config_path,
         configs_root=get_configs_root(None),
-        loader=config_loader,
+        loader=context.config_loader,
         profile=profile,
     )
 
@@ -140,18 +128,17 @@ def validate_config(
     profile: Annotated[str | None, typer.Option(help="Profile name")] = None,
 ) -> None:
     """Validate a pipeline configuration file."""
-    bootstrap_application()
     config_file = Path(config_path)
     if not config_file.exists():
         console.print(f"[red]Error:[/red] Config file not found: {config_path}")
         raise typer.Exit(1)
 
     try:
-        config_loader = create_config_loader()
+        context = get_application_context()
         build_runtime_config(
             config_path=config_file,
             configs_root=get_configs_root(None),
-            loader=config_loader,
+            loader=context.config_loader,
             profile=profile,
         )
         console.print("[green]✓[/green] Config is valid")
