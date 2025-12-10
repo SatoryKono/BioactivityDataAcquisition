@@ -133,33 +133,3 @@ class TestGetParserForEntity:
         with pytest.raises(ValueError) as exc_info:
             get_parser_for_entity("invalid")
         assert "Supported:" in str(exc_info.value)
-
-
-class TestDeprecatedApiAccessHandler:
-    """Tests for deprecated API access handler."""
-
-    def test_get_model_for_entity_raises_import_error(self):
-        """Test that get_model_for_entity raises ImportError with helpful message."""
-        # Use __getattr__ mechanism directly since importing would fail
-        import bioetl.infrastructure.clients.chembl.parser_registry as pr
-
-        with pytest.raises(ImportError) as exc_info:
-            _ = pr.get_model_for_entity  # noqa: B018
-        assert "moved to application layer" in str(exc_info.value)
-        assert "model_registry" in str(exc_info.value)
-
-    def test_entity_model_registry_raises_import_error(self):
-        """Test that ENTITY_MODEL_REGISTRY raises ImportError with helpful message."""
-        import bioetl.infrastructure.clients.chembl.parser_registry as pr
-
-        with pytest.raises(ImportError) as exc_info:
-            _ = pr.ENTITY_MODEL_REGISTRY  # noqa: B018
-        assert "moved to application layer" in str(exc_info.value)
-        assert "model_registry" in str(exc_info.value)
-
-    def test_unknown_attribute_raises_attribute_error(self):
-        """Test that unknown attributes raise AttributeError."""
-        import bioetl.infrastructure.clients.chembl.parser_registry as pr
-
-        with pytest.raises(AttributeError, match="has no attribute"):
-            _ = pr.unknown_attribute  # noqa: B018

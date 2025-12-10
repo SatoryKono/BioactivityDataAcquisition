@@ -11,7 +11,7 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParserImpl,
+    ChemblGenericResponseParser,
 )
 
 
@@ -21,7 +21,7 @@ def mock_components():
     request_builder.build_for_endpoint = MagicMock(return_value=request_builder)
     return {
         "request_builder": request_builder,
-        "response_parser": MagicMock(spec=ChemblResponseParserImpl),
+        "response_parser": MagicMock(spec=ChemblGenericResponseParser),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
         "http_client": MagicMock(),
         "logger": MagicMock(spec=LoggingPortABC),
@@ -50,8 +50,6 @@ def test_fetch_activity_with_http_client(client, mock_components):
     mock_response.status_code = 200
     mock_response.json.return_value = {"data": "test"}
     mock_components["http_client"].request.return_value = mock_response
-
-    mock_components["response_parser"].parse_response.return_value = {"data": "test"}
 
     # Act
     result = client.fetch("activity", molecule_chembl_id="CHEMBL123")

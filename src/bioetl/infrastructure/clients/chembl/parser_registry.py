@@ -69,26 +69,3 @@ __all__ = [
     "get_parser_for_entity",
     "is_supported_entity",
 ]
-
-
-# =============================================================================
-# Deprecated API Access Handler
-# =============================================================================
-
-
-def __getattr__(name: str) -> object:
-    """Handle access to deprecated module attributes.
-
-    Provides helpful error messages when accessing removed attributes.
-    """
-    if name == "ENTITY_MODEL_REGISTRY":
-        raise ImportError(
-            "ENTITY_MODEL_REGISTRY has been moved to application layer. "
-            "Import from bioetl.application.mappers.chembl.model_registry instead."
-        )
-    if name == "get_model_for_entity":
-        raise ImportError(
-            "get_model_for_entity has been moved to application layer. "
-            "Import from bioetl.application.mappers.chembl.model_registry instead."
-        )
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
