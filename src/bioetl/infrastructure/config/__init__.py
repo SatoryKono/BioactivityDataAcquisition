@@ -13,6 +13,7 @@ from bioetl.infrastructure.config.loader import (
     get_pipeline_config,
     get_pipeline_config_from_path,
 )
+from bioetl.infrastructure.config.migration import ConfigMigrator
 from bioetl.infrastructure.config.sources import (
     CONFIGS_ROOT_ENV,
     DEFAULT_CONFIGS_ROOT,
@@ -27,6 +28,7 @@ __all__ = [
     "DEFAULT_CONFIGS_ROOT",
     "ConfigError",
     "ConfigFileNotFoundError",
+    "ConfigMigrator",
     "ConfigValidationError",
     "UnknownProviderError",
     "get_configs_root",
