@@ -12,7 +12,6 @@ class PaginatorABC
 class RateLimiterABC
 class CacheABC
 class SecretProviderABC
-class CircuitBreakerABC
 class ExtractionServiceABC
 
 class BaseClientFactories {
@@ -29,7 +28,6 @@ class OffsetPaginator
 class TokenBucketRateLimiterImpl
 class MemoryCacheImpl
 class EnvSecretProvider
-class CircuitBreakerImpl
 class ChemblExtractionServiceImpl
 
 ChemblDataClientABC ..|> DataClientABC
@@ -41,10 +39,8 @@ TokenBucketRateLimiterImpl ..|> RateLimiterABC
 MemoryCacheImpl ..|> CacheABC
 EnvSecretProvider ..|> SecretProviderABC
 ChemblExtractionServiceImpl ..|> ExtractionServiceABC
-CircuitBreakerImpl ..|> CircuitBreakerABC
 UnifiedAPIClientImpl --> RateLimiterABC
 UnifiedAPIClientImpl --> CacheABC
-UnifiedAPIClientImpl --> CircuitBreakerABC
 UnifiedAPIClientImpl --> SecretProviderABC
 ChemblHttpClientImpl --> UnifiedAPIClientImpl
 ChemblHttpClientImpl --> ChemblRequestBuilder
@@ -54,7 +50,6 @@ ChemblExtractionServiceImpl --> ChemblHttpClientImpl
 BaseClientFactories --> TokenBucketRateLimiterImpl
 BaseClientFactories --> MemoryCacheImpl
 BaseClientFactories --> EnvSecretProvider
-BaseClientFactories --> CircuitBreakerImpl
 
 class ChemblHttpClientImpl domainPrimary
 class ChemblExtractionServiceImpl domainPrimary
@@ -65,7 +60,6 @@ class UnifiedAPIClientImpl domainSecondary
 class TokenBucketRateLimiterImpl domainSecondary
 class MemoryCacheImpl domainSecondary
 class EnvSecretProvider domainSecondary
-class CircuitBreakerImpl domainSecondary
 class BaseClientFactories domainSecondary
 class DataClientABC interface
 class ChemblDataClientABC interface
@@ -75,6 +69,5 @@ class PaginatorABC interface
 class RateLimiterABC interface
 class CacheABC interface
 class SecretProviderABC interface
-class CircuitBreakerABC interface
 class ExtractionServiceABC interface
 

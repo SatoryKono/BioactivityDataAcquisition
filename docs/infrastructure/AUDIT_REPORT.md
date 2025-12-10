@@ -89,22 +89,17 @@ aliases = {
 
 ### 4. Неиспользуемые компоненты
 
-#### 4.1 CircuitBreakerImpl
-**Файл:** `infrastructure/clients/base/impl/circuit_breaker.py`
-
-Класс нигде не используется в коде. Рекомендация: интегрировать в HTTP transport или удалить.
-
-#### 4.2 FileCacheImpl
+#### 4.1 FileCacheImpl
 **Файл:** `infrastructure/clients/base/impl/cache.py:60-114`
 
 Реализация файлового кэша не используется. Рекомендация: оценить необходимость; если не нужен — удалить.
 
-#### 4.3 UnifiedAPIClientImpl
+#### 4.2 UnifiedAPIClientImpl
 **Файл:** `infrastructure/clients/base/impl/unified_api_client_impl.py`
 
 Класс дублирует функциональность `_HttpTransport` и является тонкой обёрткой. Рекомендация: удалить и использовать `_HttpTransport` напрямую.
 
-#### 4.4 RenameColumnsConverter как класс
+#### 4.3 RenameColumnsConverter как класс
 **Файл:** `infrastructure/output/converters/rename_columns_converter.py`
 
 Дублирует логику из `factories.py`. Рекомендация: использовать только одну реализацию.
@@ -202,7 +197,7 @@ NormalizationService = DefaultNormImpl
 | 1 | Объединить provider_registry_loader | 2 файла → 1 |
 | 2 | Удалить UnifiedAPIClientImpl | 1 файл |
 | 3 | Вынести entity aliases в константы | 2 файла |
-| 4 | Удалить CircuitBreakerImpl | 1 файл |
+| 4 | ~~Удалить CircuitBreakerImpl~~ | ✅ Выполнено |
 
 ### Средний приоритет
 
