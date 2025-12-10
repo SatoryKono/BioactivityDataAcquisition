@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig
-from bioetl.domain.ports.extraction import VersionedRecordFetcherABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
@@ -25,7 +25,7 @@ def create_extraction_service(
     *,
     client: DataClientABC | None = None,
     field_provider: DefaultFieldProviderABC | None = None,
-) -> VersionedRecordFetcherABC:
+) -> ExtractionServiceABC:
     """Create extraction service using provided or default ChEMBL client."""
 
     resolved_client = client or create_client(config)

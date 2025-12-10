@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientSettings
-from bioetl.domain.ports.extraction import VersionedRecordFetcherABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.domain.transform.contracts import (
@@ -21,7 +21,7 @@ from bioetl.infrastructure.transform.factories import default_normalization_serv
 class ChemblProviderComponentsFactory(
     ProviderComponents[
         DataClientABC,
-        VersionedRecordFetcherABC,
+        ExtractionServiceABC,
         NormalizationServiceABC,
         object,
     ]
@@ -38,7 +38,7 @@ class ChemblProviderComponentsFactory(
         *,
         client: DataClientABC | None = None,
         field_provider: DefaultFieldProviderABC | None = None,
-    ) -> VersionedRecordFetcherABC:
+    ) -> ExtractionServiceABC:
         """Construct extraction service with optional prebuilt client."""
         return create_extraction_service(
             config, client=client, field_provider=field_provider
