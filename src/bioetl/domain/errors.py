@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, SupportsIndex
+from typing import TYPE_CHECKING, Any, SupportsIndex
+
+if TYPE_CHECKING:
+    from bioetl.domain.value_objects import RunId
 
 __all__ = [
     "BioetlError",
@@ -88,7 +91,7 @@ class PipelineStageError(BioetlError):
         entity: str,
         stage: str,
         attempt: int,
-        run_id: str,
+        run_id: str | RunId,
         *,
         cause: Exception | None = None,
     ) -> None:
@@ -101,7 +104,7 @@ class PipelineStageError(BioetlError):
         self.entity = entity
         self.stage = stage
         self.attempt = attempt
-        self.run_id = run_id
+        self.run_id = str(run_id)  # Convert RunId to str for pickle compatibility
         self.cause = cause
 
     def __str__(self) -> str:
