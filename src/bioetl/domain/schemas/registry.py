@@ -2,8 +2,16 @@
 Registry implementation for schema objects (technology-agnostic).
 """
 
+from __future__ import annotations
+
+import warnings
+from collections.abc import Callable
+
 from bioetl.domain.schemas.generator import generate_schema_from_column_order
 from bioetl.domain.validation import SchemaProviderABC, schema_type
+
+# Type alias for schema registration function
+SchemaRegisterFn = Callable[["SchemaRegistry"], "SchemaRegistry"]
 
 
 class SchemaRegistry(SchemaProviderABC):
@@ -67,14 +75,127 @@ class SchemaRegistry(SchemaProviderABC):
         return list(self._schemas.keys())
 
 
-# Global registry singleton
-registry = SchemaRegistry()
+# ---------------------------------------------------------------------------
+# Factory functions (preferred over global state)
+# ---------------------------------------------------------------------------
+
+
+def create_default_schema_registry(
+    *,
+    register_fn: SchemaRegisterFn | None = None,
+) -> SchemaRegistry:
+    """
+    Create a new SchemaRegistry populated with default schemas.
+
+    Parameters
+    ----------
+    register_fn
+        Optional callable that registers schemas into the registry.
+        Defaults to :func:`bioetl.domain.schemas.register_schemas`.
+        Useful for testing with custom schema sets.
+
+    Returns
+    -------
+    SchemaRegistry
+        A freshly created and populated registry instance.
+    """
+    reg = SchemaRegistry()
+
+    if register_fn is None:
+        # Import here to avoid circular dependency
+        from bioetl.domain.schemas import register_schemas
+
+        register_fn = register_schemas
+
+    register_fn(reg)
+    return reg
+
+
+# Lazy-initialized default instance for DI containers
+_default_registry: SchemaRegistry | None = None
+
+
+def get_default_schema_registry() -> SchemaRegistry:
+    """
+    Return the lazily-initialized default schema registry.
+
+    This function provides a singleton-like access pattern suitable for
+    dependency injection containers while avoiding module-level global state.
+
+    For tests requiring isolation, use :func:`create_default_schema_registry`
+    to create independent instances.
+    """
+    global _default_registry  # noqa: PLW0603
+    if _default_registry is None:
+        _default_registry = create_default_schema_registry()
+    return _default_registry
+
+
+def reset_default_schema_registry() -> None:
+    """
+    Reset the cached default registry (for testing purposes only).
+
+    This allows tests to clear the lazy-initialized singleton.
+    """
+    global _default_registry  # noqa: PLW0603
+    _default_registry = None
+
+
+# ---------------------------------------------------------------------------
+# Backward compatibility - deprecated global singleton
+# ---------------------------------------------------------------------------
+
+
+class _DeprecatedRegistryProxy:
+    """
+    Proxy that emits deprecation warning on first attribute access.
+
+    This maintains backward compatibility while encouraging migration
+    to the factory pattern.
+    """
+
+    _warned: bool = False
+    _instance: SchemaRegistry | None = None
+
+    def _warn_once(self) -> None:
+        if not self._warned:
+            warnings.warn(
+                "Global 'registry' is deprecated. "
+                "Use get_default_schema_registry() or "
+                "create_default_schema_registry() instead.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+            self._warned = True
+
+    def _get_instance(self) -> SchemaRegistry:
+        if self._instance is None:
+            self._instance = get_default_schema_registry()
+        return self._instance
+
+    def __getattr__(self, name: str) -> object:
+        self._warn_once()
+        return getattr(self._get_instance(), name)
+
+    def __repr__(self) -> str:
+        return f"<DeprecatedRegistryProxy wrapping {self._get_instance()!r}>"
+
+
+# Deprecated: use get_default_schema_registry() instead
+registry: SchemaRegistry = _DeprecatedRegistryProxy()  # type: ignore[assignment]
 
 
 def default_schema_provider() -> SchemaProviderABC:
     """Return the default schema provider (in-memory registry)."""
+    return get_default_schema_registry()
 
-    return registry
 
-
-__all__ = ["SchemaRegistry", "registry", "default_schema_provider"]
+__all__ = [
+    "SchemaRegistry",
+    "create_default_schema_registry",
+    "get_default_schema_registry",
+    "reset_default_schema_registry",
+    # Deprecated exports (for backward compatibility)
+    "registry",
+    "default_schema_provider",
+]

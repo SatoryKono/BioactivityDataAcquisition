@@ -32,12 +32,6 @@ class VersionProviderABC(ABC):
         """Возвращает идентификатор релиза (например, chembl_34)."""
 
 
-class VersionedRecordFetcherABC(RecordFetcherABC, VersionProviderABC):
-    """Fetcher с версией источника."""
-
-    ...
-
-
 class ExtractionServiceABC(RecordFetcherABC):
     """Абстракция сервиса извлечения данных из провайдера."""
 
@@ -94,7 +88,6 @@ class BatchAdapterABC(Protocol):
 __all__ = [
     "RecordFetcherABC",
     "VersionProviderABC",
-    "VersionedRecordFetcherABC",
     "BatchAdapterABC",
     "ExtractionServiceABC",
 ]

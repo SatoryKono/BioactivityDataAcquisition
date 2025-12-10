@@ -19,7 +19,7 @@ from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
     ExtractionServiceABC,
 )
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.record_source import ApiRecordSource, RecordSourceABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
@@ -36,7 +36,7 @@ class ChemblExtractorImpl(ExtractorABC):
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
         batch_adapter: BatchAdapterABC,
-        record_source: RecordSource | None = None,
+        record_source: RecordSourceABC | None = None,
     ) -> None:
         self.config = config
         self.extraction_service = extraction_service
@@ -79,7 +79,7 @@ class ChemblExtractorImpl(ExtractorABC):
                 if remaining <= 0:
                     break
 
-    def _resolve_record_source(self, *, limit: int | None) -> RecordSource:
+    def _resolve_record_source(self, *, limit: int | None) -> RecordSourceABC:
         """
         Builds record source based on current pipeline config.
         Falls back to API iteration when no input file is provided.
@@ -143,7 +143,7 @@ class ChemblExtractorImpl(ExtractorABC):
         csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
         chunk_size: int | None,
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         if not input_path:
             raise ValueError("input_path is required for CSV mode")
         return CsvRecordSourceImpl(
@@ -162,7 +162,7 @@ class ChemblExtractorImpl(ExtractorABC):
         csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
         chunk_size: int | None,
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         if not input_path:
             raise ValueError("input_path is required for ID-only mode")
         id_column = self._resolve_primary_key()
@@ -190,7 +190,7 @@ class ChemblExtractorImpl(ExtractorABC):
 
     def _build_api_source(
         self, *, limit: int | None, chunk_size: int | None
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         filters = dict(getattr(self.config, "pipeline", {}) or {})
         if limit is not None:
             filters["limit"] = limit

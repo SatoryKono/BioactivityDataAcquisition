@@ -99,12 +99,24 @@ These columns are part of the lineage and determinism chain defined in project r
 
 ## Schema Registration
 
-- Register every schema in the global registry:
+- Use factory functions to create schema registries:
 
   ```python
-  from bioetl.domain.schemas.registry import registry
+  from bioetl.domain.schemas.registry import (
+      create_default_schema_registry,
+      get_default_schema_registry,
+  )
 
-  registry.register(
+  # For production: use lazy-initialized singleton
+  registry = get_default_schema_registry()
+
+  # For tests: create isolated instance
+  test_registry = create_default_schema_registry()
+
+  # Custom registration (if needed)
+  from bioetl.domain.schemas.registry import SchemaRegistry
+  custom_registry = SchemaRegistry()
+  custom_registry.register(
       "activity",
       ActivityTableSchema,
       column_order=ACTIVITY_OUTPUT_COLUMNS,
