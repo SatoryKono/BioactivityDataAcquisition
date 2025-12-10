@@ -364,13 +364,14 @@ def test_pipeline_error_hooks(
         lambda **_: (_ for _ in ()).throw(ValueError("Extraction failed"))
     )
 
-    # Act & Assert
-    with pytest.raises(PipelineStageError) as exc_info:
-        pipeline.run(Path("dummy"))
+    # Act
+    result = pipeline.run(Path("dummy"))
 
-    assert isinstance(exc_info.value.cause, ValueError)
-    assert str(exc_info.value.cause) == "Extraction failed"
-    assert exc_info.value.stage == "extract"
+    # Assert - executor returns RunResult(success=False) instead of raising
+    assert not result.success
+    assert len(result.errors) > 0
+    # Error message contains stage name
+    assert "extract" in result.errors[0]
 
     # Verify hook called
     assert mock_hook.on_error.call_count >= 1
@@ -554,8 +555,9 @@ def test_error_policy_failfast_raises(
         lambda **_: (_ for _ in ()).throw(ValueError("boom"))
     )
 
-    with pytest.raises(PipelineStageError):
-        pipeline.run(output_path=tmp_path, dry_run=True)
+    result = pipeline.run(output_path=tmp_path, dry_run=True)
+    assert not result.success
+    assert len(result.errors) > 0
     assert pipeline._extractor.call_count == 1
 
 
