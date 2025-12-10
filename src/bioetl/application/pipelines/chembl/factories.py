@@ -9,10 +9,7 @@ from __future__ import annotations
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.application.pipelines.contracts import (
-    PipelineContainerABC,
-    PipelineFactoryABC,
-)
+from bioetl.application.contracts import PipelineContainerABC, PipelineFactoryABC
 
 
 class ChemblPipelineFactory(PipelineFactoryABC):

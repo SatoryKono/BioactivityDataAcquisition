@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 from bioetl.application.memory_registry import InMemoryProviderRegistry
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_factory
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext, RunResult, StageResult
