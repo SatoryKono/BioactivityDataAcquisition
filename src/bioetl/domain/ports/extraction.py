@@ -33,35 +33,29 @@ class VersionProviderABC(ABC):
 
 
 class ExtractionServiceABC(RecordFetcherABC):
-    """Абстракция сервиса извлечения данных из провайдера."""
+    """Расширенный сервис извлечения с поддержкой версионирования и сериализации.
+
+    Наследует базовые методы iter_extract() и extract_all() от RecordFetcherABC.
+    Добавляет методы для работы с версиями, батчами и сериализацией.
+    """
 
     @abstractmethod
     def get_release_version(self) -> str:
-        """Версия релиза источника (например, chembl_34)."""
-
-    @abstractmethod
-    def extract_all(self, entity: str, **filters: object) -> list["RawRecord"]:
-        """Извлекает все записи указанной сущности, применяя фильтры."""
-
-    @abstractmethod
-    def iter_extract(
-        self, entity: str, *, chunk_size: int | None = None, **filters: object
-    ) -> Iterable[list["RawRecord"]]:
-        """Итерирует по чанкам сырых записей."""
+        """Получить версию источника данных."""
 
     @abstractmethod
     def request_batch(
         self, entity: str, batch_ids: list[str], filter_key: str
     ) -> dict[str, object]:
-        """Запрашивает пакет записей по списку идентификаторов."""
+        """Запросить батч по идентификаторам."""
 
     @abstractmethod
     def parse_response(self, raw_response: object) -> list["RawRecord"]:
-        """Парсит сырой ответ в структуру RawRecord."""
+        """Разобрать сырой ответ в записи."""
 
     @abstractmethod
     def serialize_records(self, entity: str, records: list[object]) -> list[object]:
-        """Сериализует нормализованные записи для экспорта/передачи."""
+        """Сериализовать записи для вывода."""
 
 
 class BatchAdapterABC(Protocol):
