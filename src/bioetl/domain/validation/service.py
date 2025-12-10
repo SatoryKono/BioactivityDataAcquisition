@@ -54,8 +54,8 @@ class ValidationService:
             raise ValueError(f"Validation failed for {entity_name}: {result.errors}")
 
         validated_df = (
-            result.validated_df
-            if result.validated_df is not None
+            result.validated_data
+            if result.validated_data is not None
             else df_for_validation
         )
 
