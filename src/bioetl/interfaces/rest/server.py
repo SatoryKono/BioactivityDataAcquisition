@@ -21,7 +21,7 @@ from bioetl.domain.provider_registry import (
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.wiring import create_config_loader
+from bioetl.interfaces.container_factory import create_config_loader
 
 
 class PipelineRunRequest(BaseModel):
