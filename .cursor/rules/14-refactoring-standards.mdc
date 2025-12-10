@@ -1,0 +1,104 @@
+---
+description: Standards and protocols for refactoring code modules in BioETL
+globs: src/**/*.py, tests/**/*.py
+alwaysApply: false
+---
+# Refactoring Standards
+
+## Dependency Mapping Protocol
+
+Before refactoring any module (referred to as `X`), you MUST create a dependency map to ensure safety.
+
+### Steps
+1. **Find all imports of the module**:
+   ```bash
+   grep -r "from bioetl.domain.X import" src/
+   grep -r "import bioetl.domain.X" src/
+   ```
+
+2. **Find all usages of classes/functions**:
+   ```bash
+   grep -r "X\." src/ --include="*.py"
+   ```
+
+3. **Find mentions in tests**:
+   ```bash
+   grep -r "X" tests/ --include="*.py"
+   ```
+
+4. **Check re-exports in `__init__.py`**:
+   ```bash
+   grep -r "X" src/bioetl/domain/__init__.py
+   ```
+
+### Required Output Format
+When planning a refactor, produce a report containing:
+- List of files importing the module.
+- List of files using specific classes from the module.
+- List of tests that require updates.
+- Recommendations for the order of migration (e.g., leaves first, then core).
+
+## Pre-refactoring Testing Protocol
+
+Before refactoring module `X`, you MUST ensure adequate test coverage.
+
+### Steps
+1. **Check existing tests**:
+   ```bash
+   ls tests/domain/test_X.py
+   ls tests/unit/domain/
+   ```
+
+2. **Run coverage for the module**:
+   ```bash
+   pytest tests/ --cov=bioetl.domain.X --cov-report=term-missing
+   ```
+
+3. **Create tests for uncovered paths**:
+   - **Happy path** for each public method.
+   - **Edge cases** (None, empty, invalid input).
+   - **Error cases** (expected exceptions).
+
+4. **Verify tests pass**:
+   ```bash
+   pytest tests/domain/test_X.py -v
+   ```
+
+### Requirements
+- **Coverage > 80%** before starting refactoring.
+- All tests must be **green**.
+- Tests must verify **behavior**, not implementation details.
+
+## General Refactoring Rules
+- **Maintain Invariants**: Do not break core invariants (Determinism, Validation, Logging, Architecture) during refactoring.
+- **Class Inventory**: If adding new classes, ensure the total class count invariant is respected (delete old ones).
+- **Tests**: Ensure all existing tests pass before and after refactoring. Add new tests for new functionality.
+
+## Post-Refactoring Validation Checklist
+
+Context: Completed refactoring of module X.
+
+### Checklist
+1. [ ] **Tests pass**: `pytest tests/ -v`
+2. [ ] **Types are correct**: `mypy src/bioetl/domain/`
+3. [ ] **No circular imports**: `python -c "import bioetl.domain"`
+4. [ ] **Documentation updated**
+5. [ ] **__init__.py exports updated**
+6. [ ] **Deprecation warnings added** (if applicable)
+7. [ ] **CHANGELOG updated**
+8. [ ] **PR description includes breaking changes**
+
+### Verification Commands
+```bash
+# Tests
+pytest tests/ -v --tb=short
+
+# Types
+mypy src/bioetl/domain/ --strict
+
+# Imports
+python -c "from bioetl.domain import *; print('OK')"
+
+# Lint
+ruff check src/bioetl/domain/
+```
