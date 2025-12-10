@@ -5,17 +5,10 @@ Provides base pipeline implementation and factory registry.
 
 Public API:
     - PipelineBase: Abstract base class for all pipelines
-    - Registry functions for discovering and creating pipelines
+    - Registry functions: get_factory, get_pipeline_factory, etc.
 
-For contracts (PipelineContainerABC, PipelineFactoryABC), import from:
-    bioetl.application.contracts
-
-Internal modules (not exported):
-    - stage_runtime_manager
-    - stage_counter
-    - stage_error_handler
-    - hook_notifier
-    - hooks_impl
+For contracts (PipelineContainerABC, PipelineFactoryABC),
+import from bioetl.application.contracts.
 """
 
 from bioetl.application.pipelines.base import PipelineBase
@@ -31,8 +24,6 @@ from bioetl.application.pipelines.registry import (
 __all__ = [
     # Base class
     "PipelineBase",
-    # Registry functions
-    "PIPELINE_REGISTRY",
     "get_factory",
     "get_pipeline_class",
     "get_pipeline_factory",

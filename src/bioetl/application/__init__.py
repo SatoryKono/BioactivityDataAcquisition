@@ -5,14 +5,11 @@ Provides core orchestration components for pipeline assembly and execution.
 
 Public API:
     - PipelineContainer: Dependency injection container for pipelines
-    - PipelineOrchestrator: High-level orchestration of pipeline execution
+    - PipelineOrchestrator: High-level pipeline execution coordinator
     - contracts: Abstract base classes (PipelineContainerABC, PipelineFactoryABC)
 
-For internal components (bootstrap, config loading), import from submodules directly:
-    - bioetl.application.bootstrap
-    - bioetl.application.config
-    - bioetl.application.factories
-    - bioetl.application.pipelines
+For bootstrap utilities, import directly from bioetl.application.bootstrap.
+For configuration, import from bioetl.application.config.
 """
 
 from bioetl.application import contracts
