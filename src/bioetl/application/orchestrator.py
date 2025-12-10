@@ -16,11 +16,11 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.types import PipelineType
 from bioetl.domain.provider_registry import (
-    InMemoryProviderRegistry,
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 

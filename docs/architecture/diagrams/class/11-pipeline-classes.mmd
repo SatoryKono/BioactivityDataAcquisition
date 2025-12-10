@@ -6,37 +6,53 @@ classDiagram-v2
 
 class PipelineBase {
   <<Abstract>>
+  +run(limit) RunResult
+  +extract() ExtractResult
+  +transform(df) DataFrame
+  +validate(df) DataFrame
+  +write(df) WriteResult
 }
-class ChemblPipelineBase
+class ChemblPipelineBase {
+  +extractor: ChemblExtractorImpl
+  +transformer: ChemblTransformerImpl
+}
 class ChemblExtractorImpl
 class ChemblTransformerImpl
 class ChemblExtractionServiceImpl
 class StageRuntimeManagerImpl
-class RecordSource
+class RecordSourceABC
+class ApiRecordSource
+class CsvRecordSource
 class ValidationService
 class NormalizationServiceABC
-class HashService
-class UnifiedOutputWriter
+class HashServiceABC
+class UnifiedLoaderImpl
 class PipelineHookABC
 class ErrorPolicyABC
 class ExtractorABC
 class TransformerABC
-class ExtractionServiceABC
+class ExtractionPortABC
+class PipelineContainerABC
+class PipelineContainer
 
 ChemblPipelineBase --|> PipelineBase
 ChemblPipelineBase --> ChemblExtractorImpl : extractor
 ChemblPipelineBase --> ChemblTransformerImpl : transformer
 ChemblPipelineBase --> ChemblExtractionServiceImpl : extraction_service
-ChemblPipelineBase --> RecordSource : csv/id_only/api
+ChemblPipelineBase --> RecordSourceABC : record_source
 ChemblPipelineBase --> ValidationService
 ChemblPipelineBase --> NormalizationServiceABC
-ChemblPipelineBase --> HashService
-ChemblPipelineBase --> UnifiedOutputWriter
+ChemblPipelineBase --> HashServiceABC
+ChemblPipelineBase --> UnifiedLoaderImpl
 PipelineBase --> StageRuntimeManagerImpl : runtime_manager
 PipelineBase --> TransformerABC : post_transformer
 PipelineBase --> ExtractorABC
-ChemblExtractorImpl --> ExtractionServiceABC
-ChemblExtractorImpl --> RecordSource
+PipelineBase --> PipelineContainerABC
+PipelineContainer --|> PipelineContainerABC
+ChemblExtractorImpl --> ExtractionPortABC
+ChemblExtractorImpl --> RecordSourceABC
+ApiRecordSource --|> RecordSourceABC
+CsvRecordSource --|> RecordSourceABC
 ChemblTransformerImpl --> TransformerABC
 StageRuntimeManagerImpl --> PipelineHookABC
 StageRuntimeManagerImpl --> ErrorPolicyABC
