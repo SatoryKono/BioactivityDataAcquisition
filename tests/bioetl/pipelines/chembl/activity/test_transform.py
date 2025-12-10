@@ -35,6 +35,7 @@ def pipeline():
     normalization_service = MagicMock()
     normalization_service.apply_normalize_dataframe.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
+    normalization_service.normalize.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize.side_effect = lambda record: record
 
     return ChemblPipelineBase(
@@ -110,6 +111,7 @@ def test_transform_drops_invalid_rows(pipeline):
     pipeline._normalization_service.apply_normalize_dataframe.side_effect = (
         lambda df: df.copy()
     )
+    pipeline._normalization_service.normalize.side_effect = lambda df: df.copy()
 
     df = pd.DataFrame(
         {

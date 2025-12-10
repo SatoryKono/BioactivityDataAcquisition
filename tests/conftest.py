@@ -303,8 +303,8 @@ from bioetl.domain.configs import (  # noqa: E402
     StorageConfig,
 )
 from bioetl.domain.models import RunContext  # noqa: E402
-from bioetl.domain.validation.service import ValidationService  # noqa: E402
 from bioetl.domain.observability.contracts import LoggingPortABC  # noqa: E402
+from bioetl.domain.validation.service import ValidationService  # noqa: E402
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules

@@ -29,7 +29,9 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         return self
 
     def build(
-        self, endpoint_or_params: Optional[dict[str, Any] | str] = None, **params_kwargs: Any
+        self,
+        endpoint_or_params: Optional[dict[str, Any] | str] = None,
+        **params_kwargs: Any,
     ) -> str:
         """Build request URL from endpoint name or params."""
         merged_params: dict[str, Any] = {}

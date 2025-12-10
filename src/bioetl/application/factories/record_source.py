@@ -1,6 +1,7 @@
 """
 Factory for creating RecordSource instances.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -59,9 +60,7 @@ class RecordSourceFactory:
             if path is None:
                 raise ValueError("input_path is required for ID-only mode")
 
-            source_config = self._resolve_provider_config(
-                self._provider_definition
-            )
+            source_config = self._resolve_provider_config(self._provider_definition)
             id_column = self._resolve_primary_key()
             filter_key = f"{id_column}__in"
             return IdListRecordSourceImpl(

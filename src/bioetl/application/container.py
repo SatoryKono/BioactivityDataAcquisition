@@ -4,10 +4,10 @@ from types import SimpleNamespace
 from typing import Any, Callable, cast
 
 from bioetl.application.factories.hooks import PipelineHookFactory
-from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
 from bioetl.application.factories.record_source import RecordSourceFactory
 from bioetl.application.factories.services import ProviderServiceFactory
 from bioetl.application.pipelines.contracts import LoaderABC, PipelineContainerABC
+from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
 )
@@ -46,29 +46,21 @@ class PipelineContainer(PipelineContainerABC):
         hash_service: HashServiceABC | None = None,
         post_transformer: TransformerABC | None = None,
         provider_registry: ProviderRegistryABC | None = None,
-        provider_registry_provider: (
-            Callable[[], ProviderRegistryABC] | None
-        ) = None,
+        provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
         schema_provider: SchemaProviderABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
-        self._schema_provider: SchemaProviderABC = (
-            self._resolve_schema_provider(schema_provider)
+        self._schema_provider: SchemaProviderABC = self._resolve_schema_provider(
+            schema_provider
         )
-        self._validator_factory = self._resolve_validator_factory(
-            validator_factory
-        )
+        self._validator_factory = self._resolve_validator_factory(validator_factory)
         self._logger = self._resolve_logger(logger)
-        self._hooks: list[PipelineHookABC] | None = (
-            list(hooks) if hooks else None
-        )
+        self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
         self._error_policy = error_policy
         self._hash_service = hash_service
         self._post_transformer = post_transformer
-        self._metadata_builder = self._resolve_metadata_builder(
-            metadata_builder
-        )
+        self._metadata_builder = self._resolve_metadata_builder(metadata_builder)
         self._metrics_port = self._resolve_metrics_port(metrics_port)
         self._provider_registry, self._provider_registry_provider = (
             self._resolve_provider_registry(
@@ -138,9 +130,7 @@ class PipelineContainer(PipelineContainerABC):
         self,
         provider_registry: ProviderRegistryABC | None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None,
-    ) -> tuple[
-        ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None
-    ]:
+    ) -> tuple[ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None]:
         if provider_registry is None and provider_registry_provider is None:
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
@@ -222,7 +212,6 @@ class PipelineContainer(PipelineContainerABC):
         if self._hooks is None:
             self._hooks = self._get_hook_factory().create_hooks(self.get_logger())
         return list(self._hooks)
-
 
     def get_error_policy(self) -> ErrorPolicyABC:
         """Возвращает политику обработки ошибок пайплайна."""

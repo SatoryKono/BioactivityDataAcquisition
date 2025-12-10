@@ -74,6 +74,7 @@ def test_extract_stage_wraps_client_error(
     normalization_service = MagicMock()
     normalization_service.apply_normalize_dataframe.side_effect = lambda df: df
     normalization_service.apply_normalize_batch.side_effect = lambda df: df
+    normalization_service.normalize.side_effect = lambda df: df
     normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
     normalization_service.apply_normalize.side_effect = lambda record: record
 
@@ -81,7 +82,7 @@ def test_extract_stage_wraps_client_error(
         config=config,
         logger=logger,
         validation_service=validation_service,
-        output_writer=output_writer,
+        loader=output_writer,
         extraction_service=extraction_service,
         hash_service=hash_service,
         normalization_service=normalization_service,

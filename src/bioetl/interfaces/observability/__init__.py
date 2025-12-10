@@ -4,9 +4,9 @@ Observability interfaces package.
 
 from bioetl.domain.observability.contracts import (
     LoggingPortABC,
-    TracingPortABC,
     MetricsPortABC,
     ProgressReporterABC,
+    TracingPortABC,
 )
 
 __all__ = [

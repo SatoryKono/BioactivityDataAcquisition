@@ -2,6 +2,7 @@
 """
 Диагностический скрипт для проверки, откуда импортируется numpy.
 """
+
 import os
 from pathlib import Path
 import sys

@@ -1,4 +1,3 @@
-
 from unittest.mock import Mock, patch
 
 import pytest
@@ -34,8 +33,7 @@ def mock_registry():
 @pytest.fixture
 def container(mock_config, mock_registry):
     return PipelineContainer(
-        config=mock_config,
-        provider_registry=mock_registry
+        config=mock_config, provider_registry=mock_registry, loader=Mock()
     )
 
 
@@ -44,9 +42,7 @@ def test_container_initialization(container):
 
 
 def test_get_record_source_delegates_to_factory(container, mock_registry):
-    with patch(
-        'bioetl.application.container.RecordSourceFactory'
-    ) as MockFactory:
+    with patch("bioetl.application.container.RecordSourceFactory") as MockFactory:
         factory_instance = MockFactory.return_value
         factory_instance.create_record_source.return_value = "mock_source"
 
@@ -58,9 +54,7 @@ def test_get_record_source_delegates_to_factory(container, mock_registry):
 
 
 def test_get_hooks_delegates_to_factory(container):
-    with patch(
-        'bioetl.application.container.PipelineHookFactory'
-    ) as MockFactory:
+    with patch("bioetl.application.container.PipelineHookFactory") as MockFactory:
         factory_instance = MockFactory.return_value
         factory_instance.create_hooks.return_value = ["hook1", "hook2"]
 
@@ -72,13 +66,9 @@ def test_get_hooks_delegates_to_factory(container):
 
 
 def test_get_normalization_service_delegates_to_factory(container):
-    with patch(
-        'bioetl.application.container.ProviderServiceFactory'
-    ) as MockFactory:
+    with patch("bioetl.application.container.ProviderServiceFactory") as MockFactory:
         factory_instance = MockFactory.return_value
-        factory_instance.create_normalization_service.return_value = (
-            "mock_norm_service"
-        )
+        factory_instance.create_normalization_service.return_value = "mock_norm_service"
 
         service = container.get_normalization_service()
 
@@ -88,13 +78,9 @@ def test_get_normalization_service_delegates_to_factory(container):
 
 
 def test_get_extraction_service_delegates_to_factory(container):
-    with patch(
-        'bioetl.application.container.ProviderServiceFactory'
-    ) as MockFactory:
+    with patch("bioetl.application.container.ProviderServiceFactory") as MockFactory:
         factory_instance = MockFactory.return_value
-        factory_instance.create_extraction_service.return_value = (
-            "mock_ext_service"
-        )
+        factory_instance.create_extraction_service.return_value = "mock_ext_service"
 
         service = container.get_extraction_service()
 

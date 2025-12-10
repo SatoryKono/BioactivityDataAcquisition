@@ -20,9 +20,7 @@ class RequestBuilderABC(ABC):
         """Создает объект запроса из параметров."""
 
     @abstractmethod
-    def build(
-        self, endpoint: str, params: dict[str, Any] | None = None
-    ) -> Any:
+    def build(self, endpoint: str, params: dict[str, Any] | None = None) -> Any:
         """Создает запрос для указанного endpoint с параметрами."""
 
     @abstractmethod
@@ -145,3 +143,21 @@ class SideInputProviderABC(ABC):
     @abstractmethod
     def refresh(self, name: str) -> None:
         """Обновляет справочник."""
+
+
+class ApiClientABC(ABC):
+    """
+    Низкоуровневый HTTP‑клиент.
+
+    Обеспечивает базовый интерфейс для выполнения запросов и закрытия
+    соединений. Реализации должны обеспечивать таймауты, ретраи и
+    корректную обработку ошибок.
+    """
+
+    @abstractmethod
+    def request(self, method: str, url: str, **kwargs: Any) -> Any:
+        """Выполняет HTTP‑запрос и возвращает объект ответа."""
+
+    @abstractmethod
+    def close(self) -> None:
+        """Закрывает клиент/сессию."""

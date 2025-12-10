@@ -36,6 +36,7 @@ def pipeline():
     normalization_service.apply_normalize_dataframe.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize_batch.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
+    normalization_service.normalize.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize.side_effect = lambda record: record
 
     return ChemblPipelineBase(

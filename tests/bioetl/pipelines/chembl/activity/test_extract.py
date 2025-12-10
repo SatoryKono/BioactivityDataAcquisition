@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
@@ -19,7 +20,6 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.domain.observability.contracts import LoggingPortABC
 
 
 def _extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
@@ -96,6 +96,7 @@ def mock_normalization_service():
     service = MagicMock()
     service.apply_normalize_batch.side_effect = lambda df: df
     service.apply_normalize_dataframe.side_effect = lambda df: df
+    service.normalize.side_effect = lambda df: df
     return service
 
 

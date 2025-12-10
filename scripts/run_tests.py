@@ -19,6 +19,7 @@
     --html           - HTML-отчёт о покрытии
     --min-cov=85     - Минимальное покрытие (по умолчанию 85%)
 """
+
 from pathlib import Path
 import subprocess
 import sys
@@ -28,9 +29,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 def run_command(cmd: list[str], description: str) -> int:
     """Запустить команду и вернуть код возврата."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"> {description}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
     result = subprocess.run(cmd, cwd=PROJECT_ROOT)
     return result.returncode
 

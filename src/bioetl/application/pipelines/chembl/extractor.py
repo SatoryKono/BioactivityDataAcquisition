@@ -15,7 +15,10 @@ from bioetl.application.files.csv_record_source import (
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.ports.extraction import BatchAdapterABC, RecordFetcherABC
+from bioetl.domain.ports.extraction import (
+    BatchAdapterABC,
+    ExtractionServiceABC,
+)
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
@@ -29,7 +32,7 @@ class ChemblExtractorImpl(ExtractorABC):
     def __init__(
         self,
         config: PipelineConfig,
-        extraction_service: RecordFetcherABC,
+        extraction_service: ExtractionServiceABC,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
         batch_adapter: BatchAdapterABC,
@@ -66,9 +69,7 @@ class ChemblExtractorImpl(ExtractorABC):
 
             working_chunk = pd.DataFrame(normalized_input)
 
-            normalized_chunk = self.normalization_service.apply_normalize_batch(
-                working_chunk
-            )
+            normalized_chunk = self.normalization_service.normalize(working_chunk)
 
             if not normalized_chunk.empty:
                 yield normalized_chunk
