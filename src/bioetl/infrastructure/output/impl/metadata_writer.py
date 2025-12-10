@@ -1,5 +1,6 @@
 """Writers for pipeline metadata and QC artifacts."""
 
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -67,7 +68,22 @@ class MetadataWriter:
         return compute_files_sha256(paths)
 
 
-# Deprecated alias for backward compatibility (will be removed in next major version)
-MetadataWriterImpl = MetadataWriter
+# Deprecated aliases for backward compatibility
+_DEPRECATED_ALIASES = {
+    "MetadataWriterImpl": "MetadataWriter",
+}
+
+
+def __getattr__(name: str):
+    if name in _DEPRECATED_ALIASES:
+        warnings.warn(
+            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name]} instead. "
+            "Will be removed in v3.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return globals()[_DEPRECATED_ALIASES[name]]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = ["MetadataWriter", "MetadataWriterImpl", "build_quality_report_table"]

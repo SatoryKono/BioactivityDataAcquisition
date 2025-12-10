@@ -72,7 +72,7 @@ def default_output_frame_converter(
     """DEPRECATED: Use create_output_frame_converter() instead."""
     warnings.warn(
         "default_output_frame_converter is deprecated, "
-        "use create_output_frame_converter instead",
+        "use create_output_frame_converter instead. Will be removed in v3.0.",
         DeprecationWarning,
         stacklevel=2,
     )
