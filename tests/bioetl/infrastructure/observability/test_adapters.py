@@ -3,6 +3,7 @@ from bioetl.infrastructure.observability.adapters import (
     StructuredLoggerImpl,
     TracingAdapterImpl,
 )
+from bioetl.infrastructure.settings.metrics import MetricName
 
 
 def test_structured_logger_bind_and_log():
@@ -24,11 +25,11 @@ def test_tracing_adapter_noop():
 def test_prometheus_metrics_port_updates():
     port = PrometheusMetricsPortImpl()
     port.inc_counter(
-        "bioetl_client_request_total",
+        MetricName.CLIENT_REQUEST_TOTAL,
         {"provider": "chembl", "endpoint": "/e", "status": "200"},
     )
     port.observe_histogram(
-        "bioetl_client_request_duration_seconds",
+        MetricName.CLIENT_REQUEST_DURATION_SECONDS,
         0.1,
         {"provider": "chembl", "endpoint": "/e", "status": "200"},
     )
