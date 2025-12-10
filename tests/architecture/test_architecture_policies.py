@@ -186,6 +186,11 @@ def test_duplicate_class_names_are_allowlisted() -> None:
         "DefaultNormalizationTransformerImpl",
         "NormalizationConfig",
         "Config",
+        # Temporary: bounded context configs migration (will be consolidated)
+        "CsvInputConfig",
+        "DataSourceConfig",
+        "DataSinkConfig",
+        "OutputOptionsConfig",
     }
 
     class_map: dict[str, list[Path]] = {}
