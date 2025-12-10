@@ -13,6 +13,10 @@ import pytest
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
+from bioetl.infrastructure.config.loader import (
+    reset_schema_contract_provider,
+    set_schema_contract_provider,
+)
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
@@ -56,12 +60,24 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     )
     _freeze_hash_service_clock(monkeypatch)
 
-    config_loader = create_config_loader()
-    config = build_runtime_config(
-        config_path=Path("tests/fixtures/configs/chembl_activity_test.yaml"),
-        configs_root=Path("tests/fixtures/configs"),
-        loader=config_loader,
-    )
+    # Setup mock SchemaContractProvider
+    mock_schema_provider = MagicMock()
+    mock_schema_provider.get_output_schema_name.return_value = "chembl_activity"
+    mock_schema_provider.get_field_configs.return_value = [
+        {"name": "activity_id", "type": "string"},
+        {"name": "assay_id", "type": "string"},
+    ]
+    set_schema_contract_provider(mock_schema_provider)
+    try:
+        config_loader = create_config_loader()
+        config = build_runtime_config(
+            config_path=Path("tests/fixtures/configs/chembl_activity_test.yaml"),
+            configs_root=Path("tests/fixtures/configs"),
+            loader=config_loader,
+        )
+    finally:
+        reset_schema_contract_provider()
+
     # Update frozen sink config using model_copy
     output_path_str = str(tmp_path / "output")
     new_sink = config.sink.model_copy(update={"output_path": output_path_str})
