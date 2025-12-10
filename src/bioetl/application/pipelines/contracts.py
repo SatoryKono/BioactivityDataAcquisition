@@ -12,7 +12,7 @@ from bioetl.domain.pipelines.contracts import (
     LoaderABC,
     PipelineHookABC,
 )
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
@@ -59,7 +59,7 @@ class PipelineContainerABC(ABC):
         *,
         limit: int | None = None,
         logger: LoggingPortABC | None = None,
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         """Return record source for pipeline input according to config."""
 
     @abstractmethod
