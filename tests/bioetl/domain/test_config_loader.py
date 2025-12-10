@@ -2,7 +2,11 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.application.services.schema_contract_provider import (
+    SchemaContractProviderImpl,
+)
 from bioetl.domain.configs import ChemblSourceConfig
+from bioetl.domain.schemas.registry import create_default_schema_registry
 from bioetl.infrastructure.config import provider_registry
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
@@ -10,6 +14,8 @@ from bioetl.infrastructure.config.loader import (
     UnknownProviderError,
     get_pipeline_config,
     get_pipeline_config_from_path,
+    reset_schema_contract_provider,
+    set_schema_contract_provider,
 )
 
 
@@ -18,6 +24,16 @@ def _reset_provider_registry() -> None:
     provider_registry.clear_provider_registry_cache()
     yield
     provider_registry.clear_provider_registry_cache()
+
+
+@pytest.fixture(autouse=True)
+def _setup_schema_contract_provider() -> None:
+    """Set up schema contract provider for tests."""
+    registry = create_default_schema_registry()
+    contract_provider = SchemaContractProviderImpl(registry)
+    set_schema_contract_provider(contract_provider)
+    yield
+    reset_schema_contract_provider()
 
 
 def _write_pipeline_with_env_placeholder(config_path: Path) -> None:
