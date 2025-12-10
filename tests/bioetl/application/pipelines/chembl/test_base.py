@@ -112,9 +112,14 @@ def pipeline_fixture(mock_dependencies_fixture):
 
 
 def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
-    """Test ChEMBL release version retrieval."""
+    """Test ChEMBL release version retrieval.
+
+    ExtractionService returns raw version ('34'), application layer
+    formats it using domain service to 'chembl_34'.
+    """
+    # ExtractionService now returns raw version without prefix
     mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
-        "chembl_34"
+        "34"
     )
     monkeypatch.setattr(
         pipeline_fixture, "_should_skip_release_lookup", lambda: False, raising=False
@@ -123,6 +128,7 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeyp
     release1 = pipeline_fixture.get_chembl_release()
     release2 = pipeline_fixture.get_chembl_release()
 
+    # Application layer formats to 'chembl_34'
     assert release1 == "chembl_34"
     assert release2 == "chembl_34"
     (
@@ -133,9 +139,14 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeyp
 
 
 def test_enrich_context(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
-    """Test context enrichment with ChEMBL release."""
+    """Test context enrichment with ChEMBL release.
+
+    ExtractionService returns raw version ('99'), application layer
+    formats it and stores as 'chembl_99' in context metadata.
+    """
+    # ExtractionService now returns raw version without prefix
     mock_dependencies_fixture["extraction_service"].get_release_version.return_value = (
-        "chembl_99"
+        "99"
     )
     monkeypatch.setattr(
         pipeline_fixture, "_should_skip_release_lookup", lambda: False, raising=False
@@ -147,6 +158,7 @@ def test_enrich_context(pipeline_fixture, mock_dependencies_fixture, monkeypatch
     pipeline_fixture._enrich_context(context)
 
     assert "chembl_release" in context.metadata
+    # Formatted in application layer
     assert context.metadata["chembl_release"] == "chembl_99"
 
 
