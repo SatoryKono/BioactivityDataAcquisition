@@ -4,7 +4,7 @@ Implementation of ChemblExtractionService.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import Any, Iterable
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
@@ -13,12 +13,10 @@ from bioetl.domain.ports.extraction import (
     VersionProviderABC,
 )
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
-from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
+from bioetl.domain.record_source import RawRecord
 from bioetl.infrastructure.clients.chembl.constants import ENTITY_ENDPOINT_ALIASES
+from bioetl.infrastructure.clients.chembl.parser_registry import get_parser_for_entity
 from bioetl.infrastructure.observability.factories import default_logging_port
-
-if TYPE_CHECKING:
-    from bioetl.domain.record_source import RawRecord
 
 
 class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
@@ -135,7 +133,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         # Iterate pages
         for page_data in self.client.iter_pages(url):
-            records = self.parse_response(page_data)
+            records = self.parse_response(page_data, entity=mapped_entity)
             yield records
 
     def request_batch(
@@ -158,16 +156,20 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         filters = {filter_key: ",".join(batch_ids), "limit": len(batch_ids)}
         return self.client.fetch(entity, **filters)
 
-    def parse_response(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
+    def parse_response(
+        self, raw_response: dict[str, object], *, entity: str = "activity"
+    ) -> list[RawRecord]:
         """
         Parse raw response into a list of records.
 
         Args:
             raw_response: The raw API response.
+            entity: Entity type for selecting appropriate parser.
 
         Returns:
-            list[dict[str, Any]]: List of parsed records.
+            list[RawRecord]: List of parsed records.
         """
+        # Try client's parser first (for backward compatibility)
         if hasattr(self.client, "response_parser"):
             parser = getattr(self.client, "response_parser")
             if hasattr(parser, "parse_response"):
@@ -175,15 +177,13 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             if hasattr(parser, "parse"):
                 return parser.parse(raw_response)
 
-        # Fallback simple parsing
-        for value in raw_response.values():
-            if isinstance(value, list):
-                return [ActivityRawModel.model_validate(item) for item in value]
-        return []
+        # Use registry to get appropriate parser for entity type
+        parser = get_parser_for_entity(entity)
+        return parser.parse(raw_response)
 
     def serialize_records(
-        self, entity: str, records: list[ActivityRawModel]
-    ) -> list[ActivityRawModel]:
+        self, entity: str, records: list[RawRecord]
+    ) -> list[RawRecord]:
         """
         Serialize records for storage.
 
@@ -192,6 +192,6 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             records: List of records.
 
         Returns:
-            list[dict[str, Any]]: Serialized records.
+            list[RawRecord]: Serialized records.
         """
         return records
