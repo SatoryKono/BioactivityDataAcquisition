@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     PipelineConfig,
