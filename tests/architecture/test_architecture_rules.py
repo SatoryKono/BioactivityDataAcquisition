@@ -161,9 +161,15 @@ def test_abcs_have_documented_implementations(
 
 def test_pipeline_docs_and_stage_structure() -> None:
     violations: list[str] = []
+    # Directories that are not providers (shared utilities, etc.)
+    NON_PROVIDER_DIRS = {"stages"}
 
     for provider_dir in sorted(PIPELINES_ROOT.iterdir()):
-        if not provider_dir.is_dir() or provider_dir.name.startswith("__"):
+        if (
+            not provider_dir.is_dir()
+            or provider_dir.name.startswith("__")
+            or provider_dir.name in NON_PROVIDER_DIRS
+        ):
             continue
 
         docs_dir = DOC_PIPELINES_ROOT / provider_dir.name
