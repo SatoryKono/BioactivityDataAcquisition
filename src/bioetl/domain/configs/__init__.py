@@ -14,7 +14,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+# Deprecated aliases are loaded lazily via __getattr__ to emit warnings
+# Import _compat module names for documentation purposes
+from bioetl.domain.configs._compat import __all__ as _COMPAT_ALL
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
+
+# Bounded context configs
+from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.defaults import (
     ClientDefaultsConfig,
     DefaultsConfig,
@@ -31,6 +37,7 @@ from bioetl.domain.configs.defaults import (
 from bioetl.domain.configs.execution import ExecutionConfig
 from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
+from bioetl.domain.configs.manifest import PipelineManifest
 from bioetl.domain.configs.normalization import NormalizationConfig
 
 # ConfigMigrator is now loaded lazily via __getattr__ with deprecation warning
@@ -66,14 +73,12 @@ from bioetl.domain.configs.pipeline import (
 )
 from bioetl.domain.configs.profile import ProfileConfig
 
-# Deprecated aliases are loaded lazily via __getattr__ to emit warnings
-# Import _compat module names for documentation purposes
-from bioetl.domain.configs._compat import __all__ as _COMPAT_ALL
-
 __all__ = [
     # Bounded context configs (new modular structure)
     "PipelineIdentityConfig",
     "DataFlowConfig",
+    "ExecutionConfig",
+    "PipelineManifest",
     "DataSourceConfig",
     "DataSinkConfig",
     "OutputOptionsConfig",
