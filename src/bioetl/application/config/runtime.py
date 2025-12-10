@@ -29,7 +29,7 @@ def build_runtime_config(
         raise ValueError(
             "PipelineConfigLoaderProtocol is required. "
             "Provide loader (e.g. "
-            "interfaces.container_factory.create_config_loader)."
+            "interfaces.composition_root.create_config_loader)."
         )
 
     if config_path is not None:
