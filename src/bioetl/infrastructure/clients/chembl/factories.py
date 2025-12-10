@@ -23,7 +23,7 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParserImpl,
+    create_activity_parser,
 )
 
 
@@ -76,7 +76,7 @@ def default_chembl_client(
             base_url=base_url,
             max_url_length=max_url_length,
         ),
-        response_parser=ChemblResponseParserImpl(),
+        response_parser=create_activity_parser(),
         rate_limiter=rate_limiter,
         client=unified_client,
         provider="chembl",
