@@ -6,7 +6,7 @@ import pandas as pd
 from bioetl.application.files.csv_record_source import CsvRecordSourceImpl
 from bioetl.domain.configs import CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.record_source import RawRecord
+from bioetl.domain.record_source import SourceRecordModel
 
 
 def test_csv_record_source_reads_full_dataset(tmp_path):
@@ -22,7 +22,8 @@ def test_csv_record_source_reads_full_dataset(tmp_path):
 
     batches = list(src.iter_records())
     assert len(batches) == 1
+    # Records are SourceRecordModel instances
     assert [r.model_dump() for r in batches[0]] == [
-        RawRecord(a=1, b="x").model_dump(),
-        RawRecord(a=2, b="y").model_dump(),
+        SourceRecordModel(a=1, b="x").model_dump(),
+        SourceRecordModel(a=2, b="y").model_dump(),
     ]

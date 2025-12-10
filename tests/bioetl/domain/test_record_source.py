@@ -1,29 +1,31 @@
-from collections.abc import Iterable
-from typing import cast
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any, cast
 
 from bioetl.application.sources import ApiRecordSource
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.record_source import InMemoryRecordSource, RawRecord
+from bioetl.domain.record_source import InMemoryRecordSource, SourceRecordModel
 
 
 class _DummyExtractionService:
     def __init__(self) -> None:
         self.called_with: dict[str, str] | None = None
 
-    def extract_all(self, entity: str, **filters: str) -> list[RawRecord]:  # type: ignore[override]
+    def extract_all(
+        self, entity: str, **filters: str
+    ) -> list[dict[str, Any]]:  # type: ignore[override]
         record_batches = list(self.iter_extract(entity, **filters))
-        flattened: list[RawRecord] = []
+        flattened: list[dict[str, Any]] = []
         for batch in record_batches:
             flattened.extend(batch)
         return flattened
 
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: str
-    ) -> Iterable[list[RawRecord]]:  # type: ignore[override]
+    ) -> Iterable[list[dict[str, Any]]]:  # type: ignore[override]
         self.called_with = {"entity": entity, **filters, "chunk_size": chunk_size}
         records = [
-            RawRecord.model_validate({"id": "1", "name": "alpha"}),
-            RawRecord.model_validate({"id": "2", "name": "beta"}),
+            {"id": "1", "name": "alpha"},
+            {"id": "2", "name": "beta"},
         ]
         if chunk_size is None or chunk_size <= 0:
             yield records
@@ -50,9 +52,10 @@ class _DummyExtractionService:
 
 
 def test_in_memory_record_source_iterates_stably() -> None:
-    records: list[RawRecord] = [
-        RawRecord.model_validate({"id": "1", "value": "a"}),
-        RawRecord.model_validate({"id": "2", "value": "b"}),
+    """InMemoryRecordSource should support stable iteration over plain dicts."""
+    records: list[dict[str, Any]] = [
+        {"id": "1", "value": "a"},
+        {"id": "2", "value": "b"},
     ]
     source = InMemoryRecordSource(records)
 
@@ -64,7 +67,23 @@ def test_in_memory_record_source_iterates_stably() -> None:
     assert second_pass[0] == records
 
 
+def test_in_memory_record_source_accepts_pydantic_models() -> None:
+    """InMemoryRecordSource should accept SourceRecordModel instances."""
+    records = [
+        SourceRecordModel.model_validate({"id": "1", "value": "a"}),
+        SourceRecordModel.model_validate({"id": "2", "value": "b"}),
+    ]
+    source = InMemoryRecordSource(records)
+
+    batches = list(source.iter_records())
+
+    assert len(batches) == 1
+    # Records are converted to dicts internally
+    assert batches[0] == [{"id": "1", "value": "a"}, {"id": "2", "value": "b"}]
+
+
 def test_api_record_source_returns_serialized_records() -> None:
+    """ApiRecordSource should return batches of dict records."""
     extraction = _DummyExtractionService()
     source = ApiRecordSource(
         extraction_service=cast(ExtractionServiceABC, extraction),
@@ -81,7 +100,7 @@ def test_api_record_source_returns_serialized_records() -> None:
     }
     assert len(records) == 1
     expected_records = [
-        RawRecord.model_validate({"id": "1", "name": "alpha"}),
-        RawRecord.model_validate({"id": "2", "name": "beta"}),
+        {"id": "1", "name": "alpha"},
+        {"id": "2", "name": "beta"},
     ]
     assert records[0] == expected_records

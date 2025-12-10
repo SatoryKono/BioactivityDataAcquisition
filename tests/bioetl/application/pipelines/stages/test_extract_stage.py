@@ -10,7 +10,7 @@ from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.application.pipelines.stages.extract import ExtractStage
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.record_source import RawRecord
+from bioetl.domain.record_source import SourceRecordModel
 
 # =============================================================================
 # Fixtures
@@ -252,7 +252,7 @@ class TestExtractStageEdgeCases:
     ) -> None:
         """Empty batches are skipped."""
         mock_extraction_service.iter_extract.return_value = [[], [{"id": 1}], []]
-        mock_record = MagicMock(spec=RawRecord)
+        mock_record = MagicMock(spec=SourceRecordModel)
         mock_record.model_dump.return_value = {"id": 1}
         mock_mapper.map_records.return_value = [mock_record]
 
