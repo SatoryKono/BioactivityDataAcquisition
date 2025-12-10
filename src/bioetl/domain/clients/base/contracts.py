@@ -30,6 +30,7 @@ class RequestBuilderABC(ABC):
         """Добавляет параметры пагинации."""
 
     def with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
+        """Alias for build_with_pagination."""
         return self.build_with_pagination(offset, limit)
 
 
@@ -39,6 +40,7 @@ class ResponseParserABC(ABC, Generic[RecordT]):
     """
 
     def parse(self, raw_response: dict[str, object]) -> list[RecordT]:
+        """Alias for parse_response."""
         return self.parse_response(raw_response)
 
     @abstractmethod

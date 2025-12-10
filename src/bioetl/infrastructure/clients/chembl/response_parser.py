@@ -12,12 +12,14 @@ class ChemblResponseParserImpl(ResponseParserABC[ActivityRawModel]):
     """
 
     def parse(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
+        """Parse raw response into models."""
         for key, value in raw_response.items():
             if isinstance(value, list) and (not value or isinstance(value[0], dict)):
                 return [ActivityRawModel.model_validate(item) for item in value]
         return []
 
     def parse_response(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
+        """Alias for parse."""
         return self.parse(raw_response)
 
     def extract_metadata(
