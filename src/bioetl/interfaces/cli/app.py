@@ -9,17 +9,13 @@ from typing import Annotated
 from rich.console import Console
 import typer
 
-from bioetl.application.config.resolution import (
-    ConfigPathResolver,
-    build_pipeline_config,
-)
+from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.domain.configs import PipelineConfig
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.interfaces.container_factory import (
     build_default_container,
     create_config_loader,
@@ -104,14 +100,8 @@ def validate_config(
 
     try:
         config_loader = create_config_loader()
-        configs_root = (
-            config_file.parent.parent.parent
-            if config_file.parent.name == "pipelines"
-            else Path("configs")
-        )
-        build_runtime_config(
-            config_path=config_file,
-            configs_root=configs_root,
+        build_pipeline_config(
+            config_file,
             loader=config_loader,
             profile=profile,
         )
