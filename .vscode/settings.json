@@ -1,6 +1,10 @@
 {
     "python.testing.pytestArgs": [
         "tests",
+        "-m",
+        "unit",
+        "--ignore=tests/integration",
+        "--ignore=tests/golden",
         "-ra",
         "-q",
         "--strict-markers",

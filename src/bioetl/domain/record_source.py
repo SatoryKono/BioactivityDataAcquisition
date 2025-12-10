@@ -50,6 +50,10 @@ class InMemoryRecordSource(RecordSourceABC):
             yield self._records[start : start + self._chunk_size]
 
 
+# Type alias for backward compatibility
+RecordSource = RecordSourceABC
+
+
 def __getattr__(name: str) -> Any:
     """Provide backward compatibility for ApiRecordSource import.
 

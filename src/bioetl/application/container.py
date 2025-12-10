@@ -171,7 +171,7 @@ class PipelineContainer(PipelineContainerABC):
         *,
         limit: int | None = None,
         logger: LoggingPortABC | None = None,
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration."""
         return self._get_record_source_factory().create_record_source(
             extraction_service,
