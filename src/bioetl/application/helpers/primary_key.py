@@ -22,11 +22,10 @@ def resolve_primary_key(
     Resolve the primary key for an entity based on pipeline configuration.
 
     Resolution order:
-    1. config.primary_key (explicit field)
-    2. config.pipeline["primary_key"] (pipeline options dict)
-    3. f"{entity_name}_id" (convention-based fallback)
-    4. fallback parameter (if provided)
-    5. ValueError (if no resolution possible)
+    1. config.identity.primary_key[0] (first element of primary key list)
+    2. f"{entity_name}_id" (convention-based fallback)
+    3. fallback parameter (if provided)
+    4. ValueError (if no resolution possible)
 
     Args:
         config: Pipeline configuration object.
@@ -42,28 +41,25 @@ def resolve_primary_key(
         >>> pk = resolve_primary_key(config)
         >>> pk = resolve_primary_key(config, fallback="id")
     """
-    # 1. Check explicit primary_key field
-    pk = config.primary_key
+    # 1. Check explicit primary_key field (now a list in identity section)
+    pk: str | None = None
+    primary_keys = config.identity.primary_key
+    if primary_keys:
+        pk = primary_keys[0]  # Use first element
 
-    # 2. Check pipeline options dict
-    if not pk:
-        pipeline_opts = config.pipeline or {}
-        if "primary_key" in pipeline_opts:
-            pk = pipeline_opts["primary_key"]
-
-    # 3. Use entity-based convention
+    # 2. Use entity-based convention
     if not pk:
         pk = f"{config.entity_name}_id"
 
-    # 4. Use fallback if provided and pk still empty
+    # 3. Use fallback if provided and pk still empty
     if not pk and fallback is not None:
         pk = fallback
 
-    # 5. Raise if still no resolution
+    # 4. Raise if still no resolution
     if not pk:
         raise ValueError(
             f"Could not resolve primary key for entity '{config.entity_name}'. "
-            "Please set 'primary_key' in config or pipeline options."
+            "Please set 'primary_key' in config."
         )
 
     return pk
