@@ -11,9 +11,6 @@ classDiagram
     class RetryPolicy {
         +execute(callable)
     }
-    class CircuitBreaker {
-        +call(callable)
-    }
     class ChemblDataClientHTTPImpl {
         +request_activity(filters) -> dict
         +request_assay(filters) -> dict
@@ -59,7 +56,6 @@ classDiagram
 
     UnifiedAPIClient --> RateLimiter
     UnifiedAPIClient --> RetryPolicy
-    UnifiedAPIClient --> CircuitBreaker
     ChemblDataClientHTTPImpl --> UnifiedAPIClient
     ChemblDataClientHTTPImpl --> ChemblRequestBuilder
     ChemblDataClientHTTPImpl --> ChemblResponseParser
