@@ -4,6 +4,7 @@ Factory for creating provider services (extraction, normalization).
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import Any, Callable, cast
 
 from bioetl.application.providers import ApplicationFieldProvider
@@ -13,7 +14,31 @@ from bioetl.domain.providers import ProviderDefinition
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 
-class ProviderServiceFactory:
+class ProviderServiceFactoryABC(ABC):
+    """Abstract factory for creating provider-specific services.
+
+    Defines the contract for factories that create extraction and
+    normalization services based on provider configuration.
+    """
+
+    @abstractmethod
+    def create_normalization_service(self) -> NormalizationServiceABC:
+        """Create normalization service for the configured provider.
+
+        Returns:
+            NormalizationServiceABC instance for data normalization.
+        """
+
+    @abstractmethod
+    def create_extraction_service(self) -> Any:
+        """Create the extraction service based on provider configuration.
+
+        Returns:
+            Extraction service instance for data retrieval.
+        """
+
+
+class ProviderServiceFactory(ProviderServiceFactoryABC):
     """Factory for creating provider-specific services."""
 
     def __init__(
