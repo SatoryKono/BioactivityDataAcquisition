@@ -41,7 +41,16 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         configs_root=Path("tests/fixtures/configs"),
         loader=config_loader,
     )
-    config.storage.output_path = str(tmp_path / "output")
+    # Update frozen sink config using model_copy
+    output_path_str = str(tmp_path / "output")
+    new_sink = config.sink.model_copy(update={"output_path": output_path_str})
+    object.__setattr__(config, "sink", new_sink)
+    # Also update storage if it exists
+    if hasattr(config.runtime, "storage"):
+        new_storage = config.runtime.storage.model_copy(
+            update={"output_path": output_path_str}
+        )
+        object.__setattr__(config.runtime, "storage", new_storage)
 
     provider_loader_factory = partial(create_provider_loader)
     registry = provider_loader_factory().get_registry()
@@ -67,13 +76,14 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         error_policy=container.get_error_policy(),
     )
 
+    output_path = Path(config.sink.output_path)
     result = pipeline.run(
-        output_path=Path(config.storage.output_path),
+        output_path=output_path,
         dry_run=False,
     )
 
-    output_file = Path(config.storage.output_path) / "activity.csv"
-    meta_file = Path(config.storage.output_path) / "meta.yaml"
+    output_file = output_path / "activity.csv"
+    meta_file = output_path / "meta.yaml"
 
     assert result.success is True
     assert output_file.exists(), "Pipeline should write output file"

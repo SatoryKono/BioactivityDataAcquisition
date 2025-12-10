@@ -139,5 +139,5 @@ ErrorPolicyABC:
 ProviderRegistryABC:
   default_factory: bioetl.domain.provider_registry.default_provider_registry
   implementations:
-    InMemory: bioetl.domain.provider_registry.InMemoryProviderRegistry
+    InMemory: bioetl.infrastructure.provider_registry.InMemoryProviderRegistry
 

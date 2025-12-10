@@ -26,9 +26,9 @@ import requests
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
-from bioetl.infrastructure.clients.base.impl._http_transport import _HttpTransport
-from bioetl.infrastructure.clients.base.impl.rate_limiter import (
-    TokenBucketRateLimiterImpl,
+from bioetl.infrastructure.clients.base.factories import (
+    build_http_client,
+    default_rate_limiter,
 )
 from bioetl.infrastructure.observability.factories import (
     default_logging_port,
@@ -108,7 +108,7 @@ class CompositionRoot:
         config: HttpClientConfig,
         *,
         base_client: Any | None = None,
-    ) -> _HttpTransport:
+    ) -> Any:
         """
         Create an HTTP transport with all dependencies injected.
 
@@ -118,14 +118,14 @@ class CompositionRoot:
             base_client: Optional pre-configured HTTP client
 
         Returns:
-            Fully configured _HttpTransport instance
+            Fully configured HTTP transport instance
         """
-        return _HttpTransport(
+        return build_http_client(
             provider=provider,
-            config=config,
-            base_client=base_client or self.create_http_session(),
             logger=self.get_logger(),
             metrics=self.get_metrics(),
+            config=config,
+            base_client=base_client or self.create_http_session(),
         )
 
     def create_rate_limiter(
@@ -143,11 +143,10 @@ class CompositionRoot:
         Returns:
             Configured rate limiter instance
         """
-        resolved_capacity = capacity if capacity is not None else max(1.0, rate)
-        return TokenBucketRateLimiterImpl(
-            rate=rate,
-            capacity=resolved_capacity,
+        return default_rate_limiter(
             logger=self.get_logger(),
+            rate=rate,
+            capacity=capacity,
         )
 
 

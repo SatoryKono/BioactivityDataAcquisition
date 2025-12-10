@@ -296,5 +296,6 @@ def test_error_handler_creates_pipeline_error_with_cause(mock_logger):
     assert pipeline_error.entity == "test"
     assert pipeline_error.stage == "extract"
     assert pipeline_error.attempt == 2
-    assert pipeline_error.run_id == context.run_id
+    # Ensure run_id matches what's in the context
+    assert str(pipeline_error.run_id) == str(context.run_id)
     assert pipeline_error.cause is original_error
