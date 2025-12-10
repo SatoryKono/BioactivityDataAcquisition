@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pandera as pa
+import pandera.pandas as pa
 import yaml
 
 __all__ = [
