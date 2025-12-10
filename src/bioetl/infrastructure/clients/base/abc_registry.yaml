@@ -24,6 +24,8 @@ TracingPortABC: bioetl.domain.observability.contracts.TracingPortABC
 
 HasherABC: bioetl.domain.transform.contracts.HasherABC
 HashServiceABC: bioetl.domain.transform.contracts.HashServiceABC
+TimestampProviderABC: bioetl.domain.transform.contracts.TimestampProviderABC
+IndexGeneratorABC: bioetl.domain.transform.contracts.IndexGeneratorABC
 NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceABC
 
 ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
