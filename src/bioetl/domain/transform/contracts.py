@@ -1,5 +1,13 @@
-"""Domain-level transform contracts and DTOs."""
+"""Domain-level transform contracts and DTOs.
 
+Terminology:
+    compute_row_fingerprint: Computes a hash of the entire row.
+        Deprecated alias: hash_row (will be removed in v3.0).
+    compute_entity_key: Computes a hash of the business key columns.
+        Deprecated alias: hash_business_key (will be removed in v3.0).
+"""
+
+import warnings
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Protocol
@@ -63,21 +71,63 @@ class HashServiceABC(ABC):
 
     Отвечает только за хеширование строк и бизнес-ключей.
     Не содержит stateful логики (индексы, timestamps).
+
+    Terminology:
+        compute_row_fingerprint: Canonical name for row hashing.
+        compute_entity_key: Canonical name for business key hashing.
+        hash_row: Deprecated alias for compute_row_fingerprint.
+        hash_business_key: Deprecated alias for compute_entity_key.
     """
 
     @abstractmethod
-    def hash_row(self, row: dict) -> str:
-        """Вычисляет хеш строки как полного объекта."""
+    def compute_row_fingerprint(self, row: dict) -> str:
+        """Вычисляет хеш-отпечаток строки как полного объекта.
+
+        This is the canonical method name for row hashing.
+        """
 
     @abstractmethod
-    def hash_business_key(self, row: dict, key_columns: list[str]) -> str:
-        """Вычисляет хеш бизнес-ключа (выбранных колонок)."""
+    def compute_entity_key(self, row: dict, key_columns: list[str]) -> str:
+        """Вычисляет хеш бизнес-ключа (выбранных колонок).
+
+        This is the canonical method name for business key hashing.
+        """
 
     @abstractmethod
     def add_hash_columns(
         self, df: pd.DataFrame, business_key_cols: list[str] | None = None
     ) -> pd.DataFrame:
         """Добавляет hash_row и hash_business_key колонки к DataFrame."""
+
+    # =========================================================================
+    # Deprecated aliases (will be removed in v3.0)
+    # =========================================================================
+
+    def hash_row(self, row: dict) -> str:
+        """Deprecated: Use compute_row_fingerprint() instead.
+
+        Will be removed in v3.0.
+        """
+        warnings.warn(
+            "hash_row() is deprecated, use compute_row_fingerprint() instead. "
+            "Will be removed in v3.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.compute_row_fingerprint(row)
+
+    def hash_business_key(self, row: dict, key_columns: list[str]) -> str:
+        """Deprecated: Use compute_entity_key() instead.
+
+        Will be removed in v3.0.
+        """
+        warnings.warn(
+            "hash_business_key() is deprecated, use compute_entity_key() instead. "
+            "Will be removed in v3.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.compute_entity_key(row, key_columns)
 
 
 class TimestampProviderABC(ABC):

@@ -46,6 +46,7 @@ from bioetl.domain.configs.pipeline import (
     ProviderHttpConfig,
     QcConfig,
     QualityConfig,
+    QualityControlConfig,
     RuntimeConfig,
     StorageConfig,
     TransformConfig,
@@ -87,7 +88,7 @@ __all__ = [
     "PaginationConfig",
     "ProfileConfig",
     "QualityConfig",
-    "QcConfig",
+    "QualityControlConfig",
     "StorageConfig",
     "TransformConfig",
     # Defaults configs
@@ -107,4 +108,5 @@ __all__ = [
     "HttpClientDefaults",  # Use HttpClientConfig
     "HttpClientSettings",  # Use ProviderHttpConfig
     "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
+    "QcConfig",  # Use QualityControlConfig
 ]
