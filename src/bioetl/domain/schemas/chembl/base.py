@@ -1,4 +1,9 @@
-"""Shared mixins and helpers for ChEMBL Pandera schemas."""
+"""Shared mixins and helpers for ChEMBL Pandera schemas.
+
+Terminology:
+    acquisition_timestamp: Timestamp when the data was acquired from the source.
+        Deprecated alias: extracted_at (will be removed in v3.0).
+"""
 
 from typing import Any
 
@@ -6,13 +11,21 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 HEX_64_PATTERN = r"^[a-f0-9]{64}$"
+
+# Canonical column names for generated columns
 GENERATED_COLUMN_ORDER: list[str] = [
     "hash_row",
     "hash_business_key",
     "index",
     "database_version",
-    "extracted_at",
+    "acquisition_timestamp",
 ]
+
+# Deprecated column name mapping (for backward compatibility)
+# TODO: Remove in v3.0
+DEPRECATED_COLUMN_ALIASES: dict[str, str] = {
+    "extracted_at": "acquisition_timestamp",
+}
 
 
 def build_output_column_order(business_columns: list[str]) -> list[str]:
@@ -26,7 +39,12 @@ _FieldMapping = dict[str, _FieldDefinition]
 
 
 class BaseGeneratedColumnsModel(pa.DataFrameModel):
-    """Базовая схема с едиными служебными колонками и Config."""
+    """Базовая схема с едиными служебными колонками и Config.
+
+    Column naming:
+        acquisition_timestamp: Canonical name for the data acquisition timestamp.
+            Deprecated alias: extracted_at (will be removed in v3.0).
+    """
 
     hash_row: Series[str] = pa.Field(
         str_matches=HEX_64_PATTERN,
@@ -41,8 +59,10 @@ class BaseGeneratedColumnsModel(pa.DataFrameModel):
     database_version: Series[str] = pa.Field(
         nullable=True, description="Версия базы данных"
     )
-    extracted_at: Series[str] = pa.Field(
-        nullable=True, description="Дата и время извлечения"
+    acquisition_timestamp: Series[str] = pa.Field(
+        nullable=True,
+        description="Дата и время получения данных из источника",
+        alias="extracted_at",  # Backward compatibility alias
     )
 
     class Config:
