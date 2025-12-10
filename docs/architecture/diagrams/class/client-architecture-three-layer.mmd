@@ -28,7 +28,6 @@ classDiagram-v2
     }
     class RateLimiterABC
     class CacheABC
-    class CircuitBreakerABC
     class SecretProviderABC
     class ExtractionServiceABC
 
@@ -54,7 +53,6 @@ classDiagram-v2
     class OffsetPaginator
     class TokenBucketRateLimiterImpl
     class MemoryCacheImpl
-    class CircuitBreakerImpl
     class EnvSecretProvider
     class ChemblExtractionServiceImpl
 
@@ -66,7 +64,6 @@ classDiagram-v2
     RateLimiterABC <|-- TokenBucketRateLimiterImpl
     CacheABC <|-- MemoryCacheImpl
     SecretProviderABC <|-- EnvSecretProvider
-    CircuitBreakerABC <|-- CircuitBreakerImpl
     ExtractionServiceABC <|-- ChemblExtractionServiceImpl
 
     ChemblClientFactory ..> ChemblDataClientHTTPImpl : instantiates
@@ -79,7 +76,6 @@ classDiagram-v2
     ChemblDataClientHTTPImpl *-- UnifiedAPIClient
     UnifiedAPIClient --> RateLimiterABC
     UnifiedAPIClient --> CacheABC
-    UnifiedAPIClient --> CircuitBreakerABC
     UnifiedAPIClient --> SecretProviderABC
     ChemblExtractionServiceImpl --> ChemblDataClientHTTPImpl
 
@@ -95,6 +91,5 @@ classDiagram-v2
     class PaginatorABC interface
     class RateLimiterABC interface
     class CacheABC interface
-    class CircuitBreakerABC interface
     class SecretProviderABC interface
     class ExtractionServiceABC interface
