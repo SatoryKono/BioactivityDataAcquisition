@@ -1,5 +1,9 @@
 """
 Domain layer package.
+
+Terminology updates (v3.0 migration):
+    - SourceRecord: Canonical name for records from data sources.
+      Deprecated alias: RawRecord (will be removed in v3.0).
 """
 
 from bioetl.domain.errors import (
@@ -13,6 +17,11 @@ from bioetl.domain.errors import (
     PipelineStageError,
     ProviderError,
 )
+from bioetl.domain.record_source import (
+    InMemoryRecordSource,
+    RecordSourceABC,
+    SourceRecord,
+)
 from bioetl.domain.value_objects import ChemblId, EntityName, RunId
 
 __all__ = [
@@ -25,7 +34,10 @@ __all__ = [
     "ConfigError",
     "ConfigValidationError",
     "EntityName",
+    "InMemoryRecordSource",
     "PipelineStageError",
     "ProviderError",
+    "RecordSourceABC",
     "RunId",
+    "SourceRecord",
 ]
