@@ -1,8 +1,9 @@
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -18,11 +19,13 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 def mock_components():
     request_builder = MagicMock(spec=ChemblRequestBuilderImpl)
     request_builder.for_endpoint = MagicMock(return_value=request_builder)
+    http_client = MagicMock()  # HTTP client is Any type in implementation
+    http_client.request = MagicMock()  # Add request method
     return {
         "request_builder": request_builder,
         "response_parser": MagicMock(spec=ChemblResponseParserImpl),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
-        "http_client": MagicMock(spec=ApiClientABC),
+        "http_client": http_client,
     }
 
 
@@ -74,5 +77,4 @@ def test_rate_limiter_usage(client, mock_components):
     list(client.iter_pages("http://test"))
 
     # Assert
-    mock_limiter.wait_if_needed.assert_called()
-    mock_limiter.acquire.assert_called()
+    mock_limiter.acquire.assert_called()  # RateLimiterABC only has acquire() method
