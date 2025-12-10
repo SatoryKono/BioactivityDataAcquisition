@@ -323,9 +323,9 @@ def _build_config(
         cli_values = resolve_env_placeholders(cli_overrides)
         merged = apply_deep_merge(merged, cli_values)
 
-    # Migration is handled by PipelineConfig.migrate_legacy_format validator,
-    # which delegates to ConfigMigrator. We also apply it here to ensure
-    # provider_config is extracted from sources before provider validation.
+    # Migration is handled here in the infrastructure layer before Pydantic validation.
+    # This keeps the domain layer (PipelineConfig) clean from infrastructure dependencies.
+    # The migration extracts provider_config from sources before provider validation.
     merged = ConfigMigrator.migrate(merged)
 
     # After migration, provider is in identity section
