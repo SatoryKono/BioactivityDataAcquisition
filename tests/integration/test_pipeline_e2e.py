@@ -448,4 +448,4 @@ class TestDataFrameOutput:
         assert csv_path.exists()
         df_read = pd.read_csv(csv_path)
         assert len(df_read) == 2
-        assert list(df_read["activity_id"]) == ["1", "2"]
+        assert list(df_read["activity_id"]) == [1, 2]
