@@ -35,74 +35,104 @@ class PaginationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class HttpClientSettings(BaseModel):
-    """Унифицированные настройки HTTP-клиента."""
+class HttpClientConfig(BaseModel):
+    """Unified HTTP client configuration (single source of truth).
+
+    This class consolidates HttpClientSettings, HttpClientDefaults, and ClientConfig
+    into a single configuration model.
+
+    Field mapping from legacy classes:
+        HttpClientSettings.timeout -> timeout_sec
+        HttpClientSettings.retries -> max_retries
+        HttpClientSettings.backoff -> backoff_factor
+        HttpClientSettings.rate_limit -> rate_limit_per_sec
+        HttpClientSettings.retry_enabled -> (deprecated, use max_retries > 0)
+        ClientConfig.circuit_breaker_recovery_time -> circuit_breaker_recovery_sec
+    """
+
+    timeout_sec: PositiveFloat = 30.0
+    max_retries: NonNegativeInt = 3
+    retry_on_status: tuple[int, ...] = (429, 500, 502, 503, 504)
+    backoff_factor: float = 2.0
+    backoff_max: float = 60.0
+    rate_limit_per_sec: PositiveFloat = 2.5
+
+    # Circuit breaker settings
+    circuit_breaker_enabled: bool = False
+    circuit_breaker_threshold: int = 5
+    circuit_breaker_recovery_sec: float = 30.0
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_fields(cls, data: Any) -> Any:
+        """Support legacy field names for backward compatibility."""
+        if not isinstance(data, dict):
+            return data
+
+        migrated = dict(data)
+
+        # HttpClientSettings/HttpClientDefaults field mappings
+        legacy_mappings = {
+            "timeout": "timeout_sec",
+            "retries": "max_retries",
+            "backoff": "backoff_factor",
+            "rate_limit": "rate_limit_per_sec",
+            "circuit_breaker_recovery_time": "circuit_breaker_recovery_sec",
+        }
+
+        for old_name, new_name in legacy_mappings.items():
+            if old_name in migrated and new_name not in migrated:
+                value = migrated.pop(old_name)
+                if old_name in ("timeout", "retries"):
+                    value = float(value) if old_name == "timeout" else int(value)
+                migrated[new_name] = value
+
+        # Handle retry_enabled -> if False, set max_retries to 0
+        if "retry_enabled" in migrated:
+            retry_enabled = migrated.pop("retry_enabled")
+            if not retry_enabled and "max_retries" not in migrated:
+                migrated["max_retries"] = 0
+
+        return migrated
+
+    @property
+    def retry_enabled(self) -> bool:
+        """Backward compatibility property for retry_enabled."""
+        return self.max_retries > 0
+
+
+class ProviderHttpConfig(HttpClientConfig):
+    """HTTP configuration for a specific provider with base URL."""
 
     base_url: str
-    timeout: int = 30
-    retries: int = 3
-    backoff: float = 2.0
-    rate_limit: float = 2.5
-    retry_enabled: bool = True
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
 
-class HttpClientDefaults(BaseModel):
-    """Shared HTTP client defaults to centralize timeouts and limits."""
+# =============================================================================
+# DEPRECATED: Legacy aliases for backward compatibility
+# These will be removed in a future version
+# =============================================================================
 
-    timeout: int = 30
-    retries: int = 3
-    backoff_factor: float = 2.0
-    rate_limit: float = 2.5
-    retry_enabled: bool = True
+# Legacy alias - use HttpClientConfig instead
+HttpClientSettings = ProviderHttpConfig
 
-    model_config = ConfigDict(extra="forbid")
-
-
-HTTP_CLIENT_DEFAULTS = HttpClientDefaults()
+# Legacy alias - use HttpClientConfig instead
+ClientConfig = HttpClientConfig
 
 
-class ClientConfig(BaseModel):
-    """Конфигурация HTTP-клиента."""
+class HttpClientDefaults(HttpClientConfig):
+    """DEPRECATED: Use HttpClientConfig directly.
 
-    timeout_sec: PositiveFloat = Field(
-        default_factory=lambda: float(HTTP_CLIENT_DEFAULTS.timeout)
-    )
-    max_retries: NonNegativeInt = Field(
-        default_factory=lambda: HTTP_CLIENT_DEFAULTS.retries
-    )
-    rate_limit_per_sec: PositiveFloat = Field(
-        default_factory=lambda: float(HTTP_CLIENT_DEFAULTS.rate_limit)
-    )
-    backoff_factor: float = Field(
-        default_factory=lambda: HTTP_CLIENT_DEFAULTS.backoff_factor
-    )
-    retry_enabled: bool = True
-    circuit_breaker_threshold: int = 5
-    circuit_breaker_recovery_time: float = 60.0
+    Shared HTTP client defaults - now just an alias for HttpClientConfig.
+    """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
-    @classmethod
-    def from_http_settings(
-        cls,
-        http_client: HttpClientSettings,
-        *,
-        existing: ClientConfig | None = None,
-    ) -> ClientConfig:
-        """Создает ClientConfig на основе HttpClientSettings."""
 
-        base = existing.model_copy(deep=True) if existing is not None else cls()
-        return base.model_copy(
-            update={
-                "timeout_sec": float(http_client.timeout),
-                "max_retries": http_client.retries,
-                "rate_limit_per_sec": float(http_client.rate_limit),
-                "backoff_factor": http_client.backoff,
-                "retry_enabled": http_client.retry_enabled,
-            }
-        )
+HTTP_CLIENT_DEFAULTS = HttpClientConfig()
 
 
 class StorageConfig(BaseModel):
@@ -236,85 +266,107 @@ class CsvInputConfig(BaseModel):
 
 
 class BaseProviderConfig(BaseModel):
-    """Базовая строгая конфигурация провайдера."""
+    """Базовая строгая конфигурация провайдера.
+
+    Uses HttpClientConfig as the single source of truth for HTTP settings.
+    Legacy fields (http_client, client) are provided for backward compatibility.
+    """
 
     provider: Literal["chembl", "dummy"]
-    http_client: HttpClientSettings
-    client: ClientConfig = Field(default_factory=ClientConfig)
+    http: ProviderHttpConfig
 
     model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="before")
     @classmethod
-    def migrate_flat_client_fields(cls, data: Any) -> Any:
-        """Поддерживает старый формат с плоскими клиентскими настройками."""
-
+    def migrate_legacy_config(cls, data: Any) -> Any:
+        """Support legacy formats: http_client, client, or flat fields."""
         if not isinstance(data, dict):
             return data
 
-        if "http_client" in data:
-            return data
+        migrated = dict(data)
 
-        base_url = data.get("base_url")
-        client_data = data.get("client") or {}
+        # Collect HTTP config values from various sources
+        http_config: dict[str, Any] = {}
 
-        client_payload: dict[str, Any] = {}
-        for legacy_field in (
+        # If http is already set, extract its values as base
+        if "http" in migrated:
+            existing_http = migrated.pop("http")
+            if isinstance(existing_http, dict):
+                http_config.update(existing_http)
+            elif hasattr(existing_http, "model_dump"):
+                http_config.update(existing_http.model_dump())
+
+        # Priority 1: http_client (legacy HttpClientSettings)
+        if "http_client" in migrated:
+            legacy_http = migrated.pop("http_client")
+            if isinstance(legacy_http, dict):
+                for k, v in legacy_http.items():
+                    if k not in http_config:
+                        http_config[k] = v
+            elif hasattr(legacy_http, "model_dump"):
+                for k, v in legacy_http.model_dump().items():
+                    if k not in http_config:
+                        http_config[k] = v
+
+        # Priority 2: client (legacy ClientConfig)
+        if "client" in migrated:
+            legacy_client = migrated.pop("client")
+            if isinstance(legacy_client, dict):
+                for k, v in legacy_client.items():
+                    if k not in http_config:
+                        http_config[k] = v
+            elif hasattr(legacy_client, "model_dump"):
+                for k, v in legacy_client.model_dump().items():
+                    if k not in http_config:
+                        http_config[k] = v
+
+        # Priority 3: Flat fields at root level
+        flat_fields = (
+            "base_url",
             "timeout_sec",
+            "timeout",
             "max_retries",
+            "retries",
             "rate_limit_per_sec",
+            "rate_limit",
             "backoff_factor",
+            "backoff",
             "retry_enabled",
-        ):
-            if legacy_field in data:
-                client_payload[legacy_field] = data[legacy_field]
-        client_payload.update(client_data if isinstance(client_data, dict) else {})
-
-        if base_url is None:
-            return data
-
-        client_config = ClientConfig.model_validate(client_payload or {})
-        http_client = HttpClientSettings(
-            base_url=str(base_url),
-            timeout=int(client_config.timeout_sec),
-            retries=client_config.max_retries,
-            backoff=float(client_config.backoff_factor),
-            rate_limit=float(client_config.rate_limit_per_sec),
-            retry_enabled=bool(client_config.retry_enabled),
+            "retry_on_status",
+            "backoff_max",
+            "circuit_breaker_enabled",
+            "circuit_breaker_threshold",
+            "circuit_breaker_recovery_sec",
+            "circuit_breaker_recovery_time",
         )
+        for field in flat_fields:
+            if field in migrated:
+                if field not in http_config:
+                    http_config[field] = migrated.pop(field)
+                else:
+                    # Remove duplicate field if already in http_config
+                    migrated.pop(field)
 
-        cleaned = {
-            key: value
-            for key, value in data.items()
-            if key
-            not in {
-                "base_url",
-                "client",
-                "timeout_sec",
-                "max_retries",
-                "rate_limit_per_sec",
-                "backoff_factor",
-                "retry_enabled",
-            }
-        }
-        cleaned["http_client"] = http_client
-        return cleaned
+        if http_config:
+            migrated["http"] = http_config
 
-    @model_validator(mode="after")
-    def sync_client_config(self) -> "BaseProviderConfig":
-        """Гарантирует, что client отражает http_client."""
-
-        synced_client = ClientConfig.from_http_settings(
-            self.http_client, existing=self.client
-        )
-        object.__setattr__(self, "client", synced_client)
-        return self
+        return migrated
 
     @property
     def base_url(self) -> str:
-        """Совместимость с прежним интерфейсом base_url."""
+        """Backward compatibility: access base_url from http config."""
+        return self.http.base_url
 
-        return self.http_client.base_url
+    @property
+    def http_client(self) -> ProviderHttpConfig:
+        """DEPRECATED: Use .http instead. Legacy alias for http config."""
+        return self.http
+
+    @property
+    def client(self) -> HttpClientConfig:
+        """DEPRECATED: Use .http instead. Legacy alias for http config."""
+        return self.http
 
     @field_validator("provider")
     @classmethod
@@ -380,11 +432,27 @@ class RuntimeConfig(BaseModel):
     """Секция исполнения и источников данных."""
 
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
-    client: ClientConfig = Field(default_factory=ClientConfig)
+    http: HttpClientConfig = Field(default_factory=HttpClientConfig)
     storage: StorageConfig = Field(default_factory=StorageConfig)
     csv: CsvInputConfig = Field(default_factory=CsvInputConfig, alias="csv_options")
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_client_to_http(cls, data: Any) -> Any:
+        """Support legacy 'client' field name."""
+        if not isinstance(data, dict):
+            return data
+        if "client" in data and "http" not in data:
+            data = dict(data)
+            data["http"] = data.pop("client")
+        return data
+
+    @property
+    def client(self) -> HttpClientConfig:
+        """DEPRECATED: Use .http instead. Legacy alias for backward compatibility."""
+        return self.http
 
 
 class ObservabilityConfig(BaseModel):
@@ -532,15 +600,19 @@ class PipelineConfig(BaseModel):
 
     pagination = property(get_pagination, set_pagination)
 
-    def get_client(self) -> ClientConfig:
-        """Backwards compatible access to client section."""
+    def get_client(self) -> HttpClientConfig:
+        """Backwards compatible access to HTTP client config.
 
-        return self.runtime.client
+        DEPRECATED: Use runtime.http instead.
+        """
+        return self.runtime.http
 
-    def set_client(self, value: ClientConfig) -> None:
-        """Update client section in runtime config."""
+    def set_client(self, value: HttpClientConfig) -> None:
+        """Update HTTP client config in runtime.
 
-        self.runtime.client = value
+        DEPRECATED: Use runtime.http instead.
+        """
+        object.__setattr__(self.runtime, "http", value)
 
     client = property(get_client, set_client)
 
@@ -774,7 +846,7 @@ class PipelineConfig(BaseModel):
 
         _pack(
             "runtime",
-            ["pagination", "client", "storage", "csv", "csv_options"],
+            ["pagination", "client", "http", "storage", "csv", "csv_options"],
         )
         _pack("observability", ["logging", "metrics"])
         _pack("quality", ["determinism", "qc", "hashing", "normalization"])
@@ -789,12 +861,12 @@ __all__ = [
     "BusinessKeyConfig",
     "CanonicalizationConfig",
     "ChemblSourceConfig",
-    "ClientConfig",
     "CsvInputConfig",
     "DeterminismConfig",
     "DummyProviderConfig",
     "FeatureFlagsConfig",
     "HashingConfig",
+    "HttpClientConfig",
     "InterfaceFeaturesConfig",
     "LoggingConfig",
     "MetricsConfig",
@@ -803,8 +875,14 @@ __all__ = [
     "PaginationConfig",
     "PipelineConfig",
     "ProviderConfigUnion",
+    "ProviderHttpConfig",
     "QualityConfig",
     "RuntimeConfig",
     "QcConfig",
     "StorageConfig",
+    # DEPRECATED: Legacy aliases (will be removed in future versions)
+    "ClientConfig",  # Use HttpClientConfig
+    "HttpClientDefaults",  # Use HttpClientConfig
+    "HttpClientSettings",  # Use ProviderHttpConfig
+    "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
 ]

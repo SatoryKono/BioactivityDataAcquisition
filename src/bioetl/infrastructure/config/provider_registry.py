@@ -15,10 +15,10 @@ import importlib
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 import yaml
 
-from bioetl.domain.configs import HttpClientSettings
+from bioetl.domain.configs import HttpClientConfig, ProviderHttpConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
@@ -107,7 +107,23 @@ class ProviderRegistryEntryModel(BaseModel):
     factory: str
     active: bool = True
     description: str | None = None
-    http_client: HttpClientSettings | None = None
+    http: ProviderHttpConfig | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_http_client(cls, data: Any) -> Any:
+        """Support legacy 'http_client' field name."""
+        if not isinstance(data, dict):
+            return data
+        if "http_client" in data and "http" not in data:
+            data = dict(data)
+            data["http"] = data.pop("http_client")
+        return data
+
+    @property
+    def http_client(self) -> ProviderHttpConfig | None:
+        """DEPRECATED: Use .http instead."""
+        return self.http
 
 
 # Alias for backward compatibility
@@ -305,7 +321,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
             return None
 
         try:
-            definition = factory(http_client=entry.http_client)
+            definition = factory(http=entry.http)
         except Exception as exc:  # pragma: no cover - defensive logging
             self._logger.error(
                 "Provider factory invocation failed",

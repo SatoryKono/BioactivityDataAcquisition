@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import requests
 
-from bioetl.domain.configs import ClientConfig
+from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.infrastructure.errors import (
     ApiClientError,
@@ -34,7 +34,7 @@ class _HttpTransport:
     def __init__(
         self,
         provider: str,
-        config: ClientConfig,
+        config: HttpClientConfig,
         base_client: Any | None = None,
         *,
         logger: LoggingPortABC | None = None,

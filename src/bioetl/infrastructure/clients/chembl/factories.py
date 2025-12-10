@@ -5,7 +5,7 @@ Factories for ChEMBL clients.
 from typing import Any
 
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.configs import ChemblSourceConfig, ClientConfig, HttpClientSettings
+from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
@@ -29,7 +29,7 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 
 def default_chembl_client(
     source_config: ChemblSourceConfig,
-    http_client: HttpClientSettings | None = None,
+    http_config: HttpClientConfig | None = None,
     **options: Any,
 ) -> DataClientABC:
     """
@@ -37,39 +37,30 @@ def default_chembl_client(
 
     Args:
         source_config: Конфигурация источника.
-        client_config: Конфигурация клиента (опционально).
+        http_config: HTTP конфигурация (опционально, берется из source_config.http).
         **options: Дополнительные опции.
 
     Returns:
         Настроенный экземпляр клиента.
     """
-    resolved_http = http_client or source_config.http_client
-    client_config = ClientConfig.from_http_settings(
-        resolved_http, existing=source_config.client
-    )
-
-    # Create Unified Client
+    # Use provided config or fall back to source_config.http
+    resolved_config = http_config or source_config.http
     logger: LoggingPortABC | None = options.get("logger")
 
+    # Create Unified HTTP Client
     unified_client = build_http_client(
         provider="chembl",
-        client_config=client_config,
-        http_settings=resolved_http,
+        config=resolved_config,
         logger=logger,
     )
 
     # Allow explicit overrides via kwargs (used in tests and manual runs)
     override_base_url = options.get("base_url")
-    base_url = str(override_base_url or resolved_http.base_url)
-    if override_base_url:
-        resolved_http = resolved_http.model_copy(update={"base_url": base_url})
+    base_url = str(override_base_url or source_config.base_url)
     max_url_length = options.get("max_url_length", source_config.max_url_length)
 
-    # Rate limiter for proactive limiting (in addition to middleware backoff)
-    # Using explicit rate limiter in client logic
-    rate_limiter = build_rate_limiter(
-        client_config=client_config, http_settings=resolved_http, logger=logger
-    )
+    # Rate limiter for proactive limiting
+    rate_limiter = build_rate_limiter(config=resolved_config, logger=logger)
 
     return ChemblHttpClientImpl(
         request_builder=ChemblRequestBuilderImpl(
@@ -87,8 +78,7 @@ def default_chembl_client(
 
 def default_chembl_extraction_service(
     config: ChemblSourceConfig,
-    http_client: HttpClientSettings | None = None,
-    client_config: ClientConfig | None = None,
+    http_config: HttpClientConfig | None = None,
     *,
     client: DataClientABC | None = None,
     logger: LoggingPortABC | None = None,
@@ -99,26 +89,20 @@ def default_chembl_extraction_service(
 
     Args:
         config: Конфигурация источника.
-        client_config: Конфигурация клиента.
+        http_config: HTTP конфигурация (опционально).
         client: Уже созданный клиент (опционально).
+        logger: Логгер.
+        field_provider: Провайдер полей.
 
     Returns:
         Сервис экстракции.
     """
-    resolved_http = http_client or config.http_client
-    if client_config is not None:
-        resolved_http = resolved_http.model_copy(
-            update={
-                "timeout": int(client_config.timeout_sec),
-                "retries": client_config.max_retries,
-                "backoff": float(client_config.backoff_factor),
-                "rate_limit": float(client_config.rate_limit_per_sec),
-                "retry_enabled": bool(client_config.retry_enabled),
-            }
-        )
+    resolved_config = http_config or config.http
 
     if client is None:
-        client = default_chembl_client(config, http_client=resolved_http, logger=logger)
+        client = default_chembl_client(
+            config, http_config=resolved_config, logger=logger
+        )
 
     return ChemblExtractionServiceImpl(
         client=client,
