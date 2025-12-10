@@ -7,7 +7,7 @@ from typing import Any, Iterable
 
 from pydantic import ValidationError
 
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import ConfigMigrator, PipelineConfig
 from bioetl.domain.errors import ConfigError, ConfigValidationError
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.fields import build_field_configs_from_schema
@@ -120,9 +120,15 @@ def _build_config(
     if cli_overrides:
         cli_values = resolve_env_placeholders(cli_overrides)
         merged = apply_deep_merge(merged, cli_values)
-    _migrate_legacy_pipeline_config(merged)
 
-    provider_id = merged.get("provider")
+    # Migration is handled by PipelineConfig.migrate_legacy_format validator,
+    # which delegates to ConfigMigrator. We also apply it here to ensure
+    # provider_config is extracted from sources before provider validation.
+    merged = ConfigMigrator.migrate(merged)
+
+    # After migration, provider is in identity section
+    identity = merged.get("identity", {})
+    provider_id = identity.get("provider") if isinstance(identity, dict) else None
     if isinstance(provider_id, str):
         _ensure_provider_registered(provider_id)
 
@@ -269,117 +275,6 @@ def _iter_candidate_roots(
             continue
         seen.add(base)
         yield base
-
-
-def _migrate_legacy_pipeline_config(config: dict[str, Any]) -> None:
-    """Приводит устаревшие конфиги (entity_name, sources и т.д.) к актуальной схеме."""
-
-    entity_alias = config.get("entity") or config.get("entity_name")
-    if "entity" not in config and entity_alias:
-        config["entity"] = entity_alias
-    config.pop("entity_name", None)
-
-    provider = config.get("provider")
-    pipeline_section = config.get("pipeline")
-    if "id" not in config:
-        if isinstance(pipeline_section, dict) and pipeline_section.get("name"):
-            config["id"] = pipeline_section["name"]
-        elif provider and config.get("entity"):
-            config["id"] = f"{provider}.{config['entity']}"
-
-    if "output_path" not in config:
-        storage_section = config.get("storage")
-        if isinstance(storage_section, dict) and "output_path" in storage_section:
-            config["output_path"] = storage_section["output_path"]
-
-    if "batch_size" not in config:
-        batch_size = _resolve_batch_size_from_sources(config)
-        if batch_size is not None:
-            config["batch_size"] = batch_size
-
-    if "provider_config" not in config:
-        provider_config = _extract_provider_config(config)
-        if provider_config is not None:
-            config["provider_config"] = provider_config
-
-    config.pop("sources", None)
-
-    def _pack(target_section: str, keys: list[str]) -> None:
-        if target_section not in config:
-            config[target_section] = {}
-        target = config[target_section]
-        if not isinstance(target, dict):
-            return
-
-        for key in keys:
-            if key in config:
-                target[key] = config.pop(key)
-
-    _pack("runtime", ["pagination", "client", "storage", "csv", "csv_options"])
-    _pack("observability", ["logging", "metrics"])
-    _pack("quality", ["determinism", "qc", "hashing", "normalization"])
-    _pack("features", ["features", "interface_features", "interfaces"])
-    _pack("output", ["output"])
-
-    # Fix legacy client config keys
-    runtime = config.get("runtime")
-    if isinstance(runtime, dict):
-        client = runtime.get("client")
-        if isinstance(client, dict):
-            if "timeout" in client:
-                client["timeout_sec"] = client.pop("timeout")
-            if "rate_limit" in client:
-                client["rate_limit_per_sec"] = client.pop("rate_limit")
-            if "backoff" in client:
-                client["backoff_factor"] = client.pop("backoff")
-
-    # Fix legacy api_base_url
-    if "api_base_url" in config:
-        provider_conf = config.get("provider_config")
-        if isinstance(provider_conf, dict):
-            provider_conf["base_url"] = config.pop("api_base_url")
-        else:
-            config.pop("api_base_url")
-
-
-def _resolve_batch_size_from_sources(config: dict[str, Any]) -> int | None:
-    sources_section = config.get("sources")
-    if not isinstance(sources_section, dict):
-        return None
-
-    provider = config.get("provider")
-    source_entry: Any | None = None
-    if provider and provider in sources_section:
-        source_entry = sources_section[provider]
-    elif len(sources_section) == 1:
-        source_entry = next(iter(sources_section.values()))
-
-    if isinstance(source_entry, dict):
-        batch_size = source_entry.get("batch_size")
-        if isinstance(batch_size, int):
-            return batch_size
-    return None
-
-
-def _extract_provider_config(config: dict[str, Any]) -> dict[str, Any] | None:
-    sources_section = config.get("sources")
-    if not isinstance(sources_section, dict):
-        return None
-
-    provider = config.get("provider")
-    source_entry: Any | None = None
-    if provider and provider in sources_section:
-        source_entry = sources_section[provider]
-    elif len(sources_section) == 1:
-        source_entry = next(iter(sources_section.values()))
-
-    if not isinstance(source_entry, dict):
-        return None
-
-    provider_config = dict(source_entry)
-    if "provider" not in provider_config and provider:
-        provider_config["provider"] = provider
-    return provider_config
 
 
 __all__ = [
