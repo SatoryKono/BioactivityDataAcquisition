@@ -107,7 +107,7 @@ def test_timestamp_provider_uses_current_time():
 
 
 def test_fulldate_transformer():
-    """Test FulldateTransformerImpl adds extracted_at column."""
+    """Test FulldateTransformerImpl adds acquisition_timestamp column."""
     fixed_time = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
     provider = default_timestamp_provider(fixed_time=fixed_time)
     transformer = FulldateTransformerImpl(timestamp_provider=provider)
@@ -115,8 +115,8 @@ def test_fulldate_transformer():
 
     out = transformer.apply(src)
 
-    assert "extracted_at" in out.columns
-    vals = out["extracted_at"].unique()
+    assert "acquisition_timestamp" in out.columns
+    vals = out["acquisition_timestamp"].unique()
     assert len(vals) == 1
     ts = vals[0]
     assert isinstance(ts, str) and "T" in ts

@@ -115,7 +115,7 @@ class ChemblTransformerImpl(TransformerABC):
             "hash_business_key",
             "index",
             "database_version",
-            "extracted_at",
+            "acquisition_timestamp",
         }
 
         required_cols = [

@@ -18,7 +18,7 @@ def valid_target_df() -> pd.DataFrame:
             "hash_business_key": ["2" * 64],
             "index": [0],
             "database_version": ["chembl_34"],
-            "extracted_at": ["2024-01-01T00:00:00+00:00"],
+            "acquisition_timestamp": ["2024-01-01T00:00:00+00:00"],
         }
     )
     return pd.DataFrame(data)[list(schema.columns.keys())]
@@ -34,7 +34,7 @@ def test_target_schema_accepts_valid_frame(valid_target_df: pd.DataFrame) -> Non
         "hash_business_key",
         "index",
         "database_version",
-        "extracted_at",
+        "acquisition_timestamp",
     ]:
         pd.testing.assert_series_equal(
             validated[column],
