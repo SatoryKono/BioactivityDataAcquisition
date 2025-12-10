@@ -72,14 +72,12 @@ def build_default_container(
 
     logger = logger_factory()
     metrics_port = _create_metrics_port()
-    converter_id = getattr(
-        getattr(config, "output", SimpleNamespace()), "converter", None
-    )
+    converter_id = getattr(config.sink.output, "converter", None)
     frame_converter = frame_converter_factory(converter_id)
 
     loader = loader_factory(
-        config=config.determinism,
-        qc_config=config.qc,
+        config=config.quality.determinism,
+        qc_config=config.quality.qc,
         metrics_port=metrics_port,
         converter=frame_converter,
     )

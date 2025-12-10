@@ -61,14 +61,13 @@ def test_pk_resolution_from_field(dependencies):
     assert pipeline.API_FILTER_KEY == "custom_pk_id__in"
 
 
-def test_pk_resolution_from_pipeline_dict(dependencies):
-    """Test fallback to pipeline dict for legacy configs."""
+def test_pk_resolution_from_identity_primary_key_list(dependencies):
+    """Test resolution from identity.primary_key list."""
     config = PipelineConfig(
         id="chembl.test_entity",
         provider="chembl",
         entity="test_entity",
-        primary_key=None,
-        pipeline={"primary_key": "legacy_pk_id"},
+        primary_key=["my_pk_id", "secondary_pk"],  # Uses first element
         input_mode="auto_detect",
         input_path=None,
         output_path="/tmp/out",
@@ -84,8 +83,8 @@ def test_pk_resolution_from_pipeline_dict(dependencies):
     )
 
     pipeline = ChemblPipelineBase(config=config, **dependencies)
-    assert pipeline.ID_COLUMN == "legacy_pk_id"
-    assert pipeline.API_FILTER_KEY == "legacy_pk_id__in"
+    assert pipeline.ID_COLUMN == "my_pk_id"
+    assert pipeline.API_FILTER_KEY == "my_pk_id__in"
 
 
 def test_pk_resolution_default(dependencies):
