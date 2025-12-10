@@ -1,6 +1,4 @@
-"""
-Implementation of ChemblExtractionService.
-"""
+"""Implementation of ChemblExtractionService."""
 
 from __future__ import annotations
 
@@ -10,19 +8,21 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
+    RawRecordBatch,
     VersionProviderABC,
 )
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
-from bioetl.domain.record_source import RawRecord
 from bioetl.infrastructure.clients.chembl.constants import ENTITY_ENDPOINT_ALIASES
-from bioetl.infrastructure.clients.chembl.parser_registry import get_parser_for_entity
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblGenericResponseParser,
+)
 
 
 class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
-    """
-    Implementation of record fetcher for ChEMBL.
-    Uses DataClientABC (expected to be ChemblHttpClientImpl) to fetch data.
+    """Extraction service for ChEMBL data.
 
+    Returns raw dicts - domain model mapping is application layer responsibility.
     All dependencies must be explicitly injected - no default fallbacks.
     Use composition root or factories to create instances.
     """
@@ -33,11 +33,14 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         logger: LoggingPortABC,
         batch_size: int = 1000,
         field_provider: DefaultFieldProviderABC | None = None,
+        *,
+        parser: ResponseParserPortABC | None = None,
     ) -> None:
         self.client = client
         self.batch_size = batch_size
         self.logger = logger
         self.field_provider = field_provider
+        self._parser = parser or ChemblGenericResponseParser()
         self._version_cache: str | None = None
 
     def get_release_version(self) -> str:
@@ -84,26 +87,25 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         return new_filters
 
-    def extract_all(self, entity: str, **filters: object) -> list[RawRecord]:
-        """
-        Extract all records for an entity matching the filters.
+    def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+        """Extract all records for an entity as raw dicts.
 
         Args:
             entity: The entity name.
             **filters: Query filters.
 
         Returns:
-            list[RawRecord]: List of extracted records.
+            All matching records as list[dict[str, Any]].
         """
-        records = []
+        records: RawRecordBatch = []
         for batch in self.iter_extract(entity, **filters):
             records.extend(batch)
         return records
 
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: object
-    ) -> Iterable[list[RawRecord]]:
-        """Stream records from ChEMBL."""
+    ) -> Iterable[RawRecordBatch]:
+        """Stream records from ChEMBL as raw dicts."""
         if chunk_size is None:
             chunk_size = filters.get("limit", self.batch_size)
         filters["limit"] = chunk_size
@@ -135,7 +137,8 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         # Iterate pages
         for page_data in self.client.iter_pages(url):
-            records = self.parse_response(page_data, entity=mapped_entity)
+            # Use generic parser for raw dict output
+            records: RawRecordBatch = self._parser.parse_to_records(page_data)
             yield records
 
     def request_batch(
@@ -158,40 +161,29 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         filters = {filter_key: ",".join(batch_ids), "limit": len(batch_ids)}
         return self.client.fetch(entity, **filters)
 
-    def parse_response(
-        self, raw_response: dict[str, object], *, entity: str = "activity"
-    ) -> list[RawRecord]:
-        """
-        Parse raw response into a list of records.
+    def parse_response(self, raw_response: object) -> RawRecordBatch:
+        """Parse raw response into record dicts.
 
         Args:
-            raw_response: The raw API response.
-            entity: Entity type for selecting appropriate parser.
+            raw_response: Raw API response object.
 
         Returns:
-            list[RawRecord]: List of parsed records.
+            Parsed records as list[dict[str, Any]].
         """
-        # Try client's parser first (for backward compatibility)
-        if hasattr(self.client, "response_parser"):
-            parser = getattr(self.client, "response_parser")
-            if hasattr(parser, "parse"):
-                return parser.parse(raw_response)
-
-        # Use registry to get appropriate parser for entity type
-        parser = get_parser_for_entity(entity)
-        return parser.parse(raw_response)
+        if not isinstance(raw_response, dict):
+            return []
+        return self._parser.parse_to_records(raw_response)
 
     def serialize_records(
-        self, entity: str, records: list[RawRecord]
-    ) -> list[RawRecord]:
-        """
-        Serialize records for storage.
+        self, entity: str, records: RawRecordBatch
+    ) -> RawRecordBatch:
+        """Serialize records for storage.
 
         Args:
             entity: Entity name.
-            records: List of records.
+            records: List of record dicts.
 
         Returns:
-            list[RawRecord]: Serialized records.
+            Serialized records as list[dict[str, Any]].
         """
         return records

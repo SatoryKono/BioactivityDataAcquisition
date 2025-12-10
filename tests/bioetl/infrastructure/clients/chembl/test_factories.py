@@ -1,6 +1,4 @@
-"""
-Tests for ChEMBL factories.
-"""
+"""Tests for ChEMBL factories."""
 
 from unittest.mock import Mock
 
@@ -11,6 +9,7 @@ from bioetl.domain.configs import (
     HttpClientConfig,
 )
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
     default_chembl_extraction_service,
@@ -20,6 +19,9 @@ from bioetl.infrastructure.clients.chembl.impl import (
 )
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
+)
+from bioetl.infrastructure.clients.chembl.response_parser import (
+    ChemblGenericResponseParser,
 )
 
 
@@ -93,3 +95,26 @@ def test_default_chembl_extraction_service_default_batch(
     )
     # ChEMBL factory uses hard_cap=1000 for batch_size
     assert service.batch_size == 1000
+
+
+def test_default_chembl_extraction_service_uses_generic_parser(
+    source_config, mock_logger, mock_metrics
+):
+    """Test that factory creates service with generic parser by default."""
+    service = default_chembl_extraction_service(
+        source_config, mock_logger, mock_metrics
+    )
+    assert isinstance(service._parser, ChemblGenericResponseParser)
+
+
+def test_default_chembl_extraction_service_accepts_custom_parser(
+    source_config, mock_logger, mock_metrics
+):
+    """Test that parser can be injected via factory."""
+    custom_parser = Mock(spec=ResponseParserPortABC)
+
+    service = default_chembl_extraction_service(
+        source_config, mock_logger, mock_metrics, parser=custom_parser
+    )
+
+    assert service._parser is custom_parser
