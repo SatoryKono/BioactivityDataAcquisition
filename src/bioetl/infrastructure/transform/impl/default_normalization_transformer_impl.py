@@ -12,12 +12,12 @@ from bioetl.domain.transform.contracts import (
 from bioetl.domain.transform.serializers import serialize_nested
 from bioetl.infrastructure.transform.impl import normalize
 from bioetl.infrastructure.transform.impl.base_normalizer import (
-    BaseNormalizationServiceImpl,
+    BaseNormalizationService,
 )
 
 
 class DefaultNormalizationTransformerImpl(
-    BaseNormalizationServiceImpl, NormalizationServiceABC
+    BaseNormalizationService, NormalizationServiceABC
 ):
     """
     Unified normalization service for all data sources.
