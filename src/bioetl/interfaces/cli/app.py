@@ -8,7 +8,6 @@ from typing import Annotated
 
 from rich.console import Console
 import typer
-
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
