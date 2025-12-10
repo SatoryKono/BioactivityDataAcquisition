@@ -54,7 +54,7 @@ def test_validate_config_missing():
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.build_pipeline_config")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_validate_config_success(mock_loader):
     """Test validate-config success."""
     mock_loader.return_value = PipelineConfig(
@@ -87,9 +87,9 @@ def test_validate_config_success(mock_loader):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_pipeline_config")
-@patch("bioetl.interfaces.cli.app.ConfigPathResolver")
-def test_run_command(mock_resolver_cls, mock_loader, mock_orchestrator_cls):
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
+def test_run_command(mock_resolve_path, mock_loader, mock_orchestrator_cls):
     """Test the run command."""
     mock_orchestrator = MagicMock()
     mock_orchestrator.run_pipeline.return_value = MagicMock(
@@ -98,9 +98,7 @@ def test_run_command(mock_resolver_cls, mock_loader, mock_orchestrator_cls):
     mock_orchestrator_cls.return_value = mock_orchestrator
 
     # Mock the resolver
-    mock_resolver = MagicMock()
-    mock_resolver.resolve_config_path.return_value = Path("test.yaml")
-    mock_resolver_cls.return_value = mock_resolver
+    mock_resolve_path.return_value = Path("test.yaml")
 
     mock_config = PipelineConfig(
         id="chembl.activity",
@@ -146,14 +144,12 @@ def test_smoke_run(mock_run):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.ConfigPathResolver")
-def test_run_config_not_found_explicit(mock_resolver_cls):
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
+def test_run_config_not_found_explicit(mock_resolve_path):
     """Test run command with explicit config that doesn't exist."""
-    mock_resolver = MagicMock()
-    mock_resolver.resolve_config_path.side_effect = FileNotFoundError(
+    mock_resolve_path.side_effect = FileNotFoundError(
         "Config file not found: nonexistent.yaml"
     )
-    mock_resolver_cls.return_value = mock_resolver
 
     result = runner.invoke(
         app, ["run", "activity_chembl", "--config", "nonexistent.yaml"]
@@ -165,9 +161,11 @@ def test_run_config_not_found_explicit(mock_resolver_cls):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_pipeline_config")
-@patch("bioetl.interfaces.cli.app.ConfigPathResolver")
-def test_run_with_limit_and_dry_run(mock_resolver_cls, mock_loader, mock_orchestrator_cls):
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
+def test_run_with_limit_and_dry_run(
+    mock_resolve_path, mock_loader, mock_orchestrator_cls
+):
     """Test run command with limit and dry-run options."""
     mock_orchestrator = MagicMock()
     mock_orchestrator.run_pipeline.return_value = MagicMock(
@@ -176,9 +174,7 @@ def test_run_with_limit_and_dry_run(mock_resolver_cls, mock_loader, mock_orchest
     mock_orchestrator_cls.return_value = mock_orchestrator
 
     # Mock the resolver
-    mock_resolver = MagicMock()
-    mock_resolver.resolve_config_path.return_value = Path("inferred.yaml")
-    mock_resolver_cls.return_value = mock_resolver
+    mock_resolve_path.return_value = Path("inferred.yaml")
 
     mock_config = PipelineConfig(
         id="chembl.activity",
@@ -213,18 +209,16 @@ def test_run_with_limit_and_dry_run(mock_resolver_cls, mock_loader, mock_orchest
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_pipeline_config")
-@patch("bioetl.interfaces.cli.app.ConfigPathResolver")
-def test_run_pipeline_failure(mock_resolver_cls, mock_loader, mock_orchestrator_cls):
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
+def test_run_pipeline_failure(mock_resolve_path, mock_loader, mock_orchestrator_cls):
     """Test run command when pipeline fails."""
     mock_orchestrator = MagicMock()
     mock_orchestrator.run_pipeline.return_value = MagicMock(success=False)
     mock_orchestrator_cls.return_value = mock_orchestrator
 
     # Mock the resolver
-    mock_resolver = MagicMock()
-    mock_resolver.resolve_config_path.return_value = Path("inferred.yaml")
-    mock_resolver_cls.return_value = mock_resolver
+    mock_resolve_path.return_value = Path("inferred.yaml")
 
     mock_loader.return_value = PipelineConfig(
         id="chembl.activity",
@@ -252,14 +246,12 @@ def test_run_pipeline_failure(mock_resolver_cls, mock_loader, mock_orchestrator_
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.build_pipeline_config")
-@patch("bioetl.interfaces.cli.app.ConfigPathResolver")
-def test_run_exception(mock_resolver_cls, mock_loader):
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
+def test_run_exception(mock_resolve_path, mock_loader):
     """Test run command unhandled exception."""
     # Mock the resolver
-    mock_resolver = MagicMock()
-    mock_resolver.resolve_config_path.return_value = Path("inferred.yaml")
-    mock_resolver_cls.return_value = mock_resolver
+    mock_resolve_path.return_value = Path("inferred.yaml")
 
     mock_loader.side_effect = RuntimeError("Unexpected error")
 
@@ -273,10 +265,10 @@ def test_run_exception(mock_resolver_cls, mock_loader):
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.create_provider_loader")
 @patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_pipeline_config")
-@patch("bioetl.interfaces.cli.app.ConfigPathResolver")
+@patch("bioetl.interfaces.cli.app.build_runtime_config")
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
 def test_run_dry_run_pipeline_metadata(
-    mock_resolver_cls,
+    mock_resolve_path,
     mock_loader,
     mock_orchestrator_cls,
     mock_create_provider_loader,
@@ -372,9 +364,7 @@ def test_run_dry_run_pipeline_metadata(
     mock_create_provider_loader.return_value = provider_loader
 
     # Mock the resolver
-    mock_resolver = MagicMock()
-    mock_resolver.resolve_config_path.return_value = Path("config.yaml")
-    mock_resolver_cls.return_value = mock_resolver
+    mock_resolve_path.return_value = Path("config.yaml")
 
     with runner.isolated_filesystem():
         Path("config.yaml").write_text("dummy", encoding="utf-8")

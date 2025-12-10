@@ -139,7 +139,9 @@ def build_pipeline_config(
     if effective_configs_root is None:
         effective_configs_root = _infer_configs_root(config_path)
 
-    profiles_root = effective_configs_root / "profiles" if effective_configs_root else None
+    profiles_root = (
+        effective_configs_root / "profiles" if effective_configs_root else None
+    )
 
     return loader.get_from_path(
         config_path,

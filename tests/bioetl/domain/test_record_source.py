@@ -1,8 +1,8 @@
 from collections.abc import Iterable
 from typing import cast
 
-from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.application.sources import ApiRecordSource
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import InMemoryRecordSource, RawRecord
 
 

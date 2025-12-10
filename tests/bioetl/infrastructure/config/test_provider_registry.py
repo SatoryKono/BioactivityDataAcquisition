@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 from types import ModuleType
 from typing import Any, Callable
 
@@ -13,7 +13,6 @@ import yaml
 
 from bioetl.domain.configs import DummyProviderConfig, HttpClientSettings
 from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.config.provider_registry import (
     DEFAULT_PROVIDERS_REGISTRY_PATH,
@@ -30,7 +29,6 @@ from bioetl.infrastructure.config.provider_registry import (
     ensure_provider_known,
     get_provider_registry,
 )
-
 
 # ---------------------------------------------------------------------------
 # Test Fixtures and Helpers
@@ -309,13 +307,7 @@ class TestEnsureProviderKnown:
     def test_invalid_registry_format_raises_error(self, tmp_path: Path) -> None:
         config_file = tmp_path / "providers.yaml"
         config_file.write_text(
-            yaml.dump(
-                {
-                    "providers": [
-                        {"invalid": "schema"}  # Missing required fields
-                    ]
-                }
-            )
+            yaml.dump({"providers": [{"invalid": "schema"}]})  # Missing required fields
         )
 
         with pytest.raises(ProviderRegistryFormatError):
@@ -348,7 +340,9 @@ class TestProviderLoaderImpl:
             yaml.dump(
                 {
                     "providers": [
-                        {"invalid_field": "value"}  # Missing required id, module, factory
+                        {
+                            "invalid_field": "value"
+                        }  # Missing required id, module, factory
                     ]
                 }
             )
@@ -365,7 +359,9 @@ class TestProviderLoaderImpl:
         provider_definition_factory: Callable[[ProviderId], ProviderDefinition],
     ) -> None:
         # Register test module
-        def factory(http_client: HttpClientSettings | None = None) -> ProviderDefinition:
+        def factory(
+            http_client: HttpClientSettings | None = None,
+        ) -> ProviderDefinition:
             return provider_definition_factory(ProviderId.DUMMY)
 
         _register_module("test_module_disabled", "create_provider", factory)

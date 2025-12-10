@@ -1,5 +1,7 @@
 """Dependency Injection Container for the application."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from typing import Any, Callable, cast
 
@@ -16,7 +18,7 @@ from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC

@@ -16,6 +16,7 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
+from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.interfaces.container_factory import (
     build_default_container,
     create_config_loader,
@@ -50,7 +51,7 @@ def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
     config_loader = create_config_loader()
     return build_runtime_config(
         config_path=config_path,
-        configs_root=configs_root,
+        configs_root=get_configs_root(None),
         loader=config_loader,
         profile=profile,
     )
@@ -103,7 +104,7 @@ def validate_config(
         config_loader = create_config_loader()
         build_runtime_config(
             config_path=config_file,
-            configs_root=configs_root,
+            configs_root=get_configs_root(None),
             loader=config_loader,
             profile=profile,
         )

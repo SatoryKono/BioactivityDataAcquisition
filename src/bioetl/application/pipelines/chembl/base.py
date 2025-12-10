@@ -26,7 +26,6 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
-from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -46,7 +45,7 @@ class ChemblPipelineBase(PipelineBase):
         hash_service: HashServiceABC,
         loader: LoaderABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
-        record_source: RecordSource | None = None,
+        record_source: RecordSourceABC | None = None,
         normalization_service: NormalizationServiceABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,

@@ -129,5 +129,3 @@ class SecretProviderABC(ABC):
     @abstractmethod
     def get_secret(self, name: str) -> str | None:
         """Возвращает значение секрета."""
-
-
