@@ -6,10 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.schemas import register_schemas
-from bioetl.domain.schemas.registry import (
-    SchemaRegistry,
-    create_default_schema_registry,
-)
+from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.validation import SchemaProviderABC
 
 if TYPE_CHECKING:
