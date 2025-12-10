@@ -5,14 +5,13 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from bioetl.application.contracts import PipelineContainerABC
-from bioetl.application.factories.hooks import PipelineHookFactory
 from bioetl.application.factories.noop import (
     create_noop_logger,
     create_noop_metadata_builder,
-    create_noop_metrics_port,
     create_noop_validator_factory,
 )
 from bioetl.application.factories.record_source import RecordSourceFactory
+from bioetl.application.factories.runtime_factory import PipelineRuntimeFactory
 from bioetl.application.factories.service_factory import (
     ApplicationServiceFactory,
     ApplicationServiceFactoryABC,
@@ -21,10 +20,7 @@ from bioetl.application.factories.transform_factory import (
     TransformComponentFactory,
     TransformComponentFactoryABC,
 )
-from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
-from bioetl.domain.clients.base.output.contracts import (
-    RunMetadataBuilderProtocol,
-)
+from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
@@ -45,9 +41,7 @@ from bioetl.domain.validation.service import ValidationService
 
 
 class PipelineContainer(PipelineContainerABC):
-    """
-    DI Container for pipeline dependencies.
-    """
+    """DI Container for pipeline dependencies."""
 
     def __init__(
         self,
@@ -72,36 +66,127 @@ class PipelineContainer(PipelineContainerABC):
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
-        self._schema_provider: SchemaProviderABC = self._resolve_schema_provider(
-            schema_provider
-        )
-        self._validator_factory = self._resolve_validator_factory(validator_factory)
-        self._logger = self._resolve_logger(logger)
-        self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
-        self._error_policy = error_policy
-        self._hash_service = hash_service
-        self._index_generator = index_generator
-        self._timestamp_provider = timestamp_provider
-        self._post_transformer = post_transformer
-        self._metadata_builder = self._resolve_metadata_builder(metadata_builder)
-        self._metrics_port = self._resolve_metrics_port(metrics_port)
-        self._provider_registry, self._provider_registry_provider = (
-            self._resolve_provider_registry(
-                provider_registry, provider_registry_provider
-            )
-        )
+
+        # Resolve required dependencies
         if loader is None:
             raise ValueError("Loader must be provided.")
         self._loader = loader
+
+        self._provider_registry, self._provider_registry_provider = (
+            self._resolve_provider_registry(provider_registry, provider_registry_provider)
+        )
+
+        # Resolve optional dependencies with defaults
+        self._schema_provider = schema_provider or SchemaRegistry()
+        self._validator_factory = validator_factory or create_noop_validator_factory()
+        self._logger = logger or create_noop_logger()
+        self._metadata_builder = metadata_builder or create_noop_metadata_builder()
+        self._post_transformer = post_transformer
+
         register_schemas(self._schema_provider)
 
-        # Initialize factory helpers
+        # Initialize factories (lazy)
         self._injected_service_factory = service_factory
         self._injected_transform_factory = transform_factory
         self._service_factory: ApplicationServiceFactoryABC | None = None
         self._transform_factory: TransformComponentFactoryABC | None = None
         self._record_source_factory: RecordSourceFactory | None = None
-        self._hook_factory: PipelineHookFactory | None = None
+        self._runtime_factory = PipelineRuntimeFactory(
+            config, metrics_port, hooks, error_policy
+        )
+
+        # Store transform component overrides
+        self._hash_service = hash_service
+        self._index_generator = index_generator
+        self._timestamp_provider = timestamp_provider
+
+    @property
+    def config(self) -> PipelineConfig:
+        """Return the pipeline configuration."""
+        return self._config
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Core Services
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def get_logger(self) -> LoggingPortABC:
+        return self._logger
+
+    def get_validation_service(self) -> ValidationService:
+        return ValidationService(self._schema_provider, self._validator_factory)
+
+    def get_loader(self) -> LoaderABC:
+        return self._loader
+
+    def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
+        return self._metadata_builder
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Application Services (via ServiceFactory)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def get_extraction_service(self) -> Any:
+        return self._get_service_factory().create_extraction_service()
+
+    def get_normalization_service(self) -> NormalizationServiceABC:
+        return self._get_service_factory().create_normalization_service()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Transform Components (via TransformFactory)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def get_hash_service(self) -> HashServiceABC:
+        return self._get_transform_factory().get_hash_service()
+
+    def get_index_generator(self) -> IndexGeneratorABC:
+        return self._get_transform_factory().get_index_generator()
+
+    def get_timestamp_provider(self) -> TimestampProviderABC:
+        return self._get_transform_factory().get_timestamp_provider()
+
+    def get_post_transformer(
+        self, *, version_provider: Callable[[], str | None] | None = None
+    ) -> TransformerABC:
+        if self._post_transformer is not None:
+            return self._post_transformer
+        return self._get_transform_factory().get_post_transformer(
+            version_provider=version_provider
+        )
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Record Source (via RecordSourceFactory)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def get_record_source(
+        self,
+        extraction_service: Any,
+        *,
+        limit: int | None = None,
+        logger: LoggingPortABC | None = None,
+        model_cls: type | None = None,
+        batch_adapter: Any | None = None,
+    ) -> RecordSourceABC:
+        return self._get_record_source_factory().create_record_source(
+            extraction_service,
+            limit=limit,
+            logger=logger or self.get_logger(),
+            model_cls=model_cls,
+            batch_adapter=batch_adapter,
+        )
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Runtime Components (via RuntimeFactory)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def get_hooks(self) -> list[PipelineHookABC]:
+        return self._runtime_factory.get_hooks(self.get_logger())
+
+    def get_error_policy(self) -> ErrorPolicyABC:
+        return self._runtime_factory.get_error_policy()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Private Factory Accessors
+    # ─────────────────────────────────────────────────────────────────────────
 
     def _get_service_factory(self) -> ApplicationServiceFactoryABC:
         if self._service_factory is None:
@@ -112,7 +197,7 @@ class PipelineContainer(PipelineContainerABC):
                     self._config,
                     self._get_provider_registry(),
                     logger=self._logger,
-                    metrics=self._metrics_port,
+                    metrics=self._runtime_factory.get_metrics_port(),
                 )
         return self._service_factory
 
@@ -138,158 +223,18 @@ class PipelineContainer(PipelineContainerABC):
             )
         return self._record_source_factory
 
-    def _get_hook_factory(self) -> PipelineHookFactory:
-        if self._hook_factory is None:
-            self._hook_factory = PipelineHookFactory(
-                self._config,
-                self._metrics_port,
-            )
-        return self._hook_factory
-
-    def _resolve_schema_provider(
-        self, schema_provider: SchemaProviderABC | None
-    ) -> SchemaProviderABC:
-        return schema_provider or SchemaRegistry()
-
-    def _resolve_validator_factory(
-        self, validator_factory: ValidatorFactoryABC | None
-    ) -> ValidatorFactoryABC:
-        return validator_factory or create_noop_validator_factory()
-
-    def _resolve_logger(self, logger: LoggingPortABC | None) -> LoggingPortABC:
-        return logger or create_noop_logger()
-
-    def _resolve_metadata_builder(
-        self, metadata_builder: RunMetadataBuilderProtocol | None
-    ) -> RunMetadataBuilderProtocol:
-        return metadata_builder or create_noop_metadata_builder()
-
-    def _resolve_metrics_port(
-        self, metrics_port: MetricsPortABC | None
-    ) -> MetricsPortABC:
-        return metrics_port or create_noop_metrics_port()
-
-    def _resolve_provider_registry(
-        self,
-        provider_registry: ProviderRegistryABC | None,
-        provider_registry_provider: Callable[[], ProviderRegistryABC] | None,
-    ) -> tuple[ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None]:
-        if provider_registry is None and provider_registry_provider is None:
-            raise ValueError(
-                "Provider registry must be supplied (instance or provider callable)"
-            )
-        return provider_registry, provider_registry_provider
-
-    @property
-    def config(self) -> PipelineConfig:
-        """Return the pipeline configuration."""
-        return self._config
-
-    def get_logger(self) -> LoggingPortABC:
-        """Get the configured logger."""
-        return self._logger
-
-    def get_validation_service(self) -> ValidationService:
-        """Get the validation service with registered schemas."""
-        return ValidationService(
-            schema_provider=self._schema_provider,
-            validator_factory=self._validator_factory,
-        )
-
-    def get_loader(self) -> LoaderABC:
-        """Get the loader component."""
-        return self._loader
-
-    def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
-        """Get metadata builder port."""
-        return self._metadata_builder
-
-    def get_normalization_service(self) -> NormalizationServiceABC:
-        """Create normalization service for the configured provider."""
-        return self._get_service_factory().create_normalization_service()
-
-    def get_record_source(
-        self,
-        extraction_service: Any,
-        *,
-        limit: int | None = None,
-        logger: LoggingPortABC | None = None,
-        model_cls: type | None = None,
-        batch_adapter: Any | None = None,
-    ) -> RecordSourceABC:
-        """Create record source based on pipeline input configuration."""
-        return self._get_record_source_factory().create_record_source(
-            extraction_service,
-            limit=limit,
-            logger=logger or self.get_logger(),
-            model_cls=model_cls,
-            batch_adapter=batch_adapter,
-        )
-
-    def get_extraction_service(self) -> Any:
-        """Get the extraction service based on provider configuration."""
-        return self._get_service_factory().create_extraction_service()
-
-    def get_hash_service(self) -> HashServiceABC:
-        """Get the hash service.
-
-        Delegates to TransformComponentFactory.
-        """
-        return self._get_transform_factory().get_hash_service()
-
-    def get_index_generator(self) -> IndexGeneratorABC:
-        """Get the index generator.
-
-        Delegates to TransformComponentFactory.
-        """
-        return self._get_transform_factory().get_index_generator()
-
-    def get_timestamp_provider(self) -> TimestampProviderABC:
-        """Get the timestamp provider.
-
-        Delegates to TransformComponentFactory.
-        """
-        return self._get_transform_factory().get_timestamp_provider()
-
-    def get_post_transformer(
-        self, *, version_provider: Callable[[], str | None] | None = None
-    ) -> TransformerABC:
-        """Build the standard post-transformer chain.
-
-        Delegates to TransformComponentFactory.
-        """
-        if self._post_transformer is not None:
-            return self._post_transformer
-        return self._get_transform_factory().get_post_transformer(
-            version_provider=version_provider
-        )
-
-    def get_hooks(self) -> list[PipelineHookABC]:
-        """Возвращает список хуков выполнения пайплайна."""
-        if self._hooks is None:
-            self._hooks = self._get_hook_factory().create_hooks(self.get_logger())
-        return list(self._hooks)
-
-    def get_error_policy(self) -> ErrorPolicyABC:
-        """Возвращает политику обработки ошибок пайплайна."""
-        if self._error_policy is None:
-            self._error_policy = FailFastErrorPolicyImpl()
-        return self._error_policy
-
-    def _get_provider_definition(self) -> ProviderDefinition:
-        return self._get_provider_registry().get_provider(self._provider_id)
-
     def _get_provider_registry(self) -> ProviderRegistryABC:
         if self._provider_registry is not None:
             return self._provider_registry
         if self._provider_registry_provider is None:
             raise RuntimeError("Provider registry provider is not configured")
-
         self._provider_registry = self._provider_registry_provider()
         if self._provider_registry is None:
             raise RuntimeError("Provider registry provider returned None")
-
         return self._provider_registry
+
+    def _get_provider_definition(self) -> ProviderDefinition:
+        return self._get_provider_registry().get_provider(self._provider_id)
 
     def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
         source_config = self._config.get_source_config(self._provider_id.value)
@@ -299,6 +244,17 @@ class PipelineContainer(PipelineContainerABC):
                 f"provider '{self._provider_id.value}'"
             )
         return source_config
+
+    @staticmethod
+    def _resolve_provider_registry(
+        registry: ProviderRegistryABC | None,
+        provider: Callable[[], ProviderRegistryABC] | None,
+    ) -> tuple[ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None]:
+        if registry is None and provider is None:
+            raise ValueError(
+                "Provider registry must be supplied (instance or provider callable)"
+            )
+        return registry, provider
 
 
 def create_default_container_factory() -> Callable[..., PipelineContainerABC]:
