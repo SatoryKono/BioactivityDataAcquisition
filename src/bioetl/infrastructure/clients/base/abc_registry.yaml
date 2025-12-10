@@ -4,7 +4,7 @@
 
 DataClientABC: bioetl.domain.clients.contracts.DataClientABC
 RequestBuilderABC: bioetl.domain.clients.base.contracts.RequestBuilderABC
-ResponseParserABC: bioetl.domain.clients.base.contracts.ResponseParserABC
+ResponseParserPortABC: bioetl.domain.ports.parsing.ResponseParserPortABC
 PaginatorABC: bioetl.domain.clients.base.contracts.PaginatorABC
 RateLimiterABC: bioetl.domain.clients.base.contracts.RateLimiterABC
 CacheABC: bioetl.domain.clients.base.contracts.CacheABC

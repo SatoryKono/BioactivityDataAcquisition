@@ -104,10 +104,10 @@ RequestBuilderABC:
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.request_builder.ChemblRequestBuilderImpl
 
-ResponseParserABC:
+ResponseParserPortABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_response_parser
   implementations:
-    Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblResponseParserImpl
+    Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblGenericResponseParser
 
 PaginatorABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_paginator
