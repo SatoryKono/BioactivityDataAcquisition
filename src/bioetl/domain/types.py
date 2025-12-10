@@ -1,99 +1,91 @@
 """Unified type aliases for the domain layer.
 
-This module provides canonical type aliases used throughout the domain layer
-to ensure consistency and reduce duplication across ports and contracts.
+This module provides canonical type aliases for API-specific types used
+throughout the domain layer to ensure consistency.
 
 Canonical Type Aliases
 ----------------------
-- ``RawRecord``: A single record as an untyped dictionary (dict[str, Any]).
-- ``RecordBatch``: A batch/list of raw records (list[RawRecord]).
 - ``ApiPayload``: Raw API response payload (dict[str, Any]).
 - ``FieldConfig``: Field configuration dictionary (dict[str, Any]).
 
+Tabular Data Types (moved to domain.data)
+-----------------------------------------
+For tabular data abstractions, import from ``bioetl.domain.data``:
+
+- ``RecordBatch``: Sequence of records (Sequence[Mapping[str, Any]])
+- ``Record``: Single data record protocol
+- ``RecordSet``: Collection of records with schema
+- ``TabularData``: Full tabular data abstraction
+
 Migration Guide
 ---------------
-The following legacy type aliases are deprecated and will be removed in v3.0:
+The following type aliases have been moved or deprecated:
+
++------------------+---------------+---------------------------------------------+
+| Old Location     | New Location  | Notes                                       |
++==================+===============+=============================================+
+| types.RawRecord  | (removed)     | Use Mapping[str, Any] or domain.data.Record |
++------------------+---------------+---------------------------------------------+
+| types.RecordBatch| data.RecordBatch | More general type: Sequence[Mapping]     |
++------------------+---------------+---------------------------------------------+
+
+Legacy deprecated aliases (will be removed in v3.0):
 
 +------------------+---------------+---------------------------------------------+
 | Legacy Name      | New Name      | Module                                      |
 +==================+===============+=============================================+
-| RawRecordDict    | RawRecord     | domain.ports.extraction, domain.ports.parsing|
+| RawRecordDict    | (removed)     | Use Mapping[str, Any]                       |
 +------------------+---------------+---------------------------------------------+
-| RawRecordBatch   | RecordBatch   | domain.ports.extraction                     |
+| RawRecordBatch   | RecordBatch   | bioetl.domain.data                          |
 +------------------+---------------+---------------------------------------------+
-| RawRecordList    | RecordBatch   | domain.ports.parsing                        |
+| RawRecordList    | RecordBatch   | bioetl.domain.data                          |
 +------------------+---------------+---------------------------------------------+
-| RawPayload       | ApiPayload    | domain.ports.parsing                        |
+| RawPayload       | ApiPayload    | bioetl.domain.types                         |
 +------------------+---------------+---------------------------------------------+
 
 Example migration::
 
     # Before (deprecated)
-    from bioetl.domain.ports.extraction import RawRecordDict, RawRecordBatch
-
-    def process(records: RawRecordBatch) -> RawRecordDict:
-        ...
-
-    # After (recommended)
     from bioetl.domain.types import RawRecord, RecordBatch
 
     def process(records: RecordBatch) -> RawRecord:
         ...
 
+    # After (recommended)
+    from bioetl.domain.data import RecordBatch
+    from typing import Mapping, Any
+
+    def process(records: RecordBatch) -> Mapping[str, Any]:
+        ...
+
 Usage Notes
 -----------
-Import from this module for new code::
+Import API-specific types from this module::
 
-    from bioetl.domain.types import RawRecord, RecordBatch, ApiPayload, FieldConfig
+    from bioetl.domain.types import ApiPayload, FieldConfig
 
-For backward compatibility, legacy aliases are re-exported from their original
-modules with deprecation warnings.
+Import tabular data types from domain.data::
+
+    from bioetl.domain.data import RecordBatch, Record, TabularData
 """
 
 from __future__ import annotations
 
 import warnings
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
 
 __all__ = [
-    # Canonical type aliases
-    "RawRecord",
-    "RecordBatch",
+    # Canonical type aliases (API-specific)
     "ApiPayload",
     "FieldConfig",
-    # Deprecated aliases (for backward compatibility)
-    "RawRecordDict",
-    "RawRecordBatch",
-    "RawRecordList",
-    "RawPayload",
 ]
 
 # =============================================================================
-# Canonical Type Aliases
+# Canonical Type Aliases (API-specific)
 # =============================================================================
-
-RawRecord: TypeAlias = dict[str, Any]
-"""A single record as an untyped dictionary.
-
-Represents a single data record from an external source (API response,
-database row, etc.) before domain model mapping.
-
-Example:
-    >>> record: RawRecord = {"id": "CHEMBL123", "name": "Aspirin"}
-"""
-
-RecordBatch: TypeAlias = list[RawRecord]
-"""A batch/list of raw records.
-
-Represents multiple records fetched together, typically from a paginated
-API response or batch extraction.
-
-Example:
-    >>> batch: RecordBatch = [
-    ...     {"id": "CHEMBL123", "name": "Aspirin"},
-    ...     {"id": "CHEMBL456", "name": "Ibuprofen"},
-    ... ]
-"""
 
 ApiPayload: TypeAlias = dict[str, Any]
 """Raw API response payload.
@@ -124,66 +116,62 @@ Example:
 
 
 # =============================================================================
-# Deprecated Aliases (Backward Compatibility)
+# Deprecated Type Aliases (Backward Compatibility via __getattr__)
 # =============================================================================
 
-
-def _deprecated_alias(
-    old_name: str, new_name: str, value: TypeAlias
-) -> TypeAlias:
-    """Helper to create deprecated alias with runtime warning on access.
-
-    Note: TypeAlias assignments are resolved at import time, so we can't
-    intercept access. The deprecation warning is emitted via module __getattr__
-    for dynamic imports, and via explicit re-exports in ports modules.
-    """
-    return value
-
-
-# These are direct assignments for static type checkers.
-# Deprecation warnings are emitted via __getattr__ in ports modules.
-RawRecordDict: TypeAlias = RawRecord
-"""Deprecated: Use ``RawRecord`` instead."""
-
-RawRecordBatch: TypeAlias = RecordBatch
-"""Deprecated: Use ``RecordBatch`` instead."""
-
-RawRecordList: TypeAlias = RecordBatch
-"""Deprecated: Use ``RecordBatch`` instead."""
-
-RawPayload: TypeAlias = ApiPayload
-"""Deprecated: Use ``ApiPayload`` instead."""
-
-
-# =============================================================================
-# Module-level __getattr__ for deprecation warnings
-# =============================================================================
-
-_DEPRECATED_NAMES: dict[str, tuple[str, TypeAlias]] = {
-    "RawRecordDict": ("RawRecord", RawRecord),
-    "RawRecordBatch": ("RecordBatch", RecordBatch),
-    "RawRecordList": ("RecordBatch", RecordBatch),
-    "RawPayload": ("ApiPayload", ApiPayload),
+# Map of deprecated names to (new_location, deprecation_message)
+_DEPRECATED_NAMES: dict[str, tuple[str, str]] = {
+    "RawRecord": (
+        "Mapping[str, Any]",
+        "RawRecord is deprecated. Use Mapping[str, Any] directly or "
+        "bioetl.domain.data.Record protocol for typed access.",
+    ),
+    "RecordBatch": (
+        "bioetl.domain.data.RecordBatch",
+        "RecordBatch has moved to bioetl.domain.data. "
+        "Import from there: from bioetl.domain.data import RecordBatch",
+    ),
+    "RawRecordDict": (
+        "Mapping[str, Any]",
+        "RawRecordDict is deprecated. Use Mapping[str, Any] directly.",
+    ),
+    "RawRecordBatch": (
+        "bioetl.domain.data.RecordBatch",
+        "RawRecordBatch is deprecated. Use RecordBatch from bioetl.domain.data.",
+    ),
+    "RawRecordList": (
+        "bioetl.domain.data.RecordBatch",
+        "RawRecordList is deprecated. Use RecordBatch from bioetl.domain.data.",
+    ),
+    "RawPayload": (
+        "ApiPayload",
+        "RawPayload is deprecated. Use ApiPayload instead.",
+    ),
 }
 
 
 def __getattr__(name: str) -> TypeAlias:
     """Emit deprecation warning for legacy type alias access.
 
-    This is triggered for dynamic imports like:
-        getattr(types_module, "RawRecordDict")
-
-    Static imports (from bioetl.domain.types import RawRecordDict) use
-    the module-level assignments above, so deprecation warnings for those
-    are emitted from the ports modules where they're re-exported.
+    Provides backward compatibility for deprecated type aliases by returning
+    appropriate types while emitting deprecation warnings.
     """
     if name in _DEPRECATED_NAMES:
-        new_name, value = _DEPRECATED_NAMES[name]
+        new_location, message = _DEPRECATED_NAMES[name]
         warnings.warn(
-            f"{name} is deprecated, use {new_name} from bioetl.domain.types instead. "
-            "See migration guide in bioetl.domain.types module docstring.",
+            f"{message} See migration guide in bioetl.domain.types module docstring.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return value
+        # Return appropriate fallback types for backward compatibility
+        if name in ("RawRecord", "RawRecordDict"):
+            return dict[str, Any]
+        elif name in ("RecordBatch", "RawRecordBatch", "RawRecordList"):
+            # Import from data module for the actual type
+            from bioetl.domain.data import RecordBatch as _RecordBatch
+
+            return _RecordBatch
+        elif name == "RawPayload":
+            return ApiPayload
+
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
