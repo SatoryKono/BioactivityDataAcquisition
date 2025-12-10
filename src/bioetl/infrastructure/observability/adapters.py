@@ -13,6 +13,7 @@ from bioetl.domain.observability.contracts import (
     TracingPortABC,
 )
 from bioetl.infrastructure.observability import metrics
+from bioetl.infrastructure.settings.metrics import MetricName
 
 
 class StructuredLoggerImpl(LoggingPortABC):
@@ -72,12 +73,12 @@ class PrometheusMetricsPortImpl(MetricsPortABC):
 
     def __init__(self) -> None:
         self._counters: dict[str, Any] = {
-            "bioetl_client_request_total": metrics.CLIENT_REQUEST_TOTAL,
-            "bioetl_client_request_errors_total": metrics.CLIENT_REQUEST_ERRORS_TOTAL,
-            "bioetl_output_write_errors_total": metrics.OUTPUT_WRITE_ERRORS_TOTAL,
+            MetricName.CLIENT_REQUEST_TOTAL: metrics.CLIENT_REQUEST_TOTAL,
+            MetricName.CLIENT_REQUEST_ERRORS_TOTAL: metrics.CLIENT_REQUEST_ERRORS_TOTAL,
+            MetricName.OUTPUT_WRITE_ERRORS_TOTAL: metrics.OUTPUT_WRITE_ERRORS_TOTAL,
         }
         self._histograms: dict[str, Any] = {
-            "bioetl_client_request_duration_seconds": (
+            MetricName.CLIENT_REQUEST_DURATION_SECONDS: (
                 metrics.CLIENT_REQUEST_DURATION_SECONDS
             ),
         }

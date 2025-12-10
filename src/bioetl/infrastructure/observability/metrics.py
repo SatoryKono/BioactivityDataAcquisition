@@ -21,9 +21,14 @@ Examples:
 References:
     - https://prometheus.io/docs/practices/naming/
     - https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
+
+Note:
+    Metric names are centralized in infrastructure.settings.metrics.MetricName.
 """
 
 from prometheus_client import Counter, Histogram
+
+from bioetl.infrastructure.settings.metrics import MetricName
 
 __all__ = [
     # Stage metrics
@@ -42,13 +47,13 @@ __all__ = [
 # =============================================================================
 
 STAGE_DURATION_SECONDS = Histogram(
-    "bioetl_stage_duration_seconds",
+    MetricName.STAGE_DURATION_SECONDS.value,
     "Duration of pipeline stages in seconds.",
     ["pipeline", "provider", "entity", "stage", "outcome"],
 )
 
 STAGE_TOTAL = Counter(
-    "bioetl_stage_total",
+    MetricName.STAGE_TOTAL.value,
     "Total count of pipeline stage completions by outcome.",
     ["pipeline", "provider", "entity", "stage", "outcome"],
 )
@@ -58,19 +63,19 @@ STAGE_TOTAL = Counter(
 # =============================================================================
 
 CLIENT_REQUEST_TOTAL = Counter(
-    "bioetl_client_request_total",
+    MetricName.CLIENT_REQUEST_TOTAL.value,
     "Total client requests by provider and endpoint.",
     ["provider", "endpoint", "status"],
 )
 
 CLIENT_REQUEST_DURATION_SECONDS = Histogram(
-    "bioetl_client_request_duration_seconds",
+    MetricName.CLIENT_REQUEST_DURATION_SECONDS.value,
     "Duration of client requests in seconds.",
     ["provider", "endpoint", "status"],
 )
 
 CLIENT_REQUEST_ERRORS_TOTAL = Counter(
-    "bioetl_client_request_errors_total",
+    MetricName.CLIENT_REQUEST_ERRORS_TOTAL.value,
     "Total client request errors by provider and endpoint.",
     ["provider", "endpoint", "status"],
 )
@@ -80,7 +85,7 @@ CLIENT_REQUEST_ERRORS_TOTAL = Counter(
 # =============================================================================
 
 OUTPUT_WRITE_ERRORS_TOTAL = Counter(
-    "bioetl_output_write_errors_total",
+    MetricName.OUTPUT_WRITE_ERRORS_TOTAL.value,
     "Total number of failed output write attempts.",
     ["entity", "error_type"],
 )
