@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain.provider_registry import InMemoryProviderRegistry
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
