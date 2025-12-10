@@ -29,6 +29,7 @@ from bioetl.domain.configs.defaults import (
 
 # Bounded context configs
 from bioetl.domain.configs.execution import ExecutionConfig
+from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.normalization import NormalizationConfig
 
@@ -72,6 +73,7 @@ from bioetl.domain.configs._compat import __all__ as _COMPAT_ALL
 __all__ = [
     # Bounded context configs (new modular structure)
     "PipelineIdentityConfig",
+    "DataFlowConfig",
     "DataSourceConfig",
     "DataSinkConfig",
     "OutputOptionsConfig",

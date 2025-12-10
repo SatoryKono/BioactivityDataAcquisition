@@ -1,4 +1,10 @@
-"""Factories for constructing ChEMBL client stack."""
+"""Factories for constructing ChEMBL client stack.
+
+Naming convention:
+- create_*() - creates a new instance each time
+- get_*() - returns singleton/cached instance
+- build_*() - uses builder pattern
+"""
 
 from __future__ import annotations
 
@@ -9,8 +15,8 @@ from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.chembl.factories import (
-    default_chembl_client,
-    default_chembl_extraction_service,
+    create_chembl_client,
+    create_chembl_extraction_service,
 )
 
 __all__ = ["create_client", "create_extraction_service"]
@@ -26,7 +32,7 @@ def create_client(
 
     if logger is None or metrics is None:
         raise ValueError("logger and metrics are required")
-    return default_chembl_client(config, logger=logger, metrics=metrics)
+    return create_chembl_client(config, logger=logger, metrics=metrics)
 
 
 def create_extraction_service(
@@ -46,7 +52,7 @@ def create_extraction_service(
             )
         client = create_client(config, logger=logger, metrics=metrics)
 
-    return default_chembl_extraction_service(
+    return create_chembl_extraction_service(
         config,
         logger=logger,
         metrics=metrics,

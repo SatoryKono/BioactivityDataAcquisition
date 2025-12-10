@@ -2,9 +2,15 @@
 
 All factories require explicit dependencies - no implicit defaults.
 Use CompositionRoot for creating instances with default implementations.
+
+Naming convention:
+- create_*() - creates a new instance each time
+- get_*() - returns singleton/cached instance
+- build_*() - uses builder pattern with HttpClientConfig
 """
 
 import os
+import warnings
 from typing import Any
 
 import requests
@@ -79,12 +85,12 @@ def build_rate_limiter(
     return TokenBucketRateLimiterImpl(rate, capacity, logger)
 
 
-def default_rate_limiter(
+def create_rate_limiter(
     logger: LoggingPortABC,
     rate: float = _DEFAULT_HTTP_CONFIG.rate_limit_per_sec,
     capacity: float | None = None,
 ) -> RateLimiterABC:
-    """Create the default rate limiter with token bucket semantics.
+    """Create a rate limiter with token bucket semantics.
 
     Args:
         logger: Required logger instance
@@ -98,43 +104,42 @@ def default_rate_limiter(
     return TokenBucketRateLimiterImpl(rate, resolved_capacity, logger)
 
 
-def default_cache() -> CacheABC[Any]:
-    """Return the in-memory cache implementation."""
+def create_cache() -> CacheABC[Any]:
+    """Create a new in-memory cache instance."""
 
     return MemoryCacheImpl()
 
 
-def default_secret_provider() -> SecretProviderABC:
-    """Expose the environment-backed secret provider implementation."""
+def create_secret_provider() -> SecretProviderABC:
+    """Create an environment-backed secret provider instance."""
 
     return EnvSecretProviderImpl()
 
 
-def default_request_builder(*, base_url: str | None = None) -> RequestBuilderABC:
-    """
-    Stub default request builder factory.
+def create_request_builder(*, base_url: str | None = None) -> RequestBuilderABC:
+    """Create a new request builder instance.
 
     Requires explicit base_url; raises if not provided to avoid silent misuse.
     """
 
     if not base_url:
-        raise NotImplementedError("default_request_builder requires base_url")
+        raise NotImplementedError("create_request_builder requires base_url")
     return ChemblRequestBuilderImpl(base_url)
 
 
-def default_response_parser() -> ResponseParserPortABC:
-    """Return the default response parser implementation."""
+def create_response_parser() -> ResponseParserPortABC:
+    """Create a new response parser instance."""
 
     return ChemblGenericResponseParser()
 
 
-def default_paginator() -> PaginatorABC:
-    """Return the default paginator implementation."""
+def create_paginator() -> PaginatorABC:
+    """Create a new paginator instance."""
 
     return ChemblPaginatorImpl()
 
 
-def default_api_client(
+def create_api_client(
     provider: str,
     config: HttpClientConfig,
     logger: LoggingPortABC,
@@ -142,7 +147,7 @@ def default_api_client(
     *,
     base_client: Any | None = None,
 ) -> _HttpTransport:
-    """Create the default API client without middleware indirection.
+    """Create a new API client without middleware indirection.
 
     Args:
         provider: Provider identifier
@@ -196,3 +201,89 @@ def build_http_client(
         metrics=metrics,
         error_handler=resolved_error_handler,
     )
+
+
+# ---------------------------------------------------------------------------
+# Deprecated aliases for backward compatibility
+# ---------------------------------------------------------------------------
+
+
+def default_rate_limiter(
+    logger: LoggingPortABC,
+    rate: float = _DEFAULT_HTTP_CONFIG.rate_limit_per_sec,
+    capacity: float | None = None,
+) -> RateLimiterABC:
+    """DEPRECATED: Use create_rate_limiter() instead."""
+    warnings.warn(
+        "default_rate_limiter is deprecated, use create_rate_limiter instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_rate_limiter(logger, rate, capacity)
+
+
+def default_cache() -> CacheABC[Any]:
+    """DEPRECATED: Use create_cache() instead."""
+    warnings.warn(
+        "default_cache is deprecated, use create_cache instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_cache()
+
+
+def default_secret_provider() -> SecretProviderABC:
+    """DEPRECATED: Use create_secret_provider() instead."""
+    warnings.warn(
+        "default_secret_provider is deprecated, use create_secret_provider instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_secret_provider()
+
+
+def default_request_builder(*, base_url: str | None = None) -> RequestBuilderABC:
+    """DEPRECATED: Use create_request_builder() instead."""
+    warnings.warn(
+        "default_request_builder is deprecated, use create_request_builder instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_request_builder(base_url=base_url)
+
+
+def default_response_parser() -> ResponseParserPortABC:
+    """DEPRECATED: Use create_response_parser() instead."""
+    warnings.warn(
+        "default_response_parser is deprecated, use create_response_parser instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_response_parser()
+
+
+def default_paginator() -> PaginatorABC:
+    """DEPRECATED: Use create_paginator() instead."""
+    warnings.warn(
+        "default_paginator is deprecated, use create_paginator instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_paginator()
+
+
+def default_api_client(
+    provider: str,
+    config: HttpClientConfig,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
+    *,
+    base_client: Any | None = None,
+) -> _HttpTransport:
+    """DEPRECATED: Use create_api_client() instead."""
+    warnings.warn(
+        "default_api_client is deprecated, use create_api_client instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_api_client(provider, config, logger, metrics, base_client=base_client)

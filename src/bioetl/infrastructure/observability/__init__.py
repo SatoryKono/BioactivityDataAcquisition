@@ -1,4 +1,4 @@
-"""Observability adapters and default factory exports."""
+"""Observability adapters and factory exports."""
 
 from bioetl.infrastructure.observability.adapters import (
     PrometheusMetricsPortImpl,
@@ -6,6 +6,10 @@ from bioetl.infrastructure.observability.adapters import (
     TracingAdapterImpl,
 )
 from bioetl.infrastructure.observability.factories import (
+    create_logging_port,
+    create_metrics_port,
+    create_tracing_port,
+    # Deprecated aliases for backward compatibility
     default_logging_port,
     default_metrics_port,
     default_tracing_port,
@@ -15,6 +19,11 @@ __all__ = [
     "StructuredLoggerImpl",
     "PrometheusMetricsPortImpl",
     "TracingAdapterImpl",
+    # New naming convention
+    "create_logging_port",
+    "create_metrics_port",
+    "create_tracing_port",
+    # Deprecated aliases
     "default_logging_port",
     "default_metrics_port",
     "default_tracing_port",

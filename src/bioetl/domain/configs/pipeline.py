@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 
 # Import bounded context configs
+from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.normalization import NormalizationConfig
 from bioetl.domain.configs.sink import DataSinkConfig, OutputOptionsConfig
@@ -537,10 +538,13 @@ class PipelineConfig(BaseModel):
         - Removed 20+ backward compatibility property accessors
         - Only convenience accessors for entity and provider remain
 
+    Breaking Changes (v2.1):
+        - source and sink are now grouped into data_flow section
+        - Backward compatibility via .source and .sink properties
+
     Sections:
         identity: Pipeline identification (pipeline_id, provider, entity, primary_key)
-        source: Data source settings (input_mode, input_path, batch_size, csv)
-        sink: Data sink settings (output_path, dry_run, output options)
+        data_flow: Data flow settings (source + sink aggregate)
         stages: Pipeline stage flags (extract, transform, load)
         runtime: Execution settings (pagination, http, storage)
         observability: Logging and metrics
@@ -548,12 +552,15 @@ class PipelineConfig(BaseModel):
         features: Feature flags
         transform: Transform stage settings
         provider_config: Provider-specific configuration
+
+    Backward Compatibility:
+        .source -> data_flow.source
+        .sink -> data_flow.sink
     """
 
     # Core bounded context configs
     identity: PipelineIdentityConfig
-    source: DataSourceConfig
-    sink: DataSinkConfig
+    data_flow: DataFlowConfig
     stages: PipelineStagesConfig = Field(default_factory=PipelineStagesConfig)
 
     # Existing structured sections
@@ -570,6 +577,28 @@ class PipelineConfig(BaseModel):
     fields: list[dict[str, Any]] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="forbid")
+
+    # =========================================================================
+    # Backward compatibility properties for data_flow decomposition
+    # =========================================================================
+
+    @property
+    def source(self) -> DataSourceConfig:
+        """Access source from data_flow section.
+
+        Backward compatibility property for v2.0 code that accessed
+        config.source directly.
+        """
+        return self.data_flow.source
+
+    @property
+    def sink(self) -> DataSinkConfig:
+        """Access sink from data_flow section.
+
+        Backward compatibility property for v2.0 code that accessed
+        config.sink directly.
+        """
+        return self.data_flow.sink
 
     # =========================================================================
     # Convenience accessors (minimal, no backward compatibility)
@@ -739,6 +768,7 @@ __all__ = [
     "PipelineConfig",
     # Bounded context configs (re-exported for convenience)
     "PipelineIdentityConfig",
+    "DataFlowConfig",
     "DataSourceConfig",
     "DataSinkConfig",
     "OutputOptionsConfig",
