@@ -11,11 +11,11 @@ from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.application.sources import ApiRecordSource
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.providers import ProviderDefinition
-from bioetl.application.sources import ApiRecordSource
 from bioetl.domain.record_source import RecordSourceABC
 
 

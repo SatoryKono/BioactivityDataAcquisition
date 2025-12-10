@@ -201,5 +201,3 @@ def build_http_client(
         logger=logger,
         metrics=metrics,
     )
-
-

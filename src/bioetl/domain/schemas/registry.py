@@ -4,8 +4,8 @@ Registry implementation for schema objects (technology-agnostic).
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
+import warnings
 
 from bioetl.domain.schemas.generator import generate_schema_from_column_order
 from bioetl.domain.validation import SchemaProviderABC, schema_type

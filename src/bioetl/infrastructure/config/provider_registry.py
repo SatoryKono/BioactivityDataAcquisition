@@ -10,8 +10,8 @@ It combines functionality from:
 
 from __future__ import annotations
 
-import importlib
 from functools import lru_cache
+import importlib
 from pathlib import Path
 from typing import Any
 
@@ -36,7 +36,9 @@ from bioetl.infrastructure.observability.factories import default_logging_port
 
 DEFAULT_CONFIGS_ROOT = Path("configs")
 DEFAULT_PROVIDERS_REGISTRY_PATH = DEFAULT_CONFIGS_ROOT / "providers.yaml"
-DEFAULT_PROVIDERS_CONFIG_PATH = DEFAULT_PROVIDERS_REGISTRY_PATH  # Alias for compatibility
+DEFAULT_PROVIDERS_CONFIG_PATH = (
+    DEFAULT_PROVIDERS_REGISTRY_PATH  # Alias for compatibility
+)
 
 
 # ---------------------------------------------------------------------------
