@@ -95,6 +95,8 @@ class PipelineContainer(PipelineContainerABC):
                 self._config,
                 self._get_provider_definition(),
                 self._resolve_provider_config,
+                logger=self._logger,
+                metrics=self._metrics_port,
             )
         return self._service_factory
 

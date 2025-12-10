@@ -69,6 +69,8 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         loader=container.get_loader(),
         extraction_service=extraction_service,
         hash_service=container.get_hash_service(),
+        index_generator=container.get_index_generator(),
+        timestamp_provider=container.get_timestamp_provider(),
         metadata_builder=container.get_metadata_builder(),
         record_source=record_source,
         normalization_service=container.get_normalization_service(),

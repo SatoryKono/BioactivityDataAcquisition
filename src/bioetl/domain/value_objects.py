@@ -30,6 +30,7 @@ class RunId:
 
     @property
     def value(self) -> str:
+        """String representation of RunId."""
         return self._value
 
     def __str__(self) -> str:
@@ -78,6 +79,7 @@ class EntityName:
 
     @property
     def value(self) -> str:
+        """String representation of EntityName."""
         return self._value
 
     def __str__(self) -> str:
@@ -119,6 +121,7 @@ class ChemblId:
 
     @property
     def value(self) -> str:
+        """String representation of ChemblId."""
         return self._value
 
     @property
