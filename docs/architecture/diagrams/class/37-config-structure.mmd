@@ -21,9 +21,9 @@ classDiagram
 
     class RuntimeConfig {
         pagination : PaginationConfig
-        client : ClientConfig
+        http : HttpClientConfig
         storage : StorageConfig
-        csv_options : CsvInputConfig
+        csv : CsvInputConfig
     }
 
     class ObservabilityConfig {
@@ -48,12 +48,16 @@ classDiagram
         max_pages : int?
     }
 
-    class ClientConfig {
-        timeout : float
-        max_retries : int
-        rate_limit : float
+    class HttpClientConfig {
+        timeout_sec : PositiveFloat
+        max_retries : NonNegativeInt
+        retry_on_status : tuple[int, ...]
         backoff_factor : float
+        backoff_max : float
+        rate_limit_per_sec : PositiveFloat
+        circuit_breaker_enabled : bool
         circuit_breaker_threshold : int
+        circuit_breaker_recovery_sec : float
     }
 
     class StorageConfig {
@@ -73,7 +77,7 @@ classDiagram
     PipelineConfig --> QualityConfig
     PipelineConfig --> FeatureFlagsConfig
     RuntimeConfig --> PaginationConfig
-    RuntimeConfig --> ClientConfig
+    RuntimeConfig --> HttpClientConfig
     RuntimeConfig --> StorageConfig
     QualityConfig --> HashingConfig
 

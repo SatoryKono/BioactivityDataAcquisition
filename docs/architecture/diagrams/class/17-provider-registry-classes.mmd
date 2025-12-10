@@ -6,6 +6,16 @@ classDiagram-v2
 
 class ProviderId
 class BaseProviderConfig
+class HttpClientConfig {
+  +timeout_sec: PositiveFloat
+  +max_retries: NonNegativeInt
+  +rate_limit_per_sec: PositiveFloat
+  +backoff_factor: float
+  +circuit_breaker_enabled: bool
+}
+class ProviderHttpConfig {
+  +base_url: str
+}
 class ProviderComponents {
   +create_client(config)
   +create_extraction_service(config, client)
@@ -16,6 +26,7 @@ class ProviderDefinition {
   +id: ProviderId
   +config_type: type[BaseProviderConfig]
   +components: ProviderComponents
+  +http: HttpClientConfig?
 }
 class ProviderRegistryABC
 class InMemoryProviderRegistry {
@@ -42,11 +53,15 @@ class ProviderRegistryEntryConfig {
   +factory: str
   +active: bool
   +description: str?
+  +http: ProviderHttpConfig?
 }
 
 ProviderDefinition --> ProviderId
 ProviderDefinition --> BaseProviderConfig
 ProviderDefinition --> ProviderComponents
+ProviderDefinition --> HttpClientConfig
+ProviderHttpConfig --|> HttpClientConfig
+ProviderRegistryEntryConfig --> ProviderHttpConfig
 ProviderRegistryABC <|-- InMemoryProviderRegistry
 ProviderRegistryError <|-- ProviderNotRegisteredError
 ProviderRegistryError <|-- ProviderAlreadyRegisteredError
@@ -60,6 +75,8 @@ ProviderRegistryEntryConfig --> ProviderDefinition : factory()
 class ProviderId domainPrimary
 class ProviderDefinition domainPrimary
 class BaseProviderConfig domainSecondary
+class HttpClientConfig domainSecondary
+class ProviderHttpConfig domainSecondary
 class ProviderComponents domainSecondary
 class ProviderRegistryABC interface
 class InMemoryProviderRegistry domainSecondary
