@@ -174,12 +174,16 @@ class PipelineContainer(PipelineContainerABC):
         *,
         limit: int | None = None,
         logger: LoggingPortABC | None = None,
+        model_cls: type | None = None,
+        batch_adapter: Any | None = None,
     ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration."""
         return self._get_record_source_factory().create_record_source(
             extraction_service,
             limit=limit,
             logger=logger or self.get_logger(),
+            model_cls=model_cls,
+            batch_adapter=batch_adapter,
         )
 
     def get_extraction_service(self) -> Any:
