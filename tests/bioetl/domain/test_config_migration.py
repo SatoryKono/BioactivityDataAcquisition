@@ -73,7 +73,7 @@ class TestV1Migration:
             "storage": {"output_path": "/data/output"},
         }
         result = ConfigMigrator.migrate(data)
-        assert result["sink"]["output_path"] == "/data/output"
+        assert result["data_flow"]["sink"]["output_path"] == "/data/output"
 
     def test_extracts_batch_size_from_sources(self) -> None:
         """batch_size is extracted from sources section."""
@@ -83,7 +83,7 @@ class TestV1Migration:
             "sources": {"chembl": {"batch_size": 50}},
         }
         result = ConfigMigrator.migrate(data)
-        assert result["source"]["batch_size"] == 50
+        assert result["data_flow"]["source"]["batch_size"] == 50
 
     def test_extracts_provider_config_from_sources(self) -> None:
         """provider_config is extracted from sources section."""
@@ -147,7 +147,7 @@ class TestV2Normalization:
         assert result["identity"]["entity"] == "test"
 
     def test_packs_source_section(self) -> None:
-        """Flat source fields are packed into source section."""
+        """Flat source fields are packed into data_flow.source section."""
         data = {
             "identity": {"provider": "dummy", "entity": "test", "pipeline_id": "test"},
             "input_mode": "csv",
@@ -155,20 +155,20 @@ class TestV2Normalization:
             "batch_size": 100,
         }
         result = ConfigMigrator.migrate(data)
-        assert result["source"]["input_mode"] == "csv"
-        assert result["source"]["input_path"] == "/tmp/input.csv"
-        assert result["source"]["batch_size"] == 100
+        assert result["data_flow"]["source"]["input_mode"] == "csv"
+        assert result["data_flow"]["source"]["input_path"] == "/tmp/input.csv"
+        assert result["data_flow"]["source"]["batch_size"] == 100
 
     def test_packs_sink_section(self) -> None:
-        """Flat sink fields are packed into sink section."""
+        """Flat sink fields are packed into data_flow.sink section."""
         data = {
             "identity": {"provider": "dummy", "entity": "test", "pipeline_id": "test"},
             "output_path": "/tmp/output",
             "dry_run": True,
         }
         result = ConfigMigrator.migrate(data)
-        assert result["sink"]["output_path"] == "/tmp/output"
-        assert result["sink"]["dry_run"] is True
+        assert result["data_flow"]["sink"]["output_path"] == "/tmp/output"
+        assert result["data_flow"]["sink"]["dry_run"] is True
 
     def test_packs_runtime_section(self) -> None:
         """Flat runtime fields are packed into runtime section."""
@@ -215,13 +215,13 @@ class TestV2Normalization:
         }
 
     def test_migrates_csv_options_to_source(self) -> None:
-        """csv_options at root is moved to source.csv."""
+        """csv_options at root is moved to data_flow.source.csv."""
         data = {
             "identity": {"provider": "dummy", "entity": "test", "pipeline_id": "test"},
             "csv_options": {"delimiter": ";"},
         }
         result = ConfigMigrator.migrate(data)
-        assert result["source"]["csv"] == {"delimiter": ";"}
+        assert result["data_flow"]["source"]["csv"] == {"delimiter": ";"}
 
     def test_extracts_stages_from_pipeline_dict(self) -> None:
         """stages are extracted from pipeline dict."""
@@ -317,16 +317,31 @@ class TestIdempotency:
         assert result1 == result2
 
     def test_already_migrated_v2_unchanged(self) -> None:
-        """v2 config is not modified."""
+        """v2 config with data_flow is not modified."""
         data = {
             "identity": {"pipeline_id": "test", "provider": "dummy", "entity": "test"},
-            "source": {"input_mode": "csv"},
-            "sink": {"output_path": "/tmp/output"},
+            "data_flow": {
+                "source": {"input_mode": "csv"},
+                "sink": {"output_path": "/tmp/output"},
+            },
             "runtime": {"pagination": {"limit": 100}},
         }
         original = deepcopy(data)
         result = ConfigMigrator.migrate(data)
         assert result == original
+
+    def test_legacy_source_sink_migrated_to_data_flow(self) -> None:
+        """Legacy source/sink at root are migrated to data_flow."""
+        data = {
+            "identity": {"pipeline_id": "test", "provider": "dummy", "entity": "test"},
+            "source": {"input_mode": "csv"},
+            "sink": {"output_path": "/tmp/output"},
+        }
+        result = ConfigMigrator.migrate(data)
+        assert result["data_flow"]["source"]["input_mode"] == "csv"
+        assert result["data_flow"]["sink"]["output_path"] == "/tmp/output"
+        assert "source" not in result
+        assert "sink" not in result
 
     def test_v2_does_not_emit_deprecation_warning(self) -> None:
         """v2 format does not trigger deprecation warning."""
@@ -367,15 +382,25 @@ class TestEdgeCases:
         assert "id" in result
         assert "provider" in result
 
-    def test_preserves_existing_source_section(self) -> None:
-        """Existing source section is not overwritten."""
+    def test_preserves_existing_data_flow_source_section(self) -> None:
+        """Existing data_flow.source section is not overwritten by flat fields."""
         data = {
             "identity": {"pipeline_id": "test", "provider": "dummy", "entity": "test"},
-            "source": {"input_mode": "existing"},
+            "data_flow": {"source": {"input_mode": "existing"}},
             "input_mode": "should-be-ignored",
         }
         result = ConfigMigrator.migrate(data)
-        assert result["source"]["input_mode"] == "existing"
+        assert result["data_flow"]["source"]["input_mode"] == "existing"
+
+    def test_legacy_source_section_migrated_to_data_flow(self) -> None:
+        """Legacy source section at root is migrated to data_flow.source."""
+        data = {
+            "identity": {"pipeline_id": "test", "provider": "dummy", "entity": "test"},
+            "source": {"input_mode": "existing"},
+        }
+        result = ConfigMigrator.migrate(data)
+        assert result["data_flow"]["source"]["input_mode"] == "existing"
+        assert "source" not in result
 
     def test_handles_sources_with_single_provider(self) -> None:
         """Single provider in sources is extracted correctly."""
@@ -387,7 +412,7 @@ class TestEdgeCases:
         }
         result = ConfigMigrator.migrate(data)
         assert result["provider_config"]["base_url"] == "https://example.com"
-        assert result["source"]["batch_size"] == 10
+        assert result["data_flow"]["source"]["batch_size"] == 10
 
     def test_handles_null_primary_key(self) -> None:
         """Null primary_key is coerced to empty list."""
