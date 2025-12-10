@@ -7,3 +7,4 @@
 | [0003](0003-provider-registry-via-config.md) | Provider Registry Via Config | Accepted | Drive provider registration through declarative YAML config with canonical IDs and validation. |
 | [0004](0004-pipeline-hooks-for-observability.md) | Pipeline Hooks For Observability | Accepted | Provide structured lifecycle hooks in pipeline runners for logging, metrics, and trace propagation. |
 | [0005](0005-provider-loader-port.md) | Provider Loader Port | Accepted | Introduce a domain port for provider loading with infra adapter and feature flag for rollout. |
+| [0006](0006-infrastructure-domain-isolation.md) | Infrastructure-Domain Isolation | Accepted | Enforce strict layer boundaries: infrastructure returns generic types, application handles mapping. |
