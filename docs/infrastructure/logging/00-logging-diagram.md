@@ -11,17 +11,17 @@ graph TB
     end
     
     subgraph "Implementations"
-        UL[UnifiedLoggerImpl<br/>-_logger: BoundLogger<br/>implements LoggingPortABC]
+        SL[StructuredLoggerImpl<br/>-_logger: BoundLogger<br/>implements LoggingPortABC]
         TP[TqdmProgressReporterImpl<br/>-_pbar: tqdm<br/>implements ProgressReporterABC]
     end
     
-    LA -.->|implements| UL
+    LA -.->|implements| SL
     PA -.->|implements| TP
     
     style LA fill:#e1f5ff,stroke:#01579b,stroke-width:2px
     style PA fill:#e1f5ff,stroke:#01579b,stroke-width:2px
     style TA fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    style UL fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style SL fill:#fff3e0,stroke:#e65100,stroke-width:2px
     style TP fill:#fff3e0,stroke:#e65100,stroke-width:2px
 ```
 
@@ -41,19 +41,19 @@ graph TB
     end
     
     subgraph "Implementations"
-        UL[UnifiedLoggerImpl]
+        SL[StructuredLoggerImpl]
         TP[TqdmProgressReporterImpl]
     end
-    
-    DL --> UL
+
+    DL --> SL
     DPR --> TP
-    UL -.-> LA
+    SL -.-> LA
     TP -.-> PA
     
     style LA fill:#e1f5ff,stroke:#01579b
     style PA fill:#e1f5ff,stroke:#01579b
     style TA fill:#e1f5ff,stroke:#01579b
-    style UL fill:#fff3e0,stroke:#e65100
+    style SL fill:#fff3e0,stroke:#e65100
     style TP fill:#fff3e0,stroke:#e65100
 ```
 
@@ -61,11 +61,12 @@ graph TB
 
 ```text
 src/bioetl/infrastructure/logging/
-├── contracts.py          # ABC interfaces
 ├── factories.py         # Default factory functions
 └── impl/
-    ├── unified_logger.py        # LoggingPortABC implementation
     └── progress_reporter.py     # ProgressReporterABC implementation
+
+Note: LoggingPortABC is implemented by StructuredLoggerImpl in
+src/bioetl/infrastructure/observability/adapters.py
 ```
 
 ## Как просмотреть диаграмму
