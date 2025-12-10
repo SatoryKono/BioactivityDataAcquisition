@@ -48,6 +48,9 @@ def pipeline():
 
     normalization_service = DefaultNormalizationTransformerImpl(config)
 
+    record_source = MagicMock()
+    record_source.iter_records.return_value = iter([])
+
     return ChemblPipelineBase(
         config=config,
         logger=MagicMock(),
@@ -56,6 +59,7 @@ def pipeline():
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
         normalization_service=normalization_service,
+        record_source=record_source,
     )
 
 
