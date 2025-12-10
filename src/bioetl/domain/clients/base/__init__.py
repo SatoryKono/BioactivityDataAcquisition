@@ -8,7 +8,6 @@ from bioetl.domain.clients.base.contracts import (
     ResponseParserABC,
     RetryPolicyABC,
     SecretProviderABC,
-    SideInputProviderABC,
 )
 
 __all__ = [
@@ -19,5 +18,4 @@ __all__ = [
     "ResponseParserABC",
     "RetryPolicyABC",
     "SecretProviderABC",
-    "SideInputProviderABC",
 ]
