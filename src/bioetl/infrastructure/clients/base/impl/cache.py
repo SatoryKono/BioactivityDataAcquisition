@@ -1,11 +1,7 @@
-"""In-memory and file-based cache implementations with TTL support."""
+"""In-memory cache implementation with TTL support."""
 
 from __future__ import annotations
 
-import hashlib
-import os
-from pathlib import Path
-import pickle
 import time
 from typing import TypeVar
 
@@ -55,60 +51,3 @@ class MemoryCacheImpl(CacheABC[T]):
     def clear(self) -> None:
         """Clear entire in-memory cache."""
         self._store.clear()
-
-
-class FileCacheImpl(CacheABC[T]):
-    """
-    Файловый кэш с TTL.
-    """
-
-    def __init__(self, cache_dir: str) -> None:
-        self._cache_dir = Path(cache_dir)
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-
-    def get(self, key: str) -> T | None:
-        """Load cached value from disk if present and valid."""
-        cache_file = self._key_to_path(key)
-        if not cache_file.exists():
-            return None
-
-        try:
-            with cache_file.open("rb") as fh:
-                payload: tuple[T, float | None] = pickle.load(fh)
-        except (OSError, pickle.PickleError):
-            self.invalidate(key)
-            return None
-
-        value, expiry_timestamp = payload
-        if _is_expired(expiry_timestamp):
-            self.invalidate(key)
-            return None
-
-        return value
-
-    def set(self, key: str, value: T, ttl: int | None = None) -> None:
-        """Persist value to disk using atomic write."""
-        cache_file = self._key_to_path(key)
-        tmp_file = cache_file.with_suffix(cache_file.suffix + ".tmp")
-        payload: tuple[T, float | None] = (value, _get_expiry_timestamp(ttl))
-
-        with tmp_file.open("wb") as fh:
-            pickle.dump(payload, fh)
-
-        os.replace(tmp_file, cache_file)
-
-    def invalidate(self, key: str) -> None:
-        """Delete cached file if it exists."""
-        cache_file = self._key_to_path(key)
-        if cache_file.exists():
-            cache_file.unlink(missing_ok=True)
-
-    def clear(self) -> None:
-        """Remove all cache files in directory."""
-        for cache_file in self._cache_dir.glob("*.cache"):
-            cache_file.unlink(missing_ok=True)
-
-    def _key_to_path(self, key: str) -> Path:
-        digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
-        safe_name = f"{digest}.cache"
-        return self._cache_dir / safe_name
