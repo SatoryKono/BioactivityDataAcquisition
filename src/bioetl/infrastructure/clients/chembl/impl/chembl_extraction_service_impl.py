@@ -45,10 +45,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
     def get_release_version(self) -> str:
         """
-        Get the ChEMBL release version from metadata.
+        Get the raw ChEMBL release version from metadata.
 
         Returns:
-            str: The release version string (e.g., 'chembl_34').
+            str: The raw release version string (e.g., '34', '35').
+                 Returns 'unknown' if metadata is unavailable.
+
+        Note:
+            This returns raw version without 'chembl_' prefix.
+            Use domain.services.version_formatter.format_chembl_version()
+            in application layer for formatted version.
         """
         if self._version_cache:
             return self._version_cache
@@ -57,13 +63,13 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             meta = self.client.metadata()
             # Expecting {'chembl_release': '34', ...}
             if meta and "chembl_release" in meta:
-                self._version_cache = f"chembl_{meta['chembl_release']}"
+                self._version_cache = str(meta["chembl_release"])
             else:
-                self._version_cache = "chembl_unknown"
+                self._version_cache = "unknown"
         except Exception as e:
             if self.logger:
                 self.logger.warning(f"Failed to fetch metadata: {e}")
-            self._version_cache = "chembl_unknown"
+            self._version_cache = "unknown"
 
         return self._version_cache
 
