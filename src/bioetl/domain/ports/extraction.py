@@ -117,7 +117,7 @@ class ExtractionServiceABC(RecordFetcherABC):
         """
 
     @abstractmethod
-    def serialize_records(self, entity: str, records: list[object]) -> RawRecordBatch:
+    def serialize_records(self, entity: str, records: list[object]) -> RecordBatch:
         """Serialize records for storage or further processing.
 
         Args:
@@ -207,7 +207,7 @@ def from_raw_records(records: list["SourceRecord"]) -> RecordBatch:
 # =============================================================================
 
 
-def __getattr__(name: str) -> type:
+def __getattr__(name: str) -> object:
     """Emit deprecation warning for legacy type alias imports.
 
     Enables backward-compatible imports like:
@@ -234,7 +234,7 @@ __all__ = [
     "RawRecord",
     "RecordBatch",
     "ApiPayload",
-    # Deprecated type aliases (for backward compatibility)
+    # Deprecated type aliases (for backward compatibility, available via __getattr__)
     "RawRecordDict",
     "RawRecordBatch",
     # Abstract base classes
