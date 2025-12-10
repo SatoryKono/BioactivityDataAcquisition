@@ -43,7 +43,7 @@ end
 class Domain group;
 
 subgraph Infrastructure["Infrastructure Dependencies"]
-    ProviderRegistry["ProviderRegistry + Loader\nconfigs/providers.yaml\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry + Loader\nconfigs/providers.yaml\ninfrastructure.config.provider_registry"]:::componentSecondary
     Clients["ChEMBL Client Stack\nUnifiedAPIClient + ChemblDataClientHTTPImpl"]:::componentSecondary
     RecordSources["Record Sources\nApiRecordSource / CsvRecordSourceImpl / IdListRecordSourceImpl"]:::componentSecondary
     Output["UnifiedOutputWriter\nCSV writer + MetadataWriter + QC"]:::componentSecondary

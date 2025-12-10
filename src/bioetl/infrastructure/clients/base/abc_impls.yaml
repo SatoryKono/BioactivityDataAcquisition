@@ -12,9 +12,9 @@ CacheABC:
     Memory: bioetl.infrastructure.clients.base.impl.cache.MemoryCacheImpl
 
 ProviderRegistryLoaderABC:
-  default_factory: bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader
+  default_factory: bioetl.infrastructure.config.provider_registry.default_provider_registry_loader
   implementations:
-    Default: bioetl.infrastructure.clients.provider_registry_loader.ProviderRegistryLoader
+    Default: bioetl.infrastructure.config.provider_registry.ProviderRegistryLoader
 
 LoggingPortABC:
   default_factory: bioetl.infrastructure.observability.factories.default_logging_port
