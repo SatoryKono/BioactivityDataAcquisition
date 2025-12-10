@@ -16,7 +16,7 @@ def test_parse_activities():
         ],
         "page_meta": {"limit": 20},
     }
-    records = parser.parse_response(response)
+    records = parser.parse(response)
     assert len(records) == 2
     assert isinstance(records[0], ActivityRawModel)
     assert records[0].activity_id == "1"
@@ -25,7 +25,7 @@ def test_parse_activities():
 def test_parse_empty():
     parser = ChemblResponseParserImpl()
     response = {"page_meta": {}}
-    records = parser.parse_response(response)
+    records = parser.parse(response)
     assert records == []
 
 
@@ -34,7 +34,7 @@ def test_parse_invalid_payload():
     response = {"activities": [{"activity_id": 1}]}
 
     with pytest.raises(ValidationError):
-        parser.parse_response(response)
+        parser.parse(response)
 
 
 def test_extract_metadata():

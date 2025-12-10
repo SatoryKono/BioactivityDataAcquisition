@@ -1,17 +1,13 @@
-"""
-Unified output writer implementation.
-"""
+"""Unified loader implementation for pipeline outputs."""
 
 from pathlib import Path
+from typing import Protocol
 
 import pandas as pd
 
 from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
     OutputFrameConverterABC,
-    OutputWriterABC,
     QualityReportABC,
-    WriterABC,
     WriteResult,
 )
 from bioetl.domain.configs import DeterminismConfig, QcConfig
@@ -24,7 +20,23 @@ from bioetl.infrastructure.output.column_order import apply_column_order
 from bioetl.infrastructure.output.metadata import build_run_metadata
 
 
-class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
+class _DataWriter(Protocol):
+    def write(
+        self,
+        df: pd.DataFrame,
+        path: Path,
+        *,
+        column_order: list[str] | None = None,
+    ) -> WriteResult:
+        ...
+
+
+class _MetadataWriter(Protocol):
+    def write_meta(self, meta: dict, path: Path) -> None:
+        ...
+
+
+class UnifiedLoaderImpl(LoaderABC):
     """
     Фасад для записи результатов пайплайна.
 
@@ -36,8 +48,8 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
 
     def __init__(
         self,
-        writer: WriterABC,
-        metadata_writer: MetadataWriterABC,
+        writer: _DataWriter,
+        metadata_writer: _MetadataWriter,
         quality_reporter: QualityReportABC,
         config: DeterminismConfig,
         qc_config: QcConfig | None = None,
@@ -62,8 +74,8 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
-        """Alias for write_result to implement LoaderABC."""
-        return self.write_result(
+        """Alias for internal write logic to implement LoaderABC."""
+        return self._write_result(
             df=df,
             output_path=output_path,
             entity_name=context.entity_name,
@@ -71,7 +83,16 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
             column_order=column_order,
         )
 
-    def write_result(
+    def write_metadata(self, meta: dict, path: Path) -> None:
+        """Записывает метаданные детерминированно (atomic)."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._metadata_writer.write_meta(meta, path)
+
+    def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
+        """Записывает предоставленный QC-отчет детерминированно."""
+        self._write_qc_csv(path, df)
+
+    def _write_result(
         self,
         df: pd.DataFrame,
         output_path: Path,
@@ -141,7 +162,7 @@ class UnifiedOutputWriterImpl(OutputWriterABC, LoaderABC):
                 qc_checksums=qc_checksums,
                 qc_config=self._qc_config,
             )
-            self._metadata_writer.write_meta(meta, output_path / "meta.yaml")
+            self.write_metadata(meta, output_path / "meta.yaml")
 
             return final_result
         except Exception as exc:

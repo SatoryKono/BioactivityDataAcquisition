@@ -8,7 +8,6 @@ live in the domain layer.
 from bioetl.domain.observability.contracts import (
     LoggingPortABC,
     MetricsPortABC,
-    PipelineMetricsPortABC,
     ProgressReporterABC,
     TracingPortABC,
 )
@@ -17,6 +16,5 @@ __all__ = [
     "LoggingPortABC",
     "TracingPortABC",
     "MetricsPortABC",
-    "PipelineMetricsPortABC",
     "ProgressReporterABC",
 ]

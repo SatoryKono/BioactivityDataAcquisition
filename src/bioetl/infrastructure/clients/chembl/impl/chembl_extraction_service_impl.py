@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Iterable
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.extraction import RecordFetcherABC, VersionProviderABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.observability.factories import default_logging_port
@@ -17,9 +17,9 @@ if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
 
 
-class ChemblExtractionServiceImpl(ExtractionServiceABC):
+class ChemblExtractionServiceImpl(RecordFetcherABC, VersionProviderABC):
     """
-    Implementation of ExtractionServiceABC for ChEMBL.
+    Implementation of record fetcher for ChEMBL.
     Uses DataClientABC (expected to be ChemblHttpClientImpl) to fetch data.
     """
 
@@ -127,13 +127,13 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         }
         mapped_entity = aliases.get(entity, entity)
 
-        # Configure builder
+        # Configure builder via legacy fluent methods expected in tests
         if hasattr(builder, "build_for_endpoint"):
             builder.build_for_endpoint(mapped_entity)
         elif hasattr(builder, "for_endpoint"):
             builder.for_endpoint(mapped_entity)
 
-        # Build URL
+        # Build URL using dict-style params
         url = builder.build(filters)
 
         # Iterate pages
@@ -173,7 +173,10 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC):
         """
         if hasattr(self.client, "response_parser"):
             parser = getattr(self.client, "response_parser")
-            return parser.parse_response(raw_response)
+            if hasattr(parser, "parse_response"):
+                return parser.parse_response(raw_response)
+            if hasattr(parser, "parse"):
+                return parser.parse(raw_response)
 
         # Fallback simple parsing
         for value in raw_response.values():

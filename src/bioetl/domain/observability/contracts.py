@@ -65,10 +65,6 @@ class MetricsPortABC(ABC):
     ) -> None:
         """Observe a numeric value for a named histogram metric."""
 
-
-class PipelineMetricsPortABC(MetricsPortABC):
-    """Port for recording pipeline stage metrics."""
-
     @abstractmethod
     def update_stage_duration(
         self,
@@ -132,6 +128,5 @@ __all__ = [
     "LoggingPortABC",
     "TracingPortABC",
     "MetricsPortABC",
-    "PipelineMetricsPortABC",
     "ProgressReporterABC",
 ]

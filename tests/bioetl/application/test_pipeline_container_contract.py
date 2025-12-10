@@ -34,9 +34,6 @@ class StubContainer(PipelineContainerABC):
     def get_loader(self) -> str:
         return "loader"
 
-    def get_output_writer(self) -> str:
-        return "writer"
-
     def get_extraction_service(self) -> str:
         return "extraction"
 

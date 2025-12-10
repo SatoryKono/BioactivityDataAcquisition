@@ -5,7 +5,6 @@
 DataClientABC: bioetl.domain.clients.contracts.DataClientABC
 RequestBuilderABC: bioetl.domain.clients.base.contracts.RequestBuilderABC
 ResponseParserABC: bioetl.domain.clients.base.contracts.ResponseParserABC
-ApiClientABC: bioetl.domain.clients.base.contracts.ApiClientABC
 PaginatorABC: bioetl.domain.clients.base.contracts.PaginatorABC
 RateLimiterABC: bioetl.domain.clients.base.contracts.RateLimiterABC
 CacheABC: bioetl.domain.clients.base.contracts.CacheABC
@@ -15,6 +14,7 @@ SideInputProviderABC: bioetl.domain.clients.base.contracts.SideInputProviderABC
 PipelineContainerABC: bioetl.application.pipelines.contracts.PipelineContainerABC
 PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
 ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
+LoaderABC: bioetl.domain.pipelines.contracts.LoaderABC
 
 ProviderRegistryLoaderABC: bioetl.domain.provider_registry.ProviderRegistryLoaderABC
 ProviderRegistryABC: bioetl.domain.provider_registry.ProviderRegistryABC
@@ -25,7 +25,6 @@ TracingPortABC: bioetl.domain.observability.contracts.TracingPortABC
 
 HasherABC: bioetl.domain.transform.contracts.HasherABC
 HashServiceABC: bioetl.domain.transform.contracts.HashServiceABC
-BaseNormalizationServiceABC: bioetl.domain.transform.contracts.BaseNormalizationServiceABC
 NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceABC
 
 ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
@@ -33,8 +32,5 @@ SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC
 ValidatorFactoryABC: bioetl.domain.validation.contracts.ValidatorFactoryABC
 SchemaProviderFactoryABC: bioetl.domain.validation.contracts.SchemaProviderFactoryABC
 
-WriterABC: bioetl.domain.clients.base.output.contracts.WriterABC
-MetadataWriterABC: bioetl.domain.clients.base.output.contracts.MetadataWriterABC
 QualityReportABC: bioetl.domain.clients.base.output.contracts.QualityReportABC
-OutputWriterABC: bioetl.domain.clients.base.output.contracts.OutputWriterABC
 OutputFrameConverterABC: bioetl.domain.clients.base.output.contracts.OutputFrameConverterABC

@@ -52,11 +52,6 @@ SchemaProviderABC:
   implementations:
     Registry: bioetl.domain.schemas.registry.SchemaRegistry
 
-BaseNormalizationServiceABC:
-  default_factory: bioetl.infrastructure.transform.factories.default_base_normalization_service
-  implementations:
-    Base: bioetl.infrastructure.transform.impl.base_normalizer.BaseNormalizationServiceImpl
-
 NormalizationServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
   implementations:
@@ -73,26 +68,15 @@ HashServiceABC:
   implementations:
     DomainFacade: bioetl.domain.transform.hash_service.HashService
 
-WriterABC:
-  default_factory: bioetl.infrastructure.output.factories.default_writer
-  implementations:
-    Csv: bioetl.infrastructure.output.impl.csv_writer.CsvWriterImpl
-    Parquet: bioetl.infrastructure.output.impl.parquet_writer.ParquetWriterImpl
-
-MetadataWriterABC:
-  default_factory: bioetl.infrastructure.output.factories.default_metadata_writer
-  implementations:
-    Standard: bioetl.infrastructure.output.impl.metadata_writer.MetadataWriterImpl
-
 QualityReportABC:
   default_factory: bioetl.infrastructure.output.factories.default_quality_reporter
   implementations:
     Default: bioetl.infrastructure.output.impl.quality_report.QualityReportImpl
 
-OutputWriterABC:
-  default_factory: bioetl.infrastructure.output.factories.default_output_writer
+LoaderABC:
+  default_factory: bioetl.infrastructure.output.factories.default_loader
   implementations:
-    Unified: bioetl.infrastructure.output.unified_output_writer_impl.UnifiedOutputWriterImpl
+    Unified: bioetl.infrastructure.output.unified_loader_impl.UnifiedLoaderImpl
 
 OutputFrameConverterABC:
   default_factory: bioetl.infrastructure.output.converters.factories.default_output_frame_converter
@@ -115,11 +99,6 @@ ResponseParserABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_response_parser
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblResponseParserImpl
-
-ApiClientABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_api_client
-  implementations:
-    Unified: bioetl.infrastructure.clients.base.impl.unified_api_client_impl.UnifiedAPIClientImpl
 
 PaginatorABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_paginator

@@ -40,11 +40,6 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
                 # Wait for enough tokens
                 time.sleep(1.0 / self._rate)
 
-    def wait_if_needed(self) -> None:
-        """Compatibility method; acquire already enforces waiting."""
-        # Simplified check, acquire does the waiting
-        pass
-
     def _refill(self) -> None:
         now = time.monotonic()
         elapsed = now - self._last_refill

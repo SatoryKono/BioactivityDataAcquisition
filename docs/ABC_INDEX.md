@@ -10,9 +10,6 @@
 - `ResponseParserABC` — `bioetl.domain.clients.base.contracts.ResponseParserABC`
   - Разбор ответов API.
 
-- `ApiClientABC` — `bioetl.domain.clients.base.contracts.ApiClientABC`
-  - Transport-agnostic API client abstraction with lifecycle hooks.
-
 - `PaginatorABC` — `bioetl.domain.clients.base.contracts.PaginatorABC`
   - Стратегия пагинации.
 
@@ -64,11 +61,8 @@
 - `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
   - Фасад для вычисления hash_row/hash_business_key и служебных колонок. Default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.domain.transform.hash_service.HashService`.
 
-- `BaseNormalizationServiceABC` — `bioetl.domain.transform.contracts.BaseNormalizationServiceABC`
-  - Базовый контракт сервисов нормализации. Default factory: ``bioetl.infrastructure.transform.factories.default_base_normalization_service``. Implementations: ``BaseNormalizationServiceImpl``.
-
 - `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
-  - Сервис нормализации данных в DataFrame. Обязательные операции: - normalize: нормализация единичной записи - normalize_fields: пакетная нормализация DataFrame по конфигурации - normalize_dataframe: совместимый алиас для normalize_fields - normalize_batch: пакетная нормализация чанка - normalize_series: нормализация столбца по конфигурации. Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``DefaultNormalizationTransformerImpl``, ``ChemblNormalizationServiceImpl``.
+  - Сервис нормализации данных. Обязательные операции: normalize(df), normalize_record(record), ensure_numeric_columns(df). Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``DefaultNormalizationTransformerImpl``, ``ChemblNormalizationServiceImpl``.
 
 - `ValidatorABC` — `bioetl.domain.validation.contracts.ValidatorABC`
   - Валидация данных. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorImpl`` (`bioetl.infrastructure.validation.impl.pandera_validator`).
@@ -82,17 +76,11 @@
 - `SchemaProviderFactoryABC` — `bioetl.domain.validation.contracts.SchemaProviderFactoryABC`
   - Фабрика провайдеров схем. Default factory: ``bioetl.infrastructure.validation.factories.default_schema_provider_factory``. Implementations: ``PanderaSchemaProviderFactory``.
 
-- `WriterABC` — `bioetl.domain.clients.base.output.contracts.WriterABC`
-  - Запись данных в файл. Default factory: ``bioetl.infrastructure.output.factories.default_writer``. Implementations: ``CsvWriterImpl``, ``ParquetWriterImpl``.
-
-- `MetadataWriterABC` — `bioetl.domain.clients.base.output.contracts.MetadataWriterABC`
-  - Запись метаданных и отчетов. Default factory: ``bioetl.infrastructure.output.factories.default_metadata_writer``. Implementations: ``MetadataWriterImpl``.
-
 - `QualityReportABC` — `bioetl.domain.clients.base.output.contracts.QualityReportABC`
   - Порт генератора QC-отчетов.
 
-- `OutputWriterABC` — `bioetl.domain.clients.base.output.contracts.OutputWriterABC`
-  - Фасад записи результатов пайплайна (данные, метаданные, QC).
-
 - `OutputFrameConverterABC` — `bioetl.domain.clients.base.output.contracts.OutputFrameConverterABC`
   - DataFrame → DataFrame конвертер для пост-обработки перед записью. Default factory: ``bioetl.infrastructure.output.converters.factories.default_output_frame_converter``. Implementations: ``NoopConverter``, ``RenameColumnsConverter``, ``DropNaRowsConverter``.
+
+- `LoaderABC` — `bioetl.domain.pipelines.contracts.LoaderABC`
+  - Компонент записи артефактов пайплайна (данные, метаданные, QC).

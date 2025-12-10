@@ -10,7 +10,6 @@ from uuid import uuid4
 
 import requests
 
-from bioetl.domain.clients.base.contracts import ApiClientABC
 from bioetl.domain.configs import ClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.infrastructure.errors import (
@@ -26,9 +25,9 @@ from bioetl.infrastructure.observability.factories import (
 )
 
 
-class UnifiedAPIClientImpl(ApiClientABC):
+class _HttpTransport:
     """
-    Унифицированный HTTP-клиент без промежуточных middleware-слоев.
+    Внутренний HTTP-транспорт без промежуточных middleware-слоев.
     Делегирует вызовы напрямую базовому HTTP-клиенту.
     """
 
@@ -125,11 +124,11 @@ class UnifiedAPIClientImpl(ApiClientABC):
 
     def get_response(self, url: str, **kwargs: Any) -> Any:
         """GET запрос."""
-        return self._request_with_retry("GET", url, **kwargs)
+        return self.request("GET", url, **kwargs)
 
     def request_post(self, url: str, **kwargs: Any) -> Any:
         """POST запрос."""
-        return self._request_with_retry("POST", url, **kwargs)
+        return self.request("POST", url, **kwargs)
 
     def _request_with_retry(self, method: str, url: str, **kwargs: Any) -> Any:
         attempt = 1

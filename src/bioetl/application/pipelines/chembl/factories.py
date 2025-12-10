@@ -2,7 +2,6 @@
 Factories for ChEMBL pipelines.
 """
 
-from bioetl.application.pipelines.base import OutputWriterLoaderAdapter
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 
@@ -21,7 +20,7 @@ def create_chembl_pipeline(container: PipelineContainerABC) -> ChemblPipelineBas
         config=container.config,
         logger=container.get_logger(),
         validation_service=container.get_validation_service(),
-        loader=OutputWriterLoaderAdapter(container.get_output_writer()),
+        loader=container.get_loader(),
         extraction_service=container.get_extraction_service(),
         hash_service=container.get_hash_service(),
         metadata_builder=container.get_metadata_builder(),

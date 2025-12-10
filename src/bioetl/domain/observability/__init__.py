@@ -3,7 +3,6 @@
 from bioetl.domain.observability.contracts import (
     LoggingPortABC,
     MetricsPortABC,
-    PipelineMetricsPortABC,
     ProgressReporterABC,
     TracingPortABC,
 )
@@ -11,7 +10,6 @@ from bioetl.domain.observability.contracts import (
 __all__ = [
     "LoggingPortABC",
     "MetricsPortABC",
-    "PipelineMetricsPortABC",
     "TracingPortABC",
     "ProgressReporterABC",
 ]

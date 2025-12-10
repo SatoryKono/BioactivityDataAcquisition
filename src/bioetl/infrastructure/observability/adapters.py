@@ -8,11 +8,7 @@ import structlog
 from structlog.stdlib import BoundLogger
 
 from bioetl.infrastructure.observability import metrics
-from bioetl.interfaces.observability import (
-    LoggingPortABC,
-    PipelineMetricsPortABC,
-    TracingPortABC,
-)
+from bioetl.interfaces.observability import LoggingPortABC, MetricsPortABC, TracingPortABC
 
 
 class StructuredLoggerImpl(LoggingPortABC):
@@ -67,7 +63,7 @@ __all__ = [
 ]
 
 
-class PrometheusMetricsPortImpl(PipelineMetricsPortABC):
+class PrometheusMetricsPortImpl(MetricsPortABC):
     """Prometheus-backed implementation of the metrics port."""
 
     def __init__(self) -> None:

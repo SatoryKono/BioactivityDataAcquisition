@@ -11,15 +11,14 @@ class ChemblResponseParserImpl(ResponseParserABC[ActivityRawModel]):
     Парсер ответов ChEMBL API.
     """
 
-    def parse_response(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
-        """Extract and validate activity payloads from ChEMBL response."""
-        # ChEMBL responses are usually { "activities": [...], "page_meta": ... }
-        # We need to find the list key.
-        # Heuristic: find the key that holds a list of dicts.
+    def parse(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
         for key, value in raw_response.items():
             if isinstance(value, list) and (not value or isinstance(value[0], dict)):
                 return [ActivityRawModel.model_validate(item) for item in value]
         return []
+
+    def parse_response(self, raw_response: dict[str, object]) -> list[ActivityRawModel]:
+        return self.parse(raw_response)
 
     def extract_metadata(
         self, raw_response: dict[str, object]

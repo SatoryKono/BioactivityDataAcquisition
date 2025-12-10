@@ -3,10 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
-from bioetl.domain.clients.base.output.contracts import (
-    OutputWriterABC,
-    RunMetadataBuilderProtocol,
-)
+from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import (
@@ -44,8 +41,8 @@ class PipelineContainerABC(ABC):
         """Return validation service bound to registered schemas."""
 
     @abstractmethod
-    def get_output_writer(self) -> OutputWriterABC:
-        """Return unified writer for data, metadata and QC outputs."""
+    def get_loader(self) -> LoaderABC:
+        """Return unified loader for data, metadata and QC outputs."""
 
     @abstractmethod
     def get_extraction_service(self) -> Any:

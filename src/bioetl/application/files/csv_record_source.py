@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.extraction import RecordFetcherABC
 from bioetl.domain.record_source import RawRecord, RecordSourceABC as RecordSource
 
 
@@ -79,7 +79,7 @@ class IdListRecordSourceImpl(RecordSource):
         id_column: str,
         csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
-        extraction_service: ExtractionServiceABC,
+        extraction_service: RecordFetcherABC,
         source_config: ChemblSourceConfig,
         entity: str,
         filter_key: str,

@@ -29,13 +29,19 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         return self
 
     def build(
-        self, params: Optional[dict[str, Any]] = None, **params_kwargs: Any
+        self, endpoint_or_params: Optional[dict[str, Any] | str] = None, **params_kwargs: Any
     ) -> str:
-        """
-        Fluent alias for build_request to mirror test expectations.
-        Accepts either a single dict (as used in tests) or keyword arguments.
-        """
         merged_params: dict[str, Any] = {}
+        if isinstance(endpoint_or_params, str):
+            self.build_for_endpoint(endpoint_or_params)
+            params_value = params_kwargs.pop("params", None)
+            if params_value:
+                if not isinstance(params_value, dict):
+                    raise TypeError("params must be a dict when provided")
+                merged_params.update(params_value)
+            merged_params.update(params_kwargs)
+            return self.build_request(merged_params)
+        params = endpoint_or_params if endpoint_or_params is not None else {}
         if params:
             if not isinstance(params, dict):
                 raise TypeError("params must be a dict when provided")
@@ -77,3 +83,6 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         self._params["offset"] = offset
         self._params["limit"] = limit
         return self
+
+    def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilderImpl":
+        return self.build_with_pagination(offset, limit)

@@ -1,29 +1,28 @@
-"""Factories composing output writers for pipeline artifacts."""
+"""Factories composing loaders for pipeline artifacts."""
+
+from typing import Any
 
 from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
     OutputFrameConverterABC,
-    OutputWriterABC,
     QualityReportABC,
-    WriterABC,
 )
 from bioetl.domain.configs import DeterminismConfig, QcConfig
 from bioetl.domain.observability import MetricsPortABC
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
-from bioetl.infrastructure.output.unified_output_writer_impl import (
-    UnifiedOutputWriterImpl,
+from bioetl.infrastructure.output.unified_loader_impl import (
+    UnifiedLoaderImpl,
 )
 
 
-def default_writer() -> WriterABC:
+def default_writer() -> CsvWriterImpl:
     """Create the default CSV writer implementation."""
 
     return CsvWriterImpl()
 
 
-def default_metadata_writer() -> MetadataWriterABC:
+def default_metadata_writer() -> MetadataWriterImpl:
     """Create the metadata writer that stores sidecar files."""
 
     return MetadataWriterImpl()
@@ -35,19 +34,19 @@ def default_quality_reporter() -> QualityReportABC:
     return QualityReportImpl()
 
 
-def default_output_writer(
+def default_loader(
     *,
     config: DeterminismConfig,
     qc_config: QcConfig | None = None,
-    writer: WriterABC | None = None,
-    metadata_writer: MetadataWriterABC | None = None,
+    writer: Any | None = None,
+    metadata_writer: Any | None = None,
     quality_reporter: QualityReportABC | None = None,
     metrics_port: MetricsPortABC | None = None,
     converter: OutputFrameConverterABC | None = None,
-) -> OutputWriterABC:
-    """Compose the unified output writer with optional overrides."""
+) -> UnifiedLoaderImpl:
+    """Compose the unified loader with optional overrides."""
 
-    return UnifiedOutputWriterImpl(
+    return UnifiedLoaderImpl(
         writer=writer or default_writer(),
         metadata_writer=metadata_writer or default_metadata_writer(),
         quality_reporter=quality_reporter or default_quality_reporter(),

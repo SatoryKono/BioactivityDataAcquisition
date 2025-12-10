@@ -5,10 +5,8 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
-    QualityReportABC,
-)
+from bioetl.domain.clients.base.output.contracts import QualityReportABC
+from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.files.checksum import compute_files_sha256
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
 
@@ -25,7 +23,7 @@ def build_quality_report_table(
     return reporter.build_quality_report(df, min_coverage=min_coverage)
 
 
-class MetadataWriterImpl(MetadataWriterABC):
+class MetadataWriterImpl:
     """
     Запись метаданных и QC отчетов.
     """
@@ -38,11 +36,16 @@ class MetadataWriterImpl(MetadataWriterABC):
     ) -> None:
         self._quality_reporter = quality_reporter or QualityReportImpl()
         self._min_coverage = min_coverage
+        self._atomic_op = AtomicFileOperation()
 
     def write_meta(self, meta: dict, path: Path) -> None:
         """Persist run metadata as YAML with stable key ordering."""
-        with open(path, "w", encoding="utf-8") as f:
-            yaml.dump(meta, f, sort_keys=True)
+        def _write(temp_path: Path) -> None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with open(temp_path, "w", encoding="utf-8") as f:
+                yaml.dump(meta, f, sort_keys=True)
+
+        self._atomic_op.write_atomic(path, _write)
 
     def write_qc_report(
         self, df: pd.DataFrame, path: Path, *, min_coverage: float | None = None

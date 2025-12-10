@@ -7,15 +7,12 @@ from typing import Any, Callable, cast
 import pandas as pd
 from pandas._typing import DtypeArg
 
-from bioetl.domain.transform.contracts import (
-    BaseNormalizationServiceABC,
-    NormalizationConfigProviderProtocol,
-)
+from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 from bioetl.domain.transform.normalizers import normalize_array, normalize_record
 from bioetl.domain.transform.serializers import serialize_nested
 
 
-class BaseNormalizationServiceImpl(BaseNormalizationServiceABC):
+class BaseNormalizationServiceImpl:
     """Provide reusable normalization helpers for normalization services."""
 
     _NUMERIC_DTYPES: dict[str, DtypeArg] = {
