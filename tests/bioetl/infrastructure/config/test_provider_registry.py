@@ -11,7 +11,7 @@ from typing import Any, Callable
 import pytest
 import yaml
 
-from bioetl.domain.configs import DummyProviderConfig, HttpClientSettings
+from bioetl.domain.configs import DummyProviderConfig, HttpClientConfig, ProviderHttpConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.infrastructure.config.provider_registry import (
@@ -190,18 +190,21 @@ class TestProviderRegistryModels:
         assert entry.description == "ChEMBL provider"
 
     def test_entry_model_with_http_client(self) -> None:
-        http_settings = HttpClientSettings(
-            base_url="https://api.example.com", timeout=60, retries=5
+        """Test entry model with HTTP config (legacy http_client field name)."""
+        http_config = ProviderHttpConfig(
+            base_url="https://api.example.com", timeout_sec=60.0, max_retries=5
         )
         entry = ProviderRegistryEntryModel(
             id="custom",
             module="custom.module",
             factory="create_provider",
-            http_client=http_settings,
+            http=http_config,
         )
-        assert entry.http_client is not None
-        assert entry.http_client.timeout == 60
-        assert entry.http_client.retries == 5
+        assert entry.http is not None
+        assert entry.http.timeout_sec == 60.0
+        assert entry.http.max_retries == 5
+        # Legacy property still works
+        assert entry.http_client is entry.http
 
     def test_registry_config_model(self) -> None:
         config = ProviderRegistryConfig(
@@ -359,9 +362,7 @@ class TestProviderLoaderImpl:
         provider_definition_factory: Callable[[ProviderId], ProviderDefinition],
     ) -> None:
         # Register test module
-        def factory(
-            http_client: HttpClientSettings | None = None,
-        ) -> ProviderDefinition:
+        def factory(http: HttpClientConfig | None = None) -> ProviderDefinition:
             return provider_definition_factory(ProviderId.DUMMY)
 
         _register_module("test_module_disabled", "create_provider", factory)
@@ -471,7 +472,7 @@ class TestProviderLoaderImpl:
     ) -> None:
         # Register test module with factory returning wrong type
         def wrong_factory(
-            http_client: HttpClientSettings | None = None,
+            http: HttpClientConfig | None = None,
         ) -> dict[str, str]:
             return {"not": "a provider"}
 
@@ -517,7 +518,7 @@ class TestProviderLoaderImpl:
     ) -> None:
         # Register test module with valid factory
         def valid_factory(
-            http_client: HttpClientSettings | None = None,
+            http: HttpClientConfig | None = None,
         ) -> ProviderDefinition:
             return provider_definition_factory(ProviderId.DUMMY)
 
@@ -557,7 +558,7 @@ class TestProviderLoaderImpl:
         provider_definition_factory: Callable[[ProviderId], ProviderDefinition],
     ) -> None:
         def valid_factory(
-            http_client: HttpClientSettings | None = None,
+            http: HttpClientConfig | None = None,
         ) -> ProviderDefinition:
             return provider_definition_factory(ProviderId.DUMMY)
 

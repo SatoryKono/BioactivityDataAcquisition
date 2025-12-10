@@ -2,6 +2,7 @@
 
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.configs.defaults import (
+    ClientDefaultsConfig,
     DefaultsConfig,
     HashingDefaultsConfig,
     HttpDefaultsConfig,
@@ -24,6 +25,7 @@ from bioetl.domain.configs.pipeline import (
     DummyProviderConfig,
     FeatureFlagsConfig,
     HashingConfig,
+    HttpClientConfig,
     HttpClientDefaults,
     HttpClientSettings,
     InterfaceFeaturesConfig,
@@ -33,6 +35,7 @@ from bioetl.domain.configs.pipeline import (
     PaginationConfig,
     PipelineConfig,
     ProviderConfigUnion,
+    ProviderHttpConfig,
     QcConfig,
     QualityConfig,
     RuntimeConfig,
@@ -42,40 +45,50 @@ from bioetl.domain.configs.pipeline import (
 from bioetl.domain.configs.profile import ProfileConfig
 
 __all__ = [
+    # Primary HTTP configuration (single source of truth)
+    "HttpClientConfig",
+    "ProviderHttpConfig",
+    # Provider configs
     "BaseProviderConfig",
+    "ChemblSourceConfig",
+    "DummyProviderConfig",
+    "ProviderConfigUnion",
+    # Pipeline config
+    "PipelineConfig",
+    "RuntimeConfig",
+    # Sub-configs
     "BusinessKeyConfig",
     "CanonicalizationConfig",
-    "ChemblSourceConfig",
-    "ClientConfig",
     "CsvInputConfig",
-    "HTTP_CLIENT_DEFAULTS",
-    "HttpClientDefaults",
-    "HttpClientSettings",
     "DeterminismConfig",
-    "DummyProviderConfig",
     "FeatureFlagsConfig",
     "HashingConfig",
     "InterfaceFeaturesConfig",
     "LoggingConfig",
     "MetricsConfig",
     "NormalizationConfig",
+    "ObservabilityConfig",
+    "PaginationConfig",
+    "ProfileConfig",
+    "QualityConfig",
+    "QcConfig",
+    "StorageConfig",
+    "TransformConfig",
+    # Defaults configs
+    "ClientDefaultsConfig",
     "DefaultsConfig",
     "HashingDefaultsConfig",
     "HttpDefaultsConfig",
     "NetworkDefaultsConfig",
     "NetworkHttpDefaultsConfig",
     "NormalizationDefaultsConfig",
-    "ObservabilityConfig",
-    "PaginationConfig",
-    "ProfileConfig",
-    "ProviderConfigUnion",
-    "PipelineConfigLoaderProtocol",
-    "QualityConfig",
-    "RuntimeConfig",
-    "QcConfig",
-    "TransformConfig",
-    "StorageConfig",
-    "PipelineConfig",
     "SourceDefaultsConfig",
     "SourcesDefaultsConfig",
+    # Protocols
+    "PipelineConfigLoaderProtocol",
+    # DEPRECATED: Legacy aliases (will be removed in future versions)
+    "ClientConfig",  # Use HttpClientConfig
+    "HttpClientDefaults",  # Use HttpClientConfig
+    "HttpClientSettings",  # Use ProviderHttpConfig
+    "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
 ]
