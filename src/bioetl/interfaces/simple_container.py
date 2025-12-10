@@ -73,10 +73,11 @@ class SimplePipelineContainer:
         # 2. Schema contract provider
         self._schema_contract_provider = SchemaContractProviderImpl(schema_provider)
 
-        # 3. Inject into infrastructure
-        from bioetl.infrastructure.config.loader import set_schema_contract_provider
+        # 3. Inject into infrastructure (using internal function to avoid deprecation warning)
+        # This maintains backward compatibility while we transition to explicit injection
+        from bioetl.infrastructure.config.loader import _set_provider_internal
 
-        set_schema_contract_provider(self._schema_contract_provider)
+        _set_provider_internal(self._schema_contract_provider)
 
         self._bootstrapped = True
 
@@ -148,9 +149,9 @@ class SimplePipelineContainer:
 
         Clears all cached instances and resets bootstrap state.
         """
-        from bioetl.infrastructure.config.loader import clear_schema_contract_provider
+        from bioetl.infrastructure.config.loader import _clear_provider_internal
 
-        clear_schema_contract_provider()
+        _clear_provider_internal()
 
         self._schema_bootstrap = None
         self._schema_contract_provider = None
