@@ -1,34 +1,65 @@
-"""Domain contracts for validation services and schema providers."""
+"""Domain contracts for validation services and schema providers.
+
+Tabular Data Abstractions:
+    This module uses domain-level TabularData instead of pd.DataFrame.
+    Infrastructure layer provides PandasAdapter implementations.
+
+    See bioetl.domain.data for protocol definitions.
+"""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
-import pandas as pd
+from bioetl.domain.data import TabularData
 
 schema_type = Any
 
 
 @dataclass
 class ValidationResult:
-    """Результат валидации доменного уровня."""
+    """Domain-level validation result.
+
+    Attributes:
+        is_valid: Whether validation passed.
+        errors: List of validation errors.
+        warnings: List of validation warnings.
+        validated_data: Validated tabular data (if validation passed).
+    """
 
     is_valid: bool
     errors: list[Any]
     warnings: list[str]
-    validated_df: pd.DataFrame | None = None
+    validated_data: TabularData | None = None
 
 
 class ValidatorABC(ABC):
-    """Доменный интерфейс валидатора."""
+    """Domain validator interface.
+
+    Uses domain-level TabularData abstraction.
+    """
 
     @abstractmethod
-    def validate(self, df: pd.DataFrame) -> ValidationResult:
-        """Валидирует DataFrame и возвращает результат проверки."""
+    def validate(self, data: TabularData) -> ValidationResult:
+        """Validate tabular data and return validation result.
+
+        Args:
+            data: Tabular data to validate.
+
+        Returns:
+            ValidationResult with validation status and details.
+        """
 
     @abstractmethod
-    def is_valid(self, df: pd.DataFrame) -> bool:
-        """Упрощенная проверка валидности."""
+    def is_valid(self, data: TabularData) -> bool:
+        """Simplified validity check.
+
+        Args:
+            data: Tabular data to validate.
+
+        Returns:
+            True if data passes validation.
+        """
 
 
 class SchemaProviderABC(ABC):

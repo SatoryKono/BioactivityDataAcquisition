@@ -1,4 +1,11 @@
-"""Contracts for writing pipeline outputs and metadata."""
+"""Contracts for writing pipeline outputs and metadata.
+
+Tabular Data Abstractions:
+    This module uses domain-level TabularData instead of pd.DataFrame.
+    Infrastructure layer provides PandasAdapter implementations.
+
+    See bioetl.domain.data for protocol definitions.
+"""
 
 from __future__ import annotations
 
@@ -7,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
-import pandas as pd
+from bioetl.domain.data import MutableTabularData, TabularData
 
 
 @dataclass(frozen=True)
@@ -21,17 +28,35 @@ class WriteResult:
 
 
 class QualityReportABC(ABC):
-    """Порт генератора QC-отчетов."""
+    """QC report generator port.
+
+    Uses domain-level TabularData abstraction.
+    """
 
     @abstractmethod
     def build_quality_report(
-        self, df: pd.DataFrame, *, min_coverage: float
-    ) -> pd.DataFrame:
-        """Строит таблицу покрытия и базовых метрик по колонкам."""
+        self, data: TabularData, *, min_coverage: float
+    ) -> TabularData:
+        """Build coverage and basic metrics table by columns.
+
+        Args:
+            data: Input tabular data.
+            min_coverage: Minimum coverage threshold.
+
+        Returns:
+            Tabular data with quality metrics.
+        """
 
     @abstractmethod
-    def build_correlation_report(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Строит корреляционную матрицу по числовым колонкам."""
+    def build_correlation_report(self, data: TabularData) -> TabularData:
+        """Build correlation matrix for numeric columns.
+
+        Args:
+            data: Input tabular data.
+
+        Returns:
+            Tabular data with correlation matrix.
+        """
 
 
 class RunMetadataBuilderProtocol(Protocol):
@@ -48,10 +73,20 @@ class RunMetadataBuilderProtocol(Protocol):
 
 @runtime_checkable
 class OutputFrameConverterABC(Protocol):
-    """DataFrame → DataFrame конвертер для пост-обработки перед записью."""
+    """Tabular data converter for post-processing before write.
 
-    def convert(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Преобразует DataFrame (rename/reorder/drop/enrich)."""
+    Uses domain-level TabularData abstraction.
+    """
+
+    def convert(self, data: TabularData) -> MutableTabularData:
+        """Convert tabular data (rename/reorder/drop/enrich).
+
+        Args:
+            data: Input tabular data.
+
+        Returns:
+            Transformed tabular data.
+        """
         ...
 
 

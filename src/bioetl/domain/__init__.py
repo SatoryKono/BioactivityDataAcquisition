@@ -12,8 +12,22 @@ Type Aliases (unified in v3.0):
     - FieldConfig: Field configuration as dict[str, Any]
 
     Import from ``bioetl.domain.types`` for type aliases.
+
+Tabular Data Abstractions:
+    - Record: Single data record (dict-like interface)
+    - RecordSet: Collection of records with schema
+    - TabularData: Full tabular data abstraction (replaces pd.DataFrame)
+    - MutableTabularData: TabularData with mutation capabilities
+
+    Import from ``bioetl.domain.data`` for tabular data protocols.
 """
 
+from bioetl.domain.data import (
+    MutableTabularData,
+    Record,
+    RecordSet,
+    TabularData,
+)
 from bioetl.domain.errors import (
     BioetlError,
     ClientError,
@@ -39,6 +53,11 @@ from bioetl.domain.types import (
 from bioetl.domain.value_objects import ChemblId, EntityName, RunId
 
 __all__ = [
+    # Tabular data abstractions
+    "MutableTabularData",
+    "Record",
+    "RecordSet",
+    "TabularData",
     # Type aliases
     "ApiPayload",
     "FieldConfig",
