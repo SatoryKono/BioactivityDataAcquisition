@@ -15,6 +15,7 @@ from bioetl.domain.ports.extraction import (
     from_raw_records,
     to_raw_records,
 )
+from bioetl.domain.ports.filesystem import PathResolverABC
 from bioetl.domain.ports.output import (
     ChecksumCalculatorPort,
     DataWriterPort,
@@ -80,6 +81,8 @@ __all__: list[str] = [
     # Backward compatibility helpers
     "from_raw_records",
     "to_raw_records",
+    # Filesystem ports
+    "PathResolverABC",
     # Output ports
     "ChecksumCalculatorPort",
     "DataWriterPort",
