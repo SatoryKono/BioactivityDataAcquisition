@@ -151,7 +151,7 @@ class TestExtractStageWithMapper:
     def test_extract_passes_filters_to_service(
         self, mock_extraction_service: MagicMock, mock_mapper: MagicMock
     ) -> None:
-        """Filters are passed to extraction service."""
+        """Filters are passed to extraction service (limit handled internally)."""
         mock_extraction_service.iter_extract.return_value = []
 
         stage = ExtractStage(
@@ -159,13 +159,13 @@ class TestExtractStageWithMapper:
             record_mapper=mock_mapper,
         )
 
+        # limit is handled internally by ExtractStage, not passed to iter_extract
         list(stage.extract("activity", target_chembl_id="CHEMBL25", limit=100))
 
         mock_extraction_service.iter_extract.assert_called_once_with(
             "activity",
             chunk_size=None,
             target_chembl_id="CHEMBL25",
-            limit=100,
         )
 
     def test_extract_passes_chunk_size_to_service(
@@ -510,3 +510,183 @@ class TestExtractStageProperties:
         )
 
         assert stage.record_mapper is None
+
+    def test_entity_property_when_set(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """entity property returns the pre-configured entity."""
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+            entity="activity",
+        )
+
+        assert stage.entity == "activity"
+
+    def test_entity_property_when_not_set(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """entity property returns None when not set."""
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+        )
+
+        assert stage.entity is None
+
+
+# =============================================================================
+# Test Pre-configured Entity
+# =============================================================================
+
+
+class TestExtractStagePreConfiguredEntity:
+    """Tests for ExtractStage with pre-configured entity."""
+
+    def test_extract_uses_preconfigured_entity(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """extract() uses pre-configured entity when not provided."""
+        raw_batch = [{"id": 1, "name": "Test"}]
+        mock_extraction_service.iter_extract.return_value = [raw_batch]
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+            entity="activity",
+        )
+
+        dfs = list(stage.extract())  # No entity argument
+
+        mock_extraction_service.iter_extract.assert_called_once_with(
+            "activity",
+            chunk_size=None,
+        )
+        assert len(dfs) == 1
+
+    def test_extract_argument_overrides_preconfigured_entity(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """Entity argument to extract() overrides pre-configured entity."""
+        mock_extraction_service.iter_extract.return_value = []
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+            entity="activity",
+        )
+
+        list(stage.extract("molecule"))  # Override with different entity
+
+        mock_extraction_service.iter_extract.assert_called_once_with(
+            "molecule",
+            chunk_size=None,
+        )
+
+    def test_extract_raises_when_no_entity_configured(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """extract() raises ValueError when entity not provided and not configured."""
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+        )
+
+        with pytest.raises(ValueError, match="Entity must be provided"):
+            list(stage.extract())
+
+    def test_extract_all_uses_preconfigured_entity(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """extract_all() uses pre-configured entity when not provided."""
+        mock_extraction_service.extract_all.return_value = []
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+            entity="activity",
+        )
+
+        stage.extract_all()  # No entity argument
+
+        mock_extraction_service.extract_all.assert_called_once_with("activity")
+
+
+# =============================================================================
+# Test Limit Handling
+# =============================================================================
+
+
+class TestExtractStageLimitHandling:
+    """Tests for ExtractStage limit functionality."""
+
+    def test_limit_restricts_total_records(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """limit parameter restricts total number of records returned."""
+        batch1 = [{"id": 1}, {"id": 2}, {"id": 3}]
+        batch2 = [{"id": 4}, {"id": 5}]
+        mock_extraction_service.iter_extract.return_value = [batch1, batch2]
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+        )
+
+        dfs = list(stage.extract("activity", limit=4))
+        total_records = sum(len(df) for df in dfs)
+
+        assert total_records == 4
+
+    def test_limit_stops_iteration_early(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """limit parameter stops iteration before processing all batches."""
+        batch1 = [{"id": i} for i in range(5)]  # 5 records
+        batch2 = [{"id": i} for i in range(5, 10)]  # Should not be fully processed
+        mock_extraction_service.iter_extract.return_value = [batch1, batch2]
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+        )
+
+        dfs = list(stage.extract("activity", limit=7))
+        total_records = sum(len(df) for df in dfs)
+
+        assert total_records == 7  # Only 7 records despite 10 available
+
+    def test_limit_with_single_batch_larger_than_limit(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """limit works correctly when first batch exceeds limit."""
+        large_batch = [{"id": i} for i in range(100)]
+        mock_extraction_service.iter_extract.return_value = [large_batch]
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+        )
+
+        dfs = list(stage.extract("activity", limit=10))
+
+        assert len(dfs) == 1
+        assert len(dfs[0]) == 10
+
+    def test_no_limit_returns_all_records(
+        self, mock_extraction_service: MagicMock
+    ) -> None:
+        """Without limit, all records are returned."""
+        batch1 = [{"id": 1}, {"id": 2}]
+        batch2 = [{"id": 3}, {"id": 4}]
+        mock_extraction_service.iter_extract.return_value = [batch1, batch2]
+
+        stage = ExtractStage(
+            extraction_service=mock_extraction_service,
+            record_mapper=None,
+        )
+
+        dfs = list(stage.extract("activity"))
+        total_records = sum(len(df) for df in dfs)
+
+        assert total_records == 4

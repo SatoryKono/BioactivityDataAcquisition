@@ -13,6 +13,7 @@ import from bioetl.application.contracts.
 
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import (
+    PIPELINE_REGISTRY,
     get_factory,
     get_pipeline_class,
     get_pipeline_factory,
@@ -21,6 +22,7 @@ from bioetl.application.pipelines.registry import (
 )
 
 __all__ = [
+    # Base class
     "PipelineBase",
     "get_factory",
     "get_pipeline_class",

@@ -1,4 +1,39 @@
-"""Базовый класс пайплайна."""
+"""
+Base pipeline class — Template Method pattern for ETL stages.
+
+This module provides the abstract base class that all concrete pipelines extend.
+It implements the Template Method pattern where the algorithm skeleton (extract →
+transform → validate → write) is defined here, while concrete steps are
+deferred to subclasses.
+
+Architecture notes:
+    - PipelineBase is abstract: subclasses MUST implement extract() and transform()
+    - Uses composition for cross-cutting concerns (hooks, error policy, transformers)
+    - Delegates execution orchestration to PipelineExecutor
+    - StageRuntimeManager handles hook notifications and error recovery
+
+Key extension points:
+    extract(): Yield raw data chunks from source (abstract)
+    transform(): Convert raw data to domain model (abstract)
+    validate(): Validate against Pandera schema (default provided)
+    write(): Persist to output (default uses injected Loader)
+    get_version(): Return source version string (override for versioned sources)
+
+Stage composition:
+    - Pre-transform: extract() yields raw chunks
+    - Transform: transform() + _apply_transformers() (adds hash/index/timestamp)
+    - Validate: validate() ensures schema compliance
+    - Write: write() persists via Loader
+
+Example::
+
+    class ChEMBLAssayPipeline(PipelineBase):
+        def extract(self, **kwargs) -> Iterator[pd.DataFrame]:
+            yield from self._extraction_service.fetch_assays(limit=kwargs.get("limit"))
+
+        def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+            return self._normalization_service.normalize_assays(df)
+"""
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
@@ -143,7 +178,21 @@ class PipelineBase(ABC):
         dry_run: bool = False,
         **kwargs: Any,
     ) -> RunResult:
-        """Запускает полный цикл ETL-пайплайна."""
+        """
+        Execute the complete ETL pipeline cycle.
+
+        This is the main entry point for pipeline execution. It creates an
+        executor and delegates the actual run to it, ensuring proper state
+        management and error handling.
+
+        Args:
+            output_path: Path where output files will be written.
+            dry_run: If True, skip the write stage (useful for validation).
+            **kwargs: Additional arguments passed to extract stage.
+
+        Returns:
+            RunResult with execution status, metrics, and any errors.
+        """
         executor = PipelineExecutor(
             self._runtime_manager,
             self._metadata_builder,

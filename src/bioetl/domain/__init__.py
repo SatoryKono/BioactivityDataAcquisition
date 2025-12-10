@@ -51,7 +51,7 @@ from bioetl.domain.types import (
     RawRecord,
     RecordBatch,
 )
-from bioetl.domain.value_objects import ChemblId, EntityName, PipelineId, RunId
+from bioetl.domain.value_objects import ChemblId, EntityName, HashDigest, PipelineId, RunId
 
 __all__ = [
     # Tabular data abstractions
@@ -77,6 +77,7 @@ __all__ = [
     # Value objects
     "ChemblId",
     "EntityName",
+    "HashDigest",
     "PipelineId",
     "RunId",
     # Aggregates

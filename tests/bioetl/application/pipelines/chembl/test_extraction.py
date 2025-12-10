@@ -41,10 +41,15 @@ def service(mock_client, mock_logger):
 
 
 def test_get_release_version(service, mock_client):
-    """Test getting release version."""
+    """Test getting release version.
+
+    ExtractionService returns raw version (e.g., '34'), not formatted.
+    Formatting to 'chembl_34' is done in application layer (ChemblPipelineBase).
+    """
     mock_client.metadata.return_value = {"chembl_release": "34"}
     version = service.get_release_version()
-    assert version == "chembl_34"
+    # Service returns raw version, not formatted
+    assert version == "34"
     mock_client.metadata.assert_called_once()
 
 
