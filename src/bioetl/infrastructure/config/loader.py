@@ -304,6 +304,43 @@ def _migrate_legacy_pipeline_config(config: dict[str, Any]) -> None:
 
     config.pop("sources", None)
 
+    def _pack(target_section: str, keys: list[str]) -> None:
+        if target_section not in config:
+            config[target_section] = {}
+        target = config[target_section]
+        if not isinstance(target, dict):
+            return
+
+        for key in keys:
+            if key in config:
+                target[key] = config.pop(key)
+
+    _pack("runtime", ["pagination", "client", "storage", "csv", "csv_options"])
+    _pack("observability", ["logging", "metrics"])
+    _pack("quality", ["determinism", "qc", "hashing", "normalization"])
+    _pack("features", ["features", "interface_features", "interfaces"])
+    _pack("output", ["output"])
+
+    # Fix legacy client config keys
+    runtime = config.get("runtime")
+    if isinstance(runtime, dict):
+        client = runtime.get("client")
+        if isinstance(client, dict):
+            if "timeout" in client:
+                client["timeout_sec"] = client.pop("timeout")
+            if "rate_limit" in client:
+                client["rate_limit_per_sec"] = client.pop("rate_limit")
+            if "backoff" in client:
+                client["backoff_factor"] = client.pop("backoff")
+
+    # Fix legacy api_base_url
+    if "api_base_url" in config:
+        provider_conf = config.get("provider_config")
+        if isinstance(provider_conf, dict):
+            provider_conf["base_url"] = config.pop("api_base_url")
+        else:
+            config.pop("api_base_url")
+
 
 def _resolve_batch_size_from_sources(config: dict[str, Any]) -> int | None:
     sources_section = config.get("sources")

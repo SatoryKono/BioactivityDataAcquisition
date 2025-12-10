@@ -1,37 +1,31 @@
 # /run-chembl-all
 
-**Goal:** Последовательно запустить все ChEMBL-пайплайны и собрать единый отчёт.
-
+**Goal:** Последовательно запустить ChEMBL-пайплайны и собрать отчёт.
 
 **Inputs**
 
-- `--output-root PATH` (required): корневая директория артефактов
-- `--configs-dir PATH` (optional): корень конфигов
+- `--output-root PATH` (required)
+- `--configs-dir PATH` (optional)
+- `--profile NAME` (optional)
 - `--limit N` (optional)
-- `--extended` (optional)
 - `--golden PATH` (optional)
-
 
 **Steps**
 
-1) Запуск run-assay-chembl → run-activity-chembl → run-target-chembl → run-document-chembl → run-testitem-chembl
-2) Агрегировать QC/метрики
-3) Опционально сравнить с golden-наборами
-
+1) Запустить: assay → activity → target → publication → molecule
+2) Использовать команды `/run-*-chembl` (CLI: `bioetl run <name> ...`)
+3) Агрегировать QC/метрики
+4) Опционально сравнить с golden-наборами
 
 **Constraints**
 
-- Общий seed и дата-время в ISO-UTC
-- Обработка ошибок с сохранением частичных результатов
-
+- ISO-UTC, общий seed, детерминизм; частичные результаты сохранять
 
 **Outputs**
 
-- `reports/chembl_all/summary.md`
-- `reports/chembl_all/qc.json`
-
+- `reports/chembl_all/summary.md`, `reports/chembl_all/qc.json`
 
 **Exit criteria**
 
-- Все пайплайны завершились без ошибок или указаны конкретные причины с кодами
+- Успешное завершение или документированные причины с кодами
 
