@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.ports.extraction import RecordFetcherABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import RawRecord, RecordSourceABC as RecordSource
 
 
@@ -79,7 +79,7 @@ class IdListRecordSourceImpl(RecordSource):
         id_column: str,
         csv_options: dict[str, Any] | CsvInputConfig,
         limit: int | None,
-        extraction_service: RecordFetcherABC,
+        extraction_service: ExtractionServiceABC,
         source_config: ChemblSourceConfig,
         entity: str,
         filter_key: str,
@@ -95,7 +95,7 @@ class IdListRecordSourceImpl(RecordSource):
         self._id_column = id_column
         self._csv_options = self._ensure_csv_options(csv_options)
         self._limit = limit
-        self._extraction_service = extraction_service
+        self._extraction_service: ExtractionServiceABC = extraction_service
         self._source_config = source_config
         self._entity = entity
         self._filter_key = filter_key
@@ -160,7 +160,7 @@ class IdListRecordSourceImpl(RecordSource):
             )
             batch_records = self._extraction_service.parse_response(response)
             serialized = self._extraction_service.serialize_records(
-                self._entity, batch_records
+                self._entity, cast(list[object], batch_records)
             )
             serialized_records: list[RawRecord] = cast(list[RawRecord], serialized)
             if self._chunk_size is None or self._chunk_size <= 0:

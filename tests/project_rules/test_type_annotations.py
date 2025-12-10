@@ -52,8 +52,7 @@ def test_public_functions_are_annotated(bioetl_root: Path) -> None:
             missing = _missing_annotations(func)
             if missing:
                 violations.append(
-                    f"{path.as_posix()}:{func.lineno}: "
-                    f"отсутствуют аннотации {missing}"
+                    f"{path.as_posix()}:{func.lineno}: отсутствуют аннотации {missing}"
                 )
     if violations:
         pytest.fail("\n".join(sorted(set(violations))))
@@ -82,7 +81,7 @@ def test_mypy_strict_available() -> None:
     if result.returncode != 0:
         output = (result.stdout + "\n" + result.stderr).strip()
         if "No module named mypy" in output or "mypy: command not found" in output:
-            pytest.fail("mypy не найден. " "Установите зависимость: pip install mypy")
+            pytest.fail("mypy не найден. Установите зависимость: pip install mypy")
         pytest.fail(
             "mypy завершился с кодом "
             f"{result.returncode}\n"

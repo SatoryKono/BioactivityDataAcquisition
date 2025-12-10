@@ -12,10 +12,14 @@ import typer
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.domain.configs import PipelineConfig
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.container_factory import build_default_container, create_config_loader
+from bioetl.interfaces.container_factory import (
+    build_default_container,
+    create_config_loader,
+)
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
@@ -42,7 +46,7 @@ def _resolve_config_path(config: str) -> Path:
     raise FileNotFoundError(f"Config file not found: {config}")
 
 
-def _build_config(config_path: Path, profile: str | None) -> "PipelineConfig":
+def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
     config_loader = create_config_loader()
     configs_root = (
         config_path.parent.parent.parent
@@ -57,7 +61,9 @@ def _build_config(config_path: Path, profile: str | None) -> "PipelineConfig":
     )
 
 
-def _apply_output_override(pipeline_config: "PipelineConfig", output: str | None) -> None:
+def _apply_output_override(
+    pipeline_config: PipelineConfig, output: str | None
+) -> None:
     if not output:
         return
     output_path = Path(output)
@@ -67,7 +73,9 @@ def _apply_output_override(pipeline_config: "PipelineConfig", output: str | None
         pipeline_config.storage.output_path = str(output_path)
 
 
-def _create_orchestrator(pipeline_name: str, pipeline_config: "PipelineConfig") -> PipelineOrchestrator:
+def _create_orchestrator(
+    pipeline_name: str, pipeline_config: PipelineConfig
+) -> PipelineOrchestrator:
     def _provider_loader_factory() -> object:
         return create_provider_loader()
 
@@ -140,9 +148,7 @@ def run(
     try:
         inferred = _infer_config_path(pipeline_name) if config is None else config
         if inferred is None:
-            console.print(
-                "[red]Error:[/red] Cannot infer config path. Use --config."
-            )
+            console.print("[red]Error:[/red] Cannot infer config path. Use --config.")
             raise typer.Exit(1)
         config_path = _resolve_config_path(inferred)
         pipeline_config = _build_config(config_path, profile)

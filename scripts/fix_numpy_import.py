@@ -5,6 +5,7 @@
 Проблема: numpy source tree находится в site-packages вместо установленного пакета.
 Решение: удалить исходники и переустановить numpy.
 """
+
 import os
 from pathlib import Path
 import shutil

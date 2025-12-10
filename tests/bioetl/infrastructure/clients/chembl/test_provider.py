@@ -11,6 +11,15 @@ from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
 
 
 class _NormalizationServiceStub(NormalizationServiceABC):
+    def normalize(self, df):
+        return df
+
+    def normalize_record(self, record):
+        return record
+
+    def ensure_numeric_columns(self, df):
+        return df
+
     def apply_normalize(self, raw):
         return {"raw": raw}
 

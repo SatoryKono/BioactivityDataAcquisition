@@ -34,10 +34,11 @@ class VersionProviderABC(ABC):
 
 class VersionedRecordFetcherABC(RecordFetcherABC, VersionProviderABC):
     """Fetcher с версией источника."""
+
     ...
 
 
-class ExtractionServiceABC(ABC):
+class ExtractionServiceABC(RecordFetcherABC):
     """Абстракция сервиса извлечения данных из провайдера."""
 
     @abstractmethod

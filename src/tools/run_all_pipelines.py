@@ -3,9 +3,9 @@ import json
 from pathlib import Path
 import sys
 
+from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.interfaces.cli.app import app
-from bioetl.domain.observability.contracts import LoggingPortABC
 
 # Pipeline dependency order
 PIPELINES = [
