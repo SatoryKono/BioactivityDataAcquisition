@@ -8,24 +8,27 @@ Usage:
     # For production:
     root = CompositionRoot()
     http_transport = root.create_http_transport(provider="chembl", config=http_config)
+    loader = root.create_schema_contract_loader()
 
     # For testing:
     root = CompositionRoot(
         logger=mock_logger,
         metrics=mock_metrics,
+        schema_contract_provider=mock_provider,
     )
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import requests
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
+from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
     default_rate_limiter,
@@ -34,6 +37,9 @@ from bioetl.infrastructure.observability.factories import (
     default_logging_port,
     default_metrics_port,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config.loader import SchemaContractLoader
 
 
 @dataclass(frozen=True)
@@ -55,9 +61,14 @@ class CompositionRoot:
     Example:
         >>> root = CompositionRoot()
         >>> transport = root.create_http_transport("chembl", HttpClientConfig())
+        >>> loader = root.create_schema_contract_loader()
 
         # For testing with mocks:
-        >>> root = CompositionRoot(logger=mock_logger, metrics=mock_metrics)
+        >>> root = CompositionRoot(
+        ...     logger=mock_logger,
+        ...     metrics=mock_metrics,
+        ...     schema_contract_provider=mock_provider,
+        ... )
         >>> transport = root.create_http_transport("chembl", HttpClientConfig())
     """
 
@@ -67,6 +78,7 @@ class CompositionRoot:
         logger: LoggingPortABC | None = None,
         metrics: MetricsPortABC | None = None,
         http_session_factory: type | None = None,
+        schema_contract_provider: SchemaContractProviderABC | None = None,
     ) -> None:
         """
         Initialize composition root with optional overrides.
@@ -76,10 +88,13 @@ class CompositionRoot:
             metrics: Custom metrics implementation (defaults to Prometheus)
             http_session_factory: Factory for HTTP sessions
                 (defaults to requests.Session)
+            schema_contract_provider: Custom schema contract provider
+                (defaults to bootstrapped provider from schema registry)
         """
         self._logger = logger
         self._metrics = metrics
         self._http_session_factory = http_session_factory or requests.Session
+        self._schema_contract_provider = schema_contract_provider
 
     def get_logger(self) -> LoggingPortABC:
         """Get or create the logger instance."""
@@ -150,6 +165,57 @@ class CompositionRoot:
             rate=rate,
             capacity=capacity,
         )
+
+    def get_schema_contract_provider(self) -> SchemaContractProviderABC:
+        """Get or create the schema contract provider instance.
+
+        If not provided during initialization, creates a default provider
+        by bootstrapping the schema registry.
+
+        Returns:
+            Configured SchemaContractProviderABC instance.
+        """
+        if self._schema_contract_provider is None:
+            self._schema_contract_provider = _create_default_schema_contract_provider()
+        return self._schema_contract_provider
+
+    def create_schema_contract_loader(self) -> "SchemaContractLoader":
+        """Create a SchemaContractLoader with the configured provider.
+
+        This is the preferred method for obtaining a configuration loader
+        with proper dependency injection.
+
+        Returns:
+            SchemaContractLoader with injected schema contract provider.
+
+        Example:
+            >>> root = CompositionRoot()
+            >>> loader = root.create_schema_contract_loader()
+            >>> config = loader.get_pipeline_config("chembl.activity")
+        """
+        from bioetl.infrastructure.config.loader import SchemaContractLoader
+
+        return SchemaContractLoader(self.get_schema_contract_provider())
+
+
+def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
+    """Create default schema contract provider by bootstrapping schema registry.
+
+    This function is called lazily when no provider is explicitly configured.
+
+    Returns:
+        Configured SchemaContractProviderImpl instance.
+    """
+    from bioetl.application.services.schema_bootstrap import (
+        create_schema_bootstrap_service,
+    )
+    from bioetl.application.services.schema_contract_provider import (
+        SchemaContractProviderImpl,
+    )
+
+    schema_service = create_schema_bootstrap_service()
+    schema_provider = schema_service.ensure_registered()
+    return SchemaContractProviderImpl(schema_provider)
 
 
 # Module-level singleton for convenience (can be replaced in tests)
