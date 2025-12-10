@@ -1,72 +1,103 @@
-"""Unified loader implementation for pipeline outputs."""
+"""Unified loader facade for pipeline outputs.
+
+This module provides UnifiedLoaderImpl - a facade that coordinates
+multiple output components following the Single Responsibility Principle.
+"""
+
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Protocol
 
 import pandas as pd
 
 from bioetl.domain.clients.base.output.contracts import (
     OutputFrameConverterABC,
-    QualityReportABC,
     WriteResult,
 )
 from bioetl.domain.configs import DeterminismConfig, QcConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import MetricsPortABC
 from bioetl.domain.pipelines.contracts import LoaderABC
+from bioetl.domain.ports.output import (
+    ChecksumCalculatorPort,
+    DataWriterPort,
+    MetadataBuilderPort,
+    MetadataWriterPort,
+    QcReportGeneratorPort,
+)
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
-from bioetl.infrastructure.files.checksum import compute_file_sha256
 from bioetl.infrastructure.output.column_order import apply_column_order
-from bioetl.infrastructure.output.metadata import build_run_metadata
-
-
-class _DataWriter(Protocol):
-    def write(
-        self,
-        df: pd.DataFrame,
-        path: Path,
-        *,
-        column_order: list[str] | None = None,
-    ) -> WriteResult:
-        """Write DataFrame to path."""
-        ...
-
-
-class _MetadataWriter(Protocol):
-    def write_meta(self, meta: dict, path: Path) -> None:
-        """Write metadata dict to path."""
-        ...
+from bioetl.infrastructure.output.components.checksum_calculator import (
+    ChecksumCalculator,
+)
+from bioetl.infrastructure.output.components.metadata_builder import MetadataBuilder
+from bioetl.infrastructure.output.components.qc_artifact_writer import QcArtifactWriter
+from bioetl.infrastructure.output.components.qc_report_generator import (
+    QcReportGenerator,
+)
 
 
 class UnifiedLoaderImpl(LoaderABC):
     """
-    Фасад для записи результатов пайплайна.
+    Facade for writing pipeline results.
 
-    Обеспечивает:
-    - Атомарную запись (write-temp-and-rename)
-    - Генерацию meta.yaml
-    - QC-отчеты (quality_report, correlation_report)
+    Coordinates multiple components:
+    - DataWriter: writes data files (parquet, csv)
+    - QcReportGenerator: generates quality reports
+    - MetadataBuilder: constructs run metadata
+    - ChecksumCalculator: computes file checksums
+    - QcArtifactWriter: writes QC CSV files
+
+    Each component has a single responsibility and can be
+    replaced independently via dependency injection.
     """
 
     def __init__(
         self,
-        writer: _DataWriter,
-        metadata_writer: _MetadataWriter,
-        quality_reporter: QualityReportABC,
+        data_writer: DataWriterPort,
+        metadata_writer: MetadataWriterPort,
+        qc_report_generator: QcReportGeneratorPort,
         config: DeterminismConfig,
         qc_config: QcConfig | None = None,
         atomic_op: AtomicFileOperation | None = None,
         metrics: MetricsPortABC | None = None,
         converter: OutputFrameConverterABC | None = None,
+        *,
+        checksum_calculator: ChecksumCalculatorPort | None = None,
+        metadata_builder: MetadataBuilderPort | None = None,
+        qc_artifact_writer: QcArtifactWriter | None = None,
     ) -> None:
-        self._writer = writer
+        """Initialize the unified loader facade.
+
+        Args:
+            data_writer: Component for writing data files.
+            metadata_writer: Component for persisting metadata.
+            qc_report_generator: Component for generating QC reports.
+            config: Determinism configuration.
+            qc_config: QC report configuration.
+            atomic_op: Atomic file operation handler.
+            metrics: Metrics port for observability.
+            converter: Optional DataFrame converter.
+            checksum_calculator: Component for computing checksums.
+            metadata_builder: Component for building metadata dicts.
+            qc_artifact_writer: Component for writing QC CSV files.
+        """
+        # Core dependencies
+        self._data_writer = data_writer
         self._metadata_writer = metadata_writer
-        self._quality_reporter = quality_reporter
+        self._qc_report_generator = qc_report_generator
         self._config = config
         self._qc_config = qc_config or QcConfig()
         self._atomic_op = atomic_op or AtomicFileOperation()
         self._metrics = metrics
         self._converter = converter
+
+        # Component dependencies (with defaults)
+        self._checksum_calculator = checksum_calculator or ChecksumCalculator()
+        self._metadata_builder = metadata_builder or MetadataBuilder()
+        self._qc_artifact_writer = qc_artifact_writer or QcArtifactWriter(
+            self._atomic_op
+        )
 
     def load(
         self,
@@ -76,7 +107,17 @@ class UnifiedLoaderImpl(LoaderABC):
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
-        """Alias for internal write logic to implement LoaderABC."""
+        """Load DataFrame to output path with full pipeline processing.
+
+        Args:
+            df: DataFrame to write.
+            output_path: Output directory path.
+            context: Run context with execution details.
+            column_order: Optional column ordering.
+
+        Returns:
+            WriteResult with path, row_count, checksum.
+        """
         return self._write_result(
             df=df,
             output_path=output_path,
@@ -86,13 +127,23 @@ class UnifiedLoaderImpl(LoaderABC):
         )
 
     def write_metadata(self, meta: dict, path: Path) -> None:
-        """Записывает метаданные детерминированно (atomic)."""
+        """Write metadata dictionary to file.
+
+        Args:
+            meta: Metadata dictionary.
+            path: Target file path.
+        """
         path.parent.mkdir(parents=True, exist_ok=True)
         self._metadata_writer.write_meta(meta, path)
 
     def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
-        """Записывает предоставленный QC-отчет детерминированно."""
-        self._write_qc_csv(path, df)
+        """Write a pre-built QC report to file.
+
+        Args:
+            df: QC report DataFrame.
+            path: Target file path.
+        """
+        self._qc_artifact_writer.write_qc_csv(df, path)
 
     def _write_result(
         self,
@@ -103,36 +154,38 @@ class UnifiedLoaderImpl(LoaderABC):
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
-        """Основной метод записи."""
+        """Core write logic coordinating all components.
+
+        Args:
+            df: DataFrame to write.
+            output_path: Output directory.
+            entity_name: Name of the entity being written.
+            run_context: Run context.
+            column_order: Optional column ordering.
+
+        Returns:
+            WriteResult with final checksum.
+        """
         try:
             output_path.mkdir(parents=True, exist_ok=True)
 
-            # 1. Валидация колонок (Check if strictly matches order if provided)
-            # Note: Actual schema validation happens in PipelineBase.validate()
-            # Here we ensure output structure and determinism.
+            # 1. Prepare DataFrame (column order + determinism)
             df_prepared = apply_column_order(df, column_order)
-
-            # 2. Сортировка (Determinism)
             df_prepared = self._stable_sort(df_prepared, run_context, column_order)
 
-            # 2.5. Конвертация кадра перед записью (если задан конвертер)
+            # 2. Apply converter if provided
             if self._converter is not None:
                 df_prepared = self._converter.convert(df_prepared)
 
-            # Порядок колонок для записи — фактический после конвертации,
-            # чтобы не потерять переименованные/переставленные колонки
             column_order_to_write = list(df_prepared.columns)
 
-            # 3. Атомарная запись
+            # 3. Write data file atomically
             data_path = output_path / f"{entity_name}.csv"
-
-            # Wrapper to capture inner write result
             inner_result: WriteResult | None = None
 
             def _write_wrapper(path: Path) -> None:
-                """Write dataset to the provided path via underlying writer."""
                 nonlocal inner_result
-                inner_result = self._writer.write(
+                inner_result = self._data_writer.write(
                     df_prepared, path, column_order=column_order_to_write
                 )
 
@@ -141,8 +194,8 @@ class UnifiedLoaderImpl(LoaderABC):
             if inner_result is None:
                 raise RuntimeError("Inner writer did not return result")
 
-            # 4. Вычисление checksum (после записи)
-            checksum = compute_file_sha256(data_path)
+            # 4. Compute checksum for data file
+            checksum = self._checksum_calculator.compute_checksum(data_path)
 
             final_result = WriteResult(
                 path=data_path,
@@ -151,13 +204,12 @@ class UnifiedLoaderImpl(LoaderABC):
                 checksum=checksum,
             )
 
+            # 5. Generate and write QC artifacts
             qc_artifacts = self._generate_qc_artifacts(df_prepared, output_path)
-            qc_checksums = {
-                path.name: compute_file_sha256(path) for path in qc_artifacts
-            }
+            qc_checksums = self._checksum_calculator.compute_checksums(qc_artifacts)
 
-            # 5. Запись метаданных
-            meta = build_run_metadata(
+            # 6. Build and write metadata
+            meta = self._metadata_builder.build_run_metadata(
                 run_context,
                 final_result,
                 qc_artifacts=qc_artifacts,
@@ -167,6 +219,7 @@ class UnifiedLoaderImpl(LoaderABC):
             self.write_metadata(meta, output_path / "meta.yaml")
 
             return final_result
+
         except Exception as exc:
             self._record_write_error(entity_name, exc)
             raise
@@ -177,63 +230,76 @@ class UnifiedLoaderImpl(LoaderABC):
         context: RunContext,
         column_order: list[str] | None = None,
     ) -> pd.DataFrame:
+        """Apply deterministic sorting to DataFrame.
+
+        Args:
+            df: DataFrame to sort.
+            context: Run context with config.
+            column_order: Optional column order (skips column sorting if provided).
+
+        Returns:
+            Sorted DataFrame.
+        """
         if not self._config.stable_sort:
             return df
 
-        # 1. Sort columns
+        # 1. Sort columns (if no explicit order)
         if not column_order:
             df = df.reindex(sorted(df.columns), axis=1)
 
         # 2. Sort rows by business key if configured
         hashing_config = context.config.get("hashing", {})
-        # Handle Pydantic model dump or dict
         if isinstance(hashing_config, dict):
             keys = hashing_config.get("business_key_fields")
         else:
-            # Should be dict if model_dump() was used, but being safe
             keys = getattr(hashing_config, "business_key_fields", None)
 
         if keys:
-            # Only sort by keys that exist in dataframe
             valid_keys = [k for k in keys if k in df.columns]
             if valid_keys:
                 df = df.sort_values(by=valid_keys, ignore_index=True)
 
         return df
 
-    def _generate_qc_artifacts(self, df: pd.DataFrame, output_path: Path) -> list[Path]:
+    def _generate_qc_artifacts(
+        self, df: pd.DataFrame, output_path: Path
+    ) -> list[Path]:
+        """Generate QC reports using the QC report generator.
+
+        Args:
+            df: Source DataFrame.
+            output_path: Output directory.
+
+        Returns:
+            List of written QC artifact paths.
+        """
         artifacts: list[Path] = []
 
         if self._qc_config.enable_quality_report:
-            artifacts.append(
-                self._write_qc_csv(
-                    output_path / "quality_report_table.csv",
-                    self._quality_reporter.build_quality_report(
-                        df, min_coverage=self._qc_config.min_coverage
-                    ),
-                )
+            quality_report = self._qc_report_generator.build_quality_report(
+                df, min_coverage=self._qc_config.min_coverage
             )
+            path = self._qc_artifact_writer.write_qc_csv(
+                quality_report, output_path / "quality_report_table.csv"
+            )
+            artifacts.append(path)
 
         if self._qc_config.enable_correlation_report:
-            artifacts.append(
-                self._write_qc_csv(
-                    output_path / "correlation_report_table.csv",
-                    self._quality_reporter.build_correlation_report(df),
-                )
+            correlation_report = self._qc_report_generator.build_correlation_report(df)
+            path = self._qc_artifact_writer.write_qc_csv(
+                correlation_report, output_path / "correlation_report_table.csv"
             )
+            artifacts.append(path)
 
         return artifacts
 
-    def _write_qc_csv(self, path: Path, df: pd.DataFrame) -> Path:
-        def _write_qc_wrapper(temp_path: Path) -> None:
-            """Write QC dataframe to a CSV atomically."""
-            path.parent.mkdir(parents=True, exist_ok=True)
-            df.to_csv(temp_path, index=False)
-
-        self._atomic_op.write_atomic(path, _write_qc_wrapper)
-        return path
-
     def _record_write_error(self, entity_name: str, exc: Exception) -> None:
+        """Record write error metric.
+
+        Args:
+            entity_name: Entity that failed.
+            exc: Exception that occurred.
+        """
         if not self._metrics:
             return
 
@@ -241,3 +307,6 @@ class UnifiedLoaderImpl(LoaderABC):
             "bioetl_output_write_errors_total",
             {"entity": entity_name, "error_type": exc.__class__.__name__},
         )
+
+
+__all__ = ["UnifiedLoaderImpl"]

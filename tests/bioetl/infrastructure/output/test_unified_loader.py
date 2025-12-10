@@ -3,7 +3,7 @@ Tests for the UnifiedLoaderImpl.
 """
 
 # pylint: disable=redefined-outer-name, protected-access
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -64,12 +64,40 @@ def mock_atomic_op():
 
 
 @pytest.fixture
+def mock_checksum_calculator():
+    """Fixture for mock checksum calculator."""
+    calculator = MagicMock()
+    calculator.compute_checksum.return_value = "mock_checksum"
+    calculator.compute_checksums.return_value = {}
+    return calculator
+
+
+@pytest.fixture
+def mock_metadata_builder():
+    """Fixture for mock metadata builder."""
+    builder = MagicMock()
+    builder.build_run_metadata.return_value = {"run_id": "test"}
+    return builder
+
+
+@pytest.fixture
+def mock_qc_artifact_writer():
+    """Fixture for mock QC artifact writer."""
+    writer = MagicMock()
+    writer.write_qc_csv.side_effect = lambda df, path: path
+    return writer
+
+
+@pytest.fixture
 def unified_writer(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
     mock_quality_reporter,
     mock_config_fixture,
     mock_atomic_op,
+    mock_checksum_calculator,
+    mock_metadata_builder,
+    mock_qc_artifact_writer,
 ):
     """Fixture for unified writer."""
     return UnifiedLoaderImpl(
@@ -78,6 +106,9 @@ def unified_writer(
         mock_quality_reporter,
         mock_config_fixture,
         atomic_op=mock_atomic_op,
+        checksum_calculator=mock_checksum_calculator,
+        metadata_builder=mock_metadata_builder,
+        qc_artifact_writer=mock_qc_artifact_writer,
     )
 
 
@@ -86,6 +117,7 @@ def test_write_result_success(
     mock_writer_fixture,
     mock_metadata_writer_fixture,
     mock_quality_reporter,
+    mock_checksum_calculator,
     run_context_factory,
     tmp_path,
 ):
@@ -104,30 +136,25 @@ def test_write_result_success(
         )
 
     mock_writer_fixture.write.side_effect = create_file
+    mock_checksum_calculator.compute_checksum.return_value = "real_checksum"
+    mock_checksum_calculator.compute_checksums.return_value = {
+        "quality_report_table.csv": "qc_quality",
+        "correlation_report_table.csv": "qc_correlation",
+    }
 
-    # Patch checksum function
-    with patch(
-        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256"
-    ) as mock_checksum:
-        mock_checksum.side_effect = [
-            "real_checksum",
-            "qc_quality",
-            "qc_correlation",
-        ]
+    # Act
+    result = unified_writer.load(df, output_dir, run_context)
 
-        # Act
-        result = unified_writer.load(df, output_dir, run_context)
+    # Assert
+    assert result.row_count == 2
+    assert result.checksum == "real_checksum"
 
-        # Assert
-        assert result.row_count == 2
-        assert result.checksum == "real_checksum"
-
-        # Verify calls
-        mock_writer_fixture.write.assert_called_once()
-        mock_metadata_writer_fixture.write_meta.assert_called_once()
-        assert mock_checksum.call_count == 3
-        mock_quality_reporter.build_quality_report.assert_called_once()
-        mock_quality_reporter.build_correlation_report.assert_called_once()
+    # Verify calls
+    mock_writer_fixture.write.assert_called_once()
+    mock_metadata_writer_fixture.write_meta.assert_called_once()
+    mock_checksum_calculator.compute_checksum.assert_called_once()
+    mock_quality_reporter.build_quality_report.assert_called_once()
+    mock_quality_reporter.build_correlation_report.assert_called_once()
 
 
 def test_unified_writer_delegates_atomicity(
@@ -135,6 +162,7 @@ def test_unified_writer_delegates_atomicity(
     mock_writer_fixture,
     mock_atomic_op,
     mock_quality_reporter,
+    mock_qc_artifact_writer,
     run_context_factory,
     tmp_path,
 ):
@@ -148,20 +176,16 @@ def test_unified_writer_delegates_atomicity(
         path=output_dir / "test.csv", row_count=1, checksum="abc", duration_sec=0.1
     )
 
-    with patch(
-        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256"
-    ) as mock_checksum:
-        mock_checksum.side_effect = ["abc", "qc1", "qc2"]
+    # Act
+    unified_writer.load(df, output_dir, run_context)
 
-        # Act
-        unified_writer.load(df, output_dir, run_context)
-
-        # Assert
-        assert mock_atomic_op.write_atomic.call_count == 3
-        args_list = mock_atomic_op.write_atomic.call_args_list
-        assert args_list[0][0][0] == output_dir / "test_entity.csv"
-        assert args_list[1][0][0].name == "quality_report_table.csv"
-        assert args_list[2][0][0].name == "correlation_report_table.csv"
+    # Assert - atomic_op is called once for data file
+    # QC files are written through qc_artifact_writer
+    assert mock_atomic_op.write_atomic.call_count == 1
+    args_list = mock_atomic_op.write_atomic.call_args_list
+    assert args_list[0][0][0] == output_dir / "test_entity.csv"
+    # QC files are written via qc_artifact_writer
+    assert mock_qc_artifact_writer.write_qc_csv.call_count == 2
 
 
 def test_unified_writer_column_order_and_fill(
@@ -191,16 +215,12 @@ def test_unified_writer_column_order_and_fill(
 
     mock_writer_fixture.write.side_effect = capture_df
 
-    with patch(
-        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256",
-        return_value="chk",
-    ):
-        result = unified_writer.load(
-            df,
-            output_dir,
-            run_context,
-            column_order=["a", "b", "c"],
-        )
+    result = unified_writer.load(
+        df,
+        output_dir,
+        run_context,
+        column_order=["a", "b", "c"],
+    )
 
     assert result.row_count == 1
     assert captured_df is not None
@@ -268,6 +288,9 @@ def test_write_result_records_metric_on_failure(
     mock_quality_reporter,
     mock_config_fixture,
     mock_atomic_op,
+    mock_checksum_calculator,
+    mock_metadata_builder,
+    mock_qc_artifact_writer,
     run_context_factory,
     tmp_path,
 ):
@@ -284,6 +307,9 @@ def test_write_result_records_metric_on_failure(
         mock_config_fixture,
         atomic_op=mock_atomic_op,
         metrics=metrics,
+        checksum_calculator=mock_checksum_calculator,
+        metadata_builder=mock_metadata_builder,
+        qc_artifact_writer=mock_qc_artifact_writer,
     )
 
     with pytest.raises(ValueError):
@@ -300,9 +326,13 @@ def test_unified_writer_applies_converter_rename(
     mock_quality_reporter,
     mock_config_fixture,
     mock_atomic_op,
+    mock_checksum_calculator,
+    mock_metadata_builder,
+    mock_qc_artifact_writer,
     run_context_factory,
     tmp_path,
 ):
+    """Test that converter renames columns correctly."""
     writer = MagicMock()
     captured_df: pd.DataFrame | None = None
 
@@ -325,19 +355,18 @@ def test_unified_writer_applies_converter_rename(
         mock_config_fixture,
         atomic_op=mock_atomic_op,
         converter=converter,
+        checksum_calculator=mock_checksum_calculator,
+        metadata_builder=mock_metadata_builder,
+        qc_artifact_writer=mock_qc_artifact_writer,
     )
 
     df = pd.DataFrame({"a_col": [1], "b_col": [2]})
-    with patch(
-        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256",
-        return_value="chk",
-    ):
-        writer_impl.load(
-            df,
-            tmp_path / "out",
-            run_context_factory(),
-            column_order=["a_col", "b_col"],
-        )
+    writer_impl.load(
+        df,
+        tmp_path / "out",
+        run_context_factory(),
+        column_order=["a_col", "b_col"],
+    )
 
     assert captured_df is not None
     assert list(captured_df.columns) == ["a-col", "b-col"]
@@ -348,9 +377,13 @@ def test_unified_writer_applies_converter_dropna(
     mock_quality_reporter,
     mock_config_fixture,
     mock_atomic_op,
+    mock_checksum_calculator,
+    mock_metadata_builder,
+    mock_qc_artifact_writer,
     run_context_factory,
     tmp_path,
 ):
+    """Test that dropna converter removes rows with all nulls."""
     writer = MagicMock()
 
     def create_file(df_to_write, path, **kwargs):
@@ -370,18 +403,17 @@ def test_unified_writer_applies_converter_dropna(
         mock_config_fixture,
         atomic_op=mock_atomic_op,
         converter=converter,
+        checksum_calculator=mock_checksum_calculator,
+        metadata_builder=mock_metadata_builder,
+        qc_artifact_writer=mock_qc_artifact_writer,
     )
 
     df = pd.DataFrame({"a": [None], "b": [None]})
-    with patch(
-        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256",
-        return_value="chk",
-    ):
-        result = writer_impl.load(
-            df,
-            tmp_path / "out",
-            run_context_factory(),
-            column_order=["a", "b"],
-        )
+    result = writer_impl.load(
+        df,
+        tmp_path / "out",
+        run_context_factory(),
+        column_order=["a", "b"],
+    )
 
     assert result.row_count == 0

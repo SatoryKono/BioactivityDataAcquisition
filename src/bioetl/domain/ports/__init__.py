@@ -10,6 +10,14 @@ from bioetl.domain.ports.extraction import (
     from_raw_records,
     to_raw_records,
 )
+from bioetl.domain.ports.output import (
+    ChecksumCalculatorPort,
+    DataWriterPort,
+    MetadataBuilderPort,
+    MetadataWriterPort,
+    QcArtifactWriterPort,
+    QcReportGeneratorPort,
+)
 from bioetl.domain.ports.parsing import (
     PaginationInfo,
     RawPayload,
@@ -29,6 +37,13 @@ __all__: list[str] = [
     # Backward compatibility helpers
     "from_raw_records",
     "to_raw_records",
+    # Output ports
+    "ChecksumCalculatorPort",
+    "DataWriterPort",
+    "MetadataBuilderPort",
+    "MetadataWriterPort",
+    "QcArtifactWriterPort",
+    "QcReportGeneratorPort",
     # Parsing ports
     "PaginationInfo",
     "RawPayload",
