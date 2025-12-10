@@ -27,18 +27,18 @@ def common_dependencies():
     normalization_service.normalize_record.side_effect = lambda record: record
     normalization_service.ensure_numeric_columns.side_effect = lambda df: df
 
-    record_source = MagicMock()
-    record_source.iter_records.return_value = iter([])
+    # ExtractStage uses extraction_service.iter_extract instead of record_source
+    extraction_service = MagicMock()
+    extraction_service.iter_extract.return_value = iter([])
 
     return {
         "config": config,
         "logger": MagicMock(),
         "validation_service": MagicMock(),
         "loader": MagicMock(),
-        "extraction_service": MagicMock(),
+        "extraction_service": extraction_service,
         "hash_service": MagicMock(),
         "normalization_service": normalization_service,
-        "record_source": record_source,
         "index_generator": MagicMock(),
         "timestamp_provider": MagicMock(),
     }
@@ -75,7 +75,6 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         index_generator=common_dependencies["index_generator"],
         timestamp_provider=common_dependencies["timestamp_provider"],
         normalization_service=common_dependencies["normalization_service"],
-        record_source=common_dependencies["record_source"],
     )
 
     assert pipeline.ID_COLUMN == id_col

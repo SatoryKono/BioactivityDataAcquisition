@@ -1,4 +1,31 @@
-"""Pipeline executor that manages state machine for pipeline runs."""
+"""
+Pipeline executor that manages state machine for pipeline runs.
+
+This module implements the execution engine for ETL pipelines. It separates
+the "how to run" logic from the "what to run" logic in PipelineBase.
+
+Architecture notes:
+    - PipelineExecutor implements the State Machine pattern for run lifecycle
+    - Uses _RunState dataclass to maintain execution state (immutable context)
+    - Delegates actual stage work to the pipeline instance
+    - Handles error recovery and result construction
+
+Execution flow:
+    1. Initialize: Reset state, build context, bind logger
+    2. Extract phase: Run extract → transform → validate in chunks
+    3. Write phase: Concatenate validated chunks, write output (if not dry_run)
+    4. Finalize: Build metadata, construct RunResult
+
+Error handling:
+    - PipelineStageError caught and converted to failed RunResult
+    - Stage results recorded even on failure for debugging
+    - Error messages propagated to RunResult.errors list
+
+Example::
+
+    executor = PipelineExecutor(runtime_manager, metadata_builder, logger)
+    result = executor.execute(pipeline, output_path, dry_run=False)
+"""
 
 from __future__ import annotations
 
