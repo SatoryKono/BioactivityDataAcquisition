@@ -16,6 +16,7 @@ from pydantic import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.configs.manifest import PipelineManifest
     from bioetl.domain.pipelines.types import PipelineType
     from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 
@@ -528,6 +529,16 @@ class FeatureFlagsConfig(BaseModel):
 class PipelineConfig(BaseModel):
     """Aggregate root for pipeline configuration.
 
+    DEPRECATED: Use PipelineManifest for new code.
+
+    This class is maintained for backward compatibility.
+    New code should use PipelineManifest which has cleaner decomposition:
+    - ExecutionConfig groups stages + runtime + transform
+    - Observability and features are injected via DI, not in manifest
+
+    Use to_manifest() to convert to new format, from_manifest() to create
+    from PipelineManifest for backward compatibility.
+
     Composes specialized bounded context configurations.
     Contains no business logic, only structure.
 
@@ -555,6 +566,9 @@ class PipelineConfig(BaseModel):
     Backward Compatibility:
         .source -> data_flow.source
         .sink -> data_flow.sink
+
+    See Also:
+        PipelineManifest: New recommended config aggregate.
     """
 
     # Core bounded context configs
@@ -708,6 +722,84 @@ class PipelineConfig(BaseModel):
         from bioetl.infrastructure.config.migration import ConfigMigrator
 
         return ConfigMigrator.migrate(data)
+
+    # =========================================================================
+    # Manifest conversion methods
+    # =========================================================================
+
+    def to_manifest(self) -> PipelineManifest:
+        """Convert to new PipelineManifest format.
+
+        Creates a PipelineManifest from this PipelineConfig, grouping
+        execution-related settings into ExecutionConfig.
+
+        Note: observability and features are NOT transferred to the manifest,
+        as these should be injected via DI at runtime.
+
+        Returns:
+            PipelineManifest: New manifest with decomposed configuration.
+
+        Example:
+            >>> config = PipelineConfig(...)
+            >>> manifest = config.to_manifest()
+            >>> # Use manifest with new code
+        """
+        from bioetl.domain.configs.execution import ExecutionConfig
+        from bioetl.domain.configs.manifest import PipelineManifest
+
+        return PipelineManifest(
+            identity=self.identity,
+            data_flow=self.data_flow,
+            execution=ExecutionConfig(
+                stages=self.stages,
+                runtime=self.runtime,
+                transform=self.transform,
+            ),
+            quality=self.quality,
+            provider_config=self.provider_config,
+            fields=self.fields,
+        )
+
+    @classmethod
+    def from_manifest(
+        cls,
+        manifest: PipelineManifest,
+        *,
+        observability: ObservabilityConfig | None = None,
+        features: FeatureFlagsConfig | None = None,
+    ) -> PipelineConfig:
+        """Create from PipelineManifest for backward compatibility.
+
+        This factory method enables using PipelineManifest with code
+        that still expects PipelineConfig.
+
+        Args:
+            manifest: PipelineManifest instance.
+            observability: Optional observability config.
+                Defaults to ObservabilityConfig().
+            features: Optional feature flags config.
+                Defaults to FeatureFlagsConfig().
+
+        Returns:
+            PipelineConfig: Legacy configuration object.
+
+        Example:
+            >>> manifest = PipelineManifest(...)
+            >>> config = PipelineConfig.from_manifest(manifest)
+            >>> # Use config with legacy code
+        """
+        return cls(
+            identity=manifest.identity,
+            data_flow=manifest.data_flow,
+            stages=manifest.execution.stages,
+            runtime=manifest.execution.runtime,
+            transform=manifest.execution.transform,
+            quality=manifest.quality,
+            provider_config=manifest.provider_config,
+            fields=manifest.fields,
+            observability=observability or ObservabilityConfig(),
+            features=features or FeatureFlagsConfig(),
+        )
 
 
 __all__ = [
