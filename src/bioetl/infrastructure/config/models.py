@@ -19,6 +19,7 @@ from bioetl.domain.configs import (  # noqa: F401
     FeatureFlagsConfig,
     HashingConfig,
     HashingDefaultsConfig,
+    HttpClientConfig,
     HttpClientDefaults,
     HttpClientSettings,
     HttpDefaultsConfig,
@@ -34,6 +35,7 @@ from bioetl.domain.configs import (  # noqa: F401
     PipelineConfig,
     ProfileConfig,
     ProviderConfigUnion,
+    ProviderHttpConfig,
     QcConfig,
     QualityConfig,
     RuntimeConfig,
@@ -43,32 +45,35 @@ from bioetl.domain.configs import (  # noqa: F401
 )
 
 __all__ = [
+    # Primary HTTP configuration
+    "HttpClientConfig",
+    "ProviderHttpConfig",
+    # Provider configs
     "BaseProviderConfig",
+    "ChemblSourceConfig",
+    "DummyProviderConfig",
+    "ProviderConfigUnion",
+    # Pipeline config
+    "PipelineConfig",
+    "RuntimeConfig",
+    # Sub-configs
     "BusinessKeyConfig",
     "CanonicalizationConfig",
-    "ChemblSourceConfig",
-    "ClientConfig",
     "CsvInputConfig",
     "DeterminismConfig",
-    "DummyProviderConfig",
-    "HTTP_CLIENT_DEFAULTS",
-    "HttpClientDefaults",
+    "FeatureFlagsConfig",
     "HashingConfig",
-    "HttpClientSettings",
     "InterfaceFeaturesConfig",
     "LoggingConfig",
     "MetricsConfig",
     "NormalizationConfig",
     "ObservabilityConfig",
     "PaginationConfig",
-    "PipelineConfig",
     "ProfileConfig",
-    "ProviderConfigUnion",
     "QualityConfig",
-    "RuntimeConfig",
     "QcConfig",
     "StorageConfig",
-    "FeatureFlagsConfig",
+    # Defaults configs
     "DefaultsConfig",
     "HashingDefaultsConfig",
     "HttpDefaultsConfig",
@@ -77,4 +82,9 @@ __all__ = [
     "NormalizationDefaultsConfig",
     "SourceDefaultsConfig",
     "SourcesDefaultsConfig",
+    # DEPRECATED: Legacy aliases
+    "ClientConfig",  # Use HttpClientConfig
+    "HttpClientDefaults",  # Use HttpClientConfig
+    "HttpClientSettings",  # Use ProviderHttpConfig
+    "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
 ]

@@ -7,8 +7,8 @@ from typing import Annotated
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, PositiveInt
 
 from bioetl.domain.configs.pipeline import (
-    ClientConfig,
     HashingConfig,
+    HttpClientConfig,
     NormalizationConfig,
 )
 
@@ -29,10 +29,13 @@ class NormalizationDefaultsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class ClientDefaultsConfig(ClientConfig):
-    """Default HTTP client limits shared across providers."""
+class ClientDefaultsConfig(HttpClientConfig):
+    """Default HTTP client limits shared across providers.
 
-    model_config = ConfigDict(extra="forbid")
+    DEPRECATED: Use HttpClientConfig directly.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
 
 class HttpDefaultsConfig(BaseModel):
@@ -47,9 +50,14 @@ class NetworkHttpDefaultsConfig(BaseModel):
     """HTTP defaults section containing canonical defaults."""
 
     default: HttpDefaultsConfig
-    client: ClientDefaultsConfig | None = None
+    http: HttpClientConfig | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+    @property
+    def client(self) -> HttpClientConfig | None:
+        """DEPRECATED: Use .http instead."""
+        return self.http
 
 
 class NetworkDefaultsConfig(BaseModel):

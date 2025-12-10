@@ -11,12 +11,7 @@ from bioetl.domain.clients.base.contracts import (
     ResponseParserABC,
     SecretProviderABC,
 )
-from bioetl.domain.configs import (
-    HTTP_CLIENT_DEFAULTS,
-    ClientConfig,
-    HttpClientDefaults,
-    HttpClientSettings,
-)
+from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.infrastructure.clients.base.impl._http_transport import _HttpTransport
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
@@ -31,6 +26,9 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblResponseParserImpl,
 )
 
+# Default HTTP client configuration (single source of truth)
+_DEFAULT_HTTP_CONFIG = HttpClientConfig()
+
 
 class EnvSecretProviderImpl(SecretProviderABC):
     """Resolve secrets from environment variables."""
@@ -40,84 +38,36 @@ class EnvSecretProviderImpl(SecretProviderABC):
         return os.getenv(name)
 
 
-def _resolve_http_defaults(
-    *,
-    client_config: ClientConfig | None = None,
-    defaults: HttpClientDefaults | None = None,
-    http_settings: HttpClientSettings | None = None,
-) -> HttpClientDefaults:
-    """Return explicit defaults or fall back to canonical HTTP defaults."""
-
-    if http_settings is not None:
-        return HttpClientDefaults(
-            timeout=http_settings.timeout,
-            retries=http_settings.retries,
-            backoff_factor=http_settings.backoff,
-            rate_limit=http_settings.rate_limit,
-            retry_enabled=http_settings.retry_enabled,
-        )
-
-    if client_config is None:
-        return defaults or HTTP_CLIENT_DEFAULTS
-
-    return HttpClientDefaults(
-        timeout=int(client_config.timeout_sec),
-        retries=client_config.max_retries,
-        backoff_factor=client_config.backoff_factor,
-        rate_limit=float(client_config.rate_limit_per_sec),
-        retry_enabled=bool(client_config.retry_enabled),
-    )
-
-
-def _ensure_client_config(
-    *,
-    client_config: ClientConfig | None = None,
-    http_settings: HttpClientSettings | None = None,
-    defaults: HttpClientDefaults | None = None,
-) -> ClientConfig:
-    """Return provided client config or build one from defaults."""
-
-    if http_settings is not None:
-        return ClientConfig.from_http_settings(http_settings, existing=client_config)
-
-    if client_config is not None:
-        return client_config
-
-    resolved = defaults or HTTP_CLIENT_DEFAULTS
-    return ClientConfig(
-        timeout_sec=resolved.timeout,
-        max_retries=resolved.retries,
-        rate_limit_per_sec=resolved.rate_limit,
-        backoff_factor=resolved.backoff_factor,
-        retry_enabled=resolved.retry_enabled,
-    )
+def _ensure_http_config(
+    config: HttpClientConfig | dict[str, Any] | None = None,
+) -> HttpClientConfig:
+    """Normalize config to HttpClientConfig, falling back to defaults."""
+    if config is None:
+        return _DEFAULT_HTTP_CONFIG
+    if isinstance(config, HttpClientConfig):
+        return config
+    return HttpClientConfig.model_validate(config)
 
 
 def build_rate_limiter(
     *,
-    client_config: ClientConfig | None = None,
-    http_settings: HttpClientSettings | None = None,
-    defaults: HttpClientDefaults | None = None,
+    config: HttpClientConfig | None = None,
     logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
-    """Create a rate limiter using unified HTTP defaults."""
-
-    resolved_defaults = _resolve_http_defaults(
-        client_config=client_config, defaults=defaults, http_settings=http_settings
-    )
-    rate = resolved_defaults.rate_limit
+    """Create a rate limiter using HTTP config."""
+    resolved = _ensure_http_config(config)
+    rate = resolved.rate_limit_per_sec
     capacity = max(1.0, rate)
     return TokenBucketRateLimiterImpl(rate, capacity, logger=logger)
 
 
 def default_rate_limiter(
-    rate: float = HTTP_CLIENT_DEFAULTS.rate_limit,
+    rate: float = _DEFAULT_HTTP_CONFIG.rate_limit_per_sec,
     capacity: float | None = None,
     *,
     logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
     """Create the default rate limiter with token bucket semantics."""
-
     resolved_capacity = capacity if capacity is not None else max(1.0, rate)
     return TokenBucketRateLimiterImpl(rate, resolved_capacity, logger=logger)
 
@@ -160,17 +110,16 @@ def default_paginator() -> PaginatorABC:
 
 def default_api_client(
     provider: str,
-    config: ClientConfig,
+    config: HttpClientConfig,
     *,
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
     metrics: MetricsPortABC | None = None,
 ) -> _HttpTransport:
     """Create the default API client without middleware indirection."""
-
     return build_http_client(
         provider,
-        client_config=config,
+        config=config,
         base_client=base_client,
         logger=logger,
         metrics=metrics,
@@ -180,20 +129,13 @@ def default_api_client(
 def build_http_client(
     provider: str,
     *,
-    client_config: ClientConfig | None = None,
-    http_settings: HttpClientSettings | None = None,
-    defaults: HttpClientDefaults | None = None,
+    config: HttpClientConfig | None = None,
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
     metrics: MetricsPortABC | None = None,
 ) -> _HttpTransport:
-    """Construct HTTP client using centralized defaults."""
-
-    resolved_config = _ensure_client_config(
-        client_config=client_config,
-        http_settings=http_settings,
-        defaults=defaults,
-    )
+    """Construct HTTP client using HttpClientConfig."""
+    resolved_config = _ensure_http_config(config)
     return _HttpTransport(
         provider=provider,
         config=resolved_config,

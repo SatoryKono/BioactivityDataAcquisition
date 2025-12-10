@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
-from bioetl.domain.configs import BaseProviderConfig, HttpClientSettings
+from bioetl.domain.configs import BaseProviderConfig, HttpClientConfig
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 
 if TYPE_CHECKING:
@@ -82,7 +82,12 @@ class ProviderDefinition:
     config_type: type[BaseProviderConfig]
     components: ProviderComponents
     description: str | None = None
-    http_client: HttpClientSettings | None = None
+    http: HttpClientConfig | None = None
+
+    @property
+    def http_client(self) -> HttpClientConfig | None:
+        """DEPRECATED: Use .http instead."""
+        return self.http
 
 
 __all__ = [

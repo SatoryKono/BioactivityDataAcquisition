@@ -11,6 +11,7 @@ from bioetl.domain.configs.pipeline import (
     DummyProviderConfig,
     FeatureFlagsConfig,
     HashingConfig,
+    HttpClientConfig,
     HttpClientSettings,
     InterfaceFeaturesConfig,
     LoggingConfig,
@@ -20,6 +21,7 @@ from bioetl.domain.configs.pipeline import (
     PaginationConfig,
     PipelineConfig,
     ProviderConfigUnion,
+    ProviderHttpConfig,
     QcConfig,
     QualityConfig,
     RuntimeConfig,
@@ -31,13 +33,12 @@ __all__ = [
     "BusinessKeyConfig",
     "CanonicalizationConfig",
     "ChemblSourceConfig",
-    "ClientConfig",
     "CsvInputConfig",
     "DeterminismConfig",
     "DummyProviderConfig",
     "FeatureFlagsConfig",
     "HashingConfig",
-    "HttpClientSettings",
+    "HttpClientConfig",
     "InterfaceFeaturesConfig",
     "LoggingConfig",
     "MetricsConfig",
@@ -46,8 +47,12 @@ __all__ = [
     "PaginationConfig",
     "PipelineConfig",
     "ProviderConfigUnion",
+    "ProviderHttpConfig",
     "QualityConfig",
     "RuntimeConfig",
     "QcConfig",
     "StorageConfig",
+    # DEPRECATED: Legacy aliases
+    "ClientConfig",  # Use HttpClientConfig
+    "HttpClientSettings",  # Use ProviderHttpConfig
 ]
