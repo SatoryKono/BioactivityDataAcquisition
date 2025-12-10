@@ -27,7 +27,7 @@ from bioetl.domain.provider_registry import (
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.infrastructure.clients.chembl.provider import register_chembl_provider
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
 # ---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         self._config_path = (
             Path(config_path) if config_path else DEFAULT_PROVIDERS_CONFIG_PATH
         )
-        self._logger = logger or default_logging_port()
+        self._logger = logger or create_logging_port()
 
     def get_providers(
         self,
@@ -371,14 +371,14 @@ ProviderRegistryLoader = ProviderLoaderImpl
 # ---------------------------------------------------------------------------
 
 
-def get_provider_registry(
+def create_provider_registry(
     *,
     config_path: str | Path | None = None,
     logger: LoggingPortABC | None = None,
     registry: ProviderRegistryABC | None = None,
 ) -> ProviderRegistryABC:
-    """Utility to return populated provider registry."""
-    loader = default_provider_registry_loader(
+    """Create a new populated provider registry."""
+    loader = create_provider_loader(
         config_path=config_path,
         logger=logger,
     )
@@ -391,8 +391,41 @@ def create_provider_loader(
     config_path: str | Path | None = None,
     logger: LoggingPortABC | None = None,
 ) -> ProviderRegistryLoaderABC:
-    """Factory for ProviderLoaderProtocol implementations."""
+    """Create a new provider loader instance."""
     return ProviderLoaderImpl(config_path=config_path, logger=logger)
+
+
+def create_provider_registry_loader(
+    *,
+    config_path: str | Path | None = None,
+    logger: LoggingPortABC | None = None,
+) -> ProviderRegistryLoaderABC:
+    """Create a new provider registry loader instance."""
+    return ProviderLoaderImpl(config_path=config_path, logger=logger)
+
+
+# ---------------------------------------------------------------------------
+# Deprecated aliases for backward compatibility
+# ---------------------------------------------------------------------------
+
+
+def get_provider_registry(
+    *,
+    config_path: str | Path | None = None,
+    logger: LoggingPortABC | None = None,
+    registry: ProviderRegistryABC | None = None,
+) -> ProviderRegistryABC:
+    """DEPRECATED: Use create_provider_registry() instead."""
+    import warnings
+
+    warnings.warn(
+        "get_provider_registry is deprecated, use create_provider_registry instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_provider_registry(
+        config_path=config_path, logger=logger, registry=registry
+    )
 
 
 def default_provider_registry_loader(
@@ -400,8 +433,16 @@ def default_provider_registry_loader(
     config_path: str | Path | None = None,
     logger: LoggingPortABC | None = None,
 ) -> ProviderRegistryLoaderABC:
-    """Default factory for provider registry loader."""
-    return ProviderLoaderImpl(config_path=config_path, logger=logger)
+    """DEPRECATED: Use create_provider_registry_loader() instead."""
+    import warnings
+
+    warnings.warn(
+        "default_provider_registry_loader is deprecated, "
+        "use create_provider_registry_loader instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_provider_registry_loader(config_path=config_path, logger=logger)
 
 
 # ---------------------------------------------------------------------------
@@ -433,8 +474,11 @@ __all__ = [
     # Validation functions
     "ensure_provider_known",
     "clear_provider_registry_cache",
-    # Factory functions
-    "get_provider_registry",
+    # Factory functions (new naming)
+    "create_provider_registry",
     "create_provider_loader",
+    "create_provider_registry_loader",
+    # Deprecated aliases
+    "get_provider_registry",
     "default_provider_registry_loader",
 ]
