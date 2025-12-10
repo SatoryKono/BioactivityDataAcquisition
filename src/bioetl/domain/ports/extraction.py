@@ -63,7 +63,12 @@ class VersionProviderABC(ABC):
 
     @abstractmethod
     def get_release_version(self) -> str:
-        """Get data source version identifier (e.g., 'chembl_34')."""
+        """Get raw data source version identifier (e.g., '34').
+
+        Returns:
+            Raw version string without provider prefix.
+            Use domain.services.version_formatter for formatted output.
+        """
 
 
 class ExtractionServiceABC(RecordFetcherABC):
@@ -75,7 +80,7 @@ class ExtractionServiceABC(RecordFetcherABC):
 
     @abstractmethod
     def get_release_version(self) -> str:
-        """Get data source version identifier."""
+        """Get raw data source version identifier (e.g., '34')."""
 
     @abstractmethod
     def request_batch(
