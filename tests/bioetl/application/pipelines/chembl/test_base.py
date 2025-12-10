@@ -93,8 +93,8 @@ def pipeline_fixture(mock_dependencies_fixture):
     """Fixture for pipeline instance."""
     mock_dependencies_fixture["config"].model_dump.return_value = {}
 
-    record_source = MagicMock()
-    record_source.iter_records.return_value = iter([])
+    # ExtractStage uses extraction_service.iter_extract instead of record_source
+    mock_dependencies_fixture["extraction_service"].iter_extract.return_value = iter([])
 
     return ConcreteChemblPipeline(
         config=mock_dependencies_fixture["config"],
@@ -105,7 +105,6 @@ def pipeline_fixture(mock_dependencies_fixture):
         normalization_service=mock_dependencies_fixture["normalization_service"],
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
-        record_source=record_source,
         index_generator=mock_dependencies_fixture["index_generator"],
         timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
     )
@@ -247,8 +246,8 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
     normalized_df = pd.DataFrame({"a": [1, 2], "transformed": [True, True]})
     normalization_service.normalize.return_value = normalized_df
 
-    record_source = MagicMock()
-    record_source.iter_records.return_value = iter([])
+    # ExtractStage uses extraction_service.iter_extract instead of record_source
+    mock_dependencies_fixture["extraction_service"].iter_extract.return_value = iter([])
 
     pipeline = ConcreteChemblPipeline(
         config=mock_dependencies_fixture["config"],
@@ -259,7 +258,6 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
-        record_source=record_source,
         index_generator=mock_dependencies_fixture["index_generator"],
         timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
     )
@@ -275,16 +273,33 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
 
 
 def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
-    """Test that extract yields DataFrame chunks for further processing."""
-    record_source = MagicMock()
+    """Test that extract yields DataFrame chunks for further processing.
+
+    ExtractStage uses extraction_service.iter_extract() and yields
+    DataFrames. Normalization is now done in the transformer stage,
+    not during extraction.
+
+    Note: We must use a valid ChEMBL entity (activity) because ExtractStage
+    uses ChemblRecordMapper which validates records against domain models.
+    """
+    # Use activity records that match ActivityRawModel requirements
     raw_chunks = [
-        [{"id": 1}, {"id": 2}],
-        [{"id": 3}],
+        [
+            {"activity_id": 1, "standard_flag": True},
+            {"activity_id": 2, "standard_flag": True},
+        ],
+        [{"activity_id": 3, "standard_flag": False}],
     ]
-    record_source.iter_records.return_value = raw_chunks
+    # ExtractStage uses extraction_service.iter_extract
+    mock_dependencies_fixture["extraction_service"].iter_extract.return_value = iter(
+        raw_chunks
+    )
+
+    # Update config to use 'activity' entity
+    mock_dependencies_fixture["config"].entity_name = "activity"
 
     normalization_service = MagicMock()
-    normalization_service.normalize.side_effect = lambda df: df.assign(processed=True)
+    normalization_service.normalize.return_value = pd.DataFrame({"a": [1]})
 
     pipeline = ChemblPipelineBase(
         config=mock_dependencies_fixture["config"],
@@ -292,7 +307,6 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         validation_service=mock_dependencies_fixture["validation_service"],
         loader=mock_dependencies_fixture["loader"],
         extraction_service=mock_dependencies_fixture["extraction_service"],
-        record_source=record_source,
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
@@ -302,14 +316,15 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
 
     result = _collect_extract_dataframe(pipeline)
 
-    assert normalization_service.normalize.call_count == 2
+    # ExtractStage yields raw DataFrames without normalization
+    # Normalization is now done in the transformer stage
+    assert normalization_service.normalize.call_count == 0
 
-    expected = pd.concat(
-        [
-            pd.DataFrame(chunk).assign(processed=True)
-            for chunk in cast(list[list[dict[str, int]]], raw_chunks)
-        ],
-        ignore_index=True,
-    )
-
-    pd.testing.assert_frame_equal(result, expected.reset_index(drop=True))
+    # ChemblRecordMapper converts records to full domain models with all fields
+    # We verify the key columns have correct values
+    assert len(result) == 3
+    assert "activity_id" in result.columns
+    assert "standard_flag" in result.columns
+    # ChemblRecordMapper converts activity_id to string
+    assert result["activity_id"].tolist() == ["1", "2", "3"]
+    assert result["standard_flag"].tolist() == [True, True, False]
