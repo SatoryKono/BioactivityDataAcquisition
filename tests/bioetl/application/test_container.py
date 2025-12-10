@@ -14,9 +14,7 @@ from bioetl.domain.configs import (
     DummyProviderConfig,
     PipelineConfig,
 )
-from bioetl.domain.provider_registry import (
-    InMemoryProviderRegistry,
-)
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import (
     ProviderComponents,
     ProviderDefinition,
