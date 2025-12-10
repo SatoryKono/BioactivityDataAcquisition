@@ -15,6 +15,7 @@ from bioetl.domain.clients.base.contracts import (
 )
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.infrastructure.clients.chembl.constants import resolve_endpoint
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.errors import (
     ApiUnexpectedStatusError,
@@ -215,16 +216,7 @@ class ChemblHttpClientImpl(DataClientABC):
             return callable_method(**filters)
 
     def _resolve_endpoint(self, entity: str) -> str:
-        aliases = {
-            "activity": "activity",
-            "assay": "assay",
-            "target": "target",
-            "publication": "document",
-            "molecule": "molecule",
-        }
-        if entity not in aliases:
-            raise ValueError(f"Unknown entity: {entity}")
-        return aliases[entity]
+        return resolve_endpoint(entity)
 
     # Optional accessor for metadata enrichment
     def get_last_endpoint_used(self) -> str | None:
