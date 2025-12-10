@@ -57,7 +57,7 @@ class HookNotifier:
     ) -> None:
         """Notify hooks about stage start and log the event."""
         self._stage_starts[stage] = datetime.now(timezone.utc)
-        self._current_run_id = context.run_id
+        self._current_run_id = context.run_id.value
         self._logger.info(
             "Stage started",
             provider=context.provider,

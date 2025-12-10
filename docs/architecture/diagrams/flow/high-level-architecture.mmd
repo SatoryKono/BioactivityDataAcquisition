@@ -15,12 +15,13 @@ end
 subgraph Application["Application Layer"]
     Orchestrator["PipelineOrchestrator"]:::componentPrimary
     Container["PipelineContainer"]:::componentPrimary
+    PipelineFactory["PipelineFactory\nChemblPipelineFactory"]:::componentPrimary
     ConfigResolution["Config Resolution"]:::componentSecondary
     ConfigRuntime["Config Runtime"]:::componentSecondary
     StageRuntimeManager["StageRuntimeManager"]:::componentSecondary
     Hooks["Hooks Implementation"]:::componentSecondary
     ErrorPolicy["ErrorPolicy"]:::componentSecondary
-    Factories["Factories\nProviderServiceFactory\nRecordSourceFactory"]:::componentSecondary
+    Factories["Factories\nProviderServiceFactory\nRecordSourceFactory\nPipelineHookFactory"]:::componentSecondary
 end
 
 subgraph Domain["Domain Layer (Core)"]
@@ -69,8 +70,10 @@ RestAPI --> Orchestrator
 MQ --> Orchestrator
 
 Orchestrator -->|Uses| ConfigResolution
-Orchestrator -->|Uses| Container
+Orchestrator -->|Creates| Container
+Orchestrator -->|Uses| PipelineFactory
 Orchestrator -->|Uses| ConfigRuntime
+PipelineFactory -->|Creates| Container
 Container --> PipelineContracts
 Container --> Validation
 Container --> Normalization

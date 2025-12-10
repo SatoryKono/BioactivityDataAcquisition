@@ -12,11 +12,13 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, TypeAlias
 
+from bioetl.domain.record_source import SourceRecord
+
 # Generic type aliases for infrastructure layer
 # These allow infrastructure code to work without importing domain models
 RawPayload: TypeAlias = dict[str, Any]
 RawRecordDict: TypeAlias = dict[str, Any]
-RawRecordList: TypeAlias = list[RawRecordDict]
+RawRecordList: TypeAlias = list[RawRecordDict] | list[SourceRecord]
 
 
 class ResponseParserPortABC(ABC):

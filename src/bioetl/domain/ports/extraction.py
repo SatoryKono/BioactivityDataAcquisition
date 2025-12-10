@@ -7,10 +7,12 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Protocol, TypeAlias
 import warnings
 
+from bioetl.domain.record_source import SourceRecord
+
 # Generic types for cross-layer communication
 # These allow domain layer to define contracts without coupling to specific models
 RawRecordDict: TypeAlias = dict[str, Any]
-RawRecordBatch: TypeAlias = list[RawRecordDict]
+RawRecordBatch: TypeAlias = list[RawRecordDict] | list[SourceRecord]
 
 if TYPE_CHECKING:
     from bioetl.domain.record_source import RawRecord
@@ -99,6 +101,18 @@ class ExtractionServiceABC(RecordFetcherABC):
 
         Returns:
             Parsed records as list[dict[str, Any]].
+        """
+
+    @abstractmethod
+    def serialize_records(self, entity: str, records: list[object]) -> RawRecordBatch:
+        """Serialize records for storage or further processing.
+
+        Args:
+            entity: Entity name.
+            records: List of records to serialize.
+
+        Returns:
+            Serialized records as list[dict[str, Any]].
         """
 
 

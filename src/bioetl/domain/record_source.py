@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 import warnings
 
 from pydantic import BaseModel, ConfigDict
@@ -32,7 +32,7 @@ class SourceRecord(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> Any:
     """Module-level __getattr__ for deprecation warnings."""
     if name == "RawRecord":
         warnings.warn(

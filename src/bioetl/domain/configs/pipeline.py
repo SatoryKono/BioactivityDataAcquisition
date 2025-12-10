@@ -220,7 +220,7 @@ class QcConfig(QualityControlConfig):
     Will be removed in v3.0.
     """
 
-    def __init__(self, **data):
+    def __init__(self, **data: Any) -> None:
         _qc_config_deprecation_warning()
         super().__init__(**data)
 

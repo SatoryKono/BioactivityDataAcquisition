@@ -8,10 +8,10 @@ from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 
 if TYPE_CHECKING:
-    from bioetl.application.container import SimplePipelineContainer
     from bioetl.application.pipelines.base import PipelineBase
     from bioetl.domain.configs import PipelineConfig
     from bioetl.domain.ports.extraction import ExtractionServiceABC
+    from bioetl.interfaces.simple_container import SimplePipelineContainer
 
 
 def default_pipeline_container() -> PipelineContainerABC:
