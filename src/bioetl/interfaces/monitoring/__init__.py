@@ -3,7 +3,7 @@
 from bioetl.infrastructure.observability import metrics as prometheus_metrics
 from bioetl.infrastructure.observability.factories import default_metrics_port
 from bioetl.infrastructure.observability.server import start_metrics_server_once
-from bioetl.interfaces.observability import MetricsPortABC
+from bioetl.domain.observability.contracts import MetricsPortABC
 
 
 def create_prometheus_metrics_port() -> MetricsPortABC:

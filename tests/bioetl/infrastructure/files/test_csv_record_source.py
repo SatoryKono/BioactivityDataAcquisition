@@ -15,7 +15,7 @@ from bioetl.infrastructure.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
-from bioetl.interfaces.observability import LoggingPortABC
+from bioetl.domain.observability.contracts import LoggingPortABC
 
 
 class _StubExtractionService:
