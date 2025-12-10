@@ -61,9 +61,7 @@ def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
     )
 
 
-def _apply_output_override(
-    pipeline_config: PipelineConfig, output: str | None
-) -> None:
+def _apply_output_override(pipeline_config: PipelineConfig, output: str | None) -> None:
     if not output:
         return
     output_path = Path(output)
