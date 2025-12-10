@@ -7,12 +7,12 @@ from pydantic import AnyHttpUrl
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     CsvInputConfig,
 )
-from bioetl.infrastructure.files.csv_record_source import (
+from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )

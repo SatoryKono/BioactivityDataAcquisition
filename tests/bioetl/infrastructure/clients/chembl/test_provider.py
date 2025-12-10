@@ -7,7 +7,7 @@ from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.infrastructure.clients.chembl.provider import (
     ChemblProviderComponentsFactory,
 )
-from bioetl.infrastructure.config.models import ChemblSourceConfig, ClientConfig
+from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
 
 
 class _NormalizationServiceStub(NormalizationServiceABC):

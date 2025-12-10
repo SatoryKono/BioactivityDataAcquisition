@@ -1,7 +1,9 @@
 """Contracts for pipeline components."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
@@ -16,6 +18,9 @@ from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
+
+if TYPE_CHECKING:
+    from bioetl.application.pipelines.base import PipelineBase
 
 
 class PipelineContainerABC(ABC):
@@ -87,4 +92,36 @@ class PipelineContainerABC(ABC):
         """Return builder for run metadata artifacts."""
 
 
-__all__ = ["ExtractorABC", "LoaderABC", "PipelineContainerABC"]
+class PipelineFactoryABC(ABC):
+    """
+    Abstract factory for creating pipeline instances.
+
+    Each pipeline type (e.g., ChEMBL, PubChem) provides a concrete implementation
+    that knows how to assemble the pipeline with its specific dependencies.
+    """
+
+    @abstractmethod
+    def create(
+        self,
+        container: PipelineContainerABC,
+        *,
+        limit: int | None = None,
+    ) -> PipelineBase:
+        """
+        Create a fully configured pipeline instance.
+
+        Args:
+            container: Dependency injection container providing services.
+            limit: Optional record limit for extraction.
+
+        Returns:
+            Configured pipeline ready to run.
+        """
+
+
+__all__ = [
+    "ExtractorABC",
+    "LoaderABC",
+    "PipelineContainerABC",
+    "PipelineFactoryABC",
+]

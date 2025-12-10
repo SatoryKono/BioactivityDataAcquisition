@@ -7,7 +7,7 @@ import pytest
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     PipelineConfig,
