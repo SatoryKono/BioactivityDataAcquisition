@@ -17,6 +17,10 @@ from bioetl.application.factories.service_factory import (
     ApplicationServiceFactoryABC,
 )
 from bioetl.application.factories.services import ProviderServiceFactory
+from bioetl.application.factories.transform_factory import (
+    TransformComponentFactory,
+    TransformComponentFactoryABC,
+)
 
 __all__ = [
     "ApplicationServiceFactory",
@@ -24,6 +28,8 @@ __all__ = [
     "PipelineHookFactory",
     "ProviderServiceFactory",
     "RecordSourceFactory",
+    "TransformComponentFactory",
+    "TransformComponentFactoryABC",
     "create_noop_logger",
     "create_noop_metadata_builder",
     "create_noop_metrics_port",
