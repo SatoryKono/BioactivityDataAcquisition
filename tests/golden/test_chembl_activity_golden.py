@@ -66,12 +66,6 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     output_path_str = str(tmp_path / "output")
     new_sink = config.sink.model_copy(update={"output_path": output_path_str})
     object.__setattr__(config, "sink", new_sink)
-    # Also update storage if it exists
-    if hasattr(config.runtime, "storage"):
-        new_storage = config.runtime.storage.model_copy(
-            update={"output_path": output_path_str}
-        )
-        object.__setattr__(config.runtime, "storage", new_storage)
 
     provider_loader_factory = partial(create_provider_loader)
     registry = provider_loader_factory().get_registry()
@@ -101,10 +95,9 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         pipeline, "_should_skip_release_lookup", lambda: False, raising=False
     )
 
-    output_path = Path(config.sink.output_path)
-    pipeline.run(output_path=output_path)
+    pipeline.run(output_path=Path(config.sink.output_path))
 
-    actual_path = output_path / "activity.csv"
+    actual_path = Path(config.sink.output_path) / "activity.csv"
     expected_path = Path("qc/golden/chembl_activity/expected_output.csv")
 
     actual_df = pd.read_csv(actual_path)
