@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-from typing import Any, cast
+from typing import Any
 
+from bioetl.application.factories.noop import create_noop_metrics_port
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
@@ -102,7 +102,7 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         self._pipeline_id = pipeline_id
         self._provider = provider
         self._entity_name = entity_name
-        self._metrics = metrics_port or _create_noop_metrics_port()
+        self._metrics = metrics_port or create_noop_metrics_port()
 
     def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
         """Хук старта стадии не требует метрик."""
@@ -128,17 +128,3 @@ class MetricsPipelineHookImpl(PipelineHookABC):
 
     def on_error(self, stage: str, error: PipelineStageError) -> None:  # noqa: ARG002
         """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
-
-
-def _create_noop_metrics_port() -> MetricsPortABC:
-    """Return no-op metrics port."""
-
-    return cast(
-        MetricsPortABC,
-        SimpleNamespace(
-            inc_counter=lambda *_args, **_kwargs: None,
-            observe_histogram=lambda *_args, **_kwargs: None,
-            update_stage_duration=lambda **_kwargs: None,
-            update_stage_total=lambda **_kwargs: None,
-        ),
-    )
