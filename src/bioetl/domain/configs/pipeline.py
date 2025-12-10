@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import (
@@ -20,13 +19,16 @@ if TYPE_CHECKING:
     from bioetl.domain.pipelines.types import PipelineType
     from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 
-# Import NormalizationConfig from the dedicated normalization module
+# Import bounded context configs
+from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.normalization import NormalizationConfig
+from bioetl.domain.configs.sink import DataSinkConfig, OutputOptionsConfig
+from bioetl.domain.configs.source import CsvInputConfig, DataSourceConfig
 from bioetl.domain.configs.transform import TransformConfig
 
 
 class PaginationConfig(BaseModel):
-    """Конфигурация пагинации."""
+    """Pagination configuration."""
 
     limit: int = 1000
     offset: int = 0
@@ -136,7 +138,7 @@ HTTP_CLIENT_DEFAULTS = HttpClientConfig()
 
 
 class StorageConfig(BaseModel):
-    """Конфигурация путей хранения файлов."""
+    """Storage path configuration."""
 
     output_path: str = "./data/output"
     cache_path: str = "./data/cache"
@@ -146,7 +148,7 @@ class StorageConfig(BaseModel):
 
 
 class LoggingConfig(BaseModel):
-    """Конфигурация логирования."""
+    """Logging configuration."""
 
     level: str = "INFO"
     structured: bool = True
@@ -156,7 +158,7 @@ class LoggingConfig(BaseModel):
 
 
 class MetricsConfig(BaseModel):
-    """Конфигурация экспорта метрик."""
+    """Metrics export configuration."""
 
     enabled: bool = True
     port: int = 9108
@@ -175,7 +177,7 @@ class MetricsConfig(BaseModel):
 
 
 class DeterminismConfig(BaseModel):
-    """Конфигурация детерминизма."""
+    """Determinism configuration."""
 
     stable_sort: bool = True
     utc_timestamps: bool = True
@@ -186,7 +188,7 @@ class DeterminismConfig(BaseModel):
 
 
 class QcConfig(BaseModel):
-    """Конфигурация контроля качества."""
+    """Quality control configuration."""
 
     enable_quality_report: bool = True
     enable_correlation_report: bool = True
@@ -196,7 +198,7 @@ class QcConfig(BaseModel):
 
 
 class CanonicalizationConfig(BaseModel):
-    """Конфигурация канонизации для хеширования."""
+    """Canonicalization configuration for hashing."""
 
     format: Literal["canonical_json"] = "canonical_json"
     utf8: bool = True
@@ -211,7 +213,7 @@ class CanonicalizationConfig(BaseModel):
 
 
 class BusinessKeyConfig(BaseModel):
-    """Конфигурация бизнес-ключа."""
+    """Business key configuration."""
 
     serialization: Literal["json_array", "json_object"] = "json_array"
     use_concatenation: bool = False
@@ -220,7 +222,7 @@ class BusinessKeyConfig(BaseModel):
 
 
 class HashingConfig(BaseModel):
-    """Конфигурация хеширования."""
+    """Hashing configuration."""
 
     algorithm: str = "blake2b"
     digest_size_bytes: int = 32
@@ -239,128 +241,10 @@ class HashingConfig(BaseModel):
 
 
 class InterfaceFeaturesConfig(BaseModel):
-    """Фиче-флаги интерфейсов."""
+    """Interface feature flags."""
 
     rest_interface_enabled: bool = False
     mq_interface_enabled: bool = False
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class CsvInputConfig(BaseModel):
-    """Конфигурация CSV-ввода."""
-
-    delimiter: str = ","
-    header: bool = True
-
-    model_config = ConfigDict(extra="forbid")
-
-    @field_validator("delimiter")
-    @classmethod
-    def validate_delimiter(cls, value: str) -> str:
-        """Validate that CSV delimiter is a non-empty string."""
-
-        if not value:
-            raise ValueError("CSV delimiter must be a non-empty string")
-        return value
-
-
-# =============================================================================
-# Decomposed Configuration Classes
-# =============================================================================
-
-
-class PipelineIdentity(BaseModel):
-    """Pipeline identification and metadata.
-
-    Groups fields that identify the pipeline and its data domain.
-    """
-
-    id: str
-    provider: str
-    entity: str
-    primary_key: str | None = None
-
-    model_config = ConfigDict(extra="forbid")
-
-    @field_validator("provider")
-    @classmethod
-    def validate_provider_known(cls, value: str) -> str:
-        """Ensure provider identifier is known to the registry."""
-        from bioetl.domain.providers import ProviderId
-
-        known = {provider.value for provider in ProviderId}
-        if value not in known:
-            raise ValueError(f"Unknown provider: {value}")
-        return value
-
-
-class DataSourceConfig(BaseModel):
-    """Data source configuration.
-
-    Groups fields related to input data: mode, path, batching, CSV options.
-    """
-
-    input_mode: Literal["csv", "id_only", "auto_detect"]
-    input_path: str | None = None
-    batch_size: PositiveInt
-    csv: CsvInputConfig = Field(default_factory=CsvInputConfig, alias="csv_options")
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
-
-    @field_validator("input_path")
-    @classmethod
-    def validate_input_path(cls, value: str | None) -> str | None:
-        """Normalize empty input path to None and ensure path string."""
-        if value is None or value == "":
-            return None
-        path = Path(value)
-        return str(path)
-
-    @model_validator(mode="after")
-    def validate_input_mode_requires_path(self) -> DataSourceConfig:
-        """Validate that input_mode is compatible with provided paths."""
-        if self.input_mode in {"csv", "id_only"} and not self.input_path:
-            raise ValueError(
-                "input_path must be provided when input_mode is 'csv' or 'id_only'"
-            )
-        return self
-
-    @model_validator(mode="after")
-    def validate_csv_header_required(self) -> DataSourceConfig:
-        """Validate CSV header requirement for csv and auto_detect modes."""
-        if self.input_mode == "csv" and not self.csv.header:
-            raise ValueError("csv.header must be true when input_mode is 'csv'")
-
-        if (
-            self.input_mode == "auto_detect"
-            and self.input_path
-            and not self.csv.header
-        ):
-            raise ValueError(
-                "csv.header must be true when input_mode is 'auto_detect' "
-                "and input_path is set"
-            )
-        return self
-
-
-class OutputOptionsConfig(BaseModel):
-    """Опции финальной записи артефактов."""
-
-    converter: str | None = None
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class DataSinkConfig(BaseModel):
-    """Data sink configuration.
-
-    Groups fields related to output: path, dry run mode, output options.
-    """
-
-    output_path: str
-    dry_run: bool = False
-    output: OutputOptionsConfig = Field(default_factory=OutputOptionsConfig)
 
     model_config = ConfigDict(extra="forbid")
 
@@ -379,7 +263,7 @@ class PipelineStagesConfig(BaseModel):
 
 
 class BaseProviderConfig(BaseModel):
-    """Базовая строгая конфигурация провайдера.
+    """Base strict provider configuration.
 
     Uses HttpClientConfig as the single source of truth for HTTP settings.
     Legacy fields (http_client, client) are provided for backward compatibility.
@@ -494,7 +378,7 @@ class BaseProviderConfig(BaseModel):
 
 
 class ChemblSourceConfig(BaseProviderConfig):
-    """Конфигурация источника ChEMBL."""
+    """ChEMBL source configuration."""
 
     provider: Literal["chembl"] = "chembl"
     api_version: str | None = None
@@ -508,7 +392,7 @@ class ChemblSourceConfig(BaseProviderConfig):
     def resolve_effective_batch_size(
         self, limit: int | None = None, hard_cap: int | None = 25
     ) -> int:
-        """Вычисляет эффективный размер батча с учётом ограничений."""
+        """Compute effective batch size with constraints."""
 
         effective_batch = self.batch_size or hard_cap or 25
 
@@ -522,7 +406,7 @@ class ChemblSourceConfig(BaseProviderConfig):
 
 
 class DummyProviderConfig(BaseProviderConfig):
-    """Конфигурация фиктивного провайдера для тестов и шаблонов."""
+    """Dummy provider configuration for tests and templates."""
 
     provider: Literal["dummy"] = "dummy"
 
@@ -534,7 +418,7 @@ ProviderConfigUnion = Annotated[
 
 
 class RuntimeConfig(BaseModel):
-    """Секция исполнения и источников данных."""
+    """Runtime and data source section."""
 
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
     http: HttpClientConfig = Field(default_factory=HttpClientConfig)
@@ -561,7 +445,7 @@ class RuntimeConfig(BaseModel):
 
 
 class ObservabilityConfig(BaseModel):
-    """Секция логирования и метрик."""
+    """Logging and metrics section."""
 
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     metrics: MetricsConfig = Field(default_factory=MetricsConfig)
@@ -570,7 +454,7 @@ class ObservabilityConfig(BaseModel):
 
 
 class QualityConfig(BaseModel):
-    """Секция качества и детерминизма."""
+    """Quality and determinism section."""
 
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
     qc: QcConfig = Field(default_factory=QcConfig)
@@ -581,7 +465,7 @@ class QualityConfig(BaseModel):
 
 
 class FeatureFlagsConfig(BaseModel):
-    """Секция фичей интерфейсов."""
+    """Interface features section."""
 
     interfaces: InterfaceFeaturesConfig = Field(
         default_factory=InterfaceFeaturesConfig, alias="features"
@@ -612,7 +496,7 @@ class FeatureFlagsConfig(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def migrate_inline_flags(cls, data: Any) -> Any:
-        """Позволяет передавать плоские фиче-флаги без обёртки."""
+        """Allow flat feature flags without wrapper."""
 
         if not isinstance(data, dict):
             return data
@@ -627,22 +511,31 @@ class FeatureFlagsConfig(BaseModel):
 
 
 class PipelineConfig(BaseModel):
-    """Decomposed pipeline configuration for BioETL.
+    """Aggregate root for pipeline configuration.
 
-    Uses composition of bounded context configs:
-    - identity: Pipeline identification (id, provider, entity, primary_key)
-    - source: Data source settings (input_mode, input_path, batch_size, csv)
-    - sink: Data sink settings (output_path, dry_run, output options)
-    - stages: Pipeline stage flags (extract, transform, load)
-    - runtime: Execution settings (pagination, http, storage)
-    - observability: Logging and metrics
-    - quality: QC, hashing, normalization, determinism
-    - features: Feature flags
-    - transform: Transform stage settings
+    Composes specialized bounded context configurations.
+    Contains no business logic, only structure.
+
+    Breaking Changes (v2.0):
+        - Access via decomposed sections: config.identity.entity, config.source.input_mode, etc.
+        - Removed 20+ backward compatibility property accessors
+        - Only convenience accessors for entity and provider remain
+
+    Sections:
+        identity: Pipeline identification (pipeline_id, provider, entity, primary_key)
+        source: Data source settings (input_mode, input_path, batch_size, csv)
+        sink: Data sink settings (output_path, dry_run, output options)
+        stages: Pipeline stage flags (extract, transform, load)
+        runtime: Execution settings (pagination, http, storage)
+        observability: Logging and metrics
+        quality: QC, hashing, normalization, determinism
+        features: Feature flags
+        transform: Transform stage settings
+        provider_config: Provider-specific configuration
     """
 
-    # Decomposed sections
-    identity: PipelineIdentity
+    # Core bounded context configs
+    identity: PipelineIdentityConfig
     source: DataSourceConfig
     sink: DataSinkConfig
     stages: PipelineStagesConfig = Field(default_factory=PipelineStagesConfig)
@@ -655,7 +548,7 @@ class PipelineConfig(BaseModel):
     transform: TransformConfig = Field(default_factory=TransformConfig)
 
     # Provider-specific config
-    provider_config: ProviderConfigUnion
+    provider_config: ProviderConfigUnion | None = None
 
     # Schema configuration
     fields: list[dict[str, Any]] = Field(default_factory=list)
@@ -663,243 +556,28 @@ class PipelineConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     # =========================================================================
-    # Backward compatibility properties (delegating to decomposed sections)
+    # Convenience accessors (minimal, no backward compatibility)
     # =========================================================================
-
-    @property
-    def id(self) -> str:
-        """Backward compatibility: access id from identity."""
-        return self.identity.id
-
-    @id.setter
-    def id(self, value: str) -> None:
-        """Backward compatibility: set id in identity."""
-        object.__setattr__(self.identity, "id", value)
-
-    @property
-    def provider(self) -> str:
-        """Backward compatibility: access provider from identity."""
-        return self.identity.provider
-
-    @provider.setter
-    def provider(self, value: str) -> None:
-        """Backward compatibility: set provider in identity."""
-        object.__setattr__(self.identity, "provider", value)
 
     @property
     def entity(self) -> str:
-        """Backward compatibility: access entity from identity."""
+        """Access entity from identity section."""
         return self.identity.entity
 
-    @entity.setter
-    def entity(self, value: str) -> None:
-        """Backward compatibility: set entity in identity."""
-        object.__setattr__(self.identity, "entity", value)
+    @property
+    def provider(self) -> str:
+        """Access provider from identity section."""
+        return self.identity.provider
 
     @property
-    def primary_key(self) -> str | None:
-        """Backward compatibility: access primary_key from identity."""
-        return self.identity.primary_key
-
-    @primary_key.setter
-    def primary_key(self, value: str | None) -> None:
-        """Backward compatibility: set primary_key in identity."""
-        object.__setattr__(self.identity, "primary_key", value)
+    def entity_name(self) -> str:
+        """Alias for entity (backward compatibility)."""
+        return self.identity.entity
 
     @property
-    def input_mode(self) -> Literal["csv", "id_only", "auto_detect"]:
-        """Backward compatibility: access input_mode from source."""
-        return self.source.input_mode
-
-    @input_mode.setter
-    def input_mode(self, value: Literal["csv", "id_only", "auto_detect"]) -> None:
-        """Backward compatibility: set input_mode in source."""
-        object.__setattr__(self.source, "input_mode", value)
-
-    @property
-    def input_path(self) -> str | None:
-        """Backward compatibility: access input_path from source."""
-        return self.source.input_path
-
-    @input_path.setter
-    def input_path(self, value: str | None) -> None:
-        """Backward compatibility: set input_path in source."""
-        object.__setattr__(self.source, "input_path", value)
-
-    @property
-    def batch_size(self) -> int:
-        """Backward compatibility: access batch_size from source."""
-        return self.source.batch_size
-
-    @batch_size.setter
-    def batch_size(self, value: int) -> None:
-        """Backward compatibility: set batch_size in source."""
-        object.__setattr__(self.source, "batch_size", value)
-
-    @property
-    def output_path(self) -> str:
-        """Backward compatibility: access output_path from sink."""
-        return self.sink.output_path
-
-    @output_path.setter
-    def output_path(self, value: str) -> None:
-        """Backward compatibility: set output_path in sink."""
-        object.__setattr__(self.sink, "output_path", value)
-
-    @property
-    def dry_run(self) -> bool:
-        """Backward compatibility: access dry_run from sink."""
-        return self.sink.dry_run
-
-    @dry_run.setter
-    def dry_run(self, value: bool) -> None:
-        """Backward compatibility: set dry_run in sink."""
-        object.__setattr__(self.sink, "dry_run", value)
-
-    @property
-    def output(self) -> OutputOptionsConfig:
-        """Backward compatibility: access output from sink."""
-        return self.sink.output
-
-    @output.setter
-    def output(self, value: OutputOptionsConfig) -> None:
-        """Backward compatibility: set output in sink."""
-        object.__setattr__(self.sink, "output", value)
-
-    @property
-    def csv_options(self) -> CsvInputConfig:
-        """Backward compatibility: access csv from source."""
-        return self.source.csv
-
-    @csv_options.setter
-    def csv_options(self, value: CsvInputConfig) -> None:
-        """Backward compatibility: set csv in source."""
-        object.__setattr__(self.source, "csv", value)
-
-    @property
-    def pipeline(self) -> dict[str, Any]:
-        """Backward compatibility: access stages as dict."""
-        return {
-            "extract": self.stages.extract,
-            "transform": self.stages.transform,
-            "load": self.stages.load,
-        }
-
-    # =========================================================================
-    # Backward compatibility for runtime section
-    # =========================================================================
-
-    @property
-    def pagination(self) -> PaginationConfig:
-        """Backward compatibility: access pagination from runtime."""
-        return self.runtime.pagination
-
-    @pagination.setter
-    def pagination(self, value: PaginationConfig) -> None:
-        """Backward compatibility: set pagination in runtime."""
-        object.__setattr__(self.runtime, "pagination", value)
-
-    @property
-    def client(self) -> HttpClientConfig:
-        """DEPRECATED: Use runtime.http instead."""
-        return self.runtime.http
-
-    @client.setter
-    def client(self, value: HttpClientConfig) -> None:
-        """DEPRECATED: Use runtime.http instead."""
-        object.__setattr__(self.runtime, "http", value)
-
-    @property
-    def storage(self) -> StorageConfig:
-        """Backward compatibility: access storage from runtime."""
-        return self.runtime.storage
-
-    @storage.setter
-    def storage(self, value: StorageConfig) -> None:
-        """Backward compatibility: set storage in runtime."""
-        object.__setattr__(self.runtime, "storage", value)
-
-    # =========================================================================
-    # Backward compatibility for observability section
-    # =========================================================================
-
-    @property
-    def logging(self) -> LoggingConfig:
-        """Backward compatibility: access logging from observability."""
-        return self.observability.logging
-
-    @logging.setter
-    def logging(self, value: LoggingConfig) -> None:
-        """Backward compatibility: set logging in observability."""
-        object.__setattr__(self.observability, "logging", value)
-
-    @property
-    def metrics(self) -> MetricsConfig:
-        """Backward compatibility: access metrics from observability."""
-        return self.observability.metrics
-
-    @metrics.setter
-    def metrics(self, value: MetricsConfig) -> None:
-        """Backward compatibility: set metrics in observability."""
-        object.__setattr__(self.observability, "metrics", value)
-
-    # =========================================================================
-    # Backward compatibility for quality section
-    # =========================================================================
-
-    @property
-    def determinism(self) -> DeterminismConfig:
-        """Backward compatibility: access determinism from quality."""
-        return self.quality.determinism
-
-    @determinism.setter
-    def determinism(self, value: DeterminismConfig) -> None:
-        """Backward compatibility: set determinism in quality."""
-        object.__setattr__(self.quality, "determinism", value)
-
-    @property
-    def qc(self) -> QcConfig:
-        """Backward compatibility: access qc from quality."""
-        return self.quality.qc
-
-    @qc.setter
-    def qc(self, value: QcConfig) -> None:
-        """Backward compatibility: set qc in quality."""
-        object.__setattr__(self.quality, "qc", value)
-
-    @property
-    def hashing(self) -> HashingConfig:
-        """Backward compatibility: access hashing from quality."""
-        return self.quality.hashing
-
-    @hashing.setter
-    def hashing(self, value: HashingConfig) -> None:
-        """Backward compatibility: set hashing in quality."""
-        object.__setattr__(self.quality, "hashing", value)
-
-    @property
-    def normalization(self) -> NormalizationConfig:
-        """Backward compatibility: access normalization from quality."""
-        return self.quality.normalization
-
-    @normalization.setter
-    def normalization(self, value: NormalizationConfig) -> None:
-        """Backward compatibility: set normalization in quality."""
-        object.__setattr__(self.quality, "normalization", value)
-
-    # =========================================================================
-    # Backward compatibility for features section
-    # =========================================================================
-
-    @property
-    def interface_features(self) -> InterfaceFeaturesConfig:
-        """Backward compatibility: access interfaces from features."""
-        return self.features.interfaces
-
-    @interface_features.setter
-    def interface_features(self, value: InterfaceFeaturesConfig) -> None:
-        """Backward compatibility: set interfaces in features."""
-        object.__setattr__(self.features, "interfaces", value)
+    def id(self) -> str:
+        """Access pipeline_id from identity section."""
+        return self.identity.pipeline_id
 
     # =========================================================================
     # Computed properties
@@ -931,11 +609,6 @@ class PipelineConfig(BaseModel):
         return PipelineType.FULL
 
     @property
-    def entity_name(self) -> str:
-        """Alias for entity (backward compatibility)."""
-        return self.identity.entity
-
-    @property
     def serialization_mode(self) -> str:
         """Shortcut for transform.serialization_mode."""
         return self.transform.serialization_mode
@@ -963,6 +636,8 @@ class PipelineConfig(BaseModel):
                 f"Requested provider '{provider}' does not match config provider "
                 f"'{self.identity.provider}'"
             )
+        if self.provider_config is None:
+            raise ValueError("provider_config is not set")
         return self.provider_config
 
     # =========================================================================
@@ -972,143 +647,31 @@ class PipelineConfig(BaseModel):
     @model_validator(mode="after")
     def validate_provider_alignment(self) -> PipelineConfig:
         """Ensure provider_config provider aligns with identity.provider."""
-        if self.provider_config.provider != self.identity.provider:
-            raise ValueError(
-                "provider_config.provider must match identity.provider"
-            )
+        if self.provider_config is not None:
+            if self.provider_config.provider != self.identity.provider:
+                raise ValueError(
+                    "provider_config.provider must match identity.provider"
+                )
         return self
 
     @model_validator(mode="before")
     @classmethod
-    def migrate_legacy_layout(cls, data: Any) -> Any:
-        """Migrate flat legacy fields into decomposed sections."""
-        if not isinstance(data, dict):
-            return data
+    def migrate_legacy_format(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Delegate migration to ConfigMigrator."""
+        from bioetl.domain.configs.migration import ConfigMigrator
 
-        migrated = dict(data)
-
-        # -----------------------------------------------------------------
-        # Pack identity section from flat fields
-        # -----------------------------------------------------------------
-        if "identity" not in migrated:
-            identity_fields = {}
-            for field in ("id", "provider", "entity", "primary_key"):
-                if field in migrated:
-                    identity_fields[field] = migrated.pop(field)
-            if identity_fields:
-                migrated["identity"] = identity_fields
-
-        # -----------------------------------------------------------------
-        # Pack source section from flat fields
-        # -----------------------------------------------------------------
-        if "source" not in migrated:
-            source_fields = {}
-            for field in ("input_mode", "input_path", "batch_size"):
-                if field in migrated:
-                    source_fields[field] = migrated.pop(field)
-            # Handle csv_options -> csv
-            if "csv_options" in migrated:
-                source_fields["csv"] = migrated.pop("csv_options")
-            elif "csv" in migrated and "runtime" not in migrated:
-                # csv at root level goes to source
-                source_fields["csv"] = migrated.pop("csv")
-            if source_fields:
-                migrated["source"] = source_fields
-
-        # -----------------------------------------------------------------
-        # Pack sink section from flat fields
-        # -----------------------------------------------------------------
-        if "sink" not in migrated:
-            sink_fields = {}
-            for field in ("output_path", "dry_run"):
-                if field in migrated:
-                    sink_fields[field] = migrated.pop(field)
-            # Handle output section
-            if "output" in migrated:
-                output_val = migrated.pop("output")
-                if isinstance(output_val, dict):
-                    sink_fields["output"] = output_val
-            if sink_fields:
-                migrated["sink"] = sink_fields
-
-        # -----------------------------------------------------------------
-        # Pack stages section from pipeline dict + migrate primary_key
-        # -----------------------------------------------------------------
-        if "pipeline" in migrated:
-            pipeline_dict = migrated.pop("pipeline")
-            if isinstance(pipeline_dict, dict):
-                # Extract primary_key from pipeline dict -> identity
-                if "primary_key" in pipeline_dict:
-                    pk_from_pipeline = pipeline_dict.pop("primary_key")
-                    # Only use if identity.primary_key not already set
-                    if "identity" in migrated:
-                        if migrated["identity"].get("primary_key") is None:
-                            migrated["identity"]["primary_key"] = pk_from_pipeline
-                    else:
-                        migrated["identity"] = {"primary_key": pk_from_pipeline}
-
-                # Extract stages
-                if "stages" not in migrated:
-                    stages_fields = {}
-                    for field in ("extract", "transform", "load"):
-                        if field in pipeline_dict:
-                            stages_fields[field] = pipeline_dict[field]
-                    if stages_fields:
-                        migrated["stages"] = stages_fields
-
-        # -----------------------------------------------------------------
-        # Legacy runtime section packing
-        # -----------------------------------------------------------------
-        def _pack(section_key: str, keys: list[str]) -> None:
-            existing_section = (
-                migrated.get(section_key)
-                if isinstance(migrated.get(section_key), dict)
-                else None
-            )
-            keys_to_collect = list(keys)
-            if section_key in keys_to_collect and existing_section is not None:
-                keys_to_collect.remove(section_key)
-
-            collected = {
-                key: migrated.pop(key) for key in keys_to_collect if key in migrated
-            }
-            if not collected and existing_section is None:
-                return
-
-            target_section: dict[str, Any] = dict(existing_section or {})
-            nested_from_collected = collected.pop(section_key, None)
-            if isinstance(nested_from_collected, dict):
-                target_section |= nested_from_collected
-
-            for key, value in collected.items():
-                if (
-                    key in target_section
-                    and isinstance(target_section[key], dict)
-                    and isinstance(value, dict)
-                ):
-                    target_section[key] = {**target_section[key], **value}
-                else:
-                    target_section[key] = value
-
-            if target_section:
-                migrated[section_key] = target_section
-
-        _pack("runtime", ["pagination", "client", "http", "storage"])
-        _pack("observability", ["logging", "metrics"])
-        _pack("quality", ["determinism", "qc", "hashing", "normalization"])
-        _pack("features", ["features", "interface_features", "interfaces"])
-
-        return migrated
+        return ConfigMigrator.migrate(data)
 
 
 __all__ = [
-    # Decomposed config classes
-    "PipelineIdentity",
-    "DataSourceConfig",
-    "DataSinkConfig",
-    "PipelineStagesConfig",
     # Main config
     "PipelineConfig",
+    # Bounded context configs (re-exported for convenience)
+    "PipelineIdentityConfig",
+    "DataSourceConfig",
+    "DataSinkConfig",
+    "OutputOptionsConfig",
+    "CsvInputConfig",
     # Provider configs
     "BaseProviderConfig",
     "ChemblSourceConfig",
@@ -1120,11 +683,11 @@ __all__ = [
     "ObservabilityConfig",
     "QualityConfig",
     "FeatureFlagsConfig",
+    "PipelineStagesConfig",
     # Sub-section configs
     "PaginationConfig",
     "HttpClientConfig",
     "StorageConfig",
-    "CsvInputConfig",
     "LoggingConfig",
     "MetricsConfig",
     "DeterminismConfig",
@@ -1133,8 +696,8 @@ __all__ = [
     "CanonicalizationConfig",
     "BusinessKeyConfig",
     "InterfaceFeaturesConfig",
-    "OutputOptionsConfig",
     "NormalizationConfig",
+    "TransformConfig",
     # DEPRECATED: Legacy aliases (will be removed in future versions)
     "ClientConfig",  # Use HttpClientConfig
     "HttpClientDefaults",  # Use HttpClientConfig

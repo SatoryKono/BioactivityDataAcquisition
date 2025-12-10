@@ -15,6 +15,7 @@ from bioetl.domain.configs.defaults import (
 
 # Bounded context configs
 from bioetl.domain.configs.identity import PipelineIdentityConfig
+from bioetl.domain.configs.migration import ConfigMigrator
 from bioetl.domain.configs.normalization import NormalizationConfig
 from bioetl.domain.configs.pipeline import (
     HTTP_CLIENT_DEFAULTS,
@@ -24,6 +25,8 @@ from bioetl.domain.configs.pipeline import (
     ChemblSourceConfig,
     ClientConfig,
     CsvInputConfig,
+    DataSinkConfig,
+    DataSourceConfig,
     DeterminismConfig,
     DummyProviderConfig,
     FeatureFlagsConfig,
@@ -35,8 +38,10 @@ from bioetl.domain.configs.pipeline import (
     LoggingConfig,
     MetricsConfig,
     ObservabilityConfig,
+    OutputOptionsConfig,
     PaginationConfig,
     PipelineConfig,
+    PipelineStagesConfig,
     ProviderConfigUnion,
     ProviderHttpConfig,
     QcConfig,
@@ -46,19 +51,17 @@ from bioetl.domain.configs.pipeline import (
     TransformConfig,
 )
 from bioetl.domain.configs.profile import ProfileConfig
-from bioetl.domain.configs.sink import DataSinkConfig, OutputOptionsConfig
-from bioetl.domain.configs.source import (
-    CsvInputConfig as CsvInputConfigNew,
-    DataSourceConfig as DataSourceConfigNew,
-)
 
 __all__ = [
     # Bounded context configs (new modular structure)
     "PipelineIdentityConfig",
-    "DataSourceConfigNew",
+    "DataSourceConfig",
     "DataSinkConfig",
     "OutputOptionsConfig",
-    "CsvInputConfigNew",
+    "CsvInputConfig",
+    "PipelineStagesConfig",
+    # Migration utilities
+    "ConfigMigrator",
     # Primary HTTP configuration (single source of truth)
     "HttpClientConfig",
     "ProviderHttpConfig",
@@ -73,7 +76,6 @@ __all__ = [
     # Sub-configs
     "BusinessKeyConfig",
     "CanonicalizationConfig",
-    "CsvInputConfig",
     "DeterminismConfig",
     "FeatureFlagsConfig",
     "HashingConfig",

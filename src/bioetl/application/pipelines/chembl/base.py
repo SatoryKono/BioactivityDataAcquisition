@@ -112,10 +112,11 @@ class ChemblPipelineBase(PipelineBase):
     def _resolve_primary_key(config: PipelineConfig) -> tuple[str, str]:
         """Resolve entity primary key and API filter key based on config."""
 
-        pk = config.primary_key
-
-        if not pk and config.pipeline and "primary_key" in config.pipeline:
-            pk = config.pipeline["primary_key"]
+        pk: str | None = None
+        # Check explicit primary_key in identity section (now a list)
+        primary_keys = config.identity.primary_key
+        if primary_keys:
+            pk = primary_keys[0]
 
         if not pk:
             pk = f"{config.entity_name}_id"
@@ -125,7 +126,7 @@ class ChemblPipelineBase(PipelineBase):
                 (
                     "Could not resolve ID_COLUMN for entity "
                     f"'{config.entity_name}'. Please set 'primary_key' "
-                    "in config or pipeline options."
+                    "in config."
                 )
             )
 

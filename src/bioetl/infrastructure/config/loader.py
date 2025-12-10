@@ -209,10 +209,10 @@ def _ensure_input_source_valid(
 ) -> None:
     """Проверяет доступность локальных файлов для CSV/id-only режимов."""
 
-    if config.input_mode not in {"csv", "id_only"}:
+    if config.source.input_mode not in {"csv", "id_only"}:
         return
 
-    input_path = config.input_path
+    input_path = config.source.input_path
     if not input_path:
         raise ConfigValidationError(
             "input_path must be provided when input_mode is 'csv' or 'id_only'"
