@@ -14,8 +14,8 @@ from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
 from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
-from bioetl.infrastructure.output.unified_output_writer_impl import (
-    UnifiedOutputWriterImpl,
+from bioetl.infrastructure.output.unified_loader_impl import (
+    UnifiedLoaderImpl,
 )
 
 
@@ -33,7 +33,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
         config={"hashing": {"business_key_fields": ["id"]}},
     )
 
-    unified_writer = UnifiedOutputWriterImpl(
+    unified_writer = UnifiedLoaderImpl(
         writer,
         metadata_writer,
         quality_reporter,
@@ -43,7 +43,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
     )
 
     output_dir = tmp_path / "out"
-    result = unified_writer.write_result(df, output_dir, "test_entity", run_context)
+    result = unified_writer.load(df, output_dir, run_context)
 
     data_path = output_dir / "test_entity.csv"
     meta_path = output_dir / "meta.yaml"

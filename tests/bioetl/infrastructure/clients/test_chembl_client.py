@@ -19,13 +19,11 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 def mock_components():
     request_builder = MagicMock(spec=ChemblRequestBuilderImpl)
     request_builder.for_endpoint = MagicMock(return_value=request_builder)
-    http_client = MagicMock()  # HTTP client is Any type in implementation
-    http_client.request = MagicMock()  # Add request method
     return {
         "request_builder": request_builder,
         "response_parser": MagicMock(spec=ChemblResponseParserImpl),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
-        "http_client": http_client,
+        "http_client": MagicMock(),
     }
 
 
@@ -77,4 +75,4 @@ def test_rate_limiter_usage(client, mock_components):
     list(client.iter_pages("http://test"))
 
     # Assert
-    mock_limiter.acquire.assert_called()  # RateLimiterABC only has acquire() method
+    mock_limiter.acquire.assert_called()

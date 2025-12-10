@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from bioetl.domain.clients.base.contracts import ApiClientABC, RateLimiterABC
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -60,8 +60,8 @@ def fixture_client(
 
 @pytest.fixture(name="mock_http_client")
 def fixture_http_client():
-    """Mock ApiClientABC."""
-    http_client = Mock(spec=ApiClientABC)
+    """Mock HTTP client."""
+    http_client = Mock()
     http_client.request = Mock()
     return http_client
 
@@ -127,7 +127,6 @@ def test_rate_limiter_called(client):
     gen = client.iter_pages("http://test")
     next(gen)
 
-    client.rate_limiter.wait_if_needed.assert_called()
     client.rate_limiter.acquire.assert_called()
 
 
@@ -166,7 +165,6 @@ def test_iter_pages_fetches_all_pages(client):
     assert client.http.request.call_count == 2
     client.http.request.assert_any_call("GET", "https://example.org/page1")
     client.http.request.assert_any_call("GET", "https://example.org/page2")
-    assert client.rate_limiter.wait_if_needed.call_count == 2
     assert client.rate_limiter.acquire.call_count == 2
 
 
