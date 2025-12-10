@@ -20,6 +20,13 @@ def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
         yield data[i : i + size]
 
 
+def ensure_csv_options(options: dict[str, Any] | CsvInputConfig) -> CsvInputConfig:
+    """Convert dict to CsvInputConfig if needed."""
+    if isinstance(options, CsvInputConfig):
+        return options
+    return CsvInputConfig(**options)
+
+
 class CsvRecordSourceImpl(RecordSource):
     """Record source that reads full datasets from CSV."""
 
@@ -33,7 +40,7 @@ class CsvRecordSourceImpl(RecordSource):
         model_cls: type[BaseModel] | None = None,
     ) -> None:
         self._input_path = input_path
-        self._csv_options = self._ensure_csv_options(csv_options)
+        self._csv_options = ensure_csv_options(csv_options)
         self._limit = limit
         self._logger = logger
         self._chunk_size = chunk_size
@@ -61,14 +68,6 @@ class CsvRecordSourceImpl(RecordSource):
 
         yield from _chunk_list(records, self._chunk_size)
 
-    @staticmethod
-    def _ensure_csv_options(
-        options: dict[str, Any] | CsvInputConfig,
-    ) -> CsvInputConfig:
-        if isinstance(options, CsvInputConfig):
-            return options
-        return CsvInputConfig(**options)
-
 
 class IdListRecordSourceImpl(RecordSource):
     """Record source for ID-only CSVs enriched via API."""
@@ -93,7 +92,7 @@ class IdListRecordSourceImpl(RecordSource):
 
         self._input_path = input_path
         self._id_column = id_column
-        self._csv_options = self._ensure_csv_options(csv_options)
+        self._csv_options = ensure_csv_options(csv_options)
         self._limit = limit
         self._extraction_service: ExtractionServiceABC = extraction_service
         self._source_config = source_config
@@ -168,14 +167,6 @@ class IdListRecordSourceImpl(RecordSource):
                 continue
 
             yield from _chunk_list(serialized_records, self._chunk_size)
-
-    @staticmethod
-    def _ensure_csv_options(
-        options: dict[str, Any] | CsvInputConfig,
-    ) -> CsvInputConfig:
-        if isinstance(options, CsvInputConfig):
-            return options
-        return CsvInputConfig(**options)
 
 
 __all__ = [
