@@ -91,6 +91,9 @@ def pipeline_fixture(mock_dependencies_fixture):
     """Fixture for pipeline instance."""
     mock_dependencies_fixture["config"].model_dump.return_value = {}
 
+    record_source = MagicMock()
+    record_source.iter_records.return_value = iter([])
+
     return ConcreteChemblPipeline(
         config=mock_dependencies_fixture["config"],
         logger=mock_dependencies_fixture["logger"],
@@ -100,6 +103,7 @@ def pipeline_fixture(mock_dependencies_fixture):
         normalization_service=mock_dependencies_fixture["normalization_service"],
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
+        record_source=record_source,
     )
 
 
@@ -227,6 +231,9 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
     normalized_df = pd.DataFrame({"a": [1, 2], "transformed": [True, True]})
     normalization_service.normalize.return_value = normalized_df
 
+    record_source = MagicMock()
+    record_source.iter_records.return_value = iter([])
+
     pipeline = ConcreteChemblPipeline(
         config=mock_dependencies_fixture["config"],
         logger=mock_dependencies_fixture["logger"],
@@ -236,6 +243,7 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
+        record_source=record_source,
     )
 
     df = pd.DataFrame({"a": [1, 2]})

@@ -78,6 +78,15 @@ def test_extract_stage_wraps_client_error(
     normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
     normalization_service.apply_normalize.side_effect = lambda record: record
 
+    # Record source raises ClientNetworkError when iterating
+    def raise_network_error():
+        raise ClientNetworkError(
+            provider="chembl", endpoint="/status", message="timeout"
+        )
+
+    record_source = MagicMock()
+    record_source.iter_records.side_effect = raise_network_error
+
     pipeline = ChemblPipelineBase(
         config=config,
         logger=logger,
@@ -86,6 +95,7 @@ def test_extract_stage_wraps_client_error(
         extraction_service=extraction_service,
         hash_service=hash_service,
         normalization_service=normalization_service,
+        record_source=record_source,
     )
 
     with pytest.raises(PipelineStageError) as exc_info:
