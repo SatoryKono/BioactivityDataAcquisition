@@ -9,26 +9,63 @@ classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color
 classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
 subgraph Infrastructure["Infrastructure Layer"]
-    UnifiedClient["UnifiedAPIClient\nclients.base.impl.unified_client"]:::componentPrimary
-    ChemblHttp["ChemblHttpClientImpl\nclients.chembl.impl.chembl_http_client_impl"]:::componentPrimary
-    ExtractionService["ChemblExtractionServiceImpl\nclients.chembl.impl.chembl_extraction_service_impl"]:::componentSecondary
-    RequestBuilder["RequestBuilder\nclients.chembl.request_builder"]:::componentSecondary
-    ResponseParser["ResponseParser\nclients.chembl.response_parser"]:::componentSecondary
-    Paginator["OffsetPaginator\nclients.chembl.paginator"]:::componentSecondary
-    RateLimiter["TokenBucketRateLimiterImpl\nclients.base.impl.rate_limiter"]:::componentSecondary
-    Cache["MemoryCacheImpl\nclients.base.impl.cache"]:::componentSecondary
-    Secrets["EnvSecretProvider\nclients.base.factories"]:::componentSecondary
+    ChemblClient["ChemblClient Facade\ninfrastructure.chembl_client"]:::componentPrimary
+    
+    ChemblHttp["ChemblHttpClientImpl\ninfrastructure.clients.chembl.impl.chembl_http_client_impl"]:::componentPrimary
+    ExtractionService["ChemblExtractionServiceImpl\ninfrastructure.clients.chembl.impl.chembl_extraction_service_impl"]:::componentSecondary
+    RequestBuilder["RequestBuilder\ninfrastructure.clients.chembl.request_builder"]:::componentSecondary
+    ResponseParser["ResponseParser\ninfrastructure.clients.chembl.response_parser"]:::componentSecondary
+    Paginator["ChemblPaginatorImpl\ninfrastructure.clients.chembl.paginator"]:::componentSecondary
+    ParserRegistry["ParserRegistry\ninfrastructure.clients.chembl.parser_registry"]:::componentSecondary
+    Serializers["Serializers\ninfrastructure.clients.chembl.serializers"]:::componentSecondary
+    Provider["Provider\ninfrastructure.clients.chembl.provider"]:::componentSecondary
+    
+    HTTPTransport["HTTPTransport\ninfrastructure.clients.base.impl._http_transport"]:::componentSecondary
+    RateLimiter["TokenBucketRateLimiterImpl\ninfrastructure.clients.base.impl.rate_limiter"]:::componentSecondary
+    Cache["MemoryCacheImpl\ninfrastructure.clients.base.impl.cache"]:::componentSecondary
+    ClientFactories["Client Factories\ninfrastructure.clients.base.factories"]:::componentSecondary
+    ABCRegistry["ABC Registry Resolver\ninfrastructure.clients.base.abc_registry_resolver"]:::componentSecondary
+    
+    RetryPolicy["Retry Policy\ninfrastructure.http.retry"]:::componentSecondary
 
-    OutputWriter["UnifiedOutputWriter\ninfrastructure.output.unified_writer"]:::componentPrimary
-    CsvWriter["CsvWriterImpl\ninfrastructure.output.impl.csv_writer"]:::componentSecondary
+    OutputLoader["UnifiedLoaderImpl\ninfrastructure.output.unified_loader_impl"]:::componentPrimary
+    OutputFactories["Output Factories\ninfrastructure.output.factories"]:::componentSecondary
+    BaseWriter["BaseWriter\ninfrastructure.output.impl.base_writer"]:::componentSecondary
+    CsvWriter["CsvWriter\ninfrastructure.output.impl.csv_writer"]:::componentSecondary
+    ParquetWriter["ParquetWriter\ninfrastructure.output.impl.parquet_writer"]:::componentSecondary
     MetadataWriter["MetadataWriter\ninfrastructure.output.impl.metadata_writer"]:::componentSecondary
     QualityReporter["QualityReporter\ninfrastructure.output.impl.quality_reporter"]:::componentSecondary
-    AtomicIO["AtomicFileOperation + Checksum\ninfrastructure.files.atomic/checksum"]:::componentSecondary
+    Converters["Converters\nDropnaRowsConverter\nRenameColumnsConverter\ninfrastructure.output.converters.*"]:::componentSecondary
+    ColumnOrder["ColumnOrder\ninfrastructure.output.column_order"]:::componentSecondary
+    Metadata["Metadata\ninfrastructure.output.metadata"]:::componentSecondary
+    AtomicIO["AtomicFileOperation\ninfrastructure.files.atomic"]:::componentSecondary
+    Checksum["Checksum\ninfrastructure.files.checksum"]:::componentSecondary
 
-    Logging["LoggerAdapterImpl\ninfrastructure.logging.*"]:::componentSecondary
-    Observability["Prometheus Metrics\ninfrastructure.observability.*"]:::componentSecondary
-    ProviderRegistry["ProviderRegistryLoader\nconfigs/providers.yaml"]:::componentSecondary
-    RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
+    NormalizationService["ChemblNormalizationServiceImpl\ninfrastructure.transform.impl.chembl_normalization_service_impl"]:::componentPrimary
+    NormalizationImpl["DefaultNormalizationTransformerImpl\ninfrastructure.transform.impl.default_normalization_transformer_impl"]:::componentSecondary
+    BaseNormalizer["BaseNormalizer\ninfrastructure.transform.impl.base_normalizer"]:::componentSecondary
+    Hasher["HasherImpl\ninfrastructure.transform.impl.hasher"]:::componentSecondary
+    TransformFactories["Transform Factories\ninfrastructure.transform.factories"]:::componentSecondary
+
+    PanderaValidator["PanderaValidator\ninfrastructure.validation.impl.pandera_validator"]:::componentSecondary
+    ValidationFactories["Validation Factories\ninfrastructure.validation.factories"]:::componentSecondary
+
+    LoggingFactories["Logging Factories\ninfrastructure.logging.factories"]:::componentSecondary
+    ProgressReporter["ProgressReporter\ninfrastructure.logging.impl.progress_reporter"]:::componentSecondary
+    
+    ObservabilityServer["Metrics Server\ninfrastructure.observability.server"]:::componentSecondary
+    ObservabilityMetrics["Metrics\ninfrastructure.observability.metrics"]:::componentSecondary
+    ObservabilityAdapters["Observability Adapters\ninfrastructure.observability.adapters"]:::componentSecondary
+    ObservabilityFactories["Observability Factories\ninfrastructure.observability.factories"]:::componentSecondary
+    
+    ConfigLoader["Config Loader\ninfrastructure.config.loader"]:::componentSecondary
+    ConfigDefaults["Defaults Loader\ninfrastructure.config.defaults_loader"]:::componentSecondary
+    ConfigEnv["Env Config\ninfrastructure.config.env"]:::componentSecondary
+    ConfigSources["Config Sources\ninfrastructure.config.sources"]:::componentSecondary
+    ProviderRegistryLoader["ProviderRegistryLoader\ninfrastructure.config.provider_registry_loader"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry\ninfrastructure.config.provider_registry"]:::componentSecondary
+    
+    ProviderRegistryLoader2["ProviderRegistryLoader\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
 end
 class Infrastructure group
 
@@ -38,25 +75,53 @@ subgraph External["External Systems"]
 end
 class External group;
 
-UnifiedClient --> RateLimiter
-UnifiedClient --> RetryPolicy
-UnifiedClient --> Cache
-UnifiedClient --> Secrets
-UnifiedClient --> Observability
+ChemblClient --> ChemblHttp
+ChemblClient --> ExtractionService
+
 ChemblHttp --> RequestBuilder
 ChemblHttp --> ResponseParser
 ChemblHttp --> Paginator
-ChemblHttp --> UnifiedClient
+ChemblHttp --> ParserRegistry
+ChemblHttp --> Serializers
+ChemblHttp --> HTTPTransport
+ChemblHttp --> RateLimiter
+ChemblHttp --> RetryPolicy
+ChemblHttp --> Cache
+ChemblHttp --> ObservabilityMetrics
 ChemblHttp --> ChemblAPI
+
+HTTPTransport --> RateLimiter
+HTTPTransport --> RetryPolicy
+HTTPTransport --> Cache
+HTTPTransport --> ObservabilityMetrics
+
 ExtractionService --> ChemblHttp
-ExtractionService --> Observability
-ExtractionService --> RecordSources
-OutputWriter --> CsvWriter
-OutputWriter --> MetadataWriter
-OutputWriter --> QualityReporter
-OutputWriter --> Storage
-Logging --> OutputWriter
-Logging --> ChemblHttp
-ProviderRegistry --> ChemblHttp
-ProviderRegistry --> ExtractionService
+ExtractionService --> ObservabilityMetrics
+
+OutputLoader --> BaseWriter
+OutputLoader --> CsvWriter
+OutputLoader --> ParquetWriter
+OutputLoader --> MetadataWriter
+OutputLoader --> QualityReporter
+OutputLoader --> Converters
+OutputLoader --> ColumnOrder
+OutputLoader --> Metadata
+OutputLoader --> AtomicIO
+OutputLoader --> Checksum
+OutputLoader --> Storage
+
+NormalizationService --> BaseNormalizer
+NormalizationService --> NormalizationImpl
+NormalizationService --> TransformFactories
+
+PanderaValidator --> ValidationFactories
+
+ObservabilityServer --> ObservabilityMetrics
+ObservabilityServer --> ObservabilityAdapters
+
+ConfigLoader --> ConfigDefaults
+ConfigLoader --> ConfigEnv
+ConfigLoader --> ConfigSources
+ProviderRegistryLoader --> ProviderRegistry
+ProviderRegistryLoader2 --> ProviderRegistry
 

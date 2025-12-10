@@ -10,15 +10,29 @@ classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#1
 
 subgraph Domain["Domain Layer"]
     Validation["ValidationService\nbioetl.domain.validation.service"]:::componentPrimary
-    Normalization["NormalizationServiceImpl\nbioetl.infrastructure.transform.impl.normalize"]:::componentPrimary
+    ValidationContracts["Validation Contracts\nSchemaProviderABC\nValidatorFactoryABC\nbioetl.domain.validation.contracts"]:::componentSecondary
+    Normalization["NormalizationServiceABC\nbioetl.domain.transform.contracts"]:::componentPrimary
     Hashing["HashServiceABC\nbioetl.domain.transform.contracts"]:::componentPrimary
-    Transformers["TransformerChain\nHash/Index/DbVersion/Fulldate"]:::componentSecondary
-    Hasher["HasherImpl\ncanonical serializer"]:::componentSecondary
-    Schemas["SchemaRegistry\nPipelineSchemaModel\nbioetl.domain.schemas.registry"]:::componentSecondary
-    Pandera["PanderaValidator\nbioetl.domain.validation.impl"]:::componentSecondary
-    Normalizers["Scalar/array/dict normalizers\nbioetl.domain.transform.normalizers.*"]:::componentSecondary
-    ProviderRegistry["ProviderRegistry\nbioetl.domain.provider_registry"]:::componentSecondary
-    RecordSource["ApiRecordSource\nbioetl.domain.record_source"]:::componentSecondary
+    HashService["HashService\nbioetl.domain.transform.hash_service"]:::componentSecondary
+    Transformers["TransformerABC\nTransformerChain\nbioetl.domain.transform.transformers"]:::componentSecondary
+    Serializers["Serializers\nbioetl.domain.transform.serializers"]:::componentSecondary
+    Hasher["HasherImpl\nbioetl.infrastructure.transform.impl.hasher"]:::componentSecondary
+    Schemas["SchemaRegistry\nbioetl.domain.schemas.registry"]:::componentSecondary
+    SchemaContracts["Pipeline Contracts\nbioetl.domain.schemas.pipeline_contracts"]:::componentSecondary
+    Pandera["PanderaValidator\nbioetl.infrastructure.validation.impl.pandera_validator"]:::componentSecondary
+    Normalizers["Normalizers\nbase/collections/identifiers/numeric\nbioetl.domain.transform.normalizers.*"]:::componentSecondary
+    NormalizerRegistry["NormalizerRegistry\nbioetl.domain.transform.normalizers.registry"]:::componentSecondary
+    ProviderRegistry["ProviderRegistryABC\nInMemoryProviderRegistry\nbioetl.domain.provider_registry"]:::componentSecondary
+    Providers["ProviderDefinition\nbioetl.domain.providers"]:::componentSecondary
+    RecordSource["RecordSourceABC\nApiRecordSource\nbioetl.domain.record_source"]:::componentSecondary
+    Ports["Extraction Ports\nExtractionPortABC\nProviderPortABC\nbioetl.domain.ports.*"]:::componentSecondary
+    PipelineContracts["Pipeline Contracts\nPipelineContainerABC\nExtractorABC\nLoaderABC\nbioetl.domain.pipelines.contracts"]:::componentSecondary
+    ClientContracts["Client Contracts\nDataClientABC\nbioetl.domain.clients.contracts"]:::componentSecondary
+    ObservabilityContracts["Observability Contracts\nLoggingPortABC\nMetricsPortABC\nbioetl.domain.observability.contracts"]:::componentSecondary
+    Configs["Config Models\nPipelineConfig\nSourceConfig\nSinkConfig\nbioetl.domain.configs.*"]:::componentSecondary
+    Models["Domain Models\nRunContext\nRunResult\nStageResult\nbioetl.domain.models"]:::componentSecondary
+    Errors["Domain Errors\nbioetl.domain.errors"]:::componentSecondary
+    Enums["Domain Enums\nErrorAction\nbioetl.domain.enums"]:::componentSecondary
 end
 class Domain group
 
@@ -38,15 +52,27 @@ Pipeline --> Validation
 Pipeline --> Normalization
 Pipeline --> Hashing
 Pipeline --> Transformers
+Pipeline --> PipelineContracts
+Validation --> ValidationContracts
 Validation --> Schemas
 Validation --> Pandera
 Normalization --> Normalizers
-Normalization --> Schemas
+Normalization --> NormalizerRegistry
+Normalization --> SchemaContracts
+Hashing --> HashService
 Hashing --> Hasher
+Hashing --> Serializers
 Transformers --> Hashing
 Transformers --> Normalization
+Transformers --> Serializers
 Pipeline --> Writers
 Pipeline --> Clients
 Pipeline --> ProviderRegistry
 Pipeline --> RecordSource
+Pipeline --> Ports
+Pipeline --> Configs
+Pipeline --> Models
+Pipeline --> ObservabilityContracts
+Clients --> ClientContracts
+Writers --> ObservabilityContracts
 
