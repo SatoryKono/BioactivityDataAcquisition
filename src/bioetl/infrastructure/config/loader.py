@@ -152,23 +152,54 @@ def _ensure_provider_registered(provider_id: str) -> None:
         ) from exc
 
 
-_schema_contract_provider: SchemaContractProviderABC | None = None
+_SCHEMA_CONTRACT_PROVIDER: SchemaContractProviderABC | None = None
 
 
 def set_schema_contract_provider(provider: SchemaContractProviderABC) -> None:
-    """Inject schema contract provider (called from application bootstrap).
+    """Set the global schema contract provider.
+
+    This function allows the application layer to inject a configured
+    schema contract provider into the infrastructure layer. This is
+    typically called during container bootstrap.
 
     Args:
-        provider: The schema contract provider implementation.
+        provider: Configured SchemaContractProviderABC instance.
+
+    Example:
+        >>> from bioetl.application.services import SchemaContractProviderImpl
+        >>> from bioetl.domain.schemas.registry import get_default_schema_registry
+        >>> provider = SchemaContractProviderImpl(get_default_schema_registry())
+        >>> set_schema_contract_provider(provider)
     """
-    global _schema_contract_provider  # noqa: PLW0603
-    _schema_contract_provider = provider
+    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
+    _SCHEMA_CONTRACT_PROVIDER = provider
+
+
+def get_schema_contract_provider() -> SchemaContractProviderABC | None:
+    """Get the current schema contract provider.
+
+    Returns:
+        The configured schema contract provider, or None if not set.
+    """
+    return _SCHEMA_CONTRACT_PROVIDER
+
+
+def clear_schema_contract_provider() -> None:
+    """Clear the global schema contract provider (for testing).
+
+    This resets the provider to None, useful for test isolation.
+    """
+    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
+    _SCHEMA_CONTRACT_PROVIDER = None
 
 
 def reset_schema_contract_provider() -> None:
-    """Reset the schema contract provider (for testing purposes)."""
-    global _schema_contract_provider  # noqa: PLW0603
-    _schema_contract_provider = None
+    """Reset the schema contract provider (for testing purposes).
+
+    Deprecated: Use clear_schema_contract_provider() instead.
+    This function is kept for backward compatibility.
+    """
+    clear_schema_contract_provider()
 
 
 def _populate_fields_from_schema(config: PipelineConfig) -> None:
@@ -176,19 +207,19 @@ def _populate_fields_from_schema(config: PipelineConfig) -> None:
     if config.fields:
         return
 
-    if _schema_contract_provider is None:
+    if _SCHEMA_CONTRACT_PROVIDER is None:
         raise RuntimeError(
             "SchemaContractProvider not initialized. "
             "Call application bootstrap before loading configs."
         )
 
-    schema_name = _schema_contract_provider.get_output_schema_name(
+    schema_name = _SCHEMA_CONTRACT_PROVIDER.get_output_schema_name(
         config.id,
         default_entity=config.entity_name,
     )
 
     try:
-        fields = _schema_contract_provider.get_field_configs(schema_name)
+        fields = _SCHEMA_CONTRACT_PROVIDER.get_field_configs(schema_name)
     except ValueError as exc:
         raise ConfigValidationError(
             f"Schema '{schema_name}' is not registered for pipeline '{config.id}'"
@@ -283,6 +314,8 @@ __all__ = [
     "UnknownProviderError",
     "get_pipeline_config",
     "get_pipeline_config_from_path",
-    "reset_schema_contract_provider",
     "set_schema_contract_provider",
+    "get_schema_contract_provider",
+    "clear_schema_contract_provider",
+    "reset_schema_contract_provider",
 ]

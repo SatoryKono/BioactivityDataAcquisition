@@ -1,4 +1,4 @@
-"""Application layer services."""
+"""Application services for pipeline orchestration."""
 
 from bioetl.application.services.schema_bootstrap import (
     SchemaBootstrapService,
