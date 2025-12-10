@@ -11,10 +11,15 @@ from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.observability import MetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.abc_registry_resolver import ABCRegistryResolver
+from bioetl.infrastructure.config.loader import (
+    get_pipeline_config,
+    get_pipeline_config_from_path,
+)
 from bioetl.infrastructure.output.metadata import (
     build_dry_run_metadata,
     build_run_metadata,
@@ -95,3 +100,15 @@ def build_default_container(
 def create_default_container_factory() -> Callable[..., Any]:
     """Expose default container factory."""
     return build_default_container
+
+
+def create_config_loader() -> PipelineConfigLoaderProtocol:
+    """Return config loader port backed by infrastructure loader."""
+
+    return cast(
+        PipelineConfigLoaderProtocol,
+        SimpleNamespace(
+            get_by_id=get_pipeline_config,
+            get_from_path=get_pipeline_config_from_path,
+        ),
+    )

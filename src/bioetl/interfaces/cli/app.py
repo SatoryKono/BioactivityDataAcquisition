@@ -15,7 +15,7 @@ from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.wiring import build_default_container, create_config_loader
+from bioetl.interfaces.container_factory import build_default_container, create_config_loader
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
