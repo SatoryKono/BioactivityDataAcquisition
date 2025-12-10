@@ -1,10 +1,8 @@
-# /run-document-chembl
+# /run-publication-chembl
 
-## Goal
+**Goal:** Запуск пайплайна публикаций ChEMBL.
 
-Запуск документационного пайплайна ChEMBL (registry: `publication_chembl`).
-
-## Inputs
+**Inputs**
 
 - `--output PATH` (required)
 - `--config PATH` (optional): `configs/pipelines/chembl/publication.yaml`
@@ -12,7 +10,7 @@
 - `--profile NAME` (optional)
 - `--limit N` (optional)
 
-## Steps
+**Steps**
 
 1) Проверить `configs/pipelines/chembl/publication.yaml`
 2) Создать выходную директорию
@@ -20,16 +18,14 @@
 4) Убедиться в коде возврата 0
 5) Проверить артефакты и `meta.yaml`
 
-## Constraints
+**Constraints**
 
-- Детерминизм (сортировка по `year`/`document_id`), Pandera, UnifiedLogger
-- Внешние обогащения только через UnifiedAPIClient
+- Детерминизм, Pandera-валидация, UnifiedLogger
 
-## Outputs
+**Outputs**
 
 - `data/output/document/`, `meta.yaml`, QC, логи
 
-## References
+**References**
 
 - `configs/pipelines/chembl/publication.yaml`
-

@@ -33,6 +33,20 @@ from bioetl.interfaces.observability import LoggingPortABC
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "src"
 
+# Clear PYTHONPATH to avoid conflicts with other projects (e.g., numpy source tree)
+import os
+
+if "PYTHONPATH" in os.environ:
+    # Remove conflicting paths from PYTHONPATH
+    pythonpath_parts = os.environ["PYTHONPATH"].split(os.pathsep)
+    filtered_parts = [
+        p for p in pythonpath_parts if "bioactivity_data_acquisition1" not in p.lower()
+    ]
+    if filtered_parts:
+        os.environ["PYTHONPATH"] = os.pathsep.join(filtered_parts)
+    else:
+        del os.environ["PYTHONPATH"]
+
 # Aggressively clean sys.path
 sys.path = [p for p in sys.path if "bioactivity_data_acquisition1" not in p.lower()]
 

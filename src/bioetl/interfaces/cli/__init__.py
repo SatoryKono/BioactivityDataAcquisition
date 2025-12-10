@@ -1,5 +1,6 @@
-"""CLI application entry exports."""
+"""CLI interface for BioETL."""
 
-from .app import app
+from bioetl.interfaces.cli.app import app
 
 __all__ = ["app"]
+

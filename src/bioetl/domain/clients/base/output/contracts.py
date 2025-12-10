@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 import pandas as pd
 
@@ -116,6 +116,7 @@ class RunMetadataBuilderProtocol(Protocol):
         """Build metadata for a dry-run execution."""
 
 
+@runtime_checkable
 class OutputFrameConverterABC(Protocol):
     """DataFrame → DataFrame конвертер для пост-обработки перед записью."""
 

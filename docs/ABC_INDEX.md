@@ -93,3 +93,6 @@
 
 - `OutputWriterABC` — `bioetl.domain.clients.base.output.contracts.OutputWriterABC`
   - Фасад записи результатов пайплайна (данные, метаданные, QC).
+
+- `OutputFrameConverterABC` — `bioetl.domain.clients.base.output.contracts.OutputFrameConverterABC`
+  - DataFrame → DataFrame конвертер для пост-обработки перед записью. Default factory: ``bioetl.infrastructure.output.converters.factories.default_output_frame_converter``. Implementations: ``NoopConverter``, ``RenameColumnsConverter``, ``DropNaRowsConverter``.
