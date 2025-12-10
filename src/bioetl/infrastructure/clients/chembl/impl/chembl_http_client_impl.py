@@ -26,7 +26,7 @@ from bioetl.infrastructure.observability.factories import default_logging_port
 class ChemblHttpClientImpl(DataClientABC):
     """
     ChEMBL API client implemented over HTTP.
-    Uses UnifiedAPIClientImpl for requests and RateLimiter for proactive throttling.
+    Uses RateLimiter for proactive throttling.
     """
 
     def __init__(
