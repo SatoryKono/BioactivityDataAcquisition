@@ -14,7 +14,6 @@ from bioetl.domain.clients.base.contracts import (
     PaginatorABC,
     RateLimiterABC,
     RequestBuilderABC,
-    ResponseParserABC,
     SecretProviderABC,
 )
 from bioetl.domain.configs import HttpClientConfig
@@ -24,12 +23,13 @@ from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParserImpl,
+    ChemblGenericResponseParser,
 )
 
 # Default HTTP client configuration (single source of truth)
@@ -118,10 +118,10 @@ def default_request_builder(*, base_url: str | None = None) -> RequestBuilderABC
     return ChemblRequestBuilderImpl(base_url)
 
 
-def default_response_parser() -> ResponseParserABC:
+def default_response_parser() -> ResponseParserPortABC:
     """Return the default response parser implementation."""
 
-    return ChemblResponseParserImpl()
+    return ChemblGenericResponseParser()
 
 
 def default_paginator() -> PaginatorABC:

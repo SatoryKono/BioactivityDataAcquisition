@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2025-12-10
+
+### Breaking Changes
+
+- `ChemblResponseParserImpl` now returns `list[dict]` instead of typed models
+- `ExtractionServiceABC.iter_extract()` returns `Iterable[list[dict[str, Any]]]`
+- `parser_registry.ENTITY_MODEL_REGISTRY` moved to `application.mappers.chembl.model_registry`
+- Config loading requires `PipelineContainer.bootstrap()` to be called first
+
+### Added
+
+- `ChemblGenericResponseParser` - generic parser for ChEMBL API responses
+- `RecordMapperABC` - application layer contract for record mapping
+- `ChemblRecordMapper` - ChEMBL-specific record mapper
+- `SchemaBootstrapService` - application service for schema lifecycle
+- `SchemaContractProviderABC` - port for schema contract access
+
+### Removed
+
+- `ChemblResponseParserImpl` typed variant (use `ChemblGenericResponseParser`)
+- `create_activity_parser()` (use `ChemblGenericResponseParser`)
+- `ChemblActivityResponseParser` type alias
+- Direct domain schema imports in infrastructure layer
+- `parser_registry.__getattr__` deprecated API access handler
+- `tests/bioetl/infrastructure/clients/chembl/test_response_parser.py` (deprecated typed parser tests)
+
+### Migration Guide
+
+See docs/migration/2.0-hexagonal-architecture.md
+
 ## [Unreleased]
 
 ### Changed
