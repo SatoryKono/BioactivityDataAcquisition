@@ -7,7 +7,7 @@ from typing import Any, Iterable
 import pandas as pd
 from pydantic import BaseModel
 
-from bioetl.application.pipelines.contracts import ExtractorABC
+from bioetl.domain.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC

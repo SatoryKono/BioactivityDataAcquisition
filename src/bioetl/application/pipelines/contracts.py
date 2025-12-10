@@ -10,7 +10,6 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import (
     ErrorPolicyABC,
-    ExtractorABC,
     LoaderABC,
     PipelineHookABC,
 )
@@ -120,8 +119,6 @@ class PipelineFactoryABC(ABC):
 
 
 __all__ = [
-    "ExtractorABC",
-    "LoaderABC",
     "PipelineContainerABC",
     "PipelineFactoryABC",
 ]
