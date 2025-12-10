@@ -2,7 +2,8 @@
 Normalization implementation for domain entities.
 """
 
-from typing import Any
+import warnings
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
@@ -12,9 +13,11 @@ from bioetl.domain.transform.normalizers import (
     normalize_uniprot,
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
-    DefaultNormalizationTransformerImpl as DefaultNormImpl,
-)
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+        DefaultNormalizationTransformerImpl,
+    )
 
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid
@@ -24,7 +27,7 @@ normalize_uniprot_id = normalize_uniprot
 
 def normalize_scalar(value: Any, mode: str = "default") -> Any:
     """
-    Нормализует скалярное значение.
+    Normalize a scalar value.
 
     Modes:
     - "default": trim + lower (str), round 3 (float)
@@ -72,10 +75,29 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
     return val.lower()
 
 
-DefaultNormalizationTransformerImpl = DefaultNormImpl
-NormalizationTransformer = DefaultNormImpl
-NormalizationServiceImpl = DefaultNormImpl
-NormalizationService = DefaultNormImpl
+def __getattr__(name: str) -> Any:
+    """Emit deprecation warnings for legacy aliases and lazy imports."""
+    # Lazy import to avoid circular dependency
+    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+        DefaultNormalizationTransformerImpl as _DefaultImpl,
+    )
+
+    if name == "DefaultNormalizationTransformerImpl":
+        return _DefaultImpl
+
+    deprecated_aliases = {
+        "NormalizationTransformer": _DefaultImpl,
+        "NormalizationServiceImpl": _DefaultImpl,
+        "NormalizationService": _DefaultImpl,
+    }
+    if name in deprecated_aliases:
+        warnings.warn(
+            f"{name} is deprecated. Use DefaultNormalizationTransformerImpl instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return deprecated_aliases[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = [
@@ -85,7 +107,4 @@ __all__ = [
     "normalize_uniprot_id",
     "get_normalizer",
     "DefaultNormalizationTransformerImpl",
-    "NormalizationTransformer",
-    "NormalizationService",
-    "NormalizationServiceImpl",
 ]

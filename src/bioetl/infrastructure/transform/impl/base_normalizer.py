@@ -13,7 +13,14 @@ from bioetl.domain.transform.serializers import serialize_nested
 
 
 class BaseNormalizationServiceImpl:
-    """Provide reusable normalization helpers for normalization services."""
+    """Provide reusable normalization helpers for normalization services.
+
+    Args:
+        config: Provider of normalization configuration.
+        empty_value: Value to use for empty/missing data (default: None).
+        support_base_model: If True, apply_normalize accepts pydantic BaseModel.
+        serialize_array_in_series: If True, arrays are serialized in apply_normalize_series.
+    """
 
     _NUMERIC_DTYPES: dict[str, DtypeArg] = {
         "number": "Float64",
@@ -21,10 +28,17 @@ class BaseNormalizationServiceImpl:
     }
 
     def __init__(
-        self, config: NormalizationConfigProviderProtocol, empty_value: Any = None
+        self,
+        config: NormalizationConfigProviderProtocol,
+        empty_value: Any = None,
+        *,
+        support_base_model: bool = False,
+        serialize_array_in_series: bool = False,
     ):
         self._config = config
         self._empty_value = empty_value
+        self._support_base_model = support_base_model
+        self._serialize_array_in_series = serialize_array_in_series
         mode = getattr(config, "serialization_mode", "json")
         self._serialization_mode = mode if mode in {"json", "flat", "pipe"} else "json"
 

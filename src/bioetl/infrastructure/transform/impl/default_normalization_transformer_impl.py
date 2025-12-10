@@ -3,6 +3,7 @@
 from typing import Any, Callable, cast
 
 import pandas as pd
+from pydantic import BaseModel
 
 from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,
@@ -19,14 +20,33 @@ class DefaultNormalizationTransformerImpl(
     BaseNormalizationServiceImpl, NormalizationServiceABC
 ):
     """
-    Сервис нормализации данных.
-    Выполняет:
-    - Сериализацию вложенных структур (list/dict -> str)
-    - Нормализацию скалярных типов (float->round, str->trim/lower/upper)
+    Unified normalization service for all data sources.
+
+    Performs:
+    - Serialization of nested structures (list/dict -> str)
+    - Scalar type normalization (float->round, str->trim/lower/upper)
+
+    Args:
+        config: Normalization configuration provider.
+        empty_value: Value for empty/missing data (default: pd.NA).
+        support_base_model: Accept pydantic BaseModel in apply_normalize.
+        serialize_array_in_series: Serialize arrays in apply_normalize_series.
     """
 
-    def __init__(self, config: NormalizationConfigProviderProtocol):
-        BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
+    def __init__(
+        self,
+        config: NormalizationConfigProviderProtocol,
+        empty_value: Any = pd.NA,
+        *,
+        support_base_model: bool = True,
+        serialize_array_in_series: bool = True,
+    ):
+        super().__init__(
+            config,
+            empty_value=empty_value,
+            support_base_model=support_base_model,
+            serialize_array_in_series=serialize_array_in_series,
+        )
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
         """Normalize dataframe according to configured fields."""
@@ -35,10 +55,6 @@ class DefaultNormalizationTransformerImpl(
     def normalize_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Normalize single record using configured field rules."""
         return self.apply_normalize(record)
-
-    def ensure_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Cast configured numeric columns to nullable pandas dtypes."""
-        return BaseNormalizationServiceImpl.ensure_numeric_columns(self, df)
 
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
@@ -88,13 +104,32 @@ class DefaultNormalizationTransformerImpl(
 
         return self.ensure_numeric_columns(df)
 
-    def apply_normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
-        """Normalize a raw record into a dict using configured field rules."""
+    def apply_normalize(
+        self, raw: pd.Series | dict[str, Any] | BaseModel
+    ) -> dict[str, Any]:
+        """Normalize a raw record into a dict using configured field rules.
+
+        Args:
+            raw: Input data as Series, dict, or pydantic BaseModel.
+
+        Returns:
+            Normalized dictionary with all fields processed.
+        """
+        raw_data: dict[str, Any]
+        if self._support_base_model and isinstance(raw, BaseModel):
+            raw_data = raw.model_dump()
+        elif isinstance(raw, pd.Series):
+            raw_data = raw.to_dict()
+        elif isinstance(raw, dict):
+            raw_data = raw
+        else:
+            raw_data = cast(dict[str, Any], raw.model_dump())
+
         normalized: dict[str, Any] = {}
 
         for field_cfg in self._iter_fields():
             name = field_cfg.get("name")
-            if not isinstance(name, str) or name not in raw:
+            if not isinstance(name, str) or name not in raw_data:
                 continue
 
             dtype = field_cfg.get("data_type")
@@ -110,7 +145,7 @@ class DefaultNormalizationTransformerImpl(
 
                 base_normalizer = _default_normalizer
 
-            value = raw.get(name)
+            value = raw_data.get(name)
             normalized[name] = self._normalize_value(
                 value,
                 dtype,
@@ -119,7 +154,7 @@ class DefaultNormalizationTransformerImpl(
                 allow_container_normalizer=True,
             )
 
-        for key, value in raw.items():
+        for key, value in raw_data.items():
             key_str = cast(str, key)
             if key_str not in normalized:
                 normalized[key_str] = value
@@ -166,17 +201,18 @@ class DefaultNormalizationTransformerImpl(
 
         def _normalize_value_from_series(val: Any) -> Any:
             if (
-                custom_normalizer
+                self._serialize_array_in_series
+                and custom_normalizer
                 and dtype == "array"
                 and isinstance(val, (list, tuple))
             ):
                 normalized_value = custom_normalizer(val)
                 if normalized_value is None or not normalized_value:
-                    return pd.NA
+                    return self._empty_value
                 serialized = serialize_nested(
                     normalized_value, mode=self._serialization_mode
                 )
-                return pd.NA if serialized == "" else serialized
+                return self._empty_value if serialized == "" else serialized
             return self._normalize_value(
                 val,
                 dtype,
