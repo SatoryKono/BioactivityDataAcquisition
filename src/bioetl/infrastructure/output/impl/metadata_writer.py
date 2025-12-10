@@ -40,6 +40,7 @@ class MetadataWriterImpl:
 
     def write_meta(self, meta: dict, path: Path) -> None:
         """Persist run metadata as YAML with stable key ordering."""
+
         def _write(temp_path: Path) -> None:
             path.parent.mkdir(parents=True, exist_ok=True)
             with open(temp_path, "w", encoding="utf-8") as f:

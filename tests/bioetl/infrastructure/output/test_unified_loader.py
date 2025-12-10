@@ -287,12 +287,11 @@ def test_write_result_records_metric_on_failure(
     )
 
     with pytest.raises(ValueError):
-        writer_impl.load(
-            pd.DataFrame({"a": [1]}), tmp_path, run_context_factory()
-        )
+        writer_impl.load(pd.DataFrame({"a": [1]}), tmp_path, run_context_factory())
 
     metrics.inc_counter.assert_called_once_with(
-        "output_write_errors_total", {"entity": "test_entity", "error_type": "ValueError"}
+        "output_write_errors_total",
+        {"entity": "test_entity", "error_type": "ValueError"},
     )
 
 

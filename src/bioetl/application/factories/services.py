@@ -1,6 +1,7 @@
 """
 Factory for creating provider services (extraction, normalization).
 """
+
 from __future__ import annotations
 
 from typing import Any, Callable, cast
@@ -26,9 +27,7 @@ class ProviderServiceFactory:
 
     def create_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
-        source_config = self._resolve_provider_config(
-            self._provider_definition
-        )
+        source_config = self._resolve_provider_config(self._provider_definition)
         components = self._provider_definition.components
 
         factory = cast(
@@ -37,16 +36,13 @@ class ProviderServiceFactory:
         )
         if factory is None:
             raise ValueError(
-                f"Unsupported provider for normalization: "
-                f"{self._config.provider}"
+                f"Unsupported provider for normalization: {self._config.provider}"
             )
         return factory(source_config, pipeline_config=self._config)
 
     def create_extraction_service(self) -> Any:
         """Create the extraction service based on provider configuration."""
-        source_config = self._resolve_provider_config(
-            self._provider_definition
-        )
+        source_config = self._resolve_provider_config(self._provider_definition)
         components = self._provider_definition.components
 
         client = components.create_client(source_config)

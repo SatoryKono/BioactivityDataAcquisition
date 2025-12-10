@@ -23,6 +23,7 @@ class NormalizationConfigProviderProtocol(Protocol):
     def serialization_mode(self) -> str:
         """Return configured serialization mode for nested structures."""
 
+
 class HasherABC(ABC):
     """Хеширование строк."""
 

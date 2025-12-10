@@ -165,9 +165,9 @@ def test_yaml_pipeline_ids_unique(configs_root: Path) -> None:
             continue
         pipe_id = data.get("id")
         if pipe_id:
-            assert pipe_id not in ids, (
-                "Дублирующийся id " f"'{pipe_id}' в {file_path} и {ids[pipe_id]}"
-            )
+            assert (
+                pipe_id not in ids
+            ), f"Дублирующийся id '{pipe_id}' в {file_path} и {ids[pipe_id]}"
             ids[pipe_id] = file_path
 
 

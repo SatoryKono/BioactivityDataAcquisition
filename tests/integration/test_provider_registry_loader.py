@@ -8,8 +8,8 @@ from typing import Any, Callable
 import pytest
 
 from bioetl.domain.configs import DummyProviderConfig
-from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 from bioetl.domain.observability.contracts import LoggingPortABC
+from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
 
 
 @dataclass(frozen=True)

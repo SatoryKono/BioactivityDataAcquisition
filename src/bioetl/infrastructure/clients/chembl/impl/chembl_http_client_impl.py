@@ -8,7 +8,11 @@ import time
 from types import SimpleNamespace
 from typing import Any, Iterator
 
-from bioetl.domain.clients.base.contracts import RateLimiterABC, RequestBuilderABC, ResponseParserABC
+from bioetl.domain.clients.base.contracts import (
+    RateLimiterABC,
+    RequestBuilderABC,
+    ResponseParserABC,
+)
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl

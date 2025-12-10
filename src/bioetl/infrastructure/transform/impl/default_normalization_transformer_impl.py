@@ -16,7 +16,7 @@ from bioetl.infrastructure.transform.impl.base_normalizer import (
 
 
 class DefaultNormalizationTransformerImpl(
-    NormalizationServiceABC, BaseNormalizationServiceImpl
+    BaseNormalizationServiceImpl, NormalizationServiceABC
 ):
     """
     Сервис нормализации данных.
@@ -35,6 +35,10 @@ class DefaultNormalizationTransformerImpl(
     def normalize_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Normalize single record using configured field rules."""
         return self.apply_normalize(record)
+
+    def ensure_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Cast configured numeric columns to nullable pandas dtypes."""
+        return BaseNormalizationServiceImpl.ensure_numeric_columns(self, df)
 
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""

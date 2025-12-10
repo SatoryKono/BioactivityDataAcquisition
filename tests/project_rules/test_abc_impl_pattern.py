@@ -66,8 +66,7 @@ def test_impls_subclass_their_abcs() -> None:
                     try:
                         if not issubclass(ret, abc_cls):
                             violations.append(
-                                f"{factory_path}: {ret} incompatible with "
-                                f"{abc_path}"
+                                f"{factory_path}: {ret} incompatible with {abc_path}"
                             )
                     except TypeError:
                         # ignore non-class annotations (e.g., typing.Any)
