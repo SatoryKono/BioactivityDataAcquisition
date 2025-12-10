@@ -16,6 +16,7 @@ from bioetl.domain.ports.parsing import (
     RawRecordList,
     ResponseParserPortABC,
 )
+from bioetl.domain.ports.schema import SchemaContractProviderABC
 
 __all__: list[str] = [
     # Extraction ports
@@ -33,4 +34,6 @@ __all__: list[str] = [
     "RawPayload",
     "RawRecordList",
     "ResponseParserPortABC",
+    # Schema ports
+    "SchemaContractProviderABC",
 ]

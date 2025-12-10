@@ -12,7 +12,9 @@ import typer
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.application.services.schema_bootstrap import create_schema_bootstrap_service
 from bioetl.domain.configs import PipelineConfig
+from bioetl.infrastructure.config.loader import set_schema_contract_provider
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
@@ -24,6 +26,28 @@ from bioetl.interfaces.container_factory import (
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
+
+_application_bootstrapped = False
+
+
+def bootstrap_application() -> None:
+    """Initialize application layer before using infrastructure.
+
+    This function must be called before loading any pipeline configs.
+    It sets up the schema contract provider through dependency injection.
+    """
+    global _application_bootstrapped  # noqa: PLW0603
+    if _application_bootstrapped:
+        return
+
+    # 1. Bootstrap schemas
+    schema_service = create_schema_bootstrap_service()
+
+    # 2. Inject contract provider into infrastructure
+    contract_provider = schema_service.create_contract_provider()
+    set_schema_contract_provider(contract_provider)
+
+    _application_bootstrapped = True
 
 
 def _infer_config_path(pipeline_name: str) -> str | None:
@@ -48,6 +72,7 @@ def _resolve_config_path(config: str) -> Path:
 
 
 def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
+    bootstrap_application()
     config_loader = create_config_loader()
     return build_runtime_config(
         config_path=config_path,
@@ -101,6 +126,7 @@ def validate_config(
     profile: Annotated[str | None, typer.Option(help="Profile name")] = None,
 ) -> None:
     """Validate a pipeline configuration file."""
+    bootstrap_application()
     config_file = Path(config_path)
     if not config_file.exists():
         console.print(f"[red]Error:[/red] Config file not found: {config_path}")
