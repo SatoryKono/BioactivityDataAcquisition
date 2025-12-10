@@ -307,7 +307,7 @@ from bioetl.domain.validation.service import ValidationService  # noqa: E402
 from bioetl.infrastructure.output.unified_output_writer_impl import (  # noqa: E402
     UnifiedOutputWriterImpl,
 )
-from bioetl.interfaces.observability import LoggingPortABC  # noqa: E402
+from bioetl.domain.observability.contracts import LoggingPortABC  # noqa: E402
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
 # Hypothesis tries to create a set from sys.modules.values(), but some modules
