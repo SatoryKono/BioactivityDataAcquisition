@@ -7,11 +7,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.types import (
-    ApiPayload,
-    RawRecord,
-    RecordBatch,
-)
+from bioetl.domain.data import RecordBatch
+from bioetl.domain.types import ApiPayload
 
 # =============================================================================
 # Deprecated Type Aliases (backward compatibility re-exports)
@@ -23,7 +20,8 @@ __all__: list[str] = []  # Populated at end of module
 
 # Sentinel for lazy deprecation
 _DEPRECATED_TYPE_ALIASES = {
-    "RawRecordDict": "RawRecord",
+    "RawRecord": "Mapping[str, Any]",  # Use Mapping[str, Any] directly
+    "RawRecordDict": "Mapping[str, Any]",
     "RawRecordBatch": "RecordBatch",
 }
 
@@ -220,26 +218,32 @@ def __getattr__(name: str) -> object:
 
     But emits a DeprecationWarning directing users to the new location.
     """
+    from typing import Any
+
     if name in _DEPRECATED_TYPE_ALIASES:
         new_name = _DEPRECATED_TYPE_ALIASES[name]
         warnings.warn(
-            f"{name} is deprecated, use {new_name} from bioetl.domain.types instead. "
+            f"{name} is deprecated, use {new_name} instead. "
             "See migration guide in bioetl.domain.types module docstring.",
             DeprecationWarning,
             stacklevel=2,
         )
-        from bioetl.domain import types
+        # Return appropriate fallback types
+        if name in ("RawRecord", "RawRecordDict"):
+            return dict[str, Any]
+        elif name == "RawRecordBatch":
+            from bioetl.domain.data import RecordBatch as _RecordBatch
 
-        return getattr(types, new_name)
+            return _RecordBatch
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = [
-    # Canonical type aliases (re-exported from domain.types)
-    "RawRecord",
-    "RecordBatch",
-    "ApiPayload",
+    # Canonical type aliases
+    "RecordBatch",  # from domain.data
+    "ApiPayload",  # from domain.types
     # Deprecated type aliases (for backward compatibility, available via __getattr__)
+    "RawRecord",  # deprecated, use Mapping[str, Any]
     "RawRecordDict",
     "RawRecordBatch",
     # Abstract base classes
