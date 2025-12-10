@@ -1,11 +1,11 @@
 """Application context for interfaces layer.
 
-This module provides an immutable container for application-wide dependencies
-used across the interfaces layer. It consolidates observability and configuration
-dependencies into a single, testable context.
+This module provides a unified immutable container for application-wide
+dependencies, replacing scattered singletons with a single, testable context.
 
-The ApplicationContext enables clean dependency injection in CLI, REST,
-and other interface adapters while maintaining immutability for thread safety.
+The ApplicationContext consolidates observability (logging, metrics) and
+configuration loading into a single dependency that can be easily injected
+or mocked for testing purposes.
 
 Example:
     >>> # Production usage
@@ -19,7 +19,7 @@ Example:
     ...     config_loader=MockConfigLoader(),
     ... )
     >>> set_application_context(mock_context)
-    >>> # ... test ...
+    >>> # ... run tests ...
     >>> reset_application_context()
 """
 
@@ -30,10 +30,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
-    from bioetl.domain.observability.contracts import (
-        LoggingPortABC,
-        MetricsPortABC,
-    )
+    from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 
 
 @dataclass(frozen=True)
@@ -69,7 +66,7 @@ class ApplicationContext:
         - File-based pipeline config loader
 
         Returns:
-            ApplicationContext configured for production use.
+            ApplicationContext: A new context configured for production use.
 
         Raises:
             RuntimeError: If config loader is not available from bootstrap.
@@ -78,11 +75,11 @@ class ApplicationContext:
             >>> context = ApplicationContext.create_default()
             >>> context.logger.info("Ready")
         """
+        from bioetl.application.bootstrap_factory import create_default_bootstrap
         from bioetl.infrastructure.observability.factories import (
             create_logging_port,
             create_metrics_port,
         )
-        from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
         bootstrap = create_default_bootstrap()
         app_context = bootstrap.start()
@@ -100,31 +97,32 @@ class ApplicationContext:
         )
 
 
-# Module-level singleton for application context
-_application_context: ApplicationContext | None = None
+# Module-level singleton for lazy initialization
+_context: ApplicationContext | None = None
 
 
 def get_application_context() -> ApplicationContext:
-    """Get the current application context.
+    """Get the current application context, creating one if necessary.
 
-    Returns the singleton application context, creating a default one
-    if none has been set.
+    This function provides lazy initialization of the application context.
+    On first call, it creates a default context using create_default().
+    Subsequent calls return the cached instance.
 
     Returns:
-        The current ApplicationContext instance.
+        ApplicationContext: The current singleton application context.
 
     Example:
         >>> context = get_application_context()
         >>> context.logger.info("Using shared context")
     """
-    global _application_context  # noqa: PLW0603
-    if _application_context is None:
-        _application_context = ApplicationContext.create_default()
-    return _application_context
+    global _context  # noqa: PLW0603
+    if _context is None:
+        _context = ApplicationContext.create_default()
+    return _context
 
 
 def set_application_context(context: ApplicationContext) -> None:
-    """Set the application context.
+    """Set the global application context.
 
     Replaces the current context with the provided one. This is primarily
     useful for testing, where you want to inject mock dependencies.
@@ -140,8 +138,8 @@ def set_application_context(context: ApplicationContext) -> None:
         ... )
         >>> set_application_context(mock_context)
     """
-    global _application_context  # noqa: PLW0603
-    _application_context = context
+    global _context  # noqa: PLW0603
+    _context = context
 
 
 def reset_application_context() -> None:
@@ -155,8 +153,8 @@ def reset_application_context() -> None:
         >>> # In test teardown
         >>> reset_application_context()
     """
-    global _application_context  # noqa: PLW0603
-    _application_context = None
+    global _context  # noqa: PLW0603
+    _context = None
 
 
 __all__ = [
