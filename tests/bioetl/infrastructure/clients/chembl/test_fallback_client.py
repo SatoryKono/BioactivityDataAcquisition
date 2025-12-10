@@ -1,6 +1,8 @@
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC, ResponseParserABC
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -10,6 +12,9 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 
 
 class DummyParser(ResponseParserABC):
+    def parse(self, raw_response):
+        return []
+
     def parse_response(self, raw_response):
         return []
 
@@ -36,6 +41,7 @@ class DummyResponse:
 
 def test_fallback_switch_on_500(monkeypatch):
     builder = ChemblRequestBuilderImpl(base_url="https://api.example")
+    mock_logger = Mock(spec=LoggingPortABC)
 
     # http.request will return 500 for primary, 200 for fallback
     calls = {"activity": 0}
@@ -54,7 +60,8 @@ def test_fallback_switch_on_500(monkeypatch):
         request_builder=builder,
         response_parser=DummyParser(),
         rate_limiter=DummyLimiter(),
-        client=http,
+        http_client=http,
+        logger=mock_logger,
         fallbacks={"activity": ["activity", "activity_archive"]},
     )
 
