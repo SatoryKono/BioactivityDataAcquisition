@@ -10,7 +10,6 @@ from bioetl.domain.clients.base.contracts import (
     RequestBuilderABC,
     ResponseParserABC,
     SecretProviderABC,
-    SideInputProviderABC,
 )
 from bioetl.domain.configs import (
     HTTP_CLIENT_DEFAULTS,
@@ -204,7 +203,3 @@ def build_http_client(
     )
 
 
-def default_side_input_provider() -> SideInputProviderABC:
-    """Stub factory for side input providers until implemented."""
-
-    raise NotImplementedError("SideInputProviderABC has no default implementation yet")

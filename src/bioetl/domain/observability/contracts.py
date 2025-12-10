@@ -37,7 +37,10 @@ class LoggingPortABC(ABC):
 
 
 class TracingPortABC(ABC):
-    """Port describing distributed tracing operations."""
+    """Port describing distributed tracing operations.
+
+    Experimental: not yet integrated into main pipeline flow.
+    """
 
     @abstractmethod
     def start_span(self, name: str) -> Any:
