@@ -6,7 +6,7 @@ from bioetl.infrastructure.clients.base.abc_registry_resolver import (
     RoleNotFoundError,
 )
 from bioetl.infrastructure.observability.factories import default_logging_port
-from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
+from bioetl.infrastructure.output.unified_loader_impl import UnifiedLoaderImpl
 
 
 @pytest.fixture()
@@ -21,9 +21,12 @@ def test_resolve_default_factory(registry_resolver: ABCRegistryResolver) -> None
 
 
 def test_resolve_implementation(registry_resolver: ABCRegistryResolver) -> None:
-    implementation_class = registry_resolver.resolve_implementation("WriterABC", "Csv")
+    # WriterABC was removed, using LoaderABC instead
+    implementation_class = registry_resolver.resolve_implementation(
+        "LoaderABC", "Unified"
+    )
 
-    assert implementation_class is CsvWriterImpl
+    assert implementation_class is UnifiedLoaderImpl
 
 
 def test_missing_role_raises(registry_resolver: ABCRegistryResolver) -> None:
@@ -33,4 +36,4 @@ def test_missing_role_raises(registry_resolver: ABCRegistryResolver) -> None:
 
 def test_missing_implementation_raises(registry_resolver: ABCRegistryResolver) -> None:
     with pytest.raises(ImplementationNotFoundError):
-        registry_resolver.resolve_implementation("WriterABC", "UnknownImpl")
+        registry_resolver.resolve_implementation("LoaderABC", "UnknownImpl")

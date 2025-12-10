@@ -14,7 +14,10 @@ from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
-from bioetl.interfaces.container_factory import build_default_container, create_config_loader
+from bioetl.interfaces.container_factory import (
+    build_default_container,
+    create_config_loader,
+)
 
 sys.modules.setdefault("tqdm", MagicMock())
 

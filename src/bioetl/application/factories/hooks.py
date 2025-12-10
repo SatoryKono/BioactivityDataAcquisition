@@ -1,6 +1,7 @@
 """
 Factory for creating pipeline hooks.
 """
+
 from __future__ import annotations
 
 from bioetl.application.pipelines.hooks_impl import (

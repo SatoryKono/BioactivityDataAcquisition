@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import structlog
 
-from bioetl.infrastructure.observability.adapters import (
-    PrometheusMetricsPortImpl,
-    StructuredLoggerImpl,
-    TracingAdapterImpl,
-)
 from bioetl.domain.observability.contracts import (
     LoggingPortABC,
     MetricsPortABC,
     TracingPortABC,
+)
+from bioetl.infrastructure.observability.adapters import (
+    PrometheusMetricsPortImpl,
+    StructuredLoggerImpl,
+    TracingAdapterImpl,
 )
 
 

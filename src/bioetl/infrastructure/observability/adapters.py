@@ -7,8 +7,12 @@ from typing import Any, Self
 import structlog
 from structlog.stdlib import BoundLogger
 
+from bioetl.domain.observability.contracts import (
+    LoggingPortABC,
+    MetricsPortABC,
+    TracingPortABC,
+)
 from bioetl.infrastructure.observability import metrics
-from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC, TracingPortABC
 
 
 class StructuredLoggerImpl(LoggingPortABC):
