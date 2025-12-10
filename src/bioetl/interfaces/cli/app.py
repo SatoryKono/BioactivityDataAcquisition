@@ -62,9 +62,15 @@ def _apply_output_override(pipeline_config: PipelineConfig, output: str | None) 
         return
     output_path = Path(output)
     output_path.mkdir(parents=True, exist_ok=True)
-    pipeline_config.output_path = str(output_path)
-    if hasattr(pipeline_config, "storage"):
-        pipeline_config.storage.output_path = str(output_path)
+    # Update frozen sink config using model_copy
+    new_sink = pipeline_config.sink.model_copy(update={"output_path": str(output_path)})
+    object.__setattr__(pipeline_config, "sink", new_sink)
+    # Also update storage if it exists
+    if hasattr(pipeline_config.runtime, "storage"):
+        new_storage = pipeline_config.runtime.storage.model_copy(
+            update={"output_path": str(output_path)}
+        )
+        object.__setattr__(pipeline_config.runtime, "storage", new_storage)
 
 
 def _create_orchestrator(

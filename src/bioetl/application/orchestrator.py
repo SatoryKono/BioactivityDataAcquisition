@@ -86,7 +86,7 @@ class PipelineOrchestrator:
         if effective_type == PipelineType.TRANSFORM_ONLY:
             # Выполнить трансформацию и валидацию, пропустив запись
             return pipeline.run(
-                output_path=Path(self._config.output_path),
+                output_path=Path(self._config.sink.output_path),
                 dry_run=True,
                 limit=limit,
             )
@@ -136,7 +136,7 @@ class PipelineOrchestrator:
 
         # FULL (по умолчанию)
         return pipeline.run(
-            output_path=Path(self._config.output_path),
+            output_path=Path(self._config.sink.output_path),
             dry_run=dry_run,
             limit=limit,
         )
