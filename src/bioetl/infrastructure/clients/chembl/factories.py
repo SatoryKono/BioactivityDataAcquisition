@@ -16,6 +16,9 @@ from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
     build_rate_limiter,
 )
+from bioetl.infrastructure.clients.base.http_error_handler import (
+    DefaultHttpErrorHandler,
+)
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
@@ -69,6 +72,9 @@ def default_chembl_client(
     # Rate limiter for proactive limiting
     rate_limiter = build_rate_limiter(logger, config=resolved_config)
 
+    # Create unified error handler
+    error_handler = DefaultHttpErrorHandler(logger)
+
     return ChemblHttpClientImpl(
         request_builder=ChemblRequestBuilderImpl(
             base_url=base_url,
@@ -80,6 +86,7 @@ def default_chembl_client(
         logger=logger,
         provider="chembl",
         fallbacks=source_config.fallbacks or {},
+        error_handler=error_handler,
     )
 
 

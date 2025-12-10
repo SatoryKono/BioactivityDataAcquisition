@@ -12,6 +12,11 @@ import requests
 
 from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
+from bioetl.infrastructure.clients.base.http_error_handler import (
+    DefaultHttpErrorHandler,
+    HttpErrorHandlerABC,
+    RequestContext,
+)
 from bioetl.infrastructure.errors import (
     ApiClientError,
     ApiTimeoutError,
@@ -38,12 +43,14 @@ class _HttpTransport:
         base_client: Any,
         logger: LoggingPortABC,
         metrics: MetricsPortABC,
+        error_handler: HttpErrorHandlerABC | None = None,
     ) -> None:
         self.provider = provider
         self.config = config
         self.base_client = base_client
         self.logger = logger
         self.metrics = metrics
+        self.error_handler = error_handler or DefaultHttpErrorHandler(logger)
         attempts = max(1, int(config.max_retries) + 1)
         self.retry_policy = (
             ExponentialRetryPolicy(
@@ -86,10 +93,20 @@ class _HttpTransport:
                     raw_status if isinstance(raw_status, int) else None
                 )
                 status_label = self._normalize_status(context["status_code"])
+
+                # Use unified error handler
+                request_context = RequestContext(
+                    provider=self.provider,
+                    endpoint=url,
+                    status_code=context["status_code"],
+                    method=method_upper,
+                )
+                error = self.error_handler.handle(response, request_context)
+
                 log_method = (
                     self.logger.error
                     if context["status_code"] is not None
-                    and context["status_code"] >= 500
+                    and context["status_code"] >= 400
                     else self.logger.info
                 )
                 log_method(
@@ -100,13 +117,10 @@ class _HttpTransport:
                     status_code=context["status_code"],
                     latency_sec=time.monotonic() - start,
                 )
-                if context["status_code"] is not None and context["status_code"] >= 500:
-                    raise ApiUnexpectedStatusError(
-                        f"Unexpected status code: {context['status_code']}",
-                        provider=self.provider,
-                        endpoint=url,
-                        status_code=context["status_code"],
-                    )
+
+                if error is not None:
+                    raise error
+
                 return response
         except Exception as exc:
             status_label = self._status_from_exception(status_label, exc)
