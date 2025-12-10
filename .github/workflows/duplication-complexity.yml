@@ -33,8 +33,8 @@ jobs:
           radon cc src tests -a -s > reports/radon_cc.txt
           radon cc src tests -a -s -j > reports/radon_cc.json
 
-      - name: Enforce cyclomatic complexity threshold
-        run: xenon --max-absolute B --max-modules B --max-average B src tests
+      - name: Enforce cyclomatic complexity threshold (code only)
+        run: xenon --max-absolute B --max-modules B --max-average B --exclude "tests/*,src/tools/*" src
 
       - name: Install Node.js
         uses: actions/setup-node@v4

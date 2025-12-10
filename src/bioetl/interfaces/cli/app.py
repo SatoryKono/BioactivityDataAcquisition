@@ -21,6 +21,64 @@ app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
 
 
+def _infer_config_path(pipeline_name: str) -> str | None:
+    parts = pipeline_name.split("_")
+    if len(parts) >= 2:
+        entity, provider = parts[0], parts[1]
+        return f"configs/pipelines/{provider}/{entity}.yaml"
+    return None
+
+
+def _resolve_config_path(config: str) -> Path:
+    p = Path(config)
+    if p.exists():
+        return p
+    from bioetl.infrastructure.config.sources import get_configs_root
+
+    root = get_configs_root(None)
+    candidate = (root / p).resolve()
+    if candidate.exists():
+        return candidate
+    raise FileNotFoundError(f"Config file not found: {config}")
+
+
+def _build_config(config_path: Path, profile: str | None) -> "PipelineConfig":
+    config_loader = create_config_loader()
+    configs_root = (
+        config_path.parent.parent.parent
+        if config_path.parent.name == "pipelines"
+        else Path("configs")
+    )
+    return build_runtime_config(
+        config_path=config_path,
+        configs_root=configs_root,
+        loader=config_loader,
+        profile=profile,
+    )
+
+
+def _apply_output_override(pipeline_config: "PipelineConfig", output: str | None) -> None:
+    if not output:
+        return
+    output_path = Path(output)
+    output_path.mkdir(parents=True, exist_ok=True)
+    pipeline_config.output_path = str(output_path)
+    if hasattr(pipeline_config, "storage"):
+        pipeline_config.storage.output_path = str(output_path)
+
+
+def _create_orchestrator(pipeline_name: str, pipeline_config: "PipelineConfig") -> PipelineOrchestrator:
+    def _provider_loader_factory() -> object:
+        return create_provider_loader()
+
+    return PipelineOrchestrator(
+        pipeline_name=pipeline_name,
+        config=pipeline_config,
+        provider_loader_factory=_provider_loader_factory,
+        container_factory=build_default_container,
+    )
+
+
 @app.command()
 def list_pipelines() -> None:
     """List all available pipelines."""
@@ -80,67 +138,16 @@ def run(
 ) -> None:
     """Run a pipeline."""
     try:
-        # Resolve config path
-        if config is None:
-            # Try to infer from pipeline name:
-            # activity_chembl -> configs/pipelines/chembl/activity.yaml
-            parts = pipeline_name.split("_")
-            if len(parts) >= 2:
-                entity = parts[0]
-                provider = parts[1]
-                config = f"configs/pipelines/{provider}/{entity}.yaml"
-            else:
-                console.print(
-                    "[red]Error:[/red] Cannot infer config path for "
-                    f"{pipeline_name}. Use --config."
-                )
-                raise typer.Exit(1)
-
-        config_path = Path(config)
-        if not config_path.exists():
-            from bioetl.infrastructure.config.sources import get_configs_root
-
-            root = get_configs_root(None)
-            candidate = (root / config_path).resolve()
-            if candidate.exists():
-                config_path = candidate
-            else:
-                console.print(f"[red]Error:[/red] Config file not found: {config}")
-                raise typer.Exit(1)
-
-        # Load config
-        config_loader = create_config_loader()
-        configs_root = (
-            config_path.parent.parent.parent
-            if config_path.parent.name == "pipelines"
-            else Path("configs")
-        )
-        pipeline_config = build_runtime_config(
-            config_path=config_path,
-            configs_root=configs_root,
-            loader=config_loader,
-            profile=profile,
-        )
-
-        # Override output path if provided
-        if output:
-            output_path = Path(output)
-            output_path.mkdir(parents=True, exist_ok=True)
-            pipeline_config.output_path = str(output_path)
-            if hasattr(pipeline_config, "storage"):
-                pipeline_config.storage.output_path = str(output_path)
-
-        # Create orchestrator
-        def _provider_loader_factory() -> object:
-            """Factory returning provider loader instance for orchestrator."""
-            return create_provider_loader()
-
-        orchestrator = PipelineOrchestrator(
-            pipeline_name=pipeline_name,
-            config=pipeline_config,
-            provider_loader_factory=_provider_loader_factory,
-            container_factory=build_default_container,
-        )
+        inferred = _infer_config_path(pipeline_name) if config is None else config
+        if inferred is None:
+            console.print(
+                "[red]Error:[/red] Cannot infer config path. Use --config."
+            )
+            raise typer.Exit(1)
+        config_path = _resolve_config_path(inferred)
+        pipeline_config = _build_config(config_path, profile)
+        _apply_output_override(pipeline_config, output)
+        orchestrator = _create_orchestrator(pipeline_name, pipeline_config)
 
         # Run pipeline
         console.print("Starting pipeline")
