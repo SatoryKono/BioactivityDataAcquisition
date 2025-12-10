@@ -23,6 +23,11 @@ ALLOWED_DUPLICATE_CLASSES = {
     "NormalizationConfig",
     "Config",
     "BaseProviderConfig",
+    # Temporary: bounded context configs migration (will be consolidated)
+    "CsvInputConfig",
+    "DataSourceConfig",
+    "DataSinkConfig",
+    "OutputOptionsConfig",
 }
 ALLOWED_ABCS_WITHOUT_IMPL = {
     "CLICommandABC",
