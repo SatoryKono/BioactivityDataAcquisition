@@ -8,7 +8,7 @@ from typing import Any, cast
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
-from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
+from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 
 
@@ -97,7 +97,7 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         pipeline_id: str,
         provider: str,
         entity_name: str,
-        metrics_port: PipelineMetricsPortABC | None = None,
+        metrics_port: MetricsPortABC | None = None,
     ) -> None:
         self._pipeline_id = pipeline_id
         self._provider = provider
@@ -130,11 +130,11 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
 
 
-def _create_noop_metrics_port() -> PipelineMetricsPortABC:
+def _create_noop_metrics_port() -> MetricsPortABC:
     """Return no-op metrics port."""
 
     return cast(
-        PipelineMetricsPortABC,
+        MetricsPortABC,
         SimpleNamespace(
             inc_counter=lambda *_args, **_kwargs: None,
             observe_histogram=lambda *_args, **_kwargs: None,

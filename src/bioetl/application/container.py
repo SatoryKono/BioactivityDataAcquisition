@@ -1,36 +1,22 @@
 """Dependency Injection Container for the application."""
 
-from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable, cast
 
-from bioetl.application.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
+from bioetl.application.factories.hooks import PipelineHookFactory
+from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
+from bioetl.application.factories.record_source import RecordSourceFactory
+from bioetl.application.factories.services import ProviderServiceFactory
 from bioetl.application.pipelines.contracts import LoaderABC, PipelineContainerABC
-from bioetl.application.pipelines.hooks_impl import (
-    FailFastErrorPolicyImpl,
-    LoggingPipelineHookImpl,
-    MetricsPipelineHookImpl,
-)
-from bioetl.application.pipelines.loader_impl import FileLoaderImpl
-from bioetl.application.providers import ApplicationFieldProvider
-from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
-    OutputWriterABC,
-    QualityReportABC,
     RunMetadataBuilderProtocol,
-    WriterABC,
-    WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.observability import LoggingPortABC, PipelineMetricsPortABC
+from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.record_source import RecordSource
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -51,43 +37,79 @@ class PipelineContainer(PipelineContainerABC):
         config: PipelineConfig,
         *,
         logger: LoggingPortABC | None = None,
-        output_writer: OutputWriterABC | None = None,
         loader: LoaderABC | None = None,
-        writer: WriterABC | None = None,
-        metadata_writer: MetadataWriterABC | None = None,
-        quality_reporter: QualityReportABC | None = None,
         validator_factory: ValidatorFactoryABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
-        metrics_port: PipelineMetricsPortABC | None = None,
+        metrics_port: MetricsPortABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         hash_service: HashServiceABC | None = None,
         post_transformer: TransformerABC | None = None,
         provider_registry: ProviderRegistryABC | None = None,
-        provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+        provider_registry_provider: (
+            Callable[[], ProviderRegistryABC] | None
+        ) = None,
         schema_provider: SchemaProviderABC | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
-        self._schema_provider: SchemaProviderABC = self._resolve_schema_provider(
-            schema_provider
+        self._schema_provider: SchemaProviderABC = (
+            self._resolve_schema_provider(schema_provider)
         )
-        self._validator_factory = self._resolve_validator_factory(validator_factory)
+        self._validator_factory = self._resolve_validator_factory(
+            validator_factory
+        )
         self._logger = self._resolve_logger(logger)
-        self._hooks: list[PipelineHookABC] | None = list(hooks) if hooks else None
+        self._hooks: list[PipelineHookABC] | None = (
+            list(hooks) if hooks else None
+        )
         self._error_policy = error_policy
         self._hash_service = hash_service
         self._post_transformer = post_transformer
-        self._metadata_builder = self._resolve_metadata_builder(metadata_builder)
+        self._metadata_builder = self._resolve_metadata_builder(
+            metadata_builder
+        )
         self._metrics_port = self._resolve_metrics_port(metrics_port)
         self._provider_registry, self._provider_registry_provider = (
             self._resolve_provider_registry(
                 provider_registry, provider_registry_provider
             )
         )
-        self._output_writer = output_writer or _create_noop_output_writer()
-        self._loader = loader or FileLoaderImpl(self._output_writer)
+        if loader is None:
+            raise ValueError("Loader must be provided.")
+        self._loader = loader
         register_schemas(self._schema_provider)
+
+        # Initialize factory helpers
+        self._service_factory: ProviderServiceFactory | None = None
+        self._record_source_factory: RecordSourceFactory | None = None
+        self._hook_factory: PipelineHookFactory | None = None
+
+    def _get_service_factory(self) -> ProviderServiceFactory:
+        if self._service_factory is None:
+            self._service_factory = ProviderServiceFactory(
+                self._config,
+                self._get_provider_definition(),
+                self._resolve_provider_config,
+            )
+        return self._service_factory
+
+    def _get_record_source_factory(self) -> RecordSourceFactory:
+        if self._record_source_factory is None:
+            self._record_source_factory = RecordSourceFactory(
+                self._config,
+                self._get_provider_definition(),
+                self._resolve_provider_config,
+            )
+        return self._record_source_factory
+
+    def _get_hook_factory(self) -> PipelineHookFactory:
+        if self._hook_factory is None:
+            self._hook_factory = PipelineHookFactory(
+                self._config,
+                self._metrics_port,
+            )
+        return self._hook_factory
 
     def _resolve_schema_provider(
         self, schema_provider: SchemaProviderABC | None
@@ -108,15 +130,17 @@ class PipelineContainer(PipelineContainerABC):
         return metadata_builder or _create_noop_metadata_builder()
 
     def _resolve_metrics_port(
-        self, metrics_port: PipelineMetricsPortABC | None
-    ) -> PipelineMetricsPortABC:
+        self, metrics_port: MetricsPortABC | None
+    ) -> MetricsPortABC:
         return metrics_port or _create_noop_metrics_port()
 
     def _resolve_provider_registry(
         self,
         provider_registry: ProviderRegistryABC | None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None,
-    ) -> tuple[ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None]:
+    ) -> tuple[
+        ProviderRegistryABC | None, Callable[[], ProviderRegistryABC] | None
+    ]:
         if provider_registry is None and provider_registry_provider is None:
             raise ValueError(
                 "Provider registry must be supplied (instance or provider callable)"
@@ -139,10 +163,6 @@ class PipelineContainer(PipelineContainerABC):
             validator_factory=self._validator_factory,
         )
 
-    def get_output_writer(self) -> OutputWriterABC:
-        """Get the unified output writer."""
-        return self._output_writer
-
     def get_loader(self) -> LoaderABC:
         """Get the loader component."""
         return self._loader
@@ -153,20 +173,7 @@ class PipelineContainer(PipelineContainerABC):
 
     def get_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
-
-        definition = self._get_provider_definition()
-        source_config = self._resolve_provider_config(definition)
-        components = definition.components
-
-        factory = cast(
-            Callable[..., NormalizationServiceABC] | None,
-            getattr(components, "create_normalization_service", None),
-        )
-        if factory is None:
-            raise ValueError(
-                f"Unsupported provider for normalization: {self._provider_id.value}"
-            )
-        return factory(source_config, pipeline_config=self._config)
+        return self._get_service_factory().create_normalization_service()
 
     def get_record_source(
         self,
@@ -176,70 +183,15 @@ class PipelineContainer(PipelineContainerABC):
         logger: LoggingPortABC | None = None,
     ) -> RecordSource:
         """Create record source based on pipeline input configuration."""
-        mode = self._config.input_mode
-        path = self._config.input_path
-
-        if mode == "auto_detect" and path:
-            mode = "csv"
-
-        effective_logger = logger or self.get_logger()
-
-        if mode == "csv":
-            if path is None:
-                raise ValueError("input_path is required for CSV mode")
-            return CsvRecordSourceImpl(
-                input_path=Path(path),
-                csv_options=self._config.csv_options,
-                limit=limit,
-                logger=effective_logger,
-                chunk_size=None,
-            )
-
-        if mode == "id_only":
-            if path is None:
-                raise ValueError("input_path is required for ID-only mode")
-            definition = self._get_provider_definition()
-            source_config = self._resolve_provider_config(definition)
-            id_column = self._resolve_primary_key()
-            filter_key = f"{id_column}__in"
-            return IdListRecordSourceImpl(
-                input_path=Path(path),
-                id_column=id_column,
-                csv_options=self._config.csv_options,
-                limit=limit,
-                extraction_service=extraction_service,
-                source_config=source_config,
-                entity=self._config.entity_name,
-                filter_key=filter_key,
-                logger=effective_logger,
-                chunk_size=None,
-            )
-
-        filters = self._config.pipeline.copy()
-        if limit is not None:
-            filters["limit"] = limit
-
-        return ApiRecordSource(
-            extraction_service=extraction_service,
-            entity=self._config.entity_name,
-            filters=filters,
-            chunk_size=self._config.batch_size,
-            batch_adapter=PandasBatchAdapter().process_batch,
+        return self._get_record_source_factory().create_record_source(
+            extraction_service,
+            limit=limit,
+            logger=logger or self.get_logger(),
         )
 
     def get_extraction_service(self) -> Any:
         """Get the extraction service based on provider configuration."""
-        definition = self._get_provider_definition()
-        source_config = self._resolve_provider_config(definition)
-
-        client = definition.components.create_client(source_config)
-
-        # Inject application-level defaults
-        field_provider = ApplicationFieldProvider()
-
-        return definition.components.create_extraction_service(
-            source_config, client=client, field_provider=field_provider
-        )
+        return self._get_service_factory().create_extraction_service()
 
     def get_hash_service(self) -> HashServiceABC:
         """Get the hash service.
@@ -268,34 +220,15 @@ class PipelineContainer(PipelineContainerABC):
     def get_hooks(self) -> list[PipelineHookABC]:
         """Возвращает список хуков выполнения пайплайна."""
         if self._hooks is None:
-            self._hooks = [
-                LoggingPipelineHookImpl(self.get_logger()),
-                MetricsPipelineHookImpl(
-                    pipeline_id=self._config.id,
-                    provider=self._provider_id.value,
-                    entity_name=self._config.entity_name,
-                    metrics_port=self._metrics_port,
-                ),
-            ]
+            self._hooks = self._get_hook_factory().create_hooks(self.get_logger())
         return list(self._hooks)
+
 
     def get_error_policy(self) -> ErrorPolicyABC:
         """Возвращает политику обработки ошибок пайплайна."""
         if self._error_policy is None:
             self._error_policy = FailFastErrorPolicyImpl()
         return self._error_policy
-
-    def _resolve_primary_key(self) -> str:
-        pk = self._config.primary_key
-        if not pk and self._config.pipeline and "primary_key" in self._config.pipeline:
-            pk = self._config.pipeline["primary_key"]
-        if not pk:
-            pk = f"{self._config.entity_name}_id"
-        if not pk:
-            raise ValueError(
-                f"Could not resolve primary key for entity '{self._config.entity_name}'"
-            )
-        return pk
 
     def _get_provider_definition(self) -> ProviderDefinition:
         return self._get_provider_registry().get_provider(self._provider_id)
@@ -340,33 +273,6 @@ def _create_noop_logger() -> LoggingPortABC:
     )
 
 
-def _create_noop_output_writer() -> OutputWriterABC:
-    """Return a deterministic no-op output writer."""
-
-    def _write_result(
-        df: Any,
-        output_path: Path,
-        entity_name: str,  # noqa: ARG001 - contract compatibility
-        run_context: Any,  # noqa: ARG001 - contract compatibility
-        *,
-        column_order: list[str] | None = None,  # noqa: ARG001 - contract compatibility
-    ) -> WriteResult:
-        row_count = 0
-        try:
-            row_count = int(len(df))
-        except Exception:
-            row_count = 0
-        path = Path(output_path)
-        return WriteResult(
-            path=path,
-            row_count=row_count,
-            duration_sec=0.0,
-            checksum=None,
-        )
-
-    return cast(OutputWriterABC, SimpleNamespace(write_result=_write_result))
-
-
 def _create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
     """Return metadata builder that emits minimal deterministic payloads."""
 
@@ -385,11 +291,11 @@ def _create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
     )
 
 
-def _create_noop_metrics_port() -> PipelineMetricsPortABC:
+def _create_noop_metrics_port() -> MetricsPortABC:
     """Return metrics port that records nothing (for tests)."""
 
     return cast(
-        PipelineMetricsPortABC,
+        MetricsPortABC,
         SimpleNamespace(
             inc_counter=lambda *_args, **_kwargs: None,
             observe_histogram=lambda *_args, **_kwargs: None,

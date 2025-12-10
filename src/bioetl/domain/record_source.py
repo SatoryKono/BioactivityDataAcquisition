@@ -8,7 +8,7 @@ from typing import Any, Callable
 
 from pydantic import BaseModel, ConfigDict
 
-from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.extraction import RecordFetcherABC
 
 
 class RawRecord(BaseModel):
@@ -51,7 +51,7 @@ class ApiRecordSource(RecordSourceABC):
 
     def __init__(
         self,
-        extraction_service: ExtractionServiceABC,
+        extraction_service: RecordFetcherABC,
         entity: str,
         filters: dict[str, Any] | None = None,
         chunk_size: int | None = None,

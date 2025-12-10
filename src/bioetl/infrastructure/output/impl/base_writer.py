@@ -10,11 +10,11 @@ import time
 
 import pandas as pd
 
-from bioetl.domain.clients.base.output.contracts import WriterABC, WriteResult
+from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.column_order import apply_column_order
 
 
-class BaseWriterImpl(WriterABC):
+class BaseWriterImpl:
     """Template for concrete writers with shared bookkeeping."""
 
     def __init__(

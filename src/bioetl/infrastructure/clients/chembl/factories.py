@@ -7,7 +7,7 @@ from typing import Any
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, ClientConfig, HttpClientSettings
 from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.extraction import VersionedRecordFetcherABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
@@ -93,7 +93,7 @@ def default_chembl_extraction_service(
     client: DataClientABC | None = None,
     logger: LoggingPortABC | None = None,
     field_provider: DefaultFieldProviderABC | None = None,
-) -> ExtractionServiceABC:
+) -> VersionedRecordFetcherABC:
     """
     Создает сервис экстракции ChEMBL.
 

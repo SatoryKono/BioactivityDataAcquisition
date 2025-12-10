@@ -8,12 +8,7 @@ import time
 from types import SimpleNamespace
 from typing import Any, Iterator
 
-from bioetl.domain.clients.base.contracts import (
-    ApiClientABC,
-    RateLimiterABC,
-    RequestBuilderABC,
-    ResponseParserABC,
-)
+from bioetl.domain.clients.base.contracts import RateLimiterABC, RequestBuilderABC, ResponseParserABC
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
@@ -35,7 +30,7 @@ class ChemblHttpClientImpl(DataClientABC):
         request_builder: RequestBuilderABC,
         response_parser: ResponseParserABC,
         rate_limiter: RateLimiterABC,
-        client: ApiClientABC | None = None,
+        client: Any | None = None,
         *,
         provider: str = "chembl",
         logger: LoggingPortABC | None = None,
@@ -68,7 +63,6 @@ class ChemblHttpClientImpl(DataClientABC):
         paginator = ChemblPaginatorImpl()
 
         while url:
-            self.rate_limiter.wait_if_needed()
             self.rate_limiter.acquire()
 
             response_data = self._execute_request(url)
@@ -174,7 +168,13 @@ class ChemblHttpClientImpl(DataClientABC):
         builder = self.request_builder
         self._apply_endpoint_aliases(builder, endpoint)
 
+        direct: str | Any | None = None
+        try:
+            direct = builder.build(endpoint, **filters)
+        except Exception:
+            direct = None
         candidates = [
+            direct,
             self._invoke_builder_method(builder, "build_request", filters),
             self._invoke_builder_method(builder, "build", filters),
         ]

@@ -11,7 +11,7 @@ from bioetl.application.container import PipelineContainer
 from bioetl.application.pipelines.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.observability import PipelineMetricsPortABC
+from bioetl.domain.observability import MetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.abc_registry_resolver import ABCRegistryResolver
@@ -33,7 +33,7 @@ def _create_metadata_builder() -> RunMetadataBuilderProtocol:
     )
 
 
-def _create_metrics_port() -> PipelineMetricsPortABC:
+def _create_metrics_port() -> MetricsPortABC:
     """Return metrics port backed by Prometheus collectors."""
 
     return create_prometheus_metrics_port()
@@ -56,35 +56,22 @@ def build_default_container(
 
     registry_loader = ABCRegistryResolver()
     logger_factory = registry_loader.resolve_default_factory("LoggingPortABC")
-    writer_factory = registry_loader.resolve_default_factory("WriterABC")
-    metadata_writer_factory = registry_loader.resolve_default_factory(
-        "MetadataWriterABC"
-    )
-    quality_reporter_factory = registry_loader.resolve_default_factory(
-        "QualityReportABC"
-    )
-    output_writer_factory = registry_loader.resolve_default_factory("OutputWriterABC")
+    loader_factory = registry_loader.resolve_default_factory("LoaderABC")
     frame_converter_factory = registry_loader.resolve_default_factory(
         "OutputFrameConverterABC"
     )
     hash_service_factory = registry_loader.resolve_default_factory("HashServiceABC")
 
     logger = logger_factory()
-    writer = writer_factory()
-    metadata_writer = metadata_writer_factory()
-    quality_reporter = quality_reporter_factory()
     metrics_port = _create_metrics_port()
     converter_id = getattr(
         getattr(config, "output", SimpleNamespace()), "converter", None
     )
     frame_converter = frame_converter_factory(converter_id)
 
-    output_writer = output_writer_factory(
+    loader = loader_factory(
         config=config.determinism,
         qc_config=config.qc,
-        writer=writer,
-        metadata_writer=metadata_writer,
-        quality_reporter=quality_reporter,
         metrics_port=metrics_port,
         converter=frame_converter,
     )
@@ -95,7 +82,7 @@ def build_default_container(
     return PipelineContainer(
         config,
         logger=logger,
-        output_writer=output_writer,
+        loader=loader,
         validator_factory=validator_factory,
         metadata_builder=metadata_builder,
         metrics_port=metrics_port,

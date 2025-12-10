@@ -36,10 +36,13 @@ class _StubExtractionService:
             ]
         }
 
-    def parse_response(self, raw_response: dict[str, list[dict[str, str]]]):
+    def parse(self, raw_response: dict[str, list[dict[str, str]]]):
         return [
             ActivityRawModel.model_validate(item) for item in raw_response["records"]
         ]
+
+    def parse_response(self, raw_response: dict[str, list[dict[str, str]]]):
+        return self.parse(raw_response)
 
     def serialize_records(
         self, entity: str, records: list[ActivityRawModel]

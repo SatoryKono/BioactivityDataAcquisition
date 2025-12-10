@@ -10,10 +10,7 @@ import pandas as pd
 
 from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
-from bioetl.domain.clients.base.output.contracts import (
-    RunMetadataBuilderProtocol,
-    WriteResult,
-)
+from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol, WriteResult
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
@@ -27,7 +24,7 @@ from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
 
 if TYPE_CHECKING:
-    from bioetl.domain.clients.base.output.contracts import OutputWriterABC
+    pass
 
 ExtractResult: TypeAlias = Iterable[pd.DataFrame] | pd.DataFrame | None
 
@@ -54,30 +51,6 @@ def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
             },
         ),
     )
-
-
-class OutputWriterLoaderAdapter(LoaderABC):
-    """Adapter that bridges legacy OutputWriterABC to LoaderABC."""
-
-    def __init__(self, output_writer: "OutputWriterABC") -> None:
-        self._output_writer = output_writer
-
-    def load(
-        self,
-        df: pd.DataFrame,
-        output_path: Path,
-        context: RunContext,
-        *,
-        column_order: list[str] | None = None,
-    ) -> WriteResult:
-        """Persist dataframe via wrapped OutputWriter keeping context metadata."""
-        return self._output_writer.write_result(
-            df=df,
-            output_path=output_path,
-            entity_name=context.entity_name,
-            run_context=context,
-            column_order=column_order or [],
-        )
 
 
 class PipelineBase(ABC):

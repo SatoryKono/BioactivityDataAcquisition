@@ -1,15 +1,15 @@
-"""Output writer contracts re-export."""
+"""Output contracts re-export."""
 
 from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
+    OutputFrameConverterABC,
     QualityReportABC,
-    WriterABC,
+    RunMetadataBuilderProtocol,
     WriteResult,
 )
 
 __all__ = [
     "WriteResult",
-    "WriterABC",
-    "MetadataWriterABC",
     "QualityReportABC",
+    "RunMetadataBuilderProtocol",
+    "OutputFrameConverterABC",
 ]

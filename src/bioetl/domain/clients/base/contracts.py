@@ -20,14 +20,26 @@ class RequestBuilderABC(ABC):
         """Создает объект запроса из параметров."""
 
     @abstractmethod
+    def build(
+        self, endpoint: str, params: dict[str, Any] | None = None
+    ) -> Any:
+        """Создает запрос для указанного endpoint с параметрами."""
+
+    @abstractmethod
     def build_with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
         """Добавляет параметры пагинации."""
+
+    def with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
+        return self.build_with_pagination(offset, limit)
 
 
 class ResponseParserABC(ABC, Generic[RecordT]):
     """
     Разбор ответов API.
     """
+
+    def parse(self, raw_response: dict[str, object]) -> list[RecordT]:
+        return self.parse_response(raw_response)
 
     @abstractmethod
     def parse_response(self, raw_response: dict[str, object]) -> list[RecordT]:
@@ -38,27 +50,6 @@ class ResponseParserABC(ABC, Generic[RecordT]):
         self, raw_response: dict[str, object]
     ) -> dict[str, int | str | None]:
         """Извлекает метаданные из ответа (например, общее кол-во)."""
-
-
-class ApiClientABC(ABC):
-    """
-    Абстракция API-клиента, не зависящая от транспорта.
-    Поддерживает хуки жизненного цикла запросов.
-
-    Default factory:
-    ``bioetl.infrastructure.clients.base.factories.default_api_client``.
-
-    Common implementation:
-    ``bioetl.infrastructure.clients.base.impl.unified_api_client_impl.UnifiedAPIClientImpl``.
-    """
-
-    @abstractmethod
-    def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        """Execute an HTTP-style request and return the raw response object."""
-
-    @abstractmethod
-    def close(self) -> None:
-        """Release underlying resources (sessions, pools)."""
 
 
 class PaginatorABC(ABC):
@@ -88,10 +79,6 @@ class RateLimiterABC(ABC):
     def acquire(self) -> None:
         """Запрашивает разрешение на выполнение (блокирует при необходимости)."""
 
-    @abstractmethod
-    def wait_if_needed(self) -> None:
-        """Ожидает, если лимит исчерпан."""
-
 
 class RetryPolicyABC(ABC):
     """
@@ -117,52 +104,20 @@ class CacheABC(ABC, Generic[T]):
     Интерфейс кэширования.
     """
 
+    @abstractmethod
     def get(self, key: str) -> T | None:
-        """
-        Возвращает значение из кэша или ``None``.
-        Делегирует в ``get_value``.
-        """
-
-        return self.get_value(key)
+        """Возвращает значение из кэша или ``None``."""
 
     @abstractmethod
-    def get_value(self, key: str) -> T | None:
-        """Получает значение из кэша или ``None``, если его нет или оно истекло."""
-
     def set(self, key: str, value: T, ttl: int | None = None) -> None:
-        """
-        Сохраняет значение в кэш с опциональным TTL.
-        Делегирует в ``apply_set``.
-        """
-
-        self.apply_set(key, value, ttl)
-
-    @abstractmethod
-    def apply_set(self, key: str, value: T, ttl: int | None = None) -> None:
         """Сохраняет значение в кэш с опциональным TTL в секундах."""
 
-    def invalidate(self, key: str) -> None:
-        """
-        Удаляет значение из кэша.
-        Делегирует в ``apply_invalidate``.
-        """
-
-        self.apply_invalidate(key)
-
     @abstractmethod
-    def apply_invalidate(self, key: str) -> None:
+    def invalidate(self, key: str) -> None:
         """Удаляет значение из кэша."""
 
-    def clear(self) -> None:
-        """
-        Полностью очищает кэш.
-        Делегирует в ``apply_clear``.
-        """
-
-        self.apply_clear()
-
     @abstractmethod
-    def apply_clear(self) -> None:
+    def clear(self) -> None:
         """Очищает весь кэш."""
 
 

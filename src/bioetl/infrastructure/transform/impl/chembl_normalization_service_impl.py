@@ -32,6 +32,14 @@ class ChemblNormalizationServiceImpl(
     def __init__(self, config: NormalizationConfigProviderProtocol):
         super().__init__(config)
 
+    def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize dataframe according to field configuration."""
+        return self.apply_normalize_dataframe(df)
+
+    def normalize_record(self, record: dict[str, Any]) -> NormalizedRecord:
+        """Normalize single record with deterministic field handling."""
+        return self.apply_normalize(record)
+
     def apply_normalize(self, raw: RawRecord | pd.Series) -> NormalizedRecord:
         """Normalize single raw ChEMBL record into flat dict."""
         normalized: dict[str, Any] = {}

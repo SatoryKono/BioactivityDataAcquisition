@@ -28,6 +28,14 @@ class DefaultNormalizationTransformerImpl(
     def __init__(self, config: NormalizationConfigProviderProtocol):
         BaseNormalizationServiceImpl.__init__(self, config, empty_value=pd.NA)
 
+    def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize dataframe according to configured fields."""
+        return self.apply_normalize_dataframe(df)
+
+    def normalize_record(self, record: dict[str, Any]) -> dict[str, Any]:
+        """Normalize single record using configured field rules."""
+        return self.apply_normalize(record)
+
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Проходит по полям конфигурации и применяет нормализацию."""
         for field_cfg in self._iter_fields():

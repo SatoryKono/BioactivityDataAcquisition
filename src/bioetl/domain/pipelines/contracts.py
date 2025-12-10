@@ -76,3 +76,11 @@ class LoaderABC(ABC):
         """
         Loads data to destination.
         """
+
+    @abstractmethod
+    def write_metadata(self, meta: dict, path: Path) -> None:
+        """Записывает метаданные артефактов пайплайна."""
+
+    @abstractmethod
+    def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
+        """Записывает QC-отчет в детерминированном порядке."""

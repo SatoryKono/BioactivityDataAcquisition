@@ -4,7 +4,6 @@ import os
 from typing import Any
 
 from bioetl.domain.clients.base.contracts import (
-    ApiClientABC,
     CacheABC,
     PaginatorABC,
     RateLimiterABC,
@@ -24,9 +23,7 @@ from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
-from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
-    UnifiedAPIClientImpl,
-)
+from bioetl.infrastructure.clients.base.impl._http_transport import _HttpTransport
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
@@ -169,7 +166,7 @@ def default_api_client(
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
     metrics: MetricsPortABC | None = None,
-) -> ApiClientABC:
+) -> _HttpTransport:
     """Create the default API client without middleware indirection."""
 
     return build_http_client(
@@ -190,7 +187,7 @@ def build_http_client(
     base_client: Any | None = None,
     logger: LoggingPortABC | None = None,
     metrics: MetricsPortABC | None = None,
-) -> ApiClientABC:
+) -> _HttpTransport:
     """Construct HTTP client using centralized defaults."""
 
     resolved_config = _ensure_client_config(
@@ -198,7 +195,7 @@ def build_http_client(
         http_settings=http_settings,
         defaults=defaults,
     )
-    return UnifiedAPIClientImpl(
+    return _HttpTransport(
         provider=provider,
         config=resolved_config,
         base_client=base_client,

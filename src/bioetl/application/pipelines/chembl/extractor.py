@@ -15,7 +15,7 @@ from bioetl.application.files.csv_record_source import (
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.ports.extraction import BatchAdapterABC, ExtractionServiceABC
+from bioetl.domain.ports.extraction import BatchAdapterABC, RecordFetcherABC
 from bioetl.domain.record_source import ApiRecordSource, RecordSource
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.transform.contracts import NormalizationServiceABC
@@ -29,7 +29,7 @@ class ChemblExtractorImpl(ExtractorABC):
     def __init__(
         self,
         config: PipelineConfig,
-        extraction_service: ExtractionServiceABC,
+        extraction_service: RecordFetcherABC,
         normalization_service: NormalizationServiceABC,
         logger: LoggingPortABC,
         batch_adapter: BatchAdapterABC,
