@@ -74,5 +74,25 @@ ChEMBL-данные разделены на несколько предметн�
 Эти детали инкапсулированы в `bioetl.infrastructure.*` и настраиваются через
 DI/wiring.
 
+## Layer Boundaries
+
+### Infrastructure → Application
+Infrastructure adapters return generic types:
+- HTTP responses → `dict[str, Any]`
+- Parsed records → `list[dict[str, Any]]`
+
+Application layer converts to domain types via mappers.
+
+### Application → Domain
+Application services orchestrate domain logic:
+- `SchemaBootstrapService` registers schemas
+- `RecordMapperABC` implementations validate and convert records
+
+### Domain
+Pure business logic without external dependencies:
+- Pandera schemas
+- Validation rules
+- Business models (RawRecord subclasses)
+
 ## Физическая структура
 См. [05 Physical Layout](05-physical-layout.md) для маппинга этих слоев на директории проекта.

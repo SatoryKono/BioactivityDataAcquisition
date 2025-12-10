@@ -8,6 +8,10 @@
 - `04-duplication-reduction.md` — стратегии снижения дублирования через ABC/Default/Impl и наследование пайплайнов.
 - `decisions/0000-adr-index.md` — реестр принятых архитектурных решений.
 
+## Migration Guides
+
+- `../migration/2.0-hexagonal-architecture.md` — руководство по миграции на hexagonal architecture v2.0.
+
 ## Навигация
 
 Для обзора проекта начните с `docs/architecture/10-system-design.md`. За справочниками по API и схемам переходите в `docs/domain/*` и `docs/infrastructure/*`, за практическими шагами — в `docs/guides/*`, а за конкретными пайплайнами — в `docs/application/pipelines/chembl/*`.
