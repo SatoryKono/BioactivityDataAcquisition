@@ -138,24 +138,7 @@ classDiagram
         +get_delay(attempt) float
     }
 
-    class CircuitBreakerImpl {
-        -state: CircuitState
-        -failure_count: int
-        -failure_threshold: int
-        -timeout: float
-        +call(func)
-        +reset()
-    }
-
-    class CircuitState {
-        <<Enum>>
-        +CLOSED
-        +OPEN
-        +HALF_OPEN
-    }
-
     RateLimiterABC <|-- TokenBucketRateLimiterImpl
-    CircuitBreakerImpl --> CircuitState : uses
 ```
 
 ## 4. Output Writers

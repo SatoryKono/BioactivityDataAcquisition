@@ -28,10 +28,8 @@ classDiagram
     class UnifiedAPIClient {
         +get(url, params, headers) -> HTTPResponse
         -rate_limiter : RateLimiter
-        -circuit_breaker : CircuitBreaker
     }
     class RateLimiter
-    class CircuitBreaker
 
     ChemblDataClientABC <|.. ChemblDataClientHTTPImpl
     ChemblDataClientHTTPImpl --> ChemblRequestBuilderImpl
@@ -39,5 +37,4 @@ classDiagram
     ChemblDataClientHTTPImpl --> ChemblPaginatorImpl
     ChemblDataClientHTTPImpl --> UnifiedAPIClient
     UnifiedAPIClient --> RateLimiter
-    UnifiedAPIClient --> CircuitBreaker
 

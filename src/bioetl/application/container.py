@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from typing import Any, Callable, cast
 
 from bioetl.application.factories.hooks import PipelineHookFactory
+from bioetl.application.factories.noop import create_noop_metrics_port
 from bioetl.application.factories.record_source import RecordSourceFactory
 from bioetl.application.factories.services import ProviderServiceFactory
 from bioetl.application.pipelines.contracts import LoaderABC, PipelineContainerABC
@@ -126,7 +127,7 @@ class PipelineContainer(PipelineContainerABC):
     def _resolve_metrics_port(
         self, metrics_port: MetricsPortABC | None
     ) -> MetricsPortABC:
-        return metrics_port or _create_noop_metrics_port()
+        return metrics_port or create_noop_metrics_port()
 
     def _resolve_provider_registry(
         self,
@@ -278,20 +279,6 @@ def _create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
                 "run_id": getattr(context, "run_id", None),
                 "row_count": row_count,
             },
-        ),
-    )
-
-
-def _create_noop_metrics_port() -> MetricsPortABC:
-    """Return metrics port that records nothing (for tests)."""
-
-    return cast(
-        MetricsPortABC,
-        SimpleNamespace(
-            inc_counter=lambda *_args, **_kwargs: None,
-            observe_histogram=lambda *_args, **_kwargs: None,
-            update_stage_duration=lambda **_kwargs: None,
-            update_stage_total=lambda **_kwargs: None,
         ),
     )
 
