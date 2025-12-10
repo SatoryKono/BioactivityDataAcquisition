@@ -1,66 +1,115 @@
-"""Schema bootstrap service for application initialization."""
+"""Schema bootstrap service for initializing schema providers."""
 
 from __future__ import annotations
 
-from bioetl.application.services.schema_contract_provider import (
-    SchemaContractProviderImpl,
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+from bioetl.domain.schemas import register_schemas
+from bioetl.domain.schemas.registry import (
+    SchemaRegistry,
+    create_default_schema_registry,
 )
-from bioetl.domain.ports.schema import SchemaContractProviderABC
-from bioetl.domain.schemas.registry import get_default_schema_registry
 from bioetl.domain.validation import SchemaProviderABC
 
+if TYPE_CHECKING:
+    pass
 
+
+@dataclass
 class SchemaBootstrapService:
-    """Service for initializing schema infrastructure.
+    """Service for bootstrapping schema providers.
 
-    This service handles the creation and registration of schemas,
-    providing a clean entry point for application bootstrap.
+    This service ensures that schema providers are properly initialized
+    with all required schemas before being used by pipeline components.
+    It implements a lazy initialization pattern with caching.
+
+    Example:
+        >>> service = SchemaBootstrapService()
+        >>> provider = service.ensure_registered()
+        >>> # Provider now has all schemas registered
+        >>> provider.get_schema("activity")
     """
 
-    def __init__(
-        self,
-        schema_provider: SchemaProviderABC | None = None,
-    ) -> None:
-        """Initialize the bootstrap service.
-
-        Args:
-            schema_provider: Optional pre-configured schema provider.
-                If None, uses the default schema registry.
-        """
-        self._schema_provider = schema_provider
+    _schema_provider: SchemaProviderABC | None = field(default=None, repr=False)
+    _registered: bool = field(default=False, repr=False)
 
     def ensure_registered(self) -> SchemaProviderABC:
         """Ensure schemas are registered and return the provider.
 
+        Creates a schema provider if not already initialized, registers
+        all default schemas, and returns the configured provider.
+
         Returns:
-            The schema provider with all schemas registered.
+            Fully initialized schema provider with all schemas registered.
+
+        Note:
+            This method is idempotent - calling it multiple times returns
+            the same provider instance.
         """
+        if self._registered and self._schema_provider is not None:
+            return self._schema_provider
+
         if self._schema_provider is None:
-            self._schema_provider = get_default_schema_registry()
+            self._schema_provider = SchemaRegistry()
+
+        if not self._registered:
+            register_schemas(self._schema_provider)
+            self._registered = True
+
         return self._schema_provider
 
-    def create_contract_provider(self) -> SchemaContractProviderABC:
-        """Create a schema contract provider.
+    @property
+    def schema_provider(self) -> SchemaProviderABC | None:
+        """Get the current schema provider (may be None if not bootstrapped)."""
+        return self._schema_provider
 
-        Returns:
-            A configured SchemaContractProviderImpl instance.
+    @property
+    def is_registered(self) -> bool:
+        """Check if schemas have been registered."""
+        return self._registered
+
+    def reset(self) -> None:
+        """Reset the bootstrap state (primarily for testing).
+
+        Clears the cached provider and registration state.
         """
-        schema_provider = self.ensure_registered()
-        return SchemaContractProviderImpl(schema_provider)
+        self._schema_provider = None
+        self._registered = False
 
 
 def create_schema_bootstrap_service(
+    *,
     schema_provider: SchemaProviderABC | None = None,
+    auto_register: bool = False,
 ) -> SchemaBootstrapService:
-    """Factory function for creating the schema bootstrap service.
+    """Create a schema bootstrap service.
+
+    Factory function for creating SchemaBootstrapService instances
+    with optional pre-configured schema provider.
 
     Args:
-        schema_provider: Optional pre-configured schema provider.
+        schema_provider: Optional pre-existing schema provider to use.
+            If not provided, a new SchemaRegistry will be created.
+        auto_register: If True, immediately register all schemas.
+            Default is False for lazy initialization.
 
     Returns:
-        A configured SchemaBootstrapService instance.
+        Configured SchemaBootstrapService instance.
+
+    Example:
+        >>> # Create with lazy registration
+        >>> service = create_schema_bootstrap_service()
+        >>> provider = service.ensure_registered()
+        >>>
+        >>> # Create with immediate registration
+        >>> service = create_schema_bootstrap_service(auto_register=True)
+        >>> assert service.is_registered
     """
-    return SchemaBootstrapService(schema_provider)
+    service = SchemaBootstrapService(_schema_provider=schema_provider)
+    if auto_register:
+        service.ensure_registered()
+    return service
 
 
 __all__ = [
