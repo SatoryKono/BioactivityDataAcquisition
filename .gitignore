@@ -16,7 +16,7 @@ node_modules
 /htmlcov/
 /build/
 /dist/
-/*.egg-info/
+*.egg-info/
 /*.log
 /*.tmp
 /*report*.txt
