@@ -304,9 +304,6 @@ from bioetl.domain.configs import (  # noqa: E402
 )
 from bioetl.domain.models import RunContext  # noqa: E402
 from bioetl.domain.validation.service import ValidationService  # noqa: E402
-from bioetl.infrastructure.output.unified_output_writer_impl import (  # noqa: E402
-    UnifiedOutputWriterImpl,
-)
 from bioetl.domain.observability.contracts import LoggingPortABC  # noqa: E402
 
 # Workaround for Hypothesis issue with Python 3.13 and SimpleNamespace modules
@@ -406,29 +403,20 @@ def mock_validation_service():
 
 
 @pytest.fixture
-def mock_output_writer():
-    """Create a mock output writer."""
+def mock_loader():
+    """Create a mock loader compatible with LoaderABC."""
     from pathlib import Path
 
+    from bioetl.application.pipelines.contracts import LoaderABC
     from bioetl.domain.clients.base.output.contracts import WriteResult
 
-    writer = MagicMock(spec=UnifiedOutputWriterImpl)
-    writer.write_result.return_value = WriteResult(
+    loader = MagicMock(spec=LoaderABC)
+    loader.load.return_value = WriteResult(
         path=Path("/tmp/test_output.csv"),
         row_count=2,  # Default for most tests
         duration_sec=0.1,
         checksum=None,
     )
-    return writer
-
-
-@pytest.fixture
-def mock_loader(mock_output_writer):
-    """Create a mock loader compatible with LoaderABC."""
-    from bioetl.application.pipelines.contracts import LoaderABC
-
-    loader = MagicMock(spec=LoaderABC)
-    loader.load.side_effect = mock_output_writer.write_result
     return loader
 
 

@@ -1,11 +1,23 @@
 """Contracts for writing pipeline outputs and metadata."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 import pandas as pd
+
+
+@dataclass(frozen=True)
+class WriteResult:
+    """Result of a write operation."""
+
+    path: Path
+    row_count: int
+    duration_sec: float
+    checksum: str | None = None
 
 
 class QualityReportABC(ABC):
@@ -40,6 +52,7 @@ class OutputFrameConverterABC(Protocol):
 
     def convert(self, df: pd.DataFrame) -> pd.DataFrame:
         """Преобразует DataFrame (rename/reorder/drop/enrich)."""
+        ...
 
 
 __all__ = [

@@ -26,4 +26,4 @@ def test_rate_limiter_refill():
 
 def test_wait_if_needed():
     limiter = TokenBucketRateLimiterImpl(rate=1, capacity=1)
-    limiter.wait_if_needed()  # Should not raise
+    limiter.acquire()  # Should not raise
