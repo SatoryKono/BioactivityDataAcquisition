@@ -18,7 +18,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 import yaml
 
-from bioetl.domain.configs import HttpClientConfig, ProviderHttpConfig
+from bioetl.domain.configs import ProviderHttpConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,

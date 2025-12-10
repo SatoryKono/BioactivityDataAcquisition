@@ -1,7 +1,7 @@
 """Response parser for ChEMBL API responses."""
 
-import warnings
 from typing import Generic, TypeVar
+import warnings
 
 from pydantic import BaseModel, TypeAdapter
 

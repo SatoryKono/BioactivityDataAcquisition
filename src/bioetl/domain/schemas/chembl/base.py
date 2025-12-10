@@ -2,7 +2,7 @@
 
 from typing import Any
 
-import pandera as pa
+import pandera.pandas as pa
 from pandera.typing import Series
 
 HEX_64_PATTERN = r"^[a-f0-9]{64}$"

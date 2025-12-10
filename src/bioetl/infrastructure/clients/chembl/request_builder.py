@@ -1,7 +1,7 @@
 """Request builder for constructing ChEMBL API URLs."""
 
-import warnings
 from typing import Any, Optional
+import warnings
 
 from bioetl.domain.clients.base.contracts import RequestBuilderABC
 

@@ -8,6 +8,12 @@ from typing import Any
 from pydantic import ValidationError
 import pytest
 
+from bioetl.domain.configs import (
+    ChemblSourceConfig,
+    ClientConfig,
+    DummyProviderConfig,
+    PipelineConfig,
+)
 from bioetl.domain.provider_registry import (
     InMemoryProviderRegistry,
 )
@@ -18,12 +24,6 @@ from bioetl.domain.providers import (
 )
 from bioetl.infrastructure.config import (
     provider_registry_loader as config_provider_registry,
-)
-from bioetl.domain.configs import (
-    ChemblSourceConfig,
-    ClientConfig,
-    DummyProviderConfig,
-    PipelineConfig,
 )
 
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))

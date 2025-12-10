@@ -4,6 +4,10 @@ Tests for ChEMBL factories.
 
 import pytest
 
+from bioetl.domain.configs import (
+    ChemblSourceConfig,
+    HttpClientConfig,
+)
 from bioetl.infrastructure.clients.chembl.factories import (
     default_chembl_client,
     default_chembl_extraction_service,
@@ -13,10 +17,6 @@ from bioetl.infrastructure.clients.chembl.impl import (
 )
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
-)
-from bioetl.domain.configs import (
-    ChemblSourceConfig,
-    HttpClientConfig,
 )
 
 

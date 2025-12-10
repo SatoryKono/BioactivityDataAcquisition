@@ -139,9 +139,7 @@ def test_stage_counter_makes_result_with_override():
     counter.increment("extract", 100)
     counter.increment_chunks("extract", 2)
 
-    result = counter.make_stage_result(
-        "extract", override_count=50, override_chunks=1
-    )
+    result = counter.make_stage_result("extract", override_count=50, override_chunks=1)
 
     assert result.records_processed == 50
     assert result.chunks_processed == 1

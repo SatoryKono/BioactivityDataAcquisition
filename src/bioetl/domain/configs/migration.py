@@ -11,8 +11,8 @@ The migrator is idempotent: running it multiple times produces the same result.
 
 from __future__ import annotations
 
-import warnings
 from typing import Any
+import warnings
 
 
 class ConfigMigrator:

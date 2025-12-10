@@ -137,9 +137,8 @@ class StageRuntimeManagerImpl:
 
             self._hook_notifier.notify_stage_error(stage, pipeline_error)
 
-            if (
-                error_action == ErrorAction.RETRY
-                and self._error_handler.should_retry(pipeline_error)
+            if error_action == ErrorAction.RETRY and self._error_handler.should_retry(
+                pipeline_error
             ):
                 if on_retry:
                     on_retry()

@@ -2,8 +2,8 @@
 Normalization implementation for domain entities.
 """
 
-import warnings
 from typing import TYPE_CHECKING, Any
+import warnings
 
 import pandas as pd
 

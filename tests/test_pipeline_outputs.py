@@ -105,8 +105,15 @@ def test_pipeline_outputs(
 
     output_dir = tmp_path / pipeline_name
     output_dir.mkdir(parents=True, exist_ok=True)
-    config.output_path = str(output_dir)
-    config.storage.output_path = str(output_dir)
+    # Update frozen sink config using model_copy
+    new_sink = config.sink.model_copy(update={"output_path": str(output_dir)})
+    object.__setattr__(config, "sink", new_sink)
+    # Also update storage if it exists
+    if hasattr(config.runtime, "storage"):
+        new_storage = config.runtime.storage.model_copy(
+            update={"output_path": str(output_dir)}
+        )
+        object.__setattr__(config.runtime, "storage", new_storage)
 
     provider_loader_factory = partial(
         create_provider_loader, config_path=Path("configs/providers.yaml")

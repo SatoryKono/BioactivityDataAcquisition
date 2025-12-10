@@ -1,6 +1,5 @@
 """Unit tests for StageErrorHandler component."""
 
-from unittest.mock import MagicMock
 
 import pytest
 

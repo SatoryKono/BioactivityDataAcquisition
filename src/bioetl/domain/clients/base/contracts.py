@@ -1,8 +1,8 @@
 """Base contracts for data source helpers."""
 
-import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
+import warnings
 
 from pydantic import BaseModel
 

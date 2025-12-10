@@ -209,7 +209,7 @@ class PipelineContainer(PipelineContainerABC):
         if self._post_transformer is None:
             self._post_transformer = default_post_transformer(
                 hash_service=self.get_hash_service(),
-                business_key_fields=self._config.hashing.business_key_fields,
+                business_key_fields=self._config.quality.hashing.business_key_fields,
                 version_provider=version_provider,
             )
         return self._post_transformer
