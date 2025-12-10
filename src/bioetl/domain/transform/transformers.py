@@ -5,12 +5,17 @@ Domain-level transformers used in pipelines.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import timezone
 from typing import Callable
 
 import pandas as pd
 
 from bioetl.domain.models import RunContext
-from bioetl.domain.transform.contracts import HashServiceABC
+from bioetl.domain.transform.contracts import (
+    HashServiceABC,
+    IndexGeneratorABC,
+    TimestampProviderABC,
+)
 
 
 class TransformerABC(ABC):
@@ -63,14 +68,22 @@ class HashColumnsTransformerImpl(TransformerABC):
 class IndexColumnTransformerImpl(TransformerABC):
     """Добавляет индексную колонку."""
 
-    def __init__(self, hash_service: HashServiceABC) -> None:
-        self._hash_service = hash_service
+    def __init__(self, index_generator: IndexGeneratorABC) -> None:
+        self._index_generator = index_generator
 
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
         """Добавляет порядковый индекс строк."""
-        return self._hash_service.add_index_column(df)
+        df = df.copy()
+        start_index = self._index_generator.next_index()
+        # Generate range of indices for the batch
+        # We need to adjust counter for remaining rows
+        for _ in range(len(df) - 1):
+            self._index_generator.next_index()
+        end_index = start_index + len(df)
+        df["index"] = list(range(start_index, end_index))
+        return df
 
 
 class DatabaseVersionTransformerImpl(TransformerABC):
@@ -78,10 +91,8 @@ class DatabaseVersionTransformerImpl(TransformerABC):
 
     def __init__(
         self,
-        hash_service: HashServiceABC,
         database_version_provider: Callable[[], str | None],
     ) -> None:
-        self._hash_service = hash_service
         self._database_version_provider = database_version_provider
 
     def apply(
@@ -91,21 +102,27 @@ class DatabaseVersionTransformerImpl(TransformerABC):
         version = self._database_version_provider()
         if version is None:
             return df
-        return self._hash_service.add_database_version_column(df, version)
+        df = df.copy()
+        df["database_version"] = str(version)
+        return df
 
 
 class FulldateTransformerImpl(TransformerABC):
     """Добавляет колонку extracted_at с таймстампом."""
 
-    def __init__(self, hash_service: HashServiceABC) -> None:
-        self._hash_service = hash_service
+    def __init__(self, timestamp_provider: TimestampProviderABC) -> None:
+        self._timestamp_provider = timestamp_provider
 
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Добавляет extracted_at из контекста (UTC)."""
-        timestamp = context.started_at if context else None
-        return self._hash_service.add_fulldate_column(df, timestamp=timestamp)
+        """Добавляет extracted_at (UTC ISO-8601)."""
+        df = df.copy()
+        ts = self._timestamp_provider.get_extraction_timestamp()
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        df["extracted_at"] = ts.isoformat()
+        return df
 
 
 __all__ = [

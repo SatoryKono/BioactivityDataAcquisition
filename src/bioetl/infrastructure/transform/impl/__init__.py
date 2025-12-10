@@ -7,10 +7,18 @@ from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl impo
 from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
     DefaultNormalizationTransformerImpl,
 )
+from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
+from bioetl.infrastructure.transform.impl.index_generator import SequentialIndexGenerator
+from bioetl.infrastructure.transform.impl.timestamp_provider import (
+    DeterministicTimestampProvider,
+)
 
 __all__ = [
     "HasherImpl",
+    "Blake2bHashService",
+    "DeterministicTimestampProvider",
+    "SequentialIndexGenerator",
     "DefaultNormalizationTransformerImpl",
     "ChemblNormalizationService",
     "ChemblNormalizationServiceImpl",  # Deprecated alias

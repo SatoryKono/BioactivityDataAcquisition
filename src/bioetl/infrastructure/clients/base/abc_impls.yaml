@@ -65,7 +65,17 @@ HasherABC:
 HashServiceABC:
   default_factory: bioetl.infrastructure.transform.factories.default_hash_service
   implementations:
-    DomainFacade: bioetl.domain.transform.hash_service.HashService
+    Blake2b: bioetl.infrastructure.transform.impl.hash_service.Blake2bHashService
+
+TimestampProviderABC:
+  default_factory: bioetl.infrastructure.transform.factories.default_timestamp_provider
+  implementations:
+    Deterministic: bioetl.infrastructure.transform.impl.timestamp_provider.DeterministicTimestampProvider
+
+IndexGeneratorABC:
+  default_factory: bioetl.infrastructure.transform.factories.default_index_generator
+  implementations:
+    Sequential: bioetl.infrastructure.transform.impl.index_generator.SequentialIndexGenerator
 
 QualityReportABC:
   default_factory: bioetl.infrastructure.output.factories.default_quality_reporter
