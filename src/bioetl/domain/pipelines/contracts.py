@@ -1,12 +1,18 @@
-"""Domain-level pipeline contracts."""
+"""Domain-level pipeline contracts.
+
+Tabular Data Abstractions:
+    This module uses domain-level TabularData instead of pd.DataFrame.
+    Infrastructure layer provides PandasAdapter implementations.
+
+    See bioetl.domain.data for protocol definitions.
+"""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Iterable
 
-import pandas as pd
-
 from bioetl.domain.clients.base.output.contracts import WriteResult
+from bioetl.domain.data import TabularData
 from bioetl.domain.enums import ErrorAction
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult
@@ -48,39 +54,64 @@ class ErrorPolicyABC(ABC):
 
 
 class ExtractorABC(ABC):
-    """
-    Component responsible for extracting data from source.
+    """Component responsible for extracting data from source.
+
+    Uses domain-level TabularData abstraction for extracted data chunks.
     """
 
     @abstractmethod
-    def extract(self, **kwargs: Any) -> Iterable[pd.DataFrame]:
-        """
-        Yields chunks of data.
+    def extract(self, **kwargs: Any) -> Iterable[TabularData]:
+        """Extract data from source in chunks.
+
+        Args:
+            **kwargs: Source-specific extraction parameters.
+
+        Yields:
+            Chunks of tabular data.
         """
 
 
 class LoaderABC(ABC):
-    """
-    Component responsible for loading data to destination.
+    """Component responsible for loading data to destination.
+
+    Uses domain-level TabularData abstraction for input data.
     """
 
     @abstractmethod
     def load(
         self,
-        df: pd.DataFrame,
+        data: TabularData,
         output_path: Path,
         context: RunContext,
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
-        """
-        Loads data to destination.
+        """Load data to destination.
+
+        Args:
+            data: Tabular data to load.
+            output_path: Target path for output.
+            context: Run context with metadata.
+            column_order: Optional column ordering.
+
+        Returns:
+            WriteResult with operation details.
         """
 
     @abstractmethod
-    def write_metadata(self, meta: dict, path: Path) -> None:
-        """Записывает метаданные артефактов пайплайна."""
+    def write_metadata(self, meta: dict[str, Any], path: Path) -> None:
+        """Write pipeline artifact metadata.
+
+        Args:
+            meta: Metadata dictionary.
+            path: Target file path.
+        """
 
     @abstractmethod
-    def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
-        """Записывает QC-отчет в детерминированном порядке."""
+    def write_qc_report(self, data: TabularData, path: Path) -> None:
+        """Write QC report in deterministic order.
+
+        Args:
+            data: Tabular data for QC analysis.
+            path: Target report path.
+        """
