@@ -672,6 +672,58 @@ class PipelineConfig(BaseModel):
         return self.transform.serialization_mode
 
     # =========================================================================
+    # Execution aggregate (groups stages + runtime + transform)
+    # =========================================================================
+
+    @property
+    def execution(self) -> "ExecutionConfig":
+        """Aggregate accessor for all execution-related settings.
+
+        Combines stages, runtime, and transform into a single cohesive
+        ExecutionConfig object. This provides a unified interface for
+        code that needs to work with execution settings as a group.
+
+        Returns:
+            ExecutionConfig: Immutable aggregate of execution settings
+
+        Example:
+            ```python
+            if config.execution.is_extract_enabled:
+                batch_size = config.execution.effective_batch_size
+            ```
+        """
+        from bioetl.domain.configs.execution import ExecutionConfig
+
+        return ExecutionConfig(
+            stages=self.stages,
+            runtime=self.runtime,
+            transform=self.transform,
+        )
+
+    # --- Backward-compatible execution properties ---
+    # These delegate to execution aggregate for consistency
+
+    @property
+    def is_extract_enabled(self) -> bool:
+        """Check if extract stage is enabled (backward-compatible shortcut)."""
+        return self.stages.extract is not False
+
+    @property
+    def is_transform_enabled(self) -> bool:
+        """Check if transform stage is enabled (backward-compatible shortcut)."""
+        return self.stages.transform is not False
+
+    @property
+    def is_load_enabled(self) -> bool:
+        """Check if load stage is enabled (backward-compatible shortcut)."""
+        return self.stages.load is not False
+
+    @property
+    def effective_batch_size(self) -> int:
+        """Get effective batch size from runtime pagination (backward-compatible)."""
+        return self.runtime.pagination.limit
+
+    # =========================================================================
     # Public methods
     # =========================================================================
 

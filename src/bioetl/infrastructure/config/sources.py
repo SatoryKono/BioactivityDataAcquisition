@@ -3,38 +3,58 @@
 from __future__ import annotations
 
 from functools import lru_cache
-import os
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from bioetl.domain.transform.merge import apply_deep_merge
+from bioetl.infrastructure.files.path_resolver import (
+    CONFIGS_ROOT_ENV,
+    DEFAULT_CONFIGS_ROOT,
+    PathResolver,
+    create_config_resolver,
+)
 
-CONFIGS_ROOT_ENV = "BIOETL_CONFIG_DIR"
-DEFAULT_CONFIGS_ROOT = Path("configs")
+# Re-export constants for backward compatibility
+__all_constants__ = ["CONFIGS_ROOT_ENV", "DEFAULT_CONFIGS_ROOT"]
 
 
 def get_configs_root(base_dir: str | Path | None = None) -> Path:
-    """Return resolved configs root (honours BIOETL_CONFIG_DIR)."""
+    """Return resolved configs root (honours BIOETL_CONFIG_DIR).
 
-    if base_dir is not None:
-        return Path(base_dir)
-    return Path(os.environ.get(CONFIGS_ROOT_ENV, DEFAULT_CONFIGS_ROOT))
+    Args:
+        base_dir: Override base directory. If None, uses BIOETL_CONFIG_DIR
+            environment variable or default "configs" directory.
+
+    Returns:
+        Resolved configuration root directory path.
+    """
+    resolver = create_config_resolver(base_dir)
+    return resolver.base_path
 
 
 def resolve_pipeline_config_path(
     pipeline_id: str, *, base_dir: str | Path | None = None
 ) -> Path:
-    """Return path to pipeline YAML by id '<provider>.<entity>'."""
+    """Return path to pipeline YAML by id '<provider>.<entity>'.
 
-    try:
-        provider, entity = pipeline_id.split(".", maxsplit=1)
-    except ValueError as exc:
-        raise ValueError("Pipeline id must be in format '<provider>.<entity>'") from exc
+    Args:
+        pipeline_id: Pipeline identifier in format 'provider.entity'.
+        base_dir: Override base directory for configuration search.
 
-    root = get_configs_root(base_dir)
-    return root / "pipelines" / provider / f"{entity}.yaml"
+    Returns:
+        Resolved path to pipeline configuration file.
+
+    Raises:
+        ValueError: If pipeline_id is not in expected format.
+    """
+    # Validate format before delegating to resolver
+    if "." not in pipeline_id:
+        raise ValueError("Pipeline id must be in format '<provider>.<entity>'")
+
+    resolver = create_config_resolver(base_dir)
+    return resolver.resolve_config(pipeline_id)
 
 
 def get_yaml(path: Path) -> dict[str, Any]:
