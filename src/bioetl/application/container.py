@@ -16,7 +16,7 @@ from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
@@ -171,7 +171,7 @@ class PipelineContainer(PipelineContainerABC):
         *,
         limit: int | None = None,
         logger: LoggingPortABC | None = None,
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration."""
         return self._get_record_source_factory().create_record_source(
             extraction_service,

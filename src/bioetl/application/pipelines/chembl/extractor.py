@@ -12,6 +12,7 @@ from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.application.helpers import resolve_primary_key
 from bioetl.application.pipelines.contracts import ExtractorABC
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
@@ -108,19 +109,6 @@ class ChemblExtractorImpl(ExtractorABC):
 
         return self._build_api_source(limit=limit, chunk_size=batch_size)
 
-    def _resolve_primary_key(self) -> str:
-        pk = getattr(self.config, "primary_key", None)
-        pipeline_cfg = getattr(self.config, "pipeline", {}) or {}
-        if not pk and "primary_key" in pipeline_cfg:
-            pk = pipeline_cfg["primary_key"]
-        if not pk:
-            pk = f"{self.config.entity_name}_id"
-        if not pk:
-            raise ValueError(
-                f"Could not resolve ID column for entity '{self.config.entity_name}'"
-            )
-        return pk
-
     def _resolve_mode(self) -> tuple[str, str | None]:
         mode = getattr(self.config, "input_mode", "auto_detect")
         input_path = getattr(self.config, "input_path", None)
@@ -166,7 +154,7 @@ class ChemblExtractorImpl(ExtractorABC):
     ) -> RecordSourceABC:
         if not input_path:
             raise ValueError("input_path is required for ID-only mode")
-        id_column = self._resolve_primary_key()
+        id_column = resolve_primary_key(self.config)
         filter_key = f"{id_column}__in"
         source_config_raw = self.config.get_source_config(self.config.provider)
         source_config = cast(ChemblSourceConfig, source_config_raw)

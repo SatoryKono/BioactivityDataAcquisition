@@ -11,6 +11,7 @@ from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.application.helpers import resolve_primary_key
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
@@ -62,7 +63,7 @@ class RecordSourceFactory:
                 raise ValueError("input_path is required for ID-only mode")
 
             source_config = self._resolve_provider_config(self._provider_definition)
-            id_column = self._resolve_primary_key()
+            id_column = resolve_primary_key(self._config)
             filter_key = f"{id_column}__in"
             return IdListRecordSourceImpl(
                 input_path=Path(path),
@@ -88,15 +89,3 @@ class RecordSourceFactory:
             chunk_size=self._config.batch_size,
             batch_adapter=PandasBatchAdapter().process_batch,
         )
-
-    def _resolve_primary_key(self) -> str:
-        pk = self._config.primary_key
-        if not pk and self._config.pipeline and "primary_key" in self._config.pipeline:
-            pk = self._config.pipeline["primary_key"]
-        if not pk:
-            pk = f"{self._config.entity_name}_id"
-        if not pk:
-            raise ValueError(
-                f"Could not resolve primary key for entity '{self._config.entity_name}'"
-            )
-        return pk
