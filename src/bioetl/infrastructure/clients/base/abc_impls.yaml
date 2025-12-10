@@ -120,18 +120,15 @@ SecretProviderABC:
     Env: bioetl.infrastructure.clients.base.factories.EnvSecretProviderImpl
 
 PipelineContainerABC:
-  default_factory: bioetl.application.pipelines.factories.default_pipeline_container
   implementations:
     Default: bioetl.application.container.PipelineContainer
 
 PipelineHookABC:
-  default_factory: bioetl.application.pipelines.factories.default_pipeline_hook
   implementations:
     Logging: bioetl.application.pipelines.hooks_impl.LoggingPipelineHookImpl
     Metrics: bioetl.application.pipelines.hooks_impl.MetricsPipelineHookImpl
 
 ErrorPolicyABC:
-  default_factory: bioetl.application.pipelines.factories.default_error_policy
   implementations:
     FailFast: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
     ContinueOnError: bioetl.application.pipelines.hooks_impl.ContinueOnErrorPolicyImpl
