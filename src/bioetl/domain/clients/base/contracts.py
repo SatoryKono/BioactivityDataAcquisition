@@ -1,7 +1,14 @@
-"""Base contracts for data source helpers."""
+"""Base contracts for data source helpers.
+
+Note:
+    ``ResponseParserABC`` has been deprecated and unified with
+    ``ResponseParserPortABC`` from ``bioetl.domain.ports.parsing``.
+    Import ``ResponseParserPortABC`` directly from ``bioetl.domain.ports.parsing``
+    for new code. The re-export here is provided for backward compatibility only.
+"""
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 import warnings
 
 from pydantic import BaseModel
@@ -9,6 +16,9 @@ from pydantic import BaseModel
 T = TypeVar("T")
 RecordT = TypeVar("RecordT", bound=BaseModel)
 RecordModel = BaseModel
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports.parsing import ResponseParserPortABC
 
 
 class RequestBuilderABC(ABC):
@@ -42,33 +52,33 @@ class RequestBuilderABC(ABC):
         return self.build_with_pagination(offset, limit)
 
 
-class ResponseParserABC(ABC, Generic[RecordT]):
+# =============================================================================
+# Deprecated: ResponseParserABC
+# =============================================================================
+# ResponseParserABC has been unified with ResponseParserPortABC.
+# This section provides backward compatibility via re-export with deprecation.
+
+
+def __getattr__(name: str) -> type:
+    """Lazy import with deprecation warning for ResponseParserABC.
+
+    This enables backward-compatible imports like:
+        from bioetl.domain.clients.base.contracts import ResponseParserABC
+
+    But emits a DeprecationWarning directing users to the new location.
     """
-    Разбор ответов API.
-    """
+    if name == "ResponseParserABC":
+        from bioetl.domain.ports.parsing import ResponseParserPortABC
 
-    @abstractmethod
-    def parse(self, raw_response: dict[str, object]) -> list[RecordT]:
-        """Парсит сырой ответ в список типизированных записей."""
-
-    def parse_response(self, raw_response: dict[str, object]) -> list[RecordT]:
-        """Deprecated alias for parse.
-
-        .. deprecated:: 1.0
-            Use :meth:`parse` instead. Will be removed in 2.0.
-        """
         warnings.warn(
-            "parse_response() is deprecated, use parse() instead",
+            "ResponseParserABC is deprecated. "
+            "Use ResponseParserPortABC from bioetl.domain.ports.parsing instead. "
+            "See migration guide in bioetl.domain.ports.parsing module docstring.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.parse(raw_response)
-
-    @abstractmethod
-    def extract_metadata(
-        self, raw_response: dict[str, object]
-    ) -> dict[str, int | str | None]:
-        """Извлекает метаданные из ответа (например, общее кол-во)."""
+        return ResponseParserPortABC
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class PaginatorABC(ABC):
