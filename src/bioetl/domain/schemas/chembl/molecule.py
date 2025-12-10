@@ -1,6 +1,6 @@
 """Pandera schema for normalized ChEMBL molecule table."""
 
-import pandera as pa
+import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.chembl.base import (
