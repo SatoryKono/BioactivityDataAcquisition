@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -17,12 +18,13 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 @pytest.fixture
 def mock_components():
     request_builder = MagicMock(spec=ChemblRequestBuilderImpl)
-    request_builder.for_endpoint = MagicMock(return_value=request_builder)
+    request_builder.build_for_endpoint = MagicMock(return_value=request_builder)
     return {
         "request_builder": request_builder,
         "response_parser": MagicMock(spec=ChemblResponseParserImpl),
         "rate_limiter": MagicMock(spec=RateLimiterABC),
         "http_client": MagicMock(),
+        "logger": MagicMock(spec=LoggingPortABC),
     }
 
 
@@ -32,7 +34,8 @@ def client(mock_components):
         request_builder=mock_components["request_builder"],
         response_parser=mock_components["response_parser"],
         rate_limiter=mock_components["rate_limiter"],
-        client=mock_components["http_client"],
+        http_client=mock_components["http_client"],
+        logger=mock_components["logger"],
     )
     yield client
 
@@ -40,7 +43,7 @@ def client(mock_components):
 def test_fetch_activity_with_http_client(client, mock_components):
     # Arrange
     mock_builder = mock_components["request_builder"]
-    mock_builder.for_endpoint.return_value = mock_builder
+    mock_builder.build_for_endpoint.return_value = mock_builder
     mock_builder.build.return_value = "http://chembl/activity"
 
     mock_response = MagicMock()
@@ -54,7 +57,7 @@ def test_fetch_activity_with_http_client(client, mock_components):
     result = client.fetch("activity", molecule_chembl_id="CHEMBL123")
 
     # Assert
-    mock_builder.for_endpoint.assert_called_with("activity")
+    mock_builder.build_for_endpoint.assert_called_with("activity")
     mock_builder.build.assert_called_with({"molecule_chembl_id": "CHEMBL123"})
     mock_components["http_client"].request.assert_called_with(
         "GET", "http://chembl/activity"

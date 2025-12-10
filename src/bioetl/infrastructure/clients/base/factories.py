@@ -1,7 +1,13 @@
-"""Factories for infrastructure client helpers (cache, retry, rate limit)."""
+"""Factories for infrastructure client helpers (cache, retry, rate limit).
+
+All factories require explicit dependencies - no implicit defaults.
+Use CompositionRoot for creating instances with default implementations.
+"""
 
 import os
 from typing import Any
+
+import requests
 
 from bioetl.domain.clients.base.contracts import (
     CacheABC,
@@ -50,26 +56,42 @@ def _ensure_http_config(
 
 
 def build_rate_limiter(
+    logger: LoggingPortABC,
     *,
     config: HttpClientConfig | None = None,
-    logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
-    """Create a rate limiter using HTTP config."""
+    """Create a rate limiter using HTTP config.
+
+    Args:
+        logger: Required logger instance
+        config: Optional HTTP config for rate settings
+
+    Returns:
+        Configured rate limiter
+    """
     resolved = _ensure_http_config(config)
     rate = resolved.rate_limit_per_sec
     capacity = max(1.0, rate)
-    return TokenBucketRateLimiterImpl(rate, capacity, logger=logger)
+    return TokenBucketRateLimiterImpl(rate, capacity, logger)
 
 
 def default_rate_limiter(
+    logger: LoggingPortABC,
     rate: float = _DEFAULT_HTTP_CONFIG.rate_limit_per_sec,
     capacity: float | None = None,
-    *,
-    logger: LoggingPortABC | None = None,
 ) -> RateLimiterABC:
-    """Create the default rate limiter with token bucket semantics."""
+    """Create the default rate limiter with token bucket semantics.
+
+    Args:
+        logger: Required logger instance
+        rate: Tokens per second
+        capacity: Maximum bucket capacity
+
+    Returns:
+        Configured rate limiter
+    """
     resolved_capacity = capacity if capacity is not None else max(1.0, rate)
-    return TokenBucketRateLimiterImpl(rate, resolved_capacity, logger=logger)
+    return TokenBucketRateLimiterImpl(rate, resolved_capacity, logger)
 
 
 def default_cache() -> CacheABC[Any]:
@@ -111,35 +133,58 @@ def default_paginator() -> PaginatorABC:
 def default_api_client(
     provider: str,
     config: HttpClientConfig,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
     *,
     base_client: Any | None = None,
-    logger: LoggingPortABC | None = None,
-    metrics: MetricsPortABC | None = None,
 ) -> _HttpTransport:
-    """Create the default API client without middleware indirection."""
+    """Create the default API client without middleware indirection.
+
+    Args:
+        provider: Provider identifier
+        config: HTTP client configuration
+        logger: Required logger instance
+        metrics: Required metrics instance
+        base_client: Optional pre-configured HTTP client
+
+    Returns:
+        Configured HTTP transport
+    """
     return build_http_client(
         provider,
-        config=config,
-        base_client=base_client,
         logger=logger,
         metrics=metrics,
+        config=config,
+        base_client=base_client,
     )
 
 
 def build_http_client(
     provider: str,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
     *,
     config: HttpClientConfig | None = None,
     base_client: Any | None = None,
-    logger: LoggingPortABC | None = None,
-    metrics: MetricsPortABC | None = None,
 ) -> _HttpTransport:
-    """Construct HTTP client using HttpClientConfig."""
+    """Construct HTTP client using HttpClientConfig.
+
+    Args:
+        provider: Provider identifier
+        logger: Required logger instance
+        metrics: Required metrics instance
+        config: Optional HTTP config
+        base_client: Optional pre-configured HTTP client
+
+    Returns:
+        Configured HTTP transport
+    """
     resolved_config = _ensure_http_config(config)
+    resolved_client = base_client if base_client is not None else requests.Session()
     return _HttpTransport(
         provider=provider,
         config=resolved_config,
-        base_client=base_client,
+        base_client=resolved_client,
         logger=logger,
         metrics=metrics,
     )

@@ -19,32 +19,30 @@ from bioetl.infrastructure.errors import (
     wrap_http_errors,
 )
 from bioetl.infrastructure.http import ExponentialRetryPolicy
-from bioetl.infrastructure.observability.factories import (
-    default_logging_port,
-    default_metrics_port,
-)
 
 
 class _HttpTransport:
     """
     Внутренний HTTP-транспорт без промежуточных middleware-слоев.
     Делегирует вызовы напрямую базовому HTTP-клиенту.
+
+    All dependencies must be explicitly injected - no default fallbacks.
+    Use composition root or factories to create instances.
     """
 
     def __init__(
         self,
         provider: str,
         config: HttpClientConfig,
-        base_client: Any | None = None,
-        *,
-        logger: LoggingPortABC | None = None,
-        metrics: MetricsPortABC | None = None,
+        base_client: Any,
+        logger: LoggingPortABC,
+        metrics: MetricsPortABC,
     ) -> None:
         self.provider = provider
         self.config = config
-        self.base_client = base_client or requests.Session()
-        self.logger = logger or default_logging_port()
-        self.metrics = metrics or default_metrics_port()
+        self.base_client = base_client
+        self.logger = logger
+        self.metrics = metrics
         attempts = max(1, int(config.max_retries) + 1)
         self.retry_policy = (
             ExponentialRetryPolicy(

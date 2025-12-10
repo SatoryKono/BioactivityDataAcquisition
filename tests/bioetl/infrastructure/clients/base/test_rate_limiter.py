@@ -1,12 +1,19 @@
 import time
+from unittest.mock import Mock
 
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
     TokenBucketRateLimiterImpl,
 )
 
 
+def _mock_logger() -> LoggingPortABC:
+    """Create mock logger for tests."""
+    return Mock(spec=LoggingPortABC)
+
+
 def test_rate_limiter_acquire():
-    limiter = TokenBucketRateLimiterImpl(rate=50, capacity=1)
+    limiter = TokenBucketRateLimiterImpl(rate=50, capacity=1, logger=_mock_logger())
     start = time.monotonic()
     limiter.acquire()  # consume 1 (immediate if capacity=1)
 
@@ -17,7 +24,7 @@ def test_rate_limiter_acquire():
 
 
 def test_rate_limiter_refill():
-    limiter = TokenBucketRateLimiterImpl(rate=10, capacity=10)
+    limiter = TokenBucketRateLimiterImpl(rate=10, capacity=10, logger=_mock_logger())
     limiter._tokens = 0
     limiter._last_refill = time.monotonic() - 0.5
     limiter._refill()
@@ -25,5 +32,5 @@ def test_rate_limiter_refill():
 
 
 def test_wait_if_needed():
-    limiter = TokenBucketRateLimiterImpl(rate=1, capacity=1)
+    limiter = TokenBucketRateLimiterImpl(rate=1, capacity=1, logger=_mock_logger())
     limiter.acquire()  # Should not raise

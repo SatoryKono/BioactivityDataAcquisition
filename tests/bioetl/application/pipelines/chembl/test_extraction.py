@@ -8,10 +8,17 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.contracts import DataClientABC
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
     ChemblExtractionServiceImpl,
 )
+
+
+@pytest.fixture
+def mock_logger():
+    """Mock logger."""
+    return MagicMock(spec=LoggingPortABC)
 
 
 @pytest.fixture
@@ -26,9 +33,11 @@ def mock_client():
 
 
 @pytest.fixture
-def service(mock_client):
+def service(mock_client, mock_logger):
     """ChemblExtractionServiceImpl instance with mock client."""
-    return ChemblExtractionServiceImpl(client=mock_client, batch_size=10)
+    return ChemblExtractionServiceImpl(
+        client=mock_client, logger=mock_logger, batch_size=10
+    )
 
 
 def test_get_release_version(service, mock_client):
