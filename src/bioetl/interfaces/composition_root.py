@@ -39,11 +39,11 @@ from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
-    default_rate_limiter,
+    create_rate_limiter,
 )
 from bioetl.infrastructure.observability.factories import (
-    default_logging_port,
-    default_metrics_port,
+    create_logging_port,
+    create_metrics_port,
 )
 
 if TYPE_CHECKING:
@@ -109,13 +109,13 @@ class CompositionRoot:
     def get_logger(self) -> LoggingPortABC:
         """Get or create the logger instance."""
         if self._logger is None:
-            self._logger = default_logging_port()
+            self._logger = create_logging_port()
         return self._logger
 
     def get_metrics(self) -> MetricsPortABC:
         """Get or create the metrics instance."""
         if self._metrics is None:
-            self._metrics = default_metrics_port()
+            self._metrics = create_metrics_port()
         return self._metrics
 
     def get_observability_stack(self) -> ObservabilityStack:
@@ -174,7 +174,7 @@ class CompositionRoot:
         Returns:
             Configured rate limiter instance
         """
-        return default_rate_limiter(
+        return create_rate_limiter(
             logger=self.get_logger(),
             rate=rate,
             capacity=capacity,
