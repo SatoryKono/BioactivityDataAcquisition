@@ -10,7 +10,7 @@ from typing import Any, Callable, cast
 
 from bioetl.application.config.resolution import ConfigPathResolver
 from bioetl.application.container import PipelineContainer
-from bioetl.application.pipelines.contracts import PipelineContainerABC
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
