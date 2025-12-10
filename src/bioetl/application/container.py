@@ -17,6 +17,10 @@ from bioetl.application.factories.service_factory import (
     ApplicationServiceFactory,
     ApplicationServiceFactoryABC,
 )
+from bioetl.application.factories.transform_factory import (
+    TransformComponentFactory,
+    TransformComponentFactoryABC,
+)
 from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
@@ -35,7 +39,6 @@ from bioetl.domain.transform.contracts import (
     NormalizationServiceABC,
     TimestampProviderABC,
 )
-from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation import SchemaProviderABC, ValidatorFactoryABC
 from bioetl.domain.validation.service import ValidationService
@@ -51,6 +54,7 @@ class PipelineContainer(PipelineContainerABC):
         config: PipelineConfig,
         *,
         service_factory: ApplicationServiceFactoryABC | None = None,
+        transform_factory: TransformComponentFactoryABC | None = None,
         logger: LoggingPortABC | None = None,
         loader: LoaderABC | None = None,
         validator_factory: ValidatorFactoryABC | None = None,
@@ -93,7 +97,9 @@ class PipelineContainer(PipelineContainerABC):
 
         # Initialize factory helpers
         self._injected_service_factory = service_factory
+        self._injected_transform_factory = transform_factory
         self._service_factory: ApplicationServiceFactoryABC | None = None
+        self._transform_factory: TransformComponentFactoryABC | None = None
         self._record_source_factory: RecordSourceFactory | None = None
         self._hook_factory: PipelineHookFactory | None = None
 
@@ -109,6 +115,19 @@ class PipelineContainer(PipelineContainerABC):
                     metrics=self._metrics_port,
                 )
         return self._service_factory
+
+    def _get_transform_factory(self) -> TransformComponentFactoryABC:
+        if self._transform_factory is None:
+            if self._injected_transform_factory is not None:
+                self._transform_factory = self._injected_transform_factory
+            else:
+                self._transform_factory = TransformComponentFactory(
+                    self._config,
+                    hash_service=self._hash_service,
+                    index_generator=self._index_generator,
+                    timestamp_provider=self._timestamp_provider,
+                )
+        return self._transform_factory
 
     def _get_record_source_factory(self) -> RecordSourceFactory:
         if self._record_source_factory is None:
@@ -214,51 +233,36 @@ class PipelineContainer(PipelineContainerABC):
     def get_hash_service(self) -> HashServiceABC:
         """Get the hash service.
 
-        The concrete implementation must be injected from outer layers
-        (e.g. interfaces wiring or tests) to avoid application →
-        infrastructure dependencies.
+        Delegates to TransformComponentFactory.
         """
-        if self._hash_service is None:
-            raise RuntimeError("Hash service is not configured for this container")
-        return self._hash_service
+        return self._get_transform_factory().get_hash_service()
 
     def get_index_generator(self) -> IndexGeneratorABC:
         """Get the index generator.
 
-        The concrete implementation must be injected from outer layers
-        (e.g. interfaces wiring or tests) to avoid application →
-        infrastructure dependencies.
+        Delegates to TransformComponentFactory.
         """
-        if self._index_generator is None:
-            raise RuntimeError("Index generator is not configured for this container")
-        return self._index_generator
+        return self._get_transform_factory().get_index_generator()
 
     def get_timestamp_provider(self) -> TimestampProviderABC:
         """Get the timestamp provider.
 
-        The concrete implementation must be injected from outer layers
-        (e.g. interfaces wiring or tests) to avoid application →
-        infrastructure dependencies.
+        Delegates to TransformComponentFactory.
         """
-        if self._timestamp_provider is None:
-            raise RuntimeError(
-                "Timestamp provider is not configured for this container"
-            )
-        return self._timestamp_provider
+        return self._get_transform_factory().get_timestamp_provider()
 
     def get_post_transformer(
-        self, *, version_provider: Callable[[], str] | None = None
+        self, *, version_provider: Callable[[], str | None] | None = None
     ) -> TransformerABC:
-        """Собирает цепочку стандартных трансформеров."""
-        if self._post_transformer is None:
-            self._post_transformer = default_post_transformer(
-                hash_service=self.get_hash_service(),
-                index_generator=self.get_index_generator(),
-                timestamp_provider=self.get_timestamp_provider(),
-                business_key_fields=self._config.quality.hashing.business_key_fields,
-                version_provider=version_provider,
-            )
-        return self._post_transformer
+        """Build the standard post-transformer chain.
+
+        Delegates to TransformComponentFactory.
+        """
+        if self._post_transformer is not None:
+            return self._post_transformer
+        return self._get_transform_factory().get_post_transformer(
+            version_provider=version_provider
+        )
 
     def get_hooks(self) -> list[PipelineHookABC]:
         """Возвращает список хуков выполнения пайплайна."""
