@@ -1,5 +1,6 @@
 """Response parser for ChEMBL API responses."""
 
+import warnings
 from typing import Generic, TypeVar
 
 from pydantic import BaseModel, TypeAdapter
@@ -38,7 +39,16 @@ class ChemblResponseParserImpl(ResponseParserABC[T], Generic[T]):
         return []
 
     def parse_response(self, raw_response: dict[str, object]) -> list[T]:
-        """Alias for parse."""
+        """Deprecated alias for parse.
+
+        .. deprecated:: 1.0
+            Use :meth:`parse` instead. Will be removed in 2.0.
+        """
+        warnings.warn(
+            "parse_response() is deprecated, use parse() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.parse(raw_response)
 
     def extract_metadata(
