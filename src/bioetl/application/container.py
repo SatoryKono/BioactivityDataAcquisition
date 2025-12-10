@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.factories.hooks import PipelineHookFactory
 from bioetl.application.factories.noop import (
     create_noop_logger,
@@ -12,8 +13,10 @@ from bioetl.application.factories.noop import (
     create_noop_validator_factory,
 )
 from bioetl.application.factories.record_source import RecordSourceFactory
-from bioetl.application.factories.services import ProviderServiceFactory
-from bioetl.application.contracts import PipelineContainerABC
+from bioetl.application.factories.service_factory import (
+    ApplicationServiceFactory,
+    ApplicationServiceFactoryABC,
+)
 from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
@@ -47,6 +50,7 @@ class PipelineContainer(PipelineContainerABC):
         self,
         config: PipelineConfig,
         *,
+        service_factory: ApplicationServiceFactoryABC | None = None,
         logger: LoggingPortABC | None = None,
         loader: LoaderABC | None = None,
         validator_factory: ValidatorFactoryABC | None = None,
@@ -88,19 +92,22 @@ class PipelineContainer(PipelineContainerABC):
         register_schemas(self._schema_provider)
 
         # Initialize factory helpers
-        self._service_factory: ProviderServiceFactory | None = None
+        self._injected_service_factory = service_factory
+        self._service_factory: ApplicationServiceFactoryABC | None = None
         self._record_source_factory: RecordSourceFactory | None = None
         self._hook_factory: PipelineHookFactory | None = None
 
-    def _get_service_factory(self) -> ProviderServiceFactory:
+    def _get_service_factory(self) -> ApplicationServiceFactoryABC:
         if self._service_factory is None:
-            self._service_factory = ProviderServiceFactory(
-                self._config,
-                self._get_provider_definition(),
-                self._resolve_provider_config,
-                logger=self._logger,
-                metrics=self._metrics_port,
-            )
+            if self._injected_service_factory is not None:
+                self._service_factory = self._injected_service_factory
+            else:
+                self._service_factory = ApplicationServiceFactory(
+                    self._config,
+                    self._get_provider_registry(),
+                    logger=self._logger,
+                    metrics=self._metrics_port,
+                )
         return self._service_factory
 
     def _get_record_source_factory(self) -> RecordSourceFactory:
