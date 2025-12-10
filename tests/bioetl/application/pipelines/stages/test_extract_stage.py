@@ -3,15 +3,14 @@
 from unittest.mock import MagicMock
 
 import pandas as pd
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.application.pipelines.stages.extract import ExtractStage
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import RawRecord
-
 
 # =============================================================================
 # Fixtures

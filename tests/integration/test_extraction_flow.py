@@ -9,13 +9,13 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.domain.ports.extraction import RawRecordBatch
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 
 
 class TestExtractionFlow:
@@ -125,9 +125,7 @@ class TestExtractionFlow:
         assert all(isinstance(r, ActivityRawModel) for r in typed_records)
         assert [r.activity_id for r in typed_records] == ["1", "2", "3"]
 
-    def test_full_flow_to_dataframe(
-        self, sample_api_response: dict[str, Any]
-    ) -> None:
+    def test_full_flow_to_dataframe(self, sample_api_response: dict[str, Any]) -> None:
         """Full flow should produce valid DataFrame."""
         parser = ChemblGenericResponseParser()
         mapper = ChemblRecordMapper()
@@ -249,7 +247,7 @@ class TestLayerIsolation:
 
     def test_type_aliases_are_defined(self) -> None:
         """Domain layer defines proper type aliases for cross-layer use."""
-        from bioetl.domain.ports.extraction import RawRecordBatch, RawRecordDict
+        from bioetl.domain.ports.extraction import RawRecordDict
 
         # Verify type aliases exist and are correct types
         assert RawRecordDict == dict[str, Any]
@@ -332,9 +330,7 @@ class TestMapperEntitySupport:
         assert len(result) == 1
         assert result[0].document_chembl_id == "CHEMBL1125443"
 
-    def test_mapper_raises_for_unknown_entity(
-        self, mapper: ChemblRecordMapper
-    ) -> None:
+    def test_mapper_raises_for_unknown_entity(self, mapper: ChemblRecordMapper) -> None:
         """Mapper should raise ValueError for unknown entities."""
         with pytest.raises(ValueError, match="Unknown entity type"):
             mapper.map_records([{"id": "1"}], "unknown_entity")

@@ -7,18 +7,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.domain.errors import ConfigValidationError
 from bioetl.infrastructure.config.loader import (
     clear_schema_contract_provider,
-    get_pipeline_config,
     get_pipeline_config_from_path,
     get_schema_contract_provider,
-    set_schema_contract_provider,
 )
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 
 if TYPE_CHECKING:
-    from bioetl.domain.configs import PipelineConfig
+    pass
 
 
 class TestConfigLoadingWithBootstrap:

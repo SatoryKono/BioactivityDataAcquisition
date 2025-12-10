@@ -52,9 +52,6 @@ def create_extraction_service(
         extraction services. The actual implementation depends on
         the provider configuration type.
     """
-    from bioetl.application.factories.services import ProviderServiceFactory
-    from bioetl.domain.configs import PipelineConfig
-    from bioetl.domain.providers import ProviderDefinition, ProviderId
 
     # This is a simplified factory - in practice you would resolve
     # the provider definition from a registry based on config
@@ -94,8 +91,6 @@ def create_chembl_pipeline(
         This function automatically bootstraps the container if it
         hasn't been bootstrapped yet.
     """
-    from bioetl.application.pipelines.chembl.common import ChemblCommonPipeline
-    from bioetl.application.pipelines.stages.extract import ExtractStage
 
     # Ensure container is bootstrapped
     container.bootstrap()

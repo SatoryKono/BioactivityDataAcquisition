@@ -109,4 +109,5 @@ class SchemaContractProviderImpl(SchemaContractProviderABC):
         schema = self._schema_provider.get_schema(schema_name)
         return build_field_configs_from_schema(schema)
 
+
 __all__ = ["SchemaContractProviderImpl"]

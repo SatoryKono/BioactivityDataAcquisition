@@ -11,7 +11,6 @@ from bioetl.application.services.schema_bootstrap import (
 from bioetl.domain.validation import SchemaProviderABC
 
 
-
 class TestSchemaBootstrapService:
     """Tests for SchemaBootstrapService."""
 
@@ -62,4 +61,3 @@ class TestCreateSchemaBootstrapService:
 
         assert isinstance(service, SchemaBootstrapService)
         assert service.ensure_registered() is mock_provider
-

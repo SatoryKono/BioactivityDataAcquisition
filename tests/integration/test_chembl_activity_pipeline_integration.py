@@ -11,7 +11,9 @@ import pytest
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.pipelines.registry import get_pipeline_class
 from bioetl.application.services.schema_bootstrap import create_schema_bootstrap_service
-from bioetl.application.services.schema_contract_provider import SchemaContractProviderImpl
+from bioetl.application.services.schema_contract_provider import (
+    SchemaContractProviderImpl,
+)
 from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,

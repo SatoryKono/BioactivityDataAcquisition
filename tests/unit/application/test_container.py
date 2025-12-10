@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.interfaces.simple_container import SimplePipelineContainer
 from bioetl.application.mappers.chembl.record_mapper import ChemblRecordMapper
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.application.services.schema_bootstrap import SchemaBootstrapService
@@ -20,6 +19,7 @@ from bioetl.infrastructure.config.loader import (
     clear_schema_contract_provider,
     get_schema_contract_provider,
 )
+from bioetl.interfaces.simple_container import SimplePipelineContainer
 
 
 @pytest.fixture()
@@ -71,9 +71,7 @@ class TestBootstrapSequence:
         assert provider is not None
         assert provider is container._schema_contract_provider
 
-    def test_bootstrap_is_idempotent(
-        self, container: SimplePipelineContainer
-    ) -> None:
+    def test_bootstrap_is_idempotent(self, container: SimplePipelineContainer) -> None:
         """Calling bootstrap multiple times should not reinitialize."""
         container.bootstrap()
         first_bootstrap = container._schema_bootstrap
@@ -84,9 +82,7 @@ class TestBootstrapSequence:
         assert container._schema_bootstrap is first_bootstrap
         assert container._schema_contract_provider is first_provider
 
-    def test_is_bootstrapped_flag(
-        self, container: SimplePipelineContainer
-    ) -> None:
+    def test_is_bootstrapped_flag(self, container: SimplePipelineContainer) -> None:
         """is_bootstrapped should reflect bootstrap state."""
         assert not container.is_bootstrapped
 
@@ -98,9 +94,7 @@ class TestBootstrapSequence:
 class TestLazyInitialization:
     """Test lazy initialization of components."""
 
-    def test_record_mapper_lazy_init(
-        self, container: SimplePipelineContainer
-    ) -> None:
+    def test_record_mapper_lazy_init(self, container: SimplePipelineContainer) -> None:
         """record_mapper property should lazily create mapper."""
         assert container._record_mapper is None
 

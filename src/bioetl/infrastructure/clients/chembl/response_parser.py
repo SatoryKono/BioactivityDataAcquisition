@@ -8,7 +8,6 @@ from bioetl.domain.ports.parsing import (
     ResponseParserPortABC,
 )
 
-
 # =============================================================================
 # New Generic Parser (Recommended)
 # =============================================================================
