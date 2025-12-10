@@ -144,6 +144,6 @@ class TestSchemaContractProviderIntegration:
 
         for pipeline_code, expected_schema in test_cases:
             schema_name = real_contract_provider.get_output_schema_name(pipeline_code)
-            assert schema_name == expected_schema, (
-                f"Pipeline {pipeline_code} should return {expected_schema}"
-            )
+            assert (
+                schema_name == expected_schema
+            ), f"Pipeline {pipeline_code} should return {expected_schema}"
