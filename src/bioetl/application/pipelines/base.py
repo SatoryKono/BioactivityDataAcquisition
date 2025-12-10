@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias, 
 
 import pandas as pd
 
-from bioetl.application.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
@@ -19,7 +18,12 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.pipelines.contracts import (
+    ErrorPolicyABC,
+    ExtractorABC,
+    LoaderABC,
+    PipelineHookABC,
+)
 from bioetl.domain.providers import ProviderId
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC

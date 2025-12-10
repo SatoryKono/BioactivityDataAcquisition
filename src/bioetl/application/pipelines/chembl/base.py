@@ -13,7 +13,6 @@ from bioetl.application.pipelines.base import (
 )
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
-from bioetl.application.pipelines.contracts import LoaderABC
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
@@ -21,7 +20,7 @@ from bioetl.domain.clients.base.output.contracts import (
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
+from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
