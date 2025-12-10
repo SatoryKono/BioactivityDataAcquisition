@@ -1,80 +1,94 @@
-"""Registry for ChEMBL entity parsers."""
+"""Registry for ChEMBL entity parsers (infrastructure layer).
+
+This module provides generic parsing capabilities without domain model knowledge.
+Domain model mapping happens in application layer
+(bioetl.application.mappers.chembl.model_registry).
+"""
+
+from __future__ import annotations
 
 from typing import Literal, TypeAlias
 
-from pydantic import BaseModel
-
-from bioetl.domain.schemas.chembl.raw_models import (
-    ActivityRawModel,
-    AssayRawModel,
-    DocumentRawModel,
-    MoleculeRawModel,
-    TargetRawModel,
-)
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParserImpl,
+    ChemblGenericResponseParser,
 )
 
 ChemblEntityType: TypeAlias = Literal[
     "activity", "molecule", "target", "assay", "document"
 ]
 
-# Mapping entity type -> model class
-ENTITY_MODEL_REGISTRY: dict[str, type[BaseModel]] = {
-    "activity": ActivityRawModel,
-    "molecule": MoleculeRawModel,
-    "target": TargetRawModel,
-    "assay": AssayRawModel,
-    "document": DocumentRawModel,
-}
+# Supported entities (without model references)
+SUPPORTED_ENTITIES: frozenset[str] = frozenset({
+    "activity", "molecule", "target", "assay", "document"
+})
 
 
-def get_model_for_entity(entity: str) -> type[BaseModel]:
-    """
-    Get model class for entity type.
+def get_parser_for_entity(entity: str) -> ResponseParserPortABC:
+    """Get generic parser for entity type.
+
+    Note: All entities use the same generic parser in infrastructure.
+    Domain model mapping happens in application layer.
 
     Args:
-        entity: Entity type name (activity, molecule, target, assay, document).
+        entity: Entity type name.
 
     Returns:
-        Pydantic model class for the entity.
+        Generic response parser.
 
     Raises:
-        ValueError: If entity type is unknown.
-    """
-    model_class = ENTITY_MODEL_REGISTRY.get(entity)
-    if model_class is None:
-        raise ValueError(
-            f"Unknown entity type: {entity}. "
-            f"Available: {list(ENTITY_MODEL_REGISTRY.keys())}"
-        )
-    return model_class
-
-
-def get_parser_for_entity(entity: str) -> ChemblResponseParserImpl[BaseModel]:
-    """
-    Factory function: return parser for specified entity type.
-
-    Args:
-        entity: Entity type name (activity, molecule, target, assay, document).
-
-    Returns:
-        Configured ChemblResponseParserImpl for the entity type.
-
-    Raises:
-        ValueError: If entity type is unknown.
+        ValueError: If entity type is not supported.
 
     Example:
         >>> parser = get_parser_for_entity("molecule")
-        >>> records = parser.parse({"molecules": [{"molecule_chembl_id": "CHEMBL1"}]})
+        >>> records = parser.parse_to_records({"molecules": [{"id": "1"}]})
     """
-    model_class = get_model_for_entity(entity)
-    return ChemblResponseParserImpl(model_class)
+    if entity not in SUPPORTED_ENTITIES:
+        raise ValueError(
+            f"Unknown entity type: {entity}. "
+            f"Supported: {sorted(SUPPORTED_ENTITIES)}"
+        )
+    return ChemblGenericResponseParser()
+
+
+def is_supported_entity(entity: str) -> bool:
+    """Check if entity type is supported.
+
+    Args:
+        entity: Entity type name to check.
+
+    Returns:
+        True if entity type is supported, False otherwise.
+    """
+    return entity in SUPPORTED_ENTITIES
 
 
 __all__ = [
     "ChemblEntityType",
-    "ENTITY_MODEL_REGISTRY",
-    "get_model_for_entity",
+    "SUPPORTED_ENTITIES",
     "get_parser_for_entity",
+    "is_supported_entity",
 ]
+
+
+# =============================================================================
+# Deprecated API Access Handler
+# =============================================================================
+
+
+def __getattr__(name: str) -> object:
+    """Handle access to deprecated module attributes.
+
+    Provides helpful error messages when accessing removed attributes.
+    """
+    if name == "ENTITY_MODEL_REGISTRY":
+        raise ImportError(
+            "ENTITY_MODEL_REGISTRY has been moved to application layer. "
+            "Import from bioetl.application.mappers.chembl.model_registry instead."
+        )
+    if name == "get_model_for_entity":
+        raise ImportError(
+            "get_model_for_entity has been moved to application layer. "
+            "Import from bioetl.application.mappers.chembl.model_registry instead."
+        )
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
