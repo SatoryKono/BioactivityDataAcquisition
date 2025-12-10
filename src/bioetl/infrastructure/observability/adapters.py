@@ -72,12 +72,12 @@ class PrometheusMetricsPortImpl(MetricsPortABC):
 
     def __init__(self) -> None:
         self._counters: dict[str, Any] = {
-            "client_request_total": metrics.CLIENT_REQUEST_TOTAL,
-            "client_request_errors": metrics.CLIENT_REQUEST_ERRORS,
-            "output_write_errors_total": metrics.OUTPUT_WRITE_ERRORS_TOTAL,
+            "bioetl_client_request_total": metrics.CLIENT_REQUEST_TOTAL,
+            "bioetl_client_request_errors_total": metrics.CLIENT_REQUEST_ERRORS_TOTAL,
+            "bioetl_output_write_errors_total": metrics.OUTPUT_WRITE_ERRORS_TOTAL,
         }
         self._histograms: dict[str, Any] = {
-            "client_request_duration_seconds": metrics.CLIENT_REQUEST_DURATION_SECONDS,
+            "bioetl_client_request_duration_seconds": metrics.CLIENT_REQUEST_DURATION_SECONDS,
         }
 
     def inc_counter(self, name: str, labels: dict[str, str]) -> None:

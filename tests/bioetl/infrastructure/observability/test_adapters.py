@@ -24,11 +24,11 @@ def test_tracing_adapter_noop():
 def test_prometheus_metrics_port_updates():
     port = PrometheusMetricsPortImpl()
     port.inc_counter(
-        "client_request_total",
+        "bioetl_client_request_total",
         {"provider": "chembl", "endpoint": "/e", "status": "200"},
     )
     port.observe_histogram(
-        "client_request_duration_seconds",
+        "bioetl_client_request_duration_seconds",
         0.1,
         {"provider": "chembl", "endpoint": "/e", "status": "200"},
     )
