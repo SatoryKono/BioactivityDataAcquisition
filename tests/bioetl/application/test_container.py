@@ -19,7 +19,7 @@ from bioetl.domain.providers import (
 from bioetl.infrastructure.config import (
     provider_registry_loader as config_provider_registry,
 )
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     DummyProviderConfig,
