@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from bioetl.domain.ports.parsing import (
-    RawPayload,
-    RawRecordList,
+    ApiPayload,
+    RawRecord,
+    RecordBatch,
     ResponseParserPortABC,
 )
 
@@ -13,7 +14,7 @@ from bioetl.domain.ports.parsing import (
 # =============================================================================
 
 
-class ChemblGenericResponseParser(ResponseParserPortABC):
+class ChemblGenericResponseParser(ResponseParserPortABC[RawRecord]):
     """Generic parser that returns untyped dicts.
 
     This parser belongs to infrastructure because:
@@ -27,7 +28,7 @@ class ChemblGenericResponseParser(ResponseParserPortABC):
         >>> pagination = parser.extract_pagination(response)
     """
 
-    def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+    def parse_to_records(self, raw_response: ApiPayload) -> RecordBatch:
         """Extract list of records from ChEMBL response.
 
         Args:
@@ -47,7 +48,7 @@ class ChemblGenericResponseParser(ResponseParserPortABC):
         return []
 
     def extract_pagination(
-        self, raw_response: RawPayload
+        self, raw_response: ApiPayload
     ) -> dict[str, int | str | None]:
         """Extract page_meta from ChEMBL response.
 
