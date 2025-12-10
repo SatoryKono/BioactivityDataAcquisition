@@ -94,7 +94,7 @@ class PipelineIdentityConfig(BaseModel):
 
         Example:
             >>> config = PipelineIdentityConfig(
-            ...     pipeline_id="chembl_activity_v1",
+            ...     pipeline_id="chembl.activity",
             ...     provider="chembl",
             ...     entity="activity",
             ...     primary_key=["activity_id"]
