@@ -8,10 +8,6 @@ logic of configuration path resolution from the CLI layer.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
-
-from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 
 
 class ConfigPathResolver:
@@ -109,49 +105,6 @@ class ConfigPathResolver:
         )
 
 
-def build_pipeline_config(
-    config_path: Path,
-    *,
-    configs_root: Path | None = None,
-    loader: PipelineConfigLoaderProtocol,
-    profile: str | None = None,
-    cli_overrides: dict[str, Any] | None = None,
-    env_overrides: dict[str, Any] | None = None,
-) -> PipelineConfig:
-    """Load and validate pipeline config from path.
-
-    This function wraps the infrastructure loader with application-level
-    defaults for configs_root detection.
-
-    Args:
-        config_path: Path to the pipeline config YAML file.
-        configs_root: Root directory for configs. If None, inferred from
-            config_path parent structure.
-        loader: Infrastructure config loader protocol.
-        profile: Optional profile name to merge with base config.
-        cli_overrides: CLI-provided overrides (highest priority).
-        env_overrides: Environment-provided overrides.
-
-    Returns:
-        Fully validated PipelineConfig instance.
-    """
-    effective_configs_root = configs_root
-    if effective_configs_root is None:
-        effective_configs_root = _infer_configs_root(config_path)
-
-    profiles_root = (
-        effective_configs_root / "profiles" if effective_configs_root else None
-    )
-
-    return loader.get_from_path(
-        config_path,
-        profile=profile,
-        profiles_root=profiles_root,
-        cli_overrides=cli_overrides,
-        env_overrides=env_overrides,
-    )
-
-
 def _infer_configs_root(config_path: Path) -> Path:
     """Infer configs root from config file path structure.
 
@@ -174,5 +127,4 @@ def _infer_configs_root(config_path: Path) -> Path:
 
 __all__ = [
     "ConfigPathResolver",
-    "build_pipeline_config",
 ]
