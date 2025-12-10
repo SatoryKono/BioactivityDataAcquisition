@@ -552,21 +552,9 @@ exceptions:
     owner: domain
     expiry: permanent
 
-  - path: src/bioetl/infrastructure/clients/provider_registry_loader.py
-    rule_id: FUNC_PREFIX
-    reason: "Provider registry loader exposes load verbs without prefixes"
-    owner: infra
-    expiry: permanent
-
   - path: src/bioetl/infrastructure/config/loader.py
     rule_id: FUNC_PREFIX
     reason: "Config loader functions keep load_* verbs for compatibility"
-    owner: infra
-    expiry: permanent
-
-  - path: src/bioetl/infrastructure/config/provider_registry_loader.py
-    rule_id: FUNC_PREFIX
-    reason: "Registry cache helper uses clear verb without prefix"
     owner: infra
     expiry: permanent
 

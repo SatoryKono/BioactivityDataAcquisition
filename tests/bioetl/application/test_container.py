@@ -20,7 +20,7 @@ from bioetl.domain.providers import (
     ProviderId,
 )
 from bioetl.infrastructure.config import (
-    provider_registry_loader as config_provider_registry,
+    provider_registry as config_provider_registry,
 )
 from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 

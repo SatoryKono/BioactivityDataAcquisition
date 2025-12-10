@@ -26,7 +26,7 @@ from bioetl.domain.providers import (
     ProviderId,
 )
 from bioetl.infrastructure.config import (
-    provider_registry_loader as config_provider_registry,
+    provider_registry as config_provider_registry,
 )
 
 sys.modules.setdefault("tqdm", SimpleNamespace(tqdm=lambda *args, **kwargs: None))

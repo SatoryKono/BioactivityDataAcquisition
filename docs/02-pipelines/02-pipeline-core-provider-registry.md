@@ -7,7 +7,7 @@
 
 ## Factories and implementations
 
-- Default loader factory: `bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader` producing `ProviderRegistryLoader`.
+- Default loader factory: `bioetl.infrastructure.config.provider_registry.default_provider_registry_loader` producing `ProviderRegistryLoader`.
 - Registries are backed by `InMemoryProviderRegistry` for deterministic, testable state.
 - `abc_impls.yaml` maps `ProviderRegistryLoader` to the loader port to keep factories discoverable by containers.
 

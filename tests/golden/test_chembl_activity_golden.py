@@ -17,7 +17,7 @@ from bioetl.infrastructure.config.loader import (
     reset_schema_contract_provider,
     set_schema_contract_provider,
 )
-from bioetl.infrastructure.clients.provider_registry_loader import (
+from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.interfaces.container_factory import (

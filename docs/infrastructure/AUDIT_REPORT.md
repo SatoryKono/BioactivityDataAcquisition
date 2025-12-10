@@ -17,28 +17,13 @@
 
 ## Критичные проблемы
 
-### 1. Дублирование Provider Registry Loaders
+### ~~1. Дублирование Provider Registry Loaders~~ ✅ РЕШЕНО
 
-**Файлы:**
-- `infrastructure/config/provider_registry_loader.py`
-- `infrastructure/clients/provider_registry_loader.py`
+**Статус:** Объединено в единый модуль `infrastructure/config/provider_registry.py`.
 
-**Проблема:** Два файла с почти идентичным назначением и частично перекрывающейся логикой:
-- Оба имеют `ProviderRegistryError`, `ProviderNotConfiguredError`
-- Оба загружают `providers.yaml` и валидируют структуру
-- Оба определяют `ProviderRegistryEntryConfig/Model` (почти идентичные Pydantic модели)
-
-**Использование:**
-```python
-# infrastructure/config/provider_registry_loader.py используется в:
-infrastructure/config/loader.py:19
-
-# infrastructure/clients/provider_registry_loader.py используется в:
-interfaces/rest/server.py:21
-interfaces/cli/app.py:19
-```
-
-**Рекомендация:** Объединить в единый модуль, вынести в `infrastructure/config/` или `infrastructure/providers/`.
+Deprecated обёртки удалены:
+- ~~`infrastructure/config/provider_registry_loader.py`~~
+- ~~`infrastructure/clients/provider_registry_loader.py`~~
 
 ---
 
@@ -194,7 +179,7 @@ NormalizationService = DefaultNormImpl
 
 | # | Задача | Файлы |
 |---|--------|-------|
-| 1 | Объединить provider_registry_loader | 2 файла → 1 |
+| 1 | ~~Объединить provider_registry_loader~~ | ✅ Выполнено |
 | 2 | Удалить UnifiedAPIClientImpl | 1 файл |
 | 3 | Вынести entity aliases в константы | 2 файла |
 | 4 | ~~Удалить CircuitBreakerImpl~~ | ✅ Выполнено |
