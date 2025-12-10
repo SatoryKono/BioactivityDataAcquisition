@@ -10,7 +10,6 @@ CacheABC:
   default_factory: bioetl.infrastructure.clients.base.factories.default_cache
   implementations:
     Memory: bioetl.infrastructure.clients.base.impl.cache.MemoryCacheImpl
-    File: bioetl.infrastructure.clients.base.impl.cache.FileCacheImpl
 
 ProviderRegistryLoaderABC:
   default_factory: bioetl.infrastructure.clients.provider_registry_loader.default_provider_registry_loader
