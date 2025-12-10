@@ -1,5 +1,5 @@
 """
-Tests for the UnifiedOutputWriterImpl.
+Tests for the UnifiedLoaderImpl.
 """
 
 # pylint: disable=redefined-outer-name, protected-access
@@ -12,8 +12,8 @@ from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.converters.factories import (
     default_output_frame_converter,
 )
-from bioetl.infrastructure.output.unified_output_writer_impl import (
-    UnifiedOutputWriterImpl,
+from bioetl.infrastructure.output.unified_loader_impl import (
+    UnifiedLoaderImpl,
 )
 
 
@@ -72,7 +72,7 @@ def unified_writer(
     mock_atomic_op,
 ):
     """Fixture for unified writer."""
-    return UnifiedOutputWriterImpl(
+    return UnifiedLoaderImpl(
         mock_writer_fixture,
         mock_metadata_writer_fixture,
         mock_quality_reporter,
@@ -107,7 +107,7 @@ def test_write_result_success(
 
     # Patch checksum function
     with patch(
-        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256"
+        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256"
     ) as mock_checksum:
         mock_checksum.side_effect = [
             "real_checksum",
@@ -116,7 +116,7 @@ def test_write_result_success(
         ]
 
         # Act
-        result = unified_writer.write_result(df, output_dir, "test_entity", run_context)
+        result = unified_writer.load(df, output_dir, run_context)
 
         # Assert
         assert result.row_count == 2
@@ -149,12 +149,12 @@ def test_unified_writer_delegates_atomicity(
     )
 
     with patch(
-        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256"
+        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256"
     ) as mock_checksum:
         mock_checksum.side_effect = ["abc", "qc1", "qc2"]
 
         # Act
-        unified_writer.write_result(df, output_dir, "test_entity", run_context)
+        unified_writer.load(df, output_dir, run_context)
 
         # Assert
         assert mock_atomic_op.write_atomic.call_count == 3
@@ -192,13 +192,12 @@ def test_unified_writer_column_order_and_fill(
     mock_writer_fixture.write.side_effect = capture_df
 
     with patch(
-        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
+        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256",
         return_value="chk",
     ):
-        result = unified_writer.write_result(
+        result = unified_writer.load(
             df,
             output_dir,
-            "entity",
             run_context,
             column_order=["a", "b", "c"],
         )
@@ -261,7 +260,7 @@ def test_write_result_raises_on_no_inner_result(
 
     # Act & Assert
     with pytest.raises(RuntimeError, match="Inner writer did not return result"):
-        unified_writer.write_result(df, output_dir, "test_entity", run_context)
+        unified_writer.load(df, output_dir, run_context)
 
 
 def test_write_result_records_metric_on_failure(
@@ -278,7 +277,7 @@ def test_write_result_records_metric_on_failure(
     writer = MagicMock()
     writer.write.side_effect = ValueError("boom")
 
-    writer_impl = UnifiedOutputWriterImpl(
+    writer_impl = UnifiedLoaderImpl(
         writer,
         mock_metadata_writer_fixture,
         mock_quality_reporter,
@@ -288,12 +287,12 @@ def test_write_result_records_metric_on_failure(
     )
 
     with pytest.raises(ValueError):
-        writer_impl.write_result(
-            pd.DataFrame({"a": [1]}), tmp_path, "entity", run_context_factory()
+        writer_impl.load(
+            pd.DataFrame({"a": [1]}), tmp_path, run_context_factory()
         )
 
     metrics.inc_counter.assert_called_once_with(
-        "output_write_errors_total", {"entity": "entity", "error_type": "ValueError"}
+        "output_write_errors_total", {"entity": "test_entity", "error_type": "ValueError"}
     )
 
 
@@ -320,7 +319,7 @@ def test_unified_writer_applies_converter_rename(
     writer.write.side_effect = capture_df
 
     converter = default_output_frame_converter("rename_columns")
-    writer_impl = UnifiedOutputWriterImpl(
+    writer_impl = UnifiedLoaderImpl(
         writer,
         mock_metadata_writer_fixture,
         mock_quality_reporter,
@@ -331,13 +330,12 @@ def test_unified_writer_applies_converter_rename(
 
     df = pd.DataFrame({"a_col": [1], "b_col": [2]})
     with patch(
-        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
+        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256",
         return_value="chk",
     ):
-        writer_impl.write_result(
+        writer_impl.load(
             df,
             tmp_path / "out",
-            "entity",
             run_context_factory(),
             column_order=["a_col", "b_col"],
         )
@@ -366,7 +364,7 @@ def test_unified_writer_applies_converter_dropna(
     writer.write.side_effect = create_file
 
     converter = default_output_frame_converter("dropna")
-    writer_impl = UnifiedOutputWriterImpl(
+    writer_impl = UnifiedLoaderImpl(
         writer,
         mock_metadata_writer_fixture,
         mock_quality_reporter,
@@ -377,13 +375,12 @@ def test_unified_writer_applies_converter_dropna(
 
     df = pd.DataFrame({"a": [None], "b": [None]})
     with patch(
-        "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
+        "bioetl.infrastructure.output.unified_loader_impl.compute_file_sha256",
         return_value="chk",
     ):
-        result = writer_impl.write_result(
+        result = writer_impl.load(
             df,
             tmp_path / "out",
-            "entity",
             run_context_factory(),
             column_order=["a", "b"],
         )

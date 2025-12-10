@@ -5,8 +5,8 @@ import requests
 
 from bioetl.domain.configs import ClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
-from bioetl.infrastructure.clients.base.impl.unified_api_client_impl import (
-    UnifiedAPIClientImpl,
+from bioetl.infrastructure.clients.base.impl._http_transport import (
+    _HttpTransport,
 )
 from bioetl.infrastructure.errors import ApiClientError, ApiTimeoutError
 
@@ -16,7 +16,7 @@ def test_request_call_wraps_timeout_error() -> None:
     base_client.request.side_effect = requests.Timeout("timeout")
     logger = Mock(spec=LoggingPortABC)
     metrics = Mock(spec=MetricsPortABC)
-    client = UnifiedAPIClientImpl(
+    client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(retry_enabled=False),
         base_client=base_client,
@@ -40,7 +40,7 @@ def test_request_call_wraps_request_exception() -> None:
     base_client = Mock()
     base_client.request.side_effect = requests.RequestException("boom")
     metrics = Mock(spec=MetricsPortABC)
-    client = UnifiedAPIClientImpl(
+    client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(retry_enabled=False),
         base_client=base_client,
@@ -68,7 +68,7 @@ def test_request_records_metrics_on_success() -> None:
     response.status_code = 200
     base_client.request.return_value = response
     metrics = Mock(spec=MetricsPortABC)
-    client = UnifiedAPIClientImpl(
+    client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(),
         base_client=base_client,
@@ -94,7 +94,7 @@ def test_request_retries_on_timeout_until_success(
     base_client.request.side_effect = [requests.Timeout("timeout"), response]
     metrics = Mock(spec=MetricsPortABC)
     logger = Mock(spec=LoggingPortABC)
-    client = UnifiedAPIClientImpl(
+    client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(max_retries=1, backoff_factor=0.1),
         base_client=base_client,
@@ -103,7 +103,7 @@ def test_request_retries_on_timeout_until_success(
     )
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.clients.base.impl.unified_api_client_impl.time.sleep",
+        "bioetl.infrastructure.clients.base.impl._http_transport.time.sleep",
         lambda *_: None,
     )
 
@@ -122,7 +122,7 @@ def test_request_retries_on_server_error(monkeypatch: pytest.MonkeyPatch) -> Non
     second.status_code = 200
     base_client.request.side_effect = [first, second]
     metrics = Mock(spec=MetricsPortABC)
-    client = UnifiedAPIClientImpl(
+    client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(max_retries=1, backoff_factor=0.1),
         base_client=base_client,
@@ -130,7 +130,7 @@ def test_request_retries_on_server_error(monkeypatch: pytest.MonkeyPatch) -> Non
     )
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.clients.base.impl.unified_api_client_impl.time.sleep",
+        "bioetl.infrastructure.clients.base.impl._http_transport.time.sleep",
         lambda *_: None,
     )
 
