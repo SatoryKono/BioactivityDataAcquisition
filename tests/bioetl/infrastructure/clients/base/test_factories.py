@@ -3,8 +3,9 @@ Tests for factory implementations.
 """
 
 import os
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+from bioetl.domain.observability import LoggingPortABC
 from bioetl.infrastructure.clients.base.factories import (
     EnvSecretProviderImpl,
     default_cache,
@@ -19,7 +20,8 @@ from bioetl.infrastructure.clients.base.impl.rate_limiter import (
 
 def test_default_factories():
     """Test default factories return correct implementations."""
-    assert isinstance(default_rate_limiter(), TokenBucketRateLimiterImpl)
+    mock_logger = Mock(spec=LoggingPortABC)
+    assert isinstance(default_rate_limiter(mock_logger), TokenBucketRateLimiterImpl)
     assert isinstance(default_cache(), MemoryCacheImpl)
 
 

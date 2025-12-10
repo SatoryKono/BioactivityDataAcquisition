@@ -5,7 +5,6 @@ HTTP client implementation for ChEMBL API.
 from __future__ import annotations
 
 import time
-from types import SimpleNamespace
 from typing import Any, Iterator
 
 from bioetl.domain.clients.base.contracts import (
@@ -21,13 +20,15 @@ from bioetl.infrastructure.errors import (
     ApiUnexpectedStatusError,
     wrap_http_errors,
 )
-from bioetl.infrastructure.observability.factories import default_logging_port
 
 
 class ChemblHttpClientImpl(DataClientABC):
     """
     ChEMBL API client implemented over HTTP.
     Uses RateLimiter for proactive throttling.
+
+    All dependencies must be explicitly injected - no default fallbacks.
+    Use composition root or factories to create instances.
     """
 
     def __init__(
@@ -35,31 +36,20 @@ class ChemblHttpClientImpl(DataClientABC):
         request_builder: RequestBuilderABC,
         response_parser: ResponseParserABC,
         rate_limiter: RateLimiterABC,
-        client: Any | None = None,
+        http_client: Any,
+        logger: LoggingPortABC,
         *,
         provider: str = "chembl",
-        logger: LoggingPortABC | None = None,
         fallbacks: dict[str, list[str]] | None = None,
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
         self.rate_limiter = rate_limiter
-        self.client = client
-        self.logger = logger or default_logging_port()
-        self._fallbacks = fallbacks or {}
+        self.client = http_client
+        self.http = http_client
+        self.logger = logger
+        self._fallbacks = fallbacks if fallbacks is not None else {}
         self._last_endpoint_used: str | None = None
-        if client is not None:
-            self.http = client
-        else:
-            # Fallback stub to keep attribute accessible in tests;
-            # real runs must inject a concrete client.
-            def _missing_http_request(
-                method: str, url: str, **_: Any
-            ) -> Any:  # pragma: no cover
-                """Fail fast when HTTP client is not configured."""
-                raise RuntimeError("HTTP client is not configured")
-
-            self.http = SimpleNamespace(request=_missing_http_request)
         self.provider = provider
 
     def iter_pages(self, request: Any) -> Iterator[Any]:

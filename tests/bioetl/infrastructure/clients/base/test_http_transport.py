@@ -39,11 +39,13 @@ def test_request_call_wraps_timeout_error() -> None:
 def test_request_call_wraps_request_exception() -> None:
     base_client = Mock()
     base_client.request.side_effect = requests.RequestException("boom")
+    logger = Mock(spec=LoggingPortABC)
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(retry_enabled=False),
         base_client=base_client,
+        logger=logger,
         metrics=metrics,
     )
 
@@ -67,11 +69,13 @@ def test_request_records_metrics_on_success() -> None:
     response = Mock()
     response.status_code = 200
     base_client.request.return_value = response
+    logger = Mock(spec=LoggingPortABC)
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(),
         base_client=base_client,
+        logger=logger,
         metrics=metrics,
     )
 
@@ -121,11 +125,13 @@ def test_request_retries_on_server_error(monkeypatch: pytest.MonkeyPatch) -> Non
     second = Mock()
     second.status_code = 200
     base_client.request.side_effect = [first, second]
+    logger = Mock(spec=LoggingPortABC)
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
         config=ClientConfig(max_retries=1, backoff_factor=0.1),
         base_client=base_client,
+        logger=logger,
         metrics=metrics,
     )
 

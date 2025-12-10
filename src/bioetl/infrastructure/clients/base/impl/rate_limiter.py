@@ -5,23 +5,25 @@ import time
 
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.observability import LoggingPortABC
-from bioetl.infrastructure.observability.factories import default_logging_port
 
 
 class TokenBucketRateLimiterImpl(RateLimiterABC):
     """
     Реализация алгоритма Token Bucket.
+
+    All dependencies must be explicitly injected - no default fallbacks.
+    Use composition root or factories to create instances.
     """
 
     def __init__(
-        self, rate: float, capacity: float, *, logger: LoggingPortABC | None = None
+        self, rate: float, capacity: float, logger: LoggingPortABC
     ) -> None:
         self._rate = rate  # tokens per second
         self._capacity = capacity
         self._tokens = capacity
         self._last_refill = time.monotonic()
         self._lock = Lock()
-        self._logger = logger or default_logging_port()
+        self._logger = logger
         self._logger.info("rate_limiter_initialized", rate=rate, capacity=capacity)
 
     @property
