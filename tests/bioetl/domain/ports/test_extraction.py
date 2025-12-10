@@ -1,8 +1,6 @@
 """Tests for extraction port contracts and type aliases."""
 
 from collections.abc import Iterable
-from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -76,11 +74,7 @@ class TestRecordFetcherABC:
 
         class IncompleteFetcher(RecordFetcherABC):
             def iter_extract(
-                self,
-                entity: str,
-                *,
-                chunk_size: int | None = None,
-                **filters: object
+                self, entity: str, *, chunk_size: int | None = None, **filters: object
             ) -> Iterable[RawRecordBatch]:
                 yield []
 
@@ -92,11 +86,7 @@ class TestRecordFetcherABC:
 
         class CompleteFetcher(RecordFetcherABC):
             def iter_extract(
-                self,
-                entity: str,
-                *,
-                chunk_size: int | None = None,
-                **filters: object
+                self, entity: str, *, chunk_size: int | None = None, **filters: object
             ) -> Iterable[RawRecordBatch]:
                 yield [{"id": "1"}]
 
@@ -111,11 +101,7 @@ class TestRecordFetcherABC:
 
         class TestFetcher(RecordFetcherABC):
             def iter_extract(
-                self,
-                entity: str,
-                *,
-                chunk_size: int | None = None,
-                **filters: object
+                self, entity: str, *, chunk_size: int | None = None, **filters: object
             ) -> Iterable[RawRecordBatch]:
                 yield [
                     {"id": "1", "name": "first"},
@@ -138,11 +124,7 @@ class TestRecordFetcherABC:
 
         class TestFetcher(RecordFetcherABC):
             def iter_extract(
-                self,
-                entity: str,
-                *,
-                chunk_size: int | None = None,
-                **filters: object
+                self, entity: str, *, chunk_size: int | None = None, **filters: object
             ) -> Iterable[RawRecordBatch]:
                 yield []
 
@@ -206,11 +188,7 @@ class TestExtractionServiceABC:
 
         class CompleteService(ExtractionServiceABC):
             def iter_extract(
-                self,
-                entity: str,
-                *,
-                chunk_size: int | None = None,
-                **filters: object
+                self, entity: str, *, chunk_size: int | None = None, **filters: object
             ) -> Iterable[RawRecordBatch]:
                 yield [{"id": "1"}]
 
@@ -237,11 +215,7 @@ class TestExtractionServiceABC:
 
         class TestService(ExtractionServiceABC):
             def iter_extract(
-                self,
-                entity: str,
-                *,
-                chunk_size: int | None = None,
-                **filters: object
+                self, entity: str, *, chunk_size: int | None = None, **filters: object
             ) -> Iterable[RawRecordBatch]:
                 yield []
 

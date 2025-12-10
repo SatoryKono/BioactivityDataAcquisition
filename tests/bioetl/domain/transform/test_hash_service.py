@@ -1,19 +1,19 @@
 """Tests for transform services (hash, timestamp, index)."""
 
-import re
 from datetime import datetime, timezone
+import re
 
 import pandas as pd
 
+from bioetl.domain.transform.transformers import (
+    DatabaseVersionTransformerImpl,
+    FulldateTransformerImpl,
+    IndexColumnTransformerImpl,
+)
 from bioetl.infrastructure.transform.factories import (
     default_hash_service,
     default_index_generator,
     default_timestamp_provider,
-)
-from bioetl.domain.transform.transformers import (
-    IndexColumnTransformerImpl,
-    DatabaseVersionTransformerImpl,
-    FulldateTransformerImpl,
 )
 
 
@@ -151,9 +151,7 @@ def test_database_version_transformer_empty_df():
 
 def test_database_version_transformer_none_version():
     """Test version transformer skips when version is None."""
-    transformer = DatabaseVersionTransformerImpl(
-        database_version_provider=lambda: None
-    )
+    transformer = DatabaseVersionTransformerImpl(database_version_provider=lambda: None)
     src = pd.DataFrame({"a": [1]})
 
     out = transformer.apply(src)

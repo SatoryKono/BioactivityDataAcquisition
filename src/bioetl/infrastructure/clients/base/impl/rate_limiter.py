@@ -15,9 +15,7 @@ class TokenBucketRateLimiterImpl(RateLimiterABC):
     Use composition root or factories to create instances.
     """
 
-    def __init__(
-        self, rate: float, capacity: float, logger: LoggingPortABC
-    ) -> None:
+    def __init__(self, rate: float, capacity: float, logger: LoggingPortABC) -> None:
         self._rate = rate  # tokens per second
         self._capacity = capacity
         self._tokens = capacity

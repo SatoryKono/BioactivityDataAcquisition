@@ -108,7 +108,7 @@ class DatabaseVersionTransformerImpl(TransformerABC):
 
 
 class FulldateTransformerImpl(TransformerABC):
-    """Добавляет колонку extracted_at с таймстампом."""
+    """Добавляет колонку acquisition_timestamp с таймстампом."""
 
     def __init__(self, timestamp_provider: TimestampProviderABC) -> None:
         self._timestamp_provider = timestamp_provider
@@ -116,12 +116,12 @@ class FulldateTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Добавляет extracted_at (UTC ISO-8601)."""
+        """Добавляет acquisition_timestamp (UTC ISO-8601)."""
         df = df.copy()
         ts = self._timestamp_provider.get_extraction_timestamp()
         if ts.tzinfo is None:
             ts = ts.replace(tzinfo=timezone.utc)
-        df["extracted_at"] = ts.isoformat()
+        df["acquisition_timestamp"] = ts.isoformat()
         return df
 
 

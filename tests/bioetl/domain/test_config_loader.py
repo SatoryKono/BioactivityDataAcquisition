@@ -334,7 +334,8 @@ batch_size: 25
 
     config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
-    assert config.sink.output_path == "/tmp/out"  # pipeline overrides profile
+    # pipeline overrides profile
+    assert config.sink.output_path.replace("\\", "/") == "/tmp/out"
     assert config.source.batch_size == 10
     assert config.provider_config.client.timeout_sec == 10
 

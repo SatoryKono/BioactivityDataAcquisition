@@ -12,7 +12,8 @@ from bioetl.application.pipelines.contracts import PipelineFactoryABC
 
 PipelineFactory = Callable[..., PipelineBase]
 
-# Registry mapping pipeline names to pipeline classes (legacy, for backward compatibility)
+# Registry mapping pipeline names to pipeline classes
+# (legacy, for backward compatibility)
 _PIPELINE_REGISTRY: dict[str, PipelineFactory] = {
     "activity_chembl": ChemblPipelineBase,
     "assay_chembl": ChemblPipelineBase,

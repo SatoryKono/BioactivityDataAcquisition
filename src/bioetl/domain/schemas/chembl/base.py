@@ -62,7 +62,6 @@ class BaseGeneratedColumnsModel(pa.DataFrameModel):
     acquisition_timestamp: Series[str] = pa.Field(
         nullable=True,
         description="Дата и время получения данных из источника",
-        alias="extracted_at",  # Backward compatibility alias
     )
 
     class Config:

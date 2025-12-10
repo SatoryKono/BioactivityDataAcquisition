@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
+import warnings
 
 from pydantic import BaseModel, TypeAdapter
 
+from bioetl.domain.clients.base.contracts import ResponseParserABC
 from bioetl.domain.ports.parsing import (
     RawPayload,
     RawRecordList,
@@ -14,7 +15,6 @@ from bioetl.domain.ports.parsing import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.clients.base.contracts import ResponseParserABC
     from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 
 T = TypeVar("T", bound=BaseModel)
@@ -129,7 +129,7 @@ def create_activity_parser() -> ChemblResponseParserImpl[ActivityRawModel]:
 # =============================================================================
 
 
-class ChemblResponseParserImpl(Generic[T]):
+class ChemblResponseParserImpl(Generic[T], ResponseParserABC[T]):
     """Generic parser for ChEMBL API responses.
 
     .. deprecated:: 1.0

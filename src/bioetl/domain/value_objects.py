@@ -7,8 +7,8 @@ Value Objects для ключевых идентификаторов.
 from __future__ import annotations
 
 import re
-import uuid
 from typing import Self
+import uuid
 
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema
@@ -73,9 +73,7 @@ class EntityName:
         if not self._pattern.match(value):
             raise ValueError(f"EntityName must be snake_case: {value}")
         if len(value) > self._max_length:
-            raise ValueError(
-                f"EntityName too long: {len(value)} > {self._max_length}"
-            )
+            raise ValueError(f"EntityName too long: {len(value)} > {self._max_length}")
         self._value = value
 
     @property

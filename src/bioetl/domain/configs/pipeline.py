@@ -555,7 +555,8 @@ class PipelineConfig(BaseModel):
     Contains no business logic, only structure.
 
     Breaking Changes (v2.0):
-        - Access via decomposed sections: config.identity.entity, config.source.input_mode, etc.
+        - Access via decomposed sections:
+          config.identity.entity, config.source.input_mode, etc.
         - Removed 20+ backward compatibility property accessors
         - Only convenience accessors for entity and provider remain
 

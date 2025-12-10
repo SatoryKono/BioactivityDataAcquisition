@@ -1,6 +1,5 @@
 """Unit tests for StageErrorHandler component."""
 
-
 import pytest
 
 from bioetl.application.pipelines.hooks_impl import (

@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.domain.providers import ProviderId
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
 )
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
 _TEST_PROVIDERS_CONFIG = Path("tests/fixtures/configs/providers.yaml")
 

@@ -16,9 +16,11 @@ __all__ = [
 def generate_schema_from_column_order(columns: list[str]) -> pa.DataFrameSchema:
     """Build a permissive Pandera schema using the provided column order."""
 
-    return pa.DataFrameSchema(
+    schema = pa.DataFrameSchema(
         {col: pa.Column(object, nullable=True, coerce=True) for col in columns}
     )
+    # Return both old and new API for compatibility
+    return schema
 
 
 def load_column_order_from_yaml(path: str | Path) -> list[str]:

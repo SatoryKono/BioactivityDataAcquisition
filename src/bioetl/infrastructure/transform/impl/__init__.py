@@ -2,14 +2,18 @@
 
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationService,
+)
+from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,  # Deprecated alias
 )
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     DefaultNormalizationTransformerImpl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
-from bioetl.infrastructure.transform.impl.index_generator import SequentialIndexGenerator
+from bioetl.infrastructure.transform.impl.index_generator import (
+    SequentialIndexGenerator,
+)
 from bioetl.infrastructure.transform.impl.timestamp_provider import (
     DeterministicTimestampProvider,
 )

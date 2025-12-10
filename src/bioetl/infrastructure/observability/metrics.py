@@ -5,10 +5,13 @@ Naming Convention
 All metrics MUST follow these rules:
 
 1. **Prefix**: All metrics start with ``bioetl_`` to namespace them
-2. **Snake_case**: Use lowercase with underscores (e.g., ``bioetl_stage_duration_seconds``)
-3. **Unit suffix**: Include unit as suffix when applicable (``_seconds``, ``_bytes``, ``_total``)
+2. **Snake_case**: Use lowercase with underscores
+   (e.g., ``bioetl_stage_duration_seconds``)
+3. **Unit suffix**: Include unit as suffix when applicable
+   (``_seconds``, ``_bytes``, ``_total``)
 4. **Counter suffix**: All Counter metrics end with ``_total``
-5. **Descriptive names**: Use clear, descriptive names that indicate what is being measured
+5. **Descriptive names**: Use clear, descriptive names that indicate
+   what is being measured
 
 Examples:
     - ``bioetl_stage_duration_seconds`` (Histogram with unit)

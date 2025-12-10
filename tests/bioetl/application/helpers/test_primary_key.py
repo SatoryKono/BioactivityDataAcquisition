@@ -20,7 +20,8 @@ def _make_config(
 
     Args:
         entity: Entity name.
-        primary_key: Primary key - string or list of strings (will be converted to list).
+        primary_key: Primary key - string or list of strings
+            (will be converted to list).
     """
     # Convert string to list for new format
     pk_list: list[str] = []

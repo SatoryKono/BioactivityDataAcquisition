@@ -2,8 +2,6 @@
 
 import warnings
 
-import pytest
-
 from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
