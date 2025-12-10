@@ -20,24 +20,32 @@ flowchart TB
         orchestrator["PipelineOrchestrator\n(run, build_pipeline)"]:::componentPrimary
         container["PipelineContainer\n(manual DI)"]:::componentSecondary
         registry["PipelineRegistry\n(entity to class map)"]:::componentSecondary
-        hooksManager["HooksManager + ErrorPolicy"]:::componentSecondary
+        stageRuntimeManager["StageRuntimeManager"]:::componentSecondary
+        hooksImpl["HooksImpl + ErrorPolicy"]:::componentSecondary
+        factories["Factories\nProviderServiceFactory\nRecordSourceFactory"]:::componentSecondary
+        configResolution["Config Resolution"]:::componentSecondary
     end
     class Application group
 
     subgraph Domain["Domain core (Ports)"]
-        contracts["ABC contracts\n(ExtractionServiceABC, TransformerABC, OutputWriterABC, etc.)"]:::componentPrimary
-        schemas["Schemas + ValidationService"]:::componentSecondary
-        normalization["Normalization/Hash services"]:::componentSecondary
+        contracts["ABC contracts\n(ExtractionPortABC, TransformerABC, LoaderABC, etc.)"]:::componentPrimary
+        pipelineContracts["Pipeline Contracts\n(PipelineContainerABC, ExtractorABC)"]:::componentSecondary
+        schemas["SchemaRegistry + ValidationService"]:::componentSecondary
+        normalization["NormalizationServiceABC / HashServiceABC"]:::componentSecondary
+        observabilityContracts["Observability Contracts\n(LoggingPortABC, MetricsPortABC)"]:::componentSecondary
+        configs["Config Models\n(PipelineConfig, etc.)"]:::componentSecondary
     end
     class Domain group
 
     subgraph Infrastructure["Adapters (Driven ports)"]
-        apiClients["UnifiedAPIClient + ChemblDataClientHTTPImpl"]:::componentPrimary
-        recordSources["CsvRecordSource / IdListSource"]:::componentSecondary
-        extraction["ChemblExtractionServiceImpl"]:::componentSecondary
-        transformers["ChemblTransformerImpl + enrichers"]:::componentSecondary
-        writers["UnifiedOutputWriter + MetadataWriter"]:::componentSecondary
-        observability["UnifiedLogger + Metrics hooks"]:::componentSecondary
+        apiClients["ChemblHttpClientImpl\nChemblExtractionServiceImpl"]:::componentPrimary
+        recordSources["ApiRecordSource\nCsvRecordSource"]:::componentSecondary
+        transformers["ChemblTransformerImpl"]:::componentSecondary
+        writers["UnifiedLoaderImpl\nCsvWriter / ParquetWriter"]:::componentSecondary
+        normalizationImpl["ChemblNormalizationServiceImpl\nHasherImpl"]:::componentSecondary
+        validationImpl["PanderaValidator"]:::componentSecondary
+        observability["Observability Server\nMetrics / Adapters"]:::componentSecondary
+        logging["Logging Factories\nProgressReporter"]:::componentSecondary
     end
     class Infrastructure group
 
@@ -46,16 +54,26 @@ flowchart TB
     mq --> orchestrator
 
     orchestrator --> container
+    orchestrator --> configResolution
     container --> registry
     container --> contracts
+    container --> pipelineContracts
     container --> schemas
+    container --> factories
+    container --> stageRuntimeManager
+    stageRuntimeManager --> hooksImpl
 
     contracts --> apiClients
     contracts --> recordSources
     contracts --> extraction
     contracts --> transformers
     contracts --> writers
-    contracts --> observability
+    contracts --> observabilityContracts
+    pipelineContracts --> normalization
+    normalization --> normalizationImpl
+    schemas --> validationImpl
+    observabilityContracts --> observability
+    observabilityContracts --> logging
 
     apiClients --> Chembl[(ChEMBL API)]
     recordSources --> Files[(Offline CSV dumps)]
