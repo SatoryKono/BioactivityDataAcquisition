@@ -12,17 +12,17 @@ from bioetl.domain.configs import (
 
 @pytest.fixture
 def dependencies():
-    record_source = MagicMock()
-    record_source.iter_records.return_value = iter([])
+    # ExtractStage uses extraction_service.iter_extract instead of record_source
+    extraction_service = MagicMock()
+    extraction_service.iter_extract.return_value = iter([])
 
     return {
         "logger": MagicMock(),
         "validation_service": MagicMock(),
         "loader": MagicMock(),
-        "extraction_service": MagicMock(),
+        "extraction_service": extraction_service,
         "hash_service": MagicMock(),
         "normalization_service": _build_normalization_service(),
-        "record_source": record_source,
         "index_generator": MagicMock(),
         "timestamp_provider": MagicMock(),
     }

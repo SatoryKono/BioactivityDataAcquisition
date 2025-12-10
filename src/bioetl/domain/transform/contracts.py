@@ -1,29 +1,28 @@
 """Domain-level transform contracts and DTOs.
 
 Terminology:
-    compute_row_fingerprint: Computes a hash of the entire row.
-        Deprecated alias: hash_row (will be removed in v3.0).
-    compute_entity_key: Computes a hash of the business key columns.
-        Deprecated alias: hash_business_key (will be removed in v3.0).
+    fingerprint: Hash of entire record (all fields).
+    entity_key: Hash of business key fields only.
 
 Tabular Data Abstractions:
-    This module uses domain-level abstractions (Record, TabularData) instead of
-    pandas types. Infrastructure layer provides PandasAdapter implementations.
+    This module uses domain-level abstractions (Record, TabularData, RecordBatch)
+    instead of pandas types. Infrastructure layer provides adapter implementations.
 
     See bioetl.domain.data for protocol definitions.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol
-import warnings
 
 # Import the canonical NormalizationConfig from configs.normalization
 from bioetl.domain.configs.normalization import NormalizationConfig
-from bioetl.domain.data import MutableTabularData, Record, TabularData
+from bioetl.domain.data import MutableTabularData, Record, RecordBatch, TabularData
+from bioetl.domain.value_objects import HashDigest
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    pass
 
 
 class NormalizationConfigProviderProtocol(Protocol):
@@ -41,39 +40,46 @@ class NormalizationConfigProviderProtocol(Protocol):
 
 
 class HasherABC(ABC):
-    """Row hashing abstraction.
+    """Low-level hashing abstraction.
 
+    Provides primitive hashing operations used by HashServiceABC.
     Uses domain-level Record and TabularData instead of pandas types.
     Infrastructure implementations can work with pandas internally.
+
+    Note:
+        This is an internal abstraction. Prefer HashServiceABC for domain code.
     """
 
-    def get_algorithm(self) -> str:
-        """Return hashing algorithm name (default: blake2b_256)."""
+    @property
+    def algorithm(self) -> str:
+        """Return hashing algorithm identifier (e.g., 'blake2b_256')."""
         return "blake2b_256"
 
     @abstractmethod
-    def compute_hash_row(self, row: Record) -> str:
+    def compute_hash(self, record: Mapping[str, Any]) -> HashDigest:
         """Compute hash of a single record.
 
         Args:
-            row: Record to hash (dict-like interface).
+            record: Record to hash (dict-like interface).
 
         Returns:
-            Hex string hash of the record.
+            HashDigest value object.
         """
 
     @abstractmethod
-    def compute_hash_columns(
-        self, data: TabularData, columns: list[str]
-    ) -> "Sequence[str]":
-        """Compute hash of specified columns for each row.
+    def compute_hash_for_fields(
+        self,
+        record: Mapping[str, Any],
+        fields: Sequence[str],
+    ) -> HashDigest:
+        """Compute hash of specified fields from a record.
 
         Args:
-            data: Tabular data to process.
-            columns: Column names to include in hash.
+            record: Record containing fields.
+            fields: Field names to include in hash.
 
         Returns:
-            Sequence of hash strings, one per row.
+            HashDigest value object.
         """
 
 
@@ -119,90 +125,101 @@ class NormalizationServiceABC(ABC):
 
 
 class HashServiceABC(ABC):
-    """Stateless hash computation service.
+    """Stateless service for computing deterministic hashes.
 
-    Responsible for computing and adding hash columns to tabular data.
+    Responsible for computing and adding hash columns to data.
     Does not contain stateful logic (indices, timestamps).
 
     Terminology:
-        compute_row_fingerprint: Canonical name for row hashing.
-        compute_entity_key: Canonical name for business key hashing.
-        hash_row: Deprecated alias for compute_row_fingerprint.
-        hash_business_key: Deprecated alias for compute_entity_key.
+        fingerprint: Hash of entire record (all fields).
+        entity_key: Hash of business key fields only.
+
+    Example:
+        >>> service: HashServiceABC = get_hash_service()
+        >>> digest = service.compute_fingerprint({"id": 1, "name": "test"})
+        >>> print(digest.value)  # hex string
     """
 
+    @property
+    def algorithm(self) -> str:
+        """Return algorithm identifier (e.g., 'blake2b_256')."""
+        return "blake2b_256"
+
     @abstractmethod
-    def compute_row_fingerprint(self, row: dict[str, Any]) -> str:
-        """Compute hash fingerprint of a row as complete object.
+    def compute_fingerprint(self, record: Mapping[str, Any]) -> HashDigest:
+        """Compute hash fingerprint of entire record.
 
         Args:
-            row: Row data as dictionary.
+            record: Record data as mapping (dict-like).
 
         Returns:
-            Hex string hash of the row.
-
-        Note:
-            This is the canonical method name for row hashing.
+            HashDigest value object containing the hash.
         """
 
     @abstractmethod
-    def compute_entity_key(self, row: dict[str, Any], key_columns: list[str]) -> str:
-        """Compute hash of business key columns.
+    def compute_entity_key(
+        self,
+        record: Mapping[str, Any],
+        key_fields: Sequence[str],
+    ) -> HashDigest:
+        """Compute hash of business key fields.
 
         Args:
-            row: Row data as dictionary.
-            key_columns: List of columns forming the business key.
+            record: Record data as mapping.
+            key_fields: Sequence of field names forming the business key.
 
         Returns:
-            Hex string hash of the business key.
-
-        Note:
-            This is the canonical method name for business key hashing.
+            HashDigest value object containing the hash.
         """
 
     @abstractmethod
+    def add_hashes_to_batch(
+        self,
+        records: RecordBatch,
+        key_fields: Sequence[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Add hash_row and hash_business_key to each record.
+
+        This is the pandas-free version for processing record batches.
+
+        Args:
+            records: Sequence of records (Mapping[str, Any]).
+            key_fields: Optional sequence of business key field names.
+
+        Returns:
+            List of dictionaries with added hash columns:
+            - hash_row: fingerprint of entire record
+            - hash_business_key: hash of key fields (or None if key_fields not provided)
+        """
+
     def add_hash_columns(
-        self, data: TabularData, business_key_cols: list[str] | None = None
+        self,
+        data: TabularData,
+        business_key_cols: Sequence[str] | None = None,
     ) -> MutableTabularData:
-        """Add hash_row and hash_business_key columns to data.
+        """Add hash_row and hash_business_key columns to tabular data.
+
+        This method works with TabularData abstraction (pandas-compatible).
+        For pandas-free processing, use add_hashes_to_batch().
 
         Args:
             data: Input tabular data.
-            business_key_cols: Optional list of business key column names.
+            business_key_cols: Optional sequence of business key column names.
 
         Returns:
-            Data with added hash columns.
+            MutableTabularData with added hash columns.
+
+        Note:
+            Default implementation converts to records and back.
+            Infrastructure may override for better performance.
         """
-
-    # =========================================================================
-    # Deprecated aliases (will be removed in v3.0)
-    # =========================================================================
-
-    def hash_row(self, row: dict) -> str:
-        """Deprecated: Use compute_row_fingerprint() instead.
-
-        Will be removed in v3.0.
-        """
-        warnings.warn(
-            "hash_row() is deprecated, use compute_row_fingerprint() instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
+        records = data.to_records()
+        hashed = self.add_hashes_to_batch(records, business_key_cols)
+        # Infrastructure layer should provide optimized implementation
+        # This default raises to force infrastructure override
+        raise NotImplementedError(
+            "Infrastructure must override add_hash_columns for TabularData support"
         )
-        return self.compute_row_fingerprint(row)
-
-    def hash_business_key(self, row: dict, key_columns: list[str]) -> str:
-        """Deprecated: Use compute_entity_key() instead.
-
-        Will be removed in v3.0.
-        """
-        warnings.warn(
-            "hash_business_key() is deprecated, use compute_entity_key() instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.compute_entity_key(row, key_columns)
 
 
 class TimestampProviderABC(ABC):
@@ -234,11 +251,12 @@ class IndexGeneratorABC(ABC):
 
 
 __all__ = [
+    "HashDigest",
+    "HasherABC",
+    "HashServiceABC",
+    "IndexGeneratorABC",
     "NormalizationConfig",
     "NormalizationConfigProviderProtocol",
-    "HasherABC",
     "NormalizationServiceABC",
-    "HashServiceABC",
     "TimestampProviderABC",
-    "IndexGeneratorABC",
 ]

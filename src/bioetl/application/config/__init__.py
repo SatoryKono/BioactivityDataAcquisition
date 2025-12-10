@@ -1,4 +1,4 @@
-"""Public application configuration exports.
+"""Application layer configuration utilities.
 
 The main API for loading pipeline configurations is `build_runtime_config`.
 Use `ConfigPathResolver` for resolving config paths from pipeline names.

@@ -1,4 +1,31 @@
-"""Dependency Injection Container for the application."""
+"""
+Dependency Injection Container for the application.
+
+This module provides the core DI container that assembles pipeline dependencies.
+The container follows the Composition Root pattern — all object graph construction
+happens here, keeping the rest of the application free of "new" calls.
+
+Architecture notes:
+    - PipelineContainer implements PipelineContainerABC (contracts module)
+    - Uses lazy initialization for factories to defer expensive operations
+    - Supports both direct injection and provider callbacks for flexibility
+    - Delegates specialized concerns to sub-factories (service, transform, runtime)
+
+Dependency resolution order:
+    1. Explicit constructor arguments (highest priority)
+    2. Injected factory instances
+    3. Default factory creation (lowest priority)
+
+Example::
+
+    container = PipelineContainer(
+        config,
+        loader=parquet_loader,
+        provider_registry=registry,
+    )
+    logger = container.get_logger()
+    hash_service = container.get_hash_service()
+"""
 
 from __future__ import annotations
 
@@ -110,15 +137,19 @@ class PipelineContainer(PipelineContainerABC):
     # ─────────────────────────────────────────────────────────────────────────
 
     def get_logger(self) -> LoggingPortABC:
+        """Return the logging port for pipeline observability."""
         return self._logger
 
     def get_validation_service(self) -> ValidationService:
+        """Create and return a validation service with schema registry."""
         return ValidationService(self._schema_provider, self._validator_factory)
 
     def get_loader(self) -> LoaderABC:
+        """Return the loader for writing output data."""
         return self._loader
 
     def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
+        """Return the metadata builder for run result construction."""
         return self._metadata_builder
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -126,9 +157,11 @@ class PipelineContainer(PipelineContainerABC):
     # ─────────────────────────────────────────────────────────────────────────
 
     def get_extraction_service(self) -> Any:
+        """Create and return an extraction service via the service factory."""
         return self._get_service_factory().create_extraction_service()
 
     def get_normalization_service(self) -> NormalizationServiceABC:
+        """Create and return a normalization service via the service factory."""
         return self._get_service_factory().create_normalization_service()
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -136,17 +169,28 @@ class PipelineContainer(PipelineContainerABC):
     # ─────────────────────────────────────────────────────────────────────────
 
     def get_hash_service(self) -> HashServiceABC:
+        """Return the hash service for record deduplication."""
         return self._get_transform_factory().get_hash_service()
 
     def get_index_generator(self) -> IndexGeneratorABC:
+        """Return the index generator for unique record identifiers."""
         return self._get_transform_factory().get_index_generator()
 
     def get_timestamp_provider(self) -> TimestampProviderABC:
+        """Return the timestamp provider for record timestamping."""
         return self._get_transform_factory().get_timestamp_provider()
 
     def get_post_transformer(
         self, *, version_provider: Callable[[], str | None] | None = None
     ) -> TransformerABC:
+        """
+        Return the post-transformer for adding standard fields.
+
+        The post-transformer adds hash, index, and timestamp columns to records.
+
+        Args:
+            version_provider: Optional callable returning source version string.
+        """
         if self._post_transformer is not None:
             return self._post_transformer
         return self._get_transform_factory().get_post_transformer(
@@ -166,6 +210,19 @@ class PipelineContainer(PipelineContainerABC):
         model_cls: type | None = None,
         batch_adapter: Any | None = None,
     ) -> RecordSourceABC:
+        """
+        Create a record source for iterating over extracted data.
+
+        Args:
+            extraction_service: Service providing raw data extraction.
+            limit: Optional maximum number of records to extract.
+            logger: Logger instance (defaults to container's logger).
+            model_cls: Optional model class for record conversion.
+            batch_adapter: Optional adapter for batch processing.
+
+        Returns:
+            Record source providing chunked data iteration.
+        """
         return self._get_record_source_factory().create_record_source(
             extraction_service,
             limit=limit,
@@ -179,9 +236,11 @@ class PipelineContainer(PipelineContainerABC):
     # ─────────────────────────────────────────────────────────────────────────
 
     def get_hooks(self) -> list[PipelineHookABC]:
+        """Return the list of pipeline execution hooks."""
         return self._runtime_factory.get_hooks(self.get_logger())
 
     def get_error_policy(self) -> ErrorPolicyABC:
+        """Return the error handling policy for pipeline stages."""
         return self._runtime_factory.get_error_policy()
 
     # ─────────────────────────────────────────────────────────────────────────

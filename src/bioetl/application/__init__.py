@@ -1,5 +1,5 @@
 """
-Application layer package.
+Application layer — orchestration and use cases.
 
 Provides core orchestration components for pipeline assembly and execution.
 
