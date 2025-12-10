@@ -1,0 +1,23 @@
+services:
+  bioetl:
+    build: .
+    image: bioetl:latest
+    container_name: bioetl_app
+    volumes:
+      - ./configs:/app/configs
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - BIOETL_CONFIG_DIR=/app/configs
+      - LOG_LEVEL=INFO
+    command: ["--help"]
+
+  # Optional: Prometheus for metrics if needed
+  # prometheus:
+  #   image: prom/prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./configs/prometheus:/etc/prometheus
+  #   command:
+  #     - --config.file=/etc/prometheus/prometheus.yml
