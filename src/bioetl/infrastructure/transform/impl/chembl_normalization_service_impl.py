@@ -6,8 +6,8 @@ This module is kept for backward compatibility and will be removed in a future v
 
 from __future__ import annotations
 
-import warnings
 from typing import Any
+import warnings
 
 from bioetl.domain.transform.contracts import (
     NormalizationConfigProviderProtocol,

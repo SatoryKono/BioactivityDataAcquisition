@@ -407,8 +407,8 @@ def mock_loader():
     """Create a mock loader compatible with LoaderABC."""
     from pathlib import Path
 
-    from bioetl.domain.pipelines.contracts import LoaderABC
     from bioetl.domain.clients.base.output.contracts import WriteResult
+    from bioetl.domain.pipelines.contracts import LoaderABC
 
     loader = MagicMock(spec=LoaderABC)
     loader.load.return_value = WriteResult(

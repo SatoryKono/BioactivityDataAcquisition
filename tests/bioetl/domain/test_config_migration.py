@@ -1,9 +1,7 @@
 """Tests for ConfigMigrator."""
 
-import warnings
 from copy import deepcopy
-
-import pytest
+import warnings
 
 from bioetl.domain.configs.migration import ConfigMigrator
 
@@ -212,7 +210,9 @@ class TestV2Normalization:
             "interface_features": {"rest_interface_enabled": True},
         }
         result = ConfigMigrator.migrate(data)
-        assert result["features"]["interface_features"] == {"rest_interface_enabled": True}
+        assert result["features"]["interface_features"] == {
+            "rest_interface_enabled": True
+        }
 
     def test_migrates_csv_options_to_source(self) -> None:
         """csv_options at root is moved to source.csv."""
@@ -246,7 +246,12 @@ class TestV2Normalization:
 
     def test_coerces_primary_key_string_to_list(self) -> None:
         """String primary_key is coerced to list."""
-        data = {"id": "test", "provider": "dummy", "entity": "test", "primary_key": "id"}
+        data = {
+            "id": "test",
+            "provider": "dummy",
+            "entity": "test",
+            "primary_key": "id",
+        }
         result = ConfigMigrator.migrate(data)
         assert result["identity"]["primary_key"] == ["id"]
 
@@ -376,7 +381,9 @@ class TestEdgeCases:
         """Single provider in sources is extracted correctly."""
         data = {
             "entity": "test",
-            "sources": {"chembl": {"base_url": "https://example.com", "batch_size": 10}},
+            "sources": {
+                "chembl": {"base_url": "https://example.com", "batch_size": 10}
+            },
         }
         result = ConfigMigrator.migrate(data)
         assert result["provider_config"]["base_url"] == "https://example.com"
@@ -384,7 +391,12 @@ class TestEdgeCases:
 
     def test_handles_null_primary_key(self) -> None:
         """Null primary_key is coerced to empty list."""
-        data = {"id": "test", "provider": "dummy", "entity": "test", "primary_key": None}
+        data = {
+            "id": "test",
+            "provider": "dummy",
+            "entity": "test",
+            "primary_key": None,
+        }
         result = ConfigMigrator.migrate(data)
         assert result["identity"]["primary_key"] == []
 

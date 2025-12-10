@@ -8,18 +8,18 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
+from bioetl.application.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
+)
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     CsvInputConfig,
 )
-from bioetl.application.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
+from bioetl.domain.observability.contracts import LoggingPortABC
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 
 
 def _extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
@@ -110,9 +110,14 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
 
     # Default record source yields dict records (simulating API response)
     record_source = MagicMock()
-    record_source.iter_records.return_value = iter([
-        [{"activity_id": 1, "standard_flag": 1}, {"activity_id": 2, "standard_flag": 1}]
-    ])
+    record_source.iter_records.return_value = iter(
+        [
+            [
+                {"activity_id": 1, "standard_flag": 1},
+                {"activity_id": 2, "standard_flag": 1},
+            ]
+        ]
+    )
 
     return ChemblPipelineBase(
         config=mock_config,

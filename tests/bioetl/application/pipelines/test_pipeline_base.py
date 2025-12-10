@@ -11,7 +11,6 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.domain.pipelines.contracts import ExtractorABC, LoaderABC
 from bioetl.application.pipelines.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
@@ -19,7 +18,7 @@ from bioetl.application.pipelines.hooks_impl import (
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext
-from bioetl.domain.pipelines.contracts import PipelineHookABC
+from bioetl.domain.pipelines.contracts import ExtractorABC, LoaderABC, PipelineHookABC
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import (
     DatabaseVersionTransformerImpl,

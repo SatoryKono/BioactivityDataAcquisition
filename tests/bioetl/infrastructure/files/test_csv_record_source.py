@@ -4,18 +4,18 @@ from typing import cast
 import pandas as pd
 from pydantic import AnyHttpUrl
 
-from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
+from bioetl.application.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
+)
 from bioetl.domain.configs import (
     ChemblSourceConfig,
     ClientConfig,
     CsvInputConfig,
 )
-from bioetl.application.files.csv_record_source import (
-    CsvRecordSourceImpl,
-    IdListRecordSourceImpl,
-)
+from bioetl.domain.observability.contracts import LoggingPortABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 
 
 class _StubExtractionService:

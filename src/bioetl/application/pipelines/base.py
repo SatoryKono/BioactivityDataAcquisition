@@ -251,9 +251,7 @@ class PipelineBase(ABC):
     def _build_run_metadata(self, state: _RunState, dry_run: bool) -> dict[str, Any]:
         """Build metadata for the run result."""
         meta_raw = (
-            self._metadata_builder.build_run_metadata(
-                state.context, state.write_result
-            )
+            self._metadata_builder.build_run_metadata(state.context, state.write_result)
             if state.write_result
             else self._metadata_builder.build_dry_run_metadata(
                 state.context, state.counters["validate_count"]
