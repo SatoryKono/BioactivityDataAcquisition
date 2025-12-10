@@ -9,7 +9,7 @@ from bioetl.infrastructure.observability.adapters import (
     StructuredLoggerImpl,
     TracingAdapterImpl,
 )
-from bioetl.interfaces.observability import (
+from bioetl.domain.observability.contracts import (
     LoggingPortABC,
     MetricsPortABC,
     TracingPortABC,
