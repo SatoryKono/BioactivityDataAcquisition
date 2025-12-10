@@ -31,6 +31,7 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
     def build(
         self, endpoint_or_params: Optional[dict[str, Any] | str] = None, **params_kwargs: Any
     ) -> str:
+        """Build request URL from endpoint name or params."""
         merged_params: dict[str, Any] = {}
         if isinstance(endpoint_or_params, str):
             self.build_for_endpoint(endpoint_or_params)
@@ -85,4 +86,5 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         return self
 
     def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilderImpl":
+        """Alias for build_with_pagination."""
         return self.build_with_pagination(offset, limit)

@@ -28,11 +28,13 @@ class _DataWriter(Protocol):
         *,
         column_order: list[str] | None = None,
     ) -> WriteResult:
+        """Write DataFrame to path."""
         ...
 
 
 class _MetadataWriter(Protocol):
     def write_meta(self, meta: dict, path: Path) -> None:
+        """Write metadata dict to path."""
         ...
 
 

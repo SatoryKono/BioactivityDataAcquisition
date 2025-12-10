@@ -12,6 +12,8 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class WriteResult:
+    """Result of a write operation."""
+
     path: Path
     row_count: int
     duration_sec: float

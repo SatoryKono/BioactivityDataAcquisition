@@ -1,3 +1,7 @@
+"""
+Observability interfaces package.
+"""
+
 from bioetl.domain.observability.contracts import (
     LoggingPortABC,
     TracingPortABC,
