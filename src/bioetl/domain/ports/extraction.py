@@ -2,20 +2,33 @@
 
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Protocol, TypeAlias
-import warnings
+from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.record_source import SourceRecord
+from bioetl.domain.types import (
+    ApiPayload,
+    RawRecord,
+    RecordBatch,
+)
 
-# Generic types for cross-layer communication
-# These allow domain layer to define contracts without coupling to specific models
-RawRecordDict: TypeAlias = dict[str, Any]
-RawRecordBatch: TypeAlias = list[RawRecordDict] | list[SourceRecord]
+# =============================================================================
+# Deprecated Type Aliases (backward compatibility re-exports)
+# =============================================================================
+# Import from bioetl.domain.types for new code.
+# These re-exports emit deprecation warnings via __getattr__ below.
+
+__all__: list[str] = []  # Populated at end of module
+
+# Sentinel for lazy deprecation
+_DEPRECATED_TYPE_ALIASES = {
+    "RawRecordDict": "RawRecord",
+    "RawRecordBatch": "RecordBatch",
+}
 
 if TYPE_CHECKING:
-    from bioetl.domain.record_source import RawRecord
+    from bioetl.domain.record_source import SourceRecord
 
 
 class RecordFetcherABC(ABC):
@@ -29,7 +42,7 @@ class RecordFetcherABC(ABC):
     @abstractmethod
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: object
-    ) -> Iterable[RawRecordBatch]:
+    ) -> Iterable[RecordBatch]:
         """Iterate over batches of raw records.
 
         Args:
@@ -46,7 +59,7 @@ class RecordFetcherABC(ABC):
         """
 
     @abstractmethod
-    def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+    def extract_all(self, entity: str, **filters: object) -> RecordBatch:
         """Return all records for entity as raw dicts.
 
         Args:
@@ -93,7 +106,7 @@ class ExtractionServiceABC(RecordFetcherABC):
         """
 
     @abstractmethod
-    def parse_response(self, raw_response: object) -> RawRecordBatch:
+    def parse_response(self, raw_response: object) -> RecordBatch:
         """Parse raw response into record dicts.
 
         Args:
@@ -120,10 +133,10 @@ class BatchAdapterABC(Protocol):
     """Protocol for adapting raw batches to list of record dicts.
 
     Used to normalize different batch formats from extraction services
-    into the expected RawRecordBatch format.
+    into the expected RecordBatch format.
     """
 
-    def process_batch(self, raw_batch: object) -> RawRecordBatch:
+    def process_batch(self, raw_batch: object) -> RecordBatch:
         """Normalize a batch into a list of raw record mappings.
 
         Args:
@@ -140,18 +153,18 @@ class BatchAdapterABC(Protocol):
 # =============================================================================
 
 
-def to_raw_records(batch: RawRecordBatch) -> list["RawRecord"]:
-    """Convert raw dicts to RawRecord models (migration helper).
+def to_raw_records(batch: RecordBatch) -> list["SourceRecord"]:
+    """Convert raw dicts to SourceRecord models (migration helper).
 
     DEPRECATED: Use application layer mappers instead.
-    This function is provided for gradual migration from RawRecord models
+    This function is provided for gradual migration from SourceRecord models
     to generic dicts in extraction services.
 
     Args:
         batch: List of raw record dictionaries.
 
     Returns:
-        List of RawRecord Pydantic models.
+        List of SourceRecord Pydantic models.
 
     Example:
         >>> from bioetl.domain.ports.extraction import to_raw_records
@@ -163,20 +176,20 @@ def to_raw_records(batch: RawRecordBatch) -> list["RawRecord"]:
         DeprecationWarning,
         stacklevel=2,
     )
-    from bioetl.domain.record_source import RawRecord
+    from bioetl.domain.record_source import SourceRecord
 
-    return [RawRecord.model_validate(record) for record in batch]
+    return [SourceRecord.model_validate(record) for record in batch]
 
 
-def from_raw_records(records: list["RawRecord"]) -> RawRecordBatch:
-    """Convert RawRecord models to raw dicts (migration helper).
+def from_raw_records(records: list["SourceRecord"]) -> RecordBatch:
+    """Convert SourceRecord models to raw dicts (migration helper).
 
     DEPRECATED: Use application layer mappers instead.
-    This function is provided for gradual migration from RawRecord models
+    This function is provided for gradual migration from SourceRecord models
     to generic dicts in extraction services.
 
     Args:
-        records: List of RawRecord Pydantic models.
+        records: List of SourceRecord Pydantic models.
 
     Returns:
         List of raw record dictionaries.
@@ -189,8 +202,39 @@ def from_raw_records(records: list["RawRecord"]) -> RawRecordBatch:
     return [record.model_dump() for record in records]
 
 
+# =============================================================================
+# Module __getattr__ for deprecated type alias access
+# =============================================================================
+
+
+def __getattr__(name: str) -> type:
+    """Emit deprecation warning for legacy type alias imports.
+
+    Enables backward-compatible imports like:
+        from bioetl.domain.ports.extraction import RawRecordDict
+
+    But emits a DeprecationWarning directing users to the new location.
+    """
+    if name in _DEPRECATED_TYPE_ALIASES:
+        new_name = _DEPRECATED_TYPE_ALIASES[name]
+        warnings.warn(
+            f"{name} is deprecated, use {new_name} from bioetl.domain.types instead. "
+            "See migration guide in bioetl.domain.types module docstring.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from bioetl.domain import types
+
+        return getattr(types, new_name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = [
-    # Type aliases
+    # Canonical type aliases (re-exported from domain.types)
+    "RawRecord",
+    "RecordBatch",
+    "ApiPayload",
+    # Deprecated type aliases (for backward compatibility)
     "RawRecordDict",
     "RawRecordBatch",
     # Abstract base classes
