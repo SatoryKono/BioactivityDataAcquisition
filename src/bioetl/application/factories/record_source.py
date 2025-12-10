@@ -55,9 +55,9 @@ class RecordSourceFactory:
         Returns:
             Configured RecordSourceABC instance.
         """
-        mode = self._config.input_mode
-        path = self._config.input_path
-        chunk_size = self._config.batch_size
+        mode = self._config.source.input_mode
+        path = self._config.source.input_path
+        chunk_size = self._config.source.batch_size
 
         if mode == "auto_detect" and path:
             mode = "csv"
@@ -67,7 +67,7 @@ class RecordSourceFactory:
                 raise ValueError("input_path is required for CSV mode")
             return CsvRecordSourceImpl(
                 input_path=Path(path),
-                csv_options=self._config.csv_options,
+                csv_options=self._config.source.csv,
                 limit=limit,
                 logger=logger,
                 chunk_size=chunk_size,
@@ -84,7 +84,7 @@ class RecordSourceFactory:
             return IdListRecordSourceImpl(
                 input_path=Path(path),
                 id_column=id_column,
-                csv_options=self._config.csv_options,
+                csv_options=self._config.source.csv,
                 limit=limit,
                 extraction_service=extraction_service,
                 source_config=source_config,
@@ -94,7 +94,8 @@ class RecordSourceFactory:
                 chunk_size=chunk_size,
             )
 
-        filters = self._config.pipeline.copy()
+        # API filters - stages are not filters, use empty dict for API mode
+        filters: dict[str, Any] = {}
         if limit is not None:
             filters["limit"] = limit
 

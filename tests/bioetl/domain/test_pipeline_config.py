@@ -29,7 +29,7 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
     )
 
     # Test decomposed identity section
-    assert config.identity.id == "test"
+    assert config.identity.pipeline_id == "test"
     assert config.identity.provider == "dummy"
     assert config.identity.entity == "entity"
 
@@ -57,10 +57,8 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
     # Test features section
     assert config.features.interfaces.rest_interface_enabled is True
 
-    # Test backward compatibility properties
+    # Test convenience properties (minimal set retained)
     assert config.id == "test"
     assert config.provider == "dummy"
     assert config.entity == "entity"
-    assert config.input_mode == "csv"
-    assert config.output_path == "/tmp/output"
-    assert config.csv_options.delimiter == ";"
+    assert config.entity_name == "entity"
