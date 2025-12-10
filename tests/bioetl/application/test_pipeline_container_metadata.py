@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 from bioetl.domain.clients.base.output.contracts import (
-    MetadataWriterABC,
     QualityReportABC,
     WriterABC,
     WriteResult,
@@ -39,7 +38,7 @@ class RecordingWriter(WriterABC):
         return True
 
 
-class RecordingMetadataWriter(MetadataWriterABC):
+class RecordingMetadataWriter:
     def __init__(self) -> None:
         self.meta_calls: list[dict[str, object]] = []
         self.qc_calls: list[dict[str, object]] = []
