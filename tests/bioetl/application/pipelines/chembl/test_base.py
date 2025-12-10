@@ -83,6 +83,8 @@ def mock_dependencies_fixture():
         "hash_service": Blake2bHashService(hasher=_DummyHasher()),
         "metadata_builder": metadata_builder,
         "normalization_service": normalization_service,
+        "index_generator": MagicMock(),
+        "timestamp_provider": MagicMock(),
     }
 
 
@@ -104,6 +106,8 @@ def pipeline_fixture(mock_dependencies_fixture):
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
         record_source=record_source,
+        index_generator=mock_dependencies_fixture["index_generator"],
+        timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
     )
 
 
@@ -244,6 +248,8 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
         record_source=record_source,
+        index_generator=mock_dependencies_fixture["index_generator"],
+        timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
     )
 
     df = pd.DataFrame({"a": [1, 2]})
@@ -278,6 +284,8 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         normalization_service=normalization_service,
         hash_service=mock_dependencies_fixture["hash_service"],
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
+        index_generator=mock_dependencies_fixture["index_generator"],
+        timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
     )
 
     result = _collect_extract_dataframe(pipeline)

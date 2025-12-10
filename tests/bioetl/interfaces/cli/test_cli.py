@@ -25,8 +25,8 @@ HashServiceABC = importlib.import_module(
     "bioetl.domain.transform.contracts"
 ).HashServiceABC
 HashService = importlib.import_module(
-    "bioetl.domain.transform.hash_service"
-).HashService
+    "bioetl.infrastructure.transform.impl.hash_service"
+).Blake2bHashService
 try:
     app = importlib.import_module("bioetl.interfaces.cli").app
 except ModuleNotFoundError:
@@ -279,6 +279,13 @@ def test_run_dry_run_pipeline_metadata(
 
     created_instances: list[PipelineBase] = []
 
+    IndexGeneratorABC = importlib.import_module(
+        "bioetl.domain.transform.contracts"
+    ).IndexGeneratorABC
+    TimestampProviderABC = importlib.import_module(
+        "bioetl.domain.transform.contracts"
+    ).TimestampProviderABC
+
     class DryRunPipeline(PipelineBase):
         def __init__(
             self,
@@ -287,6 +294,8 @@ def test_run_dry_run_pipeline_metadata(
             validation_service,
             loader,
             hash_service: HashServiceABC,
+            index_generator: IndexGeneratorABC,
+            timestamp_provider: TimestampProviderABC,
             extraction_service=None,
         ):
             super().__init__(
@@ -295,6 +304,8 @@ def test_run_dry_run_pipeline_metadata(
                 validation_service,
                 loader,
                 hash_service,
+                index_generator,
+                timestamp_provider,
             )
             self._dataset = small_pipeline_df
             self.last_result = None
@@ -335,6 +346,8 @@ def test_run_dry_run_pipeline_metadata(
 
     # Mock orchestrator to build and run our pipeline
     hash_service = HashService(hasher=_DummyHasher())
+    index_generator = MagicMock(spec=IndexGeneratorABC)
+    timestamp_provider = MagicMock(spec=TimestampProviderABC)
 
     def build_pipeline_side_effect(*args, **kwargs):
         pipeline_instance = DryRunPipeline(
@@ -343,6 +356,8 @@ def test_run_dry_run_pipeline_metadata(
             validation_service=validation_service,
             loader=loader,
             hash_service=hash_service,
+            index_generator=index_generator,
+            timestamp_provider=timestamp_provider,
         )
         return pipeline_instance
 
