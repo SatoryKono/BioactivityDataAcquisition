@@ -1,35 +1,45 @@
-"""Утилиты регистрации Pandera-схем домена."""
+"""Schema registration utilities.
+
+This module provides the `register_schemas` function for registering
+Pandera schemas with a schema provider/registry.
+
+Architecture Note:
+    - Domain field specifications: ``bioetl.domain.schemas.field_specs``
+    - Pandera schemas: ``bioetl.infrastructure.validation.schemas.chembl``
+    - This module bridges both layers for backward compatibility
+"""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import Any
 
-from bioetl.domain.schemas.chembl.activity import (
+# Import from infrastructure (via backward-compatible re-exports in domain.schemas.chembl)
+from bioetl.infrastructure.validation.schemas.chembl.activity import (
     OUTPUT_COLUMN_ORDER as ACTIVITY_OUTPUT_COLUMNS,
     ActivityTableSchema,
 )
-from bioetl.domain.schemas.chembl.assay import (
+from bioetl.infrastructure.validation.schemas.chembl.assay import (
     OUTPUT_COLUMN_ORDER as ASSAY_OUTPUT_COLUMNS,
     AssayTableSchema,
 )
-from bioetl.domain.schemas.chembl.cell import (
+from bioetl.infrastructure.validation.schemas.chembl.cell import (
     OUTPUT_COLUMN_ORDER as CELL_OUTPUT_COLUMNS,
     CellTableSchema,
 )
-from bioetl.domain.schemas.chembl.molecule import (
+from bioetl.infrastructure.validation.schemas.chembl.molecule import (
     OUTPUT_COLUMN_ORDER as MOLECULE_OUTPUT_COLUMNS,
     MoleculeTableSchema,
 )
-from bioetl.domain.schemas.chembl.publication import (
+from bioetl.infrastructure.validation.schemas.chembl.publication import (
     OUTPUT_COLUMN_ORDER as PUBLICATION_OUTPUT_COLUMNS,
     PublicationTableSchema,
 )
-from bioetl.domain.schemas.chembl.target import (
+from bioetl.infrastructure.validation.schemas.chembl.target import (
     OUTPUT_COLUMN_ORDER as TARGET_OUTPUT_COLUMNS,
     TargetTableSchema,
 )
-from bioetl.domain.schemas.chembl.tissue import (
+from bioetl.infrastructure.validation.schemas.chembl.tissue import (
     OUTPUT_COLUMN_ORDER as TISSUE_OUTPUT_COLUMNS,
     TissueTableSchema,
 )
