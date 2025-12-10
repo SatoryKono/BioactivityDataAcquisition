@@ -1,120 +1,349 @@
-# Domain Layer Audit
+# Domain Layer Audit - BioETL
 
-## 0. ������ ������
+> **Дата аудита**: 2025-12-10
+> **Версия**: 2.0
+> **Область анализа**: `src/bioetl/domain/`
 
-����� ���������� ����� `src/bioetl/domain`, ������������ (`configs/pipelines/chembl/*.yaml`, `configs/defaults/*.yaml`), ����� `src/bioetl/domain/schemas/chembl/*.py` � ������������ (`docs/domain`, `docs/architecture/14-class-diagrams-domain.md`). ��� � ������������� ����������� ������, bounded context��, ���������� � ��������� ������ DDD, � ����� ������������ ������� ����� ��������� ����.
+---
 
-## 1. ������������� �������
+## 1. Краткий обзор domain-слоя
 
-### 1.1 Runtime, registry � config-��������
+### 1.1 Структура и организация
 
-| �������� | ��� | ��� | ������� ���� / ��������������� | ������� |
-| --- | --- | --- | --- | --- |
-| `StageResult` | `src/bioetl/domain/models.py` | dataclass | `stage_name`, `success`, �������� �������/������, ������������, ������ ������ | ���������� ������ |
-| `RunContext` | `src/bioetl/domain/models.py` | dataclass | `run_id`, `entity_name`, `provider`, `started_at`, `config`, `dry_run`, `metadata` | ���������� ������� |
-| `RunResult` | `src/bioetl/domain/models.py` | dataclass | ��� (`row_count`, `output_path`, ������������, ������, per-stage �������) | ������ ��������� |
-| `StageDescriptor` | `src/bioetl/domain/models.py` | value object | �� ������, callable, ����� `skip_on_dry_run`/`required` | ������ ��������� |
-| `PipelineConfig` + ������ | `src/bioetl/domain/configs/pipeline.py` | Pydantic aggregate | ID/`entity`/`provider`, `provider_config`, HTTP ��������, storage ����, �����������, �������, �����������, ������������, ����������� | �����������, ����������� ����� � �������������� |
-| `ProviderDefinition` | `src/bioetl/domain/providers.py` | dataclass | ������������ `ProviderId`, ��� ������������ � ������� ����������� | ����� ����������� |
-| `InMemoryProviderRegistry` | `src/bioetl/domain/provider_registry.py` | ������ | Register/list/restore �����������, �������� ���������� | ����� ����������� |
-| `RawRecord` / `RecordSource` | `src/bioetl/domain/record_source.py` | TypedDict + Protocol | �������������� raw ������ � �������� ��������� ������ | ��� Extraction |
-| `ApiRecordSource` | `src/bioetl/domain/record_source.py` | ������ | ��� �� `ExtractionServiceABC.iter_extract`, �������, chunking, optional `batch_adapter` | � ���� application-����������� |
-| `ValidationResult` | `src/bioetl/domain/validation/contracts.py` | dataclass | `is_valid`, `errors`, `warnings`, `validated_df: pd.DataFrame \| None` | �������� |
-| `WriteResult` | `src/bioetl/domain/clients/base/output/contracts.py` | dataclass | `path: Path`, `row_count`, `duration_sec`, `checksum` | IO-���� |
-| `HashService` | `src/bioetl/domain/transform/hash_service.py` | ������ | �������� `hash_row`, `hash_business_key`, `index`, `database_version`, `extracted_at` | ���-���������� ������ |
-| `SchemaRegistry` | `src/bioetl/domain/schemas/registry.py` | ������ | ���������� Pandera-����, �������� `column_order`, `list/get` API | ��������� ������� |
+Domain-слой BioETL организован по принципам **Hexagonal Architecture (Ports & Adapters)** и содержит:
 
-### 1.2 �������� �� bounded context
+```
+src/bioetl/domain/
+├── __init__.py                 # Экспорт доменных ошибок
+├── enums.py                    # ErrorAction enum
+├── errors.py                   # Иерархия исключений (10 классов)
+├── models.py                   # Core Value Objects (4 класса)
+├── providers.py                # Provider abstractions
+├── provider_registry.py        # Provider registry ABC + impl
+├── record_source.py            # Record source abstractions
+├── clients/                    # Client ports (8 ABC)
+├── configs/                    # Configuration models (~30 классов)
+├── pipelines/                  # Pipeline contracts (4 ABC)
+├── ports/                      # Extraction ports (6 ABC)
+├── schemas/                    # Schema definitions
+│   ├── chembl/                 # ChEMBL-specific schemas (8 Pandera models)
+│   └── registry.py             # Schema registry
+├── transform/                  # Transform contracts + impl
+│   └── normalizers/            # Field normalizers
+├── validation/                 # Validation contracts
+└── observability/              # Observability ports (4 ABC)
+```
 
-| ������� | Pandera schema | Pipeline config | ������� ���� | ��������� |
-| --- | --- | --- | --- | --- |
-| Activity | `src/bioetl/domain/schemas/chembl/activity.py` | `configs/pipelines/chembl/activity.yaml` | 45+ ������� (assay/document/molecule �����, ���������, hash) | CSV �������� `data/input/activity.csv` |
-| Assay | `src/bioetl/domain/schemas/chembl/assay.py` | `configs/pipelines/chembl/assay.yaml` | Organism, BAO id/label, �������������, target ������ | Config ��������� schema |
-| Publication | `src/bioetl/domain/schemas/chembl/publication.py` | `configs/pipelines/chembl/publication.yaml` | DOI/PMID, ������, ���, score | ��� ������ ������������ |
-| Molecule / �TestItem� | `src/bioetl/domain/schemas/chembl/molecule.py` | `configs/pipelines/chembl/molecule.yaml` | ChEMBL/PubChem ID, ����������� ������, parent-child, �������� | Docs ���������� ��� `TestItem`, ��� � ������ `Molecule` |
-| Target | `src/bioetl/domain/schemas/chembl/target.py` | `configs/pipelines/chembl/target.yaml` | Taxonomy, organism, UniProt, ����� � assay/activity | ����������� ��������� �������� |
-| Cell / Tissue | `src/bioetl/domain/schemas/chembl/{cell,tissue}.py` | � | ���� `data/input/cell.csv`, `data/input/tissue.csv` ��� ���� � �������� | Stub Pandera-�����, pipeline/config TBD |
+### 1.2 Основные агрегаты и контексты
 
-### 1.3 ���������
+| Bounded Context | Ключевые сущности | Файлы |
+|-----------------|-------------------|-------|
+| **Pipeline Execution** | `RunContext`, `RunResult`, `StageResult`, `StageDescriptor` | `models.py` |
+| **Configuration** | `PipelineConfig` (aggregate), 25+ config VOs | `configs/pipeline.py`, `configs/defaults.py` |
+| **Provider Management** | `ProviderId`, `ProviderDefinition`, `ProviderRegistryABC` | `providers.py`, `provider_registry.py` |
+| **Data Extraction** | `RecordSourceABC`, `ExtractionServiceABC`, `RecordFetcherABC` | `record_source.py`, `ports/extraction.py` |
+| **Data Transform** | `HasherABC`, `HashServiceABC`, `NormalizationServiceABC`, `TransformerABC` | `transform/` |
+| **Data Validation** | `ValidatorABC`, `SchemaProviderABC`, `ValidationResult` | `validation/` |
+| **ChEMBL Schemas** | `ActivityTableSchema`, `AssayTableSchema`, `MoleculeTableSchema`, etc. | `schemas/chembl/` |
 
-- �� �������� �������� ������������ Pandera-�������; ���������/dataclass��� ��� Activity/Assay/etc ���.
-- ����������� (`docs/domain/01-glossary.md`, `docs/domain/schemas/00-schemas-overview.md`, `docs/architecture/01-domain-objects.md`, ��������� � `docs/architecture/diagrams/class/*.mmd`) ������������ � Molecule; ����������� файл `28-molecule-schema.mmd` �������� `TestItem`.
-- CSV `cell/tissue` ������������ �� ������� ������; ������ ������ Pandera-����� (`cell.py`, `tissue.py`), �� pipeline/config ������ �������.
+### 1.3 Статистика
 
-## 2. �������� � �����������
+| Метрика | Значение |
+|---------|----------|
+| Всего классов/моделей | ~95 |
+| Abstract Base Classes (ABC) | ~40 |
+| Protocols | ~12 |
+| Конкретных реализаций в domain | ~20 |
+| Enums | 3 |
+| Value Objects | ~45 |
+| Exceptions | 10 |
+| Файлов Python | 57 |
 
-| ��� | ���� | ������� | ��� |
-| --- | --- | --- | --- |
-| �� `HashService` | `src/bioetl/domain/transform/hash_service.py`, `src/bioetl/infrastructure/transform/impl/hasher.py` | HashService ���������� ������ `HashServiceABC` | ✅ ��������: ������� infra-�������, HashService �������� только инжектируемый `HasherABC` |
-| �����-��� | `src/bioetl/domain/observability/contracts.py` | `ProgressReporterABC` теперь живёт рядом с logging/tracing портами | ✅ ��������: shim удалён, импорты ведут на observability |
-| ���������� �������� | `src/bioetl/domain/configs/base.py` | ����� re-export `pipeline.py` | ✅ ��������: файл удалён, импорты используют `domain.configs.pipeline` |
-| Extraction shim | `src/bioetl/domain/contracts.py` | Alias �� `domain.ports.extraction` | ✅ ��������: shim удалён, прямые импорты из `domain.ports.extraction` |
-| Docs vs ��� | `docs/domain/*`, `docs/architecture/14-class-diagrams-domain.md` | Docs ������� `TestItem/TestitemSchema`, � ���� ���� ������ `MoleculeTableSchema` | ✅ ��������: все ссылки обновлены на Molecule, диаграмма `28-molecule-schema.mmd` |
-| ���������� ����� | `data/input/cell.csv`, `data/input/tissue.csv` | ����� ����, ����/�������� ��� | ✅ ��������: добавлены stub-схемы, но pipeline/config ещё не описаны |
+---
 
-### 2.1 �������
+## 2. Выявленные проблемы
 
-- [x] **HashService**: ���������� ����������, �������� �������� ����� + ������������� `Hasher`.
-- [x] **Logging shim**: ������� `domain.clients.base.logging`, �������� ������� �� `domain.observability`.
-- [x] **Configs/base**: ������� re-export, ������������� breaking change.
-- [x] **`domain.contracts`**: ������ shim, �������� ���������/����.
-- [x] **Docs TestItem**: ���������������� glossary/��������� � ����������� `Molecule` ��� �������� �������� ��������.
-- [x] **Cell/Tissue**: ���� ������� �������/���������, ���� ������� ������� CSV.
+### 2.1 Дублирующие и семантически пересекающиеся модели
 
-## 3. ���� ���������� (ABC/Protocol)
+| ID | Проблема | Файлы | Суть нарушения | Приоритет |
+|----|----------|-------|----------------|-----------|
+| **DUP-01** | `HttpClientSettings` vs `HttpClientDefaults` vs `ClientConfig` | `configs/pipeline.py:38-85` | Три модели с перекрывающимися полями (`timeout`, `retries`, `backoff`, `rate_limit`). `ClientConfig` содержит метод `from_http_settings()` для синхронизации, что указывает на дублирование. | **Высокий** |
+| **DUP-02** | `ClientDefaultsConfig` extends `ClientConfig` | `configs/defaults.py:32-35` | Класс-наследник без добавления полей - фактический дубликат. | Средний |
+| **DUP-03** | `NormalizationConfig` в двух местах | `configs/normalization.py`, `transform/contracts.py` (re-export) | Модель определена в `normalization.py`, но re-export в `transform/contracts.py` создаёт путаницу в ownership. | Низкий |
+| **DUP-04** | `RecordFetcherABC` vs `ExtractionServiceABC` | `ports/extraction.py:13-69` | Оба интерфейса содержат методы `iter_extract()` и `extract_all()` с идентичными сигнатурами. `ExtractionServiceABC` расширяет функциональность, но дублирует базовые методы. | **Высокий** |
+| **DUP-05** | `VersionedRecordFetcherABC` | `ports/extraction.py:35-37` | Пустой класс-маркер, наследующий от двух ABC без добавления логики. | Низкий |
 
-| ��������� | ��� | ��������� | ������������ | ������ |
-| --- | --- | --- | --- | --- |
-| `RequestBuilderABC` | `domain/clients/base/contracts.py` | 1 (`ChemblRequestBuilderImpl`) | ������ ChemBL | �������� ��� �������� ���������� builder |
-| `ResponseParserABC` | `domain/clients/base/contracts.py` | 1 | ������ ChemBL | �������� |
-| `PaginatorABC` | `domain/clients/base/contracts.py` | 1 | ������ ChemBL | �������� �� enum/��������� |
-| `RateLimiterABC` | `domain/clients/base/contracts.py` | 1 (`TokenBucket`) | �� ������������� | ������� `Noop` ��� �������� �� config |
-| `SecretProviderABC` | `domain/clients/base/contracts.py` | 1 (`EnvSecretProvider`) | ����������� �������� ������� | �������� � �������������� ��� �������� Vault |
-| `SideInputProviderABC` | `domain/clients/base/contracts.py` | 0 | ���� �� ��������� | ������ |
-| `BatchAdapterABC` | `domain/ports/extraction.py` | 1 (`PandasBatchAdapter`) | ������ `ApiRecordSource` | ������� �� `Callable[[Any], list[RawRecord]]` |
-| `DataClientABC` / `ChemblDataClientABC` | `domain/clients/*.py` | 1 (`ChemblDataClientHTTPImpl`) | �� ������ ����������� | ��� ������� ���������� ������ |
-| `ExtractionServiceABC` | `domain/ports/extraction.py` | 1 (`ChemblExtractionServiceImpl`) | ��� ��������� | ���������� �������������� � ChemBL ������ |
-| `HashServiceABC` / `HasherABC` | `domain/transform/contracts.py` | 1 (domain facade + HasherImpl) | ���-����������� | ������� ������������ canonical ���������� |
-| `NormalizationServiceABC` | `domain/transform/contracts.py` | 2 (generic, ChemBL) | ���� ������������� | ���������, �� ������� ������� |
-| `SchemaProviderABC` / `ValidatorABC` | `domain/validation/contracts.py` | 1 (SchemaRegistry / Pandera) | ���� ������� | ������������ roadmap ����������� |
-| `WriterABC` / `MetadataWriterABC` / `QualityReportABC` / `OutputWriterABC` | `domain/clients/base/output/contracts.py` | 1�2 | ������ �� `Path` � `pd.DataFrame` | ������ � ��������������, �������� DTO-���� |
-| `LoggingPortABC` / `PipelineMetricsPortABC` | `domain/observability/contracts.py` | 1 (Structured logger, SimpleNamespace metrics) | ������ ����������� �������� � `interfaces/wiring.py` | ������� ����������� ������� � ���������������� � ABC registry |
+### 2.2 Неиспользуемые/слабо используемые модели
 
-��������� � ?2 ��������� ������������ (`CacheABC`, `NormalizationServiceABC`, CSV/Parquet writers) ��������, �� ��������� ������������ ������� �������������.
+| ID | Элемент | Файл | Использование | Рекомендация | Приоритет |
+|----|---------|------|---------------|--------------|-----------|
+| **UNUSED-01** | `SideInputProviderABC` | `clients/base/contracts.py:136-147` | 0 реализаций, только в документации | Удалить или задокументировать как roadmap | Средний |
+| **UNUSED-02** | `TracingPortABC` | `observability/contracts.py:39-52` | 1 stub-реализация, не интегрирован в pipeline | Пометить как experimental | Низкий |
+| **UNUSED-03** | `SecretProviderABC` | `clients/base/contracts.py:126-133` | 1 реализация (`EnvSecretProvider`), редко используется | Оставить для Vault интеграции | Низкий |
+| **UNUSED-04** | `CacheABC` | `clients/base/contracts.py:104-123` | 1 реализация, используется ограниченно | Расширить использование или удалить | Низкий |
+| **UNUSED-05** | `VersionedRecordFetcherABC` | `ports/extraction.py:35-37` | Минимальное использование | Удалить, использовать композицию | Низкий |
+| **UNUSED-06** | `RecordSource` alias | `record_source.py:29` | Backward compatibility alias | Удалить после миграции | Низкий |
 
-## 4. �������� ������ DDD
+### 2.3 God Objects и разросшиеся агрегаты
 
-1. **Domain - pandas** � `domain/transform/contracts.py`, `domain/validation/contracts.py`, `domain/clients/base/output/contracts.py` ��������� `pd.DataFrame`. > ���� value objects + �������� DataFrame - VO.
-2. **����� ��������� ����** � `PipelineConfig` �������� HTTP ��������, ���� �, ��������� ����������� � ������. > �������� �� �������� �������� � ���������������� �������.
-3. **`ApiRecordSource` ������������ ��������** � `src/bioetl/domain/record_source.py` ��������� ���������� � batch adapter. > �������� ����� � application ����, � ������ �������� ������ Protocol.
-4. **IO-����� ����� ��� `Path` � �����������** � `WriterABC`/`OutputWriterABC` ������� `Path` � ��������� �������� ���������. > ������� ���� ��������� DTO; ������ ������ � ��������������.
-5. **����������� vs ���**: docs ������������� � MoleculeTableSchema; `TestItem` ���������� ����������� (glossary, diagrams, README). > ����������� ������������� выполнена.
-6. **Metrics port ��� ����������** � `PipelineMetricsPortABC` ���������� `types.SimpleNamespace` � `src/bioetl/interfaces/wiring.py`. > ������� ��������� ������� (Prometheus) � ���������������� ��� � ABC registry.
+| ID | Элемент | Файл | Проблема | Метрика | Приоритет |
+|----|---------|------|----------|---------|-----------|
+| **GOD-01** | `PipelineConfig` | `configs/pipeline.py:456-785` | **330 строк**, 15+ вложенных секций, 20+ property-аксессоров для backward compatibility, сложная логика миграции legacy формата | Cyclomatic complexity: высокая | **Критический** |
+| **GOD-02** | `ExtractionServiceABC` | `ports/extraction.py:40-69` | 6 абстрактных методов с разной семантикой (fetch, parse, serialize) - нарушение ISP | Cohesion: низкая | **Высокий** |
+| **GOD-03** | `HashService` | `transform/hash_service.py` | Содержит stateful логику (`_index_counter`, `_extracted_at`) - не чистый сервис | Statefulness в domain service | Средний |
 
-## 5. ������ �����
+### 2.4 Нарушения принципов DDD
 
-- ����������� ������������ ������ (schema/dataclass) �� ������ ������-��������.
-- ������� ������� �������� � ��������������� ����������/DTO; DataFrame ������� ����������� �� ��������.
-- ������ ������ ����������� ����� (������ ABC ����� ?2 ���������� ��� roadmap).
-- ������ ���������: ����� ����� �� ��������������� � ��������, �������������� � ��� HTTP/storage/logging/metrics.
-- ����������� � ��������� ���������������� � �����; ����� `cell/tissue` ���� �������, ���� �������.
+#### 2.4.1 Смешение слоёв (Layer Leakage)
 
-## 6. ����������� � ��������
+| ID | Нарушение | Файл:строка | Описание | Приоритет |
+|----|-----------|-------------|----------|-----------|
+| **LAYER-01** | `pandas.DataFrame` в domain contracts | `transform/contracts.py:35-56`, `validation/contracts.py:26-31` | Domain-интерфейсы зависят от pandas - это infrastructure concern | **Высокий** |
+| **LAYER-02** | `Path` в domain contracts | `pipelines/contracts.py:68-85` | `LoaderABC` принимает `Path` - это I/O деталь | Средний |
+| **LAYER-03** | `ApiRecordSource` - конкретная реализация в domain | `record_source.py:49-82` | Класс содержит логику оркестрации, должен быть в application layer | **Высокий** |
+| **LAYER-04** | `InMemoryProviderRegistry` в domain | `provider_registry.py:70-101` | Конкретная реализация в domain, хотя это infrastructure concern | Средний |
+| **LAYER-05** | Global singleton `registry` | `schemas/registry.py:71` | Глобальное состояние в domain layer | Средний |
 
-### 6.1 Roadmap
+#### 2.4.2 Нарушение границ агрегатов
 
-| ������� | ���� | ������� �������� |
-| --- | --- | --- |
-| ������ ������ (?1 ������) | ������ | ✅ Done: HashService объединён, logging/config/extraction shim'ы удалены, docs → Molecule, stub-схемы cell/tissue |
-| ������� ���� (1�3 �������) | ������������ | ����� dataclass/TypedDict ��� Activity/Assay/Document/Target/Molecule, �������� �������, ��������� `ApiRecordSource` � application ����, ��������� pipeline config |
-| ����� ���� (3+ �������) | ������ ������� | ������� �������� metrics/writer ��������, ����������� ���������� ��� ����� �����������, ������� ����� �������� ������� |
+| ID | Нарушение | Описание | Приоритет |
+|----|-----------|----------|-----------|
+| **AGG-01** | `PipelineConfig` как mega-aggregate | Содержит ВСЕ аспекты конфигурации: runtime, observability, quality, features, transform, output, provider | **Критический** |
+| **AGG-02** | `ProviderDefinition` содержит `HttpClientSettings` | Provider definition смешивается с HTTP-конфигурацией | Средний |
 
-### 6.2 ������� �������
+#### 2.4.3 Примитивы вместо Value Objects
 
-- [x] �������� �������� �� ������� 2.1 (���������, ������������).
-- [ ] ��������� ABC �� ������ �� ������� 3.
-- [ ] ������������ ���������� �������� � ������� ���������������� ������������ (������ 4).
-- [ ] ������� `docs/architecture/14-class-diagrams-domain.md` � ��������� ��������� ����� ��������������/��������.
-- [ ] ������� `CHANGELOG.md` ��� ���� ��������� API/CLI ���������.
+| ID | Место | Текущий тип | Рекомендуемый VO | Приоритет |
+|----|-------|-------------|------------------|-----------|
+| **VO-01** | `RunContext.run_id` | `str` | `RunId` (с валидацией UUID) | Низкий |
+| **VO-02** | `PipelineConfig.entity` | `str` | `EntityName` (с ограничениями) | Низкий |
+| **VO-03** | `HashingConfig.algorithm` | `str` | `HashAlgorithm` (enum или VO) | Низкий |
+| **VO-04** | `*Config.path` fields | `str` | `FilePath` или `DirectoryPath` VO | Низкий |
+| **VO-05** | Business key fields | `list[str]` | `BusinessKeySpec` VO | Средний |
 
-���������� roadmap ��������� �����������, ������ ������� ������ � ���������� �������� ������ ������.
+#### 2.4.4 Нарушение Ubiquitous Language
+
+| ID | Термин в коде | Термин предметной области | Файл | Приоритет |
+|----|---------------|---------------------------|------|-----------|
+| **LANG-01** | `RawRecord` | `SourceRecord` / `ExtractedRecord` | `record_source.py` | Низкий |
+| **LANG-02** | `hash_row` / `hash_business_key` | `row_fingerprint` / `entity_key_hash` | `transform/` | Низкий |
+| **LANG-03** | `extracted_at` | `acquisition_timestamp` | `transform/hash_service.py` | Низкий |
+| **LANG-04** | `QcConfig` | `QualityControlConfig` | `configs/pipeline.py` | Низкий |
+
+---
+
+## 3. Предлагаемые изменения
+
+### 3.1 Критический приоритет
+
+#### REF-01: Декомпозиция `PipelineConfig`
+
+**Проблема**: `PipelineConfig` - god object с 330 строками, 15+ секциями, сложной миграцией legacy формата.
+
+**Решение**:
+```
+PipelineConfig (aggregate root, ~50 строк)
+├── PipelineIdentity (id, provider, entity, primary_key)
+├── DataSourceConfig (input_mode, input_path, batch_size)
+├── DataSinkConfig (output_path, dry_run)
+└── provider_config: ProviderConfigUnion
+
+Отдельные конфигурационные агрегаты:
+- RuntimeConfig (уже существует, оставить)
+- ObservabilityConfig (уже существует, оставить)
+- QualityConfig (уже существует, оставить)
+```
+
+**Действия**:
+1. Вынести legacy migration в отдельный `ConfigMigrator` сервис
+2. Удалить 20+ property-аксессоров backward compatibility
+3. Создать builder или factory для сборки полной конфигурации
+
+#### REF-02: Унификация `RecordFetcherABC` и `ExtractionServiceABC`
+
+**Проблема**: Дублирование методов `iter_extract()` и `extract_all()`.
+
+**Решение**:
+```python
+# Базовый интерфейс
+class RecordFetcherABC(ABC):
+    def iter_extract(self, entity: str, **filters) -> Iterable[list[RawRecord]]: ...
+    def extract_all(self, entity: str, **filters) -> list[RawRecord]: ...
+
+# Расширенный интерфейс (без дублирования)
+class ExtractionServiceABC(RecordFetcherABC):
+    def get_release_version(self) -> str: ...
+    def request_batch(self, entity: str, batch_ids: list[str], filter_key: str) -> dict: ...
+    def parse_response(self, raw_response: object) -> list[RawRecord]: ...
+    def serialize_records(self, entity: str, records: list[object]) -> list[object]: ...
+```
+
+**Действия**:
+1. Сделать `ExtractionServiceABC` наследником `RecordFetcherABC`
+2. Удалить дублирующие методы из `ExtractionServiceABC`
+3. Удалить `VersionedRecordFetcherABC`
+
+### 3.2 Высокий приоритет
+
+#### REF-03: Устранение дублирования HTTP-конфигураций
+
+**Проблема**: `HttpClientSettings`, `HttpClientDefaults`, `ClientConfig` имеют перекрывающиеся поля.
+
+**Решение**:
+```python
+# Единственный источник истины для HTTP-настроек
+class HttpClientConfig(BaseModel):
+    timeout_sec: PositiveFloat = 30.0
+    max_retries: NonNegativeInt = 3
+    rate_limit_per_sec: PositiveFloat = 2.5
+    backoff_factor: float = 2.0
+    retry_enabled: bool = True
+
+    # Circuit breaker - опционально
+    circuit_breaker_threshold: int | None = None
+    circuit_breaker_recovery_time: float | None = None
+
+# Для провайдеров - расширение с base_url
+class ProviderHttpConfig(HttpClientConfig):
+    base_url: AnyHttpUrl
+```
+
+**Действия**:
+1. Объединить `HttpClientSettings`, `HttpClientDefaults`, `ClientConfig` в `HttpClientConfig`
+2. Удалить метод `ClientConfig.from_http_settings()`
+3. Удалить `ClientDefaultsConfig`
+
+#### REF-04: Вынос `ApiRecordSource` в application layer
+
+**Проблема**: Конкретная реализация с логикой оркестрации находится в domain.
+
+**Решение**:
+```
+domain/record_source.py:
+  - RecordSourceABC (оставить)
+  - RawRecord (оставить)
+  - InMemoryRecordSource (оставить - простая реализация)
+
+application/sources/api_record_source.py:
+  - ApiRecordSource (перенести)
+```
+
+#### REF-05: Абстрагирование от pandas в domain contracts
+
+**Проблема**: `HasherABC`, `NormalizationServiceABC`, `ValidatorABC` зависят от `pd.DataFrame`.
+
+**Решение**:
+1. Ввести generic type alias: `DataFrame = TypeVar('DataFrame')`
+2. Или использовать Protocol для DataFrame-like объектов
+3. Или оставить как есть с документированным обоснованием (pandas - де-факто стандарт для tabular data в Python)
+
+**Рекомендация**: Оставить с обоснованием - pandas слишком фундаментален для data pipelines, абстрагирование создаст ненужную сложность.
+
+### 3.3 Средний приоритет
+
+#### REF-06: Удаление неиспользуемых ABC
+
+**Действия**:
+1. Удалить `SideInputProviderABC` (0 реализаций)
+2. Удалить `VersionedRecordFetcherABC` (пустой маркер)
+3. Пометить `TracingPortABC` как `@experimental`
+
+#### REF-07: Устранение глобального состояния
+
+**Проблема**: `schemas/registry.py:71` содержит глобальный singleton `registry`.
+
+**Решение**:
+1. Удалить глобальный `registry`
+2. Создавать экземпляры через DI container
+3. Оставить `default_schema_provider()` factory function
+
+#### REF-08: Перенос `InMemoryProviderRegistry` в infrastructure
+
+**Проблема**: Конкретная реализация в domain layer.
+
+**Решение**:
+```
+domain/provider_registry.py:
+  - ProviderRegistryABC
+  - ProviderRegistryError (и наследники)
+  - default_provider_registry() -> ProviderRegistryABC
+
+infrastructure/provider_registry.py:
+  - InMemoryProviderRegistry
+```
+
+### 3.4 Низкий приоритет
+
+#### REF-09: Введение Value Objects для строковых полей
+
+Создать VO для:
+- `RunId` (UUID validation)
+- `EntityName` (snake_case, limited charset)
+- `HashAlgorithm` (enum: blake2b, sha256, etc.)
+
+#### REF-10: Выравнивание терминологии
+
+- `RawRecord` → `SourceRecord`
+- `hash_row` → `row_fingerprint`
+- `QcConfig` → `QualityControlConfig`
+
+#### REF-11: Удаление backward compatibility aliases
+
+- Удалить `RecordSource = RecordSourceABC` alias
+- Удалить property-аксессоры в `PipelineConfig` после миграции
+
+---
+
+## 4. Сводная таблица приоритетов
+
+| ID | Проблема | Приоритет | Сложность | Риск breaking changes |
+|----|----------|-----------|-----------|----------------------|
+| REF-01 | Декомпозиция PipelineConfig | Критический | Высокая | Высокий |
+| REF-02 | Унификация Fetcher/Extraction ABC | Критический | Средняя | Средний |
+| REF-03 | Устранение дублирования HTTP-конфигов | Высокий | Средняя | Высокий |
+| REF-04 | Вынос ApiRecordSource | Высокий | Низкая | Низкий |
+| REF-05 | Абстрагирование от pandas | Высокий | - | - |
+| REF-06 | Удаление неиспользуемых ABC | Средний | Низкая | Низкий |
+| REF-07 | Устранение глобального состояния | Средний | Низкая | Средний |
+| REF-08 | Перенос InMemoryProviderRegistry | Средний | Низкая | Низкий |
+| REF-09 | Введение Value Objects | Низкий | Средняя | Низкий |
+| REF-10 | Выравнивание терминологии | Низкий | Низкая | Средний |
+| REF-11 | Удаление BC aliases | Низкий | Низкая | Высокий |
+
+---
+
+## 5. Итоговое резюме
+
+### 5.1 Общая оценка
+
+**Состояние domain-слоя: удовлетворительное с локальными проблемами**
+
+**Сильные стороны**:
+- Чёткая структура по принципам Hexagonal Architecture
+- Хорошее разделение на подмодули (clients, configs, transform, validation, etc.)
+- Правильное использование ABC/Protocol для определения портов
+- Детерминированная обработка данных (hash service, timestamps)
+- Расширяемость через registry patterns
+
+**Ключевые проблемы**:
+1. **`PipelineConfig` - god object** (~330 строк, 15+ секций) - требует декомпозиции
+2. **Дублирование HTTP-конфигураций** (3 класса с перекрывающимися полями)
+3. **Дублирование extraction интерфейсов** (`RecordFetcherABC` vs `ExtractionServiceABC`)
+4. **Смешение слоёв**: конкретные реализации (`ApiRecordSource`, `InMemoryProviderRegistry`) в domain
+5. **Неиспользуемые абстракции** (`SideInputProviderABC`, `VersionedRecordFetcherABC`)
+
+### 5.2 Рекомендуемый roadmap
+
+| Этап | Срок | Задачи |
+|------|------|--------|
+| **Этап 1** (Quick wins) | 1-2 недели | REF-06 (удаление unused ABC), REF-07 (global state), REF-04 (перенос ApiRecordSource) |
+| **Этап 2** (Унификация) | 2-4 недели | REF-02 (унификация extraction ABC), REF-03 (HTTP configs) |
+| **Этап 3** (Рефакторинг) | 1-2 месяца | REF-01 (декомпозиция PipelineConfig), REF-08 (перенос registry) |
+| **Этап 4** (Polish) | По мере необходимости | REF-09, REF-10, REF-11 |
+
+### 5.3 Метрики для отслеживания
+
+- Количество строк в `PipelineConfig` (цель: < 100)
+- Количество дублирующих моделей (цель: 0)
+- Количество конкретных реализаций в domain (цель: только immutable VOs)
+- Покрытие тестами domain layer (цель: > 90%)
