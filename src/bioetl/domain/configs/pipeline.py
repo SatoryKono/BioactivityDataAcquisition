@@ -187,14 +187,42 @@ class DeterminismConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class QcConfig(BaseModel):
-    """Quality control configuration."""
+class QualityControlConfig(BaseModel):
+    """Quality control configuration.
+
+    This is the canonical name for QC configuration in the domain model.
+    """
 
     enable_quality_report: bool = True
     enable_correlation_report: bool = True
     min_coverage: float = 0.85
 
     model_config = ConfigDict(extra="forbid")
+
+
+def _qc_config_deprecation_warning() -> None:
+    """Emit deprecation warning for QcConfig."""
+    import warnings
+
+    warnings.warn(
+        "QcConfig is deprecated, use QualityControlConfig instead. "
+        "Will be removed in v3.0.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
+# Deprecated alias for backward compatibility
+# TODO: Remove in v3.0
+class QcConfig(QualityControlConfig):
+    """Deprecated: Use QualityControlConfig instead.
+
+    Will be removed in v3.0.
+    """
+
+    def __init__(self, **data):
+        _qc_config_deprecation_warning()
+        super().__init__(**data)
 
 
 class CanonicalizationConfig(BaseModel):
@@ -457,11 +485,21 @@ class QualityConfig(BaseModel):
     """Quality and determinism section."""
 
     determinism: DeterminismConfig = Field(default_factory=DeterminismConfig)
-    qc: QcConfig = Field(default_factory=QcConfig)
+    quality_control: QualityControlConfig = Field(
+        default_factory=QualityControlConfig, alias="qc"
+    )
     hashing: HashingConfig = Field(default_factory=HashingConfig)
     normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    @property
+    def qc(self) -> QualityControlConfig:
+        """Deprecated: Use .quality_control instead.
+
+        Backward compatibility property. Will be removed in v3.0.
+        """
+        return self.quality_control
 
 
 class FeatureFlagsConfig(BaseModel):
@@ -691,7 +729,7 @@ __all__ = [
     "LoggingConfig",
     "MetricsConfig",
     "DeterminismConfig",
-    "QcConfig",
+    "QualityControlConfig",
     "HashingConfig",
     "CanonicalizationConfig",
     "BusinessKeyConfig",
@@ -703,4 +741,5 @@ __all__ = [
     "HttpClientDefaults",  # Use HttpClientConfig
     "HttpClientSettings",  # Use ProviderHttpConfig
     "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
+    "QcConfig",  # Use QualityControlConfig
 ]
