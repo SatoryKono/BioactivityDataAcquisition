@@ -14,7 +14,7 @@ from bioetl.infrastructure.clients.chembl.impl import (
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
-from bioetl.infrastructure.config.models import (
+from bioetl.domain.configs import (
     ChemblSourceConfig,
     HttpClientConfig,
 )
