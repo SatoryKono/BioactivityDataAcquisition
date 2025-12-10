@@ -17,6 +17,7 @@ from pydantic import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.pipelines.types import PipelineType
     from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
 
 # Import NormalizationConfig from the dedicated normalization module
@@ -237,7 +238,7 @@ class CsvInputConfig(BaseModel):
 class BaseProviderConfig(BaseModel):
     """Базовая строгая конфигурация провайдера."""
 
-    provider: Literal["chembl", "pubchem", "uniprot", "dummy"]
+    provider: Literal["chembl", "dummy"]
     http_client: HttpClientSettings
     client: ClientConfig = Field(default_factory=ClientConfig)
 
@@ -363,7 +364,6 @@ class OutputOptionsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-
 class DummyProviderConfig(BaseProviderConfig):
     """Конфигурация фиктивного провайдера для тестов и шаблонов."""
 
@@ -483,6 +483,8 @@ class PipelineConfig(BaseModel):
     def pipeline_type(self) -> PipelineType:
         """Автоопределение типа пайплайна по заполненности стадий и флагам."""
 
+        from bioetl.domain.pipelines.types import PipelineType
+
         # Явные флаги имеют приоритет
         pipeline_flags: dict[str, Any] = self.pipeline or {}
         flag_extract = pipeline_flags.get("extract")
@@ -495,7 +497,9 @@ class PipelineConfig(BaseModel):
             return default
 
         # Автоопределение
-        extract_active_auto = bool(self.input_mode or self.input_path or self.provider_config)
+        extract_active_auto = bool(
+            self.input_mode or self.input_path or self.provider_config
+        )
         transform_active_auto = True  # по умолчанию трансформация включена
         load_active_auto = not self.dry_run and bool(self.output_path)
 
@@ -804,4 +808,3 @@ __all__ = [
     "QcConfig",
     "StorageConfig",
 ]
-from bioetl.domain.pipelines.types import PipelineType

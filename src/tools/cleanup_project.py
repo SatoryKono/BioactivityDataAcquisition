@@ -1,8 +1,8 @@
 import argparse
 import os
+from pathlib import Path
 import shutil
 import sys
-from pathlib import Path
 from typing import Iterable, List, Tuple
 
 
@@ -20,8 +20,6 @@ PROJECT_ROOT = _find_project_root(THIS_FILE)
 SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
-
-from bioetl.infrastructure.logging.factories import default_logger  # type: ignore
 
 
 def _whitelist_patterns() -> List[str]:
@@ -73,7 +71,9 @@ def _iter_candidates(root: Path, patterns: Iterable[str]) -> List[Path]:
             for p in root.rglob(pat.replace("**/", "")):
                 found.append(p)
         else:
-            for p in (root / pat).glob("**/*") if _is_dir_pattern(pat) else root.glob(pat):
+            for p in (
+                (root / pat).glob("**/*") if _is_dir_pattern(pat) else root.glob(pat)
+            ):
                 if p.exists():
                     found.append(p)
     uniq = []
@@ -139,6 +139,8 @@ def _delete(paths: Iterable[Path]) -> Tuple[int, int]:
 
 
 def main() -> int:
+    from bioetl.infrastructure.logging.factories import default_logger
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--archive-logs", action="store_true")
@@ -172,4 +174,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

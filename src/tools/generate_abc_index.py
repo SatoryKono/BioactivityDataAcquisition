@@ -38,7 +38,8 @@ def load_class(target: str) -> type:
         cls = getattr(module, class_name)
         if not isinstance(cls, type):
             raise ImportError(
-                f"Target {target!r} does not resolve to a class (got {type(cls).__name__})"
+                f"Target {target!r} does not resolve to a class "
+                f"(got {type(cls).__name__})"
             )
         return cls
     except AttributeError as exc:  # pragma: no cover - explicit failure path
@@ -84,4 +85,3 @@ def generate_index() -> None:
 
 if __name__ == "__main__":
     generate_index()
-

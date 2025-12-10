@@ -8,7 +8,13 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "python -m pytest -m unit --ignore=tests/integration --ignore=tests/golden -q",
+    "test:unit": "python -m pytest -m unit --ignore=tests/integration --ignore=tests/golden -q",
+    "test:integration": "python -m pytest -m integration tests/integration -q",
+    "test:golden": "python -m pytest -m golden tests/golden -q",
+    "test:all": "python -m pytest tests/ -q",
+    "test:coverage": "python -m pytest --cov=src/bioetl --cov-report=term-missing --cov-report=html --cov-fail-under=85 -q",
+    "test:verbose": "python -m pytest -m unit --ignore=tests/integration --ignore=tests/golden -v",
     "diagrams:render": "python tools/render_diagrams.py --root docs --background white --scale 10 --theme default"
   },
   "repository": {

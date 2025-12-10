@@ -5,6 +5,14 @@ from pathlib import Path
 
 import pytest
 
+try:
+    from concurrent.futures import ProcessPoolExecutor  # noqa: F401
+    import multiprocessing.connection  # noqa: F401
+
+    CAN_RUN_BG = True
+except ImportError:
+    CAN_RUN_BG = False
+
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.infrastructure.clients.provider_registry_loader import (
@@ -26,6 +34,7 @@ def _build_config(tmp_path: Path) -> tuple[Path, dict[str, str], Path]:
     return config_path, cli_overrides, configs_root
 
 
+@pytest.mark.skipif(not CAN_RUN_BG, reason="Multiprocessing support missing")
 @pytest.mark.integration
 def test_run_in_background_with_loader(tmp_path: Path) -> None:
     config_path, cli_overrides, configs_root = _build_config(tmp_path)
@@ -57,6 +66,7 @@ def test_run_in_background_with_loader(tmp_path: Path) -> None:
     assert not (Path(config_copy.output_path) / "activity.csv").exists()
 
 
+@pytest.mark.skipif(not CAN_RUN_BG, reason="Multiprocessing support missing")
 @pytest.mark.integration
 def test_run_in_background_with_preloaded_registry(tmp_path: Path) -> None:
     config_path, cli_overrides, configs_root = _build_config(tmp_path)

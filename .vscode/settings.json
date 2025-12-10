@@ -1,9 +1,15 @@
 {
     "python.testing.pytestArgs": [
-        "."
+        "tests"
     ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.defaultInterpreterPath": "python.exe",
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "python.terminal.activateEnvironment": false,
+    "python.venvPath": "",
+    "python.venvFolders": [],
     "python.analysis.extraPaths": [
         "./src"
     ],
@@ -24,5 +30,6 @@
     "mermaid-editor.generate.scale": 5,
     "mermaid.startOnLoad": true,
     "markdown-mermaid.lightModeTheme": "default",
-    "markdown-mermaid.darkModeTheme": "dark"
+    "markdown-mermaid.darkModeTheme": "dark",
+    "python.testing.pytestPath": ".venv\\Scripts\\pytest.exe"
 }

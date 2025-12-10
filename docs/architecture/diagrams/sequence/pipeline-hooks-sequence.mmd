@@ -1,3 +1,6 @@
+---
+id: e94a218b-e485-40b2-a8a5-d0fe48f1c8b5
+---
 %%{init: {
   "theme": "base",
   "themeVariables": {
@@ -44,4 +47,3 @@ sequenceDiagram
         Pipeline->>Metrics: on_finish(success=True)
         Metrics->>Prom: observe("pipeline_runs_total", labels={status:"success"})
     end
-

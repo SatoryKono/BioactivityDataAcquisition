@@ -14,4 +14,3 @@ class PipelineType(str, Enum):
 
 
 __all__ = ["PipelineType"]
-

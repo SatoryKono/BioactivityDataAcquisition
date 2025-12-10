@@ -16,4 +16,3 @@ class DropNaRowsConverter(OutputFrameConverterABC):
 
 
 __all__ = ["DropNaRowsConverter"]
-

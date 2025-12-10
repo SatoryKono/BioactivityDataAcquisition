@@ -35,3 +35,13 @@
       language: python
       additional_dependencies: ["import-linter>=2.0.0"]
 
+    - id: forbid-compiled-python
+      name: forbid compiled python artifacts (*.pyc, __pycache__)
+      entry: python -c "import os,sys; bad=[];\
+for dp,_,fs in os.walk('.'):\
+    bad+= [os.path.join(dp,f) for f in fs if f.endswith('.pyc')];\
+    bad+= [os.path.join(dp,'__pycache__')] if '__pycache__' in fs else [];\
+print('\n'.join(bad)) or sys.exit(1) if bad else sys.exit(0)"
+      language: system
+      pass_filenames: false
+

@@ -16,4 +16,3 @@ class RenameColumnsConverter(OutputFrameConverterABC):
 
 
 __all__ = ["RenameColumnsConverter"]
-

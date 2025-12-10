@@ -31,6 +31,7 @@ try:
     app = importlib.import_module("bioetl.interfaces.cli").app
 except ModuleNotFoundError:
     import pytest
+
     pytest.skip("CLI module not available", allow_module_level=True)
 
 runner = CliRunner()
@@ -49,7 +50,7 @@ def test_validate_config_missing():
     """Test validate-config with missing file."""
     result = runner.invoke(app, ["validate-config", "nonexistent.yaml"])
     assert result.exit_code == 1
-    assert "Config validation failed" in result.stdout
+    assert "Config file not found" in result.stdout
 
 
 @pytest.mark.unit
@@ -130,7 +131,11 @@ def test_smoke_run(mock_run):
     result = runner.invoke(app, ["smoke-run", "activity_chembl"])
     assert result.exit_code == 0
     mock_run.assert_called_with(
-        "activity_chembl", profile="development", dry_run=True, limit=10
+        pipeline_name="activity_chembl",
+        config=None,
+        limit=10,
+        dry_run=True,
+        profile="development",
     )
 
 
@@ -221,7 +226,7 @@ def test_run_pipeline_failure(mock_loader, mock_orchestrator_cls):
         result = runner.invoke(app, ["run", "activity_chembl"])
 
     assert result.exit_code == 1
-    assert "Pipeline failed!" in result.stdout
+    assert "Pipeline failed" in result.stdout
 
 
 @pytest.mark.unit

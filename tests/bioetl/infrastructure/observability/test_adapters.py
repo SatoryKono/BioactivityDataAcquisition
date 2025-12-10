@@ -33,8 +33,17 @@ def test_prometheus_metrics_port_updates():
         {"provider": "chembl", "endpoint": "/e", "status": "200"},
     )
     port.update_stage_total(
-        pipeline="p1", provider="chembl", entity="activity", stage="extract", outcome="ok"
+        pipeline="p1",
+        provider="chembl",
+        entity="activity",
+        stage="extract",
+        outcome="ok",
     )
     port.update_stage_duration(
-        pipeline="p1", provider="chembl", entity="activity", stage="extract", outcome="ok", duration_sec=0.05
+        pipeline="p1",
+        provider="chembl",
+        entity="activity",
+        stage="extract",
+        outcome="ok",
+        duration_sec=0.05,
     )

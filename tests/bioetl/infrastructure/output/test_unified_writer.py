@@ -9,11 +9,11 @@ import pandas as pd
 import pytest
 
 from bioetl.domain.clients.base.output.contracts import WriteResult
-from bioetl.infrastructure.output.unified_output_writer_impl import (
-    UnifiedOutputWriterImpl,
-)
 from bioetl.infrastructure.output.converters.factories import (
     default_output_frame_converter,
+)
+from bioetl.infrastructure.output.unified_output_writer_impl import (
+    UnifiedOutputWriterImpl,
 )
 
 
@@ -313,7 +313,9 @@ def test_unified_writer_applies_converter_rename(
         captured_df = df_to_write.copy()
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
-        return WriteResult(path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0)
+        return WriteResult(
+            path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0
+        )
 
     writer.write.side_effect = capture_df
 
@@ -332,7 +334,13 @@ def test_unified_writer_applies_converter_rename(
         "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
         return_value="chk",
     ):
-        writer_impl.write_result(df, tmp_path / "out", "entity", run_context_factory(), column_order=["a_col", "b_col"])
+        writer_impl.write_result(
+            df,
+            tmp_path / "out",
+            "entity",
+            run_context_factory(),
+            column_order=["a_col", "b_col"],
+        )
 
     assert captured_df is not None
     assert list(captured_df.columns) == ["a-col", "b-col"]
@@ -351,7 +359,9 @@ def test_unified_writer_applies_converter_dropna(
     def create_file(df_to_write, path, **kwargs):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
-        return WriteResult(path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0)
+        return WriteResult(
+            path=path, row_count=len(df_to_write), checksum="", duration_sec=0.0
+        )
 
     writer.write.side_effect = create_file
 
@@ -370,6 +380,12 @@ def test_unified_writer_applies_converter_dropna(
         "bioetl.infrastructure.output.unified_output_writer_impl.compute_file_sha256",
         return_value="chk",
     ):
-        result = writer_impl.write_result(df, tmp_path / "out", "entity", run_context_factory(), column_order=["a", "b"])
+        result = writer_impl.write_result(
+            df,
+            tmp_path / "out",
+            "entity",
+            run_context_factory(),
+            column_order=["a", "b"],
+        )
 
     assert result.row_count == 0

@@ -4,9 +4,9 @@ from typing import cast
 import pandas as pd
 
 from bioetl.application.files.csv_record_source import CsvRecordSourceImpl
+from bioetl.domain.configs import CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.record_source import RawRecord
-from bioetl.domain.configs import CsvInputConfig
 
 
 def test_csv_record_source_reads_full_dataset(tmp_path):

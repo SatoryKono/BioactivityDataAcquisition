@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from concurrent.futures import Future, ProcessPoolExecutor
+from concurrent.futures import Future
 from pathlib import Path
-from typing import Callable, cast
+from typing import TYPE_CHECKING, Callable, cast
+
+if TYPE_CHECKING:
+    from concurrent.futures import ProcessPoolExecutor
 
 from bioetl.application.pipelines.base import OutputWriterLoaderAdapter, PipelineBase
 from bioetl.application.pipelines.contracts import PipelineContainerABC
@@ -117,7 +120,9 @@ class PipelineOrchestrator:
             # Только извлечение
             context = self._build_simple_context()
             extract_callable = pipeline._get_extract_callable()  # noqa: SLF001
-            iterator = pipeline._normalize_extract_result(extract_callable())  # noqa: SLF001
+            iterator = pipeline._normalize_extract_result(
+                extract_callable()
+            )  # noqa: SLF001
 
             total_rows = 0
             total_chunks = 0
@@ -169,6 +174,8 @@ class PipelineOrchestrator:
         executor: ProcessPoolExecutor | None = None,
     ) -> Future[RunResult]:
         """Запускает пайплайн в отдельном процессе."""
+        from concurrent.futures import ProcessPoolExecutor
+
         executor_to_use = executor or ProcessPoolExecutor(max_workers=1)
         created_executor = executor is None
         registry_snapshot = self._serialize_provider_registry()
