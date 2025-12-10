@@ -9,11 +9,13 @@ from typing import Annotated
 from rich.console import Console
 import typer
 
-from bioetl.application.bootstrap import ApplicationBootstrap, ApplicationContext
+from bioetl.application.bootstrap import ApplicationBootstrap
 from bioetl.application.config.runtime import build_runtime_config
-from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
-from bioetl.domain.configs import PipelineConfig
+from bioetl.application.use_cases import (
+    RunPipelineRequest,
+    RunPipelineUseCase,
+)
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
@@ -41,19 +43,15 @@ def get_bootstrap() -> ApplicationBootstrap:
     return _bootstrap
 
 
-def get_application_context() -> ApplicationContext:
-    """Initialize and return the application context.
+def _infer_config_path(pipeline_name: str) -> str | None:
+    """Infer config path from pipeline name.
 
-    This function must be called before using any application services.
-    It's idempotent - subsequent calls return the same context.
+    Args:
+        pipeline_name: Pipeline name in format entity_provider.
 
     Returns:
-        ApplicationContext: The initialized application context.
+        Inferred config path or None if cannot infer.
     """
-    return get_bootstrap().start()
-
-
-def _infer_config_path(pipeline_name: str) -> str | None:
     parts = pipeline_name.split("_")
     if len(parts) >= 2:
         entity, provider = parts[0], parts[1]
@@ -62,56 +60,25 @@ def _infer_config_path(pipeline_name: str) -> str | None:
 
 
 def _resolve_config_path(config: str) -> Path:
+    """Resolve config path to absolute path.
+
+    Args:
+        config: Config path (relative or absolute).
+
+    Returns:
+        Resolved absolute path.
+
+    Raises:
+        FileNotFoundError: If config file not found.
+    """
     p = Path(config)
     if p.exists():
         return p
-    from bioetl.infrastructure.config.sources import get_configs_root
-
     root = get_configs_root(None)
     candidate = (root / p).resolve()
     if candidate.exists():
         return candidate
     raise FileNotFoundError(f"Config file not found: {config}")
-
-
-def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
-    context = get_application_context()
-    return build_runtime_config(
-        config_path=config_path,
-        configs_root=get_configs_root(None),
-        loader=context.config_loader,
-        profile=profile,
-    )
-
-
-def _apply_output_override(pipeline_config: PipelineConfig, output: str | None) -> None:
-    if not output:
-        return
-    output_path = Path(output)
-    output_path.mkdir(parents=True, exist_ok=True)
-    # Update frozen sink config using model_copy
-    new_sink = pipeline_config.sink.model_copy(update={"output_path": str(output_path)})
-    object.__setattr__(pipeline_config, "sink", new_sink)
-    # Also update storage if it exists
-    if hasattr(pipeline_config.runtime, "storage"):
-        new_storage = pipeline_config.runtime.storage.model_copy(
-            update={"output_path": str(output_path)}
-        )
-        object.__setattr__(pipeline_config.runtime, "storage", new_storage)
-
-
-def _create_orchestrator(
-    pipeline_name: str, pipeline_config: PipelineConfig
-) -> PipelineOrchestrator:
-    def _provider_loader_factory() -> object:
-        return create_provider_loader()
-
-    return PipelineOrchestrator(
-        pipeline_name=pipeline_name,
-        config=pipeline_config,
-        provider_loader_factory=_provider_loader_factory,
-        container_factory=build_default_container,
-    )
 
 
 @app.command()
@@ -134,7 +101,11 @@ def validate_config(
         raise typer.Exit(1)
 
     try:
-        context = get_application_context()
+        bootstrap = get_bootstrap()
+        context = bootstrap.start()
+        if context.config_loader is None:
+            console.print("[red]Error:[/red] Config loader not available")
+            raise typer.Exit(1)
         build_runtime_config(
             config_path=config_file,
             configs_root=get_configs_root(None),
@@ -168,16 +139,47 @@ def run(
 ) -> None:
     """Run a pipeline."""
     try:
-        inferred = _infer_config_path(pipeline_name) if config is None else config
-        if inferred is None:
-            console.print("[red]Error:[/red] Cannot infer config path. Use --config.")
-            raise typer.Exit(1)
-        config_path = _resolve_config_path(inferred)
-        pipeline_config = _build_config(config_path, profile)
-        _apply_output_override(pipeline_config, output)
-        orchestrator = _create_orchestrator(pipeline_name, pipeline_config)
+        # Resolve config path if provided
+        config_path: Path | None = None
+        if config is not None:
+            config_path = _resolve_config_path(config)
+        else:
+            # Try to infer config path from pipeline name
+            inferred = _infer_config_path(pipeline_name)
+            if inferred is not None:
+                try:
+                    config_path = _resolve_config_path(inferred)
+                except FileNotFoundError:
+                    # If inferred path doesn't exist, let use case use get_by_id
+                    pass
 
-        # Run pipeline
+        # Get application context
+        bootstrap = get_bootstrap()
+        context = bootstrap.start()
+
+        if context.config_loader is None:
+            console.print("[red]Error:[/red] Config loader not available")
+            raise typer.Exit(1)
+
+        # Create use case
+        use_case = RunPipelineUseCase(
+            config_loader=context.config_loader,
+            container_factory=build_default_container,
+            provider_loader_factory=create_provider_loader,
+            configs_root=get_configs_root(None),
+        )
+
+        # Build request
+        request = RunPipelineRequest(
+            pipeline_name=pipeline_name,
+            profile=profile or "default",
+            dry_run=dry_run,
+            limit=limit,
+            config_path=config_path,
+            output_path=Path(output) if output else None,
+        )
+
+        # Run pipeline with progress output
         console.print("Starting pipeline")
         console.print(f"[bold]Running pipeline:[/bold] {pipeline_name}")
         if limit:
@@ -185,21 +187,18 @@ def run(
         if dry_run:
             console.print("[dim]Mode:[/dim] dry-run")
 
-        result = orchestrator.run_pipeline(
-            dry_run=dry_run,
-            limit=limit,
-        )
+        response = use_case.execute(request)
 
-        if result.success:
+        # Present result
+        if response.success:
             console.print("[green]✓ Pipeline finished successfully[/green]")
-            console.print(f"  Rows: {result.row_count}")
-            if result.output_path:
-                console.print(f"  Output: {result.output_path}")
+            console.print(f"  Rows: {response.row_count}")
+            if response.output_path:
+                console.print(f"  Output: {response.output_path}")
         else:
             console.print("[red]✗ Pipeline failed[/red]")
-            if result.errors:
-                for error in result.errors:
-                    console.print(f"  [red]Error:[/red] {error}")
+            for error in response.errors:
+                console.print(f"  [red]Error:[/red] {error}")
             raise typer.Exit(1)
 
     except KeyboardInterrupt:
