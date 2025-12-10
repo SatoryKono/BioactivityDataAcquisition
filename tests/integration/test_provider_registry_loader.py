@@ -9,7 +9,7 @@ import pytest
 
 from bioetl.domain.configs import DummyProviderConfig
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
-from bioetl.interfaces.observability import LoggingPortABC
+from bioetl.domain.observability.contracts import LoggingPortABC
 
 
 @dataclass(frozen=True)
