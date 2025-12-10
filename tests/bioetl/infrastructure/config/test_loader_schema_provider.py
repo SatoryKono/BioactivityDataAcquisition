@@ -126,7 +126,7 @@ provider_config:
         field_names = [field["name"] for field in config.fields]
         assert len(field_names) > 5
         assert "action_type" in field_names
-        assert "extracted_at" in field_names
+        assert "acquisition_timestamp" in field_names
 
     def test_fields_not_overwritten_when_present_in_config(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
