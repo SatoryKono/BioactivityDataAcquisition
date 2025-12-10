@@ -5,8 +5,6 @@ import warnings
 from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
-    ChemblResponseParserImpl,
-    create_activity_parser,
     create_generic_parser,
 )
 
@@ -187,70 +185,7 @@ class TestCreateGenericParser:
             assert len(deprecation_warnings) == 0
 
 
-class TestDeprecationWarnings:
-    """Tests for deprecation warnings on old classes."""
-
-    def test_chembl_response_parser_impl_emits_warning(self):
-        """Test ChemblResponseParserImpl emits deprecation warning."""
-        from pydantic import BaseModel
-
-        class DummyModel(BaseModel):
-            id: str
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            ChemblResponseParserImpl(DummyModel)
-
-            deprecation_warnings = [
-                x for x in w if issubclass(x.category, DeprecationWarning)
-            ]
-            assert len(deprecation_warnings) == 1
-            assert "ChemblResponseParserImpl is deprecated" in str(
-                deprecation_warnings[0].message
-            )
-
-    def test_create_activity_parser_emits_warning(self):
-        """Test create_activity_parser emits deprecation warning."""
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            create_activity_parser()
-
-            deprecation_warnings = [
-                x for x in w if issubclass(x.category, DeprecationWarning)
-            ]
-            # Should have at least 1 warning for the factory function
-            # (the impl class also emits one, so we may see 2)
-            assert len(deprecation_warnings) >= 1
-            warning_messages = [str(dw.message) for dw in deprecation_warnings]
-            assert any("create_activity_parser" in msg for msg in warning_messages)
-
-    def test_deprecated_parser_still_works(self):
-        """Test deprecated parser still functions correctly."""
-        from pydantic import BaseModel
-
-        class TestModel(BaseModel):
-            name: str
-            value: int
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            parser = ChemblResponseParserImpl(TestModel)
-
-            response = {
-                "items": [
-                    {"name": "test1", "value": 1},
-                    {"name": "test2", "value": 2},
-                ],
-            }
-            records = parser.parse(response)
-
-            assert len(records) == 2
-            assert isinstance(records[0], TestModel)
-            assert records[0].name == "test1"
-            assert records[1].value == 2
-
-
-class TestNodomainImportsAtModuleLevel:
+class TestNoDomainImportsAtModuleLevel:
     """Tests to verify domain models are not imported at module level."""
 
     def test_generic_parser_has_no_domain_model_dependencies(self):
@@ -262,12 +197,3 @@ class TestNodomainImportsAtModuleLevel:
         assert "ActivityRawModel" not in source
         assert "MoleculeRawModel" not in source
         assert "TargetRawModel" not in source
-
-    def test_module_does_not_import_raw_models_at_top(self):
-        """Verify raw_models is not imported at module level."""
-        import bioetl.infrastructure.clients.chembl.response_parser as module
-
-        # Check the module's __dict__ for ActivityRawModel
-        # It should only be available via TYPE_CHECKING or lazy import
-        module_vars = dir(module)
-        assert "ActivityRawModel" not in module_vars

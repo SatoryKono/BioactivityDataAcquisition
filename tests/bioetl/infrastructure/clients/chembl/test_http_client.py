@@ -12,7 +12,7 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    ChemblResponseParserImpl,
+    ChemblGenericResponseParser,
 )
 from bioetl.infrastructure.errors import (
     ApiParseError,
@@ -32,8 +32,8 @@ def fixture_request_builder():
 
 @pytest.fixture(name="mock_response_parser")
 def fixture_response_parser():
-    """Mock ChemblResponseParserImpl."""
-    return Mock(spec=ChemblResponseParserImpl)
+    """Mock ChemblGenericResponseParser."""
+    return Mock(spec=ChemblGenericResponseParser)
 
 
 @pytest.fixture(name="mock_rate_limiter")
