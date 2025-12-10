@@ -1,5 +1,4 @@
-"""
-Factories for ChEMBL clients.
+"""Factories for ChEMBL clients.
 
 All factories require explicit dependencies - no implicit defaults.
 Use CompositionRoot for creating instances with default implementations.
@@ -11,6 +10,7 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
@@ -26,7 +26,7 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
     ChemblRequestBuilderImpl,
 )
 from bioetl.infrastructure.clients.chembl.response_parser import (
-    create_activity_parser,
+    ChemblGenericResponseParser,
 )
 
 
@@ -74,7 +74,7 @@ def default_chembl_client(
             base_url=base_url,
             max_url_length=max_url_length,
         ),
-        response_parser=create_activity_parser(),
+        response_parser=ChemblGenericResponseParser(),
         rate_limiter=rate_limiter,
         http_client=unified_client,
         logger=logger,
@@ -91,9 +91,9 @@ def default_chembl_extraction_service(
     *,
     client: DataClientABC | None = None,
     field_provider: DefaultFieldProviderABC | None = None,
+    parser: ResponseParserPortABC | None = None,
 ) -> ExtractionServiceABC:
-    """
-    Create ChEMBL extraction service with explicit dependencies.
+    """Create ChEMBL extraction service with generic parser.
 
     Args:
         config: Source configuration.
@@ -102,9 +102,10 @@ def default_chembl_extraction_service(
         http_config: Optional HTTP configuration.
         client: Optional pre-created client.
         field_provider: Optional field provider.
+        parser: Optional parser instance (defaults to ChemblGenericResponseParser).
 
     Returns:
-        Configured extraction service.
+        Configured extraction service returning raw dicts.
     """
     resolved_config = http_config or config.http
 
@@ -119,4 +120,5 @@ def default_chembl_extraction_service(
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
         field_provider=field_provider,
+        parser=parser or ChemblGenericResponseParser(),
     )
