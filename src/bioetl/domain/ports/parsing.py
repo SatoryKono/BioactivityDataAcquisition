@@ -16,7 +16,7 @@ Method mapping:
     - ``extract_metadata(raw_response)`` → ``extract_pagination(raw_response)``
 
 Type changes:
-    - Generic[RecordT] (Pydantic models) → RawRecordList (untyped dicts)
+    - Generic[RecordT] (Pydantic models) → RecordBatch (untyped dicts)
     - This change improves layer isolation (infrastructure doesn't import domain models)
 
 Example migration::
@@ -41,13 +41,24 @@ from __future__ import annotations
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, TypeAlias
 
-# Generic type aliases for infrastructure layer
-# These allow infrastructure code to work without importing domain models
-RawPayload: TypeAlias = dict[str, Any]
-RawRecordDict: TypeAlias = dict[str, Any]
-RawRecordList: TypeAlias = list[RawRecordDict]
+from bioetl.domain.types import (
+    ApiPayload,
+    RawRecord,
+    RecordBatch,
+)
+
+# =============================================================================
+# Deprecated Type Aliases (backward compatibility re-exports)
+# =============================================================================
+# Import from bioetl.domain.types for new code.
+# These re-exports emit deprecation warnings via __getattr__ below.
+
+_DEPRECATED_TYPE_ALIASES = {
+    "RawPayload": "ApiPayload",
+    "RawRecordDict": "RawRecord",
+    "RawRecordList": "RecordBatch",
+}
 
 
 class ResponseParserPortABC(ABC):
@@ -72,7 +83,7 @@ class ResponseParserPortABC(ABC):
     """
 
     @abstractmethod
-    def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+    def parse_to_records(self, raw_response: ApiPayload) -> RecordBatch:
         """Parse raw API response into list of untyped record dicts.
 
         Args:
@@ -85,7 +96,7 @@ class ResponseParserPortABC(ABC):
 
     @abstractmethod
     def extract_pagination(
-        self, raw_response: RawPayload
+        self, raw_response: ApiPayload
     ) -> dict[str, int | str | None]:
         """Extract pagination metadata from response.
 
@@ -102,7 +113,7 @@ class ResponseParserPortABC(ABC):
     # Backward compatibility aliases (from deprecated ResponseParserABC)
     # =========================================================================
 
-    def parse(self, raw_response: RawPayload) -> RawRecordList:
+    def parse(self, raw_response: ApiPayload) -> RecordBatch:
         """Backward-compatible alias for :meth:`parse_to_records`.
 
         .. deprecated:: 2.0
@@ -123,7 +134,7 @@ class ResponseParserPortABC(ABC):
         return self.parse_to_records(raw_response)
 
     def extract_metadata(
-        self, raw_response: RawPayload
+        self, raw_response: ApiPayload
     ) -> dict[str, int | str | None]:
         """Backward-compatible alias for :meth:`extract_pagination`.
 
@@ -201,10 +212,43 @@ class PaginationInfo:
         )
 
 
+# =============================================================================
+# Module __getattr__ for deprecated type alias access
+# =============================================================================
+
+
+def __getattr__(name: str) -> type:
+    """Emit deprecation warning for legacy type alias imports.
+
+    Enables backward-compatible imports like:
+        from bioetl.domain.ports.parsing import RawPayload
+
+    But emits a DeprecationWarning directing users to the new location.
+    """
+    if name in _DEPRECATED_TYPE_ALIASES:
+        new_name = _DEPRECATED_TYPE_ALIASES[name]
+        warnings.warn(
+            f"{name} is deprecated, use {new_name} from bioetl.domain.types instead. "
+            "See migration guide in bioetl.domain.types module docstring.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from bioetl.domain import types
+
+        return getattr(types, new_name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = [
+    # Canonical type aliases (re-exported from domain.types)
+    "ApiPayload",
+    "RawRecord",
+    "RecordBatch",
+    # Deprecated type aliases (for backward compatibility)
     "RawPayload",
     "RawRecordDict",
     "RawRecordList",
+    # ABCs and classes
     "ResponseParserPortABC",
     "PaginationInfo",
 ]
