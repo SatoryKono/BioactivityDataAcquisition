@@ -8,7 +8,7 @@ This guide provides step-by-step recipes for adding new providers, pipelines, an
 2. **Create a default factory** in `src/bioetl/infrastructure/clients/<provider>/factories.py` that exposes `default_<provider>_<entity>()`, mirroring `src/bioetl/infrastructure/clients/chembl/factories.py`.
 3. **Implement the client** under `src/bioetl/infrastructure/clients/<provider>/impl/` with classes suffixed `Impl`. Reuse the ABC methods as in the Chembl HTTP implementations.
 4. **Register the ABC and default** in `src/bioetl/infrastructure/clients/base/abc_registry.yaml`, and map the default to the concrete Impl in `src/bioetl/infrastructure/clients/base/abc_impls.yaml`. Keep keys in `lower_snake_case`.
-5. **Expose the provider** through `src/bioetl/infrastructure/clients/provider_registry_loader.py` or the relevant registry loader so the dependency injection container can resolve it from configs.
+5. **Expose the provider** through `src/bioetl/infrastructure/config/provider_registry.py` so the dependency injection container can resolve it from configs.
 
 ## Wiring pipeline configs for the provider
 

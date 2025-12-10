@@ -113,30 +113,6 @@ class ProviderHttpConfig(HttpClientConfig):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
 
-# =============================================================================
-# DEPRECATED: Legacy aliases for backward compatibility
-# These will be removed in a future version
-# =============================================================================
-
-# Legacy alias - use HttpClientConfig instead
-HttpClientSettings = ProviderHttpConfig
-
-# Legacy alias - use HttpClientConfig instead
-ClientConfig = HttpClientConfig
-
-
-class HttpClientDefaults(HttpClientConfig):
-    """DEPRECATED: Use HttpClientConfig directly.
-
-    Shared HTTP client defaults - now just an alias for HttpClientConfig.
-    """
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-
-HTTP_CLIENT_DEFAULTS = HttpClientConfig()
-
-
 class StorageConfig(BaseModel):
     """Storage path configuration."""
 
@@ -737,10 +713,4 @@ __all__ = [
     "InterfaceFeaturesConfig",
     "NormalizationConfig",
     "TransformConfig",
-    # DEPRECATED: Legacy aliases (will be removed in future versions)
-    "ClientConfig",  # Use HttpClientConfig
-    "HttpClientDefaults",  # Use HttpClientConfig
-    "HttpClientSettings",  # Use ProviderHttpConfig
-    "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
-    "QcConfig",  # Use QualityControlConfig
 ]

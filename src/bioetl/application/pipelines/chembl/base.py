@@ -7,6 +7,7 @@ from typing import Any
 
 import pandas as pd
 
+from bioetl.application.helpers import resolve_primary_key_with_filter
 from bioetl.application.pipelines.base import (
     PipelineBase,
     _create_default_metadata_builder,
@@ -59,7 +60,7 @@ class ChemblPipelineBase(PipelineBase):
         self._extraction_service: ExtractionServiceABC = extraction_service
         self._chembl_release: str | None = None
 
-        self.ID_COLUMN, self.API_FILTER_KEY = self._resolve_primary_key(config)
+        self.ID_COLUMN, self.API_FILTER_KEY = resolve_primary_key_with_filter(config)
 
         if normalization_service is None:
             raise ValueError(
@@ -116,30 +117,6 @@ class ChemblPipelineBase(PipelineBase):
         self._loader = resolved_loader
         self._extractor = extractor
         self._transformer = transformer
-
-    @staticmethod
-    def _resolve_primary_key(config: PipelineConfig) -> tuple[str, str]:
-        """Resolve entity primary key and API filter key based on config."""
-
-        pk: str | None = None
-        # Check explicit primary_key in identity section (now a list)
-        primary_keys = config.identity.primary_key
-        if primary_keys:
-            pk = primary_keys[0]
-
-        if not pk:
-            pk = f"{config.entity_name}_id"
-
-        if not pk:
-            raise ValueError(
-                (
-                    "Could not resolve ID_COLUMN for entity "
-                    f"'{config.entity_name}'. Please set 'primary_key' "
-                    "in config."
-                )
-            )
-
-        return pk, f"{pk}__in"
 
     def get_version(self) -> str:
         """Возвращает версию релиза ChEMBL (например, 'chembl_34')."""

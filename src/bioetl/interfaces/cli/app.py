@@ -14,7 +14,8 @@ from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.application.services.schema_bootstrap import create_schema_bootstrap_service
 from bioetl.domain.configs import PipelineConfig
-from bioetl.infrastructure.config.loader import set_schema_contract_provider
+from bioetl.domain.ports.schema import SchemaContractProviderABC
+from bioetl.infrastructure.config.loader import _set_provider_internal
 from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
@@ -28,31 +29,39 @@ app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
 
 _application_bootstrapped = False
+_contract_provider: SchemaContractProviderABC | None = None
 
 
-def bootstrap_application() -> None:
+def bootstrap_application() -> SchemaContractProviderABC:
     """Initialize application layer before using infrastructure.
 
     This function must be called before loading any pipeline configs.
     It sets up the schema contract provider through dependency injection.
+
+    Returns:
+        SchemaContractProviderABC: The initialized contract provider.
     """
-    global _application_bootstrapped  # noqa: PLW0603
-    if _application_bootstrapped:
-        return
+    global _application_bootstrapped, _contract_provider  # noqa: PLW0603
+    if _application_bootstrapped and _contract_provider is not None:
+        return _contract_provider
 
     # 1. Bootstrap schemas
     schema_service = create_schema_bootstrap_service()
     schema_provider = schema_service.ensure_registered()
 
-    # 2. Inject contract provider into infrastructure
+    # 2. Create contract provider
     from bioetl.application.services.schema_contract_provider import (
         SchemaContractProviderImpl,
     )
 
-    contract_provider = SchemaContractProviderImpl(schema_provider)
-    set_schema_contract_provider(contract_provider)
+    _contract_provider = SchemaContractProviderImpl(schema_provider)
+
+    # 3. Inject into infrastructure for backward compatibility
+    # Using internal function to avoid deprecation warning
+    _set_provider_internal(_contract_provider)
 
     _application_bootstrapped = True
+    return _contract_provider
 
 
 def _infer_config_path(pipeline_name: str) -> str | None:
