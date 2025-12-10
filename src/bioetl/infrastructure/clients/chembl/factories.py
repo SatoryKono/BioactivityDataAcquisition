@@ -2,8 +2,14 @@
 
 All factories require explicit dependencies - no implicit defaults.
 Use CompositionRoot for creating instances with default implementations.
+
+Naming convention:
+- create_*() - creates a new instance each time
+- get_*() - returns singleton/cached instance
+- build_*() - uses builder pattern
 """
 
+import warnings
 from typing import Any
 
 from bioetl.domain.clients.contracts import DataClientABC
@@ -33,15 +39,14 @@ from bioetl.infrastructure.clients.chembl.response_parser import (
 )
 
 
-def default_chembl_client(
+def create_chembl_client(
     source_config: ChemblSourceConfig,
     logger: LoggingPortABC,
     metrics: MetricsPortABC,
     http_config: HttpClientConfig | None = None,
     **options: Any,
 ) -> DataClientABC:
-    """
-    Create default ChEMBL client with explicit dependencies.
+    """Create a new ChEMBL client with explicit dependencies.
 
     Args:
         source_config: Source configuration.
@@ -90,7 +95,7 @@ def default_chembl_client(
     )
 
 
-def default_chembl_extraction_service(
+def create_chembl_extraction_service(
     config: ChemblSourceConfig,
     logger: LoggingPortABC,
     metrics: MetricsPortABC,
@@ -100,7 +105,7 @@ def default_chembl_extraction_service(
     field_provider: DefaultFieldProviderABC | None = None,
     parser: ResponseParserPortABC | None = None,
 ) -> ExtractionServiceABC:
-    """Create ChEMBL extraction service with generic parser.
+    """Create a new ChEMBL extraction service with generic parser.
 
     Args:
         config: Source configuration.
@@ -117,7 +122,7 @@ def default_chembl_extraction_service(
     resolved_config = http_config or config.http
 
     if client is None:
-        client = default_chembl_client(
+        client = create_chembl_client(
             config, logger=logger, metrics=metrics, http_config=resolved_config
         )
 
@@ -128,4 +133,55 @@ def default_chembl_extraction_service(
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
         field_provider=field_provider,
         parser=parser or ChemblGenericResponseParser(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Deprecated aliases for backward compatibility
+# ---------------------------------------------------------------------------
+
+
+def default_chembl_client(
+    source_config: ChemblSourceConfig,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
+    http_config: HttpClientConfig | None = None,
+    **options: Any,
+) -> DataClientABC:
+    """DEPRECATED: Use create_chembl_client() instead."""
+    warnings.warn(
+        "default_chembl_client is deprecated, use create_chembl_client instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_chembl_client(
+        source_config, logger, metrics, http_config, **options
+    )
+
+
+def default_chembl_extraction_service(
+    config: ChemblSourceConfig,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
+    http_config: HttpClientConfig | None = None,
+    *,
+    client: DataClientABC | None = None,
+    field_provider: DefaultFieldProviderABC | None = None,
+    parser: ResponseParserPortABC | None = None,
+) -> ExtractionServiceABC:
+    """DEPRECATED: Use create_chembl_extraction_service() instead."""
+    warnings.warn(
+        "default_chembl_extraction_service is deprecated, "
+        "use create_chembl_extraction_service instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_chembl_extraction_service(
+        config,
+        logger,
+        metrics,
+        http_config,
+        client=client,
+        field_provider=field_provider,
+        parser=parser,
     )
