@@ -13,6 +13,27 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 - Запустить архитектурный тест: `pytest tests/architecture/test_layer_dependencies.py`
 - Полный цикл lint/type-check в CI: ruff → black --check → isort --check-only → mypy → архитектурные тесты → import-linter
 
+## Запуск тестов
+
+Быстрый старт:
+
+```bash
+# Unit-тесты (быстрые, без сети)
+npm test
+
+# Все тесты с покрытием (минимум 85%)
+npm run test:coverage
+```
+
+Доступные команды:
+- `npm test` / `npm run test:unit` - unit-тесты
+- `npm run test:integration` - интеграционные тесты
+- `npm run test:golden` - golden-тесты
+- `npm run test:all` - все тесты
+- `npm run test:coverage` - все тесты с покрытием
+
+Подробнее: [docs/guides/00-running-tests.md](docs/guides/00-running-tests.md)
+
 ## Документация
 
 ### Структура документации

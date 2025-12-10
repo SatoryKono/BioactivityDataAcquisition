@@ -5,5 +5,7 @@ from bioetl.interfaces.rest.server import create_rest_app
 
 def test_create_rest_app_and_route_exists():
     app = create_rest_app()
-    client = TestClient(app)
-    assert any(r.path == "/pipelines/run" and "POST" in r.methods for r in app.router.routes)
+    TestClient(app)
+    assert any(
+        r.path == "/pipelines/run" and "POST" in r.methods for r in app.router.routes
+    )

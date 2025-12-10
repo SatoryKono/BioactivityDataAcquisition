@@ -1,0 +1,22 @@
+name: Block Compiled Python Artifacts
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  no-pyc-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail if *.pyc or __pycache__ exists
+        run: |
+          set -e
+          FOUND=$(find . \( -name "*.pyc" -o -name "__pycache__" \) -print | head -n 1 || true)
+          if [ -n "$FOUND" ]; then
+            echo "Found compiled artifacts: $FOUND"
+            exit 1
+          fi
+          echo "No compiled artifacts found"

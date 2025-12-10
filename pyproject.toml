@@ -106,4 +106,61 @@ ignore_errors = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "-q",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "unit: Unit tests (fast, no IO/network)",
+    "integration: Integration tests (slower, may use IO/network)",
+    "golden: Golden tests (snapshot testing)",
+    "determinism: Tests for deterministic behavior",
+    "property: Property-based tests (Hypothesis)",
+    "schema: Schema validation tests",
+    "qc: Quality control tests",
+    "slow: Slow-running tests",
+    "network: Tests that require network access",
+    "api: API client tests",
+    "benchmark: Performance benchmark tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning:pandera.*",
+    "ignore::UserWarning:pandera.*",
+]
+
+[tool.pytest.ini_options.console_output_style]
+progress = "multi"
+
+[tool.coverage.run]
+source = ["src/bioetl"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 85
+
+[tool.coverage.html]
+directory = "htmlcov"
 

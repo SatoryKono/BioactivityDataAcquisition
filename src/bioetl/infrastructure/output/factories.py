@@ -2,8 +2,8 @@
 
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
-    OutputWriterABC,
     OutputFrameConverterABC,
+    OutputWriterABC,
     QualityReportABC,
     WriterABC,
 )

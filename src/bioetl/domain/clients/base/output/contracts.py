@@ -122,7 +122,7 @@ class OutputFrameConverterABC(Protocol):
 
     def convert(self, df: pd.DataFrame) -> pd.DataFrame:
         """Преобразует DataFrame (rename/reorder/drop/enrich)."""
-        
+
 
 __all__ = [
     "WriteResult",

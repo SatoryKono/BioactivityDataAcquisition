@@ -8,10 +8,12 @@ import pytest
 from typer.testing import CliRunner
 
 from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
+
 try:
     from bioetl.interfaces.cli import app
 except ModuleNotFoundError:
     import pytest
+
     pytest.skip("CLI module not available", allow_module_level=True)
 
 sys.modules.setdefault("tqdm", MagicMock())
@@ -43,6 +45,9 @@ def test_cli_run_dry_run_success(tmp_path, monkeypatch):
             str(tmp_path / "output"),
         ],
     )
+
+    if result.exit_code != 0:
+        print(f"CLI Output: {result.stdout}")
 
     assert result.exit_code == 0
     assert "Starting pipeline" in result.stdout

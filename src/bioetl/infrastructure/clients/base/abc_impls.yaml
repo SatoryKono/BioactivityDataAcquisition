@@ -153,11 +153,6 @@ ErrorPolicyABC:
     FailFast: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
     ContinueOnError: bioetl.application.pipelines.hooks_impl.ContinueOnErrorPolicyImpl
 
-CLICommandABC:
-  default_factory: bioetl.interfaces.cli.factories.default_cli_command
-  implementations:
-    Stub: bioetl.interfaces.cli.contracts.CLICommandABC
-
 ProviderRegistryABC:
   default_factory: bioetl.domain.provider_registry.default_provider_registry
   implementations:

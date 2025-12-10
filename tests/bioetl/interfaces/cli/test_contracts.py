@@ -2,6 +2,7 @@ try:
     from bioetl.interfaces.cli.contracts import CLICommandABC
 except ModuleNotFoundError:
     import pytest
+
     pytest.skip("CLI module not available", allow_module_level=True)
 
 

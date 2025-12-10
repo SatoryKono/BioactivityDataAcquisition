@@ -6,8 +6,8 @@ from pathlib import Path
 import sys
 from typing import Annotated
 
-import typer
 from rich.console import Console
+import typer
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.orchestrator import PipelineOrchestrator
@@ -42,7 +42,11 @@ def validate_config(
 
     try:
         config_loader = create_config_loader()
-        configs_root = config_file.parent.parent.parent if config_file.parent.name == "pipelines" else Path("configs")
+        configs_root = (
+            config_file.parent.parent.parent
+            if config_file.parent.name == "pipelines"
+            else Path("configs")
+        )
         build_runtime_config(
             config_path=config_file,
             configs_root=configs_root,
@@ -57,35 +61,60 @@ def validate_config(
 
 @app.command()
 def run(
-    pipeline_name: Annotated[str, typer.Argument(help="Pipeline name (e.g., activity_chembl)")],
-    config: Annotated[str | None, typer.Option("--config", "-c", help="Path to config YAML")] = None,
-    output: Annotated[str | None, typer.Option("--output", "-o", help="Output directory")] = None,
-    limit: Annotated[int | None, typer.Option("--limit", "-l", help="Limit number of records")] = None,
+    pipeline_name: Annotated[
+        str, typer.Argument(help="Pipeline name (e.g., activity_chembl)")
+    ],
+    config: Annotated[
+        str | None, typer.Option("--config", "-c", help="Path to config YAML")
+    ] = None,
+    output: Annotated[
+        str | None, typer.Option("--output", "-o", help="Output directory")
+    ] = None,
+    limit: Annotated[
+        int | None, typer.Option("--limit", "-l", help="Limit number of records")
+    ] = None,
     dry_run: Annotated[bool, typer.Option("--dry-run", help="Dry run mode")] = False,
-    profile: Annotated[str | None, typer.Option("--profile", "-p", help="Profile name")] = None,
+    profile: Annotated[
+        str | None, typer.Option("--profile", "-p", help="Profile name")
+    ] = None,
 ) -> None:
     """Run a pipeline."""
     try:
         # Resolve config path
         if config is None:
-            # Try to infer from pipeline name: activity_chembl -> configs/pipelines/chembl/activity.yaml
+            # Try to infer from pipeline name:
+            # activity_chembl -> configs/pipelines/chembl/activity.yaml
             parts = pipeline_name.split("_")
             if len(parts) >= 2:
                 entity = parts[0]
                 provider = parts[1]
                 config = f"configs/pipelines/{provider}/{entity}.yaml"
             else:
-                console.print(f"[red]Error:[/red] Cannot infer config path for {pipeline_name}. Use --config.")
+                console.print(
+                    "[red]Error:[/red] Cannot infer config path for "
+                    f"{pipeline_name}. Use --config."
+                )
                 raise typer.Exit(1)
 
         config_path = Path(config)
         if not config_path.exists():
-            console.print(f"[red]Error:[/red] Config file not found: {config}")
-            raise typer.Exit(1)
+            from bioetl.infrastructure.config.sources import get_configs_root
+
+            root = get_configs_root(None)
+            candidate = (root / config_path).resolve()
+            if candidate.exists():
+                config_path = candidate
+            else:
+                console.print(f"[red]Error:[/red] Config file not found: {config}")
+                raise typer.Exit(1)
 
         # Load config
         config_loader = create_config_loader()
-        configs_root = config_path.parent.parent.parent if config_path.parent.name == "pipelines" else Path("configs")
+        configs_root = (
+            config_path.parent.parent.parent
+            if config_path.parent.name == "pipelines"
+            else Path("configs")
+        )
         pipeline_config = build_runtime_config(
             config_path=config_path,
             configs_root=configs_root,
@@ -102,15 +131,19 @@ def run(
                 pipeline_config.storage.output_path = str(output_path)
 
         # Create orchestrator
-        provider_loader_factory = lambda: create_provider_loader()
+        def _provider_loader_factory() -> object:
+            """Factory returning provider loader instance for orchestrator."""
+            return create_provider_loader()
+
         orchestrator = PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=pipeline_config,
-            provider_loader_factory=provider_loader_factory,
+            provider_loader_factory=_provider_loader_factory,
             container_factory=build_default_container,
         )
 
         # Run pipeline
+        console.print("Starting pipeline")
         console.print(f"[bold]Running pipeline:[/bold] {pipeline_name}")
         if limit:
             console.print(f"[dim]Limit:[/dim] {limit} records")
@@ -123,7 +156,7 @@ def run(
         )
 
         if result.success:
-            console.print(f"[green]✓ Pipeline finished successfully[/green]")
+            console.print("[green]✓ Pipeline finished successfully[/green]")
             console.print(f"  Rows: {result.row_count}")
             if result.output_path:
                 console.print(f"  Output: {result.output_path}")
@@ -141,22 +174,26 @@ def run(
         console.print(f"[red]Error:[/red] {e}")
         if "--verbose" in sys.argv or "-v" in sys.argv:
             import traceback
+
             console.print(traceback.format_exc())
         raise typer.Exit(1)
 
 
 @app.command()
 def smoke_run(
-    pipeline: Annotated[str, typer.Option("--pipeline", "-p", help="Pipeline name")],
-    config: Annotated[str, typer.Option("--config", "-c", help="Config path")],
-    limit: Annotated[int, typer.Option("--limit", "-l", help="Record limit")] = 100,
+    pipeline_name: Annotated[str, typer.Argument(help="Pipeline name")],
+    config: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Config path"),
+    ] = None,
 ) -> None:
     """Quick smoke test with small limit."""
     run(
-        pipeline_name=pipeline,
+        pipeline_name=pipeline_name,
         config=config,
-        limit=limit,
-        dry_run=False,
+        limit=10,
+        dry_run=True,
+        profile="development",
     )
 
 
@@ -167,4 +204,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

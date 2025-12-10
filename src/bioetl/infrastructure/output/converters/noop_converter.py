@@ -16,4 +16,3 @@ class NoopConverter(OutputFrameConverterABC):
 
 
 __all__ = ["NoopConverter"]
-

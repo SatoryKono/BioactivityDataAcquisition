@@ -42,3 +42,8 @@ Do not remove:
 - Dry-run: `python src/tools/cleanup_project.py`
 - Apply with log archive: `python src/tools/cleanup_project.py --apply --archive-logs`
 - Full purge: `python src/tools/cleanup_project.py --apply --purge-logs`
+
+## CI & Pre-commit
+
+- Pre-commit hook forbids committing `*.pyc` and `__pycache__` (see `.pre-commit-config.yaml`)
+- CI workflow `compiled-artifacts-block.yml` fails builds if compiled artifacts are present

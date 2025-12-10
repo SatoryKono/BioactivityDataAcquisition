@@ -8,8 +8,8 @@ import pandas as pd
 
 from bioetl.domain.clients.base.output.contracts import (
     MetadataWriterABC,
-    OutputWriterABC,
     OutputFrameConverterABC,
+    OutputWriterABC,
     QualityReportABC,
     WriterABC,
     WriteResult,

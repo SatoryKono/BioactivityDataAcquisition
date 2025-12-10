@@ -16,7 +16,7 @@
 │   ├── guides/             # Руководства (How-to)
 │   ├── infrastructure/     # Адаптеры: Клиенты, Логирование, Config
 │   ├── interfaces/         # Внешние интерфейсы: CLI
-│   └── MAP.md              # Навигатор по проекту
+│   └── 00-map.md           # Навигатор по проекту
 ├── src/                    # Исходный код
 │   └── bioetl/             # Root package
 │       ├── application/    # Implementation of Use Cases
@@ -35,22 +35,24 @@
 
 ## Правила именования
 
-1.  **Markdown файлы**:
-    *   Используйте `kebab-case` (например, `system-design.md`).
-    *   Для упорядочивания используйте префиксы `NN-` (например, `01-getting-started.md`).
+1. **Markdown файлы**:
 
-2.  **Архитектурные решения (ADR)**:
-    *   Размещаются в `docs/architecture/decisions/`.
-    *   Формат: `NNNN-title-in-kebab-case.md`.
+- Используйте `kebab-case` (например, `system-design.md`).
+- Для упорядочивания используйте префиксы `NN-` (например, `01-getting-started.md`).
 
-3.  **Пайплайны**:
-    *   Документация: `docs/application/pipelines/<provider>/<entity>/`.
-    *   Код: `src/bioetl/application/pipelines/<provider>/<entity>/`.
+**2. Архитектурные решения (ADR)**:
+
+- Размещаются в `docs/architecture/decisions/`.
+- Формат: `NNNN-title-in-kebab-case.md`.
+
+**3. Пайплайны**:
+
+- Документация: `docs/application/pipelines/<provider>/<entity>/`.
+- Код: `src/bioetl/application/pipelines/<provider>/<entity>/`.
 
 ## Принципы "Docs-as-Code"
 
-*   **Источники истины**:
-    *   Схемы данных описываются в коде (`src/.../schemas`) и документируются в `docs/domain/schemas`.
-    *   Пайплайны описываются в `docs/application/pipelines` и реализуются в `src`.
-*   **Синхронизация**: Изменения в структуре `src/` должны отражаться в `docs/00-map.md`.
-
+- **Источники истины**:
+  - Схемы данных описываются в коде (`src/.../schemas`) и документируются в `docs/domain/schemas`.
+  - Пайплайны описываются в `docs/application/pipelines` и реализуются в `src`.
+- **Синхронизация**: Изменения в структуре `src/` должны отражаться в `docs/00-map.md`.
