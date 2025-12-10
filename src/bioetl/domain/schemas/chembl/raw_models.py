@@ -77,4 +77,99 @@ class ActivityRawModel(RawRecord):
         return str(value)
 
 
-__all__ = ["ActivityRawModel", "JsonValue", "JsonObject", "ScalarValue"]
+class MoleculeRawModel(RawRecord):
+    """Raw ChEMBL molecule payload."""
+
+    model_config = ConfigDict(extra="allow")
+
+    molecule_chembl_id: str
+    pref_name: str | None = None
+    molecule_type: str | None = None
+    max_phase: int | None = None
+    molecule_structures: JsonObject | None = None
+    molecule_properties: JsonObject | None = None
+
+    @field_validator("molecule_chembl_id", mode="before")
+    @classmethod
+    def _stringify_molecule_id(cls, value: str | int) -> str:
+        return str(value)
+
+
+class TargetRawModel(RawRecord):
+    """Raw ChEMBL target payload."""
+
+    model_config = ConfigDict(extra="allow")
+
+    target_chembl_id: str
+    pref_name: str | None = None
+    organism: str | None = None
+    target_type: str | None = None
+    tax_id: int | None = None
+    species_group_flag: bool | None = None
+
+    @field_validator("target_chembl_id", mode="before")
+    @classmethod
+    def _stringify_target_id(cls, value: str | int) -> str:
+        return str(value)
+
+
+class AssayRawModel(RawRecord):
+    """Raw ChEMBL assay payload."""
+
+    model_config = ConfigDict(extra="allow")
+
+    assay_chembl_id: str
+    assay_type: str | None = None
+    description: str | None = None
+    assay_organism: str | None = None
+    assay_tax_id: int | None = None
+    assay_strain: str | None = None
+    assay_tissue: str | None = None
+    assay_cell_type: str | None = None
+    assay_subcellular_fraction: str | None = None
+    target_chembl_id: str | None = None
+    document_chembl_id: str | None = None
+    src_id: int | None = None
+    bao_format: str | None = None
+
+    @field_validator("assay_chembl_id", mode="before")
+    @classmethod
+    def _stringify_assay_id(cls, value: str | int) -> str:
+        return str(value)
+
+
+class DocumentRawModel(RawRecord):
+    """Raw ChEMBL document/publication payload."""
+
+    model_config = ConfigDict(extra="allow")
+
+    document_chembl_id: str
+    journal: str | None = None
+    year: int | None = None
+    volume: str | None = None
+    issue: str | None = None
+    first_page: str | None = None
+    last_page: str | None = None
+    pubmed_id: int | None = None
+    doi: str | None = None
+    title: str | None = None
+    doc_type: str | None = None
+    authors: str | None = None
+    abstract: str | None = None
+
+    @field_validator("document_chembl_id", mode="before")
+    @classmethod
+    def _stringify_document_id(cls, value: str | int) -> str:
+        return str(value)
+
+
+__all__ = [
+    "ActivityRawModel",
+    "MoleculeRawModel",
+    "TargetRawModel",
+    "AssayRawModel",
+    "DocumentRawModel",
+    "JsonValue",
+    "JsonObject",
+    "ScalarValue",
+]
