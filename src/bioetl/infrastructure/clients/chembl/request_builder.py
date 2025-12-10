@@ -1,5 +1,6 @@
 """Request builder for constructing ChEMBL API URLs."""
 
+import warnings
 from typing import Any, Optional
 
 from bioetl.domain.clients.base.contracts import RequestBuilderABC
@@ -19,8 +20,16 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         self._params: dict[str, Any] = {}
 
     def for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
-        """Fluent alias for build_for_endpoint used in tests."""
+        """Deprecated alias for build_for_endpoint.
 
+        .. deprecated:: 1.0
+            Use :meth:`build_for_endpoint` instead. Will be removed in 2.0.
+        """
+        warnings.warn(
+            "for_endpoint() is deprecated, use build_for_endpoint() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.build_for_endpoint(endpoint)
 
     def build_for_endpoint(self, endpoint: str) -> "ChemblRequestBuilderImpl":
@@ -88,5 +97,14 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         return self
 
     def with_pagination(self, offset: int, limit: int) -> "ChemblRequestBuilderImpl":
-        """Alias for build_with_pagination."""
+        """Deprecated alias for build_with_pagination.
+
+        .. deprecated:: 1.0
+            Use :meth:`build_with_pagination` instead. Will be removed in 2.0.
+        """
+        warnings.warn(
+            "with_pagination() is deprecated, use build_with_pagination() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.build_with_pagination(offset, limit)
