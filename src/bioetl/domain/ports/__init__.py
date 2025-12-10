@@ -7,6 +7,7 @@ directly from ``bioetl.domain.types``.
 
 import warnings
 
+from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
     ExtractionServiceABC,
@@ -73,6 +74,8 @@ __all__: list[str] = [
     "RawRecordDict",
     "RawRecordList",
     "RawPayload",
+    # Entity model ports
+    "EntityModelRegistryABC",
     # Extraction ports
     "BatchAdapterABC",
     "ExtractionServiceABC",
