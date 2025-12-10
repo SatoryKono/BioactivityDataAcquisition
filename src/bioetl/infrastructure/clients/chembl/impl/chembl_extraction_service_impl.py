@@ -179,7 +179,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         # Use registry to get appropriate parser for entity type
         parser = get_parser_for_entity(entity)
-        return parser.parse(raw_response)
+        return parser.parse_to_records(raw_response)
 
     def serialize_records(
         self, entity: str, records: list[RawRecord]
