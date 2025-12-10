@@ -1,4 +1,10 @@
-"""Factories for transform infrastructure components."""
+"""Factories for transform infrastructure components.
+
+Naming convention:
+- create_*() - creates a new instance each time
+- get_*() - returns singleton/cached instance
+- build_*() - uses builder pattern
+"""
 
 from __future__ import annotations
 
@@ -26,13 +32,13 @@ from bioetl.infrastructure.transform.impl.timestamp_provider import (
 )
 
 
-def default_hasher() -> HasherABC:
-    """Create default Hasher implementation."""
+def create_hasher() -> HasherABC:
+    """Create a new Hasher instance."""
     return HasherImpl()
 
 
-def default_hash_service(hasher: HasherABC | None = None) -> HashServiceABC:
-    """Create default HashService (Blake2b-based).
+def create_hash_service(hasher: HasherABC | None = None) -> HashServiceABC:
+    """Create a new HashService (Blake2b-based).
 
     Args:
         hasher: Optional custom hasher. Uses default if not provided.
@@ -40,13 +46,13 @@ def default_hash_service(hasher: HasherABC | None = None) -> HashServiceABC:
     Returns:
         Stateless hash service for computing row and business key hashes.
     """
-    return Blake2bHashService(hasher=hasher or default_hasher())
+    return Blake2bHashService(hasher=hasher or create_hasher())
 
 
-def default_timestamp_provider(
+def create_timestamp_provider(
     fixed_time: datetime | None = None,
 ) -> TimestampProviderABC:
-    """Create default timestamp provider.
+    """Create a new timestamp provider.
 
     Args:
         fixed_time: Optional fixed timestamp. Uses current time if not provided.
@@ -57,8 +63,8 @@ def default_timestamp_provider(
     return DeterministicTimestampProvider(fixed_time=fixed_time)
 
 
-def default_index_generator(start: int = 0) -> IndexGeneratorABC:
-    """Create default index generator.
+def create_index_generator(start: int = 0) -> IndexGeneratorABC:
+    """Create a new index generator.
 
     Args:
         start: Starting index value (default 0).
@@ -69,23 +75,80 @@ def default_index_generator(start: int = 0) -> IndexGeneratorABC:
     return SequentialIndexGenerator(start=start)
 
 
+def create_normalization_service(
+    config: NormalizationConfigProviderProtocol,
+) -> NormalizationServiceABC:
+    """Create a new normalization service."""
+    return DefaultNormalizationTransformerImpl(config)
+
+
+# ---------------------------------------------------------------------------
+# Deprecated aliases for backward compatibility
+# ---------------------------------------------------------------------------
+
+
+def default_hasher() -> HasherABC:
+    """DEPRECATED: Use create_hasher() instead."""
+    warnings.warn(
+        "default_hasher is deprecated, use create_hasher instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_hasher()
+
+
+def default_hash_service(hasher: HasherABC | None = None) -> HashServiceABC:
+    """DEPRECATED: Use create_hash_service() instead."""
+    warnings.warn(
+        "default_hash_service is deprecated, use create_hash_service instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_hash_service(hasher)
+
+
+def default_timestamp_provider(
+    fixed_time: datetime | None = None,
+) -> TimestampProviderABC:
+    """DEPRECATED: Use create_timestamp_provider() instead."""
+    warnings.warn(
+        "default_timestamp_provider is deprecated, use create_timestamp_provider instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_timestamp_provider(fixed_time)
+
+
+def default_index_generator(start: int = 0) -> IndexGeneratorABC:
+    """DEPRECATED: Use create_index_generator() instead."""
+    warnings.warn(
+        "default_index_generator is deprecated, use create_index_generator instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_index_generator(start)
+
+
 def default_normalization_service(
     config: NormalizationConfigProviderProtocol,
 ) -> NormalizationServiceABC:
-    """Create default normalization service."""
-    return DefaultNormalizationTransformerImpl(config)
+    """DEPRECATED: Use create_normalization_service() instead."""
+    warnings.warn(
+        "default_normalization_service is deprecated, "
+        "use create_normalization_service instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_normalization_service(config)
 
 
 def default_chembl_normalization_service(
     config: NormalizationConfigProviderProtocol,
 ) -> NormalizationServiceABC:
-    """Create ChEMBL normalization service.
-
-    DEPRECATED: Use default_normalization_service with appropriate parameters.
-    """
+    """DEPRECATED: Use create_normalization_service() with appropriate parameters."""
     warnings.warn(
         "default_chembl_normalization_service is deprecated. "
-        "Use default_normalization_service or DefaultNormalizationTransformerImpl "
+        "Use create_normalization_service or DefaultNormalizationTransformerImpl "
         "with empty_value=None, serialize_array_in_series=False instead.",
         DeprecationWarning,
         stacklevel=2,
@@ -99,6 +162,13 @@ def default_chembl_normalization_service(
 
 
 __all__ = [
+    # New naming convention
+    "create_hasher",
+    "create_hash_service",
+    "create_timestamp_provider",
+    "create_index_generator",
+    "create_normalization_service",
+    # Deprecated aliases
     "default_hasher",
     "default_hash_service",
     "default_timestamp_provider",
