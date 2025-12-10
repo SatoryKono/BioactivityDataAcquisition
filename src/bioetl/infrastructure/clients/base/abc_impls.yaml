@@ -110,11 +110,6 @@ SecretProviderABC:
   implementations:
     Env: bioetl.infrastructure.clients.base.factories.EnvSecretProviderImpl
 
-SideInputProviderABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_side_input_provider
-  implementations:
-    Stub: bioetl.domain.clients.base.contracts.SideInputProviderABC
-
 PipelineContainerABC:
   default_factory: bioetl.application.pipelines.factories.default_pipeline_container
   implementations:

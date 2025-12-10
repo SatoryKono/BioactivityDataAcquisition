@@ -15,7 +15,7 @@ from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.providers import ProviderDefinition
-from bioetl.domain.record_source import ApiRecordSource, RecordSource
+from bioetl.domain.record_source import ApiRecordSource, RecordSourceABC
 
 
 class RecordSourceFactory:
@@ -37,7 +37,7 @@ class RecordSourceFactory:
         *,
         limit: int | None = None,
         logger: LoggingPortABC,
-    ) -> RecordSource:
+    ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration."""
         mode = self._config.input_mode
         path = self._config.input_path

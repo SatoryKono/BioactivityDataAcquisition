@@ -9,7 +9,6 @@ PaginatorABC: bioetl.domain.clients.base.contracts.PaginatorABC
 RateLimiterABC: bioetl.domain.clients.base.contracts.RateLimiterABC
 CacheABC: bioetl.domain.clients.base.contracts.CacheABC
 SecretProviderABC: bioetl.domain.clients.base.contracts.SecretProviderABC
-SideInputProviderABC: bioetl.domain.clients.base.contracts.SideInputProviderABC
 
 PipelineContainerABC: bioetl.application.pipelines.contracts.PipelineContainerABC
 PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
