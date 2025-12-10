@@ -27,6 +27,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
 
+from bioetl.application.services.config_migration_service import (
+    ConfigMigrationService,
+    ConfigMigrationServiceProtocol,
+    create_config_migration_service,
+)
 from bioetl.application.services.schema_bootstrap import (
     SchemaBootstrapService,
     create_schema_bootstrap_service,
@@ -60,11 +65,15 @@ class ApplicationContext:
         contract_provider: Provider for schema contracts used by pipelines.
         config_loader: Loader for pipeline configurations (may be None if
             no config loader factory was provided).
+        migration_service: Service for migrating and validating raw configs.
+            Provides application-layer interface for config migration without
+            going through full loader flow.
     """
 
     schema_provider: SchemaProviderABC
     contract_provider: SchemaContractProviderABC
     config_loader: PipelineConfigLoaderProtocol | None = None
+    migration_service: ConfigMigrationServiceProtocol | None = None
 
 
 class ApplicationBootstrap:
@@ -143,10 +152,14 @@ class ApplicationBootstrap:
         if self._config_loader_factory is not None:
             config_loader = self._config_loader_factory(contract_provider)
 
+        # Create migration service
+        migration_service = self._init_migration_service()
+
         self._context = ApplicationContext(
             schema_provider=schema_provider,
             contract_provider=contract_provider,
             config_loader=config_loader,
+            migration_service=migration_service,
         )
         self._started = True
         return self._context
@@ -213,6 +226,14 @@ class ApplicationBootstrap:
         """
         return SchemaContractProviderImpl(schema_provider)
 
+    def _init_migration_service(self) -> ConfigMigrationServiceProtocol:
+        """Initialize and return the config migration service.
+
+        Returns:
+            ConfigMigrationService for migrating and validating raw configs.
+        """
+        return create_config_migration_service()
+
 
 def create_application_bootstrap(
     *,
@@ -256,7 +277,10 @@ __all__ = [
     "ApplicationBootstrap",
     "ApplicationContext",
     "ConfigLoaderFactory",
+    "ConfigMigrationService",
+    "ConfigMigrationServiceProtocol",
     "ProviderClearer",
     "ProviderInjector",
     "create_application_bootstrap",
+    "create_config_migration_service",
 ]

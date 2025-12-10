@@ -764,16 +764,6 @@ class PipelineConfig(BaseModel):
                 )
         return self
 
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_legacy_format(cls, data: dict[str, Any]) -> dict[str, Any]:
-        """Delegate migration to ConfigMigrator."""
-        # Lazy import from infrastructure layer to avoid circular imports
-        # ConfigMigrator was moved from domain to infrastructure as migration
-        # is a technical concern, not a business rule
-        from bioetl.infrastructure.config.migration import ConfigMigrator
-
-        return ConfigMigrator.migrate(data)
 
     # =========================================================================
     # Manifest conversion methods
