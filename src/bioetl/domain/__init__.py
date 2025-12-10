@@ -22,6 +22,7 @@ Tabular Data Abstractions:
     Import from ``bioetl.domain.data`` for tabular data protocols.
 """
 
+from bioetl.domain.aggregates import PipelineIdentity
 from bioetl.domain.data import (
     MutableTabularData,
     Record,
@@ -50,7 +51,7 @@ from bioetl.domain.types import (
     RawRecord,
     RecordBatch,
 )
-from bioetl.domain.value_objects import ChemblId, EntityName, RunId
+from bioetl.domain.value_objects import ChemblId, EntityName, PipelineId, RunId
 
 __all__ = [
     # Tabular data abstractions
@@ -76,7 +77,10 @@ __all__ = [
     # Value objects
     "ChemblId",
     "EntityName",
+    "PipelineId",
     "RunId",
+    # Aggregates
+    "PipelineIdentity",
     # Record source
     "InMemoryRecordSource",
     "RecordSourceABC",
