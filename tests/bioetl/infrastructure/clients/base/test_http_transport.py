@@ -9,6 +9,7 @@ from bioetl.infrastructure.clients.base.impl._http_transport import (
     _HttpTransport,
 )
 from bioetl.infrastructure.errors import ApiClientError, ApiTimeoutError
+from bioetl.infrastructure.settings.metrics import MetricName
 
 
 def test_request_call_wraps_timeout_error() -> None:
@@ -31,7 +32,7 @@ def test_request_call_wraps_timeout_error() -> None:
     assert err.value.endpoint == "https://example.org"
     logger.error.assert_called_once()
     metrics.inc_counter.assert_any_call(
-        "bioetl_client_request_errors_total",
+        MetricName.CLIENT_REQUEST_ERRORS_TOTAL,
         {"provider": "chembl", "endpoint": "https://example.org", "status": "timeout"},
     )
 
@@ -55,7 +56,7 @@ def test_request_call_wraps_request_exception() -> None:
     assert err.value.provider == "chembl"
     assert err.value.endpoint == "https://example.org"
     metrics.inc_counter.assert_any_call(
-        "bioetl_client_request_errors_total",
+        MetricName.CLIENT_REQUEST_ERRORS_TOTAL,
         {
             "provider": "chembl",
             "endpoint": "https://example.org",
@@ -83,7 +84,7 @@ def test_request_records_metrics_on_success() -> None:
 
     assert result is response
     metrics.inc_counter.assert_any_call(
-        "bioetl_client_request_total",
+        MetricName.CLIENT_REQUEST_TOTAL,
         {"provider": "chembl", "endpoint": "https://example.org", "status": "200"},
     )
     metrics.observe_histogram.assert_called_once()
@@ -145,6 +146,6 @@ def test_request_retries_on_server_error(monkeypatch: pytest.MonkeyPatch) -> Non
     assert result is second
     assert base_client.request.call_count == 2
     metrics.inc_counter.assert_any_call(
-        "bioetl_client_request_errors_total",
+        MetricName.CLIENT_REQUEST_ERRORS_TOTAL,
         {"provider": "chembl", "endpoint": "https://example.org", "status": "500"},
     )

@@ -15,6 +15,7 @@ from bioetl.infrastructure.output.converters.factories import (
 from bioetl.infrastructure.output.unified_loader_impl import (
     UnifiedLoaderImpl,
 )
+from bioetl.infrastructure.settings.metrics import MetricName
 
 
 @pytest.fixture
@@ -316,7 +317,7 @@ def test_write_result_records_metric_on_failure(
         writer_impl.load(pd.DataFrame({"a": [1]}), tmp_path, run_context_factory())
 
     metrics.inc_counter.assert_called_once_with(
-        "bioetl_output_write_errors_total",
+        MetricName.OUTPUT_WRITE_ERRORS_TOTAL,
         {"entity": "test_entity", "error_type": "ValueError"},
     )
 
