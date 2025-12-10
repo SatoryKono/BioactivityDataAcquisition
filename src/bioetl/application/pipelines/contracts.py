@@ -12,7 +12,7 @@ from bioetl.domain.pipelines.contracts import (
     LoaderABC,
     PipelineHookABC,
 )
-from bioetl.domain.record_source import RecordSource
+from bioetl.domain.record_source import RecordSourceABC as RecordSource
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
