@@ -1,5 +1,9 @@
 """Public application configuration exports."""
 
+from bioetl.application.config.resolution import (
+    ConfigPathResolver,
+    build_pipeline_config,
+)
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.domain.configs import (  # noqa: F401
     BaseProviderConfig,
@@ -28,7 +32,9 @@ from bioetl.domain.configs import (  # noqa: F401
 )
 
 __all__ = [
+    "build_pipeline_config",
     "build_runtime_config",
+    "ConfigPathResolver",
     "BaseProviderConfig",
     "BusinessKeyConfig",
     "CanonicalizationConfig",
