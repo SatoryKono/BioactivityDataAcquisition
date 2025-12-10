@@ -4,6 +4,7 @@ Factory for creating RecordSource instances.
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable
 
@@ -20,7 +21,38 @@ from bioetl.domain.providers import ProviderDefinition
 from bioetl.domain.record_source import RecordSourceABC
 
 
-class RecordSourceFactory:
+class RecordSourceFactoryABC(ABC):
+    """Abstract factory for creating record sources.
+
+    Defines the contract for factories that create RecordSourceABC instances
+    based on pipeline input configuration (CSV, ID-only, or API mode).
+    """
+
+    @abstractmethod
+    def create_record_source(
+        self,
+        extraction_service: Any,
+        *,
+        limit: int | None = None,
+        logger: LoggingPortABC,
+        model_cls: type | None = None,
+        batch_adapter: Callable[..., Any] | None = None,
+    ) -> RecordSourceABC:
+        """Create record source based on pipeline input configuration.
+
+        Args:
+            extraction_service: Service for API extraction.
+            limit: Maximum number of records to fetch.
+            logger: Logger instance.
+            model_cls: Optional Pydantic model class for CSV parsing.
+            batch_adapter: Optional batch processing callable for API mode.
+
+        Returns:
+            Configured RecordSourceABC instance.
+        """
+
+
+class RecordSourceFactory(RecordSourceFactoryABC):
     """Factory for creating record sources."""
 
     def __init__(
