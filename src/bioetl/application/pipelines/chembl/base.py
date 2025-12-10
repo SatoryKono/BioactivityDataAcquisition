@@ -14,7 +14,6 @@ from bioetl.application.pipelines.base import (
 from bioetl.application.pipelines.chembl.extractor import ChemblExtractorImpl
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.pipelines.contracts import LoaderABC
-from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
@@ -28,7 +27,6 @@ from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
 from bioetl.domain.record_source import RecordSourceABC
-from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.transform.contracts import HashServiceABC, NormalizationServiceABC
 from bioetl.domain.transform.transformers import TransformerABC
@@ -65,12 +63,17 @@ class ChemblPipelineBase(PipelineBase):
             )
         norm_service = normalization_service
 
+        if record_source is None:
+            raise ValueError(
+                "Record source is required. "
+                "Use RecordSourceFactory via container.get_record_source()."
+            )
+
         extractor = ChemblExtractorImpl(
             config=config,
             extraction_service=extraction_service,
             normalization_service=norm_service,
             logger=logger,
-            batch_adapter=PandasBatchAdapter(model_cls=ActivityRawModel),
             record_source=record_source,
         )
 

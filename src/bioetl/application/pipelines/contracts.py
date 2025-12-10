@@ -59,6 +59,8 @@ class PipelineContainerABC(ABC):
         *,
         limit: int | None = None,
         logger: LoggingPortABC | None = None,
+        model_cls: type | None = None,
+        batch_adapter: Any | None = None,
     ) -> RecordSourceABC:
         """Return record source for pipeline input according to config."""
 

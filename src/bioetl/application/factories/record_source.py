@@ -5,7 +5,7 @@ Factory for creating RecordSource instances.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
@@ -39,10 +39,25 @@ class RecordSourceFactory:
         *,
         limit: int | None = None,
         logger: LoggingPortABC,
+        model_cls: type | None = None,
+        batch_adapter: Callable[..., Any] | None = None,
     ) -> RecordSourceABC:
-        """Create record source based on pipeline input configuration."""
+        """Create record source based on pipeline input configuration.
+
+        Args:
+            extraction_service: Service for API extraction.
+            limit: Maximum number of records to fetch.
+            logger: Logger instance.
+            model_cls: Optional Pydantic model class for CSV parsing.
+            batch_adapter: Optional batch processing callable for API mode.
+                If not provided, creates a default PandasBatchAdapter.
+
+        Returns:
+            Configured RecordSourceABC instance.
+        """
         mode = self._config.input_mode
         path = self._config.input_path
+        chunk_size = self._config.batch_size
 
         if mode == "auto_detect" and path:
             mode = "csv"
@@ -55,7 +70,8 @@ class RecordSourceFactory:
                 csv_options=self._config.csv_options,
                 limit=limit,
                 logger=logger,
-                chunk_size=None,
+                chunk_size=chunk_size,
+                model_cls=model_cls,
             )
 
         if mode == "id_only":
@@ -75,17 +91,23 @@ class RecordSourceFactory:
                 entity=self._config.entity_name,
                 filter_key=filter_key,
                 logger=logger,
-                chunk_size=None,
+                chunk_size=chunk_size,
             )
 
         filters = self._config.pipeline.copy()
         if limit is not None:
             filters["limit"] = limit
 
+        resolved_batch_adapter = batch_adapter
+        if resolved_batch_adapter is None:
+            resolved_batch_adapter = PandasBatchAdapter(
+                model_cls=model_cls
+            ).process_batch
+
         return ApiRecordSource(
             extraction_service=extraction_service,
             entity=self._config.entity_name,
             filters=filters,
-            chunk_size=self._config.batch_size,
-            batch_adapter=PandasBatchAdapter().process_batch,
+            chunk_size=chunk_size,
+            batch_adapter=resolved_batch_adapter,
         )
