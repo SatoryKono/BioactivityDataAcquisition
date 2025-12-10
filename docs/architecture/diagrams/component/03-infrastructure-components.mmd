@@ -62,10 +62,7 @@ subgraph Infrastructure["Infrastructure Layer"]
     ConfigDefaults["Defaults Loader\ninfrastructure.config.defaults_loader"]:::componentSecondary
     ConfigEnv["Env Config\ninfrastructure.config.env"]:::componentSecondary
     ConfigSources["Config Sources\ninfrastructure.config.sources"]:::componentSecondary
-    ProviderRegistryLoader["ProviderRegistryLoader\ninfrastructure.config.provider_registry_loader"]:::componentSecondary
-    ProviderRegistry["ProviderRegistry\ninfrastructure.config.provider_registry"]:::componentSecondary
-    
-    ProviderRegistryLoader2["ProviderRegistryLoader\ninfrastructure.clients.provider_registry_loader"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry + Loader\ninfrastructure.config.provider_registry"]:::componentSecondary
 end
 class Infrastructure group
 
