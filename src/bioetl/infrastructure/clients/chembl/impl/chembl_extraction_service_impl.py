@@ -14,6 +14,7 @@ from bioetl.domain.ports.extraction import (
 )
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
+from bioetl.infrastructure.clients.chembl.constants import ENTITY_ENDPOINT_ALIASES
 from bioetl.infrastructure.observability.factories import default_logging_port
 
 if TYPE_CHECKING:
@@ -121,14 +122,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         builder = getattr(self.client, "request_builder")
 
         # Resolve entity alias manually if needed (matches ChemblHttpClientImpl)
-        aliases = {
-            "publication": "document",
-            "molecule": "molecule",
-            "activity": "activity",
-            "assay": "assay",
-            "target": "target",
-        }
-        mapped_entity = aliases.get(entity, entity)
+        mapped_entity = ENTITY_ENDPOINT_ALIASES.get(entity, entity)
 
         # Configure builder via legacy fluent methods expected in tests
         if hasattr(builder, "build_for_endpoint"):
