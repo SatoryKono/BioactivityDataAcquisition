@@ -1,4 +1,8 @@
-"""Typed raw models for ChEMBL payloads."""
+"""Typed raw models for ChEMBL payloads.
+
+These models extend SourceRecordModel to provide typed validation
+for ChEMBL API responses at the system boundary.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +10,7 @@ from typing import TypeAlias
 
 from pydantic import ConfigDict, field_validator
 
-from bioetl.domain.record_source import RawRecord
+from bioetl.domain.record_source import SourceRecordModel
 
 ScalarValue: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = (
@@ -19,7 +23,7 @@ JsonObject: TypeAlias = dict[
 ]
 
 
-class ActivityRawModel(RawRecord):
+class ActivityRawModel(SourceRecordModel):
     """Raw ChEMBL activity payload."""
 
     model_config = ConfigDict(extra="forbid")
@@ -77,7 +81,7 @@ class ActivityRawModel(RawRecord):
         return str(value)
 
 
-class MoleculeRawModel(RawRecord):
+class MoleculeRawModel(SourceRecordModel):
     """Raw ChEMBL molecule payload."""
 
     model_config = ConfigDict(extra="allow")
@@ -95,7 +99,7 @@ class MoleculeRawModel(RawRecord):
         return str(value)
 
 
-class TargetRawModel(RawRecord):
+class TargetRawModel(SourceRecordModel):
     """Raw ChEMBL target payload."""
 
     model_config = ConfigDict(extra="allow")
@@ -113,7 +117,7 @@ class TargetRawModel(RawRecord):
         return str(value)
 
 
-class AssayRawModel(RawRecord):
+class AssayRawModel(SourceRecordModel):
     """Raw ChEMBL assay payload."""
 
     model_config = ConfigDict(extra="allow")
@@ -138,7 +142,7 @@ class AssayRawModel(RawRecord):
         return str(value)
 
 
-class DocumentRawModel(RawRecord):
+class DocumentRawModel(SourceRecordModel):
     """Raw ChEMBL document/publication payload."""
 
     model_config = ConfigDict(extra="allow")

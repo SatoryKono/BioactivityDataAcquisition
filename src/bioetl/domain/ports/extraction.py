@@ -26,7 +26,7 @@ _DEPRECATED_TYPE_ALIASES = {
 }
 
 if TYPE_CHECKING:
-    from bioetl.domain.record_source import SourceRecord
+    from bioetl.domain.record_source import SourceRecordModel
 
 
 class RecordFetcherABC(ABC):
@@ -156,18 +156,18 @@ class BatchAdapterABC(Protocol):
 # =============================================================================
 
 
-def to_raw_records(batch: RecordBatch) -> list["SourceRecord"]:
-    """Convert raw dicts to SourceRecord models (migration helper).
+def to_raw_records(batch: RecordBatch) -> list["SourceRecordModel"]:
+    """Convert raw dicts to SourceRecordModel instances (migration helper).
 
     DEPRECATED: Use application layer mappers instead.
-    This function is provided for gradual migration from SourceRecord models
+    This function is provided for gradual migration from SourceRecordModel
     to generic dicts in extraction services.
 
     Args:
         batch: List of raw record dictionaries.
 
     Returns:
-        List of SourceRecord Pydantic models.
+        List of SourceRecordModel Pydantic models.
 
     Example:
         >>> from bioetl.domain.ports.extraction import to_raw_records
@@ -179,20 +179,20 @@ def to_raw_records(batch: RecordBatch) -> list["SourceRecord"]:
         DeprecationWarning,
         stacklevel=2,
     )
-    from bioetl.domain.record_source import SourceRecord
+    from bioetl.domain.record_source import SourceRecordModel
 
-    return [SourceRecord.model_validate(record) for record in batch]
+    return [SourceRecordModel.model_validate(record) for record in batch]
 
 
-def from_raw_records(records: list["SourceRecord"]) -> RecordBatch:
-    """Convert SourceRecord models to raw dicts (migration helper).
+def from_raw_records(records: list["SourceRecordModel"]) -> RecordBatch:
+    """Convert SourceRecordModel instances to raw dicts (migration helper).
 
     DEPRECATED: Use application layer mappers instead.
-    This function is provided for gradual migration from SourceRecord models
+    This function is provided for gradual migration from SourceRecordModel
     to generic dicts in extraction services.
 
     Args:
-        records: List of SourceRecord Pydantic models.
+        records: List of SourceRecordModel Pydantic models.
 
     Returns:
         List of raw record dictionaries.

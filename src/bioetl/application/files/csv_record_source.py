@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any, cast
 
@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.record_source import RawRecord, RecordSourceABC as RecordSource
+from bioetl.domain.record_source import RecordSourceABC, SourceRecordModel
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
@@ -27,7 +27,7 @@ def ensure_csv_options(options: dict[str, Any] | CsvInputConfig) -> CsvInputConf
     return CsvInputConfig(**options)
 
 
-class CsvRecordSourceImpl(RecordSource):
+class CsvRecordSourceImpl(RecordSourceABC):
     """Record source that reads full datasets from CSV."""
 
     def __init__(
@@ -44,9 +44,9 @@ class CsvRecordSourceImpl(RecordSource):
         self._limit = limit
         self._logger = logger
         self._chunk_size = chunk_size
-        self._model_cls: type[BaseModel] = model_cls or RawRecord
+        self._model_cls: type[BaseModel] = model_cls or SourceRecordModel
 
-    def iter_records(self) -> Iterable[list[RawRecord]]:
+    def iter_records(self) -> Iterable[Sequence[Mapping[str, Any]]]:
         """Read CSV dataset and yield records respecting limits and chunking."""
         header = 0 if self._csv_options.header else None
         self._logger.info(f"Extracting records from CSV dataset: {self._input_path}")
@@ -58,8 +58,8 @@ class CsvRecordSourceImpl(RecordSource):
         if self._limit is not None:
             df = df.head(self._limit)
         records_dicts = df.to_dict(orient="records")
-        records: list[RawRecord] = [
-            cast(RawRecord, self._model_cls.model_validate(item))
+        records: list[SourceRecordModel] = [
+            cast(SourceRecordModel, self._model_cls.model_validate(item))
             for item in records_dicts
         ]
         if self._chunk_size is None or self._chunk_size <= 0:
@@ -69,7 +69,7 @@ class CsvRecordSourceImpl(RecordSource):
         yield from _chunk_list(records, self._chunk_size)
 
 
-class IdListRecordSourceImpl(RecordSource):
+class IdListRecordSourceImpl(RecordSourceABC):
     """Record source for ID-only CSVs enriched via API."""
 
     def __init__(
@@ -101,7 +101,7 @@ class IdListRecordSourceImpl(RecordSource):
         self._logger = logger
         self._chunk_size = chunk_size
 
-    def iter_records(self) -> Iterable[list[RawRecord]]:
+    def iter_records(self) -> Iterable[Sequence[Mapping[str, Any]]]:
         """Stream records resolved by IDs from CSV via extraction service."""
         header = 0 if self._csv_options.header else None
         usecols: list[Any] = [self._id_column] if self._csv_options.header else [0]
@@ -151,7 +151,7 @@ class IdListRecordSourceImpl(RecordSource):
 
     def _fetch_records(
         self, ids: list[str], batch_size: int
-    ) -> Iterable[list[RawRecord]]:
+    ) -> Iterable[Sequence[Mapping[str, Any]]]:
         for batch_ids in _chunk_list(ids, batch_size):
             self._logger.info("Fetching batch from API", batch_size=len(batch_ids))
             response = self._extraction_service.request_batch(
@@ -161,7 +161,9 @@ class IdListRecordSourceImpl(RecordSource):
             serialized = self._extraction_service.serialize_records(
                 self._entity, cast(list[object], batch_records)
             )
-            serialized_records: list[RawRecord] = cast(list[RawRecord], serialized)
+            serialized_records: list[Mapping[str, Any]] = cast(
+                list[Mapping[str, Any]], serialized
+            )
             if self._chunk_size is None or self._chunk_size <= 0:
                 yield serialized_records
                 continue
