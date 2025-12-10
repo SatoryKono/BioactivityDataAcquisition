@@ -10,6 +10,9 @@
 - `ResponseParserABC` — `bioetl.domain.clients.base.contracts.ResponseParserABC`
   - Разбор ответов API.
 
+- `ResponseParserPortABC` — `bioetl.domain.ports.parsing.ResponseParserPortABC`
+  - Порт для парсинга сырых ответов API без знания доменных моделей. Реализации в infrastructure слое парсят provider-specific форматы ответов, в то время как domain слой остается независимым от этих деталей.
+
 - `PaginatorABC` — `bioetl.domain.clients.base.contracts.PaginatorABC`
   - Стратегия пагинации.
 

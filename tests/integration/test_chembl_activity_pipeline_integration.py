@@ -10,9 +10,15 @@ import pytest
 
 from bioetl.application.config.runtime import build_runtime_config
 from bioetl.application.pipelines.registry import get_pipeline_class
+from bioetl.application.services.schema_bootstrap import create_schema_bootstrap_service
+from bioetl.application.services.schema_contract_provider import SchemaContractProviderImpl
 from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
 from bioetl.infrastructure.clients.provider_registry_loader import (
     create_provider_loader,
+)
+from bioetl.infrastructure.config.loader import (
+    get_schema_contract_provider,
+    set_schema_contract_provider,
 )
 from bioetl.interfaces.container_factory import (
     build_default_container,
@@ -34,6 +40,12 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         "get_release_version",
         lambda self: "chembl_integration",
     )
+
+    # Ensure schema contract provider is initialized
+    if get_schema_contract_provider() is None:
+        bootstrap = create_schema_bootstrap_service()
+        provider = SchemaContractProviderImpl(bootstrap.ensure_registered())
+        set_schema_contract_provider(provider)
 
     config_loader = create_config_loader()
     config = build_runtime_config(
