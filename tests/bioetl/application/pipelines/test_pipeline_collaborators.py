@@ -117,7 +117,7 @@ def test_stage_runtime_process_and_failure(mock_logger):
     assert transform_stage.records_processed == 1
     assert transform_stage.duration_sec >= 0
 
-    manager._last_error = PipelineStageError(  # type: ignore[attr-defined]
+    manager._error_handler._last_error = PipelineStageError(  # type: ignore[attr-defined]
         provider="chembl",
         entity="entity",
         stage="validate",
