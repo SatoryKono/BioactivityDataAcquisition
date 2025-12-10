@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Any
 
-from bioetl.domain.ports.parsing import RawRecordList
+from bioetl.domain.ports.parsing import RecordBatch
 from bioetl.domain.record_source import SourceRecordModel
 
 
@@ -29,7 +29,7 @@ class RecordMapperABC(ABC):
     @abstractmethod
     def map_records(
         self,
-        raw_records: RawRecordList,
+        raw_records: RecordBatch,
         entity: str,
     ) -> list[SourceRecordModel]:
         """Convert raw dicts to typed domain SourceRecordModel instances.
