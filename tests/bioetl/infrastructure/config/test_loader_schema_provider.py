@@ -71,7 +71,9 @@ provider_config:
             encoding="utf-8",
         )
 
-        with pytest.raises(RuntimeError, match="SchemaContractProvider not initialized"):
+        with pytest.raises(
+            RuntimeError, match="SchemaContractProvider not initialized"
+        ):
             get_pipeline_config_from_path(config_path)
 
     def test_set_schema_contract_provider_accepts_implementation(self) -> None:
