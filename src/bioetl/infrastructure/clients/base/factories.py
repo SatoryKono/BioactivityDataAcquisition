@@ -19,6 +19,10 @@ from bioetl.domain.clients.base.contracts import (
 from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.parsing import ResponseParserPortABC
+from bioetl.infrastructure.clients.base.http_error_handler import (
+    DefaultHttpErrorHandler,
+    HttpErrorHandlerABC,
+)
 from bioetl.infrastructure.clients.base.impl._http_transport import _HttpTransport
 from bioetl.infrastructure.clients.base.impl.cache import MemoryCacheImpl
 from bioetl.infrastructure.clients.base.impl.rate_limiter import (
@@ -166,6 +170,7 @@ def build_http_client(
     *,
     config: HttpClientConfig | None = None,
     base_client: Any | None = None,
+    error_handler: HttpErrorHandlerABC | None = None,
 ) -> _HttpTransport:
     """Construct HTTP client using HttpClientConfig.
 
@@ -175,16 +180,19 @@ def build_http_client(
         metrics: Required metrics instance
         config: Optional HTTP config
         base_client: Optional pre-configured HTTP client
+        error_handler: Optional HTTP error handler (defaults to DefaultHttpErrorHandler)
 
     Returns:
         Configured HTTP transport
     """
     resolved_config = _ensure_http_config(config)
     resolved_client = base_client if base_client is not None else requests.Session()
+    resolved_error_handler = error_handler or DefaultHttpErrorHandler(logger)
     return _HttpTransport(
         provider=provider,
         config=resolved_config,
         base_client=resolved_client,
         logger=logger,
         metrics=metrics,
+        error_handler=resolved_error_handler,
     )
