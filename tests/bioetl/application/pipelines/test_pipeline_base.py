@@ -600,7 +600,7 @@ def test_post_transformer_factory_alignment(
 
     factory_transformer = default_post_transformer(
         hash_service=hash_service,
-        business_key_fields=mock_config.hashing.business_key_fields,
+        business_key_fields=mock_config.quality.hashing.business_key_fields,
         version_provider=pipeline.get_version,
     )
 
