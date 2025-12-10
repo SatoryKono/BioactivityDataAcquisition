@@ -163,7 +163,7 @@ class _HttpTransport:
             return
 
         self.metrics.inc_counter(
-            "client_request_total",
+            "bioetl_client_request_total",
             {"provider": self.provider, "endpoint": endpoint, "status": status},
         )
 
@@ -172,7 +172,7 @@ class _HttpTransport:
             return
 
         self.metrics.observe_histogram(
-            "client_request_duration_seconds",
+            "bioetl_client_request_duration_seconds",
             latency,
             {"provider": self.provider, "endpoint": endpoint, "status": status},
         )
@@ -182,7 +182,7 @@ class _HttpTransport:
             return
 
         self.metrics.inc_counter(
-            "client_request_errors",
+            "bioetl_client_request_errors_total",
             {"provider": self.provider, "endpoint": endpoint, "status": status},
         )
 

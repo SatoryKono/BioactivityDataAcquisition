@@ -238,6 +238,6 @@ class UnifiedLoaderImpl(LoaderABC):
             return
 
         self._metrics.inc_counter(
-            "output_write_errors_total",
+            "bioetl_output_write_errors_total",
             {"entity": entity_name, "error_type": exc.__class__.__name__},
         )
