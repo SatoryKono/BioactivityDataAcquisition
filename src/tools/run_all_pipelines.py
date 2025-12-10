@@ -5,7 +5,7 @@ import sys
 
 from bioetl.infrastructure.logging.factories import default_logger
 from bioetl.interfaces.cli.app import app
-from bioetl.interfaces.observability import LoggingPortABC
+from bioetl.domain.observability.contracts import LoggingPortABC
 
 # Pipeline dependency order
 PIPELINES = [
