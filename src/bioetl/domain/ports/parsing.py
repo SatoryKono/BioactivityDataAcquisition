@@ -58,15 +58,18 @@ from typing import Generic
 
 from typing_extensions import TypeVar
 
-from bioetl.domain.types import (
-    ApiPayload,
-    RawRecord,
-    RecordBatch,
-)
+from collections.abc import Mapping
+from typing import Any
+
+from bioetl.domain.data import RecordBatch
+from bioetl.domain.types import ApiPayload
+
+# Type alias for a single raw record (replacing deprecated RawRecord from types)
+RawRecord = Mapping[str, Any]
 
 # Type variable for generic parser output
 # Uses typing_extensions.TypeVar for default= support on Python < 3.13
-RecordT = TypeVar("RecordT", default=RawRecord)
+RecordT = TypeVar("RecordT", default=dict[str, Any])
 
 # =============================================================================
 # Deprecated Type Aliases (backward compatibility re-exports)
@@ -76,7 +79,7 @@ RecordT = TypeVar("RecordT", default=RawRecord)
 
 _DEPRECATED_TYPE_ALIASES = {
     "RawPayload": "ApiPayload",
-    "RawRecordDict": "RawRecord",
+    "RawRecordDict": "Mapping[str, Any]",
     "RawRecordList": "RecordBatch",
 }
 
@@ -259,24 +262,30 @@ def __getattr__(name: str) -> object:
     if name in _DEPRECATED_TYPE_ALIASES:
         new_name = _DEPRECATED_TYPE_ALIASES[name]
         warnings.warn(
-            f"{name} is deprecated, use {new_name} from bioetl.domain.types instead. "
+            f"{name} is deprecated, use {new_name} instead. "
             "See migration guide in bioetl.domain.types module docstring.",
             DeprecationWarning,
             stacklevel=2,
         )
-        from bioetl.domain import types
+        # Return appropriate fallback types
+        if name == "RawRecordDict":
+            return dict[str, Any]
+        elif name == "RawRecordList":
+            from bioetl.domain.data import RecordBatch as _RecordBatch
 
-        return getattr(types, new_name)
+            return _RecordBatch
+        elif name == "RawPayload":
+            return ApiPayload
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = [
     # Type variable
     "RecordT",
-    # Canonical type aliases (re-exported from domain.types)
-    "ApiPayload",
-    "RawRecord",
-    "RecordBatch",
+    # Canonical type aliases
+    "ApiPayload",  # from domain.types
+    "RecordBatch",  # from domain.data
+    "RawRecord",  # local alias for Mapping[str, Any]
     # Deprecated type aliases (for backward compatibility, available via __getattr__)
     "RawPayload",
     "RawRecordDict",

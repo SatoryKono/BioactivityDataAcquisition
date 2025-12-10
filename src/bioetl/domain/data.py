@@ -49,9 +49,20 @@ RecordBatch = Sequence[Mapping[str, Any]]
 RecordBatch represents a collection of records without pandas dependency.
 Each record is a Mapping (dict-like) of field names to values.
 
-Usage:
-    def process_batch(records: RecordBatch) -> list[dict]:
-        return [dict(r) for r in records]
+This is the CANONICAL definition for batch/collection of records in the domain layer.
+Use this type alias instead of the deprecated ``list[RawRecord]`` from ``domain.types``.
+
+Example:
+    >>> batch: RecordBatch = [
+    ...     {"id": "CHEMBL123", "name": "Aspirin", "mw": 180.16},
+    ...     {"id": "CHEMBL456", "name": "Ibuprofen", "mw": 206.29},
+    ... ]
+    >>> def process_batch(records: RecordBatch) -> list[dict[str, Any]]:
+    ...     return [dict(r) for r in records]
+
+Note:
+    ``Sequence[Mapping[str, Any]]`` is more general than ``list[dict[str, Any]]``,
+    allowing tuple of dicts, list of OrderedDicts, etc.
 """
 
 __all__ = [
