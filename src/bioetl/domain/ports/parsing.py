@@ -4,10 +4,41 @@ This module defines abstract contracts for parsing raw API responses
 without domain model knowledge, following hexagonal architecture principles.
 Infrastructure adapters implement these ports to parse provider-specific responses
 into generic record dictionaries.
+
+Migration Guide (from ResponseParserABC):
+-----------------------------------------
+``ResponseParserABC`` from ``bioetl.domain.clients.base.contracts`` is deprecated.
+Use ``ResponseParserPortABC`` from this module instead.
+
+Method mapping:
+    - ``parse(raw_response)`` → ``parse_to_records(raw_response)``
+    - ``parse_response(raw_response)`` → ``parse_to_records(raw_response)`` (was deprecated)
+    - ``extract_metadata(raw_response)`` → ``extract_pagination(raw_response)``
+
+Type changes:
+    - Generic[RecordT] (Pydantic models) → RawRecordList (untyped dicts)
+    - This change improves layer isolation (infrastructure doesn't import domain models)
+
+Example migration::
+
+    # Before (deprecated)
+    from bioetl.domain.clients.base.contracts import ResponseParserABC
+
+    class MyParser(ResponseParserABC[MyModel]):
+        def parse(self, raw_response): ...
+        def extract_metadata(self, raw_response): ...
+
+    # After (recommended)
+    from bioetl.domain.ports.parsing import ResponseParserPortABC
+
+    class MyParser(ResponseParserPortABC):
+        def parse_to_records(self, raw_response): ...
+        def extract_pagination(self, raw_response): ...
 """
 
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, TypeAlias
@@ -66,6 +97,52 @@ class ResponseParserPortABC(ABC):
             total_count, offset, limit, next_url, etc.
             Keys depend on provider implementation.
         """
+
+    # =========================================================================
+    # Backward compatibility aliases (from deprecated ResponseParserABC)
+    # =========================================================================
+
+    def parse(self, raw_response: RawPayload) -> RawRecordList:
+        """Backward-compatible alias for :meth:`parse_to_records`.
+
+        .. deprecated:: 2.0
+            Use :meth:`parse_to_records` instead. Will be removed in 3.0.
+
+        Args:
+            raw_response: Raw dictionary payload from API response.
+
+        Returns:
+            List of record dictionaries without type validation.
+        """
+        warnings.warn(
+            "parse() is deprecated, use parse_to_records() instead. "
+            "See migration guide in bioetl.domain.ports.parsing docstring.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.parse_to_records(raw_response)
+
+    def extract_metadata(
+        self, raw_response: RawPayload
+    ) -> dict[str, int | str | None]:
+        """Backward-compatible alias for :meth:`extract_pagination`.
+
+        .. deprecated:: 2.0
+            Use :meth:`extract_pagination` instead. Will be removed in 3.0.
+
+        Args:
+            raw_response: Raw dictionary payload from API response.
+
+        Returns:
+            Dictionary containing pagination/metadata information.
+        """
+        warnings.warn(
+            "extract_metadata() is deprecated, use extract_pagination() instead. "
+            "See migration guide in bioetl.domain.ports.parsing docstring.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.extract_pagination(raw_response)
 
 
 @dataclass(frozen=True, slots=True)

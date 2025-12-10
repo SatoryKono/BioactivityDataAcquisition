@@ -1,8 +1,9 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from bioetl.domain.clients.base.contracts import RateLimiterABC, ResponseParserABC
+from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.ports.parsing import RawPayload, RawRecordList, ResponseParserPortABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
     ChemblHttpClientImpl,
 )
@@ -11,14 +12,15 @@ from bioetl.infrastructure.clients.chembl.request_builder import (
 )
 
 
-class DummyParser(ResponseParserABC):
-    def parse(self, raw_response):
+class DummyParser(ResponseParserPortABC):
+    """Test parser implementing the unified ResponseParserPortABC interface."""
+
+    def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
         return []
 
-    def parse_response(self, raw_response):
-        return []
-
-    def extract_metadata(self, raw_response):
+    def extract_pagination(
+        self, raw_response: RawPayload
+    ) -> dict[str, int | str | None]:
         return {}
 
 
