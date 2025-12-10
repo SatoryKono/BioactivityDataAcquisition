@@ -11,14 +11,14 @@ from bioetl.infrastructure.logging.factories import (
 from bioetl.infrastructure.logging.impl.progress_reporter import (
     TqdmProgressReporterImpl,
 )
-from bioetl.infrastructure.logging.impl.unified_logger import UnifiedLoggerImpl
+from bioetl.infrastructure.observability.adapters import StructuredLoggerImpl
 
 
 def test_default_logger():
     """Test default logger factory."""
     with patch("bioetl.infrastructure.logging.factories.structlog"):
         logger = default_logger()
-        assert isinstance(logger, UnifiedLoggerImpl)
+        assert isinstance(logger, StructuredLoggerImpl)
 
 
 def test_default_progress_reporter():
@@ -27,15 +27,15 @@ def test_default_progress_reporter():
     assert isinstance(reporter, TqdmProgressReporterImpl)
 
 
-def test_unified_logger():
-    """Test UnifiedLoggerImpl basic functionality."""
-    logger = UnifiedLoggerImpl()
+def test_structured_logger():
+    """Test StructuredLoggerImpl basic functionality."""
+    logger = StructuredLoggerImpl()
     # Mock the internal structlog logger if possible, or just test api
-    # UnifiedLoggerImpl usually wraps structlog.get_logger()
+    # StructuredLoggerImpl usually wraps structlog.get_logger()
 
     # Test binding
     bound = logger.apply_bind(key="value")
-    assert isinstance(bound, UnifiedLoggerImpl)
+    assert isinstance(bound, StructuredLoggerImpl)
     # Check if context is preserved (implementation detail)
 
     # Test methods (should not raise)
