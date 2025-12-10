@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.configs import ChemblSourceConfig, HttpClientSettings
+from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
@@ -64,16 +64,15 @@ class ChemblProviderComponentsFactory(
 
 
 def register_chembl_provider(
-    http_client: HttpClientSettings | None = None,
+    http: HttpClientConfig | None = None,
 ) -> ProviderDefinition:
     """Create ChEMBL provider definition."""
-
     definition = ProviderDefinition(
         id=ProviderId.CHEMBL,
         config_type=ChemblSourceConfig,
         components=ChemblProviderComponentsFactory(),
         description="ChEMBL data provider",
-        http_client=http_client,
+        http=http,
     )
     return definition
 

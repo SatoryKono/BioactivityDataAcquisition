@@ -16,7 +16,7 @@ from bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl import (
 )
 from bioetl.infrastructure.config.models import (
     ChemblSourceConfig,
-    ClientConfig,
+    HttpClientConfig,
 )
 
 
@@ -26,7 +26,7 @@ def source_config():
     return ChemblSourceConfig(
         base_url="https://example.com",
         max_url_length=1000,
-        client=ClientConfig(
+        http=HttpClientConfig(
             timeout_sec=30,
             max_retries=3,
             rate_limit_per_sec=5.0,
@@ -41,7 +41,8 @@ def test_default_chembl_client_success(source_config):
     # Check that parameters propagated to request_builder
     assert client.request_builder.base_url == "https://example.com"
     assert client.request_builder.max_url_length == 1000
-    assert client.rate_limiter.rate == 2.5
+    # Rate should match source_config.http.rate_limit_per_sec
+    assert client.rate_limiter.rate == 5.0
 
 
 def test_default_chembl_client_overrides(source_config):
