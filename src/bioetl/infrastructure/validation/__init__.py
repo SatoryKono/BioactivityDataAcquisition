@@ -28,6 +28,10 @@ Usage:
 from bioetl.infrastructure.validation.factories import (
     PanderaSchemaProviderFactory,
     PanderaValidatorFactory,
+    # New naming convention
+    create_schema_provider_factory,
+    create_validator_factory,
+    # Deprecated aliases for backward compatibility
     default_schema_provider_factory,
     default_validator_factory,
 )
@@ -37,6 +41,10 @@ __all__ = [
     "PanderaSchemaProviderFactory",
     "PanderaValidatorFactory",
     "PanderaValidatorImpl",
+    # New naming convention
+    "create_schema_provider_factory",
+    "create_validator_factory",
+    # Deprecated aliases
     "default_schema_provider_factory",
     "default_validator_factory",
 ]

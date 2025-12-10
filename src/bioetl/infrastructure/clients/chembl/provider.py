@@ -17,7 +17,7 @@ from bioetl.infrastructure.chembl_client import (
     create_client,
     create_extraction_service,
 )
-from bioetl.infrastructure.transform.factories import default_normalization_service
+from bioetl.infrastructure.transform.factories import create_normalization_service
 
 
 class ChemblProviderComponentsFactory(
@@ -68,7 +68,7 @@ class ChemblProviderComponentsFactory(
                     "normalization service"
                 )
             )
-        return default_normalization_service(pipeline_config)
+        return create_normalization_service(pipeline_config)
 
 
 def register_chembl_provider(

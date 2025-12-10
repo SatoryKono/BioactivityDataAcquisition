@@ -1,7 +1,14 @@
-"""Фабрика конвертеров DataFrame для пост-обработки перед записью."""
+"""Фабрика конвертеров DataFrame для пост-обработки перед записью.
+
+Naming convention:
+- create_*() - creates a new instance each time
+- get_*() - returns singleton/cached instance
+- build_*() - uses builder pattern
+"""
 
 from __future__ import annotations
 
+import warnings
 from types import SimpleNamespace
 from typing import Callable
 
@@ -28,12 +35,12 @@ def _compose(*funcs: Callable[[pd.DataFrame], pd.DataFrame]) -> OutputFrameConve
     return SimpleNamespace(convert=_convert)  # type: ignore[return-value]
 
 
-def default_output_frame_converter(
+def create_output_frame_converter(
     converter_id: str | None = None,
 ) -> OutputFrameConverterABC:
-    """Создаёт конвертер по идентификатору из конфигурации.
+    """Create a new output frame converter by identifier.
 
-    Поддерживаемые значения:
+    Supported values:
       - None | "noop"
       - "rename_columns"
       - "dropna"
@@ -54,4 +61,22 @@ def default_output_frame_converter(
     return SimpleNamespace(convert=lambda df: df)  # type: ignore[return-value]
 
 
-__all__ = ["default_output_frame_converter"]
+# ---------------------------------------------------------------------------
+# Deprecated aliases for backward compatibility
+# ---------------------------------------------------------------------------
+
+
+def default_output_frame_converter(
+    converter_id: str | None = None,
+) -> OutputFrameConverterABC:
+    """DEPRECATED: Use create_output_frame_converter() instead."""
+    warnings.warn(
+        "default_output_frame_converter is deprecated, "
+        "use create_output_frame_converter instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_output_frame_converter(converter_id)
+
+
+__all__ = ["create_output_frame_converter", "default_output_frame_converter"]
