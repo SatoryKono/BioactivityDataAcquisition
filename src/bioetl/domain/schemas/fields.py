@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import pandera.pandas as pa
+import pandera as pa
 
 DEFAULT_FILTERABLE = False
 
