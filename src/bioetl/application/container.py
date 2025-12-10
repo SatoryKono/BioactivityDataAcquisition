@@ -54,8 +54,10 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, Pipelin
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import RecordSourceABC
-from bioetl.domain.schemas import register_schemas
-from bioetl.domain.schemas.registry import SchemaRegistry
+from bioetl.application.services.schema_bootstrap import (
+    SchemaBootstrapService,
+    create_schema_bootstrap_service,
+)
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
     IndexGeneratorABC,
@@ -90,6 +92,7 @@ class PipelineContainer(PipelineContainerABC):
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
         schema_provider: SchemaProviderABC | None = None,
+        schema_bootstrap_service: SchemaBootstrapService | None = None,
     ) -> None:
         self._config = config
         self._provider_id = ProviderId(self._config.provider)
@@ -104,13 +107,16 @@ class PipelineContainer(PipelineContainerABC):
         )
 
         # Resolve optional dependencies with defaults
-        self._schema_provider = schema_provider or SchemaRegistry()
         self._validator_factory = validator_factory or create_noop_validator_factory()
         self._logger = logger or create_noop_logger()
         self._metadata_builder = metadata_builder or create_noop_metadata_builder()
         self._post_transformer = post_transformer
 
-        register_schemas(self._schema_provider)
+        # Schema bootstrap service (lazy registration on first validation service access)
+        self._schema_bootstrap_service = (
+            schema_bootstrap_service
+            or create_schema_bootstrap_service(schema_provider=schema_provider)
+        )
 
         # Initialize factories (lazy)
         self._injected_service_factory = service_factory
@@ -141,8 +147,17 @@ class PipelineContainer(PipelineContainerABC):
         return self._logger
 
     def get_validation_service(self) -> ValidationService:
-        """Create and return a validation service with schema registry."""
-        return ValidationService(self._schema_provider, self._validator_factory)
+        """Create and return a validation service with schema registry.
+
+        Note:
+            This triggers lazy schema registration on first call via
+            SchemaBootstrapService.ensure_registered().
+        """
+        schema_provider = self._schema_bootstrap_service.ensure_registered()
+        return ValidationService(
+            schema_provider=schema_provider,
+            validator_factory=self._validator_factory,
+        )
 
     def get_loader(self) -> LoaderABC:
         """Return the loader for writing output data."""
