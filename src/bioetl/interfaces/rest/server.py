@@ -16,9 +16,7 @@ from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
-from bioetl.interfaces.container_factory import (
-    build_default_container,
-)
+from bioetl.interfaces.composition_root import build_default_container
 
 
 class PipelineRunRequest(BaseModel):

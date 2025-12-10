@@ -7,8 +7,8 @@ and wired together. No other module should create dependencies with default fall
 Usage:
     # For production:
     root = CompositionRoot()
-    http_transport = root.create_http_transport(provider="chembl", config=http_config)
-    loader = root.create_schema_contract_loader()
+    container = root.create_pipeline_container(config)
+    config_loader = root.create_config_loader()
 
     # For testing:
     root = CompositionRoot(
@@ -21,14 +21,22 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from pathlib import Path
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 import requests
 
+from bioetl.application.container import PipelineContainer
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.domain.clients.base.contracts import RateLimiterABC
-from bioetl.domain.configs import HttpClientConfig
+from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
+from bioetl.domain.configs import HttpClientConfig, PipelineConfig
+from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
+from bioetl.domain.provider_registry import ProviderRegistryABC
+from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
     default_rate_limiter,
@@ -39,6 +47,7 @@ from bioetl.infrastructure.observability.factories import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.config.resolution import ConfigPathResolver
     from bioetl.infrastructure.config.loader import SchemaContractLoader
 
 
@@ -51,25 +60,19 @@ class ObservabilityStack:
 
 
 class CompositionRoot:
-    """
-    Central factory for creating application components.
+    """Единая точка сборки зависимостей для interfaces layer.
 
-    Ensures proper dependency injection. The composition root is the only
-    place where default implementations are created.
-    All other modules receive their dependencies explicitly.
+    Все concrete implementations создаются здесь. Другие модули
+    получают зависимости через этот класс, а не создают напрямую.
 
     Example:
-        >>> root = CompositionRoot()
-        >>> transport = root.create_http_transport("chembl", HttpClientConfig())
-        >>> loader = root.create_schema_contract_loader()
+        # Production
+        root = CompositionRoot()
+        container = root.create_pipeline_container(config)
 
-        # For testing with mocks:
-        >>> root = CompositionRoot(
-        ...     logger=mock_logger,
-        ...     metrics=mock_metrics,
-        ...     schema_contract_provider=mock_provider,
-        ... )
-        >>> transport = root.create_http_transport("chembl", HttpClientConfig())
+        # Testing
+        root = CompositionRoot(logger=mock_logger, metrics=mock_metrics)
+        container = root.create_pipeline_container(config)
     """
 
     def __init__(
@@ -96,6 +99,13 @@ class CompositionRoot:
         self._http_session_factory = http_session_factory or requests.Session
         self._schema_contract_provider = schema_contract_provider
 
+        # Lazy-initialized components
+        self._registry_resolver: Any | None = None
+
+    # =========================================================================
+    # Observability
+    # =========================================================================
+
     def get_logger(self) -> LoggingPortABC:
         """Get or create the logger instance."""
         if self._logger is None:
@@ -114,6 +124,10 @@ class CompositionRoot:
             logger=self.get_logger(),
             metrics=self.get_metrics(),
         )
+
+    # =========================================================================
+    # HTTP Infrastructure
+    # =========================================================================
 
     def create_http_session(self) -> Any:
         """Create a new HTTP session."""
@@ -166,6 +180,10 @@ class CompositionRoot:
             capacity=capacity,
         )
 
+    # =========================================================================
+    # Schema Contract Provider
+    # =========================================================================
+
     def get_schema_contract_provider(self) -> SchemaContractProviderABC:
         """Get or create the schema contract provider instance.
 
@@ -197,6 +215,142 @@ class CompositionRoot:
 
         return SchemaContractLoader(self.get_schema_contract_provider())
 
+    # =========================================================================
+    # Pipeline Infrastructure
+    # =========================================================================
+
+    def create_pipeline_container(
+        self,
+        config: PipelineConfig,
+        *,
+        provider_registry: ProviderRegistryABC | None = None,
+        provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+    ) -> PipelineContainerABC:
+        """Assemble pipeline container with all infrastructure dependencies.
+
+        Args:
+            config: Pipeline configuration
+            provider_registry: Pre-built registry (optional)
+            provider_registry_provider: Factory for registry (optional)
+
+        Returns:
+            Fully configured PipelineContainer
+        """
+        resolver = self._get_registry_resolver()
+
+        # Resolve factories from registry
+        loader_factory = resolver.resolve_default_factory("LoaderABC")
+        frame_converter_factory = resolver.resolve_default_factory(
+            "OutputFrameConverterABC"
+        )
+        hash_service_factory = resolver.resolve_default_factory("HashServiceABC")
+        timestamp_provider_factory = resolver.resolve_default_factory(
+            "TimestampProviderABC"
+        )
+        index_generator_factory = resolver.resolve_default_factory("IndexGeneratorABC")
+
+        # Create components
+        metrics_port = self.get_metrics()
+        converter_id = getattr(config.sink.output, "converter", None)
+        frame_converter = frame_converter_factory(converter_id)
+
+        loader = loader_factory(
+            config=config.quality.determinism,
+            qc_config=config.quality.qc,
+            metrics_port=metrics_port,
+            converter=frame_converter,
+        )
+
+        return PipelineContainer(
+            config,
+            logger=self.get_logger(),
+            loader=loader,
+            validator_factory=self._create_validator_factory(),
+            metadata_builder=self._create_metadata_builder(),
+            metrics_port=metrics_port,
+            hash_service=hash_service_factory(),
+            timestamp_provider=timestamp_provider_factory(),
+            index_generator=index_generator_factory(),
+            provider_registry=provider_registry,
+            provider_registry_provider=provider_registry_provider,
+        )
+
+    def create_config_loader(self) -> PipelineConfigLoaderProtocol:
+        """Create config loader port backed by infrastructure loader.
+
+        Creates a config loader that uses explicit schema contract provider injection.
+        The provider is obtained from ApplicationBootstrap and bound to the loader
+        functions.
+
+        Returns:
+            PipelineConfigLoaderProtocol: Config loader with bound schema provider.
+        """
+        from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
+
+        bootstrap = create_default_bootstrap()
+        context = bootstrap.start()
+
+        if context.config_loader is None:
+            raise RuntimeError("Config loader not available in ApplicationContext")
+
+        return context.config_loader
+
+    def create_config_path_resolver(
+        self,
+        configs_root: Path | str | None = None,
+    ) -> "ConfigPathResolver":
+        """Create ConfigPathResolver with default or specified configs root.
+
+        Args:
+            configs_root: Root directory for configs. If None, uses infrastructure
+                default (BIOETL_CONFIG_DIR env var or 'configs' directory).
+
+        Returns:
+            ConfigPathResolver instance.
+        """
+        from bioetl.application.config.resolution import ConfigPathResolver
+        from bioetl.infrastructure.config.sources import get_configs_root
+
+        effective_root = (
+            Path(configs_root) if configs_root is not None else get_configs_root(None)
+        )
+        return ConfigPathResolver(effective_root)
+
+    # =========================================================================
+    # Private Helpers
+    # =========================================================================
+
+    def _get_registry_resolver(self) -> Any:
+        """Lazy-load ABC registry resolver."""
+        if self._registry_resolver is None:
+            from bioetl.infrastructure.clients.base.abc_registry_resolver import (
+                ABCRegistryResolver,
+            )
+
+            self._registry_resolver = ABCRegistryResolver()
+        return self._registry_resolver
+
+    def _create_metadata_builder(self) -> RunMetadataBuilderProtocol:
+        """Create metadata builder using infrastructure helpers."""
+        from bioetl.infrastructure.output.metadata import (
+            build_dry_run_metadata,
+            build_run_metadata,
+        )
+
+        return cast(
+            RunMetadataBuilderProtocol,
+            SimpleNamespace(
+                build_run_metadata=build_run_metadata,
+                build_dry_run_metadata=build_dry_run_metadata,
+            ),
+        )
+
+    def _create_validator_factory(self) -> ValidatorFactoryABC:
+        """Create validator factory from registry."""
+        resolver = self._get_registry_resolver()
+        factory = resolver.resolve_default_factory("ValidatorFactoryABC")
+        return factory()
+
 
 def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
     """Create default schema contract provider by bootstrapping schema registry.
@@ -218,7 +372,10 @@ def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
     return SchemaContractProviderImpl(schema_provider)
 
 
-# Module-level singleton for convenience (can be replaced in tests)
+# =============================================================================
+# Module-level singleton
+# =============================================================================
+
 _default_root: CompositionRoot | None = None
 
 
@@ -240,9 +397,73 @@ def reset_composition_root() -> None:
     _default_root = None
 
 
+# =============================================================================
+# Module-level convenience functions (backward compatible API)
+# =============================================================================
+
+
+def build_default_container(
+    config: PipelineConfig,
+    *,
+    provider_registry: ProviderRegistryABC | None = None,
+    provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+) -> PipelineContainerABC:
+    """Construct application container with infrastructure defaults.
+
+    This is a convenience wrapper around CompositionRoot.create_pipeline_container()
+    that uses the default singleton.
+
+    Args:
+        config: Pipeline configuration
+        provider_registry: Pre-built registry (optional)
+        provider_registry_provider: Factory for registry (optional)
+
+    Returns:
+        Fully configured PipelineContainer
+    """
+    return get_composition_root().create_pipeline_container(
+        config,
+        provider_registry=provider_registry,
+        provider_registry_provider=provider_registry_provider,
+    )
+
+
+def create_config_loader() -> PipelineConfigLoaderProtocol:
+    """Return config loader port backed by infrastructure loader.
+
+    This is a convenience wrapper around CompositionRoot.create_config_loader()
+    that uses the default singleton.
+
+    Returns:
+        PipelineConfigLoaderProtocol: Config loader with bound schema provider.
+    """
+    return get_composition_root().create_config_loader()
+
+
+def create_config_path_resolver(
+    configs_root: Path | str | None = None,
+) -> "ConfigPathResolver":
+    """Create ConfigPathResolver with default or specified configs root.
+
+    This is a convenience wrapper around CompositionRoot.create_config_path_resolver()
+    that uses the default singleton.
+
+    Args:
+        configs_root: Root directory for configs. If None, uses infrastructure
+            default (BIOETL_CONFIG_DIR env var or 'configs' directory).
+
+    Returns:
+        ConfigPathResolver instance.
+    """
+    return get_composition_root().create_config_path_resolver(configs_root)
+
+
 __all__ = [
     "CompositionRoot",
     "ObservabilityStack",
+    "build_default_container",
+    "create_config_loader",
+    "create_config_path_resolver",
     "get_composition_root",
     "reset_composition_root",
 ]

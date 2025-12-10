@@ -22,7 +22,7 @@ from bioetl.infrastructure.config.loader import (
     get_schema_contract_provider,
     set_schema_contract_provider,
 )
-from bioetl.interfaces.container_factory import (
+from bioetl.interfaces.composition_root import (
     build_default_container,
     create_config_loader,
 )
