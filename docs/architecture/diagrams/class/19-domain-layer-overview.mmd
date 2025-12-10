@@ -3,39 +3,69 @@ id: 982f0a93-3f02-42be-9536-698deb820cb9
 ---
 %%{init: {"class": {"domainPrimary": {"fill": "#f5f5f5", "stroke": "#444", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}, "domainSecondary": {"fill": "#e3e7ec", "stroke": "#555", "strokeWidth": 1.2, "color": "#111", "fontSize": "18px"}, "interface": {"fill": "#dde7f2", "stroke": "#44546a", "strokeWidth": 1.5, "color": "#111", "fontSize": "22px"}}}}%%
 classDiagram
-    class ExtractionServiceABC {
+    class ExtractionPortABC {
+        <<interface>>
         +extract_all(entity, config) -> Iterable[dict]
         +get_release_version() -> str
     }
     class TransformerABC {
+        <<interface>>
         +apply(df) -> DataFrame
     }
     class ValidationService {
         +validate(schema_name, df) -> DataFrame
         +get_schema_columns(schema_name) -> list[str]
     }
+    class SchemaProviderABC {
+        <<interface>>
+        +get_schema(name) -> schema_type
+        +get_schema_columns(name) -> list[str]
+    }
     class SchemaRegistry {
-        +register(name, model)
-        +get(name)
+        +register(name, model, column_order)
+        +get_schema(name) -> schema_type
+        +get_schema_columns(name) -> list[str]
+    }
+    class HashServiceABC {
+        <<interface>>
+        +hash_row(row) -> str
+        +hash_business_key(row, fields) -> str
     }
     class HashService {
         +hash_row(row) -> str
         +hash_business_key(row, fields) -> str
     }
     class NormalizationServiceABC {
+        <<interface>>
         +apply_normalize_dataframe(df) -> DataFrame
     }
     class ProviderRegistryABC {
+        <<interface>>
+        +resolve(provider, component) -> DefaultFactory
+        +register(provider, component, factory)
+    }
+    class InMemoryProviderRegistry {
         +resolve(provider, component) -> DefaultFactory
     }
     class PipelineHookABC {
+        <<interface>>
         +on_start(ctx)
         +on_stage(stage, ctx)
         +on_error(ctx, exc)
         +on_finish(ctx)
     }
-    class OutputWriterABC {
-        +write(dataset, metadata)
+    class LoaderABC {
+        <<interface>>
+        +write(dataset, metadata) -> WriteResult
+    }
+    class RecordSourceABC {
+        <<interface>>
+        +iter_records() -> Iterable[RawRecord]
+    }
+    class PipelineContainerABC {
+        <<interface>>
+        +get_extractor() -> ExtractorABC
+        +get_loader() -> LoaderABC
     }
     class Schemas {
         <<module>>
@@ -44,6 +74,8 @@ classDiagram
         target.TargetTableSchema
         publication.PublicationTableSchema
         molecule.MoleculeTableSchema
+        cell.CellTableSchema
+        tissue.TissueTableSchema
     }
     class Serializers {
         <<module>>
@@ -54,13 +86,30 @@ classDiagram
         <<module>>
         FailFastErrorPolicy
         PipelineError
+        PipelineStageError
+    }
+    class PipelineConfig {
+        +identity: PipelineIdentityConfig
+        +source: DataSourceConfig
+        +sink: DataSinkConfig
+    }
+    class ObservabilityContracts {
+        <<module>>
+        LoggingPortABC
+        MetricsPortABC
     }
 
-    ExtractionServiceABC --> ProviderRegistryABC : depends on
+    ExtractionPortABC --> ProviderRegistryABC : depends on
     TransformerABC --> NormalizationServiceABC
     TransformerABC --> ValidationService : uses schema columns
-    ValidationService --> SchemaRegistry
+    ValidationService --> SchemaProviderABC
+    SchemaRegistry --|> SchemaProviderABC
+    HashServiceABC --> HashService
     HashService --> Schemas
-    OutputWriterABC --> Schemas : fixed column order
+    LoaderABC --> Schemas : fixed column order
     PipelineHookABC --> DomainErrors : reports
+    ProviderRegistryABC --> InMemoryProviderRegistry
     ProviderRegistryABC --> Serializers : prepares raw payloads
+    PipelineContainerABC --> ExtractionPortABC
+    PipelineContainerABC --> LoaderABC
+    PipelineContainerABC --> ObservabilityContracts

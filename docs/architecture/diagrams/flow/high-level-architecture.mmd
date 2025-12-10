@@ -13,55 +13,78 @@ subgraph Interfaces["Interfaces (Driving)"]
 end
 
 subgraph Application["Application Layer"]
-    Pipeline["Pipeline Orchestrator"]:::componentPrimary
-    ConfigLoader["Config Loader"]:::componentSecondary
-    Container["PipelineContainer"]:::componentSecondary
-    Hooks["Hooks (Logging + Metrics)"]:::componentSecondary
+    Orchestrator["PipelineOrchestrator"]:::componentPrimary
+    Container["PipelineContainer"]:::componentPrimary
+    ConfigResolution["Config Resolution"]:::componentSecondary
+    ConfigRuntime["Config Runtime"]:::componentSecondary
+    StageRuntimeManager["StageRuntimeManager"]:::componentSecondary
+    Hooks["Hooks Implementation"]:::componentSecondary
+    ErrorPolicy["ErrorPolicy"]:::componentSecondary
+    Factories["Factories\nProviderServiceFactory\nRecordSourceFactory"]:::componentSecondary
 end
 
 subgraph Domain["Domain Layer (Core)"]
-    Validation["Validation Service"]:::componentPrimary
-    Normalization["Normalization Service"]:::componentPrimary
-    Hashing["Hash Service"]:::componentSecondary
-    Transformers["TransformerChain"]:::componentSecondary
-    Schemas["Pandera Schemas + Contracts"]:::componentSecondary
+    Validation["ValidationService"]:::componentPrimary
+    ValidationContracts["Validation Contracts\nSchemaProviderABC\nValidatorFactoryABC"]:::componentSecondary
+    Normalization["NormalizationServiceABC"]:::componentPrimary
+    Hashing["HashServiceABC"]:::componentSecondary
+    Transformers["TransformerABC\nTransformerChain"]:::componentSecondary
+    Schemas["SchemaRegistry\nPandera Schemas"]:::componentSecondary
+    PipelineContracts["Pipeline Contracts\nPipelineContainerABC\nExtractorABC\nLoaderABC"]:::componentSecondary
+    ObservabilityContracts["Observability Contracts\nLoggingPortABC\nMetricsPortABC"]:::componentSecondary
 end
 
 subgraph Infrastructure["Infrastructure (Driven)"]
     subgraph Input
         ProviderRegistry["ProviderRegistryLoader"]:::componentSecondary
-        RecordSource["Api/Csv/IdList Record Sources"]:::componentPrimary
-        ChEMBL["ChEMBL Client Stack\nUnifiedAPIClient + HTTP client"]:::componentPrimary
+        RecordSource["ApiRecordSource\nCsvRecordSource"]:::componentPrimary
+        ChEMBL["ChEMBL Client\nChemblHttpClientImpl\nChemblExtractionServiceImpl"]:::componentPrimary
     end
     subgraph Output
-        Writer["Unified Output Writer"]:::componentPrimary
-        Logger["Unified Logger"]:::componentSecondary
-        QC["QC + Metadata Writers"]:::componentSecondary
+        Writer["UnifiedLoaderImpl\nCsvWriter\nParquetWriter"]:::componentPrimary
+        Metadata["MetadataWriter\nQualityReporter"]:::componentSecondary
+        Logger["Logging Factories\nProgressReporter"]:::componentSecondary
     end
     subgraph Observability
-        Metrics["Prometheus Metrics Server"]:::componentSecondary
+        Metrics["Observability Server\nMetrics\nAdapters"]:::componentSecondary
     end
     subgraph Config
+        ConfigLoader["Config Loader\nDefaults Loader"]:::componentSecondary
         Pydantic["Pydantic Models\nPipelineConfig"]:::componentSecondary
+    end
+    subgraph Transform
+        NormalizationImpl["ChemblNormalizationServiceImpl"]:::componentSecondary
+        Hasher["HasherImpl"]:::componentSecondary
+    end
+    subgraph Validation
+        PanderaValidator["PanderaValidator"]:::componentSecondary
     end
 end
 
 ExtChEMBL[(ChEMBL REST API)]:::external
 FS[(File system: CSV/Parquet, meta, QC)]:::external
 
-CLI -->|Calls| Pipeline
-RestAPI --> Pipeline
-MQ --> Pipeline
+CLI -->|Calls| Orchestrator
+RestAPI --> Orchestrator
+MQ --> Orchestrator
 
-Pipeline -->|Uses| ConfigLoader
-Pipeline -->|Uses| Container
-Container --> Hooks
+Orchestrator -->|Uses| ConfigResolution
+Orchestrator -->|Uses| Container
+Orchestrator -->|Uses| ConfigRuntime
+Container --> PipelineContracts
 Container --> Validation
 Container --> Normalization
 Container --> Hashing
 Container --> Transformers
+Container --> Hooks
+Container --> ErrorPolicy
+Container --> Factories
+Validation --> ValidationContracts
 Validation -->|Validates| Schemas
+Validation --> PanderaValidator
+Normalization --> NormalizationImpl
 Normalization -.->|Uses| Schemas
+Hashing --> Hasher
 Container --> RecordSource
 Container --> ChEMBL
 Container --> Writer
@@ -69,10 +92,12 @@ Container --> Logger
 Container --> Metrics
 Container --> ProviderRegistry
 Container --> Pydantic
+Container --> ObservabilityContracts
+ObservabilityContracts --> Metrics
 
 ChEMBL --> ExtChEMBL
 RecordSource --> ChEMBL
 Writer --> FS
-QC --> FS
+Metadata --> FS
 Logger --> FS
 Metrics --> RestAPI
