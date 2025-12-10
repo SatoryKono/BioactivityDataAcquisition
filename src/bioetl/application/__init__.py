@@ -1,7 +1,23 @@
 """
-Application layer package.
+Application layer — orchestration and use cases.
 
-Provides core orchestration components for pipeline assembly and execution.
+This layer coordinates domain logic and infrastructure adapters.
+It contains no business rules (those are in domain) and no I/O details
+(those are in infrastructure).
+
+Key components:
+    PipelineOrchestrator: Entry point for pipeline execution and assembly.
+    PipelineContainer: DI container for pipeline dependencies.
+    ApplicationBootstrap: Application lifecycle and dependency wiring.
+    Factories: Create specialized services and components.
+
+Typical usage::
+
+    from bioetl.application import PipelineOrchestrator, create_application_bootstrap
+
+    bootstrap = create_application_bootstrap(config_path)
+    orchestrator = PipelineOrchestrator(pipeline_name, config, ...)
+    result = orchestrator.run_pipeline()
 """
 
 from bioetl.application.bootstrap import (
