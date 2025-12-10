@@ -82,6 +82,37 @@ pytest tests/domain/test_X.py -v
 - All tests green
 - Tests must check behavior, not implementation
 
+## Post-Refactoring Validation
+
+After refactoring module X, validate correctness:
+
+### Checklist
+
+- [ ] All tests pass: `pytest tests/ -v --tb=short`
+- [ ] Mypy without errors: `mypy src/bioetl/domain/ --strict`
+- [ ] No circular imports: `python -c "from bioetl.domain import *; print('OK')"`
+- [ ] Documentation updated
+- [ ] `__init__.py` exports are current
+- [ ] Deprecation warnings added where needed
+- [ ] CHANGELOG updated
+- [ ] PR description contains breaking changes
+
+### Commands
+
+```bash
+# Tests
+pytest tests/ -v --tb=short
+
+# Types
+mypy src/bioetl/domain/ --strict
+
+# Imports
+python -c "from bioetl.domain import *; print('OK')"
+
+# Lint
+ruff check src/bioetl/domain/
+```
+
 ## Rules
 
 - Never refactor without dependency map
@@ -89,6 +120,7 @@ pytest tests/domain/test_X.py -v
 - Update tests before changing implementation
 - Maintain backward compatibility during transition
 - Document breaking changes in CHANGELOG.md
+- Validate all changes after refactoring using the checklist
 
 ## Reference
 

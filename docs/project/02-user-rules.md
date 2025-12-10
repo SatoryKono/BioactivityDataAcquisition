@@ -82,6 +82,16 @@
      - Для непокрытых путей создать тесты (happy path, edge cases, error cases)
      - Убедиться что тесты проходят: `pytest tests/domain/test_X.py -v`
    - Требования: coverage > 80% перед началом рефакторинга, все тесты green, тесты проверяют поведение, не реализацию
+   - Валидация после рефакторинга (чеклист):
+     - [ ] Все тесты проходят: `pytest tests/ -v --tb=short`
+     - [ ] Mypy без ошибок: `mypy src/bioetl/domain/ --strict`
+     - [ ] Нет circular imports: `python -c "from bioetl.domain import *; print('OK')"`
+     - [ ] Документация обновлена
+     - [ ] `__init__.py` экспорты актуальны
+     - [ ] Deprecation warnings добавлены где нужно
+     - [ ] CHANGELOG обновлён
+     - [ ] PR description содержит breaking changes
+   - Дополнительные проверки: `ruff check src/bioetl/domain/`, `python -c "import bioetl.domain"`
 
 ## Чего делать нельзя
 

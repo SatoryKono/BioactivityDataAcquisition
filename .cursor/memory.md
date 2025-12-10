@@ -23,4 +23,5 @@
   - Проверка покрытия тестами: coverage > 80% перед началом (pytest --cov=bioetl.domain.X), все тесты green, тесты проверяют поведение, не реализацию.
   - Для непокрытых путей создать тесты: happy path, edge cases (None, empty, invalid), error cases (expected exceptions).
   - Рефакторинг без карты зависимостей или без достаточного покрытия тестами запрещён; тесты обновляются до изменения реализации.
+  - Валидация после рефакторинга (чеклист): тесты (pytest -v), mypy (--strict), импорты (python -c "from bioetl.domain import *"), документация, __init__.py экспорты, deprecation warnings, CHANGELOG, PR description с breaking changes. Рефакторинг завершён только после прохождения всего чеклиста.
 

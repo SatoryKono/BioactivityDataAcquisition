@@ -51,7 +51,7 @@ def test_extract_all_single_page(service, mock_client):
     # Setup mock responses
     # iter_pages yields raw page data
     mock_client.iter_pages.return_value = [{"data": "page1"}]
-    mock_parser.parse_response.return_value = [
+    mock_parser.parse.return_value = [
         ActivityRawModel(activity_id="1", standard_flag=True),
         ActivityRawModel(activity_id="2", standard_flag=False),
     ]
@@ -79,7 +79,7 @@ def test_extract_all_pagination(service, mock_client):
 
     # Setup iteration
     mock_client.iter_pages.return_value = [{"data": "page1"}, {"data": "page2"}]
-    mock_parser.parse_response.side_effect = [
+    mock_parser.parse.side_effect = [
         [
             ActivityRawModel(activity_id="1", standard_flag=True),
             ActivityRawModel(activity_id="2", standard_flag=True),
@@ -104,7 +104,7 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
     mock_client.response_parser = mock_parser
 
     mock_client.iter_pages.return_value = [{"data": "page"}]
-    mock_parser.parse_response.return_value = [
+    mock_parser.parse.return_value = [
         ActivityRawModel(
             activity_id="1",
             standard_flag=True,
@@ -129,7 +129,7 @@ def test_extract_all_limit(service, mock_client):
 
     # Returns 10 items per call
     mock_client.iter_pages.return_value = [{"data": "page"}]
-    mock_parser.parse_response.return_value = [
+    mock_parser.parse.return_value = [
         ActivityRawModel(activity_id=str(i), standard_flag=True) for i in range(10)
     ]
 
@@ -151,7 +151,7 @@ def test_iter_extract_stops_on_empty_page(service, mock_client):
     mock_client.response_parser = mock_parser
 
     mock_client.iter_pages.return_value = []  # Empty iteration
-    mock_parser.parse_response.return_value = []
+    mock_parser.parse.return_value = []
 
     chunks = list(service.iter_extract("activity", chunk_size=5))
 
@@ -172,7 +172,7 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
         {"data": "page1"},
         {"data": "page2"},
     ]
-    mock_parser.parse_response.side_effect = [
+    mock_parser.parse.side_effect = [
         [
             ActivityRawModel(activity_id="1", standard_flag=True),
             ActivityRawModel(activity_id="2", standard_flag=True),
@@ -210,7 +210,7 @@ def test_extract_entities_dispatch(service, mock_client, entity):
     mock_parser = MagicMock()
     mock_client.response_parser = mock_parser
 
-    mock_parser.parse_response.return_value = []
+    mock_parser.parse.return_value = []
     mock_client.iter_pages.return_value = []
 
     service.extract_all(entity)
