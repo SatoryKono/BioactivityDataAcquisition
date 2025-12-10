@@ -1,41 +1,78 @@
 """
-Factories for ChEMBL pipelines.
+Factory for ChEMBL pipeline creation.
+
+This module provides the single entry point for creating ChEMBL pipelines,
+ensuring consistent configuration and dependency injection.
 """
 
+from __future__ import annotations
+
+from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.application.pipelines.contracts import PipelineContainerABC
-from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
+from bioetl.application.pipelines.contracts import (
+    PipelineContainerABC,
+    PipelineFactoryABC,
+)
 
 
-def create_chembl_pipeline(container: PipelineContainerABC) -> ChemblPipelineBase:
+class ChemblPipelineFactory(PipelineFactoryABC):
     """
-    Creates a ChEMBL entity pipeline using dependencies from container.
+    Factory for creating ChEMBL entity pipelines.
 
-    Args:
-        container: Dependency injection container.
-
-    Returns:
-        Configured ChemblPipelineBase.
+    This factory centralizes all ChEMBL pipeline creation logic, ensuring
+    dependencies are properly resolved from the container and the pipeline
+    is fully configured before returning.
     """
-    extraction_service = container.get_extraction_service()
-    logger = container.get_logger()
 
-    record_source = container.get_record_source(
-        extraction_service,
-        logger=logger,
-        model_cls=ActivityRawModel,
-    )
+    def create(
+        self,
+        container: PipelineContainerABC,
+        *,
+        limit: int | None = None,
+    ) -> PipelineBase:
+        """
+        Create a fully configured ChEMBL pipeline.
 
-    return ChemblPipelineBase(
-        config=container.config,
-        logger=logger,
-        validation_service=container.get_validation_service(),
-        loader=container.get_loader(),
-        extraction_service=extraction_service,
-        hash_service=container.get_hash_service(),
-        metadata_builder=container.get_metadata_builder(),
-        record_source=record_source,
-        normalization_service=container.get_normalization_service(),
-        hooks=container.get_hooks(),
-        error_policy=container.get_error_policy(),
-    )
+        Args:
+            container: Dependency injection container providing services.
+            limit: Optional record limit for extraction.
+
+        Returns:
+            Configured ChemblPipelineBase ready to run.
+        """
+        logger = container.get_logger()
+        extraction_service = container.get_extraction_service()
+
+        record_source = container.get_record_source(
+            extraction_service,
+            limit=limit,
+            logger=logger,
+        )
+
+        pipeline: PipelineBase = ChemblPipelineBase(
+            config=container.config,
+            logger=logger,
+            validation_service=container.get_validation_service(),
+            loader=container.get_loader(),
+            extraction_service=extraction_service,
+            hash_service=container.get_hash_service(),
+            metadata_builder=container.get_metadata_builder(),
+            record_source=record_source,
+            normalization_service=container.get_normalization_service(),
+            hooks=container.get_hooks(),
+            error_policy=container.get_error_policy(),
+        )
+
+        # Set post-transformer with version provider from the pipeline
+        pipeline.set_post_transformer(
+            container.get_post_transformer(version_provider=pipeline.get_version)
+        )
+
+        # Register hooks and error policy for runtime notifications
+        pipeline.register_hooks(container.get_hooks())
+        pipeline.set_error_policy(container.get_error_policy())
+
+        return pipeline
+
+
+__all__ = ["ChemblPipelineFactory"]
