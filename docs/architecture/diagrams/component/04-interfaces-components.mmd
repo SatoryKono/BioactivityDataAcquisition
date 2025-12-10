@@ -3,10 +3,10 @@ id: 6c47be5a-03c8-4c4b-9294-6d7b1f6c2b4c
 ---
 flowchart TB
 
-classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
 subgraph Interfaces["Interfaces Layer (Ports)"]
     CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
@@ -22,7 +22,7 @@ subgraph Interfaces["Interfaces Layer (Ports)"]
     LoggerPorts["LoggingPortABC\ninterfaces.logging"]:::componentSecondary
     MetricsPort["Metrics endpoint\ninfrastructure.observability.server"]:::componentSecondary
 end
-class Interfaces group;
+class Interfaces group
 
 subgraph Application["Application Layer"]
     Orchestrator["PipelineOrchestrator"]:::external

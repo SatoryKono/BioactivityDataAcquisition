@@ -3,10 +3,10 @@ id: 5ce0c6b3-7f5b-4c5c-8d1a-4c1cbf2c2a9e
 ---
 flowchart LR
 
-classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
 subgraph Domain["Domain Layer"]
     Validation["ValidationService\nbioetl.domain.validation.service"]:::componentPrimary
@@ -20,7 +20,7 @@ subgraph Domain["Domain Layer"]
     ProviderRegistry["ProviderRegistry\nbioetl.domain.provider_registry"]:::componentSecondary
     RecordSource["ApiRecordSource\nbioetl.domain.record_source"]:::componentSecondary
 end
-class Domain group;
+class Domain group
 
 subgraph Application["Application"]
     Pipeline["PipelineBase / ChemblPipelineBase\napplication.pipelines.*"]:::external

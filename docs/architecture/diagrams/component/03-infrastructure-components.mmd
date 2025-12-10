@@ -3,10 +3,10 @@ id: 3f8f3a0c-6e6d-4a2b-9eae-6d5d981b37c8
 ---
 flowchart LR
 
-classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
-classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
-classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
-classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px;
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
 subgraph Infrastructure["Infrastructure Layer"]
     UnifiedClient["UnifiedAPIClient\nclients.base.impl.unified_client"]:::componentPrimary
@@ -31,7 +31,7 @@ subgraph Infrastructure["Infrastructure Layer"]
     ProviderRegistry["ProviderRegistryLoader\nconfigs/providers.yaml"]:::componentSecondary
     RecordSources["CsvRecordSourceImpl / IdListRecordSourceImpl\ninfrastructure.files.csv_record_source"]:::componentSecondary
 end
-class Infrastructure group;
+class Infrastructure group
 
 subgraph External["External Systems"]
     ChemblAPI[(ChEMBL REST API)]:::external

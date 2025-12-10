@@ -48,8 +48,9 @@ def _resolve_config_path(config: str) -> Path:
 
 def _build_config(config_path: Path, profile: str | None) -> PipelineConfig:
     config_loader = create_config_loader()
-    return build_pipeline_config(
+    return build_runtime_config(
         config_path=config_path,
+        configs_root=configs_root,
         loader=config_loader,
         profile=profile,
     )
@@ -100,8 +101,9 @@ def validate_config(
 
     try:
         config_loader = create_config_loader()
-        build_pipeline_config(
-            config_file,
+        build_runtime_config(
+            config_path=config_file,
+            configs_root=configs_root,
             loader=config_loader,
             profile=profile,
         )
