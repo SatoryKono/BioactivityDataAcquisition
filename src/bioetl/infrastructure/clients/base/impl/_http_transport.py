@@ -19,6 +19,7 @@ from bioetl.infrastructure.errors import (
     wrap_http_errors,
 )
 from bioetl.infrastructure.http import ExponentialRetryPolicy
+from bioetl.infrastructure.settings.metrics import MetricName
 
 
 class _HttpTransport:
@@ -161,7 +162,7 @@ class _HttpTransport:
             return
 
         self.metrics.inc_counter(
-            "bioetl_client_request_total",
+            MetricName.CLIENT_REQUEST_TOTAL,
             {"provider": self.provider, "endpoint": endpoint, "status": status},
         )
 
@@ -170,7 +171,7 @@ class _HttpTransport:
             return
 
         self.metrics.observe_histogram(
-            "bioetl_client_request_duration_seconds",
+            MetricName.CLIENT_REQUEST_DURATION_SECONDS,
             latency,
             {"provider": self.provider, "endpoint": endpoint, "status": status},
         )
@@ -180,7 +181,7 @@ class _HttpTransport:
             return
 
         self.metrics.inc_counter(
-            "bioetl_client_request_errors_total",
+            MetricName.CLIENT_REQUEST_ERRORS_TOTAL,
             {"provider": self.provider, "endpoint": endpoint, "status": status},
         )
 

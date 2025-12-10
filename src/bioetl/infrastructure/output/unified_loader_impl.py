@@ -35,6 +35,7 @@ from bioetl.infrastructure.output.components.qc_artifact_writer import QcArtifac
 from bioetl.infrastructure.output.components.qc_report_generator import (
     QcReportGenerator,
 )
+from bioetl.infrastructure.settings.metrics import MetricName
 
 
 class UnifiedLoaderImpl(LoaderABC):
@@ -304,7 +305,7 @@ class UnifiedLoaderImpl(LoaderABC):
             return
 
         self._metrics.inc_counter(
-            "bioetl_output_write_errors_total",
+            MetricName.OUTPUT_WRITE_ERRORS_TOTAL,
             {"entity": entity_name, "error_type": exc.__class__.__name__},
         )
 

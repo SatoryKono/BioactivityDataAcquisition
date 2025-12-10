@@ -5,18 +5,11 @@ from __future__ import annotations
 import math
 from typing import Iterable
 
-import requests
-
 from bioetl.domain.clients.base.contracts import RetryPolicyABC
-from bioetl.infrastructure.errors import ApiClientError, ApiTimeoutError
-
-DEFAULT_RETRY_STATUSES = {500, 502, 503, 504}
-DEFAULT_RETRY_EXCEPTIONS: tuple[type[Exception], ...] = (
-    ApiTimeoutError,
-    requests.Timeout,
-    requests.ConnectionError,
-    requests.HTTPError,
-    requests.RequestException,
+from bioetl.infrastructure.errors import ApiClientError
+from bioetl.infrastructure.settings.http import (
+    DEFAULT_RETRY_EXCEPTIONS,
+    DEFAULT_RETRY_STATUSES,
 )
 
 
