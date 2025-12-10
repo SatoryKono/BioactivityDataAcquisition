@@ -69,7 +69,7 @@ def test_env_placeholder_resolved_from_env(
 
     config = get_pipeline_config_from_path(config_path)
 
-    assert config.primary_key == "custom_pk"
+    assert config.identity.primary_key == ["custom_pk"]
 
 
 def test_env_placeholder_falls_back_to_default(
@@ -89,7 +89,7 @@ def test_env_placeholder_falls_back_to_default(
 
     config = get_pipeline_config_from_path(config_path)
 
-    assert config.primary_key == "molecule_chembl_id"
+    assert config.identity.primary_key == ["molecule_chembl_id"]
 
 
 def test_extra_field_triggers_validation_error(
@@ -334,8 +334,8 @@ batch_size: 25
 
     config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
-    assert config.output_path == "/tmp/out"  # pipeline overrides profile
-    assert config.batch_size == 10
+    assert config.sink.output_path == "/tmp/out"  # pipeline overrides profile
+    assert config.source.batch_size == 10
     assert config.provider_config.client.timeout_sec == 10
 
 
