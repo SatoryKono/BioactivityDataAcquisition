@@ -28,3 +28,4 @@ node_modules
 /Thumbs.db
 /.ipynb_checkpoints/
 /.vercel/cache/
+API_KEY.env
