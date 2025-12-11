@@ -61,9 +61,11 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         try:
             meta = self.client.metadata()
-            # Expecting {'chembl_release': '34', ...}
-            if meta and "chembl_release" in meta:
-                self._version_cache = str(meta["chembl_release"])
+            # API returns {'chembl_db_version': 'ChEMBL_36', ...}
+            if meta and "chembl_db_version" in meta:
+                raw_version = str(meta["chembl_db_version"])
+                # Extract version number from format 'ChEMBL_36' -> '36'
+                self._version_cache = self._parse_version_string(raw_version)
             else:
                 self._version_cache = "unknown"
         except Exception as e:
@@ -72,6 +74,32 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             self._version_cache = "unknown"
 
         return self._version_cache
+
+    @staticmethod
+    def _parse_version_string(version_str: str) -> str:
+        """Parse version string from ChEMBL API format.
+
+        Handles formats:
+            - 'ChEMBL_36' -> '36'
+            - 'chembl_36' -> '36'
+            - '36' -> '36'
+
+        Args:
+            version_str: Raw version string from API.
+
+        Returns:
+            Extracted version number as string.
+        """
+        if not version_str:
+            return "unknown"
+
+        # Handle 'ChEMBL_XX' or 'chembl_XX' format
+        lower = version_str.lower()
+        if lower.startswith("chembl_"):
+            return version_str[7:]  # Remove 'ChEMBL_' or 'chembl_' prefix
+
+        # Already a plain number
+        return version_str
 
     def _enrich_filters(
         self, entity: str, filters: dict[str, object]
