@@ -10,12 +10,12 @@ Adapters defined here:
 - PandasTabularAdapter: Implements TabularData for pandas DataFrames
 """
 
+from bioetl.infrastructure.adapters.abc_registry_adapter import (
+    ABCRegistryResolverAdapter,
+)
 from bioetl.infrastructure.adapters.config_loader_adapter import (
     ConfigLoaderAdapter,
     ConfigPathResolverAdapter,
-)
-from bioetl.infrastructure.adapters.abc_registry_adapter import (
-    ABCRegistryResolverAdapter,
 )
 from bioetl.infrastructure.adapters.pandas_tabular import (
     PandasTabularAdapter,

@@ -116,4 +116,3 @@ class ConfigPathResolverPortABC(ABC):
 
 
 __all__ = ["ConfigLoaderPortABC", "ConfigPathResolverPortABC"]
-

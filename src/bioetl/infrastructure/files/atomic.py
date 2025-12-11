@@ -64,8 +64,10 @@ class AtomicFileOperation:
 
             if attempt == max_retries - 1:
                 # Provide helpful error message for Windows file lock issues
-                if is_windows and last_error and isinstance(
-                    last_error, PermissionError
+                if (
+                    is_windows
+                    and last_error
+                    and isinstance(last_error, PermissionError)
                 ):
                     msg = (
                         f"Cannot replace file '{dst}': file is locked by another "
@@ -96,9 +98,7 @@ class AtomicFileOperation:
             # On Windows, Access Denied (errno 5) may come as OSError
             if is_windows and hasattr(exc, "winerror") and exc.winerror == 5:
                 # Convert to PermissionError for consistent handling
-                raise PermissionError(
-                    f"Cannot replace file '{dst}': {exc}"
-                ) from exc
+                raise PermissionError(f"Cannot replace file '{dst}': {exc}") from exc
             raise
 
     def _try_windows_unlock_replace(

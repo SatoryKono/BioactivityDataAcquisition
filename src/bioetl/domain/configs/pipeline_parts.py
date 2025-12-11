@@ -129,9 +129,7 @@ class PipelinePartsConfiguration:
         # Extract hashing config
         hashing_section = getattr(config, "hashing", None)
         if hashing_section is None:
-            hashing_section = getattr(
-                getattr(config, "quality", None), "hashing", None
-            )
+            hashing_section = getattr(getattr(config, "quality", None), "hashing", None)
 
         business_keys: tuple[str, ...] = ()
         if hashing_section is not None:

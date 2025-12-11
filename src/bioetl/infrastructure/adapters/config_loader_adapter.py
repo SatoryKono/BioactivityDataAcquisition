@@ -9,11 +9,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.configs.pipeline import PipelineConfig
 from bioetl.domain.ports.config_loader_port import (
     ConfigLoaderPortABC,
     ConfigPathResolverPortABC,
 )
-from bioetl.domain.configs.pipeline import PipelineConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports.schema import SchemaContractProviderABC

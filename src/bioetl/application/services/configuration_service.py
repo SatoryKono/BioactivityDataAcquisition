@@ -12,11 +12,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from bioetl.domain.configs.pipeline import PipelineConfig
     from bioetl.domain.ports.config_loader_port import (
         ConfigLoaderPortABC,
         ConfigPathResolverPortABC,
     )
-    from bioetl.domain.configs.pipeline import PipelineConfig
 
 
 @dataclass(frozen=True)

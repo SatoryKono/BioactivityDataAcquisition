@@ -70,7 +70,6 @@ RawRecord = Mapping[str, Any]
 RecordT = TypeVar("RecordT", default=dict[str, Any])
 
 
-
 class ResponseParserPortABC(ABC, Generic[RecordT]):
     """Port for parsing raw API responses without domain model knowledge.
 

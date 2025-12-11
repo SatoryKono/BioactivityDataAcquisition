@@ -10,8 +10,8 @@ using Parquet format. It ensures reproducible outputs through:
 from __future__ import annotations
 
 import hashlib
-import tempfile
 from pathlib import Path
+import tempfile
 from typing import TYPE_CHECKING
 
 from bioetl.domain.output.deterministic import (

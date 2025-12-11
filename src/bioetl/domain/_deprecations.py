@@ -9,8 +9,8 @@ This module is kept for any future deprecation management needs.
 
 from __future__ import annotations
 
-import warnings
 from typing import Any, NamedTuple
+import warnings
 
 __all__ = [
     "REMOVAL_VERSION",

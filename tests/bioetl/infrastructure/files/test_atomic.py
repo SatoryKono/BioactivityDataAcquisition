@@ -134,9 +134,7 @@ def test_replace_with_retry_windows_permission_error_message(
 
 
 @patch("time.sleep")
-def test_try_replace_converts_windows_access_denied(
-    mock_sleep, atomic_op, tmp_path
-):
+def test_try_replace_converts_windows_access_denied(mock_sleep, atomic_op, tmp_path):
     """Test that OSError with winerror=5 is converted to PermissionError."""
     src = tmp_path / "src_win.txt"
     dst = tmp_path / "dst_win.txt"

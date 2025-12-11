@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Iterator
 
 
@@ -226,9 +226,21 @@ class InMemoryClientMetrics(ClientMetricsPortABC):
 
         # Calculate percentiles
         sorted_latencies = sorted(latencies)
-        p50 = sorted_latencies[int(len(sorted_latencies) * 0.5)] if sorted_latencies else 0.0
-        p95 = sorted_latencies[int(len(sorted_latencies) * 0.95)] if sorted_latencies else 0.0
-        p99 = sorted_latencies[int(len(sorted_latencies) * 0.99)] if sorted_latencies else 0.0
+        p50 = (
+            sorted_latencies[int(len(sorted_latencies) * 0.5)]
+            if sorted_latencies
+            else 0.0
+        )
+        p95 = (
+            sorted_latencies[int(len(sorted_latencies) * 0.95)]
+            if sorted_latencies
+            else 0.0
+        )
+        p99 = (
+            sorted_latencies[int(len(sorted_latencies) * 0.99)]
+            if sorted_latencies
+            else 0.0
+        )
 
         return ClientMetrics(
             requests_total=total,
