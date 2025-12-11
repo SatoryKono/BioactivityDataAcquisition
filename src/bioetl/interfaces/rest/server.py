@@ -10,13 +10,8 @@ from pydantic import BaseModel, Field
 from bioetl.application.use_cases import (
     InterfaceDisabledError,
     RunPipelineRequest,
-    RunPipelineUseCase,
 )
-from bioetl.infrastructure.config.provider_registry import (
-    create_provider_loader,
-)
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
-from bioetl.interfaces.composition_root import build_default_container
+from bioetl.interfaces.use_case_factory import get_use_case_factory
 
 
 class PipelineRunRequest(BaseModel):
@@ -51,25 +46,7 @@ def create_rest_app() -> FastAPI:
 
     @app.post("/pipelines/run", response_model=PipelineRunResponse)
     async def run_pipeline(request: PipelineRunRequest) -> PipelineRunResponse:
-        """Run a pipeline asynchronously and return execution result."""
-        # Get application context
-        bootstrap = create_default_bootstrap()
-        context = bootstrap.start()
-
-        if context.config_loader is None:
-            raise HTTPException(
-                status_code=500,
-                detail="Config loader not available",
-            )
-
-        # Create use case
-        use_case = RunPipelineUseCase(
-            config_loader=context.config_loader,
-            container_factory=build_default_container,
-            provider_loader_factory=create_provider_loader,
-        )
-
-        # Build domain request with REST interface requirement
+        """Run a pipeline via REST API."""
         domain_request = RunPipelineRequest(
             pipeline_name=request.pipeline_name,
             profile=request.profile,
@@ -78,17 +55,13 @@ def create_rest_app() -> FastAPI:
             require_rest_interface=True,
         )
 
-        # Execute in thread pool to avoid blocking
+        use_case = get_use_case_factory().create_run_pipeline_use_case()
+
         loop = asyncio.get_running_loop()
         try:
-            response = await loop.run_in_executor(
-                None, use_case.execute, domain_request
-            )
+            response = await loop.run_in_executor(None, use_case.execute, domain_request)
         except InterfaceDisabledError:
-            raise HTTPException(
-                status_code=503,
-                detail="REST interface is disabled by configuration",
-            )
+            raise HTTPException(status_code=503, detail="REST interface disabled")
 
         return PipelineRunResponse(
             run_id=response.run_id,
