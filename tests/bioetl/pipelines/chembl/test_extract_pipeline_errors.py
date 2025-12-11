@@ -5,11 +5,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.configs import (
-    ChemblSourceConfig,
-    ClientConfig,
-    PipelineConfig,
-)
+from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs.identity import PipelineIdentityConfig
+from bioetl.domain.configs.data_flow import DataFlowConfig
+from bioetl.domain.configs.source import DataSourceConfig
+from bioetl.domain.configs.sink import DataSinkConfig
+from bioetl.domain.configs.pipeline import ChemblSourceConfig, ProviderHttpConfig
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 
@@ -40,16 +41,25 @@ def test_extract_stage_wraps_client_error(
     caplog.set_level("ERROR")
 
     config = PipelineConfig(
-        id="chembl.activity",
-        provider="chembl",
-        entity="activity",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path=str(tmp_path / "out"),
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+            primary_key=["activity_id"],
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(
+                output_path=str(tmp_path / "out"),
+            ),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
@@ -78,14 +88,10 @@ def test_extract_stage_wraps_client_error(
     normalization_service.apply_normalize_fields.side_effect = lambda df, *_: df
     normalization_service.apply_normalize.side_effect = lambda record: record
 
-    # Record source raises ClientNetworkError when iterating
-    def raise_network_error():
-        raise ClientNetworkError(
-            provider="chembl", endpoint="/status", message="timeout"
-        )
-
-    record_source = MagicMock()
-    record_source.iter_records.side_effect = raise_network_error
+    index_generator = MagicMock()
+    index_generator.next_index.return_value = 0
+    timestamp_provider = MagicMock()
+    timestamp_provider.get_extraction_timestamp.return_value = "2024-01-01T00:00:00Z"
 
     pipeline = ChemblPipelineBase(
         config=config,
@@ -95,9 +101,8 @@ def test_extract_stage_wraps_client_error(
         extraction_service=extraction_service,
         hash_service=hash_service,
         normalization_service=normalization_service,
-        record_source=record_source,
-        index_generator=MagicMock(),
-        timestamp_provider=MagicMock(),
+        index_generator=index_generator,
+        timestamp_provider=timestamp_provider,
     )
 
     with pytest.raises(PipelineStageError) as exc_info:
