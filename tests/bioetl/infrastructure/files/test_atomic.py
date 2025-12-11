@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
-from bioetl.infrastructure.settings.files import MAX_FILE_RETRIES
+from bioetl.infrastructure.settings.files import DEFAULT_FILE_SETTINGS
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def test_replace_with_retry_max_retries_exceeded(mock_sleep, atomic_op, tmp_path
     src.write_text("content")
 
     is_windows = platform.system() == "Windows"
-    expected_retries = MAX_FILE_RETRIES * (2 if is_windows else 1)
+    expected_retries = DEFAULT_FILE_SETTINGS.max_retries * (2 if is_windows else 1)
 
     with patch("os.replace", side_effect=OSError("Locked")):
         with pytest.raises(OSError, match="Locked"):
@@ -114,7 +114,7 @@ def test_replace_with_retry_windows_permission_error_message(
     if not is_windows:
         pytest.skip("Windows-specific test")
 
-    expected_retries = MAX_FILE_RETRIES * 2
+    expected_retries = DEFAULT_FILE_SETTINGS.max_retries * 2
 
     # Simulate PermissionError (file locked)
     with patch(
@@ -151,7 +151,7 @@ def test_try_replace_converts_windows_access_denied(mock_sleep, atomic_op, tmp_p
             super().__init__("[WinError 5] Access is denied")
             self.winerror = 5
 
-    expected_retries = MAX_FILE_RETRIES * 2
+    expected_retries = DEFAULT_FILE_SETTINGS.max_retries * 2
 
     with patch("os.replace", side_effect=WindowsOSError()):
         with pytest.raises(PermissionError) as exc_info:

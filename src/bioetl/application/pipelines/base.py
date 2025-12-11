@@ -475,7 +475,7 @@ class PipelineBase(ABC):
 
         df_for_validation = df_for_validation.loc[:, schema_columns]
 
-        return self._validation_service.validate(  # type: ignore[no-any-return]
+        return self._validation_service.validate(
             df=df_for_validation,
             entity_name=schema_name,
         )
@@ -538,7 +538,7 @@ class PipelineBase(ABC):
     ) -> pd.DataFrame:
         if not self._post_transformer:
             return df
-        return self._post_transformer.apply(df, context)  # type: ignore[no-any-return]
+        return self._post_transformer.apply(df, context)
 
     @staticmethod
     def _resolve_validator_columns(schema: Any) -> list[str]:

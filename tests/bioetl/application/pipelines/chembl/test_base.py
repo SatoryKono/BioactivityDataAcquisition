@@ -11,7 +11,7 @@ from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
 from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     NormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
@@ -118,8 +118,8 @@ def pipeline_fixture(mock_dependencies_fixture):
     )
 
 
-def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
-    """Test ChEMBL release version retrieval.
+def test_get_version(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
+    """Test ChEMBL release version retrieval via get_version().
 
     ExtractionService returns raw version ('34'), application layer
     formats it using domain service to 'chembl_34'.
@@ -132,8 +132,8 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeyp
         pipeline_fixture, "_should_skip_release_lookup", lambda: False, raising=False
     )
 
-    release1 = pipeline_fixture.get_chembl_release()
-    release2 = pipeline_fixture.get_chembl_release()
+    release1 = pipeline_fixture.get_version()
+    release2 = pipeline_fixture.get_version()
 
     # Application layer formats to 'chembl_34'
     assert release1 == "chembl_34"

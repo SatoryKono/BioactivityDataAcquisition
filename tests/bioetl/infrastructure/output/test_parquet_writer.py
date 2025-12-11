@@ -3,11 +3,11 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
+from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriter
 
 
 def test_parquet_writer_properties():
-    writer = ParquetWriterImpl()
+    writer = ParquetWriter()
     assert writer.is_atomic is True
     assert writer.has_format_support("parquet")
     assert writer.has_format_support("PARQUET")
@@ -15,7 +15,7 @@ def test_parquet_writer_properties():
 
 
 def test_parquet_write():
-    writer = ParquetWriterImpl()
+    writer = ParquetWriter()
     df = pd.DataFrame({"a": [1, 2]})
     path = Path("test.parquet")
 

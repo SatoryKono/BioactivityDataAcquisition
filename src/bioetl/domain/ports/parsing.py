@@ -10,40 +10,16 @@ Type Parameters:
         (dict[str, Any]) for untyped parsing. Can be parameterized with Pydantic
         models or other types for typed parsing.
 
-Migration Guide (from ResponseParserABC):
------------------------------------------
-``ResponseParserABC`` from ``bioetl.domain.clients.base.contracts`` is deprecated.
-Use ``ResponseParserPortABC`` from this module instead.
+Example usage::
 
-Method mapping:
-    - ``parse(raw_response)`` → ``parse_to_records(raw_response)``
-    - ``parse_response(raw_response)`` → ``parse_to_records(raw_response)``
-      (was deprecated)
-    - ``extract_metadata(raw_response)`` → ``extract_pagination(raw_response)``
-
-Type changes:
-    - Both interfaces now support Generic[RecordT]
-    - Default type is RawRecord (dict[str, Any]) for backward compatibility
-
-Example migration::
-
-    # Before (deprecated)
-    from bioetl.domain.clients.base.contracts import ResponseParserABC
-
-    class MyParser(ResponseParserABC[MyModel]):
-        def parse(self, raw_response): ...
-        def extract_metadata(self, raw_response): ...
-
-    # After (recommended) - untyped
+    # Untyped parser (default)
     from bioetl.domain.ports.parsing import ResponseParserPortABC
 
     class MyParser(ResponseParserPortABC):
         def parse_to_records(self, raw_response): ...
         def extract_pagination(self, raw_response): ...
 
-    # After (recommended) - typed with Pydantic model
-    from bioetl.domain.ports.parsing import ResponseParserPortABC
-
+    # Typed parser with Pydantic model
     class MyTypedParser(ResponseParserPortABC[MyModel]):
         def parse_to_records(self, raw_response) -> list[MyModel]: ...
         def extract_pagination(self, raw_response): ...
@@ -54,8 +30,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Generic, TypeAlias
-import warnings
+from typing import Any, Generic
 
 from typing_extensions import TypeVar
 
@@ -131,50 +106,6 @@ class ResponseParserPortABC(ABC, Generic[RecordT]):
             Keys depend on provider implementation.
         """
 
-    # =========================================================================
-    # Backward compatibility aliases (from deprecated ResponseParserABC)
-    # =========================================================================
-
-    def parse(self, raw_response: ApiPayload) -> list[RecordT]:
-        """Backward-compatible alias for :meth:`parse_to_records`.
-
-        .. deprecated:: 2.0
-            Use :meth:`parse_to_records` instead. Will be removed in 3.0.
-
-        Args:
-            raw_response: Raw dictionary payload from API response.
-
-        Returns:
-            List of records (type depends on RecordT parameter).
-        """
-        warnings.warn(
-            "parse() is deprecated, use parse_to_records() instead. "
-            "See migration guide in bioetl.domain.ports.parsing docstring.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.parse_to_records(raw_response)
-
-    def extract_metadata(self, raw_response: ApiPayload) -> dict[str, int | str | None]:
-        """Backward-compatible alias for :meth:`extract_pagination`.
-
-        .. deprecated:: 2.0
-            Use :meth:`extract_pagination` instead. Will be removed in 3.0.
-
-        Args:
-            raw_response: Raw dictionary payload from API response.
-
-        Returns:
-            Dictionary containing pagination/metadata information.
-        """
-        warnings.warn(
-            "extract_metadata() is deprecated, use extract_pagination() instead. "
-            "See migration guide in bioetl.domain.ports.parsing docstring.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.extract_pagination(raw_response)
-
 
 @dataclass(frozen=True, slots=True)
 class PaginationInfo:
@@ -232,25 +163,6 @@ class PaginationInfo:
         )
 
 
-# Type aliases for backward compatibility with tests
-RawPayload: TypeAlias = ApiPayload
-"""Type alias for raw API payload (backward compatibility).
-
-Deprecated: Use ApiPayload from bioetl.domain.types instead.
-"""
-
-RawRecordDict: TypeAlias = dict[str, Any]
-"""Type alias for a single raw record dictionary.
-
-Deprecated: Use dict[str, Any] directly or Record from domain.data.
-"""
-
-RawRecordList: TypeAlias = list[dict[str, Any]]
-"""Type alias for a list of raw record dictionaries.
-
-Deprecated: Use list[dict[str, Any]] or RecordBatch from domain.data.
-"""
-
 __all__ = [
     # Type variable
     "RecordT",
@@ -258,10 +170,6 @@ __all__ = [
     "ApiPayload",  # from domain.types
     "RecordBatch",  # from domain.data
     "RawRecord",  # local alias for Mapping[str, Any]
-    # Backward compatibility aliases
-    "RawPayload",
-    "RawRecordDict",
-    "RawRecordList",
     # ABCs and classes
     "ResponseParserPortABC",
     "PaginationInfo",

@@ -3,14 +3,16 @@
 import hashlib
 from pathlib import Path
 
-from bioetl.infrastructure.settings.files import CHECKSUM_CHUNK_SIZE
+from bioetl.infrastructure.settings.files import DEFAULT_FILE_SETTINGS
 
 
 def compute_file_sha256(path: Path) -> str:
     """Compute SHA256 hash of a file."""
     sha256 = hashlib.sha256()
     with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(CHECKSUM_CHUNK_SIZE), b""):
+        for chunk in iter(
+            lambda: f.read(DEFAULT_FILE_SETTINGS.checksum_chunk_size), b""
+        ):
             sha256.update(chunk)
     return sha256.hexdigest()
 
