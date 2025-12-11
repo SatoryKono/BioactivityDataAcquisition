@@ -100,7 +100,10 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     )
     assay_type: Series[str] = pa.Field(
         isin=["B", "F", "A", "T", "P", "U", "b", "f", "a", "t", "p", "u"],
-        description="Assay type (B=binding, F=functional, A=ADMET, T=toxicity, P=physicochemical, U=unknown)",
+        description=(
+            "Assay type (B=binding, F=functional, A=ADMET, T=toxicity, "
+            "P=physicochemical, U=unknown)"
+        ),
     )
     assay_variant_accession: Series[str] = pa.Field(
         nullable=True, description="Protein variant accession"
