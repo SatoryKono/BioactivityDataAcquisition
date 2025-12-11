@@ -59,3 +59,9 @@ print('\n'.join(bad)) or sys.exit(1) if bad else sys.exit(0)"
       pass_filenames: false
       files: ^src/bioetl/infrastructure/
 
+    - id: check-registry-sync
+      name: check registry synchronization
+      entry: python src/tools/check_registry_sync.py
+      language: python
+      pass_filenames: false
+
