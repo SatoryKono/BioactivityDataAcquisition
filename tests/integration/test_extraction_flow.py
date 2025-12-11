@@ -14,7 +14,7 @@ from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
-from bioetl.interfaces.simple_container import SimplePipelineContainer
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 
 class TestExtractionFlow:
@@ -152,29 +152,22 @@ class TestExtractionFlow:
         assert list(df["activity_id"]) == ["1", "2", "3"]
         assert list(df["assay_chembl_id"]) == ["CHEMBL100", "CHEMBL200", "CHEMBL300"]
 
-    def test_container_bootstrap_and_components(self) -> None:
-        """Container should wire all components correctly."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
+    def test_bootstrap_provides_contract_provider(self) -> None:
+        """ApplicationBootstrap should provide schema contract provider."""
+        bootstrap = create_default_bootstrap()
+        context = bootstrap.start()
 
         try:
-            # Verify components are available
-            assert container.response_parser is not None
-            assert container.record_mapper is not None
-            assert container.schema_contract_provider is not None
-            assert container.is_bootstrapped is True
-
-            # Verify types
-            assert isinstance(container.response_parser, ChemblGenericResponseParser)
-            assert isinstance(container.record_mapper, ChemblRecordMapper)
+            # Verify contract provider is available
+            assert context.contract_provider is not None
+            assert bootstrap.is_started is True
         finally:
-            # Clean up
-            container.reset()
+            bootstrap.shutdown()
 
-    def test_container_components_work_together(self) -> None:
-        """Container-provided components should work together."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
+    def test_components_work_together(self) -> None:
+        """Parser and mapper components should work together."""
+        bootstrap = create_default_bootstrap()
+        context = bootstrap.start()
 
         try:
             sample_response = {
@@ -183,9 +176,9 @@ class TestExtractionFlow:
                 ],
             }
 
-            # Use container-provided components
-            parser = container.response_parser
-            mapper = container.record_mapper
+            # Create components directly (not managed by bootstrap)
+            parser = ChemblGenericResponseParser()
+            mapper = ChemblRecordMapper()
 
             raw_records = parser.parse_to_records(sample_response)
             typed_records = mapper.map_records(raw_records, "activity")
@@ -193,7 +186,7 @@ class TestExtractionFlow:
             assert len(typed_records) == 1
             assert typed_records[0].activity_id == "999"
         finally:
-            container.reset()
+            bootstrap.shutdown()
 
 
 class TestLayerIsolation:
