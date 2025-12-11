@@ -288,9 +288,11 @@ class TestExistingConfigFiles:
         yield bootstrap
         bootstrap.shutdown()
 
-    def test_load_chembl_activity_valid_config(self) -> None:
+    def test_load_chembl_activity_valid_config(
+        self, setup_bootstrap: ApplicationBootstrap
+    ) -> None:
         """Should load valid ChEMBL activity config from fixtures."""
-        bootstrap = self.setup_bootstrap
+        bootstrap = setup_bootstrap
         config_path = Path("tests/fixtures/configs/chembl_activity_valid.yaml")
         if not config_path.exists():
             pytest.skip("Fixture file not found")
@@ -304,9 +306,11 @@ class TestExistingConfigFiles:
         assert config.provider == "chembl"
         assert config.entity_name == "activity"
 
-    def test_load_chembl_activity_test_config(self) -> None:
+    def test_load_chembl_activity_test_config(
+        self, setup_bootstrap: ApplicationBootstrap
+    ) -> None:
         """Should load test ChEMBL activity config from fixtures."""
-        bootstrap = self.setup_bootstrap
+        bootstrap = setup_bootstrap
         config_path = Path("tests/fixtures/configs/chembl_activity_test.yaml")
         if not config_path.exists():
             pytest.skip("Fixture file not found")

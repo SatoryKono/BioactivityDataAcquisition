@@ -31,17 +31,11 @@ For DI-based usage:
 
 from __future__ import annotations
 
-import importlib
 from pathlib import Path
 from typing import NoReturn
 import warnings
 
 __all__ = ["generate_schema_from_column_order", "load_column_order_from_yaml"]
-
-
-def _load_impl() -> object:
-    """Load infrastructure implementation lazily to avoid hard dependency."""
-    return importlib.import_module("bioetl.infrastructure.validation.schema_generator")
 
 
 def _raise_missing_impl(func_name: str) -> NoReturn:
@@ -51,7 +45,7 @@ def _raise_missing_impl(func_name: str) -> NoReturn:
     )
 
 
-def generate_schema_from_column_order(columns: list[str]) -> object:
+def generate_schema_from_column_order(columns: list[str]) -> NoReturn:
     """DEPRECATED: Use PanderaSchemaGenerator from infrastructure.
 
     Build a permissive Pandera schema using the provided column order.
@@ -81,15 +75,10 @@ def generate_schema_from_column_order(columns: list[str]) -> object:
         DeprecationWarning,
         stacklevel=2,
     )
-    try:
-        module = _load_impl()
-        impl = getattr(module, "generate_schema_from_column_order")
-    except Exception:
-        _raise_missing_impl("generate_schema_from_column_order")
-    return impl(columns)
+    _raise_missing_impl("generate_schema_from_column_order")
 
 
-def load_column_order_from_yaml(path: str | Path) -> list[str]:
+def load_column_order_from_yaml(path: str | Path) -> NoReturn:
     """DEPRECATED: Use YamlColumnOrderLoader from infrastructure.
 
     Load column order from YAML file.
@@ -117,9 +106,4 @@ def load_column_order_from_yaml(path: str | Path) -> list[str]:
         DeprecationWarning,
         stacklevel=2,
     )
-    try:
-        module = _load_impl()
-        impl = getattr(module, "load_column_order_from_yaml")
-    except Exception:
-        _raise_missing_impl("load_column_order_from_yaml")
-    return impl(path)
+    _raise_missing_impl("load_column_order_from_yaml")
