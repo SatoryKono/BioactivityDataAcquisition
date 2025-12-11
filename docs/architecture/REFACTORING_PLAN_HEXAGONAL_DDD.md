@@ -1,9 +1,9 @@
 # План рефакторинга BioactivityDataAcquisition к принципам Hexagonal Architecture и DDD
 
-**Версия:** 2.1
+**Версия:** 2.2
 **Дата обновления:** 2025-12-11
-**Текущий интегральный балл:** 8.2/10 ⬆️
-**Целевой интегральный балл:** ≥8.5/10
+**Текущий интегральный балл:** 8.5/10 ⬆️
+**Целевой интегральный балл:** ≥8.5/10 ✅ ДОСТИГНУТ
 
 ---
 
@@ -18,7 +18,7 @@
 | **ABC/Protocol классов в domain** | 79 |
 | **Файлов с портами** | 30 |
 | **Архитектурных тестов** | 37 (1,881 LOC) |
-| **Import violations** | 2 (только docstrings) ✅ |
+| **Import violations** | 0 ✅ |
 
 ### Архитектурные метрики
 
@@ -28,12 +28,12 @@
 | Ports & Adapters | 9/10 | ✅ | 79 ABC/Protocol, минимальные нарушения |
 | Модульность | 8/10 | ✅ | Хорошее разделение на 4 слоя |
 | Доменная модель | 8/10 | ✅ | Value Objects чистые, configs = DTOs |
-| Конфигурация | 7/10 | ⚠️ | Defaults частично централизованы |
+| Конфигурация | 8/10 | ✅ | Defaults централизованы, fallback policy документирован |
 | Тестирование архитектуры | 9/10 | ✅ | 37 тестов, 4 файла, CI |
 | Обработка ошибок | 8/10 | ✅ | Domain errors, typed exceptions |
 | Документация | 8/10 | ✅ | Guides, API docs |
 | Наблюдаемость | 9/10 | ✅ | 4 порта полностью реализованы |
-| Технический долг | 7/10 | ✅ | Минимальный |
+| Технический долг | 8/10 | ✅ | Минимальный, YAML export готов |
 
 ### Что полностью реализовано
 
@@ -55,15 +55,17 @@
 | **Pipeline Registry** | `application/pipelines/registry.py` | 102 | Factory ✅ |
 | **Defaults Config** | `domain/configs/defaults.py` | 123 | Centralized ✅ |
 | **Background Executor** | `application/services/background_executor.py` | 100+ | ProcessPool ✅ |
+| **Fallback Policy Docs** | `docs/architecture/fallback_policy.md` | 200+ | Документация ✅ |
+| **YAML Schema Export** | `scripts/export_schemas_yaml.py` | 250+ | Скрипт ✅ |
 
 ### Оставшиеся улучшения (низкий приоритет)
 
 | Задача | Критичность | Статус |
 |--------|-------------|--------|
-| YAML schema export | 🟢 Низкая | Опционально |
-| ObservabilityContext aggregate | 🟢 Низкая | Опционально |
+| YAML schema export | 🟢 Низкая | ✅ Реализовано |
+| ObservabilityContext aggregate | 🟢 Низкая | Опционально (есть ObservabilityStack) |
 | Request-scoped DI middleware | 🟢 Низкая | Примитивы готовы |
-| Документация fallback policy | 🟢 Низкая | Рекомендуется |
+| Документация fallback policy | 🟢 Низкая | ✅ Реализовано |
 
 ---
 
@@ -87,7 +89,7 @@
 - Application layer dependency graph
 - Infrastructure layer architecture check
 
-**Нарушений:** 2 (только в docstrings, не в runtime коде)
+**Нарушений:** 0 ✅
 
 ---
 
@@ -203,7 +205,7 @@ class BaseGeneratedColumnsModel(pa.DataFrameModel):
 
 **Pipeline Contracts:** `configs/pipeline_contracts.yaml` с 5 entity contracts
 
-**Оставшаяся работа:** YAML export скрипт (низкий приоритет, опционально)
+**YAML Export:** `scripts/export_schemas_yaml.py` — экспорт Pandera схем в YAML ✅
 
 ---
 
@@ -265,7 +267,9 @@ class ObservabilityStack:
 
 ## Task 9. Pipeline Contract Fallback: Config vs Domain
 
-### Статус: ✅ **ЧАСТИЧНО ЦЕНТРАЛИЗОВАНО**
+### Статус: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
+
+**Документация:** `docs/architecture/fallback_policy.md` ✅
 
 **Централизованные defaults (123 LOC):**
 ```python
@@ -284,7 +288,7 @@ class DefaultsConfig(BaseModel):
 | Application | `application/providers/defaults.py` | Field defaults |
 | Composition | `interfaces/composition_root.py` | Runtime defaults |
 
-**Оставшаяся работа:** Документация `docs/architecture/fallback_policy.md` (рекомендуется)
+**Политика fallback:** Полностью документирована в `docs/architecture/fallback_policy.md` ✅
 
 ---
 
@@ -335,21 +339,23 @@ class DefaultsConfig(BaseModel):
 
 | Метрика | Целевое | Текущее | Статус |
 |---------|---------|---------|--------|
-| Интегральный балл | ≥7.5 | **8.2** | ✅ Превышено |
-| Import violations | ≤3 | **2** | ✅ Достигнуто |
+| Интегральный балл | ≥8.5 | **8.5** | ✅ Достигнуто |
+| Import violations | 0 | **0** | ✅ Достигнуто |
 | ABC/Protocol coverage | >50 | **79** | ✅ Превышено |
 | Arch test coverage | >30 | **37** | ✅ Достигнуто |
 | Domain purity | 100% | **100%** | ✅ Достигнуто |
 
 ### Definition of Done — ✅ ВСЁ ВЫПОЛНЕНО
 
-- [x] Import-linter: нарушений нет (2 в docstrings)
+- [x] Import-linter: 0 нарушений
 - [x] Архитектурные тесты: все проходят (37 тестов)
 - [x] CI: настроен и работает
 - [x] Composition Root: реализован
 - [x] Observability Ports: 4 порта реализованы
 - [x] Value Objects: чистые (без Pydantic)
 - [x] DI Lifecycle: contextvars реализован
+- [x] Fallback Policy: документирован
+- [x] YAML Schema Export: скрипт реализован
 
 ---
 
@@ -365,16 +371,17 @@ class DefaultsConfig(BaseModel):
 - ✅ Чистые Value Objects (без Pydantic)
 - ✅ 4 observability порта с реализациями
 
-### Рекомендации:
-- 📝 Добавить документацию fallback policy
-- 📝 Рассмотреть YAML export для Pandera schemas
-- 📝 При необходимости REST — добавить middleware
+### Рекомендации (опционально):
+- 📝 При необходимости REST — добавить request-scoped middleware
+- 📝 Рассмотреть ObservabilityContext aggregate (если нужен tracing)
 
 ---
 
 ## Ссылки
 
 ### Внутренние документы
+- `docs/architecture/fallback_policy.md` — политика разрешения defaults ✅
+- `scripts/export_schemas_yaml.py` — экспорт Pandera схем в YAML ✅
 - `docs/REFACTORING_PLAN.md` — исторический план (устарел)
 - `docs/PIPELINE_IMPLEMENTATION_GUIDE.md` — guide для разработчиков
 
