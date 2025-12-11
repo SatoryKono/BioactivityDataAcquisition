@@ -1,9 +1,10 @@
 import pandas as pd
 
-from bioetl.domain.schemas.generator import generate_schema_from_column_order
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValidatorImpl
-from bioetl.infrastructure.validation.schemas.generator import (
+from bioetl.infrastructure.validation.schema_generator import (
+    PanderaSchemaGenerator,
+    generate_schema_from_column_order,
     load_column_order_from_yaml,
 )
 
@@ -28,7 +29,7 @@ def test_register_schema_from_yaml(tmp_path):
     yaml_path.write_text("- id\n- name\n", encoding="utf-8")
 
     column_order = load_column_order_from_yaml(yaml_path)
-    registry = SchemaRegistry()
+    registry = SchemaRegistry(schema_generator=PanderaSchemaGenerator())
     registry.register("from_yaml", None, column_order=column_order)
 
     schema = registry.get_schema("from_yaml")

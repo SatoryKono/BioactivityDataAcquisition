@@ -24,6 +24,12 @@ from bioetl.interfaces.composition_root import (
     get_composition_root,
     reset_composition_root,
 )
+from bioetl.interfaces.context_manager import (
+    application_context,
+    get_current_context,
+    reset_current_context,
+    set_current_context,
+)
 from bioetl.interfaces.factories import (
     DefaultInfrastructureFactory,
     DefaultObservabilityFactory,
@@ -34,12 +40,6 @@ from bioetl.interfaces.use_case_factory import (
     UseCaseFactory,
     get_use_case_factory,
     reset_use_case_factory,
-)
-from bioetl.interfaces.context_manager import (
-    application_context,
-    get_current_context,
-    reset_current_context,
-    set_current_context,
 )
 
 __all__ = [

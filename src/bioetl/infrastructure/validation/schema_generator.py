@@ -7,16 +7,9 @@ using Pandera for DataFrame validation and YAML for configuration loading.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
 import pandera.pandas as pa
 import yaml
-
-if TYPE_CHECKING:
-    from bioetl.domain.schemas.contracts import (
-        ColumnOrderLoaderProtocol,
-        SchemaGeneratorProtocol,
-    )
 
 
 class PanderaSchemaGenerator:

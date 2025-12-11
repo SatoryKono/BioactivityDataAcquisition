@@ -7,7 +7,7 @@ from __future__ import annotations
 from collections.abc import Callable
 import warnings
 
-from bioetl.domain.schemas.generator import generate_schema_from_column_order
+from bioetl.domain.schemas.contracts import SchemaGeneratorProtocol
 from bioetl.domain.validation import SchemaProviderABC, schema_type
 
 # Type alias for schema registration function
@@ -19,9 +19,14 @@ class SchemaRegistry(SchemaProviderABC):
     Реестр схем данных.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        schema_generator: SchemaGeneratorProtocol | None = None,
+    ) -> None:
         self._schemas: dict[str, schema_type | None] = {}
         self._schema_columns: dict[str, list[str] | None] = {}
+        self._schema_generator = schema_generator
 
     def register(
         self,
@@ -50,7 +55,16 @@ class SchemaRegistry(SchemaProviderABC):
         if not column_order:
             raise ValueError(f"Column order for schema '{name}' is not available.")
 
-        generated_schema = generate_schema_from_column_order(column_order)
+        if self._schema_generator is None:
+            msg = (
+                "Schema generator is required to materialize schema from column order. "
+                "Provide a SchemaGeneratorProtocol implementation."
+            )
+            raise ValueError(msg)
+
+        generated_schema = self._schema_generator.generate_from_column_order(
+            column_order
+        )
         self._schemas[name] = generated_schema
         return generated_schema
 
@@ -83,6 +97,7 @@ class SchemaRegistry(SchemaProviderABC):
 def create_default_schema_registry(
     *,
     register_fn: SchemaRegisterFn | None = None,
+    schema_generator: SchemaGeneratorProtocol | None = None,
 ) -> SchemaRegistry:
     """
     Create a new SchemaRegistry populated with default schemas.
@@ -99,7 +114,7 @@ def create_default_schema_registry(
     SchemaRegistry
         A freshly created and populated registry instance.
     """
-    reg = SchemaRegistry()
+    reg = SchemaRegistry(schema_generator=schema_generator)
 
     if register_fn is not None:
         register_fn(reg)

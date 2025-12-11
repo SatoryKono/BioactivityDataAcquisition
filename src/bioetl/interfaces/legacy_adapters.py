@@ -22,8 +22,8 @@ Migration guide:
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
+import warnings
 
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC

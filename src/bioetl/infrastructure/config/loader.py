@@ -44,9 +44,9 @@ from bioetl.infrastructure.config.sources import (
 # Backward-compatible provider context (no global mutable state)
 # -----------------------------------------------------------------------------
 
-_SCHEMA_CONTRACT_CTX: ContextVar[
-    SchemaContractProviderABC | None
-] = ContextVar("_schema_contract_ctx", default=None)
+_SCHEMA_CONTRACT_CTX: ContextVar[SchemaContractProviderABC | None] = ContextVar(
+    "_schema_contract_ctx", default=None
+)
 
 
 def set_schema_contract_provider(provider: SchemaContractProviderABC | None) -> None:
@@ -434,8 +434,13 @@ def _populate_fields_from_schema(
         try:
             from bioetl.domain.schemas.fields import build_field_configs_from_schema
             from bioetl.domain.schemas.registry import create_default_schema_registry
+            from bioetl.infrastructure.validation.schema_generator import (
+                PanderaSchemaGenerator,
+            )
 
-            registry = create_default_schema_registry()
+            registry = create_default_schema_registry(
+                schema_generator=PanderaSchemaGenerator()
+            )
             schema = registry.get_schema(schema_name)
             fields = build_field_configs_from_schema(schema)
         except Exception:

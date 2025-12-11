@@ -28,8 +28,8 @@ Usage:
 
 from __future__ import annotations
 
-import contextvars
 from contextlib import contextmanager
+import contextvars
 from typing import TYPE_CHECKING, Generator
 
 if TYPE_CHECKING:

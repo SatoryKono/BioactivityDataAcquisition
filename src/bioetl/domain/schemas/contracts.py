@@ -17,7 +17,8 @@ class SchemaGeneratorProtocol(Protocol):
     """Protocol for schema generators.
 
     Implementations create validation schemas from column descriptors.
-    The actual schema type depends on the implementation (e.g., Pandera DataFrameSchema).
+    The actual schema type depends on the implementation
+    (e.g., Pandera DataFrameSchema).
 
     Example:
         >>> generator = PanderaSchemaGenerator()

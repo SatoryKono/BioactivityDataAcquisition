@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
     from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
     from bioetl.interfaces.composition_root import CompositionRoot
+    from bioetl.interfaces.use_case_factory import UseCaseFactory
 
 
 @dataclass(frozen=True)
@@ -140,13 +141,6 @@ def reset_application_context() -> None:
     """
     global _context
     _context = None
-
-
-# Type hint for lazy import
-class UseCaseFactory:
-    """Forward declaration for type hints."""
-
-    pass
 
 
 __all__ = [
