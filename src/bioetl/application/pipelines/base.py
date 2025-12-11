@@ -38,7 +38,7 @@ Example::
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias, cast
 
 import pandas as pd
 
