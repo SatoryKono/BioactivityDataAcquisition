@@ -102,6 +102,10 @@ ALLOWED_EXCEPTIONS: dict[str, set[str]] = {
     "src/bioetl/infrastructure/chembl/model_registry.py": {
         "bioetl.domain.schemas.chembl.raw_models",
     },
+    # Deterministic writer shares checksum contract with domain output module
+    "src/bioetl/infrastructure/output/deterministic.py": {
+        "bioetl.domain.output.deterministic",
+    },
 }
 
 

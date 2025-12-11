@@ -8,13 +8,14 @@ abstracting away provider-specific details from the container.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 from bioetl.application.factories.services import ProviderServiceFactory
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import BaseProviderConfig, PipelineConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.domain.ports.entity_models import EntityModelRegistryABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 
@@ -22,7 +23,7 @@ class ApplicationServiceFactoryABC(ABC):
     """Abstract base for application service factories."""
 
     @abstractmethod
-    def create_extraction_service(self) -> Any:
+    def create_extraction_service(self) -> ExtractionServiceABC:
         """Create extraction service for the configured provider."""
 
     @abstractmethod
@@ -30,7 +31,7 @@ class ApplicationServiceFactoryABC(ABC):
         """Create normalization service for the configured provider."""
 
     @abstractmethod
-    def create_entity_model_registry(self) -> Any:
+    def create_entity_model_registry(self) -> EntityModelRegistryABC:
         """Create entity model registry for the configured provider."""
 
 
@@ -70,7 +71,9 @@ class ApplicationServiceFactory(ApplicationServiceFactoryABC):
         """Get provider definition from registry."""
         return self._provider_registry.get_provider(self._provider_id)
 
-    def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
+    def _resolve_provider_config(
+        self, definition: ProviderDefinition
+    ) -> BaseProviderConfig:
         """Resolve and validate provider-specific configuration."""
         source_config = self._config.get_source_config(self._provider_id.value)
         if not isinstance(source_config, definition.config_type):
@@ -92,7 +95,7 @@ class ApplicationServiceFactory(ApplicationServiceFactoryABC):
             )
         return self._provider_factory
 
-    def create_extraction_service(self) -> Any:
+    def create_extraction_service(self) -> ExtractionServiceABC:
         """Create extraction service for the configured provider."""
         return self._get_provider_factory().create_extraction_service()
 
@@ -100,7 +103,7 @@ class ApplicationServiceFactory(ApplicationServiceFactoryABC):
         """Create normalization service for the configured provider."""
         return self._get_provider_factory().create_normalization_service()
 
-    def create_entity_model_registry(self) -> Any:
+    def create_entity_model_registry(self) -> EntityModelRegistryABC:
         """Create entity model registry for the configured provider."""
         return self._get_provider_factory().create_entity_model_registry()
 

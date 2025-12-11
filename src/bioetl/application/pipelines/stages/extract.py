@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from typing import Any, cast
 
 import pandas as pd
@@ -89,11 +89,11 @@ class ExtractStage(ExtractorABC):
         """Get the pre-configured entity if set."""
         return self._entity
 
-    def _is_batch_empty(self, batch: Any) -> bool:
+    def _is_batch_empty(self, batch: pd.DataFrame | Sequence[object]) -> bool:
         """Check if batch is empty (handles both DataFrame and list)."""
         if isinstance(batch, pd.DataFrame):
-            return batch.empty
-        return not batch
+            return bool(batch.empty)
+        return len(batch) == 0
 
     def _create_dataframe_from_batch(
         self, batch_records: Any, resolved_entity: str
