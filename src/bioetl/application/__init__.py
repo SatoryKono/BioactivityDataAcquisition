@@ -13,6 +13,7 @@ For configuration, import from bioetl.application.config.
 """
 
 from bioetl.application import contracts
+from bioetl.application.bootstrap_factory import create_default_bootstrap
 from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC, PipelineFactoryABC
 from bioetl.application.orchestrator import PipelineOrchestrator
@@ -23,4 +24,5 @@ __all__ = [
     "PipelineFactoryABC",
     "PipelineOrchestrator",
     "contracts",
+    "create_default_bootstrap",
 ]
