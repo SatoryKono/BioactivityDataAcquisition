@@ -45,3 +45,10 @@ print('\n'.join(bad)) or sys.exit(1) if bad else sys.exit(0)"
       language: system
       pass_filenames: false
 
+    - id: check-application-deps
+      name: check application layer dependencies
+      entry: python scripts/check_application_deps.py
+      language: python
+      pass_filenames: false
+      files: ^src/bioetl/application/
+
