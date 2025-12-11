@@ -54,6 +54,26 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
         """Normalize single record using configured field rules."""
         return self.apply_normalize(record)
 
+    def _get_normalizer_for_field(self, name: str) -> Callable[[Any], Any]:
+        """Get the appropriate normalizer function for a field.
+
+        Args:
+            name: Field name.
+
+        Returns:
+            Normalizer function (custom or default).
+        """
+        mode = self._resolve_mode(name)
+        custom_normalizer = normalize.get_normalizer(name)
+
+        if custom_normalizer:
+            return custom_normalizer
+
+        def _default_normalizer(val: Any, m: str = mode) -> Any:
+            return normalize.normalize_scalar(val, mode=m)
+
+        return _default_normalizer
+
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
         """Iterate through configuration fields and apply normalization."""
         for field_cfg in self._iter_fields():
@@ -63,17 +83,7 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
             if name not in df.columns:
                 continue
 
-            mode = self._resolve_mode(name)
-            custom_normalizer = normalize.get_normalizer(name)
-
-            if custom_normalizer:
-                base_normalizer: Callable[[Any], Any] = custom_normalizer
-            else:
-
-                def _default_normalizer(val: Any, m=mode) -> Any:
-                    return normalize.normalize_scalar(val, mode=m)
-
-                base_normalizer = _default_normalizer
+            base_normalizer = self._get_normalizer_for_field(name)
 
             def _apply_value(
                 val: Any,
@@ -134,17 +144,7 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
                 continue
 
             dtype = field_cfg.get("data_type")
-            mode = self._resolve_mode(name)
-            custom_normalizer = normalize.get_normalizer(name)
-
-            if custom_normalizer:
-                base_normalizer = custom_normalizer
-            else:
-
-                def _default_normalizer(val: Any, m: str = mode) -> Any:
-                    return normalize.normalize_scalar(val, mode=m)
-
-                base_normalizer = _default_normalizer
+            base_normalizer = self._get_normalizer_for_field(name)
 
             value = raw_data.get(name)
             normalized[name] = self._normalize_value(
@@ -188,17 +188,9 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
         """Normalize a single series according to field configuration."""
         name = cast(str, field_cfg.get("name"))
         dtype = field_cfg.get("data_type")
-        mode = self._resolve_mode(name)
+        base_normalizer = self._get_normalizer_for_field(name)
+        # Get custom normalizer for special array handling
         custom_normalizer = normalize.get_normalizer(name)
-
-        if custom_normalizer:
-            base_normalizer = custom_normalizer
-        else:
-
-            def _default_normalizer(val: Any, m: str = mode) -> Any:
-                return normalize.normalize_scalar(val, mode=m)
-
-            base_normalizer = _default_normalizer
 
         def _normalize_value_from_series(val: Any) -> Any:
             if (
