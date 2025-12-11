@@ -179,6 +179,10 @@ class PipelineContainer(PipelineContainerABC):
         """Create and return a normalization service via the service factory."""
         return self._get_service_factory().create_normalization_service()
 
+    def get_entity_model_registry(self) -> Any:
+        """Create and return an entity model registry via the service factory."""
+        return self._get_service_factory().create_entity_model_registry()
+
     # ─────────────────────────────────────────────────────────────────────────
     # Transform Components (via TransformFactory)
     # ─────────────────────────────────────────────────────────────────────────

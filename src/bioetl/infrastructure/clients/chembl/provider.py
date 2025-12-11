@@ -70,6 +70,14 @@ class ChemblProviderComponentsFactory(
             )
         return create_normalization_service(pipeline_config)
 
+    def create_entity_model_registry(self) -> Any:
+        """Create provider-specific entity model registry."""
+        from bioetl.infrastructure.chembl.model_registry import (
+            get_chembl_model_registry,
+        )
+
+        return get_chembl_model_registry()
+
 
 def register_chembl_provider(
     http: HttpClientConfig | None = None,

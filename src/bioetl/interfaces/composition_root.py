@@ -240,6 +240,7 @@ class CompositionRoot:
         - Domain layer (PipelineConfig) contains only business rules
         - Application layer (ConfigMigrationService) orchestrates use cases
         - Infrastructure layer (ConfigMigrator) handles technical migration
+        - Interfaces layer (CompositionRoot) wires them together
 
         Returns:
             ConfigMigrationServiceProtocol: Service for migrating and validating
@@ -251,7 +252,9 @@ class CompositionRoot:
             >>> raw_config = {"entity": "activity", "provider": "chembl", ...}
             >>> config = migration_service.migrate_and_validate(raw_config)
         """
-        return ConfigMigrationService()
+        from bioetl.infrastructure.config.migration import ConfigMigrator
+
+        return ConfigMigrationService(migrator=ConfigMigrator)
 
     # =========================================================================
     # Pipeline Infrastructure

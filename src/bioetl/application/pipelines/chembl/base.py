@@ -23,6 +23,7 @@ from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
+from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
@@ -50,6 +51,7 @@ class ChemblPipelineBase(PipelineBase):
         hash_service: HashServiceABC,
         index_generator: IndexGeneratorABC,
         timestamp_provider: TimestampProviderABC,
+        entity_model_registry: EntityModelRegistryABC,
         loader: LoaderABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         normalization_service: NormalizationServiceABC | None = None,
@@ -71,7 +73,7 @@ class ChemblPipelineBase(PipelineBase):
 
         extractor = ExtractStage(
             extraction_service=extraction_service,
-            record_mapper=ChemblRecordMapper(),
+            record_mapper=ChemblRecordMapper(registry=entity_model_registry),
             entity=config.entity_name,
         )
 

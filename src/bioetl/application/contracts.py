@@ -67,6 +67,10 @@ class PipelineContainerABC(ABC):
         """Return normalization service for the configured provider."""
 
     @abstractmethod
+    def get_entity_model_registry(self) -> Any:
+        """Return entity model registry for the configured provider."""
+
+    @abstractmethod
     def get_record_source(
         self,
         extraction_service: Any,
