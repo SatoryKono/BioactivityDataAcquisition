@@ -405,47 +405,6 @@ def create_provider_registry_loader(
 
 
 # ---------------------------------------------------------------------------
-# Deprecated aliases for backward compatibility
-# ---------------------------------------------------------------------------
-
-
-def get_provider_registry(
-    *,
-    config_path: str | Path | None = None,
-    logger: LoggingPortABC | None = None,
-    registry: ProviderRegistryABC | None = None,
-) -> ProviderRegistryABC:
-    """DEPRECATED: Use create_provider_registry() instead."""
-    import warnings
-
-    warnings.warn(
-        "get_provider_registry is deprecated, use create_provider_registry instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_provider_registry(
-        config_path=config_path, logger=logger, registry=registry
-    )
-
-
-def default_provider_registry_loader(
-    *,
-    config_path: str | Path | None = None,
-    logger: LoggingPortABC | None = None,
-) -> ProviderRegistryLoaderABC:
-    """DEPRECATED: Use create_provider_registry_loader() instead."""
-    import warnings
-
-    warnings.warn(
-        "default_provider_registry_loader is deprecated, "
-        "use create_provider_registry_loader instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_provider_registry_loader(config_path=config_path, logger=logger)
-
-
-# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -474,11 +433,8 @@ __all__ = [
     # Validation functions
     "ensure_provider_known",
     "clear_provider_registry_cache",
-    # Factory functions (new naming)
+    # Factory functions
     "create_provider_registry",
     "create_provider_loader",
     "create_provider_registry_loader",
-    # Deprecated aliases
-    "get_provider_registry",
-    "default_provider_registry_loader",
 ]

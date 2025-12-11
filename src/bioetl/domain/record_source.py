@@ -3,18 +3,6 @@
 This module defines the abstract interface for record sources (RecordSourceABC)
 and the SourceRecordModel Pydantic model for API response parsing.
 
-Terminology & Migration Guide
------------------------------
-+------------------+-------------------+---------------------------------------------+
-| Old Name         | New Name          | Notes                                       |
-+==================+===================+=============================================+
-| SourceRecord     | SourceRecordModel | Pydantic model for API boundary parsing.    |
-|                  |                   | SourceRecord kept as deprecated alias.      |
-+------------------+-------------------+---------------------------------------------+
-| RawRecord        | (removed)         | Was deprecated alias for SourceRecord.      |
-|                  |                   | Use Mapping[str, Any] or domain.data.Record |
-+------------------+-------------------+---------------------------------------------+
-
 SourceRecordModel Usage
 -----------------------
 ``SourceRecordModel`` is a Pydantic model intended for use ONLY at system
@@ -25,21 +13,15 @@ For internal domain contracts, use the pandas-free abstractions:
     - ``Sequence[Mapping[str, Any]]`` for batches (RecordBatch from domain.data)
     - ``Record`` protocol from domain.data for typed access
 
-Example migration::
+Example::
 
-    # Before (deprecated)
-    from bioetl.domain.record_source import SourceRecord, RawRecord
-
-    def parse_response(data: dict) -> list[SourceRecord]:
-        return [SourceRecord.model_validate(r) for r in data["items"]]
-
-    # After (recommended) - for API boundary
+    # For API boundary
     from bioetl.domain.record_source import SourceRecordModel
 
     def parse_response(data: dict) -> list[SourceRecordModel]:
         return [SourceRecordModel.model_validate(r) for r in data["items"]]
 
-    # After (recommended) - for domain contracts
+    # For domain contracts
     from collections.abc import Mapping, Sequence
     from typing import Any
 
@@ -58,15 +40,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
-
-from bioetl.domain._deprecations import (
-    emit_deprecation_warning,
-    get_deprecated_names_for_module,
-    resolve_deprecated_type,
-)
 
 
 class SourceRecordModel(BaseModel):
@@ -98,40 +74,6 @@ class SourceRecordModel(BaseModel):
     """
 
     model_config = ConfigDict(extra="allow")
-
-
-# =============================================================================
-# Deprecated Aliases (backward compatibility)
-# =============================================================================
-
-# Deprecated alias - use SourceRecordModel instead
-SourceRecord = SourceRecordModel
-"""Deprecated alias for SourceRecordModel.
-
-.. deprecated:: 2.1
-    Use ``SourceRecordModel`` instead. ``SourceRecord`` will be removed in v3.0.
-"""
-
-
-# Get deprecated names for this module from central registry
-_DEPRECATED_NAMES = get_deprecated_names_for_module(__name__)
-
-
-def __getattr__(name: str) -> Any:
-    """Module-level __getattr__ for deprecation warnings.
-
-    Uses centralized deprecation registry from bioetl.domain._deprecations.
-    """
-    if name in _DEPRECATED_NAMES:
-        emit_deprecation_warning(name, stacklevel=2)
-        return resolve_deprecated_type(name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-# Type alias for backward compatibility in TYPE_CHECKING
-if TYPE_CHECKING:
-    # Allow static type checkers to see deprecated aliases
-    pass  # SourceRecord already defined above
 
 
 # =============================================================================
@@ -215,20 +157,9 @@ class InMemoryRecordSource(RecordSourceABC):
             yield self._records[start : start + self._chunk_size]
 
 
-# Deprecated type alias for backward compatibility
-RecordSource = RecordSourceABC
-"""Deprecated alias for RecordSourceABC.
-
-.. deprecated:: 2.0
-    Use ``RecordSourceABC`` directly. Will be removed in v3.0.
-"""
-
 __all__ = [
     # Canonical exports
     "SourceRecordModel",
     "RecordSourceABC",
     "InMemoryRecordSource",
-    # Deprecated aliases (for backward compatibility)
-    "SourceRecord",
-    "RecordSource",
 ]

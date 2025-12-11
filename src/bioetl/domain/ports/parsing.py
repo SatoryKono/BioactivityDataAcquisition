@@ -69,17 +69,6 @@ RawRecord = Mapping[str, Any]
 # Uses typing_extensions.TypeVar for default= support on Python < 3.13
 RecordT = TypeVar("RecordT", default=dict[str, Any])
 
-# =============================================================================
-# Deprecated Type Aliases (backward compatibility re-exports)
-# =============================================================================
-# Import from bioetl.domain.types for new code.
-# These re-exports emit deprecation warnings via __getattr__ below.
-
-_DEPRECATED_TYPE_ALIASES = {
-    "RawPayload": "ApiPayload",
-    "RawRecordDict": "Mapping[str, Any]",
-    "RawRecordList": "RecordBatch",
-}
 
 
 class ResponseParserPortABC(ABC, Generic[RecordT]):
@@ -244,39 +233,6 @@ class PaginationInfo:
         )
 
 
-# =============================================================================
-# Module __getattr__ for deprecated type alias access
-# =============================================================================
-
-
-def __getattr__(name: str) -> object:
-    """Emit deprecation warning for legacy type alias imports.
-
-    Enables backward-compatible imports like:
-        from bioetl.domain.ports.parsing import RawPayload
-
-    But emits a DeprecationWarning directing users to the new location.
-    """
-    if name in _DEPRECATED_TYPE_ALIASES:
-        new_name = _DEPRECATED_TYPE_ALIASES[name]
-        warnings.warn(
-            f"{name} is deprecated, use {new_name} instead. "
-            "See migration guide in bioetl.domain.types module docstring.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # Return appropriate fallback types
-        if name == "RawRecordDict":
-            return dict[str, Any]
-        elif name == "RawRecordList":
-            from bioetl.domain.data import RecordBatch as _RecordBatch
-
-            return _RecordBatch
-        elif name == "RawPayload":
-            return ApiPayload
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 __all__ = [
     # Type variable
     "RecordT",
@@ -287,6 +243,4 @@ __all__ = [
     # ABCs and classes
     "ResponseParserPortABC",
     "PaginationInfo",
-    # Deprecated type aliases available via __getattr__:
-    # RawPayload, RawRecordDict, RawRecordList
 ]
