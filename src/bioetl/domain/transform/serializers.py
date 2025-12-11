@@ -67,18 +67,20 @@ def serialize_dict(value: Any) -> Any:
 
     parts: list[str] = []
     for key in sorted(value.keys()):
-        v = value[key]
-        if v is None or _is_missing(v):
+        dict_value = value[key]
+        if dict_value is None or _is_missing(dict_value):
             continue
-        if isinstance(v, Mapping):
+        if isinstance(dict_value, Mapping):
             # Skip nested mappings for this serializer
             continue
-        if isinstance(v, (list, tuple, set, frozenset, Sequence)) and not isinstance(
-            v, (str, bytes, bytearray)
-        ):
+        is_sequence = isinstance(
+            dict_value, (list, tuple, set, frozenset, Sequence)
+        )
+        is_string_like = isinstance(dict_value, (str, bytes, bytearray))
+        if is_sequence and not is_string_like:
             # Skip nested sequences
             continue
-        parts.append(f"{key}:{str(v)}")
+        parts.append(f"{key}:{str(dict_value)}")
 
     return "|".join(parts) if parts else ""
 

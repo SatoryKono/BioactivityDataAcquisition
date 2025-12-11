@@ -48,10 +48,10 @@ class PathResolver(PathResolverABC):
         Returns:
             Resolved absolute path.
         """
-        p = Path(path).expanduser()
-        if p.is_absolute():
-            return p.resolve()
-        return (self._base_path / p).resolve()
+        input_path = Path(path).expanduser()
+        if input_path.is_absolute():
+            return input_path.resolve()
+        return (self._base_path / input_path).resolve()
 
     def resolve_config(self, name: str) -> Path:
         """Resolve a configuration file path.

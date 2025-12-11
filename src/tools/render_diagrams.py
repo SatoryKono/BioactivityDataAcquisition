@@ -63,9 +63,9 @@ def _npx_command() -> str:
 def _local_mmdc() -> Path | None:
     base = Path("node_modules") / ".bin"
     for name in ("mmdc.cmd", "mmdc"):
-        p = base / name
-        if p.exists():
-            return p.resolve()
+        bin_path = base / name
+        if bin_path.exists():
+            return bin_path.resolve()
     return None
 
 
@@ -89,9 +89,9 @@ def _find_chromium_exe() -> Path | None:
                 Path("/opt/google/chrome/chrome"),
             ]
         )
-    for p in candidates:
-        if p.exists():
-            return p
+    for chromium_path in candidates:
+        if chromium_path.exists():
+            return chromium_path
     return None
 
 

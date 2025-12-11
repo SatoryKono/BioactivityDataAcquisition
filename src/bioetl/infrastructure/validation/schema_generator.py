@@ -70,11 +70,11 @@ class YamlColumnOrderLoader:
             ValueError: If YAML format is invalid.
             FileNotFoundError: If the file does not exist.
         """
-        p = Path(path)
-        if not p.exists():
-            raise FileNotFoundError(f"Column order file not found: {p}")
+        yaml_path = Path(path)
+        if not yaml_path.exists():
+            raise FileNotFoundError(f"Column order file not found: {yaml_path}")
 
-        data = yaml.safe_load(p.read_text(encoding="utf-8"))
+        data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
 
         if isinstance(data, list):
             return [str(x) for x in data]
@@ -85,7 +85,7 @@ class YamlColumnOrderLoader:
                 return [str(x) for x in cols]
 
         raise ValueError(
-            f"Invalid column-order YAML format in {p}. "
+            f"Invalid column-order YAML format in {yaml_path}. "
             "Expected a list or a dict with 'columns' key."
         )
 
