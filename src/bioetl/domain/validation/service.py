@@ -1,8 +1,6 @@
 """Validation service orchestrating schema lookup and validators."""
 
-from typing import cast
-
-import pandas as pd
+from typing import Any, cast
 
 from bioetl.domain.data import TabularData
 from bioetl.domain.validation.contracts import (
@@ -35,7 +33,7 @@ class ValidationService:
         """Возвращает упорядоченный список колонок схемы."""
         return self._schema_provider.get_schema_columns(entity_name)
 
-    def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
+    def validate(self, df: Any, entity_name: str) -> Any:
         """
         Валидирует DataFrame по схеме, используя валидатор фабрики.
 
@@ -57,7 +55,7 @@ class ValidationService:
             raise ValueError(f"Validation failed for {entity_name}: {result.errors}")
 
         validated_df = cast(
-            pd.DataFrame,
+            Any,
             result.validated_data
             if result.validated_data is not None
             else df_for_validation,
