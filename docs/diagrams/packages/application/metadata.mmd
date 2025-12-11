@@ -1,0 +1,39 @@
+---
+title: Application Metadata Package
+description: bioetl.application.metadata - Run metadata builders
+---
+classDiagram
+    direction TB
+
+    class RunMetadataBuilderProtocol {
+        <<protocol>>
+        +build_run_metadata(context, write_result) dict
+        +build_dry_run_metadata(context, row_count) dict
+    }
+
+    class DefaultRunMetadataBuilder {
+        +build_run_metadata(context, write_result) dict~str,object~
+        +build_dry_run_metadata(context, row_count) dict~str,object~
+    }
+
+    class RunContext {
+        <<dataclass>>
+        +run_id: str
+        +provider: str
+        +entity_name: str
+    }
+
+    class WriteResult {
+        <<dataclass>>
+        +row_count: int
+        +path: Path
+        +checksum: str
+    }
+
+    RunMetadataBuilderProtocol <|.. DefaultRunMetadataBuilder : implements
+    DefaultRunMetadataBuilder --> RunContext : uses
+    DefaultRunMetadataBuilder --> WriteResult : uses
+
+    note for DefaultRunMetadataBuilder "Default implementation.\nProvides basic metadata\nwithout external dependencies."
+
+    note for RunMetadataBuilderProtocol "Protocol for building\nrun metadata dictionaries."

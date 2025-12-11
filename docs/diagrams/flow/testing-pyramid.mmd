@@ -1,0 +1,18 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart TB
+    classDef layer fill:#f5f5f5,stroke:#444,stroke-width:1.5px
+    classDef detail fill:#e3e7ec,stroke:#555,stroke-width:1.2px
+    linkStyle default stroke:#666,stroke-width:1.2px
+
+    unit["Unit tests\n- domain services\n- transformers\n- clients with mocks\n(no network)"]:::layer
+    stageTests["Pipeline stage tests\n- PipelineBase behavior\n- container assembly fakes\n- error policy\n(cover branching)"]:::layer
+    golden["Golden tests\n- run pipeline with fixture input\n- compare CSV/meta artefacts byte-to-byte"]:::layer
+    integration["Integration / smoke\n- CLI run with --limit/--dry-run\n- config resolution, logging, metrics"]:::layer
+
+    unit --> stageTests --> golden --> integration
+
+    coverage["Coverage gate ≥85%\n(pytest --cov)"]:::detail
+    lint["Static checks (ruff, mypy, import-linter)\nrun before tests"]:::detail
+    unit -.-> coverage
+    golden -.-> lint
+

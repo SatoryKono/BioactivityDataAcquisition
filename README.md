@@ -11,6 +11,7 @@ BioETL is a data processing framework for acquiring, normalizing, and validating
 - Установить хуки: `pre-commit install`
 - Прогнать форматирование и линтеры: `pre-commit run --all-files` (ruff, black, isort, mypy, import-linter)
 - Запустить архитектурный тест: `pytest tests/architecture/test_layer_dependencies.py`
+- Проверить синхронизацию реестров и INDEX.md: `python src/tools/check_registry_sync.py`
 - Полный цикл lint/type-check в CI: ruff → black --check → isort --check-only → mypy → архитектурные тесты → import-linter
 
 ## Запуск тестов

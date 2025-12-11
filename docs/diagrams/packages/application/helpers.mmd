@@ -1,0 +1,28 @@
+---
+title: Application Helpers Package
+description: bioetl.application.helpers - Utility functions for pipelines
+---
+flowchart TB
+
+classDef func fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+classDef helper fill:#bbdefb,stroke:#1976d2,stroke-width:1px,color:#0d47a1
+
+subgraph Helpers["bioetl.application.helpers"]
+    direction TB
+
+    subgraph PrimaryKey["primary_key.py"]
+        resolve_primary_key["resolve_primary_key(config, fallback)\n→ str"]:::func
+        resolve_primary_key_with_filter["resolve_primary_key_with_filter(config, fallback)\n→ tuple[str, str]"]:::func
+
+        _get_primary_keys_from_config["_get_primary_keys_from_config(config)\n→ list | str | None"]:::helper
+        _get_entity_name_from_config["_get_entity_name_from_config(config)\n→ str | None"]:::helper
+        _extract_first_primary_key["_extract_first_primary_key(keys)\n→ str | None"]:::helper
+    end
+end
+
+resolve_primary_key --> _get_primary_keys_from_config
+resolve_primary_key --> _get_entity_name_from_config
+resolve_primary_key --> _extract_first_primary_key
+resolve_primary_key_with_filter --> resolve_primary_key
+
+note "Resolution order:\n1. config.identity.primary_key[0]\n2. {entity_name}_id convention\n3. fallback parameter\n4. ValueError"
