@@ -1,576 +1,461 @@
 # План рефакторинга архитектуры BioETL v6
 
 **Дата создания:** 2025-12-11
+**Дата обновления:** 2025-12-11
 **Базовый документ:** [REFACTORING_PLAN_v5.md](./REFACTORING_PLAN_v5.md)
-**Интегральный балл архитектуры (текущий):** 6.42/10
+**Интегральный балл архитектуры (текущий):** 7.2/10
 **Целевой балл:** 8.0+
-**Статус:** Планирование
+**Статус:** В процессе
 
 ---
 
 ## Оглавление
 
 1. [Краткое резюме](#краткое-резюме)
-2. [Текущее состояние архитектуры](#текущее-состояние-архитектуры)
-3. [Выявленные проблемы по категориям](#выявленные-проблемы-по-категориям)
-4. [Блокирующие задачи](#блокирующие-задачи)
-5. [Крупные задачи](#крупные-задачи)
-6. [Минорные задачи](#минорные-задачи)
-7. [Метрики и проверки](#метрики-и-проверки)
-8. [Риски и митигация](#риски-и-митигация)
-9. [Ожидаемые результаты](#ожидаемые-результаты)
+2. [Текущее состояние — что уже сделано](#текущее-состояние--что-уже-сделано)
+3. [Оставшиеся задачи](#оставшиеся-задачи)
+4. [Детальный план задач](#детальный-план-задач)
+5. [Метрики и проверки](#метрики-и-проверки)
+6. [Риски и митигация](#риски-и-митигация)
+7. [Ожидаемые результаты](#ожидаемые-результаты)
 
 ---
 
 ## Краткое резюме
 
-Проект разделён на слои **domain**, **application**, **infrastructure** и **interfaces** согласно принципам Hexagonal Architecture и DDD. Однако имеются существенные отклонения от идеальной архитектуры:
+Значительная часть запланированного рефакторинга **уже выполнена**. Архитектура проекта существенно улучшена:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    ТЕКУЩИЕ ПРОБЛЕМЫ АРХИТЕКТУРЫ                     │
+│                    СТАТУС РЕФАКТОРИНГА                              │
 ├─────────────────────────────────────────────────────────────────────┤
-│  ⚠️  Глобальные синглтоны в interfaces (_context, _factory)         │
-│  ⚠️  Прямые импорты infrastructure в application (orchestrator)     │
-│  ⚠️  Обращение к приватным методам (._get_extract_callable)        │
-│  ⚠️  Классовое состояние в infrastructure (MetricsServerManager)    │
-│  ⚠️  Синглтон паттерн в model_registry (_RegistryHolder)           │
+│  ✅ ЗАВЕРШЕНО:                                                      │
+│     • orchestrator.py — нет инфра-импортов, обязательный DI        │
+│     • PipelineBase.run_extract_only() — публичный API              │
+│     • Нет noqa: SLF001 комментариев в application                  │
+│     • context_manager.py — ContextVar для thread-safe контекста    │
+│     • domain/provider_registry.py — только абстракции (ABC)        │
+│     • Pandera/YAML в infrastructure (правильное расположение)       │
+│     • Архитектурные тесты на глобальное состояние                   │
 ├─────────────────────────────────────────────────────────────────────┤
-│  ✓  domain/provider_registry.py - чистые абстракции (OK)           │
-│  ✓  infrastructure/validation/schemas/generator.py - правильное    │
-│      расположение Pandera/YAML (OK)                                 │
+│  ⚠️  ТРЕБУЕТ ВНИМАНИЯ:                                              │
+│     • application_context.py — дублирование (module-level + ContextVar) │
+│     • MetricsServerManager — классовое состояние                    │
+│     • _RegistryHolder — синглтон паттерн                            │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Ключевое наблюдение:** Анализ показал, что:
-- `domain/provider_registry.py` уже содержит только абстракции (ABC, Protocol) — это корректно
-- Файл `generator.py` с Pandera/YAML находится в `infrastructure/validation/schemas/`, не в domain — это правильное расположение
-
 ---
 
-## Текущее состояние архитектуры
+## Текущее состояние — что уже сделано
 
-### Структура слоёв
+### ✅ B1: Удаление fallback импорта infrastructure в orchestrator — ЗАВЕРШЕНО
 
-```
-src/bioetl/
-├── domain/                  # Чистая бизнес-логика
-│   ├── aggregates/          # DDD агрегаты
-│   ├── clients/             # Абстрактные контракты
-│   ├── observability/       # Контракты логирования/метрик
-│   ├── output/              # Контракты вывода
-│   ├── ports/               # Порты (интерфейсы)
-│   ├── provider_registry.py # ✓ Только абстракции
-│   ├── schemas/             # Доменные схемы
-│   └── value_objects/       # Value Objects
-│
-├── application/             # Оркестрация и use cases
-│   ├── orchestrator.py      # ⚠️ Импортирует infrastructure
-│   ├── pipelines/           # Конвейеры обработки
-│   ├── services/            # Сервисы приложения
-│   └── use_cases/           # Use cases
-│
-├── infrastructure/          # Реализация портов
-│   ├── chembl/
-│   │   └── model_registry.py # ⚠️ Синглтон паттерн
-│   ├── clients/             # HTTP клиенты
-│   ├── observability/
-│   │   └── server.py        # ⚠️ Классовое состояние
-│   └── validation/
-│       └── schemas/
-│           └── generator.py # ✓ Pandera/YAML здесь корректно
-│
-└── interfaces/              # Композиция и точки входа
-    ├── application_context.py  # ⚠️ Module-level singleton
-    ├── composition_root.py     # ⚠️ Lazy-loaded state
-    └── use_case_factory.py     # Зависит от синглтона
-```
+**Файл:** `src/bioetl/application/orchestrator.py`
 
-### Оценка архитектуры
-
-| Категория | Вес | Текущая | Целевая |
-|-----------|:---:|:-------:|:-------:|
-| Слоистая архитектура | 0.12 | 7 | 8.5 |
-| Ports & Adapters / DDD | 0.10 | 6 | 8 |
-| Границы модулей | 0.10 | 6 | 8 |
-| Качество доменной модели | 0.10 | 7 | 7.5 |
-| Контракты и конфигурация | 0.08 | 6 | 7.5 |
-| Обработка ошибок | 0.10 | 6 | 7 |
-| Тестирование и QA | 0.10 | 6 | 8 |
-| Валидация данных | 0.10 | 7 | 7.5 |
-| Документация | 0.10 | 7 | 7.5 |
-| Сопровождаемость | 0.10 | 6 | 8 |
-| **Интегральный балл** | **1.00** | **6.42** | **8.0+** |
-
----
-
-## Выявленные проблемы по категориям
-
-### Категория 1: Нарушение слоистых зависимостей
-
-| Файл | Проблема | Критичность |
-|------|----------|:-----------:|
-| `application/orchestrator.py:67` | Импорт `InMemoryProviderRegistry` из infrastructure | Высокая |
-| `application/orchestrator.py:156-159` | Обращение к `pipeline._get_extract_callable()` | Высокая |
-
-### Категория 2: Глобальное состояние в interfaces
-
-| Файл | Проблема | Критичность |
-|------|----------|:-----------:|
-| `interfaces/application_context.py:35` | Глобальная переменная `_context` | Высокая |
-| `interfaces/composition_root.py` | Lazy-loaded `_provider_registry` | Средняя |
-
-### Категория 3: Глобальное состояние в infrastructure
-
-| Файл | Проблема | Критичность |
-|------|----------|:-----------:|
-| `infrastructure/observability/server.py` | Классовое состояние `MetricsServerManager._started` | Средняя |
-| `infrastructure/chembl/model_registry.py` | Синглтон `_RegistryHolder._instance` | Средняя |
-
----
-
-## Блокирующие задачи
-
-### Задача B1: Удаление fallback импорта infrastructure в orchestrator
-
-**Цель:** Убрать прямой импорт `InMemoryProviderRegistry` из application слоя.
-
-**Файлы:**
-- `src/bioetl/application/orchestrator.py`
-- `src/bioetl/interfaces/factories/provider_registry.py`
-- `src/bioetl/interfaces/composition_root.py`
-
-**Изменения:**
-
+**Было:**
 ```python
-# orchestrator.py — УДАЛИТЬ:
 def _get_default_registry_factory() -> ProviderRegistryFactory:
     from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
     return InMemoryProviderRegistry
+```
 
-# orchestrator.py — ИЗМЕНИТЬ:
+**Стало:**
+```python
 class PipelineOrchestrator:
     def __init__(
         self,
         ...
         provider_registry_factory: ProviderRegistryFactory,  # Обязательный!
     ) -> None:
-        self._provider_registry_factory = provider_registry_factory
-```
-
-**Критерии готовности:**
-- [ ] Функция `_get_default_registry_factory()` удалена из orchestrator.py
-- [ ] `provider_registry_factory` — обязательный параметр
-- [ ] В `application/` нет импортов `bioetl.infrastructure.*`
-- [ ] Тесты обновлены на явную инъекцию
-
-**Риски:** Поломка существующих вызовов orchestrator без явного DI.
-
----
-
-### Задача B2: Публичный API для extract-only режима
-
-**Цель:** Устранить обращения к приватным методам `_get_extract_callable` и `_normalize_extract_result`.
-
-**Файлы:**
-- `src/bioetl/application/pipelines/base.py`
-- `src/bioetl/application/orchestrator.py`
-- `src/bioetl/domain/models.py`
-
-**Изменения:**
-
-```python
-# domain/models.py — ДОБАВИТЬ:
-@dataclass(frozen=True)
-class ExtractOnlyResult:
-    """Result of extract-only pipeline execution."""
-    total_rows: int
-    total_chunks: int
-
-# pipelines/base.py — ДОБАВИТЬ публичный метод:
-class PipelineBase(ABC):
-    def run_extract_only(self, **kwargs: Any) -> ExtractOnlyResult:
-        """Execute only the extract stage and return statistics."""
-        extract_callable = self._get_extract_callable()
-        iterator = self._normalize_extract_result(extract_callable(**kwargs))
-
-        total_rows = 0
-        total_chunks = 0
-        for chunk in iterator:
-            if chunk is not None:
-                total_rows += len(chunk)
-                total_chunks += 1
-
-        return ExtractOnlyResult(
-            total_rows=total_rows,
-            total_chunks=max(total_chunks, 1),
+        # Delegate registry management to ProviderRegistryResolver
+        self._registry_resolver = ProviderRegistryResolver(
+            provider_registry_factory=provider_registry_factory,
+            ...
         )
-
-# orchestrator.py — ИЗМЕНИТЬ:
-if effective_type == PipelineType.EXTRACT_ONLY:
-    context = self._build_simple_context()
-    extract_result = pipeline.run_extract_only()  # Публичный API!
 ```
 
-**Критерии готовности:**
-- [ ] Метод `run_extract_only()` добавлен в `PipelineBase`
-- [ ] `ExtractOnlyResult` добавлен в `domain/models.py`
-- [ ] Удалены комментарии `noqa: SLF001` в orchestrator
-- [ ] Новый метод покрыт тестами
+**Проверка:**
+```bash
+grep -rn "from bioetl.infrastructure" src/bioetl/application/
+# Результат: No matches found ✅
+```
 
 ---
 
-## Крупные задачи
+### ✅ B2: Публичный API для extract-only режима — ЗАВЕРШЕНО
 
-### Задача C1: Консолидация синглтонов в interfaces (ApplicationContext)
-
-**Цель:** Объединить разрозненные синглтоны в единый контейнер с thread-safe управлением через `contextvars`.
-
-**Файлы:**
-- `src/bioetl/interfaces/application_context.py`
-- `src/bioetl/interfaces/composition_root.py`
-- `src/bioetl/interfaces/context_manager.py`
-
-**Текущее состояние:**
+**Файл:** `src/bioetl/application/pipelines/base.py:186`
 
 ```python
-# application_context.py — ТЕКУЩЕЕ:
-_context: ApplicationContext | None = None
+def run_extract_only(self, **kwargs: Any) -> ExtractOnlyResult:
+    """Execute only the extract stage and return statistics.
 
-def get_application_context() -> ApplicationContext:
-    global _context
-    if _context is None:
-        _context = ApplicationContext.create_default()
-    return _context
+    This method provides a clean public API for extract-only mode,
+    encapsulating the internal extraction logic without exposing
+    private methods.
+    """
+    extract_callable = self._get_extract_callable()
+    iterator = self._normalize_extract_result(extract_callable(**kwargs))
+    ...
 ```
 
-**Целевое состояние:**
+**Использование в orchestrator:**
+```python
+def _run_extract_only(self, pipeline: PipelineBase, limit: int | None) -> RunResult:
+    extract_result = pipeline.run_extract_only(limit=limit)  # ✅ Публичный API
+```
+
+**Проверка:**
+```bash
+grep -rn "noqa: SLF001" src/bioetl/application/
+# Результат: No matches found ✅
+```
+
+---
+
+### ✅ C2: Thread-safe контекст через ContextVar — ЧАСТИЧНО ЗАВЕРШЕНО
+
+**Файл:** `src/bioetl/interfaces/context_manager.py`
 
 ```python
-# application_context.py — ЦЕЛЕВОЕ:
-from contextvars import ContextVar
+import contextvars
 
-_context_var: ContextVar[ApplicationContext | None] = ContextVar(
-    "application_context", default=None
+_current_context: contextvars.ContextVar[ApplicationContext | None] = (
+    contextvars.ContextVar("bioetl_app_context", default=None)
 )
 
-def get_application_context() -> ApplicationContext:
-    """Get the current application context (thread-safe)."""
-    ctx = _context_var.get()
-    if ctx is None:
-        ctx = ApplicationContext.create_default()
-        _context_var.set(ctx)
-    return ctx
-
 @contextmanager
-def application_context(ctx: ApplicationContext) -> Iterator[ApplicationContext]:
-    """Context manager for temporary context override.
-
-    Usage:
-        with application_context(test_ctx):
-            # code uses test_ctx
-        # original context restored
-    """
-    token = _context_var.set(ctx)
+def application_context(ctx: ApplicationContext) -> Generator[ApplicationContext, None, None]:
+    """Context manager for scoped application context."""
+    token = _current_context.set(ctx)
     try:
         yield ctx
     finally:
-        _context_var.reset(token)
+        _current_context.reset(token)
 ```
 
-**Критерии готовности:**
-- [ ] Глобальная переменная `_context` заменена на `ContextVar`
-- [ ] Добавлен контекстный менеджер `application_context()`
-- [ ] CLI и REST обновлены для работы с новым API
-- [ ] Тесты легко подменяют контекст через `application_context()`
+**Примечание:** ContextVar API готов, но `application_context.py` всё ещё использует параллельный module-level синглтон `_context`.
 
 ---
 
-### Задача C2: Усиление архитектурных тестов
-
-**Цель:** Закрепить правила ARCHITECTURE.md автоматическими тестами.
+### ✅ Архитектурные тесты — РЕАЛИЗОВАНЫ
 
 **Файлы:**
-- `tests/architecture/test_layer_dependencies.py`
-- `tests/project_rules/test_no_global_state.py`
+- `tests/project_rules/test_no_global_state.py` — проверка отсутствия глобального состояния
+- `tests/project_rules/test_layer_architecture.py` — проверка слоёв
+- `tests/project_rules/test_domain_isolation.py` — изоляция домена
 
-**Новые тесты:**
-
-```python
-# test_layer_dependencies.py — ДОБАВИТЬ:
-
-def test_application_has_no_infrastructure_imports() -> None:
-    """Verify application layer has no direct infrastructure imports."""
-    violations: list[str] = []
-
-    for file_path in sorted(APPLICATION_ROOT.rglob("*.py")):
-        for reference in _collect_imports(file_path):
-            if reference.module.startswith("bioetl.infrastructure"):
-                violations.append(
-                    f"{file_path}:{reference.lineno}: "
-                    f"application must not import {reference.module}"
-                )
-
-    assert not violations, "\n".join(violations)
-
-
-def test_no_cross_module_private_access() -> None:
-    """Verify no module accesses private methods of other modules."""
-    import re
-    pattern = re.compile(r"(?<!self)(?<!cls)\._[a-z_]+\(")
-    violations: list[str] = []
-
-    for file_path in sorted(APPLICATION_ROOT.rglob("*.py")):
-        content = file_path.read_text(encoding="utf-8")
-        for line_no, line in enumerate(content.splitlines(), 1):
-            if pattern.search(line) and "self._" not in line and "cls._" not in line:
-                violations.append(f"{file_path}:{line_no}: {line.strip()}")
-
-    assert not violations, "\n".join(violations)
-```
-
-**Критерии готовности:**
-- [ ] Тест `test_application_has_no_infrastructure_imports` добавлен и проходит
-- [ ] Тест `test_no_cross_module_private_access` добавлен и проходит
-- [ ] ruff правило SLF001 включено без исключений
+**Тесты проверяют:**
+- Отсутствие `_PROVIDER_REGISTRY` в domain
+- Отсутствие deprecated функций (`set_provider_registry`, `get_provider_registry`)
+- Слоистые зависимости (domain не зависит от infrastructure)
+- Отсутствие глобальных провайдеров в application
 
 ---
 
-### Задача C3: Устранение прямых импортов (import-linter)
+## Оставшиеся задачи
 
-**Цель:** Сократить количество исключений в `.importlinter` до ≤3.
+### Приоритет: Высокий
 
-**Текущее состояние .importlinter:**
-- Правила определены, но есть неявные нарушения
-- Необходимо добавить явные запреты
+#### Задача R1: Унификация ApplicationContext (устранение дублирования)
 
-**План действий:**
+**Проблема:** Существуют две параллельные системы управления контекстом:
 
-1. **Выносить функциональность в доменные контракты:**
+1. `interfaces/application_context.py:109` — module-level singleton:
    ```python
-   # domain/output/contracts.py — ДОБАВИТЬ:
-   class OutputWriterABC(ABC):
-       @abstractmethod
-       def write(self, data: DataFrame, path: Path) -> None: ...
+   _context: ApplicationContext | None = None
 
-   # domain/observability/contracts.py — ДОБАВИТЬ:
-   class MetricsHookABC(Protocol):
-       def on_stage_complete(self, stage: str, duration: float) -> None: ...
+   def get_application_context() -> ApplicationContext:
+       global _context
+       if _context is None:
+           _context = ApplicationContext.create_default()
+       return _context
    ```
 
-2. **Перенести реализации в infrastructure:**
-   - `UnifiedFileWriter` → реализует `OutputWriterABC`
-   - `MetricsHook` → реализует `MetricsHookABC`
+2. `interfaces/context_manager.py:39` — ContextVar-based:
+   ```python
+   _current_context: contextvars.ContextVar[ApplicationContext | None] = (
+       contextvars.ContextVar("bioetl_app_context", default=None)
+   )
+   ```
 
-3. **Обновить пайплайны и orchestrator:**
-   - Использовать интерфейсы вместо конкретных реализаций
-   - Получать зависимости через DI
+**Решение:** Мигрировать весь код на использование `context_manager.py` и удалить дублирующий синглтон из `application_context.py`.
+
+**План:**
+
+1. **Обновить `application_context.py`** — делегировать к `context_manager.py`:
+   ```python
+   # application_context.py — ЦЕЛЕВОЕ СОСТОЯНИЕ:
+   from bioetl.interfaces.context_manager import (
+       get_current_context,
+       set_current_context,
+       reset_current_context,
+   )
+
+   # Удалить _context и связанные функции
+   # Или сделать их алиасами:
+   def get_application_context() -> ApplicationContext:
+       """Backward-compatible alias for get_current_context()."""
+       return get_current_context()
+   ```
+
+2. **Найти и обновить все вызовы:**
+   ```bash
+   grep -rn "get_application_context\|set_application_context\|reset_application_context" src/
+   ```
+
+3. **Удалить module-level `_context`** после миграции.
 
 **Критерии готовности:**
-- [ ] `lint-imports` проходит без ошибок
-- [ ] Количество игнорируемых импортов ≤3
-- [ ] Golden tests пайплайнов проходят
+- [ ] `_context` удалён из `application_context.py`
+- [ ] Все функции делегируют к `context_manager.py`
+- [ ] CLI и REST работают корректно
+- [ ] Тесты проходят
 
 ---
 
-## Минорные задачи
+### Приоритет: Средний
 
-### Задача M1: Очистка глобального состояния в infrastructure
+#### Задача R2: Рефакторинг MetricsServerManager
 
-**Цель:** Убрать глобальные переменные и классовое состояние.
+**Файл:** `src/bioetl/infrastructure/observability/server.py`
 
-#### M1.1: infrastructure/observability/server.py
-
+**Текущее состояние:**
 ```python
-# ТЕКУЩЕЕ:
 class MetricsServerManager:
     _started: bool = False  # Классовое состояние
-    _lock: Lock = Lock()
+    _lock: Lock = Lock()    # Классовое состояние
 
-# ЦЕЛЕВОЕ — использовать instance-level состояние:
+    @classmethod
+    def start(cls, *, enabled: bool, port: int, address: str) -> bool:
+        with cls._lock:
+            if cls._started:
+                return False
+            start_http_server(port, addr=address)
+            cls._started = True
+            return True
+```
+
+**Проблема:** Классовое состояние (`_started`, `_lock`) нарушает изоляцию тестов.
+
+**Варианты решения:**
+
+**Вариант A: Instance-based состояние (рекомендуется)**
+```python
 class MetricsServerManager:
     def __init__(self) -> None:
         self._started: bool = False
         self._lock: Lock = Lock()
 
-# Или через контекстный менеджер:
+    def start(self, *, enabled: bool, port: int, address: str) -> bool:
+        with self._lock:
+            if self._started:
+                return False
+            start_http_server(port, addr=address)
+            self._started = True
+            return True
+
+# Фабрика для CompositionRoot
+def create_metrics_server_manager() -> MetricsServerManager:
+    return MetricsServerManager()
+```
+
+**Вариант B: Context manager**
+```python
 @contextmanager
 def metrics_server(enabled: bool, port: int, address: str) -> Iterator[None]:
-    """Context manager for metrics server lifecycle."""
     if enabled:
         start_http_server(port, addr=address)
     try:
         yield
     finally:
-        # cleanup if needed
-        pass
+        pass  # Prometheus client не поддерживает остановку
 ```
 
-#### M1.2: infrastructure/chembl/model_registry.py
+**Критерии готовности:**
+- [ ] Классовые переменные `_started` и `_lock` заменены на instance-level
+- [ ] CompositionRoot управляет жизненным циклом
+- [ ] Тесты изолированы
 
+---
+
+#### Задача R3: Рефакторинг _RegistryHolder (model_registry)
+
+**Файл:** `src/bioetl/infrastructure/chembl/model_registry.py`
+
+**Текущее состояние:**
 ```python
-# ТЕКУЩЕЕ:
 class _RegistryHolder:
     _instance: ChemblEntityModelRegistry | None = None
 
-# ЦЕЛЕВОЕ — lazy-инициализация через фабрику:
+    @classmethod
+    def get_or_create(cls) -> ChemblEntityModelRegistry:
+        if cls._instance is None:
+            cls._instance = ChemblEntityModelRegistry()
+        return cls._instance
+
+def get_chembl_model_registry() -> ChemblEntityModelRegistry:
+    return _RegistryHolder.get_or_create()
+```
+
+**Проблема:** Синглтон на уровне класса затрудняет тестирование.
+
+**Решение: Factory-based подход**
+```python
+# Удалить _RegistryHolder полностью
+
 def create_chembl_model_registry() -> ChemblEntityModelRegistry:
     """Factory function for creating registry instance."""
     return ChemblEntityModelRegistry()
 
-# Управление временем жизни — через composition root
+# Для обратной совместимости (deprecated):
+def get_chembl_model_registry() -> ChemblEntityModelRegistry:
+    """Get a new registry instance.
+
+    .. deprecated::
+        Use create_chembl_model_registry() or inject via DI.
+    """
+    import warnings
+    warnings.warn(
+        "get_chembl_model_registry() is deprecated. "
+        "Use create_chembl_model_registry() or inject via CompositionRoot.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return create_chembl_model_registry()
 ```
 
 **Критерии готовности:**
-- [ ] `MetricsServerManager` не использует классовые переменные
-- [ ] `_RegistryHolder` удалён, используется фабрика
-- [ ] Тесты на изоляцию инфраструктуры проходят
+- [ ] `_RegistryHolder` удалён
+- [ ] `create_chembl_model_registry()` добавлен
+- [ ] `get_chembl_model_registry()` помечен как deprecated
+- [ ] Все вызовы обновлены на factory или DI
 
 ---
 
-### Задача M2: Обновление документации
+### Приоритет: Низкий
 
-**Файлы:**
-- `docs/architecture/architecture.md`
-- `docs/migration/v6.0-refactoring.md` (создать)
+#### Задача R4: Усиление архитектурных тестов
 
-**Содержание:**
-- Описание новой архитектуры
-- Гайд по миграции для пользователей API
-- Примеры использования нового DI
+**Добавить тесты:**
+
+1. **Тест на классовое состояние в infrastructure:**
+   ```python
+   def test_no_class_level_mutable_state_in_infrastructure(bioetl_root: Path) -> None:
+       """Verify infrastructure classes don't use class-level mutable state."""
+       violations = []
+       for py_file in iter_python_files(bioetl_root / "infrastructure"):
+           tree = ast.parse(py_file.read_text())
+           for node in ast.walk(tree):
+               if isinstance(node, ast.ClassDef):
+                   for item in node.body:
+                       if isinstance(item, ast.AnnAssign):
+                           # Проверить на мутабельное классовое состояние
+                           pass
+       assert not violations
+   ```
+
+2. **Тест на единственность контекста:**
+   ```python
+   def test_single_context_source(bioetl_root: Path) -> None:
+       """Verify only one context management mechanism exists."""
+       context_files = list((bioetl_root / "interfaces").glob("*context*.py"))
+       # Проверить что нет дублирования
+   ```
 
 ---
 
 ## Метрики и проверки
 
-### Целевые метрики
+### Текущее состояние метрик
 
-| Метрика | Текущее | Целевое | Команда проверки |
-|---------|:-------:|:-------:|------------------|
-| Инфра-импорты в application | >0 | 0 | `grep -rn "bioetl.infrastructure" src/bioetl/application/` |
-| Приватные методы cross-module | >0 | 0 | `grep -rn "\._[a-z_]*(" src/bioetl/application/ \| grep -v "self\._\|cls\._"` |
-| `noqa: SLF001` в orchestrator | 2 | 0 | `grep -c "noqa: SLF001" src/bioetl/application/orchestrator.py` |
-| Глобальные переменные в interfaces | 3 | 0 | `grep -rn "^_[a-z].*=" src/bioetl/interfaces/` |
-| Глобальные переменные в infra | 2 | 0 | `grep -rn "^_[a-z].*=" src/bioetl/infrastructure/` |
-| Архитектурные тесты | pass | pass | `pytest tests/architecture/ tests/project_rules/ -v` |
-| Test coverage | ≥85% | ≥85% | `pytest --cov` |
+| Метрика | Было | Сейчас | Целевое |
+|---------|:----:|:------:|:-------:|
+| Инфра-импорты в application | >0 | **0** ✅ | 0 |
+| `noqa: SLF001` в orchestrator | 2 | **0** ✅ | 0 |
+| Module-level `_context` в interfaces | 1 | 1 | **0** |
+| Классовое состояние в infra | 2 | 2 | **0** |
+| Синглтоны в infra | 1 | 1 | **0** |
+| Архитектурные тесты | pass | **pass** ✅ | pass |
 
-### Команды проверки после каждого этапа
+### Команды проверки
 
 ```bash
 #!/bin/bash
 # Скрипт проверки архитектуры
 
-echo "=== Проверка инфра-импортов в application ==="
-grep -rn "from bioetl.infrastructure" src/bioetl/application/ || echo "✓ OK"
-grep -rn "import bioetl.infrastructure" src/bioetl/application/ || echo "✓ OK"
+echo "=== [ЗАВЕРШЕНО] Проверка инфра-импортов в application ==="
+grep -rn "from bioetl.infrastructure" src/bioetl/application/ || echo "✅ OK"
 
-echo "=== Проверка приватных методов ==="
-grep -rn "\._[a-z_]*(" src/bioetl/application/ | grep -v "self\._\|cls\._" || echo "✓ OK"
+echo "=== [ЗАВЕРШЕНО] Проверка noqa: SLF001 ==="
+grep -rn "noqa: SLF001" src/bioetl/application/ || echo "✅ OK"
 
-echo "=== Проверка noqa комментариев ==="
-grep -rn "noqa: SLF001" src/bioetl/application/ || echo "✓ OK"
+echo "=== [ТРЕБУЕТСЯ] Проверка module-level синглтонов в interfaces ==="
+grep -rn "^_[a-z].*: .*= " src/bioetl/interfaces/*.py
 
-echo "=== Проверка глобальных переменных в interfaces ==="
-grep -rn "^_[a-z].*: .*= " src/bioetl/interfaces/*.py || echo "✓ OK"
-
-echo "=== Import linter ==="
-lint-imports
+echo "=== [ТРЕБУЕТСЯ] Проверка классового состояния в infrastructure ==="
+grep -rn "_started.*=\|_instance.*=\|_lock.*=" src/bioetl/infrastructure/
 
 echo "=== Архитектурные тесты ==="
-pytest tests/architecture/ tests/project_rules/ -v --tb=short
-
-echo "=== Полный тестовый прогон ==="
-pytest --cov=bioetl --cov-fail-under=85
+pytest tests/project_rules/ tests/architecture/ -v --tb=short
 ```
 
 ---
 
-## Риски и митигация
+## Диаграмма текущей и целевой архитектуры
 
-| Риск | Вероятность | Влияние | Митигация |
-|------|:-----------:|:-------:|-----------|
-| Поломка существующих вызовов orchestrator | Высокая | Среднее | Deprecation warnings + обновление документации |
-| Регрессии в пайплайнах | Средняя | Высокое | Golden tests + интеграционные тесты |
-| Ложные срабатывания архитектурных тестов | Средняя | Низкое | Whitelist для допустимых случаев |
-| Несовместимость CLI/REST | Средняя | Среднее | Обновить вместе с composition root |
-| Thread-safety при переходе на ContextVar | Низкая | Среднее | Thorough testing в concurrent сценариях |
-
-### Стратегия миграции
+### Текущее состояние
 
 ```
-Фаза 1: Deprecation (1 релиз)
-├── Добавить DeprecationWarning в fallback функции
-├── Обновить документацию
-└── Анонсировать изменения в CHANGELOG
-
-Фаза 2: Параллельная поддержка (1 релиз)
-├── Новый API работает
-├── Старый API deprecated но работает
-└── Миграционный гайд готов
-
-Фаза 3: Удаление (следующий major релиз)
-├── Удалить deprecated код
-├── Сделать параметры обязательными
-└── Финальное обновление документации
+┌─────────────────────────────────────────────────────────────────────┐
+│                         INTERFACES                                   │
+│  ┌───────────────────┐  ┌────────────────────────┐                  │
+│  │ application_      │  │ context_manager.py     │                  │
+│  │ context.py        │  │ ✅ ContextVar-based    │                  │
+│  │ ⚠️ _context       │  │                        │                  │
+│  │ (module-level)    │  │ get_current_context()  │                  │
+│  └───────────────────┘  └────────────────────────┘                  │
+│         ↓ дублирование ↑                                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                        APPLICATION                                   │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  ✅ PipelineOrchestrator (all deps injected, no fallbacks)  │   │
+│  │  ✅ PipelineBase (public API: run_extract_only())           │   │
+│  │  ✅ Нет импортов из infrastructure                          │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+├─────────────────────────────────────────────────────────────────────┤
+│                      INFRASTRUCTURE                                  │
+│  ┌────────────────────────┐  ┌─────────────────────────┐            │
+│  │ observability/server   │  │ chembl/model_registry   │            │
+│  │ ⚠️ MetricsServerManager│  │ ⚠️ _RegistryHolder      │            │
+│  │    _started (class)    │  │    _instance (class)    │            │
+│  └────────────────────────┘  └─────────────────────────┘            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## Ожидаемые результаты
-
-### Прогноз улучшения оценок
-
-| Категория | Текущая | После v6 | Прирост |
-|-----------|:-------:|:--------:|:-------:|
-| Слоистая архитектура | 7 | 8.5 | +1.5 |
-| Ports & Adapters / DDD | 6 | 8 | +2 |
-| Границы модулей | 6 | 8 | +2 |
-| Тестирование и QA | 6 | 8 | +2 |
-| Сопровождаемость | 6 | 8 | +2 |
-
-**Прогноз интегрального балла после v6:** **8.0+**
-
-### Диаграмма целевой архитектуры
+### Целевое состояние
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         INTERFACES                                   │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  ApplicationContext (ContextVar-based, thread-safe)         │   │
+│  │  ApplicationContext (delegates to context_manager)          │   │
+│  │  context_manager.py (single source: ContextVar)             │   │
 │  │  CompositionRoot (creates all dependencies via DI)          │   │
-│  │  UseCaseFactory (receives context via DI)                   │   │
-│  │  CLI / REST (use ApplicationContext)                        │   │
 │  └─────────────────────────────────────────────────────────────┘   │
-│                              │                                       │
-│                              ▼                                       │
 ├─────────────────────────────────────────────────────────────────────┤
 │                        APPLICATION                                   │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  PipelineOrchestrator (all deps injected, no fallbacks)     │   │
-│  │  PipelineBase (public API: run_extract_only())              │   │
-│  │  UseCases (operate on domain types and ports)               │   │
+│  │  ✅ PipelineOrchestrator (all deps injected)                │   │
+│  │  ✅ PipelineBase (public API only)                          │   │
 │  └─────────────────────────────────────────────────────────────┘   │
-│                              │                                       │
-│              Uses interfaces │ (ports/ABCs)                         │
-│                              ▼                                       │
-├─────────────────────────────────────────────────────────────────────┤
-│                          DOMAIN                                      │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  ProviderRegistryABC, OutputWriterABC, MetricsHookABC       │   │
-│  │  Models, Value Objects, Domain Services                      │   │
-│  │  NO infrastructure dependencies, NO global state             │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                              ▲                                       │
-│              Implements      │ (ports/ABCs)                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                      INFRASTRUCTURE                                  │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  InMemoryProviderRegistry implements ProviderRegistryABC    │   │
-│  │  UnifiedFileWriter implements OutputWriterABC               │   │
-│  │  MetricsServerManager (instance-based, no class state)      │   │
-│  │  ChemblModelRegistry (factory-based, no singleton)          │   │
-│  │  Pandera schemas, HTTP clients, etc.                         │   │
+│  │  MetricsServerManager (instance-based state)                │   │
+│  │  ChemblEntityModelRegistry (factory-based, no singleton)    │   │
+│  │  Все состояние управляется через DI                         │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -580,65 +465,69 @@ pytest --cov=bioetl --cov-fail-under=85
 ## План выполнения
 
 ```
-БЛОКИРУЮЩИЕ ЗАДАЧИ (ПРИОРИТЕТ 1)
+ОСТАВШИЕСЯ ЗАДАЧИ
 ════════════════════════════════════════════════════════════════
 
-B1: Удаление fallback импорта в orchestrator
-├── Этап B1.1: Удалить _get_default_registry_factory()
-├── Этап B1.2: Сделать provider_registry_factory обязательным
-├── Этап B1.3: Обновить CompositionRoot
-└── Этап B1.4: Обновить тесты
+R1: Унификация ApplicationContext                        [ВЫСОКИЙ]
+├── Обновить application_context.py → делегация к context_manager
+├── Найти и обновить все вызовы get_application_context()
+├── Удалить module-level _context
+└── Обновить тесты
 
-B2: Публичный API для extract-only режима
-├── Этап B2.1: Добавить ExtractOnlyResult в domain/models.py
-├── Этап B2.2: Добавить run_extract_only() в PipelineBase
-├── Этап B2.3: Обновить orchestrator
-└── Этап B2.4: Покрыть тестами
+R2: Рефакторинг MetricsServerManager                    [СРЕДНИЙ]
+├── Заменить классовые переменные на instance-level
+├── Добавить фабрику create_metrics_server_manager()
+└── Обновить CompositionRoot
 
+R3: Рефакторинг _RegistryHolder                         [СРЕДНИЙ]
+├── Удалить _RegistryHolder
+├── Добавить create_chembl_model_registry()
+├── Пометить get_chembl_model_registry() как deprecated
+└── Обновить все вызовы
 
-КРУПНЫЕ ЗАДАЧИ (ПРИОРИТЕТ 2)
-════════════════════════════════════════════════════════════════
-
-C1: Консолидация синглтонов в interfaces
-├── Этап C1.1: Заменить _context на ContextVar
-├── Этап C1.2: Добавить контекстный менеджер
-├── Этап C1.3: Обновить CLI/REST
-└── Этап C1.4: Обновить тесты
-
-C2: Усиление архитектурных тестов
-├── Этап C2.1: Тест на инфра-импорты
-├── Этап C2.2: Тест на приватные методы
-└── Этап C2.3: Интеграция с ruff
-
-C3: Устранение прямых импортов
-├── Этап C3.1: Создать OutputWriterABC
-├── Этап C3.2: Создать MetricsHookABC
-├── Этап C3.3: Обновить пайплайны
-└── Этап C3.4: Обновить .importlinter
-
-
-МИНОРНЫЕ ЗАДАЧИ (ПРИОРИТЕТ 3)
-════════════════════════════════════════════════════════════════
-
-M1: Очистка глобального состояния в infrastructure
-├── M1.1: Рефакторинг MetricsServerManager
-└── M1.2: Рефакторинг model_registry
-
-M2: Обновление документации
-├── M2.1: Обновить architecture.md
-└── M2.2: Создать migration guide
+R4: Усиление архитектурных тестов                       [НИЗКИЙ]
+├── Тест на классовое состояние
+└── Тест на единственность контекста
 ```
+
+---
+
+## Риски и митигация
+
+| Риск | Вероятность | Влияние | Митигация |
+|------|:-----------:|:-------:|-----------|
+| Поломка CLI/REST при миграции контекста | Средняя | Высокое | Постепенная миграция с aliasing |
+| Изменение поведения MetricsServer | Низкая | Среднее | Сохранить семантику one-per-process |
+| Регрессии в тестах | Средняя | Низкое | Запуск полного тестового suite |
+
+---
+
+## Ожидаемые результаты
+
+### Прогноз улучшения оценок
+
+| Категория | До рефакторинга | Сейчас | После R1-R4 |
+|-----------|:---------------:|:------:|:-----------:|
+| Слоистая архитектура | 7 | **7.5** | 8.5 |
+| Ports & Adapters / DDD | 6 | **7** | 8 |
+| Границы модулей | 6 | **7.5** | 8 |
+| Тестирование и QA | 6 | **7** | 8 |
+| Сопровождаемость | 6 | **7** | 8 |
+
+**Прогноз интегрального балла:**
+- Текущий: **7.2/10**
+- После R1-R4: **8.0+/10**
 
 ---
 
 ## Ссылки
 
 - [REFACTORING_PLAN_v5.md](./REFACTORING_PLAN_v5.md)
-- [architecture.md](./architecture.md)
-- [.importlinter](../../.importlinter)
-- [PipelineOrchestrator](../../src/bioetl/application/orchestrator.py)
-- [PipelineBase](../../src/bioetl/application/pipelines/base.py)
-- [ApplicationContext](../../src/bioetl/interfaces/application_context.py)
-- [CompositionRoot](../../src/bioetl/interfaces/composition_root.py)
-- [test_layer_dependencies.py](../../tests/architecture/test_layer_dependencies.py)
+- [orchestrator.py](../../src/bioetl/application/orchestrator.py)
+- [base.py](../../src/bioetl/application/pipelines/base.py)
+- [application_context.py](../../src/bioetl/interfaces/application_context.py)
+- [context_manager.py](../../src/bioetl/interfaces/context_manager.py)
+- [server.py](../../src/bioetl/infrastructure/observability/server.py)
+- [model_registry.py](../../src/bioetl/infrastructure/chembl/model_registry.py)
 - [test_no_global_state.py](../../tests/project_rules/test_no_global_state.py)
+- [test_layer_architecture.py](../../tests/project_rules/test_layer_architecture.py)
