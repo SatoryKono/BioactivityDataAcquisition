@@ -226,9 +226,14 @@ class RunPipelineUseCase:
         Returns:
             Configured orchestrator.
         """
+        from bioetl.interfaces.factories.provider_registry import (
+            create_provider_registry_factory,
+        )
+
         return PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
+            provider_registry_factory=create_provider_registry_factory(),
             provider_loader_factory=self._provider_loader_factory,
             container_factory=self._container_factory,
         )
