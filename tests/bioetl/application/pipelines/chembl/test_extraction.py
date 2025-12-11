@@ -46,11 +46,33 @@ def test_get_release_version(service, mock_client):
     ExtractionService returns raw version (e.g., '34'), not formatted.
     Formatting to 'chembl_34' is done in application layer (ChemblPipelineBase).
     """
-    mock_client.metadata.return_value = {"chembl_release": "34"}
+    # Real API returns 'chembl_db_version' with format 'ChEMBL_34'
+    mock_client.metadata.return_value = {"chembl_db_version": "ChEMBL_34"}
     version = service.get_release_version()
-    # Service returns raw version, not formatted
+    # Service extracts version number from 'ChEMBL_34' -> '34'
     assert version == "34"
     mock_client.metadata.assert_called_once()
+
+
+def test_get_release_version_lowercase_format(service, mock_client):
+    """Test getting release version with lowercase format."""
+    mock_client.metadata.return_value = {"chembl_db_version": "chembl_35"}
+    version = service.get_release_version()
+    assert version == "35"
+
+
+def test_get_release_version_plain_number(service, mock_client):
+    """Test getting release version when API returns plain number."""
+    mock_client.metadata.return_value = {"chembl_db_version": "36"}
+    version = service.get_release_version()
+    assert version == "36"
+
+
+def test_get_release_version_missing_key(service, mock_client):
+    """Test getting release version when key is missing."""
+    mock_client.metadata.return_value = {"status": "UP"}
+    version = service.get_release_version()
+    assert version == "unknown"
 
 
 def test_extract_all_single_page(service, mock_client):
