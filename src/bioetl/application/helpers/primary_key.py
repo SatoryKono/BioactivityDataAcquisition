@@ -71,7 +71,10 @@ def resolve_primary_key(
         except Exception:
             entity_name = getattr(config, "entity", "unknown")
         raise ValueError(
-            f"Could not resolve primary key for entity '{entity_name}'. Please set 'primary_key' in config."
+            (
+                "Could not resolve primary key for entity "
+                f"'{entity_name}'. Please set 'primary_key' in config."
+            )
         )
 
     return pk

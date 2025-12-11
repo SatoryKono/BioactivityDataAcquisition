@@ -4,7 +4,8 @@
 This script analyzes imports within the application layer to:
 1. Build a dependency graph between submodules
 2. Detect cyclic dependencies between submodules
-3. Verify no module-level imports from infrastructure (only TYPE_CHECKING or lazy allowed)
+3. Verify no module-level imports from infrastructure (only TYPE_CHECKING or
+   lazy allowed)
 4. Validate domain imports against an allowed list
 5. Check for explicitly forbidden imports
 

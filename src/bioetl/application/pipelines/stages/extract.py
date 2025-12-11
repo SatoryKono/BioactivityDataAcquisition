@@ -34,7 +34,11 @@ class ExtractStage(ExtractorABC):
         ...     process(df)
 
         # Pre-configured entity for pipeline use:
-        >>> stage = ExtractStage(extraction_service, ChemblRecordMapper(), entity="activity")
+        >>> stage = ExtractStage(
+        ...     extraction_service,
+        ...     ChemblRecordMapper(),
+        ...     entity="activity",
+        ... )
         >>> for df in stage.extract():  # Uses pre-configured entity
         ...     process(df)
     """
