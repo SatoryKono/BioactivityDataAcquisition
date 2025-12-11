@@ -459,6 +459,36 @@ class TestDomainForbiddenImports:
             formatted = "\n".join(str(v) for v in sorted(all_violations, key=str))
             pytest.fail(f"Domain layer must not depend on interfaces:\n{formatted}")
 
+    def test_domain_has_no_dynamic_infrastructure_imports(
+        self, domain_files: list[Path], domain_trees: dict[Path, ast.Module]
+    ) -> None:
+        """Verify domain doesn't use importlib to import infrastructure.
+
+        Dynamic imports via importlib.import_module() can bypass static
+        analysis and violate layer boundaries. Domain should never
+        dynamically import from infrastructure, application, or interfaces.
+        """
+        violations: list[str] = []
+
+        for file_path in domain_files:
+            code = file_path.read_text(encoding="utf-8")
+
+            # Check for importlib.import_module calls with forbidden layer references
+            if "importlib.import_module" in code:
+                for forbidden_layer in ("infrastructure", "application", "interfaces"):
+                    if forbidden_layer in code:
+                        violations.append(
+                            f"{file_path.as_posix()}: dynamic import of {forbidden_layer} "
+                            "via importlib.import_module"
+                        )
+                        break
+
+        if violations:
+            pytest.fail(
+                "Domain must not dynamically import other layers:\n"
+                + "\n".join(violations)
+            )
+
 
 class TestDomainDocumentation:
     """Tests for documentation requirements in the domain layer."""

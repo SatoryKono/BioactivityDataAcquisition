@@ -191,8 +191,6 @@ def test_duplicate_class_names_are_allowlisted() -> None:
         "DataSourceConfig",
         "DataSinkConfig",
         "OutputOptionsConfig",
-        # Temporary: duplicate implementation in application/infrastructure layers
-        "InMemoryProviderRegistry",
     }
 
     class_map: dict[str, list[Path]] = {}

@@ -39,8 +39,8 @@ if TYPE_CHECKING:
     from concurrent.futures import ProcessPoolExecutor
 
 from bioetl.application.contracts import PipelineContainerABC
-from bioetl.application.memory_registry import InMemoryProviderRegistry
 from bioetl.application.pipelines.base import PipelineBase
+from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 from bioetl.application.pipelines.registry import get_factory
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext, RunResult, StageResult

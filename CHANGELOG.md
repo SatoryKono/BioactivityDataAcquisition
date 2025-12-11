@@ -34,10 +34,29 @@ See docs/migration/2.0-hexagonal-architecture.md
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- **BREAKING**: `ConfigMigrator` no longer available from `bioetl.domain.configs.migration`.
+  Use `from bioetl.infrastructure.config.migration import ConfigMigrator` instead.
+- **BREAKING**: `to_raw_records()` and `from_raw_records()` removed from `bioetl.domain.ports.extraction`.
+  Use `RecordMapperABC` in application layer or work with dicts directly.
+- **BREAKING**: `InMemoryProviderRegistry` consolidated to `bioetl.infrastructure.provider_registry`.
+  Import from `bioetl.infrastructure.provider_registry import InMemoryProviderRegistry`.
+
+### Added
+
+- `DefaultRunMetadataBuilder` class in `bioetl.application.metadata.builder` - explicit implementation
+  replacing anonymous `SimpleNamespace` in `PipelineBase`.
+- Architecture test `test_domain_has_no_dynamic_infrastructure_imports` to prevent `importlib` bypass
+  of layer boundaries in domain.
+
 ### Removed
 
 - **BREAKING**: `SimplePipelineContainer` class removed from `bioetl.interfaces.simple_container`. Use `ApplicationBootstrap` from `bioetl.application.bootstrap` or `create_default_bootstrap()` from `bioetl.interfaces.bootstrap_factory` instead.
 - `RenameColumnsConverter` class removed from `infrastructure/output/converters/` — duplicate of `_rename_columns()` in `converters/factories.py`
+- `src/bioetl/domain/configs/migration.py` - removed proxy module, use infrastructure layer directly.
+- `src/bioetl/application/memory_registry.py` - removed duplicate `InMemoryProviderRegistry`.
+- `to_raw_records()` and `from_raw_records()` deprecated functions from extraction ports.
 
 ### Changed
 

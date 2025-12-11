@@ -766,29 +766,6 @@ class PipelineConfig(BaseModel):
     # Validators
     # =========================================================================
 
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_legacy_format(cls, data: Any) -> Any:
-        """Migrate legacy flat config format to structured format.
-
-        This validator applies migration before Pydantic validation,
-        allowing backward compatibility with old config formats.
-        """
-        if not isinstance(data, dict):
-            return data
-
-        # Lazy import to avoid circular dependency
-        # ConfigMigrator is in infrastructure layer, but we need it here
-        # for backward compatibility when PipelineConfig is created directly
-        try:
-            from bioetl.infrastructure.config.migration import ConfigMigrator
-
-            return ConfigMigrator.migrate(data)
-        except ImportError:
-            # If migration module is not available, return data as-is
-            # This allows domain layer to work without infrastructure
-            return data
-
     @model_validator(mode="after")
     def validate_provider_alignment(self) -> PipelineConfig:
         """Ensure provider_config provider aligns with identity.provider."""
