@@ -1,7 +1,6 @@
 """Infrastructure implementation of the normalization service."""
 
 from typing import Any, Callable, cast
-import warnings
 
 import pandas as pd
 from pydantic import BaseModel
@@ -223,25 +222,4 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
         return cast(pd.Series, series.apply(_normalize_value_from_series))
 
 
-# Deprecated alias for backward compatibility
-_DEPRECATED_ALIASES = {
-    "DefaultNormalizationTransformerImpl": "NormalizationServiceImpl",
-}
-
-
-def __getattr__(name: str):
-    if name in _DEPRECATED_ALIASES:
-        warnings.warn(
-            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name]} instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return globals()[_DEPRECATED_ALIASES[name]]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-__all__ = [
-    "NormalizationServiceImpl",
-    "DefaultNormalizationTransformerImpl",  # noqa: F822
-]
+__all__ = ["NormalizationServiceImpl"]

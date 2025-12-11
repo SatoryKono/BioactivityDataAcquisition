@@ -2,12 +2,12 @@
 # Maps ABC roles to their default factory functions and available implementations
 
 RateLimiterABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_rate_limiter
+  default_factory: bioetl.infrastructure.clients.base.factories.create_rate_limiter
   implementations:
     TokenBucket: bioetl.infrastructure.clients.base.impl.rate_limiter.TokenBucketRateLimiterImpl
 
 CacheABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_cache
+  default_factory: bioetl.infrastructure.clients.base.factories.create_cache
   implementations:
     Memory: bioetl.infrastructure.clients.base.impl.cache.MemoryCacheImpl
 
@@ -22,7 +22,7 @@ LoggingPortABC:
     Structured: bioetl.infrastructure.observability.adapters.StructuredLoggerImpl
 
 ProgressReporterABC:
-  default_factory: bioetl.infrastructure.logging.factories.default_progress_reporter
+  default_factory: bioetl.infrastructure.logging.factories.create_progress_reporter
   implementations:
     Tqdm: bioetl.infrastructure.logging.impl.progress_reporter.TqdmProgressReporterImpl
 
@@ -32,48 +32,47 @@ TracingPortABC:
     Default: bioetl.infrastructure.observability.adapters.TracingAdapterImpl
 
 ValidatorFactoryABC:
-  default_factory: bioetl.infrastructure.validation.factories.default_validator_factory
+  default_factory: bioetl.infrastructure.validation.factories.create_validator_factory
   implementations:
     Pandera: bioetl.infrastructure.validation.factories.PanderaValidatorFactory
 
 SchemaProviderFactoryABC:
-  default_factory: bioetl.infrastructure.validation.factories.default_schema_provider_factory
+  default_factory: bioetl.infrastructure.validation.factories.create_schema_provider_factory
   implementations:
     Pandera: bioetl.infrastructure.validation.factories.PanderaSchemaProviderFactory
 
 ValidatorABC:
-  default_factory: bioetl.infrastructure.validation.factories.default_validator
+  default_factory: null
   implementations:
     Pandera: bioetl.infrastructure.validation.impl.pandera_validator.PanderaValidatorImpl
 
 SchemaProviderABC:
-  default_factory: bioetl.domain.schemas.registry.default_schema_provider
+  default_factory: bioetl.domain.schemas.registry.get_default_schema_registry
   implementations:
     Registry: bioetl.domain.schemas.registry.SchemaRegistry
 
 NormalizationServiceABC:
-  default_factory: bioetl.infrastructure.transform.factories.default_normalization_service
+  default_factory: bioetl.infrastructure.transform.factories.create_normalization_service
   implementations:
-    Default: bioetl.infrastructure.transform.impl.default_normalization_transformer_impl.DefaultNormalizationTransformerImpl
-    Chembl: bioetl.infrastructure.transform.impl.chembl_normalization_service_impl.ChemblNormalizationService
+    Default: bioetl.infrastructure.transform.impl.default_normalization_transformer_impl.NormalizationServiceImpl
 
 HasherABC:
-  default_factory: bioetl.infrastructure.transform.factories.default_hasher
+  default_factory: bioetl.infrastructure.transform.factories.create_hasher
   implementations:
     Blake2b: bioetl.infrastructure.transform.impl.hasher.HasherImpl
 
 HashServiceABC:
-  default_factory: bioetl.infrastructure.transform.factories.default_hash_service
+  default_factory: bioetl.infrastructure.transform.factories.create_hash_service
   implementations:
     Blake2b: bioetl.infrastructure.transform.impl.hash_service.Blake2bHashService
 
 TimestampProviderABC:
-  default_factory: bioetl.infrastructure.transform.factories.default_timestamp_provider
+  default_factory: bioetl.infrastructure.transform.factories.create_timestamp_provider
   implementations:
     Deterministic: bioetl.infrastructure.transform.impl.timestamp_provider.DeterministicTimestampProvider
 
 IndexGeneratorABC:
-  default_factory: bioetl.infrastructure.transform.factories.default_index_generator
+  default_factory: bioetl.infrastructure.transform.factories.create_index_generator
   implementations:
     Sequential: bioetl.infrastructure.transform.impl.index_generator.SequentialIndexGenerator
 
@@ -88,34 +87,34 @@ LoaderABC:
     Unified: bioetl.infrastructure.output.unified_loader_impl.UnifiedLoaderImpl
 
 OutputFrameConverterABC:
-  default_factory: bioetl.infrastructure.output.converters.factories.default_output_frame_converter
+  default_factory: bioetl.infrastructure.output.converters.factories.create_output_frame_converter
   implementations:
     Noop: bioetl.infrastructure.output.converters.noop_converter.NoopConverter
     RenameColumns: bioetl.infrastructure.output.converters.rename_columns_converter.RenameColumnsConverter
     DropNaRows: bioetl.infrastructure.output.converters.dropna_rows_converter.DropNaRowsConverter
 
 DataClientABC:
-  default_factory: bioetl.infrastructure.clients.chembl.factories.default_chembl_client
+  default_factory: bioetl.infrastructure.clients.chembl.factories.create_chembl_client
   implementations:
     ChemblHTTP: bioetl.infrastructure.clients.chembl.impl.chembl_http_client_impl.ChemblHttpClientImpl
 
 RequestBuilderABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_request_builder
+  default_factory: bioetl.infrastructure.clients.base.factories.create_request_builder
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.request_builder.ChemblRequestBuilderImpl
 
 ResponseParserPortABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_response_parser
+  default_factory: bioetl.infrastructure.clients.base.factories.create_response_parser
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.response_parser.ChemblGenericResponseParser
 
 PaginatorABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_paginator
+  default_factory: bioetl.infrastructure.clients.base.factories.create_paginator
   implementations:
     Chembl: bioetl.infrastructure.clients.chembl.paginator.ChemblPaginatorImpl
 
 SecretProviderABC:
-  default_factory: bioetl.infrastructure.clients.base.factories.default_secret_provider
+  default_factory: bioetl.infrastructure.clients.base.factories.create_secret_provider
   implementations:
     Env: bioetl.infrastructure.clients.base.factories.EnvSecretProviderImpl
 
@@ -127,4 +126,3 @@ ProviderRegistryABC:
   default_factory: bioetl.infrastructure.provider_registry.create_empty_provider_registry
   implementations:
     InMemory: bioetl.infrastructure.provider_registry.InMemoryProviderRegistry
-

@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from typing import TYPE_CHECKING
-import warnings
 
 from bioetl.domain.validation import (
     SchemaProviderABC,
@@ -83,45 +82,9 @@ def create_schema_provider_factory() -> SchemaProviderFactoryABC:
     return PanderaSchemaProviderFactory()
 
 
-# ---------------------------------------------------------------------------
-# Deprecated aliases for backward compatibility
-# ---------------------------------------------------------------------------
-
-
-def default_validator_factory() -> ValidatorFactoryABC:
-    """DEPRECATED: Use create_validator_factory() instead."""
-    warnings.warn(
-        "default_validator_factory is deprecated, use create_validator_factory instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_validator_factory()
-
-
-def default_schema_provider_factory() -> SchemaProviderFactoryABC:
-    """DEPRECATED: Use create_schema_provider_factory() instead."""
-    warnings.warn(
-        "default_schema_provider_factory is deprecated, "
-        "use create_schema_provider_factory instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_schema_provider_factory()
-
-
-def default_validator() -> ValidatorABC:
-    """Stub default validator until configured."""
-    raise NotImplementedError("ValidatorABC default factory is not configured")
-
-
 __all__ = [
     "PanderaValidatorFactory",
     "PanderaSchemaProviderFactory",
-    # New naming convention
     "create_validator_factory",
     "create_schema_provider_factory",
-    # Deprecated aliases
-    "default_validator_factory",
-    "default_schema_provider_factory",
-    "default_validator",
 ]

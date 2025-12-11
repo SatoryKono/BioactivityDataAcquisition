@@ -2,19 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
-import warnings
-
 from bioetl.domain.ports.parsing import (
     ApiPayload,
     RawRecord,
     RecordBatch,
     ResponseParserPortABC,
 )
-
-# =============================================================================
-# New Generic Parser (Recommended)
-# =============================================================================
 
 
 class ChemblGenericResponseParser(ResponseParserPortABC[RawRecord]):
@@ -73,11 +66,6 @@ class ChemblGenericResponseParser(ResponseParserPortABC[RawRecord]):
         }
 
 
-# =============================================================================
-# Factory Functions
-# =============================================================================
-
-
 def create_generic_parser() -> ResponseParserPortABC:
     """Create parser for generic dict output (recommended).
 
@@ -92,39 +80,7 @@ def create_generic_parser() -> ResponseParserPortABC:
     return ChemblGenericResponseParser()
 
 
-# =============================================================================
-# Deprecated Aliases (Backward Compatibility)
-# =============================================================================
-
-_DEPRECATED_ALIASES = {
-    "ChemblResponseParserImpl": "ChemblGenericResponseParser",
-}
-
-
-def __getattr__(name: str) -> Any:
-    """Support deprecated class names with warnings.
-
-    Allows backward-compatible imports like:
-        from bioetl.infrastructure.clients.chembl.response_parser import
-        ChemblResponseParserImpl
-
-    But emits a DeprecationWarning directing users to the new name.
-    """
-    if name in _DEPRECATED_ALIASES:
-        new_name = _DEPRECATED_ALIASES[name]
-        warnings.warn(
-            f"{name} is deprecated, use {new_name} instead. "
-            "See docs/migration/2.0-hexagonal-architecture.md for migration guide.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ChemblGenericResponseParser
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 __all__ = [
     "ChemblGenericResponseParser",
     "create_generic_parser",
-    # Deprecated (available via __getattr__)
-    "ChemblResponseParserImpl",  # noqa: F822
 ]
