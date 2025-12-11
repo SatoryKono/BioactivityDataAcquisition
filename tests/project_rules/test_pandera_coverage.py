@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain.schemas.registry import SchemaRegistry, register_schemas
+from bioetl.infrastructure.validation.schema_generator import PanderaSchemaGenerator
 
 
 def _expected_entities(configs_root: Path) -> set[str]:
@@ -19,7 +20,7 @@ def _expected_entities(configs_root: Path) -> set[str]:
 
 
 def test_pandera_schemas_registered(configs_root: Path) -> None:
-    registry = SchemaRegistry()
+    registry = SchemaRegistry(schema_generator=PanderaSchemaGenerator())
     register_schemas(registry)
 
     expected_entities = _expected_entities(configs_root)
