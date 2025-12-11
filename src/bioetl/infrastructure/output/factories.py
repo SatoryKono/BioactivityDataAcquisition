@@ -63,9 +63,16 @@ def create_loader(
     )
 
 
+# Deprecated aliases for backward compatibility
+def default_metadata_writer() -> MetadataWriter:
+    """Deprecated: use create_metadata_writer() instead."""
+    return create_metadata_writer()
+
+
 __all__ = [
     "create_loader",
     "create_metadata_writer",
     "create_quality_reporter",
     "create_writer",
+    "default_metadata_writer",
 ]

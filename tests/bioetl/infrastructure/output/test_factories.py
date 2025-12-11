@@ -1,16 +1,16 @@
 from bioetl.infrastructure.output.factories import (
+    create_writer,
     default_metadata_writer,
-    default_writer,
 )
-from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
-from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
+from bioetl.infrastructure.output.impl.csv_writer import CsvWriter
+from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriter
 
 
 def test_default_writer():
-    writer = default_writer()
-    assert isinstance(writer, CsvWriterImpl)
+    writer = create_writer()
+    assert isinstance(writer, CsvWriter)
 
 
 def test_default_metadata_writer():
     writer = default_metadata_writer()
-    assert isinstance(writer, MetadataWriterImpl)
+    assert isinstance(writer, MetadataWriter)
