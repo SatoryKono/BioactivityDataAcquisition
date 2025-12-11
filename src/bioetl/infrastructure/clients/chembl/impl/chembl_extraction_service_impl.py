@@ -138,23 +138,31 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         Handles formats:
             - 'ChEMBL_36' -> '36'
             - 'chembl_36' -> '36'
+            - 'chembl36' -> '36' (without underscore)
             - '36' -> '36'
 
         Args:
             version_str: Raw version string from API.
 
         Returns:
-            Extracted version number as string.
+            Extracted version number as string, or 'unknown' if parsing fails.
         """
         if not version_str:
             return "unknown"
 
-        # Handle 'ChEMBL_XX' or 'chembl_XX' format
         lower = version_str.lower()
-        if lower.startswith("chembl_"):
-            return version_str[7:]  # Remove 'ChEMBL_' or 'chembl_' prefix
 
-        # Already a plain number
+        # Handle 'ChEMBL_XX' or 'chembl_XX' format (with underscore)
+        if lower.startswith("chembl_"):
+            result = version_str[7:]  # Remove 'ChEMBL_' or 'chembl_' prefix
+            return result if result else "unknown"
+
+        # Handle 'chemblXX' format (without underscore)
+        if lower.startswith("chembl"):
+            result = version_str[6:]  # Remove 'ChEMBL' or 'chembl' prefix
+            return result if result else "unknown"
+
+        # Already a plain number or other format
         return version_str
 
     def _enrich_filters(

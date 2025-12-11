@@ -79,6 +79,55 @@ def test_get_release_version_missing_key(service, mock_client):
     assert version == "unknown"
 
 
+def test_get_release_version_without_underscore(service, mock_client):
+    """Test getting release version when format has no underscore."""
+    mock_client.metadata.return_value = {"chembl_db_version": "chembl36"}
+    version = service.get_release_version()
+    assert version == "36"
+
+
+def test_get_release_version_empty_after_prefix(service, mock_client):
+    """Test getting release version when only prefix is present."""
+    mock_client.metadata.return_value = {"chembl_db_version": "ChEMBL_"}
+    version = service.get_release_version()
+    assert version == "unknown"
+
+
+class TestParseVersionString:
+    """Tests for _parse_version_string static method."""
+
+    def test_parses_chembl_uppercase_with_underscore(self):
+        """Parses 'ChEMBL_36' format."""
+        result = ChemblExtractionServiceImpl._parse_version_string("ChEMBL_36")
+        assert result == "36"
+
+    def test_parses_chembl_lowercase_with_underscore(self):
+        """Parses 'chembl_36' format."""
+        result = ChemblExtractionServiceImpl._parse_version_string("chembl_36")
+        assert result == "36"
+
+    def test_parses_plain_number(self):
+        """Parses plain '36' format."""
+        result = ChemblExtractionServiceImpl._parse_version_string("36")
+        assert result == "36"
+
+    def test_parses_chembl_without_underscore(self):
+        """Parses 'chembl36' format (no underscore)."""
+        result = ChemblExtractionServiceImpl._parse_version_string("chembl36")
+        assert result == "36"
+
+    def test_returns_unknown_for_empty_string(self):
+        """Returns 'unknown' for empty string."""
+        result = ChemblExtractionServiceImpl._parse_version_string("")
+        assert result == "unknown"
+
+    def test_returns_unknown_for_prefix_only(self):
+        """Returns 'unknown' when only prefix is present."""
+        assert ChemblExtractionServiceImpl._parse_version_string("ChEMBL_") == "unknown"
+        assert ChemblExtractionServiceImpl._parse_version_string("chembl_") == "unknown"
+        assert ChemblExtractionServiceImpl._parse_version_string("ChEMBL") == "unknown"
+
+
 def test_extract_all_single_page(service, mock_client):
     """Test extraction of a single page."""
     # Mock parser and paginator attributes on the instance
