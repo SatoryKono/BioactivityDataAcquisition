@@ -12,10 +12,6 @@ from bioetl.domain.ports.config_loader_port import (
     ConfigLoaderPortABC,
     ConfigPathResolverPortABC,
 )
-from bioetl.domain.ports.pipeline_contract_loader import (
-    PipelineContractLoaderError,
-    PipelineContractLoaderPortABC,
-)
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
@@ -44,6 +40,10 @@ from bioetl.domain.ports.parsing import (
     RawRecordDict,
     RawRecordList,
     ResponseParserPortABC,
+)
+from bioetl.domain.ports.pipeline_contract_loader import (
+    PipelineContractLoaderError,
+    PipelineContractLoaderPortABC,
 )
 from bioetl.domain.ports.request_building import RequestBuilderPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
