@@ -1,21 +1,12 @@
-"""Base contracts for data source helpers.
-
-Note:
-    ``ResponseParserABC`` has been deprecated and unified with
-    ``ResponseParserPortABC`` from ``bioetl.domain.ports.parsing``.
-    Import ``ResponseParserPortABC`` directly from ``bioetl.domain.ports.parsing``
-    for new code. The re-export here is provided for backward compatibility only.
-"""
+"""Base contracts for data source helpers."""
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
-import warnings
 
 from pydantic import BaseModel
 
 T = TypeVar("T")
 RecordT = TypeVar("RecordT", bound=BaseModel)
-RecordModel = BaseModel
 
 if TYPE_CHECKING:
     pass
@@ -56,67 +47,12 @@ class RequestBuilderABC(ABC):
     def build_with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
         """Add pagination parameters."""
 
-    def with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
-        """Deprecated alias for build_with_pagination.
-
-        .. deprecated:: 1.0
-            Use :meth:`build_with_pagination` instead. Will be removed in 2.0.
-        """
-        warnings.warn(
-            "with_pagination() is deprecated, use build_with_pagination() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.build_with_pagination(offset, limit)
-
-    def for_endpoint(self, endpoint: str) -> "RequestBuilderABC":
-        """Deprecated alias for build_for_endpoint.
-
-        .. deprecated:: 1.0
-            Use :meth:`build_for_endpoint` instead. Will be removed in 2.0.
-        """
-        warnings.warn(
-            "for_endpoint() is deprecated, use build_for_endpoint() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.build_for_endpoint(endpoint)
-
-
-# =============================================================================
-# Deprecated: ResponseParserABC
-# =============================================================================
-# ResponseParserABC has been unified with ResponseParserPortABC.
-# This section provides backward compatibility via re-export with deprecation.
-
-
-def __getattr__(name: str) -> type:
-    """Lazy import with deprecation warning for ResponseParserABC.
-
-    This enables backward-compatible imports like:
-        from bioetl.domain.clients.base.contracts import ResponseParserABC
-
-    But emits a DeprecationWarning directing users to the new location.
-    """
-    if name == "ResponseParserABC":
-        from bioetl.domain.ports.parsing import ResponseParserPortABC
-
-        warnings.warn(
-            "ResponseParserABC is deprecated. "
-            "Use ResponseParserPortABC from bioetl.domain.ports.parsing instead. "
-            "See migration guide in bioetl.domain.ports.parsing module docstring.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ResponseParserPortABC
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
 
 class PaginatorABC(ABC):
     """Pagination strategy."""
 
     @abstractmethod
-    def get_items(self, response: Any) -> list[RecordModel]:
+    def get_items(self, response: Any) -> list[BaseModel]:
         """Extract items from response."""
 
     @abstractmethod

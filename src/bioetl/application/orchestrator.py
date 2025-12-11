@@ -56,8 +56,6 @@ from bioetl.domain.provider_registry import (
 from bioetl.domain.providers import ProviderId
 from bioetl.domain.value_objects import EntityName, StageName
 
-ProviderLoaderProtocol = ProviderRegistryLoaderABC
-
 
 class PipelineOrchestrator:
     """Manages pipeline assembly and execution.
@@ -91,8 +89,8 @@ class PipelineOrchestrator:
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
         provider_registry_factory: ProviderRegistryFactory,
         container_factory: Callable[..., PipelineContainerABC] | None = None,
-        provider_loader: ProviderLoaderProtocol | None = None,
-        provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None = None,
+        provider_loader: ProviderRegistryLoaderABC | None = None,
+        provider_loader_factory: Callable[[], ProviderRegistryLoaderABC] | None = None,
     ) -> None:
         self._pipeline_name = pipeline_name
         self._config = config

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Protocol, runtime_checkable
+from typing import Callable, Protocol, runtime_checkable
 
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 
@@ -70,31 +70,6 @@ class ProviderRegistryLoaderABC(Protocol):
         self, *, registry: ProviderRegistryABC | None = None
     ) -> ProviderRegistryABC:
         """Load providers and return populated registry."""
-
-
-def __getattr__(name: str) -> Any:
-    """Handle removed names with helpful error messages."""
-    removed = {
-        "InMemoryProviderRegistry": (
-            "InMemoryProviderRegistry has been moved to "
-            "bioetl.infrastructure.provider_registry"
-        ),
-        "set_provider_registry": (
-            "set_provider_registry() has been removed. "
-            "Use CompositionRoot.get_provider_registry() instead."
-        ),
-        "get_provider_registry": (
-            "get_provider_registry() has been removed from domain. "
-            "Use CompositionRoot.get_provider_registry() instead."
-        ),
-        "default_provider_registry": (
-            "default_provider_registry() has been removed. "
-            "Use CompositionRoot.get_provider_registry() instead."
-        ),
-    }
-    if name in removed:
-        raise AttributeError(removed[name])
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 __all__ = [

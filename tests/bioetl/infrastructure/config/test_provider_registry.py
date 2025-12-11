@@ -715,37 +715,3 @@ class TestConstants:
         assert DEFAULT_PROVIDERS_REGISTRY_PATH == Path("configs/providers.yaml")
 
 
-# ---------------------------------------------------------------------------
-# Tests: Backward Compatibility Aliases
-# ---------------------------------------------------------------------------
-
-
-class TestBackwardCompatibilityAliases:
-    """Tests to ensure backward compatibility aliases work."""
-
-    def test_exception_aliases(self) -> None:
-        from bioetl.infrastructure.config.provider_registry import (
-            ProviderRegistryConfigNotFoundError,
-            ProviderRegistryLoaderError,
-            ProviderRegistryValidationError,
-        )
-
-        assert ProviderRegistryLoaderError is ProviderRegistryError
-        assert ProviderRegistryConfigNotFoundError is ProviderRegistryNotFoundError
-        assert ProviderRegistryValidationError is ProviderRegistryFormatError
-
-    def test_model_aliases(self) -> None:
-        from bioetl.infrastructure.config.provider_registry import (
-            ProviderRegistryEntryConfig,
-            ProviderRegistryModel,
-        )
-
-        assert ProviderRegistryEntryConfig is ProviderRegistryEntryModel
-        assert ProviderRegistryModel is ProviderRegistryConfig
-
-    def test_loader_alias(self) -> None:
-        from bioetl.infrastructure.config.provider_registry import (
-            ProviderRegistryLoader,
-        )
-
-        assert ProviderRegistryLoader is ProviderLoaderImpl
