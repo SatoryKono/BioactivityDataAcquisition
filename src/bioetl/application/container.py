@@ -29,7 +29,8 @@ Example::
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Mapping
+from typing import Callable
 
 from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.factories.noop import (
@@ -52,12 +53,14 @@ from bioetl.application.services.schema_bootstrap import (
     create_schema_bootstrap_service,
 )
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import BaseProviderConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import RecordSourceABC
+from bioetl.domain.ports.entity_models import EntityModelRegistryABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.schemas.pipeline_contracts import (
     PipelineSchemaModel,
     get_pipeline_contract,
@@ -178,7 +181,7 @@ class PipelineContainer(PipelineContainerABC):
     # Application Services (via ServiceFactory)
     # ─────────────────────────────────────────────────────────────────────────
 
-    def get_extraction_service(self) -> Any:
+    def get_extraction_service(self) -> ExtractionServiceABC:
         """Create and return an extraction service via the service factory."""
         return self._get_service_factory().create_extraction_service()
 
@@ -186,7 +189,7 @@ class PipelineContainer(PipelineContainerABC):
         """Create and return a normalization service via the service factory."""
         return self._get_service_factory().create_normalization_service()
 
-    def get_entity_model_registry(self) -> Any:
+    def get_entity_model_registry(self) -> EntityModelRegistryABC:
         """Create and return an entity model registry via the service factory."""
         return self._get_service_factory().create_entity_model_registry()
 
@@ -229,12 +232,12 @@ class PipelineContainer(PipelineContainerABC):
 
     def get_record_source(
         self,
-        extraction_service: Any,
+        extraction_service: ExtractionServiceABC,
         *,
         limit: int | None = None,
         logger: LoggingPortABC | None = None,
         model_cls: type | None = None,
-        batch_adapter: Any | None = None,
+        batch_adapter: Callable[[object], list[Mapping[str, object]]] | None = None,
     ) -> RecordSourceABC:
         """
         Create a record source for iterating over extracted data.
@@ -342,7 +345,9 @@ class PipelineContainer(PipelineContainerABC):
     def _get_provider_definition(self) -> ProviderDefinition:
         return self._get_provider_registry().get_provider(self._provider_id)
 
-    def _resolve_provider_config(self, definition: ProviderDefinition) -> Any:
+    def _resolve_provider_config(
+        self, definition: ProviderDefinition
+    ) -> BaseProviderConfig:
         source_config = self._config.get_source_config(self._provider_id.value)
         if not isinstance(source_config, definition.config_type):
             raise TypeError(
