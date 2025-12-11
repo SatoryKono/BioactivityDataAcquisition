@@ -179,31 +179,6 @@ class QualityControlConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-def _qc_config_deprecation_warning() -> None:
-    """Emit deprecation warning for QcConfig."""
-    import warnings
-
-    warnings.warn(
-        "QcConfig is deprecated, use QualityControlConfig instead. "
-        "Will be removed in v3.0.",
-        DeprecationWarning,
-        stacklevel=3,
-    )
-
-
-# Deprecated alias for backward compatibility
-# TODO: Remove in v3.0
-class QcConfig(QualityControlConfig):
-    """Deprecated: Use QualityControlConfig instead.
-
-    Will be removed in v3.0.
-    """
-
-    def __init__(self, **data: Any) -> None:
-        _qc_config_deprecation_warning()
-        super().__init__(**data)
-
-
 class CanonicalizationConfig(BaseModel):
     """Canonicalization configuration for hashing."""
 
@@ -362,16 +337,6 @@ class BaseProviderConfig(BaseModel):
         """Backward compatibility: access base_url from http config."""
         return self.http.base_url
 
-    @property
-    def http_client(self) -> ProviderHttpConfig:
-        """DEPRECATED: Use .http instead. Legacy alias for http config."""
-        return self.http
-
-    @property
-    def client(self) -> HttpClientConfig:
-        """DEPRECATED: Use .http instead. Legacy alias for http config."""
-        return self.http
-
     @field_validator("provider")
     @classmethod
     def validate_provider_known(cls, value: str) -> str:
@@ -445,11 +410,6 @@ class RuntimeConfig(BaseModel):
             data["http"] = data.pop("client")
         return data
 
-    @property
-    def client(self) -> HttpClientConfig:
-        """DEPRECATED: Use .http instead. Legacy alias for backward compatibility."""
-        return self.http
-
 
 class ObservabilityConfig(BaseModel):
     """Logging and metrics section."""
@@ -471,14 +431,6 @@ class QualityConfig(BaseModel):
     normalization: NormalizationConfig = Field(default_factory=NormalizationConfig)
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
-
-    @property
-    def qc(self) -> QualityControlConfig:
-        """Deprecated: Use .quality_control instead.
-
-        Backward compatibility property. Will be removed in v3.0.
-        """
-        return self.quality_control
 
 
 class FeatureFlagsConfig(BaseModel):

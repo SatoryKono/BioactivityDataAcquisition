@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.clients.base.output.contracts import WriteResult
-from bioetl.domain.configs import QcConfig
+from bioetl.domain.configs import QualityControlConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.ports.output import MetadataBuilderPort
 
@@ -25,7 +25,7 @@ class MetadataBuilder(MetadataBuilderPort):
         *,
         qc_artifacts: list[Path] | None = None,
         qc_checksums: dict[str, str] | None = None,
-        qc_config: QcConfig | None = None,
+        qc_config: QualityControlConfig | None = None,
     ) -> dict[str, Any]:
         """Build metadata for a completed pipeline run.
 
@@ -41,7 +41,7 @@ class MetadataBuilder(MetadataBuilderPort):
         """
         qc_artifacts = qc_artifacts or []
         qc_checksums = qc_checksums or {}
-        qc_config = qc_config or QcConfig()
+        qc_config = qc_config or QualityControlConfig()
 
         files = [result.path.name]
         files.extend(path.name for path in qc_artifacts)

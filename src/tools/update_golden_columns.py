@@ -7,9 +7,9 @@ import pandas as pd
 # Add src to python path
 sys.path.append(os.path.abspath("src"))
 
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 
-LOGGER = default_logging_port().apply_bind(tool="update_golden_columns")
+LOGGER = create_logging_port().apply_bind(tool="update_golden_columns")
 
 LOGGER.info("Script started")
 

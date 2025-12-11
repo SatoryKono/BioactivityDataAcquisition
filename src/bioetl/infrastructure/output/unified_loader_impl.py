@@ -14,7 +14,7 @@ from bioetl.domain.clients.base.output.contracts import (
     OutputFrameConverterABC,
     WriteResult,
 )
-from bioetl.domain.configs import DeterminismConfig, QcConfig
+from bioetl.domain.configs import DeterminismConfig, QualityControlConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import MetricsPortABC
 from bioetl.domain.pipelines.contracts import LoaderABC
@@ -56,7 +56,7 @@ class UnifiedLoaderImpl(LoaderABC):
         metadata_writer: MetadataWriterPort,
         qc_report_generator: QcReportGeneratorPort,
         config: DeterminismConfig,
-        qc_config: QcConfig | None = None,
+        qc_config: QualityControlConfig | None = None,
         atomic_op: AtomicFileOperation | None = None,
         metrics: MetricsPortABC | None = None,
         converter: OutputFrameConverterABC | None = None,
@@ -85,7 +85,7 @@ class UnifiedLoaderImpl(LoaderABC):
         self._metadata_writer = metadata_writer
         self._qc_report_generator = qc_report_generator
         self._config = config
-        self._qc_config = qc_config or QcConfig()
+        self._qc_config = qc_config or QualityControlConfig()
         self._atomic_op = atomic_op or AtomicFileOperation()
         self._metrics = metrics
         self._converter = converter

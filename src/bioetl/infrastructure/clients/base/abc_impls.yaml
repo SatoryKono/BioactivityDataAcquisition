@@ -17,7 +17,7 @@ ProviderRegistryLoaderABC:
     Default: bioetl.infrastructure.config.provider_registry.ProviderLoaderImpl
 
 LoggingPortABC:
-  default_factory: bioetl.infrastructure.observability.factories.default_logging_port
+  default_factory: bioetl.infrastructure.observability.factories.create_logging_port
   implementations:
     Structured: bioetl.infrastructure.observability.adapters.StructuredLoggerImpl
 
@@ -27,7 +27,7 @@ ProgressReporterABC:
     Tqdm: bioetl.infrastructure.logging.impl.progress_reporter.TqdmProgressReporterImpl
 
 TracingPortABC:
-  default_factory: bioetl.infrastructure.observability.factories.default_tracing_port
+  default_factory: bioetl.infrastructure.observability.factories.create_tracing_port
   implementations:
     Default: bioetl.infrastructure.observability.adapters.TracingAdapterImpl
 
@@ -78,12 +78,12 @@ IndexGeneratorABC:
     Sequential: bioetl.infrastructure.transform.impl.index_generator.SequentialIndexGenerator
 
 QualityReportABC:
-  default_factory: bioetl.infrastructure.output.factories.default_quality_reporter
+  default_factory: bioetl.infrastructure.output.factories.create_quality_reporter
   implementations:
     Default: bioetl.infrastructure.output.impl.quality_report.QualityReportImpl
 
 LoaderABC:
-  default_factory: bioetl.infrastructure.output.factories.default_loader
+  default_factory: bioetl.infrastructure.output.factories.create_loader
   implementations:
     Unified: bioetl.infrastructure.output.unified_loader_impl.UnifiedLoaderImpl
 

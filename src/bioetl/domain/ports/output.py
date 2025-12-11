@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
     from bioetl.domain.clients.base.output.contracts import WriteResult
-    from bioetl.domain.configs import QcConfig
+    from bioetl.domain.configs import QualityControlConfig
     from bioetl.domain.models import RunContext
 
 
@@ -102,7 +102,7 @@ class MetadataBuilderPort(ABC):
         *,
         qc_artifacts: list[Path] | None = None,
         qc_checksums: dict[str, str] | None = None,
-        qc_config: "QcConfig | None" = None,
+        qc_config: "QualityControlConfig | None" = None,
     ) -> dict[str, Any]:
         """Build metadata for a completed pipeline run.
 
