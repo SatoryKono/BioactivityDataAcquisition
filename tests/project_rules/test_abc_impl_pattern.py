@@ -21,7 +21,6 @@ ALLOWED_ABCS_WITHOUT_IMPL = {
     "PipelineHookABC",
     "ProviderRegistryABC",
     "RequestBuilderABC",
-    "ResponseParserABC",
     "SchemaProviderABC",
     "SecretProviderABC",
 }

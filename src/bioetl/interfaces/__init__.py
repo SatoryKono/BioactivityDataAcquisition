@@ -36,11 +36,7 @@ from bioetl.interfaces.factories import (
     InfrastructureFactoryABC,
     ObservabilityFactoryABC,
 )
-from bioetl.interfaces.use_case_factory import (
-    UseCaseFactory,
-    get_use_case_factory,
-    reset_use_case_factory,
-)
+from bioetl.interfaces.use_case_factory import UseCaseFactory
 
 __all__ = [
     # Application context
@@ -68,6 +64,4 @@ __all__ = [
     "DefaultInfrastructureFactory",
     # Use case factory
     "UseCaseFactory",
-    "get_use_case_factory",
-    "reset_use_case_factory",
 ]

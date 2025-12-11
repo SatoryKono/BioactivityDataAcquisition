@@ -5,7 +5,6 @@ Registry implementation for schema objects (technology-agnostic).
 from __future__ import annotations
 
 from collections.abc import Callable
-import warnings
 
 from bioetl.domain.schemas.contracts import SchemaGeneratorProtocol
 from bioetl.domain.validation import SchemaProviderABC, schema_type
@@ -162,62 +161,10 @@ def reset_default_schema_registry() -> None:
     _default_registry = None
 
 
-# ---------------------------------------------------------------------------
-# Backward compatibility - deprecated global singleton
-# ---------------------------------------------------------------------------
-
-
-class _DeprecatedRegistryProxy:
-    """
-    Proxy that emits deprecation warning on first attribute access.
-
-    This maintains backward compatibility while encouraging migration
-    to the factory pattern.
-    """
-
-    _warned: bool = False
-    _instance: SchemaRegistry | None = None
-
-    def _warn_once(self) -> None:
-        if not self._warned:
-            warnings.warn(
-                "Global 'registry' is deprecated. "
-                "Use get_default_schema_registry() or "
-                "create_default_schema_registry() instead.",
-                DeprecationWarning,
-                stacklevel=3,
-            )
-            self._warned = True
-
-    def _get_instance(self) -> SchemaRegistry:
-        if self._instance is None:
-            self._instance = get_default_schema_registry()
-        return self._instance
-
-    def __getattr__(self, name: str) -> object:
-        self._warn_once()
-        return getattr(self._get_instance(), name)
-
-    def __repr__(self) -> str:
-        return f"<DeprecatedRegistryProxy wrapping {self._get_instance()!r}>"
-
-
-# Deprecated: use get_default_schema_registry() instead
-registry: SchemaRegistry = _DeprecatedRegistryProxy()  # type: ignore[assignment]
-
-
-def default_schema_provider() -> SchemaProviderABC:
-    """Return the default schema provider (in-memory registry)."""
-    return get_default_schema_registry()
-
-
 __all__ = [
     "SchemaRegistry",
     "create_default_schema_registry",
     "register_schemas",
     "get_default_schema_registry",
     "reset_default_schema_registry",
-    # Deprecated exports (for backward compatibility)
-    "registry",
-    "default_schema_provider",
 ]

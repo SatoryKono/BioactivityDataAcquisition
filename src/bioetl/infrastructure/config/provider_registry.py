@@ -82,10 +82,6 @@ class ProviderNotConfiguredError(ProviderRegistryError):
         )
 
 
-# Aliases for backward compatibility with clients/provider_registry_loader.py
-ProviderRegistryLoaderError = ProviderRegistryError
-ProviderRegistryConfigNotFoundError = ProviderRegistryNotFoundError
-ProviderRegistryValidationError = ProviderRegistryFormatError
 
 
 # ---------------------------------------------------------------------------
@@ -109,25 +105,7 @@ class ProviderRegistryEntryModel(BaseModel):
     description: str | None = None
     http: ProviderHttpConfig | None = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_http_client(cls, data: Any) -> Any:
-        """Support legacy 'http_client' field name."""
-        if not isinstance(data, dict):
-            return data
-        if "http_client" in data and "http" not in data:
-            data = dict(data)
-            data["http"] = data.pop("http_client")
-        return data
 
-    @property
-    def http_client(self) -> ProviderHttpConfig | None:
-        """DEPRECATED: Use .http instead."""
-        return self.http
-
-
-# Alias for backward compatibility
-ProviderRegistryEntryConfig = ProviderRegistryEntryModel
 
 
 class ProviderRegistryConfig(BaseModel):
@@ -138,8 +116,6 @@ class ProviderRegistryConfig(BaseModel):
     providers: list[ProviderRegistryEntryModel] = []
 
 
-# Alias for backward compatibility
-ProviderRegistryModel = ProviderRegistryConfig
 
 
 # ---------------------------------------------------------------------------
@@ -362,8 +338,6 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         return data
 
 
-# Alias for backward compatibility
-ProviderRegistryLoader = ProviderLoaderImpl
 
 
 # ---------------------------------------------------------------------------
@@ -418,18 +392,11 @@ __all__ = [
     "ProviderRegistryNotFoundError",
     "ProviderRegistryFormatError",
     "ProviderNotConfiguredError",
-    # Backward-compatible exception aliases
-    "ProviderRegistryLoaderError",
-    "ProviderRegistryConfigNotFoundError",
-    "ProviderRegistryValidationError",
     # Models
     "ProviderRegistryEntryModel",
-    "ProviderRegistryEntryConfig",  # Alias
     "ProviderRegistryConfig",
-    "ProviderRegistryModel",  # Alias
     # Loader class
     "ProviderLoaderImpl",
-    "ProviderRegistryLoader",  # Alias
     # Validation functions
     "ensure_provider_known",
     "clear_provider_registry_cache",
