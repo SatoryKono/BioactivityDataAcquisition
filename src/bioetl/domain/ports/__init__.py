@@ -41,6 +41,7 @@ from bioetl.domain.ports.parsing import (
     RawRecordList,
     ResponseParserPortABC,
 )
+from bioetl.domain.ports.request_building import RequestBuilderPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.types import ApiPayload
 
@@ -73,6 +74,8 @@ __all__: list[str] = [
     "RawRecordDict",  # Backward compatibility alias
     "RawRecordList",  # Backward compatibility alias
     "ResponseParserPortABC",
+    # Request building ports
+    "RequestBuilderPortABC",
     # Schema ports
     "SchemaContractProviderABC",
     # Configuration ports

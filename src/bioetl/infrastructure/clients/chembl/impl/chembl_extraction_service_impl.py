@@ -4,8 +4,13 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
-from bioetl.domain.clients.contracts import DataClientABC
+from bioetl.domain.clients.contracts import DataClientWithBuilderProtocol
+from bioetl.domain.clients.resilience import RetryExhaustedError
 from bioetl.domain.data import RecordBatch
+from bioetl.domain.errors import (
+    ClientError,
+    MetadataFetchError,
+)
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
@@ -13,7 +18,7 @@ from bioetl.domain.ports.extraction import (
 )
 from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.parsing import ResponseParserPortABC
-from bioetl.infrastructure.clients.chembl.constants import ENTITY_ENDPOINT_ALIASES
+from bioetl.infrastructure.clients.chembl.constants import resolve_endpoint
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
@@ -25,31 +30,55 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
     Returns raw dicts - domain model mapping is application layer responsibility.
     All dependencies must be explicitly injected - no default fallbacks.
     Use composition root or factories to create instances.
+
+    Args:
+        client: Data client with request builder support. Must implement
+            DataClientWithBuilderProtocol for typed access to request_builder.
+        logger: Logger for observability.
+        batch_size: Default batch size for extraction.
+        filter_enricher: Optional filter enricher for query augmentation.
+        parser: Response parser. Defaults to ChemblGenericResponseParser.
     """
 
     def __init__(
         self,
-        client: DataClientABC,
+        client: DataClientWithBuilderProtocol,
         logger: LoggingPortABC,
         batch_size: int = 1000,
         filter_enricher: FilterEnricherABC | None = None,
         *,
         parser: ResponseParserPortABC | None = None,
     ) -> None:
-        self.client = client
-        self.batch_size = batch_size
-        self.logger = logger
+        self._client = client
+        self._batch_size = batch_size
+        self._logger = logger
         self._filter_enricher = filter_enricher
         self._parser = parser or ChemblGenericResponseParser()
         self._version_cache: str | None = None
 
+    @property
+    def client(self) -> DataClientWithBuilderProtocol:
+        """Return the underlying data client."""
+        return self._client
+
+    @property
+    def batch_size(self) -> int:
+        """Return the default batch size."""
+        return self._batch_size
+
+    @property
+    def logger(self) -> LoggingPortABC:
+        """Return the logger."""
+        return self._logger
+
     def get_release_version(self) -> str:
-        """
-        Get the raw ChEMBL release version from metadata.
+        """Get the raw ChEMBL release version from metadata.
 
         Returns:
             str: The raw release version string (e.g., '34', '35').
-                 Returns 'unknown' if metadata is unavailable.
+
+        Raises:
+            MetadataFetchError: If metadata cannot be fetched after retries.
 
         Note:
             This returns raw version without 'chembl_' prefix.
@@ -60,16 +89,40 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             return self._version_cache
 
         try:
-            meta = self.client.metadata()
-            # Expecting {'chembl_release': '34', ...}
+            meta = self._client.metadata()
             if meta and "chembl_release" in meta:
                 self._version_cache = str(meta["chembl_release"])
             else:
+                self._logger.warning(
+                    "metadata_missing_release",
+                    message="ChEMBL metadata response missing 'chembl_release' field",
+                    response_keys=list(meta.keys()) if meta else [],
+                )
                 self._version_cache = "unknown"
-        except Exception as e:
-            if self.logger:
-                self.logger.warning(f"Failed to fetch metadata: {e}")
-            self._version_cache = "unknown"
+        except (ConnectionError, TimeoutError) as exc:
+            self._logger.error(
+                "metadata_fetch_network_error",
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
+            raise MetadataFetchError(
+                provider="chembl",
+                message=f"Network error fetching ChEMBL metadata: {exc}",
+                cause=exc,
+                fallback_value="unknown",
+            ) from exc
+        except (ClientError, RetryExhaustedError) as exc:
+            self._logger.error(
+                "metadata_fetch_client_error",
+                error_type=type(exc).__name__,
+                error=str(exc),
+            )
+            raise MetadataFetchError(
+                provider="chembl",
+                message=f"Client error fetching ChEMBL metadata: {exc}",
+                cause=exc,
+                fallback_value="unknown",
+            ) from exc
 
         return self._version_cache
 
@@ -99,39 +152,31 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: object
     ) -> Iterable[RecordBatch]:
-        """Stream records from ChEMBL as raw dicts."""
-        if chunk_size is None:
-            chunk_size = filters.get("limit", self.batch_size)
-        filters["limit"] = chunk_size
+        """Stream records from ChEMBL as raw dicts.
+
+        Args:
+            entity: Entity name to extract (e.g., 'activity', 'assay').
+            chunk_size: Records per batch. Defaults to batch_size.
+            **filters: Additional query filters.
+
+        Yields:
+            RecordBatch: Batches of raw record dictionaries.
+        """
+        effective_chunk_size = chunk_size or self._batch_size
+        filters["limit"] = effective_chunk_size
 
         # Enrich filters using application-layer logic if available
         filters = self._enrich_filters(entity, filters)
 
-        # Ensure client has request_builder (runtime check)
-        if not hasattr(self.client, "request_builder"):
-            raise TypeError("Client must have request_builder (ChemblHttpClientImpl)")
+        # Resolve entity to API endpoint using domain mapping
+        endpoint = resolve_endpoint(entity)
 
-        # Prepare limit
-        limit = chunk_size or self.batch_size
-        filters["limit"] = limit
+        # Build request URL using typed builder - no runtime checks needed
+        builder = self._client.request_builder
+        url = builder.build_for_endpoint(endpoint).build_request(dict(filters))
 
-        builder = getattr(self.client, "request_builder")
-
-        # Resolve entity alias manually if needed (matches ChemblHttpClientImpl)
-        mapped_entity = ENTITY_ENDPOINT_ALIASES.get(entity, entity)
-
-        # Configure builder via legacy fluent methods expected in tests
-        if hasattr(builder, "build_for_endpoint"):
-            builder.build_for_endpoint(mapped_entity)
-        elif hasattr(builder, "for_endpoint"):
-            builder.for_endpoint(mapped_entity)
-
-        # Build URL using dict-style params
-        url = builder.build(filters)
-
-        # Iterate pages
-        for page_data in self.client.iter_pages(url):
-            # Use generic parser for raw dict output
+        # Iterate pages and parse responses
+        for page_data in self._client.iter_pages(url):
             records: RecordBatch = self._parser.parse_to_records(page_data)
             yield records
 
@@ -141,8 +186,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         batch_ids: list[str],
         filter_key: str,
     ) -> dict[str, Any]:
-        """
-        Request a batch of records by IDs.
+        """Request a batch of records by IDs.
 
         Args:
             entity: Entity name.
@@ -153,7 +197,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             dict[str, Any]: Raw API response.
         """
         filters = {filter_key: ",".join(batch_ids), "limit": len(batch_ids)}
-        return self.client.fetch(entity, **filters)
+        return self._client.fetch(entity, **filters)
 
     def parse_response(self, raw_response: object) -> RecordBatch:
         """Parse raw response into record dicts.
@@ -163,27 +207,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         Returns:
             Parsed records as list[dict[str, Any]].
+
+        Raises:
+            TypeError: If raw_response cannot be parsed.
         """
-        # Handle None or invalid input
         if raw_response is None:
             return []
 
-        # Try client's parser first (for backward compatibility)
-        if hasattr(self.client, "response_parser"):
-            parser = getattr(self.client, "response_parser")
-            if hasattr(parser, "parse"):
-                try:
-                    return parser.parse(raw_response)
-                except (AttributeError, TypeError):
-                    # Parser failed, fall through to internal parser
-                    pass
-
-        # Use internal parser (injected or default)
-        try:
-            return self._parser.parse_to_records(raw_response)
-        except (AttributeError, TypeError):
-            # Parser can't handle this input type, return empty list
-            return []
+        # Use the injected parser - no fallback to client parser
+        # This enforces consistent parsing through the configured parser
+        return self._parser.parse_to_records(raw_response)
 
     def serialize_records(self, entity: str, records: RecordBatch) -> RecordBatch:
         """Serialize records for storage.
