@@ -31,10 +31,10 @@ Example::
 
 from __future__ import annotations
 
-import warnings
 from concurrent.futures import Future
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
+import warnings
 
 if TYPE_CHECKING:
     from concurrent.futures import ProcessPoolExecutor
@@ -70,10 +70,11 @@ def _get_default_registry_factory_deprecated() -> ProviderRegistryFactory:
     Returns:
         Factory function that creates InMemoryProviderRegistry instances.
     """
-    # Import from interfaces layer (proper DI location)
-    from bioetl.interfaces.factories import create_provider_registry_factory
+    # Lazy import from infrastructure (allowed for backward compatibility)
+    # Note: This is deprecated and should be replaced with dependency injection
+    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
-    return create_provider_registry_factory()
+    return InMemoryProviderRegistry
 
 
 class PipelineOrchestrator:
