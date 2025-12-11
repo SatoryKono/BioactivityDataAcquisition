@@ -29,11 +29,15 @@ def _get_primary_keys_from_config(config: PipelineConfig) -> list[str] | str | N
         return None
     except AttributeError:
         # Fallback for legacy configs with primary_key at root level
-        primary_key = getattr(config, "primary_key", None)
-        if isinstance(primary_key, list):
-            return primary_key
-        if isinstance(primary_key, str):
-            return primary_key
+        primary_key_attr = getattr(config, "primary_key", None)
+        if primary_key_attr is None:
+            return None
+        if isinstance(primary_key_attr, list):
+            # Type narrowing: ensure all elements are strings
+            if all(isinstance(item, str) for item in primary_key_attr):
+                return primary_key_attr
+        if isinstance(primary_key_attr, str):
+            return primary_key_attr
         return None
 
 

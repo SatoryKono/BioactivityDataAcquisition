@@ -77,7 +77,7 @@ class ActivityRawModel(SourceRecordModel):
     value: float | None = None
 
     @classmethod
-    def _extract_string_from_dict(cls, value: dict[str, Any]) -> str | None:
+    def extract_string_from_dict(cls, value: dict[str, Any]) -> str | None:
         """Extract string value from dict using priority keys."""
         for key in ("action_type", "description", "label", "name"):
             candidate = value.get(key)
@@ -91,14 +91,14 @@ class ActivityRawModel(SourceRecordModel):
         return ";".join(scalar_values) if scalar_values else None
 
     @classmethod
-    def _coerce_action_type_value(cls, value: object) -> str | None:
+    def coerce_action_type_value(cls, value: object) -> str | None:
         """Coerce action_type to a string when API returns nested structures."""
         if value is None or value == "":
             return None
         if isinstance(value, str):
             return value
         if isinstance(value, dict):
-            return cls._extract_string_from_dict(value)
+            return cls.extract_string_from_dict(value)
         if isinstance(value, list):
             items = [str(item) for item in value if item is not None]
             return ";".join(items) if items else None
@@ -111,7 +111,7 @@ class ActivityRawModel(SourceRecordModel):
         if not isinstance(data, dict) or "action_type" not in data:
             return data
         data = dict(data)
-        data["action_type"] = cls._coerce_action_type_value(data["action_type"])
+        data["action_type"] = cls.coerce_action_type_value(data["action_type"])
         return data
 
     @field_validator("pchembl_value")
@@ -126,7 +126,7 @@ class ActivityRawModel(SourceRecordModel):
     @classmethod
     def normalize_action_type(cls, value: JsonValue) -> str | None:
         """Normalize action_type values regardless of representation."""
-        return cls._coerce_action_type_value(value)
+        return cls.coerce_action_type_value(value)
 
     @field_validator("standard_relation")
     @classmethod
