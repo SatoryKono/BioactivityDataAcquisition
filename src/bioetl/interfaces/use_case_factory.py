@@ -18,6 +18,7 @@ class UseCaseFactory:
     def _ensure_context(self):
         if self._context is None:
             from bioetl.interfaces.application_context import get_application_context
+
             self._context = get_application_context()
         return self._context
 

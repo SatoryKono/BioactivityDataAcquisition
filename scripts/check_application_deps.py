@@ -147,7 +147,9 @@ class DependencyReport:
     """Complete dependency analysis report."""
 
     # Graph data
-    submodule_graph: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
+    submodule_graph: dict[str, set[str]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
     all_edges: list[tuple[str, str, str]] = field(default_factory=list)
 
     # Violations
@@ -467,8 +469,8 @@ def check_infrastructure_imports(analyses: list[ModuleAnalysis]) -> list[Violati
                     file=analysis.relative_path,
                     line=imp.lineno,
                     message=(
-                        f"Module-level import from infrastructure "
-                        f"(should use TYPE_CHECKING or lazy import)"
+                        "Module-level import from infrastructure "
+                        "(should use TYPE_CHECKING or lazy import)"
                     ),
                     import_path=imp.module,
                 )
@@ -682,7 +684,7 @@ def print_text_report(report: DependencyReport) -> None:
         for v in domain:
             print(f"  - {v.file}:{v.line}")
             print(f"    Import: {v.import_path}")
-            print(f"    Reason: Not in allowed domain imports list")
+            print("    Reason: Not in allowed domain imports list")
     else:
         print("\n[OK] All domain imports are from allowed list")
 

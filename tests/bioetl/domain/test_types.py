@@ -166,7 +166,7 @@ class TestCustomTypes:
             ["P12345", "Q12345"], item_normalizer=normalize_uniprot
         ) == ["P12345", "Q12345"]
 
-        with pytest.raises(ValueError, match="Ошибка нормализации"):
+        with pytest.raises(ValueError, match="Error normalizing array element"):
             normalize_array(["INVALID"], item_normalizer=normalize_uniprot)
 
     def test_normalize_record(self):
@@ -177,10 +177,10 @@ class TestCustomTypes:
         assert normalize_record('{"a": 1}') == {"a": 1}
 
         # Invalid
-        with pytest.raises(ValueError, match="Ожидался словарь"):
+        with pytest.raises(ValueError, match="Expected dict"):
             normalize_record(["list"])
 
-        with pytest.raises(ValueError, match="Некорректный JSON"):
+        with pytest.raises(ValueError, match="Invalid JSON"):
             normalize_record('{"a":}')
 
         # With value normalizer
@@ -190,7 +190,7 @@ class TestCustomTypes:
             "id": "P12345"
         }
 
-        with pytest.raises(ValueError, match="Некорректное значение"):
+        with pytest.raises(ValueError, match="Invalid value in field"):
             normalize_record({"id": "INVALID"}, value_normalizer=normalize_uniprot)
 
     def test_regex_patterns(self):

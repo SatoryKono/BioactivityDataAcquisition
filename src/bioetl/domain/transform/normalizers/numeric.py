@@ -48,7 +48,7 @@ def _coerce_phase_value(value: Any) -> int | None:
 
     if isinstance(value, str):
         text = value.strip()
-        if not text:
+        if not text or text == "<NA>":
             return None
         try:
             parsed = float(text)
@@ -57,6 +57,15 @@ def _coerce_phase_value(value: Any) -> int | None:
                 f"Invalid numeric value for clinical trial phase: '{value}'"
             ) from exc
         return _coerce_phase_value(parsed)
+
+    # Handle pandas NAType explicitly
+    try:
+        import pandas as pd
+
+        if value is pd.NA:
+            return None
+    except (ImportError, AttributeError):
+        pass
 
     raise ValueError(
         "Expected numeric value for clinical trial phase, "

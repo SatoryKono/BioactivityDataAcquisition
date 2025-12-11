@@ -25,6 +25,7 @@ from bioetl.domain.ports.extraction import (
     to_raw_records,
 )
 from bioetl.domain.ports.filesystem import PathResolverABC
+from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.output import (
     ChecksumCalculatorPort,
     DataWriterPort,
@@ -37,7 +38,6 @@ from bioetl.domain.ports.parsing import (
     PaginationInfo,
     ResponseParserPortABC,
 )
-from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.types import ApiPayload
 

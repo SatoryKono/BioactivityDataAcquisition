@@ -27,7 +27,9 @@ class TestDataFlowConfig:
         data_flow = DataFlowConfig(source=source, sink=sink)
 
         with pytest.raises(Exception):  # Pydantic frozen model
-            data_flow.source = DataSourceConfig(input_mode="id_only", input_path="/tmp/other.csv")
+            data_flow.source = DataSourceConfig(
+                input_mode="id_only", input_path="/tmp/other.csv"
+            )
 
     def test_forbids_extra_fields(self) -> None:
         """DataFlowConfig rejects unknown fields."""
@@ -46,7 +48,9 @@ class TestDataFlowValidation:
         source = DataSourceConfig(input_mode="csv", input_path="/tmp/data.csv")
         sink = DataSinkConfig(output_path="/tmp/data.csv")
 
-        with pytest.raises(ValueError, match="Output path cannot be the same as input path"):
+        with pytest.raises(
+            ValueError, match="Output path cannot be the same as input path"
+        ):
             DataFlowConfig(source=source, sink=sink)
 
     def test_allows_different_paths(self) -> None:

@@ -1,4 +1,5 @@
 """Module removed. Use bioetl.interfaces.bootstrap_factory instead."""
+
 from __future__ import annotations
 
 raise ImportError(

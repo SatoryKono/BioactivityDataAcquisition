@@ -11,7 +11,7 @@ def test_pandas_batch_adapter_converts_dataframe_to_records() -> None:
 
     records = adapter.adapt_batch(df)
 
-    assert [r.model_dump() for r in records] == [
+    assert list(records) == [
         {"id": 1, "name": "a"},
         {"id": 2, "name": "b"},
     ]

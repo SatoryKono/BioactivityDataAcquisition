@@ -1,13 +1,11 @@
 """Transform infrastructure layer."""
 
-from bioetl.infrastructure.transform.factories import (
-    # New naming convention
+from bioetl.infrastructure.transform.factories import (  # New naming convention; Deprecated aliases for backward compatibility
     create_hash_service,
     create_hasher,
     create_index_generator,
     create_normalization_service,
     create_timestamp_provider,
-    # Deprecated aliases for backward compatibility
     default_hash_service,
     default_hasher,
     default_index_generator,

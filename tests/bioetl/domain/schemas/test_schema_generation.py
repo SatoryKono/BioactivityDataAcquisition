@@ -1,9 +1,11 @@
 import pandas as pd
 
 from bioetl.domain.schemas.generator import generate_schema_from_column_order
-from bioetl.infrastructure.validation.schemas.generator import load_column_order_from_yaml
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValidatorImpl
+from bioetl.infrastructure.validation.schemas.generator import (
+    load_column_order_from_yaml,
+)
 
 
 def test_generate_schema_from_column_order_validates_missing_columns():

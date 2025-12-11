@@ -113,6 +113,7 @@ def register_schemas(provider: SchemaProviderABC) -> SchemaProviderABC:
     Thin proxy to avoid import cycles in tests that import from registry.
     """
     from . import register_schemas as _register  # local import to prevent cycles
+
     return _register(provider)
 
 

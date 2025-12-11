@@ -154,9 +154,7 @@ def default_chembl_client(
         DeprecationWarning,
         stacklevel=2,
     )
-    return create_chembl_client(
-        source_config, logger, metrics, http_config, **options
-    )
+    return create_chembl_client(source_config, logger, metrics, http_config, **options)
 
 
 def default_chembl_extraction_service(

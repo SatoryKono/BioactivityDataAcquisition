@@ -43,7 +43,9 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
         get_pipeline_config_from_path,
     )
 
-    def factory(contract_provider: SchemaContractProviderABC) -> PipelineConfigLoaderProtocol:
+    def factory(
+        contract_provider: SchemaContractProviderABC,
+    ) -> PipelineConfigLoaderProtocol:
         def get_by_id(
             pipeline_id: str,
             *,

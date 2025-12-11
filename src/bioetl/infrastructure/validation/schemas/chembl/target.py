@@ -47,10 +47,10 @@ class TargetTableSchema(BaseGeneratedColumnsSchema):
     target_chembl_id: Series[str] = pa.Field(
         str_matches=CHEMBL_ID_PATTERN, description="ChEMBL target identifier"
     )
-    pref_name: Series[str] = pa.Field(nullable=True, description="Target preferred name")
-    score: Series[float] = pa.Field(
-        nullable=True, description="Search ranking score"
+    pref_name: Series[str] = pa.Field(
+        nullable=True, description="Target preferred name"
     )
+    score: Series[float] = pa.Field(nullable=True, description="Search ranking score")
     organism: Series[str] = pa.Field(nullable=True, description="Target organism")
     target_type: Series[str] = pa.Field(
         description="Target type (SINGLE PROTEIN, FAMILY, etc.)"

@@ -33,17 +33,19 @@ SOURCE_ROOT = REPO_ROOT / "src"
 DOMAIN_ROOT = SOURCE_ROOT / "bioetl" / "domain"
 
 # Forbidden external packages that domain should never use directly
-FORBIDDEN_EXTERNAL_PACKAGES = frozenset({
-    "pandas",
-    "pandera",
-    "yaml",
-    "requests",
-    "httpx",
-    "aiohttp",
-    "sqlalchemy",
-    "boto3",
-    "botocore",
-})
+FORBIDDEN_EXTERNAL_PACKAGES = frozenset(
+    {
+        "pandas",
+        "pandera",
+        "yaml",
+        "requests",
+        "httpx",
+        "aiohttp",
+        "sqlalchemy",
+        "boto3",
+        "botocore",
+    }
+)
 
 # Forbidden internal layer imports
 FORBIDDEN_LAYER_PREFIXES = (
@@ -77,7 +79,9 @@ class ImportViolation:
     reason: str
 
     def __str__(self) -> str:
-        return f"{self.file_path.as_posix()}:{self.lineno}: {self.reason} ({self.module})"
+        return (
+            f"{self.file_path.as_posix()}:{self.lineno}: {self.reason} ({self.module})"
+        )
 
 
 @dataclass(frozen=True)
@@ -89,7 +93,10 @@ class DocstringViolation:
     class_name: str
 
     def __str__(self) -> str:
-        return f"{self.file_path.as_posix()}:{self.lineno}: class '{self.class_name}' missing docstring"
+        return (
+            f"{self.file_path.as_posix()}:{self.lineno}: "
+            f"class '{self.class_name}' missing docstring"
+        )
 
 
 @dataclass(frozen=True)
@@ -419,9 +426,7 @@ class TestDomainForbiddenImports:
 
         if all_violations:
             formatted = "\n".join(str(v) for v in sorted(all_violations, key=str))
-            pytest.fail(
-                f"Domain layer must not depend on infrastructure:\n{formatted}"
-            )
+            pytest.fail(f"Domain layer must not depend on infrastructure:\n{formatted}")
 
     def test_domain_has_no_application_imports(
         self, domain_files: list[Path], domain_trees: dict[Path, ast.Module]
@@ -432,9 +437,7 @@ class TestDomainForbiddenImports:
         for file_path in domain_files:
             tree = domain_trees[file_path]
             violations = _check_forbidden_imports(file_path, tree)
-            app_violations = [
-                v for v in violations if "application layer" in v.reason
-            ]
+            app_violations = [v for v in violations if "application layer" in v.reason]
             all_violations.extend(app_violations)
 
         if all_violations:
@@ -450,9 +453,7 @@ class TestDomainForbiddenImports:
         for file_path in domain_files:
             tree = domain_trees[file_path]
             violations = _check_forbidden_imports(file_path, tree)
-            iface_violations = [
-                v for v in violations if "interfaces layer" in v.reason
-            ]
+            iface_violations = [v for v in violations if "interfaces layer" in v.reason]
             all_violations.extend(iface_violations)
 
         if all_violations:
@@ -480,9 +481,7 @@ class TestDomainDocumentation:
 
         if all_violations:
             formatted = "\n".join(str(v) for v in sorted(all_violations, key=str))
-            pytest.fail(
-                f"Public classes in domain must have docstrings:\n{formatted}"
-            )
+            pytest.fail(f"Public classes in domain must have docstrings:\n{formatted}")
 
 
 class TestDomainTypeHints:
@@ -507,9 +506,7 @@ class TestDomainTypeHints:
 
         if all_violations:
             formatted = "\n".join(str(v) for v in sorted(all_violations, key=str))
-            pytest.fail(
-                f"Public methods in domain must have type hints:\n{formatted}"
-            )
+            pytest.fail(f"Public methods in domain must have type hints:\n{formatted}")
 
 
 class TestDomainStructure:

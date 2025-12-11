@@ -16,11 +16,13 @@ def generator():
 
 def test_build_quality_report_basic(generator):
     """Test basic quality report generation."""
-    df = pd.DataFrame({
-        "col_a": [1, 2, 3],
-        "col_b": [None, 2, 3],
-        "col_c": [1, 1, 1],
-    })
+    df = pd.DataFrame(
+        {
+            "col_a": [1, 2, 3],
+            "col_b": [None, 2, 3],
+            "col_c": [1, 1, 1],
+        }
+    )
 
     report = generator.build_quality_report(df, min_coverage=0.8)
 
@@ -34,10 +36,12 @@ def test_build_quality_report_basic(generator):
 
 def test_build_quality_report_coverage_calculation(generator):
     """Test coverage calculation."""
-    df = pd.DataFrame({
-        "full": [1, 2, 3, 4],
-        "partial": [1, None, 3, None],
-    })
+    df = pd.DataFrame(
+        {
+            "full": [1, 2, 3, 4],
+            "partial": [1, None, 3, None],
+        }
+    )
 
     report = generator.build_quality_report(df, min_coverage=0.8)
     report = report.set_index("column")
@@ -48,10 +52,12 @@ def test_build_quality_report_coverage_calculation(generator):
 
 def test_build_quality_report_coverage_ok_flag(generator):
     """Test coverage_ok flag based on threshold."""
-    df = pd.DataFrame({
-        "high": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "low": [1, None, None, None, None, None, None, None, None, None],
-    })
+    df = pd.DataFrame(
+        {
+            "high": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            "low": [1, None, None, None, None, None, None, None, None, None],
+        }
+    )
 
     report = generator.build_quality_report(df, min_coverage=0.5)
     report = report.set_index("column")
@@ -62,11 +68,13 @@ def test_build_quality_report_coverage_ok_flag(generator):
 
 def test_build_quality_report_sorted_by_column(generator):
     """Test that report is sorted by column name."""
-    df = pd.DataFrame({
-        "zebra": [1],
-        "alpha": [2],
-        "middle": [3],
-    })
+    df = pd.DataFrame(
+        {
+            "zebra": [1],
+            "alpha": [2],
+            "middle": [3],
+        }
+    )
 
     report = generator.build_quality_report(df, min_coverage=0.8)
 
@@ -84,11 +92,13 @@ def test_build_quality_report_empty_dataframe(generator):
 
 def test_build_correlation_report_numeric_columns(generator):
     """Test correlation report with numeric columns."""
-    df = pd.DataFrame({
-        "a": [1, 2, 3, 4, 5],
-        "b": [2, 4, 6, 8, 10],  # Perfect correlation with a
-        "c": [5, 4, 3, 2, 1],  # Negative correlation with a
-    })
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5],
+            "b": [2, 4, 6, 8, 10],  # Perfect correlation with a
+            "c": [5, 4, 3, 2, 1],  # Negative correlation with a
+        }
+    )
 
     report = generator.build_correlation_report(df)
 
@@ -100,11 +110,13 @@ def test_build_correlation_report_numeric_columns(generator):
 
 def test_build_correlation_report_sorted_columns(generator):
     """Test that correlation report columns are sorted."""
-    df = pd.DataFrame({
-        "z": [1, 2],
-        "a": [3, 4],
-        "m": [5, 6],
-    })
+    df = pd.DataFrame(
+        {
+            "z": [1, 2],
+            "a": [3, 4],
+            "m": [5, 6],
+        }
+    )
 
     report = generator.build_correlation_report(df)
 
@@ -115,10 +127,12 @@ def test_build_correlation_report_sorted_columns(generator):
 
 def test_build_correlation_report_no_numeric_columns(generator):
     """Test correlation report with no numeric columns."""
-    df = pd.DataFrame({
-        "text_a": ["a", "b", "c"],
-        "text_b": ["x", "y", "z"],
-    })
+    df = pd.DataFrame(
+        {
+            "text_a": ["a", "b", "c"],
+            "text_b": ["x", "y", "z"],
+        }
+    )
 
     report = generator.build_correlation_report(df)
 
@@ -128,11 +142,13 @@ def test_build_correlation_report_no_numeric_columns(generator):
 
 def test_build_correlation_report_mixed_types(generator):
     """Test correlation report ignores non-numeric columns."""
-    df = pd.DataFrame({
-        "numeric": [1, 2, 3],
-        "text": ["a", "b", "c"],
-        "another_numeric": [4, 5, 6],
-    })
+    df = pd.DataFrame(
+        {
+            "numeric": [1, 2, 3],
+            "text": ["a", "b", "c"],
+            "another_numeric": [4, 5, 6],
+        }
+    )
 
     report = generator.build_correlation_report(df)
 
@@ -144,10 +160,12 @@ def test_build_correlation_report_mixed_types(generator):
 
 def test_build_correlation_report_bool_conversion(generator):
     """Test that boolean columns are converted to int for correlation."""
-    df = pd.DataFrame({
-        "numeric": [0, 1, 0, 1],
-        "boolean": [False, True, False, True],
-    })
+    df = pd.DataFrame(
+        {
+            "numeric": [0, 1, 0, 1],
+            "boolean": [False, True, False, True],
+        }
+    )
 
     report = generator.build_correlation_report(df)
 

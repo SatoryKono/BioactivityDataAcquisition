@@ -23,7 +23,9 @@ def test_compute_checksum_for_file(calculator, tmp_path):
     checksum = calculator.compute_checksum(test_file)
 
     # SHA256 of "Hello, World!" is known
-    assert checksum == "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+    assert (
+        checksum == "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+    )
 
 
 def test_compute_checksum_deterministic(calculator, tmp_path):

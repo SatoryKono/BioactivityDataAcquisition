@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from bioetl.domain.schemas.field_specs import UNIPROT_ID_PATTERN
+
 # --- Regex Patterns ---
 
 DOI_REGEX = re.compile(r"^10\.\d{4,9}/\S+$", flags=re.IGNORECASE)
@@ -13,13 +15,8 @@ PUBMED_ID_REGEX = re.compile(r"^\d{1,10}$")
 PUBCHEM_CID_REGEX = re.compile(r"^\d{1,10}$")
 BAO_ID_REGEX = re.compile(r"^BAO_\d+$", flags=re.IGNORECASE)
 
-# UniProt patterns
-_UNIPROT_PATTERN_SHORT = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]"
-_UNIPROT_PATTERN_PQ = r"[OPQ][0-9][A-Z0-9]{3}[0-9]"
-_UNIPROT_PATTERN_LONG = r"[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9][A-Z0-9]{3}[0-9]"
-
 UNIPROT_ID_REGEX = re.compile(
-    f"^(?:{_UNIPROT_PATTERN_PQ}|{_UNIPROT_PATTERN_SHORT}|{_UNIPROT_PATTERN_LONG})$",
+    UNIPROT_ID_PATTERN,
     flags=re.IGNORECASE,
 )
 

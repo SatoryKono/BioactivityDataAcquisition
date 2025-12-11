@@ -119,7 +119,7 @@ class UnifiedLoaderImpl(LoaderABC):
         return self._write_result(
             df=df,
             output_path=output_path,
-            entity_name=context.entity_name,
+            entity_name=str(context.entity_name),
             run_context=context,
             column_order=column_order,
         )
@@ -259,9 +259,7 @@ class UnifiedLoaderImpl(LoaderABC):
 
         return df
 
-    def _generate_qc_artifacts(
-        self, df: pd.DataFrame, output_path: Path
-    ) -> list[Path]:
+    def _generate_qc_artifacts(self, df: pd.DataFrame, output_path: Path) -> list[Path]:
         """Generate QC reports using the QC report generator.
 
         Args:

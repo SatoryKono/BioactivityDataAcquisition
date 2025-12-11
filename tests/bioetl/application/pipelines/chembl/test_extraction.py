@@ -145,7 +145,10 @@ def test_extract_all_limit(service, mock_client):
     # Returns 10 items per call
     mock_client.iter_pages.return_value = [{"data": "page"}]
     mock_parser.parse_to_records.return_value = [
-        ActivityRawModel(activity_id=str(i), standard_flag=True, standard_value=float(i)) for i in range(10)
+        ActivityRawModel(
+            activity_id=str(i), standard_flag=True, standard_value=float(i)
+        )
+        for i in range(10)
     ]
 
     # Act - request limit 5 (which acts as chunk_size in current impl)

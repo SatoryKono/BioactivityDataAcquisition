@@ -25,13 +25,12 @@ Usage:
     )
 """
 
+# New naming convention; Deprecated aliases for backward compatibility
 from bioetl.infrastructure.validation.factories import (
     PanderaSchemaProviderFactory,
     PanderaValidatorFactory,
-    # New naming convention
     create_schema_provider_factory,
     create_validator_factory,
-    # Deprecated aliases for backward compatibility
     default_schema_provider_factory,
     default_validator_factory,
 )

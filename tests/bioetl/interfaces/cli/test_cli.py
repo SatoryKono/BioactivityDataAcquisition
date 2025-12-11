@@ -70,6 +70,7 @@ def test_validate_config_success(mock_loader):
         PipelineIdentityConfig,
     )
     from bioetl.domain.configs.pipeline import ProviderHttpConfig
+
     mock_loader.return_value = PipelineConfig(
         identity=PipelineIdentityConfig(
             pipeline_id="chembl.test",
@@ -126,6 +127,7 @@ def test_run_command(mock_resolve_path, mock_loader, mock_orchestrator_cls):
         PipelineIdentityConfig,
     )
     from bioetl.domain.configs.pipeline import ProviderHttpConfig
+
     mock_config = PipelineConfig(
         identity=PipelineIdentityConfig(
             pipeline_id="chembl.activity",

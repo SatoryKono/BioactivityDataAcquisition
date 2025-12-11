@@ -47,7 +47,9 @@ if TYPE_CHECKING:
     pass
 
 # Type aliases for callbacks
-ConfigLoaderFactory = Callable[[SchemaContractProviderABC], PipelineConfigLoaderProtocol]
+ConfigLoaderFactory = Callable[
+    [SchemaContractProviderABC], PipelineConfigLoaderProtocol
+]
 ProviderInjector = Callable[[SchemaContractProviderABC], None]
 ProviderClearer = Callable[[], None]
 MigrationServiceFactory = Callable[[], ConfigMigrationServiceProtocol]

@@ -2,8 +2,6 @@
 
 from unittest.mock import Mock
 
-import pytest
-
 from bioetl.application.services import FilterEnrichmentService, NullFilterEnricher
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 

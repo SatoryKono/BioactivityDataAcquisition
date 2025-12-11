@@ -6,9 +6,11 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.infrastructure.validation.schemas.chembl.publication import PublicationTableSchema
 from bioetl.infrastructure.transform.impl.normalize import (
     NormalizationServiceImpl,
+)
+from bioetl.infrastructure.validation.schemas.chembl.publication import (
+    PublicationTableSchema,
 )
 
 

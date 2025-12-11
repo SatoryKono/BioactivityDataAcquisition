@@ -349,6 +349,7 @@ class CompositionRoot:
         )
         return ConfigPathResolver(effective_root)
 
+
 def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
     """Create default schema contract provider by bootstrapping schema registry.
 
@@ -459,7 +460,8 @@ def create_config_path_resolver(
 def create_config_migration_service() -> ConfigMigrationServiceProtocol:
     """Create ConfigMigrationService for migrating legacy configs.
 
-    This is a convenience wrapper around CompositionRoot.create_config_migration_service()
+    This is a convenience wrapper around
+    CompositionRoot.create_config_migration_service()
     that uses the default singleton.
 
     The service orchestrates migration of legacy pipeline configuration formats

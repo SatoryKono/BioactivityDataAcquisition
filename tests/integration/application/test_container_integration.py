@@ -25,7 +25,6 @@ from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.validation.service import ValidationService
 
-
 # =============================================================================
 # Fixtures
 # =============================================================================

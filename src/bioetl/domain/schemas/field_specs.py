@@ -134,7 +134,15 @@ class FieldSpec:
 
     def __post_init__(self) -> None:
         """Validate field specification."""
-        valid_types = {"string", "integer", "number", "boolean", "array", "object", "datetime"}
+        valid_types = {
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "array",
+            "object",
+            "datetime",
+        }
         if self.data_type not in valid_types:
             msg = f"Invalid data_type '{self.data_type}'. Must be one of: {valid_types}"
             raise ValueError(msg)
@@ -195,7 +203,9 @@ GENERATED_COLUMN_NAMES: tuple[str, ...] = tuple(f.name for f in GENERATED_FIELD_
 
 ACTIVITY_FIELD_SPECS: tuple[FieldSpec, ...] = (
     FieldSpec("action_type", "string", description="Action type (agonist, antagonist)"),
-    FieldSpec("activity_comment", "string", description="Comment on activity measurement"),
+    FieldSpec(
+        "activity_comment", "string", description="Comment on activity measurement"
+    ),
     FieldSpec(
         "activity_id",
         "integer",
@@ -204,7 +214,9 @@ ACTIVITY_FIELD_SPECS: tuple[FieldSpec, ...] = (
         description="Internal activity ID",
     ),
     FieldSpec(
-        "activity_properties", "string", description="Additional activity properties (JSON)"
+        "activity_properties",
+        "string",
+        description="Additional activity properties (JSON)",
     ),
     FieldSpec(
         "assay_chembl_id",
@@ -225,7 +237,9 @@ ACTIVITY_FIELD_SPECS: tuple[FieldSpec, ...] = (
         "assay_variant_accession", "string", description="Protein variant accession"
     ),
     FieldSpec(
-        "assay_variant_mutation", "string", description="Protein variant mutation description"
+        "assay_variant_mutation",
+        "string",
+        description="Protein variant mutation description",
     ),
     FieldSpec(
         "bao_endpoint",
@@ -360,7 +374,9 @@ ASSAY_FIELD_SPECS: tuple[FieldSpec, ...] = (
         description="ChEMBL assay identifier",
     ),
     FieldSpec(
-        "assay_classifications", "string", description="Assay classifications (BAO, etc.)"
+        "assay_classifications",
+        "string",
+        description="Assay classifications (BAO, etc.)",
     ),
     FieldSpec("assay_group", "string", description="Assay group/series"),
     FieldSpec("assay_organism", "string", description="Testing system organism"),
@@ -414,12 +430,31 @@ ASSAY_FIELD_SPECS: tuple[FieldSpec, ...] = (
         description="ChEMBL document identifier",
     ),
     FieldSpec(
-        "relationship_description", "string", description="Relationship type description"
+        "relationship_description",
+        "string",
+        description="Relationship type description",
     ),
     FieldSpec(
         "relationship_type",
         "string",
-        constraints={"isin": ["D", "H", "M", "N", "P", "T", "U", "d", "h", "m", "n", "p", "t", "u"]},
+        constraints={
+            "isin": [
+                "D",
+                "H",
+                "M",
+                "N",
+                "P",
+                "T",
+                "U",
+                "d",
+                "h",
+                "m",
+                "n",
+                "p",
+                "t",
+                "u",
+            ]
+        },
         description="Assay-target relationship type",
     ),
     FieldSpec("score", "number", description="Search ranking score"),
@@ -438,7 +473,9 @@ ASSAY_FIELD_SPECS: tuple[FieldSpec, ...] = (
         description="ChEMBL tissue identifier",
     ),
     FieldSpec(
-        "variant_sequence", "string", description="Protein variant sequence if target is protein"
+        "variant_sequence",
+        "string",
+        description="Protein variant sequence if target is protein",
     ),
 )
 
@@ -462,9 +499,13 @@ CELL_FIELD_SPECS: tuple[FieldSpec, ...] = (
         description="Organism the cell line originates from",
     ),
     FieldSpec(
-        "cell_type", "string", description="High-level cell type (epithelial, stem, etc.)"
+        "cell_type",
+        "string",
+        description="High-level cell type (epithelial, stem, etc.)",
     ),
-    FieldSpec("cell_description", "string", description="Free text cell line description"),
+    FieldSpec(
+        "cell_description", "string", description="Free text cell line description"
+    ),
 )
 
 
@@ -473,7 +514,9 @@ CELL_FIELD_SPECS: tuple[FieldSpec, ...] = (
 # ---------------------------------------------------------------------------
 
 MOLECULE_FIELD_SPECS: tuple[FieldSpec, ...] = (
-    FieldSpec("atc_classifications", "string", description="ATC codes and descriptions"),
+    FieldSpec(
+        "atc_classifications", "string", description="ATC codes and descriptions"
+    ),
     FieldSpec("availability_type", "number", description="Availability type (0/1/2)"),
     FieldSpec("black_box_warning", "number", description="Black box warning flag"),
     FieldSpec("chemical_probe", "number", description="Chemical probe flag"),
@@ -536,7 +579,9 @@ MOLECULE_FIELD_SPECS: tuple[FieldSpec, ...] = (
 PUBLICATION_FIELD_SPECS: tuple[FieldSpec, ...] = (
     FieldSpec("abstract", "string", description="Document abstract"),
     FieldSpec("authors", "string", description="List of authors"),
-    FieldSpec("chembl_release", "string", description="ChEMBL release when document appeared"),
+    FieldSpec(
+        "chembl_release", "string", description="ChEMBL release when document appeared"
+    ),
     FieldSpec("contact", "string", description="Contact for deposited datasets"),
     FieldSpec(
         "doc_type",
@@ -560,7 +605,9 @@ PUBLICATION_FIELD_SPECS: tuple[FieldSpec, ...] = (
     FieldSpec("journal_full_title", "string", description="Full journal title"),
     FieldSpec("last_page", "string", description="Last page number"),
     FieldSpec("patent_id", "string", description="Patent identifier"),
-    FieldSpec("pubmed_id", "string", pattern=PUBMED_ID_PATTERN, description="PubMed ID"),
+    FieldSpec(
+        "pubmed_id", "string", pattern=PUBMED_ID_PATTERN, description="PubMed ID"
+    ),
     FieldSpec("score", "number", description="Search ranking score"),
     FieldSpec("src_id", "number", description="Data source ID"),
     FieldSpec("title", "string", description="Document title"),
@@ -621,7 +668,9 @@ TISSUE_FIELD_SPECS: tuple[FieldSpec, ...] = (
         "string",
         description="Organism the tissue sample originates from",
     ),
-    FieldSpec("tissue_description", "string", description="Free text tissue description"),
+    FieldSpec(
+        "tissue_description", "string", description="Free text tissue description"
+    ),
     FieldSpec(
         "tissue_type", "string", description="High-level tissue type or classification"
     ),

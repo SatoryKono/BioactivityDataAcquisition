@@ -174,7 +174,9 @@ def emit_deprecation_warning(
     """
     if old_name in DEPRECATED_ALIASES:
         alias = DEPRECATED_ALIASES[old_name]
-        message = alias.message or f"{old_name} is deprecated, use {alias.new_name} instead."
+        message = (
+            alias.message or f"{old_name} is deprecated, use {alias.new_name} instead."
+        )
     else:
         message = f"{old_name} is deprecated"
         if new_name:
@@ -220,21 +222,25 @@ def resolve_deprecated_type(name: str) -> Any:
     # Handle ApiPayload
     if name == "RawPayload" or alias.new_name == "ApiPayload":
         from bioetl.domain.types import ApiPayload
+
         return ApiPayload
 
     # Handle RecordBatch variants
     if alias.new_name == "RecordBatch":
         from bioetl.domain.data import RecordBatch
+
         return RecordBatch
 
     # Handle SourceRecordModel
     if alias.new_name == "SourceRecordModel":
         from bioetl.domain.record_source import SourceRecordModel
+
         return SourceRecordModel
 
     # Handle RecordSourceABC
     if alias.new_name == "RecordSourceABC":
         from bioetl.domain.record_source import RecordSourceABC
+
         return RecordSourceABC
 
     # Fallback for unknown types

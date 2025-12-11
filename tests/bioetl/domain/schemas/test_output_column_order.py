@@ -2,12 +2,6 @@
 
 import pytest
 
-from bioetl.infrastructure.validation.schemas.chembl.activity import ActivityTableSchema
-from bioetl.infrastructure.validation.schemas.chembl.assay import AssayTableSchema
-from bioetl.infrastructure.validation.schemas.chembl.molecule import MoleculeTableSchema
-from bioetl.infrastructure.validation.schemas.chembl.publication import PublicationTableSchema
-from bioetl.infrastructure.validation.schemas.chembl.target import TargetTableSchema
-from bioetl.infrastructure.validation.schemas.pandera_base import GENERATED_COLUMN_ORDER
 from bioetl.domain.schemas.chembl.output_views import (
     ACTIVITY_OUTPUT_COLUMNS,
     ASSAY_OUTPUT_COLUMNS,
@@ -15,6 +9,14 @@ from bioetl.domain.schemas.chembl.output_views import (
     PUBLICATION_OUTPUT_COLUMNS,
     TARGET_OUTPUT_COLUMNS,
 )
+from bioetl.infrastructure.validation.schemas.chembl.activity import ActivityTableSchema
+from bioetl.infrastructure.validation.schemas.chembl.assay import AssayTableSchema
+from bioetl.infrastructure.validation.schemas.chembl.molecule import MoleculeTableSchema
+from bioetl.infrastructure.validation.schemas.chembl.publication import (
+    PublicationTableSchema,
+)
+from bioetl.infrastructure.validation.schemas.chembl.target import TargetTableSchema
+from bioetl.infrastructure.validation.schemas.pandera_base import GENERATED_COLUMN_ORDER
 
 
 @pytest.mark.parametrize(

@@ -17,6 +17,7 @@ from bioetl.domain.configs import CsvInputConfig
 from bioetl.domain.configs.pipeline import ChemblSourceConfig, ProviderHttpConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
 def _extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
@@ -121,6 +122,7 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
         metadata_builder=metadata_builder,
         index_generator=index_generator,
         timestamp_provider=timestamp_provider,
+        entity_model_registry=get_chembl_model_registry(),
     )
 
 
