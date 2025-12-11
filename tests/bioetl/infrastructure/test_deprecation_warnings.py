@@ -58,19 +58,21 @@ class TestConfigModelsDeprecation:
         assert hasattr(models, "HttpClientConfig")
 
 
-class TestCsvRecordSourceDeprecation:
-    """Tests for bioetl.infrastructure.files.csv_record_source deprecation."""
+class TestCsvRecordSourceRemoval:
+    """Tests verifying bioetl.infrastructure.files.csv_record_source is fully removed."""
 
-    def test_csv_record_source_deprecation_warning(self) -> None:
-        """Importing from infrastructure.files.csv_record_source raises ImportError."""
+    def test_csv_record_source_module_not_found(self) -> None:
+        """Importing from infrastructure.files.csv_record_source raises ModuleNotFoundError.
+
+        The module has been completely removed (not just deprecated).
+        Users should import from bioetl.application.files.csv_record_source instead.
+        """
         module_name = "bioetl.infrastructure.files.csv_record_source"
         if module_name in sys.modules:
             del sys.modules[module_name]
 
-        with pytest.raises(ImportError, match="has been removed"):
+        with pytest.raises(ModuleNotFoundError):
             importlib.import_module(module_name)
-
-    # test_csv_record_source_exports_available removed as module is removed
 
 
 class TestConstantsDeprecation:
