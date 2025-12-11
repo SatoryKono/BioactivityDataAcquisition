@@ -20,7 +20,7 @@ console = Console()
 
 def _print_start_info(pipeline_name: str, limit: int | None, dry_run: bool) -> None:
     """Print pipeline start information."""
-    console.print(f"[bold]Running pipeline:[/bold] {pipeline_name}")
+    console.print(f"[bold]Starting pipeline:[/bold] {pipeline_name}")
     if limit:
         console.print(f"[dim]Limit:[/dim] {limit} records")
     if dry_run:
