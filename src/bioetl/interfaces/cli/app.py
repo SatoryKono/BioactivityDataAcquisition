@@ -136,7 +136,9 @@ def run(
         )
 
         # 2. Get use case via factory
-        use_case = get_application_context().use_case_factory.create_run_pipeline_use_case()
+        use_case = (
+            get_application_context().use_case_factory.create_run_pipeline_use_case()
+        )
 
         # 3. Execute
         _print_start_info(pipeline_name, limit, dry_run)

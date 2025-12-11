@@ -9,7 +9,7 @@ def test_pandas_batch_adapter_converts_dataframe_to_records() -> None:
     adapter = PandasBatchAdapter()
     df = pd.DataFrame([{"id": 1, "name": "a"}, {"id": 2, "name": "b"}])
 
-    records = adapter.adapt_batch(df)
+    records = adapter.process_batch(df)
 
     assert list(records) == [
         {"id": 1, "name": "a"},

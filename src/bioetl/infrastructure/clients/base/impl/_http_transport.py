@@ -55,7 +55,7 @@ class _HttpTransport:
                 max_attempts=attempts,
                 backoff_factor=float(config.backoff_factor),
             )
-            if config.retry_enabled
+            if config.max_retries > 0
             else None
         )
         self.logger.info(

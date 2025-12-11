@@ -5,14 +5,12 @@ from bioetl.domain.configs.pipeline import (
     BusinessKeyConfig,
     CanonicalizationConfig,
     ChemblSourceConfig,
-    ClientConfig,
     CsvInputConfig,
     DeterminismConfig,
     DummyProviderConfig,
     FeatureFlagsConfig,
     HashingConfig,
     HttpClientConfig,
-    HttpClientSettings,
     InterfaceFeaturesConfig,
     LoggingConfig,
     MetricsConfig,
@@ -27,6 +25,10 @@ from bioetl.domain.configs.pipeline import (
     RuntimeConfig,
     StorageConfig,
 )
+
+# Legacy aliases for backward compatibility
+ClientConfig = HttpClientConfig
+HttpClientSettings = ProviderHttpConfig
 
 __all__ = [
     "BaseProviderConfig",

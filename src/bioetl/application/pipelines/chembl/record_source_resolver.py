@@ -21,7 +21,7 @@ from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.record_source import RecordSourceABC
 
 if TYPE_CHECKING:
-    from bioetl.domain.configs import PipelineConfig
+    from bioetl.domain.configs import DataSourceConfig, PipelineConfig
     from bioetl.domain.observability import LoggingPortABC
     from bioetl.domain.ports.extraction import ExtractionServiceABC
 
@@ -83,7 +83,7 @@ class RecordSourceResolver:
         # API mode - no file-based record source needed
         return None
 
-    def _resolve_effective_mode(self, source_cfg: "DataSourceConfig") -> str:  # type: ignore[name-defined]
+    def _resolve_effective_mode(self, source_cfg: "DataSourceConfig") -> str:
         """Determine effective input mode from configuration.
 
         Args:
@@ -100,9 +100,7 @@ class RecordSourceResolver:
 
         return mode or "api"
 
-    def _create_csv_source(
-        self, source_cfg: "DataSourceConfig"  # type: ignore[name-defined]
-    ) -> CsvRecordSourceImpl:
+    def _create_csv_source(self, source_cfg: "DataSourceConfig") -> CsvRecordSourceImpl:
         """Create CSV record source.
 
         Args:
@@ -127,7 +125,7 @@ class RecordSourceResolver:
         )
 
     def _create_id_list_source(
-        self, source_cfg: "DataSourceConfig"  # type: ignore[name-defined]
+        self, source_cfg: "DataSourceConfig"
     ) -> IdListRecordSourceImpl:
         """Create ID list record source.
 
@@ -148,9 +146,7 @@ class RecordSourceResolver:
         provider_cfg = self._config.get_source_config(self._config.provider)
 
         if not isinstance(provider_cfg, ChemblSourceConfig):
-            raise TypeError(
-                "ChemblSourceConfig is required for id_only input_mode."
-            )
+            raise TypeError("ChemblSourceConfig is required for id_only input_mode.")
 
         return IdListRecordSourceImpl(
             input_path=Path(input_path),

@@ -68,6 +68,30 @@ class HttpClientConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_fields(cls, data: Any) -> Any:
+        """Migrate legacy field names to new names."""
+        if not isinstance(data, dict):
+            return data
+
+        migrated = dict(data)
+
+        # Map legacy field names to new names
+        field_mapping = {
+            "timeout": "timeout_sec",
+            "retries": "max_retries",
+            "backoff": "backoff_factor",
+            "rate_limit": "rate_limit_per_sec",
+            "circuit_breaker_recovery_time": "circuit_breaker_recovery_sec",
+        }
+
+        for old_name, new_name in field_mapping.items():
+            if old_name in migrated and new_name not in migrated:
+                migrated[new_name] = migrated.pop(old_name)
+
+        return migrated
+
 
 class ProviderHttpConfig(HttpClientConfig):
     """HTTP configuration for a specific provider with base URL."""
@@ -549,6 +573,11 @@ class PipelineConfig(BaseModel):
     @property
     def entity(self) -> str:
         """Access entity from identity section."""
+        return str(self.identity.entity)
+
+    @property
+    def entity_name(self) -> str:
+        """Access entity_name from identity section (backward compatibility)."""
         return str(self.identity.entity)
 
     @property
