@@ -99,7 +99,7 @@ class UnifiedLoaderImpl(LoaderABC):
 
     def load(
         self,
-        df: pd.DataFrame,
+        data: pd.DataFrame,
         output_path: Path,
         context: RunContext,
         *,
@@ -108,7 +108,7 @@ class UnifiedLoaderImpl(LoaderABC):
         """Load DataFrame to output path with full pipeline processing.
 
         Args:
-            df: DataFrame to write.
+            data: DataFrame to write.
             output_path: Output directory path.
             context: Run context with execution details.
             column_order: Optional column ordering.
@@ -117,7 +117,7 @@ class UnifiedLoaderImpl(LoaderABC):
             WriteResult with path, row_count, checksum.
         """
         return self._write_result(
-            df=df,
+            df=data,
             output_path=output_path,
             entity_name=str(context.entity_name),
             run_context=context,
@@ -134,14 +134,14 @@ class UnifiedLoaderImpl(LoaderABC):
         path.parent.mkdir(parents=True, exist_ok=True)
         self._metadata_writer.write_meta(meta, path)
 
-    def write_qc_report(self, df: pd.DataFrame, path: Path) -> None:
+    def write_qc_report(self, data: pd.DataFrame, path: Path) -> None:
         """Write a pre-built QC report to file.
 
         Args:
-            df: QC report DataFrame.
+            data: QC report DataFrame.
             path: Target file path.
         """
-        self._qc_artifact_writer.write_qc_csv(df, path)
+        self._qc_artifact_writer.write_qc_csv(data, path)
 
     def _write_result(
         self,

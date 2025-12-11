@@ -1,7 +1,6 @@
 """Transform infrastructure layer."""
 
-from bioetl.infrastructure.transform.factories import (
-    # New naming convention
+from bioetl.infrastructure.transform.factories import (  # New naming convention
     create_hash_service,
     create_hasher,
     create_index_generator,

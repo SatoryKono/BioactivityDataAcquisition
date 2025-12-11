@@ -83,6 +83,36 @@ class ActivityRawModel(SourceRecordModel):
     upper_value: float | None = None
     value: float | None = None
 
+    @field_validator("action_type", mode="before")
+    @classmethod
+    def _normalize_action_type(
+        cls, value: str | dict[str, object] | list[object] | None
+    ) -> str | None:
+        """Coerce action_type to a string when API returns nested structures.
+
+        ChEMBL occasionally wraps action_type as an object with both the code
+        and a description. We pick the primary string value deterministically.
+        """
+        if value is None or value == "":
+            return None
+        if isinstance(value, str):
+            return value
+        if isinstance(value, dict):
+            for key in ("action_type", "description", "label", "name"):
+                candidate = value.get(key)
+                if isinstance(candidate, str):
+                    return candidate
+            scalar_values = [
+                str(v)
+                for _, v in sorted(value.items())
+                if isinstance(v, (str, int, float, bool))
+            ]
+            return ";".join(scalar_values) if scalar_values else None
+        if isinstance(value, list):
+            items = [str(item) for item in value if item is not None]
+            return ";".join(items) if items else None
+        return str(value)
+
     @field_validator("pchembl_value")
     @classmethod
     def validate_pchembl_range(cls, v: float | None) -> float | None:
@@ -90,6 +120,21 @@ class ActivityRawModel(SourceRecordModel):
         if v is not None and not (0 <= v <= 20):
             raise ValueError(f"pchembl_value must be 0-20, got {v}")
         return v
+
+    @field_validator("action_type", mode="before")
+    @classmethod
+    def normalize_action_type(cls, value: JsonValue) -> str | None:
+        """ChEMBL sometimes returns a dict with action_type/description fields."""
+        if value is None:
+            return None
+        if isinstance(value, dict):
+            for key in ("action_type", "action_type_description", "description"):
+                candidate = value.get(key)
+                if candidate is None:
+                    continue
+                return str(candidate)
+            return None
+        return str(value)
 
     @field_validator("standard_relation")
     @classmethod

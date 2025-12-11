@@ -130,7 +130,7 @@ class TestContainerDoesNotCallRegisterSchemasDirectly:
         pipeline_config: PipelineConfig,
         provider_registry: InMemoryProviderRegistry,
     ) -> None:
-        """Schema registration should happen lazily when validation service is requested."""
+        """Schema registration is lazy when validation service is requested."""
         loader = MagicMock()
         mock_service = MagicMock(spec=SchemaBootstrapService)
         mock_schema_provider = MagicMock()

@@ -16,10 +16,12 @@ id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
 }}%%
 sequenceDiagram
     autonumber
-    participant CLI as CLI (Typer)
+
+    participant UseCase as RunPipelineUseCase
+    participant ConfigLoader as PipelineConfigLoader
+    participant ProviderLoader as ProviderRegistryLoader
+    participant ContainerFactory as Container Factory
     participant Orchestrator as PipelineOrchestrator
-    participant Wiring as Wiring/Interfaces
-    participant Container as PipelineContainer
     participant Pipeline as PipelineBase/ChemblPipeline
     participant Hooks as PipelineHooks (Logging+Metrics)
     participant ErrorPolicy as ErrorPolicyManager
@@ -29,57 +31,41 @@ sequenceDiagram
     participant Writer as UnifiedOutputWriter
     participant Storage as Deterministic Storage
 
-    CLI->>Orchestrator: run(pipeline_name, cli_args)
-    Orchestrator->>Wiring: build_default_container(config)
-    Wiring-->>Orchestrator: PipelineContainer (extraction, transformer, validator, writer, hooks)
-    Orchestrator->>Pipeline: instantiate(config, container)
-    Orchestrator->>Pipeline: run()
+    UseCase->>ConfigLoader: load config (path or registry) with profile + profiles_root
+    ConfigLoader-->>UseCase: PipelineConfig
+    UseCase->>UseCase: validate require_rest_interface flag
+    alt output override provided
+        UseCase->>UseCase: apply output_path override (mkdir, mutate sink)
+    end
+    UseCase->>ProviderLoader: create_provider_loader()
+    ProviderLoader-->>UseCase: ProviderRegistry
+    UseCase->>Orchestrator: PipelineOrchestrator(..., container_factory, provider_loader_factory)
+    Orchestrator->>Pipeline: build_pipeline(limit) using registry + container
+
     activate Pipeline
     Pipeline->>Hooks: on_start(run_ctx)
     Pipeline->>ErrorPolicy: bind(run_ctx)
 
-    loop Extract + Transform batches
-        Pipeline->>Hooks: on_stage_start("extract")
-        Pipeline->>Extraction: extract_all(config)
-        activate Extraction
+    loop Extract + Transform + Validate batches
+        Pipeline->>Extraction: extract_all(limit)
         Extraction-->>Pipeline: batch_df
-        deactivate Extraction
-
-        Pipeline->>Hooks: on_stage_start("transform")
         Pipeline->>Transformer: apply(batch_df)
-        activate Transformer
         Transformer-->>Pipeline: normalized_df
-        deactivate Transformer
-
-        Pipeline->>Hooks: on_stage_start("validate")
         Pipeline->>Validator: validate(schema_name, normalized_df)
-        activate Validator
         Validator-->>Pipeline: validated_df
-        deactivate Validator
-
         Pipeline->>Pipeline: accumulate(validated_df)
     end
 
-    Pipeline->>Hooks: on_stage_end("extract/transform/validate")
-
-    alt Dry run?
-        Pipeline->>Hooks: on_stage_start("write")
-        Pipeline->>Pipeline: skip write but produce metrics/meta preview
-        Pipeline->>Hooks: on_stage_end("write")
+    alt dry_run or PipelineType.TRANSFORM_ONLY
+        Pipeline->>Hooks: on_stage_start("write"); skip persistent write
     else
-        Pipeline->>Hooks: on_stage_start("write")
         Pipeline->>Writer: write(all_validated_df, output_cfg)
-        activate Writer
-        Writer->>Writer: stable sort + atomic CSV/Parquet
-        Writer->>Storage: persist dataset + meta.yaml
-        Writer-->>Pipeline: WriteResult(meta)
-        deactivate Writer
-        Pipeline->>Hooks: on_stage_end("write")
+        Writer-->>Storage: atomic persist + meta.yaml + QC sidecars
     end
 
-    Pipeline->>Hooks: on_finish(success=True, stats)
+    Pipeline->>Hooks: on_finish(success, stats)
     Pipeline-->>Orchestrator: RunResult(meta, duration, hooks summary)
     deactivate Pipeline
-    Orchestrator-->>CLI: exit code + summary
+    Orchestrator-->>UseCase: RunResult
 
     Note over Pipeline,ErrorPolicy: Any exception invokes ErrorPolicy -> hooks.on_error -> propagate to orchestrator.

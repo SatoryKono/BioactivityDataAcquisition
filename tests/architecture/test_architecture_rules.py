@@ -236,9 +236,7 @@ def test_infrastructure_abc_impls_has_no_application_references() -> None:
     (interfaces/abc_impls_application.yaml) to maintain proper layer boundaries.
     Infrastructure layer must not know about application layer.
     """
-    impls_path = (
-        BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_impls.yaml"
-    )
+    impls_path = BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_impls.yaml"
     data = yaml.safe_load(impls_path.read_text(encoding="utf-8"))
 
     violations: list[str] = []
@@ -257,6 +255,7 @@ def test_infrastructure_abc_impls_has_no_application_references() -> None:
     if violations:
         pytest.fail(
             "Infrastructure abc_impls.yaml must not reference application layer.\n"
-            "Application implementations should be in interfaces/abc_impls_application.yaml.\n"
+            "Application implementations should be in "
+            "interfaces/abc_impls_application.yaml.\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )

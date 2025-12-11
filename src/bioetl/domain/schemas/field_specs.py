@@ -397,7 +397,10 @@ ASSAY_FIELD_SPECS: tuple[FieldSpec, ...] = (
         "string",
         nullable=False,
         constraints={"isin": ["B", "F", "A", "T", "P", "U"]},
-        description="Assay type (B=binding, F=functional, A=ADMET, T=toxicity, P=physicochemical, U=unknown)",
+        description=(
+            "Assay type (B=binding, F=functional, A=ADMET, T=toxicity, "
+            "P=physicochemical, U=unknown)"
+        ),
     ),
     FieldSpec("assay_type_description", "string", description="Assay type description"),
     FieldSpec(

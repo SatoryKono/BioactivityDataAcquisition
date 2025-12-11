@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 from typing import Annotated, Any
 
 from rich.console import Console
@@ -84,14 +84,12 @@ def validate_config(
     from bioetl.infrastructure.config.sources import get_configs_root
     from bioetl.interfaces.application_context import get_application_context
 
-    config_file = _resolve_config_path(config_path)
-    if config_file is None or not config_file.exists():
-        console.print(
-            f"[red]Error:[/red] Config file not found: {config_path}"
-        )
-        raise typer.Exit(1)
-
     try:
+        config_file = _resolve_config_path(config_path)
+        if config_file is None or not config_file.exists():
+            console.print(f"[red]Error:[/red] Config file not found: {config_path}")
+            raise typer.Exit(1)
+
         ctx = get_application_context()
         build_runtime_config(
             config_path=config_file,

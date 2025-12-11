@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Protocol, runtime_checkable
+import warnings
 
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 
-
 # Type alias for factory function that creates empty provider registry instances.
-# Used for dependency injection in application layer to avoid direct infrastructure imports.
+# Used for dependency injection in application layer to avoid
+# direct infrastructure imports.
 ProviderRegistryFactory = Callable[[], "ProviderRegistryABC"]
 
 

@@ -7,11 +7,11 @@ from typing import Any
 
 import pandas as pd
 
-from bioetl.application.helpers import resolve_primary_key_with_filter
 from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
     IdListRecordSourceImpl,
 )
+from bioetl.application.helpers import resolve_primary_key_with_filter
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
@@ -242,17 +242,29 @@ class ChemblPipelineBase(PipelineBase):
 
         record_source = None
         if mode == "csv":
+            input_path = source_cfg.input_path
+            if input_path is None:
+                raise ValueError("input_path is required when input_mode is 'csv'.")
             record_source = CsvRecordSourceImpl(
-                input_path=Path(source_cfg.input_path),
+                input_path=Path(input_path),
                 csv_options=source_cfg.csv,
                 limit=None,
                 logger=self._logger,
                 chunk_size=source_cfg.batch_size,
             )
         elif mode == "id_only":
+            input_path = source_cfg.input_path
+            if input_path is None:
+                raise ValueError("input_path is required when input_mode is 'id_only'.")
             provider_cfg = self._config.get_source_config(self._config.provider)
+            from bioetl.domain.configs import ChemblSourceConfig
+
+            if not isinstance(provider_cfg, ChemblSourceConfig):
+                raise TypeError(
+                    "ChemblSourceConfig is required for id_only input_mode."
+                )
             record_source = IdListRecordSourceImpl(
-                input_path=Path(source_cfg.input_path),
+                input_path=Path(input_path),
                 id_column=self.ID_COLUMN,
                 csv_options=source_cfg.csv,
                 limit=None,
