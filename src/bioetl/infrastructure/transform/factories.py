@@ -123,7 +123,10 @@ def default_timestamp_provider(
 def default_index_generator(start: int = 0) -> IndexGeneratorABC:
     """DEPRECATED: Use create_index_generator() instead."""
     warnings.warn(
-        "default_index_generator is deprecated, use create_index_generator instead",
+        (
+            "default_index_generator is deprecated, "
+            "use create_index_generator instead"
+        ),
         DeprecationWarning,
         stacklevel=2,
     )
@@ -135,8 +138,10 @@ def default_normalization_service(
 ) -> NormalizationServiceABC:
     """DEPRECATED: Use create_normalization_service() instead."""
     warnings.warn(
-        "default_normalization_service is deprecated, "
-        "use create_normalization_service instead",
+        (
+            "default_normalization_service is deprecated, "
+            "use create_normalization_service instead"
+        ),
         DeprecationWarning,
         stacklevel=2,
     )
