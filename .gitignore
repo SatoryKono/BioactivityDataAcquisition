@@ -24,9 +24,14 @@ node_modules
 /full_log.txt
 /final_report*.txt
 /project_rules_failures.txt
-/.idea/workspace.xml
+/.idea/
 /.DS_Store
 /Thumbs.db
 /.ipynb_checkpoints/
-/.vercel/cache/
+/.vercel/
+/.vscode/
+/.cursor/
+/.trae/
+/.windsurf/
+/.cursorrules
 API_KEY.env
