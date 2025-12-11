@@ -22,8 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, Callable
 
 import requests
 
@@ -34,13 +33,11 @@ from bioetl.application.services.config_migration_service import (
     ConfigMigrationServiceProtocol,
 )
 from bioetl.domain.clients.base.contracts import RateLimiterABC
-from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import HttpClientConfig, PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
-from bioetl.domain.validation import ValidatorFactoryABC
 from bioetl.infrastructure.clients.base.factories import build_http_client
 from bioetl.interfaces.factories import (
     DefaultInfrastructureFactory,
@@ -81,11 +78,13 @@ class CompositionRoot:
     def __init__(
         self,
         *,
+        # Новые параметры для фабрик
         observability_factory: ObservabilityFactoryABC | None = None,
         infrastructure_factory: InfrastructureFactoryABC | None = None,
-        # Backward compatibility parameters
+        # Старые параметры (backward compatibility)
         logger: LoggingPortABC | None = None,
         metrics: MetricsPortABC | None = None,
+        http_session_factory: type | None = None,
         schema_contract_provider: SchemaContractProviderABC | None = None,
     ) -> None:
         """
@@ -98,18 +97,19 @@ class CompositionRoot:
                 (defaults to DefaultInfrastructureFactory)
             logger: Custom logger implementation (backward compatibility)
             metrics: Custom metrics implementation (backward compatibility)
+            http_session_factory: HTTP session factory class (backward compatibility)
             schema_contract_provider: Custom schema contract provider
                 (defaults to bootstrapped provider from schema registry)
         """
+        # Фабрики
         self._observability = observability_factory or DefaultObservabilityFactory()
         self._infrastructure = infrastructure_factory or DefaultInfrastructureFactory()
+
+        # Explicit overrides (для BC и тестов)
         self._explicit_logger = logger
         self._explicit_metrics = metrics
+        self._http_session_factory = http_session_factory or requests.Session
         self._schema_contract_provider = schema_contract_provider
-        self._http_session_factory = requests.Session
-
-        # Lazy-initialized components
-        self._registry_resolver: Any | None = None
 
     # =========================================================================
     # Observability
@@ -183,7 +183,11 @@ class CompositionRoot:
         Returns:
             Configured rate limiter instance
         """
-        return self._infrastructure.create_rate_limiter(rate, capacity)
+        return self._infrastructure.create_rate_limiter(
+            logger=self.get_logger(),
+            rate=rate,
+            capacity=capacity,
+        )
 
     # =========================================================================
     # Schema Contract Provider
@@ -270,7 +274,11 @@ class CompositionRoot:
         Returns:
             Fully configured PipelineContainer
         """
-        resolver = self._get_registry_resolver()
+        from bioetl.infrastructure.clients.base.abc_registry_resolver import (
+            ABCRegistryResolver,
+        )
+
+        resolver = ABCRegistryResolver()
 
         # Resolve factories from registry
         loader_factory = resolver.resolve_default_factory("LoaderABC")
@@ -299,8 +307,8 @@ class CompositionRoot:
             config,
             logger=self.get_logger(),
             loader=loader,
-            validator_factory=self._create_validator_factory(),
-            metadata_builder=self._create_metadata_builder(),
+            validator_factory=self._infrastructure.create_validator_factory(),
+            metadata_builder=self._infrastructure.create_metadata_builder(),
             metrics_port=metrics_port,
             hash_service=hash_service_factory(),
             timestamp_provider=timestamp_provider_factory(),
@@ -337,42 +345,6 @@ class CompositionRoot:
             Path(configs_root) if configs_root is not None else get_configs_root(None)
         )
         return ConfigPathResolver(effective_root)
-
-    # =========================================================================
-    # Private Helpers
-    # =========================================================================
-
-    def _get_registry_resolver(self) -> Any:
-        """Lazy-load ABC registry resolver."""
-        if self._registry_resolver is None:
-            from bioetl.infrastructure.clients.base.abc_registry_resolver import (
-                ABCRegistryResolver,
-            )
-
-            self._registry_resolver = ABCRegistryResolver()
-        return self._registry_resolver
-
-    def _create_metadata_builder(self) -> RunMetadataBuilderProtocol:
-        """Create metadata builder using infrastructure helpers."""
-        from bioetl.infrastructure.output.metadata import (
-            build_dry_run_metadata,
-            build_run_metadata,
-        )
-
-        return cast(
-            RunMetadataBuilderProtocol,
-            SimpleNamespace(
-                build_run_metadata=build_run_metadata,
-                build_dry_run_metadata=build_dry_run_metadata,
-            ),
-        )
-
-    def _create_validator_factory(self) -> ValidatorFactoryABC:
-        """Create validator factory from registry."""
-        resolver = self._get_registry_resolver()
-        factory = resolver.resolve_default_factory("ValidatorFactoryABC")
-        return factory()
-
 
 def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
     """Create default schema contract provider by bootstrapping schema registry.
