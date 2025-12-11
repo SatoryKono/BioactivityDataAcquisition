@@ -2,8 +2,6 @@
 Tests for serialization utilities.
 """
 
-import pandas as pd
-
 from bioetl.domain.transform.serializers import (
     serialize_dict,
     serialize_list,

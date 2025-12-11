@@ -16,9 +16,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Any
-from unittest.mock import Mock
-
-import pytest
 
 from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
@@ -209,7 +206,10 @@ class StubBatchAdapter:
 
     def process_batch(self, raw_batch: object) -> list[dict[str, Any]]:
         if isinstance(raw_batch, list):
-            return [item if isinstance(item, dict) else {"value": item} for item in raw_batch]
+            return [
+                item if isinstance(item, dict) else {"value": item}
+                for item in raw_batch
+            ]
         return []
 
 

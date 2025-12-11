@@ -69,9 +69,7 @@ def minimal_config(
     minimal_data_flow: DataFlowConfig,
 ) -> PipelineConfig:
     """Minimal valid config for chembl provider."""
-    provider_http = ProviderHttpConfig(
-        base_url="https://www.ebi.ac.uk/chembl/api/data"
-    )
+    provider_http = ProviderHttpConfig(base_url="https://www.ebi.ac.uk/chembl/api/data")
     provider_config = ChemblSourceConfig(provider="chembl", http=provider_http)
 
     return PipelineConfig(

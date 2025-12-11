@@ -25,7 +25,7 @@ def is_missing(value: Any) -> bool:
     """Check if value is None or pandas NA."""
     if value is None:
         return True
-    
+
     # Check for pandas.NA (NAType) without importing pandas
     if type(value).__name__ == "NAType":
         return True

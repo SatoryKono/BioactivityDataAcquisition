@@ -14,19 +14,18 @@ pytest.importorskip("hypothesis")
 from hypothesis import assume, given, settings, strategies as st
 import pandas as pd
 
+from bioetl.domain.transform.normalizers.identifiers import (
+    normalize_chembl_id,
+    normalize_doi,
+    normalize_pcid,
+    normalize_pmid,
+)
+from bioetl.domain.transform.normalizers.numeric import normalize_clinical_phase
 from bioetl.domain.transform.serializers import (
     serialize_dict,
     serialize_list,
 )
-from bioetl.domain.transform.normalizers.identifiers import (
-    normalize_chembl_id,
-    normalize_doi,
-    normalize_pmid,
-    normalize_pcid,
-)
-from bioetl.domain.transform.normalizers.numeric import normalize_clinical_phase
 from bioetl.infrastructure.transform.impl.normalize import normalize_scalar
-
 
 # =============================================================================
 # Scalar Normalization Property Tests
@@ -236,7 +235,9 @@ def test_pcid_strips_prefix(num):
 
 # Strategy for valid DOI suffixes (simplified)
 doi_suffix = st.text(
-    alphabet=st.characters(whitelist_categories=("L", "N"), whitelist_characters=".-_/"),
+    alphabet=st.characters(
+        whitelist_categories=("L", "N"), whitelist_characters=".-_/"
+    ),
     min_size=1,
     max_size=50,
 ).filter(lambda x: x.strip() and not x.startswith("/"))

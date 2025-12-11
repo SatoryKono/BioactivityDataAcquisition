@@ -7,7 +7,7 @@ import json
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
-    import pandas as pd
+    pass
 
 
 def serialize_list(value: Any) -> Any:
