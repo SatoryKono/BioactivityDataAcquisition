@@ -127,21 +127,6 @@ DEPRECATED_ALIASES: dict[str, DeprecatedAlias] = {
         category="class_alias",
         message="RecordSource is deprecated. Use RecordSourceABC directly.",
     ),
-    # -------------------------------------------------------------------------
-    # Function Aliases (deprecated in domain/ports/extraction.py)
-    # -------------------------------------------------------------------------
-    "to_raw_records": DeprecatedAlias(
-        new_name="RecordMapperABC",
-        new_module="bioetl.application.mappers",
-        category="function",
-        message="to_raw_records is deprecated. Use RecordMapperABC in application layer.",
-    ),
-    "from_raw_records": DeprecatedAlias(
-        new_name="(direct dict return)",
-        new_module="(extraction services)",
-        category="function",
-        message="from_raw_records is deprecated. Return dicts directly from extraction.",
-    ),
 }
 
 

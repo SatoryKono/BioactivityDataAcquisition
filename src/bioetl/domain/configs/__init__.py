@@ -39,8 +39,6 @@ from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.manifest import PipelineManifest
 from bioetl.domain.configs.normalization import NormalizationConfig
 
-# ConfigMigrator is now loaded lazily via __getattr__ with deprecation warning
-# as it has been moved to infrastructure layer
 from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,
@@ -85,8 +83,6 @@ __all__ = [
     "PipelineStagesConfig",
     # Execution aggregate (groups stages + runtime + transform)
     "ExecutionConfig",
-    # Migration utilities
-    "ConfigMigrator",
     # Primary HTTP configuration (single source of truth)
     "HttpClientConfig",
     "ProviderHttpConfig",
@@ -141,7 +137,6 @@ def __getattr__(name: str) -> Any:
     """Module-level __getattr__ for lazy loading deprecated aliases.
 
     Delegates to _compat module which handles deprecation warnings.
-    Also handles ConfigMigrator which was moved to infrastructure layer.
     """
     if name == "ConfigMigrator":
         import warnings
