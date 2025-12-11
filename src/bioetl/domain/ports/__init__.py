@@ -36,6 +36,14 @@ from bioetl.domain.ports.parsing import (
     PaginationInfo,
     ResponseParserPortABC,
 )
+from bioetl.domain.ports.config_loader_port import (
+    ConfigLoaderPortABC,
+    ConfigPathResolverPortABC,
+)
+from bioetl.domain.ports.infrastructure_factory_port import (
+    ABCRegistryResolverPortABC,
+    InfrastructureFactoryPortABC,
+)
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.types import ApiPayload
 
@@ -91,4 +99,10 @@ __all__: list[str] = [
     "ResponseParserPortABC",
     # Schema ports
     "SchemaContractProviderABC",
+    # Configuration ports
+    "ConfigLoaderPortABC",
+    "ConfigPathResolverPortABC",
+    # Infrastructure factory ports
+    "ABCRegistryResolverPortABC",
+    "InfrastructureFactoryPortABC",
 ]

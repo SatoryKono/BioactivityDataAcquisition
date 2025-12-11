@@ -30,9 +30,6 @@ ALLOWED_DUPLICATE_CLASSES = {
     "OutputOptionsConfig",
     # Forward declaration for type hints (application_context.py)
     "UseCaseFactory",
-    # Deterministic output WriteResult (domain/output) vs client WriteResult (domain/clients)
-    # TODO: Consolidate into single WriteResult or rename one
-    "WriteResult",
 }
 ALLOWED_ABCS_WITHOUT_IMPL = {
     "CLICommandABC",

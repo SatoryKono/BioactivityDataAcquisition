@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.ports.config_loader_port import (
+from bioetl.domain.ports.config_loader_port import (
     ConfigLoaderPortABC,
     ConfigPathResolverPortABC,
 )

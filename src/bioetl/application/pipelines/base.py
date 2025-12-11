@@ -181,7 +181,7 @@ class PipelineBase(ABC):
             self._metadata_builder,
             self._logger,
         )
-        return executor.execute(self, output_path, dry_run=dry_run)
+        return executor.execute(self, output_path, dry_run=dry_run, **kwargs)
 
     def run_extract_only(self, **kwargs: Any) -> ExtractOnlyResult:
         """Execute only the extract stage and return statistics.

@@ -43,9 +43,9 @@ import requests
 
 from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC
-from bioetl.application.ports import (
+from bioetl.domain.ports.config_loader_port import ConfigPathResolverPortABC
+from bioetl.domain.ports.infrastructure_factory_port import (
     ABCRegistryResolverPortABC,
-    ConfigPathResolverPortABC,
 )
 from bioetl.application.services.config_migration_service import (
     ConfigMigrationService,

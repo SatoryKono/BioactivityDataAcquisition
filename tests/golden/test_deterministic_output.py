@@ -200,8 +200,8 @@ class TestDeterministicCSVWriter:
         assert result1.checksum == result2.checksum
 
 
-class TestWriteResultVerification:
-    """Tests for WriteResult verification."""
+class TestDeterministicWriteResultVerification:
+    """Tests for DeterministicWriteResult verification."""
 
     def test_verify_returns_true_for_matching_checksum(
         self,
@@ -209,7 +209,7 @@ class TestWriteResultVerification:
         sample_data: pd.DataFrame,
         tmp_path: Path,
     ) -> None:
-        """WriteResult.verify should return True for matching checksum."""
+        """DeterministicWriteResult.verify should return True for matching checksum."""
         path = tmp_path / "output.parquet"
         tabular = PandasTabularAdapter(sample_data)
 
@@ -223,7 +223,7 @@ class TestWriteResultVerification:
         sample_data: pd.DataFrame,
         tmp_path: Path,
     ) -> None:
-        """WriteResult.verify should return False for mismatched checksum."""
+        """DeterministicWriteResult.verify should return False for mismatched checksum."""
         path = tmp_path / "output.parquet"
         tabular = PandasTabularAdapter(sample_data)
 

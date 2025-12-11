@@ -99,11 +99,12 @@ class UnifiedLoaderImpl(LoaderABC):
 
     def load(
         self,
-        data: pd.DataFrame,
+        data: pd.DataFrame | None,
         output_path: Path,
         context: RunContext,
         *,
         column_order: list[str] | None = None,
+        df: pd.DataFrame | None = None,
     ) -> WriteResult:
         """Load DataFrame to output path with full pipeline processing.
 
@@ -113,11 +114,17 @@ class UnifiedLoaderImpl(LoaderABC):
             context: Run context with execution details.
             column_order: Optional column ordering.
 
+            df: Legacy keyword-only alias for ``data``.
+
         Returns:
             WriteResult with path, row_count, checksum.
         """
+        resolved_df = data if data is not None else df
+        if resolved_df is None:
+            raise TypeError("UnifiedLoaderImpl.load() requires 'data' or 'df'.")
+
         return self._write_result(
-            df=data,
+            df=resolved_df,
             output_path=output_path,
             entity_name=str(context.entity_name),
             run_context=context,

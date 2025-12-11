@@ -21,7 +21,7 @@ from bioetl.domain.data import TabularData
 
 
 @dataclass(frozen=True)
-class WriteResult:
+class DeterministicWriteResult:
     """Result of deterministic write operation.
 
     Contains information about the write operation including
@@ -82,7 +82,7 @@ class DeterministicWriterABC(ABC):
         *,
         sort_columns: tuple[str, ...] | None = None,
         reset_index: bool = True,
-    ) -> WriteResult:
+    ) -> DeterministicWriteResult:
         """Write data atomically with deterministic output.
 
         The write operation follows these steps:
@@ -100,7 +100,7 @@ class DeterministicWriterABC(ABC):
             reset_index: Whether to reset the index before writing.
 
         Returns:
-            WriteResult with path, checksum, and statistics.
+            DeterministicWriteResult with path, checksum, and statistics.
 
         Raises:
             IOError: If write operation fails.
@@ -142,5 +142,5 @@ class DeterministicWriterABC(ABC):
 
 __all__ = [
     "DeterministicWriterABC",
-    "WriteResult",
+    "DeterministicWriteResult",
 ]

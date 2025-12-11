@@ -86,6 +86,7 @@ class PipelineExecutor:
         output_path: Path,
         *,
         dry_run: bool = False,
+        **kwargs: Any,
     ) -> RunResult:
         """
         Execute the pipeline state machine.
@@ -94,6 +95,7 @@ class PipelineExecutor:
             pipeline: The pipeline instance to execute.
             output_path: Path for output files.
             dry_run: If True, skip write phase.
+            **kwargs: Additional arguments passed to extract stage.
 
         Returns:
             RunResult with execution status and metadata.
@@ -101,7 +103,7 @@ class PipelineExecutor:
         state = self._initialize_run(pipeline, dry_run)
 
         try:
-            self._run_extraction_phase(pipeline, state, dry_run)
+            self._run_extraction_phase(pipeline, state, dry_run, **kwargs)
             self._record_etl_stages(state)
 
             if not dry_run:
@@ -137,6 +139,7 @@ class PipelineExecutor:
         pipeline: PipelineBase,
         state: _RunState,
         dry_run: bool,
+        **kwargs: Any,
     ) -> None:
         """Execute extract, transform, and validate stages."""
         self._runtime_manager.notify_stage_start("extract", state.context)
@@ -145,7 +148,7 @@ class PipelineExecutor:
             state.counters,
             state.validated_chunks,
             dry_run,
-            {},
+            kwargs,
         )
 
     def _record_etl_stages(self, state: _RunState) -> None:

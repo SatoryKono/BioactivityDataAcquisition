@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from bioetl.application.ports.infrastructure_factory_port import (
+from bioetl.domain.ports.infrastructure_factory_port import (
     ABCRegistryResolverPortABC,
 )
 
