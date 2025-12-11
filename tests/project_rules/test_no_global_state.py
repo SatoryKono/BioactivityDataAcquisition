@@ -158,3 +158,71 @@ def test_infrastructure_loader_exports_only_di_api(bioetl_root: Path) -> None:
         f"loader.py __all__ still exports deprecated functions: {found_deprecated}. "
         "Remove deprecated exports from public API."
     )
+
+
+def test_no_global_provider_registry_in_domain(bioetl_root: Path) -> None:
+    """Verify domain has no global provider registry state.
+
+    The domain layer should not contain any global mutable state for
+    provider registry. All registry access should go through DI
+    via CompositionRoot or explicit injection.
+    """
+    provider_registry_path = bioetl_root / "domain" / "provider_registry.py"
+
+    assert provider_registry_path.exists(), f"File not found: {provider_registry_path}"
+
+    content = provider_registry_path.read_text()
+
+    # Check for global state pattern
+    assert "_PROVIDER_REGISTRY" not in content, (
+        "domain/provider_registry.py should not contain global state _PROVIDER_REGISTRY"
+    )
+
+    # Check for deprecated functions (as actual function definitions, not in __getattr__)
+    # We allow __getattr__ to reference these names for backward-compat error messages
+    tree = ast.parse(content)
+
+    deprecated_functions = {
+        "set_provider_registry",
+        "get_provider_registry",
+        "default_provider_registry",
+    }
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name in deprecated_functions:
+            pytest.fail(
+                f"domain/provider_registry.py contains deprecated function: {node.name}. "
+                "Global state functions should be removed from domain layer."
+            )
+
+
+def test_domain_provider_registry_exports_no_deprecated_api(bioetl_root: Path) -> None:
+    """Verify domain/provider_registry.py __all__ has no deprecated exports."""
+    provider_registry_path = bioetl_root / "domain" / "provider_registry.py"
+
+    content = provider_registry_path.read_text()
+    tree = ast.parse(content)
+
+    all_exports: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "__all__":
+                    if isinstance(node.value, ast.List):
+                        for elt in node.value.elts:
+                            if isinstance(elt, ast.Constant):
+                                all_exports.append(elt.value)
+
+    deprecated_exports = {
+        "set_provider_registry",
+        "get_provider_registry",
+        "default_provider_registry",
+        "_PROVIDER_REGISTRY",
+    }
+
+    found_deprecated = set(all_exports) & deprecated_exports
+
+    assert not found_deprecated, (
+        f"domain/provider_registry.py __all__ still exports deprecated: {found_deprecated}. "
+        "Remove deprecated exports from public API."
+    )
