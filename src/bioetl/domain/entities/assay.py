@@ -109,7 +109,20 @@ class Assay(EntityBase):
             )
 
         # Validate assay_type is one of allowed values
-        allowed_assay_types = {"B", "F", "A", "T", "P", "U", "b", "f", "a", "t", "p", "u"}
+        allowed_assay_types = {
+            "B",
+            "F",
+            "A",
+            "T",
+            "P",
+            "U",
+            "b",
+            "f",
+            "a",
+            "t",
+            "p",
+            "u",
+        }
         if self.assay_type not in allowed_assay_types:
             raise ValueError(
                 f"Invalid assay_type: {self.assay_type}. "
@@ -120,7 +133,8 @@ class Assay(EntityBase):
         if self.confidence_score is not None:
             if not 0 <= self.confidence_score <= 9:
                 raise ValueError(
-                    f"confidence_score must be between 0 and 9, got {self.confidence_score}"
+                    f"confidence_score must be between 0 and 9, "
+                    f"got {self.confidence_score}"
                 )
 
     @property
@@ -187,7 +201,9 @@ class Assay(EntityBase):
             assay_tax_id=extract_field(record, "assay_tax_id", coerce=int),
             assay_tissue=extract_field(record, "assay_tissue"),
             assay_cell_type=extract_field(record, "assay_cell_type"),
-            assay_subcellular_fraction=extract_field(record, "assay_subcellular_fraction"),
+            assay_subcellular_fraction=extract_field(
+                record, "assay_subcellular_fraction"
+            ),
             # Cell and tissue refs
             cell_chembl_id=extract_field(record, "cell_chembl_id"),
             tissue_chembl_id=extract_field(record, "tissue_chembl_id"),

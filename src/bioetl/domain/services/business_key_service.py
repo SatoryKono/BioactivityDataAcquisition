@@ -26,7 +26,10 @@ class BusinessKeyService:
     Example:
         >>> service = BusinessKeyService()
         >>> key = service.compute_key_from_record(
-        ...     record={'molecule_chembl_id': 'CHEMBL25', 'assay_chembl_id': 'CHEMBL1000'},
+        ...     record={
+        ...         'molecule_chembl_id': 'CHEMBL25',
+        ...         'assay_chembl_id': 'CHEMBL1000'
+        ...     },
         ...     key_fields=['molecule_chembl_id', 'assay_chembl_id']
         ... )
         >>> print(key)
