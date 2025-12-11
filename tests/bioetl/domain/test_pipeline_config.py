@@ -36,7 +36,7 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
 
     # Test decomposed identity section
     assert str(config.identity.pipeline_id) == "dummy.entity"
-    assert str(config.identity.provider) == "dummy"
+    assert config.identity.provider.value == "dummy"
     assert str(config.identity.entity) == "entity"
 
     # Test decomposed source section (csv_options now in source.csv)
@@ -65,6 +65,6 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
 
     # Test convenience properties (minimal set retained)
     assert str(config.id) == "dummy.entity"
-    assert str(config.provider) == "dummy"
+    assert config.provider == "dummy"  # Property already returns string
     assert str(config.entity) == "entity"
     assert str(config.entity_name) == "entity"
