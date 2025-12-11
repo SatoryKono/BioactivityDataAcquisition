@@ -37,13 +37,12 @@ from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.validation import ValidatorFactoryABC
-from bioetl.infrastructure.clients.base.factories import (
-    build_http_client,
-    create_rate_limiter,
-)
-from bioetl.infrastructure.observability.factories import (
-    create_logging_port,
-    create_metrics_port,
+from bioetl.infrastructure.clients.base.factories import build_http_client
+from bioetl.interfaces.factories import (
+    DefaultInfrastructureFactory,
+    DefaultObservabilityFactory,
+    InfrastructureFactoryABC,
+    ObservabilityFactoryABC,
 )
 
 if TYPE_CHECKING:
@@ -78,26 +77,32 @@ class CompositionRoot:
     def __init__(
         self,
         *,
+        observability_factory: ObservabilityFactoryABC | None = None,
+        infrastructure_factory: InfrastructureFactoryABC | None = None,
+        # Backward compatibility parameters
         logger: LoggingPortABC | None = None,
         metrics: MetricsPortABC | None = None,
-        http_session_factory: type | None = None,
         schema_contract_provider: SchemaContractProviderABC | None = None,
     ) -> None:
         """
         Initialize composition root with optional overrides.
 
         Args:
-            logger: Custom logger implementation (defaults to structured logger)
-            metrics: Custom metrics implementation (defaults to Prometheus)
-            http_session_factory: Factory for HTTP sessions
-                (defaults to requests.Session)
+            observability_factory: Factory for observability components
+                (defaults to DefaultObservabilityFactory)
+            infrastructure_factory: Factory for infrastructure components
+                (defaults to DefaultInfrastructureFactory)
+            logger: Custom logger implementation (backward compatibility)
+            metrics: Custom metrics implementation (backward compatibility)
             schema_contract_provider: Custom schema contract provider
                 (defaults to bootstrapped provider from schema registry)
         """
-        self._logger = logger
-        self._metrics = metrics
-        self._http_session_factory = http_session_factory or requests.Session
+        self._observability = observability_factory or DefaultObservabilityFactory()
+        self._infrastructure = infrastructure_factory or DefaultInfrastructureFactory()
+        self._explicit_logger = logger
+        self._explicit_metrics = metrics
         self._schema_contract_provider = schema_contract_provider
+        self._http_session_factory = requests.Session
 
         # Lazy-initialized components
         self._registry_resolver: Any | None = None
@@ -108,15 +113,15 @@ class CompositionRoot:
 
     def get_logger(self) -> LoggingPortABC:
         """Get or create the logger instance."""
-        if self._logger is None:
-            self._logger = create_logging_port()
-        return self._logger
+        if self._explicit_logger is not None:
+            return self._explicit_logger
+        return self._observability.create_logger()
 
     def get_metrics(self) -> MetricsPortABC:
         """Get or create the metrics instance."""
-        if self._metrics is None:
-            self._metrics = create_metrics_port()
-        return self._metrics
+        if self._explicit_metrics is not None:
+            return self._explicit_metrics
+        return self._observability.create_metrics()
 
     def get_observability_stack(self) -> ObservabilityStack:
         """Get the complete observability stack."""
@@ -174,11 +179,7 @@ class CompositionRoot:
         Returns:
             Configured rate limiter instance
         """
-        return create_rate_limiter(
-            logger=self.get_logger(),
-            rate=rate,
-            capacity=capacity,
-        )
+        return self._infrastructure.create_rate_limiter(rate, capacity)
 
     # =========================================================================
     # Schema Contract Provider
@@ -278,22 +279,10 @@ class CompositionRoot:
     def create_config_loader(self) -> PipelineConfigLoaderProtocol:
         """Create config loader port backed by infrastructure loader.
 
-        Creates a config loader that uses explicit schema contract provider injection.
-        The provider is obtained from ApplicationBootstrap and bound to the loader
-        functions.
-
         Returns:
             PipelineConfigLoaderProtocol: Config loader with bound schema provider.
         """
-        from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
-
-        bootstrap = create_default_bootstrap()
-        context = bootstrap.start()
-
-        if context.config_loader is None:
-            raise RuntimeError("Config loader not available in ApplicationContext")
-
-        return context.config_loader
+        return self._infrastructure.create_config_loader()
 
     def create_config_path_resolver(
         self,
