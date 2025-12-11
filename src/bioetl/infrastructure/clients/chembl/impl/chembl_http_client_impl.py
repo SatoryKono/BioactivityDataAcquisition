@@ -12,21 +12,24 @@ from bioetl.domain.clients.base.contracts import (
     RequestBuilderABC,
 )
 from bioetl.domain.clients.contracts import DataClientABC
+from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.ports.resilience import ClientResilienceStrategy, RequestContext
 from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.base.http_error_handler import (
     DefaultHttpErrorHandler,
     HttpErrorHandlerABC,
-    RequestContext,
 )
+from bioetl.infrastructure.clients.base.resilience import ResilientRequestMixin
 from bioetl.infrastructure.clients.chembl.constants import resolve_endpoint
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
+from bioetl.infrastructure.http import ExponentialRetryPolicy
 from bioetl.infrastructure.errors import (
     wrap_http_errors,
 )
 
 
-class ChemblHttpClientImpl(DataClientABC):
+class ChemblHttpClientImpl(DataClientABC, ResilientRequestMixin):
     """
     ChEMBL API client implemented over HTTP.
     Uses RateLimiter for proactive throttling.
@@ -46,6 +49,7 @@ class ChemblHttpClientImpl(DataClientABC):
         provider: str = "chembl",
         fallbacks: dict[str, list[str]] | None = None,
         error_handler: HttpErrorHandlerABC | None = None,
+        resilience_strategy: ClientResilienceStrategy | None = None,
     ) -> None:
         self.request_builder = request_builder
         self.response_parser = response_parser
@@ -56,7 +60,46 @@ class ChemblHttpClientImpl(DataClientABC):
         self._fallbacks = fallbacks if fallbacks is not None else {}
         self._last_endpoint_used: str | None = None
         self.provider = provider
-        self.error_handler = error_handler or DefaultHttpErrorHandler(logger)
+        strategy = resilience_strategy
+        if strategy is None:
+            client_strategy = getattr(http_client, "resilience_strategy", None)
+            if isinstance(client_strategy, ClientResilienceStrategy):
+                strategy = client_strategy
+        resolved_handler = error_handler
+        if strategy is None:
+            raw_config = getattr(http_client, "config", None)
+            default_config = (
+                raw_config
+                if isinstance(raw_config, HttpClientConfig)
+                else HttpClientConfig(max_retries=1, backoff_factor=0.01, backoff_max=0.05)
+            )
+            default_handler = DefaultHttpErrorHandler(logger)
+            strategy = ClientResilienceStrategy.from_http_config(
+                default_config,
+                classifier=default_handler.classifier,
+                retry_exceptions=(),
+            )
+            resolved_handler = resolved_handler or default_handler
+        resolved_handler = resolved_handler or DefaultHttpErrorHandler(
+            logger, classifier=strategy.error_classifier
+        )
+        self.error_handler = resolved_handler
+
+        retry_policy = None
+        if not hasattr(http_client, "resilience_strategy"):
+            retry_policy = ExponentialRetryPolicy(
+                max_attempts=strategy.backoff.max_attempts,
+                backoff_factor=strategy.backoff.backoff_factor,
+                backoff_max=strategy.backoff.backoff_max,
+                retry_statuses=strategy.backoff.retry_statuses,
+                retry_exceptions=strategy.backoff.retry_exceptions,
+            )
+
+        self._init_resilience(
+            retry_policy=retry_policy,
+            error_handler=resolved_handler,
+            logger=logger,
+        )
 
     def iter_pages(self, request: Any) -> Iterator[Any]:
         """Iterate over paginated responses for a built request."""
@@ -124,43 +167,69 @@ class ChemblHttpClientImpl(DataClientABC):
         raise RuntimeError("No endpoint candidates configured")
 
     def _execute_request(self, url: str) -> dict[str, Any]:
+        context = RequestContext(
+            provider=self.provider,
+            endpoint=url,
+            status_code=None,
+            method="GET",
+        )
+        response = self._execute_with_resilience(
+            lambda: self._send_http_get(url, context),
+            context=context,
+        )
+        status_code = getattr(response, "status_code", None)
         with wrap_http_errors(
             provider=self.provider, endpoint=url, logger=self.logger
-        ) as context:
-            start = time.monotonic()
-            response = self.http.request("GET", url)
-            latency = time.monotonic() - start
-            raw_status = getattr(response, "status_code", None)
-            status_code = raw_status if isinstance(raw_status, int) else None
-            context["status_code"] = status_code
-
-            # Use unified error handler
-            request_context = RequestContext(
-                provider=self.provider,
-                endpoint=url,
-                status_code=status_code,
-                method="GET",
-            )
-            error = self.error_handler.handle(response, request_context)
-
-            log_level = (
-                self.logger.error
-                if status_code is not None and status_code >= 400
-                else self.logger.info
-            )
-            log_level(
-                "http_request_completed",
-                provider=self.provider,
-                method="GET",
-                url=url,
-                status_code=status_code,
-                latency_sec=latency,
-            )
-
-            if error is not None:
-                raise error
-
+        ) as parse_context:
+            parse_context["status_code"] = status_code if isinstance(status_code, int) else None
             return response.json()
+
+    def _send_http_get(
+        self, url: str, context: RequestContext
+    ) -> tuple[Any, RequestContext]:
+        start = time.monotonic()
+        status_label = "unknown"
+        try:
+            with wrap_http_errors(
+                provider=self.provider, endpoint=url, logger=self.logger
+            ) as error_context:
+                response = self.http.request("GET", url)
+                latency = time.monotonic() - start
+                raw_status = getattr(response, "status_code", None)
+                status_code = raw_status if isinstance(raw_status, int) else None
+                error_context["status_code"] = status_code
+                status_label = str(status_code) if status_code is not None else "unknown"
+
+                log_level = (
+                    self.logger.error
+                    if status_code is not None and status_code >= 400
+                    else self.logger.info
+                )
+                log_level(
+                    "http_request_completed",
+                    provider=self.provider,
+                    method="GET",
+                    url=url,
+                    status_code=status_code,
+                    latency_sec=latency,
+                )
+
+                updated_context = RequestContext(
+                    provider=context.provider,
+                    endpoint=context.endpoint,
+                    status_code=status_code,
+                    method="GET",
+                    response_body=context.response_body,
+                )
+                return response, updated_context
+        except Exception:
+            self.logger.warning(
+                "http_request_failed",
+                provider=self.provider,
+                url=url,
+                status=status_label,
+            )
+            raise
 
     def _build_request_url(self, endpoint: str, filters: dict[str, Any]) -> str:
         """

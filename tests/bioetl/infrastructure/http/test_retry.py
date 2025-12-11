@@ -24,3 +24,13 @@ def test_backoff_exponential():
     assert policy.get_backoff(1) == 1.0
     assert policy.get_backoff(2) == 2.0
     assert policy.get_backoff(3) == 4.0
+
+
+def test_backoff_cap():
+    policy = ExponentialRetryPolicy(
+        max_attempts=4, backoff_factor=10.0, backoff_max=15.0
+    )
+
+    assert policy.get_backoff(1) == 10.0
+    assert policy.get_backoff(2) == 15.0
+    assert policy.get_backoff(3) == 15.0

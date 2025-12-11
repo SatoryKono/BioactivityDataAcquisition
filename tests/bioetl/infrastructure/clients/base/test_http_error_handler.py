@@ -3,11 +3,8 @@
 from unittest.mock import Mock
 
 from bioetl.domain.errors import ClientRateLimitError
-from bioetl.infrastructure.clients.base.http_error_handler import (
-    DefaultHttpErrorHandler,
-    ErrorCategory,
-    RequestContext,
-)
+from bioetl.domain.ports.resilience import ErrorCategory, RequestContext
+from bioetl.infrastructure.clients.base.http_error_handler import DefaultHttpErrorHandler
 from bioetl.infrastructure.errors import ApiUnexpectedStatusError
 
 
@@ -30,43 +27,43 @@ class TestDefaultHttpErrorHandler:
         """Test classification of successful status codes."""
         handler = DefaultHttpErrorHandler()
 
-        assert handler.classify_error(200) == ErrorCategory.SUCCESS
-        assert handler.classify_error(201) == ErrorCategory.SUCCESS
-        assert handler.classify_error(204) == ErrorCategory.SUCCESS
-        assert handler.classify_error(301) == ErrorCategory.SUCCESS
-        assert handler.classify_error(302) == ErrorCategory.SUCCESS
+        assert handler.classifier.classify(200) == ErrorCategory.SUCCESS
+        assert handler.classifier.classify(201) == ErrorCategory.SUCCESS
+        assert handler.classifier.classify(204) == ErrorCategory.SUCCESS
+        assert handler.classifier.classify(301) == ErrorCategory.SUCCESS
+        assert handler.classifier.classify(302) == ErrorCategory.SUCCESS
 
     def test_classify_error_rate_limit(self):
         """Test classification of rate limit status code."""
         handler = DefaultHttpErrorHandler()
 
-        assert handler.classify_error(429) == ErrorCategory.RATE_LIMIT
+        assert handler.classifier.classify(429) == ErrorCategory.RATE_LIMIT
 
     def test_classify_error_server_errors(self):
         """Test classification of 5xx server errors."""
         handler = DefaultHttpErrorHandler()
 
-        assert handler.classify_error(500) == ErrorCategory.SERVER_ERROR
-        assert handler.classify_error(502) == ErrorCategory.SERVER_ERROR
-        assert handler.classify_error(503) == ErrorCategory.SERVER_ERROR
-        assert handler.classify_error(504) == ErrorCategory.SERVER_ERROR
+        assert handler.classifier.classify(500) == ErrorCategory.SERVER_ERROR
+        assert handler.classifier.classify(502) == ErrorCategory.SERVER_ERROR
+        assert handler.classifier.classify(503) == ErrorCategory.SERVER_ERROR
+        assert handler.classifier.classify(504) == ErrorCategory.SERVER_ERROR
 
     def test_classify_error_client_errors(self):
         """Test classification of 4xx client errors."""
         handler = DefaultHttpErrorHandler()
 
-        assert handler.classify_error(400) == ErrorCategory.CLIENT_ERROR
-        assert handler.classify_error(401) == ErrorCategory.CLIENT_ERROR
-        assert handler.classify_error(403) == ErrorCategory.CLIENT_ERROR
-        assert handler.classify_error(404) == ErrorCategory.CLIENT_ERROR
-        assert handler.classify_error(422) == ErrorCategory.CLIENT_ERROR
+        assert handler.classifier.classify(400) == ErrorCategory.CLIENT_ERROR
+        assert handler.classifier.classify(401) == ErrorCategory.CLIENT_ERROR
+        assert handler.classifier.classify(403) == ErrorCategory.CLIENT_ERROR
+        assert handler.classifier.classify(404) == ErrorCategory.CLIENT_ERROR
+        assert handler.classifier.classify(422) == ErrorCategory.CLIENT_ERROR
 
     def test_classify_error_unknown(self):
         """Test classification of unknown status codes."""
         handler = DefaultHttpErrorHandler()
 
-        assert handler.classify_error(100) == ErrorCategory.UNKNOWN
-        assert handler.classify_error(600) == ErrorCategory.UNKNOWN
+        assert handler.classifier.classify(100) == ErrorCategory.UNKNOWN
+        assert handler.classifier.classify(600) == ErrorCategory.UNKNOWN
 
     def test_handle_success_response(self):
         """Test that successful responses return None."""

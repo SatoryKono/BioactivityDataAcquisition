@@ -42,6 +42,14 @@ from bioetl.domain.ports.pipeline_contract_loader import (
     PipelineContractLoaderPortABC,
 )
 from bioetl.domain.ports.request_building import RequestBuilderPortABC
+from bioetl.domain.ports.resilience import (
+    BackoffStrategy,
+    ClientResilienceStrategy,
+    ErrorCategory,
+    ErrorClassifierPortABC,
+    RateLimitStrategy,
+    RequestContext,
+)
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.types import ApiPayload
 
@@ -70,6 +78,13 @@ __all__: list[str] = [
     # Parsing ports
     "PaginationInfo",
     "ResponseParserPortABC",
+    # Resilience ports
+    "BackoffStrategy",
+    "ClientResilienceStrategy",
+    "ErrorCategory",
+    "ErrorClassifierPortABC",
+    "RateLimitStrategy",
+    "RequestContext",
     # Request building ports
     "RequestBuilderPortABC",
     # Schema ports

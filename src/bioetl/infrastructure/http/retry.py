@@ -22,6 +22,7 @@ class ExponentialRetryPolicy(RetryPolicyABC):
         *,
         max_attempts: int,
         backoff_factor: float = 1.0,
+        backoff_max: float | None = None,
         retry_statuses: Iterable[int] | None = None,
         retry_exceptions: tuple[type[Exception], ...] | None = None,
     ) -> None:
@@ -32,6 +33,7 @@ class ExponentialRetryPolicy(RetryPolicyABC):
 
         self._max_attempts = int(max_attempts)
         self._backoff_factor = float(backoff_factor)
+        self._backoff_max = backoff_max
         self.retry_statuses = (
             set(retry_statuses) if retry_statuses else set(DEFAULT_RETRY.retry_statuses)
         )
@@ -46,6 +48,12 @@ class ExponentialRetryPolicy(RetryPolicyABC):
     def backoff_factor(self) -> float:
         """Delay multiplier between retry attempts."""
         return self._backoff_factor
+
+    @property
+    def backoff_max(self) -> float | None:
+        """Maximum backoff delay in seconds (if configured)."""
+
+        return self._backoff_max
 
     def should_retry(self, exception: Exception, attempt: int) -> bool:
         """Check whether a retry should be attempted for the given exception.
@@ -92,7 +100,10 @@ class ExponentialRetryPolicy(RetryPolicyABC):
             Delay in seconds before next retry.
         """
         exponent = max(0, attempt - 1)
-        return self.backoff_factor * math.pow(2.0, exponent)
+        delay = self.backoff_factor * math.pow(2.0, exponent)
+        if self.backoff_max is not None:
+            return min(delay, self.backoff_max)
+        return delay
 
 
 def _extract_status_code(exc: Exception) -> int | None:

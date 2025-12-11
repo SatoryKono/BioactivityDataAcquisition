@@ -8,33 +8,34 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 from typing import Any
 
 from bioetl.domain.errors import ClientRateLimitError
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.ports.resilience import (
+    ErrorCategory,
+    ErrorClassifierPortABC,
+    RequestContext,
+)
 from bioetl.infrastructure.errors import ApiClientError, ApiUnexpectedStatusError
 
 
-class ErrorCategory(Enum):
-    """Categories of HTTP errors for classification."""
-
-    RATE_LIMIT = "rate_limit"
-    SERVER_ERROR = "server_error"
-    CLIENT_ERROR = "client_error"
-    SUCCESS = "success"
-    UNKNOWN = "unknown"
-
-
 @dataclass(frozen=True)
-class RequestContext:
-    """Context information for an HTTP request."""
+class StatusCodeErrorClassifier(ErrorClassifierPortABC):
+    """Default status-code based classifier."""
 
-    provider: str
-    endpoint: str
-    status_code: int | None
-    method: str = "GET"
-    response_body: str | None = None
+    def classify(self, status_code: int | None) -> ErrorCategory:
+        if status_code is None:
+            return ErrorCategory.UNKNOWN
+        if 200 <= status_code < 400:
+            return ErrorCategory.SUCCESS
+        if status_code == 429:
+            return ErrorCategory.RATE_LIMIT
+        if 500 <= status_code < 600:
+            return ErrorCategory.SERVER_ERROR
+        if 400 <= status_code < 500:
+            return ErrorCategory.CLIENT_ERROR
+        return ErrorCategory.UNKNOWN
 
 
 class HttpErrorHandlerABC(ABC):
@@ -84,7 +85,11 @@ class DefaultHttpErrorHandler(HttpErrorHandlerABC):
     - 2xx/3xx → Success (no error)
     """
 
-    def __init__(self, logger: LoggingPortABC | None = None) -> None:
+    def __init__(
+        self,
+        logger: LoggingPortABC | None = None,
+        classifier: ErrorClassifierPortABC | None = None,
+    ) -> None:
         """
         Initialize error handler.
 
@@ -92,6 +97,7 @@ class DefaultHttpErrorHandler(HttpErrorHandlerABC):
             logger: Optional logger for error details
         """
         self.logger = logger
+        self.classifier = classifier or StatusCodeErrorClassifier()
 
     def handle(self, response: Any, context: RequestContext) -> ApiClientError | None:
         """
@@ -121,7 +127,7 @@ class DefaultHttpErrorHandler(HttpErrorHandlerABC):
                 method=context.method,
             )
 
-        category = self.classify_error(status_code)
+        category = self.classifier.classify(status_code)
 
         if category == ErrorCategory.SUCCESS:
             return None
@@ -138,28 +144,9 @@ class DefaultHttpErrorHandler(HttpErrorHandlerABC):
         return self._create_generic_error(context)
 
     def classify_error(self, status_code: int) -> ErrorCategory:
-        """
-        Classify HTTP status code into error category.
+        """Delegate classification to configured classifier."""
 
-        Args:
-            status_code: HTTP status code
-
-        Returns:
-            ErrorCategory enum value
-        """
-        if 200 <= status_code < 400:
-            return ErrorCategory.SUCCESS
-
-        if status_code == 429:
-            return ErrorCategory.RATE_LIMIT
-
-        if 500 <= status_code < 600:
-            return ErrorCategory.SERVER_ERROR
-
-        if 400 <= status_code < 500:
-            return ErrorCategory.CLIENT_ERROR
-
-        return ErrorCategory.UNKNOWN
+        return self.classifier.classify(status_code)
 
     def _create_rate_limit_error(self, context: RequestContext) -> ClientRateLimitError:
         """Create rate limit error."""
