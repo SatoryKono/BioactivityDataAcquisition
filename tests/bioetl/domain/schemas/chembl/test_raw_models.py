@@ -1,5 +1,3 @@
-import pytest
-
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 
 
@@ -30,4 +28,3 @@ def test_action_type_normalizes_list() -> None:
     )
 
     assert record.action_type == "AGONIST;MODULATOR"
-

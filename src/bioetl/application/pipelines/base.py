@@ -463,7 +463,7 @@ class PipelineBase(ABC):
         output_columns = self._validation_service.get_schema_columns(output_schema_name)
 
         return self._loader.load(
-            df=cast(TabularData, df),
+            data=cast(TabularData, df),
             output_path=output_path,
             context=context,
             column_order=output_columns,

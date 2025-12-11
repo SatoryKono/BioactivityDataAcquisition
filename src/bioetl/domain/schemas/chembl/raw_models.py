@@ -83,16 +83,9 @@ class ActivityRawModel(SourceRecordModel):
     upper_value: float | None = None
     value: float | None = None
 
-    @field_validator("action_type", mode="before")
     @classmethod
-    def _normalize_action_type(
-        cls, value: str | dict[str, object] | list[object] | None
-    ) -> str | None:
-        """Coerce action_type to a string when API returns nested structures.
-
-        ChEMBL occasionally wraps action_type as an object with both the code
-        and a description. We pick the primary string value deterministically.
-        """
+    def _coerce_action_type_value(cls, value: object) -> str | None:
+        """Coerce action_type to a string when API returns nested structures."""
         if value is None or value == "":
             return None
         if isinstance(value, str):
@@ -112,6 +105,16 @@ class ActivityRawModel(SourceRecordModel):
             items = [str(item) for item in value if item is not None]
             return ";".join(items) if items else None
         return str(value)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_action_type(cls, data: object) -> object:
+        """Normalize action_type before field validation."""
+        if not isinstance(data, dict) or "action_type" not in data:
+            return data
+        data = dict(data)
+        data["action_type"] = cls._coerce_action_type_value(data["action_type"])
+        return data
 
     @field_validator("pchembl_value")
     @classmethod
