@@ -402,3 +402,87 @@ class ActivityId:
             ),
             serialization=core_schema.plain_serializer_function_ser_schema(str),
         )
+
+
+class AssayId(ChemblId):
+    """Value Object for ChEMBL assay identifier (format: CHEMBL123).
+
+    Semantic subtype of ChemblId for assay identifiers.
+
+    Examples:
+        >>> AssayId("CHEMBL1000")
+        AssayId('CHEMBL1000')
+    """
+
+    def __repr__(self) -> str:
+        return f"AssayId({self._value!r})"
+
+
+class TargetId(ChemblId):
+    """Value Object for ChEMBL target identifier (format: CHEMBL123).
+
+    Semantic subtype of ChemblId for target identifiers.
+
+    Examples:
+        >>> TargetId("CHEMBL1234")
+        TargetId('CHEMBL1234')
+    """
+
+    def __repr__(self) -> str:
+        return f"TargetId({self._value!r})"
+
+
+class MoleculeId(ChemblId):
+    """Value Object for ChEMBL molecule identifier (format: CHEMBL123).
+
+    Semantic subtype of ChemblId for molecule identifiers.
+
+    Examples:
+        >>> MoleculeId("CHEMBL25")
+        MoleculeId('CHEMBL25')
+    """
+
+    def __repr__(self) -> str:
+        return f"MoleculeId({self._value!r})"
+
+
+class DocumentId(ChemblId):
+    """Value Object for ChEMBL document identifier (format: CHEMBL123).
+
+    Semantic subtype of ChemblId for document/publication identifiers.
+
+    Examples:
+        >>> DocumentId("CHEMBL1123081")
+        DocumentId('CHEMBL1123081')
+    """
+
+    def __repr__(self) -> str:
+        return f"DocumentId({self._value!r})"
+
+
+class CellId(ChemblId):
+    """Value Object for ChEMBL cell line identifier (format: CHEMBL123).
+
+    Semantic subtype of ChemblId for cell line identifiers.
+
+    Examples:
+        >>> CellId("CHEMBL3307641")
+        CellId('CHEMBL3307641')
+    """
+
+    def __repr__(self) -> str:
+        return f"CellId({self._value!r})"
+
+
+class TissueId(ChemblId):
+    """Value Object for ChEMBL tissue identifier (format: CHEMBL123).
+
+    Semantic subtype of ChemblId for tissue identifiers.
+
+    Examples:
+        >>> TissueId("CHEMBL3638")
+        TissueId('CHEMBL3638')
+    """
+
+    def __repr__(self) -> str:
+        return f"TissueId({self._value!r})"
