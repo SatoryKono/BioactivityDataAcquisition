@@ -23,69 +23,91 @@ linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
 sequenceDiagram
     autonumber
 
+    participant CLI as CLI/REST (Typer/FastAPI)
     participant UseCase as RunPipelineUseCase
     participant ConfigLoader as PipelineConfigLoader
     participant ProviderLoader as ProviderRegistryLoader
-    participant ContainerFactory as Container Factory
     participant Orchestrator as PipelineOrchestrator
-    participant Pipeline as PipelineBase/ChemblPipeline
-    participant Hooks as PipelineHooks (Logging+Metrics)
-    participant ErrorPolicy as ErrorPolicyManager
-    participant Extraction as ChemblExtractionServiceImpl
+    participant ContainerFactory as PipelineContainerFactory
+    participant PipelineFactory as PipelineFactory (registry)
+    participant Pipeline as ChemblPipelineBase
+    participant Executor as PipelineExecutor
+    participant Runtime as StageRuntimeManager
+    participant Extractor as ExtractStage/ChemblExtractionServiceImpl
     participant Transformer as ChemblTransformerImpl
-    participant Validator as ValidationService
-    participant Writer as UnifiedOutputWriter
+    participant PostTransform as TransformerChainImpl
+    participant Validator as ValidationService + PanderaValidator
+    participant Loader as UnifiedLoaderImpl
+    participant AtomicIO as AtomicFileOperation
     participant Storage as Deterministic Storage
 
+    class CLI actorPrimary
     class UseCase actorPrimary
     class ConfigLoader actorSecondary
     class ProviderLoader actorSecondary
-    class ContainerFactory actorSecondary
     class Orchestrator actorPrimary
+    class ContainerFactory actorSecondary
+    class PipelineFactory actorSecondary
     class Pipeline actorPrimary
-    class Hooks actorSecondary
-    class ErrorPolicy actorSecondary
-    class Extraction actorSecondary
+    class Executor actorPrimary
+    class Runtime actorSecondary
+    class Extractor actorSecondary
     class Transformer actorSecondary
+    class PostTransform actorSecondary
     class Validator actorSecondary
-    class Writer actorPrimary
+    class Loader actorPrimary
+    class AtomicIO actorSecondary
     class Storage actorExternal
 
-    UseCase->>ConfigLoader: load config (path or registry) with profile + profiles_root
+    CLI->>UseCase: execute(request)
+    UseCase->>ConfigLoader: load config (id/path, profile)
     ConfigLoader-->>UseCase: PipelineConfig
-    UseCase->>UseCase: validate require_rest_interface flag
-    alt output override provided
-        UseCase->>UseCase: apply output_path override (mkdir, mutate sink)
-    end
-    UseCase->>ProviderLoader: create_provider_loader()
+    UseCase->>ProviderLoader: get_registry()
     ProviderLoader-->>UseCase: ProviderRegistry
-    UseCase->>Orchestrator: PipelineOrchestrator(..., container_factory, provider_loader_factory)
-    Orchestrator->>Pipeline: build_pipeline(limit) using registry + container
+    UseCase->>Orchestrator: init(pipeline_id, config, container_factory, registry)
+    Orchestrator->>PipelineFactory: resolve factory by pipeline id
+    PipelineFactory-->>Orchestrator: ChemblPipelineFactory
+    Orchestrator->>ContainerFactory: build_default_container(config, registry)
+    ContainerFactory-->>Orchestrator: PipelineContainer
+    Orchestrator->>PipelineFactory: create(container, limit)
+    PipelineFactory-->>Orchestrator: ChemblPipelineBase
+    Orchestrator->>Pipeline: run(dry_run, limit, output_path)
 
     activate Pipeline
-    Pipeline->>Hooks: on_start(run_ctx)
-    Pipeline->>ErrorPolicy: bind(run_ctx)
+    Pipeline->>Executor: execute(self, output_path, dry_run)
+    activate Executor
+    Executor->>Runtime: reset() + set_logger(run_id)
+    Runtime->>Runtime: notify_stage_start("extract")
 
-    loop Extract + Transform + Validate batches
-        Pipeline->>Extraction: extract_all(limit)
-        Extraction-->>Pipeline: batch_df
-        Pipeline->>Transformer: apply(batch_df)
-        Transformer-->>Pipeline: normalized_df
-        Pipeline->>Validator: validate(schema_name, normalized_df)
-        Validator-->>Pipeline: validated_df
-        Pipeline->>Pipeline: accumulate(validated_df)
+    loop Extract -> Transform -> Validate
+        Executor->>Extractor: extract(limit)
+        Extractor-->>Executor: batch_df
+        Executor->>Transformer: apply(batch_df)
+        Transformer-->>Executor: transformed_df
+        Executor->>PostTransform: hash + index + db_version + fulldate
+        PostTransform-->>Executor: normalized_df
+        Executor->>Validator: validate(normalized_df, schema)
+        Validator-->>Executor: validated_df
+        Executor->>Runtime: record counters + hooks
     end
 
-    alt dry_run or PipelineType.TRANSFORM_ONLY
-        Pipeline->>Hooks: on_stage_start("write"); skip persistent write
+    alt dry_run
+        Runtime->>Runtime: notify_stage_start("write") (skipped)
     else
-        Pipeline->>Writer: write(all_validated_df, output_cfg)
-        Writer-->>Storage: atomic persist + meta.yaml + QC sidecars
+        Runtime->>Runtime: notify_stage_start("write")
+        Executor->>Loader: load(all_validated_df, output_path, context)
+        Loader->>AtomicIO: write_atomic(data.csv) + checksum + meta + QC
+        AtomicIO-->>Loader: persisted
+        Loader-->>Storage: deterministic files + sidecars
+        Runtime->>Runtime: notify_stage_end("write")
     end
 
-    Pipeline->>Hooks: on_finish(success, stats)
-    Pipeline-->>Orchestrator: RunResult(meta, duration, hooks summary)
+    Executor-->>Runtime: stage results + last errors
+    Runtime-->>Executor: error policy decisions
+    Executor-->>Pipeline: RunResult(meta, counters, duration)
+    deactivate Executor
+    Pipeline-->>UseCase: RunResult
     deactivate Pipeline
-    Orchestrator-->>UseCase: RunResult
+    UseCase-->>CLI: RunPipelineResponse
 
-    Note over Pipeline,ErrorPolicy: Any exception invokes ErrorPolicy -> hooks.on_error -> propagate to orchestrator.
+    Note over Runtime,Executor: StageRuntimeManager applies ErrorPolicy and HookNotifier on every stage (retry/skip/fail).
