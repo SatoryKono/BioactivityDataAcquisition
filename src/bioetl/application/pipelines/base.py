@@ -50,7 +50,7 @@ from bioetl.domain.clients.base.output.contracts import (
     WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.data import TabularData
+from bioetl.domain.data import MutableTabularData, TabularData
 from bioetl.domain.models import ExtractOnlyResult, RunContext, RunResult, StageResult
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import (
@@ -539,7 +539,10 @@ class PipelineBase(ABC):
     ) -> pd.DataFrame:
         if not self._post_transformer:
             return df
-        return self._post_transformer.apply(df, context)
+        transformed = self._post_transformer.apply(
+            cast(MutableTabularData, df), context
+        )
+        return cast(pd.DataFrame, transformed)
 
     @staticmethod
     def _resolve_validator_columns(schema: Any) -> list[str]:
@@ -615,7 +618,9 @@ class PipelineBase(ABC):
     ) -> Callable[[pd.DataFrame], pd.DataFrame]:
         transformer = self._transformer
         if transformer is not None:
-            return lambda df: transformer.apply(df, context)
+            return lambda df: cast(
+                pd.DataFrame, transformer.apply(cast(MutableTabularData, df), context)
+            )
         return self.transform
 
     def _get_write_callable(
