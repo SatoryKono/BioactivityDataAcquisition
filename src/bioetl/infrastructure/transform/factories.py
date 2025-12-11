@@ -19,8 +19,8 @@ from bioetl.domain.transform.contracts import (
     NormalizationServiceABC,
     TimestampProviderABC,
 )
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
-    NormalizationServiceImpl,
+from bioetl.infrastructure.transform.impl import (
+    default_normalization_transformer_impl as norm_impl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
@@ -79,7 +79,7 @@ def create_normalization_service(
     config: NormalizationConfigProviderProtocol,
 ) -> NormalizationServiceABC:
     """Create a new normalization service."""
-    return NormalizationServiceImpl(config)
+    return norm_impl.NormalizationServiceImpl(config)
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +112,8 @@ def default_timestamp_provider(
 ) -> TimestampProviderABC:
     """DEPRECATED: Use create_timestamp_provider() instead."""
     warnings.warn(
-        "default_timestamp_provider is deprecated, use create_timestamp_provider instead",
+        "default_timestamp_provider is deprecated, "
+        "use create_timestamp_provider instead",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -153,7 +154,7 @@ def default_chembl_normalization_service(
         DeprecationWarning,
         stacklevel=2,
     )
-    return NormalizationServiceImpl(
+    return norm_impl.NormalizationServiceImpl(
         config,
         empty_value=None,
         support_base_model=True,

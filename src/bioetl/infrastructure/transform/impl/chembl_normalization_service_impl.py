@@ -51,11 +51,11 @@ class ChemblNormalizationService(NormalizationServiceABC):
             self._base = base
         else:
             # Lazy import to avoid circular dependency
-            from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
-                NormalizationServiceImpl,
+            from bioetl.infrastructure.transform.impl import (
+                default_normalization_transformer_impl as norm_impl,
             )
 
-            self._base = NormalizationServiceImpl(
+            self._base = norm_impl.NormalizationServiceImpl(
                 config,
                 empty_value=None,
                 support_base_model=True,
