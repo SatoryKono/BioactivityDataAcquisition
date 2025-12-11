@@ -99,13 +99,10 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         loader=container.get_loader(),
         extraction_service=extraction_service,
         normalization_service=container.get_normalization_service(),
-        record_source=container.get_record_source(
-            extraction_service=extraction_service,
-            logger=logger,
-        ),
         hash_service=container.get_hash_service(),
         index_generator=container.get_index_generator(),
         timestamp_provider=container.get_timestamp_provider(),
+        entity_model_registry=container.get_entity_model_registry(),
     )
     monkeypatch.setattr(
         pipeline, "_should_skip_release_lookup", lambda: False, raising=False
