@@ -4,17 +4,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
 from bioetl.domain.configs import BaseProviderConfig, HttpClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.filters import FilterEnricherABC
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports.entity_models import EntityModelRegistryABC
+    from bioetl.domain.ports.extraction import ExtractionServiceABC
     from bioetl.domain.transform.contracts import NormalizationServiceABC
 
 client_t = TypeVar("client_t")
-extraction_service_t = TypeVar("extraction_service_t", covariant=True)
+extraction_service_t = TypeVar(
+    "extraction_service_t", bound="ExtractionServiceABC", covariant=True
+)
 normalization_service_t = TypeVar(
     "normalization_service_t",
     bound="NormalizationServiceABC | None",
@@ -76,7 +80,9 @@ class ProviderComponents(
     ) -> writer_t:  # pragma: no cover - optional
         """Create provider-specific writer."""
 
-    def create_entity_model_registry(self) -> Any:  # pragma: no cover - optional
+    def create_entity_model_registry(
+        self,
+    ) -> "EntityModelRegistryABC":  # pragma: no cover - optional
         """Create provider-specific entity model registry."""
 
 

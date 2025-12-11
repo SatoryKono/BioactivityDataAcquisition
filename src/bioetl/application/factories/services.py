@@ -5,12 +5,14 @@ Factory for creating provider services (extraction, normalization).
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, cast
+from typing import Callable, cast
 
 from bioetl.application.providers import ApplicationFieldProvider
 from bioetl.application.services import FilterEnrichmentService
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import BaseProviderConfig, PipelineConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
+from bioetl.domain.ports.entity_models import EntityModelRegistryABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.providers import ProviderDefinition
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 
@@ -31,7 +33,7 @@ class ProviderServiceFactoryABC(ABC):
         """
 
     @abstractmethod
-    def create_extraction_service(self) -> Any:
+    def create_extraction_service(self) -> ExtractionServiceABC:
         """Create the extraction service based on provider configuration.
 
         Returns:
@@ -39,7 +41,7 @@ class ProviderServiceFactoryABC(ABC):
         """
 
     @abstractmethod
-    def create_entity_model_registry(self) -> Any:
+    def create_entity_model_registry(self) -> EntityModelRegistryABC:
         """Create entity model registry for the configured provider.
 
         Returns:
@@ -54,7 +56,7 @@ class ProviderServiceFactory(ProviderServiceFactoryABC):
         self,
         config: PipelineConfig,
         provider_definition: ProviderDefinition,
-        resolve_provider_config: Callable[[ProviderDefinition], Any],
+        resolve_provider_config: Callable[[ProviderDefinition], BaseProviderConfig],
         *,
         logger: LoggingPortABC | None = None,
         metrics: MetricsPortABC | None = None,
@@ -80,7 +82,7 @@ class ProviderServiceFactory(ProviderServiceFactoryABC):
             )
         return factory(source_config, pipeline_config=self._config)
 
-    def create_extraction_service(self) -> Any:
+    def create_extraction_service(self) -> ExtractionServiceABC:
         """Create the extraction service based on provider configuration."""
         source_config = self._resolve_provider_config(self._provider_definition)
         components = self._provider_definition.components
@@ -91,17 +93,24 @@ class ProviderServiceFactory(ProviderServiceFactoryABC):
 
         # Pass logger and metrics to create_extraction_service
         # It will create client internally if needed
-        return components.create_extraction_service(
+        extraction_factory = cast(
+            Callable[..., ExtractionServiceABC],
+            components.create_extraction_service,
+        )
+        return extraction_factory(
             source_config,
             filter_enricher=filter_enricher,
             logger=self._logger,
             metrics=self._metrics,
         )
 
-    def create_entity_model_registry(self) -> Any:
+    def create_entity_model_registry(self) -> EntityModelRegistryABC:
         """Create entity model registry for the configured provider."""
         components = self._provider_definition.components
-        factory = getattr(components, "create_entity_model_registry", None)
+        factory = cast(
+            Callable[[], EntityModelRegistryABC] | None,
+            getattr(components, "create_entity_model_registry", None),
+        )
         if factory is None:
             raise ValueError(
                 "Unsupported provider for entity model registry: "
