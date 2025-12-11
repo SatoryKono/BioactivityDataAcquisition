@@ -29,6 +29,10 @@ class ApplicationServiceFactoryABC(ABC):
     def create_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
 
+    @abstractmethod
+    def create_entity_model_registry(self) -> Any:
+        """Create entity model registry for the configured provider."""
+
 
 class ApplicationServiceFactory(ApplicationServiceFactoryABC):
     """
@@ -95,6 +99,10 @@ class ApplicationServiceFactory(ApplicationServiceFactoryABC):
     def create_normalization_service(self) -> NormalizationServiceABC:
         """Create normalization service for the configured provider."""
         return self._get_provider_factory().create_normalization_service()
+
+    def create_entity_model_registry(self) -> Any:
+        """Create entity model registry for the configured provider."""
+        return self._get_provider_factory().create_entity_model_registry()
 
 
 __all__ = [

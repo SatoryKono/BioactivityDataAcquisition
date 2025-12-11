@@ -52,6 +52,7 @@ class ChemblPipelineFactory(PipelineFactoryABC):
             hash_service=container.get_hash_service(),
             index_generator=container.get_index_generator(),
             timestamp_provider=container.get_timestamp_provider(),
+            entity_model_registry=container.get_entity_model_registry(),
             metadata_builder=container.get_metadata_builder(),
             normalization_service=container.get_normalization_service(),
             hooks=container.get_hooks(),

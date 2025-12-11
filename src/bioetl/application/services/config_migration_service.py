@@ -108,33 +108,21 @@ class ConfigMigrationService(ConfigMigrationServiceProtocol):
     - Provides clean separation between domain and infrastructure
 
     Attributes:
-        _migrator_class: Reference to ConfigMigrator for lazy import.
+        _migrator: Reference to ConfigMigrator implementation.
 
     Example:
-        >>> service = ConfigMigrationService()
+        >>> service = ConfigMigrationService(migrator=MyMigrator)
         >>> raw = {"entity": "activity", "provider": "chembl", ...}
         >>> config = service.migrate_and_validate(raw, source_hint="test.yaml")
     """
 
-    def __init__(self) -> None:
+    def __init__(self, migrator: Any) -> None:
         """Initialize the migration service.
 
-        The ConfigMigrator is imported lazily to avoid circular dependencies
-        at module load time.
+        Args:
+            migrator: ConfigMigrator implementation (injected).
         """
-        self._migrator_class: type | None = None
-
-    def _get_migrator(self) -> Any:
-        """Lazy import of ConfigMigrator from infrastructure.
-
-        Returns:
-            ConfigMigrator class from infrastructure layer.
-        """
-        if self._migrator_class is None:
-            from bioetl.infrastructure.config.migration import ConfigMigrator
-
-            self._migrator_class = ConfigMigrator
-        return self._migrator_class
+        self._migrator = migrator
 
     def migrate(self, raw_config: dict[str, Any]) -> dict[str, Any]:
         """Migrate legacy config format without validation.
@@ -148,8 +136,7 @@ class ConfigMigrationService(ConfigMigrationServiceProtocol):
         if not isinstance(raw_config, dict):
             return raw_config
 
-        migrator = self._get_migrator()
-        return cast(dict[str, Any], migrator.migrate(raw_config))
+        return cast(dict[str, Any], self._migrator.migrate(raw_config))
 
     def was_migration_applied(self, raw_config: dict[str, Any]) -> bool:
         """Check if migration would be applied to the given config.
@@ -234,19 +221,22 @@ class ConfigMigrationService(ConfigMigrationServiceProtocol):
             ) from exc
 
 
-def create_config_migration_service() -> ConfigMigrationService:
+def create_config_migration_service(migrator: Any) -> ConfigMigrationService:
     """Factory function for creating ConfigMigrationService.
 
     Provides a clean factory interface for dependency injection.
+
+    Args:
+        migrator: ConfigMigrator implementation.
 
     Returns:
         New ConfigMigrationService instance.
 
     Example:
-        >>> service = create_config_migration_service()
+        >>> service = create_config_migration_service(migrator=MyMigrator)
         >>> config = service.migrate_and_validate(raw_config)
     """
-    return ConfigMigrationService()
+    return ConfigMigrationService(migrator=migrator)
 
 
 __all__ = [

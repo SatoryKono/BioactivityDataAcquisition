@@ -38,6 +38,14 @@ class ProviderServiceFactoryABC(ABC):
             Extraction service instance for data retrieval.
         """
 
+    @abstractmethod
+    def create_entity_model_registry(self) -> Any:
+        """Create entity model registry for the configured provider.
+
+        Returns:
+            EntityModelRegistryABC instance.
+        """
+
 
 class ProviderServiceFactory(ProviderServiceFactoryABC):
     """Factory for creating provider-specific services."""
@@ -89,3 +97,13 @@ class ProviderServiceFactory(ProviderServiceFactoryABC):
             logger=self._logger,
             metrics=self._metrics,
         )
+
+    def create_entity_model_registry(self) -> Any:
+        """Create entity model registry for the configured provider."""
+        components = self._provider_definition.components
+        factory = getattr(components, "create_entity_model_registry", None)
+        if factory is None:
+            raise ValueError(
+                f"Unsupported provider for entity model registry: {self._config.provider}"
+            )
+        return factory()
