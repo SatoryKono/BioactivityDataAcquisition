@@ -1,7 +1,12 @@
-"""Interface layer — adapters for CLI, REST, Monitoring.
+"""Interface layer package.
 
-This layer adapts external requests to application use cases.
-It should NOT contain business logic.
+This layer contains adapters for external communication:
+- CLI (Typer-based command line interface)
+- REST (FastAPI-based HTTP API)
+- Monitoring (Prometheus metrics export)
+
+The interfaces layer should NOT contain business logic.
+All orchestration happens in application layer.
 """
 
 from bioetl.interfaces.application_context import (
@@ -15,6 +20,7 @@ from bioetl.interfaces.composition_root import (
     ObservabilityStack,
     build_default_container,
     create_config_loader,
+    create_config_path_resolver,
     get_composition_root,
     reset_composition_root,
 )
@@ -36,11 +42,12 @@ __all__ = [
     "get_application_context",
     "set_application_context",
     "reset_application_context",
-    # Composition root
+    # Composition root (backward compatible)
     "CompositionRoot",
     "ObservabilityStack",
     "build_default_container",
     "create_config_loader",
+    "create_config_path_resolver",
     "get_composition_root",
     "reset_composition_root",
     # Factories
@@ -48,7 +55,7 @@ __all__ = [
     "DefaultObservabilityFactory",
     "InfrastructureFactoryABC",
     "DefaultInfrastructureFactory",
-    # Use cases
+    # Use case factory
     "UseCaseFactory",
     "get_use_case_factory",
     "reset_use_case_factory",
