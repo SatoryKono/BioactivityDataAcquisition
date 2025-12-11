@@ -99,9 +99,9 @@ class UnifiedLoaderImpl(LoaderABC):
 
     def load(
         self,
-        data: pd.DataFrame | None,
-        output_path: Path,
-        context: RunContext,
+        data: pd.DataFrame | None = None,
+        output_path: Path | None = None,
+        context: RunContext | None = None,
         *,
         column_order: list[str] | None = None,
         df: pd.DataFrame | None = None,
@@ -109,7 +109,7 @@ class UnifiedLoaderImpl(LoaderABC):
         """Load DataFrame to output path with full pipeline processing.
 
         Args:
-            data: DataFrame to write.
+            data: DataFrame to write (optional if df is provided).
             output_path: Output directory path.
             context: Run context with execution details.
             column_order: Optional column ordering.
@@ -119,6 +119,14 @@ class UnifiedLoaderImpl(LoaderABC):
         Returns:
             WriteResult with path, row_count, checksum.
         """
+        if output_path is None:
+            raise TypeError(
+                "UnifiedLoaderImpl.load() missing required argument: 'output_path'"
+            )
+        if context is None:
+            raise TypeError(
+                "UnifiedLoaderImpl.load() missing required argument: 'context'"
+            )
         resolved_df = data if data is not None else df
         if resolved_df is None:
             raise TypeError("UnifiedLoaderImpl.load() requires 'data' or 'df'.")

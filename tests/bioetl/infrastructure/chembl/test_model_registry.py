@@ -27,7 +27,14 @@ class TestChemblEntityModelRegistry:
     def test_supported_entities_contains_all_types(self):
         """Test that registry supports all expected entity types."""
         registry = ChemblEntityModelRegistry()
-        expected_entities = {"activity", "molecule", "target", "assay", "document"}
+        expected_entities = {
+            "activity",
+            "molecule",
+            "target",
+            "assay",
+            "document",
+            "publication",
+        }
         assert registry.supported_entities() == expected_entities
 
     def test_supported_entities_returns_frozenset(self):
@@ -44,6 +51,7 @@ class TestChemblEntityModelRegistry:
         assert registry.get_model("target") is TargetRawModel
         assert registry.get_model("assay") is AssayRawModel
         assert registry.get_model("document") is PublicationRawModel
+        assert registry.get_model("publication") is PublicationRawModel
 
     def test_get_model_raises_for_unknown_entity(self):
         """Test that get_model raises ValueError for unknown entity."""
@@ -62,7 +70,14 @@ class TestChemblEntityModelRegistry:
     def test_is_supported_returns_true_for_supported(self):
         """Test is_supported returns True for supported entities."""
         registry = ChemblEntityModelRegistry()
-        for entity in ["activity", "molecule", "target", "assay", "document"]:
+        for entity in [
+            "activity",
+            "molecule",
+            "target",
+            "assay",
+            "document",
+            "publication",
+        ]:
             assert registry.is_supported(entity) is True
 
     def test_is_supported_returns_false_for_unsupported(self):
@@ -126,6 +141,13 @@ class TestModelValidation:
     def test_document_model_validates_data(self, registry):
         """Test that DocumentRawModel can validate document data."""
         model_class = registry.get_model("document")
+        data = {"document_chembl_id": "CHEMBL123456"}
+        instance = model_class.model_validate(data)
+        assert str(instance.document_chembl_id) == "CHEMBL123456"
+
+    def test_publication_model_validates_data(self, registry):
+        """Test PublicationRawModel validates via publication alias."""
+        model_class = registry.get_model("publication")
         data = {"document_chembl_id": "CHEMBL123456"}
         instance = model_class.model_validate(data)
         assert str(instance.document_chembl_id) == "CHEMBL123456"

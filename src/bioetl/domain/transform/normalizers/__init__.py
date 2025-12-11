@@ -25,6 +25,7 @@ from bioetl.domain.transform.normalizers.identifiers import (
     normalize_bao_id,
     normalize_bao_label,
     normalize_chembl_id,
+    normalize_chembl_release,
     normalize_doi,
     normalize_pcid,
     normalize_pmid,
@@ -48,6 +49,7 @@ __all__ = [
     # Identifiers
     "normalize_doi",
     "normalize_chembl_id",
+    "normalize_chembl_release",
     "normalize_pmid",
     "normalize_pcid",
     "normalize_uniprot",

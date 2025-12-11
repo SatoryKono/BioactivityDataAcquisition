@@ -54,7 +54,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Generic
+from typing import Any, Generic, TypeAlias
 import warnings
 
 from typing_extensions import TypeVar
@@ -232,6 +232,25 @@ class PaginationInfo:
         )
 
 
+# Type aliases for backward compatibility with tests
+RawPayload: TypeAlias = ApiPayload
+"""Type alias for raw API payload (backward compatibility).
+
+Deprecated: Use ApiPayload from bioetl.domain.types instead.
+"""
+
+RawRecordDict: TypeAlias = dict[str, Any]
+"""Type alias for a single raw record dictionary.
+
+Deprecated: Use dict[str, Any] directly or Record from domain.data.
+"""
+
+RawRecordList: TypeAlias = list[dict[str, Any]]
+"""Type alias for a list of raw record dictionaries.
+
+Deprecated: Use list[dict[str, Any]] or RecordBatch from domain.data.
+"""
+
 __all__ = [
     # Type variable
     "RecordT",
@@ -239,6 +258,10 @@ __all__ = [
     "ApiPayload",  # from domain.types
     "RecordBatch",  # from domain.data
     "RawRecord",  # local alias for Mapping[str, Any]
+    # Backward compatibility aliases
+    "RawPayload",
+    "RawRecordDict",
+    "RawRecordList",
     # ABCs and classes
     "ResponseParserPortABC",
     "PaginationInfo",

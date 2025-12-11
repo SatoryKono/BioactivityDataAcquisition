@@ -77,6 +77,8 @@ class MockMetrics(MetricsPortABC):
 class TestObservabilityFactory(ObservabilityFactoryABC):
     """Test factory providing mock observability components."""
 
+    __test__ = False  # Prevent pytest from collecting this as a test class
+
     def __init__(self) -> None:
         self._logger = MockLogger()
         self._metrics = MockMetrics()

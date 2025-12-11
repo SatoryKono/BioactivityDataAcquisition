@@ -234,11 +234,18 @@ class TestChemblRecordMapperSupportedEntities:
         assert isinstance(result, frozenset)
 
     def test_contains_all_entity_types(self) -> None:
-        """Returned set contains all five entity types."""
+        """Returned set contains all six entity types."""
         mapper = ChemblRecordMapper(get_chembl_model_registry())
         supported = mapper.get_supported_entities()
 
-        expected = {"activity", "molecule", "target", "assay", "document"}
+        expected = {
+            "activity",
+            "molecule",
+            "target",
+            "assay",
+            "document",
+            "publication",
+        }
         assert supported == expected
 
     def test_frozenset_is_immutable(self) -> None:

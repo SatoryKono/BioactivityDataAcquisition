@@ -274,7 +274,7 @@ class TestMapperEntitySupport:
         """Mapper should support all declared entity types."""
         supported = mapper.get_supported_entities()
 
-        expected = {"activity", "molecule", "target", "assay", "document"}
+        expected = {"activity", "molecule", "target", "assay", "document", "publication"}
         assert supported == expected
 
     def test_mapper_molecule_entity(self, mapper: ChemblRecordMapper) -> None:
