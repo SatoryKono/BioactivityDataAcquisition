@@ -16,7 +16,7 @@ from typing import Self, TypeAlias
 from pydantic import ConfigDict, field_validator, model_validator
 
 from bioetl.domain.record_source import SourceRecordModel
-from bioetl.domain.value_objects import ChemblId
+from bioetl.domain.value_objects import ActivityId, ChemblId
 
 ScalarValue: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = (
@@ -36,7 +36,7 @@ class ActivityRawModel(SourceRecordModel):
 
     action_type: str | None = None
     activity_comment: str | None = None
-    activity_id: str
+    activity_id: ActivityId
     activity_properties: list[JsonObject] | None = None
     assay_chembl_id: ChemblId | None = None
     assay_description: str | None = None
@@ -80,11 +80,6 @@ class ActivityRawModel(SourceRecordModel):
     uo_units: str | None = None
     upper_value: float | None = None
     value: float | None = None
-
-    @field_validator("activity_id", mode="before")
-    @classmethod
-    def _stringify_activity_id(cls, value: str | int) -> str:
-        return str(value)
 
     @field_validator("pchembl_value")
     @classmethod

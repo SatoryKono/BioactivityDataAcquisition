@@ -337,3 +337,69 @@ class ChemblId:
             core_schema.str_schema(),
             serialization=core_schema.plain_serializer_function_ser_schema(str),
         )
+
+
+class ActivityId:
+    """Value Object for ChEMBL activity identifier (numeric ID).
+
+    Unlike ChemblId which uses CHEMBL123 format, ActivityId is a pure numeric
+    identifier used in the ChEMBL activity table.
+
+    Examples:
+        >>> ActivityId(12345)
+        ActivityId('12345')
+        >>> ActivityId("67890")
+        ActivityId('67890')
+        >>> ActivityId("12345").numeric
+        12345
+    """
+
+    __slots__ = ("_value",)
+    _pattern = re.compile(r"^\d+$")
+
+    def __init__(self, value: str | int) -> None:
+        str_value = str(value)
+        if not self._pattern.match(str_value):
+            raise ValueError(f"Invalid ActivityId: {value}")
+        self._value = str_value
+
+    @property
+    def value(self) -> str:
+        """String representation of ActivityId."""
+        return self._value
+
+    @property
+    def numeric(self) -> int:
+        """Return numeric value of ActivityId."""
+        return int(self._value)
+
+    def __str__(self) -> str:
+        return self._value
+
+    def __repr__(self) -> str:
+        return f"ActivityId({self._value!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, ActivityId):
+            return self._value == other._value
+        return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self._value)
+
+    def __lt__(self, other: object) -> bool:
+        if isinstance(other, ActivityId):
+            return self.numeric < other.numeric
+        return NotImplemented
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: type, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        return core_schema.no_info_after_validator_function(
+            cls,
+            core_schema.union_schema(
+                [core_schema.str_schema(), core_schema.int_schema()]
+            ),
+            serialization=core_schema.plain_serializer_function_ser_schema(str),
+        )
