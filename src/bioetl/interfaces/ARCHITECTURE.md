@@ -71,7 +71,6 @@ interfaces/
 ├── __init__.py           # Public exports (CompositionRoot, ObservabilityStack, etc.)
 ├── composition_root.py   # Dependency assembly and wiring
 ├── bootstrap_factory.py  # ApplicationBootstrap factory functions
-├── simple_container.py   # Legacy container (deprecated)
 ├── cli/
 │   ├── __init__.py       # Exports: app
 │   └── app.py            # Typer commands (list, validate, run, smoke_run)

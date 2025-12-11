@@ -7,13 +7,14 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from bioetl.application.bootstrap import ApplicationBootstrap
 from bioetl.domain.errors import ConfigValidationError
 from bioetl.infrastructure.config.loader import (
     clear_schema_contract_provider,
     get_pipeline_config_from_path,
     get_schema_contract_provider,
 )
-from bioetl.interfaces.simple_container import SimplePipelineContainer
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 if TYPE_CHECKING:
     pass
@@ -23,13 +24,13 @@ class TestConfigLoadingWithBootstrap:
     """Test config loading after proper bootstrap."""
 
     @pytest.fixture
-    def bootstrapped_container(self) -> SimplePipelineContainer:
-        """Container with bootstrap completed."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
+    def bootstrapped_app(self) -> ApplicationBootstrap:
+        """Application with bootstrap completed."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
         # Clean up after test
-        container.reset()
+        bootstrap.shutdown()
 
     @pytest.fixture
     def clean_provider_state(self) -> None:
@@ -39,9 +40,9 @@ class TestConfigLoadingWithBootstrap:
         clear_schema_contract_provider()
 
     def test_load_config_after_bootstrap(
-        self, bootstrapped_container: SimplePipelineContainer, tmp_path: Path
+        self, bootstrapped_app: ApplicationBootstrap, tmp_path: Path
     ) -> None:
-        """Config loading should work after container bootstrap."""
+        """Config loading should work after application bootstrap."""
         # Create test config
         config_file = tmp_path / "test_pipeline.yaml"
         config_file.write_text(
@@ -96,50 +97,52 @@ provider_config:
             get_pipeline_config_from_path(config_file)
 
     def test_schema_contract_provider_injection(
-        self, bootstrapped_container: SimplePipelineContainer
+        self, bootstrapped_app: ApplicationBootstrap
     ) -> None:
         """Schema contract provider should be injectable into infrastructure."""
         provider = get_schema_contract_provider()
+        context = bootstrapped_app.context
 
         assert provider is not None
-        assert provider is bootstrapped_container.schema_contract_provider
+        assert context is not None
+        assert provider is context.contract_provider
 
-    def test_container_reset_clears_provider(
-        self, bootstrapped_container: SimplePipelineContainer
+    def test_bootstrap_shutdown_clears_provider(
+        self, bootstrapped_app: ApplicationBootstrap
     ) -> None:
-        """Container reset should clear the schema contract provider."""
+        """Bootstrap shutdown should clear the schema contract provider."""
         assert get_schema_contract_provider() is not None
 
-        bootstrapped_container.reset()
+        bootstrapped_app.shutdown()
 
         assert get_schema_contract_provider() is None
 
-    def test_multiple_bootstrap_is_idempotent(self) -> None:
-        """Calling bootstrap multiple times should be safe."""
-        container = SimplePipelineContainer()
+    def test_multiple_start_is_idempotent(self) -> None:
+        """Calling start() multiple times should be safe."""
+        bootstrap = create_default_bootstrap()
         try:
-            container.bootstrap()
-            provider_after_first = container.schema_contract_provider
+            context_first = bootstrap.start()
+            provider_after_first = context_first.contract_provider
 
-            container.bootstrap()  # Should be no-op
-            provider_after_second = container.schema_contract_provider
+            context_second = bootstrap.start()  # Should be no-op
+            provider_after_second = context_second.contract_provider
 
             assert provider_after_first is provider_after_second
-            assert container.is_bootstrapped is True
+            assert bootstrap.is_started is True
         finally:
-            container.reset()
+            bootstrap.shutdown()
 
 
 class TestConfigFieldPopulation:
     """Test that fields are populated from schema correctly."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     def test_activity_config_has_activity_fields(self, tmp_path: Path) -> None:
         """Activity config should have activity-specific fields."""
@@ -213,12 +216,12 @@ class TestConfigValidation:
     """Test config validation during loading."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     def test_invalid_provider_raises_error(self, tmp_path: Path) -> None:
         """Unknown provider should raise an error."""
@@ -261,12 +264,12 @@ class TestExistingConfigFiles:
     """Test loading existing config files from fixtures."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     def test_load_chembl_activity_valid_config(self) -> None:
         """Should load valid ChEMBL activity config from fixtures."""
