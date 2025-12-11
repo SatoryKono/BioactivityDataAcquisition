@@ -109,6 +109,12 @@ def create_cache() -> CacheABC[Any]:
     return MemoryCacheImpl()
 
 
+# Deprecated aliases for backward compatibility
+def default_cache() -> CacheABC[Any]:
+    """Deprecated: use create_cache() instead."""
+    return create_cache()
+
+
 def create_secret_provider() -> SecretProviderABC:
     """Create an environment-backed secret provider instance."""
 
@@ -200,3 +206,18 @@ def build_http_client(
         metrics=metrics,
         error_handler=resolved_error_handler,
     )
+
+
+__all__ = [
+    "build_http_client",
+    "build_rate_limiter",
+    "create_api_client",
+    "create_cache",
+    "create_paginator",
+    "create_rate_limiter",
+    "create_request_builder",
+    "create_response_parser",
+    "create_secret_provider",
+    "default_cache",
+    "EnvSecretProviderImpl",
+]

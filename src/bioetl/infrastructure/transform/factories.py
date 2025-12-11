@@ -81,10 +81,25 @@ def create_normalization_service(
     return norm_impl.NormalizationServiceImpl(config)
 
 
+# Deprecated aliases for backward compatibility
+def default_hash_service() -> HashServiceABC:
+    """Deprecated: use create_hash_service() instead."""
+    return create_hash_service()
+
+
+def default_normalization_service(
+    config: NormalizationConfigProviderProtocol,
+) -> NormalizationServiceABC:
+    """Deprecated: use create_normalization_service() instead."""
+    return create_normalization_service(config)
+
+
 __all__ = [
     "create_hasher",
     "create_hash_service",
     "create_timestamp_provider",
     "create_index_generator",
     "create_normalization_service",
+    "default_hash_service",
+    "default_normalization_service",
 ]
