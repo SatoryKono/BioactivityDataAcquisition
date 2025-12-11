@@ -8,9 +8,11 @@ from typing import Any, Callable, Iterable, List, Optional, Tuple
 
 def _find_project_root(start: Path) -> Path:
     cur = start.resolve()
-    for p in [cur, *cur.parents]:
-        if (p / "pyproject.toml").exists() or (p / ".git").exists():
-            return p
+    for candidate_path in [cur, *cur.parents]:
+        has_pyproject = (candidate_path / "pyproject.toml").exists()
+        has_git = (candidate_path / ".git").exists()
+        if has_pyproject or has_git:
+            return candidate_path
     return start.resolve().parents[2]
 
 
@@ -100,8 +102,8 @@ def _is_top_bioetl_package(path: Path) -> bool:
 
 
 def _match_any(path: Path, patterns: List[str]) -> bool:
-    s = str(path).replace("\\", "/")
-    return any(fnmatch.fnmatch(s, p) for p in patterns)
+    path_str = str(path).replace("\\", "/")
+    return any(fnmatch.fnmatch(path_str, p) for p in patterns)
 
 
 def _discover_candidates(
@@ -112,21 +114,21 @@ def _discover_candidates(
     candidates: List[Tuple[Path, str]] = []
     for base in scope_dirs:
         for dirpath, dirnames, filenames in os.walk(base):
-            p = Path(dirpath)
-            if _match_any(p, exclude):
+            current_dir = Path(dirpath)
+            if _match_any(current_dir, exclude):
                 continue
             files = [Path(dirpath) / f for f in filenames if f not in IGNORED_FILES]
             subdirs = [Path(dirpath) / d for d in dirnames]
 
             if not files and not subdirs:
-                candidates.append((p, "empty"))
+                candidates.append((current_dir, "empty"))
                 continue
 
             if len(files) == 1 and not subdirs and _is_dunder_py(files[0].name):
                 # Skip protected src/bioetl top packages unless include_src=True
-                if not include_src and _is_top_bioetl_package(p):
+                if not include_src and _is_top_bioetl_package(current_dir):
                     continue
-                candidates.append((p, "single_dunder_py"))
+                candidates.append((current_dir, "single_dunder_py"))
     return candidates
 
 
@@ -156,14 +158,14 @@ def _apply(candidates: Iterable[Tuple[Path, str]], aggressive: bool) -> Tuple[in
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(
+    arg_parser = argparse.ArgumentParser(
         description="Cleanup empty and dunder-only directories"
     )
-    ap.add_argument("--apply", action="store_true")
-    ap.add_argument("--include-src", action="store_true")
-    ap.add_argument("--aggressive", action="store_true")
-    ap.add_argument("--exclude", action="append", default=[])
-    args = ap.parse_args()
+    arg_parser.add_argument("--apply", action="store_true")
+    arg_parser.add_argument("--include-src", action="store_true")
+    arg_parser.add_argument("--aggressive", action="store_true")
+    arg_parser.add_argument("--exclude", action="append", default=[])
+    args = arg_parser.parse_args()
 
     logger = None
     if get_logging_port is not None:

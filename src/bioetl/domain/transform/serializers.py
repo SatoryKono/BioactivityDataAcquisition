@@ -84,9 +84,9 @@ def serialize_dict(value: Any) -> Any:
 
     parts: list[str] = []
     for key in sorted(value.keys()):
-        v = value[key]
-        if not _should_skip_dict_value(v):
-            parts.append(f"{key}:{str(v)}")
+        dict_value = value[key]
+        if not _should_skip_dict_value(dict_value):
+            parts.append(f"{key}:{str(dict_value)}")
 
     return "|".join(parts) if parts else ""
 

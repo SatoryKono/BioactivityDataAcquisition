@@ -8,9 +8,11 @@ from typing import Iterable, List, Tuple
 
 def _find_project_root(start: Path) -> Path:
     cur = start.resolve()
-    for p in [cur, *cur.parents]:
-        if (p / "pyproject.toml").exists() or (p / ".git").exists():
-            return p
+    for candidate_path in [cur, *cur.parents]:
+        has_pyproject = (candidate_path / "pyproject.toml").exists()
+        has_git = (candidate_path / ".git").exists()
+        if has_pyproject or has_git:
+            return candidate_path
     # Fallback for typical layout: src/tools/* -> project root two levels up
     return start.resolve().parents[2]
 
@@ -68,21 +70,21 @@ def _iter_candidates(root: Path, patterns: Iterable[str]) -> List[Path]:
     found: List[Path] = []
     for pat in patterns:
         if pat.startswith("**/") or pat.startswith("**\\") or pat.startswith("**"):
-            for p in root.rglob(pat.replace("**/", "")):
-                found.append(p)
+            for candidate_path in root.rglob(pat.replace("**/", "")):
+                found.append(candidate_path)
         else:
-            for p in (
+            for candidate_path in (
                 (root / pat).glob("**/*") if _is_dir_pattern(pat) else root.glob(pat)
             ):
-                if p.exists():
-                    found.append(p)
+                if candidate_path.exists():
+                    found.append(candidate_path)
     uniq = []
     seen = set()
-    for p in found:
-        rp = p.resolve()
-        if rp not in seen:
-            seen.add(rp)
-            uniq.append(rp)
+    for candidate_path in found:
+        resolved_path = candidate_path.resolve()
+        if resolved_path not in seen:
+            seen.add(resolved_path)
+            uniq.append(resolved_path)
     return uniq
 
 
@@ -95,9 +97,9 @@ def _size_bytes(path: Path) -> int:
     total = 0
     for dirpath, _, filenames in os.walk(path, onerror=lambda e: None):
         for f in filenames:
-            fp = Path(dirpath) / f
+            file_path = Path(dirpath) / f
             try:
-                total += fp.stat().st_size
+                total += file_path.stat().st_size
             except OSError:
                 pass
     return total
@@ -108,14 +110,14 @@ def _archive_logs(paths: Iterable[Path], root: Path) -> Tuple[int, int]:
     reports_dir.mkdir(exist_ok=True)
     moved = 0
     bytes_moved = 0
-    for p in paths:
-        if p.is_file() and _is_log_like(p):
-            if p.resolve().parent == reports_dir.resolve():
+    for current_path in paths:
+        if current_path.is_file() and _is_log_like(current_path):
+            if current_path.resolve().parent == reports_dir.resolve():
                 continue
-            target = reports_dir / p.name
-            if target.exists() and target.resolve() != p.resolve():
+            target = reports_dir / current_path.name
+            if target.exists() and target.resolve() != current_path.resolve():
                 target.unlink()
-            shutil.move(str(p), str(target))
+            shutil.move(str(current_path), str(target))
             moved += 1
             bytes_moved += _size_bytes(target)
     return moved, bytes_moved
@@ -124,13 +126,13 @@ def _archive_logs(paths: Iterable[Path], root: Path) -> Tuple[int, int]:
 def _delete(paths: Iterable[Path]) -> Tuple[int, int]:
     deleted = 0
     bytes_deleted = 0
-    for p in paths:
+    for current_path in paths:
         try:
-            size = _size_bytes(p)
-            if p.is_dir():
-                shutil.rmtree(p, ignore_errors=True)
+            size = _size_bytes(current_path)
+            if current_path.is_dir():
+                shutil.rmtree(current_path, ignore_errors=True)
             else:
-                p.unlink(missing_ok=True)
+                current_path.unlink(missing_ok=True)
             deleted += 1
             bytes_deleted += size
         except Exception:
@@ -141,11 +143,11 @@ def _delete(paths: Iterable[Path]) -> Tuple[int, int]:
 def main() -> int:
     from bioetl.infrastructure.observability.factories import create_logging_port
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--apply", action="store_true")
-    ap.add_argument("--archive-logs", action="store_true")
-    ap.add_argument("--purge-logs", action="store_true")
-    args = ap.parse_args()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--apply", action="store_true")
+    arg_parser.add_argument("--archive-logs", action="store_true")
+    arg_parser.add_argument("--purge-logs", action="store_true")
+    args = arg_parser.parse_args()
 
     logger = create_logging_port().apply_bind(task="cleanup_project")
     root = PROJECT_ROOT
