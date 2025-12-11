@@ -15,7 +15,9 @@ SchemaRegisterFn = Callable[["SchemaRegistry"], SchemaProviderABC]
 
 
 class SchemaRegistry(SchemaProviderABC):
-    """Data schema registry."""
+    """
+    Реестр схем данных.
+    """
 
     def __init__(self) -> None:
         self._schemas: dict[str, schema_type | None] = {}
@@ -108,25 +110,10 @@ def create_default_schema_registry(
 def register_schemas(provider: SchemaProviderABC) -> SchemaProviderABC:
     """Register all default schemas into the given provider.
 
-    This is a stub function in the domain layer. The actual implementation
-    should be provided by the infrastructure layer via dependency injection.
-
-    For actual schema registration, use the infrastructure layer's
-    register_schemas function from bioetl.infrastructure.validation.bootstrap.
-
-    Args:
-        provider: Schema provider to register schemas into.
-
-    Returns:
-        The same provider instance (no-op in domain layer).
-
-    Note:
-        This function exists for backward compatibility and type hints.
-        Real registration must be done by infrastructure layer.
+    Thin proxy to avoid import cycles in tests that import from registry.
     """
-    # Domain layer cannot register schemas directly - this is infrastructure concern
-    # Return provider as-is; actual registration should happen via DI
-    return provider
+    from . import register_schemas as _register  # local import to prevent cycles
+    return _register(provider)
 
 
 # Lazy-initialized default instance for DI containers

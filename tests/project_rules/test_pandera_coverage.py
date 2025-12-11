@@ -4,8 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain.schemas.registry import SchemaRegistry
-from bioetl.infrastructure.validation.bootstrap import register_schemas
+from bioetl.domain.schemas.registry import SchemaRegistry, register_schemas
 
 
 def _expected_entities(configs_root: Path) -> set[str]:

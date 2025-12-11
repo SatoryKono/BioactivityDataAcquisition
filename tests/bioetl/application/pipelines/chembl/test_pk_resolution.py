@@ -11,6 +11,7 @@ from bioetl.domain.configs import (
     PipelineIdentityConfig,
 )
 from bioetl.domain.configs.pipeline import ChemblSourceConfig, ProviderHttpConfig
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
 @pytest.fixture
@@ -28,6 +29,7 @@ def dependencies():
         "normalization_service": _build_normalization_service(),
         "index_generator": MagicMock(),
         "timestamp_provider": MagicMock(),
+        "entity_model_registry": get_chembl_model_registry(),
     }
 
 

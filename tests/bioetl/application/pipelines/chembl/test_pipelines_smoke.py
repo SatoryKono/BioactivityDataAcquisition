@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
 @pytest.fixture
@@ -41,6 +42,7 @@ def common_dependencies():
         "normalization_service": normalization_service,
         "index_generator": MagicMock(),
         "timestamp_provider": MagicMock(),
+        "entity_model_registry": get_chembl_model_registry(),
     }
 
 
@@ -75,6 +77,7 @@ def test_pipeline_instantiation(pipeline_info, common_dependencies):
         index_generator=common_dependencies["index_generator"],
         timestamp_provider=common_dependencies["timestamp_provider"],
         normalization_service=common_dependencies["normalization_service"],
+        entity_model_registry=common_dependencies["entity_model_registry"],
     )
 
     assert pipeline.ID_COLUMN == id_col

@@ -34,5 +34,4 @@ def __getattr__(name: str) -> Any:
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-# ConfigMigrator available via __getattr__ for backward compatibility
-__all__: list[str] = []
+__all__ = ["ConfigMigrator"]

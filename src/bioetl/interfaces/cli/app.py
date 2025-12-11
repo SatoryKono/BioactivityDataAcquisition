@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 from rich.console import Console
 import typer
@@ -47,7 +47,8 @@ def list_pipelines() -> None:
         console.print(f"  - {name}")
 
 
-def build_runtime_config(*args, **kwargs):
+def build_runtime_config(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN201
+    """Build runtime configuration (delegates to application layer)."""
     from bioetl.application.config.runtime import build_runtime_config as _brc
     return _brc(*args, **kwargs)
 

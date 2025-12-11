@@ -18,6 +18,27 @@ from bioetl.domain.schemas.chembl.output_views import (
     TISSUE_OUTPUT_COLUMNS,
 )
 
+from bioetl.domain.validation import SchemaProviderABC
+
+
+def register_schemas(provider: SchemaProviderABC) -> SchemaProviderABC:
+    """Register default schemas (column orders) into provider.
+
+    The provider must support `.register(name, schema, column_order=...)`.
+    """
+    mapping = {
+        "activity_output": ACTIVITY_OUTPUT_COLUMNS,
+        "assay_output": ASSAY_OUTPUT_COLUMNS,
+        "cell_output": CELL_OUTPUT_COLUMNS,
+        "molecule_output": MOLECULE_OUTPUT_COLUMNS,
+        "publication_output": PUBLICATION_OUTPUT_COLUMNS,
+        "target_output": TARGET_OUTPUT_COLUMNS,
+        "tissue_output": TISSUE_OUTPUT_COLUMNS,
+    }
+    for name, cols in mapping.items():
+        provider.register(name, None, column_order=cols)
+    return provider
+
 __all__ = [
     "ACTIVITY_OUTPUT_COLUMNS",
     "ASSAY_OUTPUT_COLUMNS",
@@ -26,4 +47,5 @@ __all__ = [
     "PUBLICATION_OUTPUT_COLUMNS",
     "TARGET_OUTPUT_COLUMNS",
     "TISSUE_OUTPUT_COLUMNS",
+    "register_schemas",
 ]
