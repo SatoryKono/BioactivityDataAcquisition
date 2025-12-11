@@ -82,6 +82,9 @@ jobs:
       - name: Import Linter contract
         run: lint-imports --config .importlinter
 
+      - name: Application layer dependency graph
+        run: python scripts/check_application_deps.py --json
+
   unit-tests:
     needs: lint
     runs-on: ubuntu-latest
