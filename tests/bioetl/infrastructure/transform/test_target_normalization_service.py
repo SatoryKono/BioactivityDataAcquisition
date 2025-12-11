@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import pandas as pd
 
 from bioetl.infrastructure.transform.impl.normalize import (
-    DefaultNormalizationTransformerImpl,
+    NormalizationServiceImpl,
 )
 
 
@@ -27,7 +27,7 @@ class _DummyConfig:
 
 
 def test_normalization_service_handles_target_arrays():
-    service = DefaultNormalizationTransformerImpl(_DummyConfig())
+    service = NormalizationServiceImpl(_DummyConfig())
     df = pd.DataFrame(
         {
             "target_components": [
