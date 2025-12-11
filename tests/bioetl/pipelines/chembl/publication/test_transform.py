@@ -8,7 +8,7 @@ import pytest
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.infrastructure.validation.schemas.chembl.publication import PublicationTableSchema
 from bioetl.infrastructure.transform.impl.normalize import (
-    DefaultNormalizationTransformerImpl,
+    NormalizationServiceImpl,
 )
 
 
@@ -46,7 +46,7 @@ def pipeline():
         PublicationTableSchema.to_schema().columns.keys()
     )
 
-    normalization_service = DefaultNormalizationTransformerImpl(config)
+    normalization_service = NormalizationServiceImpl(config)
 
     index_generator = MagicMock()
     index_generator.next_index.return_value = 0

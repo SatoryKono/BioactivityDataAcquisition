@@ -3,7 +3,7 @@
 import hashlib
 from pathlib import Path
 
-from bioetl.infrastructure.constants import CHECKSUM_CHUNK_SIZE
+from bioetl.infrastructure.settings.files import CHECKSUM_CHUNK_SIZE
 
 
 def compute_file_sha256(path: Path) -> str:

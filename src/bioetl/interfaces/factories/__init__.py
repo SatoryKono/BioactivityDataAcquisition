@@ -1,3 +1,5 @@
+"""Factory interfaces for dependency injection."""
+
 from bioetl.interfaces.factories.infrastructure import (
     DefaultInfrastructureFactory,
     InfrastructureFactoryABC,
@@ -9,9 +11,9 @@ from bioetl.interfaces.factories.observability import (
 )
 
 __all__ = [
-    "ObservabilityFactoryABC",
-    "DefaultObservabilityFactory",
-    "create_observability_factory",
-    "InfrastructureFactoryABC",
     "DefaultInfrastructureFactory",
+    "DefaultObservabilityFactory",
+    "InfrastructureFactoryABC",
+    "ObservabilityFactoryABC",
+    "create_observability_factory",
 ]

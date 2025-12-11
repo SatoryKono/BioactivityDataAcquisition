@@ -5,8 +5,8 @@ import warnings
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationService,
 )
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
-    DefaultNormalizationTransformerImpl,
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+    NormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 from bioetl.infrastructure.transform.impl.hasher import HasherImpl
@@ -20,6 +20,7 @@ from bioetl.infrastructure.transform.impl.timestamp_provider import (
 # Deprecated aliases for backward compatibility
 _DEPRECATED_ALIASES = {
     "ChemblNormalizationServiceImpl": "ChemblNormalizationService",
+    "DefaultNormalizationTransformerImpl": "NormalizationServiceImpl",
 }
 
 
@@ -40,7 +41,8 @@ __all__ = [
     "Blake2bHashService",
     "DeterministicTimestampProvider",
     "SequentialIndexGenerator",
-    "DefaultNormalizationTransformerImpl",
+    "NormalizationServiceImpl",
+    "DefaultNormalizationTransformerImpl",  # Deprecated alias
     "ChemblNormalizationService",
     "ChemblNormalizationServiceImpl",  # Deprecated alias
 ]
