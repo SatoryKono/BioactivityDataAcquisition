@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from bioetl.domain.transform.contracts import NormalizationConfig
-from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
-    ChemblNormalizationServiceImpl,
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+    NormalizationServiceImpl,
 )
 
 
@@ -37,8 +37,10 @@ class _ConfigStub:
         return self.fields
 
 
-def test_chembl_normalization_service_normalizes_scalars_and_ids() -> None:
-    service = ChemblNormalizationServiceImpl(_ConfigStub())
+def test_normalization_service_normalizes_scalars_and_ids() -> None:
+    service = NormalizationServiceImpl(
+        _ConfigStub(), empty_value=None, serialize_array_in_series=False
+    )
     raw = {
         "name": "  Alpha  ",
         "activity_id": "act1",
@@ -54,8 +56,10 @@ def test_chembl_normalization_service_normalizes_scalars_and_ids() -> None:
     assert normalized["extra"] == "keep"
 
 
-def test_chembl_normalization_service_serializes_nested_values() -> None:
-    service = ChemblNormalizationServiceImpl(_ConfigStub())
+def test_normalization_service_serializes_nested_values() -> None:
+    service = NormalizationServiceImpl(
+        _ConfigStub(), empty_value=None, serialize_array_in_series=False
+    )
     raw = {
         "tags": ["A", "b", ""],
         "metadata": {"key": "Value", "other": None},
@@ -69,8 +73,10 @@ def test_chembl_normalization_service_serializes_nested_values() -> None:
     assert normalized["label"] == "MiXeD"
 
 
-def test_chembl_normalization_service_handles_empty_collections() -> None:
-    service = ChemblNormalizationServiceImpl(_ConfigStub())
+def test_normalization_service_handles_empty_collections() -> None:
+    service = NormalizationServiceImpl(
+        _ConfigStub(), empty_value=None, serialize_array_in_series=False
+    )
     raw = {"tags": [], "metadata": {}, "label": "  NoChange "}
 
     normalized = service.apply_normalize(raw)
@@ -80,8 +86,10 @@ def test_chembl_normalization_service_handles_empty_collections() -> None:
     assert normalized["label"] == "NoChange"
 
 
-def test_chembl_normalization_service_normalizes_dataframe_batch() -> None:
-    service = ChemblNormalizationServiceImpl(_ConfigStub())
+def test_normalization_service_normalizes_dataframe_batch() -> None:
+    service = NormalizationServiceImpl(
+        _ConfigStub(), empty_value=None, serialize_array_in_series=False
+    )
     df = pd.DataFrame(
         {
             "name": ["  Alpha  ", "Beta"],
@@ -104,8 +112,10 @@ def test_chembl_normalization_service_normalizes_dataframe_batch() -> None:
     assert normalized_df["label"].tolist() == ["MiXeD", "lower"]
 
 
-def test_chembl_normalization_service_coerces_numeric_columns() -> None:
-    service = ChemblNormalizationServiceImpl(_ConfigStub())
+def test_normalization_service_coerces_numeric_columns() -> None:
+    service = NormalizationServiceImpl(
+        _ConfigStub(), empty_value=None, serialize_array_in_series=False
+    )
     df = pd.DataFrame(
         {
             "score": ["1.234", "bad", None],

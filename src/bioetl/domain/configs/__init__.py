@@ -1,21 +1,7 @@
-"""Domain configuration models (pure, without I/O).
-
-Deprecated aliases (will be removed in v3.0):
-    - ClientConfig -> use HttpClientConfig
-    - HttpClientSettings -> use ProviderHttpConfig
-    - HttpClientDefaults -> use HttpClientConfig
-    - HTTP_CLIENT_DEFAULTS -> use HttpClientConfig()
-
-These deprecated names are available via lazy loading with DeprecationWarning.
-"""
+"""Domain configuration models (pure, without I/O)."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
-# Deprecated aliases are loaded lazily via __getattr__ to emit warnings
-# Import _compat module names for documentation purposes
-from bioetl.domain.configs._compat import __all__ as _COMPAT_ALL
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 
 # Bounded context configs
@@ -69,7 +55,6 @@ from bioetl.domain.configs.pipeline import (
     RuntimeConfig,
     StorageConfig,
 )
-# ProfileConfig, TransformConfig, NormalizationConfig imported from pipeline_options above
 
 __all__ = [
     # Bounded context configs (new modular structure)
@@ -124,32 +109,4 @@ __all__ = [
     "SourcesDefaultsConfig",
     # Protocols
     "PipelineConfigLoaderProtocol",
-    # DEPRECATED: Legacy aliases (will be removed in v3.0)
-    # These are lazy-loaded with DeprecationWarning via __getattr__
-    "ClientConfig",  # Use HttpClientConfig
-    "HttpClientDefaults",  # Use HttpClientConfig
-    "HttpClientSettings",  # Use ProviderHttpConfig
-    "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
 ]
-
-
-def __getattr__(name: str) -> Any:
-    """Module-level __getattr__ for lazy loading deprecated aliases.
-
-    Delegates to _compat module which handles deprecation warnings.
-    """
-    if name in _COMPAT_ALL:
-        from bioetl.domain.configs import _compat
-
-        return getattr(_compat, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-# For static type checking only
-if TYPE_CHECKING:
-    from bioetl.domain.configs._compat import (
-        HTTP_CLIENT_DEFAULTS as HTTP_CLIENT_DEFAULTS,
-        ClientConfig as ClientConfig,
-        HttpClientDefaults as HttpClientDefaults,
-        HttpClientSettings as HttpClientSettings,
-    )

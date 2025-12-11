@@ -11,14 +11,14 @@ from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
 from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
-from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
-    ChemblNormalizationServiceImpl,
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+    NormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 
 
 def _collect_extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
-    """Собирает все чанки extract в единый DataFrame для тестов."""
+    """Collects all extract chunks into a single DataFrame for tests."""
     extract_result = pipeline.extract()
     if isinstance(extract_result, pd.DataFrame):
         chunks = [extract_result]
@@ -77,7 +77,9 @@ def mock_dependencies_fixture():
     metadata_builder.build_run_metadata.return_value = {}
     metadata_builder.build_dry_run_metadata.return_value = {}
 
-    normalization_service = ChemblNormalizationServiceImpl(config=config)
+    normalization_service = NormalizationServiceImpl(
+        config=config, empty_value=None, serialize_array_in_series=False
+    )
 
     return {
         "config": config,
@@ -181,10 +183,7 @@ def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixt
     mock_dependencies_fixture["config"].serialization_mode = "pipe"
     # Also update the already initialized service
     service = mock_dependencies_fixture["normalization_service"]
-    if hasattr(service, "_base"):
-        service._base._serialization_mode = "pipe"
-    else:
-        service._serialization_mode = "pipe"
+    service._serialization_mode = "pipe"
 
     norm = MagicMock()
     norm.case_sensitive_fields = []
