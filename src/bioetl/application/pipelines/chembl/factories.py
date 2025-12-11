@@ -40,11 +40,8 @@ class ChemblPipelineFactory(PipelineFactoryABC):
         logger = container.get_logger()
         extraction_service = container.get_extraction_service()
 
-        record_source = container.get_record_source(
-            extraction_service,
-            limit=limit,
-            logger=logger,
-        )
+        # Note: ChemblPipelineBase uses ExtractStage with ChemblRecordMapper
+        # internally, so record_source is not needed here.
 
         pipeline: PipelineBase = ChemblPipelineBase(
             config=container.config,
@@ -56,7 +53,6 @@ class ChemblPipelineFactory(PipelineFactoryABC):
             index_generator=container.get_index_generator(),
             timestamp_provider=container.get_timestamp_provider(),
             metadata_builder=container.get_metadata_builder(),
-            record_source=record_source,
             normalization_service=container.get_normalization_service(),
             hooks=container.get_hooks(),
             error_policy=container.get_error_policy(),

@@ -1,18 +1,21 @@
-"""CSV-based record source implementations for application layer."""
+"""CSV-based record source implementations for application layer.
+
+These sources return raw dicts (Mapping[str, Any]) per RecordSourceABC contract.
+Domain model conversion should happen via RecordMapperABC in ExtractStage.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import pandas as pd
-from pydantic import BaseModel
 
 from bioetl.domain.configs import ChemblSourceConfig, CsvInputConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.record_source import RecordSourceABC, SourceRecordModel
+from bioetl.domain.record_source import RecordSourceABC
 
 
 def _chunk_list(data: list[Any], size: int) -> Iterator[list[Any]]:
@@ -28,7 +31,11 @@ def ensure_csv_options(options: dict[str, Any] | CsvInputConfig) -> CsvInputConf
 
 
 class CsvRecordSourceImpl(RecordSourceABC):
-    """Record source that reads full datasets from CSV."""
+    """Record source that reads full datasets from CSV.
+
+    Returns raw dicts per RecordSourceABC contract. Domain model conversion
+    should happen via RecordMapperABC in ExtractStage if needed.
+    """
 
     def __init__(
         self,
@@ -37,17 +44,30 @@ class CsvRecordSourceImpl(RecordSourceABC):
         limit: int | None,
         logger: LoggingPortABC,
         chunk_size: int | None = None,
-        model_cls: type[BaseModel] | None = None,
+        model_cls: Any = None,  # Deprecated, kept for backward compatibility
     ) -> None:
         self._input_path = input_path
         self._csv_options = ensure_csv_options(csv_options)
         self._limit = limit
         self._logger = logger
         self._chunk_size = chunk_size
-        self._model_cls: type[BaseModel] = model_cls or SourceRecordModel
+        # model_cls is no longer used - validation happens via RecordMapperABC
+        if model_cls is not None:
+            import warnings
+
+            warnings.warn(
+                "model_cls parameter is deprecated. Use RecordMapperABC in "
+                "ExtractStage for domain model conversion.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
     def iter_records(self) -> Iterable[Sequence[Mapping[str, Any]]]:
-        """Read CSV dataset and yield records respecting limits and chunking."""
+        """Read CSV dataset and yield records respecting limits and chunking.
+
+        Returns raw dicts. Domain model validation should be performed by
+        RecordMapperABC in the extraction stage.
+        """
         header = 0 if self._csv_options.header else None
         self._logger.info(f"Extracting records from CSV dataset: {self._input_path}")
         df = pd.read_csv(
@@ -57,11 +77,10 @@ class CsvRecordSourceImpl(RecordSourceABC):
         )
         if self._limit is not None:
             df = df.head(self._limit)
-        records_dicts = df.to_dict(orient="records")
-        records: list[SourceRecordModel] = [
-            cast(SourceRecordModel, self._model_cls.model_validate(item))
-            for item in records_dicts
-        ]
+
+        # Return raw dicts - no model conversion
+        records: list[Mapping[str, Any]] = df.to_dict(orient="records")
+
         if self._chunk_size is None or self._chunk_size <= 0:
             yield records
             return
