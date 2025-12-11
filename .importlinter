@@ -29,10 +29,6 @@ source_modules =
     bioetl.application
 forbidden_modules =
     bioetl.infrastructure
-ignore_imports =
-    # Legacy: Lazy import for backward compatibility (deprecation warning issued)
-    # Tracked for removal - see test_application_has_no_runtime_infrastructure_imports
-    bioetl.application.orchestrator -> bioetl.infrastructure.provider_registry
 
 [contract:application_no_interfaces]
 name = Application layer cannot depend on interfaces layer

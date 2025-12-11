@@ -31,8 +31,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
 
-import requests
-
 from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.services.config_migration_service import (
@@ -106,7 +104,7 @@ class CompositionRoot:
         self._observability = observability_factory or DefaultObservabilityFactory()
         self._infrastructure = infrastructure_factory or DefaultInfrastructureFactory()
 
-        self._http_session_factory = http_session_factory or requests.Session
+        self._http_session_factory = http_session_factory
         self._schema_contract_provider = schema_contract_provider
 
         # Lazy-loaded provider registry
@@ -173,7 +171,15 @@ class CompositionRoot:
 
     def create_http_session(self) -> Any:
         """Create a new HTTP session."""
-        return self._http_session_factory()
+        return self._get_http_session_factory()()
+
+    def _get_http_session_factory(self) -> type:
+        """Get HTTP session factory, using lazy import if not explicitly set."""
+        if self._http_session_factory is None:
+            import requests  # Lazy import to avoid module-level dependency
+
+            return requests.Session
+        return self._http_session_factory
 
     def create_http_transport(
         self,
