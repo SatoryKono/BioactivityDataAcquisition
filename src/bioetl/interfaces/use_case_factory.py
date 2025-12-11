@@ -57,25 +57,20 @@ class UseCaseFactory:
             Configured RunPipelineUseCase ready for execution.
         """
         from bioetl.application.use_cases import RunPipelineUseCase
-        from bioetl.infrastructure.config.provider_registry import (
-            create_provider_loader,
-        )
-        from bioetl.infrastructure.config.sources import get_configs_root
         from bioetl.interfaces.factories.provider_registry import (
             create_provider_registry_factory,
         )
 
         ctx = self._ensure_context()
+        root = ctx.composition_root
 
-        # Use composition_root from context for container factory
-        container_factory = ctx.composition_root.create_pipeline_container
-
+        # Use composition_root methods to avoid direct infrastructure imports
         return RunPipelineUseCase(
             config_loader=ctx.config_loader,
-            container_factory=container_factory,
-            provider_loader_factory=create_provider_loader,
+            container_factory=root.create_pipeline_container,
+            provider_loader_factory=root.create_provider_loader(),
             provider_registry_factory=create_provider_registry_factory(),
-            configs_root=get_configs_root(None),
+            configs_root=root.get_configs_root(),
         )
 
 

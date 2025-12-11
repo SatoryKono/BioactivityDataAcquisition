@@ -465,40 +465,23 @@ def test_infrastructure_does_not_import_interfaces() -> None:
     _assert_no_violations(violations)
 
 
-def test_pipeline_contracts_config_matches_hardcoded() -> None:
-    """Verify YAML config contracts match hardcoded fallback.
+def test_no_hardcoded_pipeline_contracts() -> None:
+    """Verify domain layer has no hardcoded PIPELINE_CONTRACTS.
 
-    This test ensures the configs/pipeline_contracts.yaml stays in sync
-    with the hardcoded PIPELINE_CONTRACTS dictionary during the migration
-    period.
+    Pipeline contracts should be loaded exclusively from YAML configuration
+    via the PipelineContractLoaderPortABC port, not from hardcoded dictionaries.
     """
-    import yaml
+    from bioetl.domain.schemas import pipeline_contracts
 
-    from bioetl.domain.schemas.pipeline_contracts import PIPELINE_CONTRACTS
+    assert not hasattr(
+        pipeline_contracts, "PIPELINE_CONTRACTS"
+    ), "PIPELINE_CONTRACTS should be removed from domain layer"
 
+
+def test_pipeline_contracts_yaml_exists() -> None:
+    """Verify pipeline_contracts.yaml exists as the single source of truth."""
     config_path = REPO_ROOT / "configs" / "pipeline_contracts.yaml"
 
-    if not config_path.exists():
-        pytest.skip("pipeline_contracts.yaml not found (optional during migration)")
-
-    with config_path.open() as f:
-        config_data = yaml.safe_load(f)
-
-    contracts_from_yaml = config_data.get("contracts", {})
-
-    # Check all hardcoded contracts exist in YAML
-    for code, model in PIPELINE_CONTRACTS.items():
-        assert (
-            code in contracts_from_yaml
-        ), f"Hardcoded contract '{code}' not found in pipeline_contracts.yaml"
-
-        yaml_contract = contracts_from_yaml[code]
-        assert (
-            yaml_contract["schema_out"] == model.schema_out
-        ), f"schema_out mismatch for {code}"
-        assert (
-            yaml_contract.get("schema_in") == model.schema_in
-        ), f"schema_in mismatch for {code}"
-        assert (
-            yaml_contract.get("output_schema") == model.output_schema
-        ), f"output_schema mismatch for {code}"
+    assert (
+        config_path.exists()
+    ), "configs/pipeline_contracts.yaml must exist as the single source of contracts"

@@ -24,6 +24,8 @@ class InfrastructureFactoryPortABC(ABC):
         >>> class DefaultInfraFactory(InfrastructureFactoryPortABC):
         ...     def create_rate_limiter(self, rate: float, **kwargs) -> RateLimiterABC:
         ...         return TokenBucketRateLimiter(rate=rate)
+        ...     def create_http_session(self) -> Any:
+        ...         return requests.Session()
     """
 
     @abstractmethod
@@ -43,6 +45,19 @@ class InfrastructureFactoryPortABC(ABC):
 
         Returns:
             Configured RateLimiterABC instance.
+        """
+        ...
+
+    @abstractmethod
+    def create_http_session(self) -> Any:
+        """Create HTTP session instance.
+
+        This method abstracts the creation of HTTP sessions, allowing
+        the interfaces layer to obtain sessions without importing
+        HTTP libraries directly.
+
+        Returns:
+            HTTP session instance (e.g., requests.Session).
         """
         ...
 

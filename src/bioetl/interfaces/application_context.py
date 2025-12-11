@@ -93,12 +93,19 @@ class ApplicationContext:
         Returns:
             ApplicationContext with all production dependencies configured.
         """
+        from bioetl.domain.schemas.pipeline_contracts import set_contract_loader
+        from bioetl.infrastructure.config.pipeline_contract_loader import (
+            get_default_contract_loader,
+        )
         from bioetl.infrastructure.observability.factories import (
             create_logging_port,
             create_metrics_port,
         )
         from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
         from bioetl.interfaces.composition_root import CompositionRoot
+
+        # Initialize pipeline contract loader (required before any pipeline operations)
+        set_contract_loader(get_default_contract_loader())
 
         bootstrap = create_default_bootstrap()
         bootstrap_context = bootstrap.start()
@@ -167,8 +174,11 @@ def reset_application_context() -> None:
     After calling this, the next call to get_application_context() will
     create a new default context.
     """
+    from bioetl.domain.schemas.pipeline_contracts import clear_contract_loader
     from bioetl.interfaces.context_manager import reset_current_context
 
+    # Clear contract loader to ensure clean state
+    clear_contract_loader()
     reset_current_context()
 
 
