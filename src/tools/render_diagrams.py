@@ -196,6 +196,12 @@ def _render_diagram(
             theme,
             "--quiet",
         ]
+    
+    # Add puppeteer config for sandbox workaround in CI environments
+    puppeteer_config = Path("puppeteer-config.json")
+    if puppeteer_config.exists():
+        cmd.extend(["--puppeteerConfigFile", str(puppeteer_config.resolve())])
+    
     if config is not None:
         cmd.extend(["--configFile", str(config)])
 

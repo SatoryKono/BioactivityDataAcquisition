@@ -30,3 +30,4 @@ node_modules
 /.ipynb_checkpoints/
 /.vercel/cache/
 API_KEY.env
+puppeteer-config.json
