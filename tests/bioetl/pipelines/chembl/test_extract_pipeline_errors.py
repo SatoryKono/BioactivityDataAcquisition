@@ -117,7 +117,7 @@ def test_extract_stage_wraps_client_error(
     # Check that error details were captured in stage results
     failed_stages = [s for s in result.stages if not s.success]
     assert len(failed_stages) == 1
-    assert failed_stages[0].stage == "extract"
+    assert failed_stages[0].stage_name.value == "extract"
 
     log_text = caplog.text
     assert "Stage failed" in log_text # or check for Pipeline failed depending on executor logs
