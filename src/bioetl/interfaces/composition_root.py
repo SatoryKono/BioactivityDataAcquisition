@@ -170,16 +170,13 @@ class CompositionRoot:
     # =========================================================================
 
     def create_http_session(self) -> Any:
-        """Create a new HTTP session."""
-        return self._get_http_session_factory()()
+        """Create a new HTTP session.
 
-    def _get_http_session_factory(self) -> type:
-        """Get HTTP session factory, using lazy import if not explicitly set."""
-        if self._http_session_factory is None:
-            import requests  # Lazy import to avoid module-level dependency
-
-            return requests.Session
-        return self._http_session_factory
+        Delegates to InfrastructureFactory for proper layering.
+        """
+        if self._http_session_factory is not None:
+            return self._http_session_factory()
+        return self._infrastructure.create_http_session()
 
     def create_http_transport(
         self,
