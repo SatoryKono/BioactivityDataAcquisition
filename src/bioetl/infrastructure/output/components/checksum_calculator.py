@@ -6,7 +6,7 @@ import hashlib
 from pathlib import Path
 
 from bioetl.domain.ports.output import ChecksumCalculatorPort
-from bioetl.infrastructure.constants import CHECKSUM_CHUNK_SIZE
+from bioetl.infrastructure.settings.files import CHECKSUM_CHUNK_SIZE
 
 
 class ChecksumCalculator(ChecksumCalculatorPort):
