@@ -89,6 +89,21 @@ class ExtractStage(ExtractorABC):
         """Get the pre-configured entity if set."""
         return self._entity
 
+    def _is_batch_empty(self, batch: Any) -> bool:
+        """Check if batch is empty (handles both DataFrame and list)."""
+        if isinstance(batch, pd.DataFrame):
+            return batch.empty
+        return not batch
+
+    def _create_dataframe_from_batch(
+        self, batch_records: Any, resolved_entity: str
+    ) -> pd.DataFrame:
+        """Convert batch records to DataFrame, with optional mapping."""
+        if self._mapper:
+            typed_records = self._mapper.map_records(batch_records, resolved_entity)
+            return pd.DataFrame([r.model_dump() for r in typed_records])
+        return pd.DataFrame(batch_records)
+
     def extract(
         self,
         entity: str | None = None,
@@ -121,40 +136,26 @@ class ExtractStage(ExtractorABC):
                 "Entity must be provided either to extract() or in constructor."
             )
 
-        # Extract limit from filters for manual limiting
         limit = filters.pop("limit", None)
         remaining = limit
 
-        if self._record_source:
-            iterator = self._record_source.iter_records()
-        else:
-            iterator = self._extraction_service.iter_extract(
+        iterator = (
+            self._record_source.iter_records()
+            if self._record_source
+            else self._extraction_service.iter_extract(
                 resolved_entity, chunk_size=chunk_size, **filters
             )
+        )
 
         for batch in iterator:
             if remaining is not None and remaining <= 0:
                 break
 
-            # Check if batch is empty (works for both list and DataFrame)
-            if isinstance(batch, pd.DataFrame):
-                if batch.empty:
-                    continue
-            elif not batch:
+            if self._is_batch_empty(batch):
                 continue
 
-            # Apply limit to batch if needed
-            batch_records = batch
-            if remaining is not None:
-                batch_records = batch[:remaining]
-
-            if self._mapper:
-                # Map to domain models first (validates structure)
-                typed_records = self._mapper.map_records(batch_records, resolved_entity)
-                df = pd.DataFrame([r.model_dump() for r in typed_records])
-            else:
-                # Direct conversion (no validation)
-                df = pd.DataFrame(batch_records)
+            batch_records = batch[:remaining] if remaining is not None else batch
+            df = self._create_dataframe_from_batch(batch_records, resolved_entity)
 
             if not df.empty:
                 yield cast(TabularData, df)

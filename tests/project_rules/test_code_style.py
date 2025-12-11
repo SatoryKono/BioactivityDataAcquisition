@@ -34,6 +34,20 @@ def _run_tool(module: str, args: list[str]) -> None:
         ("black", ["--check", "."]),
         ("isort", ["--check-only", "."]),
         ("ruff", ["check", ".", "--extend-ignore", "I001"]),
+        (
+            "xenon",
+            [
+                "--max-absolute",
+                "B",
+                "--max-modules",
+                "B",
+                "--max-average",
+                "B",
+                "--exclude",
+                "tests/*,src/tools/*",
+                "src",
+            ],
+        ),
     ],
 )
 def test_code_style_tools(module: str, args: list[str]) -> None:

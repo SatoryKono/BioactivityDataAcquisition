@@ -190,6 +190,24 @@ def _normalize_synonyms(value: Any) -> Any:
     return "|".join(sorted(normalized))
 
 
+def _normalize_single_xref_entry(entry: Mapping[str, Any]) -> str | None:
+    """Normalize a single xref entry into a serialized string."""
+    normalized_entry: dict[str, Any] = {}
+    src = str(entry.get("xref_src", "") or "").strip()
+    if src:
+        normalized_entry["xref_src"] = src
+    normalized_entry["xref_id"] = _normalize_xref_id(src, entry.get("xref_id"))
+
+    for key, raw_value in entry.items():
+        if key in {"xref_src", "xref_id"}:
+            continue
+        if is_missing(raw_value) or isinstance(raw_value, (list, dict)):
+            continue
+        normalized_entry[str(key)] = str(raw_value).strip()
+
+    return _serialize_mapping(normalized_entry)
+
+
 def _normalize_component_xrefs(value: Any) -> Any:
     if is_missing(value):
         return None
@@ -203,28 +221,11 @@ def _normalize_component_xrefs(value: Any) -> Any:
     for entry in entries:
         if not isinstance(entry, Mapping):
             continue
-
-        normalized_entry: dict[str, Any] = {}
-        src = str(entry.get("xref_src", "") or "").strip()
-        if src:
-            normalized_entry["xref_src"] = src
-        normalized_entry["xref_id"] = _normalize_xref_id(src, entry.get("xref_id"))
-
-        for key, raw_value in entry.items():
-            if key in {"xref_src", "xref_id"}:
-                continue
-            if is_missing(raw_value) or isinstance(raw_value, (list, dict)):
-                continue
-            normalized_entry[str(key)] = str(raw_value).strip()
-
-        entry_str = _serialize_mapping(normalized_entry)
+        entry_str = _normalize_single_xref_entry(entry)
         if entry_str:
             normalized_entries.append(entry_str)
 
-    if not normalized_entries:
-        return None
-
-    return "|".join(normalized_entries)
+    return "|".join(normalized_entries) if normalized_entries else None
 
 
 def _serialize_mapping(mapping: Mapping[str, Any]) -> str | None:

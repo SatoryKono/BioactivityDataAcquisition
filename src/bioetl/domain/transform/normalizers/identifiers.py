@@ -71,18 +71,36 @@ def normalize_chembl_id(value: Any) -> str | None:
     return text
 
 
+def _coerce_pmid_from_float(value: float) -> int:
+    """Coerce float to int for PMID, raising if not integer."""
+    if is_missing(value):
+        return None
+    if value.is_integer():
+        return int(value)
+    raise ValueError(f"PubMed ID is not an integer: '{value}'")
+
+
+def _coerce_pmid_from_string(text: str, original_value: Any) -> int:
+    """Coerce string to int for PMID, raising if invalid."""
+    if not text or text == "<NA>":
+        return None
+    if not text.isdigit():
+        raise ValueError(
+            f"Invalid PubMed ID (contains non-digit characters): '{original_value}'"
+        )
+    return int(text)
+
+
 def normalize_pmid(value: Any) -> int | None:
     """Normalize PubMed ID as positive integer."""
     if is_missing(value):
         return None
 
     if isinstance(value, float):
-        if is_missing(value):
+        coerced = _coerce_pmid_from_float(value)
+        if coerced is None:
             return None
-        if value.is_integer():
-            value = int(value)
-        else:
-            raise ValueError(f"PubMed ID is not an integer: '{value}'")
+        value = coerced
 
     if isinstance(value, int):
         if value <= 0:
@@ -90,13 +108,7 @@ def normalize_pmid(value: Any) -> int | None:
         return value
 
     text = str(value).strip()
-    if not text or text == "<NA>":
-        return None
-
-    if not text.isdigit():
-        raise ValueError(
-            f"Invalid PubMed ID (contains non-digit characters): '{value}'"
-        )
+    return _coerce_pmid_from_string(text, value)
 
     parsed = int(text)
     if parsed <= 0:

@@ -45,6 +45,50 @@ class HttpConfigMigrator:
     }
 
     @classmethod
+    def _apply_legacy_mappings(
+        cls, migrated: dict[str, Any], migrated_fields: list[str]
+    ) -> None:
+        """Apply legacy field mappings to migrated dict."""
+        for old_name, (new_name, converter) in cls.LEGACY_MAPPINGS.items():
+            if old_name in migrated and new_name not in migrated:
+                value = migrated.pop(old_name)
+                if converter is not None:
+                    value = converter(value)
+                migrated[new_name] = value
+                migrated_fields.append(old_name)
+            elif old_name in migrated:
+                migrated.pop(old_name)
+                migrated_fields.append(old_name)
+
+    @classmethod
+    def _handle_retry_enabled(
+        cls, migrated: dict[str, Any], migrated_fields: list[str]
+    ) -> None:
+        """Handle retry_enabled special case."""
+        if "retry_enabled" in migrated:
+            retry_enabled = migrated.pop("retry_enabled")
+            if not retry_enabled and "max_retries" not in migrated:
+                migrated["max_retries"] = 0
+            migrated_fields.append("retry_enabled")
+
+    @classmethod
+    def _emit_deprecation_warning(
+        cls, migrated_fields: list[str], warn_stacklevel: int
+    ) -> None:
+        """Emit deprecation warning for legacy fields."""
+        if not migrated_fields:
+            return
+        fields_str = ", ".join(sorted(migrated_fields))
+        warnings.warn(
+            f"Legacy HTTP client config fields detected: {fields_str}. "
+            "Please update to canonical field names "
+            "(timeout_sec, max_retries, backoff_factor, rate_limit_per_sec). "
+            "Legacy fields will be removed in v3.0.",
+            DeprecationWarning,
+            stacklevel=warn_stacklevel,
+        )
+
+    @classmethod
     def migrate(
         cls,
         data: dict[str, Any],
@@ -68,37 +112,11 @@ class HttpConfigMigrator:
         migrated = dict(data)
         migrated_fields: list[str] = []
 
-        # Apply legacy field mappings
-        for old_name, (new_name, converter) in cls.LEGACY_MAPPINGS.items():
-            if old_name in migrated and new_name not in migrated:
-                value = migrated.pop(old_name)
-                if converter is not None:
-                    value = converter(value)
-                migrated[new_name] = value
-                migrated_fields.append(old_name)
-            elif old_name in migrated:
-                # Remove duplicate legacy field
-                migrated.pop(old_name)
-                migrated_fields.append(old_name)
+        cls._apply_legacy_mappings(migrated, migrated_fields)
+        cls._handle_retry_enabled(migrated, migrated_fields)
 
-        # Handle retry_enabled special case
-        if "retry_enabled" in migrated:
-            retry_enabled = migrated.pop("retry_enabled")
-            if not retry_enabled and "max_retries" not in migrated:
-                migrated["max_retries"] = 0
-            migrated_fields.append("retry_enabled")
-
-        # Emit deprecation warning if any legacy fields were found
-        if warn and migrated_fields:
-            fields_str = ", ".join(sorted(migrated_fields))
-            warnings.warn(
-                f"Legacy HTTP client config fields detected: {fields_str}. "
-                "Please update to canonical field names "
-                "(timeout_sec, max_retries, backoff_factor, rate_limit_per_sec). "
-                "Legacy fields will be removed in v3.0.",
-                DeprecationWarning,
-                stacklevel=warn_stacklevel,
-            )
+        if warn:
+            cls._emit_deprecation_warning(migrated_fields, warn_stacklevel)
 
         return migrated
 

@@ -10,6 +10,25 @@ if TYPE_CHECKING:
     pass
 
 
+def _is_sequence(value: Any) -> bool:
+    """Check if value is a sequence (but not string/bytes)."""
+    return isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
+        value, (str, bytes, bytearray)
+    )
+
+
+def _serialize_list_item(item: Any) -> str | None:
+    """Serialize a single list item, returning None if it should be skipped."""
+    if item is None or _is_missing(item):
+        return None
+    if isinstance(item, Mapping):
+        dict_str = serialize_dict(item)
+        return dict_str if dict_str and dict_str != "" else None
+    if _is_sequence(item):
+        return None  # Skip nested sequences
+    return str(item)
+
+
 def serialize_list(value: Any) -> Any:
     """Serialize a list of primitives or dicts into a pipe-delimited string.
 
@@ -21,31 +40,30 @@ def serialize_list(value: Any) -> Any:
     if value is None or _is_missing(value):
         return None
 
-    if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
-        value, (str, bytes, bytearray)
-    ):
-        if not value:
-            return None
-        parts: list[str] = []
-        for item in value:
-            if item is None or _is_missing(item):
-                continue
-            if isinstance(item, Mapping):
-                dict_str = serialize_dict(item)
-                if dict_str and dict_str != "":
-                    parts.append(dict_str)
-                continue
-            if isinstance(
-                item, (list, tuple, set, frozenset, Sequence)
-            ) and not isinstance(item, (str, bytes, bytearray)):
-                # Explicitly skip nested sequences
-                continue
-            parts.append(str(item))
+    if not _is_sequence(value):
+        return None if _is_missing(value) else str(value)
 
-        return "|".join(parts) if parts else None
+    if not value:
+        return None
 
-    # Non-sequence values: treat None as missing, otherwise convert to string
-    return None if _is_missing(value) else str(value)
+    parts: list[str] = []
+    for item in value:
+        serialized = _serialize_list_item(item)
+        if serialized is not None:
+            parts.append(serialized)
+
+    return "|".join(parts) if parts else None
+
+
+def _should_skip_dict_value(v: Any) -> bool:
+    """Check if dict value should be skipped during serialization."""
+    if v is None or _is_missing(v):
+        return True
+    if isinstance(v, Mapping):
+        return True  # Skip nested mappings
+    if _is_sequence(v):
+        return True  # Skip nested sequences
+    return False
 
 
 def serialize_dict(value: Any) -> Any:
@@ -59,7 +77,6 @@ def serialize_dict(value: Any) -> Any:
         return ""
 
     if not isinstance(value, Mapping):
-        # Non-dict values are not supported here; fall back to NA if missing
         return "" if _is_missing(value) else str(value)
 
     if not value:
@@ -68,17 +85,8 @@ def serialize_dict(value: Any) -> Any:
     parts: list[str] = []
     for key in sorted(value.keys()):
         v = value[key]
-        if v is None or _is_missing(v):
-            continue
-        if isinstance(v, Mapping):
-            # Skip nested mappings for this serializer
-            continue
-        if isinstance(v, (list, tuple, set, frozenset, Sequence)) and not isinstance(
-            v, (str, bytes, bytearray)
-        ):
-            # Skip nested sequences
-            continue
-        parts.append(f"{key}:{str(v)}")
+        if not _should_skip_dict_value(v):
+            parts.append(f"{key}:{str(v)}")
 
     return "|".join(parts) if parts else ""
 

@@ -249,6 +249,32 @@ class ConfigMigrator:
             data.pop("api_base_url")
 
     @classmethod
+    def _migrate_http_section(
+        cls, section: dict[str, Any], HttpConfigMigrator: type
+    ) -> None:
+        """Migrate HTTP config section using HttpConfigMigrator."""
+        if "client" in section and isinstance(section["client"], dict):
+            section["client"] = HttpConfigMigrator.migrate(section["client"], warn=False)
+        if "http" in section and isinstance(section["http"], dict):
+            section["http"] = HttpConfigMigrator.migrate(section["http"], warn=False)
+
+    @classmethod
+    def _migrate_provider_config_http(
+        cls, provider_config: dict[str, Any], HttpConfigMigrator: type
+    ) -> None:
+        """Migrate HTTP config in provider_config section."""
+        if "http" in provider_config and isinstance(provider_config["http"], dict):
+            provider_config["http"] = HttpConfigMigrator.migrate(
+                provider_config["http"], warn=False
+            )
+        if "http_client" in provider_config and isinstance(
+            provider_config["http_client"], dict
+        ):
+            provider_config["http_client"] = HttpConfigMigrator.migrate(
+                provider_config["http_client"], warn=False
+            )
+
+    @classmethod
     def _migrate_runtime_client_keys(cls, data: dict[str, Any]) -> None:
         """Fix legacy client config keys in runtime section.
 
@@ -259,33 +285,12 @@ class ConfigMigrator:
         )
 
         runtime = data.get("runtime")
-        if not isinstance(runtime, dict):
-            return
+        if isinstance(runtime, dict):
+            cls._migrate_http_section(runtime, HttpConfigMigrator)
 
-        # Migrate 'client' section (legacy name)
-        if "client" in runtime and isinstance(runtime["client"], dict):
-            runtime["client"] = HttpConfigMigrator.migrate(
-                runtime["client"], warn=False
-            )
-
-        # Migrate 'http' section (current name)
-        if "http" in runtime and isinstance(runtime["http"], dict):
-            runtime["http"] = HttpConfigMigrator.migrate(runtime["http"], warn=False)
-
-        # Also migrate provider_config.http if present
         provider_config = data.get("provider_config")
         if isinstance(provider_config, dict):
-            if "http" in provider_config and isinstance(provider_config["http"], dict):
-                provider_config["http"] = HttpConfigMigrator.migrate(
-                    provider_config["http"], warn=False
-                )
-            # Legacy: http_client section in provider_config
-            if "http_client" in provider_config and isinstance(
-                provider_config["http_client"], dict
-            ):
-                provider_config["http_client"] = HttpConfigMigrator.migrate(
-                    provider_config["http_client"], warn=False
-                )
+            cls._migrate_provider_config_http(provider_config, HttpConfigMigrator)
 
     # =========================================================================
     # Section packing helpers (v2 normalization)
@@ -319,6 +324,48 @@ class ConfigMigrator:
             data["identity"] = identity_fields
 
     @classmethod
+    def _build_source_section(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Build source section from flat fields and existing source."""
+        source_fields: dict[str, Any] = {}
+
+        if "source" in data:
+            existing_source = data.pop("source")
+            if isinstance(existing_source, dict):
+                source_fields.update(existing_source)
+
+        for field in cls.SOURCE_FIELDS:
+            if field in data:
+                source_fields[field] = data.pop(field)
+
+        if "csv_options" in data:
+            source_fields["csv"] = data.pop("csv_options")
+        elif "csv" in data and "runtime" not in data:
+            source_fields["csv"] = data.pop("csv")
+
+        return source_fields
+
+    @classmethod
+    def _build_sink_section(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Build sink section from flat fields and existing sink."""
+        sink_fields: dict[str, Any] = {}
+
+        if "sink" in data:
+            existing_sink = data.pop("sink")
+            if isinstance(existing_sink, dict):
+                sink_fields.update(existing_sink)
+
+        for field in cls.SINK_FIELDS:
+            if field in data:
+                sink_fields[field] = data.pop(field)
+
+        if "output" in data:
+            output_val = data.pop("output")
+            if isinstance(output_val, dict):
+                sink_fields["output"] = output_val
+
+        return sink_fields
+
+    @classmethod
     def _pack_data_flow(cls, data: dict[str, Any]) -> None:
         """Pack source and sink into data_flow aggregate.
 
@@ -331,53 +378,13 @@ class ConfigMigrator:
         - source: DataSourceConfig fields
         - sink: DataSinkConfig fields
         """
-        # If data_flow already exists, migrate any remaining flat fields into it
         if "data_flow" in data:
             cls._migrate_flat_fields_to_data_flow(data)
             return
 
-        # Build source section
-        source_fields: dict[str, Any] = {}
+        source_fields = cls._build_source_section(data)
+        sink_fields = cls._build_sink_section(data)
 
-        # Use existing source section if present
-        if "source" in data:
-            existing_source = data.pop("source")
-            if isinstance(existing_source, dict):
-                source_fields.update(existing_source)
-
-        # Pack flat source fields
-        for field in cls.SOURCE_FIELDS:
-            if field in data:
-                source_fields[field] = data.pop(field)
-
-        # Handle csv_options -> csv
-        if "csv_options" in data:
-            source_fields["csv"] = data.pop("csv_options")
-        elif "csv" in data and "runtime" not in data:
-            # csv at root level goes to source if no runtime section
-            source_fields["csv"] = data.pop("csv")
-
-        # Build sink section
-        sink_fields: dict[str, Any] = {}
-
-        # Use existing sink section if present
-        if "sink" in data:
-            existing_sink = data.pop("sink")
-            if isinstance(existing_sink, dict):
-                sink_fields.update(existing_sink)
-
-        # Pack flat sink fields
-        for field in cls.SINK_FIELDS:
-            if field in data:
-                sink_fields[field] = data.pop(field)
-
-        # Handle output section
-        if "output" in data:
-            output_val = data.pop("output")
-            if isinstance(output_val, dict):
-                sink_fields["output"] = output_val
-
-        # Create data_flow section if we have any content
         if source_fields or sink_fields:
             data_flow: dict[str, Any] = {}
             if source_fields:
@@ -387,14 +394,8 @@ class ConfigMigrator:
             data["data_flow"] = data_flow
 
     @classmethod
-    def _migrate_flat_fields_to_data_flow(cls, data: dict[str, Any]) -> None:
-        """Migrate any remaining flat source/sink fields into existing data_flow."""
-        data_flow = data.get("data_flow", {})
-        if not isinstance(data_flow, dict):
-            return
-
-        # Migrate flat source fields
-        source = data_flow.setdefault("source", {})
+    def _migrate_source_fields(cls, data: dict[str, Any], source: dict[str, Any]) -> None:
+        """Migrate flat source fields into source section."""
         for field in cls.SOURCE_FIELDS:
             if field in data and field not in source:
                 source[field] = data.pop(field)
@@ -403,8 +404,17 @@ class ConfigMigrator:
         if "csv_options" in data and "csv" not in source:
             source["csv"] = data.pop("csv_options")
 
-        # Migrate flat sink fields
-        sink = data_flow.setdefault("sink", {})
+        # Handle legacy source section at root (defensive)
+        if "source" in data:
+            existing_source = data.pop("source")
+            if isinstance(existing_source, dict):
+                for k, v in existing_source.items():
+                    if k not in source:
+                        source[k] = v
+
+    @classmethod
+    def _migrate_sink_fields(cls, data: dict[str, Any], sink: dict[str, Any]) -> None:
+        """Migrate flat sink fields into sink section."""
         for field in cls.SINK_FIELDS:
             if field in data and field not in sink:
                 sink[field] = data.pop(field)
@@ -415,21 +425,61 @@ class ConfigMigrator:
             if isinstance(output_val, dict):
                 sink["output"] = output_val
 
-        # Also handle legacy source/sink sections at root
-        # (shouldn't happen but defensive)
-        if "source" in data:
-            existing_source = data.pop("source")
-            if isinstance(existing_source, dict):
-                for k, v in existing_source.items():
-                    if k not in source:
-                        source[k] = v
-
+        # Handle legacy sink section at root (defensive)
         if "sink" in data:
             existing_sink = data.pop("sink")
             if isinstance(existing_sink, dict):
                 for k, v in existing_sink.items():
                     if k not in sink:
                         sink[k] = v
+
+    @classmethod
+    def _migrate_flat_fields_to_data_flow(cls, data: dict[str, Any]) -> None:
+        """Migrate any remaining flat source/sink fields into existing data_flow."""
+        data_flow = data.get("data_flow", {})
+        if not isinstance(data_flow, dict):
+            return
+
+        source = data_flow.setdefault("source", {})
+        cls._migrate_source_fields(data, source)
+
+        sink = data_flow.setdefault("sink", {})
+        cls._migrate_sink_fields(data, sink)
+
+    @classmethod
+    def _coerce_primary_key_to_list(pk_value: Any) -> list[str]:
+        """Coerce primary key value to list format."""
+        if isinstance(pk_value, str):
+            return [pk_value] if pk_value else []
+        if pk_value is None:
+            return []
+        return list(pk_value)
+
+    @classmethod
+    def _extract_primary_key_from_pipeline(
+        cls, pipeline_dict: dict[str, Any], data: dict[str, Any]
+    ) -> None:
+        """Extract primary_key from pipeline dict to identity section."""
+        if "primary_key" not in pipeline_dict:
+            return
+        pk_from_pipeline = pipeline_dict.pop("primary_key")
+        identity = data.setdefault("identity", {})
+        if isinstance(identity, dict) and identity.get("primary_key") is None:
+            identity["primary_key"] = cls._coerce_primary_key_to_list(pk_from_pipeline)
+
+    @classmethod
+    def _extract_stages_from_pipeline(
+        cls, pipeline_dict: dict[str, Any], data: dict[str, Any]
+    ) -> None:
+        """Extract stages fields from pipeline dict."""
+        if "stages" in data:
+            return
+        stages_fields: dict[str, Any] = {}
+        for field in cls.STAGES_FIELDS:
+            if field in pipeline_dict:
+                stages_fields[field] = pipeline_dict[field]
+        if stages_fields:
+            data["stages"] = stages_fields
 
     @classmethod
     def _pack_stages(cls, data: dict[str, Any]) -> None:
@@ -441,29 +491,18 @@ class ConfigMigrator:
         if not isinstance(pipeline_dict, dict):
             return
 
-        # Extract primary_key from pipeline dict -> identity
-        if "primary_key" in pipeline_dict:
-            pk_from_pipeline = pipeline_dict.pop("primary_key")
-            identity = data.setdefault("identity", {})
-            if isinstance(identity, dict) and identity.get("primary_key") is None:
-                # Coerce to list
-                if isinstance(pk_from_pipeline, str):
-                    identity["primary_key"] = (
-                        [pk_from_pipeline] if pk_from_pipeline else []
-                    )
-                elif pk_from_pipeline is None:
-                    identity["primary_key"] = []
-                else:
-                    identity["primary_key"] = list(pk_from_pipeline)
+        cls._extract_primary_key_from_pipeline(pipeline_dict, data)
+        cls._extract_stages_from_pipeline(pipeline_dict, data)
 
-        # Extract stages
-        if "stages" not in data:
-            stages_fields: dict[str, Any] = {}
-            for field in cls.STAGES_FIELDS:
-                if field in pipeline_dict:
-                    stages_fields[field] = pipeline_dict[field]
-            if stages_fields:
-                data["stages"] = stages_fields
+    @classmethod
+    def _merge_nested_dict(
+        cls, target: dict[str, Any], key: str, value: dict[str, Any]
+    ) -> None:
+        """Merge nested dict value into target section."""
+        if key in target and isinstance(target[key], dict):
+            target[key] = {**target[key], **value}
+        else:
+            target[key] = value
 
     @classmethod
     def _pack_section(
@@ -493,12 +532,8 @@ class ConfigMigrator:
             target_section |= nested_from_collected
 
         for key, value in collected.items():
-            if (
-                key in target_section
-                and isinstance(target_section[key], dict)
-                and isinstance(value, dict)
-            ):
-                target_section[key] = {**target_section[key], **value}
+            if isinstance(value, dict):
+                cls._merge_nested_dict(target_section, key, value)
             else:
                 target_section[key] = value
 

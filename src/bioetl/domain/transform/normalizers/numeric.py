@@ -28,13 +28,35 @@ def normalize_clinical_phase(value: Any) -> int | None:
     return numeric_value
 
 
+def _coerce_phase_from_float(value: float) -> int | None:
+    """Coerce float to int phase, returning None if not integer."""
+    if is_missing(value):
+        return None
+    if not value.is_integer():
+        return None
+    return int(value)
+
+
+def _coerce_phase_from_string(value: str) -> int | None:
+    """Coerce string to int phase."""
+    text = value.strip()
+    if not text or text == "<NA>":
+        return None
+    try:
+        parsed = float(text)
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid numeric value for clinical trial phase: '{value}'"
+        ) from exc
+    return _coerce_phase_value(parsed)
+
+
 def _coerce_phase_value(value: Any) -> int | None:
     """Coerce incoming value to an integer phase or None."""
     if is_missing(value):
         return None
 
     # Handle pandas NAType explicitly before type checks
-    # pd.NA != pd.NA is True, so is_missing should catch it, but double-check
     try:
         if value != value:  # This catches pd.NA, NaN, etc.
             return None
@@ -48,23 +70,10 @@ def _coerce_phase_value(value: Any) -> int | None:
         return value
 
     if isinstance(value, float):
-        if is_missing(value):
-            return None
-        if not value.is_integer():
-            return None
-        return int(value)
+        return _coerce_phase_from_float(value)
 
     if isinstance(value, str):
-        text = value.strip()
-        if not text or text == "<NA>":
-            return None
-        try:
-            parsed = float(text)
-        except ValueError as exc:
-            raise ValueError(
-                f"Invalid numeric value for clinical trial phase: '{value}'"
-            ) from exc
-        return _coerce_phase_value(parsed)
+        return _coerce_phase_from_string(value)
 
     raise ValueError(
         "Expected numeric value for clinical trial phase, "
