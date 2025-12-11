@@ -1,11 +1,8 @@
-"""
-CSV Writer implementation.
-"""
+"""CSV Writer implementation."""
 
 from __future__ import annotations
 
 from pathlib import Path
-import warnings
 
 import pandas as pd
 
@@ -30,22 +27,4 @@ class CsvWriter(BaseWriter):
         return fmt.lower() == "csv"
 
 
-# Deprecated aliases for backward compatibility
-_DEPRECATED_ALIASES = {
-    "CsvWriterImpl": "CsvWriter",
-}
-
-
-def __getattr__(name: str):
-    if name in _DEPRECATED_ALIASES:
-        warnings.warn(
-            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name]} instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return globals()[_DEPRECATED_ALIASES[name]]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-__all__ = ["CsvWriter", "CsvWriterImpl"]  # noqa: F822
+__all__ = ["CsvWriter"]
