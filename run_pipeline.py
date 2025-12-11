@@ -63,7 +63,8 @@ def main() -> None:
     from bioetl.interfaces.cli.app import app
 
     # Set CLI arguments
-    sys.argv = [
+    # Pass through additional CLI arguments (e.g., --limit, --dry-run)
+    base_args = [
         "bioetl",
         "run",
         pipeline["name"],
@@ -71,9 +72,9 @@ def main() -> None:
         pipeline["config"],
         "--output",
         pipeline["output"],
-        "--limit",
-        "10",
     ]
+    # Append any additional arguments passed to this script
+    sys.argv = base_args + sys.argv[2:]
     app()
 
 
