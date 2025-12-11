@@ -27,13 +27,15 @@ def _get_entity_model_map() -> dict[str, type[BaseModel]]:
     )
 
     # Internal mapping of entity type -> model class
-    # Note: "document" entity uses PublicationRawModel (canonical name)
+    # Note: Both "document" and "publication" entities use PublicationRawModel
+    # "publication" is the domain name, "document" is the ChEMBL API endpoint name
     return {
         "activity": ActivityRawModel,
         "molecule": MoleculeRawModel,
         "target": TargetRawModel,
         "assay": AssayRawModel,
-        "document": PublicationRawModel,  # Canonical: PublicationRawModel
+        "document": PublicationRawModel,  # ChEMBL API endpoint name
+        "publication": PublicationRawModel,  # Domain canonical name
     }
 
 
@@ -44,13 +46,15 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
     domain models.
 
     Note:
-        The "document" entity maps to PublicationRawModel (canonical name).
-        DocumentRawModel is a deprecated alias.
+        Both "document" (ChEMBL API endpoint) and "publication" (domain canonical name)
+        map to PublicationRawModel. DocumentRawModel is a deprecated alias.
 
     Example:
         >>> registry = ChemblEntityModelRegistry()
-        >>> model_class = registry.get_model("document")
+        >>> model_class = registry.get_model("publication")
         >>> model_class.__name__
+        'PublicationRawModel'
+        >>> registry.get_model("document").__name__
         'PublicationRawModel'
     """
 
@@ -58,7 +62,8 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
         """Get domain model class for entity type.
 
         Args:
-            entity: Entity type name (activity, molecule, target, assay, document).
+            entity: Entity type name (activity, molecule, target, assay,
+                document, publication).
 
         Returns:
             Pydantic model class for the entity.
@@ -96,7 +101,8 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
         """Return set of supported entity names.
 
         Returns:
-            Frozen set containing: activity, assay, target, molecule, document.
+            Frozen set containing: activity, assay, target, molecule,
+            document, publication.
         """
         return frozenset(_get_entity_model_map().keys())
 

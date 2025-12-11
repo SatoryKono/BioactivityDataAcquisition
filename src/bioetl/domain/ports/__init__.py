@@ -16,6 +16,7 @@ from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
     ExtractionServiceABC,
+    RawRecordBatch,
     RecordFetcherABC,
     VersionProviderABC,
 )
@@ -35,6 +36,9 @@ from bioetl.domain.ports.output import (
 )
 from bioetl.domain.ports.parsing import (
     PaginationInfo,
+    RawPayload,
+    RawRecordDict,
+    RawRecordList,
     ResponseParserPortABC,
 )
 from bioetl.domain.ports.schema import SchemaContractProviderABC
@@ -64,6 +68,10 @@ __all__: list[str] = [
     "QcReportGeneratorPort",
     # Parsing ports
     "PaginationInfo",
+    "RawPayload",  # Backward compatibility alias
+    "RawRecordBatch",  # Backward compatibility alias
+    "RawRecordDict",  # Backward compatibility alias
+    "RawRecordList",  # Backward compatibility alias
     "ResponseParserPortABC",
     # Schema ports
     "SchemaContractProviderABC",

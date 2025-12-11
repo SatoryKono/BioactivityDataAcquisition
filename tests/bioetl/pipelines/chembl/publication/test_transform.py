@@ -1,6 +1,6 @@
 """Tests for ChemblPipelineBase (Document context)."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -71,25 +71,15 @@ def pipeline():
 
 
 def test_transform_chembl_release(pipeline):
+    """Test that chembl_release normalizer extracts value from dict format."""
     df = pd.DataFrame(
         {"chembl_release": [{"chembl_release": "chembl_33"}, "chembl_34"]}
     )
 
     pipeline._validation_service.get_schema_columns.return_value = ["chembl_release"]
 
-    def extract_release(val):
-        if isinstance(val, dict):
-            return val.get("chembl_release")
-        return val
-
-    with patch(
-        "bioetl.infrastructure.transform.impl.normalize.get_normalizer"
-    ) as mock_get:
-        mock_get.side_effect = lambda name: (
-            extract_release if name == "chembl_release" else None
-        )
-
-        result = pipeline.transform(df)
+    # Normalizer is now registered in registry, no need for mock
+    result = pipeline.transform(df)
 
     assert result.iloc[0]["chembl_release"] == "chembl_33"
     assert result.iloc[1]["chembl_release"] == "chembl_34"

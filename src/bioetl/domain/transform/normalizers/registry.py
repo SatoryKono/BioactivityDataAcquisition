@@ -6,6 +6,7 @@ from bioetl.domain.transform.normalizers.identifiers import (
     normalize_bao_id,
     normalize_bao_label,
     normalize_chembl_id,
+    normalize_chembl_release,
     normalize_doi,
     normalize_pcid,
     normalize_pmid,
@@ -22,6 +23,8 @@ CUSTOM_FIELD_NORMALIZERS: dict[str, Callable[[Any], Any]] = {
     "assay_chembl_id": normalize_chembl_id,
     "molecule_chembl_id": normalize_chembl_id,
     "target_chembl_id": normalize_chembl_id,
+    # ChEMBL release
+    "chembl_release": normalize_chembl_release,
     # PubMed
     "pubmed_id": normalize_pmid,
     "pmid": normalize_pmid,

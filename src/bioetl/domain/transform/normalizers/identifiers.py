@@ -168,6 +168,31 @@ def normalize_bao_label(value: Any) -> str | None:
     return text if text else None
 
 
+def normalize_chembl_release(value: Any) -> str | None:
+    """
+    Normalize ChEMBL release identifier.
+
+    Handles both dict format {"chembl_release": "chembl_33"} and scalar values.
+    Returns trimmed string or None.
+    """
+    if is_missing(value):
+        return None
+
+    # Extract value from dict if present
+    if isinstance(value, dict):
+        extracted = value.get("chembl_release")
+        if extracted is None:
+            return None
+        value = extracted
+
+    # Convert to string and normalize
+    if not isinstance(value, str):
+        value = str(value)
+
+    text = value.strip()
+    return text if text else None
+
+
 def _parse_positive_int_with_prefixes(
     value: Any, *, field_name: str, prefixes: tuple[str, ...]
 ) -> int | None:
@@ -224,4 +249,5 @@ __all__ = [
     "normalize_uniprot",
     "normalize_bao_id",
     "normalize_bao_label",
+    "normalize_chembl_release",
 ]

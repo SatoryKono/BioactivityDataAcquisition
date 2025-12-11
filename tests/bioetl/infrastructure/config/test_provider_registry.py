@@ -29,9 +29,9 @@ from bioetl.infrastructure.config.provider_registry import (
     ProviderRegistryNotFoundError,
     clear_provider_registry_cache,
     create_provider_loader,
-    default_provider_registry_loader,
+    create_provider_registry,
+    create_provider_registry_loader,
     ensure_provider_known,
-    get_provider_registry,
 )
 
 # ---------------------------------------------------------------------------
@@ -632,7 +632,7 @@ class TestFactoryFunctions:
         config_file = tmp_path / "providers.yaml"
         config_file.write_text(yaml.dump({"providers": []}))
 
-        loader = default_provider_registry_loader(config_path=config_file)
+        loader = create_provider_registry_loader(config_path=config_file)
 
         assert isinstance(loader, ProviderLoaderImpl)
 
@@ -640,7 +640,7 @@ class TestFactoryFunctions:
         config_file = tmp_path / "providers.yaml"
         config_file.write_text(yaml.dump({"providers": []}))
 
-        registry = get_provider_registry(config_path=config_file)
+        registry = create_provider_registry(config_path=config_file)
 
         assert registry is not None
         # Should have ChEMBL fallback

@@ -47,7 +47,8 @@ class ChemblRecordMapper(RecordMapperABC):
 
         Args:
             raw_records: Untyped records from infrastructure parser.
-            entity: Entity type (activity, assay, target, molecule, document).
+            entity: Entity type (activity, assay, target, molecule, document,
+                publication).
 
         Returns:
             List of validated domain SourceRecordModel instances.
@@ -66,7 +67,8 @@ class ChemblRecordMapper(RecordMapperABC):
         """Return set of entity names this mapper supports.
 
         Returns:
-            Frozen set containing: activity, assay, target, molecule, document.
+            Frozen set containing: activity, assay, target, molecule,
+            document, publication.
         """
         return self._registry.supported_entities()
 
