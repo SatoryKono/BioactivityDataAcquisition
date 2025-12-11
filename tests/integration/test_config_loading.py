@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from bioetl.application.bootstrap import ApplicationBootstrap
-from bioetl.application.bootstrap_factory import create_default_bootstrap
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 from bioetl.domain.errors import ConfigValidationError
 from bioetl.infrastructure.config.loader import (
     clear_schema_contract_provider,

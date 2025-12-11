@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.bootstrap import ApplicationBootstrap, ApplicationContext
-from bioetl.application.bootstrap_factory import create_default_bootstrap
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 
 class TestCreateDefaultBootstrap:
