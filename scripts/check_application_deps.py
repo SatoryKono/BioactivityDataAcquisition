@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""
-Dependency graph validator for bioetl.application layer.
+"""Check application layer dependencies for violations.
 
 This script analyzes imports within the application layer to:
 1. Build a dependency graph between submodules
-2. Detect cyclic dependencies (via topological sort)
-3. Verify no module-level imports from infrastructure (only TYPE_CHECKING allowed)
-4. Output a detailed JSON report
+2. Detect cyclic dependencies between submodules
+3. Verify no module-level imports from infrastructure (only TYPE_CHECKING or lazy allowed)
+4. Validate domain imports against an allowed list
+5. Check for explicitly forbidden imports
 
 Usage:
-    python scripts/check_application_deps.py [--json] [--mermaid] [--strict]
+    python scripts/check_application_deps.py
+    python scripts/check_application_deps.py --format json
+    python scripts/check_application_deps.py --format mermaid
 
 Exit codes:
     0: All checks passed
@@ -35,11 +37,13 @@ from typing import Iterator, NamedTuple
 APPLICATION_ROOT = Path(__file__).parent.parent / "src" / "bioetl" / "application"
 APPLICATION_MODULE = "bioetl.application"
 INFRASTRUCTURE_MODULE = "bioetl.infrastructure"
+DOMAIN_MODULE = "bioetl.domain"
 
 # Top-level submodules in application layer
 SUBMODULES = frozenset(
     {
         "bootstrap",
+        "bootstrap_factory",
         "config",
         "container",
         "contracts",
@@ -59,10 +63,43 @@ SUBMODULES = frozenset(
     }
 )
 
-# Known exceptions for infrastructure imports (documented in .importlinter)
-# These are legacy exceptions that should be tracked and eventually removed
-ALLOWED_INFRASTRUCTURE_IMPORTS: set[tuple[str, str]] = {
-    # Format: (source_module, infrastructure_module)
+# Allowed domain imports - application layer can only import from these
+ALLOWED_DOMAIN_IMPORTS = {
+    "bioetl.domain.ports",
+    "bioetl.domain.configs",
+    "bioetl.domain.errors",
+    "bioetl.domain.observability",
+    "bioetl.domain.transform.contracts",
+    "bioetl.domain.validation",
+    "bioetl.domain.pipelines.contracts",
+    "bioetl.domain.provider_registry",
+    "bioetl.domain.providers",
+    "bioetl.domain.record_source",
+    "bioetl.domain.models",
+    "bioetl.domain.types",
+    # Additional allowed imports discovered in codebase
+    "bioetl.domain.clients.base.output.contracts",
+    "bioetl.domain.transform.transformers",
+    "bioetl.domain.validation.service",
+    "bioetl.domain.pipelines",
+    "bioetl.domain.transform",
+    "bioetl.domain.clients",
+    "bioetl.domain.schemas",
+    "bioetl.domain.ports.schema",
+    "bioetl.domain.configs.contracts",
+    "bioetl.domain.enums",
+    "bioetl.domain.services",
+}
+
+# Explicitly forbidden imports (never allowed, even in TYPE_CHECKING)
+# Note: bioetl.infrastructure is handled separately by check_infrastructure_imports
+FORBIDDEN_IMPORTS = {
+    "bioetl.domain.schemas.chembl.raw_models",
+}
+
+# Known exceptions for infrastructure imports (documented legacy exceptions)
+ALLOWED_INFRASTRUCTURE_EXCEPTIONS: set[tuple[str, str]] = {
+    # Format: (relative_file_path, infrastructure_module)
     # Add exceptions here only if they are documented and approved
 }
 
@@ -91,7 +128,19 @@ class ModuleAnalysis:
     imports: list[ImportInfo] = field(default_factory=list)
     infrastructure_imports: list[ImportInfo] = field(default_factory=list)
     application_imports: list[ImportInfo] = field(default_factory=list)
+    domain_imports: list[ImportInfo] = field(default_factory=list)
     parse_error: str | None = None
+
+
+@dataclass
+class Violation:
+    """A single dependency violation."""
+
+    type: str  # "cycle", "infrastructure", "forbidden", "domain"
+    file: str
+    line: int | None
+    message: str
+    import_path: str | None = None
 
 
 @dataclass
@@ -100,11 +149,10 @@ class DependencyReport:
 
     # Graph data
     submodule_graph: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
-    all_edges: list[tuple[str, str, str]] = field(default_factory=list)  # (from, to, file)
+    all_edges: list[tuple[str, str, str]] = field(default_factory=list)
 
     # Violations
-    cycles: list[list[str]] = field(default_factory=list)
-    infrastructure_violations: list[dict] = field(default_factory=list)
+    violations: list[Violation] = field(default_factory=list)
 
     # Metadata
     modules_analyzed: int = 0
@@ -113,7 +161,7 @@ class DependencyReport:
 
     @property
     def has_violations(self) -> bool:
-        return bool(self.cycles or self.infrastructure_violations)
+        return bool(self.violations)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -190,9 +238,9 @@ class ImportVisitor(ast.NodeVisitor):
         return False
 
 
-def analyze_module(path: Path) -> ModuleAnalysis:
+def analyze_module(path: Path, src_root: Path) -> ModuleAnalysis:
     """Analyze a single Python module for imports."""
-    relative = path.relative_to(APPLICATION_ROOT.parent.parent.parent)
+    relative = path.relative_to(src_root)
     submodule = _get_submodule(path)
 
     analysis = ModuleAnalysis(
@@ -221,6 +269,8 @@ def analyze_module(path: Path) -> ModuleAnalysis:
             analysis.infrastructure_imports.append(imp)
         elif imp.module.startswith(APPLICATION_MODULE):
             analysis.application_imports.append(imp)
+        elif imp.module.startswith(DOMAIN_MODULE):
+            analysis.domain_imports.append(imp)
 
     return analysis
 
@@ -254,6 +304,28 @@ def _extract_target_submodule(import_module: str) -> str | None:
     if not parts or not parts[0]:
         return "__init__"
     return parts[0]
+
+
+def _is_domain_import_allowed(import_module: str) -> bool:
+    """Check if a domain import is in the allowed list."""
+    # Check exact match
+    if import_module in ALLOWED_DOMAIN_IMPORTS:
+        return True
+
+    # Check if it's a submodule of an allowed import
+    for allowed in ALLOWED_DOMAIN_IMPORTS:
+        if import_module.startswith(allowed + "."):
+            return True
+
+    return False
+
+
+def _is_forbidden_import(import_module: str) -> bool:
+    """Check if an import is explicitly forbidden."""
+    for forbidden in FORBIDDEN_IMPORTS:
+        if import_module == forbidden or import_module.startswith(forbidden + "."):
+            return True
+    return False
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -352,37 +424,96 @@ def topological_sort(graph: dict[str, set[str]]) -> list[str] | None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def check_infrastructure_imports(
-    analyses: list[ModuleAnalysis], strict: bool = False
-) -> list[dict]:
+def check_cycles(graph: dict[str, set[str]]) -> list[Violation]:
+    """Check for cyclic dependencies between submodules."""
+    violations: list[Violation] = []
+    cycles = detect_cycles(graph)
+
+    for cycle in cycles:
+        violations.append(
+            Violation(
+                type="cycle",
+                file="",
+                line=None,
+                message=f"Cyclic dependency: {' -> '.join(cycle)}",
+                import_path=None,
+            )
+        )
+
+    return violations
+
+
+def check_infrastructure_imports(analyses: list[ModuleAnalysis]) -> list[Violation]:
     """Check for forbidden infrastructure imports at module level."""
-    violations: list[dict] = []
+    violations: list[Violation] = []
 
     for analysis in analyses:
         for imp in analysis.infrastructure_imports:
-            # Skip TYPE_CHECKING imports
+            # Skip TYPE_CHECKING imports (allowed)
             if imp.in_type_checking:
                 continue
 
-            # Skip lazy imports (inside functions)
+            # Skip lazy imports inside functions (allowed)
             if imp.is_lazy:
                 continue
 
             # Check if this is an allowed exception
             exception_key = (analysis.relative_path, imp.module)
-            if not strict and exception_key in ALLOWED_INFRASTRUCTURE_IMPORTS:
+            if exception_key in ALLOWED_INFRASTRUCTURE_EXCEPTIONS:
                 continue
 
             violations.append(
-                {
-                    "file": analysis.relative_path,
-                    "line": imp.lineno,
-                    "import": imp.module,
-                    "submodule": analysis.submodule,
-                    "reason": "Module-level import from infrastructure "
-                    "(should use TYPE_CHECKING or lazy import)",
-                }
+                Violation(
+                    type="infrastructure",
+                    file=analysis.relative_path,
+                    line=imp.lineno,
+                    message=(
+                        f"Module-level import from infrastructure "
+                        f"(should use TYPE_CHECKING or lazy import)"
+                    ),
+                    import_path=imp.module,
+                )
             )
+
+    return violations
+
+
+def check_forbidden_imports(analyses: list[ModuleAnalysis]) -> list[Violation]:
+    """Check for explicitly forbidden imports."""
+    violations: list[Violation] = []
+
+    for analysis in analyses:
+        for imp in analysis.imports:
+            if _is_forbidden_import(imp.module):
+                violations.append(
+                    Violation(
+                        type="forbidden",
+                        file=analysis.relative_path,
+                        line=imp.lineno,
+                        message=f"Forbidden import: {imp.module}",
+                        import_path=imp.module,
+                    )
+                )
+
+    return violations
+
+
+def check_domain_imports(analyses: list[ModuleAnalysis]) -> list[Violation]:
+    """Check that all domain imports are from the allowed list."""
+    violations: list[Violation] = []
+
+    for analysis in analyses:
+        for imp in analysis.domain_imports:
+            if not _is_domain_import_allowed(imp.module):
+                violations.append(
+                    Violation(
+                        type="domain",
+                        file=analysis.relative_path,
+                        line=imp.lineno,
+                        message=f"Domain import not in allowed list: {imp.module}",
+                        import_path=imp.module,
+                    )
+                )
 
     return violations
 
@@ -392,14 +523,17 @@ def check_infrastructure_imports(
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def generate_report(strict: bool = False) -> DependencyReport:
+def generate_report() -> DependencyReport:
     """Generate a complete dependency analysis report."""
     report = DependencyReport()
+
+    # Determine src root for relative paths
+    src_root = APPLICATION_ROOT.parent.parent.parent
 
     # Find and analyze all modules
     analyses: list[ModuleAnalysis] = []
     for path in find_python_files(APPLICATION_ROOT):
-        analysis = analyze_module(path)
+        analysis = analyze_module(path, src_root)
         analyses.append(analysis)
 
         if analysis.parse_error:
@@ -422,11 +556,11 @@ def generate_report(strict: bool = False) -> DependencyReport:
             if target and target != source and target in SUBMODULES:
                 report.all_edges.append((source, target, analysis.relative_path))
 
-    # Detect cycles
-    report.cycles = detect_cycles(dict(report.submodule_graph))
-
-    # Check infrastructure imports
-    report.infrastructure_violations = check_infrastructure_imports(analyses, strict)
+    # Collect all violations
+    report.violations.extend(check_cycles(dict(report.submodule_graph)))
+    report.violations.extend(check_infrastructure_imports(analyses))
+    report.violations.extend(check_forbidden_imports(analyses))
+    report.violations.extend(check_domain_imports(analyses))
 
     return report
 
@@ -436,21 +570,29 @@ def format_json_report(report: DependencyReport) -> dict:
     # Convert sets to sorted lists for JSON
     graph_json = {k: sorted(v) for k, v in report.submodule_graph.items()}
 
+    # Format violations
+    violations_json = [
+        {
+            "type": v.type,
+            "file": v.file,
+            "line": v.line,
+            "message": v.message,
+            "import": v.import_path,
+        }
+        for v in report.violations
+    ]
+
     return {
-        "status": "FAIL" if report.has_violations else "PASS",
-        "summary": {
+        "status": "ok" if not report.has_violations else "error",
+        "graph": graph_json,
+        "violations": violations_json,
+        "metadata": {
             "modules_analyzed": report.modules_analyzed,
             "total_imports": report.total_imports,
             "submodules": len(report.submodule_graph),
-            "cycle_count": len(report.cycles),
-            "infrastructure_violation_count": len(report.infrastructure_violations),
-            "parse_error_count": len(report.parse_errors),
+            "topological_order": topological_sort(dict(report.submodule_graph)),
+            "parse_errors": report.parse_errors,
         },
-        "dependency_graph": graph_json,
-        "cycles": report.cycles,
-        "infrastructure_violations": report.infrastructure_violations,
-        "parse_errors": report.parse_errors,
-        "topological_order": topological_sort(dict(report.submodule_graph)),
     }
 
 
@@ -466,7 +608,10 @@ def generate_mermaid(report: DependencyReport) -> str:
 
     # Sort for consistent output
     for source, target in sorted(edges):
-        lines.append(f"    {source} --> {target}")
+        # Sanitize node names for Mermaid (replace underscores)
+        src_id = source.replace("_", "")
+        tgt_id = target.replace("_", "")
+        lines.append(f"    {src_id}[{source}] --> {tgt_id}[{target}]")
 
     # Add styling for special modules
     lines.append("")
@@ -490,17 +635,23 @@ def print_text_report(report: DependencyReport) -> None:
 
     # Parse errors
     if report.parse_errors:
-        print(f"\n⚠️  Parse Errors ({len(report.parse_errors)}):")
+        print(f"\n[!] Parse Errors ({len(report.parse_errors)}):")
         for err in report.parse_errors:
             print(f"  - {err['file']}: {err['error']}")
 
+    # Group violations by type
+    cycles = [v for v in report.violations if v.type == "cycle"]
+    infra = [v for v in report.violations if v.type == "infrastructure"]
+    forbidden = [v for v in report.violations if v.type == "forbidden"]
+    domain = [v for v in report.violations if v.type == "domain"]
+
     # Cycles
-    if report.cycles:
-        print(f"\n❌ CYCLES DETECTED ({len(report.cycles)}):")
-        for cycle in report.cycles:
-            print(f"  - {' -> '.join(cycle)}")
+    if cycles:
+        print(f"\n[X] CYCLES DETECTED ({len(cycles)}):")
+        for v in cycles:
+            print(f"  - {v.message}")
     else:
-        print("\n✅ No cyclic dependencies detected")
+        print("\n[OK] No cyclic dependencies detected")
 
     # Topological order
     topo_order = topological_sort(dict(report.submodule_graph))
@@ -508,14 +659,33 @@ def print_text_report(report: DependencyReport) -> None:
         print(f"\nTopological order: {' -> '.join(topo_order)}")
 
     # Infrastructure violations
-    if report.infrastructure_violations:
-        print(f"\n❌ INFRASTRUCTURE IMPORT VIOLATIONS ({len(report.infrastructure_violations)}):")
-        for v in report.infrastructure_violations:
-            print(f"  - {v['file']}:{v['line']}")
-            print(f"    Import: {v['import']}")
-            print(f"    Reason: {v['reason']}")
+    if infra:
+        print(f"\n[X] INFRASTRUCTURE IMPORT VIOLATIONS ({len(infra)}):")
+        for v in infra:
+            print(f"  - {v.file}:{v.line}")
+            print(f"    Import: {v.import_path}")
+            print(f"    Reason: {v.message}")
     else:
-        print("\n✅ No forbidden infrastructure imports at module level")
+        print("\n[OK] No forbidden infrastructure imports at module level")
+
+    # Forbidden imports
+    if forbidden:
+        print(f"\n[X] FORBIDDEN IMPORT VIOLATIONS ({len(forbidden)}):")
+        for v in forbidden:
+            print(f"  - {v.file}:{v.line}")
+            print(f"    Import: {v.import_path}")
+    else:
+        print("\n[OK] No explicitly forbidden imports")
+
+    # Domain import violations
+    if domain:
+        print(f"\n[X] DOMAIN IMPORT VIOLATIONS ({len(domain)}):")
+        for v in domain:
+            print(f"  - {v.file}:{v.line}")
+            print(f"    Import: {v.import_path}")
+            print(f"    Reason: Not in allowed domain imports list")
+    else:
+        print("\n[OK] All domain imports are from allowed list")
 
     # Dependency graph
     print("\nDependency Graph (submodule -> dependencies):")
@@ -528,9 +698,9 @@ def print_text_report(report: DependencyReport) -> None:
 
     print("\n" + "=" * 70)
     if report.has_violations:
-        print("RESULT: ❌ FAIL - Violations detected")
+        print("RESULT: [X] FAIL - Violations detected")
     else:
-        print("RESULT: ✅ PASS - All checks passed")
+        print("RESULT: [OK] PASS - All checks passed")
     print("=" * 70)
 
 
@@ -545,29 +715,20 @@ def main() -> int:
         description="Check dependency graph for bioetl.application layer"
     )
     parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output report as JSON",
-    )
-    parser.add_argument(
-        "--mermaid",
-        action="store_true",
-        help="Output Mermaid diagram only",
-    )
-    parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Strict mode: fail on any infrastructure import (ignore exceptions)",
+        "--format",
+        choices=["text", "json", "mermaid"],
+        default="text",
+        help="Output format (default: text)",
     )
     args = parser.parse_args()
 
-    report = generate_report(strict=args.strict)
+    report = generate_report()
 
-    if args.mermaid:
+    if args.format == "mermaid":
         print(generate_mermaid(report))
         return 0
 
-    if args.json:
+    if args.format == "json":
         print(json.dumps(format_json_report(report), indent=2))
     else:
         print_text_report(report)
