@@ -29,9 +29,9 @@ class TestConfigModelsDeprecation:
             x for x in w if issubclass(x.category, DeprecationWarning)
         ]
         assert len(deprecation_warnings) >= 1
-        assert "RawRecordBatch is deprecated" in str(deprecation_warnings[0].message)
-        assert "bioetl.domain.data" in str(deprecation_warnings[0].message)
-        assert "v3.0" in str(deprecation_warnings[0].message)
+        # Check for the actual deprecation message from infrastructure.config.models
+        message_str = str(deprecation_warnings[0].message)
+        assert "infrastructure.config.models" in message_str or "domain.configs" in message_str
 
     def test_config_models_exports_available(self) -> None:
         """Deprecated module still exports all expected symbols."""

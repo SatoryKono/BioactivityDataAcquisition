@@ -126,6 +126,6 @@ class TestModelValidation:
     def test_document_model_validates_data(self, registry):
         """Test that DocumentRawModel can validate document data."""
         model_class = registry.get_model("document")
-        data = {"document_chembl_id": "CHEMBL_DOC_1"}
+        data = {"document_chembl_id": "CHEMBL123456"}
         instance = model_class.model_validate(data)
-        assert instance.document_chembl_id == "CHEMBL_DOC_1"
+        assert str(instance.document_chembl_id) == "CHEMBL123456"
