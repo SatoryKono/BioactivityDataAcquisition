@@ -13,7 +13,7 @@ from bioetl.application.files.csv_record_source import (
 )
 from bioetl.application.helpers import resolve_primary_key_with_filter
 from bioetl.application.mappers.chembl import ChemblRecordMapper
-from bioetl.application.pipelines.base import PipelineBase
+from bioetl.application.pipelines.base import ExtractResult, PipelineBase
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.pipelines.stages.extract import ExtractStage
 from bioetl.domain.clients.base.output.contracts import (
@@ -179,7 +179,7 @@ class ChemblPipelineBase(PipelineBase):
             return True
         return bool(pipeline_cfg.get("skip_release_lookup"))
 
-    def extract(self, **kwargs: Any) -> TabularData:
+    def extract(self, **kwargs: Any) -> ExtractResult:
         """Return single TabularData for unit tests and local checks.
 
         Main run process uses self._extractor directly, so
@@ -194,7 +194,7 @@ class ChemblPipelineBase(PipelineBase):
 
         extract_result = extractor.extract(**kwargs)
         if extract_result is None:
-            return pd.DataFrame()
+            return None
 
         if isinstance(extract_result, pd.DataFrame):
             return extract_result
@@ -239,7 +239,7 @@ class ChemblPipelineBase(PipelineBase):
 
     def write(
         self,
-        df: TabularData,
+        df: pd.DataFrame,
         output_path: Path,
         context: RunContext,
     ) -> WriteResult:

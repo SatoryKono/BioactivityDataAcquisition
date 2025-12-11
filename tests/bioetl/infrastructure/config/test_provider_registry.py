@@ -715,3 +715,55 @@ class TestConstants:
         assert DEFAULT_PROVIDERS_REGISTRY_PATH == Path("configs/providers.yaml")
 
 
+# ---------------------------------------------------------------------------
+# Tests: Backward Compatibility Aliases
+# ---------------------------------------------------------------------------
+
+
+class TestBackwardCompatibilityAliases:
+    """Tests for backward compatibility aliases."""
+
+    def test_exception_aliases(self) -> None:
+        """Test that exception classes have backward-compatible alias properties."""
+        path = Path("/test/registry.yaml")
+
+        # ProviderRegistryNotFoundError
+        error1 = ProviderRegistryNotFoundError(path)
+        assert error1.registry_path == path
+        assert error1.path == path  # Alias
+
+        # ProviderRegistryFormatError
+        error2 = ProviderRegistryFormatError(path, "test message")
+        assert error2.registry_path == path
+        assert error2.path == path  # Alias
+
+        # ProviderNotConfiguredError
+        error3 = ProviderNotConfiguredError("test_provider", path)
+        assert error3.registry_path == path
+
+    def test_model_aliases(self) -> None:
+        """Test that model classes have backward-compatible alias properties."""
+        http_config = ProviderHttpConfig(
+            base_url="https://api.example.com", timeout_sec=60.0, max_retries=5
+        )
+        entry = ProviderRegistryEntryModel(
+            id="test",
+            module="test.module",
+            factory="create",
+            http=http_config,
+        )
+
+        # http_client should be an alias for http
+        assert entry.http is not None
+        assert entry.http_client is entry.http
+        assert entry.http_client is not None
+
+    def test_loader_alias(self) -> None:
+        """Test that loader uses backward-compatible config path alias."""
+        from bioetl.infrastructure.config.provider_registry import (
+            DEFAULT_PROVIDERS_CONFIG_PATH,
+        )
+
+        # Both should point to the same path
+        assert DEFAULT_PROVIDERS_REGISTRY_PATH == DEFAULT_PROVIDERS_CONFIG_PATH
+        assert DEFAULT_PROVIDERS_CONFIG_PATH == Path("configs/providers.yaml")

@@ -64,11 +64,8 @@ class HashColumnsTransformerImpl(TransformerABC):
             result["hash_row"] = None
             return result
 
-        return cast(
-            MutableTabularData,
-            self._hash_service.add_hash_columns(
-                cast(TabularData, df), business_key_cols=self._business_key_fields
-            ),
+        return self._hash_service.add_hash_columns(
+            cast(TabularData, df), business_key_cols=self._business_key_fields
         )
 
 
