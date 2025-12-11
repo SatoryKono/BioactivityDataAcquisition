@@ -29,7 +29,7 @@ from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
 from bioetl.domain.record_source import RecordSourceABC
-from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.services.version_formatter import format_chembl_version
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
@@ -54,6 +54,7 @@ class ChemblPipelineBase(PipelineBase):
         index_generator: IndexGeneratorABC,
         timestamp_provider: TimestampProviderABC,
         entity_model_registry: EntityModelRegistryABC,
+        schema_contract: PipelineSchemaModel,
         loader: LoaderABC | None = None,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         normalization_service: NormalizationServiceABC | None = None,
@@ -82,12 +83,10 @@ class ChemblPipelineBase(PipelineBase):
             record_source=record_source,
         )
 
-        # Create Transformer
-        # Need schema contract
-        contract = get_pipeline_contract(config.id, default_entity=config.entity_name)
+        # Create Transformer with injected schema contract
         transformer = ChemblTransformerImpl(
             validation_service=validation_service,
-            schema_contract=contract,
+            schema_contract=schema_contract,
             normalization_service=norm_service,
             logger=logger,
             serialization_mode=config.serialization_mode,
@@ -105,6 +104,7 @@ class ChemblPipelineBase(PipelineBase):
             hash_service=hash_service,
             index_generator=index_generator,
             timestamp_provider=timestamp_provider,
+            schema_contract=schema_contract,
             metadata_builder=metadata_builder,
             extractor=extractor,
             hooks=hooks,

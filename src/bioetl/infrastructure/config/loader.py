@@ -3,23 +3,21 @@
 This module provides pipeline configuration loading functionality with support
 for dependency injection of schema contract providers.
 
-Preferred usage (DI approach):
+Usage (DI approach - recommended):
     >>> from bioetl.interfaces.composition_root import get_composition_root
     >>> root = get_composition_root()
     >>> loader = root.create_schema_contract_loader()
     >>> config = loader.get_pipeline_config("chembl.activity")
 
-Legacy usage (deprecated, will be removed):
+Alternative (explicit provider):
     >>> from bioetl.infrastructure.config.loader import get_pipeline_config
-    >>> set_schema_contract_provider(provider)  # deprecated
-    >>> config = get_pipeline_config("chembl.activity")
+    >>> config = get_pipeline_config("chembl.activity", schema_contract_provider=provider)
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Iterable
-import warnings
 
 from pydantic import ValidationError
 
@@ -189,14 +187,14 @@ class SchemaContractLoader:
 
 
 # ============================================================================
-# Module-level functions (use explicit provider or deprecated global state)
+# Module-level functions (require explicit provider)
 # ============================================================================
 
 
 def get_pipeline_config(
     pipeline_id: str,
     *,
-    schema_contract_provider: SchemaContractProviderABC | None = None,
+    schema_contract_provider: SchemaContractProviderABC,
     profile: str | None = None,
     cli_overrides: dict[str, Any] | None = None,
     env_overrides: dict[str, Any] | None = None,
@@ -206,8 +204,7 @@ def get_pipeline_config(
 
     Args:
         pipeline_id: Pipeline identifier (e.g., "chembl.activity").
-        schema_contract_provider: Schema provider. If None, uses
-            global provider (deprecated) or raises RuntimeError.
+        schema_contract_provider: Schema provider (required).
         profile: Profile name to apply.
         cli_overrides: CLI overrides.
         env_overrides: Environment variable overrides.
@@ -218,9 +215,9 @@ def get_pipeline_config(
 
     Raises:
         ConfigFileNotFoundError: Configuration file not found.
-        RuntimeError: SchemaContractProvider not initialized.
+        ValueError: If schema_contract_provider is not provided.
     """
-    effective_provider = _resolve_schema_provider(schema_contract_provider)
+    effective_provider = _require_schema_provider(schema_contract_provider)
 
     try:
         config_path, raw_config = get_yaml_for_pipeline(
@@ -245,7 +242,7 @@ def get_pipeline_config(
 def get_pipeline_config_from_path(
     config_path: str | Path,
     *,
-    schema_contract_provider: SchemaContractProviderABC | None = None,
+    schema_contract_provider: SchemaContractProviderABC,
     profile: str | None = None,
     profiles_root: str | Path | None = None,
     cli_overrides: dict[str, Any] | None = None,
@@ -255,8 +252,7 @@ def get_pipeline_config_from_path(
 
     Args:
         config_path: Path to configuration file.
-        schema_contract_provider: Schema provider. If None, uses
-            global provider (deprecated) or raises RuntimeError.
+        schema_contract_provider: Schema provider (required).
         profile: Profile name to apply.
         profiles_root: Profiles root directory.
         cli_overrides: CLI overrides.
@@ -267,9 +263,9 @@ def get_pipeline_config_from_path(
 
     Raises:
         ConfigFileNotFoundError: Configuration file not found.
-        RuntimeError: SchemaContractProvider not initialized.
+        ValueError: If schema_contract_provider is not provided.
     """
-    effective_provider = _resolve_schema_provider(schema_contract_provider)
+    effective_provider = _require_schema_provider(schema_contract_provider)
 
     try:
         path, raw_config = get_yaml_from_path(
@@ -361,193 +357,27 @@ def _ensure_provider_registered(provider_id: str) -> None:
         ) from exc
 
 
-# ============================================================================
-# DEPRECATED: Global state for backward compatibility
-# These will be removed in a future release. Pass schema_contract_provider
-# explicitly to get_pipeline_config() and get_pipeline_config_from_path().
-# ============================================================================
-
-_SCHEMA_CONTRACT_PROVIDER: SchemaContractProviderABC | None = None
-
-
-def _resolve_schema_provider(
+def _require_schema_provider(
     explicit_provider: SchemaContractProviderABC | None,
 ) -> SchemaContractProviderABC:
-    """Resolve the schema provider to use, with deprecation warning for global state.
+    """Require explicit schema provider (no global fallback).
 
     Args:
         explicit_provider: Explicitly provided schema contract provider.
 
     Returns:
-        The provider to use (explicit or global fallback).
+        The provider to use.
 
     Raises:
-        RuntimeError: If no provider is available.
+        ValueError: If no provider is provided.
     """
-    if explicit_provider is not None:
-        return explicit_provider
-
-    # Fallback to global state (deprecated)
-    if _SCHEMA_CONTRACT_PROVIDER is not None:
-        warnings.warn(
-            "Using global SchemaContractProvider is deprecated. "
-            "Pass schema_contract_provider explicitly to get_pipeline_config() "
-            "or get_pipeline_config_from_path(). "
-            "Global state will be removed in a future release.",
-            DeprecationWarning,
-            stacklevel=4,
+    if explicit_provider is None:
+        raise ValueError(
+            "schema_contract_provider is required. "
+            "Use CompositionRoot.create_schema_contract_loader() for DI-based loading "
+            "or pass schema_contract_provider explicitly."
         )
-        return _SCHEMA_CONTRACT_PROVIDER
-
-    raise RuntimeError(
-        "SchemaContractProvider not initialized. "
-        "Pass schema_contract_provider parameter explicitly or "
-        "call set_schema_contract_provider() for legacy compatibility."
-    )
-
-
-def set_schema_contract_provider(provider: SchemaContractProviderABC) -> None:
-    """Set the global schema contract provider.
-
-    .. deprecated::
-        Global state injection is deprecated. Pass schema_contract_provider
-        explicitly to get_pipeline_config() and get_pipeline_config_from_path()
-        instead. This function will be removed in a future release.
-
-    Args:
-        provider: Configured SchemaContractProviderABC instance.
-
-    Example:
-        >>> from bioetl.application.services import SchemaContractProviderImpl
-        >>> from bioetl.domain.schemas.registry import get_default_schema_registry
-        >>> provider = SchemaContractProviderImpl(get_default_schema_registry())
-        >>> set_schema_contract_provider(provider)  # deprecated
-    """
-    warnings.warn(
-        "set_schema_contract_provider() is deprecated. "
-        "Pass schema_contract_provider explicitly to get_pipeline_config() "
-        "or get_pipeline_config_from_path(). "
-        "This function will be removed in a future release.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
-    _SCHEMA_CONTRACT_PROVIDER = provider
-
-
-def get_schema_contract_provider() -> SchemaContractProviderABC | None:
-    """Get the current schema contract provider.
-
-    .. deprecated::
-        Global state access is deprecated. Use explicit provider injection instead.
-
-    Returns:
-        The configured schema contract provider, or None if not set.
-    """
-    warnings.warn(
-        "get_schema_contract_provider() is deprecated. "
-        "Use explicit provider injection instead. "
-        "This function will be removed in a future release.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return _SCHEMA_CONTRACT_PROVIDER
-
-
-def clear_schema_contract_provider() -> None:
-    """Clear the global schema contract provider (for testing).
-
-    .. deprecated::
-        Global state management is deprecated.
-
-    This resets the provider to None, useful for test isolation.
-    """
-    warnings.warn(
-        "clear_schema_contract_provider() is deprecated. "
-        "Use explicit provider injection instead. "
-        "This function will be removed in a future release.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
-    _SCHEMA_CONTRACT_PROVIDER = None
-
-
-def reset_schema_contract_provider() -> None:
-    """Reset the schema contract provider (for testing purposes).
-
-    .. deprecated::
-        Use clear_schema_contract_provider() instead.
-        This function is kept for backward compatibility.
-    """
-    warnings.warn(
-        "reset_schema_contract_provider() is deprecated. "
-        "Use explicit provider injection instead. "
-        "This function will be removed in a future release.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    _clear_provider_internal()
-
-
-def _clear_provider_internal() -> None:
-    """Internal function to clear provider without deprecation warning.
-
-    Used for test cleanup and internal state management.
-    """
-    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
-    _SCHEMA_CONTRACT_PROVIDER = None
-
-
-def _set_provider_internal(provider: SchemaContractProviderABC) -> None:
-    """Internal function to set provider without deprecation warning.
-
-    Used for backward compatibility in container bootstrap.
-    Will be removed when global state is fully deprecated.
-    """
-    global _SCHEMA_CONTRACT_PROVIDER  # noqa: PLW0603
-    _SCHEMA_CONTRACT_PROVIDER = provider
-
-
-def create_schema_contract_loader(
-    schema_contract_provider: SchemaContractProviderABC | None = None,
-) -> SchemaContractLoader:
-    """Create a SchemaContractLoader with the given or global provider.
-
-    .. deprecated::
-        This factory function is deprecated. Use dependency injection
-        via CompositionRoot.create_schema_contract_loader() instead,
-        or instantiate SchemaContractLoader directly with an explicit provider.
-
-    Args:
-        schema_contract_provider: Provider for schema contracts.
-            If None, falls back to global state (deprecated).
-
-    Returns:
-        Configured SchemaContractLoader instance.
-
-    Raises:
-        RuntimeError: If no provider is available.
-
-    Example (deprecated):
-        >>> loader = create_schema_contract_loader()
-        >>> config = loader.get_pipeline_config("chembl.activity")
-
-    Preferred (DI approach):
-        >>> from bioetl.interfaces.composition_root import get_composition_root
-        >>> root = get_composition_root()
-        >>> loader = root.create_schema_contract_loader()
-    """
-    warnings.warn(
-        "create_schema_contract_loader() is deprecated. "
-        "Use CompositionRoot.create_schema_contract_loader() "
-        "or instantiate SchemaContractLoader directly with an explicit provider. "
-        "This function will be removed in a future release.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    effective_provider = _resolve_schema_provider(schema_contract_provider)
-    return SchemaContractLoader(effective_provider)
+    return explicit_provider
 
 
 def _populate_fields_from_schema(
@@ -707,16 +537,7 @@ __all__ = [
     # Exceptions
     "ConfigFileNotFoundError",
     "UnknownProviderError",
-    # Module-level functions (support explicit provider or deprecated global state)
+    # Module-level functions (require explicit provider)
     "get_pipeline_config",
     "get_pipeline_config_from_path",
-    # Deprecated functions (for backward compatibility, will be removed)
-    "create_schema_contract_loader",
-    "set_schema_contract_provider",
-    "get_schema_contract_provider",
-    "clear_schema_contract_provider",
-    "reset_schema_contract_provider",
-    # Internal functions (for container/test use during transition)
-    "_set_provider_internal",
-    "_clear_provider_internal",
 ]
