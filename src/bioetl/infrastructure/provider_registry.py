@@ -25,6 +25,17 @@ class InMemoryProviderRegistry(ProviderRegistryABC):
     def __init__(self) -> None:
         self._providers: dict[ProviderId, ProviderDefinition] = {}
 
+    @classmethod
+    def create(cls) -> "InMemoryProviderRegistry":
+        """Factory method to create a new empty registry instance.
+
+        This is the preferred way to create registry instances for DI.
+
+        Returns:
+            New empty InMemoryProviderRegistry instance.
+        """
+        return cls()
+
     def register_provider(self, definition: ProviderDefinition) -> None:
         """Register provider in registry."""
         if definition.id in self._providers:
@@ -52,6 +63,26 @@ class InMemoryProviderRegistry(ProviderRegistryABC):
             self._providers[definition.id] = definition
 
 
+def create_empty_provider_registry() -> InMemoryProviderRegistry:
+    """Factory function to create a new empty provider registry.
+
+    This is the recommended factory for dependency injection.
+    Use this instead of the deprecated domain.provider_registry.default_provider_registry().
+
+    Returns:
+        New empty InMemoryProviderRegistry instance.
+
+    Example:
+        >>> from bioetl.infrastructure.provider_registry import (
+        ...     create_empty_provider_registry,
+        ... )
+        >>> registry = create_empty_provider_registry()
+        >>> registry.register_provider(provider_definition)
+    """
+    return InMemoryProviderRegistry()
+
+
 __all__ = [
     "InMemoryProviderRegistry",
+    "create_empty_provider_registry",
 ]

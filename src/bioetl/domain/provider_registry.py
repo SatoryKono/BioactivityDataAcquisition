@@ -73,91 +73,29 @@ class ProviderRegistryLoaderABC(Protocol):
         """Load providers and return populated registry."""
 
 
-# Global registry instance - DEPRECATED
-# New code should inject ProviderRegistryABC through CompositionRoot
-_PROVIDER_REGISTRY: ProviderRegistryABC | None = None
-
-
-def set_provider_registry(registry: ProviderRegistryABC) -> None:
-    """Sets the global provider registry instance.
-
-    DEPRECATED: Use dependency injection through CompositionRoot instead.
-    Global state makes testing difficult and creates implicit dependencies.
-
-    This should be called by the application entry point or configuration loader
-    to inject the concrete implementation (Dependency Injection).
-
-    .. deprecated:: 2.0
-        Use CompositionRoot.get_provider_registry() and pass the registry
-        explicitly to components that need it.
-    """
-    warnings.warn(
-        "set_provider_registry() is deprecated. "
-        "Use CompositionRoot.get_provider_registry() and pass the registry "
-        "explicitly to components that need it.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    global _PROVIDER_REGISTRY
-    _PROVIDER_REGISTRY = registry
-
-
-def get_provider_registry() -> ProviderRegistryABC:
-    """Access point for the provider registry.
-
-    DEPRECATED: Use dependency injection through CompositionRoot instead.
-
-    Returns the global registry instance.
-    Raises RuntimeError if the registry has not been initialized.
-
-    .. deprecated:: 2.0
-        Use CompositionRoot.get_provider_registry() and pass the registry
-        explicitly to components that need it.
-    """
-    warnings.warn(
-        "get_provider_registry() is deprecated. "
-        "Use CompositionRoot.get_provider_registry() and pass the registry "
-        "explicitly to components that need it.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if _PROVIDER_REGISTRY is None:
-        raise RuntimeError(
-            "Provider registry has not been initialized. "
-            "Call set_provider_registry() with a concrete implementation first."
-        )
-    return _PROVIDER_REGISTRY
-
-
-# Backward compatibility alias
-def default_provider_registry() -> ProviderRegistryABC:
-    """DEPRECATED: Use get_provider_registry() instead.
-
-    .. deprecated:: 2.0
-        Use CompositionRoot.get_provider_registry() instead.
-    """
-    warnings.warn(
-        "default_provider_registry() is deprecated. "
-        "Use CompositionRoot.get_provider_registry() instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    # Call without triggering double warning
-    if _PROVIDER_REGISTRY is None:
-        raise RuntimeError(
-            "Provider registry has not been initialized. "
-            "Call set_provider_registry() with a concrete implementation first."
-        )
-    return _PROVIDER_REGISTRY
-
-
 def __getattr__(name: str) -> Any:
-    """Lazy import for backward compatibility."""
+    """Lazy import for backward compatibility with deprecated functions."""
     if name == "InMemoryProviderRegistry":
         raise ImportError(
             "InMemoryProviderRegistry is no longer available in bioetl.domain. "
             "Import it from bioetl.infrastructure.provider_registry instead."
         )
+
+    # Handle deprecated global state functions - redirect to infrastructure
+    if name in ("set_provider_registry", "get_provider_registry", "default_provider_registry"):
+        warnings.warn(
+            f"{name}() has been removed from bioetl.domain.provider_registry. "
+            "Use dependency injection through CompositionRoot.get_provider_registry() "
+            "or bioetl.infrastructure.provider_registry.create_empty_provider_registry() "
+            "instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        raise AttributeError(
+            f"{name}() has been removed. Use CompositionRoot.get_provider_registry() "
+            "for DI-based registry access."
+        )
+
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -171,9 +109,4 @@ __all__ = [
     "ProviderAlreadyRegisteredError",
     # Type aliases for DI
     "ProviderRegistryFactory",
-    # Factory function
-    "get_provider_registry",
-    "set_provider_registry",
-    # Backward compatibility
-    "default_provider_registry",
 ]
