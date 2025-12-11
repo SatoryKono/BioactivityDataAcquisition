@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 from typing import Self
 
-from bioetl.application.pipelines.hooks_impl import LoggingPipelineHookImpl
+from bioetl.application.factories.hooks_impl import LoggingPipelineHookImpl
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import StageResult
 from bioetl.domain.observability.contracts import LoggingPortABC

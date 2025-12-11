@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.hooks_impl import ContinueOnErrorPolicyImpl
+from bioetl.application.factories.hooks_impl import ContinueOnErrorPolicyImpl
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext, StageResult

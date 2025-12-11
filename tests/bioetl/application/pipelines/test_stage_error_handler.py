@@ -2,7 +2,7 @@
 
 import pytest
 
-from bioetl.application.pipelines.hooks_impl import (
+from bioetl.application.factories.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
