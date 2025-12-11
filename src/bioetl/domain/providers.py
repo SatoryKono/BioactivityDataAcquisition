@@ -90,11 +90,6 @@ class ProviderDefinition:
     description: str | None = None
     http: HttpClientConfig | None = None
 
-    @property
-    def http_client(self) -> HttpClientConfig | None:
-        """DEPRECATED: Use .http instead."""
-        return self.http
-
 
 __all__ = [
     "ProviderComponents",

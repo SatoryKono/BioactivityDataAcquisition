@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 import requests
 
-from bioetl.domain.configs import ClientConfig
+from bioetl.domain.configs import HttpClientConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.infrastructure.clients.base.impl._http_transport import (
     _HttpTransport,
@@ -19,7 +19,7 @@ def test_request_call_wraps_timeout_error() -> None:
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=ClientConfig(retry_enabled=False),
+        config=HttpClientConfig(retry_enabled=False),
         base_client=base_client,
         logger=logger,
         metrics=metrics,
@@ -44,7 +44,7 @@ def test_request_call_wraps_request_exception() -> None:
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=ClientConfig(retry_enabled=False),
+        config=HttpClientConfig(retry_enabled=False),
         base_client=base_client,
         logger=logger,
         metrics=metrics,
@@ -74,7 +74,7 @@ def test_request_records_metrics_on_success() -> None:
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=ClientConfig(),
+        config=HttpClientConfig(),
         base_client=base_client,
         logger=logger,
         metrics=metrics,
@@ -101,7 +101,7 @@ def test_request_retries_on_timeout_until_success(
     logger = Mock(spec=LoggingPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=ClientConfig(max_retries=1, backoff_factor=0.1),
+        config=HttpClientConfig(max_retries=1, backoff_factor=0.1),
         base_client=base_client,
         metrics=metrics,
         logger=logger,
@@ -130,7 +130,7 @@ def test_request_retries_on_server_error(monkeypatch: pytest.MonkeyPatch) -> Non
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=ClientConfig(max_retries=1, backoff_factor=0.1),
+        config=HttpClientConfig(max_retries=1, backoff_factor=0.1),
         base_client=base_client,
         logger=logger,
         metrics=metrics,

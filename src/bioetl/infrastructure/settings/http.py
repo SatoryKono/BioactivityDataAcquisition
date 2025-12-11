@@ -92,16 +92,6 @@ DEFAULT_TIMEOUTS: Final[HttpTimeouts] = HttpTimeouts()
 DEFAULT_RETRY: Final[RetrySettings] = RetrySettings()
 DEFAULT_POOL: Final[ConnectionPoolSettings] = ConnectionPoolSettings()
 
-# Legacy compatibility constants (deprecated, use dataclass instances instead)
-DEFAULT_RETRY_STATUSES: Final[frozenset[int]] = DEFAULT_RETRY.retry_statuses
-DEFAULT_RETRY_EXCEPTIONS: Final[tuple[type[Exception], ...]] = (
-    ApiTimeoutError,
-    requests.Timeout,
-    requests.ConnectionError,
-    requests.HTTPError,
-    requests.RequestException,
-)
-
 
 __all__ = [
     "HttpTimeouts",
@@ -110,7 +100,4 @@ __all__ = [
     "DEFAULT_TIMEOUTS",
     "DEFAULT_RETRY",
     "DEFAULT_POOL",
-    # Legacy compatibility
-    "DEFAULT_RETRY_STATUSES",
-    "DEFAULT_RETRY_EXCEPTIONS",
 ]

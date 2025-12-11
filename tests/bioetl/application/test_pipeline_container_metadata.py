@@ -7,7 +7,9 @@ from bioetl.domain.clients.base.output.contracts import QualityReportABC
 
 # Legacy imports commented out - not used in active tests
 # from bioetl.domain.clients.base.output.contracts import WriteResult
-# from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
+# from bioetl.domain.configs import (
+#     HttpClientConfig, DummyProviderConfig, PipelineConfig
+# )
 
 # Provider registry module was removed
 # from bioetl.domain.provider_registry import InMemoryProviderRegistry
@@ -81,7 +83,7 @@ class StubQualityReporter(QualityReportABC):
 #         batch_size=10,
 #         provider_config=DummyProviderConfig(
 #             base_url="https://example.com",  # type: ignore[arg-type]
-#             client=ClientConfig(
+#             client=HttpClientConfig(
 #                 timeout_sec=1,
 #                 max_retries=0,
 #                 rate_limit_per_sec=1.0,

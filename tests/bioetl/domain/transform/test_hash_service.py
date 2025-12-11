@@ -11,15 +11,15 @@ from bioetl.domain.transform.transformers import (
     IndexColumnTransformerImpl,
 )
 from bioetl.infrastructure.transform.factories import (
-    default_hash_service,
-    default_index_generator,
-    default_timestamp_provider,
+    create_hash_service,
+    create_index_generator,
+    create_timestamp_provider,
 )
 
 
 def test_hash_service_add_hash_columns():
     """Test that hash service adds hash columns correctly."""
-    svc = default_hash_service()
+    svc = create_hash_service()
     src = pd.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
     out = svc.add_hash_columns(src, business_key_cols=["a"])
 
@@ -30,7 +30,7 @@ def test_hash_service_add_hash_columns():
 
 def test_hash_service_hash_row():
     """Test compute_fingerprint computes deterministic hash."""
-    svc = default_hash_service()
+    svc = create_hash_service()
     row = {"a": 1, "b": "test"}
 
     hash1 = svc.compute_fingerprint(row)
@@ -42,7 +42,7 @@ def test_hash_service_hash_row():
 
 def test_hash_service_hash_business_key():
     """Test compute_entity_key computes hash for specific columns."""
-    svc = default_hash_service()
+    svc = create_hash_service()
     row = {"a": 1, "b": "test", "c": 3}
 
     hash1 = svc.compute_entity_key(row, ["a", "b"])
@@ -54,7 +54,7 @@ def test_hash_service_hash_business_key():
 
 def test_index_generator_sequential():
     """Test sequential index generation."""
-    gen = default_index_generator()
+    gen = create_index_generator()
 
     assert gen.next_index() == 0
     assert gen.next_index() == 1
@@ -66,7 +66,7 @@ def test_index_generator_sequential():
 
 def test_index_generator_with_start():
     """Test index generator with custom start."""
-    gen = default_index_generator(start=100)
+    gen = create_index_generator(start=100)
 
     assert gen.next_index() == 100
     assert gen.next_index() == 101
@@ -74,7 +74,7 @@ def test_index_generator_with_start():
 
 def test_index_column_transformer():
     """Test IndexColumnTransformerImpl adds index column."""
-    gen = default_index_generator()
+    gen = create_index_generator()
     transformer = IndexColumnTransformerImpl(index_generator=gen)
     src = pd.DataFrame({"a": [1, 2, 3]})
 
@@ -88,7 +88,7 @@ def test_index_column_transformer():
 def test_timestamp_provider_deterministic():
     """Test deterministic timestamp provider."""
     fixed_time = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
-    provider = default_timestamp_provider(fixed_time=fixed_time)
+    provider = create_timestamp_provider(fixed_time=fixed_time)
 
     ts1 = provider.get_extraction_timestamp()
     ts2 = provider.get_extraction_timestamp()
@@ -98,7 +98,7 @@ def test_timestamp_provider_deterministic():
 
 def test_timestamp_provider_uses_current_time():
     """Test timestamp provider uses current time if not fixed."""
-    provider = default_timestamp_provider()
+    provider = create_timestamp_provider()
 
     ts = provider.get_extraction_timestamp()
 
@@ -109,7 +109,7 @@ def test_timestamp_provider_uses_current_time():
 def test_fulldate_transformer():
     """Test FulldateTransformerImpl adds acquisition_timestamp column."""
     fixed_time = datetime(2024, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
-    provider = default_timestamp_provider(fixed_time=fixed_time)
+    provider = create_timestamp_provider(fixed_time=fixed_time)
     transformer = FulldateTransformerImpl(timestamp_provider=provider)
     src = pd.DataFrame({"a": [1, 2, 3]})
 

@@ -8,7 +8,7 @@ import platform
 import time
 from typing import Callable
 
-from bioetl.infrastructure.settings.files import MAX_FILE_RETRIES, RETRY_DELAY_SEC
+from bioetl.infrastructure.settings.files import DEFAULT_FILE_SETTINGS
 
 
 class AtomicFileOperation:
@@ -47,9 +47,9 @@ class AtomicFileOperation:
         last_error: OSError | None = None
         is_windows = platform.system() == "Windows"
         # On Windows use longer delay due to antivirus/indexers
-        delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
+        delay = DEFAULT_FILE_SETTINGS.retry_delay_sec * (2.0 if is_windows else 1.0)
         # Increase retries on Windows for locked files
-        max_retries = MAX_FILE_RETRIES * (2 if is_windows else 1)
+        max_retries = DEFAULT_FILE_SETTINGS.max_retries * (2 if is_windows else 1)
 
         for attempt in range(max_retries):
             try:

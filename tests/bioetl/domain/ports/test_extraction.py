@@ -1,51 +1,16 @@
-"""Tests for extraction port contracts and type aliases."""
+"""Tests for extraction port contracts."""
 
 from collections.abc import Iterable
 
 import pytest
 
+from bioetl.domain.data import RecordBatch
 from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
     ExtractionServiceABC,
-    RawRecordBatch,
-    RawRecordDict,
     RecordFetcherABC,
     VersionProviderABC,
 )
-
-
-class TestTypeAliases:
-    """Tests for type alias compatibility and correctness."""
-
-    def test_raw_record_dict_accepts_dict(self) -> None:
-        """RawRecordDict should accept dict[str, Any]."""
-        record: RawRecordDict = {"id": "123", "name": "test", "value": 42.5}
-        assert isinstance(record, dict)
-        assert record["id"] == "123"
-
-    def test_raw_record_batch_accepts_list_of_dicts(self) -> None:
-        """RawRecordBatch should accept list of record dicts."""
-        batch: RawRecordBatch = [
-            {"id": "1", "name": "first"},
-            {"id": "2", "name": "second"},
-        ]
-        assert isinstance(batch, list)
-        assert len(batch) == 2
-        assert all(isinstance(r, dict) for r in batch)
-
-    def test_type_aliases_are_compatible_with_any_values(self) -> None:
-        """Type aliases should allow Any values in dicts."""
-        record: RawRecordDict = {
-            "string": "value",
-            "int": 42,
-            "float": 3.14,
-            "bool": True,
-            "none": None,
-            "list": [1, 2, 3],
-            "nested": {"deep": {"value": "ok"}},
-        }
-        assert record["string"] == "value"
-        assert record["nested"]["deep"]["value"] == "ok"
 
 
 class TestRecordFetcherABC:
@@ -60,7 +25,7 @@ class TestRecordFetcherABC:
         """Implementations must provide iter_extract method."""
 
         class IncompleteFetcher(RecordFetcherABC):
-            def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+            def extract_all(self, entity: str, **filters: object) -> RecordBatch:
                 return []
 
         with pytest.raises(TypeError, match="abstract"):
@@ -72,7 +37,7 @@ class TestRecordFetcherABC:
         class IncompleteFetcher(RecordFetcherABC):
             def iter_extract(
                 self, entity: str, *, chunk_size: int | None = None, **filters: object
-            ) -> Iterable[RawRecordBatch]:
+            ) -> Iterable[RecordBatch]:
                 yield []
 
         with pytest.raises(TypeError, match="abstract"):
@@ -84,10 +49,10 @@ class TestRecordFetcherABC:
         class CompleteFetcher(RecordFetcherABC):
             def iter_extract(
                 self, entity: str, *, chunk_size: int | None = None, **filters: object
-            ) -> Iterable[RawRecordBatch]:
+            ) -> Iterable[RecordBatch]:
                 yield [{"id": "1"}]
 
-            def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+            def extract_all(self, entity: str, **filters: object) -> RecordBatch:
                 return [{"id": "1"}]
 
         fetcher = CompleteFetcher()
@@ -99,13 +64,13 @@ class TestRecordFetcherABC:
         class TestFetcher(RecordFetcherABC):
             def iter_extract(
                 self, entity: str, *, chunk_size: int | None = None, **filters: object
-            ) -> Iterable[RawRecordBatch]:
+            ) -> Iterable[RecordBatch]:
                 yield [
                     {"id": "1", "name": "first"},
                     {"id": "2", "name": "second"},
                 ]
 
-            def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+            def extract_all(self, entity: str, **filters: object) -> RecordBatch:
                 return list(self.iter_extract(entity))[0]
 
         fetcher = TestFetcher()
@@ -122,10 +87,10 @@ class TestRecordFetcherABC:
         class TestFetcher(RecordFetcherABC):
             def iter_extract(
                 self, entity: str, *, chunk_size: int | None = None, **filters: object
-            ) -> Iterable[RawRecordBatch]:
+            ) -> Iterable[RecordBatch]:
                 yield []
 
-            def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+            def extract_all(self, entity: str, **filters: object) -> RecordBatch:
                 return [
                     {"id": "1", "value": 100},
                     {"id": "2", "value": 200},
@@ -186,10 +151,10 @@ class TestExtractionServiceABC:
         class CompleteService(ExtractionServiceABC):
             def iter_extract(
                 self, entity: str, *, chunk_size: int | None = None, **filters: object
-            ) -> Iterable[RawRecordBatch]:
+            ) -> Iterable[RecordBatch]:
                 yield [{"id": "1"}]
 
-            def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+            def extract_all(self, entity: str, **filters: object) -> RecordBatch:
                 return [{"id": "1"}]
 
             def get_release_version(self) -> str:
@@ -200,12 +165,12 @@ class TestExtractionServiceABC:
             ) -> dict[str, object]:
                 return {"results": []}
 
-            def parse_response(self, raw_response: object) -> RawRecordBatch:
+            def parse_response(self, raw_response: object) -> RecordBatch:
                 return []
 
             def serialize_records(
                 self, entity: str, records: list[object]
-            ) -> RawRecordBatch:
+            ) -> RecordBatch:
                 return []
 
         service = CompleteService()
@@ -218,10 +183,10 @@ class TestExtractionServiceABC:
         class TestService(ExtractionServiceABC):
             def iter_extract(
                 self, entity: str, *, chunk_size: int | None = None, **filters: object
-            ) -> Iterable[RawRecordBatch]:
+            ) -> Iterable[RecordBatch]:
                 yield []
 
-            def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+            def extract_all(self, entity: str, **filters: object) -> RecordBatch:
                 return []
 
             def get_release_version(self) -> str:
@@ -232,7 +197,7 @@ class TestExtractionServiceABC:
             ) -> dict[str, object]:
                 return {}
 
-            def parse_response(self, raw_response: object) -> RawRecordBatch:
+            def parse_response(self, raw_response: object) -> RecordBatch:
                 if isinstance(raw_response, dict):
                     items = raw_response.get("items", [])
                     if isinstance(items, list):
@@ -241,7 +206,7 @@ class TestExtractionServiceABC:
 
             def serialize_records(
                 self, entity: str, records: list[object]
-            ) -> RawRecordBatch:
+            ) -> RecordBatch:
                 return []
 
         service = TestService()
@@ -260,7 +225,7 @@ class TestBatchAdapterABC:
         """Protocol should accept classes with process_batch method."""
 
         class ConformingAdapter:
-            def process_batch(self, raw_batch: object) -> RawRecordBatch:
+            def process_batch(self, raw_batch: object) -> RecordBatch:
                 if isinstance(raw_batch, list):
                     return raw_batch
                 return []
@@ -291,23 +256,9 @@ class TestPortsModuleExports:
         """All exports should be available from package init."""
         from bioetl.domain import ports
 
-        # Type aliases
-        assert hasattr(ports, "RawRecordDict")
-        assert hasattr(ports, "RawRecordBatch")
         # Abstract base classes
         assert hasattr(ports, "RecordFetcherABC")
         assert hasattr(ports, "VersionProviderABC")
         assert hasattr(ports, "ExtractionServiceABC")
         # Protocols
         assert hasattr(ports, "BatchAdapterABC")
-
-    def test_type_alias_values_are_correct(self) -> None:
-        """Type aliases should have correct underlying types."""
-        from bioetl.domain.ports.extraction import RawRecordBatch, RawRecordDict
-
-        # These are TypeAliases, we can verify they work as expected
-        test_dict: RawRecordDict = {"key": "value"}
-        test_batch: RawRecordBatch = [test_dict]
-
-        assert isinstance(test_dict, dict)
-        assert isinstance(test_batch, list)

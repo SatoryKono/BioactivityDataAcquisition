@@ -150,10 +150,6 @@ class ChemblPipelineBase(PipelineBase):
 
         return self._chembl_release
 
-    def get_chembl_release(self) -> str:
-        """Alias for get_version for backward compatibility."""
-        return self.get_version()
-
     def _enrich_context(self, context: RunContext) -> None:
         """Adds ChEMBL release version to metadata."""
         context.metadata["chembl_release"] = self.get_version()
@@ -226,7 +222,7 @@ class ChemblPipelineBase(PipelineBase):
         transformer = self._transformer
         if transformer is None:
             raise RuntimeError("Chembl transformer is not initialized.")
-        return transformer.apply(df)  # type: ignore[no-any-return]
+        return transformer.apply(df)
 
     def write(
         self,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.configs import ClientConfig, DummyProviderConfig, PipelineConfig
+from bioetl.domain.configs import DummyProviderConfig, HttpClientConfig, PipelineConfig
 
 # Provider registry module was removed
 # from bioetl.domain.provider_registry import InMemoryProviderRegistry
@@ -19,7 +19,7 @@ def _build_dummy_config() -> PipelineConfig:
         batch_size=1,
         provider_config=DummyProviderConfig(
             base_url="https://example.com",
-            client=ClientConfig(
+            client=HttpClientConfig(
                 timeout_sec=1,
                 max_retries=0,
                 rate_limit_per_sec=1.0,

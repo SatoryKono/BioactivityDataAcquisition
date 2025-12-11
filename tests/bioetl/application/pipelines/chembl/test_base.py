@@ -118,8 +118,8 @@ def pipeline_fixture(mock_dependencies_fixture):
     )
 
 
-def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
-    """Test ChEMBL release version retrieval.
+def test_get_version(pipeline_fixture, mock_dependencies_fixture, monkeypatch):
+    """Test ChEMBL release version retrieval via get_version().
 
     ExtractionService returns raw version ('34'), application layer
     formats it using domain service to 'chembl_34'.
@@ -132,8 +132,8 @@ def test_get_chembl_release(pipeline_fixture, mock_dependencies_fixture, monkeyp
         pipeline_fixture, "_should_skip_release_lookup", lambda: False, raising=False
     )
 
-    release1 = pipeline_fixture.get_chembl_release()
-    release2 = pipeline_fixture.get_chembl_release()
+    release1 = pipeline_fixture.get_version()
+    release2 = pipeline_fixture.get_version()
 
     # Application layer formats to 'chembl_34'
     assert release1 == "chembl_34"

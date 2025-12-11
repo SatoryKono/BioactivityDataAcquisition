@@ -6,7 +6,7 @@ import hashlib
 from pathlib import Path
 
 from bioetl.domain.ports.output import ChecksumCalculatorPort
-from bioetl.infrastructure.settings.files import CHECKSUM_CHUNK_SIZE
+from bioetl.infrastructure.settings.files import DEFAULT_FILE_SETTINGS
 
 
 class ChecksumCalculator(ChecksumCalculatorPort):
@@ -21,9 +21,9 @@ class ChecksumCalculator(ChecksumCalculatorPort):
 
         Args:
             chunk_size: Size of chunks for reading large files.
-                        Defaults to CHECKSUM_CHUNK_SIZE constant.
+                        Defaults to DEFAULT_FILE_SETTINGS.checksum_chunk_size.
         """
-        self._chunk_size = chunk_size or CHECKSUM_CHUNK_SIZE
+        self._chunk_size = chunk_size or DEFAULT_FILE_SETTINGS.checksum_chunk_size
 
     def compute_checksum(self, path: Path) -> str:
         """Compute SHA256 checksum for a single file.
