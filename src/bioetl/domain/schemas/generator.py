@@ -1,13 +1,37 @@
-"""Helpers for generating Pandera schemas from column descriptors.
+"""DEPRECATED: Schema generator moved to infrastructure.
 
-This module provides utilities for dynamically creating Pandera schemas,
-particularly useful for cases where schema structure is determined at
-runtime.
+This module is deprecated. Use bioetl.infrastructure.validation.schema_generator
+instead for schema generation functionality.
+
+The domain layer should not depend on Pandera or YAML parsing directly.
+Use the protocol interfaces from bioetl.domain.schemas.contracts for type hints.
+
+Migration guide:
+    Old:
+        from bioetl.domain.schemas.generator import generate_schema_from_column_order
+        schema = generate_schema_from_column_order(columns)
+
+    New:
+        from bioetl.infrastructure.validation.schema_generator import (
+            generate_schema_from_column_order,
+        )
+        schema = generate_schema_from_column_order(columns)
+
+For DI-based usage:
+    from bioetl.domain.schemas.contracts import SchemaGeneratorProtocol
+    from bioetl.infrastructure.validation.schema_generator import PanderaSchemaGenerator
+
+    def my_function(generator: SchemaGeneratorProtocol) -> None:
+        schema = generator.generate_from_column_order(columns)
+
+    # At composition root:
+    generator = PanderaSchemaGenerator()
+    my_function(generator)
 """
 
 from __future__ import annotations
 
-import importlib
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -15,10 +39,13 @@ __all__ = ["generate_schema_from_column_order", "load_column_order_from_yaml"]
 
 
 def generate_schema_from_column_order(columns: list[str]) -> Any:
-    """Build a permissive Pandera schema using the provided column order.
+    """DEPRECATED: Use PanderaSchemaGenerator from infrastructure.
 
-    Creates a schema where all columns are typed as `object` with nullable=True.
-    This is useful for initial data loading before strict validation.
+    Build a permissive Pandera schema using the provided column order.
+
+    .. deprecated:: 2.0
+        Use bioetl.infrastructure.validation.schema_generator.generate_schema_from_column_order
+        or PanderaSchemaGenerator().generate_from_column_order() instead.
 
     Parameters
     ----------
@@ -29,23 +56,30 @@ def generate_schema_from_column_order(columns: list[str]) -> Any:
     -------
     pa.DataFrameSchema
         A permissive schema accepting any data types.
-
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> schema = generate_schema_from_column_order(["id", "name", "value"])
-    >>> df = pd.DataFrame({"id": [1], "name": ["test"], "value": [1.5]})
-    >>> validated = schema.validate(df)
     """
-    pa = importlib.import_module("pandera.pandas")
-    schema = pa.DataFrameSchema(
-        {col: pa.Column(object, nullable=True, coerce=True) for col in columns}
+    warnings.warn(
+        "bioetl.domain.schemas.generator.generate_schema_from_column_order is deprecated. "
+        "Use bioetl.infrastructure.validation.schema_generator.generate_schema_from_column_order "
+        "instead.",
+        DeprecationWarning,
+        stacklevel=2,
     )
-    return schema
+    # Lazy import to maintain backward compatibility
+    from bioetl.infrastructure.validation.schema_generator import (
+        generate_schema_from_column_order as _impl,
+    )
+
+    return _impl(columns)
 
 
 def load_column_order_from_yaml(path: str | Path) -> list[str]:
-    """Load column order from YAML file.
+    """DEPRECATED: Use YamlColumnOrderLoader from infrastructure.
+
+    Load column order from YAML file.
+
+    .. deprecated:: 2.0
+        Use bioetl.infrastructure.validation.schema_generator.load_column_order_from_yaml
+        or YamlColumnOrderLoader().load() instead.
 
     Args:
         path: Path to YAML file (str or Path object).
@@ -56,16 +90,15 @@ def load_column_order_from_yaml(path: str | Path) -> list[str]:
     Raises:
         ValueError: If YAML format is invalid.
     """
-    import importlib
-    from pathlib import Path as _P
+    warnings.warn(
+        "bioetl.domain.schemas.generator.load_column_order_from_yaml is deprecated. "
+        "Use bioetl.infrastructure.validation.schema_generator.load_column_order_from_yaml "
+        "instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from bioetl.infrastructure.validation.schema_generator import (
+        load_column_order_from_yaml as _impl,
+    )
 
-    p = _P(path)
-    yaml = importlib.import_module("yaml")
-    data = yaml.safe_load(p.read_text(encoding="utf-8"))
-    if isinstance(data, list):
-        return [str(x) for x in data]
-    if isinstance(data, dict) and "columns" in data:
-        cols = data["columns"]
-        if isinstance(cols, list):
-            return [str(x) for x in cols]
-    raise ValueError("Invalid column-order YAML format")
+    return _impl(path)

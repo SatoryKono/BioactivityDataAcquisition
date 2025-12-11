@@ -35,6 +35,12 @@ from bioetl.interfaces.use_case_factory import (
     get_use_case_factory,
     reset_use_case_factory,
 )
+from bioetl.interfaces.context_manager import (
+    application_context,
+    get_current_context,
+    reset_current_context,
+    set_current_context,
+)
 
 __all__ = [
     # Application context
@@ -42,6 +48,11 @@ __all__ = [
     "get_application_context",
     "set_application_context",
     "reset_application_context",
+    # Thread-safe context manager (recommended for tests)
+    "application_context",
+    "get_current_context",
+    "set_current_context",
+    "reset_current_context",
     # Composition root (backward compatible)
     "CompositionRoot",
     "ObservabilityStack",
