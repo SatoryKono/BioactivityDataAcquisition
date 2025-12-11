@@ -39,9 +39,11 @@ class ChemblPipelineFactory(PipelineFactoryABC):
         """
         logger = container.get_logger()
         extraction_service = container.get_extraction_service()
-
-        # Note: ChemblPipelineBase uses ExtractStage with ChemblRecordMapper
-        # internally, so record_source is not needed here.
+        record_source = container.get_record_source(
+            extraction_service=extraction_service,
+            limit=limit,
+            logger=logger,
+        )
 
         pipeline: PipelineBase = ChemblPipelineBase(
             config=container.config,
@@ -57,6 +59,7 @@ class ChemblPipelineFactory(PipelineFactoryABC):
             normalization_service=container.get_normalization_service(),
             hooks=container.get_hooks(),
             error_policy=container.get_error_policy(),
+            record_source=record_source,
         )
 
         # Set post-transformer with version provider from the pipeline

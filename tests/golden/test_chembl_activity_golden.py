@@ -92,6 +92,7 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     )
     logger = container.get_logger()
     extraction_service = container.get_extraction_service()
+    record_source = container.get_record_source(extraction_service, logger=logger)
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,
@@ -104,6 +105,7 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
         index_generator=container.get_index_generator(),
         timestamp_provider=container.get_timestamp_provider(),
         entity_model_registry=container.get_entity_model_registry(),
+        record_source=record_source,
     )
     monkeypatch.setattr(
         pipeline, "_should_skip_release_lookup", lambda: False, raising=False
