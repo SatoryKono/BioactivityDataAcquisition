@@ -29,6 +29,10 @@ import requests
 
 from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC
+from bioetl.application.services.config_migration_service import (
+    ConfigMigrationService,
+    ConfigMigrationServiceProtocol,
+)
 from bioetl.domain.clients.base.contracts import RateLimiterABC
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import HttpClientConfig, PipelineConfig
@@ -215,6 +219,35 @@ class CompositionRoot:
         from bioetl.infrastructure.config.loader import SchemaContractLoader
 
         return SchemaContractLoader(self.get_schema_contract_provider())
+
+    # =========================================================================
+    # Config Migration Service
+    # =========================================================================
+
+    def create_config_migration_service(self) -> ConfigMigrationServiceProtocol:
+        """Create a ConfigMigrationService for migrating legacy configs.
+
+        The ConfigMigrationService orchestrates migration of legacy pipeline
+        configuration formats to the current structure. It delegates actual
+        migration logic to the infrastructure layer (ConfigMigrator) while
+        keeping the domain layer (PipelineConfig) clean.
+
+        This follows Hexagonal Architecture principles:
+        - Domain layer (PipelineConfig) contains only business rules
+        - Application layer (ConfigMigrationService) orchestrates use cases
+        - Infrastructure layer (ConfigMigrator) handles technical migration
+
+        Returns:
+            ConfigMigrationServiceProtocol: Service for migrating and validating
+                raw config dictionaries into PipelineConfig domain objects.
+
+        Example:
+            >>> root = CompositionRoot()
+            >>> migration_service = root.create_config_migration_service()
+            >>> raw_config = {"entity": "activity", "provider": "chembl", ...}
+            >>> config = migration_service.migrate_and_validate(raw_config)
+        """
+        return ConfigMigrationService()
 
     # =========================================================================
     # Pipeline Infrastructure
@@ -447,11 +480,36 @@ def create_config_path_resolver(
     return get_composition_root().create_config_path_resolver(configs_root)
 
 
+def create_config_migration_service() -> ConfigMigrationServiceProtocol:
+    """Create ConfigMigrationService for migrating legacy configs.
+
+    This is a convenience wrapper around CompositionRoot.create_config_migration_service()
+    that uses the default singleton.
+
+    The service orchestrates migration of legacy pipeline configuration formats
+    to the current structure, delegating to infrastructure layer (ConfigMigrator)
+    while keeping domain layer (PipelineConfig) clean.
+
+    Returns:
+        ConfigMigrationServiceProtocol: Service for migrating and validating
+            raw config dictionaries into PipelineConfig domain objects.
+
+    Example:
+        >>> from bioetl.interfaces.composition_root import create_config_migration_service
+        >>> service = create_config_migration_service()
+        >>> raw = {"entity": "activity", "provider": "chembl", ...}
+        >>> config = service.migrate_and_validate(raw)
+    """
+    return get_composition_root().create_config_migration_service()
+
+
 __all__ = [
     "CompositionRoot",
+    "ConfigMigrationServiceProtocol",
     "ObservabilityStack",
     "build_default_container",
     "create_config_loader",
+    "create_config_migration_service",
     "create_config_path_resolver",
     "get_composition_root",
     "reset_composition_root",
