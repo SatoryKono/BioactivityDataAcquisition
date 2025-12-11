@@ -1,0 +1,42 @@
+---
+title: Application Use Cases Package
+description: bioetl.application.use_cases - Business use cases
+---
+classDiagram
+    direction TB
+
+    class RunPipelineUseCase {
+        +execute(request) RunPipelineResponse
+        -_orchestrator: PipelineOrchestrator
+        -_config_service: ConfigurationService
+        -_logger: Logger
+    }
+
+    class RunPipelineRequest {
+        +pipeline_name: str
+        +config_path: Path
+        +limit: int
+        +dry_run: bool
+        +output_format: str
+        +filters: dict
+    }
+
+    class RunPipelineResponse {
+        +success: bool
+        +output_path: Path
+        +record_count: int
+        +duration: timedelta
+        +errors: list[str]
+        +metadata: dict
+    }
+
+    class UseCaseABC {
+        <<interface>>
+        +execute(request) Response
+    }
+
+    UseCaseABC <|.. RunPipelineUseCase
+    RunPipelineUseCase ..> RunPipelineRequest : accepts
+    RunPipelineUseCase ..> RunPipelineResponse : returns
+
+    note for RunPipelineUseCase "Main use case for\nexecuting ETL pipelines"

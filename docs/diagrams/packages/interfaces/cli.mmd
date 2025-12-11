@@ -1,0 +1,46 @@
+---
+title: Interfaces CLI Package
+description: bioetl.interfaces.cli - Command-line interface
+---
+flowchart TB
+
+classDef entrypoint fill:#f48fb1,stroke:#e91e63,stroke-width:2px,color:#880e4f
+classDef command fill:#f8bbd9,stroke:#d81b60,stroke-width:1px,color:#880e4f
+classDef component fill:#fce4ec,stroke:#c2185b,stroke-width:1px,color:#880e4f
+
+subgraph CLI["bioetl.interfaces.cli"]
+    direction TB
+
+    subgraph App["app.py"]
+        TyperApp["Typer Application\nmain entry point"]:::entrypoint
+    end
+
+    subgraph Commands["Commands"]
+        RunCommand["run\nExecute pipeline"]:::command
+        ValidateCommand["validate\nValidate configuration"]:::command
+        InfoCommand["info\nShow pipeline info"]:::command
+        ListCommand["list\nList available pipelines"]:::command
+        SchemaCommand["schema\nShow schema information"]:::command
+    end
+
+    subgraph Options["Common Options"]
+        ConfigOption["--config\nConfiguration file path"]:::component
+        OutputOption["--output\nOutput directory"]:::component
+        FormatOption["--format\nOutput format (csv/parquet)"]:::component
+        LimitOption["--limit\nRecord limit"]:::component
+        DryRunOption["--dry-run\nSimulation mode"]:::component
+        VerboseOption["--verbose\nVerbose output"]:::component
+    end
+end
+
+subgraph Dependencies["Dependencies"]
+    Typer["Typer Framework"]:::component
+    CompositionRoot["CompositionRoot"]:::component
+    UseCases["Use Cases"]:::component
+end
+
+TyperApp --> Commands
+Commands --> Options
+RunCommand --> CompositionRoot
+RunCommand --> UseCases
+ValidateCommand --> CompositionRoot

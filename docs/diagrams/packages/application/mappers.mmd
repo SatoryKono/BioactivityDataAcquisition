@@ -1,0 +1,43 @@
+---
+title: Application Mappers Package
+description: bioetl.application.mappers - Record mapping implementations
+---
+classDiagram
+    direction TB
+
+    class RecordMapperABC {
+        <<interface>>
+        +map_record(raw) MappedRecord
+        +map_batch(records) list[MappedRecord]
+        +get_field_mapping() dict
+    }
+
+    class ChemblRecordMapper {
+        +map_record(raw) MappedRecord
+        +map_batch(records) list[MappedRecord]
+        +get_field_mapping() dict
+        -_field_mapping: dict
+        -_normalizers: dict
+        -_entity_type: str
+    }
+
+    class MappedRecord {
+        +data: dict
+        +source_id: str
+        +mapped_at: datetime
+        +errors: list[str]
+    }
+
+    class FieldMapping {
+        +source_field: str
+        +target_field: str
+        +transformer: Callable
+        +required: bool
+    }
+
+    RecordMapperABC <|.. ChemblRecordMapper
+    ChemblRecordMapper ..> MappedRecord : produces
+    ChemblRecordMapper --> FieldMapping : uses
+
+    note for ChemblRecordMapper "Maps ChEMBL API responses\nto internal record format"
+    note for FieldMapping "Defines field transformation\nrules"

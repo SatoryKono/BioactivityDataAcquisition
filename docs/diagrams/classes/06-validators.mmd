@@ -1,0 +1,107 @@
+---
+title: Validation and Schema Classes
+description: All validation-related classes
+---
+classDiagram
+    direction TB
+
+    %% Contracts
+    class ValidationServiceABC {
+        <<interface>>
+        +validate(df) DataFrame
+        +get_errors() list~ValidationError~
+        +is_valid() bool
+    }
+
+    class ValidatorFactoryABC {
+        <<interface>>
+        +create_validator(schema_name) Validator
+        +register_schema(name, schema)
+    }
+
+    class SchemaProviderABC {
+        <<interface>>
+        +get_schema(name) Schema
+    }
+
+    %% Implementations
+    class PanderaValidator {
+        +validate(df) DataFrame
+        +get_errors() list
+        +is_valid() bool
+        -_schema: PanderaSchema
+        -_coerce: bool
+    }
+
+    class PanderaSchemaGenerator {
+        +generate(field_specs) PanderaSchema
+        +from_model(model) PanderaSchema
+    }
+
+    class SchemaAdapter {
+        +get_schema(entity) PanderaSchema
+        +validate(df, schema) ValidationResult
+        -_schemas: dict
+    }
+
+    class SchemaRegistry {
+        +register(name, schema)
+        +get(name) Schema
+        +list_schemas() list
+        -_schemas: dict
+    }
+
+    %% ChEMBL Pandera Schemas
+    class ActivityTableSchema {
+        +activity_id: Column~str~
+        +assay_chembl_id: Column~str~
+        +molecule_chembl_id: Column~str~
+        +standard_value: Column~float~
+    }
+
+    class AssayTableSchema {
+        +assay_chembl_id: Column~str~
+        +assay_type: Column~str~
+        +assay_organism: Column~str~
+    }
+
+    class MoleculeTableSchema {
+        +molecule_chembl_id: Column~str~
+        +pref_name: Column~str~
+        +molecule_type: Column~str~
+    }
+
+    class TargetTableSchema {
+        +target_chembl_id: Column~str~
+        +pref_name: Column~str~
+        +target_type: Column~str~
+    }
+
+    class PublicationTableSchema {
+        +document_chembl_id: Column~str~
+        +pubmed_id: Column~int~
+        +doi: Column~str~
+    }
+
+    class CellTableSchema {
+        +cell_chembl_id: Column~str~
+        +cell_name: Column~str~
+    }
+
+    class TissueTableSchema {
+        +tissue_chembl_id: Column~str~
+        +pref_name: Column~str~
+    }
+
+    %% Relationships
+    ValidationServiceABC <|.. PanderaValidator
+    PanderaValidator --> PanderaSchemaGenerator
+    SchemaProviderABC <|.. SchemaAdapter
+    SchemaAdapter --> SchemaRegistry
+    SchemaRegistry --> ActivityTableSchema
+    SchemaRegistry --> AssayTableSchema
+    SchemaRegistry --> MoleculeTableSchema
+    SchemaRegistry --> TargetTableSchema
+    SchemaRegistry --> PublicationTableSchema
+    SchemaRegistry --> CellTableSchema
+    SchemaRegistry --> TissueTableSchema

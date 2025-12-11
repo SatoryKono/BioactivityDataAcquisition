@@ -1,0 +1,33 @@
+---
+title: Infrastructure Logging Package
+description: bioetl.infrastructure.logging - Logging implementations
+---
+classDiagram
+    direction TB
+
+    class ProgressReporterABC {
+        <<interface>>
+        +start(total) void
+        +update(n) void
+        +finish() void
+    }
+
+    class TqdmProgressReporter {
+        +start(total) void
+        +update(n) void
+        +finish() void
+        +set_description(desc) void
+        -_pbar: tqdm
+        -_total: int
+    }
+
+    class LoggingFactories {
+        +create_progress_reporter() TqdmProgressReporter
+        +create_logger(name) Logger
+        +configure_logging(level) void
+    }
+
+    ProgressReporterABC <|.. TqdmProgressReporter
+    LoggingFactories --> TqdmProgressReporter : creates
+
+    note for TqdmProgressReporter "Progress bar using\ntqdm library"

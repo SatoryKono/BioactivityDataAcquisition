@@ -1,0 +1,38 @@
+---
+title: Infrastructure Adapters Package
+description: bioetl.infrastructure.adapters - Port adapter implementations
+---
+classDiagram
+    direction TB
+
+    class ConfigLoaderPortABC {
+        <<interface>>
+        +load(path) Config
+    }
+
+    class ConfigLoaderAdapter {
+        +load(path) Config
+        +load_yaml(path) dict
+        +load_json(path) dict
+        -_loader: YamlConfigLoader
+    }
+
+    class ABCRegistryResolverAdapter {
+        +resolve(name) Type
+        +register(name, cls) void
+        +list_registered() list[str]
+        -_registry: dict
+    }
+
+    class PandasTabularAdapter {
+        +to_dataframe(records) DataFrame
+        +from_dataframe(df) list[dict]
+        +apply_schema(df, schema) DataFrame
+        -_dtypes: dict
+    }
+
+    ConfigLoaderPortABC <|.. ConfigLoaderAdapter
+
+    note for ConfigLoaderAdapter "Adapts YAML/JSON config\nloading to port interface"
+    note for ABCRegistryResolverAdapter "Registry for ABC\nimplementations"
+    note for PandasTabularAdapter "Converts between records\nand DataFrames"
