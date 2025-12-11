@@ -2,7 +2,7 @@
 Normalization implementation for domain entities.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 import warnings
 
 import pandas as pd
@@ -13,11 +13,6 @@ from bioetl.domain.transform.normalizers import (
     normalize_uniprot,
 )
 from bioetl.domain.transform.normalizers.registry import get_normalizer
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
-        DefaultNormalizationTransformerImpl,
-    )
 
 # Aliases for backward compatibility or convenience
 normalize_pubmed_id = normalize_pmid
@@ -79,24 +74,22 @@ def __getattr__(name: str) -> Any:
     """Emit deprecation warnings for legacy aliases and lazy imports."""
     # Lazy import to avoid circular dependency
     from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
-        DefaultNormalizationTransformerImpl as _DefaultImpl,
+        NormalizationServiceImpl as _NormImpl,
     )
 
-    if name == "DefaultNormalizationTransformerImpl":
-        return _DefaultImpl
+    # Canonical export
+    if name == "NormalizationServiceImpl":
+        return _NormImpl
 
-    deprecated_aliases = {
-        "NormalizationTransformer": _DefaultImpl,
-        "NormalizationServiceImpl": _DefaultImpl,
-        "NormalizationService": _DefaultImpl,
-    }
-    if name in deprecated_aliases:
+    # Single deprecated alias for migration
+    if name == "NormalizationService":
         warnings.warn(
-            f"{name} is deprecated. Use DefaultNormalizationTransformerImpl instead.",
+            "NormalizationService is deprecated. Use NormalizationServiceImpl instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return deprecated_aliases[name]
+        return _NormImpl
+
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -106,5 +99,6 @@ __all__ = [
     "normalize_pubchem_cid",
     "normalize_uniprot_id",
     "get_normalizer",
-    "DefaultNormalizationTransformerImpl",
+    "NormalizationServiceImpl",
+    "NormalizationService",  # Deprecated alias
 ]
