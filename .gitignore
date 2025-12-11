@@ -9,6 +9,7 @@ __pycache__/
 node_modules
 /.pytest_cache
 /.mypy_cache
+**/.mypy_cache/
 /.ruff_cache
 /*.pyd
 /.coverage*
