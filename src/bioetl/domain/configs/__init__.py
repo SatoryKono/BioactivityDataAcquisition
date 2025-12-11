@@ -22,16 +22,12 @@ from bioetl.domain.configs.defaults import (
 from bioetl.domain.configs.execution import ExecutionConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.manifest import PipelineManifest
-from bioetl.domain.configs.pipeline_options import (
-    NormalizationConfig,
-    ProfileConfig,
-    TransformConfig,
-)
 from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,
     CanonicalizationConfig,
     ChemblSourceConfig,
+    ClientConfig,
     CsvInputConfig,
     DataSinkConfig,
     DataSourceConfig,
@@ -54,6 +50,11 @@ from bioetl.domain.configs.pipeline import (
     QualityControlConfig,
     RuntimeConfig,
     StorageConfig,
+)
+from bioetl.domain.configs.pipeline_options import (
+    NormalizationConfig,
+    ProfileConfig,
+    TransformConfig,
 )
 
 __all__ = [
@@ -109,4 +110,6 @@ __all__ = [
     "SourcesDefaultsConfig",
     # Protocols
     "PipelineConfigLoaderProtocol",
+    # Deprecated aliases (for backward compatibility)
+    "ClientConfig",
 ]

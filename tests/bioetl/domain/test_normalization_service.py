@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from bioetl.domain.transform.contracts import NormalizationConfig
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     NormalizationServiceImpl,
 )
 

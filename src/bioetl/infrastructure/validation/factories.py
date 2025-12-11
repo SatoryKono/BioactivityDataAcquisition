@@ -82,9 +82,22 @@ def create_schema_provider_factory() -> SchemaProviderFactoryABC:
     return PanderaSchemaProviderFactory()
 
 
+# Deprecated aliases for backward compatibility
+def default_validator_factory() -> ValidatorFactoryABC:
+    """Deprecated: use create_validator_factory() instead."""
+    return create_validator_factory()
+
+
+def default_schema_provider_factory() -> SchemaProviderFactoryABC:
+    """Deprecated: use create_schema_provider_factory() instead."""
+    return create_schema_provider_factory()
+
+
 __all__ = [
     "PanderaValidatorFactory",
     "PanderaSchemaProviderFactory",
     "create_validator_factory",
     "create_schema_provider_factory",
+    "default_validator_factory",
+    "default_schema_provider_factory",
 ]
