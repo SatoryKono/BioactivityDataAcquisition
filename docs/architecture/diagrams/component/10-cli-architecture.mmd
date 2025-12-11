@@ -5,23 +5,30 @@ flowchart LR
     classDef external fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
     linkStyle default stroke:#666,stroke-width:1.2px,color:#111
 
-    typer["Typer App\n`bioetl.interfaces.cli.app`"]:::componentPrimary
-    commandRegistry["CLICommandABC implementations\n(run, list, validate-config, profile helpers)"]:::componentSecondary
-    runCmd["RunPipelineCommand\nparses args, resolves config"]:::componentPrimary
-    profiles["Profile loader\nconfigs/profiles/*.yaml"]:::componentSecondary
-    pipelineConfig["Pipeline config loader\nconfigs/pipelines/<provider>/<entity>.yaml"]:::componentSecondary
-    overrides["CLI overrides (--limit, --output, --dry-run)\nmerged into config"]:::componentSecondary
-    orchestrator["PipelineOrchestrator\n(application.orchestrator)"]:::componentPrimary
-    feedback["Structured CLI feedback\ninfo/error logs via UnifiedLogger"]:::componentSecondary
-    scripts["bioetl console script / python -m bioetl\nentrypoints"]:::external
+    entry["Entry points\nconsole_script / python -m bioetl"]:::external
+    typer["Typer app\nbioetl.interfaces.cli.app"]:::componentPrimary
+    commands["Commands: run, list_pipelines,\nvalidate_config, smoke_run"]:::componentSecondary
+    useCaseFactory["UseCaseFactory\ninterfaces.use_case_factory"]:::componentSecondary
+    appCtx["ApplicationContext\n(logger, metrics, config_loader)"]:::componentSecondary
+    runUseCase["RunPipelineUseCase\napplication.use_cases.run_pipeline"]:::componentPrimary
+    configLoader["PipelineConfigLoader\ninfrastructure.config.sources"]:::componentSecondary
+    providerLoader["ProviderRegistryLoader\ninfrastructure.config.provider_registry"]:::componentSecondary
+    containerFactory["build_default_container\ninterfaces.composition_root"]:::componentSecondary
+    orchestrator["PipelineOrchestrator\napplication.orchestrator"]:::componentPrimary
+    pipelineRegistry["Pipeline registry factories\napplication.pipelines.registry"]:::componentSecondary
+    pipelines["Pipelines (Chembl activity/assay/...)\nPipelineBase implementations"]:::componentPrimary
+    console["Rich console output\nresult formatting + errors"]:::componentSecondary
 
-    scripts --> typer
-    typer --> commandRegistry
-    commandRegistry --> runCmd
-    runCmd --> profiles
-    runCmd --> pipelineConfig
-    runCmd --> overrides
-    runCmd --> orchestrator
-    orchestrator --> feedback
-    feedback --> typer
+    entry --> typer --> commands
+    commands --> useCaseFactory
+    useCaseFactory --> appCtx
+    useCaseFactory --> runUseCase
+    runUseCase --> configLoader
+    runUseCase --> providerLoader
+    runUseCase --> containerFactory
+    runUseCase --> orchestrator
+    orchestrator --> pipelineRegistry
+    orchestrator --> pipelines
+    orchestrator --> console
+    console --> typer
 

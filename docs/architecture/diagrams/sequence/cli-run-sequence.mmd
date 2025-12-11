@@ -1,31 +1,46 @@
+---
+id: 57544a83-ca5a-4e5a-a348-afc397a7176a
+---
 %%{init: {
   "theme": "base",
   "themeVariables": {
     "actorLineColor": "#444",
     "actorTextColor": "#111",
     "actorBkg": "#f5f5f5",
+    "actorBorderRadius": 6,
     "actorFontSize": "18px",
+    "sequenceNumberColor": "#444",
     "activationBkgColor": "#e3e7ec",
     "activationBorderColor": "#444"
   }
 }}%%
 sequenceDiagram
     autonumber
+
     participant User as Operator
-    participant CLI as Typer command
-    participant Config as ConfigLoader
+    participant CLI as Typer CLI (bioetl)
+    participant UseCaseFactory as UseCaseFactory
+    participant AppCtx as ApplicationContext
+    participant UseCase as RunPipelineUseCase
+    participant ConfigLoader as PipelineConfigLoader
+    participant ProviderLoader as ProviderRegistryLoader
     participant Orchestrator as PipelineOrchestrator
     participant Pipeline as PipelineBase
 
-    User->>CLI: bioetl run activity_chembl --profile dev --limit 100 --dry-run
-    CLI->>Config: load_pipeline_yaml(activity)
-    Config-->>CLI: pipeline config dict
-    CLI->>Config: load_profile_yaml(dev)
-    Config-->>CLI: profile overrides
-    CLI->>CLI: merge overrides (limit, dry_run, output)
-    CLI->>Orchestrator: run(pipeline_name, merged_config)
-    Orchestrator->>Pipeline: build + run
-    Pipeline-->>Orchestrator: RunResult(meta)
-    Orchestrator-->>CLI: status + summary
-    CLI-->>User: exit code + printed metrics
+    User->>CLI: bioetl run activity_chembl --config ... --profile dev --dry-run --limit 100
+    CLI->>CLI: resolve config path (BIOETL_CONFIG_DIR fallback)
+    CLI->>UseCaseFactory: get_use_case_factory()
+    UseCaseFactory->>AppCtx: get_application_context()
+    AppCtx-->>UseCaseFactory: logger, metrics, config_loader
+    UseCaseFactory-->>CLI: RunPipelineUseCase
 
+    CLI->>UseCase: execute(RunPipelineRequest{pipeline_name, profile, dry_run, limit, output_path})
+    UseCase->>ConfigLoader: load config (path or registry) with profile+profiles_root
+    ConfigLoader-->>UseCase: PipelineConfig
+    UseCase->>ProviderLoader: create_provider_loader()
+    UseCase->>Orchestrator: PipelineOrchestrator(..., container_factory, provider_loader_factory)
+    Orchestrator->>Pipeline: build_pipeline(limit)
+    Pipeline-->>Orchestrator: RunResult (dry_run respected)
+    Orchestrator-->>UseCase: RunResult
+    UseCase-->>CLI: RunPipelineResponse(success, row_count, output_path)
+    CLI-->>User: exit code + summary

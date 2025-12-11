@@ -82,15 +82,16 @@ DEPRECATED_ALIASES: dict[str, DeprecatedAlias] = {
         new_name="RecordBatch",
         new_module="bioetl.domain.data",
         category="type_alias",
-        message="RawRecordBatch is deprecated. Use RecordBatch from bioetl.domain.data.",
+        message=(
+            "RawRecordBatch is deprecated. " "Use RecordBatch from bioetl.domain.data."
+        ),
     ),
     "RawRecordList": DeprecatedAlias(
         new_name="RecordBatch",
         new_module="bioetl.domain.data",
         category="type_alias",
         message=(
-            "RawRecordList is deprecated. "
-            "Use RecordBatch from bioetl.domain.data."
+            "RawRecordList is deprecated. " "Use RecordBatch from bioetl.domain.data."
         ),
     ),
     "RawPayload": DeprecatedAlias(

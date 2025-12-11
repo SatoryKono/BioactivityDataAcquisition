@@ -43,7 +43,8 @@ class ChemblNormalizationService(NormalizationServiceABC):
         warnings.warn(
             "ChemblNormalizationService is deprecated. "
             "Use NormalizationServiceImpl(config, empty_value=None, "
-            "serialize_array_in_series=False) instead. Will be removed in v3.0.",
+            "serialize_array_in_series=False) instead. "
+            "Will be removed in v3.0.",
             DeprecationWarning,
             stacklevel=2,
         )

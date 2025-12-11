@@ -5,8 +5,9 @@ from bioetl.infrastructure.observability.adapters import (
     StructuredLoggerImpl,
     TracingAdapterImpl,
 )
+
+# Deprecated aliases for backward compatibility
 from bioetl.infrastructure.observability.factories import (
-    # Deprecated aliases for backward compatibility
     create_logging_port,
     create_metrics_port,
     create_tracing_port,

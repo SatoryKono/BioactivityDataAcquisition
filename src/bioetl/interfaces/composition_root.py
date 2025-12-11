@@ -321,9 +321,7 @@ class CompositionRoot:
 
         # Create resolver with both infrastructure and application YAML files
         application_impls_path = Path(__file__).parent / "abc_impls_application.yaml"
-        resolver = ABCRegistryResolver(
-            additional_impls_paths=[application_impls_path]
-        )
+        resolver = ABCRegistryResolver(additional_impls_paths=[application_impls_path])
 
         # Resolve factories from registry
         loader_factory = resolver.resolve_default_factory("LoaderABC")

@@ -66,6 +66,9 @@ class MetadataWriter:
         return compute_files_sha256(paths)
 
 
+# Backward-compatible alias to satisfy deprecated symbol references.
+MetadataWriterImpl = MetadataWriter
+
 # Deprecated aliases for backward compatibility
 _DEPRECATED_ALIASES = {
     "MetadataWriterImpl": "MetadataWriter",
@@ -84,4 +87,8 @@ def __getattr__(name: str):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["MetadataWriter", "MetadataWriterImpl", "build_quality_report_table"]  # noqa: F822
+__all__ = [
+    "MetadataWriter",
+    "MetadataWriterImpl",  # noqa: F822
+    "build_quality_report_table",
+]

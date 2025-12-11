@@ -41,9 +41,10 @@ class TestConfigModelsDeprecation:
                 found = True
                 break
 
-        assert (
-            found
-        ), f"Expected warning not found in: {[str(w.message) for w in deprecation_warnings]}"
+        assert found, (
+            "Expected warning not found in: "
+            f"{[str(w.message) for w in deprecation_warnings]}"
+        )
 
     def test_config_models_exports_available(self) -> None:
         """Deprecated module still exports all expected symbols."""
@@ -59,10 +60,10 @@ class TestConfigModelsDeprecation:
 
 
 class TestCsvRecordSourceRemoval:
-    """Tests verifying bioetl.infrastructure.files.csv_record_source is fully removed."""
+    """Tests verifying csv_record_source removal."""
 
     def test_csv_record_source_module_not_found(self) -> None:
-        """Importing from infrastructure.files.csv_record_source raises ModuleNotFoundError.
+        """Importing infrastructure.files.csv_record_source raises ModuleNotFoundError.
 
         The module has been completely removed (not just deprecated).
         Users should import from bioetl.application.files.csv_record_source instead.

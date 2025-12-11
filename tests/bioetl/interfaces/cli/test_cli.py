@@ -107,8 +107,10 @@ def test_validate_config_success(mock_loader):
 
 @pytest.mark.unit
 @patch("bioetl.interfaces.cli.app.get_use_case_factory")
-def test_run_command(mock_get_factory):
+@patch("bioetl.interfaces.cli.app._resolve_config_path")
+def test_run_command(mock_resolve, mock_get_factory):
     """Test the run command."""
+    mock_resolve.return_value = Path("test.yaml")
     mock_use_case = MagicMock()
     mock_use_case.execute.return_value = MagicMock(
         success=True, row_count=10, duration_sec=1.0, output_path="out", errors=[]

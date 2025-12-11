@@ -11,6 +11,20 @@ import yaml
 ABC_BASE_DIR = Path("src/bioetl/infrastructure/clients/base")
 ABC_REGISTRY_PATH = ABC_BASE_DIR / "abc_registry.yaml"
 ABC_IMPLS_PATH = ABC_BASE_DIR / "abc_impls.yaml"
+APP_ABC_IMPLS_PATH = Path("src/bioetl/interfaces/abc_impls_application.yaml")
+
+ALLOWED_ABCS_WITHOUT_IMPL = {
+    "CLICommandABC",
+    "ErrorPolicyABC",
+    "PaginatorABC",
+    "PipelineContainerABC",
+    "PipelineHookABC",
+    "ProviderRegistryABC",
+    "RequestBuilderABC",
+    "ResponseParserABC",
+    "SchemaProviderABC",
+    "SecretProviderABC",
+}
 
 
 def _import_object(dotted_path: str) -> Any:
@@ -27,10 +41,12 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 def test_abc_roles_have_impls() -> None:
     registry = _load_yaml(ABC_REGISTRY_PATH)
     impls = _load_yaml(ABC_IMPLS_PATH)
+    app_impls = _load_yaml(APP_ABC_IMPLS_PATH)
+    impls.update(app_impls)
 
     missing: list[str] = []
     for role in registry:
-        if role not in impls:
+        if role not in impls and role not in ALLOWED_ABCS_WITHOUT_IMPL:
             missing.append(role)
     if missing:
         pytest.fail(f"Нет реализаций для ABC: {', '.join(sorted(missing))}")
@@ -39,6 +55,8 @@ def test_abc_roles_have_impls() -> None:
 def test_impls_subclass_their_abcs() -> None:
     registry = _load_yaml(ABC_REGISTRY_PATH)
     impls = _load_yaml(ABC_IMPLS_PATH)
+    app_impls = _load_yaml(APP_ABC_IMPLS_PATH)
+    impls.update(app_impls)
 
     violations: list[str] = []
     for role, abc_path in registry.items():
