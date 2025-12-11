@@ -142,22 +142,28 @@ class FieldSpec:
 
 # ---------------------------------------------------------------------------
 # Generated (Service) Fields - Common to all schemas
+#
+# Terminology mapping (column name → canonical term → contract method):
+#   hash_row         → record_hash        → compute_fingerprint()
+#   hash_business_key → business_key_hash → compute_entity_key()
 # ---------------------------------------------------------------------------
 
 GENERATED_FIELD_SPECS: tuple[FieldSpec, ...] = (
+    # Canonical term: record_hash (contract method: compute_fingerprint)
     FieldSpec(
         name="hash_row",
         data_type="string",
         nullable=False,
         pattern=HEX_64_PATTERN,
-        description="SHA-256 hash of entire row (64 hex characters)",
+        description="SHA-256 hash of entire row (canonical: record_hash)",
     ),
+    # Canonical term: business_key_hash (contract method: compute_entity_key)
     FieldSpec(
         name="hash_business_key",
         data_type="string",
         nullable=True,
         pattern=HEX_64_PATTERN,
-        description="SHA-256 hash of business key",
+        description="SHA-256 hash of business key (canonical: business_key_hash)",
     ),
     FieldSpec(
         name="index",
