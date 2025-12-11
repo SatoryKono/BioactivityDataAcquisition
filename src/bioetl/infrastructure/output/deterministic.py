@@ -20,8 +20,9 @@ from bioetl.domain.output.deterministic import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.data import TabularData
     import pandas as pd
+
+    from bioetl.domain.data import TabularData
 
 
 class _BaseDeterministicWriter(DeterministicWriterABC):
