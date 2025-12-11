@@ -1,7 +1,6 @@
-"""
-Value Objects для идентификаторов.
+"""Value Objects for identifiers.
 
-Содержит типобезопасные идентификаторы для различных сущностей системы.
+Contains type-safe identifiers for various system entities.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ from pydantic_core import CoreSchema, core_schema
 
 
 class RunId:
-    """Value Object для идентификатора запуска pipeline (UUID v4)."""
+    """Value Object for pipeline run identifier (UUID v4)."""
 
     __slots__ = ("_value",)
     _pattern = re.compile(
@@ -49,7 +48,7 @@ class RunId:
 
     @classmethod
     def generate(cls) -> Self:
-        """Генерирует новый уникальный RunId."""
+        """Generate a new unique RunId."""
         return cls(str(uuid.uuid4()))
 
     @classmethod
@@ -64,15 +63,15 @@ class RunId:
 
 
 class StageName:
-    """Value Object для имени стадии pipeline.
+    """Value Object for pipeline stage name.
 
-    Ограниченный набор допустимых стадий с поддержкой aliases.
+    Limited set of allowed stages with alias support.
 
     Allowed values:
-        - "extract" - стадия извлечения данных
-        - "transform" - стадия трансформации
-        - "validate" - стадия валидации
-        - "export" - стадия экспорта (alias: "load")
+        - "extract" - data extraction stage
+        - "transform" - transformation stage
+        - "validate" - validation stage
+        - "export" - export stage (alias: "load")
 
     Features:
         - Case-insensitive: StageName("EXTRACT") → StageName("extract")
@@ -176,7 +175,7 @@ StageName.EXPORT = StageName("export")
 
 
 class EntityName:
-    """Value Object для имени сущности (snake_case)."""
+    """Value Object for entity name (snake_case format)."""
 
     __slots__ = ("_value",)
     _pattern = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -220,7 +219,7 @@ class EntityName:
 
 
 class PipelineId:
-    """Value Object для идентификатора pipeline (формат: provider.entity).
+    """Value Object for pipeline identifier (format: provider.entity).
 
     Examples:
         - "chembl.activity"
@@ -273,7 +272,7 @@ class PipelineId:
 
     @classmethod
     def from_parts(cls, provider: str, entity: str) -> Self:
-        """Создаёт PipelineId из отдельных компонентов."""
+        """Create PipelineId from separate components."""
         return cls(f"{provider}.{entity}")
 
     @classmethod
@@ -288,7 +287,7 @@ class PipelineId:
 
 
 class ChemblId:
-    """Value Object для ChEMBL идентификатора (формат CHEMBL123)."""
+    """Value Object for ChEMBL identifier (format: CHEMBL123)."""
 
     __slots__ = ("_value",)
     _pattern = re.compile(r"^CHEMBL\d+$")
@@ -306,7 +305,7 @@ class ChemblId:
 
     @property
     def numeric_id(self) -> int:
-        """Возвращает числовую часть идентификатора."""
+        """Return the numeric part of the identifier."""
         return int(self._value[6:])
 
     def __str__(self) -> str:

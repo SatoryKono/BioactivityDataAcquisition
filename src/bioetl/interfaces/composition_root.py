@@ -60,10 +60,10 @@ class ObservabilityStack:
 
 
 class CompositionRoot:
-    """Единая точка сборки зависимостей для interfaces layer.
+    """Single dependency assembly point for interfaces layer.
 
-    Все concrete implementations создаются здесь. Другие модули
-    получают зависимости через этот класс, а не создают напрямую.
+    All concrete implementations are created here. Other modules
+    obtain dependencies through this class, not directly.
 
     Example:
         # Production
@@ -78,10 +78,10 @@ class CompositionRoot:
     def __init__(
         self,
         *,
-        # Новые параметры для фабрик
+        # New factory parameters
         observability_factory: ObservabilityFactoryABC | None = None,
         infrastructure_factory: InfrastructureFactoryABC | None = None,
-        # Старые параметры (backward compatibility)
+        # Legacy parameters (backward compatibility)
         logger: LoggingPortABC | None = None,
         metrics: MetricsPortABC | None = None,
         http_session_factory: type | None = None,
@@ -101,11 +101,11 @@ class CompositionRoot:
             schema_contract_provider: Custom schema contract provider
                 (defaults to bootstrapped provider from schema registry)
         """
-        # Фабрики
+        # Factories
         self._observability = observability_factory or DefaultObservabilityFactory()
         self._infrastructure = infrastructure_factory or DefaultInfrastructureFactory()
 
-        # Explicit overrides (для BC и тестов)
+        # Explicit overrides (for BC and tests)
         self._explicit_logger = logger
         self._explicit_metrics = metrics
         self._http_session_factory = http_session_factory or requests.Session

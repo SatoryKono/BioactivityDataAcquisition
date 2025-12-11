@@ -22,7 +22,7 @@ def normalize_doi(value: Any) -> str | None:
     if is_missing(value):
         return None
     if not isinstance(value, str):
-        raise ValueError(f"DOI должен быть строкой, получено: {type(value)}")
+        raise ValueError(f"DOI must be a string, got: {type(value)}")
 
     doi = value.strip().lower()
     doi = re.sub(r"^(https?://)?(dx\.)?doi\.org/", "", doi)
@@ -33,10 +33,10 @@ def normalize_doi(value: Any) -> str | None:
         return None
 
     if not doi.startswith("10."):
-        raise ValueError(f"Неверный формат DOI (должен начинаться с '10.'): '{value}'")
+        raise ValueError(f"Invalid DOI format (must start with '10.'): '{value}'")
 
     if not DOI_REGEX.match(doi):
-        raise ValueError(f"Неверный формат DOI: '{value}'")
+        raise ValueError(f"Invalid DOI format: '{value}'")
 
     return doi
 
@@ -60,7 +60,7 @@ def normalize_chembl_id(value: Any) -> str | None:
     match = re.fullmatch(r"CHEMBL(\d+)", text)
     if not match:
         raise ValueError(
-            f"Неверный ChEMBL ID (ожидался формат CHEMBL<digits>): '{value}'"
+            f"Invalid ChEMBL ID (expected format CHEMBL<digits>): '{value}'"
         )
 
     return text
@@ -75,11 +75,11 @@ def normalize_pmid(value: Any) -> int | None:
         if value.is_integer():
             value = int(value)
         else:
-            raise ValueError(f"PubMed ID не является целым числом: '{value}'")
+            raise ValueError(f"PubMed ID is not an integer: '{value}'")
 
     if isinstance(value, int):
         if value <= 0:
-            raise ValueError("PubMed ID должен быть положительным числом")
+            raise ValueError("PubMed ID must be a positive number")
         return value
 
     text = str(value).strip()
@@ -87,11 +87,11 @@ def normalize_pmid(value: Any) -> int | None:
         return None
 
     if not text.isdigit():
-        raise ValueError(f"Неверный PubMed ID (содержит нецифровые символы): '{value}'")
+        raise ValueError(f"Invalid PubMed ID (contains non-digit characters): '{value}'")
 
     parsed = int(text)
     if parsed <= 0:
-        raise ValueError("PubMed ID должен быть положительным числом")
+        raise ValueError("PubMed ID must be a positive number")
     return parsed
 
 
@@ -109,14 +109,14 @@ def normalize_uniprot(value: Any) -> str | None:
     if is_missing(value):
         return None
     if not isinstance(value, str):
-        raise ValueError("UniProt ID должен быть строкой")
+        raise ValueError("UniProt ID must be a string")
 
     accession = value.strip().upper()
     if not accession:
         return None
 
     if not UNIPROT_ID_REGEX.match(accession):
-        raise ValueError(f"Неверный UniProt ID: '{value}'")
+        raise ValueError(f"Invalid UniProt ID: '{value}'")
     return accession
 
 
@@ -134,7 +134,7 @@ def normalize_bao_id(value: Any) -> str | None:
         return None
 
     if not BAO_ID_REGEX.match(text):
-        raise ValueError(f"Неверный BAO ID (ожидался формат BAO_<digits>): '{value}'")
+        raise ValueError(f"Invalid BAO ID (expected format BAO_<digits>): '{value}'")
 
     return text
 
@@ -167,7 +167,7 @@ def _parse_positive_int_with_prefixes(
 
     stripped = _strip_prefix(text, prefixes)
     if not stripped.isdigit():
-        raise ValueError(f"Неверный {field_name}: '{value}'")
+        raise ValueError(f"Invalid {field_name}: '{value}'")
 
     parsed = int(stripped)
     _ensure_positive(parsed, field_name)
@@ -177,7 +177,7 @@ def _parse_positive_int_with_prefixes(
 def _coerce_positive_int(value: Any, field_name: str) -> int | None:
     if isinstance(value, float):
         if not value.is_integer():
-            raise ValueError(f"{field_name} не является целым числом: '{value}'")
+            raise ValueError(f"{field_name} is not an integer: '{value}'")
         value = int(value)
 
     if isinstance(value, int):
@@ -196,7 +196,7 @@ def _strip_prefix(text: str, prefixes: tuple[str, ...]) -> str:
 
 def _ensure_positive(value: int, field_name: str) -> None:
     if value <= 0:
-        raise ValueError(f"{field_name} должен быть положительным числом")
+        raise ValueError(f"{field_name} must be a positive number")
 
 
 __all__ = [

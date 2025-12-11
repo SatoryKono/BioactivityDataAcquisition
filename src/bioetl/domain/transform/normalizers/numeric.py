@@ -54,13 +54,13 @@ def _coerce_phase_value(value: Any) -> int | None:
             parsed = float(text)
         except ValueError as exc:
             raise ValueError(
-                f"Некорректное числовое значение фазы клинических испытаний: '{value}'"
+                f"Invalid numeric value for clinical trial phase: '{value}'"
             ) from exc
         return _coerce_phase_value(parsed)
 
     raise ValueError(
-        "Ожидалось числовое значение фазы клинических испытаний, "
-        f"получено {type(value).__name__}"
+        "Expected numeric value for clinical trial phase, "
+        f"got {type(value).__name__}"
     )
 
 

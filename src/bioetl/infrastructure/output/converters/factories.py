@@ -1,4 +1,4 @@
-"""Фабрика конвертеров DataFrame для пост-обработки перед записью.
+"""DataFrame converter factory for post-processing before writing.
 
 Naming convention:
 - create_*() - creates a new instance each time

@@ -15,7 +15,7 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 
 
 class InMemoryProviderRegistry(ProviderRegistryABC):
-    """Реализация реестра провайдеров в памяти.
+    """In-memory provider registry implementation.
 
     Concrete implementation of the provider registry that stores
     provider definitions in memory.
@@ -25,27 +25,27 @@ class InMemoryProviderRegistry(ProviderRegistryABC):
         self._providers: dict[ProviderId, ProviderDefinition] = {}
 
     def register_provider(self, definition: ProviderDefinition) -> None:
-        """Регистрирует провайдер в реестре."""
+        """Register provider in registry."""
         if definition.id in self._providers:
             raise ProviderAlreadyRegisteredError(definition.id)
         self._providers[definition.id] = definition
 
     def get_provider(self, provider_id: ProviderId) -> ProviderDefinition:
-        """Получает определение провайдера по идентификатору."""
+        """Get provider definition by identifier."""
         if provider_id not in self._providers:
             raise ProviderNotRegisteredError(provider_id)
         return self._providers[provider_id]
 
     def list_providers(self) -> list[ProviderDefinition]:
-        """Возвращает список всех зарегистрированных провайдеров."""
+        """Return list of all registered providers."""
         return list(self._providers.values())
 
     def reset_provider_registry(self) -> None:
-        """Очищает реестр провайдеров."""
+        """Clear the provider registry."""
         self._providers.clear()
 
     def restore_provider_registry(self, definitions: list[ProviderDefinition]) -> None:
-        """Восстанавливает реестр из списка определений."""
+        """Restore registry from list of definitions."""
         self._providers.clear()
         for definition in definitions:
             self._providers[definition.id] = definition

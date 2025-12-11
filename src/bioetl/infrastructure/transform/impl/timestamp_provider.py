@@ -8,18 +8,18 @@ from bioetl.domain.transform.contracts import TimestampProviderABC
 
 
 class DeterministicTimestampProvider(TimestampProviderABC):
-    """
-    Провайдер детерминированных временных меток.
+    """Deterministic timestamp provider.
 
-    Фиксирует время при инициализации и возвращает его при всех вызовах.
-    Это обеспечивает детерминизм в рамках одной сессии обработки данных.
+    Fixes time at initialization and returns it for all calls.
+    This ensures determinism within a single data processing session.
     """
 
     def __init__(self, fixed_time: datetime | None = None) -> None:
-        """
+        """Initialize provider.
+
         Args:
-            fixed_time: Фиксированное время. Если не указано,
-                        используется текущее время (UTC).
+            fixed_time: Fixed timestamp. If not specified,
+                        current time (UTC) is used.
         """
         if fixed_time is None:
             self._time = datetime.now(timezone.utc)
@@ -31,7 +31,7 @@ class DeterministicTimestampProvider(TimestampProviderABC):
                 self._time = fixed_time
 
     def get_extraction_timestamp(self) -> datetime:
-        """Возвращает зафиксированный timestamp извлечения данных."""
+        """Return fixed data extraction timestamp."""
         return self._time
 
 

@@ -7,9 +7,7 @@ from bioetl.domain.clients.base.contracts import RequestBuilderABC
 
 
 class ChemblRequestBuilderImpl(RequestBuilderABC):
-    """
-    Builder для запросов к ChEMBL API.
-    """
+    """Builder for ChEMBL API requests."""
 
     def __init__(self, base_url: str, max_url_length: Optional[int] = None) -> None:
         if not base_url:
@@ -62,9 +60,9 @@ class ChemblRequestBuilderImpl(RequestBuilderABC):
         return self.build_request(merged_params)
 
     def build_request(self, params: dict[str, Any]) -> str:
-        """
-        Строит URL с параметрами.
-        Возвращает полный URL (строка; в реальности может быть Request object).
+        """Build URL with parameters.
+
+        Returns full URL string (could be a Request object in practice).
         """
         # Merge base params with call-specific params (without mutating state)
         current_params = self._params.copy()

@@ -19,17 +19,17 @@ from bioetl.domain.transform.contracts import (
 
 
 class TransformerABC(ABC):
-    """Базовый интерфейс для DataFrame-трансформеров."""
+    """Base interface for DataFrame transformers."""
 
     @abstractmethod
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Выполняет преобразование DataFrame."""
+        """Apply transformation to DataFrame."""
 
 
 class TransformerChainImpl(TransformerABC):
-    """Комбинирует несколько трансформеров в последовательность."""
+    """Combines multiple transformers into a sequence."""
 
     def __init__(self, transformers: list[TransformerABC]) -> None:
         self._transformers = transformers
@@ -37,7 +37,7 @@ class TransformerChainImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Последовательно применяет зарегистрированные трансформеры."""
+        """Apply registered transformers sequentially."""
         result = df
         for transformer in self._transformers:
             result = transformer.apply(result, context)
@@ -45,7 +45,7 @@ class TransformerChainImpl(TransformerABC):
 
 
 class HashColumnsTransformerImpl(TransformerABC):
-    """Добавляет hash_business_key и hash_row."""
+    """Adds hash_business_key and hash_row columns."""
 
     def __init__(
         self, hash_service: HashServiceABC, business_key_fields: list[str] | None
@@ -56,7 +56,7 @@ class HashColumnsTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Добавляет hash_business_key и hash_row, если DataFrame не пуст."""
+        """Add hash_business_key and hash_row if DataFrame is not empty."""
         if df.empty:
             return df.assign(hash_business_key=None, hash_row=None)
 
@@ -66,7 +66,7 @@ class HashColumnsTransformerImpl(TransformerABC):
 
 
 class IndexColumnTransformerImpl(TransformerABC):
-    """Добавляет индексную колонку."""
+    """Adds index column."""
 
     def __init__(self, index_generator: IndexGeneratorABC) -> None:
         self._index_generator = index_generator
@@ -74,7 +74,7 @@ class IndexColumnTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Добавляет порядковый индекс строк."""
+        """Add sequential row index."""
         df = df.copy()
         start_index = self._index_generator.next_index()
         # Generate range of indices for the batch
@@ -87,7 +87,7 @@ class IndexColumnTransformerImpl(TransformerABC):
 
 
 class DatabaseVersionTransformerImpl(TransformerABC):
-    """Добавляет колонку с версией базы данных."""
+    """Adds database version column."""
 
     def __init__(
         self,
@@ -98,7 +98,7 @@ class DatabaseVersionTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Добавляет database_version, если значение предоставлено."""
+        """Add database_version if value is provided."""
         version = self._database_version_provider()
         if version is None:
             return df
@@ -108,7 +108,7 @@ class DatabaseVersionTransformerImpl(TransformerABC):
 
 
 class FulldateTransformerImpl(TransformerABC):
-    """Добавляет колонку acquisition_timestamp с таймстампом."""
+    """Adds acquisition_timestamp column with timestamp."""
 
     def __init__(self, timestamp_provider: TimestampProviderABC) -> None:
         self._timestamp_provider = timestamp_provider
@@ -116,7 +116,7 @@ class FulldateTransformerImpl(TransformerABC):
     def apply(
         self, df: pd.DataFrame, context: RunContext | None = None
     ) -> pd.DataFrame:
-        """Добавляет acquisition_timestamp (UTC ISO-8601)."""
+        """Add acquisition_timestamp (UTC ISO-8601)."""
         df = df.copy()
         ts = self._timestamp_provider.get_extraction_timestamp()
         if ts.tzinfo is None:

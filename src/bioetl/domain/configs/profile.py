@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProfileConfig(BaseModel):
-    """Конфигурация профиля поверх пайплайн-конфига."""
+    """Profile configuration on top of pipeline config."""
 
     name: str
     extends: str | None = None

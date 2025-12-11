@@ -18,11 +18,10 @@ from bioetl.domain.value_objects import HashDigest
 
 
 class Blake2bHashService(HashServiceABC):
-    """
-    Stateless хеш-сервис на основе BLAKE2b-256.
+    """Stateless hash service based on BLAKE2b-256.
 
-    Использует HasherABC для вычисления хешей.
-    Не содержит никакого состояния - чистые функции хеширования.
+    Uses HasherABC for hash computation.
+    Contains no state - pure hashing functions.
 
     Methods:
         compute_fingerprint: Compute record_hash of entire record.
@@ -31,9 +30,10 @@ class Blake2bHashService(HashServiceABC):
     """
 
     def __init__(self, hasher: HasherABC) -> None:
-        """
+        """Initialize service.
+
         Args:
-            hasher: Реализация алгоритма хеширования.
+            hasher: Hash algorithm implementation.
         """
         self._hasher = hasher
 
@@ -134,13 +134,13 @@ class Blake2bHashService(HashServiceABC):
     # Legacy methods for backward compatibility
 
     def compute_row_fingerprint(self, row: dict) -> str:
-        """Вычисляет хеш-отпечаток строки как полного объекта (legacy).
+        """Compute hash fingerprint of row as complete object (legacy).
 
         Args:
-            row: Словарь с данными строки.
+            row: Dictionary with row data.
 
         Returns:
-            Hex-строка с хешем строки.
+            Hex string with row hash.
         """
         return self.compute_fingerprint(row).value
 

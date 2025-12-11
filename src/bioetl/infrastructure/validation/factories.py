@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 
 class PanderaValidatorFactory(ValidatorFactoryABC):
-    """Фабрика валидаторов Pandera."""
+    """Pandera validator factory."""
 
     def create_validator(self, schema: schema_type) -> ValidatorABC:
         """Instantiate a Pandera-backed validator for given schema."""
@@ -38,7 +38,7 @@ class PanderaValidatorFactory(ValidatorFactoryABC):
 
 
 class PanderaSchemaProviderFactory(SchemaProviderFactoryABC):
-    """Фабрика провайдеров схем для Pandera.
+    """Schema provider factory for Pandera.
 
     This factory supports dependency injection via constructor parameter,
     allowing tests to provide mock schema providers. When no factory is

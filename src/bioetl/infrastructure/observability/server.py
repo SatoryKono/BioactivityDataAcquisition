@@ -1,4 +1,4 @@
-"""HTTP сервер экспонирования метрик Prometheus."""
+"""Prometheus metrics HTTP server."""
 
 from __future__ import annotations
 
@@ -11,10 +11,10 @@ _metrics_server_lock = Lock()
 
 
 def start_metrics_server_once(*, enabled: bool, port: int, address: str) -> bool:
-    """Запускает HTTP сервер метрик один раз на процесс.
+    """Start metrics HTTP server once per process.
 
-    Возвращает ``True``, если сервер был запущен в текущем вызове, и ``False``
-    если он уже работал или отключен конфигурацией.
+    Returns ``True`` if server was started in this call, ``False``
+    if already running or disabled by configuration.
     """
 
     if not enabled:

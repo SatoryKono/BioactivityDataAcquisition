@@ -39,7 +39,7 @@ from bioetl.domain.validation.service import ValidationService
 
 
 class ChemblPipelineBase(PipelineBase):
-    """Базовый класс для ChEMBL-пайплайнов."""
+    """Base class for ChEMBL pipelines."""
 
     def __init__(
         self,
@@ -111,10 +111,10 @@ class ChemblPipelineBase(PipelineBase):
         self._transformer = transformer
 
     def get_version(self) -> str:
-        """Возвращает версию релиза ChEMBL (например, 'chembl_34').
+        """Return ChEMBL release version (e.g., 'chembl_34').
 
-        Extraction service возвращает сырую версию (например, '34').
-        Форматирование выполняется в application layer через domain service.
+        Extraction service returns raw version (e.g., '34').
+        Formatting is done in application layer via domain service.
         """
         if self._chembl_release is not None:
             return self._chembl_release
@@ -126,7 +126,7 @@ class ChemblPipelineBase(PipelineBase):
         try:
             raw_version = self._extraction_service.get_release_version()
             self._chembl_release = format_chembl_version(raw_version)
-        except Exception as exc:  # pragma: no cover - защитный контур
+        except Exception as exc:  # pragma: no cover - defensive guard
             self._logger.warning(
                 "Failed to fetch ChEMBL release; using 'unknown'",
                 error=str(exc),
@@ -153,7 +153,7 @@ class ChemblPipelineBase(PipelineBase):
             pass
 
     def _should_skip_release_lookup(self) -> bool:
-        """True, если версию ChEMBL нужно пропустить (офлайн/CSV режим)."""
+        """True if ChEMBL version lookup should be skipped (offline/CSV mode)."""
         input_mode = getattr(self._config, "input_mode", None)
         pipeline_cfg = getattr(self._config, "pipeline", {}) or {}
         if input_mode == "csv":
@@ -161,11 +161,10 @@ class ChemblPipelineBase(PipelineBase):
         return bool(pipeline_cfg.get("skip_release_lookup"))
 
     def extract(self, **kwargs: Any) -> pd.DataFrame:
-        """
-        Возвращает единый DataFrame для удобства unit-тестов и локальных проверок.
+        """Return single DataFrame for unit tests and local checks.
 
-        Основной run-процесс использует self._extractor напрямую, поэтому
-        материализация чанков в этой обёртке не влияет на боевой поток.
+        Main run process uses self._extractor directly, so
+        chunk materialization in this wrapper doesn't affect production flow.
         """
         extractor = self._extractor
         if extractor is None:
@@ -180,9 +179,9 @@ class ChemblPipelineBase(PipelineBase):
 
         try:
             iterator = iter(extract_result)
-        except TypeError as exc:  # pragma: no cover - защитный контур
+        except TypeError as exc:  # pragma: no cover - defensive guard
             raise TypeError(
-                "ExtractStage.extract() должен возвращать DataFrame или Iterable."
+                "ExtractStage.extract() must return DataFrame or Iterable."
             ) from exc
 
         chunks: list[pd.DataFrame] = []
@@ -190,7 +189,7 @@ class ChemblPipelineBase(PipelineBase):
             if chunk is None:
                 continue
             if not isinstance(chunk, pd.DataFrame):
-                raise TypeError("Extractor chunks должны быть pandas.DataFrame.")
+                raise TypeError("Extractor chunks must be pandas.DataFrame.")
             if chunk.empty:
                 continue
             chunks.append(chunk)

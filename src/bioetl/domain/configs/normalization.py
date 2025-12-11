@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class NormalizationConfig(BaseModel):
-    """Конфигурация нормализации данных."""
+    """Data normalization configuration."""
 
     case_sensitive_fields: list[str] = Field(default_factory=list)
     id_fields: list[str] = Field(default_factory=list)
