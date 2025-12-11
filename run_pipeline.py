@@ -28,7 +28,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     """Load YAML file without importing heavy dependencies."""
     import yaml  # Lazy import
 
-    with path.open() as f:
+    with path.open(encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
@@ -49,7 +49,9 @@ def discover_pipelines() -> dict[str, dict[str, str]]:
     for config_path in sorted(PIPELINES_ROOT.rglob("*.yaml")):
         try:
             config = _load_yaml(config_path)
-        except Exception:
+        except Exception as e:
+            # Log error but continue processing other files
+            print(f"Warning: Failed to load {config_path.relative_to(REPO_ROOT)}: {e}", file=sys.stderr)
             continue
 
         # Extract pipeline info from config
