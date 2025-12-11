@@ -94,6 +94,18 @@ def default_normalization_service(
     return create_normalization_service(config)
 
 
+def default_index_generator(start: int = 0) -> IndexGeneratorABC:
+    """Deprecated: use create_index_generator() instead."""
+    return create_index_generator(start)
+
+
+def default_timestamp_provider(
+    fixed_time: datetime | None = None,
+) -> TimestampProviderABC:
+    """Deprecated: use create_timestamp_provider() instead."""
+    return create_timestamp_provider(fixed_time)
+
+
 __all__ = [
     "create_hasher",
     "create_hash_service",
@@ -101,5 +113,7 @@ __all__ = [
     "create_index_generator",
     "create_normalization_service",
     "default_hash_service",
+    "default_index_generator",
     "default_normalization_service",
+    "default_timestamp_provider",
 ]

@@ -133,3 +133,41 @@ def create_chembl_extraction_service(
         filter_enricher=filter_enricher,
         parser=parser or ChemblGenericResponseParser(),
     )
+
+
+# Deprecated aliases for backward compatibility
+def default_chembl_client(
+    source_config: ChemblSourceConfig,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
+    http_config: HttpClientConfig | None = None,
+    **options: Any,
+) -> DataClientABC:
+    """Deprecated: use create_chembl_client() instead."""
+    return create_chembl_client(
+        source_config, logger, metrics, http_config, **options
+    )
+
+
+def default_chembl_extraction_service(
+    config: ChemblSourceConfig,
+    logger: LoggingPortABC,
+    metrics: MetricsPortABC,
+    http_config: HttpClientConfig | None = None,
+    *,
+    client: DataClientABC | None = None,
+    filter_enricher: FilterEnricherABC | None = None,
+    parser: ResponseParserPortABC | None = None,
+) -> ExtractionServiceABC:
+    """Deprecated: use create_chembl_extraction_service() instead."""
+    return create_chembl_extraction_service(
+        config, logger, metrics, http_config, client=client, filter_enricher=filter_enricher, parser=parser
+    )
+
+
+__all__ = [
+    "create_chembl_client",
+    "create_chembl_extraction_service",
+    "default_chembl_client",
+    "default_chembl_extraction_service",
+]

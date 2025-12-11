@@ -60,4 +60,15 @@ def create_output_frame_converter(
     return SimpleNamespace(convert=lambda df: df)  # type: ignore[return-value]
 
 
-__all__ = ["create_output_frame_converter"]
+# Deprecated aliases for backward compatibility
+def default_output_frame_converter(
+    converter_id: str | None = None,
+) -> OutputFrameConverterABC:
+    """Deprecated: use create_output_frame_converter() instead."""
+    return create_output_frame_converter(converter_id)
+
+
+__all__ = [
+    "create_output_frame_converter",
+    "default_output_frame_converter",
+]

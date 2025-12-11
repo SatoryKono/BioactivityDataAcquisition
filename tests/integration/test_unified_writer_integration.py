@@ -11,8 +11,8 @@ import yaml
 from bioetl.domain.configs import DeterminismConfig, QualityControlConfig
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
-from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
-from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriterImpl
+from bioetl.infrastructure.output.impl.csv_writer import CsvWriter
+from bioetl.infrastructure.output.impl.metadata_writer import MetadataWriter
 from bioetl.infrastructure.output.impl.quality_report import QualityReportImpl
 from bioetl.infrastructure.output.unified_loader_impl import (
     UnifiedLoaderImpl,
@@ -26,7 +26,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
     qc_config = QualityControlConfig(
         enable_quality_report=True, enable_correlation_report=True
     )
-    writer = CsvWriterImpl()
+    writer = CsvWriter()
     metadata_writer = MetadataWriterImpl()
     quality_reporter = QualityReportImpl()
     atomic_op, calls = _with_tracking_atomic()
