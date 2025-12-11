@@ -22,7 +22,26 @@ if TYPE_CHECKING:
 
 
 class RequestBuilderABC(ABC):
-    """Builder pattern for request creation."""
+    """Builder pattern for request creation.
+
+    This ABC provides a fluent interface for constructing API requests.
+    Implementations should support endpoint configuration and pagination.
+
+    Note:
+        Consider using :class:`bioetl.domain.ports.request_building.RequestBuilderPortABC`
+        for new code - it provides a cleaner port-based contract.
+    """
+
+    @abstractmethod
+    def build_for_endpoint(self, endpoint: str) -> "RequestBuilderABC":
+        """Configure builder for a specific API endpoint.
+
+        Args:
+            endpoint: The API endpoint name (e.g., 'activity', 'assay').
+
+        Returns:
+            Self for method chaining.
+        """
 
     @abstractmethod
     def build_request(self, params: dict[str, Any]) -> Any:
@@ -48,6 +67,19 @@ class RequestBuilderABC(ABC):
             stacklevel=2,
         )
         return self.build_with_pagination(offset, limit)
+
+    def for_endpoint(self, endpoint: str) -> "RequestBuilderABC":
+        """Deprecated alias for build_for_endpoint.
+
+        .. deprecated:: 1.0
+            Use :meth:`build_for_endpoint` instead. Will be removed in 2.0.
+        """
+        warnings.warn(
+            "for_endpoint() is deprecated, use build_for_endpoint() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.build_for_endpoint(endpoint)
 
 
 # =============================================================================
