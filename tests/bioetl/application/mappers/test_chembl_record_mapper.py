@@ -34,7 +34,7 @@ class TestChemblRecordMapperActivityMapping:
         assert isinstance(result[0], ActivityRawModel)
         assert result[0].activity_id == "12345"
         assert result[0].standard_flag is True
-        assert result[0].assay_chembl_id == "CHEMBL123"
+        assert str(result[0].assay_chembl_id) == "CHEMBL123"
 
     def test_maps_multiple_activity_records(self) -> None:
         """Multiple activity records are all mapped correctly."""
@@ -71,7 +71,7 @@ class TestChemblRecordMapperMoleculeMapping:
 
         assert len(result) == 1
         assert isinstance(result[0], MoleculeRawModel)
-        assert result[0].molecule_chembl_id == "CHEMBL25"
+        assert str(result[0].molecule_chembl_id) == "CHEMBL25"
         assert result[0].pref_name == "ASPIRIN"
         assert result[0].max_phase == 4
 
@@ -96,7 +96,7 @@ class TestChemblRecordMapperTargetMapping:
 
         assert len(result) == 1
         assert isinstance(result[0], TargetRawModel)
-        assert result[0].target_chembl_id == "CHEMBL204"
+        assert str(result[0].target_chembl_id) == "CHEMBL204"
         assert result[0].organism == "Homo sapiens"
         assert result[0].tax_id == 9606
 
@@ -120,7 +120,7 @@ class TestChemblRecordMapperAssayMapping:
 
         assert len(result) == 1
         assert isinstance(result[0], AssayRawModel)
-        assert result[0].assay_chembl_id == "CHEMBL1217643"
+        assert str(result[0].assay_chembl_id) == "CHEMBL1217643"
         assert result[0].assay_type == "B"
         assert result[0].description == "Binding assay"
 
@@ -145,7 +145,7 @@ class TestChemblRecordMapperDocumentMapping:
 
         assert len(result) == 1
         assert isinstance(result[0], DocumentRawModel)
-        assert result[0].document_chembl_id == "CHEMBL1125443"
+        assert str(result[0].document_chembl_id) == "CHEMBL1125443"
         assert result[0].journal == "J. Med. Chem."
         assert result[0].year == 2007
         assert result[0].pubmed_id == 17181143

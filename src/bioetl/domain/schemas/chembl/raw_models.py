@@ -11,6 +11,7 @@ from typing import TypeAlias
 from pydantic import ConfigDict, field_validator
 
 from bioetl.domain.record_source import SourceRecordModel
+from bioetl.domain.value_objects import ChemblId
 
 ScalarValue: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = (
@@ -32,7 +33,7 @@ class ActivityRawModel(SourceRecordModel):
     activity_comment: str | None = None
     activity_id: str
     activity_properties: list[JsonObject] | None = None
-    assay_chembl_id: str | None = None
+    assay_chembl_id: ChemblId | None = None
     assay_description: str | None = None
     assay_type: str | None = None
     assay_variant_accession: str | None = None
@@ -43,13 +44,13 @@ class ActivityRawModel(SourceRecordModel):
     canonical_smiles: str | None = None
     data_validity_comment: str | None = None
     data_validity_description: str | None = None
-    document_chembl_id: str | None = None
+    document_chembl_id: ChemblId | None = None
     document_journal: str | None = None
     document_year: int | None = None
     ligand_efficiency: JsonObject | None = None
-    molecule_chembl_id: str | None = None
+    molecule_chembl_id: ChemblId | None = None
     molecule_pref_name: str | None = None
-    parent_molecule_chembl_id: str | None = None
+    parent_molecule_chembl_id: ChemblId | None = None
     pchembl_value: float | None = None
     potential_duplicate: bool | None = None
     qudt_units: str | None = None
@@ -63,7 +64,7 @@ class ActivityRawModel(SourceRecordModel):
     standard_units: str | None = None
     standard_upper_value: float | None = None
     standard_value: float | None = None
-    target_chembl_id: str | None = None
+    target_chembl_id: ChemblId | None = None
     target_organism: str | None = None
     target_pref_name: str | None = None
     target_tax_id: int | None = None
@@ -86,7 +87,7 @@ class MoleculeRawModel(SourceRecordModel):
 
     model_config = ConfigDict(extra="allow")
 
-    molecule_chembl_id: str
+    molecule_chembl_id: ChemblId
     pref_name: str | None = None
     molecule_type: str | None = None
     max_phase: int | None = None
@@ -104,7 +105,7 @@ class TargetRawModel(SourceRecordModel):
 
     model_config = ConfigDict(extra="allow")
 
-    target_chembl_id: str
+    target_chembl_id: ChemblId
     pref_name: str | None = None
     organism: str | None = None
     target_type: str | None = None
@@ -122,7 +123,7 @@ class AssayRawModel(SourceRecordModel):
 
     model_config = ConfigDict(extra="allow")
 
-    assay_chembl_id: str
+    assay_chembl_id: ChemblId
     assay_type: str | None = None
     description: str | None = None
     assay_organism: str | None = None
@@ -131,8 +132,8 @@ class AssayRawModel(SourceRecordModel):
     assay_tissue: str | None = None
     assay_cell_type: str | None = None
     assay_subcellular_fraction: str | None = None
-    target_chembl_id: str | None = None
-    document_chembl_id: str | None = None
+    target_chembl_id: ChemblId | None = None
+    document_chembl_id: ChemblId | None = None
     src_id: int | None = None
     bao_format: str | None = None
 
@@ -147,7 +148,7 @@ class DocumentRawModel(SourceRecordModel):
 
     model_config = ConfigDict(extra="allow")
 
-    document_chembl_id: str
+    document_chembl_id: ChemblId
     journal: str | None = None
     year: int | None = None
     volume: str | None = None
