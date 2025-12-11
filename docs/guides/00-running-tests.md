@@ -13,7 +13,7 @@ ImportError: Error importing numpy: you should not try to import numpy from its 
 
 **Быстрое исправление:**
 ```bash
-python scripts/fix_numpy_import.py
+python -m tools.fix_numpy_import
 ```
 
 **Или вручную:**
@@ -97,22 +97,22 @@ python -m pytest --cov=src/bioetl --cov-report=html --cov-fail-under=85
 
 ```bash
 # Unit-тесты
-python scripts/run_tests.py unit
+python -m tools.run_tests unit
 
 # С покрытием
-python scripts/run_tests.py coverage --html
+python -m tools.run_tests coverage --html
 
 # Подробный вывод
-python scripts/run_tests.py unit --verbose
+python -m tools.run_tests unit --verbose
 ```
 
 ### Bash-скрипт (Unix/Linux/Mac)
 
 ```bash
-chmod +x scripts/run_tests.sh
+chmod +x src/tools/run_tests.sh
 
-./scripts/run_tests.sh unit
-./scripts/run_tests.sh coverage
+./src/tools/run_tests.sh unit
+./src/tools/run_tests.sh coverage
 ```
 
 ## NPM-скрипты

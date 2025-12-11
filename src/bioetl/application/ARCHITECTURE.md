@@ -242,7 +242,7 @@ Key tests:
 ## Submodule Dependency Graph
 
 The following diagram shows the dependencies between submodules within the application layer.
-This graph is validated by `scripts/check_application_deps.py` to ensure no cyclic dependencies.
+This graph is validated by `src/tools/check_application_deps.py` to ensure no cyclic dependencies.
 
 ```mermaid
 flowchart TD
@@ -329,13 +329,13 @@ Run the dependency checker to validate the graph:
 
 ```bash
 # Text report
-python scripts/check_application_deps.py
+python -m tools.check_application_deps
 
 # JSON output (for CI)
-python scripts/check_application_deps.py --json
+python -m tools.check_application_deps --format json
 
 # Generate fresh Mermaid diagram
-python scripts/check_application_deps.py --mermaid
+python -m tools.check_application_deps --format mermaid
 ```
 
 ## Module Structure
