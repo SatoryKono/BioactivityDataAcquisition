@@ -9,21 +9,23 @@ from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.data import RecordBatch
 from bioetl.domain.types import ApiPayload
+from bioetl.domain._deprecations import (
+    emit_deprecation_warning,
+    resolve_deprecated_type,
+    get_deprecated_names_for_module,
+)
 
 # =============================================================================
 # Deprecated Type Aliases (backward compatibility re-exports)
 # =============================================================================
 # Import from bioetl.domain.types for new code.
 # These re-exports emit deprecation warnings via __getattr__ below.
+# Deprecated names managed centrally in bioetl.domain._deprecations.
 
 __all__: list[str] = []  # Populated at end of module
 
-# Sentinel for lazy deprecation
-_DEPRECATED_TYPE_ALIASES = {
-    "RawRecord": "Mapping[str, Any]",  # Use Mapping[str, Any] directly
-    "RawRecordDict": "Mapping[str, Any]",
-    "RawRecordBatch": "RecordBatch",
-}
+# Get deprecated names for this module from central registry
+_DEPRECATED_TYPE_ALIASES = get_deprecated_names_for_module(__name__)
 
 if TYPE_CHECKING:
     from bioetl.domain.record_source import SourceRecordModel
@@ -217,24 +219,11 @@ def __getattr__(name: str) -> object:
         from bioetl.domain.ports.extraction import RawRecordDict
 
     But emits a DeprecationWarning directing users to the new location.
+    Uses centralized deprecation registry from bioetl.domain._deprecations.
     """
-    from typing import Any
-
     if name in _DEPRECATED_TYPE_ALIASES:
-        new_name = _DEPRECATED_TYPE_ALIASES[name]
-        warnings.warn(
-            f"{name} is deprecated, use {new_name} instead. "
-            "See migration guide in bioetl.domain.types module docstring.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # Return appropriate fallback types
-        if name in ("RawRecord", "RawRecordDict"):
-            return dict[str, Any]
-        elif name == "RawRecordBatch":
-            from bioetl.domain.data import RecordBatch as _RecordBatch
-
-            return _RecordBatch
+        emit_deprecation_warning(name, stacklevel=2)
+        return resolve_deprecated_type(name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
