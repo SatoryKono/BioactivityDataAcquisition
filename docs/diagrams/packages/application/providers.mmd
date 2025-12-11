@@ -1,0 +1,35 @@
+---
+title: Application Providers Package
+description: bioetl.application.providers - Default field providers
+---
+classDiagram
+    direction TB
+
+    class DefaultFieldProviderABC {
+        <<abstract>>
+        +get_default_fields(entity) list~str~
+    }
+
+    class ApplicationFieldProvider {
+        +get_default_fields(entity) list~str~
+    }
+
+    DefaultFieldProviderABC <|.. ApplicationFieldProvider : implements
+
+    note for ApplicationFieldProvider "Provides default fields\nfor entities.\nCurrently supports 'assay'\nwith 30+ default fields."
+
+    class AssayDefaultFields {
+        <<constant>>
+        aidx
+        assay_category
+        assay_cell_type
+        assay_chembl_id
+        assay_classifications
+        assay_group
+        assay_organism
+        assay_parameters
+        assay_type
+        ...30+ fields
+    }
+
+    ApplicationFieldProvider --> AssayDefaultFields : uses

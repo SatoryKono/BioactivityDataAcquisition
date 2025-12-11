@@ -1,0 +1,42 @@
+---
+title: Infrastructure HTTP Package
+description: bioetl.infrastructure.http - HTTP retry policies and utilities
+---
+classDiagram
+    direction TB
+
+    class RetryPolicyABC {
+        <<abstract>>
+        +max_attempts: int
+        +backoff_factor: float
+        +should_retry(exception, attempt) bool
+        +get_backoff(attempt) float
+    }
+
+    class ExponentialRetryPolicy {
+        -_max_attempts: int
+        -_backoff_factor: float
+        +retry_statuses: set~int~
+        +retry_exceptions: tuple~type~
+        +max_attempts: int
+        +backoff_factor: float
+        +should_retry(exception, attempt) bool
+        +get_backoff(attempt) float
+    }
+
+    RetryPolicyABC <|.. ExponentialRetryPolicy : implements
+
+    class ApiClientError {
+        <<exception>>
+        +status_code: int | None
+        +cause: Exception | None
+    }
+
+    class ApiTimeoutError {
+        <<exception>>
+    }
+
+    ExponentialRetryPolicy --> ApiClientError : handles
+    ExponentialRetryPolicy --> ApiTimeoutError : handles
+
+    note for ExponentialRetryPolicy "Exponential backoff retry policy:\n- Delay = factor * 2^(attempt-1)\n- Retries on: 429, 500, 502, 503, 504\n- Retries on: Timeout, ConnectionError"

@@ -1,0 +1,17 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart LR
+    classDef stepPrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+    classDef external fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111
+
+    dump[(Offline CSV dump\n`data/input/<entity>.csv`)]:::external
+    csvReader["CsvRecordSourceImpl\n(stream read by chunks)"]:::stepPrimary
+    dataframe["Pandas DataFrame\nconstructed directly from CSV"]:::stepPrimary
+    fillColumns["Schema enforcement\nadd missing columns + dtype cast"]:::stepSecondary
+    normalization["Normalization chain + enrichment\n(same as API path)"]:::stepPrimary
+    validation["Pandera validation"]:::stepPrimary
+    write["UnifiedOutputWriter\n(atomic write)"]:::stepPrimary
+
+    dump --> csvReader --> dataframe --> fillColumns --> normalization --> validation --> write
+

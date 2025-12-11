@@ -1,0 +1,34 @@
+---
+title: Application Ports Package
+description: bioetl.application.ports - Application-level abstract factories
+---
+classDiagram
+    direction TB
+
+    class ObservabilityFactoryPortABC {
+        <<abstract>>
+        +create_logger() LoggingPortABC
+        +create_metrics() MetricsPortABC
+    }
+
+    class LoggingPortABC {
+        <<abstract>>
+        +info(msg, **ctx)
+        +error(msg, **ctx)
+        +debug(msg, **ctx)
+        +warning(msg, **ctx)
+        +apply_bind(**ctx) Self
+    }
+
+    class MetricsPortABC {
+        <<abstract>>
+        +inc_counter(name, labels)
+        +observe_histogram(name, value, labels)
+        +update_stage_duration(...)
+        +update_stage_total(...)
+    }
+
+    ObservabilityFactoryPortABC --> LoggingPortABC : creates
+    ObservabilityFactoryPortABC --> MetricsPortABC : creates
+
+    note for ObservabilityFactoryPortABC "Abstract factory for\nobservability components.\nImplementations in interfaces layer."

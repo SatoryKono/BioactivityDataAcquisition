@@ -1,0 +1,31 @@
+---
+title: Application Runtime Package
+description: bioetl.application.runtime - Pipeline runtime support
+---
+flowchart TB
+
+classDef component fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+classDef runtime fill:#bbdefb,stroke:#1976d2,stroke-width:1px,color:#0d47a1
+
+subgraph Runtime["bioetl.application.runtime"]
+    direction TB
+
+    note1["This package provides runtime\nsupport classes and utilities\nfor pipeline execution."]
+
+    subgraph StageManagement["Stage Management"]
+        StageRuntimeManager["StageRuntimeManager\n- Manages stage lifecycle\n- Tracks execution state"]:::runtime
+        StageCounter["StageCounter\n- Counts processed records\n- Tracks batch progress"]:::runtime
+    end
+
+    subgraph ErrorHandling["Error Handling"]
+        StageErrorHandler["StageErrorHandler\n- Handles stage errors\n- Applies error policies"]:::runtime
+    end
+
+    subgraph Context["Execution Context"]
+        PipelineRuntimeContext["PipelineRuntimeContext\n- Holds runtime state\n- Provides context to stages"]:::runtime
+    end
+end
+
+StageRuntimeManager --> StageCounter : uses
+StageRuntimeManager --> StageErrorHandler : uses
+StageRuntimeManager --> PipelineRuntimeContext : creates
