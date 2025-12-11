@@ -220,6 +220,110 @@ class PipelineBase(ABC):
             total_chunks=max(total_chunks, 1),
         )
 
+    def get_hash_service(self) -> HashServiceABC:
+        """Get the hash service instance.
+
+        Returns:
+            Hash service for computing row hashes.
+        """
+        return self._hash_service
+
+    def build_context(self, dry_run: bool) -> RunContext:
+        """Build a new run context.
+
+        Args:
+            dry_run: Whether this is a dry run.
+
+        Returns:
+            New RunContext instance.
+        """
+        return self._build_context(dry_run)
+
+    def init_stage_counters(self) -> dict[str, int]:
+        """Initialize counters for all stages.
+
+        Returns:
+            Dictionary with zero counters for each stage.
+        """
+        return self._init_stage_counters()
+
+    def process_extract_stage(
+        self,
+        context: RunContext,
+        counters: dict[str, int],
+        validated_chunks: list[pd.DataFrame],
+        dry_run: bool,
+        kwargs: dict[str, Any],
+    ) -> tuple[dict[str, int], list[pd.DataFrame]]:
+        """Process extract stage with transform and validate.
+
+        Args:
+            context: Run context.
+            counters: Stage counters to update.
+            validated_chunks: List to accumulate validated chunks.
+            dry_run: Whether this is a dry run.
+            kwargs: Additional arguments for extract function.
+
+        Returns:
+            Tuple of (updated counters, validated chunks).
+        """
+        return self._process_extract_stage(
+            context, counters, validated_chunks, dry_run, kwargs
+        )
+
+    def perform_write_stage(
+        self,
+        context: RunContext,
+        validated_chunks: list[pd.DataFrame],
+        output_path: Path,
+        counters: dict[str, int],
+        stages_results: list[StageResult],
+    ) -> tuple[WriteResult | None, dict[str, int]]:
+        """Perform write stage.
+
+        Args:
+            context: Run context.
+            validated_chunks: Validated data chunks.
+            output_path: Output file path.
+            counters: Stage counters to update.
+            stages_results: List to append stage results.
+
+        Returns:
+            Tuple of (write result or None, updated counters).
+        """
+        return self._perform_write_stage(
+            context, validated_chunks, output_path, counters, stages_results
+        )
+
+    def normalize_meta(
+        self,
+        meta: dict[str, Any],
+        context: RunContext,
+        row_count: int,
+        dry_run: bool,
+    ) -> dict[str, Any]:
+        """Normalize metadata ensuring required fields are present.
+
+        Args:
+            meta: Raw metadata from builder.
+            context: Run context.
+            row_count: Number of rows processed.
+            dry_run: Whether this is a dry run.
+
+        Returns:
+            Normalized metadata dictionary.
+        """
+        return self._normalize_meta(meta, context, row_count, dry_run)
+
+    @property
+    def config(self) -> PipelineConfig:
+        """Get pipeline configuration.
+
+        Returns:
+            Pipeline configuration instance.
+        """
+        return self._config
+
     def _resolve_business_key_fields(self) -> list[str] | None:
         """Return business keys from config with legacy field support."""
 

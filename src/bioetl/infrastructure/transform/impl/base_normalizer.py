@@ -141,6 +141,20 @@ class BaseNormalizationService:
     ) -> Any:
         return self._apply_normalizer(value, normalizer, field_name)
 
+    def _normalize_to_array(
+        self, value: Any, field_name: str
+    ) -> list[Any] | tuple[Any, ...]:
+        """Normalize value to array format."""
+        try:
+            container_value = normalize_array(value, item_normalizer=lambda item: item)
+        except ValueError as exc:
+            raise ValueError(
+                f"Error normalizing list in field '{field_name}': {exc}"
+            ) from exc
+        if not container_value:
+            return self._empty_value
+        return container_value
+
     def _normalize_container_value(
         self,
         value: Any,
@@ -153,16 +167,7 @@ class BaseNormalizationService:
     ) -> Any:
         container_value = value
         if dtype == "array" and not isinstance(value, (list, tuple)):
-            try:
-                container_value = normalize_array(
-                    value, item_normalizer=lambda item: item
-                )
-            except ValueError as exc:
-                raise ValueError(
-                    f"Error normalizing list in field '{field_name}': {exc}"
-                ) from exc
-            if not container_value:
-                return self._empty_value
+            container_value = self._normalize_to_array(value, field_name)
 
         if (
             isinstance(container_value, (list, tuple, dict))

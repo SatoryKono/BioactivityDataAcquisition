@@ -66,7 +66,7 @@ class BackgroundPipelineExecutor:
         created_executor = executor is None
 
         future = executor_to_use.submit(
-            BackgroundPipelineExecutor._run_in_subprocess,
+            BackgroundPipelineExecutor.run_in_subprocess,
             pipeline_name,
             config.model_dump(by_alias=False),
             dry_run,
@@ -83,7 +83,7 @@ class BackgroundPipelineExecutor:
         return future
 
     @staticmethod
-    def _run_in_subprocess(
+    def run_in_subprocess(
         pipeline_name: str,
         config_payload: dict,
         dry_run: bool,

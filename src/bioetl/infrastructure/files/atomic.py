@@ -39,6 +39,26 @@ class AtomicFileOperation:
                     pass
             raise
 
+    def _get_retry_params(self, is_windows: bool) -> tuple[float, int]:
+        """Get retry delay and max retries based on platform."""
+        delay = DEFAULT_FILE_SETTINGS.retry_delay_sec * (2.0 if is_windows else 1.0)
+        max_retries = DEFAULT_FILE_SETTINGS.max_retries * (2 if is_windows else 1)
+        return delay, max_retries
+
+    def _handle_final_retry_error(
+        self, dst: Path, last_error: OSError | None, is_windows: bool
+    ) -> None:
+        """Handle error after all retries exhausted."""
+        if is_windows and last_error and isinstance(last_error, PermissionError):
+            msg = (
+                f"Cannot replace file '{dst}': file is locked by another "
+                f"process. Please close any programs that have this file "
+                f"open (e.g., Excel, Notepad, or file explorer) and try "
+                f"again. Original error: {last_error}"
+            )
+            raise PermissionError(msg) from last_error
+        raise last_error or OSError("Move failed without explicit error.")
+
     def _replace_with_retry(self, src: Path, dst: Path) -> None:
         """Atomic file replacement with retries (for Windows).
 
@@ -46,16 +66,12 @@ class AtomicFileOperation:
         """
         last_error: OSError | None = None
         is_windows = platform.system() == "Windows"
-        # On Windows use longer delay due to antivirus/indexers
-        delay = DEFAULT_FILE_SETTINGS.retry_delay_sec * (2.0 if is_windows else 1.0)
-        # Increase retries on Windows for locked files
-        max_retries = DEFAULT_FILE_SETTINGS.max_retries * (2 if is_windows else 1)
+        delay, max_retries = self._get_retry_params(is_windows)
 
         for attempt in range(max_retries):
             try:
                 if self._try_replace(src, dst, is_windows):
                     return
-                # If attempt did not raise exception but failed, record the error.
                 last_error = last_error or OSError(
                     "Move failed without explicit error."
                 )
@@ -63,20 +79,7 @@ class AtomicFileOperation:
                 last_error = exc
 
             if attempt == max_retries - 1:
-                # Provide helpful error message for Windows file lock issues
-                if (
-                    is_windows
-                    and last_error
-                    and isinstance(last_error, PermissionError)
-                ):
-                    msg = (
-                        f"Cannot replace file '{dst}': file is locked by another "
-                        f"process. Please close any programs that have this file "
-                        f"open (e.g., Excel, Notepad, or file explorer) and try "
-                        f"again. Original error: {last_error}"
-                    )
-                    raise PermissionError(msg) from last_error
-                raise last_error or OSError("Move failed without explicit error.")
+                self._handle_final_retry_error(dst, last_error, is_windows)
             time.sleep(delay)
 
     def _try_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:

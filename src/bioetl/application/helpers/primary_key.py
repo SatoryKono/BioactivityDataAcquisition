@@ -14,19 +14,45 @@ if TYPE_CHECKING:
 
 
 def _get_primary_keys_from_config(config: PipelineConfig) -> list[str] | str | None:
-    """Extract primary keys from config, handling both identity.primary_key and primary_key."""
+    """Extract primary keys from config.
+
+    Handles both identity.primary_key and primary_key.
+    """
     try:
-        return getattr(config, "identity").primary_key
-    except Exception:
-        return getattr(config, "primary_key", None)
+        identity = config.identity
+        primary_key = identity.primary_key
+        # primary_key is list[str] in PipelineIdentityConfig, but we support legacy str
+        if isinstance(primary_key, list):
+            return primary_key
+        if isinstance(primary_key, str):
+            return primary_key
+        return None
+    except AttributeError:
+        # Fallback for legacy configs with primary_key at root level
+        primary_key = getattr(config, "primary_key", None)
+        if isinstance(primary_key, list):
+            return primary_key
+        if isinstance(primary_key, str):
+            return primary_key
+        return None
 
 
 def _get_entity_name_from_config(config: PipelineConfig) -> str | None:
     """Extract entity name from config, handling both entity_name and entity."""
     try:
-        return getattr(config, "entity_name")
-    except Exception:
-        return getattr(config, "entity", None)
+        identity = config.identity
+        entity = identity.entity
+        # entity is EntityName value object, convert to str
+        return str(entity) if entity else None
+    except AttributeError:
+        # Fallback for legacy configs
+        entity_name = getattr(config, "entity_name", None)
+        if isinstance(entity_name, str):
+            return entity_name
+        entity = getattr(config, "entity", None)
+        if isinstance(entity, str):
+            return entity
+        return None
 
 
 def _extract_first_primary_key(primary_keys: list[str] | str | None) -> str | None:

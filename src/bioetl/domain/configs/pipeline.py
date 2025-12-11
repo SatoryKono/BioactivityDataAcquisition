@@ -242,20 +242,23 @@ class BaseProviderConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     @staticmethod
-    def _extract_http_from_dict_or_model(value: Any) -> dict[str, Any]:
+    def extract_http_from_dict_or_model(value: Any) -> dict[str, Any]:
         """Extract HTTP config from dict or Pydantic model."""
         if isinstance(value, dict):
             return value
         if hasattr(value, "model_dump"):
-            return value.model_dump()
+            result = value.model_dump()
+            if isinstance(result, dict):
+                return result
+            return {}
         return {}
 
     @staticmethod
-    def _merge_legacy_http_config(
+    def merge_legacy_http_config(
         http_config: dict[str, Any], legacy_value: Any
     ) -> None:
         """Merge legacy HTTP config into http_config dict."""
-        legacy_dict = BaseProviderConfig._extract_http_from_dict_or_model(legacy_value)
+        legacy_dict = BaseProviderConfig.extract_http_from_dict_or_model(legacy_value)
         for k, v in legacy_dict.items():
             if k not in http_config:
                 http_config[k] = v
@@ -302,15 +305,17 @@ class BaseProviderConfig(BaseModel):
 
         # If http is already set, extract its values as base
         if "http" in migrated:
-            http_config.update(cls._extract_http_from_dict_or_model(migrated.pop("http")))
+            http_config.update(
+                cls.extract_http_from_dict_or_model(migrated.pop("http"))
+            )
 
         # Priority 1: http_client (legacy HttpClientSettings)
         if "http_client" in migrated:
-            cls._merge_legacy_http_config(http_config, migrated.pop("http_client"))
+            cls.merge_legacy_http_config(http_config, migrated.pop("http_client"))
 
         # Priority 2: client (legacy ClientConfig)
         if "client" in migrated:
-            cls._merge_legacy_http_config(http_config, migrated.pop("client"))
+            cls.merge_legacy_http_config(http_config, migrated.pop("client"))
 
         # Priority 3: Flat fields at root level
         cls._migrate_flat_http_fields(migrated, http_config)

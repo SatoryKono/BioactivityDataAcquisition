@@ -12,9 +12,9 @@ if TYPE_CHECKING:
 
 def _is_sequence(value: Any) -> bool:
     """Check if value is a sequence (but not string/bytes)."""
-    return isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
-        value, (str, bytes, bytearray)
-    )
+    is_seq = isinstance(value, (list, tuple, set, frozenset, Sequence))
+    is_str = isinstance(value, (str, bytes, bytearray))
+    return is_seq and not is_str
 
 
 def _serialize_list_item(item: Any) -> str | None:

@@ -71,7 +71,7 @@ def normalize_chembl_id(value: Any) -> str | None:
     return text
 
 
-def _coerce_pmid_from_float(value: float) -> int:
+def _coerce_pmid_from_float(value: float) -> int | None:
     """Coerce float to int for PMID, raising if not integer."""
     if is_missing(value):
         return None
@@ -80,7 +80,7 @@ def _coerce_pmid_from_float(value: float) -> int:
     raise ValueError(f"PubMed ID is not an integer: '{value}'")
 
 
-def _coerce_pmid_from_string(text: str, original_value: Any) -> int:
+def _coerce_pmid_from_string(text: str, original_value: Any) -> int | None:
     """Coerce string to int for PMID, raising if invalid."""
     if not text or text == "<NA>":
         return None
