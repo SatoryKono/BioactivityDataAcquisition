@@ -11,11 +11,14 @@ Usage (DI approach - recommended):
 
 Alternative (explicit provider):
     >>> from bioetl.infrastructure.config.loader import get_pipeline_config
-    >>> config = get_pipeline_config("chembl.activity", schema_contract_provider=provider)
+    >>> config = get_pipeline_config(
+    ...     "chembl.activity", schema_contract_provider=provider
+    ... )
 """
 
 from __future__ import annotations
 
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -36,6 +39,36 @@ from bioetl.infrastructure.config.sources import (
     get_yaml_for_pipeline,
     get_yaml_from_path,
 )
+
+# -----------------------------------------------------------------------------
+# Backward-compatible provider context (no global mutable state)
+# -----------------------------------------------------------------------------
+
+_SCHEMA_CONTRACT_CTX: ContextVar[
+    SchemaContractProviderABC | None
+] = ContextVar("_schema_contract_ctx", default=None)
+
+
+def set_schema_contract_provider(provider: SchemaContractProviderABC | None) -> None:
+    """Inject schema contract provider into context (legacy compatibility)."""
+    if provider is None:
+        raise ValueError("provider must not be None")
+    _SCHEMA_CONTRACT_CTX.set(provider)
+
+
+def get_schema_contract_provider() -> SchemaContractProviderABC | None:
+    """Return schema contract provider from context if set."""
+    return _SCHEMA_CONTRACT_CTX.get()
+
+
+def clear_schema_contract_provider() -> None:
+    """Clear schema contract provider from context."""
+    _SCHEMA_CONTRACT_CTX.set(None)
+
+
+def reset_schema_contract_provider() -> None:
+    """Alias for clearing provider (kept for backward compatibility)."""
+    clear_schema_contract_provider()
 
 
 class ConfigFileNotFoundError(ConfigError):
@@ -194,7 +227,7 @@ class SchemaContractLoader:
 def get_pipeline_config(
     pipeline_id: str,
     *,
-    schema_contract_provider: SchemaContractProviderABC,
+    schema_contract_provider: SchemaContractProviderABC | None = None,
     profile: str | None = None,
     cli_overrides: dict[str, Any] | None = None,
     env_overrides: dict[str, Any] | None = None,
@@ -217,7 +250,7 @@ def get_pipeline_config(
         ConfigFileNotFoundError: Configuration file not found.
         ValueError: If schema_contract_provider is not provided.
     """
-    effective_provider = _require_schema_provider(schema_contract_provider)
+    effective_provider = _resolve_schema_provider(schema_contract_provider)
 
     try:
         config_path, raw_config = get_yaml_for_pipeline(
@@ -242,7 +275,7 @@ def get_pipeline_config(
 def get_pipeline_config_from_path(
     config_path: str | Path,
     *,
-    schema_contract_provider: SchemaContractProviderABC,
+    schema_contract_provider: SchemaContractProviderABC | None = None,
     profile: str | None = None,
     profiles_root: str | Path | None = None,
     cli_overrides: dict[str, Any] | None = None,
@@ -265,7 +298,7 @@ def get_pipeline_config_from_path(
         ConfigFileNotFoundError: Configuration file not found.
         ValueError: If schema_contract_provider is not provided.
     """
-    effective_provider = _require_schema_provider(schema_contract_provider)
+    effective_provider = _resolve_schema_provider(schema_contract_provider)
 
     try:
         path, raw_config = get_yaml_from_path(
@@ -357,27 +390,31 @@ def _ensure_provider_registered(provider_id: str) -> None:
         ) from exc
 
 
-def _require_schema_provider(
+def _resolve_schema_provider(
     explicit_provider: SchemaContractProviderABC | None,
 ) -> SchemaContractProviderABC:
-    """Require explicit schema provider (no global fallback).
+    """Resolve schema provider from explicit arg or global injection."""
+    if explicit_provider is not None:
+        return explicit_provider
 
-    Args:
-        explicit_provider: Explicitly provided schema contract provider.
+    provider = get_schema_contract_provider()
+    if provider is None:
+        provider = _create_default_schema_contract_provider()
+        set_schema_contract_provider(provider)
+    return provider
 
-    Returns:
-        The provider to use.
 
-    Raises:
-        ValueError: If no provider is provided.
-    """
-    if explicit_provider is None:
-        raise ValueError(
-            "schema_contract_provider is required. "
-            "Use CompositionRoot.create_schema_contract_loader() for DI-based loading "
-            "or pass schema_contract_provider explicitly."
-        )
-    return explicit_provider
+def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
+    """Create default schema contract provider with registered schemas."""
+    from bioetl.application.services.schema_contract_provider import (
+        SchemaContractProviderImpl,
+    )
+    from bioetl.domain.schemas.registry import create_default_schema_registry
+    from bioetl.infrastructure.validation.bootstrap import register_schemas
+
+    registry = create_default_schema_registry()
+    register_schemas(registry)
+    return SchemaContractProviderImpl(registry)
 
 
 def _populate_fields_from_schema(
