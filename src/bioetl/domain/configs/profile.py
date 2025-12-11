@@ -1,18 +1,22 @@
-"""Profile configuration models (domain layer)."""
+"""DEPRECATED: Profile config moved to pipeline_options.py.
+
+This module is deprecated and will be removed in v3.0.
+Import from bioetl.domain.configs.pipeline_options instead:
+
+    from bioetl.domain.configs.pipeline_options import ProfileConfig
+"""
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+import warnings
 
+from bioetl.domain.configs.pipeline_options import ProfileConfig
 
-class ProfileConfig(BaseModel):
-    """Profile configuration on top of pipeline config."""
-
-    name: str
-    extends: str | None = None
-    overrides: dict[str, object] = Field(default_factory=dict)
-
-    model_config = ConfigDict(extra="forbid")
-
+warnings.warn(
+    "bioetl.domain.configs.profile is deprecated. "
+    "Import from bioetl.domain.configs.pipeline_options instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 __all__ = ["ProfileConfig"]

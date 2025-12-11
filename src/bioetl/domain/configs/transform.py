@@ -1,20 +1,22 @@
-"""Transform-stage configuration models."""
+"""DEPRECATED: Transform config moved to pipeline_options.py.
+
+This module is deprecated and will be removed in v3.0.
+Import from bioetl.domain.configs.pipeline_options instead:
+
+    from bioetl.domain.configs.pipeline_options import TransformConfig
+"""
 
 from __future__ import annotations
 
-from typing import Literal
+import warnings
 
-from pydantic import BaseModel, ConfigDict, Field
+from bioetl.domain.configs.pipeline_options import TransformConfig
 
-
-class TransformConfig(BaseModel):
-    """Transform stage settings."""
-
-    serialization_mode: Literal["json", "flat", "pipe"] = Field(
-        default="json", description="Canonical serialization format for nested fields"
-    )
-
-    model_config = ConfigDict(extra="forbid")
-
+warnings.warn(
+    "bioetl.domain.configs.transform is deprecated. "
+    "Import from bioetl.domain.configs.pipeline_options instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 __all__ = ["TransformConfig"]
