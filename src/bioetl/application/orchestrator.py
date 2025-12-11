@@ -34,7 +34,6 @@ from __future__ import annotations
 from concurrent.futures import Future
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
-import warnings
 
 if TYPE_CHECKING:
     from concurrent.futures import ProcessPoolExecutor
@@ -56,29 +55,24 @@ from bioetl.domain.value_objects import EntityName, StageName
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
 
-def _get_default_registry_factory_deprecated() -> ProviderRegistryFactory:
-    """Get the default provider registry factory (DEPRECATED).
-
-    .. deprecated:: 1.0
-        Use ``create_provider_registry_factory()`` from
-        ``bioetl.interfaces.factories`` instead.
-
-    This function lazily imports from infrastructure to provide backward
-    compatibility. New code should inject the factory explicitly via
-    ``provider_registry_factory`` parameter.
-
-    Returns:
-        Factory function that creates InMemoryProviderRegistry instances.
-    """
-    # Lazy import from infrastructure (allowed for backward compatibility)
-    # Note: This is deprecated and should be replaced with dependency injection
-    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
-
-    return InMemoryProviderRegistry
-
-
 class PipelineOrchestrator:
-    """Manages pipeline assembly and execution."""
+    """Manages pipeline assembly and execution.
+
+    Args:
+        pipeline_name: Name of the pipeline to execute.
+        config: Pipeline configuration.
+        provider_registry: Optional pre-configured provider registry.
+        provider_registry_provider: Callable that returns a provider registry.
+        provider_registry_factory: Factory for creating provider registries.
+            Required parameter - use create_provider_registry_factory()
+            from bioetl.interfaces.factories.
+        container_factory: Factory for creating pipeline containers.
+        provider_loader: Loader for provider definitions.
+        provider_loader_factory: Factory for creating provider loaders.
+
+    Raises:
+        ValueError: If provider_registry_factory is not provided.
+    """
 
     def __init__(
         self,
@@ -87,7 +81,7 @@ class PipelineOrchestrator:
         *,
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
-        provider_registry_factory: ProviderRegistryFactory | None = None,
+        provider_registry_factory: ProviderRegistryFactory,
         container_factory: Callable[..., PipelineContainerABC] | None = None,
         provider_loader: ProviderLoaderProtocol | None = None,
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None = None,
@@ -96,20 +90,7 @@ class PipelineOrchestrator:
         self._config = config
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
-
-        if provider_registry_factory is None:
-            warnings.warn(
-                "Using default provider_registry_factory is deprecated. "
-                "Pass provider_registry_factory explicitly via "
-                "create_provider_registry_factory() from bioetl.interfaces.factories. "
-                "This will become a required parameter in a future release.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            self._provider_registry_factory = _get_default_registry_factory_deprecated()
-        else:
-            self._provider_registry_factory = provider_registry_factory
-
+        self._provider_registry_factory = provider_registry_factory
         self._container_factory = self._resolve_container_factory(container_factory)
         self._provider_loader = provider_loader
         self._provider_loader_factory = provider_loader_factory
@@ -243,6 +224,7 @@ class PipelineOrchestrator:
             self._provider_loader_factory,
             self._container_factory,
             registry_snapshot,
+            self._provider_registry_factory,
         )
 
         if created_executor:
@@ -259,16 +241,20 @@ class PipelineOrchestrator:
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None,
         container_factory: Callable[..., PipelineContainerABC] | None,
         registry_payload: list[ProviderDefinition] | None,
+        registry_factory: ProviderRegistryFactory,
     ) -> RunResult:
         config = PipelineConfig(**config_payload)
         loader = provider_loader_factory() if provider_loader_factory else None
         registry = PipelineOrchestrator._build_registry_for_subprocess(
-            loader=loader, registry_payload=registry_payload
+            loader=loader,
+            registry_payload=registry_payload,
+            registry_factory=registry_factory,
         )
         orchestrator = PipelineOrchestrator(
             pipeline_name,
             config,
             provider_registry=registry,
+            provider_registry_factory=registry_factory,
             provider_loader=loader,
             provider_loader_factory=provider_loader_factory,
             container_factory=container_factory,
@@ -345,18 +331,27 @@ class PipelineOrchestrator:
         *,
         loader: ProviderLoaderProtocol | None,
         registry_payload: list[ProviderDefinition] | None,
-        registry_factory: ProviderRegistryFactory | None = None,
+        registry_factory: ProviderRegistryFactory,
     ) -> ProviderRegistryABC:
-        factory = registry_factory or _get_default_registry_factory_deprecated()
+        """Build registry for subprocess execution.
+
+        Args:
+            loader: Optional provider loader.
+            registry_payload: Optional serialized provider definitions.
+            registry_factory: Factory for creating registry instances.
+
+        Returns:
+            Configured provider registry.
+        """
         if registry_payload is not None:
-            registry = factory()
+            registry = registry_factory()
             registry.restore_provider_registry(registry_payload)
             return registry
 
         if loader is not None:
-            return loader.get_registry(registry=factory())
+            return loader.get_registry(registry=registry_factory())
 
-        return factory()
+        return registry_factory()
 
 
 __all__ = ["PipelineOrchestrator"]

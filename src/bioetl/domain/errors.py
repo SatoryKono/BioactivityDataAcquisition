@@ -16,6 +16,8 @@ __all__ = [
     "ClientNetworkError",
     "ClientRateLimitError",
     "ClientResponseError",
+    "MetadataFetchError",
+    "ParseError",
     "PipelineStageError",
 ]
 
@@ -80,6 +82,72 @@ class ClientRateLimitError(ClientError):
 
 class ClientResponseError(ClientError):
     """Client response errors."""
+
+
+class MetadataFetchError(ClientError):
+    """Error fetching metadata from external data source.
+
+    Raised when metadata retrieval fails due to network issues,
+    invalid responses, or service unavailability. Provides structured
+    information about the failure for observability.
+
+    Example:
+        >>> raise MetadataFetchError(
+        ...     provider="chembl",
+        ...     message="Failed to fetch release version",
+        ...     cause=original_exception,
+        ... )
+    """
+
+    def __init__(
+        self,
+        provider: str,
+        message: str,
+        *,
+        cause: Exception | None = None,
+        endpoint: str | None = "metadata",
+        fallback_value: str | None = None,
+    ) -> None:
+        super().__init__(
+            provider=provider,
+            message=message,
+            endpoint=endpoint,
+            cause=cause,
+        )
+        self.fallback_value = fallback_value
+
+
+class ParseError(ClientError):
+    """Error parsing response from external data source.
+
+    Raised when response parsing fails due to unexpected format,
+    missing fields, or invalid data. Distinguishes between recoverable
+    parse errors (empty result) and fatal parse errors.
+
+    Example:
+        >>> raise ParseError(
+        ...     provider="chembl",
+        ...     message="Unexpected response format",
+        ...     raw_response_preview=str(response)[:200],
+        ... )
+    """
+
+    def __init__(
+        self,
+        provider: str,
+        message: str,
+        *,
+        cause: Exception | None = None,
+        endpoint: str | None = None,
+        raw_response_preview: str | None = None,
+    ) -> None:
+        super().__init__(
+            provider=provider,
+            message=message,
+            endpoint=endpoint,
+            cause=cause,
+        )
+        self.raw_response_preview = raw_response_preview
 
 
 class PipelineStageError(BioetlError):
