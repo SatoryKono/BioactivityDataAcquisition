@@ -6,7 +6,7 @@ import pytest
 
 from bioetl.application.bootstrap import ApplicationBootstrap, ApplicationContext
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
+from bioetl.application.bootstrap_factory import create_default_bootstrap
 
 
 class TestCreateDefaultBootstrap:
