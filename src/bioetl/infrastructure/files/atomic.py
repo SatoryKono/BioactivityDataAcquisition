@@ -12,29 +12,26 @@ from bioetl.infrastructure.settings.files import MAX_FILE_RETRIES, RETRY_DELAY_S
 
 
 class AtomicFileOperation:
-    """
-    Утилита для атомарных операций с файлами.
-    """
+    """Utility for atomic file operations."""
 
     def write_atomic(self, path: Path, write_fn: Callable[[Path], None]) -> None:
-        """
-        Выполняет атомарную запись через временный файл.
+        """Perform atomic write via temporary file.
 
         Args:
-            path: Целевой путь.
-            write_fn: Функция записи, принимающая временный путь.
+            path: Target path.
+            write_fn: Write function accepting temporary path.
         """
         tmp_path = path.with_suffix(".tmp")
 
         try:
-            # 1. Запись во временный файл
+            # 1. Write to temporary file
             write_fn(tmp_path)
 
-            # 2. Атомарное перемещение с retry
+            # 2. Atomic move with retry
             self._replace_with_retry(tmp_path, path)
 
         except Exception:
-            # Очистка в случае ошибки (если файл создан)
+            # Cleanup on error (if file was created)
             if tmp_path.exists():
                 try:
                     os.remove(tmp_path)
@@ -43,20 +40,20 @@ class AtomicFileOperation:
             raise
 
     def _replace_with_retry(self, src: Path, dst: Path) -> None:
-        """
-        Атомарная замена файла с повторными попытками (для Windows).
-        Использует os.replace для атомарной замены на всех платформах.
+        """Atomic file replacement with retries (for Windows).
+
+        Uses os.replace for atomic replacement on all platforms.
         """
         last_error: OSError | None = None
         is_windows = platform.system() == "Windows"
-        # На Windows используем более длительную задержку из-за антивирусов/индексаторов
+        # On Windows use longer delay due to antivirus/indexers
         delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
 
         for attempt in range(MAX_FILE_RETRIES):
             try:
                 if self._try_replace(src, dst, is_windows):
                     return
-                # Если попытка не выбросила исключение, но не удалась, фиксируем ошибку.
+                # If attempt did not raise exception but failed, record the error.
                 last_error = last_error or OSError(
                     "Move failed without explicit error."
                 )
@@ -68,22 +65,21 @@ class AtomicFileOperation:
             time.sleep(delay)
 
     def _try_replace(self, src: Path, dst: Path, is_windows: bool) -> bool:
-        """
-        Попытка заменить файл атомарно.
+        """Attempt to replace file atomically.
 
         Returns:
-            True если замена успешна, False иначе.
+            True if replacement successful, False otherwise.
         """
         try:
             os.replace(src, dst)
             return True
         except PermissionError as exc:
-            # На Windows PermissionError часто означает, что файл заблокирован
+            # On Windows PermissionError often means file is locked
             if self._try_windows_unlock_replace(src, dst, is_windows):
                 return True
             raise exc
         except OSError:
-            # Передаём исключение наверх, чтобы оно учитывалось в retry и сообщениях
+            # Pass exception up so it's accounted for in retry and messages
             raise
 
     def _try_windows_unlock_replace(
@@ -92,11 +88,10 @@ class AtomicFileOperation:
         dst: Path,
         is_windows: bool,
     ) -> bool:
-        """
-        Попытка разблокировать и заменить файл на Windows.
+        """Attempt to unlock and replace file on Windows.
 
         Returns:
-            True если замена успешна, False иначе.
+            True if replacement successful, False otherwise.
         """
         if not is_windows or not dst.exists():
             return False

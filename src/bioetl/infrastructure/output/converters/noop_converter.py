@@ -1,4 +1,4 @@
-"""Конвертер-заглушка, возвращающий DataFrame без изменений."""
+"""No-op converter that returns DataFrame unchanged."""
 
 from __future__ import annotations
 
@@ -8,10 +8,10 @@ from bioetl.domain.clients.base.output.contracts import OutputFrameConverterABC
 
 
 class NoopConverter(OutputFrameConverterABC):
-    """Конвертер, который не изменяет DataFrame."""
+    """Converter that does not modify the DataFrame."""
 
     def convert(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Возвращает DataFrame без изменений."""
+        """Return DataFrame without changes."""
         return df
 
 

@@ -1,4 +1,4 @@
-"""Прикладной фасад для загрузки конфигураций пайплайнов."""
+"""Application facade for loading pipeline configurations."""
 
 from __future__ import annotations
 
@@ -19,10 +19,9 @@ def build_runtime_config(
     configs_root: str | Path | None = None,
     loader: PipelineConfigLoaderProtocol | None = None,
 ) -> PipelineConfig:
-    """
-    Загружает конфигурацию пайплайна через инфраструктурный слой.
+    """Load pipeline configuration via infrastructure layer.
 
-    Приоритет значений: CLI overrides → ENV overrides → YAML.
+    Value priority: CLI overrides → ENV overrides → YAML.
     """
 
     if loader is None:

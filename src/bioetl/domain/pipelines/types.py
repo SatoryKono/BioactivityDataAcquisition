@@ -1,4 +1,4 @@
-"""Типы пайплайнов для определения режима выполнения."""
+"""Pipeline types for defining execution mode."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from enum import Enum
 
 
 class PipelineType(str, Enum):
-    """Тип режима выполнения пайплайна."""
+    """Pipeline execution mode type."""
 
     EXTRACT_ONLY = "extract"
     FULL = "full"

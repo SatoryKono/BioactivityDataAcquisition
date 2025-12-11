@@ -1,4 +1,4 @@
-"""Общие исключения BioETL."""
+"""Common BioETL exceptions."""
 
 from __future__ import annotations
 
@@ -21,19 +21,19 @@ __all__ = [
 
 
 class BioetlError(Exception):
-    """Базовое исключение BioETL."""
+    """Base BioETL exception."""
 
 
 class ConfigError(BioetlError):
-    """Ошибки конфигурации."""
+    """Configuration errors."""
 
 
 class ConfigValidationError(ConfigError):
-    """Ошибки валидации конфигурации."""
+    """Configuration validation errors."""
 
 
 class ProviderError(BioetlError):
-    """Ошибки провайдера данных."""
+    """Data provider errors."""
 
     def __init__(
         self, provider: str, message: str, *, cause: Exception | None = None
@@ -44,7 +44,7 @@ class ProviderError(BioetlError):
 
 
 class ClientError(ProviderError):
-    """Базовое исключение для клиентских ошибок."""
+    """Base exception for client errors."""
 
     def __init__(
         self,
@@ -71,19 +71,19 @@ class ClientError(ProviderError):
 
 
 class ClientNetworkError(ClientError):
-    """Сетевые ошибки клиента."""
+    """Client network errors."""
 
 
 class ClientRateLimitError(ClientError):
-    """Ошибки ограничения запросов (rate limit)."""
+    """Rate limit errors."""
 
 
 class ClientResponseError(ClientError):
-    """Ошибки ответа клиента."""
+    """Client response errors."""
 
 
 class PipelineStageError(BioetlError):
-    """Исключение для сбоев на стадиях пайплайна."""
+    """Exception for pipeline stage failures."""
 
     def __init__(
         self,
@@ -121,7 +121,7 @@ class PipelineStageError(BioetlError):
         return self.__reduce__()
 
     def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
-        """Делает исключение сериализуемым для multiprocessing."""
+        """Make exception serializable for multiprocessing."""
 
         return (
             _rebuild_pipeline_stage_error,
@@ -144,7 +144,7 @@ def _rebuild_pipeline_stage_error(
     run_id: str,
     cause: Exception | None,
 ) -> PipelineStageError:
-    """Восстанавливает PipelineStageError после unpickle."""
+    """Rebuild PipelineStageError after unpickle."""
     return PipelineStageError(
         provider=provider,
         entity=entity,

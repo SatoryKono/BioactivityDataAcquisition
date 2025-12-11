@@ -69,14 +69,14 @@ def _coerce_record_mapping(value: Any) -> Mapping[str, Any]:
             try:
                 parsed = json.loads(value)
             except json.JSONDecodeError as exc:
-                raise ValueError(f"Некорректный JSON для записи: {exc}") from exc
+                raise ValueError(f"Invalid JSON for record: {exc}") from exc
 
             if not isinstance(parsed, Mapping):
-                raise ValueError(f"Ожидался словарь, получено {type(parsed).__name__}")
+                raise ValueError(f"Expected dict, got {type(parsed).__name__}")
             return dict(parsed)
 
     if not isinstance(value, Mapping):
-        raise ValueError(f"Ожидался словарь, получено {type(value).__name__}")
+        raise ValueError(f"Expected dict, got {type(value).__name__}")
     # Make a shallow copy to avoid mutating caller-provided mappings and to keep
     # a predictable mapping type downstream.
     return dict(value)
@@ -98,7 +98,7 @@ def _normalize_record_value(
             return override
         return value_normalizer(item) if value_normalizer else item
     except ValueError as exc:
-        raise ValueError(f"Некорректное значение в поле '{str_key}': {exc}") from exc
+        raise ValueError(f"Invalid value in field '{str_key}': {exc}") from exc
 
 
 def _coerce_to_iterable(value: Any) -> Iterable[Any]:
@@ -135,7 +135,7 @@ def _normalize_array_item(
         return str(item)
     except ValueError as exc:
         raise ValueError(
-            f"Ошибка нормализации элемента массива на позиции {idx}: {exc}"
+            f"Error normalizing array element at position {idx}: {exc}"
         ) from exc
 
 
@@ -174,7 +174,7 @@ def _normalize_synonyms(value: Any) -> Any:
     try:
         items = normalize_array(value)
     except ValueError as exc:
-        raise ValueError(f"Некорректный список синонимов: {exc}") from exc
+        raise ValueError(f"Invalid synonym list: {exc}") from exc
 
     normalized: list[str] = []
     for synonym in items:
@@ -197,7 +197,7 @@ def _normalize_component_xrefs(value: Any) -> Any:
     try:
         entries = normalize_array(value)
     except ValueError as exc:
-        raise ValueError(f"Некорректный список component_xrefs: {exc}") from exc
+        raise ValueError(f"Invalid component_xrefs list: {exc}") from exc
 
     normalized_entries: list[str] = []
     for entry in entries:

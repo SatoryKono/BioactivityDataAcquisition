@@ -4,7 +4,7 @@ from enum import Enum
 
 
 class ErrorAction(Enum):
-    """Действия при ошибке."""
+    """Error handling actions."""
 
     FAIL = "fail"
     SKIP = "skip"

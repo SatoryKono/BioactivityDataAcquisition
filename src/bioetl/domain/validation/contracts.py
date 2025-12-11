@@ -63,19 +63,19 @@ class ValidatorABC(ABC):
 
 
 class SchemaProviderABC(ABC):
-    """Провайдер схем данных (без привязки к конкретной технологии)."""
+    """Data schema provider (technology-agnostic)."""
 
     @abstractmethod
     def get_schema(self, name: str) -> schema_type:
-        """Возвращает схему по имени."""
+        """Return schema by name."""
 
     @abstractmethod
     def list_schemas(self) -> list[str]:
-        """Возвращает список доступных схем."""
+        """Return list of available schemas."""
 
     @abstractmethod
     def get_schema_columns(self, name: str) -> list[str]:
-        """Возвращает порядок колонок для схемы."""
+        """Return column order for schema."""
 
     @abstractmethod
     def register(
@@ -85,20 +85,20 @@ class SchemaProviderABC(ABC):
         *,
         column_order: list[str] | None = None,
     ) -> None:
-        """Регистрирует новую схему."""
+        """Register a new schema."""
 
 
 @runtime_checkable
 class ValidatorFactoryABC(Protocol):
-    """Фабрика валидаторов под конкретную схему."""
+    """Factory for schema-specific validators."""
 
     def create_validator(self, schema: schema_type) -> ValidatorABC:
-        """Создает валидатор для указанной схемы."""
+        """Create validator for the specified schema."""
 
 
 @runtime_checkable
 class SchemaProviderFactoryABC(Protocol):
-    """Фабрика провайдеров схем."""
+    """Factory for schema providers."""
 
     def create_schema_provider(self) -> SchemaProviderABC:
-        """Создает провайдер схем."""
+        """Create schema provider instance."""

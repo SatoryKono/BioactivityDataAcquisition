@@ -1,6 +1,4 @@
-"""
-Модели данных для ядра ETL-пайплайна.
-"""
+"""Data models for ETL pipeline core."""
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -13,15 +11,15 @@ from bioetl.domain.value_objects import EntityName, RunId, StageName
 
 @dataclass
 class StageResult:
-    """Результат выполнения стадии.
+    """Stage execution result.
 
     Attributes:
-        stage_name: Имя стадии (StageName). Принимает str для обратной совместимости.
-        success: Успешность выполнения.
-        records_processed: Количество обработанных записей.
-        chunks_processed: Количество обработанных чанков.
-        duration_sec: Длительность выполнения в секундах.
-        errors: Список ошибок.
+        stage_name: Stage name (StageName). Accepts str for backward compatibility.
+        success: Execution success status.
+        records_processed: Number of processed records.
+        chunks_processed: Number of processed chunks.
+        duration_sec: Execution duration in seconds.
+        errors: List of errors.
     """
 
     stage_name: StageName
@@ -39,18 +37,18 @@ class StageResult:
 
 @dataclass
 class RunContext:
-    """
-    Контекст выполнения пайплайна.
-    Содержит информацию о текущем запуске, конфигурации и окружении.
+    """Pipeline execution context.
+
+    Contains information about current run, configuration and environment.
 
     Attributes:
-        run_id: Уникальный идентификатор запуска (RunId).
-        entity_name: Имя сущности (EntityName). Принимает str для обратной совместимости.
-        provider: Идентификатор провайдера (ProviderId). Принимает str для обратной совместимости.
-        started_at: Время начала выполнения.
-        config: Конфигурация запуска.
-        dry_run: Флаг тестового запуска.
-        metadata: Дополнительные метаданные.
+        run_id: Unique run identifier (RunId).
+        entity_name: Entity name (EntityName). Accepts str for backward compatibility.
+        provider: Provider identifier (ProviderId). Accepts str for backward compatibility.
+        started_at: Execution start time.
+        config: Run configuration.
+        dry_run: Test run flag.
+        metadata: Additional metadata.
     """
 
     run_id: RunId = field(default_factory=RunId.generate)
@@ -79,9 +77,7 @@ class RunContext:
 
 @dataclass
 class RunResult:
-    """
-    Результат выполнения пайплайна.
-    """
+    """Pipeline execution result."""
 
     run_id: RunId
     success: bool
@@ -96,9 +92,9 @@ class RunResult:
 
 @dataclass
 class StageDescriptor:
-    """
-    Дескриптор стадии пайплайна.
-    Описывает стадию, её исполнимый код и метаданные.
+    """Pipeline stage descriptor.
+
+    Describes stage, its executable code and metadata.
     """
 
     name: str

@@ -25,9 +25,7 @@ def build_quality_report_table(
 
 
 class MetadataWriter:
-    """
-    Запись метаданных и QC отчетов.
-    """
+    """Metadata and QC report writer."""
 
     def __init__(
         self,

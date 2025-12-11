@@ -11,9 +11,7 @@ from bioetl.domain.validation.contracts import (
 
 
 class ValidationService:
-    """
-    Сервис валидации данных, работающий через доменные интерфейсы.
-    """
+    """Data validation service operating through domain interfaces."""
 
     def __init__(
         self,
@@ -25,22 +23,21 @@ class ValidationService:
         self._validator_factory = validator_factory
 
     def get_schema(self, entity_name: str) -> schema_type:
-        """Возвращает схему для сущности."""
+        """Return schema for entity."""
         return self._schema_provider.get_schema(entity_name)
 
     def get_schema_columns(self, entity_name: str) -> list[str]:
-        """Возвращает упорядоченный список колонок схемы."""
+        """Return ordered list of schema columns."""
         return self._schema_provider.get_schema_columns(entity_name)
 
     def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
-        """
-        Валидирует DataFrame по схеме, используя валидатор фабрики.
+        """Validate DataFrame against schema using factory validator.
 
-        Возвращает валидированный DataFrame (если валидатор его модифицирует),
-        либо исходный df при успешной проверке без преобразований.
+        Returns validated DataFrame (if validator modifies it),
+        or original df if validation passes without transformations.
 
         Raises:
-            ValueError: если валидация не пройдена.
+            ValueError: If validation fails.
         """
         schema = self._schema_provider.get_schema(entity_name)
         validator = self._validator_factory.create_validator(schema)

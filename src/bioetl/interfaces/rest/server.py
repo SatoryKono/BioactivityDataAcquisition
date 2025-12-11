@@ -1,4 +1,4 @@
-"""Минимальный REST-сервер для запуска пайплайнов через RunPipelineUseCase."""
+"""Minimal REST server for running pipelines via RunPipelineUseCase."""
 
 from __future__ import annotations
 
@@ -15,22 +15,22 @@ from bioetl.interfaces.use_case_factory import get_use_case_factory
 
 
 class PipelineRunRequest(BaseModel):
-    """Запрос на запуск пайплайна."""
+    """Pipeline run request."""
 
     pipeline_name: str = Field(
-        ..., description="Имя пайплайна в формате entity_provider"
+        ..., description="Pipeline name in entity_provider format"
     )
     profile: str = Field(
-        default="default", description="Активный конфигурационный профиль"
+        default="default", description="Active configuration profile"
     )
-    dry_run: bool = Field(default=False, description="Запуск без записи вывода")
+    dry_run: bool = Field(default=False, description="Run without writing output")
     limit: int | None = Field(
-        default=None, description="Ограничение на количество записей"
+        default=None, description="Record count limit"
     )
 
 
 class PipelineRunResponse(BaseModel):
-    """Ответ с результатами выполнения пайплайна."""
+    """Pipeline execution result response."""
 
     run_id: str
     success: bool
@@ -40,7 +40,7 @@ class PipelineRunResponse(BaseModel):
 
 
 def create_rest_app() -> FastAPI:
-    """Создает и возвращает FastAPI-приложение для запуска пайплайнов."""
+    """Create and return FastAPI application for running pipelines."""
 
     app = FastAPI(title="BioETL REST Interface")
 

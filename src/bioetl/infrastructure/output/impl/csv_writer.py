@@ -14,9 +14,9 @@ from bioetl.infrastructure.output.impl.base_writer import BaseWriter
 
 
 class CsvWriter(BaseWriter):
-    """
-    Запись CSV.
-    Делегирует атомарность и хеширование внешнему фасаду.
+    """CSV file writer.
+
+    Delegates atomicity and hashing to external facade.
     """
 
     def __init__(self) -> None:

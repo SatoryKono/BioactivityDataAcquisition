@@ -19,9 +19,7 @@ def _is_expired(expiry_timestamp: float | None) -> bool:
 
 
 class MemoryCacheImpl(CacheABC[T]):
-    """
-    Простой кэш в памяти.
-    """
+    """Simple in-memory cache."""
 
     def __init__(self) -> None:
         self._store: dict[str, tuple[T, float | None]] = {}

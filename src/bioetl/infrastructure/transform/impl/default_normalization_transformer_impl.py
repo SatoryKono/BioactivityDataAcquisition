@@ -56,7 +56,7 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
         return self.apply_normalize(record)
 
     def apply_normalize_fields(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Проходит по полям конфигурации и применяет нормализацию."""
+        """Iterate through configuration fields and apply normalization."""
         for field_cfg in self._iter_fields():
             name = field_cfg["name"]
             dtype = field_cfg.get("data_type")
@@ -93,7 +93,7 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
                     )
                 except ValueError as exc:
                     raise ValueError(
-                        f"Ошибка нормализации поля '{field_name}': {exc}"
+                        f"Error normalizing field '{field_name}': {exc}"
                     ) from exc
 
             df[name] = df[name].apply(_apply_value)

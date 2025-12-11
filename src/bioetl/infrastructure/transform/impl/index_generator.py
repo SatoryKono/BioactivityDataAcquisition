@@ -6,40 +6,39 @@ from bioetl.domain.transform.contracts import IndexGeneratorABC
 
 
 class SequentialIndexGenerator(IndexGeneratorABC):
-    """
-    Генератор последовательных индексов.
+    """Sequential index generator.
 
-    Stateful: сохраняет текущее значение счётчика между вызовами.
-    Используется для присвоения уникальных индексов строкам данных.
+    Stateful: maintains counter value between calls.
+    Used for assigning unique indices to data rows.
     """
 
     def __init__(self, start: int = 0) -> None:
-        """
+        """Initialize generator.
+
         Args:
-            start: Начальное значение счётчика (по умолчанию 0).
+            start: Initial counter value (default 0).
         """
         self._start = start
         self._counter = start
 
     def next_index(self) -> int:
-        """Возвращает следующий индекс и увеличивает счётчик."""
+        """Return next index and increment counter."""
         idx = self._counter
         self._counter += 1
         return idx
 
     def reset(self) -> None:
-        """Сбрасывает счётчик в начальное состояние."""
+        """Reset counter to initial state."""
         self._counter = self._start
 
     def generate_range(self, count: int) -> list[int]:
-        """
-        Генерирует диапазон индексов для batch операций.
+        """Generate index range for batch operations.
 
         Args:
-            count: Количество индексов для генерации.
+            count: Number of indices to generate.
 
         Returns:
-            Список последовательных индексов.
+            List of sequential indices.
         """
         start = self._counter
         self._counter += count

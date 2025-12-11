@@ -1,7 +1,6 @@
-"""
-Value Objects для временных примитивов.
+"""Value Objects for temporal primitives.
 
-Содержит типобезопасные обёртки для временных меток.
+Contains type-safe wrappers for timestamps.
 """
 
 from __future__ import annotations
@@ -14,9 +13,9 @@ from pydantic_core import CoreSchema, core_schema
 
 
 class Timestamp:
-    """Value Object для timezone-aware timestamp (всегда UTC).
+    """Value Object for timezone-aware timestamp (always UTC).
 
-    Гарантирует, что все временные метки хранятся в UTC.
+    Ensures that all timestamps are stored in UTC.
     """
 
     __slots__ = ("_value",)
@@ -27,7 +26,7 @@ class Timestamp:
                 "Timestamp must be timezone-aware. "
                 "Use Timestamp.now() or Timestamp.from_iso() for convenience."
             )
-        # Конвертируем в UTC для консистентности
+        # Convert to UTC for consistency
         self._value = value.astimezone(timezone.utc)
 
     def __setattr__(self, name: str, value: object) -> None:
@@ -41,11 +40,11 @@ class Timestamp:
         return self._value
 
     def to_iso(self) -> str:
-        """Возвращает ISO 8601 строку с timezone."""
+        """Return ISO 8601 string with timezone."""
         return self._value.isoformat()
 
     def to_epoch(self) -> float:
-        """Возвращает Unix timestamp (seconds since epoch)."""
+        """Return Unix timestamp (seconds since epoch)."""
         return self._value.timestamp()
 
     def __str__(self) -> str:
@@ -84,12 +83,12 @@ class Timestamp:
 
     @classmethod
     def now(cls) -> Self:
-        """Создаёт Timestamp с текущим временем в UTC."""
+        """Create Timestamp with current time in UTC."""
         return cls(datetime.now(timezone.utc))
 
     @classmethod
     def from_iso(cls, iso_string: str) -> Self:
-        """Создаёт Timestamp из ISO 8601 строки.
+        """Create Timestamp from ISO 8601 string.
 
         Args:
             iso_string: ISO 8601 formatted datetime string.
@@ -112,7 +111,7 @@ class Timestamp:
 
     @classmethod
     def from_epoch(cls, epoch: float) -> Self:
-        """Создаёт Timestamp из Unix timestamp."""
+        """Create Timestamp from Unix timestamp."""
         return cls(datetime.fromtimestamp(epoch, tz=timezone.utc))
 
     @classmethod

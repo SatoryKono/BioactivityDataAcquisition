@@ -28,10 +28,9 @@ from bioetl.infrastructure.settings.metrics import MetricName
 
 
 class _HttpTransport:
-    """
-    Внутренний HTTP-транспорт без промежуточных middleware-слоев.
-    Делегирует вызовы напрямую базовому HTTP-клиенту.
+    """Internal HTTP transport without middleware layers.
 
+    Delegates calls directly to the underlying HTTP client.
     All dependencies must be explicitly injected - no default fallbacks.
     Use composition root or factories to create instances.
     """
@@ -70,7 +69,20 @@ class _HttpTransport:
         )
 
     def request_call(self, method: str, url: str, **kwargs: Any) -> Any:
-        """Выполнить HTTP-запрос с настройками клиента."""
+        """Execute HTTP request with client settings.
+
+        Args:
+            method: HTTP method (GET, POST, etc.).
+            url: Target URL for the request.
+            **kwargs: Additional request parameters passed to underlying client.
+
+        Returns:
+            Response object from the underlying HTTP client.
+
+        Raises:
+            ApiTimeoutError: If request times out.
+            ApiClientError: If request fails with HTTP error.
+        """
         start = time.monotonic()
         status_label = "unknown"
 
@@ -136,11 +148,11 @@ class _HttpTransport:
         return self._request_with_retry(method, url, **kwargs)
 
     def get_response(self, url: str, **kwargs: Any) -> Any:
-        """GET запрос."""
+        """Execute GET request."""
         return self.request("GET", url, **kwargs)
 
     def request_post(self, url: str, **kwargs: Any) -> Any:
-        """POST запрос."""
+        """Execute POST request."""
         return self.request("POST", url, **kwargs)
 
     def _request_with_retry(self, method: str, url: str, **kwargs: Any) -> Any:
@@ -167,7 +179,7 @@ class _HttpTransport:
                 attempt += 1
 
     def close(self) -> None:
-        """Закрыть соединение."""
+        """Close the underlying HTTP connection."""
         if hasattr(self.base_client, "close"):
             self.base_client.close()
 

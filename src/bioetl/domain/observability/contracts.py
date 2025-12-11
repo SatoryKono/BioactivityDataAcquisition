@@ -95,23 +95,22 @@ class MetricsPortABC(ABC):
 
 
 class ProgressReporterABC(ABC):
-    """
-    Интерфейс отчетности о прогрессе.
+    """Progress reporting interface.
 
-    Реализация выбирается инфраструктурой и связывается с контейнером.
+    Concrete implementation is selected by infrastructure and bound to the container.
     """
 
     @abstractmethod
     def start(self, total: int, description: str = "") -> None:
-        """Начинает отслеживание прогресса."""
+        """Start progress tracking with the specified total count."""
 
     @abstractmethod
     def apply_update(self, n: int = 1) -> None:
-        """Обновляет прогресс на n единиц."""
+        """Update progress by n units."""
 
     @abstractmethod
     def stop_reporting(self) -> None:
-        """Завершает отслеживание."""
+        """Stop progress tracking and clean up resources."""
 
     @contextmanager
     def create_bar(self, total: int, desc: str = "") -> Iterator[Any]:
