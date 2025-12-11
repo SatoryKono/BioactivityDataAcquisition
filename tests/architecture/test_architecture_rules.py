@@ -431,8 +431,6 @@ def test_interfaces_has_controlled_infrastructure_imports() -> None:
         "factories/infrastructure.py",
         "factories/observability.py",
         "factories/provider_registry.py",
-        # Legacy support
-        "legacy_adapters.py",
         # CLI entry points (composition happens here)
         "cli/app.py",
         "cli/__init__.py",

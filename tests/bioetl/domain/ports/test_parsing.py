@@ -1,4 +1,4 @@
-"""Tests for parsing port contracts and type aliases."""
+"""Tests for parsing port contracts."""
 
 from typing import Any
 
@@ -6,51 +6,9 @@ import pytest
 
 from bioetl.domain.ports.parsing import (
     PaginationInfo,
-    RawPayload,
-    RawRecordDict,
-    RawRecordList,
     ResponseParserPortABC,
 )
-
-
-class TestTypeAliases:
-    """Tests for type alias compatibility and correctness."""
-
-    def test_raw_payload_accepts_dict(self) -> None:
-        """RawPayload should accept dict[str, Any]."""
-        payload: RawPayload = {"key": "value", "number": 123, "nested": {"a": 1}}
-        assert isinstance(payload, dict)
-        assert payload["key"] == "value"
-
-    def test_raw_record_dict_accepts_dict(self) -> None:
-        """RawRecordDict should accept dict[str, Any]."""
-        record: RawRecordDict = {"id": "123", "name": "test", "value": 42.5}
-        assert isinstance(record, dict)
-        assert record["id"] == "123"
-
-    def test_raw_record_list_accepts_list_of_dicts(self) -> None:
-        """RawRecordList should accept list of record dicts."""
-        records: RawRecordList = [
-            {"id": "1", "name": "first"},
-            {"id": "2", "name": "second"},
-        ]
-        assert isinstance(records, list)
-        assert len(records) == 2
-        assert all(isinstance(r, dict) for r in records)
-
-    def test_type_aliases_are_compatible_with_any_values(self) -> None:
-        """Type aliases should allow Any values in dicts."""
-        payload: RawPayload = {
-            "string": "value",
-            "int": 42,
-            "float": 3.14,
-            "bool": True,
-            "none": None,
-            "list": [1, 2, 3],
-            "nested": {"deep": {"value": "ok"}},
-        }
-        assert payload["string"] == "value"
-        assert payload["nested"]["deep"]["value"] == "ok"
+from bioetl.domain.types import ApiPayload
 
 
 class TestResponseParserPortABC:
@@ -66,7 +24,7 @@ class TestResponseParserPortABC:
 
         class IncompleteParser(ResponseParserPortABC):
             def extract_pagination(
-                self, raw_response: RawPayload
+                self, raw_response: ApiPayload
             ) -> dict[str, int | str | None]:
                 return {}
 
@@ -77,7 +35,9 @@ class TestResponseParserPortABC:
         """Implementations must provide extract_pagination method."""
 
         class IncompleteParser(ResponseParserPortABC):
-            def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+            def parse_to_records(
+                self, raw_response: ApiPayload
+            ) -> list[dict[str, Any]]:
                 return []
 
         with pytest.raises(TypeError, match="abstract"):
@@ -87,14 +47,16 @@ class TestResponseParserPortABC:
         """Complete implementation should be instantiable."""
 
         class CompleteParser(ResponseParserPortABC):
-            def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+            def parse_to_records(
+                self, raw_response: ApiPayload
+            ) -> list[dict[str, Any]]:
                 for value in raw_response.values():
                     if isinstance(value, list):
                         return value
                 return []
 
             def extract_pagination(
-                self, raw_response: RawPayload
+                self, raw_response: ApiPayload
             ) -> dict[str, int | str | None]:
                 return raw_response.get("page_meta", {})
 
@@ -105,16 +67,18 @@ class TestResponseParserPortABC:
         """Implementation should correctly parse records from response."""
 
         class TestParser(ResponseParserPortABC):
-            def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+            def parse_to_records(
+                self, raw_response: ApiPayload
+            ) -> list[dict[str, Any]]:
                 return raw_response.get("items", [])
 
             def extract_pagination(
-                self, raw_response: RawPayload
+                self, raw_response: ApiPayload
             ) -> dict[str, int | str | None]:
                 return raw_response.get("meta", {})
 
         parser = TestParser()
-        response: RawPayload = {
+        response: ApiPayload = {
             "items": [{"id": "1"}, {"id": "2"}],
             "meta": {"total_count": 100},
         }
@@ -128,11 +92,13 @@ class TestResponseParserPortABC:
         """Implementation should correctly extract pagination metadata."""
 
         class TestParser(ResponseParserPortABC):
-            def parse_to_records(self, raw_response: RawPayload) -> RawRecordList:
+            def parse_to_records(
+                self, raw_response: ApiPayload
+            ) -> list[dict[str, Any]]:
                 return []
 
             def extract_pagination(
-                self, raw_response: RawPayload
+                self, raw_response: ApiPayload
             ) -> dict[str, int | str | None]:
                 meta = raw_response.get("page_meta", {})
                 return {
@@ -142,7 +108,7 @@ class TestResponseParserPortABC:
                 }
 
         parser = TestParser()
-        response: RawPayload = {
+        response: ApiPayload = {
             "page_meta": {"total_count": 500, "offset": 0, "limit": 100}
         }
         pagination = parser.extract_pagination(response)
@@ -279,8 +245,5 @@ class TestPortsModuleExports:
         """All exports should be available from package init."""
         from bioetl.domain import ports
 
-        assert hasattr(ports, "RawPayload")
-        assert hasattr(ports, "RawRecordDict")
-        assert hasattr(ports, "RawRecordList")
         assert hasattr(ports, "ResponseParserPortABC")
         assert hasattr(ports, "PaginationInfo")

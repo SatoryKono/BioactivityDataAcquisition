@@ -318,7 +318,3 @@ class StageRuntimeManagerImpl:
     @staticmethod
     def _calculate_duration(context: RunContext) -> float:
         return (datetime.now(timezone.utc) - context.started_at).total_seconds()
-
-
-# Backwards compatibility for legacy imports
-StageRuntimeManager = StageRuntimeManagerImpl

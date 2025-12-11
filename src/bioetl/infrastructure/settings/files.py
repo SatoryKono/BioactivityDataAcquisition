@@ -34,17 +34,8 @@ class FileSettings:
 # Default instance for convenient access
 DEFAULT_FILE_SETTINGS: Final[FileSettings] = FileSettings()
 
-# Legacy compatibility constants (deprecated, use FileSettings instance instead)
-MAX_FILE_RETRIES: Final[int] = DEFAULT_FILE_SETTINGS.max_retries
-RETRY_DELAY_SEC: Final[float] = DEFAULT_FILE_SETTINGS.retry_delay_sec
-CHECKSUM_CHUNK_SIZE: Final[int] = DEFAULT_FILE_SETTINGS.checksum_chunk_size
-
 
 __all__ = [
     "FileSettings",
     "DEFAULT_FILE_SETTINGS",
-    # Legacy compatibility
-    "MAX_FILE_RETRIES",
-    "RETRY_DELAY_SEC",
-    "CHECKSUM_CHUNK_SIZE",
 ]

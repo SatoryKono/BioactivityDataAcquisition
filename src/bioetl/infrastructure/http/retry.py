@@ -6,11 +6,8 @@ import math
 from typing import Iterable
 
 from bioetl.domain.clients.base.contracts import RetryPolicyABC
-from bioetl.infrastructure.errors import ApiClientError
-from bioetl.infrastructure.settings.http import (
-    DEFAULT_RETRY_EXCEPTIONS,
-    DEFAULT_RETRY_STATUSES,
-)
+from bioetl.infrastructure.errors import ApiClientError, ApiTimeoutError
+from bioetl.infrastructure.settings.http import DEFAULT_RETRY
 
 
 class ExponentialRetryPolicy(RetryPolicyABC):
@@ -36,9 +33,9 @@ class ExponentialRetryPolicy(RetryPolicyABC):
         self._max_attempts = int(max_attempts)
         self._backoff_factor = float(backoff_factor)
         self.retry_statuses = (
-            set(retry_statuses) if retry_statuses else set(DEFAULT_RETRY_STATUSES)
+            set(retry_statuses) if retry_statuses else set(DEFAULT_RETRY.retry_statuses)
         )
-        self.retry_exceptions = retry_exceptions or DEFAULT_RETRY_EXCEPTIONS
+        self.retry_exceptions = retry_exceptions or DEFAULT_RETRY.retry_exceptions
 
     @property
     def max_attempts(self) -> int:
@@ -63,9 +60,11 @@ class ExponentialRetryPolicy(RetryPolicyABC):
         if attempt >= self.max_attempts:
             return False
 
-        if isinstance(exception, self.retry_exceptions):
+        # ApiTimeoutError should always be retried (network issue, not client error)
+        if isinstance(exception, ApiTimeoutError):
             return True
 
+        # ApiClientError with status code - only retry based on status code
         if isinstance(exception, ApiClientError):
             status = getattr(exception, "status_code", None)
             if status is not None and status in self.retry_statuses:
@@ -74,6 +73,11 @@ class ExponentialRetryPolicy(RetryPolicyABC):
             cause = getattr(exception, "cause", None)
             if isinstance(cause, self.retry_exceptions):
                 return True
+            return False
+
+        # For other exceptions, check if they are in retry_exceptions
+        if isinstance(exception, self.retry_exceptions):
+            return True
 
         status_code = _extract_status_code(exception)
         return status_code in self.retry_statuses if status_code is not None else False

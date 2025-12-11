@@ -6,8 +6,6 @@ CompositionRoot to Pipeline creation without global state.
 
 from __future__ import annotations
 
-import pytest
-
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.interfaces.composition_root import CompositionRoot
@@ -166,46 +164,3 @@ class TestSchemaContractInjection:
         assert isinstance(contract, PipelineSchemaModel)
         assert contract.pipeline_code == "unknown.pipeline"
         assert contract.schema_out == "my_entity"
-
-
-class TestLegacyAdapters:
-    """Test legacy adapter for backward compatibility."""
-
-    def test_create_composition_root_with_legacy_emits_warning(self) -> None:
-        """Verify legacy adapter emits deprecation warning."""
-        from bioetl.interfaces.legacy_adapters import (
-            create_composition_root_with_legacy,
-        )
-
-        with pytest.warns(DeprecationWarning, match="logger/metrics parameters"):
-            root = create_composition_root_with_legacy(
-                logger=MockLogger(),
-                metrics=MockMetrics(),
-            )
-
-        assert root is not None
-        assert isinstance(root.get_logger(), MockLogger)
-        assert isinstance(root.get_metrics(), MockMetrics)
-
-    def test_create_composition_root_with_legacy_no_warning_without_legacy_params(
-        self,
-    ) -> None:
-        """Verify legacy adapter doesn't warn when not using legacy params."""
-        import warnings
-
-        from bioetl.interfaces.legacy_adapters import (
-            create_composition_root_with_legacy,
-        )
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            root = create_composition_root_with_legacy(
-                observability_factory=TestObservabilityFactory()
-            )
-
-        # Should not emit deprecation warning
-        deprecation_warnings = [
-            x for x in w if issubclass(x.category, DeprecationWarning)
-        ]
-        assert len(deprecation_warnings) == 0
-        assert root is not None

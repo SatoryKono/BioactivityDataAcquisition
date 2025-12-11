@@ -25,14 +25,11 @@ Usage:
     )
 """
 
-# New naming convention; Deprecated aliases for backward compatibility
 from bioetl.infrastructure.validation.factories import (
     PanderaSchemaProviderFactory,
     PanderaValidatorFactory,
     create_schema_provider_factory,
     create_validator_factory,
-    default_schema_provider_factory,
-    default_validator_factory,
 )
 from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValidatorImpl
 from bioetl.infrastructure.validation.schema_generator import (
@@ -46,13 +43,9 @@ __all__ = [
     "PanderaSchemaProviderFactory",
     "PanderaValidatorFactory",
     "PanderaValidatorImpl",
-    # New naming convention
     "create_schema_provider_factory",
     "create_validator_factory",
-    # Deprecated aliases
-    "default_schema_provider_factory",
-    "default_validator_factory",
-    # Schema generation (moved from domain)
+    # Schema generation
     "PanderaSchemaGenerator",
     "YamlColumnOrderLoader",
     "generate_schema_from_column_order",

@@ -13,16 +13,16 @@ import pandas as pd
 import pytest
 import yaml
 
-from bioetl.infrastructure.output.impl.base_writer import BaseWriterImpl
-from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
+from bioetl.infrastructure.output.impl.base_writer import BaseWriter
+from bioetl.infrastructure.output.impl.csv_writer import CsvWriter
 from bioetl.infrastructure.output.impl.metadata_writer import (
-    MetadataWriterImpl,
+    MetadataWriter,
     build_quality_report_table,
 )
-from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriterImpl
+from bioetl.infrastructure.output.impl.parquet_writer import ParquetWriter
 
 
-class DummyWriter(BaseWriterImpl):
+class DummyWriter(BaseWriter):
     """Minimal writer for base class tests."""
 
     def __init__(self, *, checksum_fn: Callable[[Path], str] | None = None) -> None:
@@ -48,19 +48,19 @@ def _assert_qc_row(report: pd.DataFrame, expectations: dict[str, object]) -> Non
 @pytest.fixture
 def csv_writer():
     """Fixture for CSV writer."""
-    return CsvWriterImpl()
+    return CsvWriter()
 
 
 @pytest.fixture
 def parquet_writer():
     """Fixture for Parquet writer."""
-    return ParquetWriterImpl()
+    return ParquetWriter()
 
 
 @pytest.fixture
 def metadata_writer():
     """Fixture for Metadata writer."""
-    return MetadataWriterImpl()
+    return MetadataWriter()
 
 
 def test_csv_writer_write(csv_writer, tmp_path):

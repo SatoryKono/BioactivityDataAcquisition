@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.domain.configs import ChemblSourceConfig, ClientConfig
+from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
 from bioetl.domain.transform.contracts import NormalizationServiceABC
 from bioetl.infrastructure.clients.chembl.provider import (
     ChemblProviderComponentsFactory,
@@ -40,7 +40,7 @@ class _NormalizationServiceStub(NormalizationServiceABC):
 def chembl_config() -> ChemblSourceConfig:
     return ChemblSourceConfig(
         base_url="https://example.com/api",
-        client=ClientConfig(
+        client=HttpClientConfig(
             timeout_sec=30,
             max_retries=1,
             rate_limit_per_sec=1.0,

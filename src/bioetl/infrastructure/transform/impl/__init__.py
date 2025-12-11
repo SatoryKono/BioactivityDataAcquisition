@@ -1,6 +1,6 @@
 """Concrete transform implementations."""
 
-from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
+from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
     NormalizationServiceImpl,
 )
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
@@ -11,7 +11,6 @@ from bioetl.infrastructure.transform.impl.index_generator import (
 from bioetl.infrastructure.transform.impl.timestamp_provider import (
     DeterministicTimestampProvider,
 )
-
 
 __all__ = [
     "HasherImpl",

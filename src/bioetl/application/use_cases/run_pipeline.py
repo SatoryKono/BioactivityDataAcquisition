@@ -19,7 +19,7 @@ from bioetl.domain.models import RunResult
 from bioetl.domain.provider_registry import ProviderRegistryFactory
 
 if TYPE_CHECKING:
-    from bioetl.application.pipelines.contracts import PipelineContainerABC
+    from bioetl.application.contracts import PipelineContainerABC
     from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
     from bioetl.domain.provider_registry import ProviderRegistryLoaderABC
 

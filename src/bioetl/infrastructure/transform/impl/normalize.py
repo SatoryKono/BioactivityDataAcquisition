@@ -3,7 +3,6 @@ Normalization implementation for domain entities.
 """
 
 from typing import Any
-import warnings
 
 import pandas as pd
 
@@ -71,23 +70,12 @@ def _normalize_string_value(value: str, mode: str) -> str | None:
 
 
 def __getattr__(name: str) -> Any:
-    """Emit deprecation warnings for legacy aliases and lazy imports."""
-    # Lazy import to avoid circular dependency
-    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
-        NormalizationServiceImpl as _NormImpl,
-    )
-
-    # Canonical export
+    """Lazy import for NormalizationServiceImpl to avoid circular dependency."""
     if name == "NormalizationServiceImpl":
-        return _NormImpl
-
-    # Single deprecated alias for migration
-    if name == "NormalizationService":
-        warnings.warn(
-            "NormalizationService is deprecated. Use NormalizationServiceImpl instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (  # noqa: E501
+            NormalizationServiceImpl as _NormImpl,
         )
+
         return _NormImpl
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
@@ -99,6 +87,5 @@ __all__ = [
     "normalize_pubchem_cid",
     "normalize_uniprot_id",
     "get_normalizer",
-    "NormalizationServiceImpl",  # noqa: F822
-    "NormalizationService",  # noqa: F822  # Deprecated alias
+    "NormalizationServiceImpl",  # noqa: F822 - lazy import
 ]

@@ -203,9 +203,7 @@ class PipelineOrchestrator:
             executor=executor,
         )
 
-    def _run_extract_only(
-        self, pipeline: PipelineBase, limit: int | None
-    ) -> RunResult:
+    def _run_extract_only(self, pipeline: PipelineBase, limit: int | None) -> RunResult:
         """Execute extract-only mode."""
         context = self._build_simple_context()
         extract_result = pipeline.run_extract_only(limit=limit)

@@ -4,8 +4,8 @@ import pandera.pandas as pa
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.infrastructure.validation.factories import (
     PanderaSchemaProviderFactory,
-    default_schema_provider_factory,
-    default_validator_factory,
+    create_schema_provider_factory,
+    create_validator_factory,
 )
 from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValidatorImpl
 
@@ -53,15 +53,15 @@ def test_pandera_validator_exception():
 
 
 def test_validator_factory_creates_pandera_validator():
-    factory = default_validator_factory()
+    factory = create_validator_factory()
     validator = factory.create_validator(DummySchema)
     assert isinstance(validator, PanderaValidatorImpl)
     assert validator.is_valid(pd.DataFrame({"id": [1], "name": ["x"]}))
 
 
 def test_schema_provider_factory_creates_registry():
-    default_factory = default_schema_provider_factory()
-    provider = default_factory.create_schema_provider()
+    factory = create_schema_provider_factory()
+    provider = factory.create_schema_provider()
     assert isinstance(provider, SchemaRegistry)
 
     provider.register("dummy", DummySchema, column_order=["id", "name"])

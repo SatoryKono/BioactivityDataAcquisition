@@ -10,7 +10,7 @@ RateLimiterABC: bioetl.domain.clients.base.contracts.RateLimiterABC
 CacheABC: bioetl.domain.clients.base.contracts.CacheABC
 SecretProviderABC: bioetl.domain.clients.base.contracts.SecretProviderABC
 
-PipelineContainerABC: bioetl.application.pipelines.contracts.PipelineContainerABC
+PipelineContainerABC: bioetl.application.contracts.PipelineContainerABC
 PipelineHookABC: bioetl.domain.pipelines.contracts.PipelineHookABC
 ErrorPolicyABC: bioetl.domain.pipelines.contracts.ErrorPolicyABC
 LoaderABC: bioetl.domain.pipelines.contracts.LoaderABC
@@ -28,7 +28,8 @@ TimestampProviderABC: bioetl.domain.transform.contracts.TimestampProviderABC
 IndexGeneratorABC: bioetl.domain.transform.contracts.IndexGeneratorABC
 NormalizationServiceABC: bioetl.domain.transform.contracts.NormalizationServiceABC
 
-ValidatorABC: bioetl.domain.validation.contracts.ValidatorABC
+# Note: ValidatorABC is created by ValidatorFactoryABC.create_validator(schema)
+# and is omitted from this registry (no default instantiation possible)
 SchemaProviderABC: bioetl.domain.validation.contracts.SchemaProviderABC
 ValidatorFactoryABC: bioetl.domain.validation.contracts.ValidatorFactoryABC
 SchemaProviderFactoryABC: bioetl.domain.validation.contracts.SchemaProviderFactoryABC

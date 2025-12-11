@@ -29,7 +29,7 @@ from bioetl.domain.transform.transformers import (
     TransformerABC,
     TransformerChainImpl,
 )
-from bioetl.infrastructure.transform.factories import default_hash_service
+from bioetl.infrastructure.transform.factories import create_hash_service
 
 
 class CallableExtractor(ExtractorABC):
@@ -159,7 +159,7 @@ class DatasetPipeline(PipelineBase):
 
 @pytest.fixture
 def hash_service():
-    return default_hash_service()
+    return create_hash_service()
 
 
 @pytest.fixture

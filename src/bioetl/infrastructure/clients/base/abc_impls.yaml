@@ -41,10 +41,8 @@ SchemaProviderFactoryABC:
   implementations:
     Pandera: bioetl.infrastructure.validation.factories.PanderaSchemaProviderFactory
 
-ValidatorABC:
-  default_factory: null
-  implementations:
-    Pandera: bioetl.infrastructure.validation.impl.pandera_validator.PanderaValidatorImpl
+# Note: ValidatorABC instances are created via ValidatorFactoryABC.create_validator(schema)
+# and cannot have a default factory - omitted from this registry.
 
 SchemaProviderABC:
   default_factory: bioetl.domain.schemas.registry.get_default_schema_registry
