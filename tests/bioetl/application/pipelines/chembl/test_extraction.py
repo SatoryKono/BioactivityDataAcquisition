@@ -66,7 +66,7 @@ def test_extract_all_single_page(service, mock_client):
     # iter_pages yields raw page data
     mock_client.iter_pages.return_value = [{"data": "page1"}]
     mock_parser.parse_to_records.return_value = [
-        ActivityRawModel(activity_id="1", standard_flag=True),
+        ActivityRawModel(activity_id="1", standard_flag=True, standard_value=1.0),
         ActivityRawModel(activity_id="2", standard_flag=False),
     ]
 
@@ -122,6 +122,7 @@ def test_extract_all_serializes_nested_fields(service, mock_client):
         ActivityRawModel(
             activity_id="1",
             standard_flag=True,
+            standard_value=1.0,
             activity_properties=[{"k1": "v1"}, {"k2": "v2"}],
             ligand_efficiency={"le": 1.1},
         )
@@ -144,7 +145,7 @@ def test_extract_all_limit(service, mock_client):
     # Returns 10 items per call
     mock_client.iter_pages.return_value = [{"data": "page"}]
     mock_parser.parse_to_records.return_value = [
-        ActivityRawModel(activity_id=str(i), standard_flag=True) for i in range(10)
+        ActivityRawModel(activity_id=str(i), standard_flag=True, standard_value=float(i)) for i in range(10)
     ]
 
     # Act - request limit 5 (which acts as chunk_size in current impl)

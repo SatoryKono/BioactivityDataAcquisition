@@ -4,6 +4,7 @@ from pydantic import ValidationError
 import pytest
 
 from bioetl.application.mappers.chembl import ChemblRecordMapper
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.domain.schemas.chembl.raw_models import (
     ActivityRawModel,
     AssayRawModel,
@@ -18,11 +19,12 @@ class TestChemblRecordMapperActivityMapping:
 
     def test_maps_valid_activity_record(self) -> None:
         """Valid activity dict is mapped to ActivityRawModel."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
                 "activity_id": 12345,
                 "standard_flag": True,
+                "standard_value": 10.5,
                 "assay_chembl_id": "CHEMBL123",
                 "molecule_chembl_id": "CHEMBL456",
             }
@@ -32,24 +34,24 @@ class TestChemblRecordMapperActivityMapping:
 
         assert len(result) == 1
         assert isinstance(result[0], ActivityRawModel)
-        assert result[0].activity_id == "12345"
+        assert str(result[0].activity_id) == "12345"
         assert result[0].standard_flag is True
         assert str(result[0].assay_chembl_id) == "CHEMBL123"
 
     def test_maps_multiple_activity_records(self) -> None:
         """Multiple activity records are all mapped correctly."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
-            {"activity_id": 1, "standard_flag": True},
+            {"activity_id": 1, "standard_flag": True, "standard_value": 1.0},
             {"activity_id": 2, "standard_flag": False},
-            {"activity_id": 3, "standard_flag": True},
+            {"activity_id": 3, "standard_flag": True, "standard_value": 3.0},
         ]
 
         result = mapper.map_records(raw_records, "activity")
 
         assert len(result) == 3
         assert all(isinstance(r, ActivityRawModel) for r in result)
-        assert [r.activity_id for r in result] == ["1", "2", "3"]
+        assert [str(r.activity_id) for r in result] == ["1", "2", "3"]
 
 
 class TestChemblRecordMapperMoleculeMapping:
@@ -57,7 +59,7 @@ class TestChemblRecordMapperMoleculeMapping:
 
     def test_maps_valid_molecule_record(self) -> None:
         """Valid molecule dict is mapped to MoleculeRawModel."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
                 "molecule_chembl_id": "CHEMBL25",
@@ -81,7 +83,7 @@ class TestChemblRecordMapperTargetMapping:
 
     def test_maps_valid_target_record(self) -> None:
         """Valid target dict is mapped to TargetRawModel."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
                 "target_chembl_id": "CHEMBL204",
@@ -106,7 +108,7 @@ class TestChemblRecordMapperAssayMapping:
 
     def test_maps_valid_assay_record(self) -> None:
         """Valid assay dict is mapped to AssayRawModel."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
                 "assay_chembl_id": "CHEMBL1217643",
@@ -130,7 +132,7 @@ class TestChemblRecordMapperDocumentMapping:
 
     def test_maps_valid_document_record(self) -> None:
         """Valid document dict is mapped to DocumentRawModel."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
                 "document_chembl_id": "CHEMBL1125443",
@@ -156,7 +158,7 @@ class TestChemblRecordMapperUnknownEntity:
 
     def test_raises_value_error_for_unknown_entity(self) -> None:
         """ValueError is raised when entity type is not supported."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [{"id": 1}]
 
         with pytest.raises(ValueError, match="Unknown entity type: unknown"):
@@ -164,7 +166,7 @@ class TestChemblRecordMapperUnknownEntity:
 
     def test_error_message_lists_supported_entities(self) -> None:
         """Error message includes list of supported entity types."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [{"id": 1}]
 
         with pytest.raises(ValueError) as exc_info:
@@ -183,7 +185,7 @@ class TestChemblRecordMapperValidationError:
 
     def test_raises_validation_error_for_missing_required_field(self) -> None:
         """ValidationError is raised when required field is missing."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         # activity_id is required but missing
         raw_records = [{"standard_flag": True}]
 
@@ -192,7 +194,7 @@ class TestChemblRecordMapperValidationError:
 
     def test_raises_validation_error_for_invalid_type(self) -> None:
         """ValidationError is raised when field has invalid type."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         # standard_flag must be bool
         raw_records = [
             {
@@ -209,7 +211,7 @@ class TestChemblRecordMapperValidationError:
 
         ActivityRawModel uses extra='forbid' configuration.
         """
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
                 "activity_id": 1,
@@ -227,13 +229,13 @@ class TestChemblRecordMapperSupportedEntities:
 
     def test_returns_frozenset(self) -> None:
         """Method returns a frozenset."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         result = mapper.get_supported_entities()
         assert isinstance(result, frozenset)
 
     def test_contains_all_entity_types(self) -> None:
         """Returned set contains all five entity types."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         supported = mapper.get_supported_entities()
 
         expected = {"activity", "molecule", "target", "assay", "document"}
@@ -241,7 +243,7 @@ class TestChemblRecordMapperSupportedEntities:
 
     def test_frozenset_is_immutable(self) -> None:
         """Returned frozenset cannot be modified."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         supported = mapper.get_supported_entities()
 
         with pytest.raises(AttributeError):
@@ -253,6 +255,6 @@ class TestChemblRecordMapperEmptyInput:
 
     def test_empty_list_returns_empty_list(self) -> None:
         """Empty input list returns empty output list."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(get_chembl_model_registry())
         result = mapper.map_records([], "activity")
         assert result == []
