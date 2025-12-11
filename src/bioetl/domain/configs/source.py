@@ -112,10 +112,5 @@ class DataSourceConfig(BaseModel):
             )
         return self
 
-    @property
-    def csv_options(self) -> CsvInputConfig:
-        """Backward compatibility alias for csv."""
-        return self.csv
-
 
 __all__ = ["CsvInputConfig", "DataSourceConfig"]

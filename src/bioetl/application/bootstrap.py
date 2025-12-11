@@ -296,6 +296,3 @@ __all__ = [
     "create_application_bootstrap",
     "create_config_migration_service",
 ]
-
-# Backward compatibility alias
-ApplicationContext = ApplicationServicesContext

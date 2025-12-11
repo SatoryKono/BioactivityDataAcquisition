@@ -19,7 +19,7 @@ def test_request_call_wraps_timeout_error() -> None:
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=HttpClientConfig(retry_enabled=False),
+        config=HttpClientConfig(max_retries=0),
         base_client=base_client,
         logger=logger,
         metrics=metrics,
@@ -44,7 +44,7 @@ def test_request_call_wraps_request_exception() -> None:
     metrics = Mock(spec=MetricsPortABC)
     client = _HttpTransport(
         provider="chembl",
-        config=HttpClientConfig(retry_enabled=False),
+        config=HttpClientConfig(max_retries=0),
         base_client=base_client,
         logger=logger,
         metrics=metrics,

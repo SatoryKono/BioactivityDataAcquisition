@@ -12,9 +12,6 @@ Usage:
     # Direct instantiation (for testing)
     factory = UseCaseFactory(mock_context)
     use_case = factory.create_run_pipeline_use_case()
-
-    # Legacy singleton (deprecated, delegates to ApplicationContext)
-    factory = get_use_case_factory()
 """
 
 from __future__ import annotations
@@ -82,33 +79,6 @@ class UseCaseFactory:
         )
 
 
-def get_use_case_factory() -> UseCaseFactory:
-    """Get use case factory from ApplicationContext singleton.
-
-    This function delegates to ApplicationContext to ensure single source
-    of truth for application dependencies.
-
-    Returns:
-        UseCaseFactory configured with current ApplicationContext.
-    """
-    from bioetl.interfaces.application_context import get_application_context
-
-    return get_application_context().use_case_factory
-
-
-def reset_use_case_factory() -> None:
-    """Reset use case factory (for testing).
-
-    Since UseCaseFactory is now created from ApplicationContext,
-    this function resets the ApplicationContext instead.
-    """
-    from bioetl.interfaces.application_context import reset_application_context
-
-    reset_application_context()
-
-
 __all__ = [
     "UseCaseFactory",
-    "get_use_case_factory",
-    "reset_use_case_factory",
 ]
