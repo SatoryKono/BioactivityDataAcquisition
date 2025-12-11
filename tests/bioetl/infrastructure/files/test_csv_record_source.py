@@ -33,19 +33,29 @@ class _StubExtractionService:
         return {
             "records": [
                 {
-                    "activity_id": value.lstrip("A") if value.startswith("A") else value,
+                    "activity_id": (
+                        value.lstrip("A") if value.startswith("A") else value
+                    ),
                     "standard_flag": True,
-                    "standard_value": 1.0
-                } for value in batch_ids
+                    "standard_value": 1.0,
+                }
+                for value in batch_ids
             ]
         }
 
     def parse(self, raw_response: dict[str, list[dict[str, str]]]):
         return [
-            ActivityRawModel.model_validate({
-                **item,
-                "standard_value": item.get("standard_value", 1.0) if item.get("standard_flag") else None
-            }) for item in raw_response["records"]
+            ActivityRawModel.model_validate(
+                {
+                    **item,
+                    "standard_value": (
+                        item.get("standard_value", 1.0)
+                        if item.get("standard_flag")
+                        else None
+                    ),
+                }
+            )
+            for item in raw_response["records"]
         ]
 
     def parse_response(self, raw_response: dict[str, list[dict[str, str]]]):

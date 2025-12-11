@@ -98,6 +98,7 @@ class ActivityRawModel(SourceRecordModel):
 
     @model_validator(mode="after")
     def validate_standard_flag_consistency(self) -> Self:
+        """Validate standard_flag consistency with standard_value."""
         if self.standard_flag and self.standard_value is None:
             raise ValueError("standard_value required when standard_flag is True")
         return self
@@ -189,6 +190,7 @@ class PublicationRawModel(SourceRecordModel):
     @field_validator("document_chembl_id", mode="before")
     @classmethod
     def _stringify_document_id(cls, value: str | int) -> str:
+        """Convert document ID to string."""
         return str(value)
 
 

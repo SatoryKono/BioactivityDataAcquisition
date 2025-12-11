@@ -29,7 +29,7 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
         "csv_options": {"delimiter": ";"},
         "features": {"rest_interface_enabled": True},
     }
-    
+
     # Apply migration before validation (same as loader does)
     migrated_data = ConfigMigrator.migrate(legacy_data)
     config = PipelineConfig.model_validate(migrated_data)
