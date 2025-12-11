@@ -8,7 +8,6 @@ Migration guide:
     - HttpClientSettings -> ProviderHttpConfig
     - HttpClientDefaults -> HttpClientConfig
     - HTTP_CLIENT_DEFAULTS -> HttpClientConfig()
-    - QcConfig -> QualityControlConfig
 """
 
 from __future__ import annotations
@@ -20,7 +19,6 @@ if TYPE_CHECKING:
     from bioetl.domain.configs.pipeline import (
         HttpClientConfig,
         ProviderHttpConfig,
-        QualityControlConfig,
     )
 
 __all__ = [
@@ -28,7 +26,6 @@ __all__ = [
     "HttpClientDefaults",
     "HttpClientSettings",
     "HTTP_CLIENT_DEFAULTS",
-    "QcConfig",
 ]
 
 # Mapping of deprecated names to (new_name, actual_import_path)
@@ -37,7 +34,6 @@ _DEPRECATED_ALIASES: dict[str, tuple[str, str]] = {
     "HttpClientSettings": ("ProviderHttpConfig", "bioetl.domain.configs.pipeline"),
     "HttpClientDefaults": ("HttpClientConfig", "bioetl.domain.configs.pipeline"),
     "HTTP_CLIENT_DEFAULTS": ("HttpClientConfig()", "bioetl.domain.configs.pipeline"),
-    "QcConfig": ("QualityControlConfig", "bioetl.domain.configs.pipeline"),
 }
 
 
@@ -75,23 +71,6 @@ def _get_provider_http_config() -> type:
     return ProviderHttpConfig
 
 
-def _get_quality_control_config() -> type:
-    """Lazy import QualityControlConfig."""
-    from bioetl.domain.configs.pipeline import QualityControlConfig
-
-    return QualityControlConfig
-
-
-class _DeprecatedQcConfig:
-    """Factory for QcConfig that emits deprecation warning on instantiation."""
-
-    def __new__(cls, **data: Any) -> Any:
-        # stacklevel=2: user code -> QcConfig() -> __new__
-        _warn_deprecated("QcConfig", "QualityControlConfig", stacklevel=2)
-        QualityControlConfig = _get_quality_control_config()
-        return QualityControlConfig(**data)
-
-
 class _DeprecatedHttpClientDefaults:
     """Factory for HttpClientDefaults that emits deprecation warning."""
 
@@ -125,10 +104,6 @@ def __getattr__(name: str) -> Any:
         HttpClientConfig = _get_http_client_config()
         return HttpClientConfig()
 
-    if name == "QcConfig":
-        _warn_deprecated("QcConfig", "QualityControlConfig")
-        return _DeprecatedQcConfig
-
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -138,4 +113,3 @@ if TYPE_CHECKING:
     HttpClientSettings = ProviderHttpConfig
     HttpClientDefaults = HttpClientConfig
     HTTP_CLIENT_DEFAULTS: HttpClientConfig
-    QcConfig = QualityControlConfig

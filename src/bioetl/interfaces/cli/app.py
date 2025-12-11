@@ -11,7 +11,7 @@ import typer
 
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.application.use_cases import RunPipelineRequest, RunPipelineResponse
-from bioetl.infrastructure.config.sources import get_configs_root
+from bioetl.interfaces.composition_root import get_composition_root
 from bioetl.interfaces.use_case_factory import get_use_case_factory
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
@@ -65,7 +65,8 @@ def _resolve_config_path(config: str | None) -> Path | None:
     if provided_path.exists():
         return provided_path
 
-    configs_root = get_configs_root(None)
+    path_resolver = get_composition_root().create_config_path_resolver()
+    configs_root = path_resolver.configs_root
     candidate = configs_root / config
     if candidate.exists():
         return candidate
@@ -81,7 +82,6 @@ def validate_config(
     profile: Annotated[str | None, typer.Option(help="Profile name")] = None,
 ) -> None:
     """Validate a pipeline configuration file."""
-    from bioetl.infrastructure.config.sources import get_configs_root
     from bioetl.interfaces.application_context import get_application_context
 
     try:
@@ -91,9 +91,10 @@ def validate_config(
             raise typer.Exit(1)
 
         ctx = get_application_context()
+        path_resolver = ctx.composition_root.create_config_path_resolver()
         build_runtime_config(
             config_path=config_file,
-            configs_root=get_configs_root(None),
+            configs_root=path_resolver.configs_root,
             loader=ctx.config_loader,
             profile=profile,
         )

@@ -47,7 +47,7 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
 
     Note:
         Both "document" (ChEMBL API endpoint) and "publication" (domain canonical name)
-        map to PublicationRawModel. DocumentRawModel is a deprecated alias.
+        map to PublicationRawModel.
 
     Example:
         >>> registry = ChemblEntityModelRegistry()

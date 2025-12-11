@@ -7,8 +7,8 @@ from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.domain.schemas.chembl.raw_models import (
     ActivityRawModel,
     AssayRawModel,
-    DocumentRawModel,
     MoleculeRawModel,
+    PublicationRawModel,
     TargetRawModel,
 )
 from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
@@ -131,7 +131,7 @@ class TestChemblRecordMapperDocumentMapping:
     """Tests for document record mapping."""
 
     def test_maps_valid_document_record(self) -> None:
-        """Valid document dict is mapped to DocumentRawModel."""
+        """Valid document dict is mapped to PublicationRawModel."""
         mapper = ChemblRecordMapper(get_chembl_model_registry())
         raw_records = [
             {
@@ -146,7 +146,7 @@ class TestChemblRecordMapperDocumentMapping:
         result = mapper.map_records(raw_records, "document")
 
         assert len(result) == 1
-        assert isinstance(result[0], DocumentRawModel)
+        assert isinstance(result[0], PublicationRawModel)
         assert str(result[0].document_chembl_id) == "CHEMBL1125443"
         assert result[0].journal == "J. Med. Chem."
         assert result[0].year == 2007

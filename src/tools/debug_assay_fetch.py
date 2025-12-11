@@ -5,13 +5,13 @@ from unittest.mock import patch
 import pandas as pd
 
 from bioetl.infrastructure.clients.chembl.impl import ChemblExtractionServiceImpl
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 from bioetl.interfaces.cli.app import app
 
 # Create output dir
 Path("data/output/assay").mkdir(parents=True, exist_ok=True)
 
-LOGGER = default_logging_port().apply_bind(tool="debug_assay_fetch")
+LOGGER = create_logging_port().apply_bind(tool="debug_assay_fetch")
 
 
 def debug_fetch():

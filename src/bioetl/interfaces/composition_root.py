@@ -348,7 +348,7 @@ class CompositionRoot:
 
         loader = loader_factory(
             config=config.quality.determinism,
-            qc_config=config.quality.qc,
+            qc_config=config.quality.quality_control,
             metrics_port=metrics_port,
             converter=frame_converter,
         )

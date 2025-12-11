@@ -22,8 +22,8 @@ from bioetl.domain.configs.pipeline import (
     PipelineConfig,
     ProviderConfigUnion,
     ProviderHttpConfig,
-    QcConfig,
     QualityConfig,
+    QualityControlConfig,
     RuntimeConfig,
     StorageConfig,
 )
@@ -49,8 +49,8 @@ __all__ = [
     "ProviderConfigUnion",
     "ProviderHttpConfig",
     "QualityConfig",
+    "QualityControlConfig",
     "RuntimeConfig",
-    "QcConfig",
     "StorageConfig",
     # DEPRECATED: Legacy aliases
     "ClientConfig",  # Use HttpClientConfig

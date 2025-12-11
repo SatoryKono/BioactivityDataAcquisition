@@ -5,7 +5,7 @@ from bioetl.infrastructure.clients.base.abc_registry_resolver import (
     ImplementationNotFoundError,
     RoleNotFoundError,
 )
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 from bioetl.infrastructure.output.unified_loader_impl import UnifiedLoaderImpl
 
 
@@ -17,7 +17,7 @@ def registry_resolver() -> ABCRegistryResolver:
 def test_resolve_default_factory(registry_resolver: ABCRegistryResolver) -> None:
     factory = registry_resolver.resolve_default_factory("LoggingPortABC")
 
-    assert factory is default_logging_port
+    assert factory is create_logging_port
 
 
 def test_resolve_implementation(registry_resolver: ABCRegistryResolver) -> None:
