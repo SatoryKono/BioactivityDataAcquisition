@@ -134,6 +134,7 @@ class TestConfigFieldPopulation:
 
     def test_activity_config_has_activity_fields(self, tmp_path: Path) -> None:
         """Activity config should have activity-specific fields."""
+        bootstrap = self.setup_bootstrap
         config_file = tmp_path / "activity.yaml"
         config_file.write_text(
             """
@@ -149,7 +150,7 @@ provider_config:
 """
         )
 
-        loader = bootstrapped_app.context.config_loader
+        loader = bootstrap.context.config_loader
         assert loader is not None
 
         config = loader.get_from_path(config_file)
@@ -160,6 +161,7 @@ provider_config:
 
     def test_molecule_config_has_molecule_fields(self, tmp_path: Path) -> None:
         """Molecule config should have molecule-specific fields."""
+        bootstrap = self.setup_bootstrap
         config_file = tmp_path / "molecule.yaml"
         config_file.write_text(
             """
@@ -175,7 +177,7 @@ provider_config:
 """
         )
 
-        loader = bootstrapped_app.context.config_loader
+        loader = bootstrap.context.config_loader
         assert loader is not None
 
         config = loader.get_from_path(config_file)
@@ -185,6 +187,7 @@ provider_config:
 
     def test_target_config_has_target_fields(self, tmp_path: Path) -> None:
         """Target config should have target-specific fields."""
+        bootstrap = self.setup_bootstrap
         config_file = tmp_path / "target.yaml"
         config_file.write_text(
             """
@@ -200,7 +203,7 @@ provider_config:
 """
         )
 
-        loader = bootstrapped_app.context.config_loader
+        loader = bootstrap.context.config_loader
         assert loader is not None
 
         config = loader.get_from_path(config_file)
@@ -270,11 +273,12 @@ class TestExistingConfigFiles:
 
     def test_load_chembl_activity_valid_config(self) -> None:
         """Should load valid ChEMBL activity config from fixtures."""
+        bootstrap = self.setup_bootstrap
         config_path = Path("tests/fixtures/configs/chembl_activity_valid.yaml")
         if not config_path.exists():
             pytest.skip("Fixture file not found")
 
-        loader = bootstrapped_app.context.config_loader
+        loader = bootstrap.context.config_loader
         assert loader is not None
 
         config = loader.get_from_path(config_path)
@@ -285,11 +289,12 @@ class TestExistingConfigFiles:
 
     def test_load_chembl_activity_test_config(self) -> None:
         """Should load test ChEMBL activity config from fixtures."""
+        bootstrap = self.setup_bootstrap
         config_path = Path("tests/fixtures/configs/chembl_activity_test.yaml")
         if not config_path.exists():
             pytest.skip("Fixture file not found")
 
-        loader = bootstrapped_app.context.config_loader
+        loader = bootstrap.context.config_loader
         assert loader is not None
 
         config = loader.get_from_path(config_path)
