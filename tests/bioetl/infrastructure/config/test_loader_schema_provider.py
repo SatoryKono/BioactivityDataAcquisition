@@ -97,6 +97,9 @@ provider_config:
 
         # Inject real provider
         registry = create_default_schema_registry()
+        # Register schemas for the pipeline
+        from bioetl.infrastructure.validation.bootstrap import register_schemas
+        register_schemas(registry)
         contract_provider = SchemaContractProviderImpl(registry)
         set_schema_contract_provider(contract_provider)
 
