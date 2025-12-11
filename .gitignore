@@ -35,3 +35,4 @@ node_modules
 /.windsurf/
 /.cursorrules
 API_KEY.env
+puppeteer-config.json
