@@ -11,8 +11,8 @@ import typer
 
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.application.use_cases import RunPipelineRequest, RunPipelineResponse
+from bioetl.interfaces.application_context import get_application_context
 from bioetl.interfaces.composition_root import get_composition_root
-from bioetl.interfaces.use_case_factory import get_use_case_factory
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
@@ -136,7 +136,7 @@ def run(
         )
 
         # 2. Get use case via factory
-        use_case = get_use_case_factory().create_run_pipeline_use_case()
+        use_case = get_application_context().use_case_factory.create_run_pipeline_use_case()
 
         # 3. Execute
         _print_start_info(pipeline_name, limit, dry_run)

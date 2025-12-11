@@ -22,18 +22,6 @@ class PandasBatchAdapter(BatchAdapterABC):
     should happen via RecordMapperABC in ExtractStage if needed.
     """
 
-    def __init__(self, model_cls: Any = None) -> None:
-        # model_cls is no longer used - validation happens via RecordMapperABC
-        if model_cls is not None:
-            import warnings
-
-            warnings.warn(
-                "model_cls parameter is deprecated. Use RecordMapperABC in "
-                "ExtractStage for domain model conversion.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
     def process_batch(self, raw_batch: Any) -> list[Mapping[str, Any]]:
         """Normalize provider batch to list of raw dicts.
 
@@ -59,10 +47,6 @@ class PandasBatchAdapter(BatchAdapterABC):
             "Unsupported batch type "
             f"'{type(raw_batch).__name__}' for PandasBatchAdapter"
         )
-
-    def adapt_batch(self, raw_batch: Any) -> list[Mapping[str, Any]]:
-        """Alias for process_batch for backward compatibility."""
-        return self.process_batch(raw_batch)
 
     def _convert_record(self, item: Any) -> Mapping[str, Any]:
         """Convert a single record to raw dict."""
