@@ -47,6 +47,7 @@ def _freeze_hash_service_clock(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.golden
+@pytest.mark.network
 def test_chembl_activity_golden(tmp_path, monkeypatch):
     """TS-004: pipeline output matches golden snapshot."""
     monkeypatch.setenv(
