@@ -77,14 +77,16 @@ class BaseGeneratedColumnsModel(pa.DataFrameModel):
         ordered = True: Validate column order
     """
 
+    # Canonical term: record_hash (contract method: compute_fingerprint)
     hash_row: Series[str] = pa.Field(
         str_matches=HEX_64_PATTERN,
-        description="SHA-256 hash of entire row (64 hex characters)",
+        description="SHA-256 hash of entire row (canonical: record_hash)",
     )
+    # Canonical term: business_key_hash (contract method: compute_entity_key)
     hash_business_key: Series[str] = pa.Field(
         nullable=True,
         str_matches=HEX_64_PATTERN,
-        description="SHA-256 hash of business key",
+        description="SHA-256 hash of business key (canonical: business_key_hash)",
     )
     index: Series[int] = pa.Field(ge=0, description="Row order number")
     database_version: Series[str] = pa.Field(
