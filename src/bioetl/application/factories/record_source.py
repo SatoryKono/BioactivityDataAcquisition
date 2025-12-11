@@ -5,8 +5,9 @@ Factory for creating RecordSource instances.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 from bioetl.application.files.csv_record_source import (
     CsvRecordSourceImpl,
@@ -15,10 +16,11 @@ from bioetl.application.files.csv_record_source import (
 from bioetl.application.helpers import resolve_primary_key
 from bioetl.application.sources import ApiRecordSource
 from bioetl.application.transform.pandas_batch_adapter import PandasBatchAdapter
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import BaseProviderConfig, ChemblSourceConfig, PipelineConfig
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.providers import ProviderDefinition
 from bioetl.domain.record_source import RecordSourceABC
+from bioetl.domain.ports.extraction import ExtractionServiceABC
 
 
 class RecordSourceFactoryABC(ABC):
@@ -35,12 +37,12 @@ class RecordSourceFactoryABC(ABC):
     @abstractmethod
     def create_record_source(
         self,
-        extraction_service: Any,
+        extraction_service: ExtractionServiceABC,
         *,
         limit: int | None = None,
         logger: LoggingPortABC,
         model_cls: type | None = None,
-        batch_adapter: Callable[..., Any] | None = None,
+        batch_adapter: Callable[[object], list[Mapping[str, object]]] | None = None,
     ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration.
 
@@ -63,7 +65,7 @@ class RecordSourceFactory(RecordSourceFactoryABC):
         self,
         config: PipelineConfig,
         provider_definition: ProviderDefinition,
-        resolve_provider_config: Any,
+        resolve_provider_config: Callable[[ProviderDefinition], BaseProviderConfig],
     ) -> None:
         self._config = config
         self._provider_definition = provider_definition
@@ -71,12 +73,12 @@ class RecordSourceFactory(RecordSourceFactoryABC):
 
     def create_record_source(
         self,
-        extraction_service: Any,
+        extraction_service: ExtractionServiceABC,
         *,
         limit: int | None = None,
         logger: LoggingPortABC,
         model_cls: type | None = None,
-        batch_adapter: Callable[..., Any] | None = None,
+        batch_adapter: Callable[[object], list[Mapping[str, object]]] | None = None,
     ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration.
 
@@ -118,9 +120,14 @@ class RecordSourceFactory(RecordSourceFactoryABC):
             if path is None:
                 raise ValueError("input_path is required for ID-only mode")
 
-            source_config = self._resolve_provider_config(self._provider_definition)
             id_column = resolve_primary_key(self._config)
             filter_key = f"{id_column}__in"
+            source_config = self._resolve_provider_config(self._provider_definition)
+            if not isinstance(source_config, ChemblSourceConfig):
+                raise TypeError(
+                    "ID-only input mode requires ChemblSourceConfig for batch sizing"
+                )
+
             return IdListRecordSourceImpl(
                 input_path=Path(path),
                 id_column=id_column,
@@ -135,7 +142,7 @@ class RecordSourceFactory(RecordSourceFactoryABC):
             )
 
         # API filters - stages are not filters, use empty dict for API mode
-        filters: dict[str, Any] = {}
+        filters: dict[str, object] = {}
         if limit is not None:
             filters["limit"] = limit
 

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
+from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
+from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.providers import ProviderComponents, ProviderDefinition, ProviderId
@@ -40,8 +40,8 @@ class ChemblProviderComponentsFactory(
         *,
         client: DataClientABC | None = None,
         filter_enricher: FilterEnricherABC | None = None,
-        logger: Any | None = None,
-        metrics: Any | None = None,
+        logger: LoggingPortABC | None = None,
+        metrics: MetricsPortABC | None = None,
     ) -> ExtractionServiceABC:
         """Construct extraction service with optional prebuilt client."""
         return create_extraction_service(
@@ -70,7 +70,7 @@ class ChemblProviderComponentsFactory(
             )
         return create_normalization_service(pipeline_config)
 
-    def create_entity_model_registry(self) -> Any:
+    def create_entity_model_registry(self) -> EntityModelRegistryABC:
         """Create provider-specific entity model registry."""
         from bioetl.infrastructure.chembl.model_registry import (
             get_chembl_model_registry,

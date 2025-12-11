@@ -11,7 +11,7 @@ Previous location: bioetl.domain.record_source
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any, Callable, cast
+from typing import Callable, cast
 
 from bioetl.domain.ports.extraction import RecordFetcherABC
 from bioetl.domain.record_source import RecordSourceABC
@@ -46,9 +46,9 @@ class ApiRecordSource(RecordSourceABC):
         self,
         extraction_service: RecordFetcherABC,
         entity: str,
-        filters: dict[str, Any] | None = None,
+        filters: dict[str, object] | None = None,
         chunk_size: int | None = None,
-        batch_adapter: Callable[[Any], list[Mapping[str, Any]]] | None = None,
+        batch_adapter: Callable[[object], list[Mapping[str, object]]] | None = None,
     ) -> None:
         self._extraction_service = extraction_service
         self._entity = entity
@@ -56,7 +56,7 @@ class ApiRecordSource(RecordSourceABC):
         self._chunk_size = chunk_size
         self._batch_adapter = batch_adapter
 
-    def iter_records(self) -> Iterable[Sequence[Mapping[str, Any]]]:
+    def iter_records(self) -> Iterable[Sequence[Mapping[str, object]]]:
         """Iterate over extracted provider batches as normalized records.
 
         Yields:
@@ -82,4 +82,4 @@ class ApiRecordSource(RecordSourceABC):
                 )
 
             # Raw batch is already a sequence of mappings
-            yield cast(Sequence[Mapping[str, Any]], raw_batch)
+            yield cast(Sequence[Mapping[str, object]], raw_batch)
