@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any, Callable, cast
-import warnings
 
 import pandas as pd
 from pandas._typing import DtypeArg
@@ -308,25 +307,4 @@ class BaseNormalizationService:
         return False
 
 
-# Deprecated aliases for backward compatibility
-_DEPRECATED_ALIASES = {
-    "BaseNormalizationServiceImpl": "BaseNormalizationService",
-}
-
-
-def __getattr__(name: str):
-    if name in _DEPRECATED_ALIASES:
-        warnings.warn(
-            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name]} instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return globals()[_DEPRECATED_ALIASES[name]]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-__all__ = [
-    "BaseNormalizationService",
-    "BaseNormalizationServiceImpl",  # noqa: F822
-]  # noqa: F822
+__all__ = ["BaseNormalizationService"]

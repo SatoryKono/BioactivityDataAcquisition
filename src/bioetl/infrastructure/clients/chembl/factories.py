@@ -10,7 +10,6 @@ Naming convention:
 """
 
 from typing import Any
-import warnings
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
@@ -133,53 +132,4 @@ def create_chembl_extraction_service(
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
         filter_enricher=filter_enricher,
         parser=parser or ChemblGenericResponseParser(),
-    )
-
-
-# ---------------------------------------------------------------------------
-# Deprecated aliases for backward compatibility
-# ---------------------------------------------------------------------------
-
-
-def default_chembl_client(
-    source_config: ChemblSourceConfig,
-    logger: LoggingPortABC,
-    metrics: MetricsPortABC,
-    http_config: HttpClientConfig | None = None,
-    **options: Any,
-) -> DataClientABC:
-    """DEPRECATED: Use create_chembl_client() instead."""
-    warnings.warn(
-        "default_chembl_client is deprecated, use create_chembl_client instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_chembl_client(source_config, logger, metrics, http_config, **options)
-
-
-def default_chembl_extraction_service(
-    config: ChemblSourceConfig,
-    logger: LoggingPortABC,
-    metrics: MetricsPortABC,
-    http_config: HttpClientConfig | None = None,
-    *,
-    client: DataClientABC | None = None,
-    filter_enricher: FilterEnricherABC | None = None,
-    parser: ResponseParserPortABC | None = None,
-) -> ExtractionServiceABC:
-    """DEPRECATED: Use create_chembl_extraction_service() instead."""
-    warnings.warn(
-        "default_chembl_extraction_service is deprecated, "
-        "use create_chembl_extraction_service instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_chembl_extraction_service(
-        config,
-        logger,
-        metrics,
-        http_config,
-        client=client,
-        filter_enricher=filter_enricher,
-        parser=parser,
     )

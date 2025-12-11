@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 from typing import Callable
-import warnings
 
 import pandas as pd
 
@@ -61,22 +60,4 @@ def create_output_frame_converter(
     return SimpleNamespace(convert=lambda df: df)  # type: ignore[return-value]
 
 
-# ---------------------------------------------------------------------------
-# Deprecated aliases for backward compatibility
-# ---------------------------------------------------------------------------
-
-
-def default_output_frame_converter(
-    converter_id: str | None = None,
-) -> OutputFrameConverterABC:
-    """DEPRECATED: Use create_output_frame_converter() instead."""
-    warnings.warn(
-        "default_output_frame_converter is deprecated, "
-        "use create_output_frame_converter instead. Will be removed in v3.0.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_output_frame_converter(converter_id)
-
-
-__all__ = ["create_output_frame_converter", "default_output_frame_converter"]
+__all__ = ["create_output_frame_converter"]
