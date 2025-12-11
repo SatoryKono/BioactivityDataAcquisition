@@ -6,9 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import timezone
-from typing import Callable, cast
-
-import pandas as pd
+from typing import Any, Callable, cast
 
 from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext
@@ -23,9 +21,7 @@ class TransformerABC(ABC):
     """Базовый интерфейс для DataFrame-трансформеров."""
 
     @abstractmethod
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Выполняет преобразование DataFrame."""
 
 
@@ -35,9 +31,7 @@ class TransformerChainImpl(TransformerABC):
     def __init__(self, transformers: list[TransformerABC]) -> None:
         self._transformers = transformers
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Последовательно применяет зарегистрированные трансформеры."""
         result = df
         for transformer in self._transformers:
@@ -62,7 +56,7 @@ class HashColumnsTransformerImpl(TransformerABC):
             return df.assign(hash_business_key=None, hash_row=None)
 
         return cast(
-            pd.DataFrame,
+            Any,
             self._hash_service.add_hash_columns(
                 cast(TabularData, df), business_key_cols=self._business_key_fields
             ),
@@ -75,9 +69,7 @@ class IndexColumnTransformerImpl(TransformerABC):
     def __init__(self, index_generator: IndexGeneratorABC) -> None:
         self._index_generator = index_generator
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Добавляет порядковый индекс строк."""
         df = df.copy()
         start_index = self._index_generator.next_index()
@@ -99,9 +91,7 @@ class DatabaseVersionTransformerImpl(TransformerABC):
     ) -> None:
         self._database_version_provider = database_version_provider
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Добавляет database_version, если значение предоставлено."""
         version = self._database_version_provider()
         if version is None:
