@@ -1,0 +1,71 @@
+---
+title: Application Services Package
+description: bioetl.application.services - Application-level services
+---
+classDiagram
+    direction TB
+
+    class ConfigurationService {
+        +load_config(path) PipelineConfig
+        +validate_config(config) bool
+        +merge_configs(base, override) PipelineConfig
+        +get_effective_config() PipelineConfig
+        -_loader: ConfigLoaderPortABC
+        -_resolver: ConfigPathResolverABC
+    }
+
+    class SchemaBootstrapService {
+        +bootstrap() void
+        +register_schemas() void
+        +get_schema(name) Schema
+        -_registry: SchemaRegistry
+        -_generator: SchemaGenerator
+    }
+
+    class SchemaContractProviderImpl {
+        +get_contract(pipeline_name) PipelineSchemaModel
+        +register_contract(name, contract) void
+        +list_contracts() list[str]
+        -_contracts: dict
+        -_loader: PipelineContractLoaderABC
+    }
+
+    class FilterEnrichmentService {
+        +enrich_filters(filters, context) dict
+        +apply_defaults(filters) dict
+        +validate_filters(filters) bool
+        -_enrichers: list[FilterEnricherABC]
+    }
+
+    class ObservabilityService {
+        +setup_metrics() MetricsCollector
+        +setup_logging() Logger
+        +setup_tracing() Tracer
+        -_factory: ObservabilityFactoryPort
+    }
+
+    class ConfigMigrationService {
+        +migrate(old_config) NewConfig
+        +detect_version(config) str
+        +get_migration_path(from_v, to_v) list
+        -_migrations: dict
+    }
+
+    class BackgroundExecutor {
+        +submit(task) Future
+        +wait_all() list[Result]
+        +shutdown() void
+        -_executor: ThreadPoolExecutor
+    }
+
+    class ProviderRegistryResolver {
+        +resolve(provider_name) Provider
+        +list_providers() list[str]
+        +register(name, provider) void
+        -_registry: ProviderRegistryABC
+    }
+
+    %% Dependencies
+    ConfigurationService --> SchemaContractProviderImpl : uses
+    SchemaBootstrapService --> SchemaContractProviderImpl : registers
+    ObservabilityService --> BackgroundExecutor : may use

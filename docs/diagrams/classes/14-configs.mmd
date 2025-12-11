@@ -1,0 +1,138 @@
+---
+title: Configuration Model Classes
+description: All configuration-related classes
+---
+classDiagram
+    direction TB
+
+    %% Base
+    class ConfigBase {
+        <<abstract>>
+        +validate() bool
+        +to_dict() dict
+        +from_dict(data) Config
+    }
+
+    %% Main Pipeline Config
+    class PipelineConfig {
+        +identity: IdentityConfig
+        +source: SourceConfig
+        +sink: SinkConfig
+        +execution: ExecutionConfig
+        +data_flow: DataFlowConfig
+        +pipeline_options: PipelineOptionsConfig
+    }
+
+    class IdentityConfig {
+        +pipeline_name: str
+        +provider: str
+        +entity: str
+        +version: str
+        +description: str
+    }
+
+    class SourceConfig {
+        +type: SourceType
+        +api_endpoint: str
+        +filters: dict
+        +limit: int
+        +offset: int
+        +csv_path: Path
+        +id_list: list~str~
+    }
+
+    class SinkConfig {
+        +output_dir: Path
+        +format: OutputFormat
+        +compression: str
+        +partition_by: list~str~
+        +overwrite: bool
+    }
+
+    class ExecutionConfig {
+        +batch_size: int
+        +max_retries: int
+        +timeout: int
+        +error_policy: ErrorPolicyType
+        +dry_run: bool
+        +parallel: bool
+    }
+
+    class DataFlowConfig {
+        +columns: list~str~
+        +transformations: list
+        +validations: list
+        +deduplication: bool
+    }
+
+    class PipelineOptionsConfig {
+        +enable_qc: bool
+        +enable_metadata: bool
+        +enable_checksums: bool
+        +serialization_mode: str
+    }
+
+    %% Manifest Config
+    class ManifestConfig {
+        +pipelines: list~PipelineConfig~
+        +defaults: PipelineDefaults
+        +version: str
+    }
+
+    class PipelineDefaults {
+        +batch_size: int
+        +timeout: int
+        +output_format: str
+        +error_policy: str
+    }
+
+    %% Runtime Config
+    class RuntimeConfig {
+        +environment: str
+        +debug: bool
+        +log_level: str
+        +output_dir: Path
+        +temp_dir: Path
+    }
+
+    %% Enums
+    class SourceType {
+        <<enumeration>>
+        API
+        CSV
+        ID_LIST
+        PARQUET
+    }
+
+    class OutputFormat {
+        <<enumeration>>
+        CSV
+        PARQUET
+        JSON
+    }
+
+    class ErrorPolicyType {
+        <<enumeration>>
+        FAIL_FAST
+        CONTINUE
+        LOG_ONLY
+    }
+
+    %% Relationships
+    ConfigBase <|-- PipelineConfig
+    ConfigBase <|-- ManifestConfig
+    ConfigBase <|-- RuntimeConfig
+
+    PipelineConfig *-- IdentityConfig
+    PipelineConfig *-- SourceConfig
+    PipelineConfig *-- SinkConfig
+    PipelineConfig *-- ExecutionConfig
+    PipelineConfig *-- DataFlowConfig
+    PipelineConfig *-- PipelineOptionsConfig
+
+    ManifestConfig o-- PipelineDefaults
+    ManifestConfig o-- PipelineConfig
+
+    SourceConfig --> SourceType
+    SinkConfig --> OutputFormat
+    ExecutionConfig --> ErrorPolicyType

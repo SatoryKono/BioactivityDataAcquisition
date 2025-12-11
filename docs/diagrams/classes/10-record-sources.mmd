@@ -1,0 +1,91 @@
+---
+title: Record Source Classes
+description: All record source implementations
+---
+classDiagram
+    direction TB
+
+    %% Contract
+    class RecordSourceABC {
+        <<interface>>
+        +iter_records() Iterable~dict~
+        +get_total_count() int
+        +get_source_info() SourceInfo
+    }
+
+    %% Implementations
+    class ApiRecordSource {
+        +iter_records() Iterable~dict~
+        +get_total_count() int
+        +get_source_info() SourceInfo
+        -_extraction_service: ExtractionServiceABC
+        -_filters: dict
+        -_limit: int
+        -_offset: int
+    }
+
+    class CsvRecordSourceImpl {
+        +iter_records() Iterable~dict~
+        +get_total_count() int
+        +get_source_info() SourceInfo
+        -_file_path: Path
+        -_delimiter: str
+        -_encoding: str
+        -_chunk_size: int
+    }
+
+    class IdListRecordSourceImpl {
+        +iter_records() Iterable~dict~
+        +get_total_count() int
+        +get_source_info() SourceInfo
+        -_ids: list~str~
+        -_extraction_service: ExtractionServiceABC
+        -_batch_size: int
+    }
+
+    %% Supporting Classes
+    class SourceInfo {
+        +type: SourceType
+        +location: str
+        +record_count: int
+        +metadata: dict
+    }
+
+    class RecordSourceResolver {
+        +resolve(config) RecordSourceABC
+        +get_source_type(config) SourceType
+        -_factories: dict
+    }
+
+    class RecordSourceFactory {
+        +create_api_source() ApiRecordSource
+        +create_csv_source() CsvRecordSourceImpl
+        +create_id_list_source() IdListRecordSourceImpl
+        +resolve_source(config) RecordSourceABC
+        -_extraction_service: ExtractionServiceABC
+    }
+
+    %% Enums
+    class SourceType {
+        <<enumeration>>
+        API
+        CSV
+        ID_LIST
+        PARQUET
+    }
+
+    %% Relationships
+    RecordSourceABC <|.. ApiRecordSource
+    RecordSourceABC <|.. CsvRecordSourceImpl
+    RecordSourceABC <|.. IdListRecordSourceImpl
+
+    ApiRecordSource ..> SourceInfo : returns
+    CsvRecordSourceImpl ..> SourceInfo : returns
+    IdListRecordSourceImpl ..> SourceInfo : returns
+
+    RecordSourceResolver --> RecordSourceFactory
+    RecordSourceFactory --> ApiRecordSource : creates
+    RecordSourceFactory --> CsvRecordSourceImpl : creates
+    RecordSourceFactory --> IdListRecordSourceImpl : creates
+
+    SourceInfo --> SourceType

@@ -1,0 +1,52 @@
+---
+title: Layer Dependencies
+description: Dependency flow between layers
+---
+flowchart TB
+
+classDef domain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+classDef application fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+classDef infrastructure fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100
+classDef interface fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f
+
+subgraph Interfaces["Interfaces Layer"]
+    direction LR
+    CLI["CLI"]:::interface
+    REST["REST API"]:::interface
+    CompositionRoot["Composition Root"]:::interface
+end
+
+subgraph Application["Application Layer"]
+    direction LR
+    UseCases["Use Cases"]:::application
+    Orchestrator["Orchestrator"]:::application
+    AppServices["Services"]:::application
+    AppFactories["Factories"]:::application
+    Pipelines["Pipelines"]:::application
+end
+
+subgraph Infrastructure["Infrastructure Layer"]
+    direction LR
+    Clients["HTTP Clients"]:::infrastructure
+    Writers["Output Writers"]:::infrastructure
+    ConfigLoaders["Config Loaders"]:::infrastructure
+    Validators["Validators"]:::infrastructure
+    Transforms["Transformers"]:::infrastructure
+end
+
+subgraph Domain["Domain Layer"]
+    direction LR
+    Entities["Entities"]:::domain
+    ValueObjects["Value Objects"]:::domain
+    Ports["Ports/Contracts"]:::domain
+    DomainServices["Domain Services"]:::domain
+end
+
+%% Layer dependencies (arrows point TO dependency)
+Interfaces --> Application
+Interfaces --> Infrastructure
+Application --> Domain
+Infrastructure --> Domain
+
+%% Note: Domain has NO dependencies on other layers
+%% This is the Dependency Inversion Principle in action

@@ -1,0 +1,132 @@
+---
+title: Transformer and Normalizer Classes
+description: All transformation-related classes
+---
+classDiagram
+    direction TB
+
+    %% Contracts
+    class TransformerABC {
+        <<interface>>
+        +apply(df, context) DataFrame
+    }
+
+    class NormalizationServiceABC {
+        <<interface>>
+        +normalize(df) DataFrame
+    }
+
+    class HashServiceABC {
+        <<interface>>
+        +hash_row(row) str
+        +hash_business_key(fields) str
+    }
+
+    class IndexGeneratorABC {
+        <<interface>>
+        +generate_index() int
+    }
+
+    class TimestampProviderABC {
+        <<interface>>
+        +get_timestamp() datetime
+    }
+
+    %% Transformer Implementations
+    class ChemblTransformerImpl {
+        +apply(df, context) DataFrame
+        -_validation_service: ValidationService
+        -_schema_contract: PipelineSchemaModel
+        -_normalization_service: NormalizationServiceABC
+    }
+
+    class DefaultNormalizationTransformerImpl {
+        +apply(df, context) DataFrame
+        +normalize_all(df) DataFrame
+        -_normalizers: dict
+        -_column_mapping: dict
+    }
+
+    %% Normalizers
+    class BaseNormalizer {
+        +normalize(value) Any
+        +normalize_column(series) Series
+        -_null_values: set
+    }
+
+    class NumericNormalizer {
+        +normalize(value) float
+        +normalize_column(series) Series
+        -_precision: int
+        -_na_value: float
+    }
+
+    class IdentifierNormalizer {
+        +normalize(value) str
+        +validate_format(value) bool
+        -_prefix: str
+        -_pattern: regex
+    }
+
+    class CollectionsNormalizer {
+        +normalize(value) list
+        +flatten(nested) list
+        -_separator: str
+    }
+
+    class NormalizerRegistry {
+        +register(name, normalizer)
+        +get(name) BaseNormalizer
+        +normalize_field(field, value) Any
+        -_normalizers: dict
+    }
+
+    %% Service Implementations
+    class HashServiceImpl {
+        +hash_row(row) str
+        +hash_business_key(fields) str
+        -_algorithm: str
+        -_encoding: str
+    }
+
+    class IndexGenerator {
+        +generate_index() int
+        +reset()
+        -_counter: int
+        -_prefix: str
+    }
+
+    class TimestampProvider {
+        +get_timestamp() datetime
+        +get_utc_timestamp() datetime
+        +format_timestamp(dt) str
+        -_timezone: str
+    }
+
+    %% Serializers
+    class JsonSerializer {
+        +serialize(obj) str
+        +deserialize(json_str) Any
+    }
+
+    class ListSerializer {
+        +serialize(items) str
+        +deserialize(str) list
+        -_separator: str
+    }
+
+    %% Relationships
+    TransformerABC <|.. ChemblTransformerImpl
+    TransformerABC <|.. DefaultNormalizationTransformerImpl
+    NormalizationServiceABC <|.. DefaultNormalizationTransformerImpl
+    HashServiceABC <|.. HashServiceImpl
+    IndexGeneratorABC <|.. IndexGenerator
+    TimestampProviderABC <|.. TimestampProvider
+
+    BaseNormalizer <|-- NumericNormalizer
+    BaseNormalizer <|-- IdentifierNormalizer
+    BaseNormalizer <|-- CollectionsNormalizer
+
+    DefaultNormalizationTransformerImpl --> NormalizerRegistry
+    NormalizerRegistry --> BaseNormalizer
+    ChemblTransformerImpl --> DefaultNormalizationTransformerImpl

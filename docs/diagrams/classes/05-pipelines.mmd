@@ -1,0 +1,104 @@
+---
+title: Pipeline Class Hierarchy
+description: All pipeline-related classes
+---
+classDiagram
+    direction TB
+
+    class PipelineBase {
+        <<abstract>>
+        +run(limit) RunResult
+        +extract() ExtractResult
+        +transform(df) DataFrame
+        +validate(df) DataFrame
+        +write(df) WriteResult
+        #_config: PipelineConfig
+        #_logger: Logger
+        #_validation_service: ValidationService
+        #_loader: LoaderABC
+        #_runtime_manager: StageRuntimeManager
+    }
+
+    class ChemblPipelineBase {
+        +run(limit) RunResult
+        #_extraction_service: ExtractionServiceABC
+        #_chembl_release: str
+        #ID_COLUMN: str
+        #API_FILTER_KEY: str
+    }
+
+    class ChemblCommonPipeline {
+        +run(limit) RunResult
+        +get_common_transforms() list
+    }
+
+    class PipelineContainer {
+        +get_logger() Logger
+        +get_validation_service() ValidationService
+        +get_loader() LoaderABC
+        +get_extraction_service() ExtractionServiceABC
+        +get_normalization_service() NormalizationServiceABC
+        +get_record_source() RecordSourceABC
+        +get_hash_service() HashServiceABC
+        +get_hooks() list~PipelineHookABC~
+    }
+
+    class PipelineContainerABC {
+        <<interface>>
+        +get_logger() Logger
+        +get_validation_service() ValidationService
+        +get_loader() LoaderABC
+    }
+
+    class PipelineOrchestrator {
+        +build_pipeline(limit) PipelineBase
+        +run_pipeline(dry_run, limit) RunResult
+        -_pipeline_name: str
+        -_config: PipelineConfig
+        -_container_factory: Callable
+    }
+
+    class PipelineRuntimeContext {
+        +pipeline_name: str
+        +config: PipelineConfig
+        +start_time: datetime
+        +metrics: dict
+    }
+
+    class StageRuntimeManager {
+        +execute_stage(stage, context) StageResult
+        +handle_error(error) void
+        -_logger: Logger
+        -_error_policy: ErrorPolicyABC
+        -_hooks: list~PipelineHookABC~
+    }
+
+    class StageErrorHandler {
+        +handle(error, context) void
+        +should_continue(error) bool
+        -_policy: ErrorPolicyABC
+    }
+
+    class ExtractStage {
+        +execute(context) StageResult
+        -_extractor: ExtractorABC
+    }
+
+    class StageABC {
+        <<interface>>
+        +execute(context) StageResult
+    }
+
+    %% Inheritance
+    PipelineBase <|-- ChemblPipelineBase
+    ChemblPipelineBase <|-- ChemblCommonPipeline
+    PipelineContainerABC <|.. PipelineContainer
+    StageABC <|.. ExtractStage
+
+    %% Composition
+    PipelineBase --> StageRuntimeManager
+    PipelineBase --> PipelineContainer
+    PipelineOrchestrator --> PipelineContainer
+    PipelineOrchestrator --> PipelineBase
+    StageRuntimeManager --> StageErrorHandler
+    StageRuntimeManager --> PipelineRuntimeContext

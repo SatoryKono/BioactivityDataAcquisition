@@ -1,0 +1,175 @@
+---
+title: All Ports and Abstract Base Classes
+description: Abstract contracts across all layers
+---
+classDiagram
+    direction TB
+
+    %% Pipeline Contracts
+    class ExtractorABC {
+        <<abstract>>
+        +extract() Iterable~DataFrame~
+    }
+
+    class LoaderABC {
+        <<abstract>>
+        +write(df, path) WriteResult
+    }
+
+    class PipelineHookABC {
+        <<abstract>>
+        +on_stage_start()
+        +on_stage_complete()
+        +on_stage_error()
+    }
+
+    class ErrorPolicyABC {
+        <<abstract>>
+        +handle_error(error)
+    }
+
+    class StageABC {
+        <<abstract>>
+        +execute(context) StageResult
+    }
+
+    %% Transform Contracts
+    class TransformerABC {
+        <<abstract>>
+        +apply(df, context) DataFrame
+    }
+
+    class NormalizationServiceABC {
+        <<abstract>>
+        +normalize(df) DataFrame
+    }
+
+    class HashServiceABC {
+        <<abstract>>
+        +hash_row(row) str
+        +hash_business_key(fields) str
+    }
+
+    class IndexGeneratorABC {
+        <<abstract>>
+        +generate_index() int
+    }
+
+    class TimestampProviderABC {
+        <<abstract>>
+        +get_timestamp() datetime
+    }
+
+    %% Extraction Contracts
+    class ExtractionServiceABC {
+        <<abstract>>
+        +fetch_records() Iterable
+        +get_total_count() int
+    }
+
+    class RecordSourceABC {
+        <<abstract>>
+        +iter_records() Iterable
+        +get_total_count() int
+    }
+
+    class RecordMapperABC {
+        <<abstract>>
+        +map_record(raw) MappedRecord
+        +map_batch(records) list
+    }
+
+    %% Client Contracts
+    class HttpClientABC {
+        <<abstract>>
+        +get(url, params) Response
+        +post(url, data) Response
+    }
+
+    class PaginatorABC {
+        <<abstract>>
+        +get_next_page() PageInfo
+        +has_more() bool
+    }
+
+    class RetryPolicyABC {
+        <<abstract>>
+        +should_retry(error) bool
+        +get_delay(attempt) float
+    }
+
+    class RateLimiterABC {
+        <<abstract>>
+        +acquire()
+        +release()
+    }
+
+    %% Config Contracts
+    class ConfigLoaderPortABC {
+        <<abstract>>
+        +load(path) Config
+    }
+
+    class ConfigPathResolverABC {
+        <<abstract>>
+        +resolve(name) Path
+    }
+
+    class PipelineContractLoaderABC {
+        <<abstract>>
+        +load(name) PipelineSchemaModel
+    }
+
+    %% Output Contracts
+    class DataWriterPort {
+        <<abstract>>
+        +write(df, path) WriteResult
+    }
+
+    class ResponseParserPortABC {
+        <<abstract>>
+        +parse(response) Records
+    }
+
+    %% Schema Contracts
+    class SchemaProviderABC {
+        <<abstract>>
+        +get_schema(name) Schema
+    }
+
+    class ValidatorFactoryABC {
+        <<abstract>>
+        +create_validator(schema_name) Validator
+    }
+
+    %% Validation Contracts
+    class ValidationServiceABC {
+        <<abstract>>
+        +validate(df) DataFrame
+        +get_errors() list
+    }
+
+    %% Factory Contracts
+    class InfrastructureFactoryPort {
+        <<abstract>>
+        +create_client() HttpClientABC
+        +create_loader() LoaderABC
+    }
+
+    class ObservabilityFactoryPort {
+        <<abstract>>
+        +create_metrics() MetricsCollector
+        +create_logger() Logger
+    }
+
+    class PipelineContainerABC {
+        <<abstract>>
+        +get_logger() Logger
+        +get_validation_service() ValidationServiceABC
+        +get_loader() LoaderABC
+    }
+
+    class PipelineFactoryABC {
+        <<abstract>>
+        +create_pipeline() PipelineBase
+    }

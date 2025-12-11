@@ -1,0 +1,183 @@
+---
+title: Infrastructure Layer Components
+description: External adapters, HTTP clients, output writers, config loaders
+---
+flowchart TB
+
+classDef pkg fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100
+classDef component fill:#ffe0b2,stroke:#f57c00,stroke-width:1px,color:#e65100
+classDef adapter fill:#ffcc80,stroke:#fb8c00,stroke-width:1px,color:#e65100
+
+subgraph Infrastructure["Infrastructure Layer (bioetl.infrastructure)"]
+    direction TB
+
+    subgraph Clients["clients/"]
+        subgraph ChemblClient["chembl/"]
+            ChemblHttpClient["ChemblHttpClientImpl\nimpl/chembl_http_client_impl.py"]:::adapter
+            ChemblExtractionService["ChemblExtractionServiceImpl\nimpl/chembl_extraction_service_impl.py"]:::adapter
+            ResponseParser["ChemblResponseParser\nresponse_parser.py"]:::component
+            Paginator["ChemblPaginator\npaginator.py"]:::component
+            RequestBuilder["RequestBuilder\nrequest_builder.py"]:::component
+            ChemblConstants["Constants\nconstants.py"]:::component
+            ChemblSerializer["ChemblSerializer\nserializers.py"]:::component
+            ParserRegistry["ParserRegistry\nparser_registry.py"]:::component
+            ChemblProvider["ChemblProvider\nprovider.py"]:::component
+            ChemblClientFactories["ClientFactories\nfactories.py"]:::component
+        end
+
+        subgraph BaseClient["base/"]
+            ABCRegistryResolver["ABCRegistryResolver\nabc_registry_resolver.py"]:::component
+            HttpTransport["HttpTransport\nimpl/_http_transport.py"]:::component
+            Cache["ResponseCache\nimpl/cache.py"]:::component
+            RateLimiter["RateLimiter\nimpl/rate_limiter.py"]:::component
+            HttpErrorHandler["HttpErrorHandler\nhttp_error_handler.py"]:::component
+            BaseFactories["BaseFactories\nfactories.py"]:::component
+        end
+    end
+    class Clients pkg
+
+    subgraph Output["output/"]
+        UnifiedLoader["UnifiedLoaderImpl\nunified_loader_impl.py"]:::adapter
+        DeterministicWriter["DeterministicWriterABC\ndeterministic.py"]:::component
+        ColumnOrder["ColumnOrder\ncolumn_order.py"]:::component
+        OutputFactories["OutputFactories\nfactories.py"]:::component
+
+        subgraph Impl["impl/"]
+            BaseWriter["BaseWriter\nbase_writer.py"]:::component
+            CsvWriter["CsvWriter\ncsv_writer.py"]:::adapter
+            ParquetWriter["ParquetWriter\nparquet_writer.py"]:::adapter
+            MetadataWriter["MetadataWriter\nmetadata_writer.py"]:::adapter
+            QualityReport["QualityReportWriter\nquality_report.py"]:::adapter
+        end
+
+        subgraph Components["components/"]
+            DataWriter["DataWriterAdapter\ndata_writer.py"]:::adapter
+            MetadataBuilder["MetadataBuilder\nmetadata_builder.py"]:::component
+            ChecksumCalculator["ChecksumCalculator\nchecksum_calculator.py"]:::component
+            QcReportGenerator["QcReportGenerator\nqc_report_generator.py"]:::component
+            QcArtifactWriter["QcArtifactWriter\nqc_artifact_writer.py"]:::component
+        end
+
+        subgraph Converters["converters/"]
+            RenameColumnsConverter["RenameColumnsConverter"]:::component
+            DropNaConverter["DropNaRowsConverter"]:::component
+            NoopConverter["NoopConverter"]:::component
+            ConverterFactories["ConverterFactories"]:::component
+        end
+    end
+    class Output pkg
+
+    subgraph ConfigPkg["config/"]
+        ConfigLoader["YamlConfigLoader\nloader.py"]:::adapter
+        PipelineContractLoader["PipelineContractLoader\npipeline_contract_loader.py"]:::adapter
+        ProviderRegistryLoader["ProviderRegistryLoader\nprovider_registry.py"]:::adapter
+        DefaultsLoader["DefaultsLoader\ndefaults_loader.py"]:::component
+        SourcesLoader["SourcesLoader\nsources.py"]:::component
+        EnvConfig["EnvironmentConfig\nenv.py"]:::component
+        Migration["ConfigMigration\nmigration.py"]:::component
+        HttpConfigMigration["HttpConfigMigration\nhttp_config_migration.py"]:::component
+    end
+    class ConfigPkg pkg
+
+    subgraph Validation["validation/"]
+        SchemaGenerator["PanderaSchemaGenerator\nschema_generator.py"]:::component
+        ValidationBootstrap["ValidationBootstrap\nbootstrap.py"]:::component
+
+        subgraph ImplValidation["impl/"]
+            PanderaValidator["PanderaValidator\npandera_validator.py"]:::adapter
+        end
+
+        subgraph SchemasImpl["schemas/"]
+            SchemaAdapter["SchemaAdapter\nadapter.py"]:::adapter
+            SchemaGeneratorImpl["SchemaGeneratorImpl\ngenerator.py"]:::component
+
+            subgraph ChemblSchemas["chembl/"]
+                ActivitySchema["ActivityTableSchema"]:::component
+                AssaySchema["AssayTableSchema"]:::component
+                MoleculeSchema["MoleculeTableSchema"]:::component
+                TargetSchema["TargetTableSchema"]:::component
+                PublicationSchema["PublicationTableSchema"]:::component
+                CellSchema["CellTableSchema"]:::component
+                TissueSchema["TissueTableSchema"]:::component
+            end
+        end
+    end
+    class Validation pkg
+
+    subgraph TransformPkg["transform/"]
+        TransformFactories["TransformFactories\nfactories.py"]:::component
+
+        subgraph TransformImpl["impl/"]
+            HashServiceImpl["HashServiceImpl\nhasher.py"]:::adapter
+            IndexGenerator["IndexGenerator\nindex_generator.py"]:::adapter
+            TimestampProvider["TimestampProvider\ntimestamp_provider.py"]:::adapter
+            BaseNormalizer["BaseNormalizer\nbase_normalizer.py"]:::component
+            DefaultNormTransformer["DefaultNormalizationTransformerImpl\ndefault_normalization_transformer_impl.py"]:::adapter
+        end
+    end
+    class TransformPkg pkg
+
+    subgraph FilesPkg["files/"]
+        AtomicWriter["AtomicFileWriter\natomic.py"]:::component
+        ChecksumCalc["ChecksumCalculator\nchecksum.py"]:::component
+        PathResolver["PathResolver\npath_resolver.py"]:::component
+    end
+    class FilesPkg pkg
+
+    subgraph Logging["logging/"]
+        LoggingFactories["LoggingFactories\nfactories.py"]:::component
+        subgraph LoggingImpl["impl/"]
+            ProgressReporter["TqdmProgressReporter\nprogress_reporter.py"]:::adapter
+        end
+    end
+    class Logging pkg
+
+    subgraph Http["http/"]
+        RetryPolicy["RetryPolicy\nretry.py"]:::component
+    end
+    class Http pkg
+
+    subgraph Adapters["adapters/"]
+        ConfigLoaderAdapter["ConfigLoaderAdapter\nconfig_loader_adapter.py"]:::adapter
+        ABCRegistryAdapter["ABCRegistryResolverAdapter\nabc_registry_adapter.py"]:::adapter
+        PandasTabularAdapter["PandasTabularAdapter\npandas_tabular.py"]:::adapter
+    end
+    class Adapters pkg
+
+    subgraph Observability["observability/"]
+        MetricsCollector["MetricsCollector\nmetrics.py"]:::component
+        ObservabilityAdapters["ObservabilityAdapters\nadapters.py"]:::adapter
+        ObservabilityFactories["ObservabilityFactories\nfactories.py"]:::component
+        MetricsServer["MetricsServer\nserver.py"]:::component
+    end
+    class Observability pkg
+
+    subgraph Settings["settings/"]
+        MetricsSettings["MetricsSettings\nmetrics.py"]:::component
+        FilesSettings["FilesSettings\nfiles.py"]:::component
+        HttpSettings["HttpSettings\nhttp.py"]:::component
+    end
+    class Settings pkg
+
+    subgraph ChemblPkg["chembl/"]
+        ModelRegistry["ChemblEntityModelRegistry\nmodel_registry.py"]:::component
+    end
+    class ChemblPkg pkg
+
+    subgraph Core["Core"]
+        ProviderRegistry["ProviderRegistryImpl\nprovider_registry.py"]:::adapter
+        ChemblClientLegacy["ChemblClient\nchembl_client.py"]:::adapter
+        InfraErrors["InfrastructureErrors\nerrors.py"]:::component
+    end
+    class Core pkg
+end
+class Infrastructure pkg
+
+%% Dependencies
+ChemblHttpClient --> ResponseParser
+ChemblHttpClient --> Paginator
+ChemblHttpClient --> RequestBuilder
+UnifiedLoader --> CsvWriter
+UnifiedLoader --> ParquetWriter
+UnifiedLoader --> MetadataWriter
+PanderaValidator --> ChemblSchemas

@@ -1,0 +1,36 @@
+---
+title: Interfaces REST Package
+description: bioetl.interfaces.rest - REST API interface
+---
+flowchart TB
+
+classDef entrypoint fill:#f48fb1,stroke:#e91e63,stroke-width:2px,color:#880e4f
+classDef endpoint fill:#f8bbd9,stroke:#d81b60,stroke-width:1px,color:#880e4f
+classDef component fill:#fce4ec,stroke:#c2185b,stroke-width:1px,color:#880e4f
+
+subgraph REST["bioetl.interfaces.rest"]
+    direction TB
+
+    subgraph Server["server.py"]
+        RestServer["REST Server\nFastAPI/Starlette"]:::entrypoint
+    end
+
+    subgraph Endpoints["API Endpoints"]
+        HealthEndpoint["/health\nHealth check"]:::endpoint
+        PipelinesEndpoint["/pipelines\nList pipelines"]:::endpoint
+        RunEndpoint["/pipelines/{name}/run\nRun pipeline"]:::endpoint
+        StatusEndpoint["/pipelines/{name}/status\nPipeline status"]:::endpoint
+        MetricsEndpoint["/metrics\nPrometheus metrics"]:::endpoint
+    end
+end
+
+subgraph Dependencies["Dependencies"]
+    FastAPI["FastAPI Framework"]:::component
+    CompositionRoot["CompositionRoot"]:::component
+    UseCases["Use Cases"]:::component
+end
+
+RestServer --> Endpoints
+RunEndpoint --> CompositionRoot
+RunEndpoint --> UseCases
+StatusEndpoint --> UseCases
