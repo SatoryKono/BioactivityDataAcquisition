@@ -225,3 +225,127 @@ def test_domain_provider_registry_exports_no_deprecated_api(bioetl_root: Path) -
         "domain/provider_registry.py __all__ still exports deprecated: "
         f"{found_deprecated}. Remove deprecated exports from public API."
     )
+
+
+def test_no_class_level_singleton_holders(bioetl_root: Path) -> None:
+    """Verify infrastructure doesn't use class-level singleton holder pattern.
+
+    The _RegistryHolder pattern with class-level _instance attribute
+    is an anti-pattern that should be replaced with factory functions.
+    """
+    violations: list[str] = []
+
+    # Check for _RegistryHolder or similar holder classes
+    holder_pattern_names = {"_RegistryHolder", "_Holder", "_InstanceHolder"}
+
+    for py_file in iter_python_files(bioetl_root / "infrastructure"):
+        try:
+            content = py_file.read_text()
+            tree = ast.parse(content)
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                if node.name in holder_pattern_names:
+                    violations.append(
+                        f"{py_file}: contains singleton holder class {node.name}"
+                    )
+
+    assert not violations, (
+        "Found singleton holder classes in infrastructure:\n"
+        + "\n".join(violations)
+        + "\nUse factory functions instead."
+    )
+
+
+def test_no_module_level_context_variable_in_application_context(
+    bioetl_root: Path,
+) -> None:
+    """Verify application_context.py doesn't have module-level _context variable.
+
+    The application_context module should delegate to context_manager.py
+    which uses ContextVar for thread-safe context management.
+    """
+    app_context_path = bioetl_root / "interfaces" / "application_context.py"
+
+    assert app_context_path.exists(), f"File not found: {app_context_path}"
+
+    content = app_context_path.read_text()
+    tree = ast.parse(content)
+
+    # Check for module-level _context variable
+    for node in tree.body:
+        if isinstance(node, ast.AnnAssign):
+            if isinstance(node.target, ast.Name) and node.target.id == "_context":
+                pytest.fail(
+                    "application_context.py should not have module-level _context. "
+                    "Context management is delegated to context_manager.py."
+                )
+
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "_context":
+                    pytest.fail(
+                        "application_context.py should not have module-level _context. "
+                        "Context management is delegated to context_manager.py."
+                    )
+
+
+def test_application_context_delegates_to_context_manager(bioetl_root: Path) -> None:
+    """Verify get_application_context delegates to context_manager.
+
+    The application_context module should import and use get_current_context
+    from context_manager for the actual context storage.
+    """
+    app_context_path = bioetl_root / "interfaces" / "application_context.py"
+
+    assert app_context_path.exists(), f"File not found: {app_context_path}"
+
+    content = app_context_path.read_text()
+
+    # Check that get_current_context is imported and used
+    assert "get_current_context" in content, (
+        "application_context.py should import get_current_context from context_manager"
+    )
+
+    # Check that there's no 'global _context' usage
+    assert "global _context" not in content, (
+        "application_context.py should not use 'global _context'. "
+        "Context management is delegated to context_manager.py."
+    )
+
+
+def test_metrics_server_uses_instance_state(bioetl_root: Path) -> None:
+    """Verify MetricsServerManager uses instance-level state, not class-level.
+
+    The class should use __init__ to initialize _started and _lock as
+    instance attributes, not class attributes.
+    """
+    server_path = bioetl_root / "infrastructure" / "observability" / "server.py"
+
+    assert server_path.exists(), f"File not found: {server_path}"
+
+    content = server_path.read_text()
+    tree = ast.parse(content)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == "MetricsServerManager":
+            # Check for class-level attribute assignments (bad)
+            for item in node.body:
+                if isinstance(item, ast.AnnAssign):
+                    if isinstance(item.target, ast.Name):
+                        if item.target.id in ("_started", "_lock"):
+                            pytest.fail(
+                                f"MetricsServerManager has class-level {item.target.id}. "
+                                "Use instance-level state in __init__ instead."
+                            )
+
+                if isinstance(item, ast.Assign):
+                    for target in item.targets:
+                        if isinstance(target, ast.Name):
+                            if target.id in ("_started", "_lock"):
+                                pytest.fail(
+                                    f"MetricsServerManager has class-level {target.id}. "
+                                    "Use instance-level state in __init__ instead."
+                                )
