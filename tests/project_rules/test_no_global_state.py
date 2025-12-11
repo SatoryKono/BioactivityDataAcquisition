@@ -305,9 +305,9 @@ def test_application_context_delegates_to_context_manager(bioetl_root: Path) -> 
     content = app_context_path.read_text()
 
     # Check that get_current_context is imported and used
-    assert "get_current_context" in content, (
-        "application_context.py should import get_current_context from context_manager"
-    )
+    assert (
+        "get_current_context" in content
+    ), "application_context.py should import get_current_context from context_manager"
 
     # Check that there's no 'global _context' usage
     assert "global _context" not in content, (
@@ -337,7 +337,8 @@ def test_metrics_server_uses_instance_state(bioetl_root: Path) -> None:
                     if isinstance(item.target, ast.Name):
                         if item.target.id in ("_started", "_lock"):
                             pytest.fail(
-                                f"MetricsServerManager has class-level {item.target.id}. "
+                                f"MetricsServerManager has class-level "
+                                f"{item.target.id}. "
                                 "Use instance-level state in __init__ instead."
                             )
 
@@ -346,6 +347,7 @@ def test_metrics_server_uses_instance_state(bioetl_root: Path) -> None:
                         if isinstance(target, ast.Name):
                             if target.id in ("_started", "_lock"):
                                 pytest.fail(
-                                    f"MetricsServerManager has class-level {target.id}. "
+                                    f"MetricsServerManager has class-level "
+                                    f"{target.id}. "
                                     "Use instance-level state in __init__ instead."
                                 )
