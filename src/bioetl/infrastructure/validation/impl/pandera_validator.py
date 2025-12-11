@@ -12,7 +12,7 @@ from bioetl.domain.validation.contracts import schema_type
 
 
 class PanderaValidatorImpl(ValidatorABC):
-    """Реализация валидатора на основе Pandera."""
+    """Pandera-based validator implementation."""
 
     def __init__(self, schema: schema_type) -> None:
         self._schema = schema

@@ -104,13 +104,12 @@ def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
 
 
 class PipelineBase(ABC):
-    """
-    Абстрактный базовый класс для всех ETL-пайплайнов.
+    """Abstract base class for all ETL pipelines.
 
-    Реализует паттерн Template Method для стадий:
+    Implements Template Method pattern for stages:
     extract → transform → validate → write
 
-    Использует композицию для стадий (Extractor, Transformer).
+    Uses composition for stages (Extractor, Transformer).
     """
 
     def __init__(
@@ -205,7 +204,7 @@ class PipelineBase(ABC):
         return executor.execute(self, output_path, dry_run=dry_run)
 
     def _resolve_business_key_fields(self) -> list[str] | None:
-        """Возвращает бизнес-ключи из конфига с поддержкой legacy-полей."""
+        """Return business keys from config with legacy field support."""
 
         hashing_section = getattr(self._config, "hashing", None)
         if isinstance(hashing_section, property):
@@ -422,28 +421,28 @@ class PipelineBase(ABC):
     # === Abstract Methods ===
 
     def get_database_version(self) -> str | None:
-        """
-        Возвращает версию базы данных источника.
-        Может быть переопределено в наследниках.
+        """Return source database version.
+
+        Can be overridden in subclasses.
         """
         return None
 
     # === Concrete Methods ===
 
     def get_version(self) -> str:
-        """Возвращает версию источника данных. По умолчанию 'unknown'."""
+        """Return data source version. Default is 'unknown'."""
         return "unknown"
 
     @abstractmethod
     def extract(self, **kwargs: Any) -> ExtractResult:
-        """Возвращает итератор чанков исходных данных."""
+        """Return iterator of source data chunks."""
 
     @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Преобразует сырые данные."""
+        """Transform raw data."""
 
     def validate(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Валидирует DataFrame по Pandera-схеме, соблюдая порядок колонок схемы."""
+        """Validate DataFrame against Pandera schema, respecting column order."""
         schema_name = self._schema_contract.schema_out
         schema = self._validation_service.get_schema(schema_name)
         schema_columns = self._resolve_validator_columns(schema)
@@ -470,11 +469,10 @@ class PipelineBase(ABC):
         output_path: Path,
         context: RunContext,
     ) -> WriteResult:
-        """
-        Записывает валидированный DataFrame с помощью предоставленного Loader.
+        """Write validated DataFrame using the provided Loader.
 
-        Наследники могут переопределить метод, если нужно расширить поведение,
-        но по умолчанию используется loader, переданный через конструктор.
+        Subclasses can override to extend behavior,
+        but by default uses loader passed via constructor.
         """
 
         return self._write_with_loader(df=df, output_path=output_path, context=context)
@@ -498,20 +496,20 @@ class PipelineBase(ABC):
     # === Hooks ===
 
     def register_hook(self, hook: PipelineHookABC) -> None:
-        """Добавляет хук выполнения."""
+        """Add execution hook."""
         self._runtime_manager.register_hook(hook)
 
     def register_hooks(self, hooks: list[PipelineHookABC]) -> None:
-        """Добавляет список хуков выполнения."""
+        """Add list of execution hooks."""
         self._runtime_manager.register_hooks(hooks)
 
     def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
-        """Устанавливает политику обработки ошибок."""
+        """Set error handling policy."""
         self._error_policy = error_policy
         self._runtime_manager.set_error_policy(error_policy)
 
     def set_post_transformer(self, transformer: TransformerABC) -> None:
-        """Позволяет заменить пост-обработчик трансформации."""
+        """Replace post-transform handler."""
         self._post_transformer = transformer
 
     # === Internal Methods ===
@@ -527,7 +525,7 @@ class PipelineBase(ABC):
 
     @staticmethod
     def _resolve_validator_columns(schema: Any) -> list[str]:
-        """Возвращает порядок колонок, объявленный в Pandera-схеме."""
+        """Return column order declared in Pandera schema."""
         schema_obj = schema
         if hasattr(schema_obj, "to_schema"):
             schema_obj = schema_obj.to_schema()
@@ -553,7 +551,7 @@ class PipelineBase(ABC):
         )
 
     def _default_on_skip(self, stage: str) -> Any:
-        """Возвращает безопасное значение по умолчанию при пропуске стадии."""
+        """Return safe default value when skipping stage."""
 
         import pandas as pd  # pylint: disable=import-outside-toplevel
 
@@ -619,6 +617,4 @@ class PipelineBase(ABC):
         raise TypeError("Extractor must return a DataFrame or iterable of DataFrames.")
 
     def _enrich_context(self, context: RunContext) -> None:
-        """
-        Хук для обогащения контекста (например, добавления версии релиза).
-        """
+        """Hook for context enrichment (e.g., adding release version)."""

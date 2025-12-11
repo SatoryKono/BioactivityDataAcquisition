@@ -7,9 +7,7 @@ from bioetl.infrastructure.settings.files import CHECKSUM_CHUNK_SIZE
 
 
 def compute_file_sha256(path: Path) -> str:
-    """
-    Вычисляет SHA256 хеш файла.
-    """
+    """Compute SHA256 hash of a file."""
     sha256 = hashlib.sha256()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(CHECKSUM_CHUNK_SIZE), b""):
@@ -18,10 +16,9 @@ def compute_file_sha256(path: Path) -> str:
 
 
 def compute_files_sha256(paths: list[Path]) -> dict[str, str]:
-    """
-    Вычисляет SHA256 хеши нескольких файлов.
+    """Compute SHA256 hashes for multiple files.
 
-    Отсутствующие файлы пропускаются.
+    Missing files are skipped.
     """
     checksums: dict[str, str] = {}
     for path in paths:

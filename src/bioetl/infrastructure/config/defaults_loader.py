@@ -1,4 +1,4 @@
-"""Загрузчик глобальных конфигураций по умолчанию."""
+"""Global default configuration loader."""
 
 from __future__ import annotations
 
@@ -25,11 +25,11 @@ from bioetl.infrastructure.config.sources import (
 
 
 class DefaultsConfigError(Exception):
-    """Базовая ошибка загрузки дефолтных конфигов."""
+    """Base error for default config loading."""
 
 
 class DefaultsFileNotFoundError(DefaultsConfigError):
-    """Файл конфигурации не найден."""
+    """Configuration file not found."""
 
     def __init__(self, path: Path) -> None:
         super().__init__(f"Defaults config file not found: {path}")
@@ -37,7 +37,7 @@ class DefaultsFileNotFoundError(DefaultsConfigError):
 
 
 class DefaultsValidationError(DefaultsConfigError):
-    """Ошибка валидации конфигурации."""
+    """Configuration validation error."""
 
     def __init__(self, path: Path, message: str) -> None:
         super().__init__(f"{path}: {message}")
@@ -45,7 +45,7 @@ class DefaultsValidationError(DefaultsConfigError):
 
 
 def get_defaults_config(*, base_dir: str | Path | None = None) -> DefaultsConfig:
-    """Читает и валидирует глобальные конфигурации по умолчанию."""
+    """Read and validate global default configurations."""
 
     primary_root = get_configs_root(base_dir).resolve()
     fallback_root = DEFAULT_CONFIGS_ROOT.resolve()

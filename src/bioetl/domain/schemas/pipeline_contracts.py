@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class PipelineSchemaModel:
-    """Описание схем для пайплайна."""
+    """Schema description for pipeline."""
 
     pipeline_code: str
     schema_out: str
@@ -15,7 +15,7 @@ class PipelineSchemaModel:
     output_schema: str | None = None
 
     def get_output_schema(self) -> str:
-        """Возвращает схему для записи (fallback на schema_out)."""
+        """Return schema for writing (fallback to schema_out)."""
 
         return self.output_schema or self.schema_out
 
@@ -67,7 +67,7 @@ PIPELINE_CONTRACTS: dict[str, PipelineSchemaModel] = {
 def get_pipeline_contract(
     pipeline_code: str, *, default_entity: str | None = None
 ) -> PipelineSchemaModel:
-    """Возвращает контракт схем для пайплайна."""
+    """Return schema contract for pipeline."""
 
     if pipeline_code in PIPELINE_CONTRACTS:
         return PIPELINE_CONTRACTS[pipeline_code]

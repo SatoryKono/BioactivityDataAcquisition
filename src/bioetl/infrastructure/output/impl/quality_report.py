@@ -8,7 +8,7 @@ from bioetl.domain.clients.base.output.contracts import QualityReportABC
 
 
 class QualityReportImpl(QualityReportABC):
-    """Генератор QC-отчетов на базе Pandas."""
+    """Pandas-based QC report generator."""
 
     def build_quality_report(
         self, df: pd.DataFrame, *, min_coverage: float

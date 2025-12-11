@@ -1,4 +1,4 @@
-"""Реализации хуков и политик обработки ошибок пайплайна."""
+"""Pipeline hook and error policy implementations."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
 
 
 class LoggingPipelineHookImpl(PipelineHookABC):
-    """Хук, логирующий события жизненного цикла стадий."""
+    """Hook that logs stage lifecycle events."""
 
     def __init__(self, logger: LoggingPortABC) -> None:
         self._logger = logger
@@ -52,19 +52,19 @@ class LoggingPipelineHookImpl(PipelineHookABC):
 
 
 class FailFastErrorPolicyImpl(ErrorPolicyABC):
-    """Политика остановки пайплайна при первой ошибке."""
+    """Policy to stop pipeline on first error."""
 
     def handle(self, error: PipelineStageError, context: Any) -> ErrorAction:
         """Always fail the pipeline on first error."""
         return ErrorAction.FAIL
 
-    def can_retry(self, error: PipelineStageError) -> bool:  # noqa: ARG002 - интерфейс
+    def can_retry(self, error: PipelineStageError) -> bool:  # noqa: ARG002 - interface
         """Fail-fast policy never retries."""
         return False
 
 
 class ContinueOnErrorPolicyImpl(ErrorPolicyABC):
-    """Политика продолжения выполнения при ошибках стадий."""
+    """Policy to continue execution on stage errors."""
 
     def __init__(self, *, max_retries: int = 0) -> None:
         self._max_retries = max_retries
@@ -89,7 +89,7 @@ __all__ = [
 
 
 class MetricsPipelineHookImpl(PipelineHookABC):
-    """Хук, фиксирующий метрики завершения стадий."""
+    """Hook that records stage completion metrics."""
 
     def __init__(
         self,
@@ -105,7 +105,7 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         self._metrics = metrics_port or create_noop_metrics_port()
 
     def on_stage_start(self, stage: str, context: Any) -> None:  # noqa: ARG002
-        """Хук старта стадии не требует метрик."""
+        """Stage start hook does not require metrics."""
 
     def on_stage_end(self, stage: str, result: StageResult) -> None:
         """Record Prometheus metrics for stage completion."""
@@ -127,4 +127,4 @@ class MetricsPipelineHookImpl(PipelineHookABC):
         )
 
     def on_error(self, stage: str, error: PipelineStageError) -> None:  # noqa: ARG002
-        """Метрики фиксируются в on_stage_end, поэтому обработка не требуется."""
+        """Metrics are recorded in on_stage_end, so no processing needed."""

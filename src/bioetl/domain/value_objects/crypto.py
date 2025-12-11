@@ -1,7 +1,6 @@
-"""
-Value Objects для криптографических примитивов.
+"""Value Objects for cryptographic primitives.
 
-Содержит типобезопасные обёртки для хэшей и дайджестов.
+Contains type-safe wrappers for hashes and digests.
 """
 
 from __future__ import annotations

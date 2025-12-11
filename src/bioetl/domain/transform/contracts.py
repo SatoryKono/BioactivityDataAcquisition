@@ -247,31 +247,29 @@ class HashServiceABC(ABC):
 
 
 class TimestampProviderABC(ABC):
-    """
-    Провайдер временных меток для извлечения данных.
+    """Timestamp provider for data extraction.
 
-    Обеспечивает детерминированный timestamp в рамках сессии.
+    Provides deterministic timestamp within a session.
     """
 
     @abstractmethod
     def get_extraction_timestamp(self) -> datetime:
-        """Возвращает timestamp извлечения данных."""
+        """Return data extraction timestamp."""
 
 
 class IndexGeneratorABC(ABC):
-    """
-    Генератор последовательных индексов для строк данных.
+    """Sequential index generator for data rows.
 
-    Stateful: сохраняет текущее значение счётчика между вызовами.
+    Stateful: maintains counter value between calls.
     """
 
     @abstractmethod
     def next_index(self) -> int:
-        """Возвращает следующий индекс и увеличивает счётчик."""
+        """Return next index and increment counter."""
 
     @abstractmethod
     def reset(self) -> None:
-        """Сбрасывает счётчик в начальное состояние."""
+        """Reset counter to initial state."""
 
 
 __all__ = [

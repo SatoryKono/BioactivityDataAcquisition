@@ -30,14 +30,14 @@ def default_post_transformer(
     """Create a default chain of post-transformers.
 
     Args:
-        hash_service: Сервис для вычисления хешей.
-        index_generator: Генератор последовательных индексов.
-        timestamp_provider: Провайдер временных меток.
-        business_key_fields: Поля для хеширования бизнес-ключа.
-        version_provider: Опциональный провайдер версии БД.
+        hash_service: Service for computing hashes.
+        index_generator: Sequential index generator.
+        timestamp_provider: Timestamp provider.
+        business_key_fields: Fields for business key hashing.
+        version_provider: Optional database version provider.
 
     Returns:
-        Цепочка трансформеров для пост-обработки данных.
+        Transformer chain for post-processing data.
     """
     provider = version_provider or (lambda: "unknown")
     return TransformerChainImpl(

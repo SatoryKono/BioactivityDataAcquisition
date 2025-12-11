@@ -6,9 +6,7 @@ from bioetl.domain.observability import ProgressReporterABC
 
 
 class TqdmProgressReporterImpl(ProgressReporterABC):
-    """
-    Реализация прогресс-бара через tqdm.
-    """
+    """Progress bar implementation using tqdm."""
 
     def __init__(self) -> None:
         self._pbar: tqdm | None = None

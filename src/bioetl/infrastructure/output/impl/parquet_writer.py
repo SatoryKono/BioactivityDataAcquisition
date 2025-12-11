@@ -12,9 +12,7 @@ from bioetl.infrastructure.output.impl.base_writer import BaseWriter
 
 
 class ParquetWriter(BaseWriter):
-    """
-    Запись Parquet.
-    """
+    """Parquet file writer."""
 
     def __init__(self, *, checksum_fn: Callable[[Path], str] | None = None) -> None:
         super().__init__(atomic=True, checksum_fn=checksum_fn)

@@ -14,16 +14,12 @@ from bioetl.domain.value_objects import HashDigest
 
 
 def normalize_unicode(text: str) -> str:
-    """
-    Нормализует строку в форму NFC.
-    """
+    """Normalize string to NFC form."""
     return unicodedata.normalize("NFC", text)
 
 
 def format_float(value: float | Decimal) -> str:
-    """
-    Форматирует число с плавающей точкой по спецификации: %.15g.
-    """
+    """Format floating-point number per specification: %.15g."""
     # Decimal is treated as float for canonicalization purposes per spec
     # to avoid discrepancies between float and Decimal types in source
     val = float(value)
@@ -36,9 +32,7 @@ def format_float(value: float | Decimal) -> str:
 
 
 def _serialize_canonical(obj: Any) -> str:
-    """
-    Рекурсивная функция сериализации в строку.
-    """
+    """Recursive function for serializing to string."""
     if obj is None:
         return "null"
     if isinstance(obj, bool):
@@ -84,16 +78,12 @@ def _serialize_mapping(obj: dict[str, Any]) -> str:
 
 
 def blake2b_hash_hex(data_bytes: bytes, digest_size: int = 32) -> str:
-    """
-    Вычисляет BLAKE2b хеш.
-    """
+    """Compute BLAKE2b hash."""
     return hashlib.blake2b(data_bytes, digest_size=digest_size).hexdigest()
 
 
 class HasherImpl(HasherABC):
-    """
-    Реализация хеширования (BLAKE2b-256) с канонической JSON сериализацией.
-    """
+    """Hasher implementation (BLAKE2b-256) with canonical JSON serialization."""
 
     @property
     def algorithm(self) -> str:
@@ -138,18 +128,16 @@ class HasherImpl(HasherABC):
         return "blake2b_256"
 
     def compute_hash_row(self, row: pd.Series) -> str:
-        """
-        Хеширует строку Series как полный объект (hash_row).
-        """
+        """Hash Series row as complete object (hash_row)."""
         record = row.to_dict()
         serialized = _serialize_canonical(record)
         return blake2b_hash_hex(serialized.encode("utf-8"))
 
     def compute_hash_columns(self, df: pd.DataFrame, columns: list[str]) -> pd.Series:
-        """
-        Хеширует выбранные колонки DataFrame (как список значений в заданном порядке).
-        Используется для hash_business_key.
-        Если columns пуст -> возвращает None (в Series).
+        """Hash selected DataFrame columns (as list of values in specified order).
+
+        Used for hash_business_key.
+        If columns is empty, returns None (in Series).
         """
         if not columns:
             return pd.Series([None] * len(df), index=df.index, dtype=object)

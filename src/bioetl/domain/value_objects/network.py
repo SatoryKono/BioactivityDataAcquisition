@@ -1,7 +1,6 @@
-"""
-Value Objects для сетевых примитивов.
+"""Value Objects for network primitives.
 
-Содержит типобезопасные обёртки для URL и сетевых адресов.
+Contains type-safe wrappers for URLs and network addresses.
 """
 
 from __future__ import annotations
@@ -13,7 +12,7 @@ from pydantic_core import CoreSchema, core_schema
 
 
 class HttpUrl:
-    """Value Object для HTTP/HTTPS URL с валидацией и нормализацией."""
+    """Value Object for HTTP/HTTPS URL with validation and normalization."""
 
     __slots__ = ("_value", "_scheme", "_host", "_path")
     _allowed_schemes = frozenset({"http", "https"})
@@ -36,13 +35,13 @@ class HttpUrl:
 
         self._scheme = parsed.scheme.lower()
         self._host = parsed.netloc.lower()
-        # Нормализация path: удаляем trailing slash, если он не единственный символ
+        # Normalize path: remove trailing slash unless it's the only character
         path = parsed.path
         if path and path != "/" and path.endswith("/"):
             path = path.rstrip("/")
         self._path = path or "/"
 
-        # Сборка нормализованного URL
+        # Assemble normalized URL
         query = f"?{parsed.query}" if parsed.query else ""
         fragment = f"#{parsed.fragment}" if parsed.fragment else ""
         self._value = f"{self._scheme}://{self._host}{self._path}{query}{fragment}"

@@ -26,31 +26,31 @@ __all__ = [
 
 
 class PipelineHookABC(ABC):
-    """Хуки жизненного цикла пайплайна."""
+    """Pipeline lifecycle hooks."""
 
     @abstractmethod
     def on_stage_start(self, stage: str, context: Any) -> None:
-        """Вызывается перед началом стадии."""
+        """Called before stage starts."""
 
     @abstractmethod
     def on_stage_end(self, stage: str, result: StageResult) -> None:
-        """Вызывается после завершения стадии."""
+        """Called after stage completes."""
 
     @abstractmethod
     def on_error(self, stage: str, error: PipelineStageError) -> None:
-        """Вызывается при ошибке."""
+        """Called on error."""
 
 
 class ErrorPolicyABC(ABC):
-    """Политика обработки ошибок."""
+    """Error handling policy."""
 
     @abstractmethod
     def handle(self, error: PipelineStageError, context: Any) -> ErrorAction:
-        """Определяет действие при ошибке."""
+        """Determine action on error."""
 
     @abstractmethod
     def can_retry(self, error: PipelineStageError) -> bool:
-        """Проверяет, стоит ли повторять операцию."""
+        """Check whether operation should be retried."""
 
 
 class ExtractorABC(ABC):

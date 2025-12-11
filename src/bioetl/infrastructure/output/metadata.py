@@ -17,14 +17,13 @@ def build_base_metadata(
     dry_run: bool = False,
     include_metadata: bool = True,
 ) -> dict[str, Any]:
-    """
-    Формирует базовый словарь метаданных.
+    """Build base metadata dictionary.
 
     Args:
-        context: Контекст запуска.
-        row_count: Количество строк результата.
-        dry_run: Признак dry-run.
-        include_metadata: Добавлять ли пользовательские метаданные из контекста.
+        context: Run context.
+        row_count: Number of result rows.
+        dry_run: Dry-run flag.
+        include_metadata: Whether to include user metadata from context.
     """
     meta = {
         "run_id": context.run_id,
@@ -52,12 +51,11 @@ def build_run_metadata(
     qc_checksums: dict[str, str] | None = None,
     qc_config: QcConfig | None = None,
 ) -> dict[str, Any]:
-    """
-    Создает словарь метаданных.
+    """Create run metadata dictionary.
 
     Args:
-        context: Контекст запуска.
-        result: Результат записи.
+        context: Run context.
+        result: Write result.
     """
     files = [result.path.name]
     qc_artifacts = qc_artifacts or []
@@ -98,9 +96,7 @@ def build_run_metadata(
 
 
 def build_dry_run_metadata(context: RunContext, row_count: int) -> dict[str, Any]:
-    """
-    Создает метаданные для dry run.
-    """
+    """Create metadata for dry run."""
     return build_base_metadata(
         context, row_count=row_count, dry_run=True, include_metadata=True
     )
