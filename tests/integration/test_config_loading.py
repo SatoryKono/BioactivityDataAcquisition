@@ -9,11 +9,22 @@ import pytest
 
 from bioetl.application.bootstrap import ApplicationBootstrap
 from bioetl.domain.errors import ConfigValidationError
-from bioetl.infrastructure.config.loader import get_pipeline_config_from_path
+from bioetl.infrastructure.config.loader import (
+    get_pipeline_config_from_path,
+    reset_schema_contract_provider,
+)
 from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 if TYPE_CHECKING:
     pass
+
+
+@pytest.fixture(autouse=True)
+def _reset_schema_contract_ctx() -> None:
+    """Ensure schema contract provider context is cleared between tests."""
+    reset_schema_contract_provider()
+    yield
+    reset_schema_contract_provider()
 
 
 class TestConfigLoadingWithBootstrap:
@@ -132,9 +143,11 @@ class TestConfigFieldPopulation:
         yield bootstrap
         bootstrap.shutdown()
 
-    def test_activity_config_has_activity_fields(self, tmp_path: Path) -> None:
+    def test_activity_config_has_activity_fields(
+        self, setup_bootstrap: ApplicationBootstrap, tmp_path: Path
+    ) -> None:
         """Activity config should have activity-specific fields."""
-        bootstrap = self.setup_bootstrap
+        bootstrap = setup_bootstrap
         config_file = tmp_path / "activity.yaml"
         config_file.write_text(
             """
@@ -159,9 +172,11 @@ provider_config:
         # Activity should have these essential fields
         assert "activity_id" in field_names
 
-    def test_molecule_config_has_molecule_fields(self, tmp_path: Path) -> None:
+    def test_molecule_config_has_molecule_fields(
+        self, setup_bootstrap: ApplicationBootstrap, tmp_path: Path
+    ) -> None:
         """Molecule config should have molecule-specific fields."""
-        bootstrap = self.setup_bootstrap
+        bootstrap = setup_bootstrap
         config_file = tmp_path / "molecule.yaml"
         config_file.write_text(
             """
@@ -185,9 +200,11 @@ provider_config:
         field_names = {f.get("name") for f in config.fields}
         assert "molecule_chembl_id" in field_names
 
-    def test_target_config_has_target_fields(self, tmp_path: Path) -> None:
+    def test_target_config_has_target_fields(
+        self, setup_bootstrap: ApplicationBootstrap, tmp_path: Path
+    ) -> None:
         """Target config should have target-specific fields."""
-        bootstrap = self.setup_bootstrap
+        bootstrap = setup_bootstrap
         config_file = tmp_path / "target.yaml"
         config_file.write_text(
             """

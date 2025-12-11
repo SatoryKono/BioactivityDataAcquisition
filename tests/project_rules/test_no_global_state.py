@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import Iterable
 
 import pytest
 
@@ -88,20 +87,17 @@ def test_no_global_provider_references_in_application(bioetl_root: Path) -> None
         for func_name in deprecated_functions:
             if func_name in content:
                 # Skip if it's just a type annotation or comment
-                if f"import {func_name}" in content or f"from " in content:
+                if f"import {func_name}" in content or "from " in content:
                     violations.append(f"{py_file}: imports deprecated {func_name}")
 
-    assert not violations, (
-        f"Found global state references in application layer:\n"
-        + "\n".join(violations)
-    )
+    assert (
+        not violations
+    ), "Found global state references in application layer:\n" + "\n".join(violations)
 
 
 def test_no_global_state_setter_in_bootstrap(bioetl_root: Path) -> None:
     """Verify bootstrap_factory doesn't use global state setters."""
-    bootstrap_factory_path = (
-        bioetl_root / "interfaces" / "bootstrap_factory.py"
-    )
+    bootstrap_factory_path = bioetl_root / "interfaces" / "bootstrap_factory.py"
 
     assert bootstrap_factory_path.exists(), f"File not found: {bootstrap_factory_path}"
 
@@ -119,8 +115,8 @@ def test_no_global_state_setter_in_bootstrap(bioetl_root: Path) -> None:
             violations.append(func_name)
 
     assert not violations, (
-        f"bootstrap_factory.py still references deprecated functions: {violations}. "
-        "Provider injection via global state is removed."
+        "bootstrap_factory.py still references deprecated functions: "
+        f"{violations}. Provider injection via global state is removed."
     )
 
 
@@ -175,11 +171,13 @@ def test_no_global_provider_registry_in_domain(bioetl_root: Path) -> None:
 
     # Check for global state pattern
     assert "_PROVIDER_REGISTRY" not in content, (
-        "domain/provider_registry.py should not contain global state _PROVIDER_REGISTRY"
+        "domain/provider_registry.py should not contain global "
+        "state _PROVIDER_REGISTRY"
     )
 
-    # Check for deprecated functions (as actual function definitions, not in __getattr__)
-    # We allow __getattr__ to reference these names for backward-compat error messages
+    # Check for deprecated functions (as actual function definitions,
+    # not in __getattr__). We allow __getattr__ to reference these names
+    # for backward-compat error messages.
     tree = ast.parse(content)
 
     deprecated_functions = {
@@ -191,8 +189,9 @@ def test_no_global_provider_registry_in_domain(bioetl_root: Path) -> None:
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name in deprecated_functions:
             pytest.fail(
-                f"domain/provider_registry.py contains deprecated function: {node.name}. "
-                "Global state functions should be removed from domain layer."
+                "domain/provider_registry.py contains deprecated function: "
+                f"{node.name}. Global state functions should be removed from "
+                "domain layer."
             )
 
 
@@ -223,6 +222,6 @@ def test_domain_provider_registry_exports_no_deprecated_api(bioetl_root: Path) -
     found_deprecated = set(all_exports) & deprecated_exports
 
     assert not found_deprecated, (
-        f"domain/provider_registry.py __all__ still exports deprecated: {found_deprecated}. "
-        "Remove deprecated exports from public API."
+        "domain/provider_registry.py __all__ still exports deprecated: "
+        f"{found_deprecated}. Remove deprecated exports from public API."
     )

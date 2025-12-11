@@ -80,8 +80,9 @@ def test_domain_has_no_dynamic_infrastructure_imports(bioetl_root) -> None:
             for pattern in patterns:
                 if pattern in content:
                     violations.append(
-                        f"{file_path.as_posix()}: dynamically imports {pkg} via importlib. "
-                        "Domain must not depend on infrastructure packages."
+                        f"{file_path.as_posix()}: dynamically imports {pkg} "
+                        "via importlib. Domain must not depend on "
+                        "infrastructure packages."
                     )
                     break
 

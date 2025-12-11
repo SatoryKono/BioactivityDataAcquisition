@@ -67,7 +67,8 @@ def create_empty_provider_registry() -> InMemoryProviderRegistry:
     """Factory function to create a new empty provider registry.
 
     This is the recommended factory for dependency injection.
-    Use this instead of the deprecated domain.provider_registry.default_provider_registry().
+    Use this instead of the deprecated
+    domain.provider_registry.default_provider_registry().
 
     Returns:
         New empty InMemoryProviderRegistry instance.

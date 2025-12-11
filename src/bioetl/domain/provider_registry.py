@@ -82,18 +82,28 @@ def __getattr__(name: str) -> Any:
         )
 
     # Handle deprecated global state functions - redirect to infrastructure
-    if name in ("set_provider_registry", "get_provider_registry", "default_provider_registry"):
+    if name in (
+        "set_provider_registry",
+        "get_provider_registry",
+        "default_provider_registry",
+    ):
         warnings.warn(
-            f"{name}() has been removed from bioetl.domain.provider_registry. "
-            "Use dependency injection through CompositionRoot.get_provider_registry() "
-            "or bioetl.infrastructure.provider_registry.create_empty_provider_registry() "
-            "instead.",
+            (
+                f"{name}() has been removed from bioetl.domain.provider_registry. "
+                "Use dependency injection through "
+                "CompositionRoot.get_provider_registry() or "
+                "bioetl.infrastructure.provider_registry."
+                "create_empty_provider_registry() instead."
+            ),
             DeprecationWarning,
             stacklevel=2,
         )
         raise AttributeError(
-            f"{name}() has been removed. Use CompositionRoot.get_provider_registry() "
-            "for DI-based registry access."
+            (
+                f"{name}() has been removed. "
+                "Use CompositionRoot.get_provider_registry() "
+                "for DI-based registry access."
+            )
         )
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -31,21 +31,35 @@ For DI-based usage:
 
 from __future__ import annotations
 
-import warnings
+import importlib
 from pathlib import Path
-from typing import Any
+from typing import NoReturn
+import warnings
 
 __all__ = ["generate_schema_from_column_order", "load_column_order_from_yaml"]
 
 
-def generate_schema_from_column_order(columns: list[str]) -> Any:
+def _load_impl() -> object:
+    """Load infrastructure implementation lazily to avoid hard dependency."""
+    return importlib.import_module("bioetl.infrastructure.validation.schema_generator")
+
+
+def _raise_missing_impl(func_name: str) -> NoReturn:
+    raise RuntimeError(
+        f"{func_name} moved to bioetl.infrastructure.validation.schema_generator. "
+        "Use the infrastructure module or inject SchemaGeneratorProtocol instead."
+    )
+
+
+def generate_schema_from_column_order(columns: list[str]) -> object:
     """DEPRECATED: Use PanderaSchemaGenerator from infrastructure.
 
     Build a permissive Pandera schema using the provided column order.
 
     .. deprecated:: 2.0
-        Use bioetl.infrastructure.validation.schema_generator.generate_schema_from_column_order
-        or PanderaSchemaGenerator().generate_from_column_order() instead.
+        Use bioetl.infrastructure.validation.schema_generator.
+        generate_schema_from_column_order or
+        PanderaSchemaGenerator().generate_from_column_order() instead.
 
     Parameters
     ----------
@@ -58,18 +72,21 @@ def generate_schema_from_column_order(columns: list[str]) -> Any:
         A permissive schema accepting any data types.
     """
     warnings.warn(
-        "bioetl.domain.schemas.generator.generate_schema_from_column_order is deprecated. "
-        "Use bioetl.infrastructure.validation.schema_generator.generate_schema_from_column_order "
-        "instead.",
+        (
+            "bioetl.domain.schemas.generator.generate_schema_from_column_order "
+            "is deprecated. Use "
+            "bioetl.infrastructure.validation.schema_generator."
+            "generate_schema_from_column_order instead."
+        ),
         DeprecationWarning,
         stacklevel=2,
     )
-    # Lazy import to maintain backward compatibility
-    from bioetl.infrastructure.validation.schema_generator import (
-        generate_schema_from_column_order as _impl,
-    )
-
-    return _impl(columns)
+    try:
+        module = _load_impl()
+        impl = getattr(module, "generate_schema_from_column_order")
+    except Exception:
+        _raise_missing_impl("generate_schema_from_column_order")
+    return impl(columns)
 
 
 def load_column_order_from_yaml(path: str | Path) -> list[str]:
@@ -78,8 +95,8 @@ def load_column_order_from_yaml(path: str | Path) -> list[str]:
     Load column order from YAML file.
 
     .. deprecated:: 2.0
-        Use bioetl.infrastructure.validation.schema_generator.load_column_order_from_yaml
-        or YamlColumnOrderLoader().load() instead.
+        Use bioetl.infrastructure.validation.schema_generator.
+        load_column_order_from_yaml or YamlColumnOrderLoader().load() instead.
 
     Args:
         path: Path to YAML file (str or Path object).
@@ -91,14 +108,18 @@ def load_column_order_from_yaml(path: str | Path) -> list[str]:
         ValueError: If YAML format is invalid.
     """
     warnings.warn(
-        "bioetl.domain.schemas.generator.load_column_order_from_yaml is deprecated. "
-        "Use bioetl.infrastructure.validation.schema_generator.load_column_order_from_yaml "
-        "instead.",
+        (
+            "bioetl.domain.schemas.generator.load_column_order_from_yaml "
+            "is deprecated. Use "
+            "bioetl.infrastructure.validation.schema_generator."
+            "load_column_order_from_yaml instead."
+        ),
         DeprecationWarning,
         stacklevel=2,
     )
-    from bioetl.infrastructure.validation.schema_generator import (
-        load_column_order_from_yaml as _impl,
-    )
-
-    return _impl(path)
+    try:
+        module = _load_impl()
+        impl = getattr(module, "load_column_order_from_yaml")
+    except Exception:
+        _raise_missing_impl("load_column_order_from_yaml")
+    return impl(path)

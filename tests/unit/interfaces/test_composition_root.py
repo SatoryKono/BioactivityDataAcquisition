@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import Mock
 
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.interfaces.composition_root import (
@@ -47,16 +45,35 @@ class MockLogger(LoggingPortABC):
 class MockMetrics(MetricsPortABC):
     """Mock metrics for testing."""
 
-    def increment(self, name: str, value: int = 1, **tags) -> None:
+    def inc_counter(self, name: str, labels: dict[str, str]) -> None:
         pass
 
-    def gauge(self, name: str, value: float, **tags) -> None:
+    def observe_histogram(
+        self, name: str, value: float, labels: dict[str, str]
+    ) -> None:
         pass
 
-    def timing(self, name: str, value: float, **tags) -> None:
+    def update_stage_duration(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+        duration_sec: float,
+    ) -> None:
         pass
 
-    def histogram(self, name: str, value: float, **tags) -> None:
+    def update_stage_total(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+    ) -> None:
         pass
 
 

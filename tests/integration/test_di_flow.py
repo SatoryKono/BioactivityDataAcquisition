@@ -42,16 +42,35 @@ class MockLogger(LoggingPortABC):
 class MockMetrics(MetricsPortABC):
     """Mock metrics for testing."""
 
-    def increment(self, name: str, value: int = 1, **tags) -> None:
+    def inc_counter(self, name: str, labels: dict[str, str]) -> None:
         pass
 
-    def gauge(self, name: str, value: float, **tags) -> None:
+    def observe_histogram(
+        self, name: str, value: float, labels: dict[str, str]
+    ) -> None:
         pass
 
-    def timing(self, name: str, value: float, **tags) -> None:
+    def update_stage_duration(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+        duration_sec: float,
+    ) -> None:
         pass
 
-    def histogram(self, name: str, value: float, **tags) -> None:
+    def update_stage_total(
+        self,
+        *,
+        pipeline: str,
+        provider: str,
+        entity: str,
+        stage: str,
+        outcome: str,
+    ) -> None:
         pass
 
 
@@ -74,9 +93,7 @@ class TestDIFlow:
 
     def test_composition_root_creates_schema_contract_provider(self) -> None:
         """Verify CompositionRoot creates schema contract provider."""
-        root = CompositionRoot(
-            observability_factory=TestObservabilityFactory()
-        )
+        root = CompositionRoot(observability_factory=TestObservabilityFactory())
 
         provider = root.get_schema_contract_provider()
 
@@ -86,9 +103,7 @@ class TestDIFlow:
 
     def test_composition_root_creates_schema_contract_loader(self) -> None:
         """Verify CompositionRoot creates schema contract loader."""
-        root = CompositionRoot(
-            observability_factory=TestObservabilityFactory()
-        )
+        root = CompositionRoot(observability_factory=TestObservabilityFactory())
 
         loader = root.create_schema_contract_loader()
 
@@ -109,9 +124,7 @@ class TestDIFlow:
 
     def test_composition_root_provides_provider_registry(self) -> None:
         """Verify CompositionRoot provides provider registry."""
-        root = CompositionRoot(
-            observability_factory=TestObservabilityFactory()
-        )
+        root = CompositionRoot(observability_factory=TestObservabilityFactory())
 
         registry = root.get_provider_registry()
 
@@ -146,10 +159,7 @@ class TestSchemaContractInjection:
         """Verify get_pipeline_contract creates default for unknown pipeline."""
         from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 
-        contract = get_pipeline_contract(
-            "unknown.pipeline",
-            default_entity="my_entity"
-        )
+        contract = get_pipeline_contract("unknown.pipeline", default_entity="my_entity")
 
         assert isinstance(contract, PipelineSchemaModel)
         assert contract.pipeline_code == "unknown.pipeline"
