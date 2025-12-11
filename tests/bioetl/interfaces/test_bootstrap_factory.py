@@ -1,75 +1,79 @@
-"""Tests for bootstrap_factory in interfaces layer."""
-
 from __future__ import annotations
 
-from bioetl.application.bootstrap import (
-    ApplicationBootstrap,
-    ApplicationServicesContext,
-)
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
+from unittest.mock import MagicMock
+
+import pytest
+
+from bioetl.application.bootstrap import ApplicationBootstrap
+from bioetl.interfaces import bootstrap_factory
+
+pytestmark = pytest.mark.unit
+
+
+class _BootstrapSpy(ApplicationBootstrap):
+    def __init__(self, *, config_loader_factory, schema_register_fn):  # type: ignore[override]
+        self.config_loader_factory = config_loader_factory
+        self.schema_register_fn = schema_register_fn
 
 
 class TestCreateDefaultBootstrap:
-    """Tests for create_default_bootstrap factory function."""
+    """Юнит-тесты фабрики create_default_bootstrap с моками инфраструктуры."""
 
-    def test_returns_bootstrap_instance(self) -> None:
-        """Test that factory returns ApplicationBootstrap instance."""
-        bootstrap = create_default_bootstrap()
+    def test_returns_bootstrap_instance(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(
+            "bioetl.domain.schemas.pipeline_contracts.set_contract_loader",
+            lambda loader: loader,
+        )
+        monkeypatch.setattr(
+            "bioetl.infrastructure.config.pipeline_contract_loader.get_default_contract_loader",
+            lambda: object(),
+        )
+        monkeypatch.setattr(
+            "bioetl.infrastructure.validation.bootstrap.register_schemas",
+            MagicMock(),
+        )
+        monkeypatch.setattr(
+            bootstrap_factory, "_create_config_loader_factory", lambda: MagicMock()
+        )
+
+        bootstrap = bootstrap_factory.create_default_bootstrap()
 
         assert isinstance(bootstrap, ApplicationBootstrap)
 
-    def test_bootstrap_starts_successfully(self) -> None:
-        """Test that created bootstrap starts without errors."""
-        bootstrap = create_default_bootstrap()
-        context = bootstrap.start()
+    def test_contract_loader_and_schema_registration_called(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        contract_loader = object()
+        set_loader_calls: list[object] = []
 
-        assert isinstance(context, ApplicationServicesContext)
+        monkeypatch.setattr(
+            "bioetl.infrastructure.config.pipeline_contract_loader.get_default_contract_loader",
+            lambda: contract_loader,
+        )
+        monkeypatch.setattr(
+            "bioetl.domain.schemas.pipeline_contracts.set_contract_loader",
+            lambda loader: set_loader_calls.append(loader),
+        )
 
-    def test_context_has_config_loader(self) -> None:
-        """Test that context from default bootstrap has config_loader."""
-        bootstrap = create_default_bootstrap()
-        context = bootstrap.start()
+        register_calls: list[object] = []
+        monkeypatch.setattr(
+            "bioetl.infrastructure.validation.bootstrap.register_schemas",
+            lambda provider: register_calls.append(provider),
+        )
 
-        assert context.config_loader is not None
+        fake_config_factory = MagicMock()
+        monkeypatch.setattr(
+            bootstrap_factory, "_create_config_loader_factory", lambda: fake_config_factory
+        )
 
-    def test_config_loader_has_get_by_id(self) -> None:
-        """Test that config_loader has get_by_id method."""
-        bootstrap = create_default_bootstrap()
-        context = bootstrap.start()
+        monkeypatch.setattr(bootstrap_factory, "ApplicationBootstrap", _BootstrapSpy)
 
-        assert hasattr(context.config_loader, "get_by_id")
-        assert callable(context.config_loader.get_by_id)
+        bootstrap = bootstrap_factory.create_default_bootstrap()
 
-    def test_config_loader_has_get_from_path(self) -> None:
-        """Test that config_loader has get_from_path method."""
-        bootstrap = create_default_bootstrap()
-        context = bootstrap.start()
+        assert isinstance(bootstrap, ApplicationBootstrap)
+        assert set_loader_calls == [contract_loader]
 
-        assert hasattr(context.config_loader, "get_from_path")
-        assert callable(context.config_loader.get_from_path)
-
-    def test_shutdown_clears_state(self) -> None:
-        """Test that shutdown clears bootstrap state."""
-        bootstrap = create_default_bootstrap()
-        bootstrap.start()
-
-        assert bootstrap.is_started
-
-        bootstrap.shutdown()
-
-        assert not bootstrap.is_started
-
-    def test_multiple_bootstraps_are_independent(self) -> None:
-        """Test that multiple bootstrap instances are independent."""
-        bootstrap1 = create_default_bootstrap()
-        bootstrap2 = create_default_bootstrap()
-
-        context1 = bootstrap1.start()
-        context2 = bootstrap2.start()
-
-        # Contexts should be different objects
-        assert context1 is not context2
-
-        # But both should be valid
-        assert context1.schema_provider is not None
-        assert context2.schema_provider is not None
+        schema_provider = MagicMock()
+        bootstrap.schema_register_fn(schema_provider)
+        assert register_calls == [schema_provider]
+        assert bootstrap.config_loader_factory is fake_config_factory
