@@ -1,0 +1,23 @@
+# Application layer implementations for ABC registry.
+# These are loaded separately from infrastructure abc_impls.yaml to maintain
+# layer boundary integrity (infrastructure should not reference application).
+#
+# This file is loaded by the CompositionRoot in the interfaces layer,
+# which has access to all layers.
+
+PipelineContainerABC:
+  default_factory: bioetl.application.container.create_default_container_factory
+  implementations:
+    Default: bioetl.application.container.PipelineContainer
+
+PipelineHookABC:
+  default_factory: bioetl.application.factories.hooks.PipelineHookFactory
+  implementations:
+    Logging: bioetl.application.pipelines.hooks_impl.LoggingPipelineHookImpl
+    Metrics: bioetl.application.pipelines.hooks_impl.MetricsPipelineHookImpl
+
+ErrorPolicyABC:
+  default_factory: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
+  implementations:
+    FailFast: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
+    ContinueOnError: bioetl.application.pipelines.hooks_impl.ContinueOnErrorPolicyImpl

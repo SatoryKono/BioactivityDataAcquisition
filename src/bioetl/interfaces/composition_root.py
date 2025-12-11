@@ -111,6 +111,44 @@ class CompositionRoot:
         self._http_session_factory = http_session_factory or requests.Session
         self._schema_contract_provider = schema_contract_provider
 
+        # Lazy-loaded provider registry
+        self._provider_registry: ProviderRegistryABC | None = None
+
+    # =========================================================================
+    # Provider Registry
+    # =========================================================================
+
+    def get_provider_registry(self) -> ProviderRegistryABC:
+        """Get or create the provider registry instance.
+
+        This method creates and bootstraps the provider registry lazily.
+        The registry is cached for subsequent calls.
+
+        This is the preferred method for obtaining a provider registry,
+        replacing the deprecated global get_provider_registry() function.
+
+        Returns:
+            Configured ProviderRegistryABC instance.
+
+        Example:
+            >>> root = CompositionRoot()
+            >>> registry = root.get_provider_registry()
+            >>> provider = registry.get_provider(ProviderId("chembl"))
+        """
+        if self._provider_registry is None:
+            from bioetl.infrastructure.config.provider_registry import (
+                ProviderRegistryLoader,
+            )
+            from bioetl.infrastructure.provider_registry import (
+                InMemoryProviderRegistry,
+            )
+
+            self._provider_registry = InMemoryProviderRegistry()
+            loader = ProviderRegistryLoader()
+            loader.get_providers(registry=self._provider_registry)
+
+        return self._provider_registry
+
     # =========================================================================
     # Observability
     # =========================================================================
@@ -281,7 +319,11 @@ class CompositionRoot:
             ABCRegistryResolver,
         )
 
-        resolver = ABCRegistryResolver()
+        # Create resolver with both infrastructure and application YAML files
+        application_impls_path = Path(__file__).parent / "abc_impls_application.yaml"
+        resolver = ABCRegistryResolver(
+            additional_impls_paths=[application_impls_path]
+        )
 
         # Resolve factories from registry
         loader_factory = resolver.resolve_default_factory("LoaderABC")
