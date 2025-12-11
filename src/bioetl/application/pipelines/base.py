@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias, 
 
 import pandas as pd
 
-from bioetl.application.executor import PipelineExecutor
+from bioetl.application.pipelines.executor import PipelineExecutor
 from bioetl.application.metadata.builder import DefaultRunMetadataBuilder
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.clients.base.output.contracts import (
