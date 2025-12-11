@@ -1,6 +1,7 @@
 # Molecule Pipeline Configuration
 
-id: molecule_chembl
+# Use provider.entity format expected by PipelineId value object
+id: chembl.molecule
 provider: chembl
 entity: molecule
 primary_key: "${CHEMBL_MOLECULE_PRIMARY_KEY:-molecule_chembl_id}"

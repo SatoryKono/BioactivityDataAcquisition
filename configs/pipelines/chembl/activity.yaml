@@ -1,6 +1,7 @@
 # Activity Pipeline Configuration
 
-id: activity_chembl
+# Use provider.entity format expected by PipelineId value object
+id: chembl.activity
 provider: chembl
 entity: activity
 primary_key: "${CHEMBL_ACTIVITY_PRIMARY_KEY:-activity_id}"
