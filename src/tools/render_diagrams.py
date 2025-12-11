@@ -198,7 +198,11 @@ def _render_diagram(
         ]
     
     # Add puppeteer config for sandbox workaround in CI environments
+    # Check in current working directory first, then in script directory
     puppeteer_config = Path("puppeteer-config.json")
+    if not puppeteer_config.exists():
+        script_dir = Path(__file__).parent.parent.parent  # Go to repo root
+        puppeteer_config = script_dir / "puppeteer-config.json"
     if puppeteer_config.exists():
         cmd.extend(["--puppeteerConfigFile", str(puppeteer_config.resolve())])
     
