@@ -68,44 +68,6 @@ class HttpClientConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_legacy_fields(cls, data: Any) -> Any:
-        """Support legacy field names for backward compatibility."""
-        if not isinstance(data, dict):
-            return data
-
-        migrated = dict(data)
-
-        # HttpClientSettings/HttpClientDefaults field mappings
-        legacy_mappings = {
-            "timeout": "timeout_sec",
-            "retries": "max_retries",
-            "backoff": "backoff_factor",
-            "rate_limit": "rate_limit_per_sec",
-            "circuit_breaker_recovery_time": "circuit_breaker_recovery_sec",
-        }
-
-        for old_name, new_name in legacy_mappings.items():
-            if old_name in migrated and new_name not in migrated:
-                value = migrated.pop(old_name)
-                if old_name in ("timeout", "retries"):
-                    value = float(value) if old_name == "timeout" else int(value)
-                migrated[new_name] = value
-
-        # Handle retry_enabled -> if False, set max_retries to 0
-        if "retry_enabled" in migrated:
-            retry_enabled = migrated.pop("retry_enabled")
-            if not retry_enabled and "max_retries" not in migrated:
-                migrated["max_retries"] = 0
-
-        return migrated
-
-    @property
-    def retry_enabled(self) -> bool:
-        """Backward compatibility property for retry_enabled."""
-        return self.max_retries > 0
-
 
 class ProviderHttpConfig(HttpClientConfig):
     """HTTP configuration for a specific provider with base URL."""
@@ -596,11 +558,6 @@ class PipelineConfig(BaseModel):
         return prov.value if hasattr(prov, "value") else str(prov)
 
     @property
-    def entity_name(self) -> str:
-        """Alias for entity (backward compatibility)."""
-        return str(self.identity.entity)
-
-    @property
     def id(self) -> str:
         """Access pipeline_id from identity section."""
         return str(self.identity.pipeline_id)
@@ -667,29 +624,6 @@ class PipelineConfig(BaseModel):
             runtime=self.runtime,
             transform=self.transform,
         )
-
-    # --- Backward-compatible execution properties ---
-    # These delegate to execution aggregate for consistency
-
-    @property
-    def is_extract_enabled(self) -> bool:
-        """Check if extract stage is enabled (backward-compatible shortcut)."""
-        return self.stages.extract is not False
-
-    @property
-    def is_transform_enabled(self) -> bool:
-        """Check if transform stage is enabled (backward-compatible shortcut)."""
-        return self.stages.transform is not False
-
-    @property
-    def is_load_enabled(self) -> bool:
-        """Check if load stage is enabled (backward-compatible shortcut)."""
-        return self.stages.load is not False
-
-    @property
-    def effective_batch_size(self) -> int:
-        """Get effective batch size from runtime pagination (backward-compatible)."""
-        return self.runtime.pagination.limit
 
     # =========================================================================
     # Public methods
@@ -847,11 +781,4 @@ __all__ = [
     "InterfaceFeaturesConfig",
     "NormalizationConfig",
     "TransformConfig",
-    # Deprecated aliases
-    "ClientConfig",
-    "HttpClientSettings",
 ]
-
-# Deprecated aliases for backward compatibility
-ClientConfig = HttpClientConfig
-HttpClientSettings = HttpClientConfig

@@ -27,7 +27,6 @@ from bioetl.domain.configs.pipeline import (
     BusinessKeyConfig,
     CanonicalizationConfig,
     ChemblSourceConfig,
-    ClientConfig,
     CsvInputConfig,
     DataSinkConfig,
     DataSourceConfig,
@@ -110,6 +109,4 @@ __all__ = [
     "SourcesDefaultsConfig",
     # Protocols
     "PipelineConfigLoaderProtocol",
-    # Deprecated aliases (for backward compatibility)
-    "ClientConfig",
 ]
