@@ -1,0 +1,90 @@
+---
+title: Domain Configs Package
+description: bioetl.domain.configs - Configuration models
+---
+classDiagram
+    direction TB
+
+    class ConfigBase {
+        <<abstract>>
+        +validate() bool
+    }
+
+    class PipelineConfig {
+        +identity: IdentityConfig
+        +source: SourceConfig
+        +sink: SinkConfig
+        +execution: ExecutionConfig
+        +data_flow: DataFlowConfig
+    }
+
+    class IdentityConfig {
+        +pipeline_name: str
+        +provider: str
+        +entity: str
+        +version: str
+    }
+
+    class SourceConfig {
+        +type: SourceType
+        +api_endpoint: str
+        +filters: dict
+        +limit: int
+        +offset: int
+    }
+
+    class SinkConfig {
+        +output_dir: Path
+        +format: OutputFormat
+        +compression: str
+        +partition_by: list
+    }
+
+    class ExecutionConfig {
+        +batch_size: int
+        +max_retries: int
+        +timeout: int
+        +error_policy: ErrorPolicyType
+        +dry_run: bool
+    }
+
+    class DataFlowConfig {
+        +columns: list
+        +transformations: list
+        +validations: list
+    }
+
+    class ManifestConfig {
+        +pipelines: list
+        +defaults: dict
+        +version: str
+    }
+
+    class PipelineDefaults {
+        +batch_size: int
+        +timeout: int
+        +output_format: str
+    }
+
+    class PipelinePartsConfig {
+        +extract: ExtractConfig
+        +transform: TransformConfig
+        +load: LoadConfig
+    }
+
+    class ConfigContracts {
+        <<interface>>
+        +from_dict(data) Config
+        +to_dict() dict
+    }
+
+    ConfigBase <|-- PipelineConfig
+    ConfigBase <|-- ManifestConfig
+    ConfigBase <|-- PipelineDefaults
+    PipelineConfig *-- IdentityConfig
+    PipelineConfig *-- SourceConfig
+    PipelineConfig *-- SinkConfig
+    PipelineConfig *-- ExecutionConfig
+    PipelineConfig *-- DataFlowConfig
+    ManifestConfig o-- PipelineDefaults
+    PipelineConfig ..|> ConfigContracts

@@ -1,0 +1,54 @@
+---
+title: Domain Validation Package
+description: bioetl.domain.validation - Validation service contracts
+---
+classDiagram
+    direction TB
+
+    class ValidationServiceABC {
+        <<interface>>
+        +validate(df: DataFrame) DataFrame
+        +get_errors() list[ValidationError]
+        +is_valid() bool
+    }
+
+    class ValidatorFactoryABC {
+        <<interface>>
+        +create_validator(schema_name) Validator
+        +register_schema(name, schema) void
+    }
+
+    class ValidationContracts {
+        <<interface>>
+        +ValidationError
+        +ValidationResult
+        +ValidationContext
+    }
+
+    class ValidationError {
+        +column: str
+        +row_index: int
+        +message: str
+        +severity: ErrorSeverity
+    }
+
+    class ValidationResult {
+        +is_valid: bool
+        +errors: list[ValidationError]
+        +warnings: list[ValidationError]
+        +row_count: int
+        +error_count: int
+    }
+
+    class ValidationContext {
+        +schema_name: str
+        +strict_mode: bool
+        +coerce_types: bool
+    }
+
+    ValidationServiceABC ..> ValidationResult : returns
+    ValidationServiceABC ..> ValidationError : produces
+    ValidatorFactoryABC ..> ValidationServiceABC : creates
+    ValidationContracts -- ValidationError
+    ValidationContracts -- ValidationResult
+    ValidationContracts -- ValidationContext

@@ -1,0 +1,70 @@
+---
+title: Domain Clients Package
+description: bioetl.domain.clients - Client base contracts and resilience
+---
+classDiagram
+    direction TB
+
+    class HttpClientABC {
+        <<interface>>
+        +get(url, params) Response
+        +post(url, data) Response
+        +close() void
+    }
+
+    class PaginatorABC {
+        <<interface>>
+        +get_next_page() PageInfo
+        +has_more() bool
+        +get_total() int
+    }
+
+    class RetryPolicyABC {
+        <<interface>>
+        +should_retry(error) bool
+        +get_delay(attempt) float
+        +max_attempts: int
+    }
+
+    class RateLimiterABC {
+        <<interface>>
+        +acquire() void
+        +release() void
+        +wait_if_needed() void
+    }
+
+    class CircuitBreakerABC {
+        <<interface>>
+        +is_open() bool
+        +record_success() void
+        +record_failure() void
+    }
+
+    class OutputWriterABC {
+        <<interface>>
+        +write(data, path) WriteResult
+        +get_supported_formats() list
+    }
+
+    class OutputContracts {
+        <<interface>>
+        +WriteResult
+        +OutputMetadata
+    }
+
+    class WriteResult {
+        +path: Path
+        +row_count: int
+        +file_size: int
+        +checksum: str
+        +format: str
+    }
+
+    HttpClientABC ..> RetryPolicyABC : uses
+    HttpClientABC ..> RateLimiterABC : uses
+    HttpClientABC ..> CircuitBreakerABC : uses
+    OutputWriterABC ..> WriteResult : returns
+
+    note for HttpClientABC "Base HTTP client contract\nfor all API clients"
+    note for PaginatorABC "Handles API pagination\nfor large result sets"
+    note for RetryPolicyABC "Defines retry behavior\nfor failed requests"

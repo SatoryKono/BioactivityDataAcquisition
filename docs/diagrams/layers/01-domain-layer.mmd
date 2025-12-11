@@ -1,0 +1,117 @@
+---
+title: Domain Layer Components
+description: Core business logic, contracts (ports), entities, and value objects
+---
+flowchart TB
+
+classDef pkg fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+classDef component fill:#c8e6c9,stroke:#388e3c,stroke-width:1px,color:#1b5e20
+classDef contract fill:#a5d6a7,stroke:#43a047,stroke-width:1px,color:#1b5e20
+
+subgraph Domain["Domain Layer (bioetl.domain)"]
+    direction TB
+
+    subgraph Entities["entities/"]
+        Activity["Activity"]:::component
+        Assay["Assay"]:::component
+        Target["Target"]:::component
+        Molecule["Molecule"]:::component
+        Publication["Publication"]:::component
+        Cell["Cell"]:::component
+        Tissue["Tissue"]:::component
+    end
+    class Entities pkg
+
+    subgraph Ports["ports/"]
+        ExtractionPort["ExtractionServiceABC"]:::contract
+        OutputPort["DataWriterPort"]:::contract
+        ConfigLoaderPort["ConfigLoaderPortABC"]:::contract
+        ParsingPort["ResponseParserPortABC"]:::contract
+        FilterPort["FilterStrategyABC"]:::contract
+        SchemaPort["SchemaProviderABC"]:::contract
+        EntityModelsPort["EntityModelRegistryABC"]:::contract
+        FilesystemPort["FilesystemPortABC"]:::contract
+        InfraFactoryPort["InfrastructureFactoryPort"]:::contract
+    end
+    class Ports pkg
+
+    subgraph Schemas["schemas/"]
+        PipelineContracts["PipelineSchemaModel"]:::component
+        FieldSpecs["FieldSpecs"]:::component
+        SchemaRegistry["SchemaRegistry"]:::component
+        ChemblRawModels["ChEMBL Raw Models"]:::component
+        OutputViews["OutputViews"]:::component
+    end
+    class Schemas pkg
+
+    subgraph Configs["configs/"]
+        PipelineConfig["PipelineConfig"]:::component
+        SourceConfig["SourceConfig"]:::component
+        SinkConfig["SinkConfig"]:::component
+        ExecutionConfig["ExecutionConfig"]:::component
+        IdentityConfig["IdentityConfig"]:::component
+        DataFlowConfig["DataFlowConfig"]:::component
+    end
+    class Configs pkg
+
+    subgraph Services["services/"]
+        EntityFactory["EntityFactory"]:::component
+        BusinessKeyService["BusinessKeyService"]:::component
+        VersionFormatter["VersionFormatter"]:::component
+    end
+    class Services pkg
+
+    subgraph Transform["transform/"]
+        TransformContracts["TransformerABC\nNormalizationServiceABC\nHashServiceABC"]:::contract
+        Normalizers["BaseNormalizer\nNumericNormalizer\nIdentifierNormalizer\nCollectionsNormalizer"]:::component
+        Serializers["Serializers"]:::component
+        Merge["MergeStrategy"]:::component
+    end
+    class Transform pkg
+
+    subgraph Validation["validation/"]
+        ValidationService["ValidationServiceABC"]:::contract
+        ValidationContracts["ValidatorFactoryABC"]:::contract
+    end
+    class Validation pkg
+
+    subgraph Clients["clients/"]
+        BaseContracts["HttpClientABC\nPaginatorABC"]:::contract
+        Resilience["RetryPolicyABC\nRateLimiterABC"]:::contract
+        OutputContracts["OutputWriterABC"]:::contract
+    end
+    class Clients pkg
+
+    subgraph ValueObjects["value_objects/"]
+        Identifiers["ChemblID\nInChIKey"]:::component
+        Temporal["Timestamp\nDateRange"]:::component
+        Network["URL\nAPIEndpoint"]:::component
+        Crypto["Hash\nChecksum"]:::component
+    end
+    class ValueObjects pkg
+
+    subgraph Pipelines["pipelines/"]
+        PipelineContracts2["ExtractorABC\nLoaderABC\nPipelineHookABC\nErrorPolicyABC"]:::contract
+        PipelineTypes["StageResult\nRunResult"]:::component
+    end
+    class Pipelines pkg
+
+    subgraph Other["Core"]
+        RecordSource["RecordSourceABC"]:::contract
+        ProviderRegistry["ProviderRegistryABC"]:::contract
+        Enums["Enums"]:::component
+        Errors["DomainErrors"]:::component
+        Models["Models"]:::component
+        Data["DataProtocols"]:::component
+    end
+    class Other pkg
+end
+class Domain pkg
+
+%% Dependencies within domain
+Entities --> ValueObjects
+Services --> Entities
+Schemas --> FieldSpecs
+Transform --> Normalizers
+Pipelines --> Transform
+Validation --> Schemas

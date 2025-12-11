@@ -1,0 +1,151 @@
+---
+title: HTTP Client Classes
+description: All HTTP client-related classes
+---
+classDiagram
+    direction TB
+
+    %% Contracts
+    class HttpClientABC {
+        <<interface>>
+        +get(url, params) Response
+        +post(url, data) Response
+        +close()
+    }
+
+    class PaginatorABC {
+        <<interface>>
+        +get_next_page() PageInfo
+        +has_more() bool
+        +get_total() int
+    }
+
+    class RetryPolicyABC {
+        <<interface>>
+        +should_retry(error) bool
+        +get_delay(attempt) float
+        +max_attempts: int
+    }
+
+    class RateLimiterABC {
+        <<interface>>
+        +acquire()
+        +release()
+        +wait_if_needed()
+    }
+
+    class ExtractionServiceABC {
+        <<interface>>
+        +fetch_records() Iterable
+        +get_total_count() int
+    }
+
+    class ResponseParserPortABC {
+        <<interface>>
+        +parse(response) Records
+    }
+
+    %% ChEMBL Client Implementation
+    class ChemblHttpClientImpl {
+        +get(url, params) Response
+        +fetch_records(filters) Records
+        +fetch_by_ids(ids) Records
+        -_transport: HttpTransport
+        -_rate_limiter: RateLimiter
+        -_retry_policy: RetryPolicy
+        -_base_url: str
+    }
+
+    class ChemblExtractionServiceImpl {
+        +fetch_records() Iterable
+        +get_total_count() int
+        -_client: ChemblHttpClientImpl
+        -_parser: ChemblResponseParser
+        -_paginator: ChemblPaginator
+    }
+
+    class ChemblResponseParser {
+        +parse(response) Records
+        +parse_single(data) dict
+        -_entity_parsers: dict
+    }
+
+    class ChemblPaginator {
+        +get_next_page() PageInfo
+        +has_more() bool
+        +get_total() int
+        -_offset: int
+        -_limit: int
+        -_total: int
+    }
+
+    class RequestBuilder {
+        +build(params) Request
+        +add_filter(key, value)
+        +set_pagination(offset, limit)
+        -_base_url: str
+        -_params: dict
+    }
+
+    %% Base Client Components
+    class HttpTransport {
+        +send(request) Response
+        +close()
+        -_session: httpx.Client
+        -_timeout: float
+    }
+
+    class RateLimiterImpl {
+        +acquire()
+        +release()
+        +wait_if_needed()
+        -_rate: float
+        -_tokens: int
+        -_last_update: float
+    }
+
+    class ResponseCache {
+        +get(key) Response
+        +set(key, response)
+        +invalidate(key)
+        -_cache: dict
+        -_ttl: int
+    }
+
+    class HttpErrorHandler {
+        +handle(error) void
+        +is_retryable(error) bool
+    }
+
+    class RetryPolicy {
+        +should_retry(error) bool
+        +get_delay(attempt) float
+        -_max_attempts: int
+        -_base_delay: float
+        -_backoff_factor: float
+    }
+
+    class ParserRegistry {
+        +register(entity, parser)
+        +get_parser(entity) Callable
+        -_parsers: dict
+    }
+
+    %% Relationships
+    HttpClientABC <|.. ChemblHttpClientImpl
+    PaginatorABC <|.. ChemblPaginator
+    RetryPolicyABC <|.. RetryPolicy
+    RateLimiterABC <|.. RateLimiterImpl
+    ExtractionServiceABC <|.. ChemblExtractionServiceImpl
+    ResponseParserPortABC <|.. ChemblResponseParser
+
+    ChemblHttpClientImpl --> HttpTransport
+    ChemblHttpClientImpl --> RateLimiterImpl
+    ChemblHttpClientImpl --> RetryPolicy
+    ChemblExtractionServiceImpl --> ChemblHttpClientImpl
+    ChemblExtractionServiceImpl --> ChemblResponseParser
+    ChemblExtractionServiceImpl --> ChemblPaginator
+    ChemblResponseParser --> ParserRegistry
+    RequestBuilder --> ChemblHttpClientImpl
+    HttpTransport --> ResponseCache
+    HttpTransport --> HttpErrorHandler
