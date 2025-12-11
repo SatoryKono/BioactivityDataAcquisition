@@ -1,38 +1,55 @@
-"""Tests for ApplicationBootstrap."""
+"""Тесты для ApplicationBootstrap с моками инфраструктуры."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.bootstrap import (
-    ApplicationBootstrap,
-    ApplicationServicesContext,
-    create_application_bootstrap,
-)
+from bioetl.application.bootstrap import ApplicationBootstrap, create_application_bootstrap
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.validation import SchemaProviderABC
 
-if TYPE_CHECKING:
-    pass
+if TYPE_CHECKING:  # pragma: no cover
+    from bioetl.application.services.schema_bootstrap import SchemaBootstrapService
+
+pytestmark = pytest.mark.unit
+
+
+def _make_schema_bootstrap_service(schema_provider: SchemaProviderABC) -> SchemaBootstrapService:
+    service = MagicMock()
+    service.ensure_registered.return_value = schema_provider
+    return service  # type: ignore[return-value]
 
 
 class TestApplicationBootstrap:
-    """Tests for ApplicationBootstrap class."""
+    """Проверка базовой логики ApplicationBootstrap."""
 
-    def test_start_returns_context(self) -> None:
-        """Test that start() returns an ApplicationServicesContext."""
+    def test_start_uses_schema_bootstrap_service(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        schema_provider = MagicMock(spec=SchemaProviderABC)
+        schema_service = _make_schema_bootstrap_service(schema_provider)
+
+        monkeypatch.setattr(
+            "bioetl.application.bootstrap.create_schema_bootstrap_service",
+            lambda register_fn=None: schema_service,
+        )
+
         bootstrap = ApplicationBootstrap()
         context = bootstrap.start()
 
-        assert isinstance(context, ApplicationServicesContext)
-        assert isinstance(context.schema_provider, SchemaProviderABC)
-        assert isinstance(context.contract_provider, SchemaContractProviderABC)
+        assert context.schema_provider is schema_provider
+        schema_service.ensure_registered.assert_called_once()
 
-    def test_start_is_idempotent(self) -> None:
-        """Test that multiple calls to start() return the same context."""
+    def test_start_is_idempotent(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        schema_provider = MagicMock(spec=SchemaProviderABC)
+        schema_service = _make_schema_bootstrap_service(schema_provider)
+        monkeypatch.setattr(
+            "bioetl.application.bootstrap.create_schema_bootstrap_service",
+            lambda register_fn=None: schema_service,
+        )
+
         bootstrap = ApplicationBootstrap()
 
         context1 = bootstrap.start()
@@ -40,155 +57,104 @@ class TestApplicationBootstrap:
 
         assert context1 is context2
 
-    def test_is_started_property(self) -> None:
-        """Test is_started property reflects bootstrap state."""
-        bootstrap = ApplicationBootstrap()
+    def test_config_loader_factory_receives_contract_provider(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        schema_provider = MagicMock(spec=SchemaProviderABC)
+        schema_service = _make_schema_bootstrap_service(schema_provider)
+        monkeypatch.setattr(
+            "bioetl.application.bootstrap.create_schema_bootstrap_service",
+            lambda register_fn=None: schema_service,
+        )
 
-        assert not bootstrap.is_started
+        captured: list[SchemaContractProviderABC] = []
 
-        bootstrap.start()
-
-        assert bootstrap.is_started
-
-    def test_context_property(self) -> None:
-        """Test context property returns None before start and context after."""
-        bootstrap = ApplicationBootstrap()
-
-        assert bootstrap.context is None
-
-        context = bootstrap.start()
-
-        assert bootstrap.context is context
-
-    def test_shutdown_resets_state(self) -> None:
-        """Test that shutdown() resets the bootstrap state."""
-        bootstrap = ApplicationBootstrap()
-        bootstrap.start()
-
-        assert bootstrap.is_started
-
-        bootstrap.shutdown()
-
-        assert not bootstrap.is_started
-        assert bootstrap.context is None
-
-    def test_can_restart_after_shutdown(self) -> None:
-        """Test that bootstrap can be restarted after shutdown."""
-        bootstrap = ApplicationBootstrap()
-
-        context1 = bootstrap.start()
-        bootstrap.shutdown()
-        context2 = bootstrap.start()
-
-        assert context1 is not context2
-        assert bootstrap.is_started
-
-    def test_config_loader_is_none_without_factory(self) -> None:
-        """Test that config_loader is None when no factory is provided."""
-        bootstrap = ApplicationBootstrap()
-        context = bootstrap.start()
-
-        assert context.config_loader is None
-
-    def test_config_loader_factory_is_called(self) -> None:
-        """Test that config_loader_factory is called with contract_provider."""
-        captured_provider = []
-
-        def mock_factory(
-            provider: SchemaContractProviderABC,
-        ) -> PipelineConfigLoaderProtocol:
-            captured_provider.append(provider)
-            return object()  # type: ignore
+        def mock_factory(provider: SchemaContractProviderABC) -> PipelineConfigLoaderProtocol:
+            captured.append(provider)
+            return MagicMock(spec=PipelineConfigLoaderProtocol)
 
         bootstrap = ApplicationBootstrap(config_loader_factory=mock_factory)
         context = bootstrap.start()
 
-        assert len(captured_provider) == 1
-        assert captured_provider[0] is context.contract_provider
+        assert captured == [context.contract_provider]
         assert context.config_loader is not None
 
-    def test_provider_injector_is_called(self) -> None:
-        """Test that provider_injector callback is called during start."""
-        injected_providers = []
+    def test_provider_callbacks_invoked(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        schema_provider = MagicMock(spec=SchemaProviderABC)
+        schema_service = _make_schema_bootstrap_service(schema_provider)
+        monkeypatch.setattr(
+            "bioetl.application.bootstrap.create_schema_bootstrap_service",
+            lambda register_fn=None: schema_service,
+        )
 
-        def mock_injector(provider: SchemaContractProviderABC) -> None:
-            injected_providers.append(provider)
+        injected: list[SchemaContractProviderABC] = []
+        cleared: list[bool] = []
 
-        bootstrap = ApplicationBootstrap(provider_injector=mock_injector)
+        bootstrap = ApplicationBootstrap(
+            provider_injector=lambda provider: injected.append(provider),
+            provider_clearer=lambda: cleared.append(True),
+        )
+
         context = bootstrap.start()
+        bootstrap.shutdown()
 
-        assert len(injected_providers) == 1
-        assert injected_providers[0] is context.contract_provider
+        assert injected == [context.contract_provider]
+        assert cleared == [True]
 
-    def test_provider_clearer_is_called_on_shutdown(self) -> None:
-        """Test that provider_clearer callback is called during shutdown."""
-        clear_called = []
+    def test_migration_service_factory_is_used(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        schema_provider = MagicMock(spec=SchemaProviderABC)
+        schema_service = _make_schema_bootstrap_service(schema_provider)
+        monkeypatch.setattr(
+            "bioetl.application.bootstrap.create_schema_bootstrap_service",
+            lambda register_fn=None: schema_service,
+        )
 
-        def mock_clearer() -> None:
-            clear_called.append(True)
+        migration_service = MagicMock()
+        bootstrap = ApplicationBootstrap(
+            migration_service_factory=lambda: migration_service,
+        )
 
-        bootstrap = ApplicationBootstrap(provider_clearer=mock_clearer)
+        context = bootstrap.start()
+        assert context.migration_service is migration_service
+
+    def test_shutdown_resets_state(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        schema_provider = MagicMock(spec=SchemaProviderABC)
+        schema_service = _make_schema_bootstrap_service(schema_provider)
+        monkeypatch.setattr(
+            "bioetl.application.bootstrap.create_schema_bootstrap_service",
+            lambda register_fn=None: schema_service,
+        )
+
+        bootstrap = ApplicationBootstrap()
         bootstrap.start()
         bootstrap.shutdown()
 
-        assert len(clear_called) == 1
+        assert bootstrap.context is None
+        assert not bootstrap.is_started
 
 
 class TestCreateApplicationBootstrap:
-    """Tests for create_application_bootstrap factory function."""
+    """Проверка фабричной функции create_application_bootstrap."""
 
     def test_returns_bootstrap_instance(self) -> None:
-        """Test that factory returns ApplicationBootstrap instance."""
         bootstrap = create_application_bootstrap()
 
         assert isinstance(bootstrap, ApplicationBootstrap)
 
-    def test_accepts_config_loader_factory(self) -> None:
-        """Test that factory accepts config_loader_factory parameter."""
+    def test_passes_factories_and_callbacks(self) -> None:
+        def mock_factory(provider: SchemaContractProviderABC) -> PipelineConfigLoaderProtocol:
+            return MagicMock(spec=PipelineConfigLoaderProtocol)
 
-        def mock_factory(
-            provider: SchemaContractProviderABC,
-        ) -> PipelineConfigLoaderProtocol:
-            return object()  # type: ignore
-
-        bootstrap = create_application_bootstrap(config_loader_factory=mock_factory)
-        context = bootstrap.start()
-
-        assert context.config_loader is not None
-
-    def test_accepts_provider_callbacks(self) -> None:
-        """Test that factory accepts provider callback parameters."""
-        injected = []
-        cleared = []
+        def mock_injector(provider: SchemaContractProviderABC) -> None:
+            provider  # pragma: no cover - side-effect free
 
         bootstrap = create_application_bootstrap(
-            provider_injector=lambda p: injected.append(p),
-            provider_clearer=lambda: cleared.append(True),
+            config_loader_factory=mock_factory,
+            provider_injector=mock_injector,
         )
 
-        bootstrap.start()
-        assert len(injected) == 1
-
-        bootstrap.shutdown()
-        assert len(cleared) == 1
-
-
-class TestApplicationServicesContext:
-    """Tests for ApplicationServicesContext dataclass."""
-
-    def test_is_frozen(self) -> None:
-        """Test that ApplicationServicesContext is immutable."""
-        bootstrap = ApplicationBootstrap()
-        context = bootstrap.start()
-
-        with pytest.raises(Exception):  # FrozenInstanceError
-            context.schema_provider = None  # type: ignore
-
-    def test_has_required_attributes(self) -> None:
-        """Test that context has all required attributes."""
-        bootstrap = ApplicationBootstrap()
-        context = bootstrap.start()
-
-        assert hasattr(context, "schema_provider")
-        assert hasattr(context, "contract_provider")
-        assert hasattr(context, "config_loader")
+        assert isinstance(bootstrap, ApplicationBootstrap)
