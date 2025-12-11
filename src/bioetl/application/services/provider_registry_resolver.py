@@ -42,7 +42,9 @@ class ProviderRegistryResolver:
         provider_registry_provider: "Callable[[], ProviderRegistryABC] | None" = None,
         provider_registry_factory: "ProviderRegistryFactory",
         provider_loader: "ProviderRegistryLoaderABC | None" = None,
-        provider_loader_factory: "Callable[[], ProviderRegistryLoaderABC] | None" = None,
+        provider_loader_factory: (
+            "Callable[[], ProviderRegistryLoaderABC] | None"
+        ) = None,
     ) -> None:
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider

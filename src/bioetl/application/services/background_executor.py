@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from bioetl.domain.configs import PipelineConfig
     from bioetl.domain.models import RunResult
     from bioetl.domain.provider_registry import (
-        ProviderRegistryABC,
         ProviderRegistryFactory,
         ProviderRegistryLoaderABC,
     )
