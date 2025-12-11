@@ -36,8 +36,7 @@ jobs:
       # /run-tests command
       - name: Run Tests (Coverage)
         run: |
-          chmod +x scripts/run_tests.sh
-          ./scripts/run_tests.sh coverage
+          python -m tools.run_tests coverage --min-cov=85
 
       # /render-diagrams command
       - name: Render Diagrams & Check Consistency
