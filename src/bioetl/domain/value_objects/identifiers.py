@@ -40,7 +40,7 @@ class RunId:
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, RunId):
-            return self._value == other._value
+            return self._value == other.value
         return NotImplemented
 
     def __hash__(self) -> int:
@@ -142,7 +142,7 @@ class StageName:
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, StageName):
-            return self._value == other._value
+            return self._value == other.value
         return NotImplemented
 
     def __hash__(self) -> int:
