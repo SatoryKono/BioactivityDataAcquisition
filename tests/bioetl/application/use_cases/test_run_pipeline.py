@@ -158,6 +158,11 @@ class TestRunPipelineUseCase:
         return Mock()
 
     @pytest.fixture
+    def mock_provider_registry_factory(self) -> Mock:
+        """Create mock provider registry factory."""
+        return Mock()
+
+    @pytest.fixture
     def mock_config(self) -> Mock:
         """Create mock PipelineConfig."""
         config = Mock()
@@ -185,6 +190,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
         mock_run_result: Mock,
     ) -> None:
@@ -195,6 +201,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
             configs_root=Path("/configs"),
         )
 
@@ -223,6 +230,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
         mock_run_result: Mock,
     ) -> None:
@@ -233,6 +241,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
             configs_root=Path("/configs"),
         )
 
