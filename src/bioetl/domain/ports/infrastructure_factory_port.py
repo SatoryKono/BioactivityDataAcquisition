@@ -107,3 +107,4 @@ class ABCRegistryResolverPortABC(ABC):
 
 
 __all__ = ["ABCRegistryResolverPortABC", "InfrastructureFactoryPortABC"]
+

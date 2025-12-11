@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.output.deterministic import (
     DeterministicWriterABC,
-    WriteResult,
+    DeterministicWriteResult,
 )
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class DeterministicParquetWriter(DeterministicWriterABC):
         *,
         sort_columns: tuple[str, ...] | None = None,
         reset_index: bool = True,
-    ) -> WriteResult:
+    ) -> DeterministicWriteResult:
         """Write data atomically with deterministic output."""
         import pandas as pd
 
@@ -87,7 +87,7 @@ class DeterministicParquetWriter(DeterministicWriterABC):
             # 5. Atomic rename
             temp_path.rename(target_path)
 
-            return WriteResult(
+            return DeterministicWriteResult(
                 path=target_path,
                 checksum=checksum,
                 row_count=len(df),
@@ -128,7 +128,7 @@ class DeterministicCSVWriter(DeterministicWriterABC):
         *,
         sort_columns: tuple[str, ...] | None = None,
         reset_index: bool = True,
-    ) -> WriteResult:
+    ) -> DeterministicWriteResult:
         """Write data atomically with deterministic output."""
         import pandas as pd
 
@@ -168,7 +168,7 @@ class DeterministicCSVWriter(DeterministicWriterABC):
             # 5. Atomic rename
             temp_path.rename(target_path)
 
-            return WriteResult(
+            return DeterministicWriteResult(
                 path=target_path,
                 checksum=checksum,
                 row_count=len(df),

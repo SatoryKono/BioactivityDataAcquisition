@@ -48,8 +48,10 @@ class AtomicFileOperation:
         is_windows = platform.system() == "Windows"
         # On Windows use longer delay due to antivirus/indexers
         delay = RETRY_DELAY_SEC * (2.0 if is_windows else 1.0)
+        # Increase retries on Windows for locked files
+        max_retries = MAX_FILE_RETRIES * (2 if is_windows else 1)
 
-        for attempt in range(MAX_FILE_RETRIES):
+        for attempt in range(max_retries):
             try:
                 if self._try_replace(src, dst, is_windows):
                     return
@@ -60,7 +62,18 @@ class AtomicFileOperation:
             except OSError as exc:
                 last_error = exc
 
-            if attempt == MAX_FILE_RETRIES - 1:
+            if attempt == max_retries - 1:
+                # Provide helpful error message for Windows file lock issues
+                if is_windows and last_error and isinstance(
+                    last_error, PermissionError
+                ):
+                    msg = (
+                        f"Cannot replace file '{dst}': file is locked by another "
+                        f"process. Please close any programs that have this file "
+                        f"open (e.g., Excel, Notepad, or file explorer) and try "
+                        f"again. Original error: {last_error}"
+                    )
+                    raise PermissionError(msg) from last_error
                 raise last_error or OSError("Move failed without explicit error.")
             time.sleep(delay)
 
@@ -77,9 +90,15 @@ class AtomicFileOperation:
             # On Windows PermissionError often means file is locked
             if self._try_windows_unlock_replace(src, dst, is_windows):
                 return True
+            # Re-raise as PermissionError to preserve type for better error messages
             raise exc
-        except OSError:
-            # Pass exception up so it's accounted for in retry and messages
+        except OSError as exc:
+            # On Windows, Access Denied (errno 5) may come as OSError
+            if is_windows and hasattr(exc, "winerror") and exc.winerror == 5:
+                # Convert to PermissionError for consistent handling
+                raise PermissionError(
+                    f"Cannot replace file '{dst}': {exc}"
+                ) from exc
             raise
 
     def _try_windows_unlock_replace(

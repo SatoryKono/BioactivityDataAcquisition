@@ -4,24 +4,27 @@ This module defines abstract ports (interfaces) that the application layer
 uses to communicate with infrastructure. Concrete implementations (adapters)
 are provided by the infrastructure layer and injected at composition time.
 
+Note:
+    Most ports have been moved to domain.ports to allow infrastructure
+    adapters to implement them without depending on application layer.
+    Only application-specific ports remain here.
+
 Ports defined here:
-- ConfigLoaderPortABC: Loading pipeline configurations
-- ConfigPathResolverPortABC: Resolving configuration paths
-- InfrastructureFactoryPortABC: Creating infrastructure components
-- ABCRegistryResolverPortABC: Resolving ABC implementations
 - ObservabilityFactoryPortABC: Creating observability components
 """
 
-from bioetl.application.ports.config_loader_port import (
+from bioetl.application.ports.observability_factory_port import (
+    ObservabilityFactoryPortABC,
+)
+
+# Re-export domain ports for backward compatibility
+from bioetl.domain.ports.config_loader_port import (
     ConfigLoaderPortABC,
     ConfigPathResolverPortABC,
 )
-from bioetl.application.ports.infrastructure_factory_port import (
+from bioetl.domain.ports.infrastructure_factory_port import (
     ABCRegistryResolverPortABC,
     InfrastructureFactoryPortABC,
-)
-from bioetl.application.ports.observability_factory_port import (
-    ObservabilityFactoryPortABC,
 )
 
 __all__ = [

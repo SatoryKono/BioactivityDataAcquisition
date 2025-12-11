@@ -6,10 +6,10 @@ including deterministic and atomic write semantics.
 
 from bioetl.domain.output.deterministic import (
     DeterministicWriterABC,
-    WriteResult,
+    DeterministicWriteResult,
 )
 
 __all__ = [
     "DeterministicWriterABC",
-    "WriteResult",
+    "DeterministicWriteResult",
 ]

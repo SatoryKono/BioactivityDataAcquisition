@@ -171,7 +171,7 @@ class PipelineOrchestrator:
         if effective_type == PipelineType.EXTRACT_ONLY:
             # Extract only - use public API
             context = self._build_simple_context()
-            extract_result = pipeline.run_extract_only()
+            extract_result = pipeline.run_extract_only(limit=limit)
 
             stage = StageResult(
                 stage_name=StageName.EXTRACT,

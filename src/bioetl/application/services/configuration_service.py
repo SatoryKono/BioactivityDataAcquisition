@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from bioetl.application.ports.config_loader_port import (
+    from bioetl.domain.ports.config_loader_port import (
         ConfigLoaderPortABC,
         ConfigPathResolverPortABC,
     )

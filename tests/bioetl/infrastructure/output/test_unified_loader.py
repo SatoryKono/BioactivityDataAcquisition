@@ -189,6 +189,34 @@ def test_unified_writer_delegates_atomicity(
     assert mock_qc_artifact_writer.write_qc_csv.call_count == 2
 
 
+def test_load_accepts_df_keyword(
+    unified_writer,
+    mock_writer_fixture,
+    run_context_factory,
+    tmp_path,
+):
+    """Loader.load should accept legacy df keyword for backward compatibility."""
+    run_context = run_context_factory()
+    df = pd.DataFrame({"a": [1]})
+    output_dir = tmp_path / "out"
+
+    def _fake_write(df_to_write, path, **kwargs):
+        return WriteResult(
+            path=path, row_count=len(df_to_write), checksum=None, duration_sec=0.0
+        )
+
+    mock_writer_fixture.write.side_effect = _fake_write
+
+    result = unified_writer.load(
+        df=df,
+        output_path=output_dir,
+        context=run_context,
+    )
+
+    assert result.row_count == 1
+    mock_writer_fixture.write.assert_called_once()
+
+
 def test_unified_writer_column_order_and_fill(
     unified_writer,
     mock_writer_fixture,

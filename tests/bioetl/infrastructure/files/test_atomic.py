@@ -1,4 +1,5 @@
 from pathlib import Path
+import platform
 from unittest.mock import patch
 
 import pytest
@@ -89,11 +90,79 @@ def test_replace_with_retry_max_retries_exceeded(mock_sleep, atomic_op, tmp_path
     dst = tmp_path / "dst_max.txt"
     src.write_text("content")
 
+    is_windows = platform.system() == "Windows"
+    expected_retries = MAX_FILE_RETRIES * (2 if is_windows else 1)
+
     with patch("os.replace", side_effect=OSError("Locked")):
         with pytest.raises(OSError, match="Locked"):
             atomic_op._replace_with_retry(src, dst)
 
-    assert mock_sleep.call_count == MAX_FILE_RETRIES - 1
+    assert mock_sleep.call_count == expected_retries - 1
+
+
+@patch("time.sleep")
+def test_replace_with_retry_windows_permission_error_message(
+    mock_sleep, atomic_op, tmp_path
+):
+    """Test that Windows PermissionError provides helpful error message."""
+    src = tmp_path / "src_perm.txt"
+    dst = tmp_path / "dst_perm.txt"
+    src.write_text("content")
+    dst.write_text("locked")
+
+    is_windows = platform.system() == "Windows"
+    if not is_windows:
+        pytest.skip("Windows-specific test")
+
+    expected_retries = MAX_FILE_RETRIES * 2
+
+    # Simulate PermissionError (file locked)
+    with patch(
+        "os.replace", side_effect=PermissionError("[WinError 5] Access is denied")
+    ):
+        with pytest.raises(
+            PermissionError,
+            match="file is locked by another process",
+        ) as exc_info:
+            atomic_op._replace_with_retry(src, dst)
+
+        # Verify helpful error message
+        assert "Please close any programs" in str(exc_info.value)
+        assert str(dst) in str(exc_info.value)
+
+    assert mock_sleep.call_count == expected_retries - 1
+
+
+@patch("time.sleep")
+def test_try_replace_converts_windows_access_denied(
+    mock_sleep, atomic_op, tmp_path
+):
+    """Test that OSError with winerror=5 is converted to PermissionError."""
+    src = tmp_path / "src_win.txt"
+    dst = tmp_path / "dst_win.txt"
+    src.write_text("content")
+    dst.write_text("locked")
+
+    is_windows = platform.system() == "Windows"
+    if not is_windows:
+        pytest.skip("Windows-specific test")
+
+    # Create OSError with winerror attribute (simulating Windows Access Denied)
+    class WindowsOSError(OSError):
+        def __init__(self):
+            super().__init__("[WinError 5] Access is denied")
+            self.winerror = 5
+
+    expected_retries = MAX_FILE_RETRIES * 2
+
+    with patch("os.replace", side_effect=WindowsOSError()):
+        with pytest.raises(PermissionError) as exc_info:
+            atomic_op._replace_with_retry(src, dst)
+
+        # Verify error message mentions the file
+        assert str(dst) in str(exc_info.value)
+
+    assert mock_sleep.call_count == expected_retries - 1
 
 
 def test_move_overwrites_existing(atomic_op, tmp_path):
