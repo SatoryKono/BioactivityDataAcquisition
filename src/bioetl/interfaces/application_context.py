@@ -26,7 +26,7 @@ class ApplicationContext:
             create_logging_port,
             create_metrics_port,
         )
-        from bioetl.application.bootstrap_factory import create_default_bootstrap
+        from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
         bootstrap = create_default_bootstrap()
         context = bootstrap.start()

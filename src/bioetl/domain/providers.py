@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
 
 from bioetl.domain.configs import BaseProviderConfig, HttpClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
@@ -75,6 +75,9 @@ class ProviderComponents(
         client: client_t | None = None,
     ) -> writer_t:  # pragma: no cover - optional
         """Create provider-specific writer."""
+
+    def create_entity_model_registry(self) -> Any:  # pragma: no cover - optional
+        """Create provider-specific entity model registry."""
 
 
 @dataclass(frozen=True)

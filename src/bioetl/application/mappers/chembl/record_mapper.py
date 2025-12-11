@@ -8,7 +8,6 @@ from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.parsing import RecordBatch
 from bioetl.domain.record_source import SourceRecordModel
-from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
 class ChemblRecordMapper(RecordMapperABC):
@@ -30,15 +29,14 @@ class ChemblRecordMapper(RecordMapperABC):
 
     def __init__(
         self,
-        registry: EntityModelRegistryABC | None = None,
+        registry: EntityModelRegistryABC,
     ) -> None:
         """Initialize mapper with entity model registry.
 
         Args:
             registry: Entity model registry for resolving entity types.
-                If None, uses the default ChEMBL model registry.
         """
-        self._registry = registry or get_chembl_model_registry()
+        self._registry = registry
 
     def map_records(
         self,
@@ -60,7 +58,7 @@ class ChemblRecordMapper(RecordMapperABC):
         """
         model_class = self._registry.get_model(entity)
         return [
-            cast(SourceRecord, model_class.model_validate(record))
+            cast(SourceRecordModel, model_class.model_validate(record))
             for record in raw_records
         ]
 
