@@ -46,7 +46,8 @@ def create_rest_app() -> FastAPI:
 
     @app.post("/pipelines/run", response_model=PipelineRunResponse)
     async def run_pipeline(request: PipelineRunRequest) -> PipelineRunResponse:
-        """Run a pipeline via REST API."""
+        """Run a pipeline asynchronously and return execution result."""
+        # 1. Map REST DTO to application DTO
         domain_request = RunPipelineRequest(
             pipeline_name=request.pipeline_name,
             profile=request.profile,
@@ -55,14 +56,17 @@ def create_rest_app() -> FastAPI:
             require_rest_interface=True,
         )
 
+        # 2. Get use case via factory
         use_case = get_use_case_factory().create_run_pipeline_use_case()
 
+        # 3. Execute in thread pool
         loop = asyncio.get_running_loop()
         try:
             response = await loop.run_in_executor(None, use_case.execute, domain_request)
         except InterfaceDisabledError:
-            raise HTTPException(status_code=503, detail="REST interface disabled")
+            raise HTTPException(status_code=503, detail="REST interface is disabled")
 
+        # 4. Map application response to REST response
         return PipelineRunResponse(
             run_id=response.run_id,
             success=response.success,
