@@ -4,6 +4,8 @@ Factory for creating pipeline hooks.
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
+
 from bioetl.application.pipelines.hooks_impl import (
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
@@ -13,7 +15,27 @@ from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import PipelineHookABC
 
 
-class PipelineHookFactory:
+class PipelineHookFactoryABC(ABC):
+    """Abstract factory for creating pipeline hooks.
+
+    Defines the contract for factories that create hooks for pipeline execution.
+    Hooks receive callbacks at various points during pipeline execution
+    (start, batch processed, error, completion).
+    """
+
+    @abstractmethod
+    def create_hooks(self, logger: LoggingPortABC) -> list[PipelineHookABC]:
+        """Create pipeline execution hooks.
+
+        Args:
+            logger: Logger instance for logging hooks.
+
+        Returns:
+            List of pipeline hooks to be invoked during execution.
+        """
+
+
+class PipelineHookFactory(PipelineHookFactoryABC):
     """Factory for creating pipeline hooks."""
 
     def __init__(

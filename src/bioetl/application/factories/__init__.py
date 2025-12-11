@@ -18,7 +18,10 @@ No-op factories (for testing/fallback):
     - create_noop_validator_factory
 """
 
-from bioetl.application.factories.hooks import PipelineHookFactory
+from bioetl.application.factories.hooks import (
+    PipelineHookFactory,
+    PipelineHookFactoryABC,
+)
 from bioetl.application.factories.noop import (
     create_noop_logger,
     create_noop_metadata_builder,
@@ -51,6 +54,7 @@ __all__ = [
     "ApplicationServiceFactory",
     "ApplicationServiceFactoryABC",
     "PipelineHookFactory",
+    "PipelineHookFactoryABC",
     "PipelineRuntimeFactory",
     "PipelineRuntimeFactoryABC",
     "ProviderServiceFactory",
