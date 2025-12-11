@@ -186,6 +186,7 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
         name = cast(str, field_cfg.get("name"))
         dtype = field_cfg.get("data_type")
         base_normalizer = self._get_normalizer_for_field(name)
+        # Get custom normalizer for special array handling
         custom_normalizer = normalize.get_normalizer(name)
 
         def _normalize_value_from_series(val: Any) -> Any:
