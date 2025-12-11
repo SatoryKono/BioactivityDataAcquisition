@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 from prometheus_client import Histogram
 
-from bioetl.application.pipelines.hooks_impl import MetricsPipelineHookImpl
+from bioetl.application.factories.hooks_impl import MetricsPipelineHookImpl
 from bioetl.domain.models import StageResult
 from bioetl.infrastructure.observability import metrics
 

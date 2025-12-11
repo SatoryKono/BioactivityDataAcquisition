@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.pipelines.hooks_impl import (
+from bioetl.application.factories.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
