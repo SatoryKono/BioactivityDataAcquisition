@@ -67,6 +67,6 @@ npm run test:coverage
 
 ### Пайплайны по провайдерам
 
-- [ChEMBL Pipelines](docs/02-pipelines/chembl/00-index.md) — Activity, Assay, Target, Document, Molecule
+- [ChEMBL Pipelines](docs/02-pipelines/chembl/00-index.md) — Activity, Assay, Target, Publication, Molecule
 
 Детальная документация по конкретным пайплайнам и компонентам доступна через соответствующие INDEX.md файлы.
