@@ -36,7 +36,11 @@ from bioetl.domain.configs.defaults import (
 from bioetl.domain.configs.execution import ExecutionConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.manifest import PipelineManifest
-from bioetl.domain.configs.normalization import NormalizationConfig
+from bioetl.domain.configs.pipeline_options import (
+    NormalizationConfig,
+    ProfileConfig,
+    TransformConfig,
+)
 from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,
@@ -64,9 +68,8 @@ from bioetl.domain.configs.pipeline import (
     QualityControlConfig,
     RuntimeConfig,
     StorageConfig,
-    TransformConfig,
 )
-from bioetl.domain.configs.profile import ProfileConfig
+# ProfileConfig, TransformConfig, NormalizationConfig imported from pipeline_options above
 
 __all__ = [
     # Bounded context configs (new modular structure)
