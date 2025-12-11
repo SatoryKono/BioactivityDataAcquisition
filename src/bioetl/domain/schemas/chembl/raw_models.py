@@ -127,17 +127,8 @@ class ActivityRawModel(SourceRecordModel):
     @field_validator("action_type", mode="before")
     @classmethod
     def normalize_action_type(cls, value: JsonValue) -> str | None:
-        """ChEMBL sometimes returns a dict with action_type/description fields."""
-        if value is None:
-            return None
-        if isinstance(value, dict):
-            for key in ("action_type", "action_type_description", "description"):
-                candidate = value.get(key)
-                if candidate is None:
-                    continue
-                return str(candidate)
-            return None
-        return str(value)
+        """Normalize action_type values regardless of representation."""
+        return cls._coerce_action_type_value(value)
 
     @field_validator("standard_relation")
     @classmethod
