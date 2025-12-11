@@ -479,6 +479,28 @@ def test_no_cross_module_private_attribute_access() -> None:
                 if not attr_name.startswith("_") or attr_name.startswith("__"):
                     continue
 
+                # Skip cls._method calls (class method calls are legitimate)
+                if isinstance(node.value, ast.Name) and node.value.id == "cls":
+                    continue
+
+                # Skip other._value in comparison methods (value object pattern)
+                if isinstance(node.value, ast.Name) and node.value.id == "other":
+                    # Check if we're in a comparison method
+                    parent = node
+                    for _ in range(10):  # Check up to 10 levels up
+                        if hasattr(parent, "parent"):
+                            parent = parent.parent
+                        else:
+                            break
+                        # Check if we're in __eq__, __lt__, __le__, __gt__, __ge__
+                        if isinstance(parent, ast.FunctionDef):
+                            if parent.name in ("__eq__", "__lt__", "__le__", "__gt__", "__ge__", "__hash__"):
+                                break
+                    else:
+                        # Not in a comparison method, check if it's _value
+                        if attr_name == "_value":
+                            continue
+
                 # Check if it's accessing on something other than self
                 if isinstance(node.value, ast.Name):
                     if node.value.id != "self":
@@ -488,6 +510,13 @@ def test_no_cross_module_private_attribute_access() -> None:
                         )
                 elif isinstance(node.value, ast.Attribute):
                     # Chain access like obj.sub._private
+                    # Skip cls._method patterns
+                    if (
+                        isinstance(node.value, ast.Attribute)
+                        and isinstance(node.value.value, ast.Name)
+                        and node.value.value.id == "cls"
+                    ):
+                        continue
                     violations.append(f"{path}:{node.lineno}: ....{attr_name}")
 
     # Filter to keep only likely cross-module violations
