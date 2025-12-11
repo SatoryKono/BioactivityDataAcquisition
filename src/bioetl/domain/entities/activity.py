@@ -229,7 +229,9 @@ class Activity(EntityBase):
             # Molecule info
             molecule_pref_name=extract_field(record, "molecule_pref_name"),
             canonical_smiles=extract_field(record, "canonical_smiles"),
-            parent_molecule_chembl_id=extract_field(record, "parent_molecule_chembl_id"),
+            parent_molecule_chembl_id=extract_field(
+                record, "parent_molecule_chembl_id"
+            ),
             # Document info
             document_journal=extract_field(record, "document_journal"),
             document_year=extract_field(record, "document_year", coerce=int),
@@ -237,7 +239,9 @@ class Activity(EntityBase):
             standard_flag=extract_field(record, "standard_flag", default=True),
             potential_duplicate=extract_field(record, "potential_duplicate"),
             data_validity_comment=extract_field(record, "data_validity_comment"),
-            data_validity_description=extract_field(record, "data_validity_description"),
+            data_validity_description=extract_field(
+                record, "data_validity_description"
+            ),
             activity_comment=extract_field(record, "activity_comment"),
             # Metadata
             bao_endpoint=extract_field(record, "bao_endpoint"),

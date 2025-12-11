@@ -8,11 +8,8 @@ encapsulated within them.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, ClassVar, Mapping, Sequence
-
-if TYPE_CHECKING:
-    from bioetl.domain.value_objects import HashDigest
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, ClassVar, Mapping
 
 
 @dataclass(frozen=True)
