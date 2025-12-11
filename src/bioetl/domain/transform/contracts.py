@@ -1,8 +1,19 @@
 """Domain-level transform contracts and DTOs.
 
-Terminology:
-    fingerprint: Hash of entire record (all fields).
-    entity_key: Hash of business key fields only.
+Terminology Mapping (contracts ↔ schemas):
+    This module uses domain-specific terms for hash concepts. The schema layer
+    uses column names that differ for data storage compatibility.
+
+    | Contract term | Schema column      | Canonical term       |
+    |---------------|--------------------|----------------------|
+    | fingerprint   | hash_row           | record_hash          |
+    | entity_key    | hash_business_key  | business_key_hash    |
+
+    Definitions:
+        record_hash (fingerprint): SHA-256 hash of entire record (all fields).
+            Provides content-based deduplication and change detection.
+        business_key_hash (entity_key): SHA-256 hash of business key fields only.
+            Identifies logical entity regardless of non-key field changes.
 
 Tabular Data Abstractions:
     This module uses domain-level abstractions (Record, TabularData, RecordBatch)
@@ -130,9 +141,13 @@ class HashServiceABC(ABC):
     Responsible for computing and adding hash columns to data.
     Does not contain stateful logic (indices, timestamps).
 
-    Terminology:
-        fingerprint: Hash of entire record (all fields).
-        entity_key: Hash of business key fields only.
+    Terminology (see module docstring for full mapping):
+        fingerprint: Computes record_hash - hash of entire record.
+        entity_key: Computes business_key_hash - hash of business key fields.
+
+    Output columns (schema layer):
+        hash_row: Contains the record_hash (fingerprint result).
+        hash_business_key: Contains the business_key_hash (entity_key result).
 
     Example:
         >>> service: HashServiceABC = get_hash_service()
@@ -147,13 +162,16 @@ class HashServiceABC(ABC):
 
     @abstractmethod
     def compute_fingerprint(self, record: Mapping[str, Any]) -> HashDigest:
-        """Compute hash fingerprint of entire record.
+        """Compute record_hash (fingerprint) of entire record.
+
+        This produces the canonical record_hash value, stored in schema
+        column ``hash_row``.
 
         Args:
             record: Record data as mapping (dict-like).
 
         Returns:
-            HashDigest value object containing the hash.
+            HashDigest value object containing the record_hash.
         """
 
     @abstractmethod
@@ -162,14 +180,17 @@ class HashServiceABC(ABC):
         record: Mapping[str, Any],
         key_fields: Sequence[str],
     ) -> HashDigest:
-        """Compute hash of business key fields.
+        """Compute business_key_hash (entity_key) from key fields.
+
+        This produces the canonical business_key_hash value, stored in
+        schema column ``hash_business_key``.
 
         Args:
             record: Record data as mapping.
             key_fields: Sequence of field names forming the business key.
 
         Returns:
-            HashDigest value object containing the hash.
+            HashDigest value object containing the business_key_hash.
         """
 
     @abstractmethod
@@ -178,7 +199,7 @@ class HashServiceABC(ABC):
         records: RecordBatch,
         key_fields: Sequence[str] | None = None,
     ) -> list[dict[str, Any]]:
-        """Add hash_row and hash_business_key to each record.
+        """Add hash columns (record_hash, business_key_hash) to each record.
 
         This is the pandas-free version for processing record batches.
 
@@ -188,8 +209,8 @@ class HashServiceABC(ABC):
 
         Returns:
             List of dictionaries with added hash columns:
-            - hash_row: fingerprint of entire record
-            - hash_business_key: hash of key fields (or None if key_fields not provided)
+            - hash_row: record_hash (fingerprint) of entire record
+            - hash_business_key: business_key_hash (or None if key_fields not provided)
         """
 
     def add_hash_columns(
@@ -197,7 +218,11 @@ class HashServiceABC(ABC):
         data: TabularData,
         business_key_cols: Sequence[str] | None = None,
     ) -> MutableTabularData:
-        """Add hash_row and hash_business_key columns to tabular data.
+        """Add hash columns (record_hash, business_key_hash) to tabular data.
+
+        Adds columns:
+            - hash_row: Contains record_hash (fingerprint)
+            - hash_business_key: Contains business_key_hash (entity_key)
 
         This method works with TabularData abstraction (pandas-compatible).
         For pandas-free processing, use add_hashes_to_batch().

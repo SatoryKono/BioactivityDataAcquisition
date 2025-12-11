@@ -12,18 +12,19 @@ from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.schemas.chembl.raw_models import (
     ActivityRawModel,
     AssayRawModel,
-    DocumentRawModel,
     MoleculeRawModel,
+    PublicationRawModel,
     TargetRawModel,
 )
 
 # Internal mapping of entity type -> model class
+# Note: "document" entity uses PublicationRawModel (canonical name)
 _ENTITY_MODEL_MAP: dict[str, type[BaseModel]] = {
     "activity": ActivityRawModel,
     "molecule": MoleculeRawModel,
     "target": TargetRawModel,
     "assay": AssayRawModel,
-    "document": DocumentRawModel,
+    "document": PublicationRawModel,  # Canonical: PublicationRawModel
 }
 
 
@@ -33,11 +34,15 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
     Maps ChEMBL entity type names to their corresponding Pydantic
     domain models.
 
+    Note:
+        The "document" entity maps to PublicationRawModel (canonical name).
+        DocumentRawModel is a deprecated alias.
+
     Example:
         >>> registry = ChemblEntityModelRegistry()
-        >>> model_class = registry.get_model("activity")
+        >>> model_class = registry.get_model("document")
         >>> model_class.__name__
-        'ActivityRawModel'
+        'PublicationRawModel'
     """
 
     def get_model(self, entity: str) -> type[BaseModel]:
