@@ -1,0 +1,147 @@
+---
+id: 3f8f3a0c-6e6d-4a2b-9eae-6d5d981b37c8
+title: Infrastructure Layer Components
+---
+flowchart LR
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
+
+subgraph Infrastructure["Infrastructure Layer"]
+    subgraph ClientsBase["Clients Base (infrastructure.clients.base)"]
+        HTTPTransport["HTTPTransport\nimpl/_http_transport.py"]:::componentSecondary
+        RateLimiter["TokenBucketRateLimiterImpl\nimpl/rate_limiter.py"]:::componentSecondary
+        Cache["MemoryCacheImpl\nimpl/cache.py"]:::componentSecondary
+        ClientFactories["build_http_client()\nfactories.py"]:::componentSecondary
+        ABCRegistry["ABCRegistryResolver\nabc_registry_resolver.py"]:::componentSecondary
+    end
+
+    subgraph ClientsChembl["Clients ChEMBL (infrastructure.clients.chembl)"]
+        ChemblHttpClient["ChemblHttpClientImpl\nimpl/chembl_http_client_impl.py"]:::componentPrimary
+        ExtractionService["ChemblExtractionServiceImpl\nimpl/chembl_extraction_service_impl.py"]:::componentSecondary
+        RequestBuilder["RequestBuilder\nrequest_builder.py"]:::componentSecondary
+        ResponseParser["ResponseParser\nresponse_parser.py"]:::componentSecondary
+        Paginator["ChemblPaginatorImpl\npaginator.py"]:::componentSecondary
+        ParserRegistry["ParserRegistry\nparser_registry.py"]:::componentSecondary
+        ChemblSerializer["Serializers\nserializers.py"]:::componentSecondary
+    end
+
+    subgraph HTTP["HTTP (infrastructure.http)"]
+        RetryPolicy["RetryPolicy\nretry.py"]:::componentSecondary
+    end
+
+    subgraph Output["Output (infrastructure.output)"]
+        UnifiedLoader["UnifiedLoaderImpl\nunified_loader_impl.py"]:::componentPrimary
+        OutputFactories["OutputFactories\nfactories.py"]:::componentSecondary
+        BaseWriter["BaseWriter\nimpl/base_writer.py"]:::componentSecondary
+        CsvWriter["CsvWriter\nimpl/csv_writer.py"]:::componentSecondary
+        ParquetWriter["ParquetWriter\nimpl/parquet_writer.py"]:::componentSecondary
+        MetadataWriter["MetadataWriter\nimpl/metadata_writer.py"]:::componentSecondary
+        QualityReporter["QualityReporter\nimpl/quality_reporter.py"]:::componentSecondary
+        Converters["DropnaRowsConverter\nRenameColumnsConverter\nconverters/*.py"]:::componentSecondary
+        ColumnOrder["ColumnOrder\ncolumn_order.py"]:::componentSecondary
+    end
+
+    subgraph Files["Files (infrastructure.files)"]
+        AtomicIO["AtomicFileOperation\natomic.py"]:::componentSecondary
+        Checksum["Checksum\nchecksum.py"]:::componentSecondary
+    end
+
+    subgraph Transform["Transform (infrastructure.transform)"]
+        NormalizationService["ChemblNormalizationServiceImpl\nimpl/chembl_normalization_service_impl.py"]:::componentPrimary
+        NormalizationImpl["DefaultNormalizationTransformerImpl\nimpl/default_normalization_transformer_impl.py"]:::componentSecondary
+        Hasher["HasherImpl\nimpl/hasher.py"]:::componentSecondary
+        TransformFactories["TransformFactories\nfactories.py"]:::componentSecondary
+        IndexGenerator["IndexGeneratorImpl\nimpl/index_generator.py"]:::componentSecondary
+        TimestampProvider["TimestampProviderImpl\nimpl/timestamp_provider.py"]:::componentSecondary
+    end
+
+    subgraph Validation["Validation (infrastructure.validation)"]
+        PanderaValidator["PanderaValidatorImpl\nimpl/pandera_validator.py"]:::componentSecondary
+        ValidationFactories["ValidationFactories\nfactories.py"]:::componentSecondary
+        ValidationBootstrap["register_schemas()\nbootstrap.py"]:::componentSecondary
+        ValidationSchemas["ChEMBL Pandera Schemas\nschemas/chembl/*.py"]:::componentSecondary
+    end
+
+    subgraph Logging["Logging (infrastructure.logging)"]
+        LoggingFactories["LoggingFactories\nfactories.py"]:::componentSecondary
+        ProgressReporter["ProgressReporter\nimpl/progress_reporter.py"]:::componentSecondary
+        UnifiedLogger["UnifiedLoggerAdapter\nimpl/unified_logger.py"]:::componentSecondary
+    end
+
+    subgraph Observability["Observability (infrastructure.observability)"]
+        ObservabilityServer["MetricsServer\nserver.py"]:::componentSecondary
+        ObservabilityMetrics["PrometheusMetrics\nmetrics.py"]:::componentSecondary
+        ObservabilityAdapters["MetricsAdapter\nadapters.py"]:::componentSecondary
+        ObservabilityFactories["ObservabilityFactories\nfactories.py"]:::componentSecondary
+    end
+
+    subgraph Config["Config (infrastructure.config)"]
+        ConfigLoader["ConfigLoader\nloader.py"]:::componentSecondary
+        ConfigMigrator["ConfigMigrator\nmigration.py"]:::componentSecondary
+        ConfigDefaults["DefaultsLoader\ndefaults_loader.py"]:::componentSecondary
+        ConfigEnv["EnvConfig\nenv.py"]:::componentSecondary
+        ConfigSources["get_configs_root()\nsources.py"]:::componentSecondary
+        ProviderRegistryLoader["ProviderRegistryLoader\nprovider_registry.py"]:::componentSecondary
+    end
+
+    subgraph Adapters["Adapters (infrastructure.adapters)"]
+        ABCRegistryAdapter["ABCRegistryResolverAdapter\nadapter.py"]:::componentSecondary
+        ConfigPathAdapter["ConfigPathResolverAdapter\nconfig_path_adapter.py"]:::componentSecondary
+    end
+
+    subgraph Settings["Settings (infrastructure.settings)"]
+        SettingsManager["Settings\nsettings.py"]:::componentSecondary
+    end
+end
+class Infrastructure group
+
+subgraph External["External Systems"]
+    ChemblAPI[(ChEMBL REST API)]:::external
+    Storage[(Filesystem: CSV/Parquet + meta)]:::external
+end
+class External group;
+
+ChemblHttpClient --> RequestBuilder
+ChemblHttpClient --> ResponseParser
+ChemblHttpClient --> Paginator
+ChemblHttpClient --> HTTPTransport
+ChemblHttpClient --> RateLimiter
+ChemblHttpClient --> RetryPolicy
+ChemblHttpClient --> Cache
+ChemblHttpClient --> ObservabilityMetrics
+ChemblHttpClient --> ChemblAPI
+
+HTTPTransport --> RateLimiter
+HTTPTransport --> RetryPolicy
+HTTPTransport --> Cache
+
+ExtractionService --> ChemblHttpClient
+
+UnifiedLoader --> BaseWriter
+UnifiedLoader --> CsvWriter
+UnifiedLoader --> ParquetWriter
+UnifiedLoader --> MetadataWriter
+UnifiedLoader --> QualityReporter
+UnifiedLoader --> Converters
+UnifiedLoader --> ColumnOrder
+UnifiedLoader --> AtomicIO
+UnifiedLoader --> Checksum
+UnifiedLoader --> Storage
+
+NormalizationService --> NormalizationImpl
+NormalizationService --> TransformFactories
+
+PanderaValidator --> ValidationFactories
+PanderaValidator --> ValidationSchemas
+
+ObservabilityServer --> ObservabilityMetrics
+ObservabilityServer --> ObservabilityAdapters
+
+ConfigLoader --> ConfigDefaults
+ConfigLoader --> ConfigEnv
+ConfigLoader --> ConfigSources
+ConfigLoader --> ConfigMigrator
+ProviderRegistryLoader --> ConfigSources

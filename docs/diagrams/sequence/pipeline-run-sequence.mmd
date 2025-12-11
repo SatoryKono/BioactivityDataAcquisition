@@ -1,0 +1,113 @@
+---
+id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
+---
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "actorLineColor": "#444",
+    "actorTextColor": "#111",
+    "actorBkg": "#f5f5f5",
+    "actorBorderRadius": 6,
+    "actorFontSize": "18px",
+    "sequenceNumberColor": "#444",
+    "activationBkgColor": "#e3e7ec",
+    "activationBorderColor": "#444"
+  }
+}}%%
+%% Shared palette (per diagramming policy)
+classDef actorPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef actorSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef actorExternal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
+sequenceDiagram
+    autonumber
+
+    participant CLI as CLI/REST (Typer/FastAPI)
+    participant UseCase as RunPipelineUseCase
+    participant ConfigLoader as PipelineConfigLoader
+    participant ProviderLoader as ProviderRegistryLoader
+    participant Orchestrator as PipelineOrchestrator
+    participant ContainerFactory as PipelineContainerFactory
+    participant PipelineFactory as PipelineFactory (registry)
+    participant Pipeline as ChemblPipelineBase
+    participant Executor as PipelineExecutor
+    participant Runtime as StageRuntimeManager
+    participant Extractor as ExtractStage/ChemblExtractionServiceImpl
+    participant Transformer as ChemblTransformerImpl
+    participant PostTransform as TransformerChainImpl
+    participant Validator as ValidationService + PanderaValidator
+    participant Loader as UnifiedLoaderImpl
+    participant AtomicIO as AtomicFileOperation
+    participant Storage as Deterministic Storage
+
+    class CLI actorPrimary
+    class UseCase actorPrimary
+    class ConfigLoader actorSecondary
+    class ProviderLoader actorSecondary
+    class Orchestrator actorPrimary
+    class ContainerFactory actorSecondary
+    class PipelineFactory actorSecondary
+    class Pipeline actorPrimary
+    class Executor actorPrimary
+    class Runtime actorSecondary
+    class Extractor actorSecondary
+    class Transformer actorSecondary
+    class PostTransform actorSecondary
+    class Validator actorSecondary
+    class Loader actorPrimary
+    class AtomicIO actorSecondary
+    class Storage actorExternal
+
+    CLI->>UseCase: execute(request)
+    UseCase->>ConfigLoader: load config (id/path, profile)
+    ConfigLoader-->>UseCase: PipelineConfig
+    UseCase->>ProviderLoader: get_registry()
+    ProviderLoader-->>UseCase: ProviderRegistry
+    UseCase->>Orchestrator: init(pipeline_id, config, container_factory, registry)
+    Orchestrator->>PipelineFactory: resolve factory by pipeline id
+    PipelineFactory-->>Orchestrator: ChemblPipelineFactory
+    Orchestrator->>ContainerFactory: build_default_container(config, registry)
+    ContainerFactory-->>Orchestrator: PipelineContainer
+    Orchestrator->>PipelineFactory: create(container, limit)
+    PipelineFactory-->>Orchestrator: ChemblPipelineBase
+    Orchestrator->>Pipeline: run(dry_run, limit, output_path)
+
+    activate Pipeline
+    Pipeline->>Executor: execute(self, output_path, dry_run)
+    activate Executor
+    Executor->>Runtime: reset() + set_logger(run_id)
+    Runtime->>Runtime: notify_stage_start("extract")
+
+    loop Extract -> Transform -> Validate
+        Executor->>Extractor: extract(limit)
+        Extractor-->>Executor: batch_df
+        Executor->>Transformer: apply(batch_df)
+        Transformer-->>Executor: transformed_df
+        Executor->>PostTransform: hash + index + db_version + fulldate
+        PostTransform-->>Executor: normalized_df
+        Executor->>Validator: validate(normalized_df, schema)
+        Validator-->>Executor: validated_df
+        Executor->>Runtime: record counters + hooks
+    end
+
+    alt dry_run
+        Runtime->>Runtime: notify_stage_start("write") (skipped)
+    else
+        Runtime->>Runtime: notify_stage_start("write")
+        Executor->>Loader: load(all_validated_df, output_path, context)
+        Loader->>AtomicIO: write_atomic(data.csv) + checksum + meta + QC
+        AtomicIO-->>Loader: persisted
+        Loader-->>Storage: deterministic files + sidecars
+        Runtime->>Runtime: notify_stage_end("write")
+    end
+
+    Executor-->>Runtime: stage results + last errors
+    Runtime-->>Executor: error policy decisions
+    Executor-->>Pipeline: RunResult(meta, counters, duration)
+    deactivate Executor
+    Pipeline-->>UseCase: RunResult
+    deactivate Pipeline
+    UseCase-->>CLI: RunPipelineResponse
+
+    Note over Runtime,Executor: StageRuntimeManager applies ErrorPolicy and HookNotifier on every stage (retry/skip/fail).
