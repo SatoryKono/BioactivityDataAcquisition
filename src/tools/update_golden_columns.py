@@ -33,22 +33,22 @@ def main():
             return
 
     LOGGER.info("Reading golden file", path=str(path))
-    df = pd.read_csv(path)
+    golden_data = pd.read_csv(path)
 
     # Get columns from schema to ensure correct order
     schema = ActivityTableSchema.to_schema()
     expected_columns = list(schema.columns.keys())
 
     LOGGER.info("Reordering columns to match schema")
-    missing = [c for c in expected_columns if c not in df.columns]
+    missing = [c for c in expected_columns if c not in golden_data.columns]
     if missing:
         LOGGER.error("Missing columns in CSV", missing_columns=missing)
         return
 
-    df = df[expected_columns]
+    golden_data = golden_data[expected_columns]
 
     LOGGER.info("Writing reordered CSV", path=str(path))
-    df.to_csv(path, index=False)
+    golden_data.to_csv(path, index=False)
     LOGGER.info("Column update completed")
 
 

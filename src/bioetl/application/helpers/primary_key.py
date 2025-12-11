@@ -38,10 +38,10 @@ def resolve_primary_key(
         ValueError: If primary key cannot be resolved and no fallback provided.
 
     Examples:
-        >>> pk = resolve_primary_key(config)
-        >>> pk = resolve_primary_key(config, fallback="id")
+        >>> primary_key = resolve_primary_key(config)
+        >>> primary_key = resolve_primary_key(config, fallback="id")
     """
-    pk: str | None = None
+    primary_key: str | None = None
     try:
         primary_keys = getattr(config, "identity").primary_key
     except Exception:
@@ -49,23 +49,23 @@ def resolve_primary_key(
     if primary_keys:
         if isinstance(primary_keys, list):
             if len(primary_keys) > 0 and primary_keys[0]:
-                pk = primary_keys[0]
+                primary_key = primary_keys[0]
         elif isinstance(primary_keys, str) and primary_keys:
-            pk = primary_keys
+            primary_key = primary_keys
 
-    if not pk:
+    if not primary_key:
         try:
             entity_name = getattr(config, "entity_name")
         except Exception:
             entity_name = getattr(config, "entity", None)
         if not entity_name:
             raise ValueError("Missing entity name in config")
-        pk = f"{entity_name}_id"
+        primary_key = f"{entity_name}_id"
 
-    if not pk and fallback is not None:
-        pk = fallback
+    if not primary_key and fallback is not None:
+        primary_key = fallback
 
-    if not pk:
+    if not primary_key:
         try:
             entity_name = getattr(config, "entity_name")
         except Exception:
@@ -77,7 +77,7 @@ def resolve_primary_key(
             )
         )
 
-    return pk
+    return primary_key
 
 
 def resolve_primary_key_with_filter(
@@ -89,21 +89,21 @@ def resolve_primary_key_with_filter(
     Resolve primary key and its corresponding API filter key.
 
     This is a convenience wrapper that returns both the primary key
-    and the filter key (pk + "__in") used for API batch queries.
+    and the filter key (primary_key + "__in") used for API batch queries.
 
     Args:
         config: Pipeline configuration object.
         fallback: Optional fallback value if primary key cannot be determined.
 
     Returns:
-        Tuple of (primary_key, filter_key) where filter_key is "{pk}__in".
+        Tuple of (primary_key, filter_key) where filter_key is "{primary_key}__in".
 
     Raises:
         ValueError: If primary key cannot be resolved and no fallback provided.
 
     Examples:
-        >>> pk, filter_key = resolve_primary_key_with_filter(config)
-        >>> # pk = "activity_id", filter_key = "activity_id__in"
+        >>> primary_key, filter_key = resolve_primary_key_with_filter(config)
+        >>> # primary_key = "activity_id", filter_key = "activity_id__in"
     """
-    pk = resolve_primary_key(config, fallback=fallback)
-    return pk, f"{pk}__in"
+    primary_key = resolve_primary_key(config, fallback=fallback)
+    return primary_key, f"{primary_key}__in"
