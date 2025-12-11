@@ -10,6 +10,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
+from bioetl.domain.data import TabularData
+
 if TYPE_CHECKING:
     import pandas as pd
 
@@ -19,7 +21,7 @@ if TYPE_CHECKING:
 
 
 class DataWriterPort(Protocol):
-    """Port for writing DataFrame to various formats (parquet, csv, json).
+    """Port for writing tabular data to various formats (parquet, csv, json).
 
     Implementations handle format-specific serialization without
     knowledge of QC reports, metadata, or checksums.
@@ -27,15 +29,15 @@ class DataWriterPort(Protocol):
 
     def write(
         self,
-        df: Any,
+        data: TabularData,
         path: Path,
         *,
         column_order: list[str] | None = None,
     ) -> "WriteResult":
-        """Write DataFrame to the specified path.
+        """Write tabular data to the specified path.
 
         Args:
-            df: DataFrame to write.
+            data: Tabular data to write.
             path: Target file path.
             column_order: Optional column ordering.
 
@@ -64,26 +66,28 @@ class QcReportGeneratorPort(ABC):
     """
 
     @abstractmethod
-    def build_quality_report(self, df: Any, *, min_coverage: float) -> Any:
-        """Build quality metrics report for DataFrame columns.
+    def build_quality_report(
+        self, data: TabularData, *, min_coverage: float
+    ) -> TabularData:
+        """Build quality metrics report for tabular data columns.
 
         Args:
-            df: Source DataFrame.
+            data: Source tabular data.
             min_coverage: Minimum coverage threshold.
 
         Returns:
-            DataFrame with column-level quality metrics.
+            TabularData with column-level quality metrics.
         """
 
     @abstractmethod
-    def build_correlation_report(self, df: Any) -> Any:
+    def build_correlation_report(self, data: TabularData) -> TabularData:
         """Build correlation matrix for numeric columns.
 
         Args:
-            df: Source DataFrame.
+            data: Source tabular data.
 
         Returns:
-            DataFrame with correlation matrix.
+            TabularData with correlation matrix.
         """
 
 

@@ -21,6 +21,7 @@ from bioetl.domain.clients.base.output.contracts import (
     WriteResult,
 )
 from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig
+from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
@@ -178,11 +179,14 @@ class ChemblPipelineBase(PipelineBase):
             return True
         return bool(pipeline_cfg.get("skip_release_lookup"))
 
-    def extract(self, **kwargs: Any) -> pd.DataFrame:
-        """Return single DataFrame for unit tests and local checks.
+    def extract(self, **kwargs: Any) -> TabularData:
+        """Return single TabularData for unit tests and local checks.
 
         Main run process uses self._extractor directly, so
         chunk materialization in this wrapper doesn't affect production flow.
+
+        Returns:
+            TabularData (pd.DataFrame is compatible with TabularData protocol).
         """
         extractor = self._extractor
         if extractor is None:
@@ -217,8 +221,15 @@ class ChemblPipelineBase(PipelineBase):
 
         return pd.concat(chunks, ignore_index=True, copy=False)
 
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Runs Chembl-specific transformer pipeline on dataframe."""
+    def transform(self, df: TabularData) -> TabularData:
+        """Runs Chembl-specific transformer pipeline on tabular data.
+
+        Args:
+            df: Input tabular data (pd.DataFrame compatible).
+
+        Returns:
+            Transformed tabular data.
+        """
         transformer = self._transformer
         if transformer is None:
             raise RuntimeError("Chembl transformer is not initialized.")
@@ -226,11 +237,20 @@ class ChemblPipelineBase(PipelineBase):
 
     def write(
         self,
-        df: pd.DataFrame,
+        df: TabularData,
         output_path: Path,
         context: RunContext,
     ) -> WriteResult:
-        """Persists transformed dataframe using the resolved loader."""
+        """Persists transformed tabular data using the resolved loader.
+
+        Args:
+            df: Tabular data to write (pd.DataFrame compatible).
+            output_path: Path for output file.
+            context: Run context with execution details.
+
+        Returns:
+            WriteResult with path and row count.
+        """
         return self._write_with_loader(df, output_path, context)
 
     # === Internal helpers ===
