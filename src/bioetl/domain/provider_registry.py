@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Callable, Protocol, runtime_checkable
 
 from bioetl.domain.providers import ProviderDefinition, ProviderId
+
+
+# Type alias for factory function that creates empty provider registry instances.
+# Used for dependency injection in application layer to avoid direct infrastructure imports.
+ProviderRegistryFactory = Callable[[], "ProviderRegistryABC"]
 
 
 class ProviderRegistryError(Exception):
@@ -67,16 +73,31 @@ class ProviderRegistryLoaderABC(Protocol):
         """Load providers and return populated registry."""
 
 
-# Global registry instance
+# Global registry instance - DEPRECATED
+# New code should inject ProviderRegistryABC through CompositionRoot
 _PROVIDER_REGISTRY: ProviderRegistryABC | None = None
 
 
 def set_provider_registry(registry: ProviderRegistryABC) -> None:
     """Sets the global provider registry instance.
 
+    DEPRECATED: Use dependency injection through CompositionRoot instead.
+    Global state makes testing difficult and creates implicit dependencies.
+
     This should be called by the application entry point or configuration loader
     to inject the concrete implementation (Dependency Injection).
+
+    .. deprecated:: 2.0
+        Use CompositionRoot.get_provider_registry() and pass the registry
+        explicitly to components that need it.
     """
+    warnings.warn(
+        "set_provider_registry() is deprecated. "
+        "Use CompositionRoot.get_provider_registry() and pass the registry "
+        "explicitly to components that need it.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     global _PROVIDER_REGISTRY
     _PROVIDER_REGISTRY = registry
 
@@ -84,9 +105,22 @@ def set_provider_registry(registry: ProviderRegistryABC) -> None:
 def get_provider_registry() -> ProviderRegistryABC:
     """Access point for the provider registry.
 
+    DEPRECATED: Use dependency injection through CompositionRoot instead.
+
     Returns the global registry instance.
     Raises RuntimeError if the registry has not been initialized.
+
+    .. deprecated:: 2.0
+        Use CompositionRoot.get_provider_registry() and pass the registry
+        explicitly to components that need it.
     """
+    warnings.warn(
+        "get_provider_registry() is deprecated. "
+        "Use CompositionRoot.get_provider_registry() and pass the registry "
+        "explicitly to components that need it.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if _PROVIDER_REGISTRY is None:
         raise RuntimeError(
             "Provider registry has not been initialized. "
@@ -97,8 +131,24 @@ def get_provider_registry() -> ProviderRegistryABC:
 
 # Backward compatibility alias
 def default_provider_registry() -> ProviderRegistryABC:
-    """DEPRECATED: Use get_provider_registry() instead."""
-    return get_provider_registry()
+    """DEPRECATED: Use get_provider_registry() instead.
+
+    .. deprecated:: 2.0
+        Use CompositionRoot.get_provider_registry() instead.
+    """
+    warnings.warn(
+        "default_provider_registry() is deprecated. "
+        "Use CompositionRoot.get_provider_registry() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    # Call without triggering double warning
+    if _PROVIDER_REGISTRY is None:
+        raise RuntimeError(
+            "Provider registry has not been initialized. "
+            "Call set_provider_registry() with a concrete implementation first."
+        )
+    return _PROVIDER_REGISTRY
 
 
 def __getattr__(name: str) -> Any:
@@ -119,6 +169,8 @@ __all__ = [
     "ProviderRegistryError",
     "ProviderNotRegisteredError",
     "ProviderAlreadyRegisteredError",
+    # Type aliases for DI
+    "ProviderRegistryFactory",
     # Factory function
     "get_provider_registry",
     "set_provider_registry",
