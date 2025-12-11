@@ -11,9 +11,9 @@ Model naming:
 from __future__ import annotations
 
 import warnings
-from typing import TypeAlias
+from typing import Self, TypeAlias
 
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, field_validator, model_validator
 
 from bioetl.domain.record_source import SourceRecordModel
 from bioetl.domain.value_objects import ChemblId
@@ -85,6 +85,27 @@ class ActivityRawModel(SourceRecordModel):
     @classmethod
     def _stringify_activity_id(cls, value: str | int) -> str:
         return str(value)
+
+    @field_validator("pchembl_value")
+    @classmethod
+    def validate_pchembl_range(cls, v: float | None) -> float | None:
+        if v is not None and not (0 <= v <= 20):
+            raise ValueError(f"pchembl_value must be 0-20, got {v}")
+        return v
+
+    @field_validator("standard_relation")
+    @classmethod
+    def validate_standard_relation(cls, v: str | None) -> str | None:
+        valid = {"=", ">", "<", ">=", "<=", "~", None}
+        if v not in valid:
+            raise ValueError(f"Invalid standard_relation: {v}")
+        return v
+
+    @model_validator(mode="after")
+    def validate_standard_flag_consistency(self) -> Self:
+        if self.standard_flag and self.standard_value is None:
+            raise ValueError("standard_value required when standard_flag is True")
+        return self
 
 
 class MoleculeRawModel(SourceRecordModel):
