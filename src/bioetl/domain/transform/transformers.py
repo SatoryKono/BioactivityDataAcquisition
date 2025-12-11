@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import timezone
-from typing import Any, Callable, cast
+from typing import Callable, cast
 
 import pandas as pd
 
@@ -61,12 +61,11 @@ class HashColumnsTransformerImpl(TransformerABC):
         if df.empty:
             return df.assign(hash_business_key=None, hash_row=None)
 
-        return cast(
-            Any,
-            self._hash_service.add_hash_columns(
-                cast(TabularData, df), business_key_cols=self._business_key_fields
-            ),
+        result = self._hash_service.add_hash_columns(
+            cast(TabularData, df), business_key_cols=self._business_key_fields
         )
+        # MutableTabularData protocol is compatible with pd.DataFrame in infrastructure
+        return cast(pd.DataFrame, result)
 
 
 class IndexColumnTransformerImpl(TransformerABC):
