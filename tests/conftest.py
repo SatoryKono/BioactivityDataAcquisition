@@ -559,9 +559,48 @@ def disable_network_calls(monkeypatch, request):
 
 @pytest.fixture(autouse=True)
 def init_provider_registry():
-    """Initialize the provider registry for all tests."""
-    from bioetl.domain.provider_registry import set_provider_registry
+    """Initialize the provider registry for all tests.
+
+    Uses the new DI approach through ApplicationContext instead of
+    deprecated global state functions.
+    """
+    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+    from bioetl.interfaces.application_context import (
+        reset_application_context,
+    )
+
+    # Reset application context to ensure clean state for each test
+    reset_application_context()
+
+    # Note: Provider registry is now managed through CompositionRoot
+    # and ApplicationContext. Tests that need a provider registry should
+    # either:
+    # 1. Use get_application_context().composition_root.get_provider_registry()
+    # 2. Create their own registry via InMemoryProviderRegistry()
+    # 3. Use the mock_provider_registry fixture (for integration tests)
+
+    yield
+
+    # Reset after test
+    reset_application_context()
+
+
+@pytest.fixture
+def mock_provider_registry():
+    """Create a fresh InMemoryProviderRegistry for tests.
+
+    Use this fixture in tests that need to interact with the provider registry.
+    The registry is empty and isolated per test.
+
+    Returns:
+        InMemoryProviderRegistry: Fresh, empty provider registry.
+
+    Example:
+        def test_provider_registration(mock_provider_registry):
+            provider = ProviderDefinition(...)
+            mock_provider_registry.register_provider(provider)
+            assert mock_provider_registry.list_providers() == [provider]
+    """
     from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
-    registry = InMemoryProviderRegistry()
-    set_provider_registry(registry)
+    return InMemoryProviderRegistry()

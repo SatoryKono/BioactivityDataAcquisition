@@ -51,7 +51,7 @@ from bioetl.domain.clients.base.output.contracts import (
 )
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.data import TabularData
-from bioetl.domain.models import RunContext, RunResult, StageResult
+from bioetl.domain.models import ExtractOnlyResult, RunContext, RunResult, StageResult
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import (
     ErrorPolicyABC,
@@ -182,6 +182,40 @@ class PipelineBase(ABC):
             self._logger,
         )
         return executor.execute(self, output_path, dry_run=dry_run)
+
+    def run_extract_only(self, **kwargs: Any) -> ExtractOnlyResult:
+        """Execute only the extract stage and return statistics.
+
+        This method provides a clean public API for extract-only mode,
+        encapsulating the internal extraction logic without exposing
+        private methods.
+
+        Args:
+            **kwargs: Arguments passed to the extract stage.
+
+        Returns:
+            ExtractOnlyResult with row count and chunk count.
+
+        Example:
+            >>> result = pipeline.run_extract_only(limit=1000)
+            >>> print(f"Extracted {result.total_rows} rows in {result.total_chunks} chunks")
+        """
+        extract_callable = self._get_extract_callable()
+        iterator = self._normalize_extract_result(extract_callable(**kwargs))
+
+        total_rows = 0
+        total_chunks = 0
+
+        for chunk in iterator:
+            if chunk is None:
+                continue
+            total_rows += len(chunk)
+            total_chunks += 1
+
+        return ExtractOnlyResult(
+            total_rows=total_rows,
+            total_chunks=max(total_chunks, 1),
+        )
 
     def _resolve_business_key_fields(self) -> list[str] | None:
         """Return business keys from config with legacy field support."""
