@@ -75,7 +75,7 @@ def test_extract_all_single_page(service, mock_client):
 
     # Assert
     assert len(records) == 2
-    assert records[0].activity_id == "1"
+    assert str(records[0].activity_id) == "1"
     # Verify iter_pages called with URL from builder
     mock_client.iter_pages.assert_called_once_with("http://mock-url")
     # Verify builder used correct limit
@@ -95,10 +95,10 @@ def test_extract_all_pagination(service, mock_client):
     mock_client.iter_pages.return_value = [{"data": "page1"}, {"data": "page2"}]
     mock_parser.parse_to_records.side_effect = [
         [
-            ActivityRawModel(activity_id="1", standard_flag=True),
-            ActivityRawModel(activity_id="2", standard_flag=True),
+            ActivityRawModel(activity_id="1", standard_flag=True, standard_value=1.0),
+            ActivityRawModel(activity_id="2", standard_flag=True, standard_value=2.0),
         ],
-        [ActivityRawModel(activity_id="3", standard_flag=True)],
+        [ActivityRawModel(activity_id="3", standard_flag=True, standard_value=3.0)],
     ]
 
     # Act
@@ -189,10 +189,10 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
     ]
     mock_parser.parse_to_records.side_effect = [
         [
-            ActivityRawModel(activity_id="1", standard_flag=True),
-            ActivityRawModel(activity_id="2", standard_flag=True),
+            ActivityRawModel(activity_id="1", standard_flag=True, standard_value=1.0),
+            ActivityRawModel(activity_id="2", standard_flag=True, standard_value=2.0),
         ],
-        [ActivityRawModel(activity_id="3", standard_flag=True)],
+        [ActivityRawModel(activity_id="3", standard_flag=True, standard_value=3.0)],
     ]
 
     # chunk_size=2 used for limit

@@ -6,9 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import timezone
-from typing import Callable, cast
-
-import pandas as pd
+from typing import Any, Callable, cast
 
 from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext
@@ -23,9 +21,7 @@ class TransformerABC(ABC):
     """Base interface for DataFrame transformers."""
 
     @abstractmethod
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Apply transformation to DataFrame."""
 
 
@@ -35,9 +31,7 @@ class TransformerChainImpl(TransformerABC):
     def __init__(self, transformers: list[TransformerABC]) -> None:
         self._transformers = transformers
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Apply registered transformers sequentially."""
         result = df
         for transformer in self._transformers:
@@ -54,18 +48,17 @@ class HashColumnsTransformerImpl(TransformerABC):
         self._hash_service = hash_service
         self._business_key_fields = business_key_fields or []
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Add hash_business_key and hash_row if DataFrame is not empty."""
         if df.empty:
             return df.assign(hash_business_key=None, hash_row=None)
 
-        result = self._hash_service.add_hash_columns(
-            cast(TabularData, df), business_key_cols=self._business_key_fields
+        return cast(
+            Any,
+            self._hash_service.add_hash_columns(
+                cast(TabularData, df), business_key_cols=self._business_key_fields
+            ),
         )
-        # MutableTabularData protocol is compatible with pd.DataFrame in infrastructure
-        return cast(pd.DataFrame, result)
 
 
 class IndexColumnTransformerImpl(TransformerABC):
@@ -74,9 +67,7 @@ class IndexColumnTransformerImpl(TransformerABC):
     def __init__(self, index_generator: IndexGeneratorABC) -> None:
         self._index_generator = index_generator
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Add sequential row index."""
         df = df.copy()
         start_index = self._index_generator.next_index()
@@ -98,9 +89,7 @@ class DatabaseVersionTransformerImpl(TransformerABC):
     ) -> None:
         self._database_version_provider = database_version_provider
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Add database_version if value is provided."""
         version = self._database_version_provider()
         if version is None:
@@ -116,9 +105,7 @@ class FulldateTransformerImpl(TransformerABC):
     def __init__(self, timestamp_provider: TimestampProviderABC) -> None:
         self._timestamp_provider = timestamp_provider
 
-    def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+    def apply(self, df: Any, context: RunContext | None = None) -> Any:
         """Add acquisition_timestamp (UTC ISO-8601)."""
         df = df.copy()
         ts = self._timestamp_provider.get_extraction_timestamp()

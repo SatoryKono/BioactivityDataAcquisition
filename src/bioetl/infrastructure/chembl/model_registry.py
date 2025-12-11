@@ -6,26 +6,41 @@ for ChEMBL entities, mapping entity type names to their Pydantic models.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pydantic import BaseModel
 
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
-from bioetl.domain.schemas.chembl.raw_models import (
-    ActivityRawModel,
-    AssayRawModel,
-    MoleculeRawModel,
-    PublicationRawModel,
-    TargetRawModel,
-)
 
-# Internal mapping of entity type -> model class
-# Note: "document" entity uses PublicationRawModel (canonical name)
-_ENTITY_MODEL_MAP: dict[str, type[BaseModel]] = {
-    "activity": ActivityRawModel,
-    "molecule": MoleculeRawModel,
-    "target": TargetRawModel,
-    "assay": AssayRawModel,
-    "document": PublicationRawModel,  # Canonical: PublicationRawModel
-}
+if TYPE_CHECKING:
+    from bioetl.domain.schemas.chembl.raw_models import (
+        ActivityRawModel,
+        AssayRawModel,
+        MoleculeRawModel,
+        PublicationRawModel,
+        TargetRawModel,
+    )
+
+
+def _get_entity_model_map() -> dict[str, type[BaseModel]]:
+    """Lazy import of domain models to avoid module-level import."""
+    from bioetl.domain.schemas.chembl.raw_models import (
+        ActivityRawModel,
+        AssayRawModel,
+        MoleculeRawModel,
+        PublicationRawModel,
+        TargetRawModel,
+    )
+
+    # Internal mapping of entity type -> model class
+    # Note: "document" entity uses PublicationRawModel (canonical name)
+    return {
+        "activity": ActivityRawModel,
+        "molecule": MoleculeRawModel,
+        "target": TargetRawModel,
+        "assay": AssayRawModel,
+        "document": PublicationRawModel,  # Canonical: PublicationRawModel
+    }
 
 
 class ChemblEntityModelRegistry(EntityModelRegistryABC):
@@ -63,11 +78,12 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
             >>> model_class.__name__
             'ActivityRawModel'
         """
-        model_class = _ENTITY_MODEL_MAP.get(entity)
+        entity_map = _get_entity_model_map()
+        model_class = entity_map.get(entity)
         if model_class is None:
             raise ValueError(
                 f"Unknown entity type: {entity}. "
-                f"Supported: {sorted(_ENTITY_MODEL_MAP.keys())}"
+                f"Supported: {sorted(entity_map.keys())}"
             )
         return model_class
 
@@ -80,7 +96,7 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
         Returns:
             True if entity has a registered model, False otherwise.
         """
-        return entity in _ENTITY_MODEL_MAP
+        return entity in _get_entity_model_map()
 
     def supported_entities(self) -> frozenset[str]:
         """Return set of supported entity names.
@@ -88,7 +104,7 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
         Returns:
             Frozen set containing: activity, assay, target, molecule, document.
         """
-        return frozenset(_ENTITY_MODEL_MAP.keys())
+        return frozenset(_get_entity_model_map().keys())
 
 
 # Singleton instance for convenience
