@@ -6,7 +6,7 @@ import pandas as pd
 from pydantic import AnyHttpUrl
 
 from bioetl.infrastructure.clients.chembl import impl as chembl_impl
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 from bioetl.interfaces.cli.app import app
 
 # Force unbuffered stdout when supported by the runtime
@@ -17,7 +17,7 @@ Path("data/output/assay").mkdir(parents=True, exist_ok=True)
 
 ChemblExtractionServiceImpl = chembl_impl.ChemblExtractionServiceImpl
 
-LOGGER = default_logging_port().apply_bind(tool="debug_assay_fetch_v2")
+LOGGER = create_logging_port().apply_bind(tool="debug_assay_fetch_v2")
 
 
 def debug_fetch() -> None:

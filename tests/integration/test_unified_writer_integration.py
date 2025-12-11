@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from bioetl.domain.configs import DeterminismConfig, QcConfig
+from bioetl.domain.configs import DeterminismConfig, QualityControlConfig
 from bioetl.domain.models import RunContext
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 from bioetl.infrastructure.output.impl.csv_writer import CsvWriterImpl
@@ -23,7 +23,7 @@ from bioetl.infrastructure.output.unified_loader_impl import (
 def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
     df = pd.DataFrame({"value": [3, 1, 2], "id": [2, 3, 1]})
     config = DeterminismConfig(stable_sort=True)
-    qc_config = QcConfig(enable_quality_report=True, enable_correlation_report=True)
+    qc_config = QualityControlConfig(enable_quality_report=True, enable_correlation_report=True)
     writer = CsvWriterImpl()
     metadata_writer = MetadataWriterImpl()
     quality_reporter = QualityReportImpl()

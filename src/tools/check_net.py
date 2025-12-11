@@ -2,9 +2,9 @@ import time
 
 import requests
 
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 
-LOGGER = default_logging_port().apply_bind(tool="check_net")
+LOGGER = create_logging_port().apply_bind(tool="check_net")
 
 
 def check(url: str) -> None:

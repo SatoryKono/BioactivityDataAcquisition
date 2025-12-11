@@ -5,7 +5,6 @@ Deprecated aliases (will be removed in v3.0):
     - HttpClientSettings -> use ProviderHttpConfig
     - HttpClientDefaults -> use HttpClientConfig
     - HTTP_CLIENT_DEFAULTS -> use HttpClientConfig()
-    - QcConfig -> use QualityControlConfig
 
 These deprecated names are available via lazy loading with DeprecationWarning.
 """
@@ -128,7 +127,6 @@ __all__ = [
     "HttpClientDefaults",  # Use HttpClientConfig
     "HttpClientSettings",  # Use ProviderHttpConfig
     "HTTP_CLIENT_DEFAULTS",  # Use HttpClientConfig()
-    "QcConfig",  # Use QualityControlConfig
 ]
 
 
@@ -151,5 +149,4 @@ if TYPE_CHECKING:
         ClientConfig as ClientConfig,
         HttpClientDefaults as HttpClientDefaults,
         HttpClientSettings as HttpClientSettings,
-        QcConfig as QcConfig,
     )
