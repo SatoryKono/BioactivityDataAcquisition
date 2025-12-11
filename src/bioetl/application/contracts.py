@@ -19,6 +19,7 @@ from bioetl.domain.pipelines.contracts import (
     PipelineHookABC,
 )
 from bioetl.domain.record_source import RecordSourceABC
+from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
     IndexGeneratorABC,
@@ -125,6 +126,17 @@ class PipelineContainerABC(ABC):
     @abstractmethod
     def get_metadata_builder(self) -> RunMetadataBuilderProtocol:
         """Return builder for run metadata artifacts."""
+
+    @abstractmethod
+    def get_schema_contract(self) -> PipelineSchemaModel:
+        """Return schema contract for the pipeline.
+
+        The schema contract defines input/output schemas for the pipeline,
+        ensuring consistent validation and data flow.
+
+        Returns:
+            PipelineSchemaModel for the current pipeline configuration.
+        """
 
 
 class PipelineFactoryABC(ABC):
