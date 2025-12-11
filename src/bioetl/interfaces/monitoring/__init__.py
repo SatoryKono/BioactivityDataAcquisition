@@ -27,8 +27,7 @@ from bioetl.infrastructure.observability.server import start_metrics_server_once
 
 
 def create_prometheus_metrics_port() -> MetricsPortABC:
-    """Create metrics port wired to Prometheus collectors.
-
+    """Create metrics port wired to Prometheus collectors."""
     return create_metrics_port()
 
 
