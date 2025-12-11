@@ -4,6 +4,9 @@ This module provides a single, consolidated application context that replaces
 multiple scattered singletons (_default_root, _context, _factory) with a
 unified, testable context object.
 
+The actual context storage is delegated to context_manager.py which uses
+contextvars.ContextVar for thread-safe and async-safe context management.
+
 Usage:
     # Get the default context
     ctx = get_application_context()
@@ -21,6 +24,12 @@ Usage:
         composition_root=mock_root,
     )
     set_application_context(test_ctx)
+
+    # For scoped context (recommended for testing):
+    from bioetl.interfaces.context_manager import application_context
+    with application_context(test_ctx):
+        # code uses test_ctx
+    # original context restored
 """
 
 from __future__ import annotations
@@ -105,42 +114,62 @@ class ApplicationContext:
         )
 
 
-# Module-level singleton
-_context: ApplicationContext | None = None
+# =============================================================================
+# Context access functions - delegate to context_manager for thread-safety
+# =============================================================================
 
 
 def get_application_context() -> ApplicationContext:
-    """Get or create the application context singleton.
+    """Get or create the application context for the current thread/task.
 
     This is the primary entry point for obtaining application dependencies.
-    For testing, use set_application_context() to inject a custom context.
+    The context is stored using contextvars.ContextVar for thread-safety.
+
+    For testing, use set_application_context() to inject a custom context,
+    or preferably use the application_context() context manager from
+    context_manager.py for automatic cleanup.
 
     Returns:
-        The singleton ApplicationContext instance.
+        The ApplicationContext instance for the current thread/task.
+
+    Example:
+        >>> ctx = get_application_context()
+        >>> logger = ctx.logger
     """
-    global _context
-    if _context is None:
-        _context = ApplicationContext.create_default()
-    return _context
+    from bioetl.interfaces.context_manager import get_current_context
+
+    return get_current_context()
 
 
 def set_application_context(context: ApplicationContext) -> None:
-    """Set custom application context (for testing).
+    """Set custom application context for the current thread/task.
+
+    This is primarily used for testing. For scoped context that
+    automatically restores the previous context, prefer using
+    the application_context() context manager from context_manager.py.
 
     Args:
-        context: Custom ApplicationContext to use as the singleton.
+        context: Custom ApplicationContext to use.
+
+    Example:
+        >>> set_application_context(test_ctx)
+        >>> # Now get_application_context() returns test_ctx
     """
-    global _context
-    _context = context
+    from bioetl.interfaces.context_manager import set_current_context
+
+    set_current_context(context)
 
 
 def reset_application_context() -> None:
     """Reset application context to force re-initialization.
 
     This is primarily used in tests to ensure a clean state between tests.
+    After calling this, the next call to get_application_context() will
+    create a new default context.
     """
-    global _context
-    _context = None
+    from bioetl.interfaces.context_manager import reset_current_context
+
+    reset_current_context()
 
 
 __all__ = [
