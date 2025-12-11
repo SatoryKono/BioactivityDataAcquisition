@@ -154,7 +154,13 @@ class ChemblPipelineBase(PipelineBase):
 
     def _should_skip_release_lookup(self) -> bool:
         """True if ChEMBL version lookup should be skipped (offline/CSV mode)."""
-        input_mode = getattr(self._config, "input_mode", None)
+        # Try new config structure first
+        try:
+            input_mode = self._config.source.input_mode
+        except AttributeError:
+            # Fallback for compatibility or mocks
+            input_mode = getattr(self._config, "input_mode", None)
+            
         pipeline_cfg = getattr(self._config, "pipeline", {}) or {}
         if input_mode == "csv":
             return True
