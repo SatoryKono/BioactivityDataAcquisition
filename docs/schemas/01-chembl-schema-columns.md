@@ -4,7 +4,7 @@
 Canonical column order for ChEMBL outputs. Lists mirror the `OUTPUT_COLUMN_ORDER`
 constants in `src/bioetl/domain/schemas/chembl/*`. Business columns go first, then
 the generated metadata columns `hash_row`, `hash_business_key`, `index`,
-`database_version`, `extracted_at`.
+`database_version`, `acquisition_timestamp`.
 
 ## Activity
 
@@ -19,7 +19,7 @@ the generated metadata columns `hash_row`, `hash_business_key`, `index`,
 `standard_type`, `standard_units`, `standard_upper_value`, `standard_value`,
 `target_chembl_id`, `target_organism`, `target_pref_name`, `target_tax_id`,
 `text_value`, `toid`, `type`, `units`, `uo_units`, `upper_value`, `value`,
-`hash_row`, `hash_business_key`, `index`, `database_version`, `extracted_at`.
+`hash_row`, `hash_business_key`, `index`, `database_version`, `acquisition_timestamp`.
 
 ## Assay
 
@@ -31,7 +31,7 @@ the generated metadata columns `hash_row`, `hash_business_key`, `index`,
 `document_chembl_id`, `relationship_description`, `relationship_type`, `score`,
 `src_assay_id`, `src_id`, `target_chembl_id`, `tissue_chembl_id`,
 `variant_sequence`, `hash_row`, `hash_business_key`, `index`, `database_version`,
-`extracted_at`.
+`acquisition_timestamp`.
 
 ## Molecule
 
@@ -44,7 +44,7 @@ the generated metadata columns `hash_row`, `hash_business_key`, `index`,
 `structure_type`, `therapeutic_flag`, `topical`, `usan_stem`,
 `usan_stem_definition`, `usan_substem`, `usan_year`, `veterinary`,
 `withdrawn_flag`, `hash_row`, `hash_business_key`, `index`, `database_version`,
-`extracted_at`.
+`acquisition_timestamp`.
 
 ## Publication
 
@@ -52,23 +52,23 @@ the generated metadata columns `hash_row`, `hash_business_key`, `index`,
 `document_chembl_id`, `doi`, `doi_chembl`, `first_page`, `issue`, `journal`,
 `journal_full_title`, `last_page`, `patent_id`, `pubmed_id`, `score`, `src_id`,
 `title`, `volume`, `year`, `hash_row`, `hash_business_key`, `index`,
-`database_version`, `extracted_at`.
+`database_version`, `acquisition_timestamp`.
 
 ## Target
 
 `target_chembl_id`, `pref_name`, `score`, `organism`, `target_type`, `tax_id`,
 `species_group_flag`, `target_components`, `cross_references`, `uniprot_id`,
-`hash_row`, `hash_business_key`, `index`, `database_version`, `extracted_at`.
+`hash_row`, `hash_business_key`, `index`, `database_version`, `acquisition_timestamp`.
 
 ## Cell
 
 `cell_chembl_id`, `cell_name`, `cell_source_organism`, `cell_type`,
 `cell_description`, `hash_row`, `hash_business_key`, `index`, `database_version`,
-`extracted_at`.
+`acquisition_timestamp`.
 
 ## Tissue
 
 `tissue_chembl_id`, `tissue_name`, `tissue_source_organism`, `tissue_description`,
 `tissue_type`, `hash_row`, `hash_business_key`, `index`, `database_version`,
-`extracted_at`.
+`acquisition_timestamp`.
 
