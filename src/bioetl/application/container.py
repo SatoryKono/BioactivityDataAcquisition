@@ -58,6 +58,10 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, Pipelin
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import RecordSourceABC
+from bioetl.domain.schemas.pipeline_contracts import (
+    PipelineSchemaModel,
+    get_pipeline_contract,
+)
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
     IndexGeneratorABC,
@@ -267,6 +271,24 @@ class PipelineContainer(PipelineContainerABC):
     def get_error_policy(self) -> ErrorPolicyABC:
         """Return the error handling policy for pipeline stages."""
         return self._runtime_factory.get_error_policy()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Schema Contract
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def get_schema_contract(self) -> PipelineSchemaModel:
+        """Return schema contract for the pipeline.
+
+        Uses the pipeline configuration to look up the appropriate schema contract
+        from the domain registry.
+
+        Returns:
+            PipelineSchemaModel for the current pipeline configuration.
+        """
+        return get_pipeline_contract(
+            self._config.id,
+            default_entity=self._config.entity_name,
+        )
 
     # ─────────────────────────────────────────────────────────────────────────
     # Private Factory Accessors
