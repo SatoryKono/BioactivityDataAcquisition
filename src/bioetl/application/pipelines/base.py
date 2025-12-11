@@ -455,8 +455,8 @@ class PipelineBase(ABC):
         """Return iterator of source data chunks."""
 
     @abstractmethod
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Transform raw data."""
+    def transform(self, df: TabularData) -> TabularData:
+        """Transform raw tabular data."""
 
     def validate(self, df: pd.DataFrame) -> pd.DataFrame:
         """Validate DataFrame against Pandera schema, respecting column order."""
