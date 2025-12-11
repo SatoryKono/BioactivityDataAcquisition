@@ -207,6 +207,9 @@ class TestDeprecatedAliases:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Import the deprecated alias
+            from bioetl.infrastructure.clients.chembl.response_parser import (
+                ChemblResponseParserImpl,  # noqa: F401
+            )
 
             deprecation_warnings = [
                 x for x in w if issubclass(x.category, DeprecationWarning)
