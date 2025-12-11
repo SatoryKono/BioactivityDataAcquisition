@@ -9,7 +9,6 @@ Naming convention:
 from __future__ import annotations
 
 from datetime import datetime
-import warnings
 
 from bioetl.domain.transform.contracts import (
     HasherABC,
@@ -82,103 +81,10 @@ def create_normalization_service(
     return norm_impl.NormalizationServiceImpl(config)
 
 
-# ---------------------------------------------------------------------------
-# Deprecated aliases for backward compatibility
-# ---------------------------------------------------------------------------
-
-
-def default_hasher() -> HasherABC:
-    """DEPRECATED: Use create_hasher() instead."""
-    warnings.warn(
-        "default_hasher is deprecated, use create_hasher instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_hasher()
-
-
-def default_hash_service(hasher: HasherABC | None = None) -> HashServiceABC:
-    """DEPRECATED: Use create_hash_service() instead."""
-    warnings.warn(
-        "default_hash_service is deprecated, use create_hash_service instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_hash_service(hasher)
-
-
-def default_timestamp_provider(
-    fixed_time: datetime | None = None,
-) -> TimestampProviderABC:
-    """DEPRECATED: Use create_timestamp_provider() instead."""
-    warnings.warn(
-        "default_timestamp_provider is deprecated, "
-        "use create_timestamp_provider instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_timestamp_provider(fixed_time)
-
-
-def default_index_generator(start: int = 0) -> IndexGeneratorABC:
-    """DEPRECATED: Use create_index_generator() instead."""
-    warnings.warn(
-        (
-            "default_index_generator is deprecated, "
-            "use create_index_generator instead"
-        ),
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_index_generator(start)
-
-
-def default_normalization_service(
-    config: NormalizationConfigProviderProtocol,
-) -> NormalizationServiceABC:
-    """DEPRECATED: Use create_normalization_service() instead."""
-    warnings.warn(
-        (
-            "default_normalization_service is deprecated, "
-            "use create_normalization_service instead"
-        ),
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return create_normalization_service(config)
-
-
-def default_chembl_normalization_service(
-    config: NormalizationConfigProviderProtocol,
-) -> NormalizationServiceABC:
-    """DEPRECATED: Use create_normalization_service() with appropriate parameters."""
-    warnings.warn(
-        "default_chembl_normalization_service is deprecated. "
-        "Use create_normalization_service or NormalizationServiceImpl "
-        "with empty_value=None, serialize_array_in_series=False instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return norm_impl.NormalizationServiceImpl(
-        config,
-        empty_value=None,
-        support_base_model=True,
-        serialize_array_in_series=False,
-    )
-
-
 __all__ = [
-    # New naming convention
     "create_hasher",
     "create_hash_service",
     "create_timestamp_provider",
     "create_index_generator",
     "create_normalization_service",
-    # Deprecated aliases
-    "default_hasher",
-    "default_hash_service",
-    "default_timestamp_provider",
-    "default_index_generator",
-    "default_normalization_service",
-    "default_chembl_normalization_service",
 ]

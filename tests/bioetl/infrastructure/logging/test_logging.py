@@ -1,15 +1,8 @@
-"""
-Tests for logging and progress reporting components.
-"""
+"""Tests for logging and progress reporting components."""
 
 from unittest.mock import patch
-import warnings
 
-from bioetl.infrastructure.logging.factories import (
-    create_logger,
-    default_logger,
-    default_progress_reporter,
-)
+from bioetl.infrastructure.logging.factories import create_progress_reporter
 from bioetl.infrastructure.logging.impl.progress_reporter import (
     TqdmProgressReporterImpl,
 )
@@ -23,33 +16,9 @@ def test_create_logging_port():
     assert isinstance(logger, StructuredLoggerImpl)
 
 
-def test_create_logger_deprecated():
-    """Test that create_logger emits deprecation warning and delegates."""
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        logger = create_logger()
-        assert isinstance(logger, StructuredLoggerImpl)
-        assert len(w) == 1
-        assert issubclass(w[0].category, DeprecationWarning)
-        assert "v1.6" in str(w[0].message)
-        assert "create_logging_port" in str(w[0].message)
-
-
-def test_default_logger_deprecated():
-    """Test that default_logger emits deprecation warning and delegates."""
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        logger = default_logger()
-        assert isinstance(logger, StructuredLoggerImpl)
-        assert len(w) == 1
-        assert issubclass(w[0].category, DeprecationWarning)
-        assert "v1.6" in str(w[0].message)
-        assert "create_logging_port" in str(w[0].message)
-
-
-def test_default_progress_reporter():
-    """Test default progress reporter factory."""
-    reporter = default_progress_reporter()
+def test_create_progress_reporter():
+    """Test progress reporter factory."""
+    reporter = create_progress_reporter()
     assert isinstance(reporter, TqdmProgressReporterImpl)
 
 
