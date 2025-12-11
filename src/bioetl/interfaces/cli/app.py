@@ -9,7 +9,7 @@ from typing import Annotated, Any
 from rich.console import Console
 import typer
 
-from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+from bioetl.application.pipelines.registry import list_pipelines as list_registered_pipelines
 from bioetl.application.use_cases import RunPipelineRequest, RunPipelineResponse
 from bioetl.interfaces.application_context import get_application_context
 from bioetl.interfaces.composition_root import get_composition_root
@@ -44,7 +44,7 @@ def _present_result(response: RunPipelineResponse) -> None:
 def list_pipelines() -> None:
     """List all available pipelines."""
     console.print("[bold]Available Pipelines:[/bold]")
-    for name in sorted(PIPELINE_REGISTRY.keys()):
+    for name in list_registered_pipelines():
         console.print(f"  - {name}")
 
 

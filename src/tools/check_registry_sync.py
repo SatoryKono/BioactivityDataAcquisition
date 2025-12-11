@@ -91,14 +91,14 @@ def build_sync_report() -> RegistrySyncReport:
     index_paths = [root / "docs/ABC_INDEX.md", root / "docs/01-ABC/INDEX.md"]
     config_root = root / "configs/pipelines"
 
-    from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
+    from bioetl.application.pipelines.registry import list_pipelines
 
     registry_names = _read_yaml_mapping(registry_path).keys()
 
     impl_names: set[str] = set()
     for path in impl_paths:
         impl_names.update(_read_yaml_mapping(path).keys())
-    pipeline_registry_names = PIPELINE_REGISTRY.keys()
+    pipeline_registry_names = list_pipelines()
     pipeline_config_names = _iter_pipeline_config_names(config_root)
 
     sections: list[SectionResult] = [

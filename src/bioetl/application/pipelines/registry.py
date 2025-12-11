@@ -2,27 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Type
 
 from bioetl.application.contracts import PipelineFactoryABC
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.factories import ChemblPipelineFactory
 
-PipelineFactory = Callable[..., PipelineBase]
-
-# Registry mapping pipeline names to pipeline classes
-PIPELINE_REGISTRY: dict[str, PipelineFactory] = {
-    "activity_chembl": ChemblPipelineBase,
-    "assay_chembl": ChemblPipelineBase,
-    "publication_chembl": ChemblPipelineBase,
-    "target_chembl": ChemblPipelineBase,
-    "molecule_chembl": ChemblPipelineBase,
-}
-
 # Factory registry: maps pipeline names to their factory instances
-# This is the preferred way to create pipelines
 _FACTORY_REGISTRY: dict[str, PipelineFactoryABC] = {
     "activity_chembl": ChemblPipelineFactory(),
     "assay_chembl": ChemblPipelineFactory(),
@@ -32,43 +18,15 @@ _FACTORY_REGISTRY: dict[str, PipelineFactoryABC] = {
 }
 
 
-def get_pipeline_factory(name: str) -> PipelineFactory:
-    """Return factory callable for the given pipeline name."""
+def list_pipelines() -> list[str]:
+    """Return sorted list of available pipeline identifiers."""
 
-    try:
-        return PIPELINE_REGISTRY[name]
-    except KeyError as exc:
-        raise ValueError(
-            f"Pipeline '{name}' not found. Available: {list(PIPELINE_REGISTRY.keys())}"
-        ) from exc
+    return sorted(_FACTORY_REGISTRY.keys())
 
 
-def get_pipeline_class(name: str) -> Type[PipelineBase]:
-    """Return pipeline class for the given name when registered as a class."""
+def get_pipeline_factory(name: str) -> PipelineFactoryABC:
+    """Return the factory instance for the given pipeline name."""
 
-    factory = get_pipeline_factory(name)
-    if isinstance(factory, type) and issubclass(factory, PipelineBase):
-        return factory
-    raise ValueError(
-        f"Pipeline '{name}' is registered with a non-class factory: {factory}"
-    )
-
-
-def get_factory(name: str) -> PipelineFactoryABC:
-    """
-    Return the factory instance for creating pipelines of the given type.
-
-    This is the preferred method for obtaining pipeline factories.
-
-    Args:
-        name: Pipeline name (e.g., 'activity_chembl').
-
-    Returns:
-        Factory instance implementing PipelineFactoryABC.
-
-    Raises:
-        ValueError: If no factory is registered for the given name.
-    """
     try:
         return _FACTORY_REGISTRY[name]
     except KeyError as exc:
@@ -78,10 +36,22 @@ def get_factory(name: str) -> PipelineFactoryABC:
         ) from exc
 
 
-def get_registered_pipelines() -> dict[str, PipelineFactory]:
-    """Return a copy of the registered pipeline mapping."""
+def get_factory(name: str) -> PipelineFactoryABC:
+    """Backward-compatible alias for :func:`get_pipeline_factory`."""
 
-    return dict(PIPELINE_REGISTRY)
+    return get_pipeline_factory(name)
+
+
+def get_pipeline_class(name: str) -> Type[PipelineBase]:
+    """Return pipeline class exposed by the registered factory."""
+
+    factory = get_pipeline_factory(name)
+    pipeline_cls = getattr(factory, "pipeline_cls", None)
+    if isinstance(pipeline_cls, type) and issubclass(pipeline_cls, PipelineBase):
+        return pipeline_cls
+    raise ValueError(
+        f"Pipeline '{name}' is registered without accessible pipeline class"
+    )
 
 
 def get_registered_factories() -> dict[str, PipelineFactoryABC]:
@@ -91,11 +61,9 @@ def get_registered_factories() -> dict[str, PipelineFactoryABC]:
 
 
 __all__ = [
-    "PIPELINE_REGISTRY",
-    "PipelineFactory",
     "get_factory",
     "get_pipeline_class",
     "get_pipeline_factory",
     "get_registered_factories",
-    "get_registered_pipelines",
+    "list_pipelines",
 ]

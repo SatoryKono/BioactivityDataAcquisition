@@ -21,6 +21,8 @@ class ChemblPipelineFactory(PipelineFactoryABC):
     is fully configured before returning.
     """
 
+    pipeline_cls = ChemblPipelineBase
+
     def create(
         self,
         container: PipelineContainerABC,
