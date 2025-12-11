@@ -28,13 +28,16 @@ def format_chembl_version(raw_version: str) -> str:
         'unknown'
         >>> format_chembl_version('')
         'unknown'
+        >>> format_chembl_version('ChEMBL_36')
+        'chembl_36'
     """
     if not raw_version or raw_version == UNKNOWN_VERSION:
         return UNKNOWN_VERSION
 
-    # Already formatted - return as is
-    if raw_version.startswith(CHEMBL_VERSION_PREFIX):
-        return raw_version
+    # Already formatted (case-insensitive check) - normalize to lowercase
+    lower_version = raw_version.lower()
+    if lower_version.startswith(CHEMBL_VERSION_PREFIX):
+        return lower_version
 
     return f"{CHEMBL_VERSION_PREFIX}{raw_version}"
 

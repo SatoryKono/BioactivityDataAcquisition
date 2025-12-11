@@ -10,7 +10,8 @@ in the validation infrastructure. It defines:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+import warnings
 
 import pandera.pandas as pa
 from pandera.typing import Series

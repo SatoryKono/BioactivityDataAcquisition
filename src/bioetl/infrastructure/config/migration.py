@@ -270,9 +270,7 @@ class ConfigMigrator:
 
         # Migrate 'http' section (current name)
         if "http" in runtime and isinstance(runtime["http"], dict):
-            runtime["http"] = HttpConfigMigrator.migrate(
-                runtime["http"], warn=False
-            )
+            runtime["http"] = HttpConfigMigrator.migrate(runtime["http"], warn=False)
 
         # Also migrate provider_config.http if present
         provider_config = data.get("provider_config")

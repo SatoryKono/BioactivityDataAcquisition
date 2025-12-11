@@ -488,17 +488,17 @@ def test_pipeline_contracts_config_matches_hardcoded() -> None:
 
     # Check all hardcoded contracts exist in YAML
     for code, model in PIPELINE_CONTRACTS.items():
-        assert code in contracts_from_yaml, (
-            f"Hardcoded contract '{code}' not found in pipeline_contracts.yaml"
-        )
+        assert (
+            code in contracts_from_yaml
+        ), f"Hardcoded contract '{code}' not found in pipeline_contracts.yaml"
 
         yaml_contract = contracts_from_yaml[code]
-        assert yaml_contract["schema_out"] == model.schema_out, (
-            f"schema_out mismatch for {code}"
-        )
-        assert yaml_contract.get("schema_in") == model.schema_in, (
-            f"schema_in mismatch for {code}"
-        )
-        assert yaml_contract.get("output_schema") == model.output_schema, (
-            f"output_schema mismatch for {code}"
-        )
+        assert (
+            yaml_contract["schema_out"] == model.schema_out
+        ), f"schema_out mismatch for {code}"
+        assert (
+            yaml_contract.get("schema_in") == model.schema_in
+        ), f"schema_in mismatch for {code}"
+        assert (
+            yaml_contract.get("output_schema") == model.output_schema
+        ), f"output_schema mismatch for {code}"
