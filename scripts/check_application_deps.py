@@ -89,6 +89,9 @@ ALLOWED_DOMAIN_IMPORTS = {
     "bioetl.domain.configs.contracts",
     "bioetl.domain.enums",
     "bioetl.domain.services",
+    # Data types and value objects used in pipelines
+    "bioetl.domain.value_objects",
+    "bioetl.domain.data",
 }
 
 # Explicitly forbidden imports (never allowed, even in TYPE_CHECKING)
@@ -342,7 +345,11 @@ def find_python_files(root: Path) -> Iterator[Path]:
 
 
 def build_dependency_graph(analyses: list[ModuleAnalysis]) -> dict[str, set[str]]:
-    """Build a dependency graph from module analyses."""
+    """Build a dependency graph from module analyses.
+
+    Only includes runtime imports (excludes TYPE_CHECKING and lazy imports)
+    since those don't create runtime cyclic dependencies.
+    """
     graph: dict[str, set[str]] = defaultdict(set)
 
     # Initialize all known submodules
@@ -352,6 +359,12 @@ def build_dependency_graph(analyses: list[ModuleAnalysis]) -> dict[str, set[str]
     for analysis in analyses:
         source = analysis.submodule
         for imp in analysis.application_imports:
+            # Skip TYPE_CHECKING imports - they don't create runtime cycles
+            if imp.in_type_checking:
+                continue
+            # Skip lazy imports inside functions - they don't create import cycles
+            if imp.is_lazy:
+                continue
             target = _extract_target_submodule(imp.module)
             if target and target != source and target in SUBMODULES:
                 graph[source].add(target)

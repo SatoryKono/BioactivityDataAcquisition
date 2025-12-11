@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 from bioetl.application.factories.hooks import PipelineHookFactory
 from bioetl.application.factories.noop import create_noop_metrics_port
-from bioetl.application.pipelines.hooks_impl import FailFastErrorPolicyImpl
+from bioetl.application.factories.hooks_impl import FailFastErrorPolicyImpl
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, PipelineHookABC
