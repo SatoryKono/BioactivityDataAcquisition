@@ -17,13 +17,13 @@ def _find_project_root(start: Path) -> Path:
 ROOT = _find_project_root(Path(__file__))
 
 try:
-    from bioetl.infrastructure.logging.factories import (
-        default_logger as get_default_logger,
+    from bioetl.infrastructure.observability.factories import (
+        create_logging_port as get_logging_port,
     )
 except Exception:
-    get_default_logger: Optional[Callable[[], Any]] = None
+    get_logging_port: Optional[Callable[[], Any]] = None
 else:
-    get_default_logger = get_default_logger
+    get_logging_port = get_logging_port
 
 
 IGNORED_FILES = {".DS_Store", "Thumbs.db"}
@@ -166,8 +166,8 @@ def main() -> int:
     args = ap.parse_args()
 
     logger = None
-    if get_default_logger is not None:
-        logger = get_default_logger().apply_bind(task="cleanup_packages")
+    if get_logging_port is not None:
+        logger = get_logging_port().apply_bind(task="cleanup_packages")
 
     scope = [ROOT / "tests", ROOT / "docs", ROOT / "src" / "tools"]
     if args.include_src:
