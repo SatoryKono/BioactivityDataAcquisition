@@ -5,6 +5,10 @@ from bioetl.application.services.config_migration_service import (
     ConfigMigrationServiceProtocol,
     create_config_migration_service,
 )
+from bioetl.application.services.filter_enrichment_service import (
+    FilterEnrichmentService,
+    NullFilterEnricher,
+)
 from bioetl.application.services.schema_bootstrap import (
     SchemaBootstrapService,
     create_schema_bootstrap_service,
@@ -16,6 +20,8 @@ from bioetl.application.services.schema_contract_provider import (
 __all__ = [
     "ConfigMigrationService",
     "ConfigMigrationServiceProtocol",
+    "FilterEnrichmentService",
+    "NullFilterEnricher",
     "SchemaBootstrapService",
     "SchemaContractProviderImpl",
     "create_config_migration_service",
