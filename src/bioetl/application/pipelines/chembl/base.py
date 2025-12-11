@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -21,7 +21,7 @@ from bioetl.domain.clients.base.output.contracts import (
     WriteResult,
 )
 from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig
-from bioetl.domain.data import TabularData
+from bioetl.domain.data import MutableTabularData, TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
@@ -233,7 +233,9 @@ class ChemblPipelineBase(PipelineBase):
         transformer = self._transformer
         if transformer is None:
             raise RuntimeError("Chembl transformer is not initialized.")
-        return transformer.apply(df)
+        # Cast TabularData to MutableTabularData for transformer
+        transformed = transformer.apply(cast(MutableTabularData, df))
+        return cast(TabularData, transformed)
 
     def write(
         self,

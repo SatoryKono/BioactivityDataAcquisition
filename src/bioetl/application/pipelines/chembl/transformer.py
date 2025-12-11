@@ -6,7 +6,9 @@ from typing import Literal, cast
 
 import pandas as pd
 
-from bioetl.domain.data import TabularData
+from typing import cast
+
+from bioetl.domain.data import MutableTabularData, TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
@@ -40,19 +42,21 @@ class ChemblTransformerImpl(TransformerABC):
         self._serialization_mode = serialization_mode
 
     def apply(
-        self, df: pd.DataFrame, context: RunContext | None = None
-    ) -> pd.DataFrame:
+        self, df: MutableTabularData, context: RunContext | None = None
+    ) -> MutableTabularData:
         """Apply ChEMBL pipeline transforms to the dataframe."""
-        df = self.pre_transform(df)
-        df = self.do_transform(df)
-        df = cast(
+        # Cast to pd.DataFrame for pandas-specific operations
+        df_pd = cast(pd.DataFrame, df)
+        df_pd = self.pre_transform(df_pd)
+        df_pd = self.do_transform(df_pd)
+        df_pd = cast(
             pd.DataFrame,
-            self.normalization_service.normalize(cast(TabularData, df)),
+            self.normalization_service.normalize(cast(TabularData, df_pd)),
         )
-        df = self._serialize_nested_fields(df)
-        df = self._enforce_schema(df)
-        df = self._drop_nulls_in_required_columns(df)
-        return df
+        df_pd = self._serialize_nested_fields(df_pd)
+        df_pd = self._enforce_schema(df_pd)
+        df_pd = self._drop_nulls_in_required_columns(df_pd)
+        return cast(MutableTabularData, df_pd)
 
     def pre_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Hook for pre-transformation."""
