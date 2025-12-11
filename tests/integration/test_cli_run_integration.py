@@ -50,7 +50,7 @@ def test_cli_run_dry_run_success(tmp_path, monkeypatch):
         print(f"CLI Output: {result.stdout}")
 
     assert result.exit_code == 0
-    assert "Running pipeline" in result.stdout
+    assert "Starting pipeline" in result.stdout
     assert "Pipeline finished successfully" in result.stdout
     assert not (tmp_path / "output" / "activity.csv").exists()
 
