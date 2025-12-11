@@ -341,7 +341,9 @@ def _build_config(
             f"Validation failed for {config_path}: {exc}"
         ) from exc
     _ensure_input_source_valid(config, config_path=config_path, base_dir=base_dir)
-    _populate_fields_from_schema(config, schema_contract_provider=schema_contract_provider)
+    _populate_fields_from_schema(
+        config, schema_contract_provider=schema_contract_provider
+    )
     return config
 
 

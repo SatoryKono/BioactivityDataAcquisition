@@ -11,6 +11,7 @@ from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.application.pipelines.stages.extract import ExtractStage
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 from bioetl.domain.record_source import SourceRecordModel
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 # =============================================================================
 # Fixtures
@@ -32,7 +33,7 @@ def mock_mapper() -> MagicMock:
 @pytest.fixture
 def chembl_mapper() -> ChemblRecordMapper:
     """Create a real ChemblRecordMapper."""
-    return ChemblRecordMapper()
+    return ChemblRecordMapper(registry=get_chembl_model_registry())
 
 
 # =============================================================================
@@ -402,7 +403,7 @@ class TestExtractStageIntegration:
 
         stage = ExtractStage(
             extraction_service=mock_extraction_service,
-            record_mapper=ChemblRecordMapper(),
+            record_mapper=ChemblRecordMapper(registry=get_chembl_model_registry()),
         )
 
         dfs = list(stage.extract("activity"))
@@ -433,7 +434,7 @@ class TestExtractStageIntegration:
 
         stage = ExtractStage(
             extraction_service=mock_extraction_service,
-            record_mapper=ChemblRecordMapper(),
+            record_mapper=ChemblRecordMapper(registry=get_chembl_model_registry()),
         )
 
         dfs = list(stage.extract("molecule"))
@@ -448,7 +449,7 @@ class TestExtractStageIntegration:
         self, mock_extraction_service: MagicMock
     ) -> None:
         """ExtractStage supports all ChEMBL entity types."""
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         test_cases = [
             ("activity", {"activity_id": 1, "standard_flag": True}),
@@ -511,9 +512,7 @@ class TestExtractStageProperties:
 
         assert stage.record_mapper is None
 
-    def test_entity_property_when_set(
-        self, mock_extraction_service: MagicMock
-    ) -> None:
+    def test_entity_property_when_set(self, mock_extraction_service: MagicMock) -> None:
         """entity property returns the pre-configured entity."""
         stage = ExtractStage(
             extraction_service=mock_extraction_service,

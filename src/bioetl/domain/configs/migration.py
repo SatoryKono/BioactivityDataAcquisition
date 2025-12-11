@@ -29,9 +29,11 @@ def __getattr__(name: str) -> Any:
             DeprecationWarning,
             stacklevel=2,
         )
-        mod = importlib.import_module(".".join(["bioetl", "infrastructure", "config", "migration"]))
+        mod = importlib.import_module(
+            ".".join(["bioetl", "infrastructure", "config", "migration"])
+        )
         return getattr(mod, "ConfigMigrator")
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["ConfigMigrator"]
+__all__ = ["ConfigMigrator"]  # noqa: F822

@@ -4,7 +4,6 @@ from pydantic import ValidationError
 import pytest
 
 from bioetl.application.mappers.chembl import ChemblRecordMapper
-from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.domain.schemas.chembl.raw_models import (
     ActivityRawModel,
     AssayRawModel,
@@ -12,6 +11,7 @@ from bioetl.domain.schemas.chembl.raw_models import (
     MoleculeRawModel,
     TargetRawModel,
 )
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
 class TestChemblRecordMapperActivityMapping:

@@ -64,7 +64,9 @@ PipelineIdField = Annotated[
 ProviderIdField = Annotated[
     Any,
     PlainValidator(_coerce_provider_id),
-    PlainSerializer(lambda v: v.value if hasattr(v, "value") else str(v), return_type=str),
+    PlainSerializer(
+        lambda v: v.value if hasattr(v, "value") else str(v), return_type=str
+    ),
 ]
 
 EntityNameField = Annotated[

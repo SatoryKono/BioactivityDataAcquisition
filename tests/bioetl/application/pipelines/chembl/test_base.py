@@ -8,9 +8,9 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
     ChemblNormalizationServiceImpl,
 )

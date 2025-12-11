@@ -6,6 +6,8 @@ from collections.abc import Mapping, Sequence
 import json
 from typing import Any, Literal
 
+import pandas as pd
+
 
 def serialize_list(value: Any) -> Any:
     """Serialize a list of primitives or dicts into a pipe-delimited string.
@@ -15,19 +17,21 @@ def serialize_list(value: Any) -> Any:
     - Nested lists/tuples/sequences are skipped
     - None or empty lists yield `pd.NA`
     """
-    if value is None:
-        return ""
+    if value is None or _is_missing(value):
+        return pd.NA
 
     if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
         value, (str, bytes, bytearray)
     ):
+        if not value:
+            return pd.NA
         parts: list[str] = []
         for item in value:
             if item is None or _is_missing(item):
                 continue
             if isinstance(item, Mapping):
                 dict_str = serialize_dict(item)
-                if dict_str:
+                if dict_str and dict_str != "":
                     parts.append(dict_str)
                 continue
             if isinstance(
@@ -37,10 +41,10 @@ def serialize_list(value: Any) -> Any:
                 continue
             parts.append(str(item))
 
-        return "|".join(parts) if parts else ""
+        return "|".join(parts) if parts else pd.NA
 
     # Non-sequence values: treat None as NA, otherwise convert to string
-    return "" if _is_missing(value) else str(value)
+    return pd.NA if _is_missing(value) else str(value)
 
 
 def serialize_dict(value: Any) -> Any:
@@ -84,7 +88,7 @@ def serialize_nested(
     """Serialize nested structures deterministically to a string."""
 
     if _is_missing(value):
-        return ""
+        return "" if mode != "pipe" else ""
 
     if mode not in {"json", "flat", "pipe"}:
         raise ValueError(f"Unsupported serialization mode: {mode}")

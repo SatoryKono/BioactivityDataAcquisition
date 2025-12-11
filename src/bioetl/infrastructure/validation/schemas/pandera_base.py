@@ -15,7 +15,7 @@ from typing import Any
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.field_specs import GENERATED_COLUMN_NAMES
+from bioetl.domain.schemas.field_specs import GENERATED_COLUMN_NAMES, HEX_64_PATTERN
 
 __all__ = [
     "HEX_64_PATTERN",
@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 # Regex pattern for SHA-256 hash validation
-HEX_64_PATTERN = r"^[a-f0-9]{64}$"
+# Imported from domain.schemas.field_specs
 
 # Canonical column names for generated columns (derived from domain specs)
 GENERATED_COLUMN_ORDER: list[str] = list(GENERATED_COLUMN_NAMES)

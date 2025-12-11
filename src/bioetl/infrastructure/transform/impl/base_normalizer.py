@@ -326,4 +326,7 @@ def __getattr__(name: str):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["BaseNormalizationService", "BaseNormalizationServiceImpl"]
+__all__ = [
+    "BaseNormalizationService",
+    "BaseNormalizationServiceImpl",  # noqa: F822
+]  # noqa: F822

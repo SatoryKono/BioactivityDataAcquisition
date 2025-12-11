@@ -32,13 +32,20 @@ class _StubExtractionService:
         self.batches.append(batch_ids)
         return {
             "records": [
-                {"activity_id": value, "standard_flag": True} for value in batch_ids
+                {
+                    "activity_id": value.lstrip("A") if value.startswith("A") else value,
+                    "standard_flag": True,
+                    "standard_value": 1.0
+                } for value in batch_ids
             ]
         }
 
     def parse(self, raw_response: dict[str, list[dict[str, str]]]):
         return [
-            ActivityRawModel.model_validate(item) for item in raw_response["records"]
+            ActivityRawModel.model_validate({
+                **item,
+                "standard_value": item.get("standard_value", 1.0) if item.get("standard_flag") else None
+            }) for item in raw_response["records"]
         ]
 
     def parse_response(self, raw_response: dict[str, list[dict[str, str]]]):
@@ -87,7 +94,7 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
     chunks = list(source.iter_records())
 
     assert len(chunks) == 1
-    expected = [ActivityRawModel(activity_id="1", standard_flag=True)]
+    expected = [ActivityRawModel(activity_id="1", standard_flag=True, standard_value=1.0)]
     assert chunks[0] == expected
 
 
@@ -126,8 +133,8 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     assert len(records) == 2
     combined = [record for batch in records for record in batch]
     expected = [
-        ActivityRawModel(activity_id="A1", standard_flag=True),
-        ActivityRawModel(activity_id="A2", standard_flag=True),
-        ActivityRawModel(activity_id="A3", standard_flag=True),
+        ActivityRawModel(activity_id="1", standard_flag=True, standard_value=1.0),
+        ActivityRawModel(activity_id="2", standard_flag=True, standard_value=1.0),
+        ActivityRawModel(activity_id="3", standard_flag=True, standard_value=1.0),
     ]
     assert combined == expected

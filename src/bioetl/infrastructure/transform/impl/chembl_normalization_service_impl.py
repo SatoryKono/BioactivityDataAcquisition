@@ -6,8 +6,8 @@ This module is kept for backward compatibility and will be removed in a future v
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any
+import warnings
 
 import pandas as pd
 
@@ -17,9 +17,7 @@ from bioetl.domain.transform.contracts import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.transform.impl.default_normalization_transformer_impl import (
-        NormalizationServiceImpl,
-    )
+    pass
 
 
 class ChemblNormalizationService(NormalizationServiceABC):
@@ -77,9 +75,7 @@ class ChemblNormalizationService(NormalizationServiceABC):
         return self._base.ensure_numeric_columns(df)
 
     # Delegate additional methods for backward compatibility
-    def apply_normalize(
-        self, raw: pd.Series | dict[str, Any]
-    ) -> dict[str, Any]:
+    def apply_normalize(self, raw: pd.Series | dict[str, Any]) -> dict[str, Any]:
         """Normalize a raw record into a dict using configured field rules."""
         return self._base.apply_normalize(raw)
 
@@ -122,6 +118,6 @@ def __getattr__(name: str):
 
 __all__ = [
     "ChemblNormalizationService",
-    "ChemblNormalizationServiceImpl",  # Deprecated alias
+    "ChemblNormalizationServiceImpl",  # noqa: F822
     "NormalizedRecord",
 ]

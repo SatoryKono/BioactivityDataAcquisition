@@ -21,6 +21,13 @@ def normalize_doi(value: Any) -> str | None:
     """
     if is_missing(value):
         return None
+    # Check for pandas NAType before converting to string
+    try:
+        import pandas as pd
+        if value is pd.NA:
+            return None
+    except (ImportError, AttributeError):
+        pass
     if not isinstance(value, str):
         raise ValueError(f"DOI must be a string, got: {type(value)}")
 
@@ -51,7 +58,7 @@ def normalize_chembl_id(value: Any) -> str | None:
         return None
 
     text = str(value).strip().upper()
-    if not text:
+    if not text or text == "<NA>":
         return None
 
     if text.isdigit():
@@ -72,6 +79,8 @@ def normalize_pmid(value: Any) -> int | None:
         return None
 
     if isinstance(value, float):
+        if is_missing(value):
+            return None
         if value.is_integer():
             value = int(value)
         else:
@@ -83,11 +92,13 @@ def normalize_pmid(value: Any) -> int | None:
         return value
 
     text = str(value).strip()
-    if not text:
+    if not text or text == "<NA>":
         return None
 
     if not text.isdigit():
-        raise ValueError(f"Invalid PubMed ID (contains non-digit characters): '{value}'")
+        raise ValueError(
+            f"Invalid PubMed ID (contains non-digit characters): '{value}'"
+        )
 
     parsed = int(text)
     if parsed <= 0:
@@ -108,6 +119,13 @@ def normalize_uniprot(value: Any) -> str | None:
     """Normalize UniProt accession with strict format validation."""
     if is_missing(value):
         return None
+    # Check for pandas NAType before converting to string
+    try:
+        import pandas as pd
+        if value is pd.NA:
+            return None
+    except (ImportError, AttributeError):
+        pass
     if not isinstance(value, str):
         raise ValueError("UniProt ID must be a string")
 
@@ -162,7 +180,7 @@ def _parse_positive_int_with_prefixes(
         return numeric
 
     text = str(value).strip().upper()
-    if not text:
+    if not text or text == "<NA>":
         return None
 
     stripped = _strip_prefix(text, prefixes)

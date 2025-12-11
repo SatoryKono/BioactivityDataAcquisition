@@ -27,7 +27,6 @@ def _reset_provider_registry() -> None:
     provider_registry.clear_provider_registry_cache()
 
 
-
 @pytest.fixture(autouse=True)
 def _setup_schema_contract_provider() -> None:
     """Set up schema contract provider for tests."""

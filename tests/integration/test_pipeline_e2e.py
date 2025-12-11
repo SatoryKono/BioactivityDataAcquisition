@@ -9,11 +9,12 @@ import pandas as pd
 import pytest
 
 from bioetl.application.bootstrap import ApplicationBootstrap
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 from bioetl.application.mappers.chembl import ChemblRecordMapper
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 
 class TestPipelineDataFlow:
@@ -90,7 +91,7 @@ class TestPipelineDataFlow:
     ) -> None:
         """Test full parse → map → transform flow."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         all_records = []
         for response in mock_api_responses:
@@ -143,7 +144,7 @@ class TestBatchProcessing:
     def test_process_empty_batch(self) -> None:
         """Empty batch should be handled gracefully."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         response = {"activities": [], "page_meta": {"total_count": 0}}
 
@@ -156,7 +157,7 @@ class TestBatchProcessing:
     def test_process_large_batch(self) -> None:
         """Large batch should be processed correctly."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         # Create 1000 records
         activities = [
@@ -183,7 +184,7 @@ class TestBatchProcessing:
     def test_batch_with_null_values(self) -> None:
         """Batch with null values should be handled correctly."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         response = {
             "activities": [
@@ -271,7 +272,7 @@ class TestMultiEntityFlow:
     ) -> None:
         """All entity types should be processable through the same flow."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         results = {}
         for entity, response in entity_responses.items():
@@ -320,7 +321,7 @@ class TestBootstrapIntegration:
     def test_parser_and_mapper_work_independently(self) -> None:
         """Parser and mapper should work without bootstrap."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         response = {"activities": [{"activity_id": 1, "standard_flag": True}]}
 
@@ -352,7 +353,7 @@ class TestDataFrameOutput:
     def test_dataframe_preserves_all_fields(self) -> None:
         """DataFrame should preserve all record fields."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         response = {
             "activities": [
@@ -383,7 +384,7 @@ class TestDataFrameOutput:
     def test_dataframe_dtypes_are_correct(self) -> None:
         """DataFrame should have correct data types."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         response = {
             "activities": [
@@ -405,7 +406,7 @@ class TestDataFrameOutput:
     def test_dataframe_export_to_csv(self, tmp_path: Path) -> None:
         """DataFrame should be exportable to CSV."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         response = {
             "activities": [

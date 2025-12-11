@@ -145,6 +145,7 @@ def __getattr__(name: str) -> Any:
     """
     if name == "ConfigMigrator":
         import warnings
+
         from bioetl.domain.configs.migration import ConfigMigrator
 
         warnings.warn(

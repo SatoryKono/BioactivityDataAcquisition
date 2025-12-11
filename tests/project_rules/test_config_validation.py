@@ -19,7 +19,8 @@ def test_pipeline_configs_validate(configs_root: Path) -> None:
     for config_file in configs_root.glob("pipelines/*/*.yaml"):
         data = _load_yaml(config_file)
         try:
-            PipelineConfig(**data)
+            # Use model_validate to trigger migration validator
+            PipelineConfig.model_validate(data)
         except ValidationError as exc:
             violations.append(f"{config_file.as_posix()}: {exc}")
 

@@ -132,10 +132,10 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     document_chembl_id: Series[str] = pa.Field(
         str_matches=CHEMBL_ID_PATTERN, description="ChEMBL document identifier"
     )
-    document_journal: Series[str] = pa.Field(
-        nullable=True, description="Journal name"
+    document_journal: Series[str] = pa.Field(nullable=True, description="Journal name")
+    document_year: Series[float] = pa.Field(
+        nullable=True, description="Publication year"
     )
-    document_year: Series[float] = pa.Field(nullable=True, description="Publication year")
     ligand_efficiency: Series[str] = pa.Field(
         nullable=True, description="Ligand efficiency metrics (JSON)"
     )
@@ -151,7 +151,10 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
         description="Parent molecule ChEMBL ID",
     )
     pchembl_value: Series[float] = pa.Field(
-        nullable=True, ge=0, le=15, description="Normalized activity (-log10, range 0-15)"
+        nullable=True,
+        ge=0,
+        le=15,
+        description="Normalized activity (-log10, range 0-15)",
     )
     potential_duplicate: Series[bool] = pa.Field(
         nullable=True, description="Flag for potential duplicate"
@@ -203,22 +206,14 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     target_tax_id: Series[float] = pa.Field(
         nullable=True, description="Target NCBI Taxonomy ID"
     )
-    text_value: Series[str] = pa.Field(
-        nullable=True, description="Original text value"
-    )
+    text_value: Series[str] = pa.Field(nullable=True, description="Original text value")
     toid: Series[str] = pa.Field(nullable=True, description="Target Ontology ID")
-    type: Series[str] = pa.Field(
-        nullable=True, description="Original activity type"
-    )
+    type: Series[str] = pa.Field(nullable=True, description="Original activity type")
     units: Series[str] = pa.Field(
         nullable=True, description="Original measurement units"
     )
-    uo_units: Series[str] = pa.Field(
-        nullable=True, description="Unit Ontology ID"
-    )
+    uo_units: Series[str] = pa.Field(nullable=True, description="Unit Ontology ID")
     upper_value: Series[float] = pa.Field(
         nullable=True, description="Upper bound of original interval"
     )
-    value: Series[float] = pa.Field(
-        nullable=True, description="Original numeric value"
-    )
+    value: Series[float] = pa.Field(nullable=True, description="Original numeric value")

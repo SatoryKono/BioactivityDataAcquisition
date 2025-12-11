@@ -112,9 +112,9 @@ class MetadataBuilder(MetadataBuilderPort):
             Base metadata dictionary.
         """
         meta: dict[str, Any] = {
-            "run_id": context.run_id,
-            "entity": context.entity_name,
-            "provider": context.provider,
+            "run_id": str(context.run_id),
+            "entity": str(context.entity_name),
+            "provider": str(context.provider),
             "timestamp": context.started_at.isoformat(),
             "hash_version": "v1_blake2b_256",
             "row_count": row_count,

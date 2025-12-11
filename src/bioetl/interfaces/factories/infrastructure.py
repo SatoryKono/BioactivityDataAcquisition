@@ -8,8 +8,7 @@ rate limiters, metadata builders, and validator factories.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bioetl.domain.clients.base.contracts import RateLimiterABC
@@ -108,19 +107,12 @@ class DefaultInfrastructureFactory(InfrastructureFactoryABC):
         )
 
     def create_metadata_builder(self) -> RunMetadataBuilderProtocol:
-        """Create run metadata builder using SimpleNamespace."""
-        from bioetl.infrastructure.output.metadata import (
-            build_dry_run_metadata,
-            build_run_metadata,
+        """Create run metadata builder using MetadataBuilder component."""
+        from bioetl.infrastructure.output.components.metadata_builder import (
+            MetadataBuilder,
         )
 
-        return cast(
-            RunMetadataBuilderProtocol,
-            SimpleNamespace(
-                build_run_metadata=build_run_metadata,
-                build_dry_run_metadata=build_dry_run_metadata,
-            ),
-        )
+        return MetadataBuilder()
 
     def create_validator_factory(self) -> ValidatorFactoryABC:
         """Create validator factory via registry resolver."""

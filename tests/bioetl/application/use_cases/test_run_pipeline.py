@@ -204,9 +204,7 @@ class TestRunPipelineUseCase:
             profile="production",
         )
 
-        with patch.object(
-            use_case, "_create_orchestrator"
-        ) as mock_create_orchestrator:
+        with patch.object(use_case, "_create_orchestrator") as mock_create_orchestrator:
             mock_orchestrator = Mock()
             mock_orchestrator.run_pipeline.return_value = mock_run_result
             mock_create_orchestrator.return_value = mock_orchestrator
@@ -243,9 +241,7 @@ class TestRunPipelineUseCase:
             profile="default",
         )
 
-        with patch.object(
-            use_case, "_create_orchestrator"
-        ) as mock_create_orchestrator:
+        with patch.object(use_case, "_create_orchestrator") as mock_create_orchestrator:
             mock_orchestrator = Mock()
             mock_orchestrator.run_pipeline.return_value = mock_run_result
             mock_create_orchestrator.return_value = mock_orchestrator
@@ -309,9 +305,7 @@ class TestRunPipelineUseCase:
             require_rest_interface=False,
         )
 
-        with patch.object(
-            use_case, "_create_orchestrator"
-        ) as mock_create_orchestrator:
+        with patch.object(use_case, "_create_orchestrator") as mock_create_orchestrator:
             mock_orchestrator = Mock()
             mock_orchestrator.run_pipeline.return_value = mock_run_result
             mock_create_orchestrator.return_value = mock_orchestrator
@@ -344,9 +338,7 @@ class TestRunPipelineUseCase:
             output_path=output_path,
         )
 
-        with patch.object(
-            use_case, "_create_orchestrator"
-        ) as mock_create_orchestrator:
+        with patch.object(use_case, "_create_orchestrator") as mock_create_orchestrator:
             mock_orchestrator = Mock()
             mock_orchestrator.run_pipeline.return_value = mock_run_result
             mock_create_orchestrator.return_value = mock_orchestrator
@@ -379,9 +371,7 @@ class TestRunPipelineUseCase:
             limit=50,
         )
 
-        with patch.object(
-            use_case, "_create_orchestrator"
-        ) as mock_create_orchestrator:
+        with patch.object(use_case, "_create_orchestrator") as mock_create_orchestrator:
             mock_orchestrator = Mock()
             mock_orchestrator.run_pipeline.return_value = mock_run_result
             mock_create_orchestrator.return_value = mock_orchestrator

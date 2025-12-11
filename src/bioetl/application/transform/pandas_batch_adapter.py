@@ -70,9 +70,7 @@ class PandasBatchAdapter(BatchAdapterABC):
             return item.model_dump()
         if isinstance(item, Mapping):
             return dict(item)
-        raise TypeError(
-            f"Cannot convert {type(item).__name__} to Mapping[str, Any]"
-        )
+        raise TypeError(f"Cannot convert {type(item).__name__} to Mapping[str, Any]")
 
 
 __all__ = ["PandasBatchAdapter"]

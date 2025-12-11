@@ -103,7 +103,9 @@ class PipelineContainer(PipelineContainerABC):
         self._loader = loader
 
         self._provider_registry, self._provider_registry_provider = (
-            self._resolve_provider_registry(provider_registry, provider_registry_provider)
+            self._resolve_provider_registry(
+                provider_registry, provider_registry_provider
+            )
         )
 
         # Resolve optional dependencies with defaults

@@ -1,7 +1,7 @@
 """Infrastructure implementation of the normalization service."""
 
-import warnings
 from typing import Any, Callable, cast
+import warnings
 
 import pandas as pd
 from pydantic import BaseModel
@@ -243,5 +243,5 @@ def __getattr__(name: str):
 
 __all__ = [
     "NormalizationServiceImpl",
-    "DefaultNormalizationTransformerImpl",  # Deprecated alias
+    "DefaultNormalizationTransformerImpl",  # noqa: F822
 ]

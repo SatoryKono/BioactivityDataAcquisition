@@ -54,9 +54,9 @@ def create_loader(
     """Create a new unified loader with optional overrides."""
 
     return UnifiedLoaderImpl(
-        writer=writer or create_writer(),
+        data_writer=writer or create_writer(),
         metadata_writer=metadata_writer or create_metadata_writer(),
-        quality_reporter=quality_reporter or create_quality_reporter(),
+        qc_report_generator=quality_reporter or create_quality_reporter(),
         config=config,
         qc_config=qc_config,
         metrics=metrics_port,

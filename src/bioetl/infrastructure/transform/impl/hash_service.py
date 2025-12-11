@@ -125,13 +125,17 @@ class Blake2bHashService(HashServiceABC):
             if cols_to_hash:
                 df["hash_business_key"] = df.apply(
                     lambda row, _hasher=self._hasher, _cols=cols_to_hash: (
-                        (lambda _res: _res.value if hasattr(_res, "value") else str(_res))(
-                            _hasher.compute_hash_for_fields(row.to_dict(), _cols)
-                        )
+                        (
+                            lambda _res: (
+                                _res.value if hasattr(_res, "value") else str(_res)
+                            )
+                        )(_hasher.compute_hash_for_fields(row.to_dict(), _cols))
                         if hasattr(_hasher, "compute_hash_for_fields")
-                        else (lambda _res: _res.value if hasattr(_res, "value") else str(_res))(
-                            _hasher.compute_hash_columns(row.to_dict(), _cols)
-                        )
+                        else (
+                            lambda _res: (
+                                _res.value if hasattr(_res, "value") else str(_res)
+                            )
+                        )(_hasher.compute_hash_columns(row.to_dict(), _cols))
                     ),
                     axis=1,
                 )

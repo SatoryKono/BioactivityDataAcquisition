@@ -9,12 +9,13 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 
 class TestExtractionFlow:
@@ -100,7 +101,7 @@ class TestExtractionFlow:
     ) -> None:
         """Mapper should convert dicts to typed RawRecord models."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         raw_records = parser.parse_to_records(sample_api_response)
         typed_records = mapper.map_records(raw_records, "activity")
@@ -115,7 +116,7 @@ class TestExtractionFlow:
     ) -> None:
         """Mapper should handle multiple records correctly."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         raw_records = parser.parse_to_records(multi_record_response)
         typed_records = mapper.map_records(raw_records, "activity")
@@ -127,7 +128,7 @@ class TestExtractionFlow:
     def test_full_flow_to_dataframe(self, sample_api_response: dict[str, Any]) -> None:
         """Full flow should produce valid DataFrame."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         raw_records = parser.parse_to_records(sample_api_response)
         typed_records = mapper.map_records(raw_records, "activity")
@@ -142,7 +143,7 @@ class TestExtractionFlow:
     ) -> None:
         """Full flow with multiple records produces complete DataFrame."""
         parser = ChemblGenericResponseParser()
-        mapper = ChemblRecordMapper()
+        mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         raw_records = parser.parse_to_records(multi_record_response)
         typed_records = mapper.map_records(raw_records, "activity")
@@ -177,7 +178,7 @@ class TestExtractionFlow:
 
             # Create components directly (not managed by bootstrap)
             parser = ChemblGenericResponseParser()
-            mapper = ChemblRecordMapper()
+            mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
             raw_records = parser.parse_to_records(sample_response)
             typed_records = mapper.map_records(raw_records, "activity")
@@ -265,7 +266,7 @@ class TestMapperEntitySupport:
     @pytest.fixture
     def mapper(self) -> ChemblRecordMapper:
         """Provide a fresh mapper instance."""
-        return ChemblRecordMapper()
+        return ChemblRecordMapper(registry=get_chembl_model_registry())
 
     def test_mapper_supports_all_entity_types(self, mapper: ChemblRecordMapper) -> None:
         """Mapper should support all declared entity types."""

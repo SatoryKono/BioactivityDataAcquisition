@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from collections.abc import Callable
-from typing import Any, TYPE_CHECKING
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.validation import SchemaProviderABC

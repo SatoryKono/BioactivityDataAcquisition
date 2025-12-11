@@ -6,8 +6,8 @@ Contains type-safe identifiers for various system entities.
 from __future__ import annotations
 
 import re
-import uuid
 from typing import Self
+import uuid
 
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema

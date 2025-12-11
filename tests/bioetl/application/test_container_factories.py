@@ -88,9 +88,7 @@ def test_get_hooks_delegates_to_runtime_factory(container):
 
 def test_get_normalization_service_delegates_to_factory(container):
     """Test that get_normalization_service delegates to ApplicationServiceFactory."""
-    with patch(
-        "bioetl.application.container.ApplicationServiceFactory"
-    ) as MockFactory:
+    with patch("bioetl.application.container.ApplicationServiceFactory") as MockFactory:
         factory_instance = MockFactory.return_value
         factory_instance.create_normalization_service.return_value = "mock_norm_service"
 
@@ -103,9 +101,7 @@ def test_get_normalization_service_delegates_to_factory(container):
 
 def test_get_extraction_service_delegates_to_factory(container):
     """Test that get_extraction_service delegates to ApplicationServiceFactory."""
-    with patch(
-        "bioetl.application.container.ApplicationServiceFactory"
-    ) as MockFactory:
+    with patch("bioetl.application.container.ApplicationServiceFactory") as MockFactory:
         factory_instance = MockFactory.return_value
         factory_instance.create_extraction_service.return_value = "mock_ext_service"
 

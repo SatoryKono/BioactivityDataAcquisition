@@ -99,6 +99,6 @@ __all__ = [
     "normalize_pubchem_cid",
     "normalize_uniprot_id",
     "get_normalizer",
-    "NormalizationServiceImpl",
-    "NormalizationService",  # Deprecated alias
+    "NormalizationServiceImpl",  # noqa: F822
+    "NormalizationService",  # noqa: F822  # Deprecated alias
 ]

@@ -21,4 +21,3 @@ __all__ = [
     "TARGET_OUTPUT_COLUMNS",
     "TISSUE_OUTPUT_COLUMNS",
 ]
-

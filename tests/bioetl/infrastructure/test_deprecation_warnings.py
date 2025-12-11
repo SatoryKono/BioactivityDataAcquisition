@@ -8,8 +8,6 @@ import importlib
 import sys
 import warnings
 
-import pytest
-
 
 class TestConfigModelsDeprecation:
     """Tests for bioetl.infrastructure.config.models deprecation."""

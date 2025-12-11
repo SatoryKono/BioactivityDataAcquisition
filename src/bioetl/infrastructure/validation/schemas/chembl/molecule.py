@@ -126,9 +126,7 @@ class MoleculeTableSchema(BaseGeneratedColumnsSchema):
     parenteral: Series[bool] = pa.Field(
         nullable=True, description="Parenteral administration"
     )
-    polymer_flag: Series[float] = pa.Field(
-        nullable=True, description="Polymer flag"
-    )
+    polymer_flag: Series[float] = pa.Field(nullable=True, description="Polymer flag")
     pref_name: Series[str] = pa.Field(
         nullable=True, description="Preferred molecule name"
     )
@@ -139,7 +137,9 @@ class MoleculeTableSchema(BaseGeneratedColumnsSchema):
     therapeutic_flag: Series[bool] = pa.Field(
         nullable=True, description="Therapeutic agent flag"
     )
-    topical: Series[bool] = pa.Field(nullable=True, description="Topical administration")
+    topical: Series[bool] = pa.Field(
+        nullable=True, description="Topical administration"
+    )
     usan_stem: Series[str] = pa.Field(nullable=True, description="USAN stem")
     usan_stem_definition: Series[str] = pa.Field(
         nullable=True, description="USAN stem definition"

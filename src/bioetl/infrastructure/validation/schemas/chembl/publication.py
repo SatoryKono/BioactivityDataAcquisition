@@ -89,17 +89,13 @@ class PublicationTableSchema(BaseGeneratedColumnsSchema):
         nullable=True, description="Full journal title"
     )
     last_page: Series[str] = pa.Field(nullable=True, description="Last page number")
-    patent_id: Series[str] = pa.Field(
-        nullable=True, description="Patent identifier"
-    )
+    patent_id: Series[str] = pa.Field(nullable=True, description="Patent identifier")
     pubmed_id: Series[str] = pa.Field(
         nullable=True,
         str_matches=PUBMED_ID_PATTERN,
         description="PubMed ID",
     )
-    score: Series[float] = pa.Field(
-        nullable=True, description="Search ranking score"
-    )
+    score: Series[float] = pa.Field(nullable=True, description="Search ranking score")
     src_id: Series[float] = pa.Field(
         nullable=True,
         description="Data source ID",

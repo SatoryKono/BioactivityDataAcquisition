@@ -20,13 +20,9 @@ class PipelineRunRequest(BaseModel):
     pipeline_name: str = Field(
         ..., description="Pipeline name in entity_provider format"
     )
-    profile: str = Field(
-        default="default", description="Active configuration profile"
-    )
+    profile: str = Field(default="default", description="Active configuration profile")
     dry_run: bool = Field(default=False, description="Run without writing output")
-    limit: int | None = Field(
-        default=None, description="Record count limit"
-    )
+    limit: int | None = Field(default=None, description="Record count limit")
 
 
 class PipelineRunResponse(BaseModel):
@@ -62,7 +58,9 @@ def create_rest_app() -> FastAPI:
         # 3. Execute in thread pool
         loop = asyncio.get_running_loop()
         try:
-            response = await loop.run_in_executor(None, use_case.execute, domain_request)
+            response = await loop.run_in_executor(
+                None, use_case.execute, domain_request
+            )
         except InterfaceDisabledError:
             raise HTTPException(status_code=503, detail="REST interface is disabled")
 

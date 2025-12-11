@@ -2,8 +2,8 @@
 Tests for logging and progress reporting components.
 """
 
-import warnings
 from unittest.mock import patch
+import warnings
 
 from bioetl.infrastructure.logging.factories import (
     create_logger,

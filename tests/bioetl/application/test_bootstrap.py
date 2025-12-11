@@ -94,7 +94,9 @@ class TestApplicationBootstrap:
         """Test that config_loader_factory is called with contract_provider."""
         captured_provider = []
 
-        def mock_factory(provider: SchemaContractProviderABC) -> PipelineConfigLoaderProtocol:
+        def mock_factory(
+            provider: SchemaContractProviderABC,
+        ) -> PipelineConfigLoaderProtocol:
             captured_provider.append(provider)
             return object()  # type: ignore
 
@@ -143,7 +145,10 @@ class TestCreateApplicationBootstrap:
 
     def test_accepts_config_loader_factory(self) -> None:
         """Test that factory accepts config_loader_factory parameter."""
-        def mock_factory(provider: SchemaContractProviderABC) -> PipelineConfigLoaderProtocol:
+
+        def mock_factory(
+            provider: SchemaContractProviderABC,
+        ) -> PipelineConfigLoaderProtocol:
             return object()  # type: ignore
 
         bootstrap = create_application_bootstrap(config_loader_factory=mock_factory)

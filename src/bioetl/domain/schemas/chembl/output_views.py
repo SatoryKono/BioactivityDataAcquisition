@@ -24,9 +24,7 @@ ACTIVITY_OUTPUT_COLUMNS: list[str] = _build_column_order(ACTIVITY_FIELD_SPECS)
 ASSAY_OUTPUT_COLUMNS: list[str] = _build_column_order(ASSAY_FIELD_SPECS)
 CELL_OUTPUT_COLUMNS: list[str] = _build_column_order(CELL_FIELD_SPECS)
 MOLECULE_OUTPUT_COLUMNS: list[str] = _build_column_order(MOLECULE_FIELD_SPECS)
-PUBLICATION_OUTPUT_COLUMNS: list[str] = _build_column_order(
-    PUBLICATION_FIELD_SPECS
-)
+PUBLICATION_OUTPUT_COLUMNS: list[str] = _build_column_order(PUBLICATION_FIELD_SPECS)
 TARGET_OUTPUT_COLUMNS: list[str] = _build_column_order(TARGET_FIELD_SPECS)
 TISSUE_OUTPUT_COLUMNS: list[str] = _build_column_order(TISSUE_FIELD_SPECS)
 

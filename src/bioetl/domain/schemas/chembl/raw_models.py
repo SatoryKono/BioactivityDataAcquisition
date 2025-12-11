@@ -10,8 +10,8 @@ Model naming:
 
 from __future__ import annotations
 
-import warnings
 from typing import Self, TypeAlias
+import warnings
 
 from pydantic import ConfigDict, field_validator, model_validator
 

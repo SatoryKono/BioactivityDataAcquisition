@@ -98,30 +98,30 @@ class TestModelValidation:
     def test_activity_model_validates_data(self, registry):
         """Test that ActivityRawModel can validate activity data."""
         model_class = registry.get_model("activity")
-        data = {"activity_id": "1", "standard_flag": True}
+        data = {"activity_id": "1", "standard_flag": True, "standard_value": 1.0}
         instance = model_class.model_validate(data)
-        assert instance.activity_id == "1"
+        assert str(instance.activity_id) == "1"
 
     def test_molecule_model_validates_data(self, registry):
         """Test that MoleculeRawModel can validate molecule data."""
         model_class = registry.get_model("molecule")
         data = {"molecule_chembl_id": "CHEMBL1"}
         instance = model_class.model_validate(data)
-        assert instance.molecule_chembl_id == "CHEMBL1"
+        assert str(instance.molecule_chembl_id) == "CHEMBL1"
 
     def test_target_model_validates_data(self, registry):
         """Test that TargetRawModel can validate target data."""
         model_class = registry.get_model("target")
         data = {"target_chembl_id": "CHEMBL1234"}
         instance = model_class.model_validate(data)
-        assert instance.target_chembl_id == "CHEMBL1234"
+        assert str(instance.target_chembl_id) == "CHEMBL1234"
 
     def test_assay_model_validates_data(self, registry):
         """Test that AssayRawModel can validate assay data."""
         model_class = registry.get_model("assay")
         data = {"assay_chembl_id": "CHEMBL1000"}
         instance = model_class.model_validate(data)
-        assert instance.assay_chembl_id == "CHEMBL1000"
+        assert str(instance.assay_chembl_id) == "CHEMBL1000"
 
     def test_document_model_validates_data(self, registry):
         """Test that DocumentRawModel can validate document data."""

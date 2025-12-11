@@ -81,9 +81,7 @@ class AssayTableSchema(BaseGeneratedColumnsSchema):
     assay_classifications: Series[str] = pa.Field(
         nullable=True, description="Assay classifications (BAO, etc.)"
     )
-    assay_group: Series[str] = pa.Field(
-        nullable=True, description="Assay group/series"
-    )
+    assay_group: Series[str] = pa.Field(nullable=True, description="Assay group/series")
     assay_organism: Series[str] = pa.Field(
         nullable=True, description="Testing system organism"
     )
@@ -105,7 +103,10 @@ class AssayTableSchema(BaseGeneratedColumnsSchema):
     )
     assay_type: Series[str] = pa.Field(
         isin=["B", "F", "A", "T", "P", "U"],
-        description="Assay type (B=binding, F=functional, A=ADMET, T=toxicity, P=physicochemical, U=unknown)",
+        description=(
+            "Assay type (B=binding, F=functional, A=ADMET, T=toxicity, "
+            "P=physicochemical, U=unknown)"
+        ),
     )
     assay_type_description: Series[str] = pa.Field(
         nullable=True, description="Assay type description"
@@ -115,9 +116,7 @@ class AssayTableSchema(BaseGeneratedColumnsSchema):
         str_matches=BAO_ID_PATTERN,
         description="BioAssay Ontology format",
     )
-    bao_label: Series[str] = pa.Field(
-        nullable=True, description="BAO format label"
-    )
+    bao_label: Series[str] = pa.Field(nullable=True, description="BAO format label")
     cell_chembl_id: Series[str] = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
@@ -146,9 +145,7 @@ class AssayTableSchema(BaseGeneratedColumnsSchema):
         isin=["D", "H", "M", "N", "P", "T", "U", "d", "h", "m", "n", "p", "t", "u"],
         description="Assay-target relationship type",
     )
-    score: Series[float] = pa.Field(
-        nullable=True, description="Search ranking score"
-    )
+    score: Series[float] = pa.Field(nullable=True, description="Search ranking score")
     src_assay_id: Series[str] = pa.Field(
         nullable=True, description="Source database assay ID"
     )

@@ -74,7 +74,9 @@ def field_spec_to_pandera_field(spec: FieldSpec) -> pa.Field:
 
     Examples
     --------
-    >>> spec = FieldSpec("activity_id", "integer", nullable=False, constraints={"ge": 1})
+    >>> spec = FieldSpec(
+    ...     "activity_id", "integer", nullable=False, constraints={"ge": 1}
+    ... )
     >>> field = field_spec_to_pandera_field(spec)
     """
     kwargs: dict[str, Any] = {
@@ -165,7 +167,9 @@ def create_schema_from_field_specs(
     Examples
     --------
     >>> from bioetl.domain.schemas.field_specs import ACTIVITY_FIELD_SPECS
-    >>> ActivitySchema = create_schema_from_field_specs("ActivitySchema", ACTIVITY_FIELD_SPECS)
+    >>> ActivitySchema = create_schema_from_field_specs(
+    ...     "ActivitySchema", ACTIVITY_FIELD_SPECS
+    ... )
     """
     from bioetl.domain.schemas.field_specs import GENERATED_FIELD_SPECS
     from bioetl.infrastructure.validation.schemas.pandera_base import (

@@ -3,6 +3,7 @@
 CsvRecordSourceImpl returns raw dicts per RecordSourceABC contract.
 Domain model conversion should happen via RecordMapperABC in ExtractStage.
 """
+
 from pathlib import Path
 from typing import cast
 

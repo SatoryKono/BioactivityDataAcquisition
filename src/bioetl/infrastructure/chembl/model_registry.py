@@ -13,13 +13,7 @@ from pydantic import BaseModel
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 
 if TYPE_CHECKING:
-    from bioetl.domain.schemas.chembl.raw_models import (
-        ActivityRawModel,
-        AssayRawModel,
-        MoleculeRawModel,
-        PublicationRawModel,
-        TargetRawModel,
-    )
+    pass
 
 
 def _get_entity_model_map() -> dict[str, type[BaseModel]]:
