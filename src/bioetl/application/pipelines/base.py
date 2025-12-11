@@ -621,7 +621,8 @@ class PipelineBase(ABC):
             return lambda df: cast(
                 pd.DataFrame, transformer.apply(cast(MutableTabularData, df), context)
             )
-        return self.transform
+        # Cast TabularData to pd.DataFrame for compatibility
+        return lambda df: cast(pd.DataFrame, self.transform(cast(TabularData, df)))
 
     def _get_write_callable(
         self, context: RunContext

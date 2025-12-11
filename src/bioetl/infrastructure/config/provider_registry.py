@@ -82,8 +82,6 @@ class ProviderNotConfiguredError(ProviderRegistryError):
         )
 
 
-
-
 # ---------------------------------------------------------------------------
 # Pydantic Models
 # ---------------------------------------------------------------------------
@@ -105,7 +103,22 @@ class ProviderRegistryEntryModel(BaseModel):
     description: str | None = None
     http: ProviderHttpConfig | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_http_client(cls, data: Any) -> Any:
+        """Migrate http_client field to http for backward compatibility."""
+        if not isinstance(data, dict):
+            return data
+        if "http_client" in data and "http" not in data:
+            migrated = dict(data)
+            migrated["http"] = migrated.pop("http_client")
+            return migrated
+        return data
 
+    @property
+    def http_client(self) -> ProviderHttpConfig | None:
+        """Legacy alias for http field (backward compatibility)."""
+        return self.http
 
 
 class ProviderRegistryConfig(BaseModel):
@@ -114,8 +127,6 @@ class ProviderRegistryConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     providers: list[ProviderRegistryEntryModel] = []
-
-
 
 
 # ---------------------------------------------------------------------------
@@ -338,8 +349,6 @@ class ProviderLoaderImpl(ProviderRegistryLoaderABC):
         return data
 
 
-
-
 # ---------------------------------------------------------------------------
 # Factory Functions
 # ---------------------------------------------------------------------------
@@ -382,6 +391,9 @@ def create_provider_registry_loader(
 # Public API
 # ---------------------------------------------------------------------------
 
+# Backward compatibility alias
+ProviderRegistryLoader = ProviderLoaderImpl
+
 __all__ = [
     # Constants
     "DEFAULT_CONFIGS_ROOT",
@@ -397,6 +409,7 @@ __all__ = [
     "ProviderRegistryConfig",
     # Loader class
     "ProviderLoaderImpl",
+    "ProviderRegistryLoader",  # Backward compatibility alias
     # Validation functions
     "ensure_provider_known",
     "clear_provider_registry_cache",

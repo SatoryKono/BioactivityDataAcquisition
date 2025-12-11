@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.application.bootstrap import (
     ApplicationBootstrap,
-    ApplicationContext,
+    ApplicationServicesContext,
     create_application_bootstrap,
 )
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
@@ -23,11 +23,11 @@ class TestApplicationBootstrap:
     """Tests for ApplicationBootstrap class."""
 
     def test_start_returns_context(self) -> None:
-        """Test that start() returns an ApplicationContext."""
+        """Test that start() returns an ApplicationServicesContext."""
         bootstrap = ApplicationBootstrap()
         context = bootstrap.start()
 
-        assert isinstance(context, ApplicationContext)
+        assert isinstance(context, ApplicationServicesContext)
         assert isinstance(context.schema_provider, SchemaProviderABC)
         assert isinstance(context.contract_provider, SchemaContractProviderABC)
 
@@ -173,11 +173,11 @@ class TestCreateApplicationBootstrap:
         assert len(cleared) == 1
 
 
-class TestApplicationContext:
-    """Tests for ApplicationContext dataclass."""
+class TestApplicationServicesContext:
+    """Tests for ApplicationServicesContext dataclass."""
 
     def test_is_frozen(self) -> None:
-        """Test that ApplicationContext is immutable."""
+        """Test that ApplicationServicesContext is immutable."""
         bootstrap = ApplicationBootstrap()
         context = bootstrap.start()
 

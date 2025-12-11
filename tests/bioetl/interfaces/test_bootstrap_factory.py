@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.bootstrap import ApplicationBootstrap, ApplicationContext
+from bioetl.application.bootstrap import (
+    ApplicationBootstrap,
+    ApplicationServicesContext,
+)
 from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 
@@ -20,7 +23,7 @@ class TestCreateDefaultBootstrap:
         bootstrap = create_default_bootstrap()
         context = bootstrap.start()
 
-        assert isinstance(context, ApplicationContext)
+        assert isinstance(context, ApplicationServicesContext)
 
     def test_context_has_config_loader(self) -> None:
         """Test that context from default bootstrap has config_loader."""
