@@ -33,6 +33,14 @@ def _coerce_phase_value(value: Any) -> int | None:
     if is_missing(value):
         return None
 
+    # Handle pandas NAType explicitly before type checks
+    # pd.NA != pd.NA is True, so is_missing should catch it, but double-check
+    try:
+        if value != value:  # This catches pd.NA, NaN, etc.
+            return None
+    except (TypeError, ValueError):
+        pass
+
     if isinstance(value, bool):
         return int(value)
 
@@ -57,9 +65,6 @@ def _coerce_phase_value(value: Any) -> int | None:
                 f"Invalid numeric value for clinical trial phase: '{value}'"
             ) from exc
         return _coerce_phase_value(parsed)
-
-    # Handle pandas NAType explicitly
-    # Use is_missing which handles pd.NA without importing pandas
 
     raise ValueError(
         "Expected numeric value for clinical trial phase, "
