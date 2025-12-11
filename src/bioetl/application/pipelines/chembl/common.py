@@ -44,7 +44,7 @@ class ChemblCommonPipeline(ChemblPipelineBase):
         """
         return ExtractStage(
             extraction_service=self._extraction_service,
-            record_mapper=ChemblRecordMapper(),
+            record_mapper=ChemblRecordMapper(registry=self._entity_model_registry),
         )
 
     def create_raw_extract_stage(self) -> ExtractStage:

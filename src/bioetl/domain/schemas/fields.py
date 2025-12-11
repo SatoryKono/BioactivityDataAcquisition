@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:  # type hints only, no runtime import
-    import pandera as pa
+    import pandera as pa  # noqa: F401
 
 DEFAULT_FILTERABLE = False
 

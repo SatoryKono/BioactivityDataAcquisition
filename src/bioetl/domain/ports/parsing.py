@@ -284,11 +284,9 @@ __all__ = [
     "ApiPayload",  # from domain.types
     "RecordBatch",  # from domain.data
     "RawRecord",  # local alias for Mapping[str, Any]
-    # Deprecated type aliases (for backward compatibility, available via __getattr__)
-    "RawPayload",
-    "RawRecordDict",
-    "RawRecordList",
     # ABCs and classes
     "ResponseParserPortABC",
     "PaginationInfo",
+    # Deprecated type aliases available via __getattr__:
+    # RawPayload, RawRecordDict, RawRecordList
 ]

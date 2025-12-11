@@ -5,8 +5,6 @@ from __future__ import annotations
 import re
 from typing import Any
 
-import pandas as pd
-
 # --- Regex Patterns ---
 
 DOI_REGEX = re.compile(r"^10\.\d{4,9}/\S+$", flags=re.IGNORECASE)
@@ -31,7 +29,7 @@ def is_missing(value: Any) -> bool:
     if value is None:
         return True
     try:
-        return bool(pd.isna(value))
+        return bool(value != value)
     except (ValueError, TypeError):
         return False
 

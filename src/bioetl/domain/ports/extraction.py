@@ -231,10 +231,6 @@ __all__ = [
     # Canonical type aliases
     "RecordBatch",  # from domain.data
     "ApiPayload",  # from domain.types
-    # Deprecated type aliases (for backward compatibility, available via __getattr__)
-    "RawRecord",  # deprecated, use Mapping[str, Any]
-    "RawRecordDict",
-    "RawRecordBatch",
     # Abstract base classes
     "RecordFetcherABC",
     "VersionProviderABC",
@@ -244,4 +240,6 @@ __all__ = [
     # Backward compatibility helpers
     "to_raw_records",
     "from_raw_records",
+    # Deprecated type aliases available via __getattr__:
+    # RawRecord, RawRecordDict, RawRecordBatch
 ]

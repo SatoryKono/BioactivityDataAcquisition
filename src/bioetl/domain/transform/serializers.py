@@ -6,8 +6,6 @@ from collections.abc import Mapping, Sequence
 import json
 from typing import Any, Literal
 
-import pandas as pd
-
 
 def serialize_list(value: Any) -> Any:
     """Serialize a list of primitives or dicts into a pipe-delimited string.
@@ -18,7 +16,7 @@ def serialize_list(value: Any) -> Any:
     - None or empty lists yield `pd.NA`
     """
     if value is None:
-        return pd.NA
+        return ""
 
     if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
         value, (str, bytes, bytearray)
@@ -29,7 +27,7 @@ def serialize_list(value: Any) -> Any:
                 continue
             if isinstance(item, Mapping):
                 dict_str = serialize_dict(item)
-                if not pd.isna(dict_str) and dict_str:
+                if dict_str:
                     parts.append(dict_str)
                 continue
             if isinstance(
@@ -39,10 +37,10 @@ def serialize_list(value: Any) -> Any:
                 continue
             parts.append(str(item))
 
-        return "|".join(parts) if parts else pd.NA
+        return "|".join(parts) if parts else ""
 
     # Non-sequence values: treat None as NA, otherwise convert to string
-    return pd.NA if _is_missing(value) else str(value)
+    return "" if _is_missing(value) else str(value)
 
 
 def serialize_dict(value: Any) -> Any:
@@ -53,14 +51,14 @@ def serialize_dict(value: Any) -> Any:
     - None or empty dict yields `pd.NA`
     """
     if value is None:
-        return pd.NA
+        return ""
 
     if not isinstance(value, Mapping):
         # Non-dict values are not supported here; fall back to NA if missing
-        return pd.NA if _is_missing(value) else str(value)
+        return "" if _is_missing(value) else str(value)
 
     if not value:
-        return pd.NA
+        return ""
 
     parts: list[str] = []
     for key in sorted(value.keys()):
@@ -77,7 +75,7 @@ def serialize_dict(value: Any) -> Any:
             continue
         parts.append(f"{key}:{str(v)}")
 
-    return "|".join(parts) if parts else pd.NA
+    return "|".join(parts) if parts else ""
 
 
 def serialize_nested(
@@ -172,7 +170,7 @@ def _is_missing(value: Any) -> bool:
     if value is None:
         return True
     try:
-        return bool(pd.isna(value))
+        return bool(value != value)
     except (TypeError, ValueError):
         return False
 

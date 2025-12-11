@@ -24,6 +24,9 @@ from bioetl.application.pipelines.registry import (
 __all__ = [
     # Base class
     "PipelineBase",
+    # Registry
+    "PIPELINE_REGISTRY",
+    # Factory functions
     "get_factory",
     "get_pipeline_class",
     "get_pipeline_factory",

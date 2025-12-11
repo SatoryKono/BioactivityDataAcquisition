@@ -8,11 +8,13 @@ runtime.
 from __future__ import annotations
 
 import importlib
+from pathlib import Path
+from typing import Any
 
 __all__ = ["generate_schema_from_column_order", "load_column_order_from_yaml"]
 
 
-def generate_schema_from_column_order(columns: list[str]):
+def generate_schema_from_column_order(columns: list[str]) -> Any:
     """Build a permissive Pandera schema using the provided column order.
 
     Creates a schema where all columns are typed as `object` with nullable=True.
@@ -42,7 +44,18 @@ def generate_schema_from_column_order(columns: list[str]):
     return schema
 
 
-def load_column_order_from_yaml(path: str | "Path") -> list[str]:
+def load_column_order_from_yaml(path: str | Path) -> list[str]:
+    """Load column order from YAML file.
+
+    Args:
+        path: Path to YAML file (str or Path object).
+
+    Returns:
+        List of column names in order.
+
+    Raises:
+        ValueError: If YAML format is invalid.
+    """
     import importlib
     from pathlib import Path as _P
 
