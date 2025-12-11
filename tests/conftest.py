@@ -564,7 +564,6 @@ def init_provider_registry():
     Uses the new DI approach through ApplicationContext instead of
     deprecated global state functions.
     """
-    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
     from bioetl.interfaces.application_context import (
         reset_application_context,
     )
