@@ -52,3 +52,10 @@ print('\n'.join(bad)) or sys.exit(1) if bad else sys.exit(0)"
       pass_filenames: false
       files: ^src/bioetl/application/
 
+    - id: check-architecture
+      name: check infrastructure architectural boundaries
+      entry: python scripts/check_architecture.py
+      language: python
+      pass_filenames: false
+      files: ^src/bioetl/infrastructure/
+
