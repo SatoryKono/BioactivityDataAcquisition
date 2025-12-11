@@ -269,6 +269,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
     ) -> None:
         """Test execute raises InterfaceDisabledError when REST is disabled."""
@@ -279,6 +280,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
         )
 
         request = RunPipelineRequest(
@@ -296,6 +298,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
         mock_run_result: Mock,
     ) -> None:
@@ -307,6 +310,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
         )
 
         request = RunPipelineRequest(
@@ -328,6 +332,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
         mock_run_result: Mock,
         tmp_path: Path,
@@ -339,6 +344,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
         )
 
         output_path = tmp_path / "custom_output"
@@ -362,6 +368,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
         mock_run_result: Mock,
     ) -> None:
@@ -372,6 +379,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
         )
 
         request = RunPipelineRequest(
@@ -397,6 +405,7 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
         mock_config: Mock,
     ) -> None:
         """Test _create_orchestrator creates orchestrator with correct params."""
@@ -404,6 +413,7 @@ class TestRunPipelineUseCase:
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
         )
 
         with patch(
@@ -414,6 +424,7 @@ class TestRunPipelineUseCase:
         MockOrchestrator.assert_called_once_with(
             pipeline_name="activity_chembl",
             config=mock_config,
+            provider_registry_factory=mock_provider_registry_factory,
             provider_loader_factory=mock_provider_loader_factory,
             container_factory=mock_container_factory,
         )
@@ -423,12 +434,14 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
     ) -> None:
         """Test _get_profiles_root returns profiles subdirectory."""
         use_case = RunPipelineUseCase(
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
             configs_root=Path("/configs"),
         )
 
@@ -439,12 +452,14 @@ class TestRunPipelineUseCase:
         mock_config_loader: Mock,
         mock_container_factory: Mock,
         mock_provider_loader_factory: Mock,
+        mock_provider_registry_factory: Mock,
     ) -> None:
         """Test _get_profiles_root returns None without configs_root."""
         use_case = RunPipelineUseCase(
             config_loader=mock_config_loader,
             container_factory=mock_container_factory,
             provider_loader_factory=mock_provider_loader_factory,
+            provider_registry_factory=mock_provider_registry_factory,
         )
 
         assert use_case._get_profiles_root() is None

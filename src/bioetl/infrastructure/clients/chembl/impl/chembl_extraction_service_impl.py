@@ -193,7 +193,11 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         Yields:
             RecordBatch: Batches of raw record dictionaries.
         """
-        effective_chunk_size = chunk_size or self._batch_size
+        # Use limit from filters as chunk_size if chunk_size not explicitly provided
+        if chunk_size is None and "limit" in filters:
+            effective_chunk_size = int(filters["limit"])
+        else:
+            effective_chunk_size = chunk_size or self._batch_size
         filters["limit"] = effective_chunk_size
 
         # Enrich filters using application-layer logic if available
@@ -238,11 +242,16 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         Returns:
             Parsed records as list[dict[str, Any]].
+            Returns empty list if raw_response is None or not a dict.
 
         Raises:
             TypeError: If raw_response cannot be parsed.
         """
         if raw_response is None:
+            return []
+
+        # Parser expects a dict - return empty list for non-dict input
+        if not isinstance(raw_response, dict):
             return []
 
         # Use the injected parser - no fallback to client parser

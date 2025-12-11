@@ -18,6 +18,9 @@ from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.interfaces.composition_root import create_config_loader
+from bioetl.interfaces.factories.provider_registry import (
+    create_provider_registry_factory,
+)
 from tests.golden.pipeline_outputs.test_pipeline_outputs_helpers import MissingDataFile
 
 _PIPELINE_CASES = [
@@ -121,6 +124,7 @@ def test_pipeline_outputs(
     )
     provider_loader = provider_loader_factory()
     provider_registry = None
+    provider_registry_factory = create_provider_registry_factory()
 
     orchestrator = PipelineOrchestrator(
         pipeline_name,
@@ -128,6 +132,7 @@ def test_pipeline_outputs(
         provider_registry=provider_registry,
         provider_loader=provider_loader,
         provider_loader_factory=provider_loader_factory,
+        provider_registry_factory=provider_registry_factory,
     )
     golden = importlib.import_module(golden_module)
     expected_data = getattr(golden, expected_attr)
