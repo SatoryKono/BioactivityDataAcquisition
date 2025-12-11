@@ -84,4 +84,4 @@ def __getattr__(name: str):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["MetadataWriter", "MetadataWriterImpl", "build_quality_report_table"]
+__all__ = ["MetadataWriter", "MetadataWriterImpl", "build_quality_report_table"]  # noqa: F822

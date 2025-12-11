@@ -74,7 +74,6 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     )
     logger = container.get_logger()
     extraction_service = container.get_extraction_service()
-    record_source = container.get_record_source(extraction_service, logger=logger)
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,

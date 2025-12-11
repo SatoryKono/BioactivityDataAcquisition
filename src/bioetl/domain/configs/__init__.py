@@ -38,7 +38,6 @@ from bioetl.domain.configs.execution import ExecutionConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.manifest import PipelineManifest
 from bioetl.domain.configs.normalization import NormalizationConfig
-
 from bioetl.domain.configs.pipeline import (
     BaseProviderConfig,
     BusinessKeyConfig,

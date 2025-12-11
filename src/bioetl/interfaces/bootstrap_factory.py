@@ -47,6 +47,7 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
         contract_provider: SchemaContractProviderABC,
     ) -> PipelineConfigLoaderProtocol:
         """Build a config loader bound to the provided schema contracts."""
+
         def get_by_id(
             pipeline_id: str,
             *,

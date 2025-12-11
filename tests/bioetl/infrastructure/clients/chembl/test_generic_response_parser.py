@@ -207,8 +207,8 @@ class TestDeprecatedAliases:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Import the deprecated alias
-            from bioetl.infrastructure.clients.chembl.response_parser import (
-                ChemblResponseParserImpl,  # noqa: F401
+            from bioetl.infrastructure.clients.chembl.response_parser import (  # noqa: F401
+                ChemblResponseParserImpl,
             )
 
             deprecation_warnings = [

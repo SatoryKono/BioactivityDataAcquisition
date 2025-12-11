@@ -125,5 +125,5 @@ __all__ = [
     "ChemblGenericResponseParser",
     "create_generic_parser",
     # Deprecated (available via __getattr__)
-    "ChemblResponseParserImpl",
+    "ChemblResponseParserImpl",  # noqa: F822
 ]

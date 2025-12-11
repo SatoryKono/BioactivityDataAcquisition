@@ -27,6 +27,11 @@ class DefaultObservabilityFactory(ObservabilityFactoryABC):
         self._metrics: MetricsPortABC | None = None
 
     def create_logger(self) -> LoggingPortABC:
+        """Create logging port instance using infrastructure factory.
+
+        Returns:
+            LoggingPortABC: The configured logger instance.
+        """
         if self._logger is None:
             from bioetl.infrastructure.observability.factories import (
                 create_logging_port,
@@ -36,6 +41,11 @@ class DefaultObservabilityFactory(ObservabilityFactoryABC):
         return self._logger
 
     def create_metrics(self) -> MetricsPortABC:
+        """Create metrics port instance using infrastructure factory.
+
+        Returns:
+            MetricsPortABC: The configured metrics instance.
+        """
         if self._metrics is None:
             from bioetl.infrastructure.observability.factories import (
                 create_metrics_port,
