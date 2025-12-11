@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import os
 from pathlib import Path
 import re
 import subprocess
 import sys
 from typing import Iterable
+
+logger = logging.getLogger(__name__)
 
 MERMAID_CLI_VERSION = "10.9.1"
 MERMAID_CLI_PACKAGE = f"@mermaid-js/mermaid-cli@{MERMAID_CLI_VERSION}"
@@ -159,7 +162,7 @@ def _render_diagram(
 
     tmp_in_path.write_text(content, encoding="utf-8")
 
-    print(f"[render] {path} -> {target}")
+    logger.info("Rendering %s -> %s", path, target)
 
     local_mmdc = _local_mmdc()
     if local_mmdc is not None:
@@ -245,19 +248,22 @@ def _render_all(
         if ok:
             continue
         errors.append((diagram_path, message))
-        print(f"[error] {diagram_path}: {message}", file=sys.stderr)
+        logger.error("Failed to render %s: %s", diagram_path, message)
 
     if errors:
         raise RuntimeError(f"{len(errors)} diagram(s) failed")
 
 
 def main() -> int:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(levelname)s] %(message)s",
+    )
     args = _parse_args()
     _cleanup_temp(args.root)
     diagrams = _find_diagrams(args.root)
     if not diagrams:
-        msg = f"Диаграммы (*.mmd) не найдены в {args.root}"
-        print(msg, file=sys.stderr)
+        logger.warning("No diagrams (*.mmd) found in %s", args.root)
         return 1
 
     try:
@@ -269,7 +275,7 @@ def main() -> int:
             config=args.config,
         )
     except RuntimeError as exc:
-        print(f"Ошибка рендеринга: {exc}", file=sys.stderr)
+        logger.error("Rendering failed: %s", exc)
         return 1
 
     return 0
