@@ -6,25 +6,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Protocol
 
-from bioetl.domain._deprecations import (
-    emit_deprecation_warning,
-    get_deprecated_names_for_module,
-    resolve_deprecated_type,
-)
 from bioetl.domain.data import RecordBatch
 from bioetl.domain.types import ApiPayload
-
-# =============================================================================
-# Deprecated Type Aliases (backward compatibility re-exports)
-# =============================================================================
-# Import from bioetl.domain.types for new code.
-# These re-exports emit deprecation warnings via __getattr__ below.
-# Deprecated names managed centrally in bioetl.domain._deprecations.
-
-__all__: list[str] = []  # Populated at end of module
-
-# Get deprecated names for this module from central registry
-_DEPRECATED_TYPE_ALIASES = get_deprecated_names_for_module(__name__)
 
 
 class RecordFetcherABC(ABC):
@@ -149,26 +132,6 @@ class BatchAdapterABC(Protocol):
         ...
 
 
-# =============================================================================
-# Module __getattr__ for deprecated type alias access
-# =============================================================================
-
-
-def __getattr__(name: str) -> object:
-    """Emit deprecation warning for legacy type alias imports.
-
-    Enables backward-compatible imports like:
-        from bioetl.domain.ports.extraction import RawRecordDict
-
-    But emits a DeprecationWarning directing users to the new location.
-    Uses centralized deprecation registry from bioetl.domain._deprecations.
-    """
-    if name in _DEPRECATED_TYPE_ALIASES:
-        emit_deprecation_warning(name, stacklevel=2)
-        return resolve_deprecated_type(name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 __all__ = [
     # Canonical type aliases
     "RecordBatch",  # from domain.data
@@ -179,6 +142,4 @@ __all__ = [
     "ExtractionServiceABC",
     # Protocols
     "BatchAdapterABC",
-    # Deprecated type aliases available via __getattr__:
-    # RawRecord, RawRecordDict, RawRecordBatch
 ]

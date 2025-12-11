@@ -6,9 +6,9 @@ from typing import Any, Iterable
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability.contracts import LoggingPortABC
+from bioetl.domain.data import RecordBatch
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
-    RawRecordBatch,
     VersionProviderABC,
 )
 from bioetl.domain.ports.filters import FilterEnricherABC
@@ -81,7 +81,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             return filters
         return self._filter_enricher.enrich_filters(entity, filters)
 
-    def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
+    def extract_all(self, entity: str, **filters: object) -> RecordBatch:
         """Extract all records for an entity as raw dicts.
 
         Args:
@@ -91,14 +91,14 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         Returns:
             All matching records as list[dict[str, Any]].
         """
-        records: RawRecordBatch = []
+        records: RecordBatch = []
         for batch in self.iter_extract(entity, **filters):
             records.extend(batch)
         return records
 
     def iter_extract(
         self, entity: str, *, chunk_size: int | None = None, **filters: object
-    ) -> Iterable[RawRecordBatch]:
+    ) -> Iterable[RecordBatch]:
         """Stream records from ChEMBL as raw dicts."""
         if chunk_size is None:
             chunk_size = filters.get("limit", self.batch_size)
@@ -132,7 +132,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         # Iterate pages
         for page_data in self.client.iter_pages(url):
             # Use generic parser for raw dict output
-            records: RawRecordBatch = self._parser.parse_to_records(page_data)
+            records: RecordBatch = self._parser.parse_to_records(page_data)
             yield records
 
     def request_batch(
@@ -155,7 +155,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         filters = {filter_key: ",".join(batch_ids), "limit": len(batch_ids)}
         return self.client.fetch(entity, **filters)
 
-    def parse_response(self, raw_response: object) -> RawRecordBatch:
+    def parse_response(self, raw_response: object) -> RecordBatch:
         """Parse raw response into record dicts.
 
         Args:
@@ -185,7 +185,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             # Parser can't handle this input type, return empty list
             return []
 
-    def serialize_records(self, entity: str, records: RawRecordBatch) -> RawRecordBatch:
+    def serialize_records(self, entity: str, records: RecordBatch) -> RecordBatch:
         """Serialize records for storage.
 
         Args:
