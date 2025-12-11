@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.infrastructure.constants import MAX_FILE_RETRIES
+from bioetl.infrastructure.settings.files import MAX_FILE_RETRIES
 from bioetl.infrastructure.files.atomic import AtomicFileOperation
 
 
