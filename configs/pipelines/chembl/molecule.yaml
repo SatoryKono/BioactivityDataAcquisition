@@ -7,7 +7,7 @@ entity: molecule
 primary_key: "${CHEMBL_MOLECULE_PRIMARY_KEY:-molecule_chembl_id}"
 input_mode: id_only
 input_path: data/input/molecule.csv
-output_path: ./data/output/molecule
+output_path: ./data/output/chembl/molecule
 batch_size: 20
 provider_config:
   provider: chembl
