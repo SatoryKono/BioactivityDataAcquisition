@@ -18,6 +18,7 @@ from bioetl.infrastructure.config.provider_registry import (
     create_provider_loader,
 )
 from bioetl.interfaces.composition_root import create_config_loader
+from tests.golden.pipeline_outputs.test_pipeline_outputs_helpers import MissingDataFile
 
 _PIPELINE_CASES = [
     (
@@ -129,7 +130,10 @@ def test_pipeline_outputs(
         provider_loader_factory=provider_loader_factory,
     )
     golden = importlib.import_module(golden_module)
-    expected_df = pd.DataFrame(getattr(golden, expected_attr))
+    expected_data = getattr(golden, expected_attr)
+    if isinstance(expected_data, MissingDataFile):
+        pytest.skip(f"Golden data file not found: {expected_data.path}")
+    expected_df = pd.DataFrame(expected_data)
     output_csv = output_dir / f"{entity_name}.csv"
 
     def _run_offline_pipeline(*, limit: int | None, dry_run: bool) -> RunResult:

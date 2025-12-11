@@ -8,7 +8,7 @@ from pathlib import Path
 import socket
 import sys
 from types import SimpleNamespace
-from typing import Any, cast
+from typing import Any
 from unittest.mock import MagicMock
 
 # CRITICAL: Clean sys.path and PYTHONPATH BEFORE importing any packages
@@ -291,16 +291,16 @@ except Exception as e:
 
 # Now safe to import packages
 import pandas as pd  # noqa: E402
-from pydantic import AnyHttpUrl  # noqa: E402
 import pytest  # noqa: E402
 
-from bioetl.domain.configs import (  # noqa: E402
+from bioetl.domain.configs import PipelineConfig  # noqa: E402
+from bioetl.domain.configs.identity import PipelineIdentityConfig  # noqa: E402
+from bioetl.domain.configs.data_flow import DataFlowConfig  # noqa: E402
+from bioetl.domain.configs.source import DataSourceConfig  # noqa: E402
+from bioetl.domain.configs.sink import DataSinkConfig  # noqa: E402
+from bioetl.domain.configs.pipeline import (  # noqa: E402
     ChemblSourceConfig,
-    ClientConfig,
-    HashingConfig,
-    LoggingConfig,
-    PipelineConfig,
-    StorageConfig,
+    ProviderHttpConfig,
 )
 from bioetl.domain.models import RunContext  # noqa: E402
 from bioetl.domain.observability.contracts import LoggingPortABC  # noqa: E402
@@ -362,25 +362,30 @@ def pytest_configure(config):
 def mock_config():
     """Create a mock pipeline configuration."""
     return PipelineConfig(
-        id="chembl.test_entity",
-        provider="chembl",
-        entity="test_entity",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="./test_out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.test_entity",
+            provider="chembl",
+            entity="test_entity",
+            primary_key=["id"],
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(
+                output_path="./test_out",
+            ),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url=cast(AnyHttpUrl, "https://www.ebi.ac.uk/chembl/api/data"),
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
             ),
         ),
-        logging=LoggingConfig(level="DEBUG"),
-        storage=StorageConfig(output_path="./test_out"),
-        hashing=HashingConfig(business_key_fields=["id"]),
-        pipeline={},
     )
 
 
@@ -478,25 +483,30 @@ def pipeline_test_config(tmp_path_factory: pytest.TempPathFactory) -> PipelineCo
     """Pipeline config for integration-style unit tests."""
     output_dir = tmp_path_factory.mktemp("pipeline_output")
     return PipelineConfig(
-        id="chembl.test_entity",
-        provider="chembl",
-        entity="test_entity",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path=str(output_dir),
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.test_entity",
+            provider="chembl",
+            entity="test_entity",
+            primary_key=["id"],
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(
+                output_path=str(output_dir),
+            ),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url=cast(AnyHttpUrl, "https://www.ebi.ac.uk/chembl/api/data"),
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
             ),
         ),
-        logging=LoggingConfig(level="DEBUG"),
-        storage=StorageConfig(output_path=str(output_dir)),
-        hashing=HashingConfig(business_key_fields=["id"]),
-        pipeline={},
     )
 
 

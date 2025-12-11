@@ -111,7 +111,11 @@ class ExtractStage:
             if remaining is not None and remaining <= 0:
                 break
 
-            if not batch:
+            # Check if batch is empty (works for both list and DataFrame)
+            if isinstance(batch, pd.DataFrame):
+                if batch.empty:
+                    continue
+            elif not batch:
                 continue
 
             # Apply limit to batch if needed
