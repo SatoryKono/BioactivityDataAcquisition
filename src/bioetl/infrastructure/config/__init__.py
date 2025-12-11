@@ -7,13 +7,13 @@ from bioetl.infrastructure.config.defaults_loader import (
     DefaultsValidationError,
     get_defaults_config,
 )
+from bioetl.infrastructure.config.http_config_migration import HttpConfigMigrator
 from bioetl.infrastructure.config.loader import (
     ConfigFileNotFoundError,
     UnknownProviderError,
     get_pipeline_config,
     get_pipeline_config_from_path,
 )
-from bioetl.infrastructure.config.http_config_migration import HttpConfigMigrator
 from bioetl.infrastructure.config.migration import ConfigMigrator
 from bioetl.infrastructure.config.pipeline_contract_loader import (
     DEFAULT_CONTRACTS_FILE,

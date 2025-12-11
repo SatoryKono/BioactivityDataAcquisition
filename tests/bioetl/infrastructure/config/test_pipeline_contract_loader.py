@@ -110,9 +110,7 @@ class TestYamlPipelineContractLoader:
         assert contract.schema_out == "custom_entity"
         assert contract.schema_in == "custom_entity_in"
 
-    def test_has_contract(
-        self, loader_with_sample: YamlPipelineContractLoader
-    ) -> None:
+    def test_has_contract(self, loader_with_sample: YamlPipelineContractLoader) -> None:
         """Test checking contract existence."""
         assert loader_with_sample.has_contract("test.entity") is True
         assert loader_with_sample.has_contract("unknown.x") is False
@@ -127,9 +125,7 @@ class TestYamlPipelineContractLoader:
 
     def test_nonexistent_file_returns_empty(self, tmp_path: Path) -> None:
         """Test loading from nonexistent file returns empty contracts."""
-        loader = YamlPipelineContractLoader(
-            config_path=tmp_path / "nonexistent.yaml"
-        )
+        loader = YamlPipelineContractLoader(config_path=tmp_path / "nonexistent.yaml")
         contracts = loader.load_contracts()
 
         assert contracts == {}

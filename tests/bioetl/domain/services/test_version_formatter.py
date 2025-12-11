@@ -26,6 +26,11 @@ class TestFormatChemblVersion:
         """Already formatted version is not double-prefixed."""
         assert format_chembl_version("chembl_34") == "chembl_34"
 
+    def test_uppercase_chembl_prefix_normalized(self):
+        """ChEMBL_ prefix is normalized to lowercase."""
+        assert format_chembl_version("ChEMBL_36") == "chembl_36"
+        assert format_chembl_version("CHEMBL_36") == "chembl_36"
+
     def test_handles_numeric_string(self):
         """Handles version as string of number."""
         assert format_chembl_version("100") == "chembl_100"
