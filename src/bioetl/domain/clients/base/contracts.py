@@ -28,7 +28,8 @@ class RequestBuilderABC(ABC):
     Implementations should support endpoint configuration and pagination.
 
     Note:
-        Consider using :class:`bioetl.domain.ports.request_building.RequestBuilderPortABC`
+        Consider using
+        :class:`bioetl.domain.ports.request_building.RequestBuilderPortABC`
         for new code - it provides a cleaner port-based contract.
     """
 
