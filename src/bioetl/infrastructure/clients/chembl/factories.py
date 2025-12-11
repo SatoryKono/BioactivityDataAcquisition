@@ -144,9 +144,7 @@ def default_chembl_client(
     **options: Any,
 ) -> DataClientABC:
     """Deprecated: use create_chembl_client() instead."""
-    return create_chembl_client(
-        source_config, logger, metrics, http_config, **options
-    )
+    return create_chembl_client(source_config, logger, metrics, http_config, **options)
 
 
 def default_chembl_extraction_service(
@@ -161,7 +159,13 @@ def default_chembl_extraction_service(
 ) -> ExtractionServiceABC:
     """Deprecated: use create_chembl_extraction_service() instead."""
     return create_chembl_extraction_service(
-        config, logger, metrics, http_config, client=client, filter_enricher=filter_enricher, parser=parser
+        config,
+        logger,
+        metrics,
+        http_config,
+        client=client,
+        filter_enricher=filter_enricher,
+        parser=parser,
     )
 
 
