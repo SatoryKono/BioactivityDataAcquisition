@@ -31,6 +31,56 @@ class ConfigPathResolver:
         """Return the configured configs root directory."""
         return self._configs_root
 
+    def resolve(
+        self, config_path: str | Path | None, pipeline_name: str | None = None
+    ) -> Path:
+        """Resolve config path, inferring from pipeline name if needed.
+
+        Args:
+            config_path: Explicit path (relative or absolute), or None to infer
+            pipeline_name: Pipeline name for inference, e.g. "activity_chembl"
+
+        Returns:
+            Resolved absolute path to config file
+
+        Raises:
+            FileNotFoundError: If config cannot be resolved or inferred
+        """
+        if config_path is not None:
+            return self._resolve_explicit(Path(config_path))
+        if pipeline_name is not None:
+            inferred = self._infer_from_pipeline_name(pipeline_name)
+            if inferred is not None:
+                return inferred
+        raise FileNotFoundError(
+            f"Cannot resolve config: path={config_path}, pipeline={pipeline_name}"
+        )
+
+    def _resolve_explicit(self, config_path: Path) -> Path:
+        """Resolve explicit config path to absolute."""
+        if config_path.is_absolute() and config_path.exists():
+            return config_path
+        if config_path.exists():
+            return config_path.resolve()
+        candidate = (self._configs_root / config_path).resolve()
+        if candidate.exists():
+            return candidate
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
+    def _infer_from_pipeline_name(self, pipeline_name: str) -> Path | None:
+        """Infer config path from pipeline naming convention.
+
+        Convention: {entity}_{provider} -> pipelines/{provider}/{entity}.yaml
+        """
+        parts = pipeline_name.split("_")
+        if len(parts) < 2:
+            return None
+        entity, provider = parts[0], parts[1]
+        candidate = self._configs_root / "pipelines" / provider / f"{entity}.yaml"
+        if candidate.exists():
+            return candidate
+        return None
+
     def infer_config_path(self, pipeline_name: str) -> Path | None:
         """Infer config path from pipeline name (entity_provider pattern).
 
