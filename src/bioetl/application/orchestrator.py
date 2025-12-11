@@ -46,13 +46,27 @@ from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.types import PipelineType
 from bioetl.domain.provider_registry import (
     ProviderRegistryABC,
+    ProviderRegistryFactory,
     ProviderRegistryLoaderABC,
 )
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.value_objects import EntityName, StageName
-from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
+
+
+def _get_default_registry_factory() -> ProviderRegistryFactory:
+    """Get the default provider registry factory.
+
+    This function lazily imports from infrastructure to provide backward
+    compatibility. New code should inject the factory explicitly.
+
+    Returns:
+        Factory function that creates InMemoryProviderRegistry instances.
+    """
+    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+
+    return InMemoryProviderRegistry
 
 
 class PipelineOrchestrator:
@@ -65,6 +79,7 @@ class PipelineOrchestrator:
         *,
         provider_registry: ProviderRegistryABC | None = None,
         provider_registry_provider: Callable[[], ProviderRegistryABC] | None = None,
+        provider_registry_factory: ProviderRegistryFactory | None = None,
         container_factory: Callable[..., PipelineContainerABC] | None = None,
         provider_loader: ProviderLoaderProtocol | None = None,
         provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None = None,
@@ -73,6 +88,9 @@ class PipelineOrchestrator:
         self._config = config
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
+        self._provider_registry_factory = (
+            provider_registry_factory or _get_default_registry_factory()
+        )
         self._container_factory = self._resolve_container_factory(container_factory)
         self._provider_loader = provider_loader
         self._provider_loader_factory = provider_loader_factory
@@ -298,7 +316,7 @@ class PipelineOrchestrator:
         if loader is None:
             return None
 
-        registry = loader.get_registry(registry=InMemoryProviderRegistry())
+        registry = loader.get_registry(registry=self._provider_registry_factory())
         self._provider_registry = registry
         return registry
 
@@ -319,16 +337,18 @@ class PipelineOrchestrator:
         *,
         loader: ProviderLoaderProtocol | None,
         registry_payload: list[ProviderDefinition] | None,
+        registry_factory: ProviderRegistryFactory | None = None,
     ) -> ProviderRegistryABC:
+        factory = registry_factory or _get_default_registry_factory()
         if registry_payload is not None:
-            registry = InMemoryProviderRegistry()
+            registry = factory()
             registry.restore_provider_registry(registry_payload)
             return registry
 
         if loader is not None:
-            return loader.get_registry(registry=InMemoryProviderRegistry())
+            return loader.get_registry(registry=factory())
 
-        return InMemoryProviderRegistry()
+        return factory()
 
 
 __all__ = ["PipelineOrchestrator"]

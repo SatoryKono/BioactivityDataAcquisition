@@ -227,3 +227,36 @@ def test_no_untracked_duplicate_class_names() -> None:
             f"{name}: {sorted(paths)}" for name, paths in sorted(duplicates.items())
         ]
         pytest.fail("Potential duplicate classes detected:\n" + "\n".join(formatted))
+
+
+def test_infrastructure_abc_impls_has_no_application_references() -> None:
+    """Verify infrastructure abc_impls.yaml doesn't reference application layer.
+
+    Application-layer implementations should be defined in interfaces layer
+    (interfaces/abc_impls_application.yaml) to maintain proper layer boundaries.
+    Infrastructure layer must not know about application layer.
+    """
+    impls_path = (
+        BIOETL_ROOT / "infrastructure" / "clients" / "base" / "abc_impls.yaml"
+    )
+    data = yaml.safe_load(impls_path.read_text(encoding="utf-8"))
+
+    violations: list[str] = []
+    for role, config in data.items():
+        if not isinstance(config, dict):
+            continue
+
+        default_factory = config.get("default_factory", "")
+        if "bioetl.application" in default_factory:
+            violations.append(f"{role}.default_factory -> {default_factory}")
+
+        for impl_name, impl_path in config.get("implementations", {}).items():
+            if "bioetl.application" in impl_path:
+                violations.append(f"{role}.implementations.{impl_name} -> {impl_path}")
+
+    if violations:
+        pytest.fail(
+            "Infrastructure abc_impls.yaml must not reference application layer.\n"
+            "Application implementations should be in interfaces/abc_impls_application.yaml.\n"
+            "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
+        )

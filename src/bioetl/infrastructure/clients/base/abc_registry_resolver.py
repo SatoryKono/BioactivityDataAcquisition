@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import importlib
 from pathlib import Path
 from typing import Any, Callable
@@ -57,14 +57,33 @@ def _import_from_path(dotted_path: str) -> Any:
 
 @dataclass
 class ABCRegistryResolverImpl:
-    """Resolves ABC registry definitions and factories/implementations."""
+    """Resolves ABC registry definitions and factories/implementations.
+
+    Supports loading multiple implementation YAML files and merging them.
+    This allows layer separation where infrastructure implementations are
+    defined in infrastructure layer and application implementations are
+    defined in interfaces layer.
+
+    Args:
+        registry_path: Path to the ABC registry definitions YAML.
+        impls_path: Path to the primary implementations YAML (infrastructure).
+        additional_impls_paths: Optional list of additional implementation YAML
+            files to merge (e.g., application layer implementations).
+    """
 
     registry_path: Path = Path(__file__).with_name("abc_registry.yaml")
     impls_path: Path = Path(__file__).with_name("abc_impls.yaml")
+    additional_impls_paths: list[Path] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self._registry = self._load_yaml(self.registry_path)
         self._impls = self._load_yaml(self.impls_path)
+
+        # Merge additional implementation files if provided
+        for additional_path in self.additional_impls_paths:
+            if additional_path.exists():
+                additional_impls = self._load_yaml(additional_path)
+                self._impls.update(additional_impls)
 
     def resolve_default_factory(self, role: str) -> Callable[..., Any]:
         """Return default factory callable for the given role."""
