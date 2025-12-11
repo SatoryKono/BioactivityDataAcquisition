@@ -29,6 +29,10 @@ def mock_client():
     client.request_builder = MagicMock()
     # Default build return
     client.request_builder.build.return_value = "http://mock-url"
+    # Setup fluent interface: build_for_endpoint returns builder,
+    # build_request returns URL
+    client.request_builder.build_for_endpoint.return_value = client.request_builder
+    client.request_builder.build_request.return_value = "http://mock-url"
     return client
 
 
@@ -101,7 +105,10 @@ def test_extract_all_single_page(service, mock_client):
     # Verify iter_pages called with URL from builder
     mock_client.iter_pages.assert_called_once_with("http://mock-url")
     # Verify builder used correct limit
-    mock_client.request_builder.build.assert_called_with({"limit": 10})
+    # (extract_all calls iter_extract which uses
+    # build_for_endpoint(...).build_request(...))
+    mock_client.request_builder.build_for_endpoint.assert_called_with("activity")
+    mock_client.request_builder.build_request.assert_called_with({"limit": 10})
 
 
 def test_extract_all_pagination(service, mock_client):
@@ -179,7 +186,10 @@ def test_extract_all_limit(service, mock_client):
     # Assert
     assert len(records) == 10  # Mock returns 10 because iter_pages isn't filtering
     # Verify client called with limit=5
-    mock_client.request_builder.build.assert_called_with({"limit": 5})
+    # (extract_all calls iter_extract which uses
+    # build_for_endpoint(...).build_request(...))
+    mock_client.request_builder.build_for_endpoint.assert_called_with("activity")
+    mock_client.request_builder.build_request.assert_called_with({"limit": 5})
 
 
 def test_iter_extract_stops_on_empty_page(service, mock_client):
@@ -197,7 +207,9 @@ def test_iter_extract_stops_on_empty_page(service, mock_client):
 
     assert chunks == []
     mock_client.iter_pages.assert_called_once()
-    mock_client.request_builder.build.assert_called_with({"limit": 5})
+    # iter_extract uses build_for_endpoint(...).build_request(...)
+    mock_client.request_builder.build_for_endpoint.assert_called_with("activity")
+    mock_client.request_builder.build_request.assert_called_with({"limit": 5})
 
 
 def test_iter_extract_respects_limit_with_pagination(service, mock_client):
@@ -225,7 +237,9 @@ def test_iter_extract_respects_limit_with_pagination(service, mock_client):
 
     assert len(chunks) == 2
     assert sum(len(chunk) for chunk in chunks) == 3
-    mock_client.request_builder.build.assert_called_with({"limit": 2})
+    # iter_extract uses build_for_endpoint(...).build_request(...)
+    mock_client.request_builder.build_for_endpoint.assert_called_with("activity")
+    mock_client.request_builder.build_request.assert_called_with({"limit": 2})
 
 
 def test_extract_unknown_entity(service, mock_client):
