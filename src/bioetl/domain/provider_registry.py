@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Protocol, runtime_checkable
-import warnings
 
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 
@@ -74,38 +73,27 @@ class ProviderRegistryLoaderABC(Protocol):
 
 
 def __getattr__(name: str) -> Any:
-    """Lazy import for backward compatibility with deprecated functions."""
-    if name == "InMemoryProviderRegistry":
-        raise ImportError(
-            "InMemoryProviderRegistry is no longer available in bioetl.domain. "
-            "Import it from bioetl.infrastructure.provider_registry instead."
-        )
-
-    # Handle deprecated global state functions - redirect to infrastructure
-    if name in (
-        "set_provider_registry",
-        "get_provider_registry",
-        "default_provider_registry",
-    ):
-        warnings.warn(
-            (
-                f"{name}() has been removed from bioetl.domain.provider_registry. "
-                "Use dependency injection through "
-                "CompositionRoot.get_provider_registry() or "
-                "bioetl.infrastructure.provider_registry."
-                "create_empty_provider_registry() instead."
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        raise AttributeError(
-            (
-                f"{name}() has been removed. "
-                "Use CompositionRoot.get_provider_registry() "
-                "for DI-based registry access."
-            )
-        )
-
+    """Handle removed names with helpful error messages."""
+    removed = {
+        "InMemoryProviderRegistry": (
+            "InMemoryProviderRegistry has been moved to "
+            "bioetl.infrastructure.provider_registry"
+        ),
+        "set_provider_registry": (
+            "set_provider_registry() has been removed. "
+            "Use CompositionRoot.get_provider_registry() instead."
+        ),
+        "get_provider_registry": (
+            "get_provider_registry() has been removed from domain. "
+            "Use CompositionRoot.get_provider_registry() instead."
+        ),
+        "default_provider_registry": (
+            "default_provider_registry() has been removed. "
+            "Use CompositionRoot.get_provider_registry() instead."
+        ),
+    }
+    if name in removed:
+        raise AttributeError(removed[name])
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

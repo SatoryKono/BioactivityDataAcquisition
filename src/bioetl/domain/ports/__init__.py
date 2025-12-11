@@ -7,13 +7,6 @@ directly from ``bioetl.domain.types``.
 
 from __future__ import annotations
 
-from typing import cast
-
-from bioetl.domain._deprecations import (
-    emit_deprecation_warning,
-    get_deprecated_names_for_module,
-    resolve_deprecated_type,
-)
 from bioetl.domain.data import RecordBatch
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
@@ -47,35 +40,10 @@ from bioetl.domain.ports.infrastructure_factory_port import (
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.types import ApiPayload
 
-# =============================================================================
-# Deprecated Type Aliases (backward compatibility re-exports)
-# =============================================================================
-# Deprecated names are now managed centrally in bioetl.domain._deprecations.
-
-_DEPRECATED_TYPE_ALIASES = get_deprecated_names_for_module(__name__)
-
-
-def __getattr__(name: str) -> type:
-    """Emit deprecation warning for legacy type alias imports.
-
-    Uses centralized deprecation registry from bioetl.domain._deprecations.
-    """
-    if name in _DEPRECATED_TYPE_ALIASES:
-        emit_deprecation_warning(name, stacklevel=2)
-        return cast(type, resolve_deprecated_type(name))
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 __all__: list[str] = [
     # Canonical type aliases
     "ApiPayload",  # from domain.types
     "RecordBatch",  # from domain.data
-    # Deprecated type aliases (for backward compatibility via __getattr__)
-    "RawRecord",  # deprecated, use Mapping[str, Any]
-    "RawRecordBatch",
-    "RawRecordDict",
-    "RawRecordList",
-    "RawPayload",
     # Entity model ports
     "EntityModelRegistryABC",
     # Filter ports
