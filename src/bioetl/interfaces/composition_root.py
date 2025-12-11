@@ -10,11 +10,26 @@ Usage:
     container = root.create_pipeline_container(config)
     config_loader = root.create_config_loader()
 
-    # For testing:
+    # For testing with custom observability (recommended):
+    from bioetl.interfaces.factories import ObservabilityFactoryABC
+
+    class MockObservabilityFactory(ObservabilityFactoryABC):
+        def create_logger(self) -> LoggingPortABC:
+            return mock_logger
+        def create_metrics(self) -> MetricsPortABC:
+            return mock_metrics
+
     root = CompositionRoot(
+        observability_factory=MockObservabilityFactory(),
+        schema_contract_provider=mock_provider,
+    )
+
+    # Legacy usage (deprecated - will be removed in future release):
+    # Use create_composition_root_with_legacy() for backward compatibility
+    from bioetl.interfaces.legacy_adapters import create_composition_root_with_legacy
+    root = create_composition_root_with_legacy(
         logger=mock_logger,
         metrics=mock_metrics,
-        schema_contract_provider=mock_provider,
     )
 """
 
@@ -70,20 +85,16 @@ class CompositionRoot:
         root = CompositionRoot()
         container = root.create_pipeline_container(config)
 
-        # Testing
-        root = CompositionRoot(logger=mock_logger, metrics=mock_metrics)
+        # Testing with custom factory (recommended)
+        root = CompositionRoot(observability_factory=MockObservabilityFactory())
         container = root.create_pipeline_container(config)
     """
 
     def __init__(
         self,
         *,
-        # New factory parameters
         observability_factory: ObservabilityFactoryABC | None = None,
         infrastructure_factory: InfrastructureFactoryABC | None = None,
-        # Legacy parameters (backward compatibility)
-        logger: LoggingPortABC | None = None,
-        metrics: MetricsPortABC | None = None,
         http_session_factory: type | None = None,
         schema_contract_provider: SchemaContractProviderABC | None = None,
     ) -> None:
@@ -95,9 +106,7 @@ class CompositionRoot:
                 (defaults to DefaultObservabilityFactory)
             infrastructure_factory: Factory for infrastructure components
                 (defaults to DefaultInfrastructureFactory)
-            logger: Custom logger implementation (backward compatibility)
-            metrics: Custom metrics implementation (backward compatibility)
-            http_session_factory: HTTP session factory class (backward compatibility)
+            http_session_factory: HTTP session factory class
             schema_contract_provider: Custom schema contract provider
                 (defaults to bootstrapped provider from schema registry)
         """
@@ -105,9 +114,6 @@ class CompositionRoot:
         self._observability = observability_factory or DefaultObservabilityFactory()
         self._infrastructure = infrastructure_factory or DefaultInfrastructureFactory()
 
-        # Explicit overrides (for BC and tests)
-        self._explicit_logger = logger
-        self._explicit_metrics = metrics
         self._http_session_factory = http_session_factory or requests.Session
         self._schema_contract_provider = schema_contract_provider
 
@@ -155,14 +161,10 @@ class CompositionRoot:
 
     def get_logger(self) -> LoggingPortABC:
         """Get or create the logger instance."""
-        if self._explicit_logger is not None:
-            return self._explicit_logger
         return self._observability.create_logger()
 
     def get_metrics(self) -> MetricsPortABC:
         """Get or create the metrics instance."""
-        if self._explicit_metrics is not None:
-            return self._explicit_metrics
         return self._observability.create_metrics()
 
     def get_observability_stack(self) -> ObservabilityStack:

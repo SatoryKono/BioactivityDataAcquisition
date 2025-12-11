@@ -1,8 +1,7 @@
 """Factory for creating ApplicationBootstrap with infrastructure integration.
 
 This module provides factory functions for creating ApplicationBootstrap
-instances configured with infrastructure-layer components (config loaders,
-provider injection).
+instances configured with infrastructure-layer components (config loaders).
 
 The separation between application-layer bootstrap logic and infrastructure
 integration maintains clean architecture boundaries while providing a
@@ -24,8 +23,6 @@ from typing import Any, cast
 from bioetl.application.bootstrap import (
     ApplicationBootstrap,
     ConfigLoaderFactory,
-    ProviderClearer,
-    ProviderInjector,
 )
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
@@ -95,41 +92,11 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
     return factory
 
 
-def _create_provider_injector() -> ProviderInjector:
-    """Create a provider injector for backward compatibility.
-
-    Returns:
-        Callback function that injects the provider into infrastructure.
-    """
-    from bioetl.infrastructure.config.loader import _set_provider_internal
-
-    def injector(provider: SchemaContractProviderABC) -> None:
-        """Inject provider instance into infrastructure config loader."""
-        _set_provider_internal(provider)
-
-    return injector
-
-
-def _create_provider_clearer() -> ProviderClearer:
-    """Create a provider clearer for cleanup.
-
-    Returns:
-        Callback function that clears the provider from infrastructure.
-    """
-    from bioetl.infrastructure.config.loader import _clear_provider_internal
-
-    def clearer() -> None:
-        """Clear injected provider from infrastructure config loader."""
-        _clear_provider_internal()
-
-    return clearer
-
-
 def create_default_bootstrap() -> ApplicationBootstrap:
     """Create an ApplicationBootstrap with default infrastructure integration.
 
     This factory creates a fully configured ApplicationBootstrap instance
-    with config loader support and provider injection for backward compatibility.
+    with config loader support via explicit dependency injection.
 
     Returns:
         ApplicationBootstrap configured with infrastructure components.
@@ -143,8 +110,6 @@ def create_default_bootstrap() -> ApplicationBootstrap:
 
     return ApplicationBootstrap(
         config_loader_factory=_create_config_loader_factory(),
-        provider_injector=_create_provider_injector(),
-        provider_clearer=_create_provider_clearer(),
         schema_register_fn=register_schemas,
     )
 
