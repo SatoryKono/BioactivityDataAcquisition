@@ -13,7 +13,7 @@ from typing import Any
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig
 from bioetl.domain.ports.extraction import ExtractionServiceABC
-from bioetl.domain.ports.providers import DefaultFieldProviderABC
+from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.infrastructure.clients.chembl.factories import (
     create_chembl_client,
     create_chembl_extraction_service,
@@ -39,7 +39,7 @@ def create_extraction_service(
     config: ChemblSourceConfig,
     *,
     client: DataClientABC | None = None,
-    field_provider: DefaultFieldProviderABC | None = None,
+    filter_enricher: FilterEnricherABC | None = None,
     logger: Any | None = None,
     metrics: Any | None = None,
 ) -> ExtractionServiceABC:
@@ -57,5 +57,5 @@ def create_extraction_service(
         logger=logger,
         metrics=metrics,
         client=client,
-        field_provider=field_provider,
+        filter_enricher=filter_enricher,
     )

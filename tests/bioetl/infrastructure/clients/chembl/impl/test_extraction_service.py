@@ -2,8 +2,10 @@
 
 from unittest.mock import Mock
 
+from bioetl.application.services import FilterEnrichmentService
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl import (
@@ -19,57 +21,76 @@ def _mock_logger() -> LoggingPortABC:
     return Mock(spec=LoggingPortABC)
 
 
-def test_attach_entity_fields_uses_provider():
-    """Test that field provider is used to populate fields."""
-
-    client = Mock(spec=DataClientABC)
-    client.provider = "chembl"
-
+def test_filter_enricher_uses_provider():
+    """Test that filter enricher uses field provider to populate fields."""
     mock_provider = Mock(spec=DefaultFieldProviderABC)
     mock_provider.get_default_fields.return_value = ["col1", "col2"]
 
-    service = ChemblExtractionServiceImpl(
-        client, logger=_mock_logger(), field_provider=mock_provider
-    )
+    enricher = FilterEnrichmentService(mock_provider)
 
-    # Case 1: entity="assay", no fields provided
-    filters = {}
-    result = service._attach_entity_fields("assay", filters)
+    # entity="assay", no fields provided
+    filters: dict[str, object] = {}
+    result = enricher.enrich_filters("assay", filters)
 
     assert result["fields"] == "col1,col2"
     mock_provider.get_default_fields.assert_called_with("assay")
 
 
-def test_attach_entity_fields_skips_if_fields_present():
-    """Test that provider is ignored if fields are already present."""
-    client = Mock(spec=DataClientABC)
-    client.provider = "chembl"
+def test_filter_enricher_skips_if_fields_present():
+    """Test that enricher is ignored if fields are already present."""
     mock_provider = Mock(spec=DefaultFieldProviderABC)
 
-    service = ChemblExtractionServiceImpl(
-        client, logger=_mock_logger(), field_provider=mock_provider
-    )
+    enricher = FilterEnrichmentService(mock_provider)
 
-    filters = {"fields": "custom"}
-    result = service._attach_entity_fields("assay", filters)
+    filters: dict[str, object] = {"fields": "custom"}
+    result = enricher.enrich_filters("assay", filters)
 
     assert result["fields"] == "custom"
     mock_provider.get_default_fields.assert_not_called()
 
 
-def test_attach_entity_fields_no_provider():
+def test_filter_enricher_no_provider():
     """Test fallback when no provider is configured."""
+    enricher = FilterEnrichmentService(field_provider=None)
+
+    filters: dict[str, object] = {}
+    result = enricher.enrich_filters("assay", filters)
+
+    assert "fields" not in result
+
+
+def test_extraction_service_uses_filter_enricher():
+    """Test that extraction service delegates to filter enricher."""
+    client = Mock(spec=DataClientABC)
+    client.provider = "chembl"
+
+    mock_enricher = Mock(spec=FilterEnricherABC)
+    mock_enricher.enrich_filters.return_value = {"fields": "enriched", "limit": 100}
+
+    service = ChemblExtractionServiceImpl(
+        client, logger=_mock_logger(), filter_enricher=mock_enricher
+    )
+
+    # Test _enrich_filters delegation
+    result = service._enrich_filters("assay", {"limit": 100})
+
+    mock_enricher.enrich_filters.assert_called_once_with("assay", {"limit": 100})
+    assert result == {"fields": "enriched", "limit": 100}
+
+
+def test_extraction_service_no_enricher():
+    """Test extraction service without enricher passes filters through."""
     client = Mock(spec=DataClientABC)
     client.provider = "chembl"
 
     service = ChemblExtractionServiceImpl(
-        client, logger=_mock_logger(), field_provider=None
+        client, logger=_mock_logger(), filter_enricher=None
     )
 
-    filters = {}
-    result = service._attach_entity_fields("assay", filters)
+    filters: dict[str, object] = {"limit": 100}
+    result = service._enrich_filters("assay", filters)
 
-    assert "fields" not in result
+    assert result == {"limit": 100}
 
 
 # =============================================================================
