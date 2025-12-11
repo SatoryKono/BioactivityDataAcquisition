@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Protocol
-import warnings
+from typing import Protocol
 
 from bioetl.domain._deprecations import (
     emit_deprecation_warning,
@@ -26,9 +25,6 @@ __all__: list[str] = []  # Populated at end of module
 
 # Get deprecated names for this module from central registry
 _DEPRECATED_TYPE_ALIASES = get_deprecated_names_for_module(__name__)
-
-if TYPE_CHECKING:
-    from bioetl.domain.record_source import SourceRecordModel
 
 
 class RecordFetcherABC(ABC):
@@ -154,60 +150,6 @@ class BatchAdapterABC(Protocol):
 
 
 # =============================================================================
-# Backward Compatibility Helpers
-# =============================================================================
-
-
-def to_raw_records(batch: RecordBatch) -> list["SourceRecordModel"]:
-    """Convert raw dicts to SourceRecordModel instances (migration helper).
-
-    DEPRECATED: Use application layer mappers instead.
-    This function is provided for gradual migration from SourceRecordModel
-    to generic dicts in extraction services.
-
-    Args:
-        batch: List of raw record dictionaries.
-
-    Returns:
-        List of SourceRecordModel Pydantic models.
-
-    Example:
-        >>> from bioetl.domain.ports.extraction import to_raw_records
-        >>> dicts = [{"id": "1", "name": "test"}]
-        >>> records = to_raw_records(dicts)  # DeprecationWarning
-    """
-    warnings.warn(
-        "to_raw_records is deprecated. Use RecordMapperABC in application layer.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    from bioetl.domain.record_source import SourceRecordModel
-
-    return [SourceRecordModel.model_validate(record) for record in batch]
-
-
-def from_raw_records(records: list["SourceRecordModel"]) -> RecordBatch:
-    """Convert SourceRecordModel instances to raw dicts (migration helper).
-
-    DEPRECATED: Use application layer mappers instead.
-    This function is provided for gradual migration from SourceRecordModel
-    to generic dicts in extraction services.
-
-    Args:
-        records: List of SourceRecordModel Pydantic models.
-
-    Returns:
-        List of raw record dictionaries.
-    """
-    warnings.warn(
-        "from_raw_records is deprecated. Return dicts directly from extraction.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return [record.model_dump() for record in records]
-
-
-# =============================================================================
 # Module __getattr__ for deprecated type alias access
 # =============================================================================
 
@@ -237,9 +179,6 @@ __all__ = [
     "ExtractionServiceABC",
     # Protocols
     "BatchAdapterABC",
-    # Backward compatibility helpers
-    "to_raw_records",
-    "from_raw_records",
     # Deprecated type aliases available via __getattr__:
     # RawRecord, RawRecordDict, RawRecordBatch
 ]

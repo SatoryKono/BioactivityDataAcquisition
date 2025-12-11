@@ -11,10 +11,7 @@ from bioetl.domain.ports.extraction import (
     RawRecordDict,
     RecordFetcherABC,
     VersionProviderABC,
-    from_raw_records,
-    to_raw_records,
 )
-from bioetl.domain.record_source import SourceRecordModel
 
 
 class TestTypeAliases:
@@ -280,89 +277,6 @@ class TestBatchAdapterABC:
         assert hasattr(BatchAdapterABC, "process_batch")
 
 
-class TestBackwardCompatibilityHelpers:
-    """Tests for backward compatibility helper functions."""
-
-    def test_to_raw_records_converts_dicts_to_models(self) -> None:
-        """to_raw_records should convert dicts to RawRecord models."""
-        batch: RawRecordBatch = [
-            {"id": "1", "name": "first"},
-            {"id": "2", "name": "second"},
-        ]
-
-        with pytest.warns(DeprecationWarning, match="to_raw_records is deprecated"):
-            records = to_raw_records(batch)
-
-        assert len(records) == 2
-        assert all(isinstance(r, SourceRecordModel) for r in records)
-        assert records[0].id == "1"  # type: ignore[attr-defined]
-        assert records[1].name == "second"  # type: ignore[attr-defined]
-
-    def test_to_raw_records_handles_empty_batch(self) -> None:
-        """to_raw_records should handle empty batches."""
-        with pytest.warns(DeprecationWarning):
-            records = to_raw_records([])
-
-        assert records == []
-
-    def test_to_raw_records_preserves_nested_structures(self) -> None:
-        """to_raw_records should preserve nested data structures."""
-        batch: RawRecordBatch = [
-            {
-                "id": "1",
-                "nested": {"key": "value"},
-                "list": [1, 2, 3],
-            }
-        ]
-
-        with pytest.warns(DeprecationWarning):
-            records = to_raw_records(batch)
-
-        assert records[0].nested == {"key": "value"}  # type: ignore[attr-defined]
-        assert records[0].list == [1, 2, 3]  # type: ignore[attr-defined]
-
-    def test_from_raw_records_converts_models_to_dicts(self) -> None:
-        """from_raw_records should convert SourceRecordModel models to dicts."""
-        records = [
-            SourceRecordModel.model_validate({"id": "1", "name": "first"}),
-            SourceRecordModel.model_validate({"id": "2", "name": "second"}),
-        ]
-
-        with pytest.warns(DeprecationWarning, match="from_raw_records is deprecated"):
-            batch = from_raw_records(records)
-
-        assert len(batch) == 2
-        assert all(isinstance(r, dict) for r in batch)
-        assert batch[0]["id"] == "1"
-        assert batch[1]["name"] == "second"
-
-    def test_from_raw_records_handles_empty_list(self) -> None:
-        """from_raw_records should handle empty lists."""
-        with pytest.warns(DeprecationWarning):
-            batch = from_raw_records([])
-
-        assert batch == []
-
-    def test_roundtrip_conversion(self) -> None:
-        """Converting dicts -> models -> dicts should preserve data."""
-        original_batch: RawRecordBatch = [
-            {"id": "1", "value": 100, "nested": {"a": 1}},
-            {"id": "2", "value": 200, "nested": {"b": 2}},
-        ]
-
-        with pytest.warns(DeprecationWarning):
-            records = to_raw_records(original_batch)
-
-        with pytest.warns(DeprecationWarning):
-            restored_batch = from_raw_records(records)
-
-        assert len(restored_batch) == len(original_batch)
-        for orig, restored in zip(original_batch, restored_batch):
-            assert orig["id"] == restored["id"]
-            assert orig["value"] == restored["value"]
-            assert orig["nested"] == restored["nested"]
-
-
 class TestPortsModuleExports:
     """Tests for module __all__ exports."""
 
@@ -386,9 +300,6 @@ class TestPortsModuleExports:
         assert hasattr(ports, "ExtractionServiceABC")
         # Protocols
         assert hasattr(ports, "BatchAdapterABC")
-        # Backward compatibility helpers
-        assert hasattr(ports, "to_raw_records")
-        assert hasattr(ports, "from_raw_records")
 
     def test_type_alias_values_are_correct(self) -> None:
         """Type aliases should have correct underlying types."""

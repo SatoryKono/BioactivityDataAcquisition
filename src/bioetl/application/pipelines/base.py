@@ -38,12 +38,12 @@ Example::
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
-from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, TypeAlias
 
 import pandas as pd
 
 from bioetl.application.executor import PipelineExecutor
+from bioetl.application.metadata.builder import DefaultRunMetadataBuilder
 from bioetl.application.pipelines.stage_runtime_manager import StageRuntimeManagerImpl
 from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
@@ -77,30 +77,6 @@ if TYPE_CHECKING:
 ExtractResult: TypeAlias = (
     Iterable[pd.DataFrame] | Iterable[TabularData] | pd.DataFrame | None
 )
-
-
-def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
-    """Fallback metadata builder for cases when container is not provided."""
-
-    return cast(
-        RunMetadataBuilderProtocol,
-        SimpleNamespace(
-            build_run_metadata=lambda context, write_result: {
-                "run_id": getattr(context, "run_id", None),
-                "provider": getattr(context, "provider", None),
-                "entity": getattr(context, "entity_name", None),
-                "row_count": getattr(write_result, "row_count", 0),
-                "dry_run": False,
-            },
-            build_dry_run_metadata=lambda context, row_count: {
-                "run_id": getattr(context, "run_id", None),
-                "provider": getattr(context, "provider", None),
-                "entity": getattr(context, "entity_name", None),
-                "row_count": row_count,
-                "dry_run": True,
-            },
-        ),
-    )
 
 
 class PipelineBase(ABC):
@@ -140,7 +116,7 @@ class PipelineBase(ABC):
         self._hash_service = hash_service
         self._index_generator = index_generator
         self._timestamp_provider = timestamp_provider
-        self._metadata_builder = metadata_builder or _create_default_metadata_builder()
+        self._metadata_builder = metadata_builder or DefaultRunMetadataBuilder()
         self._extractor = extractor
         self._transformer = transformer
         self._post_transformer = post_transformer

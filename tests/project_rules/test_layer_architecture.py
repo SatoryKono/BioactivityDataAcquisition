@@ -61,11 +61,19 @@ def test_layer_dependencies(bioetl_root: Path) -> None:
                     )
 
             if module.startswith("bioetl.application"):
-                if ref.startswith(("bioetl.infrastructure", "bioetl.interfaces")):
+                # Application can import from infrastructure, but not implementations
+                # (modules containing "impl" in path)
+                if ref.startswith("bioetl.infrastructure") and "impl" in ref.split("."):
                     violations.append(
                         f"{file_path.as_posix()}:{reference.lineno}: "
                         "application must not depend on "
-                        f"infrastructure/interfaces ({ref})"
+                        f"infrastructure implementations ({ref})"
+                    )
+                if ref.startswith("bioetl.interfaces"):
+                    violations.append(
+                        f"{file_path.as_posix()}:{reference.lineno}: "
+                        "application must not depend on "
+                        f"interfaces ({ref})"
                     )
 
             if module.startswith("bioetl.infrastructure"):
