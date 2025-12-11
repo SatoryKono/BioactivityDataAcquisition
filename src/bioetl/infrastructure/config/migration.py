@@ -254,7 +254,9 @@ class ConfigMigrator:
     ) -> None:
         """Migrate HTTP config section using HttpConfigMigrator."""
         if "client" in section and isinstance(section["client"], dict):
-            section["client"] = HttpConfigMigrator.migrate(section["client"], warn=False)
+            section["client"] = HttpConfigMigrator.migrate(
+                section["client"], warn=False
+            )
         if "http" in section and isinstance(section["http"], dict):
             section["http"] = HttpConfigMigrator.migrate(section["http"], warn=False)
 
@@ -394,7 +396,9 @@ class ConfigMigrator:
             data["data_flow"] = data_flow
 
     @classmethod
-    def _migrate_source_fields(cls, data: dict[str, Any], source: dict[str, Any]) -> None:
+    def _migrate_source_fields(
+        cls, data: dict[str, Any], source: dict[str, Any]
+    ) -> None:
         """Migrate flat source fields into source section."""
         for field in cls.SOURCE_FIELDS:
             if field in data and field not in source:
@@ -413,25 +417,34 @@ class ConfigMigrator:
                         source[k] = v
 
     @classmethod
-    def _migrate_sink_fields(cls, data: dict[str, Any], sink: dict[str, Any]) -> None:
-        """Migrate flat sink fields into sink section."""
-        for field in cls.SINK_FIELDS:
-            if field in data and field not in sink:
-                sink[field] = data.pop(field)
-
-        # Handle output at root
+    def _migrate_output_field(cls, data: dict[str, Any], sink: dict[str, Any]) -> None:
+        """Migrate output field from root to sink section."""
         if "output" in data and "output" not in sink:
             output_val = data.pop("output")
             if isinstance(output_val, dict):
                 sink["output"] = output_val
 
-        # Handle legacy sink section at root (defensive)
+    @classmethod
+    def _migrate_legacy_sink_section(
+        cls, data: dict[str, Any], sink: dict[str, Any]
+    ) -> None:
+        """Migrate legacy sink section from root to sink."""
         if "sink" in data:
             existing_sink = data.pop("sink")
             if isinstance(existing_sink, dict):
                 for k, v in existing_sink.items():
                     if k not in sink:
                         sink[k] = v
+
+    @classmethod
+    def _migrate_sink_fields(cls, data: dict[str, Any], sink: dict[str, Any]) -> None:
+        """Migrate flat sink fields into sink section."""
+        for field in cls.SINK_FIELDS:
+            if field in data and field not in sink:
+                sink[field] = data.pop(field)
+
+        cls._migrate_output_field(data, sink)
+        cls._migrate_legacy_sink_section(data, sink)
 
     @classmethod
     def _migrate_flat_fields_to_data_flow(cls, data: dict[str, Any]) -> None:
@@ -446,7 +459,7 @@ class ConfigMigrator:
         sink = data_flow.setdefault("sink", {})
         cls._migrate_sink_fields(data, sink)
 
-    @classmethod
+    @staticmethod
     def _coerce_primary_key_to_list(pk_value: Any) -> list[str]:
         """Coerce primary key value to list format."""
         if isinstance(pk_value, str):
@@ -505,6 +518,40 @@ class ConfigMigrator:
             target[key] = value
 
     @classmethod
+    def _prepare_keys_to_collect(
+        cls,
+        section_key: str,
+        keys: tuple[str, ...],
+        existing_section: dict[str, Any] | None,
+    ) -> list[str]:
+        """Prepare list of keys to collect, removing section_key if needed."""
+        keys_to_collect = list(keys)
+        if section_key in keys_to_collect and existing_section is not None:
+            keys_to_collect.remove(section_key)
+        return keys_to_collect
+
+    @classmethod
+    def _build_target_section(
+        cls,
+        section_key: str,
+        existing_section: dict[str, Any] | None,
+        collected: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Build target section from existing and collected fields."""
+        target_section: dict[str, Any] = dict(existing_section or {})
+        nested_from_collected = collected.pop(section_key, None)
+        if isinstance(nested_from_collected, dict):
+            target_section |= nested_from_collected
+
+        for key, value in collected.items():
+            if isinstance(value, dict):
+                cls._merge_nested_dict(target_section, key, value)
+            else:
+                target_section[key] = value
+
+        return target_section
+
+    @classmethod
     def _pack_section(
         cls, section_key: str, keys: tuple[str, ...], data: dict[str, Any]
     ) -> None:
@@ -518,25 +565,17 @@ class ConfigMigrator:
         existing_section = (
             data.get(section_key) if isinstance(data.get(section_key), dict) else None
         )
-        keys_to_collect = list(keys)
-        if section_key in keys_to_collect and existing_section is not None:
-            keys_to_collect.remove(section_key)
+        keys_to_collect = cls._prepare_keys_to_collect(
+            section_key, keys, existing_section
+        )
 
         collected = {key: data.pop(key) for key in keys_to_collect if key in data}
         if not collected and existing_section is None:
             return
 
-        target_section: dict[str, Any] = dict(existing_section or {})
-        nested_from_collected = collected.pop(section_key, None)
-        if isinstance(nested_from_collected, dict):
-            target_section |= nested_from_collected
-
-        for key, value in collected.items():
-            if isinstance(value, dict):
-                cls._merge_nested_dict(target_section, key, value)
-            else:
-                target_section[key] = value
-
+        target_section = cls._build_target_section(
+            section_key, existing_section, collected
+        )
         if target_section:
             data[section_key] = target_section
 

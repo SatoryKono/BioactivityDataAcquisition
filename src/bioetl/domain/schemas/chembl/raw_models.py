@@ -6,7 +6,7 @@ for ChEMBL API responses at the system boundary.
 
 from __future__ import annotations
 
-from typing import Self, TypeAlias
+from typing import Any, Self, TypeAlias
 
 from pydantic import ConfigDict, field_validator, model_validator
 
@@ -77,6 +77,20 @@ class ActivityRawModel(SourceRecordModel):
     value: float | None = None
 
     @classmethod
+    def _extract_string_from_dict(cls, value: dict[str, Any]) -> str | None:
+        """Extract string value from dict using priority keys."""
+        for key in ("action_type", "description", "label", "name"):
+            candidate = value.get(key)
+            if isinstance(candidate, str):
+                return candidate
+        scalar_values = [
+            str(v)
+            for _, v in sorted(value.items())
+            if isinstance(v, (str, int, float, bool))
+        ]
+        return ";".join(scalar_values) if scalar_values else None
+
+    @classmethod
     def _coerce_action_type_value(cls, value: object) -> str | None:
         """Coerce action_type to a string when API returns nested structures."""
         if value is None or value == "":
@@ -84,16 +98,7 @@ class ActivityRawModel(SourceRecordModel):
         if isinstance(value, str):
             return value
         if isinstance(value, dict):
-            for key in ("action_type", "description", "label", "name"):
-                candidate = value.get(key)
-                if isinstance(candidate, str):
-                    return candidate
-            scalar_values = [
-                str(v)
-                for _, v in sorted(value.items())
-                if isinstance(v, (str, int, float, bool))
-            ]
-            return ";".join(scalar_values) if scalar_values else None
+            return cls._extract_string_from_dict(value)
         if isinstance(value, list):
             items = [str(item) for item in value if item is not None]
             return ";".join(items) if items else None

@@ -102,6 +102,18 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
 
         return self.ensure_numeric_columns(df)
 
+    def _convert_to_dict(
+        self, raw: pd.Series | dict[str, Any] | BaseModel
+    ) -> dict[str, Any]:
+        """Convert input to dictionary format."""
+        if self._support_base_model and isinstance(raw, BaseModel):
+            return raw.model_dump()
+        if isinstance(raw, pd.Series):
+            return raw.to_dict()
+        if isinstance(raw, dict):
+            return raw
+        return cast(dict[str, Any], raw.model_dump())
+
     def apply_normalize(
         self, raw: pd.Series | dict[str, Any] | BaseModel
     ) -> dict[str, Any]:
@@ -113,16 +125,7 @@ class NormalizationServiceImpl(BaseNormalizationService, NormalizationServiceABC
         Returns:
             Normalized dictionary with all fields processed.
         """
-        raw_data: dict[str, Any]
-        if self._support_base_model and isinstance(raw, BaseModel):
-            raw_data = raw.model_dump()
-        elif isinstance(raw, pd.Series):
-            raw_data = raw.to_dict()
-        elif isinstance(raw, dict):
-            raw_data = raw
-        else:
-            raw_data = cast(dict[str, Any], raw.model_dump())
-
+        raw_data = self._convert_to_dict(raw)
         normalized: dict[str, Any] = {}
 
         for field_cfg in self._iter_fields():

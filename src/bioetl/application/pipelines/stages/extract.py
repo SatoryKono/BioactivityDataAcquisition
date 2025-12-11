@@ -104,6 +104,25 @@ class ExtractStage(ExtractorABC):
             return pd.DataFrame([r.model_dump() for r in typed_records])
         return pd.DataFrame(batch_records)
 
+    def _process_batch_with_limit(
+        self, batch: Any, remaining: int | None, resolved_entity: str
+    ) -> tuple[pd.DataFrame, int | None]:
+        """Process a single batch with limit handling."""
+        if remaining is not None and remaining <= 0:
+            return pd.DataFrame(), remaining
+
+        if self._is_batch_empty(batch):
+            return pd.DataFrame(), remaining
+
+        batch_records = batch[:remaining] if remaining is not None else batch
+        df = self._create_dataframe_from_batch(batch_records, resolved_entity)
+
+        new_remaining = remaining
+        if remaining is not None:
+            new_remaining = remaining - len(batch_records)
+
+        return df, new_remaining
+
     def extract(
         self,
         entity: str | None = None,
@@ -148,22 +167,13 @@ class ExtractStage(ExtractorABC):
         )
 
         for batch in iterator:
-            if remaining is not None and remaining <= 0:
-                break
-
-            if self._is_batch_empty(batch):
-                continue
-
-            batch_records = batch[:remaining] if remaining is not None else batch
-            df = self._create_dataframe_from_batch(batch_records, resolved_entity)
-
+            df, remaining = self._process_batch_with_limit(
+                batch, remaining, resolved_entity
+            )
             if not df.empty:
                 yield cast(TabularData, df)
-
-            if remaining is not None:
-                remaining -= len(batch_records)
-                if remaining <= 0:
-                    break
+            if remaining is not None and remaining <= 0:
+                break
 
     def extract_all(
         self,

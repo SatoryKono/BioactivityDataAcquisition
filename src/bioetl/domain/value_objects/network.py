@@ -5,6 +5,7 @@ Contains type-safe wrappers for URLs and network addresses.
 
 from __future__ import annotations
 
+from typing import Any
 from urllib.parse import urlparse
 
 from pydantic import GetCoreSchemaHandler

@@ -119,17 +119,18 @@ class PipelineExecutor:
     def _initialize_run(self, pipeline: PipelineBase, dry_run: bool) -> _RunState:
         """Initialize runtime state for a new pipeline run."""
         self._runtime_manager.reset()
-        if hasattr(pipeline._hash_service, "reset_state"):
-            pipeline._hash_service.reset_state()
+        hash_service = pipeline.get_hash_service()
+        if hasattr(hash_service, "reset_state"):
+            hash_service.reset_state()
 
-        context = pipeline._build_context(dry_run)
+        context = pipeline.build_context(dry_run)
         self._logger = self._logger.apply_bind(run_id=context.run_id)
         self._runtime_manager.set_logger(self._logger)
         self._logger.info("Pipeline started", run_id=context.run_id)
 
         return _RunState(
             context=context,
-            counters=pipeline._init_stage_counters(),
+            counters=pipeline.init_stage_counters(),
             validated_chunks=[],
             stages_results=[],
         )
@@ -143,7 +144,7 @@ class PipelineExecutor:
     ) -> None:
         """Execute extract, transform, and validate stages."""
         self._runtime_manager.notify_stage_start("extract", state.context)
-        state.counters, state.validated_chunks = pipeline._process_extract_stage(
+        state.counters, state.validated_chunks = pipeline.process_extract_stage(
             state.context,
             state.counters,
             state.validated_chunks,
@@ -168,7 +169,7 @@ class PipelineExecutor:
         output_path: Path,
     ) -> RunResult | None:
         """Execute write stage; returns RunResult on failure, None on success."""
-        state.write_result, state.counters = pipeline._perform_write_stage(
+        state.write_result, state.counters = pipeline.perform_write_stage(
             state.context,
             state.validated_chunks,
             output_path,
@@ -193,7 +194,7 @@ class PipelineExecutor:
         return RunResult(
             run_id=state.context.run_id,
             success=True,
-            entity_name=pipeline._config.entity_name,
+            entity_name=pipeline.config.entity_name,
             row_count=state.counters["validate_count"],
             output_path=output_path if not dry_run else None,
             duration_sec=self._calculate_duration(state.context),
@@ -216,7 +217,7 @@ class PipelineExecutor:
                 state.context, state.counters["validate_count"]
             )
         )
-        return pipeline._normalize_meta(
+        return pipeline.normalize_meta(
             meta_raw, state.context, state.counters["validate_count"], dry_run
         )
 
