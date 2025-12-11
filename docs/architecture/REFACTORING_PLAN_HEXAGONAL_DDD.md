@@ -56,7 +56,7 @@
 | **Defaults Config** | `domain/configs/defaults.py` | 123 | Centralized ✅ |
 | **Background Executor** | `application/services/background_executor.py` | 100+ | ProcessPool ✅ |
 | **Fallback Policy Docs** | `docs/architecture/fallback_policy.md` | 200+ | Документация ✅ |
-| **YAML Schema Export** | `scripts/export_schemas_yaml.py` | 250+ | Скрипт ✅ |
+| **YAML Schema Export** | `src/tools/export_schemas_yaml.py` | 250+ | Скрипт ✅ |
 
 ### Оставшиеся улучшения (низкий приоритет)
 
@@ -205,7 +205,7 @@ class BaseGeneratedColumnsModel(pa.DataFrameModel):
 
 **Pipeline Contracts:** `configs/pipeline_contracts.yaml` с 5 entity contracts
 
-**YAML Export:** `scripts/export_schemas_yaml.py` — экспорт Pandera схем в YAML ✅
+**YAML Export:** `src/tools/export_schemas_yaml.py` — экспорт Pandera схем в YAML ✅
 
 ---
 
@@ -381,7 +381,7 @@ class DefaultsConfig(BaseModel):
 
 ### Внутренние документы
 - `docs/architecture/fallback_policy.md` — политика разрешения defaults ✅
-- `scripts/export_schemas_yaml.py` — экспорт Pandera схем в YAML ✅
+- `src/tools/export_schemas_yaml.py` — экспорт Pandera схем в YAML ✅
 - `docs/REFACTORING_PLAN.md` — исторический план (устарел)
 - `docs/PIPELINE_IMPLEMENTATION_GUIDE.md` — guide для разработчиков
 
