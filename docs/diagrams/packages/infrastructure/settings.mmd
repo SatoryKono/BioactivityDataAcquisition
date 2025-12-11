@@ -1,0 +1,43 @@
+---
+title: Infrastructure Settings Package
+description: bioetl.infrastructure.settings - Configuration constants and defaults
+---
+classDiagram
+    direction TB
+
+    class HttpTimeouts {
+        <<frozen dataclass>>
+        +connect: float = 10.0
+        +read: float = 30.0
+        +total: float = 30.0
+    }
+
+    class RetrySettings {
+        <<frozen dataclass>>
+        +max_attempts: int = 4
+        +backoff_factor: float = 2.0
+        +backoff_max: float = 60.0
+        +retry_statuses: frozenset~int~
+        +retry_exceptions: tuple
+    }
+
+    class ConnectionPoolSettings {
+        <<frozen dataclass>>
+        +rate_limit_per_sec: float = 2.5
+        +pool_connections: int = 10
+        +pool_maxsize: int = 10
+        +pool_block: bool = False
+    }
+
+    class DefaultInstances {
+        <<constants>>
+        DEFAULT_TIMEOUTS: HttpTimeouts
+        DEFAULT_RETRY: RetrySettings
+        DEFAULT_POOL: ConnectionPoolSettings
+    }
+
+    DefaultInstances --> HttpTimeouts : uses
+    DefaultInstances --> RetrySettings : uses
+    DefaultInstances --> ConnectionPoolSettings : uses
+
+    note for RetrySettings "Default retry statuses:\n429, 500, 502, 503, 504\n\nRetry exceptions:\nApiTimeoutError, ApiClientError,\nrequests.Timeout, ConnectionError"

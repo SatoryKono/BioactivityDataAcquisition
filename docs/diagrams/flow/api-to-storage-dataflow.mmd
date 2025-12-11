@@ -1,0 +1,23 @@
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart LR
+    classDef stepPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px
+    classDef stepSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px
+    classDef external      fill:#dde7f2,stroke:#44546a,stroke-width:1.5px
+    classDef storage       fill:#f0f4d4,stroke:#596235,stroke-width:1.5px
+    linkStyle default stroke:#666,stroke-width:1.2px
+
+    chembl[(ChEMBL REST API JSON)]:::external
+    httpClient["UnifiedAPIClient\n+ retry + rate-limit + circuit breaker"]:::stepPrimary
+    recordModel["flatten_chembl_payload (utility)\nnormalize nested payloads to strings\nbypass configured fields"]:::stepSecondary
+    batches["Batch buffer / generator\nlist of dicts"]:::stepSecondary
+    dataframe["Pandas DataFrame\nconstructed from flattened dicts"]:::stepPrimary
+    normalize["Normalization chain\n(serialization, unit normalization, enrichment)"]:::stepPrimary
+    validate["Pandera schema validation\n(strict order + coerce)"]:::stepPrimary
+    hash["Hash & metadata columns\nhash_row, hash_business_key, index, extracted_at"]:::stepSecondary
+    write["UnifiedOutputWriter\nstable sort + atomic CSV/Parquet"]:::stepPrimary
+    meta["Metadata/QC writers\nmeta.yaml + QC tables + checksums"]:::stepSecondary
+    storage[(Deterministic storage\nCSV/Parquet + QC + meta)]:::storage
+
+    chembl --> httpClient --> recordModel --> batches --> dataframe --> normalize --> validate --> hash --> write --> storage
+    write --> meta --> storage
+

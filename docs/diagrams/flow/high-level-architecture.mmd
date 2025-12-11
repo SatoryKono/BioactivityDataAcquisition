@@ -1,0 +1,97 @@
+%%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
+flowchart LR
+
+classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
+classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
+
+subgraph Interfaces["Interfaces (driving ports)"]
+    CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
+    REST["REST API (FastAPI)\ninterfaces.rest.server"]:::componentSecondary
+end
+
+subgraph Application["Application layer"]
+    UseCase["RunPipelineUseCase\napplication.use_cases.run_pipeline"]:::componentPrimary
+    Orchestrator["PipelineOrchestrator\napplication.orchestrator"]:::componentPrimary
+    Container["PipelineContainer\napplication.container"]:::componentPrimary
+    Registry["Pipeline registry + factories\napplication.pipelines.registry"]:::componentSecondary
+    Executor["PipelineExecutor\napplication.executor"]:::componentPrimary
+    Runtime["StageRuntimeManager\n+ HookNotifier + StageErrorHandler\napplication.pipelines.*"]:::componentSecondary
+    Config["Config resolution/runtime\napplication.config.*"]:::componentSecondary
+    Factories["Service/Transform factories\napplication.factories.*"]:::componentSecondary
+end
+
+subgraph Domain["Domain layer (core)"]
+    Pipeline["PipelineBase / ChemblPipelineBase"]:::componentPrimary
+    Validation["ValidationService\n+ SchemaProviderABC + ValidatorFactoryABC"]:::componentPrimary
+    Transform["TransformerChainImpl\nHash/Index/DB version/Fulldate"]:::componentPrimary
+    Contracts["Pipeline contracts\nExtractorABC / LoaderABC / Hooks / ErrorPolicy"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry"]:::componentSecondary
+    Schemas["SchemaRegistry\nPandera schemas"]:::componentSecondary
+end
+
+subgraph Infrastructure["Infrastructure (driven adapters)"]
+    ConfigLoader["PipelineConfigLoader\ninfrastructure.config.loader"]:::componentSecondary
+    ProviderLoader["ProviderRegistryLoader\ninfrastructure.config.provider_registry"]:::componentSecondary
+    RecordSources["ApiRecordSource / CsvRecordSourceImpl / IdListRecordSourceImpl"]:::componentSecondary
+    Clients["UnifiedAPIClient + ChemblDataClientHTTPImpl\ninfrastructure.clients.chembl.*"]:::componentPrimary
+    Extraction["ChemblExtractionServiceImpl"]:::componentSecondary
+    Output["UnifiedLoaderImpl\n+ DataWriter/Metadata/QC/AtomicFileOperation"]:::componentPrimary
+    Hashing["Blake2bHashService + HasherImpl"]:::componentSecondary
+    Indexing["SequentialIndexGenerator"]:::componentSecondary
+    Timestamp["DeterministicTimestampProvider"]:::componentSecondary
+    Normalization["NormalizationServiceImpl"]:::componentSecondary
+    Logging["UnifiedLogger + ProgressReporter"]:::componentSecondary
+    Metrics["Observability server (Prometheus)"]:::componentSecondary
+end
+
+ExtChEMBL[(ChEMBL REST API)]:::external
+FS[(Filesystem: CSV/Parquet + meta.yaml + QC)]:::external
+MetricsSink[(Prometheus / HTTP exporters)]:::external
+
+CLI --> UseCase
+REST --> UseCase
+UseCase --> ConfigLoader
+UseCase --> ProviderLoader
+UseCase --> Orchestrator
+
+Orchestrator --> Registry
+Orchestrator --> Container
+Container --> Factories
+Container --> ProviderRegistry
+ProviderLoader --> ProviderRegistry
+Container --> Pipeline
+Container --> Validation
+Container --> Transform
+Container --> Hashing
+Container --> Indexing
+Container --> Timestamp
+Container --> Normalization
+Container --> Output
+Container --> Logging
+Container --> Metrics
+Container --> Config
+
+Pipeline --> Executor
+Executor --> Runtime
+Pipeline --> Validation
+Validation --> Schemas
+Pipeline --> Transform
+Transform --> Hashing
+Transform --> Indexing
+Transform --> Timestamp
+Transform --> Normalization
+Pipeline --> Output
+
+ProviderRegistry --> Clients
+ProviderRegistry --> RecordSources
+RecordSources --> Extraction
+Extraction --> Clients
+Clients --> ExtChEMBL
+
+Output --> FS
+Logging --> FS
+Metrics --> MetricsSink
+Runtime --> Logging
+Runtime --> Metrics

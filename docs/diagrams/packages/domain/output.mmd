@@ -1,0 +1,36 @@
+---
+title: Domain Output Package
+description: bioetl.domain.output - Deterministic output specifications
+---
+classDiagram
+    direction TB
+
+    class DeterministicWriterABC {
+        <<abstract>>
+        +write_atomic(data, target_path, sort_columns, reset_index) DeterministicWriteResult
+        +verify_checksum(path, expected) bool
+        +compute_checksum(path) str
+    }
+
+    class DeterministicWriteResult {
+        <<frozen dataclass>>
+        +path: Path
+        +checksum: str
+        +row_count: int
+        +is_atomic: bool
+        +bytes_written: int
+        +verify(expected_checksum) bool
+    }
+
+    class TabularData {
+        <<protocol>>
+        +columns: Sequence[str]
+        +shape: tuple[int, int]
+    }
+
+    DeterministicWriterABC --> TabularData : uses
+    DeterministicWriterABC --> DeterministicWriteResult : returns
+
+    note for DeterministicWriterABC "Guarantees:\n1. Byte-for-byte identical output\n2. Atomic writes (temp + rename)\n3. Checksum verification"
+
+    note for DeterministicWriteResult "Contains write operation\nresults with checksum\nfor validation"

@@ -1,0 +1,49 @@
+---
+id: d2e3f4a5-6789-0abc-def1-234567890123
+title: Architecture Rules and Invariants
+---
+%%{init: { 'flowchart': { 'useMaxWidth': true, 'htmlLabels': true } }}%%
+flowchart TB
+    classDef rulePrimary fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+    classDef ruleSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+    classDef group fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111
+
+    rules["BioETL Architecture Invariants"]:::rulePrimary
+
+    direction["One-way Dependencies\nInterfaces -> Application -> Domain\nApplication -> Infrastructure\n(import-linter enforced)"]:::ruleSecondary
+
+    abcPattern["Ports & Adapters Pattern\nDomain ABC -> Default factory -> Impl\nABCRegistryResolver for discovery"]:::ruleSecondary
+
+    determinism["Deterministic IO\nStable sort + Pandera validation\nAtomic write operations"]:::ruleSecondary
+
+    contracts["Contracts & Schemas\nDomain ABC + PipelineSchemaModel\nSingle source of truth"]:::ruleSecondary
+
+    testing["Testing Policy\nUnit + Pipeline golden tests\nCoverage >= 85%\nNo network in unit tests"]:::ruleSecondary
+
+    naming["Naming + Layer Guards\nRegex enforcement for IDs\nimport-linter to block leaks"]:::ruleSecondary
+
+    logging["Structured Observability\nUnifiedLogger + MetricsAdapter\nNo print() statements"]:::ruleSecondary
+
+    config["Typed Configuration\nPydantic models\nYAML validated via schema"]:::ruleSecondary
+
+    secrets["Secrets Policy\nOnly env vars / secret manager\nNo inline tokens"]:::ruleSecondary
+
+    di["Dependency Injection\nCompositionRoot assembly\nPipelineContainer for services\nNo service locator pattern"]:::ruleSecondary
+
+    valueObjects["Value Objects\nImmutable domain primitives\nChemblId, EntityName, HashDigest"]:::ruleSecondary
+
+    errorHandling["Error Handling\nErrorPolicyABC (FailFast/PartialSuccess)\nTyped domain exceptions"]:::ruleSecondary
+
+    rules --> direction
+    rules --> abcPattern
+    rules --> determinism
+    rules --> contracts
+    rules --> testing
+    rules --> naming
+    rules --> logging
+    rules --> config
+    rules --> secrets
+    rules --> di
+    rules --> valueObjects
+    rules --> errorHandling
