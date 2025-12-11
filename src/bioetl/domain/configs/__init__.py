@@ -138,20 +138,6 @@ def __getattr__(name: str) -> Any:
 
     Delegates to _compat module which handles deprecation warnings.
     """
-    if name == "ConfigMigrator":
-        import warnings
-
-        from bioetl.domain.configs.migration import ConfigMigrator
-
-        warnings.warn(
-            "Importing ConfigMigrator from bioetl.domain.configs is deprecated. "
-            "Import from bioetl.infrastructure.config.migration instead. "
-            "This re-export will be removed in a future release.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ConfigMigrator
-
     if name in _COMPAT_ALL:
         from bioetl.domain.configs import _compat
 
