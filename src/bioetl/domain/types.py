@@ -77,8 +77,13 @@ Import tabular data types from domain.data::
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, TypeAlias
+
+from bioetl.domain._deprecations import (
+    emit_deprecation_warning,
+    resolve_deprecated_type,
+    get_deprecated_names_for_module,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -125,32 +130,12 @@ Example:
 # Deprecated Type Aliases (Backward Compatibility via __getattr__)
 # =============================================================================
 
-# Map of deprecated names to (new_location, deprecation_message)
+# Deprecated names are now managed centrally in bioetl.domain._deprecations.
+# This module handles: RecordBatch, RawRecordDict, RawRecordBatch, RawRecordList, RawPayload
 # NOTE: RawRecord has been removed completely. Do not add it here.
 # Use Mapping[str, Any] or bioetl.domain.data.Record protocol instead.
-_DEPRECATED_NAMES: dict[str, tuple[str, str]] = {
-    "RecordBatch": (
-        "bioetl.domain.data.RecordBatch",
-        "RecordBatch has moved to bioetl.domain.data. "
-        "Import from there: from bioetl.domain.data import RecordBatch",
-    ),
-    "RawRecordDict": (
-        "Mapping[str, Any]",
-        "RawRecordDict is deprecated. Use Mapping[str, Any] directly.",
-    ),
-    "RawRecordBatch": (
-        "bioetl.domain.data.RecordBatch",
-        "RawRecordBatch is deprecated. Use RecordBatch from bioetl.domain.data.",
-    ),
-    "RawRecordList": (
-        "bioetl.domain.data.RecordBatch",
-        "RawRecordList is deprecated. Use RecordBatch from bioetl.domain.data.",
-    ),
-    "RawPayload": (
-        "ApiPayload",
-        "RawPayload is deprecated. Use ApiPayload instead.",
-    ),
-}
+
+_DEPRECATED_NAMES = get_deprecated_names_for_module(__name__)
 
 
 def __getattr__(name: str) -> TypeAlias:
@@ -158,23 +143,11 @@ def __getattr__(name: str) -> TypeAlias:
 
     Provides backward compatibility for deprecated type aliases by returning
     appropriate types while emitting deprecation warnings.
+
+    Uses centralized deprecation registry from bioetl.domain._deprecations.
     """
     if name in _DEPRECATED_NAMES:
-        new_location, message = _DEPRECATED_NAMES[name]
-        warnings.warn(
-            f"{message} See migration guide in bioetl.domain.types module docstring.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # Return appropriate fallback types for backward compatibility
-        if name == "RawRecordDict":
-            return dict[str, Any]
-        elif name in ("RecordBatch", "RawRecordBatch", "RawRecordList"):
-            # Import from data module for the actual type
-            from bioetl.domain.data import RecordBatch as _RecordBatch
-
-            return _RecordBatch
-        elif name == "RawPayload":
-            return ApiPayload
+        emit_deprecation_warning(name, stacklevel=2)
+        return resolve_deprecated_type(name)
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
