@@ -42,14 +42,19 @@ def mock_dependencies_fixture():
     """Fixture for pipeline dependencies."""
 
     class _DummyHasher(HasherABC):
-        def get_algorithm(self):
-            return "sha256"
+        @property
+        def algorithm(self) -> str:
+            return "blake2b_256"
 
-        def compute_hash_row(self, _row):
-            return "hash_row"
+        def compute_hash(self, record):
+            from bioetl.domain.value_objects import HashDigest
 
-        def compute_hash_columns(self, df, _columns):
-            return pd.Series(["hash_business_key"] * len(df))
+            return HashDigest("dummy_hash_row")
+
+        def compute_hash_for_fields(self, record, fields):
+            from bioetl.domain.value_objects import HashDigest
+
+            return HashDigest("dummy_hash_business_key")
 
     config = MagicMock()
     config.entity_name = "test"

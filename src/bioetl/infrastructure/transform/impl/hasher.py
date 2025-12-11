@@ -1,5 +1,6 @@
 """Hasher implementation with canonical JSON serialization (BLAKE2b-256)."""
 
+from collections.abc import Mapping, Sequence
 from decimal import Decimal
 import hashlib
 import json
@@ -9,6 +10,7 @@ import unicodedata
 import pandas as pd
 
 from bioetl.domain.transform.contracts import HasherABC
+from bioetl.domain.value_objects import HashDigest
 
 
 def normalize_unicode(text: str) -> str:
@@ -93,8 +95,46 @@ class HasherImpl(HasherABC):
     Реализация хеширования (BLAKE2b-256) с канонической JSON сериализацией.
     """
 
-    def get_algorithm(self) -> str:
+    @property
+    def algorithm(self) -> str:
         """Return hash algorithm identifier."""
+        return "blake2b_256"
+
+    def compute_hash(self, record: Mapping[str, Any]) -> HashDigest:
+        """Compute hash of a single record.
+
+        Args:
+            record: Record to hash (dict-like interface).
+
+        Returns:
+            HashDigest value object.
+        """
+        record_dict = dict(record)
+        serialized = _serialize_canonical(record_dict)
+        hash_hex = blake2b_hash_hex(serialized.encode("utf-8"))
+        return HashDigest(hash_hex)
+
+    def compute_hash_for_fields(
+        self,
+        record: Mapping[str, Any],
+        fields: Sequence[str],
+    ) -> HashDigest:
+        """Compute hash of specified fields from a record.
+
+        Args:
+            record: Record containing fields.
+            fields: Field names to include in hash.
+
+        Returns:
+            HashDigest value object.
+        """
+        values = [record.get(field) for field in fields]
+        serialized = _serialize_canonical(values)
+        hash_hex = blake2b_hash_hex(serialized.encode("utf-8"))
+        return HashDigest(hash_hex)
+
+    def get_algorithm(self) -> str:
+        """Return hash algorithm identifier (legacy method)."""
         return "blake2b_256"
 
     def compute_hash_row(self, row: pd.Series) -> str:

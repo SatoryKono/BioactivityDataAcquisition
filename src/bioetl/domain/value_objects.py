@@ -151,6 +151,14 @@ class StageName:
     def __hash__(self) -> int:
         return hash(self._value)
 
+    def __setattr__(self, name: str, value: object) -> None:
+        """Prevent modification after initialization."""
+        if hasattr(self, "_value"):
+            raise AttributeError(
+                f"Cannot modify immutable StageName: attribute {name!r}"
+            )
+        object.__setattr__(self, name, value)
+
     @classmethod
     def __get_pydantic_core_schema__(
         cls, source_type: type, handler: GetCoreSchemaHandler

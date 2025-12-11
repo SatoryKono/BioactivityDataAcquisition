@@ -29,27 +29,27 @@ def test_hash_service_add_hash_columns():
 
 
 def test_hash_service_hash_row():
-    """Test hash_row computes deterministic hash."""
+    """Test compute_fingerprint computes deterministic hash."""
     svc = default_hash_service()
     row = {"a": 1, "b": "test"}
 
-    hash1 = svc.hash_row(row)
-    hash2 = svc.hash_row(row)
+    hash1 = svc.compute_fingerprint(row)
+    hash2 = svc.compute_fingerprint(row)
 
     assert hash1 == hash2
-    assert len(hash1) == 64  # blake2b-256 hex
+    assert len(hash1.value) == 64  # blake2b-256 hex
 
 
 def test_hash_service_hash_business_key():
-    """Test hash_business_key computes hash for specific columns."""
+    """Test compute_entity_key computes hash for specific columns."""
     svc = default_hash_service()
     row = {"a": 1, "b": "test", "c": 3}
 
-    hash1 = svc.hash_business_key(row, ["a", "b"])
-    hash2 = svc.hash_business_key(row, ["a", "b"])
+    hash1 = svc.compute_entity_key(row, ["a", "b"])
+    hash2 = svc.compute_entity_key(row, ["a", "b"])
 
     assert hash1 == hash2
-    assert len(hash1) == 64
+    assert len(hash1.value) == 64
 
 
 def test_index_generator_sequential():

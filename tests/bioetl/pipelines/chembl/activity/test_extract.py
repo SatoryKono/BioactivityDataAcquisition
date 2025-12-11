@@ -13,11 +13,8 @@ from bioetl.application.files.csv_record_source import (
     IdListRecordSourceImpl,
 )
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.configs import (
-    ChemblSourceConfig,
-    ClientConfig,
-    CsvInputConfig,
-)
+from bioetl.domain.configs import CsvInputConfig
+from bioetl.domain.configs.pipeline import ChemblSourceConfig, ProviderHttpConfig
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 
@@ -38,13 +35,13 @@ def _extract_dataframe(pipeline: ChemblPipelineBase) -> pd.DataFrame:
 def source_config():
     """Create test ChemblSourceConfig with flat structure."""
     return ChemblSourceConfig(
-        base_url="https://test.com",
-        batch_size=100,
-        client=ClientConfig(
+        http=ProviderHttpConfig(
+            base_url="https://test.com",
             timeout_sec=30,
             max_retries=3,
             rate_limit_per_sec=5.0,
         ),
+        batch_size=100,
     )
 
 
@@ -107,17 +104,11 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
     validation_service = MagicMock()
     loader = MagicMock()
     metadata_builder = MagicMock()
-
-    # Default record source yields dict records (simulating API response)
-    record_source = MagicMock()
-    record_source.iter_records.return_value = iter(
-        [
-            [
-                {"activity_id": 1, "standard_flag": 1},
-                {"activity_id": 2, "standard_flag": 1},
-            ]
-        ]
-    )
+    index_generator = MagicMock()
+    index_generator.next_index.return_value = 0
+    timestamp_provider = MagicMock()
+    timestamp_provider.get_extraction_timestamp.return_value = "2024-01-01T00:00:00Z"
+    hash_service = MagicMock()
 
     return ChemblPipelineBase(
         config=mock_config,
@@ -125,12 +116,11 @@ def pipeline(mock_config, mock_extraction_service, mock_normalization_service):
         validation_service=validation_service,
         loader=loader,
         extraction_service=mock_extraction_service,
-        hash_service=MagicMock(),
+        hash_service=hash_service,
         normalization_service=mock_normalization_service,
         metadata_builder=metadata_builder,
-        record_source=record_source,
-        index_generator=MagicMock(),
-        timestamp_provider=MagicMock(),
+        index_generator=index_generator,
+        timestamp_provider=timestamp_provider,
     )
 
 
@@ -229,12 +219,14 @@ def test_extract_batch_size_from_config(
 
     pipeline._config.input_mode = "id_only"
     pipeline._config.input_path = str(csv_path)
-    from bioetl.domain.configs import ChemblSourceConfig
-
     new_source_config = ChemblSourceConfig(
-        base_url=source_config.base_url,
+        http=ProviderHttpConfig(
+            base_url=source_config.http.base_url,
+            timeout_sec=source_config.http.timeout_sec,
+            max_retries=source_config.http.max_retries,
+            rate_limit_per_sec=source_config.http.rate_limit_per_sec,
+        ),
         batch_size=2,
-        client=source_config.client.model_copy(deep=True),
     )
     pipeline._config.provider_config = new_source_config
     pipeline._config.get_source_config = lambda provider: new_source_config
