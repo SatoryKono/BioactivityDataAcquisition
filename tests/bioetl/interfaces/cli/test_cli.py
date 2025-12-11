@@ -116,7 +116,9 @@ def test_run_command(mock_resolve, mock_get_factory):
         success=True, row_count=10, duration_sec=1.0, output_path="out", errors=[]
     )
     mock_context = mock_get_factory.return_value
-    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = mock_use_case
+    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = (
+        mock_use_case
+    )
 
     result = runner.invoke(app, ["run", "activity_chembl", "--config", "test.yaml"])
 
@@ -155,7 +157,9 @@ def test_run_config_not_found_explicit(mock_get_factory):
     mock_use_case = MagicMock()
     mock_use_case.execute.side_effect = FileNotFoundError("Config file not found")
     mock_context = mock_get_factory.return_value
-    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = mock_use_case
+    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = (
+        mock_use_case
+    )
 
     result = runner.invoke(
         app, ["run", "activity_chembl", "--config", "nonexistent.yaml"]
@@ -174,7 +178,9 @@ def test_run_with_limit_and_dry_run(mock_get_factory):
         success=True, row_count=5, duration_sec=0.5, output_path="out", errors=[]
     )
     mock_context = mock_get_factory.return_value
-    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = mock_use_case
+    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = (
+        mock_use_case
+    )
 
     result = runner.invoke(app, ["run", "activity_chembl", "--limit", "5", "--dry-run"])
 
@@ -194,7 +200,9 @@ def test_run_pipeline_failure(mock_get_factory):
     mock_use_case = MagicMock()
     mock_use_case.execute.return_value = MagicMock(success=False, errors=["Error 1"])
     mock_context = mock_get_factory.return_value
-    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = mock_use_case
+    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = (
+        mock_use_case
+    )
 
     result = runner.invoke(app, ["run", "activity_chembl"])
 
@@ -209,7 +217,9 @@ def test_run_exception(mock_get_factory):
     mock_use_case = MagicMock()
     mock_use_case.execute.side_effect = RuntimeError("Unexpected error")
     mock_context = mock_get_factory.return_value
-    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = mock_use_case
+    mock_context.use_case_factory.create_run_pipeline_use_case.return_value = (
+        mock_use_case
+    )
 
     result = runner.invoke(app, ["run", "activity_chembl"])
 

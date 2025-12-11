@@ -6,8 +6,6 @@ from typing import Literal, cast
 
 import pandas as pd
 
-from typing import cast
-
 from bioetl.domain.data import MutableTabularData, TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC

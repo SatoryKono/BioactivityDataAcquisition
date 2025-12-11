@@ -141,10 +141,8 @@ class RecordSourceFactory(RecordSourceFactoryABC):
 
         resolved_batch_adapter = batch_adapter
         if resolved_batch_adapter is None:
-            # Note: model_cls is deprecated, pass to trigger warning if used
-            resolved_batch_adapter = PandasBatchAdapter(
-                model_cls=model_cls  # Deprecated, triggers warning if not None
-            ).process_batch
+            # Note: model_cls is deprecated, ignored
+            resolved_batch_adapter = PandasBatchAdapter().process_batch
 
         return ApiRecordSource(
             extraction_service=extraction_service,

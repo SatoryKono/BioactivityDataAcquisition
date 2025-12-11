@@ -53,7 +53,9 @@ def create_rest_app() -> FastAPI:
         )
 
         # 2. Get use case via factory
-        use_case = get_application_context().use_case_factory.create_run_pipeline_use_case()
+        use_case = (
+            get_application_context().use_case_factory.create_run_pipeline_use_case()
+        )
 
         # 3. Execute in thread pool
         loop = asyncio.get_running_loop()
