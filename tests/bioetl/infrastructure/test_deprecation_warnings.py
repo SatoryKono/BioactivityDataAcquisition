@@ -30,8 +30,15 @@ class TestConfigModelsDeprecation:
         ]
         assert len(deprecation_warnings) >= 1
         # Check for the actual deprecation message from infrastructure.config.models
-        message_str = str(deprecation_warnings[0].message)
-        assert "infrastructure.config.models" in message_str or "domain.configs" in message_str
+        # Iterate over all warnings as other warnings might be emitted first
+        found = False
+        for warning in deprecation_warnings:
+            message_str = str(warning.message)
+            if "infrastructure.config.models" in message_str or "domain.configs" in message_str:
+                found = True
+                break
+        
+        assert found, f"Expected warning not found in: {[str(w.message) for w in deprecation_warnings]}"
 
     def test_config_models_exports_available(self) -> None:
         """Deprecated module still exports all expected symbols."""
