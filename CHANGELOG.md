@@ -37,6 +37,7 @@ See docs/migration/2.0-hexagonal-architecture.md
 ### Removed
 
 - **BREAKING**: `SimplePipelineContainer` class removed from `bioetl.interfaces.simple_container`. Use `ApplicationBootstrap` from `bioetl.application.bootstrap` or `create_default_bootstrap()` from `bioetl.interfaces.bootstrap_factory` instead.
+- `RenameColumnsConverter` class removed from `infrastructure/output/converters/` — duplicate of `_rename_columns()` in `converters/factories.py`
 
 ### Changed
 
