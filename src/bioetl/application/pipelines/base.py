@@ -475,10 +475,11 @@ class PipelineBase(ABC):
 
         df_for_validation = df_for_validation.loc[:, schema_columns]
 
-        return self._validation_service.validate(
-            df=df_for_validation,
+        validated = self._validation_service.validate(
+            df=cast(MutableTabularData, df_for_validation),
             entity_name=schema_name,
         )
+        return cast(pd.DataFrame, validated)
 
     def write(
         self,

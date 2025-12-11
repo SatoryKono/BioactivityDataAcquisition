@@ -381,6 +381,7 @@ def test_application_has_no_pandas_imports() -> None:
         "base.py",  # pipelines/base.py and chembl/base.py
         "transformer.py",
         "stage_runtime_manager.py",
+        "stage_processor.py",
         "extract.py",
         "pandas_batch_adapter.py",
     }
