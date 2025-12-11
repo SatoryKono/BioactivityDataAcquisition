@@ -1,10 +1,10 @@
 import requests
 
-from bioetl.infrastructure.logging.factories import default_logger
+from bioetl.infrastructure.observability.factories import create_logging_port
 
 
 def main():
-    logger = default_logger().apply_bind(
+    logger = create_logging_port().apply_bind(
         pipeline="publication_chembl", entity="publication", stage="debug_fetch"
     )
 

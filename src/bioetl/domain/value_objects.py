@@ -298,11 +298,26 @@ class HashDigest:
     """Value Object for cryptographic hash digest (hex-encoded).
 
     Provides type safety for hash values throughout the system.
-    Supports common algorithms: blake2b_256, sha256, md5.
+    Supports multiple algorithms with length validation.
+    Immutable after creation.
 
     Attributes:
         value: Hex-encoded hash string (lowercase).
-        algorithm: Algorithm identifier (e.g., 'blake2b_256').
+        algorithm: Algorithm identifier (default: 'blake2b_256').
+
+    Supported algorithms:
+        - blake2b_256: 64 hex chars (256 bits)
+        - sha256: 64 hex chars (256 bits)
+        - sha512: 128 hex chars (512 bits)
+        - md5: 32 hex chars (128 bits)
+
+    Examples:
+        >>> HashDigest("a" * 64)  # Default blake2b_256
+        HashDigest('aaaa...', algorithm='blake2b_256')
+        >>> HashDigest("b" * 32, "md5")
+        HashDigest('bbbb...', algorithm='md5')
+        >>> HashDigest.blake2b_256("c" * 64)  # Factory method
+        HashDigest('cccc...', algorithm='blake2b_256')
     """
 
     __slots__ = ("_value", "_algorithm")
@@ -335,8 +350,16 @@ class HashDigest:
                 f"expected {expected_len}, got {len(normalized)}"
             )
 
-        self._value = normalized
-        self._algorithm = algorithm
+        object.__setattr__(self, "_value", normalized)
+        object.__setattr__(self, "_algorithm", algorithm)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        """Prevent modification after initialization (immutability guard)."""
+        if hasattr(self, "_value"):
+            raise AttributeError(
+                f"Cannot modify immutable HashDigest: attribute {name!r}"
+            )
+        object.__setattr__(self, name, value)
 
     @property
     def value(self) -> str:
@@ -347,6 +370,11 @@ class HashDigest:
     def algorithm(self) -> str:
         """Algorithm identifier."""
         return self._algorithm
+
+    @property
+    def is_blake2b(self) -> bool:
+        """Check if this is a BLAKE2b-256 hash."""
+        return self._algorithm == "blake2b_256"
 
     def __str__(self) -> str:
         return self._value
@@ -363,8 +391,28 @@ class HashDigest:
         return hash((self._value, self._algorithm))
 
     @classmethod
+    def blake2b_256(cls, hex_value: str) -> Self:
+        """Factory for BLAKE2b-256 hashes (backward compatibility).
+
+        Args:
+            hex_value: 64-character hex string.
+
+        Returns:
+            HashDigest with algorithm='blake2b_256'.
+        """
+        return cls(hex_value, "blake2b_256")
+
+    @classmethod
     def from_hex(cls, hex_string: str, algorithm: str = "blake2b_256") -> Self:
-        """Create HashDigest from hex string."""
+        """Create HashDigest from hex string.
+
+        Args:
+            hex_string: Hex-encoded hash value.
+            algorithm: Algorithm identifier (default: blake2b_256).
+
+        Returns:
+            HashDigest instance.
+        """
         return cls(hex_string, algorithm)
 
     @classmethod
