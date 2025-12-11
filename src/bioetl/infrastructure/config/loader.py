@@ -399,22 +399,11 @@ def _resolve_schema_provider(
 
     provider = get_schema_contract_provider()
     if provider is None:
-        provider = _create_default_schema_contract_provider()
-        set_schema_contract_provider(provider)
+        raise RuntimeError(
+            "SchemaContractProvider not initialized. "
+            "Bootstrap the application or call set_schema_contract_provider()."
+        )
     return provider
-
-
-def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
-    """Create default schema contract provider with registered schemas."""
-    from bioetl.application.services.schema_contract_provider import (
-        SchemaContractProviderImpl,
-    )
-    from bioetl.domain.schemas.registry import create_default_schema_registry
-    from bioetl.infrastructure.validation.bootstrap import register_schemas
-
-    registry = create_default_schema_registry()
-    register_schemas(registry)
-    return SchemaContractProviderImpl(registry)
 
 
 def _populate_fields_from_schema(

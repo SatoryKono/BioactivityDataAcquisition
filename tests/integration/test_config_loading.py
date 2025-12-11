@@ -9,11 +9,7 @@ import pytest
 
 from bioetl.application.bootstrap import ApplicationBootstrap
 from bioetl.domain.errors import ConfigValidationError
-from bioetl.infrastructure.config.loader import (
-    clear_schema_contract_provider,
-    get_pipeline_config_from_path,
-    get_schema_contract_provider,
-)
+from bioetl.infrastructure.config.loader import get_pipeline_config_from_path
 from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 if TYPE_CHECKING:
@@ -31,13 +27,6 @@ class TestConfigLoadingWithBootstrap:
         yield bootstrap
         # Clean up after test
         bootstrap.shutdown()
-
-    @pytest.fixture
-    def clean_provider_state(self) -> None:
-        """Ensure clean provider state before and after test."""
-        clear_schema_contract_provider()
-        yield
-        clear_schema_contract_provider()
 
     def test_load_config_after_bootstrap(
         self, bootstrapped_app: ApplicationBootstrap, tmp_path: Path
@@ -63,16 +52,17 @@ provider_config:
 """
         )
 
-        config = get_pipeline_config_from_path(config_file)
+        loader = bootstrapped_app.context.config_loader
+        assert loader is not None
+
+        config = loader.get_from_path(config_file)
 
         assert config.id == "chembl.activity"
         # Fields should be populated from schema
         assert config.fields is not None
         assert len(config.fields) > 0
 
-    def test_load_config_without_bootstrap_fails(
-        self, clean_provider_state: None, tmp_path: Path
-    ) -> None:
+    def test_load_config_without_bootstrap_fails(self, tmp_path: Path) -> None:
         """Config loading should fail gracefully without bootstrap."""
         config_file = tmp_path / "test.yaml"
         config_file.write_text(
@@ -100,22 +90,20 @@ provider_config:
         self, bootstrapped_app: ApplicationBootstrap
     ) -> None:
         """Schema contract provider should be injectable into infrastructure."""
-        provider = get_schema_contract_provider()
         context = bootstrapped_app.context
 
-        assert provider is not None
         assert context is not None
-        assert provider is context.contract_provider
+        assert context.contract_provider is not None
 
     def test_bootstrap_shutdown_clears_provider(
         self, bootstrapped_app: ApplicationBootstrap
     ) -> None:
         """Bootstrap shutdown should clear the schema contract provider."""
-        assert get_schema_contract_provider() is not None
+        assert bootstrapped_app.context is not None
 
         bootstrapped_app.shutdown()
 
-        assert get_schema_contract_provider() is None
+        assert bootstrapped_app.context is None
 
     def test_multiple_start_is_idempotent(self) -> None:
         """Calling start() multiple times should be safe."""
@@ -161,7 +149,10 @@ provider_config:
 """
         )
 
-        config = get_pipeline_config_from_path(config_file)
+        loader = bootstrapped_app.context.config_loader
+        assert loader is not None
+
+        config = loader.get_from_path(config_file)
 
         field_names = {f.get("name") for f in config.fields}
         # Activity should have these essential fields
@@ -184,7 +175,10 @@ provider_config:
 """
         )
 
-        config = get_pipeline_config_from_path(config_file)
+        loader = bootstrapped_app.context.config_loader
+        assert loader is not None
+
+        config = loader.get_from_path(config_file)
 
         field_names = {f.get("name") for f in config.fields}
         assert "molecule_chembl_id" in field_names
@@ -206,7 +200,10 @@ provider_config:
 """
         )
 
-        config = get_pipeline_config_from_path(config_file)
+        loader = bootstrapped_app.context.config_loader
+        assert loader is not None
+
+        config = loader.get_from_path(config_file)
 
         field_names = {f.get("name") for f in config.fields}
         assert "target_chembl_id" in field_names
@@ -277,7 +274,10 @@ class TestExistingConfigFiles:
         if not config_path.exists():
             pytest.skip("Fixture file not found")
 
-        config = get_pipeline_config_from_path(config_path)
+        loader = bootstrapped_app.context.config_loader
+        assert loader is not None
+
+        config = loader.get_from_path(config_path)
 
         assert config.id == "chembl.activity"
         assert config.provider == "chembl"
@@ -289,7 +289,10 @@ class TestExistingConfigFiles:
         if not config_path.exists():
             pytest.skip("Fixture file not found")
 
-        config = get_pipeline_config_from_path(config_path)
+        loader = bootstrapped_app.context.config_loader
+        assert loader is not None
+
+        config = loader.get_from_path(config_path)
 
         assert config.provider == "chembl"
         assert config.entity_name == "activity"
