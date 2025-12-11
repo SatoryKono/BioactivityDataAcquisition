@@ -8,6 +8,10 @@ from typing import Any
 import pandas as pd
 
 from bioetl.application.helpers import resolve_primary_key_with_filter
+from bioetl.application.files.csv_record_source import (
+    CsvRecordSourceImpl,
+    IdListRecordSourceImpl,
+)
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
@@ -109,6 +113,7 @@ class ChemblPipelineBase(PipelineBase):
         self._loader = resolved_loader
         self._extractor = extractor
         self._transformer = transformer
+        self._attach_record_source(extractor)
 
     def get_version(self) -> str:
         """Return ChEMBL release version (e.g., 'chembl_34').
@@ -221,3 +226,40 @@ class ChemblPipelineBase(PipelineBase):
     ) -> WriteResult:
         """Persists transformed dataframe using the resolved loader."""
         return self._write_with_loader(df, output_path, context)
+
+    # === Internal helpers ===
+
+    def _attach_record_source(self, extractor: ExtractStage) -> None:
+        """Attach file-based record source when configured to avoid network calls."""
+
+        source_cfg = self._config.source
+        mode = source_cfg.input_mode
+        if mode == "auto_detect" and source_cfg.input_path:
+            mode = "csv"
+
+        record_source = None
+        if mode == "csv":
+            record_source = CsvRecordSourceImpl(
+                input_path=Path(source_cfg.input_path),
+                csv_options=source_cfg.csv,
+                limit=None,
+                logger=self._logger,
+                chunk_size=source_cfg.batch_size,
+            )
+        elif mode == "id_only":
+            provider_cfg = self._config.get_source_config(self._config.provider)
+            record_source = IdListRecordSourceImpl(
+                input_path=Path(source_cfg.input_path),
+                id_column=self.ID_COLUMN,
+                csv_options=source_cfg.csv,
+                limit=None,
+                extraction_service=self._extraction_service,
+                source_config=provider_cfg,
+                entity=self._config.entity_name,
+                filter_key=self.API_FILTER_KEY,
+                logger=self._logger,
+                chunk_size=source_cfg.batch_size,
+            )
+
+        if record_source is not None:
+            extractor.record_source = record_source
