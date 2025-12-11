@@ -40,8 +40,10 @@ def pipeline():
     normalization_service.normalize.side_effect = lambda df: df.copy()
     normalization_service.apply_normalize.side_effect = lambda record: record
 
-    record_source = MagicMock()
-    record_source.iter_records.return_value = iter([])
+    index_generator = MagicMock()
+    index_generator.next_index.return_value = 0
+    timestamp_provider = MagicMock()
+    timestamp_provider.get_extraction_timestamp.return_value = "2024-01-01T00:00:00Z"
 
     return ChemblPipelineBase(
         config=config,
@@ -50,10 +52,9 @@ def pipeline():
         loader=MagicMock(),
         extraction_service=MagicMock(),
         hash_service=MagicMock(),
-        index_generator=MagicMock(),
-        timestamp_provider=MagicMock(),
+        index_generator=index_generator,
+        timestamp_provider=timestamp_provider,
         normalization_service=normalization_service,
-        record_source=record_source,
     )
 
 
