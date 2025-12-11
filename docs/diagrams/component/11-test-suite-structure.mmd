@@ -1,0 +1,60 @@
+---
+id: f4a5b6c7-8901-2abc-def3-456789012345
+title: Test Suite Structure
+---
+%%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
+flowchart LR
+    classDef group fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
+    classDef suite fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
+    classDef detail fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px
+    linkStyle default stroke:#666,stroke-width:1.2px,color:#111
+
+    subgraph Unit["tests/bioetl/**"]
+        application["application/\n- pipelines/test_pipeline_base.py\n- container/orchestrator tests\n- factories/ tests\n- use_cases/ tests"]:::suite
+        domainTests["domain/\n- schemas/test_activity_schema.py\n- services (hash/normalizers)\n- transform/ tests\n- validation/ tests\n- ports/ tests"]:::suite
+        infraTests["infrastructure/\n- clients/test_unified_client.py\n- output/test_writer.py\n- transform/ tests\n- config/ tests\n- validation/ tests"]:::suite
+        interfacesTests["interfaces/\n- cli/test_run_command.py\n- rest/ tests\n- factories/ tests"]:::suite
+    end
+    class Unit group
+
+    subgraph Golden["tests/golden/"]
+        goldenActivity["test_chembl_activity_golden.py\nfixtures: tests/fixtures/input/"]:::suite
+        goldenNormalization["test_normalization_golden.py\nuses golden_examples.json"]:::suite
+        pipelineOutputs["pipeline_outputs/\ngolden output snapshots"]:::suite
+    end
+    class Golden group
+
+    subgraph Integration["tests/integration/"]
+        cliSmoke["test_cli_smoke.py\nruns bioetl run ... --dry-run"]:::suite
+        configIntegration["test_config_profiles.py\nconfig validation tests"]:::suite
+        applicationIntegration["application/\nintegration tests"]:::suite
+    end
+    class Integration group
+
+    subgraph Contracts["tests/contracts/"]
+        contractTests["Contract verification tests\nABC implementation checks"]:::suite
+    end
+    class Contracts group
+
+    subgraph ProjectRules["tests/project_rules/"]
+        architectureRules["test_architecture_rules.py\n(import-linter enforcement)"]:::suite
+        layerDeps["test_layer_dependencies.py\ndependency direction checks"]:::suite
+    end
+    class ProjectRules group
+
+    subgraph UnitSpecific["tests/unit/"]
+        unitApplication["application/\nunit-level app tests"]:::suite
+        unitInterfaces["interfaces/\nunit-level interface tests"]:::suite
+    end
+    class UnitSpecific group
+
+    subgraph Pipelines["tests/bioetl/pipelines/"]
+        chemblPipelines["chembl/\n- activity/\n- assay/\n- molecule/\n- publication/\n- target/"]:::suite
+    end
+    class Pipelines group
+
+    Unit --> Golden --> Integration --> Contracts --> ProjectRules
+    pyramidNote(["pytest.ini markers: unit, integration, golden, contracts"]):::detail
+    Integration --> pyramidNote
+
+    fixturesNote["tests/fixtures/\n- input/: sample CSV/JSON\n- expected/: golden outputs"]:::detail
