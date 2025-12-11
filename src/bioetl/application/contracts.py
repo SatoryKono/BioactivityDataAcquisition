@@ -76,7 +76,21 @@ class PipelineContainerABC(ABC):
         model_cls: type | None = None,
         batch_adapter: Any | None = None,
     ) -> RecordSourceABC:
-        """Return record source for pipeline input according to config."""
+        """Return record source for pipeline input according to config.
+
+        Record sources return raw dicts. Domain model conversion should happen
+        via RecordMapperABC in ExtractStage.
+
+        Args:
+            extraction_service: Service for data extraction.
+            limit: Optional maximum records to extract.
+            logger: Logger instance.
+            model_cls: Deprecated. Use RecordMapperABC for domain model conversion.
+            batch_adapter: Optional batch processing adapter.
+
+        Returns:
+            RecordSourceABC returning raw dicts.
+        """
 
     @abstractmethod
     def get_hash_service(self) -> HashServiceABC:
