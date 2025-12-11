@@ -20,7 +20,7 @@ from bioetl.domain.clients.base.output.contracts import (
     RunMetadataBuilderProtocol,
     WriteResult,
 )
-from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.configs import ChemblSourceConfig, PipelineConfig
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
@@ -240,7 +240,7 @@ class ChemblPipelineBase(PipelineBase):
         if mode == "auto_detect" and source_cfg.input_path:
             mode = "csv"
 
-        record_source = None
+        record_source: RecordSourceABC | None = None
         if mode == "csv":
             input_path = source_cfg.input_path
             if input_path is None:
@@ -257,7 +257,6 @@ class ChemblPipelineBase(PipelineBase):
             if input_path is None:
                 raise ValueError("input_path is required when input_mode is 'id_only'.")
             provider_cfg = self._config.get_source_config(self._config.provider)
-            from bioetl.domain.configs import ChemblSourceConfig
 
             if not isinstance(provider_cfg, ChemblSourceConfig):
                 raise TypeError(
