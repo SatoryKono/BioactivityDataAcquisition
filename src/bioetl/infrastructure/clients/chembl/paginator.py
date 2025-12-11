@@ -7,9 +7,7 @@ from bioetl.domain.clients.base.contracts import PaginatorABC
 
 
 class ChemblPaginatorImpl(PaginatorABC):
-    """
-    Стратегия пагинации ChEMBL (offset/limit).
-    """
+    """ChEMBL pagination strategy (offset/limit)."""
 
     def get_items(self, response: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract list payload from response body."""

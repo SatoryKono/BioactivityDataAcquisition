@@ -8,8 +8,7 @@ from bioetl.domain.observability import LoggingPortABC
 
 
 class TokenBucketRateLimiterImpl(RateLimiterABC):
-    """
-    Реализация алгоритма Token Bucket.
+    """Token Bucket algorithm implementation.
 
     All dependencies must be explicitly injected - no default fallbacks.
     Use composition root or factories to create instances.

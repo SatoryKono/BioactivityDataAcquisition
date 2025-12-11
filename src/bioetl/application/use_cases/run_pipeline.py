@@ -1,10 +1,10 @@
-"""Use case для запуска ETL-пайплайна.
+"""Use case for running ETL pipeline.
 
-Инкапсулирует всю логику:
-- Загрузка конфигурации
-- Разрешение путей
-- Создание orchestrator
-- Запуск пайплайна
+Encapsulates all logic:
+- Configuration loading
+- Path resolution
+- Orchestrator creation
+- Pipeline execution
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 class InterfaceDisabledError(Exception):
-    """Запрошенный интерфейс отключён в конфигурации."""
+    """Requested interface is disabled in configuration."""
 
     def __init__(self, interface: str) -> None:
         super().__init__(f"{interface} interface is disabled by configuration")
@@ -33,7 +33,7 @@ class InterfaceDisabledError(Exception):
 
 @dataclass(frozen=True)
 class RunPipelineRequest:
-    """Запрос на выполнение пайплайна."""
+    """Pipeline execution request."""
 
     pipeline_name: str
     profile: str = "default"
@@ -44,11 +44,11 @@ class RunPipelineRequest:
     require_rest_interface: bool = False
 
     def get_pipeline_id(self) -> str:
-        """Преобразует имя пайплайна в ID формата provider.entity.
+        """Convert pipeline name to ID in provider.entity format.
 
-        Имя пайплайна в формате entity_provider преобразуется в provider.entity.
-        Если в имени несколько подчёркиваний, используется последнее для
-        разделения (например, drug_indication_chembl → chembl.drug_indication).
+        Pipeline name in entity_provider format is converted to provider.entity.
+        If there are multiple underscores, the last one is used for separation
+        (e.g., drug_indication_chembl → chembl.drug_indication).
         """
         try:
             entity, provider = self.pipeline_name.rsplit("_", 1)
@@ -60,7 +60,7 @@ class RunPipelineRequest:
 
 @dataclass(frozen=True)
 class RunPipelineResponse:
-    """Результат выполнения пайплайна."""
+    """Pipeline execution result."""
 
     run_id: str
     success: bool
@@ -71,7 +71,7 @@ class RunPipelineResponse:
 
     @classmethod
     def from_run_result(cls, result: RunResult) -> "RunPipelineResponse":
-        """Создаёт ответ из результата выполнения пайплайна."""
+        """Create response from pipeline execution result."""
         return cls(
             run_id=str(result.run_id),
             success=result.success,
@@ -83,13 +83,13 @@ class RunPipelineResponse:
 
 
 class RunPipelineUseCase:
-    """Use case для запуска ETL-пайплайна.
+    """Use case for running ETL pipeline.
 
-    Инкапсулирует всю логику:
-    - Загрузка конфигурации
-    - Разрешение путей
-    - Создание orchestrator
-    - Запуск пайплайна
+    Encapsulates all logic:
+    - Configuration loading
+    - Path resolution
+    - Orchestrator creation
+    - Pipeline execution
 
     Example:
         use_case = RunPipelineUseCase(
@@ -116,13 +116,13 @@ class RunPipelineUseCase:
         provider_loader_factory: Callable[[], "ProviderRegistryLoaderABC"],
         configs_root: Path | None = None,
     ) -> None:
-        """Инициализирует use case с необходимыми зависимостями.
+        """Initialize use case with required dependencies.
 
         Args:
-            config_loader: Загрузчик конфигураций пайплайнов.
-            container_factory: Фабрика для создания контейнера зависимостей.
-            provider_loader_factory: Фабрика для создания загрузчика провайдеров.
-            configs_root: Корневая директория конфигураций.
+            config_loader: Pipeline configuration loader.
+            container_factory: Factory for creating dependency container.
+            provider_loader_factory: Factory for creating provider loader.
+            configs_root: Configuration root directory.
         """
         self._config_loader = config_loader
         self._container_factory = container_factory
@@ -130,28 +130,28 @@ class RunPipelineUseCase:
         self._configs_root = configs_root
 
     def execute(self, request: RunPipelineRequest) -> RunPipelineResponse:
-        """Выполняет пайплайн и возвращает результат.
+        """Execute pipeline and return result.
 
         Args:
-            request: Запрос с параметрами запуска.
+            request: Request with execution parameters.
 
         Returns:
-            Результат выполнения пайплайна.
+            Pipeline execution result.
 
         Raises:
-            InterfaceDisabledError: Если требуемый интерфейс отключён.
+            InterfaceDisabledError: If required interface is disabled.
         """
-        # 1. Загрузка конфигурации
+        # 1. Load configuration
         config = self._load_config(request)
 
-        # 2. Проверка доступности интерфейса
+        # 2. Validate interface availability
         self._validate_interface_enabled(config, request)
 
-        # 3. Применение переопределений
+        # 3. Apply overrides
         if request.output_path:
             config = self._apply_output_override(config, request.output_path)
 
-        # 4. Создание и запуск orchestrator
+        # 4. Create and run orchestrator
         orchestrator = self._create_orchestrator(request.pipeline_name, config)
         result = orchestrator.run_pipeline(
             dry_run=request.dry_run,
@@ -161,13 +161,13 @@ class RunPipelineUseCase:
         return RunPipelineResponse.from_run_result(result)
 
     def _load_config(self, request: RunPipelineRequest) -> PipelineConfig:
-        """Загружает конфигурацию из файла или по ID.
+        """Load configuration from file or by ID.
 
         Args:
-            request: Запрос с параметрами конфигурации.
+            request: Request with configuration parameters.
 
         Returns:
-            Загруженная конфигурация пайплайна.
+            Loaded pipeline configuration.
         """
         if request.config_path:
             return self._config_loader.get_from_path(
@@ -185,14 +185,14 @@ class RunPipelineUseCase:
     def _validate_interface_enabled(
         self, config: PipelineConfig, request: RunPipelineRequest
     ) -> None:
-        """Проверяет, что требуемый интерфейс включён в конфигурации.
+        """Verify that required interface is enabled in configuration.
 
         Args:
-            config: Конфигурация пайплайна.
-            request: Запрос с флагами интерфейсов.
+            config: Pipeline configuration.
+            request: Request with interface flags.
 
         Raises:
-            InterfaceDisabledError: Если требуемый интерфейс отключён.
+            InterfaceDisabledError: If required interface is disabled.
         """
         if request.require_rest_interface:
             if not config.features.rest_interface_enabled:
@@ -201,14 +201,14 @@ class RunPipelineUseCase:
     def _apply_output_override(
         self, config: PipelineConfig, output_path: Path
     ) -> PipelineConfig:
-        """Применяет переопределение пути вывода.
+        """Apply output path override.
 
         Args:
-            config: Исходная конфигурация.
-            output_path: Новый путь для вывода.
+            config: Original configuration.
+            output_path: New output path.
 
         Returns:
-            Конфигурация с обновлённым путём вывода.
+            Configuration with updated output path.
         """
         output_path.mkdir(parents=True, exist_ok=True)
         new_sink = config.sink.model_copy(update={"output_path": str(output_path)})
@@ -217,14 +217,14 @@ class RunPipelineUseCase:
     def _create_orchestrator(
         self, pipeline_name: str, config: PipelineConfig
     ) -> PipelineOrchestrator:
-        """Создаёт оркестратор для выполнения пайплайна.
+        """Create orchestrator for pipeline execution.
 
         Args:
-            pipeline_name: Имя пайплайна.
-            config: Конфигурация пайплайна.
+            pipeline_name: Pipeline name.
+            config: Pipeline configuration.
 
         Returns:
-            Настроенный оркестратор.
+            Configured orchestrator.
         """
         return PipelineOrchestrator(
             pipeline_name=pipeline_name,
@@ -234,10 +234,10 @@ class RunPipelineUseCase:
         )
 
     def _get_profiles_root(self) -> Path | None:
-        """Возвращает путь к директории профилей.
+        """Return path to profiles directory.
 
         Returns:
-            Путь к директории профилей или None.
+            Path to profiles directory or None.
         """
         if self._configs_root:
             return self._configs_root / "profiles"

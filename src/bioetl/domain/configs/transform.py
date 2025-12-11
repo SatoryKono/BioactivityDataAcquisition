@@ -8,10 +8,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class TransformConfig(BaseModel):
-    """Настройки стадии transform."""
+    """Transform stage settings."""
 
     serialization_mode: Literal["json", "flat", "pipe"] = Field(
-        default="json", description="Канонический формат сериализации вложенных полей"
+        default="json", description="Canonical serialization format for nested fields"
     )
 
     model_config = ConfigDict(extra="forbid")

@@ -14,7 +14,11 @@ from bioetl.infrastructure.settings.http import (
 
 
 class ExponentialRetryPolicy(RetryPolicyABC):
-    """Экспоненциальная стратегия повторных попыток для HTTP-клиентов."""
+    """Exponential backoff retry policy for HTTP clients.
+
+    Implements configurable retry logic with exponential delay growth.
+    Retries are triggered based on HTTP status codes or exception types.
+    """
 
     def __init__(
         self,
@@ -38,17 +42,24 @@ class ExponentialRetryPolicy(RetryPolicyABC):
 
     @property
     def max_attempts(self) -> int:
-        """Максимальное количество попыток."""
+        """Maximum number of retry attempts."""
         return self._max_attempts
 
     @property
     def backoff_factor(self) -> float:
-        """Множитель задержки между попытками."""
+        """Delay multiplier between retry attempts."""
         return self._backoff_factor
 
     def should_retry(self, exception: Exception, attempt: int) -> bool:
-        """Проверяет, можно ли повторить попытку на данном шаге."""
+        """Check whether a retry should be attempted for the given exception.
 
+        Args:
+            exception: The exception that was raised.
+            attempt: Current attempt number (1-indexed).
+
+        Returns:
+            True if retry should be attempted, False otherwise.
+        """
         if attempt >= self.max_attempts:
             return False
 
@@ -68,15 +79,27 @@ class ExponentialRetryPolicy(RetryPolicyABC):
         return status_code in self.retry_statuses if status_code is not None else False
 
     def get_backoff(self, attempt: int) -> float:
-        """Возвращает задержку перед следующей попыткой в секундах."""
+        """Calculate delay before the next retry attempt in seconds.
 
+        Args:
+            attempt: Current attempt number (1-indexed).
+
+        Returns:
+            Delay in seconds before next retry.
+        """
         exponent = max(0, attempt - 1)
         return self.backoff_factor * math.pow(2.0, exponent)
 
 
 def _extract_status_code(exc: Exception) -> int | None:
-    """Пробует извлечь код статуса из исключения requests."""
+    """Extract HTTP status code from a requests exception.
 
+    Args:
+        exc: Exception that may contain a response object.
+
+    Returns:
+        HTTP status code if available, None otherwise.
+    """
     response = getattr(exc, "response", None)
     status = getattr(response, "status_code", None)
     if isinstance(status, int):

@@ -1,4 +1,4 @@
-"""Загрузчик конфигураций пайплайнов.
+"""Pipeline configuration loader.
 
 This module provides pipeline configuration loading functionality with support
 for dependency injection of schema contract providers.
@@ -41,7 +41,7 @@ from bioetl.infrastructure.config.sources import (
 
 
 class ConfigFileNotFoundError(ConfigError):
-    """Файл конфигурации не найден."""
+    """Configuration file not found."""
 
     def __init__(self, path: Path) -> None:
         super().__init__(f"Config file not found: {path}")
@@ -49,7 +49,7 @@ class ConfigFileNotFoundError(ConfigError):
 
 
 class UnknownProviderError(ConfigError):
-    """Неизвестный провайдер."""
+    """Unknown provider."""
 
     def __init__(self, provider: str) -> None:
         super().__init__(f"Unknown provider: {provider}")
@@ -202,23 +202,23 @@ def get_pipeline_config(
     env_overrides: dict[str, Any] | None = None,
     base_dir: str | Path | None = None,
 ) -> PipelineConfig:
-    """Загружает конфигурацию пайплайна по идентификатору.
+    """Load pipeline configuration by identifier.
 
     Args:
-        pipeline_id: Идентификатор пайплайна (например, "chembl.activity").
-        schema_contract_provider: Провайдер схем. Если None, используется
-            глобальный провайдер (deprecated) или выбрасывается RuntimeError.
-        profile: Имя профиля для применения.
-        cli_overrides: Переопределения из CLI.
-        env_overrides: Переопределения из переменных окружения.
-        base_dir: Базовая директория для поиска конфигураций.
+        pipeline_id: Pipeline identifier (e.g., "chembl.activity").
+        schema_contract_provider: Schema provider. If None, uses
+            global provider (deprecated) or raises RuntimeError.
+        profile: Profile name to apply.
+        cli_overrides: CLI overrides.
+        env_overrides: Environment variable overrides.
+        base_dir: Base directory for configuration search.
 
     Returns:
-        PipelineConfig: Загруженная и валидированная конфигурация.
+        PipelineConfig: Loaded and validated configuration.
 
     Raises:
-        ConfigFileNotFoundError: Файл конфигурации не найден.
-        RuntimeError: SchemaContractProvider не инициализирован.
+        ConfigFileNotFoundError: Configuration file not found.
+        RuntimeError: SchemaContractProvider not initialized.
     """
     effective_provider = _resolve_schema_provider(schema_contract_provider)
 
@@ -251,23 +251,23 @@ def get_pipeline_config_from_path(
     cli_overrides: dict[str, Any] | None = None,
     env_overrides: dict[str, Any] | None = None,
 ) -> PipelineConfig:
-    """Загружает конфигурацию пайплайна из файла.
+    """Load pipeline configuration from file.
 
     Args:
-        config_path: Путь к файлу конфигурации.
-        schema_contract_provider: Провайдер схем. Если None, используется
-            глобальный провайдер (deprecated) или выбрасывается RuntimeError.
-        profile: Имя профиля для применения.
-        profiles_root: Корневая директория профилей.
-        cli_overrides: Переопределения из CLI.
-        env_overrides: Переопределения из переменных окружения.
+        config_path: Path to configuration file.
+        schema_contract_provider: Schema provider. If None, uses
+            global provider (deprecated) or raises RuntimeError.
+        profile: Profile name to apply.
+        profiles_root: Profiles root directory.
+        cli_overrides: CLI overrides.
+        env_overrides: Environment variable overrides.
 
     Returns:
-        PipelineConfig: Загруженная и валидированная конфигурация.
+        PipelineConfig: Loaded and validated configuration.
 
     Raises:
-        ConfigFileNotFoundError: Файл конфигурации не найден.
-        RuntimeError: SchemaContractProvider не инициализирован.
+        ConfigFileNotFoundError: Configuration file not found.
+        RuntimeError: SchemaContractProvider not initialized.
     """
     effective_provider = _resolve_schema_provider(schema_contract_provider)
 
@@ -300,22 +300,22 @@ def _build_config(
     env_overrides: dict[str, Any] | None = None,
     base_dir: Path | None = None,
 ) -> PipelineConfig:
-    """Собирает PipelineConfig из сырых данных с применением overrides.
+    """Build PipelineConfig from raw data with applied overrides.
 
     Args:
-        raw_config: Сырые данные конфигурации из YAML.
-        config_path: Путь к файлу конфигурации.
-        schema_contract_provider: Провайдер схем для заполнения полей.
-        cli_overrides: Переопределения из CLI.
-        env_overrides: Переопределения из переменных окружения.
-        base_dir: Базовая директория для разрешения относительных путей.
+        raw_config: Raw configuration data from YAML.
+        config_path: Path to configuration file.
+        schema_contract_provider: Schema provider for populating fields.
+        cli_overrides: CLI overrides.
+        env_overrides: Environment variable overrides.
+        base_dir: Base directory for resolving relative paths.
 
     Returns:
-        PipelineConfig: Собранная и валидированная конфигурация.
+        PipelineConfig: Built and validated configuration.
     """
     merged = resolve_env_placeholders(dict(raw_config))
 
-    # Применяем overrides в порядке приоритета: env → CLI
+    # Apply overrides in priority order: env → CLI
     if env_overrides:
         env_values = resolve_env_placeholders(env_overrides)
         merged = apply_deep_merge(merged, env_values)
@@ -346,7 +346,7 @@ def _build_config(
 
 
 def _ensure_provider_registered(provider_id: str) -> None:
-    """Проверяет наличие провайдера в реестре до валидации схемы."""
+    """Check provider existence in registry before schema validation."""
 
     try:
         ensure_provider_known(provider_id)
@@ -583,7 +583,7 @@ def _populate_fields_from_schema(
             raise ConfigValidationError(
                 f"Schema '{schema_name}' is not registered for pipeline '{config.id}'"
             ) from exc
-    except Exception as exc:  # pragma: no cover - защитный контур
+    except Exception as exc:  # pragma: no cover - defensive guard
         raise ConfigValidationError(
             f"Failed to derive fields from schema '{schema_name}' "
             f"for pipeline '{config.id}': {exc}"
@@ -604,7 +604,7 @@ def _ensure_input_source_valid(
     config_path: Path,
     base_dir: Path | None,
 ) -> None:
-    """Проверяет доступность локальных файлов для CSV/id-only режимов."""
+    """Check local file accessibility for CSV/id-only modes."""
 
     if config.source.input_mode not in {"csv", "id_only"}:
         return
@@ -633,7 +633,7 @@ def _resolve_existing_input_path(
     config_path: Path,
     base_dir: Path | None,
 ) -> Path | None:
-    """Пытается разрешить относительный путь к существующему файлу.
+    """Try to resolve relative path to existing file.
 
     Uses PathResolver to check path existence against multiple candidate
     root directories.
@@ -668,7 +668,7 @@ def _iter_candidate_roots(
     config_path: Path,
     base_dir: Path | None,
 ) -> Iterable[Path]:
-    """Генерирует директории, относительно которых ищем входной файл.
+    """Generate directories relative to which we search for input file.
 
     Yields directories in priority order:
     1. base_dir (if provided)

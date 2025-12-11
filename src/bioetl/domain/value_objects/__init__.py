@@ -1,9 +1,8 @@
-"""
-Value Objects для ключевых идентификаторов.
+"""Value Objects for key identifiers.
 
-Обеспечивают type safety и валидацию на уровне типов.
+Provide type safety and type-level validation.
 
-Этот пакет содержит:
+This package contains:
 - identifiers: ActivityId, RunId, PipelineId, EntityName, ChemblId, StageName
 - crypto: HashDigest
 - network: HttpUrl

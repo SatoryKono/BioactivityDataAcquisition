@@ -160,7 +160,7 @@ class BaseNormalizationService:
                 )
             except ValueError as exc:
                 raise ValueError(
-                    f"Ошибка нормализации списка в поле '{field_name}': {exc}"
+                    f"Error normalizing list in field '{field_name}': {exc}"
                 ) from exc
             if not container_value:
                 return self._empty_value
@@ -214,7 +214,7 @@ class BaseNormalizationService:
             )
         except ValueError as exc:
             raise ValueError(
-                f"Ошибка нормализации списка в поле '{field_name}': {exc}"
+                f"Error normalizing list in field '{field_name}': {exc}"
             ) from exc
 
         if not normalized_list:
@@ -231,7 +231,7 @@ class BaseNormalizationService:
             normalized_dict = normalize_record(dict_value, value_normalizer=normalizer)
         except ValueError as exc:
             raise ValueError(
-                f"Ошибка нормализации записи в поле '{field_name}': {exc}"
+                f"Error normalizing record in field '{field_name}': {exc}"
             ) from exc
 
         if normalized_dict is None:
@@ -248,7 +248,7 @@ class BaseNormalizationService:
         try:
             return normalizer(value)
         except ValueError as exc:
-            raise ValueError(f"Ошибка нормализации поля '{field_name}': {exc}") from exc
+            raise ValueError(f"Error normalizing field '{field_name}': {exc}") from exc
 
     def _apply_container_normalizer(
         self,

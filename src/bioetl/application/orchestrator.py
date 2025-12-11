@@ -56,7 +56,7 @@ ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
 
 class PipelineOrchestrator:
-    """Управляет сборкой и выполнением пайплайнов."""
+    """Manages pipeline assembly and execution."""
 
     def __init__(
         self,
@@ -124,7 +124,7 @@ class PipelineOrchestrator:
         pipeline = self.build_pipeline(limit=limit)
 
         if effective_type == PipelineType.TRANSFORM_ONLY:
-            # Выполнить трансформацию и валидацию, пропустив запись
+            # Execute transform and validate, skipping write
             return pipeline.run(
                 output_path=Path(self._config.sink.output_path),
                 dry_run=True,
@@ -132,7 +132,7 @@ class PipelineOrchestrator:
             )
 
         if effective_type == PipelineType.EXTRACT_ONLY:
-            # Только извлечение
+            # Extract only
             context = self._build_simple_context()
             extract_callable = pipeline._get_extract_callable()  # noqa: SLF001
             iterator = pipeline._normalize_extract_result(
@@ -174,7 +174,7 @@ class PipelineOrchestrator:
                 },
             )
 
-        # FULL (по умолчанию)
+        # FULL (default)
         return pipeline.run(
             output_path=Path(self._config.sink.output_path),
             dry_run=dry_run,
@@ -282,13 +282,13 @@ class PipelineOrchestrator:
         return self._resolve_registry_from_provider()
 
     def _serialize_provider_registry(self) -> list[ProviderDefinition] | None:
-        """Снимок реестра провайдеров для передачи в подпроцесс."""
+        """Provider registry snapshot for subprocess transfer."""
         if self._provider_registry is None:
             return None
         return list(self._provider_registry.list_providers())
 
     def _load_registry_via_loader(self) -> ProviderRegistryABC | None:
-        """Попытаться загрузить реестр через loader."""
+        """Try to load registry via loader."""
         loader = self._provider_loader
         if loader is None and self._provider_loader_factory is not None:
             loader = self._provider_loader_factory()
@@ -302,7 +302,7 @@ class PipelineOrchestrator:
         return registry
 
     def _resolve_registry_from_provider(self) -> ProviderRegistryABC:
-        """Получить реестр через provider (fallback)."""
+        """Get registry via provider (fallback)."""
         if self._provider_registry_provider is None:
             raise RuntimeError("Provider registry is not configured")
 

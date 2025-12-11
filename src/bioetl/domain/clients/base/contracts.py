@@ -22,21 +22,19 @@ if TYPE_CHECKING:
 
 
 class RequestBuilderABC(ABC):
-    """
-    Паттерн Builder для создания запросов.
-    """
+    """Builder pattern for request creation."""
 
     @abstractmethod
     def build_request(self, params: dict[str, Any]) -> Any:
-        """Создает объект запроса из параметров."""
+        """Create request object from parameters."""
 
     @abstractmethod
     def build(self, endpoint: str, params: dict[str, Any] | None = None) -> Any:
-        """Создает запрос для указанного endpoint с параметрами."""
+        """Create request for specified endpoint with parameters."""
 
     @abstractmethod
     def build_with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
-        """Добавляет параметры пагинации."""
+        """Add pagination parameters."""
 
     def with_pagination(self, offset: int, limit: int) -> "RequestBuilderABC":
         """Deprecated alias for build_with_pagination.
@@ -82,79 +80,69 @@ def __getattr__(name: str) -> type:
 
 
 class PaginatorABC(ABC):
-    """
-    Стратегия пагинации.
-    """
+    """Pagination strategy."""
 
     @abstractmethod
     def get_items(self, response: Any) -> list[RecordModel]:
-        """Извлекает элементы из ответа."""
+        """Extract items from response."""
 
     @abstractmethod
     def get_next_marker(self, response: Any) -> str | int | None:
-        """Возвращает маркер следующей страницы (offset, cursor, url)."""
+        """Return next page marker (offset, cursor, url)."""
 
     @abstractmethod
     def has_more(self, response: Any) -> bool:
-        """Проверяет, есть ли еще страницы."""
+        """Check if there are more pages."""
 
 
 class RateLimiterABC(ABC):
-    """
-    Ограничение частоты запросов.
-    """
+    """Request rate limiting."""
 
     @abstractmethod
     def acquire(self) -> None:
-        """Запрашивает разрешение на выполнение (блокирует при необходимости)."""
+        """Request permission to execute (blocks if necessary)."""
 
 
 class RetryPolicyABC(ABC):
-    """
-    Политика повторных попыток.
-    """
+    """Retry policy."""
 
     @property
     @abstractmethod
     def max_attempts(self) -> int:
-        """Максимальное количество попыток."""
+        """Maximum number of attempts."""
 
     @abstractmethod
     def should_retry(self, error: Exception, attempt: int) -> bool:
-        """Определяет, нужно ли повторять попытку."""
+        """Determine whether to retry."""
 
     @abstractmethod
     def get_backoff(self, attempt: int) -> float:
-        """Возвращает задержку перед следующей попыткой (в секундах)."""
+        """Return delay before next attempt (in seconds)."""
 
 
 class CacheABC(ABC, Generic[T]):
-    """
-    Интерфейс кэширования.
-    """
+    """Caching interface."""
 
     @abstractmethod
     def get(self, key: str) -> T | None:
-        """Возвращает значение из кэша или ``None``."""
+        """Return value from cache or ``None``."""
 
     @abstractmethod
     def set(self, key: str, value: T, ttl: int | None = None) -> None:
-        """Сохраняет значение в кэш с опциональным TTL в секундах."""
+        """Store value in cache with optional TTL in seconds."""
 
     @abstractmethod
     def invalidate(self, key: str) -> None:
-        """Удаляет значение из кэша."""
+        """Remove value from cache."""
 
     @abstractmethod
     def clear(self) -> None:
-        """Очищает весь кэш."""
+        """Clear entire cache."""
 
 
 class SecretProviderABC(ABC):
-    """
-    Поставщик секретов (env, vault).
-    """
+    """Secret provider (env, vault)."""
 
     @abstractmethod
     def get_secret(self, name: str) -> str | None:
-        """Возвращает значение секрета."""
+        """Return secret value."""

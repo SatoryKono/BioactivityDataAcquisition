@@ -1,4 +1,4 @@
-"""Адаптер для конвертации pandas DataFrame и других батчей в raw dicts.
+"""Adapter for converting pandas DataFrame and other batches to raw dicts.
 
 Returns raw dicts (Mapping[str, Any]) per BatchAdapterABC contract.
 Domain model conversion should happen via RecordMapperABC in ExtractStage.
@@ -16,7 +16,7 @@ from bioetl.domain.ports.extraction import BatchAdapterABC
 
 
 class PandasBatchAdapter(BatchAdapterABC):
-    """Конвертирует сырые батчи в список записей (raw dicts).
+    """Converts raw batches to list of records (raw dicts).
 
     Returns raw dicts per BatchAdapterABC contract. Domain model conversion
     should happen via RecordMapperABC in ExtractStage if needed.
@@ -35,7 +35,7 @@ class PandasBatchAdapter(BatchAdapterABC):
             )
 
     def process_batch(self, raw_batch: Any) -> list[Mapping[str, Any]]:
-        """Нормализует батч провайдера в список raw dicts.
+        """Normalize provider batch to list of raw dicts.
 
         Returns raw dicts. Domain model validation should be performed by
         RecordMapperABC in the extraction stage.
@@ -61,7 +61,7 @@ class PandasBatchAdapter(BatchAdapterABC):
         )
 
     def adapt_batch(self, raw_batch: Any) -> list[Mapping[str, Any]]:
-        """Alias для process_batch для обратной совместимости."""
+        """Alias for process_batch for backward compatibility."""
         return self.process_batch(raw_batch)
 
     def _convert_record(self, item: Any) -> Mapping[str, Any]:

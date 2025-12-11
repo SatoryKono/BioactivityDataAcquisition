@@ -15,9 +15,7 @@ SchemaRegisterFn = Callable[["SchemaRegistry"], SchemaProviderABC]
 
 
 class SchemaRegistry(SchemaProviderABC):
-    """
-    Реестр схем данных.
-    """
+    """Data schema registry."""
 
     def __init__(self) -> None:
         self._schemas: dict[str, schema_type | None] = {}

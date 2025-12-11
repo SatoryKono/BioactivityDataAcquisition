@@ -1,4 +1,4 @@
-"""Управление выполнением стадий пайплайна, хуками и политикой ошибок."""
+"""Pipeline stage execution management, hooks and error policy."""
 
 from collections.abc import Callable, Iterable
 from datetime import datetime, timezone
@@ -60,39 +60,39 @@ class StageRuntimeManagerImpl:
 
     @property
     def last_error(self) -> PipelineStageError | None:
-        """Последняя ошибка выполнения стадии."""
+        """Last stage execution error."""
         return self._error_handler.last_error
 
     def register_hook(self, hook: PipelineHookABC) -> None:
-        """Добавляет хук выполнения."""
+        """Add execution hook."""
         self._hook_notifier.register_hook(hook)
 
     def register_hooks(self, hooks: Iterable[PipelineHookABC]) -> None:
-        """Добавляет список хуков выполнения."""
+        """Add list of execution hooks."""
         self._hook_notifier.register_hooks(hooks)
 
     def get_hooks(self) -> list[PipelineHookABC]:
-        """Возвращает зарегистрированные хуки."""
+        """Return registered hooks."""
         return self._hook_notifier.get_hooks()
 
     def reset(self) -> None:
-        """Сбрасывает накопленное состояние выполнения."""
+        """Reset accumulated execution state."""
         self._hook_notifier.reset()
         self._stage_counter.reset()
         self._error_handler.reset()
 
     def set_logger(self, logger: LoggingPortABC) -> None:
-        """Обновляет логгер для дальнейших сообщений."""
+        """Update logger for subsequent messages."""
         self._logger = logger
         self._hook_notifier.set_logger(logger)
         self._error_handler.set_logger(logger)
 
     def set_error_policy(self, error_policy: ErrorPolicyABC) -> None:
-        """Заменяет используемую политику ошибок."""
+        """Replace the error policy in use."""
         self._error_handler.set_error_policy(error_policy)
 
     def notify_stage_start(self, stage: str, context: RunContext) -> None:
-        """Уведомляет о старте стадии и логирует событие."""
+        """Notify stage start and log the event."""
         self._stage_counter.mark_stage_start(stage)
         self._hook_notifier.notify_stage_start(
             stage,
@@ -102,7 +102,7 @@ class StageRuntimeManagerImpl:
         )
 
     def notify_stage_end(self, stage: str, result: StageResult) -> None:
-        """Уведомляет о завершении стадии и логирует событие."""
+        """Notify stage end and log the event."""
         self._hook_notifier.notify_stage_end(
             stage,
             result,
@@ -111,7 +111,7 @@ class StageRuntimeManagerImpl:
         )
 
     def get_stage_start(self, stage: str) -> datetime | None:
-        """Возвращает время старта указанной стадии, если оно зафиксировано."""
+        """Return stage start time if recorded."""
         return self._stage_counter.get_stage_start(stage)
 
     def execute_stage(
@@ -123,7 +123,7 @@ class StageRuntimeManagerImpl:
         attempt: int = 1,
         on_retry: Callable[[], None] | None = None,
     ) -> object:
-        """Выполняет действие с учётом политики ошибок."""
+        """Execute action according to error policy."""
         try:
             result = action()
             self._error_handler.clear_error()
@@ -157,11 +157,11 @@ class StageRuntimeManagerImpl:
             raise pipeline_error from exc
 
     def get_last_error_messages(self) -> list[str]:
-        """Возвращает список сообщений последней ошибки."""
+        """Return list of last error messages."""
         return self._error_handler.get_last_error_messages()
 
     def get_last_action(self, stage: str) -> ErrorAction | None:
-        """Возвращает последнее действие политики ошибок для стадии."""
+        """Return last error policy action for stage."""
         return self._error_handler.get_last_action(stage)
 
     def process_chunk(
@@ -230,7 +230,7 @@ class StageRuntimeManagerImpl:
         errors: list[str] | None = None,
         chunks: int = 0,
     ) -> StageResult:
-        """Собирает StageResult с длительностью и счётчиками."""
+        """Build StageResult with duration and counters."""
         return self._stage_counter.make_stage_result(
             stage,
             success=success,
@@ -248,7 +248,7 @@ class StageRuntimeManagerImpl:
         count: int = 0,
         chunks: int = 0,
     ) -> RunResult:
-        """Формирует результат неуспешного запуска и уведомляет хуки."""
+        """Build failed run result and notify hooks."""
         errors = self.get_last_error_messages()
         stage_result = self.make_stage_result(
             stage,

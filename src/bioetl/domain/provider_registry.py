@@ -9,11 +9,11 @@ from bioetl.domain.providers import ProviderDefinition, ProviderId
 
 
 class ProviderRegistryError(Exception):
-    """Базовая ошибка реестра провайдеров."""
+    """Base provider registry error."""
 
 
 class ProviderNotRegisteredError(ProviderRegistryError):
-    """Провайдер не зарегистрирован."""
+    """Provider not registered error."""
 
     def __init__(self, provider_id: ProviderId) -> None:
         super().__init__(f"Provider '{provider_id.value}' is not registered")
@@ -21,7 +21,7 @@ class ProviderNotRegisteredError(ProviderRegistryError):
 
 
 class ProviderAlreadyRegisteredError(ProviderRegistryError):
-    """Провайдер уже зарегистрирован."""
+    """Provider already registered error."""
 
     def __init__(self, provider_id: ProviderId) -> None:
         super().__init__(f"Provider '{provider_id.value}' is already registered")
@@ -29,42 +29,42 @@ class ProviderAlreadyRegisteredError(ProviderRegistryError):
 
 
 class ProviderRegistryABC(ABC):
-    """Абстрактный базовый класс для реестра провайдеров."""
+    """Abstract base class for provider registry."""
 
     @abstractmethod
     def register_provider(self, definition: ProviderDefinition) -> None:
-        """Регистрирует провайдер в реестре."""
+        """Register provider in registry."""
 
     @abstractmethod
     def get_provider(self, provider_id: ProviderId) -> ProviderDefinition:
-        """Получает определение провайдера по идентификатору."""
+        """Get provider definition by identifier."""
 
     @abstractmethod
     def list_providers(self) -> list[ProviderDefinition]:
-        """Возвращает список всех зарегистрированных провайдеров."""
+        """Return list of all registered providers."""
 
     @abstractmethod
     def reset_provider_registry(self) -> None:
-        """Очищает реестр провайдеров."""
+        """Clear the provider registry."""
 
     @abstractmethod
     def restore_provider_registry(self, definitions: list[ProviderDefinition]) -> None:
-        """Восстанавливает реестр из списка определений."""
+        """Restore registry from list of definitions."""
 
 
 @runtime_checkable
 class ProviderRegistryLoaderABC(Protocol):
-    """Протокол для загрузчика реестра провайдеров."""
+    """Protocol for provider registry loader."""
 
     def get_providers(
         self, *, registry: ProviderRegistryABC | None = None
     ) -> list[ProviderDefinition]:
-        """Загружает провайдеры из конфигурации и регистрирует их."""
+        """Load providers from configuration and register them."""
 
     def get_registry(
         self, *, registry: ProviderRegistryABC | None = None
     ) -> ProviderRegistryABC:
-        """Загружает провайдеры и возвращает заполненный реестр."""
+        """Load providers and return populated registry."""
 
 
 # Global registry instance

@@ -1,4 +1,4 @@
-"""Конвертер для удаления полностью пустых строк из DataFrame."""
+"""Converter for removing completely empty rows from DataFrame."""
 
 from __future__ import annotations
 
@@ -8,10 +8,10 @@ from bioetl.domain.clients.base.output.contracts import OutputFrameConverterABC
 
 
 class DropNaRowsConverter(OutputFrameConverterABC):
-    """Удаляет строки, где все значения являются NaN."""
+    """Remove rows where all values are NaN."""
 
     def convert(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Удаляет строки, где все значения являются NaN."""
+        """Remove rows where all values are NaN."""
         return df.dropna(how="all")
 
 
