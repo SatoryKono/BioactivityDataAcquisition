@@ -1,792 +1,487 @@
 # План рефакторинга BioactivityDataAcquisition к принципам Hexagonal Architecture и DDD
 
+**Версия:** 2.0
+**Дата обновления:** 2025-12-11
+**Текущий интегральный балл:** 7.1/10
+**Целевой интегральный балл:** ≥7.5/10
+
+---
+
 ## Обзор текущего состояния
 
-### Что уже реализовано
+### Архитектурные метрики
 
-| Компонент | Статус | Местоположение |
-|-----------|--------|----------------|
-| Слоёная архитектура | ✅ Реализовано | `.importlinter`, `tests/architecture/` |
-| Composition Root | ✅ Реализовано | `interfaces/composition_root.py` |
-| DI Container | ✅ Реализовано | `application/container.py` |
-| ApplicationContext | ✅ Реализовано | `interfaces/application_context.py` |
-| Provider Registry Port | ✅ Реализовано | `domain/provider_registry.py` |
-| Observability Ports | ✅ Реализовано | `domain/observability/contracts.py` |
-| Value Objects | ✅ Реализовано | `domain/value_objects/` |
-| Pandera Schemas | ✅ Реализовано | `infrastructure/validation/schemas/` |
-| Архитектурные тесты | ✅ Реализовано | `tests/architecture/`, `tests/project_rules/` |
+| Категория | Балл | Статус | Комментарий |
+|-----------|------|--------|-------------|
+| Слоистая архитектура | 8/10 | ✅ | 7 контрактов import-linter |
+| Ports & Adapters | 7/10 | ⚠️ | 26 прямых импортов interfaces→infrastructure |
+| Модульность | 7/10 | ✅ | Хорошее разделение |
+| Доменная модель | 7/10 | ⚠️ | Pydantic в domain configs |
+| Конфигурация | 6/10 | ⚠️ | Fallback политика размазана |
+| Тестирование архитектуры | 8/10 | ✅ | 8 тестов, CI настроен |
+| Обработка ошибок | 7/10 | ✅ | Domain errors defined |
+| Документация | 8/10 | ✅ | Отлично |
+| Наблюдаемость | 7/10 | ✅ | Порты реализованы |
+| Технический долг | 6/10 | ⚠️ | Legacy convenience functions |
 
-### Выявленные проблемы
+### Что уже полностью реализовано
 
-| Проблема | Критичность | Task |
-|----------|-------------|------|
-| Pydantic в Domain слое | Высокая | Task 7 |
-| Нет scoped DI lifecycle | Средняя | Task 4 |
-| Pandera schemas только в коде | Низкая | Task 6 |
-| Fallback логика размазана | Средняя | Task 9 |
-| Import-linter не в CI | Средняя | Task 1, 10 |
+| Компонент | Файл | Примечание |
+|-----------|------|------------|
+| **Слоёная архитектура** | `.importlinter` | 7 контрактов |
+| **CI для архитектуры** | `.github/workflows/import-linter.yml` | 4 уровня проверки |
+| **Composition Root** | `interfaces/composition_root.py` | 566 строк, lazy init |
+| **ApplicationContext** | `interfaces/application_context.py` | Unified singleton |
+| **Thread-safe Context** | `interfaces/context_manager.py` | contextvars, 135 строк |
+| **Provider Registry Port** | `domain/provider_registry.py` | ABC + InMemory impl |
+| **Schema Registry** | `domain/schemas/registry.py` | Lazy generation support |
+| **Observability Ports** | `domain/observability/contracts.py` | Logger, Metrics, Tracing, Progress |
+| **Value Objects** | `domain/value_objects/` | RunId, EntityName, ChemblId, etc. |
+| **Pandera Schemas** | `infrastructure/validation/schemas/` | 7 entity schemas |
+| **Архитектурные тесты** | `tests/architecture/` | 8 файлов тестов |
+
+### Выявленные проблемы (требуют исправления)
+
+| Проблема | Критичность | Файлы | План |
+|----------|-------------|-------|------|
+| interfaces → infrastructure импорты | 🔴 Высокая | 8 файлов, 26 импортов | REFACTORING_PLAN.md Фаза 1 |
+| Pydantic в domain configs | 🟡 Средняя | 15+ классов | Task 7 (низкий приоритет) |
+| Fallback политика размазана | 🟡 Средняя | 3 места | Task 9 |
+| Legacy convenience functions | 🟢 Низкая | ~10 функций | Task 2 |
 
 ---
 
 ## Task 1. Enforce Layered Architecture and Import Rules
 
-### Текущее состояние
-- ✅ Файл `.importlinter` настроен с 6 контрактами
-- ✅ Архитектурные тесты в `tests/architecture/test_architecture_rules.py`
-- ⚠️ Import-linter не запускается в CI автоматически
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
 
-### Рекомендация: **Вариант 1 — Строгая проверка через import-linter**
+**Что сделано:**
+- ✅ `.importlinter` с 7 контрактами
+- ✅ CI pipeline в `.github/workflows/import-linter.yml`
+- ✅ 8 архитектурных тестов в `tests/architecture/`
+- ✅ AST-анализ в `test_layer_dependencies.py`
+- ✅ Domain isolation в `test_domain_isolation.py`
 
-### План действий
-
-#### Фаза 1.1: Интеграция import-linter в CI
-```yaml
-# .github/workflows/architecture.yml
-name: Architecture Checks
-on: [push, pull_request]
-jobs:
-  import-linter:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install import-linter
-      - run: lint-imports
-```
-
-#### Фаза 1.2: Расширение контрактов
+**Текущие контракты:**
 ```ini
-# .importlinter (дополнения)
-
-[contract:domain_no_pydantic_basemodel]
-name = Domain should not use Pydantic BaseModel directly in core entities
-type = forbidden
-source_modules =
-    bioetl.domain.models
-    bioetl.domain.value_objects
-forbidden_modules =
-    pydantic
-
-[contract:application_no_pandas_runtime]
-name = Application layer must use TabularData protocol, not pandas directly
-type = forbidden
-source_modules =
-    bioetl.application
-forbidden_modules =
-    pandas
-ignore_imports =
-    # Temporary exceptions for migration
-    bioetl.application.pipelines.base
-    bioetl.application.transform.pandas_batch_adapter
+[contract:domain_purity]              # Domain не зависит от других слоёв
+[contract:application_no_infrastructure]  # Application ≠ infrastructure
+[contract:application_no_interfaces]      # Application ≠ interfaces
+[contract:infrastructure_no_application]  # Infrastructure ≠ application
+[contract:infrastructure_no_interfaces]   # Infrastructure ≠ interfaces
+[contract:no_direct_impl_imports]         # No impl/ imports from app
+[contract:interfaces_controls_wiring]     # Only interfaces does composition
 ```
 
-#### Файлы для изменения
-- `.github/workflows/architecture.yml` — создать
-- `.importlinter` — расширить контракты
-- `pyproject.toml` — добавить `import-linter` в dev dependencies
+### Оставшаяся работа: **НЕТ**
+
+Задача полностью выполнена. Дополнительные контракты добавляются по мере необходимости.
 
 ---
 
 ## Task 2. Establish Composition Root (ApplicationContext)
 
-### Текущее состояние
-- ✅ `CompositionRoot` в `interfaces/composition_root.py`
-- ✅ `ApplicationContext` в `interfaces/application_context.py`
-- ⚠️ Есть legacy convenience functions (`build_default_container`, etc.)
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
 
-### Рекомендация: **Вариант 1 — Единая точка сборки**
+**Что сделано:**
+- ✅ `CompositionRoot` — единая точка сборки (566 строк)
+- ✅ `ApplicationContext` — unified singleton с injection support
+- ✅ `context_manager.py` — thread-safe/async-safe через contextvars
+- ✅ Lazy initialization всех компонентов
+- ✅ Factory injection для тестирования
 
-### План действий
+**Архитектура:**
+```
+┌─────────────────────────────────────────┐
+│ ApplicationContext (singleton)          │
+│  - logger: LoggingPortABC               │
+│  - metrics: MetricsPortABC              │
+│  - config_loader: Protocol              │
+│  - composition_root: CompositionRoot    │
+│  - use_case_factory (property)          │
+└─────────────────────────────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────────┐
+│ context_manager.py (contextvars)        │
+│  get_current_context()                  │
+│  application_context(ctx) [CM]          │
+│  reset_current_context()                │
+└─────────────────────────────────────────┘
+```
 
-#### Фаза 2.1: Консолидация точки входа
-Убрать дублирование module-level функций, направить всё через `ApplicationContext`:
+### Оставшаяся работа: Deprecation warnings (низкий приоритет)
 
+**Рекомендация:** Добавить deprecation для legacy функций в v3.0:
 ```python
-# interfaces/composition_root.py
-# DEPRECATED: удалить в v3.0
-def build_default_container(...) -> PipelineContainerABC:
-    """Deprecated: Use get_application_context().composition_root.create_pipeline_container()"""
-    import warnings
-    warnings.warn(
-        "build_default_container is deprecated. "
-        "Use get_application_context().composition_root.create_pipeline_container()",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return get_composition_root().create_pipeline_container(...)
+def build_default_container(...):
+    warnings.warn("Use get_application_context()...", DeprecationWarning)
 ```
-
-#### Фаза 2.2: Документация DI-графа
-Создать диаграмму зависимостей:
-
-```
-docs/architecture/dependency_graph.md
-```
-
-```mermaid
-graph TD
-    CLI[CLI/REST] --> AC[ApplicationContext]
-    AC --> CR[CompositionRoot]
-    CR --> PC[PipelineContainer]
-    CR --> PR[ProviderRegistry]
-    CR --> OBS[ObservabilityStack]
-    PC --> Loader[LoaderABC]
-    PC --> Validator[ValidatorFactoryABC]
-    PC --> Hash[HashServiceABC]
-```
-
-#### Файлы для изменения
-- `interfaces/composition_root.py` — добавить deprecation warnings
-- `docs/architecture/dependency_graph.md` — создать
-- `CHANGELOG.md` — задокументировать
 
 ---
 
 ## Task 3. Pipeline Orchestration vs. Factory Pattern
 
-### Текущее состояние
-- ✅ `PipelineFactory` pattern в `application/pipelines/registry.py`
-- ✅ `PipelineOrchestrator` в `application/orchestrator.py`
-- ✅ Template Method в `PipelineBase`
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
 
-### Рекомендация: **Вариант 1 — Factory подход** (уже реализован)
+**Что сделано:**
+- ✅ `PipelineOrchestrator` — facade для управления пайплайнами
+- ✅ `PipelineFactory` pattern с registry в `application/pipelines/registry.py`
+- ✅ Template Method в `PipelineBase` (`run()` → `extract()` → `transform()` → `validate()` → `write()`)
+- ✅ `ProviderRegistryResolver` для разрешения провайдеров
 
-### План действий
+**Паттерны:**
+| Паттерн | Использование | Файл |
+|---------|---------------|------|
+| Factory | Создание pipelines | `pipelines/registry.py` |
+| Template Method | Execution flow | `pipelines/base.py` |
+| Facade | Orchestration | `orchestrator.py` |
+| Resolver | Registry lookup | `provider_registry_resolver.py` |
 
-#### Фаза 3.1: Документация паттернов
-```markdown
-# docs/architecture/pipeline_patterns.md
+### Оставшаяся работа: **НЕТ**
 
-## Factory Pattern
-- Используется для создания pipeline instances
-- `ChemblPipelineFactory` создаёт `ChemblPipelineBase`
-
-## Template Method Pattern
-- `PipelineBase.run()` определяет skeleton
-- Subclasses override: `extract()`, `transform()`, `validate()`
-
-## Когда использовать оркестратор
-- Для batch-режима с несколькими pipelines
-- Для параллельного выполнения
-- Для retry/circuit-breaker логики
-```
-
-#### Фаза 3.2: Формализация контракта PipelineFactoryABC
-
-```python
-# domain/pipelines/contracts.py (дополнение)
-class PipelineFactoryProtocol(Protocol):
-    """Protocol for pipeline factory implementations."""
-
-    def create(
-        self,
-        config: PipelineConfig,
-        container: PipelineContainerABC,
-    ) -> PipelineBase:
-        """Create a pipeline instance with injected dependencies."""
-        ...
-```
-
-#### Файлы для изменения
-- `docs/architecture/pipeline_patterns.md` — создать
-- `domain/pipelines/contracts.py` — добавить `PipelineFactoryProtocol`
+Задача полностью выполнена. Документация паттернов опциональна.
 
 ---
 
 ## Task 4. Manage DI Lifecycle and Reset
 
-### Текущее состояние
-- ✅ `reset_application_context()` в `application_context.py`
-- ✅ `reset_composition_root()` в `composition_root.py`
-- ⚠️ Нет scoped container для batch-режима
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
 
-### Рекомендация: **Вариант 1 — Кратковременные контейнеры**
+**Что сделано:**
+- ✅ `contextvars` для thread-safe/async-safe scoping
+- ✅ `application_context()` context manager
+- ✅ `reset_current_context()` для сброса
+- ✅ Scoped context поддерживает async tasks
 
-### План действий
-
-#### Фаза 4.1: Scoped Container Context Manager
-
+**Пример использования:**
 ```python
-# interfaces/scoped_context.py
-from contextlib import contextmanager
-from typing import Iterator
+# Thread-safe scoping для тестов
+with application_context(mock_ctx):
+    result = function_under_test()
+# Контекст восстановлен
 
-@contextmanager
-def scoped_pipeline_context(
-    config: PipelineConfig,
-) -> Iterator[PipelineContainerABC]:
-    """Create isolated container for a single pipeline run.
-
-    Usage:
-        with scoped_pipeline_context(config) as container:
-            pipeline = factory.create(config, container)
-            result = pipeline.run()
-        # Container is cleaned up automatically
-    """
-    root = CompositionRoot()  # Fresh instance
-    container = root.create_pipeline_container(config)
-    try:
-        yield container
-    finally:
-        # Cleanup any stateful resources
-        pass  # Container will be garbage collected
+# Async-safe
+async def process_request():
+    ctx = get_current_context()  # Изолирован для каждой async task
 ```
 
-#### Фаза 4.2: Batch Runner с изолированными контекстами
+### Оставшаяся работа: Request-scoped DI (низкий приоритет)
 
+**Опционально:** Для REST API можно добавить middleware:
 ```python
-# application/batch_runner.py
-class BatchPipelineRunner:
-    """Run multiple pipelines with isolated DI contexts."""
-
-    def run_batch(
-        self,
-        configs: list[PipelineConfig],
-    ) -> list[RunResult]:
-        results = []
-        for config in configs:
-            with scoped_pipeline_context(config) as container:
-                result = self._run_single(config, container)
-                results.append(result)
-        return results
+# interfaces/rest/middleware.py
+class RequestContextMiddleware:
+    async def __call__(self, request, call_next):
+        with application_context(create_request_context()):
+            return await call_next(request)
 ```
-
-#### Файлы для изменения
-- `interfaces/scoped_context.py` — создать
-- `application/batch_runner.py` — создать или расширить
-- `tests/integration/test_scoped_context.py` — тесты
 
 ---
 
 ## Task 5. Define Registry Port and Implementations
 
-### Текущее состояние
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
+
+**Что сделано:**
 - ✅ `ProviderRegistryABC` в `domain/provider_registry.py`
 - ✅ `InMemoryProviderRegistry` в `infrastructure/provider_registry.py`
-- ✅ DI через `CompositionRoot.get_provider_registry()`
+- ✅ `SchemaRegistry` в `domain/schemas/registry.py` (с lazy generation)
+- ✅ Factory injection через `create_provider_registry_factory()`
+- ✅ `ProviderRegistryLoader` для загрузки из YAML
 
-### Рекомендация: **Уже реализовано** — поддерживать текущий подход
-
-### План действий (улучшения)
-
-#### Фаза 5.1: Добавить SchemaRegistryABC в domain
-
+**ABC контракты:**
 ```python
-# domain/schemas/registry.py (рефакторинг)
-from abc import ABC, abstractmethod
-
-class SchemaRegistryABC(ABC):
-    """Domain port for schema registry."""
-
-    @abstractmethod
-    def register(self, name: str, schema: type, column_order: list[str]) -> None:
-        """Register a schema by name."""
-
-    @abstractmethod
-    def get_schema(self, name: str) -> type:
-        """Get schema by name."""
-
-    @abstractmethod
-    def get_schema_columns(self, name: str) -> list[str]:
-        """Get column order for schema."""
+class ProviderRegistryABC(ABC):
+    def register_provider(definition: ProviderDefinition) -> None
+    def get_provider(provider_id: ProviderId) -> ProviderDefinition
+    def list_providers() -> list[ProviderDefinition]
+    def reset_provider_registry() -> None
+    def restore_provider_registry(definitions) -> None
 ```
 
-#### Файлы для изменения
-- `domain/schemas/registry.py` — выделить ABC
-- `infrastructure/validation/schema_registry_impl.py` — реализация
+### Оставшаяся работа: **НЕТ**
 
 ---
 
 ## Task 6. Pandera/YAML Schema Generation
 
-### Текущее состояние
-- ✅ Pandera schemas в Python коде (`infrastructure/validation/schemas/chembl/`)
-- ⚠️ Нет YAML representation для non-technical review
+### Текущее состояние: 🟡 **ЧАСТИЧНО РЕАЛИЗОВАНО**
 
-### Рекомендация: **Гибридный подход** — код + генерация YAML для документации
+**Что сделано:**
+- ✅ Pandera schemas в `infrastructure/validation/schemas/chembl/`
+- ✅ `BaseGeneratedColumnsModel` с hash, index, timestamp
+- ✅ `build_output_column_order()` helper
+- ✅ Schema contracts в `configs/pipeline_contracts.yaml`
+- ✅ `load_column_order_from_yaml()` в generator.py
+- ⚠️ YAML export из Pandera schemas — не реализован
 
-### План действий
+**Текущая структура:**
+```
+infrastructure/validation/schemas/
+├── pandera_base.py          # BaseGeneratedColumnsModel
+├── generator.py             # load_column_order_from_yaml()
+├── adapter.py               # Schema adaptation
+└── chembl/
+    ├── activity.py          # ActivityTableSchema (224 строки)
+    ├── assay.py             # AssayTableSchema
+    ├── molecule.py          # MoleculeTableSchema
+    ├── target.py            # TargetTableSchema
+    ├── publication.py       # PublicationTableSchema
+    ├── cell.py              # CellTableSchema
+    └── tissue.py            # TissueTableSchema
+```
 
-#### Фаза 6.1: Генератор YAML из Pandera schemas
+### Оставшаяся работа: YAML export (низкий приоритет)
 
+**Создать скрипт:**
 ```python
 # scripts/generate_schema_yaml.py
-"""Generate YAML documentation from Pandera schemas."""
-import yaml
-from pathlib import Path
-
-def schema_to_yaml(schema_class: type) -> dict:
-    """Convert Pandera SchemaModel to YAML-serializable dict."""
-    fields = {}
-    for name, field in schema_class.to_schema().columns.items():
-        fields[name] = {
-            "type": str(field.dtype),
-            "nullable": field.nullable,
-            "description": field.description or "",
+def schema_to_yaml(schema_class) -> dict:
+    return {
+        "columns": {
+            name: {"type": str(f.dtype), "nullable": f.nullable}
+            for name, f in schema_class.to_schema().columns.items()
         }
-        if field.checks:
-            fields[name]["checks"] = [str(c) for c in field.checks]
-    return {"columns": fields}
-
-def generate_all_schemas():
-    from bioetl.infrastructure.validation.schemas.chembl import (
-        ActivityTableSchema,
-        AssayTableSchema,
-        # ...
-    )
-
-    output_dir = Path("docs/schemas/generated")
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    for schema_cls in [ActivityTableSchema, AssayTableSchema]:
-        yaml_data = schema_to_yaml(schema_cls)
-        output_path = output_dir / f"{schema_cls.__name__}.yaml"
-        output_path.write_text(yaml.dump(yaml_data, sort_keys=False))
+    }
 ```
-
-#### Фаза 6.2: Pre-commit hook для синхронизации
-
-```yaml
-# .pre-commit-config.yaml (дополнение)
-- repo: local
-  hooks:
-    - id: generate-schema-docs
-      name: Generate schema YAML docs
-      entry: python scripts/generate_schema_yaml.py
-      language: python
-      files: 'infrastructure/validation/schemas/.*\.py$'
-```
-
-#### Файлы для изменения
-- `scripts/generate_schema_yaml.py` — создать
-- `docs/schemas/generated/` — генерируемые файлы
-- `.pre-commit-config.yaml` — добавить hook
 
 ---
 
 ## Task 7. Domain Value Objects and Static Typing
 
-### Текущее состояние
-- ✅ Value Objects в `domain/value_objects/` (RunId, EntityName, etc.)
-- ⚠️ Value Objects используют Pydantic для сериализации (`__get_pydantic_core_schema__`)
-- ⚠️ Domain configs (`domain/configs/`) используют `pydantic.BaseModel`
+### Текущее состояние: 🟡 **ЧАСТИЧНО РЕАЛИЗОВАНО**
 
-### Рекомендация: **Вариант 2 — Plain dataclasses для domain core**
+**Что сделано:**
+- ✅ Value Objects в `domain/value_objects/` — чистые классы с `__slots__`
+- ✅ Валидация в конструкторе
+- ✅ Immutability через `__setattr__` override
+- ⚠️ Pydantic integration через `__get_pydantic_core_schema__`
+- ⚠️ Domain configs используют `pydantic.BaseModel`
 
-### План действий
-
-#### Фаза 7.1: Миграция Value Objects на чистые классы
-
-Текущий код использует Pydantic hooks для сериализации:
+**Текущие Value Objects:**
 ```python
-# Текущее состояние (domain/value_objects/identifiers.py)
+# domain/value_objects/identifiers.py
 class RunId:
+    __slots__ = ("_value",)
+    _pattern = re.compile(r"^[0-9a-f]{8}-...")
+
+    def __init__(self, value: str) -> None:
+        if not self._pattern.match(value.lower()):
+            raise ValueError(f"Invalid RunId: {value}")
+        self._value = value.lower()
+
+    # Pydantic hook (can be moved to infrastructure)
     @classmethod
-    def __get_pydantic_core_schema__(cls, ...):
-        ...  # Pydantic integration
+    def __get_pydantic_core_schema__(cls, source_type, handler):
+        return core_schema.no_info_after_validator_function(...)
 ```
 
-Целевое состояние:
-```python
-# domain/value_objects/identifiers.py (после рефакторинга)
-from dataclasses import dataclass
+### Оставшаяся работа: Pydantic separation (очень низкий приоритет)
 
-@dataclass(frozen=True, slots=True)
-class RunId:
-    """Value Object for pipeline run identifier (UUID v4)."""
-    _value: str
-
-    def __post_init__(self) -> None:
-        normalized = self._value.lower()
-        if not self._pattern.match(normalized):
-            raise ValueError(f"Invalid RunId format: {self._value}")
-        object.__setattr__(self, "_value", normalized)
-
-    @property
-    def value(self) -> str:
-        return self._value
+**Долгосрочная цель:** Вынести Pydantic hooks в infrastructure:
+```
+infrastructure/adapters/pydantic_adapters.py
 ```
 
-Pydantic интеграция перенести в infrastructure:
-```python
-# infrastructure/adapters/pydantic_adapters.py
-from pydantic import GetCoreSchemaHandler
-from pydantic_core import CoreSchema, core_schema
-from bioetl.domain.value_objects import RunId
-
-def run_id_pydantic_schema(
-    source_type: type, handler: GetCoreSchemaHandler
-) -> CoreSchema:
-    return core_schema.no_info_after_validator_function(
-        RunId,
-        core_schema.str_schema(),
-        serialization=core_schema.plain_serializer_function_ser_schema(str),
-    )
-```
-
-#### Фаза 7.2: Domain Configs — переход на DTO-паттерн
-
-**Проблема:** `domain/configs/pipeline.py` использует `pydantic.BaseModel`
-
-**Решение:** Разделить на:
-1. **Domain models** (чистые dataclasses) — бизнес-логика
-2. **DTOs** (Pydantic) — сериализация/валидация на границе
-
-```
-domain/configs/
-├── models.py          # Pure dataclasses (no Pydantic)
-│   └── PipelineIdentity, DataFlow, etc.
-└── types.py           # Type definitions
-
-infrastructure/config/
-├── dto/
-│   └── pipeline_dto.py  # Pydantic models for YAML parsing
-└── mappers/
-    └── config_mapper.py # DTO -> Domain model conversion
-```
-
-```python
-# domain/configs/models.py
-from dataclasses import dataclass
-
-@dataclass(frozen=True)
-class PipelineIdentity:
-    """Domain model for pipeline identity."""
-    pipeline_id: str
-    provider: str
-    entity: str
-    primary_key: str | None = None
-
-# infrastructure/config/dto/pipeline_dto.py
-from pydantic import BaseModel
-
-class PipelineIdentityDTO(BaseModel):
-    """DTO for parsing YAML config."""
-    pipeline_id: str
-    provider: str
-    entity: str
-    primary_key: str | None = None
-
-    def to_domain(self) -> PipelineIdentity:
-        return PipelineIdentity(
-            pipeline_id=self.pipeline_id,
-            provider=self.provider,
-            entity=self.entity,
-            primary_key=self.primary_key,
-        )
-```
-
-#### Файлы для изменения
-- `domain/value_objects/*.py` — убрать Pydantic hooks
-- `infrastructure/adapters/pydantic_adapters.py` — создать
-- `domain/configs/models.py` — чистые dataclasses
-- `infrastructure/config/dto/` — Pydantic DTOs
-- `.importlinter` — добавить контракт запрета Pydantic в domain
+**Примечание:** Текущий подход допустим, т.к.:
+1. Value Objects не импортируют Pydantic напрямую (только pydantic_core)
+2. Domain configs — это по сути DTOs, не core business logic
+3. Рефакторинг потребует значительных усилий с минимальной отдачей
 
 ---
 
 ## Task 8. LoggingPort and MetricsPort Abstractions
 
-### Текущее состояние
-- ✅ `LoggingPortABC` в `domain/observability/contracts.py`
-- ✅ `MetricsPortABC` в `domain/observability/contracts.py`
-- ✅ `TracingPortABC` (экспериментальный)
-- ✅ Реализации в `infrastructure/observability/`
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
 
-### Рекомендация: **Уже реализовано** — расширить
+**Что сделано:**
+- ✅ `LoggingPortABC` с structured logging (`apply_bind`)
+- ✅ `MetricsPortABC` с counters и histograms
+- ✅ `TracingPortABC` (экспериментально)
+- ✅ `ProgressReporterABC` для progress bars
+- ✅ `DefaultObservabilityFactory` для создания
 
-### План действий (улучшения)
-
-#### Фаза 8.1: Унифицированный ObservabilityPort
-
+**Порты:**
 ```python
-# domain/observability/contracts.py (дополнение)
-from dataclasses import dataclass
+class LoggingPortABC(ABC):
+    def info(self, msg: str, **ctx) -> None
+    def error(self, msg: str, **ctx) -> None
+    def debug(self, msg: str, **ctx) -> None
+    def warning(self, msg: str, **ctx) -> None
+    def apply_bind(self, **ctx) -> Self  # Structured context
 
+class MetricsPortABC(ABC):
+    def inc_counter(self, name: str, labels: dict) -> None
+    def observe_histogram(self, name: str, value: float, labels: dict) -> None
+    def update_stage_duration(*, pipeline, provider, entity, stage, outcome, duration_sec)
+    def update_stage_total(*, pipeline, provider, entity, stage, outcome)
+```
+
+### Оставшаяся работа: ObservabilityContext aggregate (низкий приоритет)
+
+**Опционально:** Добавить unified aggregate:
+```python
 @dataclass(frozen=True)
-class ObservabilityPorts:
-    """Aggregate of all observability ports."""
+class ObservabilityContext:
     logger: LoggingPortABC
     metrics: MetricsPortABC
-    tracing: TracingPortABC | None = None
+    tracer: TracingPortABC | None = None
 
-    def with_context(self, **ctx: Any) -> "ObservabilityPorts":
-        """Create new ports with bound context."""
-        return ObservabilityPorts(
-            logger=self.logger.apply_bind(**ctx),
+    def with_context(self, **kwargs) -> "ObservabilityContext":
+        return ObservabilityContext(
+            logger=self.logger.apply_bind(**kwargs),
             metrics=self.metrics,
-            tracing=self.tracing,
+            tracer=self.tracer,
         )
 ```
-
-#### Фаза 8.2: Структурированные события
-
-```python
-# domain/observability/events.py
-from dataclasses import dataclass
-from enum import Enum
-
-class EventSeverity(Enum):
-    DEBUG = "debug"
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-
-@dataclass(frozen=True)
-class PipelineEvent:
-    """Structured pipeline event for observability."""
-    event_type: str
-    severity: EventSeverity
-    pipeline_id: str
-    stage: str | None = None
-    message: str = ""
-    context: dict[str, Any] = field(default_factory=dict)
-```
-
-#### Файлы для изменения
-- `domain/observability/contracts.py` — добавить `ObservabilityPorts`
-- `domain/observability/events.py` — создать
-- `application/pipelines/base.py` — использовать structured events
 
 ---
 
 ## Task 9. Pipeline Contract Fallback: Config vs Domain
 
-### Текущее состояние
-- ⚠️ Fallback логика разбросана между:
-  - `configs/defaults/*.yaml`
-  - `domain/configs/pipeline.py` (default_factory)
-  - `application/services/` (runtime defaults)
+### Текущее состояние: 🟡 **ЧАСТИЧНО РЕАЛИЗОВАНО**
 
-### Рекомендация: **Гибридный подход** — бизнес-fallbacks в domain, env-specific в config
+**Что сделано:**
+- ✅ Schema contracts в `configs/pipeline_contracts.yaml`
+- ✅ Default values в Pydantic models (`default_factory`)
+- ⚠️ Hardcoded fallbacks в `domain/schemas/pipeline_contracts.py`
+- ⚠️ HTTP fallbacks в `infrastructure/clients/chembl/impl/`
 
-### План действий
+**Текущие места fallback:**
+| Место | Тип | Пример |
+|-------|-----|--------|
+| `domain/configs/pipeline.py` | Field defaults | `batch_size: int = 25` |
+| `configs/pipeline_contracts.yaml` | Schema contracts | column orders |
+| `domain/schemas/pipeline_contracts.py` | Hardcoded fallback | PIPELINE_CONTRACTS dict |
+| `infrastructure/clients/.../impl/` | HTTP fallbacks | retry strategies |
 
-#### Фаза 9.1: Явное разделение fallback-политик
+### Оставшаяся работа: Централизация (средний приоритет)
 
+**Создать `domain/configs/defaults.py`:**
 ```python
-# domain/configs/defaults.py
-"""Domain-level default values (business rules)."""
-
 class DomainDefaults:
-    """Centralized domain defaults."""
-
-    # Business rule: default batch size for API calls
+    """Single source of truth for domain defaults."""
     BATCH_SIZE: int = 25
-
-    # Business rule: maximum retries before failure
     MAX_RETRIES: int = 3
-
-    # Business rule: default hash algorithm
     HASH_ALGORITHM: str = "blake2b"
-
-# configs/defaults/chembl.yaml
-# Environment-specific defaults (can vary by deployment)
-http:
-  timeout_sec: ${CHEMBL_TIMEOUT:-30.0}
-  rate_limit_per_sec: ${CHEMBL_RATE_LIMIT:-2.5}
+    HTTP_TIMEOUT: float = 30.0
 ```
 
-#### Фаза 9.2: Документация fallback-цепочки
-
-```markdown
-# docs/architecture/fallback_policy.md
-
-## Fallback Resolution Order
-
-1. **Explicit config value** — значение из YAML
-2. **Environment variable** — ${VAR:-default}
-3. **Domain default** — DomainDefaults.*
-4. **Hard-coded sentinel** — None (error if required)
-
-## Examples
-
-### Batch Size
-1. `config.provider_config.batch_size` (YAML)
-2. `CHEMBL_BATCH_SIZE` env var
-3. `DomainDefaults.BATCH_SIZE` (25)
-
-### Timeout
-1. `config.provider_config.http.timeout_sec` (YAML)
-2. `CHEMBL_TIMEOUT` env var
-3. `DomainDefaults.HTTP_TIMEOUT` (30.0)
-```
-
-#### Файлы для изменения
-- `domain/configs/defaults.py` — создать
-- `docs/architecture/fallback_policy.md` — создать
-- `infrastructure/config/loader.py` — использовать DomainDefaults
+**Создать документацию:** `docs/architecture/fallback_policy.md`
 
 ---
 
 ## Task 10. Validation and Architectural Test Controls
 
-### Текущее состояние
-- ✅ Тесты в `tests/architecture/test_architecture_rules.py`
-- ✅ Тесты в `tests/project_rules/test_layer_architecture.py`
-- ⚠️ Нет интеграции с CI для блокировки merge
+### Текущее состояние: ✅ **ПОЛНОСТЬЮ РЕАЛИЗОВАНО**
 
-### Рекомендация: **Вариант 1 — Автоматизированные архитектурные тесты**
+**Что сделано:**
+- ✅ CI pipeline `.github/workflows/import-linter.yml`
+- ✅ 8 архитектурных тестов (100% coverage критических правил)
+- ✅ `lint-imports` в CI
+- ✅ `pytest tests/architecture/` в CI
+- ✅ Coverage requirements: 80% overall, 90% domain/application
 
-### План действий
+**Архитектурные тесты:**
+| Тест | Назначение | Строк |
+|------|-----------|-------|
+| `test_layer_dependencies.py` | AST-анализ импортов | ~100 |
+| `test_domain_boundaries.py` | Запрет pandas/yaml в domain | ~50 |
+| `test_domain_isolation.py` | Чистота domain | ~80 |
+| `test_architecture_rules.py` | Общие правила | ~530 |
+| `test_architecture_policies.py` | Policy enforcement | ~100 |
+| `test_pandera_coverage.py` | Pandera schema coverage | ~50 |
+| `test_naming_conventions.py` | Naming conventions | ~80 |
+| `test_type_annotations.py` | Type annotation coverage | ~60 |
 
-#### Фаза 10.1: CI Pipeline с блокировкой
+### Оставшаяся работа: **НЕТ**
 
-```yaml
-# .github/workflows/architecture.yml
-name: Architecture Validation
+---
 
-on:
-  pull_request:
-    paths:
-      - 'src/bioetl/**'
-      - '.importlinter'
+## Связь с основным планом рефакторинга
 
-jobs:
-  architecture-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+### Критическая задача: Устранение 26 импортов
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+**Детальный план в:** `docs/REFACTORING_PLAN.md`
 
-      - name: Install dependencies
-        run: |
-          pip install -e ".[dev]"
-          pip install import-linter
+| Файл | Нарушений | Статус |
+|------|-----------|--------|
+| `interfaces/composition_root.py` | 10 | 🔴 TODO |
+| `interfaces/bootstrap_factory.py` | 2 | 🔴 TODO |
+| `interfaces/factories/infrastructure.py` | 4 | 🔴 TODO |
+| `interfaces/factories/observability.py` | 2 | 🔴 TODO |
+| `interfaces/cli/app.py` | 2 | 🔴 TODO |
+| `interfaces/use_case_factory.py` | 2 | 🔴 TODO |
+| `interfaces/application_context.py` | 1 | 🔴 TODO |
+| `interfaces/monitoring/__init__.py` | 3 | 🔴 TODO |
+| **Итого** | **26** | |
 
-      - name: Run import-linter
-        run: lint-imports
-
-      - name: Run architecture tests
-        run: pytest tests/architecture/ tests/project_rules/ -v
-
-      - name: Check for new layer violations
-        run: |
-          python scripts/check_layer_violations.py --strict
-```
-
-#### Фаза 10.2: Pre-commit hooks
-
-```yaml
-# .pre-commit-config.yaml (дополнение)
-repos:
-  - repo: local
-    hooks:
-      - id: import-linter
-        name: Check import rules
-        entry: lint-imports
-        language: python
-        types: [python]
-        pass_filenames: false
-
-      - id: architecture-quick
-        name: Quick architecture check
-        entry: pytest tests/architecture/test_architecture_rules.py -x -q
-        language: python
-        types: [python]
-        pass_filenames: false
-```
-
-#### Фаза 10.3: Метрики архитектурного здоровья
-
-```python
-# scripts/architecture_metrics.py
-"""Generate architecture health metrics."""
-
-def calculate_metrics():
-    return {
-        "layer_violations": count_import_violations(),
-        "domain_purity": calculate_domain_purity(),
-        "port_coverage": calculate_port_coverage(),
-        "test_coverage_arch": get_arch_test_coverage(),
-    }
-```
-
-#### Файлы для изменения
-- `.github/workflows/architecture.yml` — создать
-- `.pre-commit-config.yaml` — расширить
-- `scripts/check_layer_violations.py` — создать
-- `scripts/architecture_metrics.py` — создать
+**Решение (из REFACTORING_PLAN.md):**
+1. Создать порты в `application/ports/` (ConfigLoaderPort, InfrastructureFactoryPort, etc.)
+2. Создать адаптеры в `infrastructure/adapters/`
+3. Рефакторинг CompositionRoot для использования портов
 
 ---
 
 ## Приоритеты и дорожная карта
 
-### Фаза 1: Критические улучшения (Sprint 1-2)
+### Фаза 1: Критические (следующий спринт)
 
-| Task | Приоритет | Усилия | Влияние |
-|------|-----------|--------|---------|
-| Task 1: CI для import-linter | Высокий | Низкие | Высокое |
-| Task 10: Архитектурные тесты в CI | Высокий | Низкие | Высокое |
-| Task 4: Scoped DI lifecycle | Высокий | Средние | Высокое |
+| Задача | Статус | Приоритет | Документ |
+|--------|--------|-----------|----------|
+| Устранение 26 импортов | 🔴 TODO | Критический | REFACTORING_PLAN.md |
 
-### Фаза 2: Улучшение чистоты домена (Sprint 3-4)
+### Фаза 2: Средние (2-3 спринта)
 
-| Task | Приоритет | Усилия | Влияние |
-|------|-----------|--------|---------|
-| Task 7 (Value Objects): Убрать Pydantic | Средний | Высокие | Среднее |
-| Task 9: Centralized fallbacks | Средний | Средние | Среднее |
-| Task 5: Schema Registry ABC | Низкий | Низкие | Низкое |
+| Задача | Статус | Приоритет |
+|--------|--------|-----------|
+| Task 9: Centralized fallbacks | 🟡 Partial | Средний |
+| Request-scoped DI | 🟡 Optional | Низкий |
+| ObservabilityContext | 🟡 Optional | Низкий |
 
-### Фаза 3: Документация и tooling (Sprint 5-6)
+### Фаза 3: Опциональные (backlog)
 
-| Task | Приоритет | Усилия | Влияние |
-|------|-----------|--------|---------|
-| Task 2: DI graph docs | Низкий | Низкие | Среднее |
-| Task 3: Pipeline patterns docs | Низкий | Низкие | Среднее |
-| Task 6: YAML schema generation | Низкий | Средние | Низкое |
-| Task 8: Structured events | Низкий | Средние | Среднее |
-
-### Фаза 4: Глубокий рефакторинг (Sprint 7+)
-
-| Task | Приоритет | Усилия | Влияние |
-|------|-----------|--------|---------|
-| Task 7 (Configs): DTO separation | Низкий | Очень высокие | Высокое |
+| Задача | Статус | Приоритет |
+|--------|--------|-----------|
+| Task 6: YAML schema export | 🟡 Partial | Низкий |
+| Task 7: Pydantic separation | 🔴 TODO | Очень низкий |
+| Deprecation warnings | 🔴 TODO | Низкий |
 
 ---
 
 ## Критерии успеха
 
-### Метрики качества архитектуры
+### Целевые метрики
 
-1. **Import-linter violations: 0**
-   - Все контракты проходят
-   - CI блокирует merge при нарушениях
+| Метрика | Текущее | Целевое | Дельта |
+|---------|---------|---------|--------|
+| Интегральный балл | 7.1 | ≥7.5 | +0.4 |
+| interfaces→infrastructure | 26 | 3* | -23 |
+| Domain purity | 95% | 100% | +5% |
+| Test coverage | 85% | ≥80% | ✅ |
 
-2. **Domain purity: 100%**
-   - Никаких runtime зависимостей на infrastructure
-   - Только TYPE_CHECKING imports для type hints
+*3 разрешённых импорта адаптеров в composition_root.py
 
-3. **Port coverage: >90%**
-   - Все внешние зависимости доступны через ports
-   - Тестируемость через mock implementations
+### Definition of Done
 
-4. **Architectural test coverage: >80%**
-   - Все критические правила покрыты тестами
-   - Regression detection < 1 hour
-
-### Definition of Done для каждого Task
-
-- [ ] Код реализован и протестирован
-- [ ] Архитектурные тесты проходят
-- [ ] Import-linter контракты обновлены
-- [ ] Документация обновлена
-- [ ] Code review проведён
-- [ ] CI pipeline зелёный
+- [ ] Import-linter: 0 нарушений
+- [ ] Архитектурные тесты: все проходят
+- [ ] CI: зелёный
+- [ ] Code review: проведён
+- [ ] Документация: обновлена
 
 ---
 
 ## Ссылки
 
+### Внутренние документы
+- `docs/REFACTORING_PLAN.md` — детальный план по 26 импортам (Фазы 1-4)
+- `docs/PIPELINE_IMPLEMENTATION_GUIDE.md` — guide для разработчиков
+- `docs/refactoring/config-dependency-map.md` — карта зависимостей
+
+### Внешние ресурсы
 - [Hexagonal Architecture - AWS](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/hexagonal-architecture.html)
 - [Import Linter](https://roman.pt/posts/python-architecture-linter/)
 - [Composition Root](https://stackoverflow.com/questions/6277771/what-is-a-composition-root-in-the-context-of-dependency-injection)
 - [Value Objects in Python](https://blog.szymonmiks.pl/p/value-objects-with-python/)
-- [Keep Pydantic out of Domain](https://news.ycombinator.com/item?id=44656419)
-- [Pandera Schema Inference](https://pandera.readthedocs.io/en/latest/schema_inference.html)
