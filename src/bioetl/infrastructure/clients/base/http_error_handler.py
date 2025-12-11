@@ -112,6 +112,15 @@ class DefaultHttpErrorHandler(HttpErrorHandlerABC):
         if status_code is None:
             return None
 
+        # Update context with status_code if it was extracted from response
+        if context.status_code is None and status_code is not None:
+            context = RequestContext(
+                provider=context.provider,
+                endpoint=context.endpoint,
+                status_code=status_code,
+                method=context.method,
+            )
+
         category = self.classify_error(status_code)
 
         if category == ErrorCategory.SUCCESS:

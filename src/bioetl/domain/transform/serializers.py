@@ -89,7 +89,7 @@ def serialize_nested(
     """Serialize nested structures deterministically to a string."""
 
     if _is_missing(value):
-        return "" if mode != "pipe" else ""
+        return ""
 
     if mode not in {"json", "flat", "pipe"}:
         raise ValueError(f"Unsupported serialization mode: {mode}")

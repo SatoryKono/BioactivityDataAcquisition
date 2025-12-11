@@ -117,6 +117,12 @@ def normalize_uniprot(value: Any) -> str | None:
     """Normalize UniProt accession with strict format validation."""
     if is_missing(value):
         return None
+    # Handle pandas NAType explicitly before type checks
+    try:
+        if value != value:  # This catches pd.NA, NaN, etc.
+            return None
+    except (TypeError, ValueError):
+        pass
     # Check for pandas NAType before converting to string
     # Use is_missing which handles pd.NA without importing pandas
     if not isinstance(value, str):
