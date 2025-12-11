@@ -10,7 +10,7 @@ import pytest
 
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.infrastructure.output.converters.factories import (
-    default_output_frame_converter,
+    create_output_frame_converter,
 )
 from bioetl.infrastructure.output.unified_loader_impl import (
     UnifiedLoaderImpl,
@@ -376,7 +376,7 @@ def test_unified_writer_applies_converter_rename(
 
     writer.write.side_effect = capture_df
 
-    converter = default_output_frame_converter("rename_columns")
+    converter = create_output_frame_converter("rename_columns")
     writer_impl = UnifiedLoaderImpl(
         writer,
         mock_metadata_writer_fixture,
@@ -424,7 +424,7 @@ def test_unified_writer_applies_converter_dropna(
 
     writer.write.side_effect = create_file
 
-    converter = default_output_frame_converter("dropna")
+    converter = create_output_frame_converter("dropna")
     writer_impl = UnifiedLoaderImpl(
         writer,
         mock_metadata_writer_fixture,

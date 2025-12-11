@@ -13,17 +13,13 @@ from bioetl.application.pipelines.chembl.factories import ChemblPipelineFactory
 PipelineFactory = Callable[..., PipelineBase]
 
 # Registry mapping pipeline names to pipeline classes
-# (legacy, for backward compatibility)
-_PIPELINE_REGISTRY: dict[str, PipelineFactory] = {
+PIPELINE_REGISTRY: dict[str, PipelineFactory] = {
     "activity_chembl": ChemblPipelineBase,
     "assay_chembl": ChemblPipelineBase,
     "publication_chembl": ChemblPipelineBase,
     "target_chembl": ChemblPipelineBase,
     "molecule_chembl": ChemblPipelineBase,
 }
-
-# Backwards-compatible export for tests expecting PIPELINE_REGISTRY
-PIPELINE_REGISTRY = _PIPELINE_REGISTRY
 
 # Factory registry: maps pipeline names to their factory instances
 # This is the preferred way to create pipelines
@@ -40,10 +36,10 @@ def get_pipeline_factory(name: str) -> PipelineFactory:
     """Return factory callable for the given pipeline name."""
 
     try:
-        return _PIPELINE_REGISTRY[name]
+        return PIPELINE_REGISTRY[name]
     except KeyError as exc:
         raise ValueError(
-            f"Pipeline '{name}' not found. Available: {list(_PIPELINE_REGISTRY.keys())}"
+            f"Pipeline '{name}' not found. Available: {list(PIPELINE_REGISTRY.keys())}"
         ) from exc
 
 
@@ -85,7 +81,7 @@ def get_factory(name: str) -> PipelineFactoryABC:
 def get_registered_pipelines() -> dict[str, PipelineFactory]:
     """Return a copy of the registered pipeline mapping."""
 
-    return dict(_PIPELINE_REGISTRY)
+    return dict(PIPELINE_REGISTRY)
 
 
 def get_registered_factories() -> dict[str, PipelineFactoryABC]:

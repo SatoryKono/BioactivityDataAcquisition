@@ -66,7 +66,7 @@ def test_get_pipeline_config_from_path_valid():
     assert config.id == "chembl.activity"
     assert config.provider == "chembl"
     assert isinstance(config.provider_config, ChemblSourceConfig)
-    assert config.provider_config.client.timeout_sec == 30
+    assert config.provider_config.http.timeout_sec == 30
 
 
 def test_env_placeholder_resolved_from_env(
@@ -354,7 +354,7 @@ batch_size: 25
     # pipeline overrides profile
     assert config.sink.output_path.replace("\\", "/") == "/tmp/out"
     assert config.source.batch_size == 10
-    assert config.provider_config.client.timeout_sec == 10
+    assert config.provider_config.http.timeout_sec == 10
 
 
 def test_fields_populated_from_schema_when_missing(

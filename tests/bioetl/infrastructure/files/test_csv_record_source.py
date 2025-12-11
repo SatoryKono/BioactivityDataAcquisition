@@ -10,8 +10,8 @@ from bioetl.application.files.csv_record_source import (
 )
 from bioetl.domain.configs import (
     ChemblSourceConfig,
-    ClientConfig,
     CsvInputConfig,
+    HttpClientConfig,
 )
 from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
@@ -120,7 +120,7 @@ def test_id_list_record_source_fetches_batches(tmp_path: Path) -> None:
     source_config = ChemblSourceConfig(
         provider="chembl",
         base_url=cast(AnyHttpUrl, "https://example.org"),
-        client=ClientConfig(
+        client=HttpClientConfig(
             timeout_sec=1,
             max_retries=0,
             rate_limit_per_sec=1.0,

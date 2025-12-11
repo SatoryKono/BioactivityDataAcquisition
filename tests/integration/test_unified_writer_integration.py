@@ -27,7 +27,7 @@ def test_unified_writer_writes_data_and_meta(tmp_path, run_context_factory):
         enable_quality_report=True, enable_correlation_report=True
     )
     writer = CsvWriter()
-    metadata_writer = MetadataWriterImpl()
+    metadata_writer = MetadataWriter()
     quality_reporter = QualityReportImpl()
     atomic_op, calls = _with_tracking_atomic()
 

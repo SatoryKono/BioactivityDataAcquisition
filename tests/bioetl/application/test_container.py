@@ -10,8 +10,8 @@ import pytest
 
 from bioetl.domain.configs import (
     ChemblSourceConfig,
-    ClientConfig,
     DummyProviderConfig,
+    HttpClientConfig,
     PipelineConfig,
 )
 from bioetl.domain.providers import (
@@ -130,7 +130,7 @@ def test_config_validation_error_is_propagated_container() -> None:
             batch_size=10,
             provider_config=ChemblSourceConfig(
                 base_url="https://www.ebi.ac.uk/chembl/api/data",
-                client=ClientConfig(
+                client=HttpClientConfig(
                     timeout_sec=30,
                     max_retries=3,
                     rate_limit_per_sec=10.0,

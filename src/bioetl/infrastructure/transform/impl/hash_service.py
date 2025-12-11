@@ -160,18 +160,5 @@ class Blake2bHashService(HashServiceABC):
         df["hash_row"] = df.apply(lambda row: _row_hash(row.to_dict()), axis=1)
         return df
 
-    # Legacy methods for backward compatibility
-
-    def compute_row_fingerprint(self, row: dict) -> str:
-        """Compute hash fingerprint of row as complete object (legacy).
-
-        Args:
-            row: Dictionary with row data.
-
-        Returns:
-            Hex string with row hash.
-        """
-        return self.compute_fingerprint(row).value
-
 
 __all__ = ["Blake2bHashService"]

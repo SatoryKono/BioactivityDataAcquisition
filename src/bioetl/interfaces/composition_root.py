@@ -23,14 +23,6 @@ Usage:
         observability_factory=MockObservabilityFactory(),
         schema_contract_provider=mock_provider,
     )
-
-    # Legacy usage (deprecated - will be removed in future release):
-    # Use create_composition_root_with_legacy() for backward compatibility
-    from bioetl.interfaces.legacy_adapters import create_composition_root_with_legacy
-    root = create_composition_root_with_legacy(
-        logger=mock_logger,
-        metrics=mock_metrics,
-    )
 """
 
 from __future__ import annotations

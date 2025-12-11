@@ -229,37 +229,19 @@ class TestLayerIsolation:
             assert not hasattr(item, "model_dump")
 
     def test_extraction_service_returns_generic_types(self) -> None:
-        """ExtractionServiceABC should use dict types or RawRecordBatch."""
+        """ExtractionServiceABC should use RecordBatch type."""
         from bioetl.domain.ports.extraction import ExtractionServiceABC
 
         # Check method signatures use generic types
         hints = typing.get_type_hints(ExtractionServiceABC.iter_extract)
         return_hint = str(hints.get("return", ""))
 
-        # Should use RawRecordBatch (which might resolve to list[dict]
-        # or list[RawRecord])
-        # We accept generic dicts, mappings, or the aliased union
+        # Should use RecordBatch (Sequence[Mapping[str, Any]])
         assert (
-            "RawRecordBatch" in return_hint
+            "RecordBatch" in return_hint
             or "dict" in return_hint
             or "Mapping" in return_hint
-            or "RawRecord" in return_hint
         )
-
-    def test_type_aliases_are_defined(self) -> None:
-        """Domain layer defines proper type aliases for cross-layer use."""
-        from bioetl.domain.ports.extraction import RawRecordBatch, RawRecordDict
-
-        # Verify type aliases exist and are correct types
-        assert RawRecordDict == dict[str, Any]
-        # RawRecordBatch is Sequence[Mapping[str, Any]]
-        origin = getattr(RawRecordBatch, "__origin__", None)
-        if origin:
-            # It's a generic type (Sequence)
-            assert "Sequence" in str(origin)
-        else:
-            # Fallback
-            assert RawRecordBatch is not None
 
 
 class TestMapperEntitySupport:
