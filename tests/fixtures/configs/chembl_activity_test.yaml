@@ -1,4 +1,4 @@
-id: activity_chembl_test
+id: chembl.activity_test
 provider: chembl
 entity: activity
 primary_key: activity_id

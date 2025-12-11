@@ -207,7 +207,7 @@ class ChemblPipelineBase(PipelineBase):
         transformer = self._transformer
         if transformer is None:
             raise RuntimeError("Chembl transformer is not initialized.")
-        return transformer.apply(df)
+        return transformer.apply(df)  # type: ignore[no-any-return]
 
     def write(
         self,

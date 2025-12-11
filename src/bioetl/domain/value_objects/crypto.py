@@ -39,6 +39,8 @@ class HashDigest:
     """
 
     __slots__ = ("_value", "_algorithm")
+    _value: str
+    _algorithm: str
     _hex_pattern = re.compile(r"^[0-9a-f]+$")
     _known_lengths: dict[str, int] = {
         "blake2b_256": 64,  # 256 bits = 64 hex chars

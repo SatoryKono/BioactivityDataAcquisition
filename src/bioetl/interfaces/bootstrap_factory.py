@@ -131,10 +131,13 @@ def create_default_bootstrap() -> ApplicationBootstrap:
         >>> context = bootstrap.start()
         >>> config = context.config_loader.get_by_id("chembl.activity")
     """
+    from bioetl.infrastructure.validation.bootstrap import register_schemas
+
     return ApplicationBootstrap(
         config_loader_factory=_create_config_loader_factory(),
         provider_injector=_create_provider_injector(),
         provider_clearer=_create_provider_clearer(),
+        schema_register_fn=register_schemas,
     )
 
 

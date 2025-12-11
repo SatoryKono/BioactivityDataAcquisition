@@ -25,7 +25,7 @@ Example:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 from bioetl.application.services.config_migration_service import (
     ConfigMigrationService,
@@ -122,6 +122,7 @@ class ApplicationBootstrap:
         provider_injector: ProviderInjector | None = None,
         provider_clearer: ProviderClearer | None = None,
         migration_service_factory: MigrationServiceFactory | None = None,
+        schema_register_fn: Callable[[SchemaProviderABC], Any] | None = None,
     ) -> None:
         """Initialize the bootstrap instance with optional infrastructure hooks."""
         self._context: ApplicationServicesContext | None = None
@@ -133,6 +134,7 @@ class ApplicationBootstrap:
         self._provider_injector = provider_injector
         self._provider_clearer = provider_clearer
         self._migration_service_factory = migration_service_factory
+        self._schema_register_fn = schema_register_fn
 
     def start(self) -> ApplicationServicesContext:
         """Initialize the application and return the context.
@@ -217,7 +219,9 @@ class ApplicationBootstrap:
         Returns:
             Fully initialized schema provider with all schemas registered.
         """
-        self._schema_bootstrap_service = create_schema_bootstrap_service()
+        self._schema_bootstrap_service = create_schema_bootstrap_service(
+            register_fn=self._schema_register_fn
+        )
         return self._schema_bootstrap_service.ensure_registered()
 
     def _init_contract_provider(
@@ -240,6 +244,7 @@ def create_application_bootstrap(
     provider_injector: ProviderInjector | None = None,
     provider_clearer: ProviderClearer | None = None,
     migration_service_factory: MigrationServiceFactory | None = None,
+    schema_register_fn: Callable[[SchemaProviderABC], Any] | None = None,
 ) -> ApplicationBootstrap:
     """Create an ApplicationBootstrap instance.
 
@@ -252,6 +257,7 @@ def create_application_bootstrap(
         provider_injector: Optional callback to inject the contract provider.
         provider_clearer: Optional callback to clear the injected provider.
         migration_service_factory: Optional factory for creating migration service.
+        schema_register_fn: Optional callback to register schemas.
 
     Returns:
         New ApplicationBootstrap instance.
@@ -272,6 +278,7 @@ def create_application_bootstrap(
         provider_injector=provider_injector,
         provider_clearer=provider_clearer,
         migration_service_factory=migration_service_factory,
+        schema_register_fn=schema_register_fn,
     )
 
 

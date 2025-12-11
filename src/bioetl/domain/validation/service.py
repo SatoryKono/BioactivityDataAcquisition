@@ -35,6 +35,9 @@ class ValidationService:
         """
         Validate DataFrame against schema using factory validator.
 
+        Returns validated DataFrame (if validator modifies it),
+        or original df if validation passes without transformations.
+
         Raises:
             ValueError: If validation fails.
         """

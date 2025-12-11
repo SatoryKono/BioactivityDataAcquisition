@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
 from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
@@ -111,6 +112,7 @@ def pipeline_fixture(mock_dependencies_fixture):
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
         index_generator=mock_dependencies_fixture["index_generator"],
         timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
+        entity_model_registry=get_chembl_model_registry(),
     )
 
 
@@ -178,7 +180,11 @@ def test_transform_nested_normalization(pipeline_fixture, mock_dependencies_fixt
     # Explicitly set serialization mode to pipe to match expected output
     mock_dependencies_fixture["config"].serialization_mode = "pipe"
     # Also update the already initialized service
-    mock_dependencies_fixture["normalization_service"]._serialization_mode = "pipe"
+    service = mock_dependencies_fixture["normalization_service"]
+    if hasattr(service, "_base"):
+        service._base._serialization_mode = "pipe"
+    else:
+        service._serialization_mode = "pipe"
 
     norm = MagicMock()
     norm.case_sensitive_fields = []
@@ -264,6 +270,7 @@ def test_transform_uses_batch_normalization(mock_dependencies_fixture):
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
         index_generator=mock_dependencies_fixture["index_generator"],
         timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
+        entity_model_registry=get_chembl_model_registry(),
     )
 
     df = pd.DataFrame({"a": [1, 2]})
@@ -289,8 +296,8 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
     # Use activity records that match ActivityRawModel requirements
     raw_chunks = [
         [
-            {"activity_id": 1, "standard_flag": True},
-            {"activity_id": 2, "standard_flag": True},
+            {"activity_id": 1, "standard_flag": True, "standard_value": 1.0},
+            {"activity_id": 2, "standard_flag": True, "standard_value": 2.0},
         ],
         [{"activity_id": 3, "standard_flag": False}],
     ]
@@ -316,6 +323,7 @@ def test_extract_handles_dataframe_chunks(mock_dependencies_fixture):
         metadata_builder=mock_dependencies_fixture["metadata_builder"],
         index_generator=mock_dependencies_fixture["index_generator"],
         timestamp_provider=mock_dependencies_fixture["timestamp_provider"],
+        entity_model_registry=get_chembl_model_registry(),
     )
 
     result = _collect_extract_dataframe(pipeline)
