@@ -8,7 +8,7 @@ import platform
 import time
 from typing import Callable
 
-from bioetl.infrastructure.constants import MAX_FILE_RETRIES, RETRY_DELAY_SEC
+from bioetl.infrastructure.settings.files import MAX_FILE_RETRIES, RETRY_DELAY_SEC
 
 
 class AtomicFileOperation:
