@@ -1,0 +1,67 @@
+---
+title: Infrastructure Config Package
+description: bioetl.infrastructure.config - Configuration loaders
+---
+classDiagram
+    direction TB
+
+    class ConfigLoaderPortABC {
+        <<interface>>
+        +load(path) Config
+    }
+
+    class YamlConfigLoader {
+        +load(path) Config
+        +load_all(pattern) list[Config]
+        -_parse_yaml(content) dict
+        -_validate(data) bool
+    }
+
+    class PipelineContractLoader {
+        +load(name) PipelineSchemaModel
+        +load_all() dict[str, PipelineSchemaModel]
+        -_contracts_dir: Path
+        -_cache: dict
+    }
+
+    class ProviderRegistryLoader {
+        +load() ProviderRegistry
+        +load_provider(name) Provider
+        -_registry_path: Path
+    }
+
+    class DefaultsLoader {
+        +load_defaults() dict
+        +merge_with_defaults(config) Config
+        -_defaults_path: Path
+    }
+
+    class SourcesLoader {
+        +load_sources() list[SourceConfig]
+        +get_source(name) SourceConfig
+    }
+
+    class EnvConfig {
+        +get(key) str
+        +get_int(key) int
+        +get_bool(key) bool
+        +get_path(key) Path
+        -_prefix: str
+    }
+
+    class ConfigMigration {
+        +migrate(old_config) NewConfig
+        +get_version(config) str
+        -_migrations: dict
+    }
+
+    class HttpConfigMigration {
+        +migrate_http_config(old) NewHttpConfig
+        -_field_mappings: dict
+    }
+
+    ConfigLoaderPortABC <|.. YamlConfigLoader
+    YamlConfigLoader --> DefaultsLoader : uses
+    PipelineContractLoader --> YamlConfigLoader : uses
+    ProviderRegistryLoader --> YamlConfigLoader : uses
+    ConfigMigration --> HttpConfigMigration : uses

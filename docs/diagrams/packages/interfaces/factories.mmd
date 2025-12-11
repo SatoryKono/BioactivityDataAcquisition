@@ -1,0 +1,47 @@
+---
+title: Interfaces Factories Package
+description: bioetl.interfaces.factories - Interface-level factories
+---
+classDiagram
+    direction TB
+
+    class InfrastructureFactoryPort {
+        <<interface>>
+        +create_client() HttpClientABC
+        +create_loader() LoaderABC
+        +create_config_loader() ConfigLoaderPortABC
+    }
+
+    class DefaultInfrastructureFactory {
+        +create_client() ChemblHttpClientImpl
+        +create_loader() UnifiedLoaderImpl
+        +create_config_loader() ConfigLoaderAdapter
+        +create_validation_service() PanderaValidator
+        +create_output_writer() DataWriterAdapter
+        -_config: PipelineConfig
+    }
+
+    class ObservabilityFactoryPort {
+        <<interface>>
+        +create_metrics() MetricsCollector
+        +create_logger() Logger
+    }
+
+    class DefaultObservabilityFactory {
+        +create_metrics() PrometheusMetrics
+        +create_logger() StructuredLogger
+        +create_tracer() OpenTelemetryTracer
+        -_settings: MetricsSettings
+    }
+
+    class ProviderRegistryFactory {
+        +create_registry() ProviderRegistry
+        +load_providers() dict
+        -_config_path: Path
+    }
+
+    InfrastructureFactoryPort <|.. DefaultInfrastructureFactory
+    ObservabilityFactoryPort <|.. DefaultObservabilityFactory
+
+    note for DefaultInfrastructureFactory "Creates all infrastructure\ncomponents for pipeline"
+    note for DefaultObservabilityFactory "Creates observability\nstack components"

@@ -1,0 +1,132 @@
+---
+title: Value Object Classes
+description: Immutable domain value types
+---
+classDiagram
+    direction TB
+
+    class ValueObject {
+        <<abstract>>
+        +__eq__(other) bool
+        +__hash__() int
+        +__repr__() str
+    }
+
+    %% Identifiers
+    class ChemblID {
+        +value: str
+        +entity_type: EntityType
+        +validate() bool
+        +from_string(s) ChemblID
+        +get_numeric_part() int
+    }
+
+    class InChIKey {
+        +value: str
+        +connectivity_layer: str
+        +stereochemistry_layer: str
+        +protonation_layer: str
+        +validate() bool
+        +is_standard() bool
+    }
+
+    class SMILES {
+        +value: str
+        +is_canonical: bool
+        +validate() bool
+        +to_canonical() SMILES
+    }
+
+    class UniProtID {
+        +value: str
+        +validate() bool
+    }
+
+    %% Temporal
+    class Timestamp {
+        +value: datetime
+        +timezone: str
+        +to_iso() str
+        +to_unix() int
+        +to_utc() Timestamp
+    }
+
+    class DateRange {
+        +start: date
+        +end: date
+        +contains(d) bool
+        +overlap(other) DateRange
+        +duration_days() int
+    }
+
+    %% Network
+    class URL {
+        +scheme: str
+        +host: str
+        +port: int
+        +path: str
+        +query: dict
+        +fragment: str
+        +to_string() str
+        +with_path(path) URL
+    }
+
+    class APIEndpoint {
+        +base_url: URL
+        +path: str
+        +version: str
+        +build_url(params) URL
+    }
+
+    %% Crypto
+    class Hash {
+        +value: str
+        +algorithm: HashAlgorithm
+        +validate() bool
+    }
+
+    class Checksum {
+        +value: str
+        +algorithm: str
+        +file_path: Path
+        +verify(data) bool
+        +calculate(data) Checksum
+    }
+
+    %% Enums
+    class EntityType {
+        <<enumeration>>
+        ACTIVITY
+        ASSAY
+        TARGET
+        MOLECULE
+        PUBLICATION
+        CELL
+        TISSUE
+    }
+
+    class HashAlgorithm {
+        <<enumeration>>
+        MD5
+        SHA1
+        SHA256
+        SHA512
+    }
+
+    %% Inheritance
+    ValueObject <|-- ChemblID
+    ValueObject <|-- InChIKey
+    ValueObject <|-- SMILES
+    ValueObject <|-- UniProtID
+    ValueObject <|-- Timestamp
+    ValueObject <|-- DateRange
+    ValueObject <|-- URL
+    ValueObject <|-- APIEndpoint
+    ValueObject <|-- Hash
+    ValueObject <|-- Checksum
+
+    %% Composition
+    ChemblID --> EntityType
+    APIEndpoint --> URL
+    Checksum --> Hash
+    Hash --> HashAlgorithm

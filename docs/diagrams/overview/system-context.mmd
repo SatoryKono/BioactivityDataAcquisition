@@ -1,0 +1,40 @@
+---
+title: System Context Diagram
+description: BioETL in context with external systems
+---
+flowchart TB
+
+classDef system fill:#e3f2fd,stroke:#1565c0,stroke-width:3px,color:#0d47a1
+classDef external fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#212121
+classDef user fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+classDef storage fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100
+
+%% Users
+Researcher["Researcher\n(Data Consumer)"]:::user
+Developer["Developer\n(Pipeline Maintainer)"]:::user
+Scheduler["Job Scheduler\n(Cron/Airflow)"]:::user
+
+%% Main System
+BioETL["BioETL\n\nBioactivity Data\nAcquisition System\n\n- Extract bioactivity data\n- Transform and normalize\n- Validate against schemas\n- Generate output files"]:::system
+
+%% External Data Sources
+ChEMBL["ChEMBL Database\n(REST API)\n\nBioactivity data\nCompound info\nTarget info"]:::external
+
+%% Storage
+LocalFS["Local File System\n\n- CSV outputs\n- Parquet outputs\n- Metadata files\n- QC reports"]:::storage
+
+ConfigFiles["Configuration Files\n\n- Pipeline configs\n- Schema contracts\n- Provider registry"]:::storage
+
+%% Monitoring
+Prometheus["Prometheus\n\nMetrics collection"]:::external
+
+%% Relationships
+Researcher -->|"Uses data"| LocalFS
+Developer -->|"Configures"| ConfigFiles
+Developer -->|"Monitors"| Prometheus
+Scheduler -->|"Triggers"| BioETL
+
+BioETL -->|"Fetches data"| ChEMBL
+BioETL -->|"Reads config"| ConfigFiles
+BioETL -->|"Writes output"| LocalFS
+BioETL -->|"Exposes metrics"| Prometheus

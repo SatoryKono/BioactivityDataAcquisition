@@ -1,0 +1,134 @@
+---
+title: Application Layer Components
+description: Use cases, services orchestration, pipeline implementations, and factories
+---
+flowchart TB
+
+classDef pkg fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+classDef component fill:#bbdefb,stroke:#1976d2,stroke-width:1px,color:#0d47a1
+classDef service fill:#90caf9,stroke:#1e88e5,stroke-width:1px,color:#0d47a1
+
+subgraph Application["Application Layer (bioetl.application)"]
+    direction TB
+
+    subgraph Factories["factories/"]
+        ServiceFactory["ApplicationServiceFactory\nservice_factory.py"]:::component
+        RuntimeFactory["PipelineRuntimeFactory\nruntime_factory.py"]:::component
+        HookFactory["PipelineHookFactory\nhooks.py"]:::component
+        TransformFactory["TransformComponentFactory\ntransform_factory.py"]:::component
+        RecordSourceFactory["RecordSourceFactory\nrecord_source.py"]:::component
+        ProviderServiceFactory["ProviderServiceFactory\nservices.py"]:::component
+        NoopFactory["NoopFactory\nnoop.py"]:::component
+    end
+    class Factories pkg
+
+    subgraph Services["services/"]
+        ConfigurationService["ConfigurationService"]:::service
+        SchemaBootstrap["SchemaBootstrapService"]:::service
+        SchemaContractProvider["SchemaContractProviderImpl"]:::service
+        FilterEnrichment["FilterEnrichmentService"]:::service
+        ObservabilityService["ObservabilityService"]:::service
+        ConfigMigration["ConfigMigrationService"]:::service
+        BackgroundExecutor["BackgroundExecutor"]:::service
+        ProviderRegistryResolver["ProviderRegistryResolver"]:::service
+    end
+    class Services pkg
+
+    subgraph Pipelines["pipelines/"]
+        PipelineBase["PipelineBase\nbase.py"]:::component
+
+        subgraph ChemblPipelines["chembl/"]
+            ChemblBase["ChemblPipelineBase\nbase.py"]:::component
+            ChemblCommon["ChemblCommonPipeline\ncommon.py"]:::component
+            ChemblFactories["ChemblPipelineFactory\nfactories.py"]:::component
+            ChemblComponents["ChemblPipelineComponents\ncomponents.py"]:::component
+            ChemblTransformer["ChemblTransformerImpl\ntransformer.py"]:::component
+            RecordSourceResolver["RecordSourceResolver\nrecord_source_resolver.py"]:::component
+        end
+
+        subgraph Stages["stages/"]
+            ExtractStage["ExtractStage\nextract.py"]:::component
+            StageRegistry["StageRegistry\nregistry.py"]:::component
+        end
+
+        StageRuntimeManager["StageRuntimeManager\nstage_runtime_manager.py"]:::component
+        StageErrorHandler["StageErrorHandler\nstage_error_handler.py"]:::component
+        StageProcessor["StageProcessor\nstage_processor.py"]:::component
+        Context["PipelineRuntimeContext\ncontext.py"]:::component
+        ContextBuilder["ContextBuilder\ncontext_builder.py"]:::component
+        HookNotifier["HookNotifier\nhook_notifier.py"]:::component
+        HooksImpl["LoggingPipelineHookImpl\nMetricsPipelineHookImpl\nhooks_impl.py"]:::component
+        PipelineRegistry["PipelineRegistry\nregistry.py"]:::component
+    end
+    class Pipelines pkg
+
+    subgraph Sources["sources/"]
+        ApiRecordSource["ApiRecordSource\napi_record_source.py"]:::component
+    end
+    class Sources pkg
+
+    subgraph Files["files/"]
+        CsvRecordSource["CsvRecordSourceImpl\ncsv_record_source.py"]:::component
+    end
+    class Files pkg
+
+    subgraph Mappers["mappers/"]
+        MapperContracts["RecordMapperABC\ncontracts.py"]:::component
+        subgraph ChemblMappers["chembl/"]
+            ChemblRecordMapper["ChemblRecordMapper\nrecord_mapper.py"]:::component
+        end
+    end
+    class Mappers pkg
+
+    subgraph UseCases["use_cases/"]
+        RunPipeline["RunPipelineUseCase\nrun_pipeline.py"]:::component
+    end
+    class UseCases pkg
+
+    subgraph Config["config/"]
+        ConfigResolution["ConfigPathResolver\nresolution.py"]:::component
+        ConfigRuntime["ConfigRuntimeService\nruntime.py"]:::component
+    end
+    class Config pkg
+
+    subgraph Metadata["metadata/"]
+        MetadataBuilder["MetadataBuilder\nbuilder.py"]:::component
+    end
+    class Metadata pkg
+
+    subgraph TransformPkg["transform/"]
+        PandasBatchAdapter["PandasBatchAdapter\npandas_batch_adapter.py"]:::component
+    end
+    class TransformPkg pkg
+
+    subgraph Providers["providers/"]
+        DefaultProviders["DefaultProviders\ndefaults.py"]:::component
+    end
+    class Providers pkg
+
+    subgraph PortsPkg["ports/"]
+        ObservabilityFactoryPort["ObservabilityFactoryPort\nobservability_factory_port.py"]:::component
+    end
+    class PortsPkg pkg
+
+    subgraph Core["Core Files"]
+        Orchestrator["PipelineOrchestrator\norchestrator.py"]:::service
+        Container["PipelineContainer\ncontainer.py"]:::component
+        Contracts["PipelineContainerABC\nPipelineFactoryABC\ncontracts.py"]:::component
+        Executor["PipelineExecutor\nexecutor.py"]:::component
+        Bootstrap["Bootstrap\nbootstrap.py"]:::component
+        BootstrapFactory["BootstrapFactory\nbootstrap_factory.py"]:::component
+    end
+    class Core pkg
+end
+class Application pkg
+
+%% Internal dependencies
+Orchestrator --> Container
+Orchestrator --> PipelineRegistry
+Container --> Factories
+Container --> Services
+PipelineBase --> StageRuntimeManager
+ChemblBase --> PipelineBase
+ChemblCommon --> ChemblBase
+UseCases --> Orchestrator

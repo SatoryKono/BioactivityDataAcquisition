@@ -1,0 +1,63 @@
+---
+title: Application Pipelines Package
+description: bioetl.application.pipelines - Pipeline implementations
+---
+flowchart TB
+
+classDef base fill:#bbdefb,stroke:#1976d2,stroke-width:2px,color:#0d47a1
+classDef chembl fill:#90caf9,stroke:#1e88e5,stroke-width:1px,color:#0d47a1
+classDef stage fill:#64b5f6,stroke:#1976d2,stroke-width:1px,color:#0d47a1
+classDef support fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#0d47a1
+
+subgraph Pipelines["bioetl.application.pipelines"]
+    direction TB
+
+    subgraph Core["Core Pipeline"]
+        PipelineBase["PipelineBase\nbase.py\n- run(limit)\n- extract()\n- transform(df)\n- validate(df)\n- write(df)"]:::base
+        PipelineRegistry["PipelineRegistry\nregistry.py"]:::support
+    end
+
+    subgraph ChemblPkg["chembl/"]
+        ChemblPipelineBase["ChemblPipelineBase\nbase.py"]:::chembl
+        ChemblCommonPipeline["ChemblCommonPipeline\ncommon.py"]:::chembl
+        ChemblPipelineFactory["ChemblPipelineFactory\nfactories.py"]:::chembl
+        ChemblPipelineComponents["ChemblPipelineComponents\ncomponents.py"]:::chembl
+        ChemblTransformerImpl["ChemblTransformerImpl\ntransformer.py"]:::chembl
+        RecordSourceResolver["RecordSourceResolver\nrecord_source_resolver.py"]:::chembl
+    end
+
+    subgraph Stages["stages/"]
+        ExtractStage["ExtractStage\nextract.py"]:::stage
+        StageRegistry["StageRegistry\nregistry.py"]:::stage
+    end
+
+    subgraph Runtime["Runtime Support"]
+        StageRuntimeManager["StageRuntimeManager\nstage_runtime_manager.py"]:::support
+        StageErrorHandler["StageErrorHandler\nstage_error_handler.py"]:::support
+        StageProcessor["StageProcessor\nstage_processor.py"]:::support
+        StageCounter["StageCounter\nstage_counter.py"]:::support
+    end
+
+    subgraph Context["Context"]
+        PipelineContext["PipelineRuntimeContext\ncontext.py"]:::support
+        ContextBuilder["ContextBuilder\ncontext_builder.py"]:::support
+    end
+
+    subgraph Hooks["Hooks"]
+        HooksImpl["LoggingPipelineHookImpl\nMetricsPipelineHookImpl\nhooks_impl.py"]:::support
+        HookNotifier["HookNotifier\nhook_notifier.py"]:::support
+    end
+end
+
+%% Inheritance
+ChemblPipelineBase --> PipelineBase
+ChemblCommonPipeline --> ChemblPipelineBase
+
+%% Composition
+PipelineBase --> StageRuntimeManager
+PipelineBase --> ExtractStage
+ChemblPipelineBase --> ChemblTransformerImpl
+ChemblPipelineFactory --> ChemblPipelineComponents
+ChemblPipelineComponents --> RecordSourceResolver
+StageRuntimeManager --> StageErrorHandler
+StageRuntimeManager --> HookNotifier

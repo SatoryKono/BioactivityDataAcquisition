@@ -1,0 +1,58 @@
+---
+title: Domain Transform Package
+description: bioetl.domain.transform - Transformation contracts and normalizers
+---
+flowchart TB
+
+classDef contract fill:#a5d6a7,stroke:#43a047,stroke-width:2px,color:#1b5e20
+classDef normalizer fill:#81c784,stroke:#4caf50,stroke-width:1px,color:#1b5e20
+classDef component fill:#c8e6c9,stroke:#388e3c,stroke-width:1px,color:#1b5e20
+
+subgraph Transform["bioetl.domain.transform"]
+    direction TB
+
+    subgraph Contracts["contracts.py"]
+        TransformerABC["TransformerABC\n+apply(df, context) -> DataFrame"]:::contract
+        NormalizationServiceABC["NormalizationServiceABC\n+normalize(df) -> DataFrame"]:::contract
+        HashServiceABC["HashServiceABC\n+hash_row(row) -> str\n+hash_business_key(fields) -> str"]:::contract
+        IndexGeneratorABC["IndexGeneratorABC\n+generate_index() -> int"]:::contract
+        TimestampProviderABC["TimestampProviderABC\n+get_timestamp() -> datetime"]:::contract
+    end
+
+    subgraph Normalizers["normalizers/"]
+        BaseNormalizer["BaseNormalizer\nbase.py"]:::normalizer
+        NumericNormalizer["NumericNormalizer\nnumeric.py"]:::normalizer
+        IdentifierNormalizer["IdentifierNormalizer\nidentifiers.py"]:::normalizer
+        CollectionsNormalizer["CollectionsNormalizer\ncollections.py"]:::normalizer
+        NormalizerRegistry["NormalizerRegistry\nregistry.py"]:::component
+    end
+
+    subgraph Serializers["serializers.py"]
+        JsonSerializer["JsonSerializer"]:::component
+        ListSerializer["ListSerializer"]:::component
+        DictSerializer["DictSerializer"]:::component
+    end
+
+    subgraph Merge["merge.py"]
+        MergeStrategy["MergeStrategy"]:::component
+        DeduplicationStrategy["DeduplicationStrategy"]:::component
+    end
+
+    subgraph Factories["factories.py"]
+        TransformFactoryABC["TransformFactoryABC"]:::contract
+    end
+
+    subgraph Transformers["transformers.py"]
+        ColumnTransformer["ColumnTransformer"]:::component
+        TypeCastTransformer["TypeCastTransformer"]:::component
+        RenameTransformer["RenameTransformer"]:::component
+    end
+end
+
+%% Relationships
+BaseNormalizer <|-- NumericNormalizer
+BaseNormalizer <|-- IdentifierNormalizer
+BaseNormalizer <|-- CollectionsNormalizer
+NormalizerRegistry --> BaseNormalizer
+TransformFactoryABC --> TransformerABC
+NormalizationServiceABC --> Normalizers

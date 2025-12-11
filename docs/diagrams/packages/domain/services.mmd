@@ -1,0 +1,33 @@
+---
+title: Domain Services Package
+description: bioetl.domain.services - Domain-level services
+---
+classDiagram
+    direction TB
+
+    class EntityFactory {
+        +create_activity(data) Activity
+        +create_assay(data) Assay
+        +create_target(data) Target
+        +create_molecule(data) Molecule
+        +create_publication(data) Publication
+        -_validate_data(data) bool
+    }
+
+    class BusinessKeyService {
+        +generate_key(entity) str
+        +validate_key(key) bool
+        +extract_components(key) dict
+        -_hash_fields(fields) str
+    }
+
+    class VersionFormatter {
+        +format_version(major, minor, patch) str
+        +parse_version(version_str) tuple
+        +compare_versions(v1, v2) int
+        +increment_version(version, level) str
+    }
+
+    note for EntityFactory "Creates domain entities\nfrom raw API data"
+    note for BusinessKeyService "Generates unique business\nkeys for deduplication"
+    note for VersionFormatter "Handles version string\nformatting and comparison"

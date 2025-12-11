@@ -1,0 +1,35 @@
+---
+title: Infrastructure Files Package
+description: bioetl.infrastructure.files - File operations
+---
+classDiagram
+    direction TB
+
+    class AtomicFileWriter {
+        +write(path, data) void
+        +write_with_temp(path, data) void
+        -_temp_suffix: str
+        -_backup: bool
+    }
+
+    class ChecksumCalculator {
+        +calculate(path) str
+        +calculate_from_bytes(data) str
+        +verify(path, expected) bool
+        -_algorithm: str
+    }
+
+    class PathResolver {
+        +resolve(path) Path
+        +ensure_dir(path) Path
+        +get_temp_path(path) Path
+        +clean_temp_files(dir) void
+        -_base_path: Path
+    }
+
+    AtomicFileWriter --> PathResolver : uses
+    AtomicFileWriter --> ChecksumCalculator : uses
+
+    note for AtomicFileWriter "Ensures file writes\nare atomic (all or nothing)"
+    note for ChecksumCalculator "Calculates file checksums\nfor integrity verification"
+    note for PathResolver "Resolves and manages\nfile system paths"

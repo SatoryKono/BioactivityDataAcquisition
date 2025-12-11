@@ -1,0 +1,58 @@
+---
+title: Infrastructure Output Package
+description: bioetl.infrastructure.output - Output writers and components
+---
+flowchart TB
+
+classDef adapter fill:#ffcc80,stroke:#fb8c00,stroke-width:2px,color:#e65100
+classDef component fill:#ffe0b2,stroke:#f57c00,stroke-width:1px,color:#e65100
+classDef writer fill:#fff3e0,stroke:#ef6c00,stroke-width:1px,color:#e65100
+
+subgraph Output["bioetl.infrastructure.output"]
+    direction TB
+
+    subgraph Core["Core"]
+        UnifiedLoader["UnifiedLoaderImpl\nunified_loader_impl.py"]:::adapter
+        DeterministicWriter["DeterministicWriterABC\ndeterministic.py"]:::component
+        ColumnOrder["ColumnOrder\ncolumn_order.py"]:::component
+        OutputFactories["OutputFactories\nfactories.py"]:::component
+    end
+
+    subgraph Impl["impl/"]
+        BaseWriter["BaseWriter\nbase_writer.py"]:::writer
+        CsvWriter["CsvWriter\ncsv_writer.py"]:::adapter
+        ParquetWriter["ParquetWriter\nparquet_writer.py"]:::adapter
+        MetadataWriter["MetadataWriter\nmetadata_writer.py"]:::adapter
+        QualityReport["QualityReportWriter\nquality_report.py"]:::adapter
+    end
+
+    subgraph Components["components/"]
+        DataWriterAdapter["DataWriterAdapter\ndata_writer.py"]:::adapter
+        MetadataBuilder["MetadataBuilder\nmetadata_builder.py"]:::component
+        ChecksumCalculator["ChecksumCalculator\nchecksum_calculator.py"]:::component
+        QcReportGenerator["QcReportGenerator\nqc_report_generator.py"]:::component
+        QcArtifactWriter["QcArtifactWriter\nqc_artifact_writer.py"]:::component
+    end
+
+    subgraph Converters["converters/"]
+        RenameColumnsConverter["RenameColumnsConverter\nrename_columns_converter.py"]:::component
+        DropNaConverter["DropNaRowsConverter\ndropna_rows_converter.py"]:::component
+        NoopConverter["NoopConverter\nnoop_converter.py"]:::component
+        ConverterFactories["ConverterFactories\nfactories.py"]:::component
+    end
+end
+
+%% Inheritance
+BaseWriter <-- CsvWriter
+BaseWriter <-- ParquetWriter
+BaseWriter <-- MetadataWriter
+
+%% Composition
+UnifiedLoader --> CsvWriter
+UnifiedLoader --> ParquetWriter
+UnifiedLoader --> MetadataWriter
+UnifiedLoader --> DataWriterAdapter
+DataWriterAdapter --> MetadataBuilder
+DataWriterAdapter --> ChecksumCalculator
+DataWriterAdapter --> QcReportGenerator
+OutputFactories --> UnifiedLoader
