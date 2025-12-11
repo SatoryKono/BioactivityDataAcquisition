@@ -1,8 +1,19 @@
 [importlinter]
 root_package = bioetl
 
+# =============================================================================
+# Hexagonal Architecture Layer Contracts
+# =============================================================================
+# Dependency direction: interfaces -> application -> domain <- infrastructure
+#
+# - Domain: Pure business logic, no external dependencies
+# - Application: Orchestration, uses domain types and ports (interfaces)
+# - Infrastructure: Implements ports, adapts external systems
+# - Interfaces: Composition root, CLI, wires everything together
+# =============================================================================
+
 [contract:domain_purity]
-name = Domain depends only on itself and shared/stdlib utilities
+name = Domain layer has no dependencies on other layers
 type = forbidden
 source_modules =
     bioetl.domain
@@ -11,36 +22,68 @@ forbidden_modules =
     bioetl.infrastructure
     bioetl.interfaces
 
-[contract:application_allowed_dependencies]
-name = Application imports domain plus explicitly allowed infrastructure contracts
+[contract:application_no_infrastructure]
+name = Application layer cannot import infrastructure directly
 type = forbidden
 source_modules =
     bioetl.application
 forbidden_modules =
     bioetl.infrastructure
 ignore_imports =
-    # Lazy import for backward compatibility (provider registry factory)
+    # Legacy: Lazy import for backward compatibility (deprecation warning issued)
+    # Tracked for removal - see test_application_has_no_runtime_infrastructure_imports
     bioetl.application.orchestrator -> bioetl.infrastructure.provider_registry
-    # ChEMBL extraction service compatibility facade
-    bioetl.application.services.chembl_extraction -> bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl
 
-[contract:application_avoids_infrastructure_implementations]
-name = Application does not depend on infrastructure implementations (except compatibility facade)
+[contract:application_no_interfaces]
+name = Application layer cannot depend on interfaces layer
 type = forbidden
 source_modules =
     bioetl.application
 forbidden_modules =
+    bioetl.interfaces
+
+[contract:infrastructure_no_application]
+name = Infrastructure cannot depend on application layer
+type = forbidden
+source_modules =
+    bioetl.infrastructure
+forbidden_modules =
+    bioetl.application
+
+[contract:infrastructure_no_interfaces]
+name = Infrastructure cannot depend on interfaces layer
+type = forbidden
+source_modules =
+    bioetl.infrastructure
+forbidden_modules =
+    bioetl.interfaces
+
+# =============================================================================
+# Implementation Isolation Contracts
+# =============================================================================
+
+[contract:no_direct_impl_imports]
+name = Application must not import concrete implementations
+type = forbidden
+source_modules =
+    bioetl.application
+forbidden_modules =
+    # HTTP client implementations
     bioetl.infrastructure.clients.chembl.impl
     bioetl.infrastructure.clients.base.impl
+    # Logging implementations
     bioetl.infrastructure.logging.impl
-ignore_imports =
-    bioetl.application.services.chembl_extraction -> bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl
+    # Config implementations
+    bioetl.infrastructure.config.loader
+    bioetl.infrastructure.config.migration
 
-[contract:infrastructure_no_upper_layers]
-name = Infrastructure imports domain (and stdlib) but not higher layers
+[contract:interfaces_controls_wiring]
+name = Interfaces layer controls all wiring and composition
 type = forbidden
 source_modules =
-    bioetl.infrastructure
-forbidden_modules =
+    bioetl.domain
     bioetl.application
-    bioetl.interfaces
+forbidden_modules =
+    # Only interfaces layer should do composition
+    bioetl.interfaces.composition_root
+    bioetl.interfaces.factories
