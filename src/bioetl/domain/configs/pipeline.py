@@ -336,6 +336,11 @@ class BaseProviderConfig(BaseModel):
         """Backward compatibility: access base_url from http config."""
         return self.http.base_url
 
+    @property
+    def client(self) -> ProviderHttpConfig:
+        """Backward compatibility: access http config via client property."""
+        return self.http
+
     @field_validator("provider")
     @classmethod
     def validate_provider_known(cls, value: str) -> str:
