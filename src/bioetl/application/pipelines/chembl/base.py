@@ -60,6 +60,7 @@ class ChemblPipelineBase(PipelineBase):
         post_transformer: TransformerABC | None = None,
     ) -> None:
         self._extraction_service: ExtractionServiceABC = extraction_service
+        self._entity_model_registry: EntityModelRegistryABC = entity_model_registry
         self._chembl_release: str | None = None
 
         self.ID_COLUMN, self.API_FILTER_KEY = resolve_primary_key_with_filter(config)

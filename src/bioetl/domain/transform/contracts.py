@@ -238,10 +238,9 @@ class HashServiceABC(ABC):
             Default implementation converts to records and back.
             Infrastructure may override for better performance.
         """
-        records = data.to_records()
-        hashed = self.add_hashes_to_batch(records, business_key_cols)
         # Infrastructure layer should provide optimized implementation
         # This default raises to force infrastructure override
+        # Note: Default implementation would convert to records and back
         raise NotImplementedError(
             "Infrastructure must override add_hash_columns for TabularData support"
         )

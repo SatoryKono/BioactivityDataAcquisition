@@ -17,6 +17,7 @@ from bioetl.infrastructure.config.loader import (
     reset_schema_contract_provider,
     set_schema_contract_provider,
 )
+from bioetl.infrastructure.validation.bootstrap import register_schemas
 
 
 @pytest.fixture(autouse=True)
@@ -26,10 +27,11 @@ def _reset_provider_registry() -> None:
     provider_registry.clear_provider_registry_cache()
 
 
+
 @pytest.fixture(autouse=True)
 def _setup_schema_contract_provider() -> None:
     """Set up schema contract provider for tests."""
-    registry = create_default_schema_registry()
+    registry = create_default_schema_registry(register_fn=register_schemas)
     contract_provider = SchemaContractProviderImpl(registry)
     set_schema_contract_provider(contract_provider)
     yield

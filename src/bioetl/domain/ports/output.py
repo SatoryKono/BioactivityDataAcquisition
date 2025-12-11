@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from bioetl.domain.clients.base.output.contracts import WriteResult
     from bioetl.domain.configs import QcConfig
     from bioetl.domain.models import RunContext

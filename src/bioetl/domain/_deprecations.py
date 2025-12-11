@@ -175,12 +175,10 @@ def emit_deprecation_warning(
     if old_name in DEPRECATED_ALIASES:
         alias = DEPRECATED_ALIASES[old_name]
         message = alias.message or f"{old_name} is deprecated, use {alias.new_name} instead."
-        new_location = f"{alias.new_module}.{alias.new_name}" if alias.new_module else alias.new_name
     else:
         message = f"{old_name} is deprecated"
         if new_name:
             message += f", use {new_name} instead"
-        new_location = new_name or "(see documentation)"
 
     full_message = (
         f"{message} "

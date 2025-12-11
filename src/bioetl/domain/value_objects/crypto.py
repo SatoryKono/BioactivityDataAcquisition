@@ -93,21 +93,21 @@ class HashDigest:
     @property
     def is_blake2b(self) -> bool:
         """Check if this is a BLAKE2b-256 hash."""
-        return self._algorithm == "blake2b_256"
+        return self.algorithm == "blake2b_256"
 
     def __str__(self) -> str:
-        return self._value
+        return self.value
 
     def __repr__(self) -> str:
-        return f"HashDigest({self._value!r}, algorithm={self._algorithm!r})"
+        return f"HashDigest({self.value!r}, algorithm={self.algorithm!r})"
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, HashDigest):
-            return self._value == other._value and self._algorithm == other._algorithm
+            return self.value == other.value and self.algorithm == other.algorithm
         return NotImplemented
 
     def __hash__(self) -> int:
-        return hash((self._value, self._algorithm))
+        return hash((self.value, self.algorithm))
 
     @classmethod
     def blake2b_256(cls, hex_value: str) -> Self:
