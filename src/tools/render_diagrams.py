@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 import re
 import subprocess
-import sys
 from typing import Iterable
 
 logger = logging.getLogger(__name__)
