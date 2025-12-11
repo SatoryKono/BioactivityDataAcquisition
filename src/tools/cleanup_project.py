@@ -9,9 +9,9 @@ from typing import Iterable, List, Tuple
 def _find_project_root(start: Path) -> Path:
     cur = start.resolve()
     for candidate_path in [cur, *cur.parents]:
-        pyproject_exists = (candidate_path / "pyproject.toml").exists()
-        git_exists = (candidate_path / ".git").exists()
-        if pyproject_exists or git_exists:
+        has_pyproject = (candidate_path / "pyproject.toml").exists()
+        has_git = (candidate_path / ".git").exists()
+        if has_pyproject or has_git:
             return candidate_path
     # Fallback for typical layout: src/tools/* -> project root two levels up
     return start.resolve().parents[2]
