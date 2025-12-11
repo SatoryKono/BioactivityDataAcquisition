@@ -24,10 +24,9 @@ if TYPE_CHECKING:
 # Import bounded context configs
 from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
-from bioetl.domain.configs.normalization import NormalizationConfig
+from bioetl.domain.configs.pipeline_options import NormalizationConfig, TransformConfig
 from bioetl.domain.configs.sink import DataSinkConfig, OutputOptionsConfig
 from bioetl.domain.configs.source import CsvInputConfig, DataSourceConfig
-from bioetl.domain.configs.transform import TransformConfig
 
 
 class PaginationConfig(BaseModel):
