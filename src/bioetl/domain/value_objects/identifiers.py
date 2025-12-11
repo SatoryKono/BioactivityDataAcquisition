@@ -92,7 +92,7 @@ class StageName:
     __slots__ = ("_value",)
 
     # Allowed stage names
-    _ALLOWED_VALUES: frozenset[str] = frozenset(
+    ALLOWED_VALUES: frozenset[str] = frozenset(
         {"extract", "transform", "validate", "export"}
     )
 
@@ -115,8 +115,8 @@ class StageName:
         if normalized in self._ALIASES:
             normalized = self._ALIASES[normalized]
 
-        if normalized not in self._ALLOWED_VALUES:
-            allowed = sorted(self._ALLOWED_VALUES | set(self._ALIASES.keys()))
+        if normalized not in self.ALLOWED_VALUES:
+            allowed = sorted(self.ALLOWED_VALUES | set(self._ALIASES.keys()))
             raise ValueError(
                 f"Invalid stage name: {value!r}. "
                 f"Allowed values: {', '.join(allowed)}"
@@ -127,7 +127,7 @@ class StageName:
     @classmethod
     def all_values(cls) -> frozenset[str]:
         """Return all allowed stage name values."""
-        return cls._ALLOWED_VALUES
+        return cls.ALLOWED_VALUES
 
     @property
     def value(self) -> str:
