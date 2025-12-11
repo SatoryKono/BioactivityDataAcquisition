@@ -613,6 +613,16 @@ class PipelineConfig(BaseModel):
         """
         return self.data_flow.sink
 
+    @sink.setter
+    def sink(self, value: DataSinkConfig) -> None:
+        """Allow updating sink while keeping DataFlowConfig frozen.
+
+        Creates a new DataFlowConfig with the provided sink and assigns it,
+        so callers can override output paths in tests/CLI without mutating
+        the frozen DataFlowConfig instance.
+        """
+        self.data_flow = self.data_flow.model_copy(update={"sink": value})
+
     # =========================================================================
     # Convenience accessors (minimal, no backward compatibility)
     # =========================================================================
