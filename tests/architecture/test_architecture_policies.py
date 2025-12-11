@@ -193,8 +193,6 @@ def test_duplicate_class_names_are_allowlisted() -> None:
         "OutputOptionsConfig",
         # Temporary: duplicate implementation in application/infrastructure layers
         "InMemoryProviderRegistry",
-        # Temporary: duplicate container implementations
-        "SimplePipelineContainer",
     }
 
     class_map: dict[str, list[Path]] = {}

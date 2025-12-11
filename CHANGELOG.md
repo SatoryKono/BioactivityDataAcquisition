@@ -34,6 +34,10 @@ See docs/migration/2.0-hexagonal-architecture.md
 
 ## [Unreleased]
 
+### Removed
+
+- **BREAKING**: `SimplePipelineContainer` class removed from `bioetl.interfaces.simple_container`. Use `ApplicationBootstrap` from `bioetl.application.bootstrap` or `create_default_bootstrap()` from `bioetl.interfaces.bootstrap_factory` instead.
+
 ### Changed
 
 - **HTTP Configuration Refactoring**: Consolidated three overlapping HTTP configuration models into a single source of truth:

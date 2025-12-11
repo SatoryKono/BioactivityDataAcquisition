@@ -8,23 +8,24 @@ from typing import Any
 import pandas as pd
 import pytest
 
+from bioetl.application.bootstrap import ApplicationBootstrap
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
-from bioetl.interfaces.simple_container import SimplePipelineContainer
+from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
 
 
 class TestPipelineDataFlow:
     """Test complete data flow through pipeline components."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     @pytest.fixture
     def mock_api_responses(self) -> list[dict[str, Any]]:
@@ -132,12 +133,12 @@ class TestBatchProcessing:
     """Test batch processing scenarios."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     def test_process_empty_batch(self) -> None:
         """Empty batch should be handled gracefully."""
@@ -213,12 +214,12 @@ class TestMultiEntityFlow:
     """Test processing multiple entity types."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     @pytest.fixture
     def entity_responses(self) -> dict[str, dict[str, Any]]:
@@ -293,54 +294,41 @@ class TestMultiEntityFlow:
         assert results["document"][0].document_chembl_id == "CHEMBL1125443"
 
 
-class TestContainerIntegration:
-    """Test container-based integration scenarios."""
+class TestBootstrapIntegration:
+    """Test bootstrap-based integration scenarios."""
 
-    def test_container_provides_consistent_components(self) -> None:
-        """Container should provide the same component instances."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
+    def test_bootstrap_provides_consistent_context(self) -> None:
+        """Bootstrap should provide the same context on multiple start() calls."""
+        bootstrap = create_default_bootstrap()
+        context1 = bootstrap.start()
+        context2 = bootstrap.start()
 
         try:
-            # Get components multiple times
-            parser1 = container.response_parser
-            parser2 = container.response_parser
-            mapper1 = container.record_mapper
-            mapper2 = container.record_mapper
-
-            # Should be the same instances (lazy singleton)
-            assert parser1 is parser2
-            assert mapper1 is mapper2
+            # Should be the same context (idempotent)
+            assert context1 is context2
+            assert context1.contract_provider is context2.contract_provider
         finally:
-            container.reset()
+            bootstrap.shutdown()
 
-    def test_container_reset_creates_new_components(self) -> None:
-        """Reset should create new component instances."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        parser_before = container.response_parser
-        mapper_before = container.record_mapper
+    def test_bootstrap_shutdown_allows_restart(self) -> None:
+        """Shutdown should allow fresh restart."""
+        bootstrap = create_default_bootstrap()
+        context_before = bootstrap.start()
+        provider_before = context_before.contract_provider
 
-        container.reset()
-        container.bootstrap()
+        bootstrap.shutdown()
+        context_after = bootstrap.start()
 
-        parser_after = container.response_parser
-        mapper_after = container.record_mapper
-
-        # Should be different instances after reset
-        assert parser_before is not parser_after
-        assert mapper_before is not mapper_after
+        # Should be different context after shutdown
+        assert context_before is not context_after
 
         # Clean up
-        container.reset()
+        bootstrap.shutdown()
 
-    def test_components_work_without_bootstrap_for_lazy_init(self) -> None:
-        """Parser and mapper should work without bootstrap (lazy init)."""
-        container = SimplePipelineContainer()
-
-        # These should work without bootstrap
-        parser = container.response_parser
-        mapper = container.record_mapper
+    def test_parser_and_mapper_work_independently(self) -> None:
+        """Parser and mapper should work without bootstrap."""
+        parser = ChemblGenericResponseParser()
+        mapper = ChemblRecordMapper()
 
         response = {"activities": [{"activity_id": 1, "standard_flag": True}]}
 
@@ -349,24 +337,25 @@ class TestContainerIntegration:
 
         assert len(typed_records) == 1
 
-    def test_schema_contract_requires_bootstrap(self) -> None:
-        """Schema contract provider should require bootstrap."""
-        container = SimplePipelineContainer()
+    def test_contract_provider_requires_bootstrap(self) -> None:
+        """Contract provider should require bootstrap.start()."""
+        bootstrap = create_default_bootstrap()
 
-        with pytest.raises(RuntimeError, match="not bootstrapped"):
-            _ = container.schema_contract_provider
+        # Context should be None before start
+        assert bootstrap.context is None
+        assert not bootstrap.is_started
 
 
 class TestDataFrameOutput:
     """Test DataFrame output generation."""
 
     @pytest.fixture(autouse=True)
-    def setup_container(self) -> SimplePipelineContainer:
-        """Bootstrap container for each test."""
-        container = SimplePipelineContainer()
-        container.bootstrap()
-        yield container
-        container.reset()
+    def setup_bootstrap(self) -> ApplicationBootstrap:
+        """Bootstrap application for each test."""
+        bootstrap = create_default_bootstrap()
+        bootstrap.start()
+        yield bootstrap
+        bootstrap.shutdown()
 
     def test_dataframe_preserves_all_fields(self) -> None:
         """DataFrame should preserve all record fields."""
