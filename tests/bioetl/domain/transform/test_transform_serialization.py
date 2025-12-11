@@ -13,8 +13,8 @@ from bioetl.domain.transform.serializers import (
 def test_serialize_list_primitives():
     assert serialize_list(["a", "b"]) == "a|b"
     assert serialize_list([1, 2]) == "1|2"
-    assert serialize_list([]) is pd.NA
-    assert serialize_list(None) is pd.NA
+    assert serialize_list([]) is None
+    assert serialize_list(None) is None
 
 
 def test_serialize_list_dicts():

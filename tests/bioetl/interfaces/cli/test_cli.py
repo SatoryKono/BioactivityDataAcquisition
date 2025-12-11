@@ -106,60 +106,26 @@ def test_validate_config_success(mock_loader):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_runtime_config")
-@patch("bioetl.interfaces.cli.app._resolve_config_path")
-def test_run_command(mock_resolve_path, mock_loader, mock_orchestrator_cls):
+@patch("bioetl.interfaces.cli.app.get_use_case_factory")
+def test_run_command(mock_get_factory):
     """Test the run command."""
-    mock_orchestrator = MagicMock()
-    mock_orchestrator.run_pipeline.return_value = MagicMock(
-        success=True, row_count=10, duration_sec=1.0
+    mock_use_case = MagicMock()
+    mock_use_case.execute.return_value = MagicMock(
+        success=True, row_count=10, duration_sec=1.0, output_path="out", errors=[]
     )
-    mock_orchestrator_cls.return_value = mock_orchestrator
+    factory = mock_get_factory.return_value
+    factory.create_run_pipeline_use_case.return_value = mock_use_case
 
-    # Mock the resolver
-    mock_resolve_path.return_value = Path("test.yaml")
-
-    from bioetl.domain.configs import (
-        DataFlowConfig,
-        DataSinkConfig,
-        DataSourceConfig,
-        PipelineIdentityConfig,
-    )
-    from bioetl.domain.configs.pipeline import ProviderHttpConfig
-
-    mock_config = PipelineConfig(
-        identity=PipelineIdentityConfig(
-            pipeline_id="chembl.activity",
-            provider="chembl",
-            entity="activity",
-        ),
-        data_flow=DataFlowConfig(
-            source=DataSourceConfig(
-                input_mode="auto_detect",
-                input_path=None,
-                batch_size=10,
-            ),
-            sink=DataSinkConfig(output_path="out"),
-        ),
-        provider_config=ChemblSourceConfig(
-            http=ProviderHttpConfig(
-                base_url="https://www.ebi.ac.uk/chembl/api/data",
-                timeout_sec=30,
-                max_retries=3,
-                rate_limit_per_sec=10.0,
-            ),
-        ),
-    )
-    mock_loader.return_value = mock_config
-
-    # We need to mock file existence for config
-    with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(app, ["run", "activity_chembl", "--config", "test.yaml"])
+    result = runner.invoke(app, ["run", "activity_chembl", "--config", "test.yaml"])
 
     assert result.exit_code == 0
     assert "Pipeline finished successfully" in result.stdout
-    mock_orchestrator.run_pipeline.assert_called_once()
+    mock_use_case.execute.assert_called_once()
+
+    args = mock_use_case.execute.call_args[0]
+    request = args[0]
+    assert request.pipeline_name == "activity_chembl"
+    assert request.config_path == Path("test.yaml")
 
 
 @pytest.mark.unit
@@ -178,12 +144,16 @@ def test_smoke_run(mock_run):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app._resolve_config_path")
-def test_run_config_not_found_explicit(mock_resolve_path):
-    """Test run command with explicit config that doesn't exist."""
-    mock_resolve_path.side_effect = FileNotFoundError(
-        "Config file not found: nonexistent.yaml"
-    )
+@patch("bioetl.interfaces.cli.app.get_use_case_factory")
+def test_run_config_not_found_explicit(mock_get_factory):
+    """Test run command with explicit config that doesn't exist.
+
+    Simulated via UseCase.
+    """
+    mock_use_case = MagicMock()
+    mock_use_case.execute.side_effect = FileNotFoundError("Config file not found")
+    factory = mock_get_factory.return_value
+    factory.create_run_pipeline_use_case.return_value = mock_use_case
 
     result = runner.invoke(
         app, ["run", "activity_chembl", "--config", "nonexistent.yaml"]
@@ -194,134 +164,73 @@ def test_run_config_not_found_explicit(mock_resolve_path):
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_runtime_config")
-@patch("bioetl.interfaces.cli.app._resolve_config_path")
-def test_run_with_limit_and_dry_run(
-    mock_resolve_path, mock_loader, mock_orchestrator_cls
-):
+@patch("bioetl.interfaces.cli.app.get_use_case_factory")
+def test_run_with_limit_and_dry_run(mock_get_factory):
     """Test run command with limit and dry-run options."""
-    mock_orchestrator = MagicMock()
-    mock_orchestrator.run_pipeline.return_value = MagicMock(
-        success=True, row_count=5, duration_sec=0.5
+    mock_use_case = MagicMock()
+    mock_use_case.execute.return_value = MagicMock(
+        success=True, row_count=5, duration_sec=0.5, output_path="out", errors=[]
     )
-    mock_orchestrator_cls.return_value = mock_orchestrator
+    factory = mock_get_factory.return_value
+    factory.create_run_pipeline_use_case.return_value = mock_use_case
 
-    # Mock the resolver
-    mock_resolve_path.return_value = Path("inferred.yaml")
-
-    mock_config = PipelineConfig(
-        identity=PipelineIdentityConfig(
-            pipeline_id="chembl.activity",
-            provider="chembl",
-            entity="activity",
-        ),
-        data_flow=DataFlowConfig(
-            source=DataSourceConfig(
-                input_mode="auto_detect",
-                input_path=None,
-                batch_size=10,
-            ),
-            sink=DataSinkConfig(output_path="out"),
-        ),
-        provider_config=ChemblSourceConfig(
-            http=ProviderHttpConfig(
-                base_url="https://www.ebi.ac.uk/chembl/api/data",
-                timeout_sec=30,
-                max_retries=3,
-                rate_limit_per_sec=10.0,
-            ),
-        ),
-    )
-    mock_loader.return_value = mock_config
-
-    with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(
-            app, ["run", "activity_chembl", "--limit", "5", "--dry-run"]
-        )
+    result = runner.invoke(app, ["run", "activity_chembl", "--limit", "5", "--dry-run"])
 
     assert result.exit_code == 0
-    mock_orchestrator.run_pipeline.assert_called_once()
-    _, kwargs = mock_orchestrator.run_pipeline.call_args
-    assert kwargs["limit"] == 5
-    assert kwargs["dry_run"] is True
+    mock_use_case.execute.assert_called_once()
+
+    args = mock_use_case.execute.call_args[0]
+    request = args[0]
+    assert request.limit == 5
+    assert request.dry_run is True
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_runtime_config")
-@patch("bioetl.interfaces.cli.app._resolve_config_path")
-def test_run_pipeline_failure(mock_resolve_path, mock_loader, mock_orchestrator_cls):
+@patch("bioetl.interfaces.cli.app.get_use_case_factory")
+def test_run_pipeline_failure(mock_get_factory):
     """Test run command when pipeline fails."""
-    mock_orchestrator = MagicMock()
-    mock_orchestrator.run_pipeline.return_value = MagicMock(success=False)
-    mock_orchestrator_cls.return_value = mock_orchestrator
+    mock_use_case = MagicMock()
+    mock_use_case.execute.return_value = MagicMock(success=False, errors=["Error 1"])
+    factory = mock_get_factory.return_value
+    factory.create_run_pipeline_use_case.return_value = mock_use_case
 
-    # Mock the resolver
-    mock_resolve_path.return_value = Path("inferred.yaml")
-
-    mock_loader.return_value = PipelineConfig(
-        identity=PipelineIdentityConfig(
-            pipeline_id="chembl.activity",
-            provider="chembl",
-            entity="activity",
-        ),
-        data_flow=DataFlowConfig(
-            source=DataSourceConfig(
-                input_mode="auto_detect",
-                input_path=None,
-                batch_size=10,
-            ),
-            sink=DataSinkConfig(output_path="out"),
-        ),
-        provider_config=ChemblSourceConfig(
-            http=ProviderHttpConfig(
-                base_url="https://www.ebi.ac.uk/chembl/api/data",
-                timeout_sec=30,
-                max_retries=3,
-                rate_limit_per_sec=10.0,
-            ),
-        ),
-    )
-
-    with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(app, ["run", "activity_chembl"])
+    result = runner.invoke(app, ["run", "activity_chembl"])
 
     assert result.exit_code == 1
     assert "Pipeline failed" in result.stdout
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.build_runtime_config")
-@patch("bioetl.interfaces.cli.app._resolve_config_path")
-def test_run_exception(mock_resolve_path, mock_loader):
+@patch("bioetl.interfaces.cli.app.get_use_case_factory")
+def test_run_exception(mock_get_factory):
     """Test run command unhandled exception."""
-    # Mock the resolver
-    mock_resolve_path.return_value = Path("inferred.yaml")
+    mock_use_case = MagicMock()
+    mock_use_case.execute.side_effect = RuntimeError("Unexpected error")
+    factory = mock_get_factory.return_value
+    factory.create_run_pipeline_use_case.return_value = mock_use_case
 
-    mock_loader.side_effect = RuntimeError("Unexpected error")
-
-    with patch("pathlib.Path.exists", return_value=True):
-        result = runner.invoke(app, ["run", "activity_chembl"])
+    result = runner.invoke(app, ["run", "activity_chembl"])
 
     assert result.exit_code == 1
     assert "Unexpected error" in result.stdout
 
 
 @pytest.mark.unit
-@patch("bioetl.interfaces.cli.app.create_provider_loader")
-@patch("bioetl.interfaces.cli.app.PipelineOrchestrator")
-@patch("bioetl.interfaces.cli.app.build_runtime_config")
-@patch("bioetl.interfaces.cli.app._resolve_config_path")
+@patch("bioetl.infrastructure.config.provider_registry.create_provider_loader")
+@patch("bioetl.application.use_cases.run_pipeline.PipelineOrchestrator")
+@patch("bioetl.application.use_cases.run_pipeline.RunPipelineUseCase._load_config")
 def test_run_dry_run_pipeline_metadata(
-    mock_resolve_path,
-    mock_loader,
+    mock_load_config,
     mock_orchestrator_cls,
     mock_create_provider_loader,
     pipeline_test_config,
     small_pipeline_df,
 ):
     """Dry-run via CLI preserves stage info and metadata."""
+
+    # We patch UseCase internals to facilitate this integration-like test
+    # without full context
+    mock_load_config.return_value = pipeline_test_config
 
     created_instances: list[PipelineBase] = []
 
@@ -429,13 +338,12 @@ def test_run_dry_run_pipeline_metadata(
     mock_orchestrator.run_pipeline.side_effect = run_pipeline_side_effect
     mock_orchestrator_cls.return_value = mock_orchestrator
 
-    mock_loader.return_value = pipeline_test_config
     provider_loader = MagicMock()
     provider_loader.get_registry.return_value = MagicMock()
     mock_create_provider_loader.return_value = provider_loader
 
-    # Mock the resolver
-    mock_resolve_path.return_value = Path("config.yaml")
+    # Mock the resolver - no longer needed as we mock _load_config
+    # mock_resolve_path.return_value = Path("config.yaml")
 
     with runner.isolated_filesystem():
         Path("config.yaml").write_text("dummy", encoding="utf-8")
@@ -453,7 +361,9 @@ def test_run_dry_run_pipeline_metadata(
 
     created_pipeline = created_instances[0]
     assert created_pipeline.last_result is not None
-    stage_names = [stage.stage_name for stage in created_pipeline.last_result.stages]
+    stage_names = [
+        str(stage.stage_name) for stage in created_pipeline.last_result.stages
+    ]
     assert stage_names == ["extract", "transform", "validate"]
     assert created_pipeline.last_result.meta["dry_run"] is True
     assert created_pipeline.last_result.errors == []

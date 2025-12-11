@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import json
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
-import pandas as pd
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def serialize_list(value: Any) -> Any:
@@ -15,16 +16,16 @@ def serialize_list(value: Any) -> Any:
     - Primitives are converted to strings and joined with '|'
     - Dict items are serialized via `serialize_dict`
     - Nested lists/tuples/sequences are skipped
-    - None or empty lists yield `pd.NA`
+    - None or empty lists yield None (infrastructure layer converts to pd.NA)
     """
     if value is None or _is_missing(value):
-        return pd.NA
+        return None
 
     if isinstance(value, (list, tuple, set, frozenset, Sequence)) and not isinstance(
         value, (str, bytes, bytearray)
     ):
         if not value:
-            return pd.NA
+            return None
         parts: list[str] = []
         for item in value:
             if item is None or _is_missing(item):
@@ -41,10 +42,10 @@ def serialize_list(value: Any) -> Any:
                 continue
             parts.append(str(item))
 
-        return "|".join(parts) if parts else pd.NA
+        return "|".join(parts) if parts else None
 
-    # Non-sequence values: treat None as NA, otherwise convert to string
-    return pd.NA if _is_missing(value) else str(value)
+    # Non-sequence values: treat None as missing, otherwise convert to string
+    return None if _is_missing(value) else str(value)
 
 
 def serialize_dict(value: Any) -> Any:
@@ -171,8 +172,12 @@ def _serialize_sequence(
 
 
 def _is_missing(value: Any) -> bool:
+    """Check if value is None or NaN-like (handles pd.NA without importing pandas)."""
     if value is None:
         return True
+    
+    # Check for NaN-like values (including pd.NA) using != comparison
+    # This works for pd.NA because pd.NA != pd.NA is True
     try:
         return bool(value != value)
     except (TypeError, ValueError):

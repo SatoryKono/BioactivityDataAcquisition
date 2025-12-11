@@ -21,17 +21,15 @@ def normalize_doi(value: Any) -> str | None:
     """
     if is_missing(value):
         return None
-    # Check for pandas NAType before converting to string
-    try:
-        import pandas as pd
-        if value is pd.NA:
-            return None
-    except (ImportError, AttributeError):
-        pass
+    # Convert to string, handling non-string types
     if not isinstance(value, str):
-        raise ValueError(f"DOI must be a string, got: {type(value)}")
+        value_str = str(value).strip()
+        if not value_str or value_str.lower() in ("nan", "none", "<na>"):
+            return None
+    else:
+        value_str = value
 
-    doi = value.strip().lower()
+    doi = value_str.strip().lower()
     doi = re.sub(r"^(https?://)?(dx\.)?doi\.org/", "", doi)
     if doi.startswith("doi:"):
         doi = doi[4:]
@@ -120,12 +118,7 @@ def normalize_uniprot(value: Any) -> str | None:
     if is_missing(value):
         return None
     # Check for pandas NAType before converting to string
-    try:
-        import pandas as pd
-        if value is pd.NA:
-            return None
-    except (ImportError, AttributeError):
-        pass
+    # Use is_missing which handles pd.NA without importing pandas
     if not isinstance(value, str):
         raise ValueError("UniProt ID must be a string")
 

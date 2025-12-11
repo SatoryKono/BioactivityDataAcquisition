@@ -80,7 +80,7 @@ class TestExtractStageWithMapper:
     ) -> None:
         """Records are validated through mapper before DataFrame conversion."""
         raw_batch = [
-            {"activity_id": 1, "standard_flag": True},
+            {"activity_id": 1, "standard_flag": True, "standard_value": 1.0},
             {"activity_id": 2, "standard_flag": False},
         ]
         mock_extraction_service.iter_extract.return_value = [raw_batch]
@@ -102,7 +102,7 @@ class TestExtractStageWithMapper:
         self, mock_extraction_service: MagicMock, chembl_mapper: ChemblRecordMapper
     ) -> None:
         """Multiple batches are each converted to separate DataFrames."""
-        batch1 = [{"activity_id": 1, "standard_flag": True}]
+        batch1 = [{"activity_id": 1, "standard_flag": True, "standard_value": 1.0}]
         batch2 = [{"activity_id": 2, "standard_flag": False}]
         mock_extraction_service.iter_extract.return_value = [batch1, batch2]
 
@@ -297,7 +297,7 @@ class TestExtractStageExtractAll:
     ) -> None:
         """extract_all with mapper validates all records."""
         all_records = [
-            {"activity_id": 1, "standard_flag": True},
+            {"activity_id": 1, "standard_flag": True, "standard_value": 1.0},
             {"activity_id": 2, "standard_flag": False},
         ]
         mock_extraction_service.extract_all.return_value = all_records
@@ -452,7 +452,7 @@ class TestExtractStageIntegration:
         mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         test_cases = [
-            ("activity", {"activity_id": 1, "standard_flag": True}),
+            ("activity", {"activity_id": 1, "standard_flag": True, "standard_value": 1.0}),
             ("molecule", {"molecule_chembl_id": "CHEMBL1"}),
             ("target", {"target_chembl_id": "CHEMBL1"}),
             ("assay", {"assay_chembl_id": "CHEMBL1"}),

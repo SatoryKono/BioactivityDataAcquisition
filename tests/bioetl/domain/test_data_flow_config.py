@@ -1,5 +1,7 @@
 """Tests for DataFlowConfig aggregate."""
 
+from pathlib import Path
+
 import pytest
 
 from bioetl.domain.configs.data_flow import DataFlowConfig
@@ -18,7 +20,7 @@ class TestDataFlowConfig:
         data_flow = DataFlowConfig(source=source, sink=sink)
 
         assert data_flow.source.input_mode == "csv"
-        assert data_flow.sink.output_path == "/tmp/output"
+        assert Path(data_flow.sink.output_path).as_posix() == "/tmp/output"
 
     def test_is_frozen(self) -> None:
         """DataFlowConfig is immutable."""
@@ -59,8 +61,8 @@ class TestDataFlowValidation:
         sink = DataSinkConfig(output_path="/tmp/output.json")
 
         data_flow = DataFlowConfig(source=source, sink=sink)
-        assert data_flow.source.input_path == "/tmp/input.csv"
-        assert data_flow.sink.output_path == "/tmp/output.json"
+        assert Path(data_flow.source.input_path).as_posix() == "/tmp/input.csv"
+        assert Path(data_flow.sink.output_path).as_posix() == "/tmp/output.json"
 
     def test_allows_auto_detect_without_input_path(self) -> None:
         """DataFlowConfig allows auto_detect mode without input path."""
@@ -77,8 +79,8 @@ class TestDataFlowValidation:
         sink = DataSinkConfig(output_path="/data/output/")
 
         data_flow = DataFlowConfig(source=source, sink=sink)
-        assert data_flow.source.input_path == "/data/input/file.csv"
-        assert data_flow.sink.output_path == "/data/output"
+        assert Path(data_flow.source.input_path).as_posix() == "/data/input/file.csv"
+        assert Path(data_flow.sink.output_path).as_posix() == "/data/output"
 
 
 class TestDataFlowFromDict:

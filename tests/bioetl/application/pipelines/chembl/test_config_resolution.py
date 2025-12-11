@@ -28,6 +28,7 @@ def dependencies():
         "hash_service": MagicMock(),
         "normalization_service": MagicMock(),
         "index_generator": MagicMock(),
+        "entity_model_registry": get_chembl_model_registry(),
         "timestamp_provider": MagicMock(),
         "entity_model_registry": get_chembl_model_registry(),
     }

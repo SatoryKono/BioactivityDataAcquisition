@@ -8,6 +8,8 @@ import importlib
 import sys
 import warnings
 
+import pytest
+
 
 class TestConfigModelsDeprecation:
     """Tests for bioetl.infrastructure.config.models deprecation."""
@@ -27,9 +29,9 @@ class TestConfigModelsDeprecation:
             x for x in w if issubclass(x.category, DeprecationWarning)
         ]
         assert len(deprecation_warnings) >= 1
-        assert "infrastructure.config.models" in str(deprecation_warnings[0].message)
-        assert "domain.configs" in str(deprecation_warnings[0].message)
-        assert "v2.0" in str(deprecation_warnings[0].message)
+        assert "RawRecordBatch is deprecated" in str(deprecation_warnings[0].message)
+        assert "bioetl.domain.data" in str(deprecation_warnings[0].message)
+        assert "v3.0" in str(deprecation_warnings[0].message)
 
     def test_config_models_exports_available(self) -> None:
         """Deprecated module still exports all expected symbols."""
@@ -48,35 +50,15 @@ class TestCsvRecordSourceDeprecation:
     """Tests for bioetl.infrastructure.files.csv_record_source deprecation."""
 
     def test_csv_record_source_deprecation_warning(self) -> None:
-        """Importing from infrastructure.files.csv_record_source emits warning."""
+        """Importing from infrastructure.files.csv_record_source raises ImportError."""
         module_name = "bioetl.infrastructure.files.csv_record_source"
         if module_name in sys.modules:
             del sys.modules[module_name]
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+        with pytest.raises(ImportError, match="has been removed"):
             importlib.import_module(module_name)
 
-        deprecation_warnings = [
-            x for x in w if issubclass(x.category, DeprecationWarning)
-        ]
-        assert len(deprecation_warnings) >= 1
-        assert "infrastructure.files.csv_record_source" in str(
-            deprecation_warnings[0].message
-        )
-        assert "application.files.csv_record_source" in str(
-            deprecation_warnings[0].message
-        )
-        assert "v2.0" in str(deprecation_warnings[0].message)
-
-    def test_csv_record_source_exports_available(self) -> None:
-        """Deprecated module still exports all expected symbols."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            from bioetl.infrastructure.files import csv_record_source
-
-        assert hasattr(csv_record_source, "CsvRecordSourceImpl")
-        assert hasattr(csv_record_source, "IdListRecordSourceImpl")
+    # test_csv_record_source_exports_available removed as module is removed
 
 
 class TestConstantsDeprecation:

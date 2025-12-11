@@ -80,10 +80,16 @@ def mock_extraction_service():
         {"activity_id": [1, 2, 3], "standard_flag": [1, 1, 1]}
     )
     service.iter_extract.return_value = iter(
-        [pd.DataFrame({"activity_id": [1, 2, 3], "standard_flag": [1, 1, 1]})]
+        [
+            [
+                {"activity_id": 1, "standard_flag": True, "standard_value": 1.0},
+                {"activity_id": 2, "standard_flag": True, "standard_value": 1.0},
+                {"activity_id": 3, "standard_flag": True, "standard_value": 1.0},
+            ]
+        ]
     )
     service.request_batch.return_value = {
-        "activities": [{"activity_id": 1, "standard_flag": 1}]
+        "activities": [{"activity_id": 1, "standard_flag": True, "standard_value": 1.0}]
     }
     return service
 
@@ -146,6 +152,7 @@ def test_extract_full_data_csv(pipeline, mock_extraction_service, tmp_path):
             "activity_id": [10, 11],
             "standard_value": [5.5, 6.6],
             "standard_type": ["IC50", "Ki"],
+            "standard_flag": [True, True],
         }
     ).to_csv(csv_path, index=False)
 
@@ -195,9 +202,9 @@ def test_extract_ids_only_csv(
     pipeline._extractor.record_source = id_list_record_source
 
     mock_extraction_service.parse_response.return_value = [
-        ActivityRawModel(activity_id="100", standard_flag=True),
-        ActivityRawModel(activity_id="101", standard_flag=True),
-        ActivityRawModel(activity_id="102", standard_flag=True),
+        ActivityRawModel(activity_id="100", standard_flag=True, standard_value=1.0),
+        ActivityRawModel(activity_id="101", standard_flag=True, standard_value=1.0),
+        ActivityRawModel(activity_id="102", standard_flag=True, standard_value=1.0),
     ]
 
     mock_extraction_service.serialize_records.side_effect = lambda entity, recs: recs

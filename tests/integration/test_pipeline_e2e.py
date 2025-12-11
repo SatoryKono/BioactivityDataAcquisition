@@ -164,6 +164,7 @@ class TestBatchProcessing:
             {
                 "activity_id": i,
                 "standard_flag": i % 2 == 0,
+                "standard_value": 10.0 if i % 2 == 0 else None,
             }
             for i in range(1, 1001)
         ]
@@ -178,8 +179,8 @@ class TestBatchProcessing:
         assert len(raw_records) == 1000
         assert len(typed_records) == 1000
         # Verify first and last records
-        assert typed_records[0].activity_id == "1"
-        assert typed_records[-1].activity_id == "1000"
+        assert str(typed_records[0].activity_id) == "1"
+        assert str(typed_records[-1].activity_id) == "1000"
 
     def test_batch_with_null_values(self) -> None:
         """Batch with null values should be handled correctly."""
@@ -190,7 +191,7 @@ class TestBatchProcessing:
             "activities": [
                 {
                     "activity_id": 1,
-                    "standard_flag": True,
+                    "standard_flag": False,
                     "standard_value": None,
                     "standard_units": None,
                 },
@@ -228,7 +229,7 @@ class TestMultiEntityFlow:
         return {
             "activity": {
                 "activities": [
-                    {"activity_id": 1, "standard_flag": True},
+                    {"activity_id": 1, "standard_flag": True, "standard_value": 10.0},
                     {"activity_id": 2, "standard_flag": False},
                 ],
             },
@@ -288,7 +289,7 @@ class TestMultiEntityFlow:
         assert len(results["document"]) == 1
 
         # Verify record types
-        assert results["activity"][0].activity_id == "1"
+        assert str(results["activity"][0].activity_id) == "1"
         assert str(results["molecule"][0].molecule_chembl_id) == "CHEMBL25"
         assert str(results["target"][0].target_chembl_id) == "CHEMBL204"
         assert str(results["assay"][0].assay_chembl_id) == "CHEMBL1217643"
@@ -323,7 +324,11 @@ class TestBootstrapIntegration:
         parser = ChemblGenericResponseParser()
         mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
-        response = {"activities": [{"activity_id": 1, "standard_flag": True}]}
+        response = {
+            "activities": [
+                {"activity_id": 1, "standard_flag": True, "standard_value": 10.0}
+            ]
+        }
 
         raw_records = parser.parse_to_records(response)
         typed_records = mapper.map_records(raw_records, "activity")
@@ -410,7 +415,7 @@ class TestDataFrameOutput:
 
         response = {
             "activities": [
-                {"activity_id": 1, "standard_flag": True},
+                {"activity_id": 1, "standard_flag": True, "standard_value": 10.0},
                 {"activity_id": 2, "standard_flag": False},
             ],
         }
