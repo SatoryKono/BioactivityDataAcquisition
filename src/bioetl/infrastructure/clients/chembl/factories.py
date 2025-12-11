@@ -16,8 +16,8 @@ from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.parsing import ResponseParserPortABC
-from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.base.factories import (
     build_http_client,
     build_rate_limiter,
@@ -102,7 +102,7 @@ def create_chembl_extraction_service(
     http_config: HttpClientConfig | None = None,
     *,
     client: DataClientABC | None = None,
-    field_provider: DefaultFieldProviderABC | None = None,
+    filter_enricher: FilterEnricherABC | None = None,
     parser: ResponseParserPortABC | None = None,
 ) -> ExtractionServiceABC:
     """Create a new ChEMBL extraction service with generic parser.
@@ -113,7 +113,7 @@ def create_chembl_extraction_service(
         metrics: Required metrics instance.
         http_config: Optional HTTP configuration.
         client: Optional pre-created client.
-        field_provider: Optional field provider.
+        filter_enricher: Optional filter enricher for adding domain defaults.
         parser: Optional parser instance (defaults to ChemblGenericResponseParser).
 
     Returns:
@@ -131,7 +131,7 @@ def create_chembl_extraction_service(
         logger=logger,
         # Allow provider config to set batch_size while keeping a generous hard cap
         batch_size=config.resolve_effective_batch_size(hard_cap=1000),
-        field_provider=field_provider,
+        filter_enricher=filter_enricher,
         parser=parser or ChemblGenericResponseParser(),
     )
 
@@ -166,7 +166,7 @@ def default_chembl_extraction_service(
     http_config: HttpClientConfig | None = None,
     *,
     client: DataClientABC | None = None,
-    field_provider: DefaultFieldProviderABC | None = None,
+    filter_enricher: FilterEnricherABC | None = None,
     parser: ResponseParserPortABC | None = None,
 ) -> ExtractionServiceABC:
     """DEPRECATED: Use create_chembl_extraction_service() instead."""
@@ -182,6 +182,6 @@ def default_chembl_extraction_service(
         metrics,
         http_config,
         client=client,
-        field_provider=field_provider,
+        filter_enricher=filter_enricher,
         parser=parser,
     )

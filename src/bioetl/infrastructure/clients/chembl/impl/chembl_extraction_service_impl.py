@@ -11,8 +11,8 @@ from bioetl.domain.ports.extraction import (
     RawRecordBatch,
     VersionProviderABC,
 )
+from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.parsing import ResponseParserPortABC
-from bioetl.domain.ports.providers import DefaultFieldProviderABC
 from bioetl.infrastructure.clients.chembl.constants import ENTITY_ENDPOINT_ALIASES
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
@@ -32,14 +32,14 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         client: DataClientABC,
         logger: LoggingPortABC,
         batch_size: int = 1000,
-        field_provider: DefaultFieldProviderABC | None = None,
+        filter_enricher: FilterEnricherABC | None = None,
         *,
         parser: ResponseParserPortABC | None = None,
     ) -> None:
         self.client = client
         self.batch_size = batch_size
         self.logger = logger
-        self.field_provider = field_provider
+        self._filter_enricher = filter_enricher
         self._parser = parser or ChemblGenericResponseParser()
         self._version_cache: str | None = None
 
@@ -73,25 +73,13 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
 
         return self._version_cache
 
-    def _attach_entity_fields(
+    def _enrich_filters(
         self, entity: str, filters: dict[str, object]
     ) -> dict[str, object]:
-        """Attach default fields to filters if configured."""
-        if not self.field_provider:
+        """Enrich filters using injected enricher if available."""
+        if self._filter_enricher is None:
             return filters
-
-        # Skip if fields already specified
-        if "fields" in filters:
-            return filters
-
-        new_filters = filters.copy()
-
-        # Use get_default_fields as expected by tests/contracts
-        fields = self.field_provider.get_default_fields(entity)
-        if fields:
-            new_filters["fields"] = ",".join(fields)
-
-        return new_filters
+        return self._filter_enricher.enrich_filters(entity, filters)
 
     def extract_all(self, entity: str, **filters: object) -> RawRecordBatch:
         """Extract all records for an entity as raw dicts.
@@ -116,8 +104,8 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             chunk_size = filters.get("limit", self.batch_size)
         filters["limit"] = chunk_size
 
-        # Attach default fields if applicable
-        filters = self._attach_entity_fields(entity, filters)
+        # Enrich filters using application-layer logic if available
+        filters = self._enrich_filters(entity, filters)
 
         # Ensure client has request_builder (runtime check)
         if not hasattr(self.client, "request_builder"):

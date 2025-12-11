@@ -27,6 +27,7 @@ from bioetl.domain.ports.parsing import (
     PaginationInfo,
     ResponseParserPortABC,
 )
+from bioetl.domain.ports.filters import FilterEnricherABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.data import RecordBatch
 from bioetl.domain.types import ApiPayload
@@ -67,6 +68,8 @@ __all__: list[str] = [
     "RawPayload",
     # Entity model ports
     "EntityModelRegistryABC",
+    # Filter ports
+    "FilterEnricherABC",
     # Extraction ports
     "BatchAdapterABC",
     "ExtractionServiceABC",
