@@ -1,3 +1,5 @@
+"""Application context helpers for sharing infra dependencies across interfaces."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

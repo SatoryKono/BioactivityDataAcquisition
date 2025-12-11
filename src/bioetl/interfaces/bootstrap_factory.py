@@ -46,6 +46,7 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
     def factory(
         contract_provider: SchemaContractProviderABC,
     ) -> PipelineConfigLoaderProtocol:
+        """Build a config loader bound to the provided schema contracts."""
         def get_by_id(
             pipeline_id: str,
             *,
@@ -54,6 +55,7 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
             env_overrides: dict[str, Any] | None = None,
             base_dir: str | Path | None = None,
         ) -> PipelineConfig:
+            """Load pipeline config by id with optional overrides."""
             return get_pipeline_config(
                 pipeline_id,
                 schema_contract_provider=contract_provider,
@@ -71,6 +73,7 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
             cli_overrides: dict[str, Any] | None = None,
             env_overrides: dict[str, Any] | None = None,
         ) -> PipelineConfig:
+            """Load pipeline config from an explicit file path."""
             return get_pipeline_config_from_path(
                 config_path,
                 schema_contract_provider=contract_provider,
@@ -100,6 +103,7 @@ def _create_provider_injector() -> ProviderInjector:
     from bioetl.infrastructure.config.loader import _set_provider_internal
 
     def injector(provider: SchemaContractProviderABC) -> None:
+        """Inject provider instance into infrastructure config loader."""
         _set_provider_internal(provider)
 
     return injector
@@ -114,6 +118,7 @@ def _create_provider_clearer() -> ProviderClearer:
     from bioetl.infrastructure.config.loader import _clear_provider_internal
 
     def clearer() -> None:
+        """Clear injected provider from infrastructure config loader."""
         _clear_provider_internal()
 
     return clearer

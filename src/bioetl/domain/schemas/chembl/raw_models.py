@@ -84,6 +84,7 @@ class ActivityRawModel(SourceRecordModel):
     @field_validator("pchembl_value")
     @classmethod
     def validate_pchembl_range(cls, v: float | None) -> float | None:
+        """Ensure pchembl_value stays within the valid 0–20 range."""
         if v is not None and not (0 <= v <= 20):
             raise ValueError(f"pchembl_value must be 0-20, got {v}")
         return v
@@ -91,6 +92,7 @@ class ActivityRawModel(SourceRecordModel):
     @field_validator("standard_relation")
     @classmethod
     def validate_standard_relation(cls, v: str | None) -> str | None:
+        """Validate standard_relation against the allowed relation symbols."""
         valid = {"=", ">", "<", ">=", "<=", "~", None}
         if v not in valid:
             raise ValueError(f"Invalid standard_relation: {v}")

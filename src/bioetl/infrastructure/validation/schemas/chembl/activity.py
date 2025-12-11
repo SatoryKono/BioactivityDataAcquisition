@@ -99,7 +99,8 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
         nullable=True, description="Textual assay description"
     )
     assay_type: Series[str] = pa.Field(
-        isin=["B", "F", "b", "f"], description="Assay type (B=binding, F=functional)"
+        isin=["B", "F", "A", "T", "P", "U", "b", "f", "a", "t", "p", "u"],
+        description="Assay type (B=binding, F=functional, A=ADMET, T=toxicity, P=physicochemical, U=unknown)",
     )
     assay_variant_accession: Series[str] = pa.Field(
         nullable=True, description="Protein variant accession"
@@ -165,8 +166,8 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     )
     relation: Series[str] = pa.Field(
         nullable=True,
-        isin=["="],
-        description="Original relation (=)",
+        isin=["=", ">", "<", ">=", "<=", "~"],
+        description="Original relation (=, >, <, etc.)",
     )
     src_id: Series[float] = pa.Field(nullable=True, description="Data source ID")
     standard_flag: Series[bool] = pa.Field(
@@ -174,7 +175,7 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     )
     standard_relation: Series[str] = pa.Field(
         nullable=True,
-        isin=["="],
+        isin=["=", ">", "<", ">=", "<=", "~"],
         description="Standardized relation",
     )
     standard_text_value: Series[str] = pa.Field(
