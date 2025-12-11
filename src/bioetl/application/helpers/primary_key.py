@@ -13,6 +13,31 @@ if TYPE_CHECKING:
     from bioetl.domain.configs import PipelineConfig
 
 
+def _get_primary_keys_from_config(config: PipelineConfig) -> list[str] | str | None:
+    """Extract primary keys from config, handling both identity.primary_key and primary_key."""
+    try:
+        return getattr(config, "identity").primary_key
+    except Exception:
+        return getattr(config, "primary_key", None)
+
+
+def _get_entity_name_from_config(config: PipelineConfig) -> str | None:
+    """Extract entity name from config, handling both entity_name and entity."""
+    try:
+        return getattr(config, "entity_name")
+    except Exception:
+        return getattr(config, "entity", None)
+
+
+def _extract_first_primary_key(primary_keys: list[str] | str | None) -> str | None:
+    """Extract first primary key from list or string."""
+    if not primary_keys:
+        return None
+    if isinstance(primary_keys, list):
+        return primary_keys[0] if primary_keys and primary_keys[0] else None
+    return primary_keys if isinstance(primary_keys, str) else None
+
+
 def resolve_primary_key(
     config: PipelineConfig,
     *,
@@ -41,40 +66,27 @@ def resolve_primary_key(
         >>> pk = resolve_primary_key(config)
         >>> pk = resolve_primary_key(config, fallback="id")
     """
-    pk: str | None = None
-    try:
-        primary_keys = getattr(config, "identity").primary_key
-    except Exception:
-        primary_keys = getattr(config, "primary_key", None)
-    if primary_keys:
-        if isinstance(primary_keys, list):
-            if len(primary_keys) > 0 and primary_keys[0]:
-                pk = primary_keys[0]
-        elif isinstance(primary_keys, str) and primary_keys:
-            pk = primary_keys
+    # Try to get primary key from config
+    primary_keys = _get_primary_keys_from_config(config)
+    pk = _extract_first_primary_key(primary_keys)
 
+    # Fallback to convention-based naming
     if not pk:
-        try:
-            entity_name = getattr(config, "entity_name")
-        except Exception:
-            entity_name = getattr(config, "entity", None)
+        entity_name = _get_entity_name_from_config(config)
         if not entity_name:
             raise ValueError("Missing entity name in config")
         pk = f"{entity_name}_id"
 
+    # Use provided fallback
     if not pk and fallback is not None:
         pk = fallback
 
+    # Final validation
     if not pk:
-        try:
-            entity_name = getattr(config, "entity_name")
-        except Exception:
-            entity_name = getattr(config, "entity", "unknown")
+        entity_name = _get_entity_name_from_config(config) or "unknown"
         raise ValueError(
-            (
-                "Could not resolve primary key for entity "
-                f"'{entity_name}'. Please set 'primary_key' in config."
-            )
+            f"Could not resolve primary key for entity '{entity_name}'. "
+            "Please set 'primary_key' in config."
         )
 
     return pk
