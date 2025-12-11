@@ -128,6 +128,19 @@ class SchemaContractLoader:
         """Get the schema contract provider."""
         return self._schema_contract_provider
 
+    @staticmethod
+    def _handle_file_not_found(exc: FileNotFoundError) -> None:
+        """Convert FileNotFoundError to ConfigFileNotFoundError.
+
+        Args:
+            exc: The original FileNotFoundError.
+
+        Raises:
+            ConfigFileNotFoundError: Always raised with extracted path.
+        """
+        path_str = str(exc).rsplit(": ", maxsplit=1)[-1]
+        raise ConfigFileNotFoundError(Path(path_str)) from exc
+
     def get_pipeline_config(
         self,
         pipeline_id: str,
@@ -161,8 +174,7 @@ class SchemaContractLoader:
                 base_dir=base_dir,
             )
         except FileNotFoundError as exc:
-            path_str = str(exc).rsplit(": ", maxsplit=1)[-1]
-            raise ConfigFileNotFoundError(Path(path_str)) from exc
+            self._handle_file_not_found(exc)
 
         return _build_config(
             raw_config,
@@ -206,8 +218,7 @@ class SchemaContractLoader:
                 profiles_root=profiles_root,
             )
         except FileNotFoundError as exc:
-            path_str = str(exc).rsplit(": ", maxsplit=1)[-1]
-            raise ConfigFileNotFoundError(Path(path_str)) from exc
+            self._handle_file_not_found(exc)
 
         return _build_config(
             raw_config,
@@ -222,6 +233,21 @@ class SchemaContractLoader:
 # ============================================================================
 # Module-level functions (require explicit provider)
 # ============================================================================
+
+
+def _handle_file_not_found_error(exc: FileNotFoundError) -> None:
+    """Convert FileNotFoundError to ConfigFileNotFoundError.
+
+    Helper function for module-level config loading functions.
+
+    Args:
+        exc: The original FileNotFoundError.
+
+    Raises:
+        ConfigFileNotFoundError: Always raised with extracted path.
+    """
+    path_str = str(exc).rsplit(": ", maxsplit=1)[-1]
+    raise ConfigFileNotFoundError(Path(path_str)) from exc
 
 
 def get_pipeline_config(
@@ -259,8 +285,7 @@ def get_pipeline_config(
             base_dir=base_dir,
         )
     except FileNotFoundError as exc:
-        path_str = str(exc).rsplit(": ", maxsplit=1)[-1]
-        raise ConfigFileNotFoundError(Path(path_str)) from exc
+        _handle_file_not_found_error(exc)
 
     return _build_config(
         raw_config,
@@ -307,8 +332,7 @@ def get_pipeline_config_from_path(
             profiles_root=profiles_root,
         )
     except FileNotFoundError as exc:
-        path_str = str(exc).rsplit(": ", maxsplit=1)[-1]
-        raise ConfigFileNotFoundError(Path(path_str)) from exc
+        _handle_file_not_found_error(exc)
 
     return _build_config(
         raw_config,
