@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 
 from bioetl.domain.observability.contracts import LoggingPortABC
-from bioetl.infrastructure.logging.factories import default_logger
+from bioetl.infrastructure.observability.factories import create_logging_port
 from bioetl.interfaces.cli.app import app
 
 # Pipeline dependency order
@@ -78,7 +78,7 @@ def run_pipeline(name: str, limit: int, logger: LoggingPortABC) -> dict:
 
 
 def main():
-    logger = default_logger().apply_bind(
+    logger = create_logging_port().apply_bind(
         pipeline="chembl_all", entity="chembl", stage="runner"
     )
 

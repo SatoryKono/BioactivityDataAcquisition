@@ -139,7 +139,7 @@ def _delete(paths: Iterable[Path]) -> Tuple[int, int]:
 
 
 def main() -> int:
-    from bioetl.infrastructure.logging.factories import default_logger
+    from bioetl.infrastructure.observability.factories import create_logging_port
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
@@ -147,7 +147,7 @@ def main() -> int:
     ap.add_argument("--purge-logs", action="store_true")
     args = ap.parse_args()
 
-    logger = default_logger().apply_bind(task="cleanup_project")
+    logger = create_logging_port().apply_bind(task="cleanup_project")
     root = PROJECT_ROOT
     patterns = _whitelist_patterns()
     candidates = _iter_candidates(root, patterns)
