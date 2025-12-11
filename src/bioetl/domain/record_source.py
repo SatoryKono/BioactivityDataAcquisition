@@ -56,12 +56,17 @@ See also:
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict
+
+from bioetl.domain._deprecations import (
+    emit_deprecation_warning,
+    resolve_deprecated_type,
+    get_deprecated_names_for_module,
+)
 
 
 class SourceRecordModel(BaseModel):
@@ -108,16 +113,18 @@ SourceRecord = SourceRecordModel
 """
 
 
+# Get deprecated names for this module from central registry
+_DEPRECATED_NAMES = get_deprecated_names_for_module(__name__)
+
+
 def __getattr__(name: str) -> Any:
-    """Module-level __getattr__ for deprecation warnings."""
-    if name == "SourceRecord":
-        warnings.warn(
-            "SourceRecord is deprecated, use SourceRecordModel instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return SourceRecordModel
+    """Module-level __getattr__ for deprecation warnings.
+
+    Uses centralized deprecation registry from bioetl.domain._deprecations.
+    """
+    if name in _DEPRECATED_NAMES:
+        emit_deprecation_warning(name, stacklevel=2)
+        return resolve_deprecated_type(name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
