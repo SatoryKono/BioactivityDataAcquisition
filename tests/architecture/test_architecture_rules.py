@@ -472,52 +472,71 @@ def test_no_cross_module_private_attribute_access() -> None:
     for path in sorted(_iter_python_files(BIOETL_ROOT)):
         tree = ast.parse(path.read_text(encoding="utf-8"))
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Attribute):
+        class ContextVisitor(ast.NodeVisitor):
+            def __init__(self) -> None:
+                self.violations: list[str] = []
+                self.current_function: str | None = None
+
+            def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+                old_function = self.current_function
+                self.current_function = node.name
+                self.generic_visit(node)
+                self.current_function = old_function
+
+            def visit_Attribute(self, node: ast.Attribute) -> None:
                 attr_name = node.attr
                 # Skip dunder methods and non-private attributes
                 if not attr_name.startswith("_") or attr_name.startswith("__"):
-                    continue
+                    self.generic_visit(node)
+                    return
 
                 # Skip cls._method calls (class method calls are legitimate)
                 if isinstance(node.value, ast.Name) and node.value.id == "cls":
-                    continue
+                    self.generic_visit(node)
+                    return
 
                 # Skip other._value in comparison methods (value object pattern)
-                if isinstance(node.value, ast.Name) and node.value.id == "other":
-                    # Check if we're in a comparison method
-                    parent = node
-                    for _ in range(10):  # Check up to 10 levels up
-                        if hasattr(parent, "parent"):
-                            parent = parent.parent
-                        else:
-                            break
-                        # Check if we're in __eq__, __lt__, __le__, __gt__, __ge__
-                        if isinstance(parent, ast.FunctionDef):
-                            if parent.name in ("__eq__", "__lt__", "__le__", "__gt__", "__ge__", "__hash__"):
-                                break
-                    else:
-                        # Not in a comparison method, check if it's _value
-                        if attr_name == "_value":
-                            continue
+                comparison_methods = (
+                    "__eq__",
+                    "__lt__",
+                    "__le__",
+                    "__gt__",
+                    "__ge__",
+                    "__hash__",
+                )
+                if (
+                    isinstance(node.value, ast.Name)
+                    and node.value.id == "other"
+                    and attr_name == "_value"
+                    and self.current_function
+                    and self.current_function in comparison_methods
+                ):
+                    self.generic_visit(node)
+                    return
 
                 # Check if it's accessing on something other than self
                 if isinstance(node.value, ast.Name):
                     if node.value.id != "self":
                         # Accessing _private on a variable (not self)
-                        violations.append(
+                        self.violations.append(
                             f"{path}:{node.lineno}: {node.value.id}.{attr_name}"
                         )
                 elif isinstance(node.value, ast.Attribute):
                     # Chain access like obj.sub._private
                     # Skip cls._method patterns
                     if (
-                        isinstance(node.value, ast.Attribute)
-                        and isinstance(node.value.value, ast.Name)
+                        isinstance(node.value.value, ast.Name)
                         and node.value.value.id == "cls"
                     ):
-                        continue
-                    violations.append(f"{path}:{node.lineno}: ....{attr_name}")
+                        self.generic_visit(node)
+                        return
+                    self.violations.append(f"{path}:{node.lineno}: ....{attr_name}")
+
+                self.generic_visit(node)
+
+        visitor = ContextVisitor()
+        visitor.visit(tree)
+        violations = visitor.violations
 
     # Filter to keep only likely cross-module violations
     # Some false positives are expected (e.g., testing, internal use)
