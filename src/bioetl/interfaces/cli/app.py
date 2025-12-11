@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Annotated, Any
 
 from rich.console import Console
@@ -11,6 +11,7 @@ import typer
 
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.application.use_cases import RunPipelineRequest, RunPipelineResponse
+from bioetl.infrastructure.config.sources import get_configs_root
 from bioetl.interfaces.use_case_factory import get_use_case_factory
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
@@ -54,13 +55,24 @@ def build_runtime_config(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN201
     return _brc(*args, **kwargs)
 
 
-def _resolve_config_path(config: str | None) -> Path:
+def _resolve_config_path(config: str | None) -> Path | None:
+    """Resolve config path using provided value or BIOETL_CONFIG_DIR."""
+
     if not config:
-        raise FileNotFoundError("Config file not found: none provided")
-    p = Path(config)
-    if not p.exists():
-        raise FileNotFoundError(f"Config file not found: {config}")
-    return p
+        return None
+
+    provided_path = Path(config)
+    if provided_path.exists():
+        return provided_path
+
+    configs_root = get_configs_root(None)
+    candidate = configs_root / config
+    if candidate.exists():
+        return candidate
+
+    raise FileNotFoundError(
+        f"Config file not found: {config}; tried {provided_path} and {candidate}"
+    )
 
 
 @app.command()
@@ -72,9 +84,11 @@ def validate_config(
     from bioetl.infrastructure.config.sources import get_configs_root
     from bioetl.interfaces.application_context import get_application_context
 
-    config_file = Path(config_path)
-    if not config_file.exists():
-        console.print(f"[red]Error:[/red] Config file not found: {config_path}")
+    config_file = _resolve_config_path(config_path)
+    if config_file is None or not config_file.exists():
+        console.print(
+            f"[red]Error:[/red] Config file not found: {config_path}"
+        )
         raise typer.Exit(1)
 
     try:
@@ -115,7 +129,7 @@ def run(
         # 1. Build request from CLI args
         request = RunPipelineRequest(
             pipeline_name=pipeline_name,
-            config_path=Path(config) if config else None,
+            config_path=_resolve_config_path(config),
             output_path=Path(output) if output else None,
             limit=limit,
             dry_run=dry_run,
