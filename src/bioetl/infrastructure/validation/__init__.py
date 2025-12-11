@@ -35,6 +35,12 @@ from bioetl.infrastructure.validation.factories import (
     default_validator_factory,
 )
 from bioetl.infrastructure.validation.impl.pandera_validator import PanderaValidatorImpl
+from bioetl.infrastructure.validation.schema_generator import (
+    PanderaSchemaGenerator,
+    YamlColumnOrderLoader,
+    generate_schema_from_column_order,
+    load_column_order_from_yaml,
+)
 
 __all__ = [
     "PanderaSchemaProviderFactory",
@@ -46,4 +52,9 @@ __all__ = [
     # Deprecated aliases
     "default_schema_provider_factory",
     "default_validator_factory",
+    # Schema generation (moved from domain)
+    "PanderaSchemaGenerator",
+    "YamlColumnOrderLoader",
+    "generate_schema_from_column_order",
+    "load_column_order_from_yaml",
 ]
