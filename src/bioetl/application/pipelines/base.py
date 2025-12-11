@@ -136,7 +136,7 @@ class PipelineBase(ABC):
                 business_key_fields=business_key_fields,
                 version_provider=self.get_version,
             )
-        from bioetl.application.pipelines.hooks_impl import (  # pylint: disable=import-outside-toplevel
+        from bioetl.application.factories.hooks_impl import (  # pylint: disable=import-outside-toplevel
             FailFastErrorPolicyImpl,
         )
 
