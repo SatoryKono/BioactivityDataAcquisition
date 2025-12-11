@@ -106,7 +106,7 @@ ignore_errors = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["tests"]
+testpaths = ["tests/bioetl", "tests/unit", "tests/integration", "tests/golden"]
 addopts = [
     "-ra",
     "-q",
