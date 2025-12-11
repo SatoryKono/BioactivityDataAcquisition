@@ -9,10 +9,7 @@ import pandas as pd
 
 from bioetl.application.helpers import resolve_primary_key_with_filter
 from bioetl.application.mappers.chembl import ChemblRecordMapper
-from bioetl.application.pipelines.base import (
-    PipelineBase,
-    _create_default_metadata_builder,
-)
+from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.transformer import ChemblTransformerImpl
 from bioetl.application.pipelines.stages.extract import ExtractStage
 from bioetl.domain.clients.base.output.contracts import (
@@ -101,7 +98,7 @@ class ChemblPipelineBase(PipelineBase):
             hash_service=hash_service,
             index_generator=index_generator,
             timestamp_provider=timestamp_provider,
-            metadata_builder=metadata_builder or _create_default_metadata_builder(),
+            metadata_builder=metadata_builder,
             extractor=extractor,
             hooks=hooks,
             error_policy=error_policy,

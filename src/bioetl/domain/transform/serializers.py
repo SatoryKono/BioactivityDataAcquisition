@@ -176,8 +176,11 @@ def _is_missing(value: Any) -> bool:
     if value is None:
         return True
 
-    # Check for NaN-like values (including pd.NA) using != comparison
-    # This works for pd.NA because pd.NA != pd.NA is True
+    # Check for pandas.NA (NAType) without importing pandas
+    if type(value).__name__ == "NAType":
+        return True
+
+    # Check for NaN-like values
     try:
         return bool(value != value)
     except (TypeError, ValueError):
