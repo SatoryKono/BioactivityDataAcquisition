@@ -136,7 +136,7 @@ class ActivityTableSchema(BaseGeneratedColumnsSchema):
     document_year: Series[float] = pa.Field(
         nullable=True, description="Publication year"
     )
-    ligand_efficiency: Series[str] = pa.Field(
+    ligand_efficiency: Series[object] = pa.Field(
         nullable=True, description="Ligand efficiency metrics (JSON)"
     )
     molecule_chembl_id: Series[str] = pa.Field(
