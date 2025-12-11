@@ -105,7 +105,8 @@ def __getattr__(name: str) -> Any:
     """Support deprecated class names with warnings.
 
     Allows backward-compatible imports like:
-        from bioetl.infrastructure.clients.chembl.response_parser import ChemblResponseParserImpl
+        from bioetl.infrastructure.clients.chembl.response_parser import
+        ChemblResponseParserImpl
 
     But emits a DeprecationWarning directing users to the new name.
     """
