@@ -14,7 +14,7 @@ from bioetl.infrastructure.config.loader import (
     get_pipeline_config_from_path,
     get_schema_contract_provider,
 )
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
+from bioetl.application.bootstrap_factory import create_default_bootstrap
 
 if TYPE_CHECKING:
     pass
