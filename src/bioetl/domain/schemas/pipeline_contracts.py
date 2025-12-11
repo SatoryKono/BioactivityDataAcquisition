@@ -1,25 +1,20 @@
 """Pipeline schema contracts and registry.
 
 This module defines pipeline schema contracts that map pipeline identifiers
-to their input/output schema names. The contracts can be loaded from:
-
-1. External configuration (YAML) via injected loader - preferred
-2. Hardcoded fallback dictionary - for backward compatibility
+to their input/output schema names. Contracts are loaded from external
+configuration (YAML) via an injected loader.
 
 Architecture notes:
     The domain layer does not import infrastructure. External loaders are
-    injected via the PipelineContractLoaderPortABC port. If no loader is
-    configured, the module falls back to PIPELINE_CONTRACTS dictionary.
+    injected via the PipelineContractLoaderPortABC port. A loader MUST be
+    configured before using contract functions.
 
 Example:
-    >>> # Using default (hardcoded) contracts
-    >>> contract = get_pipeline_contract("chembl.activity")
-    >>> print(contract.schema_out)  # "activity"
-
-    >>> # With injected loader (set up by application layer)
+    >>> # Set up loader (typically done in application bootstrap)
     >>> from bioetl.infrastructure.config import get_default_contract_loader
     >>> set_contract_loader(get_default_contract_loader())
     >>> contract = get_pipeline_contract("chembl.activity")
+    >>> print(contract.schema_out)  # "activity"
 """
 
 from __future__ import annotations
@@ -32,6 +27,16 @@ if TYPE_CHECKING:
     from bioetl.domain.ports.pipeline_contract_loader import (
         PipelineContractLoaderPortABC,
     )
+
+
+class ContractLoaderNotConfiguredError(RuntimeError):
+    """Raised when contract loader is not configured."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "Pipeline contract loader is not configured. "
+            "Call set_contract_loader() during application bootstrap."
+        )
 
 
 @dataclass(frozen=True)
@@ -75,47 +80,6 @@ def _default_contract(code: str, entity: str | None) -> PipelineSchemaModel:
 
 
 # =============================================================================
-# Hardcoded fallback contracts (backward compatibility)
-# =============================================================================
-# NOTE: These contracts are maintained for backward compatibility.
-# New pipelines should be added to configs/pipeline_contracts.yaml instead.
-# This dictionary will be deprecated in a future version.
-
-PIPELINE_CONTRACTS: dict[str, PipelineSchemaModel] = {
-    "chembl.activity": PipelineSchemaModel(
-        pipeline_code="chembl.activity",
-        schema_out="activity",
-        schema_in="activity_input",
-        output_schema="activity_output",
-    ),
-    "chembl.assay": PipelineSchemaModel(
-        pipeline_code="chembl.assay",
-        schema_out="assay",
-        schema_in="assay_input",
-        output_schema="assay_output",
-    ),
-    "chembl.document": PipelineSchemaModel(
-        pipeline_code="chembl.document",
-        schema_out="document",
-        schema_in="document_input",
-        output_schema="document_output",
-    ),
-    "chembl.target": PipelineSchemaModel(
-        pipeline_code="chembl.target",
-        schema_out="target",
-        schema_in="target_input",
-        output_schema="target_output",
-    ),
-    "chembl.molecule": PipelineSchemaModel(
-        pipeline_code="chembl.molecule",
-        schema_out="molecule",
-        schema_in="molecule_input",
-        output_schema="molecule_output",
-    ),
-}
-
-
-# =============================================================================
 # Contract loader injection (dependency inversion)
 # =============================================================================
 
@@ -150,8 +114,16 @@ def get_contract_loader() -> PipelineContractLoaderPortABC | None:
 
 
 def clear_contract_loader() -> None:
-    """Clear contract loader, reverting to hardcoded fallback."""
+    """Clear contract loader."""
     _CONTRACT_LOADER_CTX.set(None)
+
+
+def _require_loader() -> "PipelineContractLoaderPortABC":
+    """Get loader or raise if not configured."""
+    loader = get_contract_loader()
+    if loader is None:
+        raise ContractLoaderNotConfiguredError()
+    return loader
 
 
 # =============================================================================
@@ -164,9 +136,8 @@ def get_pipeline_contract(
 ) -> PipelineSchemaModel:
     """Return schema contract for pipeline.
 
-    This function first tries to load the contract from an injected loader
-    (if configured), then falls back to the hardcoded PIPELINE_CONTRACTS
-    dictionary.
+    Loads contract from the configured external loader. If the contract
+    is not found, returns a default contract based on the pipeline code.
 
     Args:
         pipeline_code: Pipeline identifier (e.g., "chembl.activity").
@@ -175,37 +146,29 @@ def get_pipeline_contract(
     Returns:
         PipelineSchemaModel with schema names for the pipeline.
 
+    Raises:
+        ContractLoaderNotConfiguredError: If no loader is configured.
+
     Example:
         >>> contract = get_pipeline_contract("chembl.activity")
         >>> print(contract.schema_out)  # "activity"
         >>> print(contract.schema_in)   # "activity_input"
     """
-    # Try injected loader first
-    loader = get_contract_loader()
-    if loader is not None:
-        return loader.get_contract(pipeline_code, default_entity=default_entity)
-
-    # Fallback to hardcoded contracts
-    if pipeline_code in PIPELINE_CONTRACTS:
-        return PIPELINE_CONTRACTS[pipeline_code]
-
-    return _default_contract(pipeline_code, default_entity)
+    loader = _require_loader()
+    return loader.get_contract(pipeline_code, default_entity=default_entity)
 
 
 def list_pipeline_codes() -> list[str]:
-    """List all available pipeline codes.
-
-    Returns contracts from injected loader if configured, otherwise
-    from hardcoded dictionary.
+    """List all available pipeline codes from the configured loader.
 
     Returns:
         List of pipeline code strings.
-    """
-    loader = get_contract_loader()
-    if loader is not None:
-        return loader.list_pipeline_codes()
 
-    return list(PIPELINE_CONTRACTS.keys())
+    Raises:
+        ContractLoaderNotConfiguredError: If no loader is configured.
+    """
+    loader = _require_loader()
+    return loader.list_pipeline_codes()
 
 
 def has_pipeline_contract(pipeline_code: str) -> bool:
@@ -216,17 +179,17 @@ def has_pipeline_contract(pipeline_code: str) -> bool:
 
     Returns:
         True if contract is explicitly defined.
-    """
-    loader = get_contract_loader()
-    if loader is not None:
-        return loader.has_contract(pipeline_code)
 
-    return pipeline_code in PIPELINE_CONTRACTS
+    Raises:
+        ContractLoaderNotConfiguredError: If no loader is configured.
+    """
+    loader = _require_loader()
+    return loader.has_contract(pipeline_code)
 
 
 __all__ = [
+    "ContractLoaderNotConfiguredError",
     "PipelineSchemaModel",
-    "PIPELINE_CONTRACTS",
     "get_pipeline_contract",
     "list_pipeline_codes",
     "has_pipeline_contract",

@@ -1,60 +1,139 @@
 #!/usr/bin/env python
-"""Unified wrapper script to run ChEMBL pipelines.
+"""Unified wrapper script to run pipelines.
 
 Usage:
-    python run_pipeline.py activity    # Run activity_chembl pipeline
-    python run_pipeline.py assay       # Run assay_chembl pipeline
-    python run_pipeline.py molecule    # Run molecule_chembl pipeline
-    python run_pipeline.py target      # Run target_chembl pipeline
-    python run_pipeline.py publication # Run publication_chembl pipeline
+    python run_pipeline.py activity       # Run chembl.activity pipeline
+    python run_pipeline.py chembl.assay   # Run chembl.assay pipeline
+    python run_pipeline.py --list         # List available pipelines
 
-This script replaces the individual run_*.py scripts for a cleaner interface.
+This script dynamically discovers pipeline configurations from the
+configs/pipelines directory and supports running any configured pipeline.
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 import sys
+from typing import TYPE_CHECKING
 
-PIPELINES = {
-    "activity": {
-        "name": "activity_chembl",
-        "config": "configs/pipelines/chembl/activity.yaml",
-        "output": "data/output/chembl/activity",
-    },
-    "assay": {
-        "name": "assay_chembl",
-        "config": "configs/pipelines/chembl/assay.yaml",
-        "output": "data/output/chembl/assay",
-    },
-    "molecule": {
-        "name": "molecule_chembl",
-        "config": "configs/pipelines/chembl/molecule.yaml",
-        "output": "data/output/chembl/molecule",
-    },
-    "target": {
-        "name": "target_chembl",
-        "config": "configs/pipelines/chembl/target.yaml",
-        "output": "data/output/chembl/target",
-    },
-    "publication": {
-        "name": "publication_chembl",
-        "config": "configs/pipelines/chembl/publication.yaml",
-        "output": "data/output/chembl/publication",
-    },
-}
+if TYPE_CHECKING:
+    from typing import Any
+
+# Root directory for this project
+REPO_ROOT = Path(__file__).resolve().parent
+PIPELINES_ROOT = REPO_ROOT / "configs" / "pipelines"
+
+
+def _load_yaml(path: Path) -> dict[str, Any]:
+    """Load YAML file without importing heavy dependencies."""
+    import yaml  # Lazy import
+
+    with path.open() as f:
+        return yaml.safe_load(f) or {}
+
+
+def discover_pipelines() -> dict[str, dict[str, str]]:
+    """Discover available pipelines from config files.
+
+    Returns:
+        Dictionary mapping shorthand names to pipeline info:
+        - 'config': path to config file
+        - 'name': pipeline name from config
+        - 'output': output path from config
+    """
+    pipelines: dict[str, dict[str, str]] = {}
+
+    if not PIPELINES_ROOT.exists():
+        return pipelines
+
+    for config_path in sorted(PIPELINES_ROOT.rglob("*.yaml")):
+        try:
+            config = _load_yaml(config_path)
+        except Exception:
+            continue
+
+        # Extract pipeline info from config
+        pipeline_id = config.get("id", "")
+        entity = config.get("entity", config_path.stem)
+        pipeline_name = config.get("pipeline", {}).get("name", f"{entity}_chembl")
+        output_path = config.get("output_path", f"data/output/{entity}")
+
+        # Use relative config path
+        rel_config = config_path.relative_to(REPO_ROOT)
+
+        pipeline_info = {
+            "config": str(rel_config),
+            "name": pipeline_name,
+            "output": output_path,
+        }
+
+        # Register by full pipeline_id (e.g., "chembl.activity")
+        if pipeline_id:
+            pipelines[pipeline_id] = pipeline_info
+
+        # Also register by entity shorthand (e.g., "activity")
+        if entity and entity not in pipelines:
+            pipelines[entity] = pipeline_info
+
+    return pipelines
+
+
+def list_pipelines() -> None:
+    """Print list of available pipelines."""
+    pipelines = discover_pipelines()
+
+    if not pipelines:
+        print("No pipelines found in configs/pipelines/")
+        return
+
+    print("Available pipelines:")
+    print()
+
+    # Group by provider
+    seen_configs: set[str] = set()
+    for key in sorted(pipelines.keys()):
+        info = pipelines[key]
+        config = info["config"]
+        if config in seen_configs:
+            continue
+        seen_configs.add(config)
+
+        print(f"  {key:20} -> {config}")
+    print()
+    print("Usage: python run_pipeline.py <pipeline> [--limit N] [--dry-run]")
 
 
 def main() -> None:
     """Configure path, set arguments, and run the CLI app."""
-    if len(sys.argv) < 2 or sys.argv[1] not in PIPELINES:
-        print(f"Usage: {sys.argv[0]} <pipeline>")
-        print(f"Available pipelines: {', '.join(PIPELINES.keys())}")
-        sys.exit(1)
+    # Handle --list flag
+    if len(sys.argv) >= 2 and sys.argv[1] in ("--list", "-l"):
+        list_pipelines()
+        return
+
+    # Discover available pipelines
+    pipelines = discover_pipelines()
+
+    if len(sys.argv) < 2 or sys.argv[1] in ("--help", "-h"):
+        print(f"Usage: {sys.argv[0]} <pipeline> [options]")
+        print(f"       {sys.argv[0]} --list")
+        print()
+        print("Available pipelines:")
+        for key in sorted(set(p["config"] for p in pipelines.values())):
+            # Find entity name for this config
+            entity = next(k for k, v in pipelines.items() if v["config"] == key and "." not in k)
+            print(f"  {entity}")
+        sys.exit(0 if "--help" in sys.argv or "-h" in sys.argv else 1)
 
     pipeline_key = sys.argv[1]
-    pipeline = PIPELINES[pipeline_key]
+    if pipeline_key not in pipelines:
+        print(f"Error: Unknown pipeline '{pipeline_key}'")
+        print(f"Use --list to see available pipelines")
+        sys.exit(1)
+
+    pipeline = pipelines[pipeline_key]
 
     # Configure path
-    src_dir = Path(__file__).parent / "src"
+    src_dir = REPO_ROOT / "src"
     src_str = str(src_dir)
     if src_str in sys.path:
         sys.path.remove(src_str)

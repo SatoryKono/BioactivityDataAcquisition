@@ -1,22 +1,27 @@
-# План рефакторинга архитектуры BioETL
+# Консолидированный план рефакторинга архитектуры BioETL
 
 **Дата обновления:** 2025-12-11
-**Интегральный балл архитектуры:** 6.15/10
-**Целевой балл:** 7.2–7.5
+**Базовый интегральный балл:** 6.1 - 8.3 (среднее ~7.0/10)
+**Целевой балл:** 8.5 - 9.0/10
 **Статус:** В работе
+
+> Этот документ консолидирует результаты 9 архитектурных обзоров и является каноничным источником для планирования рефакторинга.
 
 ---
 
 ## Оглавление
 
 1. [Краткое резюме](#краткое-резюме)
-2. [Архитектурная оценка](#архитектурная-оценка)
-3. [Фаза 1: Устранение доменных прокси инфраструктуры](#фаза-1-устранение-доменных-прокси-инфраструктуры)
-4. [Фаза 2: Полноценная регистрация схем и валидации](#фаза-2-полноценная-регистрация-схем-и-валидации)
-5. [Фаза 3: Избавление от глобального реестра провайдеров](#фаза-3-избавление-от-глобального-реестра-провайдеров)
-6. [Фаза 4: Усиление наблюдаемости и контроля качества](#фаза-4-усиление-наблюдаемости-и-контроля-качества)
-7. [Метрики и тесты](#метрики-и-тесты)
-8. [Порядок выполнения](#порядок-выполнения)
+2. [Сводная архитектурная оценка](#сводная-архитектурная-оценка)
+3. [Фаза 1: Устранение дублирования контрактов](#фаза-1-устранение-дублирования-контрактов-p0)
+4. [Фаза 2: Изоляция интерфейсного слоя](#фаза-2-изоляция-интерфейсного-слоя-p1)
+5. [Фаза 3: Декомпозиция god objects](#фаза-3-декомпозиция-god-objects-p1)
+6. [Фаза 4: Устранение глобальных синглтонов](#фаза-4-устранение-глобальных-синглтонов-p2)
+7. [Фаза 5: Обработка ошибок и устойчивость](#фаза-5-обработка-ошибок-и-устойчивость-p2)
+8. [Фаза 6: Документация и архитектурные тесты](#фаза-6-документация-и-архитектурные-тесты-p3)
+9. [Метрики и тесты](#метрики-и-тесты)
+10. [Порядок выполнения](#порядок-выполнения)
+11. [Устаревшие задачи](#устаревшие-задачи-из-предыдущих-версий)
 
 ---
 
@@ -40,45 +45,176 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Текущие проблемы (приоритет ↓)
+### Сильные стороны
+- Чёткое разделение слоёв, защищённое архитектурными тестами
+- 79 ABC/Protocol контрактов, обеспечивающих Ports & Adapters
+- Централизованный Composition Root для сборки зависимостей
+- Детальная документация (README, ADR, архитектурные гайды)
 
-| # | Проблема | Влияние | Категория |
-|---|----------|---------|-----------|
-| 1 | Утечка инфраструктуры в домен через ConfigMigrator прокси | Нарушение направленности зависимостей | Слоистая архитектура |
-| 2 | Регистрация схем без реальных Pandera-валидаторов (None) | Отложенная валидация, смешение ответственности | Валидация данных |
-| 3 | Глобальное состояние `_PROVIDER_REGISTRY` | Скрытые зависимости, риски параллельного запуска | DI/Конфигурация |
-| 4 | Неунифицированное логирование и метрики | Сложность отладки и мониторинга | Наблюдаемость |
+### Консолидированные проблемы (приоритет ↓)
 
----
-
-## Архитектурная оценка
-
-| Категория | Описание | Вес | Оценка | Взвешенный балл |
-|-----------|----------|-----|--------|-----------------|
-| Слоистая архитектура | Чёткость разделения domain/application/infrastructure | 0.15 | 7 | 1.05 |
-| Ports & Adapters / DDD | Наличие портов, явность границ контекстов | 0.10 | 6 | 0.60 |
-| Модульность и связность | Разбиение на модули, отсутствие циклов | 0.10 | 6 | 0.60 |
-| Конфигурация и DI | Чистота инъекций, отсутствие глобального состояния | 0.10 | 5.5 | 0.55 |
-| Обработка ошибок | Политики ошибок, fail-fast, дефолты | 0.10 | 6 | 0.60 |
-| Логирование и наблюдаемость | Единообразие логов/метрик | 0.05 | 6 | 0.30 |
-| Тестирование и QA-гейты | Архитектурные тесты, покрытие | 0.10 | 7 | 0.70 |
-| Документация и стандарты | Правила и путеводители | 0.10 | 7 | 0.70 |
-| Валидация данных и схемы | Полнота Pandera-схем, регистрация | 0.10 | 5 | 0.50 |
-| Технический долг | Депрекейшены, обратная совместимость | 0.10 | 5.5 | 0.55 |
-| **Итого** | | **1.0** | | **6.15** |
-
-**Уровень 5–7.9:** Система функционирует, но заметен технический долг и точки риска.
+| # | Проблема | Влияние | Файлы | Категория |
+|---|----------|---------|-------|-----------|
+| 1 | **Дублирование контрактов пайплайнов** (YAML + hardcoded) | Рассинхронизация, двойное обновление | `domain/schemas/pipeline_contracts.py`, `configs/pipeline_contracts.yaml` | Конфигурация |
+| 2 | **Хардкод пайплайнов в run_pipeline.py** | Обход DI, дублирование путей | `run_pipeline.py` | Техдолг |
+| 3 | **HTTP-сессии в interfaces** | Нарушение Ports & Adapters | `interfaces/composition_root.py:178-182` | Слоистая архитектура |
+| 4 | **PipelineContainer как god object** | 369 строк, 18+ методов | `application/container.py` | Модульность |
+| 5 | **CompositionRoot слишком сложный** | 566 строк, смешение ответственностей | `interfaces/composition_root.py` | Модульность |
+| 6 | **Глобальные синглтоны** (29 файлов) | Скрытые зависимости, проблемы тестов | Разные файлы | DI/Конфигурация |
+| 7 | **Отсутствие обработки ошибок в RunPipelineUseCase** | Необработанные исключения | `application/use_cases/run_pipeline.py` | Устойчивость |
+| 8 | **CLI зависит от глобальных реестров** | Затруднено тестирование | `interfaces/cli/app.py` | Ports & Adapters |
 
 ---
 
-## Фаза 1: Устранение доменных прокси инфраструктуры
+## Сводная архитектурная оценка
 
-**Цель:** Восстановить строгую направленность зависимостей (domain → ничего внешнего).
+> Усреднённая оценка по 9 архитектурным обзорам
 
-### Задача 1.1: Удаление ConfigMigrator прокси из домена
+| Категория | Описание | Вес | Текущий балл | После рефакторинга |
+|-----------|----------|-----|--------------|-------------------|
+| Слоистая архитектура | Чёткость разделения domain/application/infrastructure | 0.15 | 7.5 | 8.5 |
+| Ports & Adapters / DDD | Наличие портов, явность границ контекстов | 0.10 | 7.0 | 8.5 |
+| Модульность и связность | Разбиение на модули, отсутствие god objects | 0.10 | 6.5 | 8.0 |
+| Конфигурация и DI | Единый источник, отсутствие глобального состояния | 0.10 | 6.5 | 8.0 |
+| Обработка ошибок | Политики ошибок, fail-fast, типизированные исключения | 0.10 | 6.5 | 7.5 |
+| Логирование и наблюдаемость | Единообразие логов/метрик | 0.08 | 7.0 | 7.5 |
+| Тестирование и QA-гейты | Архитектурные тесты, покрытие | 0.10 | 7.5 | 8.5 |
+| Документация и стандарты | Правила и путеводители | 0.10 | 8.0 | 8.5 |
+| Доменная модель | Контракты, схемы, Value Objects | 0.10 | 7.0 | 7.5 |
+| Технический долг | Синглтоны, дублирование, обратная совместимость | 0.07 | 6.0 | 8.0 |
+| **Итого** | | **1.0** | **~7.0** | **~8.5** |
+
+**Уровень 7.0:** Архитектура в целом зрелая, но требует упорядочивания и снижения долга.
+
+---
+
+## Фаза 1: Устранение дублирования контрактов (P0)
+
+**Цель:** Единый источник правды для контрактов пайплайнов.
+**Ожидаемый эффект:** +0.7 к интегральному баллу
+
+### Задача 1.1: Единый источник контрактов пайплайнов
 
 **Проблема:**
-Файл `src/bioetl/domain/configs/migration.py` содержит динамический импорт из infrastructure через `importlib.import_module()`, что нарушает изоляцию доменного слоя даже при использовании `__getattr__` для lazy loading.
+Контракты пайплайнов дублируются между YAML и hardcoded словарём `PIPELINE_CONTRACTS`.
+
+**Файлы:**
+- `src/bioetl/domain/schemas/pipeline_contracts.py` (строки 84-115)
+- `configs/pipeline_contracts.yaml`
+
+**Текущее состояние:**
+```python
+# domain/schemas/pipeline_contracts.py
+PIPELINE_CONTRACTS: dict[str, PipelineSchemaModel] = {
+    "chembl.activity": PipelineSchemaModel(
+        pipeline_code="chembl.activity",
+        schema_out="activity",
+        schema_in="activity_input",
+        output_schema="activity_output",
+    ),
+    # ... дублирует данные из YAML
+}
+```
+
+**Решение:**
+1. Удалить `PIPELINE_CONTRACTS` словарь из доменного слоя
+2. Сделать `PipelineContractLoaderPortABC` обязательным (убрать fallback)
+3. Обновить `get_pipeline_contract()` для выброса исключения если loader не настроен
+4. Добавить валидацию в bootstrap приложения
+
+**Шаги выполнения:**
+
+```bash
+# 1. Проверить использование PIPELINE_CONTRACTS
+grep -r "PIPELINE_CONTRACTS" src/ tests/
+
+# 2. Обновить get_pipeline_contract() - убрать fallback
+# 3. Удалить PIPELINE_CONTRACTS из pipeline_contracts.py
+# 4. Обновить архитектурные тесты
+# 5. Запустить тесты
+pytest tests/architecture/ -v
+```
+
+**Затрагиваемые файлы:**
+- `src/bioetl/domain/schemas/pipeline_contracts.py`
+- `src/bioetl/infrastructure/config/pipeline_contract_loader.py`
+- `src/bioetl/interfaces/composition_root.py`
+- `tests/architecture/test_contracts_sync.py`
+
+**Критерии готовности:**
+- [ ] `PIPELINE_CONTRACTS` удалён из кода
+- [ ] Архитектурный тест запрещает hardcoded контракты в domain
+- [ ] Все тесты проходят с единым YAML источником
+- [ ] Добавление нового пайплайна требует только изменения YAML
+
+**Риски и смягчение:**
+- **Риск:** Потеря обратной совместимости
+- **Смягчение:** Deprecation warning в текущей версии + миграционный период (1 релиз)
+
+---
+
+### Задача 1.2: Убрать хардкод пайплайнов в run_pipeline.py
+
+**Проблема:**
+Словарь `PIPELINES` в `run_pipeline.py` дублирует информацию из конфигов и registry.
+
+**Текущее состояние:**
+```python
+# run_pipeline.py (строки 17-43)
+PIPELINES = {
+    "activity": {
+        "name": "activity_chembl",
+        "config": "configs/pipelines/chembl/activity.yaml",
+        "output": "data/output/chembl/activity",
+    },
+    # ... хардкод для каждого пайплайна
+}
+```
+
+**Решение:**
+1. Создать функцию `discover_pipelines()` в interfaces слое
+2. Генерировать список пайплайнов из `configs/pipeline_contracts.yaml`
+3. Использовать конвенцию для путей: `configs/pipelines/{provider}/{entity}.yaml`
+4. Добавить `--list` команду в CLI для вывода доступных пайплайнов
+
+**Новый файл:** `src/bioetl/interfaces/factories/pipeline_discovery.py`
+
+```python
+def discover_pipelines() -> dict[str, PipelineInfo]:
+    """Discover pipelines from contract registry.
+
+    Returns pipeline info based on:
+    - configs/pipeline_contracts.yaml for pipeline codes
+    - Convention: configs/pipelines/{provider}/{entity}.yaml
+    """
+    contracts = load_pipeline_contracts()
+    pipelines = {}
+    for code in contracts:
+        provider, entity = code.split(".")
+        pipelines[entity] = PipelineInfo(
+            name=f"{entity}_{provider}",
+            config=f"configs/pipelines/{provider}/{entity}.yaml",
+            output=f"data/output/{provider}/{entity}",
+        )
+    return pipelines
+```
+
+**Затрагиваемые файлы:**
+- `run_pipeline.py`
+- `src/bioetl/interfaces/cli/app.py`
+- `src/bioetl/interfaces/factories/pipeline_discovery.py` (новый)
+
+**Критерии готовности:**
+- [ ] `run_pipeline.py` не содержит статического `PIPELINES` словаря
+- [ ] CLI `--list` выводит пайплайны из registry
+- [ ] Добавление нового пайплайна не требует изменения Python кода
+
+---
+
+### Задача 1.3: Удаление ConfigMigrator прокси из домена
+
+**Проблема:**
+Файл `src/bioetl/domain/configs/migration.py` содержит динамический импорт из infrastructure.
 
 **Текущее состояние:**
 ```python
@@ -89,29 +225,15 @@ mod = importlib.import_module(
 return getattr(mod, "ConfigMigrator")
 ```
 
-**Затронутые файлы:**
-
-| Файл | Действие |
-|------|----------|
-| `src/bioetl/domain/configs/migration.py` | Удалить полностью |
-| `src/bioetl/domain/configs/__init__.py:141-153` | Удалить реэкспорт ConfigMigrator |
-| `tests/bioetl/domain/test_config_migration.py:6` | Импорт уже из infrastructure ✓ |
-| `tests/project_rules/test_config_validation.py:10` | Импорт уже из infrastructure ✓ |
-
 **Шаги выполнения:**
-
 ```bash
 # 1. Проверить внешние зависимости на старый путь
-grep -r "from bioetl.domain.configs.migration import\|from bioetl.domain.configs import ConfigMigrator" src/ tests/
+grep -r "from bioetl.domain.configs.migration import" src/ tests/
 
 # 2. Удалить deprecated модуль
 rm src/bioetl/domain/configs/migration.py
 
-# 3. Обновить __init__.py (удалить строки 141-153)
-# Удалить блок:
-#     if name == "ConfigMigrator":
-#         ...
-#         return ConfigMigrator
+# 3. Обновить __init__.py (удалить __getattr__ для ConfigMigrator)
 
 # 4. Запустить архитектурные тесты
 pytest tests/architecture/test_domain_boundaries.py -v
@@ -119,626 +241,536 @@ pytest tests/architecture/test_domain_boundaries.py -v
 
 **Критерии готовности:**
 - [ ] Файл `domain/configs/migration.py` удалён
-- [ ] Нет `__getattr__` для ConfigMigrator в `domain/configs/__init__.py`
 - [ ] Архитектурный тест `test_domain_has_no_dynamic_infrastructure_imports` проходит
-- [ ] Нет нарушений в `pytest tests/architecture/ -v`
-
-**Риски и митигация:**
-- **Риск:** Внешний код зависит от `bioetl.domain.configs.migration`
-- **Митигация:** Deprecation warning уже работает; добавить Breaking Change в CHANGELOG
 
 ---
 
-### Задача 1.2: Удаление InMemoryProviderRegistry из domain прокси
+## Фаза 2: Изоляция интерфейсного слоя (P1)
+
+**Цель:** Interfaces слой не должен напрямую импортировать инфраструктуру.
+**Ожидаемый эффект:** +0.5 к интегральному баллу
+
+### Задача 2.1: Делегировать создание HTTP-сессий инфраструктурной фабрике
 
 **Проблема:**
-Модуль `domain/provider_registry.py` содержит `__getattr__`, который при запросе `InMemoryProviderRegistry` выбрасывает `ImportError` с указанием на infrastructure. Это допустимо, но лучше удалить прокси полностью.
+`CompositionRoot` напрямую импортирует `requests.Session` (строки 178-182).
 
 **Текущее состояние:**
 ```python
-# src/bioetl/domain/provider_registry.py:104-111
-def __getattr__(name: str) -> Any:
-    if name == "InMemoryProviderRegistry":
-        raise ImportError(
-            "InMemoryProviderRegistry is no longer available in bioetl.domain. "
-            "Import it from bioetl.infrastructure.provider_registry instead."
-        )
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+# interfaces/composition_root.py:178-182
+def _get_http_session_factory(self) -> type:
+    if self._http_session_factory is None:
+        import requests  # Нарушение: interfaces импортирует infrastructure библиотеку
+        return requests.Session
+    return self._http_session_factory
 ```
 
-**Действие:** Оставить как есть (уже корректно предотвращает импорт).
+**Решение:**
+1. Создать `HttpSessionFactoryABC` в `domain/ports/http.py`
+2. Реализовать `RequestsHttpSessionFactory` в `infrastructure/clients/base/`
+3. Инжектировать фабрику через `InfrastructureFactoryABC`
+4. Убрать импорт `requests` из interfaces слоя
 
-**Критерий готовности:**
-- [ ] Подтвердить, что нет реальных импортов `InMemoryProviderRegistry` из domain
+**Новые файлы:**
+- `src/bioetl/domain/ports/http_session.py`
 
-```bash
-grep -r "from bioetl.domain.provider_registry import InMemoryProviderRegistry\|from bioetl.domain import.*InMemoryProviderRegistry" src/ tests/
+```python
+from abc import ABC, abstractmethod
+from typing import Any
+
+class HttpSessionFactoryABC(ABC):
+    """Port for creating HTTP sessions."""
+
+    @abstractmethod
+    def create_session(self) -> Any:
+        """Create a new HTTP session instance."""
+        ...
 ```
+
+**Затрагиваемые файлы:**
+- `src/bioetl/domain/ports/http_session.py` (новый)
+- `src/bioetl/infrastructure/clients/base/factories.py`
+- `src/bioetl/interfaces/composition_root.py`
+- `src/bioetl/interfaces/factories/infrastructure.py`
+
+**Критерии готовности:**
+- [ ] Архитектурный тест: interfaces не импортирует `requests`
+- [ ] `CompositionRoot` использует только `InfrastructureFactoryABC`
+- [ ] Тесты HTTP можно запускать с mock-фабрикой
 
 ---
 
-### Задача 1.3: Консолидация дублирующихся классов
+### Задача 2.2: Изолировать UseCaseFactory от инфраструктурных зависимостей
 
 **Проблема:**
-Класс `InMemoryProviderRegistry` может быть продублирован в application layer.
+`UseCaseFactory` в interfaces импортирует конкретные инфраструктурные фабрики.
 
-**Проверка:**
-```bash
-grep -r "class InMemoryProviderRegistry" src/
-```
+**Файл:** `src/bioetl/interfaces/use_case_factory.py`
 
-**Ожидаемый результат:**
-```
-src/bioetl/infrastructure/provider_registry.py:17:class InMemoryProviderRegistry(ProviderRegistryABC):
-```
+**Решение:**
+1. Переместить создание use cases в `CompositionRoot`
+2. `UseCaseFactory` должен получать готовые зависимости через конструктор
+3. Убрать прямые импорты infrastructure из interfaces (кроме composition_root)
 
-Если найден дубликат в `application/memory_registry.py`:
-
-**Шаги выполнения:**
-1. Обновить все импорты на `infrastructure.provider_registry`
-2. Удалить дубликат из application
-3. Обновить исключения в архитектурных тестах
+**Критерии готовности:**
+- [ ] `UseCaseFactory` не импортирует из infrastructure
+- [ ] Архитектурный тест подтверждает изоляцию
+- [ ] Тесты use cases работают без infrastructure mock
 
 ---
 
-### Задача 1.4: Архитектурный тест на динамические импорты
+## Фаза 3: Декомпозиция god objects (P1)
 
-**Статус:** ✓ Уже реализован
+**Цель:** Уменьшить размер и сложность ключевых классов.
+**Ожидаемый эффект:** +1.3 к интегральному баллу
 
-Тест `test_domain_has_no_dynamic_infrastructure_imports` в `tests/architecture/test_domain_boundaries.py:463-491` проверяет:
+### Задача 3.1: Декомпозировать PipelineContainer
 
-```python
-def test_domain_has_no_dynamic_infrastructure_imports(
-    self, domain_files: list[Path], domain_trees: dict[Path, ast.Module]
-) -> None:
-    """Verify domain doesn't use importlib to import infrastructure."""
-    violations: list[str] = []
-    for file_path in domain_files:
-        code = file_path.read_text(encoding="utf-8")
-        if "importlib.import_module" in code:
-            for forbidden_layer in ("infrastructure", "application", "interfaces"):
-                if forbidden_layer in code:
-                    violations.append(...)
+**Проблема:**
+`PipelineContainer` (369 строк) объединяет слишком много ответственностей.
+
+**Файл:** `src/bioetl/application/container.py`
+
+**Текущие ответственности (18+ методов):**
+- Управление конфигурацией
+- Создание сервисов (extraction, normalization)
+- Создание transform компонентов (hash, timestamp, index)
+- Управление record source
+- Runtime компоненты (hooks, error policy)
+- Schema contract resolution
+
+**Решение:** Разбить на специализированные под-контейнеры:
+
+```
+PipelineContainer (фасад, ~150 строк)
+├── _service_container: ServiceContainer
+│   ├── get_extraction_service()
+│   ├── get_normalization_service()
+│   └── get_entity_model_registry()
+├── _transform_container: TransformContainer
+│   ├── get_hash_service()
+│   ├── get_index_generator()
+│   └── get_timestamp_provider()
+├── _runtime_container: RuntimeContainer
+│   ├── get_hooks()
+│   └── get_error_policy()
+└── _validation_container: ValidationContainer
+    ├── get_validation_service()
+    └── get_schema_contract()
 ```
 
-**После удаления `domain/configs/migration.py` этот тест будет проходить.**
+**Новые файлы:**
+- `src/bioetl/application/containers/service_container.py`
+- `src/bioetl/application/containers/transform_container.py`
+- `src/bioetl/application/containers/runtime_container.py`
+- `src/bioetl/application/containers/validation_container.py`
+
+**Критерии готовности:**
+- [ ] `PipelineContainer` < 150 строк
+- [ ] Каждый под-контейнер < 100 строк
+- [ ] Цикломатическая сложность снижена на 40%
+- [ ] Все существующие тесты проходят
 
 ---
 
-## Фаза 2: Полноценная регистрация схем и валидации
+### Задача 3.2: Декомпозировать CompositionRoot
 
-**Цель:** Гарантировать валидацию на уровне инфраструктуры, оставить домен чистым от технологических деталей (Pandera).
+**Проблема:**
+`CompositionRoot` (566 строк) смешивает создание разных типов зависимостей.
 
-### Задача 2.1: Анализ текущей регистрации схем
+**Файл:** `src/bioetl/interfaces/composition_root.py`
 
-**Текущее состояние:**
+**Текущие ответственности:**
+- Provider Registry (строки 117-147)
+- Observability (строки 153-166)
+- HTTP Infrastructure (строки 172-232)
+- Schema Contract Provider (строки 238-267)
+- Config Migration (строки 273-299)
+- Pipeline Container (строки 305-374)
+- Config Loader (строки 376-408)
 
-```python
-# src/bioetl/domain/schemas/__init__.py:37-38
-for name, cols in mapping.items():
-    provider.register(name, None, column_order=cols)  # schema=None!
+**Решение:** Разбить на специализированные roots:
+
+```
+CompositionRoot (координатор, ~200 строк)
+├── _observability: ObservabilityRoot
+│   ├── get_logger()
+│   ├── get_metrics()
+│   └── get_observability_stack()
+├── _infrastructure: InfrastructureRoot
+│   ├── create_http_session()
+│   ├── create_http_transport()
+│   └── create_rate_limiter()
+├── _configuration: ConfigurationRoot
+│   ├── get_schema_contract_provider()
+│   ├── create_config_loader()
+│   └── create_config_migration_service()
+└── _providers: ProviderRoot
+    ├── get_provider_registry()
+    └── create_pipeline_container()
 ```
 
-Домен регистрирует только **порядок колонок** с `schema=None`, что:
-- Откладывает создание реальных Pandera-схем на момент первого использования
-- Смешивает ответственность: домен знает о структуре схем, но не о валидации
-- Усложняет тестирование: схемы создаются лениво через `generate_schema_from_column_order()`
+**Новые файлы:**
+- `src/bioetl/interfaces/roots/observability_root.py`
+- `src/bioetl/interfaces/roots/infrastructure_root.py`
+- `src/bioetl/interfaces/roots/configuration_root.py`
+- `src/bioetl/interfaces/roots/provider_root.py`
 
-**Текущая архитектура:**
-```
-domain/schemas/
-├── __init__.py          # register_schemas() - регистрирует колонки с None
-├── registry.py          # SchemaRegistry - хранит schema|None + column_order
-├── generator.py         # generate_schema_from_column_order() - создаёт Pandera динамически
-└── chembl/
-    └── output_views.py  # ACTIVITY_OUTPUT_COLUMNS и т.д.
-
-infrastructure/validation/schemas/
-├── chembl/
-│   ├── activity.py      # ActivityOutputSchema(pa.DataFrameModel)
-│   ├── assay.py         # AssayOutputSchema
-│   └── ...
-└── pandera_base.py      # BaseGeneratedColumnsModel
-```
+**Критерии готовности:**
+- [ ] `CompositionRoot` < 200 строк
+- [ ] Каждый специализированный root < 150 строк
+- [ ] Тесты можно писать для каждого root отдельно
 
 ---
 
-### Задача 2.2: Перенос регистрации Pandera-схем в инфраструктуру
+### Задача 3.3: Разделить ответственности PipelineBase
 
-**Целевая архитектура:**
+**Проблема:**
+`PipelineBase` (26+ KB) объединяет оркестрацию и трансформации.
 
+**Файл:** `src/bioetl/application/pipelines/base.py`
+
+**Решение:**
+1. Выделить `PipelineOrchestrator` для координации stages
+2. Выделить `StageExecutor` для выполнения отдельных stages
+3. Оставить `PipelineBase` как Template Method с минимальной логикой
+
+**Структура:**
 ```
-domain/schemas/
-├── registry.py          # SchemaRegistry (без изменений в контракте)
-├── contracts.py         # OutputSchemaSpec - описание полей без Pandera
-└── chembl/
-    └── field_specs.py   # Спецификации полей (колонки + типы)
-
-infrastructure/validation/
-├── schemas/
-│   └── chembl/          # Pandera DataFrameModel классы
-├── registry_bootstrap.py # register_pandera_schemas() - регистрирует реальные схемы
-└── factories.py          # PanderaSchemaProviderFactory
-```
-
-**Шаги выполнения:**
-
-#### Этап 2.2.1: Создать инфраструктурный bootstrap для схем
-
-```python
-# src/bioetl/infrastructure/validation/registry_bootstrap.py
-"""Bootstrap Pandera schemas into the domain registry."""
-
-from bioetl.domain.validation import SchemaProviderABC
-from bioetl.infrastructure.validation.schemas.chembl.activity import (
-    ActivityOutputSchema,
-)
-from bioetl.infrastructure.validation.schemas.chembl.assay import AssayOutputSchema
-# ... другие импорты
-
-
-def register_pandera_schemas(registry: SchemaProviderABC) -> SchemaProviderABC:
-    """Register actual Pandera schemas into the registry.
-
-    This replaces None placeholders with concrete Pandera DataFrameModel classes.
-    Should be called during application bootstrap, not in domain.
-    """
-    schema_mapping = {
-        "activity_output": ActivityOutputSchema,
-        "assay_output": AssayOutputSchema,
-        "cell_output": CellOutputSchema,
-        "molecule_output": MoleculeOutputSchema,
-        "publication_output": PublicationOutputSchema,
-        "target_output": TargetOutputSchema,
-        "tissue_output": TissueOutputSchema,
-    }
-
-    for name, schema_class in schema_mapping.items():
-        # Get existing column order from registry
-        try:
-            column_order = registry.get_schema_columns(name)
-        except ValueError:
-            column_order = None
-
-        # Register with actual Pandera schema
-        registry.register(name, schema_class, column_order=column_order)
-
-    return registry
+PipelineBase (Template Method, ~300 строк)
+├── _orchestrator: PipelineOrchestrator (~200 строк)
+│   ├── run_stages()
+│   └── handle_errors()
+└── _executor: StageExecutor (~150 строк)
+    ├── execute_extract()
+    ├── execute_transform()
+    └── execute_load()
 ```
 
-#### Этап 2.2.2: Обновить composition root для bootstrap схем
-
-```python
-# src/bioetl/interfaces/composition_root.py
-
-def _bootstrap_schema_registry(self) -> SchemaProviderABC:
-    """Bootstrap schema registry with Pandera schemas."""
-    from bioetl.domain.schemas import register_schemas
-    from bioetl.domain.schemas.registry import create_default_schema_registry
-    from bioetl.infrastructure.validation.registry_bootstrap import (
-        register_pandera_schemas,
-    )
-
-    # 1. Create empty registry
-    registry = create_default_schema_registry()
-
-    # 2. Register domain column orders
-    register_schemas(registry)
-
-    # 3. Register infrastructure Pandera schemas
-    register_pandera_schemas(registry)
-
-    return registry
-```
-
-#### Этап 2.2.3: Обновить домен для работы без None-схем (опционально)
-
-Текущий код в `SchemaRegistry.get_schema()` создаёт схемы лениво:
-
-```python
-# src/bioetl/domain/schemas/registry.py:41-55
-def get_schema(self, name: str) -> schema_type:
-    schema = self._schemas[name]
-    if schema is not None:
-        return schema
-
-    # Lazy generation if schema is None
-    column_order = self._schema_columns.get(name)
-    generated_schema = generate_schema_from_column_order(column_order)
-    self._schemas[name] = generated_schema
-    return generated_schema
-```
-
-**Оставить как есть** — это обеспечивает fallback для тестов и старого кода.
+**Критерии готовности:**
+- [ ] `PipelineBase` < 300 строк
+- [ ] `PipelineOrchestrator` < 200 строк
+- [ ] Unit-тесты для каждого компонента отдельно
 
 ---
 
-### Задача 2.3: Добавить golden-тесты на схемы
+## Фаза 4: Устранение глобальных синглтонов (P2)
 
-**Цель:** Гарантировать соответствие схем ожидаемой структуре колонок.
+**Цель:** Централизовать управление состоянием в ApplicationContext.
+**Ожидаемый эффект:** +0.8 к интегральному баллу
 
+### Задача 4.1: Централизовать управление синглтонами
+
+**Проблема:**
+29 файлов содержат глобальные синглтоны/ContextVar.
+
+**Ключевые файлы:**
+| Файл | Синглтон | Тип |
+|------|----------|-----|
+| `domain/schemas/registry.py` | `_default_registry` | Global |
+| `domain/services/entity_factory.py` | `_entity_factory` | Global |
+| `infrastructure/chembl/model_registry.py` | `_default_registry` | Global |
+| `infrastructure/observability/server.py` | `_default_manager` | Global |
+| `domain/schemas/pipeline_contracts.py` | `_CONTRACT_LOADER_CTX` | ContextVar |
+| `application/pipelines/registry.py` | `PIPELINE_REGISTRY` | Dict |
+
+**Решение:**
+1. Переместить все singleton accessor'ы в `ApplicationContext`
+2. Добавить `reset()` методы для тестирования
+3. Использовать `ContextVar` только где необходима изоляция async контекста
+4. Пометить глобальные `get_*()` функции `@deprecated`
+
+**Пример миграции:**
 ```python
-# tests/infrastructure/validation/test_schema_contracts.py
-"""Golden tests for Pandera schema column structure."""
+# До:
+from bioetl.domain.schemas.registry import get_default_registry
+registry = get_default_registry()
 
-import pytest
-from bioetl.domain.schemas.chembl.output_views import (
-    ACTIVITY_OUTPUT_COLUMNS,
-    ASSAY_OUTPUT_COLUMNS,
-)
-from bioetl.infrastructure.validation.schemas.chembl.activity import (
-    ActivityOutputSchema,
-)
-from bioetl.infrastructure.validation.schemas.chembl.assay import AssayOutputSchema
-
-
-class TestSchemaColumnContracts:
-    """Verify Pandera schemas match domain column specifications."""
-
-    @pytest.mark.parametrize(
-        "schema_class,expected_columns",
-        [
-            (ActivityOutputSchema, ACTIVITY_OUTPUT_COLUMNS),
-            (AssayOutputSchema, ASSAY_OUTPUT_COLUMNS),
-            # ... other schemas
-        ],
-    )
-    def test_schema_columns_match_domain_spec(
-        self, schema_class, expected_columns: list[str]
-    ) -> None:
-        """Verify schema columns match domain column order."""
-        pandera_schema = schema_class.to_schema()
-        actual_columns = list(pandera_schema.columns.keys())
-
-        assert actual_columns == expected_columns, (
-            f"Schema {schema_class.__name__} columns mismatch:\n"
-            f"Expected: {expected_columns}\n"
-            f"Actual: {actual_columns}"
-        )
+# После:
+from bioetl.interfaces.application_context import get_application_context
+registry = get_application_context().schema_registry
 ```
 
-**Критерии готовности Фазы 2:**
-- [ ] `register_pandera_schemas()` создан в infrastructure
-- [ ] Composition root вызывает bootstrap схем
-- [ ] Golden-тесты на соответствие колонок проходят
-- [ ] Архитектурные тесты не показывают импорт domain → infrastructure
-- [ ] Валидационные тесты проходят с реальными схемами
-
----
-
-## Фаза 3: Избавление от глобального реестра провайдеров
-
-**Цель:** Сделать конфигурацию провайдеров явной и тестируемой через DI.
-
-### Задача 3.1: Анализ текущего глобального состояния
-
-**Текущее состояние:**
-
-```python
-# src/bioetl/domain/provider_registry.py:70-95
-_PROVIDER_REGISTRY: ProviderRegistryABC | None = None
-
-def set_provider_registry(registry: ProviderRegistryABC) -> None:
-    global _PROVIDER_REGISTRY
-    _PROVIDER_REGISTRY = registry
-
-def get_provider_registry() -> ProviderRegistryABC:
-    if _PROVIDER_REGISTRY is None:
-        raise RuntimeError("Provider registry has not been initialized...")
-    return _PROVIDER_REGISTRY
-```
-
-**Проблемы:**
-1. Глобальное состояние создаёт неявные зависимости
-2. Порядок инициализации критичен (`set_` должен быть вызван до `get_`)
-3. Параллельные тесты могут конфликтовать
-4. Затруднена изоляция в unit-тестах
-
-**Использование глобального реестра:**
-```bash
-grep -rn "get_provider_registry\|set_provider_registry" src/
-```
-
----
-
-### Задача 3.2: Внедрение реестра через DI-контейнер
-
-**Целевая архитектура:**
-
-```
-interfaces/composition_root.py
-    └── создаёт InMemoryProviderRegistry
-        └── передаёт в PipelineContainer
-            └── передаёт в use cases / services
-
-# Нет глобальных переменных!
-```
-
-**Шаги выполнения:**
-
-#### Этап 3.2.1: Добавить реестр в CompositionRoot
-
-```python
-# src/bioetl/interfaces/composition_root.py
-
-class CompositionRoot:
-    def __init__(self, ...):
-        ...
-        self._provider_registry: ProviderRegistryABC | None = None
-
-    def get_provider_registry(self) -> ProviderRegistryABC:
-        """Get or create provider registry instance."""
-        if self._provider_registry is None:
-            from bioetl.infrastructure.provider_registry import (
-                InMemoryProviderRegistry,
-            )
-            self._provider_registry = InMemoryProviderRegistry()
-            self._bootstrap_providers(self._provider_registry)
-        return self._provider_registry
-
-    def _bootstrap_providers(self, registry: ProviderRegistryABC) -> None:
-        """Register default providers."""
-        from bioetl.infrastructure.config.provider_registry import (
-            ProviderRegistryLoader,
-        )
-        loader = ProviderRegistryLoader()
-        loader.get_providers(registry=registry)
-```
-
-#### Этап 3.2.2: Обновить PipelineContainer для приёма реестра
-
-```python
-# src/bioetl/application/container.py
-
-class PipelineContainer:
-    def __init__(
-        self,
-        provider_registry: ProviderRegistryABC,  # Явная инъекция!
-        schema_provider: SchemaProviderABC,
-        ...
-    ):
-        self._provider_registry = provider_registry
-        ...
-
-    def get_provider(self, provider_id: ProviderId) -> ProviderDefinition:
-        return self._provider_registry.get_provider(provider_id)
-```
-
-#### Этап 3.2.3: Удалить глобальные функции (deprecation period)
-
-**Вариант A: Немедленное удаление**
-```python
-# src/bioetl/domain/provider_registry.py
-# Удалить:
-# - _PROVIDER_REGISTRY
-# - set_provider_registry()
-# - get_provider_registry()
-# - default_provider_registry()
-```
-
-**Вариант B: Deprecation window**
-```python
-# src/bioetl/domain/provider_registry.py
-
-import warnings
-
-def get_provider_registry() -> ProviderRegistryABC:
-    """DEPRECATED: Use CompositionRoot.get_provider_registry() instead."""
-    warnings.warn(
-        "get_provider_registry() is deprecated. "
-        "Inject ProviderRegistryABC through CompositionRoot or DI container.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if _PROVIDER_REGISTRY is None:
-        raise RuntimeError(...)
-    return _PROVIDER_REGISTRY
-```
-
-#### Этап 3.2.4: Обновить тесты для изоляции реестра
-
-```python
-# tests/conftest.py
-
-@pytest.fixture
-def isolated_provider_registry() -> ProviderRegistryABC:
-    """Create isolated provider registry for tests."""
-    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
-    return InMemoryProviderRegistry()
-
-
-@pytest.fixture
-def pipeline_container(
-    isolated_provider_registry: ProviderRegistryABC,
-    schema_registry: SchemaProviderABC,
-) -> PipelineContainer:
-    """Create container with isolated dependencies."""
-    return PipelineContainer(
-        provider_registry=isolated_provider_registry,
-        schema_provider=schema_registry,
-        ...
-    )
-```
-
-**Критерии готовности Фазы 3:**
-- [ ] `CompositionRoot.get_provider_registry()` создан
-- [ ] `PipelineContainer` принимает реестр через конструктор
-- [ ] Глобальные функции помечены deprecated или удалены
-- [ ] Тесты используют изолированные фикстуры
+**Критерии готовности:**
+- [ ] Глобальные функции помечены `@deprecated`
+- [ ] `ApplicationContext` предоставляет все сервисы
+- [ ] Тесты используют `reset_application_context()` для изоляции
 - [ ] Параллельные тесты (`pytest -n auto`) проходят без конфликтов
-- [ ] Нет глобальных переменных модульного уровня
 
 ---
 
-## Фаза 4: Усиление наблюдаемости и контроля качества
+### Задача 4.2: Инвертировать зависимости CLI от глобальных реестров
 
-**Цель:** Обеспечить воспроизводимость и наблюдаемость пайплайнов.
+**Проблема:**
+CLI напрямую использует `PIPELINE_REGISTRY` и `get_application_context()`.
 
-### Задача 4.1: Стандартизация логирования по слоям
+**Файлы:**
+- `src/bioetl/interfaces/cli/app.py`
+- `src/bioetl/application/pipelines/registry.py`
 
-**Текущее состояние:**
-- `LoggingPortABC` определён в `domain/observability/`
-- Реализации в `infrastructure/logging/`
-- Разные модули используют разные паттерны логирования
+**Решение:**
+1. CLI получает реестр через DI (параметр команды или context)
+2. Добавить `PipelineRegistryABC` порт в domain
+3. Реализовать `InMemoryPipelineRegistry` в infrastructure
+4. Инжектировать через `CompositionRoot`
 
-**Целевое состояние:**
+**Критерии готовности:**
+- [ ] CLI не импортирует `PIPELINE_REGISTRY` напрямую
+- [ ] Unit-тесты CLI с mock registry
+- [ ] Архитектурный тест на запрет прямого доступа к реестру
+
+---
+
+## Фаза 5: Обработка ошибок и устойчивость (P2)
+
+**Цель:** Типизированные исключения и graceful degradation.
+**Ожидаемый эффект:** +0.7 к интегральному баллу
+
+### Задача 5.1: Ввести доменное исключение для ошибок валидации
+
+**Проблема:**
+`ValidationService` возвращает общие `ValueError`.
+
+**Файл:** `src/bioetl/domain/validation/service.py`
+
+**Решение:**
+1. Создать `ValidationError(DomainError)` с категоризацией
+2. Добавить поля: `field_name`, `validation_type`, `details`
+3. Обновить `ValidationService` для выброса типизированных ошибок
+
+**Новый файл:** `src/bioetl/domain/validation/errors.py`
 
 ```python
-# Стандартный контекст для всех логов пайплайна
-@dataclass
-class PipelineLogContext:
-    run_id: str
-    provider: str
-    entity: str
-    stage: str  # extract | transform | load | validate
+from enum import Enum
+from dataclasses import dataclass
+from typing import Any
 
-# Использование:
-logger.info(
-    "Processing batch",
-    extra={"context": asdict(log_context), "batch_size": 100}
-)
+class ValidationErrorType(Enum):
+    SCHEMA_MISMATCH = "schema_mismatch"
+    TYPE_ERROR = "type_error"
+    CONSTRAINT_VIOLATION = "constraint_violation"
+    MISSING_FIELD = "missing_field"
+
+@dataclass
+class ValidationError(DomainError):
+    """Typed validation error with detailed context."""
+    field_name: str | None
+    validation_type: ValidationErrorType
+    details: dict[str, Any]
 ```
 
-**Шаги выполнения:**
-
-1. Создать `src/bioetl/domain/observability/log_context.py`:
-   ```python
-   @dataclass(frozen=True)
-   class PipelineLogContext:
-       """Structured context for pipeline logs."""
-       run_id: str
-       provider: str
-       entity: str
-       stage: str
-
-       def as_dict(self) -> dict[str, str]:
-           return asdict(self)
-   ```
-
-2. Обновить `PipelineBase` для автоматического контекста:
-   ```python
-   def _create_log_context(self, stage: str) -> PipelineLogContext:
-       return PipelineLogContext(
-           run_id=self._context.run_id,
-           provider=self._context.provider,
-           entity=self._context.entity_name,
-           stage=stage,
-       )
-   ```
-
-3. Добавить структурированное логирование в каждую стадию пайплайна
+**Критерии готовности:**
+- [ ] Все ошибки валидации типизированы
+- [ ] Логирование включает категорию ошибки
+- [ ] Метрики по типам ошибок
 
 ---
 
-### Задача 4.2: Добавление метрик по стадиям
+### Задача 5.2: Ввести политику обработки ошибок в RunPipelineUseCase
 
-**Текущее состояние:**
-- `MetricsPortABC` определён в domain
-- Частичное покрытие метриками
+**Проблема:**
+`RunPipelineUseCase` не перехватывает исключения оркестратора.
 
-**Целевые метрики:**
+**Файл:** `src/bioetl/application/use_cases/run_pipeline.py`
 
-| Метрика | Тип | Описание |
-|---------|-----|----------|
-| `pipeline_stage_duration_seconds` | Histogram | Время выполнения стадии |
-| `pipeline_records_processed_total` | Counter | Количество обработанных записей |
-| `pipeline_validation_errors_total` | Counter | Количество ошибок валидации |
-| `pipeline_runs_total` | Counter | Количество запусков (success/failure) |
+**Решение:**
+1. Обернуть выполнение в try-except
+2. Конвертировать исключения в структурированный `RunResult`
+3. Добавить политику retry для recoverable ошибок
+4. Логировать с correlation ID
 
-**Шаги выполнения:**
+```python
+class RunPipelineUseCase:
+    def execute(self, pipeline_id: str) -> RunResult:
+        try:
+            return self._execute_pipeline(pipeline_id)
+        except RecoverableError as e:
+            return self._handle_recoverable_error(e)
+        except DomainError as e:
+            return self._handle_domain_error(e)
+        except Exception as e:
+            return self._handle_unexpected_error(e)
+```
 
-1. Определить метрики в `domain/observability/metrics_contracts.py`
-2. Реализовать в `infrastructure/observability/prometheus_metrics.py`
-3. Интегрировать в `PipelineBase` через `MetricsPortABC`
+**Критерии готовности:**
+- [ ] Все исключения конвертируются в `RunResult`
+- [ ] Retry для сетевых ошибок
+- [ ] Correlation ID в логах
 
 ---
 
-### Задача 4.3: Документация по мониторингу
+## Фаза 6: Документация и архитектурные тесты (P3)
 
-**Создать:** `docs/operations/monitoring.md`
+**Цель:** Синхронизировать документацию и усилить автоматический контроль.
+**Ожидаемый эффект:** +0.5 к интегральному баллу
 
-Содержание:
-- Конфигурация логирования (уровни, форматы)
-- Список метрик и их значение
-- Примеры Grafana dashboards
-- Алерты и пороговые значения
+### Задача 6.1: Консолидировать архитектурные планы
+
+**Проблема:**
+Несколько версий планов в `docs/architecture/` создают путаницу:
+- `REFACTORING_PLAN.md` (этот документ - каноничный)
+- `REFACTORING_PLAN_v2.md` ... `REFACTORING_PLAN_v6.md`
+- `REFACTORING_PLAN_HEXAGONAL_DDD.md`
+- `REFACTORING_PLAN_MERGED.md`
+
+**Решение:**
+1. Этот документ становится каноничным источником
+2. Архивировать старые версии в `docs/architecture/archive/`
+3. Добавить CHANGELOG для отслеживания изменений
+4. Обновить README с ссылкой на актуальный план
+
+**Критерии готовности:**
+- [ ] Один каноничный REFACTORING_PLAN.md
+- [ ] Старые планы архивированы
+- [ ] README обновлён
+
+---
+
+### Задача 6.2: Расширить архитектурные тесты
+
+**Текущие тесты:** `tests/architecture/`
+- `test_layer_dependencies.py`
+- `test_domain_boundaries.py`
+- `test_architecture_policies.py`
+
+**Новые тесты:**
+1. `test_no_hardcoded_contracts.py` - запрет PIPELINE_CONTRACTS в domain
+2. `test_no_global_singletons.py` - запрет глобальных `get_*()` в production коде
+3. `test_interfaces_isolation.py` - interfaces не импортирует requests, pandas напрямую
+4. `test_composition_root_factories.py` - CompositionRoot использует только фабрики
+
+**Критерии готовности:**
+- [ ] 4+ новых архитектурных теста
+- [ ] 100% прохождение тестов
+- [ ] CI блокирует нарушения
+
+---
+
+### Задача 6.3: Добавить verbose режим в CLI
+
+**Проблема:**
+Опция `--verbose` упоминается в коде, но не объявлена в Click.
+
+**Файл:** `src/bioetl/interfaces/cli/app.py`
+
+**Решение:**
+1. Добавить `@click.option('--verbose', '-v', is_flag=True)`
+2. Пробросить в обработку ошибок
+3. При verbose выводить full traceback
+
+**Критерии готовности:**
+- [ ] `--verbose` в `--help`
+- [ ] Traceback при ошибках с verbose
+- [ ] Unit-тест на verbose режим
 
 ---
 
 ## Метрики и тесты
 
-### Новые метрики для отслеживания
+### Сводная таблица метрик
 
 | Метрика | Текущее | Целевое |
 |---------|---------|---------|
-| Импорты infrastructure в domain | 1 (dynamic via importlib) | 0 |
-| Схемы с `None` вместо Pandera | ~7 | 0 |
-| Глобальные переменные состояния | 2 (`_PROVIDER_REGISTRY`, `_default_registry`) | 0 |
-| Устаревшие прокси в домене | 2 | 0 |
-| Покрытие Pandera-схемами | ~60% | 100% |
+| Hardcoded contracts в domain | 1 (PIPELINE_CONTRACTS) | 0 |
+| Hardcoded pipelines в run_pipeline.py | 5 | 0 |
+| Импорты requests в interfaces | 1 | 0 |
+| Размер PipelineContainer | 369 строк | <150 строк |
+| Размер CompositionRoot | 566 строк | <200 строк |
+| Глобальные синглтоны | 29 файлов | 0 |
+| Необработанные исключения в UseCase | да | нет |
 
-### Расширение архитектурных тестов
+### Архитектурные тесты для контроля
+
+**Существующие:**
+- `tests/architecture/test_layer_dependencies.py`
+- `tests/architecture/test_domain_boundaries.py`
+- `tests/architecture/test_architecture_policies.py`
+
+**Новые тесты (после рефакторинга):**
 
 ```python
-# tests/architecture/test_schema_coverage.py
+# tests/architecture/test_refactoring_compliance.py
 
-def test_all_entities_have_pandera_schemas() -> None:
-    """Verify all registered entity outputs have Pandera schemas."""
-    from bioetl.domain.schemas.registry import get_default_schema_registry
+def test_no_hardcoded_pipeline_contracts():
+    """Domain layer should not contain PIPELINE_CONTRACTS dict."""
+    from bioetl.domain.schemas import pipeline_contracts
+    assert not hasattr(pipeline_contracts, 'PIPELINE_CONTRACTS')
 
-    registry = get_default_schema_registry()
-    for schema_name in registry.list_schemas():
-        if schema_name.endswith("_output"):
-            schema = registry.get_schema(schema_name)
-            assert schema is not None, f"Schema {schema_name} is None"
-            assert hasattr(schema, "to_schema"), f"Schema {schema_name} is not Pandera"
-
-
-def test_no_global_mutable_state_in_domain() -> None:
-    """Verify domain has no module-level mutable global state."""
-    # Scan domain modules for module-level assignments
-    # that are not constants (UPPER_CASE) or type aliases
+def test_interfaces_no_requests_import():
+    """Interfaces layer should not import requests directly."""
+    # Scan interfaces/*.py for 'import requests'
     ...
+
+def test_composition_root_size():
+    """CompositionRoot should be under 200 lines."""
+    from bioetl.interfaces.composition_root import CompositionRoot
+    import inspect
+    source = inspect.getsource(CompositionRoot)
+    assert len(source.splitlines()) < 200
+
+def test_pipeline_container_size():
+    """PipelineContainer should be under 150 lines."""
+    from bioetl.application.container import PipelineContainer
+    import inspect
+    source = inspect.getsource(PipelineContainer)
+    assert len(source.splitlines()) < 150
 ```
 
 ### Связка с интегральным баллом
 
-| Шаг | Категории, которые улучшатся | Ожидаемый рост оценки |
-|-----|------------------------------|----------------------|
-| Фаза 1 | Слоистая архитектура, Технический долг | +0.5 |
-| Фаза 2 | Валидация данных, Ports & Adapters | +0.8 |
-| Фаза 3 | Конфигурация и DI, Модульность | +0.4 |
-| Фаза 4 | Наблюдаемость, Документация | +0.3 |
-| **Итого** | | **+2.0** → **8.15** |
+| Фаза | Категории улучшения | Ожидаемый рост |
+|------|---------------------|----------------|
+| Фаза 1 | Конфигурация, Техдолг | +0.7 |
+| Фаза 2 | Слоистая архитектура, Ports & Adapters | +0.5 |
+| Фаза 3 | Модульность, Связность | +1.3 |
+| Фаза 4 | DI, Тестируемость | +0.8 |
+| Фаза 5 | Обработка ошибок, Устойчивость | +0.7 |
+| Фаза 6 | Документация, Тестирование | +0.5 |
+| **Итого** | | **+4.5** → **~8.5** |
 
 ---
 
 ## Порядок выполнения
 
 ```
-Фаза 1: Устранение доменных прокси (Критично)
-├── 1.1 Удаление ConfigMigrator прокси         [1 час]
-├── 1.2 Проверка InMemoryProviderRegistry      [30 мин]
-├── 1.3 Консолидация дубликатов (если есть)    [1 час]
-└── 1.4 Проверка архитектурных тестов          [30 мин]
+Фаза 1: Устранение дублирования контрактов (P0)
+├── 1.1 Единый источник контрактов            [2 часа]
+├── 1.2 Убрать хардкод в run_pipeline.py      [2 часа]
+└── 1.3 Удаление ConfigMigrator прокси        [1 час]
 
-Фаза 2: Регистрация схем и валидация (Критично)
-├── 2.1 Анализ текущей регистрации             [30 мин]
-├── 2.2 Создание infrastructure bootstrap       [2 часа]
-├── 2.3 Golden-тесты на схемы                  [1 час]
-└── 2.4 Интеграция в composition root          [1 час]
+Фаза 2: Изоляция интерфейсного слоя (P1)
+├── 2.1 HTTP-сессии через фабрику             [2 часа]
+└── 2.2 Изолировать UseCaseFactory            [1 час]
 
-Фаза 3: Избавление от глобального реестра (Высокий)
-├── 3.1 Анализ использования                   [30 мин]
-├── 3.2 DI через CompositionRoot               [2 часа]
-├── 3.3 Обновление PipelineContainer           [1 час]
-├── 3.4 Deprecation глобальных функций         [30 мин]
-└── 3.5 Обновление тестовых фикстур            [1 час]
+Фаза 3: Декомпозиция god objects (P1)
+├── 3.1 Декомпозировать PipelineContainer     [4 часа]
+├── 3.2 Декомпозировать CompositionRoot       [4 часа]
+└── 3.3 Разделить PipelineBase                [4 часа]
 
-Фаза 4: Наблюдаемость (Средний)
-├── 4.1 Стандартизация логирования             [2 часа]
-├── 4.2 Добавление метрик по стадиям           [2 часа]
-└── 4.3 Документация по мониторингу            [1 час]
+Фаза 4: Устранение глобальных синглтонов (P2)
+├── 4.1 Централизовать в ApplicationContext   [3 часа]
+└── 4.2 DI для CLI                            [2 часа]
+
+Фаза 5: Обработка ошибок (P2)
+├── 5.1 Доменные ошибки валидации             [2 часа]
+└── 5.2 Error handling в UseCase              [2 часа]
+
+Фаза 6: Документация и тесты (P3)
+├── 6.1 Консолидация архитектурных планов     [1 час]
+├── 6.2 Новые архитектурные тесты             [2 часа]
+└── 6.3 Verbose режим CLI                     [1 час]
+```
+
+### Визуализация прогресса
+
+```
+Текущий балл: ████████░░░░░░░░░░░░ 7.0/10
+
+После Фазы 1-2: ██████████████░░░░░░ 7.7/10
+
+После Фазы 3-4: ████████████████░░░░ 8.5/10
+
+После Фазы 5-6: █████████████████░░░ 8.8/10
 ```
 
 ---
@@ -752,21 +784,46 @@ pytest tests/architecture/ -v
 # Проверка границ домена
 pytest tests/architecture/test_domain_boundaries.py -v
 
-# Проверка динамических импортов
-pytest tests/architecture/test_domain_boundaries.py::TestDomainForbiddenImports::test_domain_has_no_dynamic_infrastructure_imports -v
-
-# Проверка схем
-pytest tests/infrastructure/validation/test_schema_contracts.py -v
-
 # Полный набор архитектурных проверок
 pytest tests/architecture/ tests/project_rules/ -v --tb=short
 
-# Поиск импортов infrastructure в domain
-grep -r "from bioetl.infrastructure\|import bioetl.infrastructure" src/bioetl/domain/
+# Поиск дублирования контрактов
+grep -r "PIPELINE_CONTRACTS" src/
 
-# Поиск глобальных переменных
-grep -rn "^_[A-Z].*: .* = None$" src/bioetl/domain/
+# Поиск глобальных синглтонов
+grep -rn "^_[A-Z].*: .* = None$" src/bioetl/
+
+# Поиск импортов requests в interfaces
+grep -r "import requests" src/bioetl/interfaces/
 ```
+
+---
+
+## Риски и смягчение
+
+| Риск | Вероятность | Влияние | Смягчение |
+|------|-------------|---------|-----------|
+| Регрессии при декомпозиции | Средняя | Высокое | Покрыть тестами до изменений |
+| Потеря обратной совместимости | Высокая | Среднее | Deprecation warnings, миграционный период |
+| Увеличение сложности DI | Средняя | Среднее | Builder pattern для контейнеров |
+| Сломанный CI | Низкая | Высокое | Feature branches, постепенный merge |
+
+---
+
+## Устаревшие задачи (из предыдущих версий)
+
+> Следующие задачи были консолидированы из предыдущих версий плана.
+> Они либо выполнены, либо включены в новые фазы.
+
+### Выполненные
+- ✅ Архитектурные тесты на границы слоёв
+- ✅ CompositionRoot создан
+- ✅ 79 ABC/Protocol контрактов определены
+
+### Включены в новый план
+- Регистрация Pandera-схем → Фаза 7 (дополнительная)
+- Глобальный реестр провайдеров → Фаза 4
+- Наблюдаемость → Фаза 5 + документация
 
 ---
 
@@ -776,3 +833,10 @@ grep -rn "^_[A-Z].*: .* = None$" src/bioetl/domain/
 - [Architecture Tests](../../tests/architecture/)
 - [Infrastructure Validation Schemas](../../src/bioetl/infrastructure/validation/schemas/)
 - [Domain Schema Registry](../../src/bioetl/domain/schemas/registry.py)
+- [ADR Index](./decisions/0000-adr-index.md)
+
+---
+
+**Владелец плана:** Architecture Team
+**Ревьюеры:** Lead Developers
+**Дата последнего обновления:** 2025-12-11

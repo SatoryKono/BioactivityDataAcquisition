@@ -36,6 +36,14 @@ class InfrastructureFactoryABC(ABC):
         """Create rate limiter instance."""
 
     @abstractmethod
+    def create_http_session(self) -> Any:
+        """Create HTTP session instance.
+
+        Returns:
+            HTTP session instance (e.g., requests.Session).
+        """
+
+    @abstractmethod
     def create_http_transport(
         self,
         provider: str,
@@ -85,6 +93,14 @@ class DefaultInfrastructureFactory(InfrastructureFactoryABC):
 
         return infra_create_rate_limiter(logger=logger, rate=rate, capacity=capacity)
 
+    def create_http_session(self) -> Any:
+        """Create HTTP session using requests library."""
+        from bioetl.infrastructure.clients.base.http_session_factory import (
+            create_http_session,
+        )
+
+        return create_http_session()
+
     def create_http_transport(
         self,
         provider: str,
@@ -94,8 +110,6 @@ class DefaultInfrastructureFactory(InfrastructureFactoryABC):
         base_client: Any | None = None,
     ) -> Any:
         """Create an HTTP transport using build_http_client."""
-        import requests
-
         from bioetl.infrastructure.clients.base.factories import build_http_client
 
         return build_http_client(
@@ -103,7 +117,7 @@ class DefaultInfrastructureFactory(InfrastructureFactoryABC):
             logger=logger,
             metrics=metrics,
             config=config,
-            base_client=base_client or requests.Session(),
+            base_client=base_client or self.create_http_session(),
         )
 
     def create_metadata_builder(self) -> RunMetadataBuilderProtocol:

@@ -170,16 +170,13 @@ class CompositionRoot:
     # =========================================================================
 
     def create_http_session(self) -> Any:
-        """Create a new HTTP session."""
-        return self._get_http_session_factory()()
+        """Create a new HTTP session.
 
-    def _get_http_session_factory(self) -> type:
-        """Get HTTP session factory, using lazy import if not explicitly set."""
-        if self._http_session_factory is None:
-            import requests  # Lazy import to avoid module-level dependency
-
-            return requests.Session
-        return self._http_session_factory
+        Delegates to InfrastructureFactory for proper layering.
+        """
+        if self._http_session_factory is not None:
+            return self._http_session_factory()
+        return self._infrastructure.create_http_session()
 
     def create_http_transport(
         self,
@@ -396,16 +393,48 @@ class CompositionRoot:
         """
         from bioetl.application.config.resolution import ConfigPathResolver
 
-        if configs_root is not None:
-            effective_root = Path(configs_root)
-        else:
-            # Use adapter for path resolution
-            from bioetl.infrastructure.adapters import ConfigPathResolverAdapter
-
-            path_resolver = ConfigPathResolverAdapter()
-            effective_root = path_resolver.get_configs_root()
-
+        effective_root = self.get_configs_root(configs_root)
         return ConfigPathResolver(effective_root)
+
+    def get_configs_root(self, base_dir: Path | str | None = None) -> Path:
+        """Get resolved configs root directory.
+
+        Args:
+            base_dir: Optional base directory override. If None, uses
+                BIOETL_CONFIG_DIR env var or default 'configs' directory.
+
+        Returns:
+            Resolved Path to configs root.
+        """
+        if base_dir is not None:
+            return Path(base_dir)
+
+        from bioetl.infrastructure.config.sources import get_configs_root
+
+        return get_configs_root(None)
+
+    def create_provider_loader(
+        self,
+        *,
+        config_path: Path | str | None = None,
+    ) -> Callable[..., Any]:
+        """Create provider loader factory function.
+
+        Returns factory that creates ProviderRegistryLoader instances.
+        This allows interfaces layer to create provider loaders without
+        importing infrastructure directly.
+
+        Args:
+            config_path: Optional path to providers config file.
+
+        Returns:
+            Factory function for creating ProviderRegistryLoader.
+        """
+        from bioetl.infrastructure.config.provider_registry import (
+            create_provider_loader,
+        )
+
+        return create_provider_loader
 
 
 def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
