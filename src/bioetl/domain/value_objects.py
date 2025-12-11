@@ -293,11 +293,26 @@ class HashDigest:
     """Value Object for cryptographic hash digest (hex-encoded).
 
     Provides type safety for hash values throughout the system.
-    Supports common algorithms: blake2b_256, sha256, md5.
+    Supports multiple algorithms with length validation.
+    Immutable after creation.
 
     Attributes:
         value: Hex-encoded hash string (lowercase).
-        algorithm: Algorithm identifier (e.g., 'blake2b_256').
+        algorithm: Algorithm identifier (default: 'blake2b_256').
+
+    Supported algorithms:
+        - blake2b_256: 64 hex chars (256 bits)
+        - sha256: 64 hex chars (256 bits)
+        - sha512: 128 hex chars (512 bits)
+        - md5: 32 hex chars (128 bits)
+
+    Examples:
+        >>> HashDigest("a" * 64)  # Default blake2b_256
+        HashDigest('aaaa...', algorithm='blake2b_256')
+        >>> HashDigest("b" * 32, "md5")
+        HashDigest('bbbb...', algorithm='md5')
+        >>> HashDigest.blake2b_256("c" * 64)  # Factory method
+        HashDigest('cccc...', algorithm='blake2b_256')
     """
 
     __slots__ = ("_value", "_algorithm")
@@ -330,8 +345,16 @@ class HashDigest:
                 f"expected {expected_len}, got {len(normalized)}"
             )
 
-        self._value = normalized
-        self._algorithm = algorithm
+        object.__setattr__(self, "_value", normalized)
+        object.__setattr__(self, "_algorithm", algorithm)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        """Prevent modification after initialization (immutability guard)."""
+        if hasattr(self, "_value"):
+            raise AttributeError(
+                f"Cannot modify immutable HashDigest: attribute {name!r}"
+            )
+        object.__setattr__(self, name, value)
 
     @property
     def value(self) -> str:
@@ -342,6 +365,11 @@ class HashDigest:
     def algorithm(self) -> str:
         """Algorithm identifier."""
         return self._algorithm
+
+    @property
+    def is_blake2b(self) -> bool:
+        """Check if this is a BLAKE2b-256 hash."""
+        return self._algorithm == "blake2b_256"
 
     def __str__(self) -> str:
         return self._value
@@ -358,8 +386,28 @@ class HashDigest:
         return hash((self._value, self._algorithm))
 
     @classmethod
+    def blake2b_256(cls, hex_value: str) -> Self:
+        """Factory for BLAKE2b-256 hashes (backward compatibility).
+
+        Args:
+            hex_value: 64-character hex string.
+
+        Returns:
+            HashDigest with algorithm='blake2b_256'.
+        """
+        return cls(hex_value, "blake2b_256")
+
+    @classmethod
     def from_hex(cls, hex_string: str, algorithm: str = "blake2b_256") -> Self:
-        """Create HashDigest from hex string."""
+        """Create HashDigest from hex string.
+
+        Args:
+            hex_string: Hex-encoded hash value.
+            algorithm: Algorithm identifier (default: blake2b_256).
+
+        Returns:
+            HashDigest instance.
+        """
         return cls(hex_string, algorithm)
 
     @classmethod
@@ -413,56 +461,6 @@ class ChemblId:
         if isinstance(other, ChemblId):
             return self.numeric_id < other.numeric_id
         return NotImplemented
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: type, handler: GetCoreSchemaHandler
-    ) -> CoreSchema:
-        return core_schema.no_info_after_validator_function(
-            cls,
-            core_schema.str_schema(),
-            serialization=core_schema.plain_serializer_function_ser_schema(str),
-        )
-
-
-class HashDigest:
-    """Value Object для BLAKE2b-256 хеш-дайджеста (64 hex символа)."""
-
-    __slots__ = ("_value",)
-    _pattern = re.compile(r"^[a-f0-9]{64}$")
-
-    def __init__(self, value: str) -> None:
-        normalized = value.lower()
-        if not self._pattern.match(normalized):
-            raise ValueError(
-                f"Invalid HashDigest: '{value}'. "
-                f"Expected 64 lowercase hex characters (BLAKE2b-256)"
-            )
-        self._value = normalized
-
-    def __setattr__(self, name: str, value: object) -> None:
-        if name == "_value" and hasattr(self, "_value"):
-            raise AttributeError("HashDigest is immutable")
-        super().__setattr__(name, value)
-
-    @property
-    def value(self) -> str:
-        """String representation of HashDigest."""
-        return self._value
-
-    def __str__(self) -> str:
-        return self._value
-
-    def __repr__(self) -> str:
-        return f"HashDigest({self._value!r})"
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, HashDigest):
-            return self._value == other._value
-        return NotImplemented
-
-    def __hash__(self) -> int:
-        return hash(self._value)
 
     @classmethod
     def __get_pydantic_core_schema__(
