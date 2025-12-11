@@ -98,7 +98,9 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             else:
                 self._logger.warning(
                     "metadata_missing_release",
-                    message="ChEMBL metadata response missing 'chembl_db_version' field",
+                    message=(
+                        "ChEMBL metadata response missing 'chembl_db_version' field"
+                    ),
                     response_keys=list(meta.keys()) if meta else [],
                 )
                 self._version_cache = "unknown"

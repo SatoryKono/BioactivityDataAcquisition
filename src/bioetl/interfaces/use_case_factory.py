@@ -64,6 +64,9 @@ class UseCaseFactory:
             create_provider_loader,
         )
         from bioetl.infrastructure.config.sources import get_configs_root
+        from bioetl.interfaces.factories.provider_registry import (
+            create_provider_registry_factory,
+        )
 
         ctx = self._ensure_context()
 
@@ -74,6 +77,7 @@ class UseCaseFactory:
             config_loader=ctx.config_loader,
             container_factory=container_factory,
             provider_loader_factory=create_provider_loader,
+            provider_registry_factory=create_provider_registry_factory(),
             configs_root=get_configs_root(None),
         )
 
