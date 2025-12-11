@@ -8,6 +8,8 @@ from abc import ABC, abstractmethod
 from datetime import timezone
 from typing import Any, Callable, cast
 
+import pandas as pd
+
 from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import (
@@ -21,7 +23,9 @@ class TransformerABC(ABC):
     """Base interface for DataFrame transformers."""
 
     @abstractmethod
-    def apply(self, df: Any, context: RunContext | None = None) -> Any:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         """Apply transformation to DataFrame."""
 
 
@@ -31,7 +35,9 @@ class TransformerChainImpl(TransformerABC):
     def __init__(self, transformers: list[TransformerABC]) -> None:
         self._transformers = transformers
 
-    def apply(self, df: Any, context: RunContext | None = None) -> Any:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         """Apply registered transformers sequentially."""
         result = df
         for transformer in self._transformers:
@@ -48,13 +54,15 @@ class HashColumnsTransformerImpl(TransformerABC):
         self._hash_service = hash_service
         self._business_key_fields = business_key_fields or []
 
-    def apply(self, df: Any, context: RunContext | None = None) -> Any:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         """Add hash_business_key and hash_row if DataFrame is not empty."""
         if df.empty:
             return df.assign(hash_business_key=None, hash_row=None)
 
         return cast(
-            Any,
+            pd.DataFrame,
             self._hash_service.add_hash_columns(
                 cast(TabularData, df), business_key_cols=self._business_key_fields
             ),
@@ -67,7 +75,9 @@ class IndexColumnTransformerImpl(TransformerABC):
     def __init__(self, index_generator: IndexGeneratorABC) -> None:
         self._index_generator = index_generator
 
-    def apply(self, df: Any, context: RunContext | None = None) -> Any:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         """Add sequential row index."""
         df = df.copy()
         start_index = self._index_generator.next_index()
@@ -89,7 +99,9 @@ class DatabaseVersionTransformerImpl(TransformerABC):
     ) -> None:
         self._database_version_provider = database_version_provider
 
-    def apply(self, df: Any, context: RunContext | None = None) -> Any:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         """Add database_version if value is provided."""
         version = self._database_version_provider()
         if version is None:
@@ -105,7 +117,9 @@ class FulldateTransformerImpl(TransformerABC):
     def __init__(self, timestamp_provider: TimestampProviderABC) -> None:
         self._timestamp_provider = timestamp_provider
 
-    def apply(self, df: Any, context: RunContext | None = None) -> Any:
+    def apply(
+        self, df: pd.DataFrame, context: RunContext | None = None
+    ) -> pd.DataFrame:
         """Add acquisition_timestamp (UTC ISO-8601)."""
         df = df.copy()
         ts = self._timestamp_provider.get_extraction_timestamp()

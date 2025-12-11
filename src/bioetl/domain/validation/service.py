@@ -2,6 +2,8 @@
 
 from typing import Any, cast
 
+import pandas as pd
+
 from bioetl.domain.data import TabularData
 from bioetl.domain.validation.contracts import (
     SchemaProviderABC,
@@ -31,7 +33,7 @@ class ValidationService:
         """Return ordered list of schema columns."""
         return self._schema_provider.get_schema_columns(entity_name)
 
-    def validate(self, df: Any, entity_name: str) -> Any:
+    def validate(self, df: pd.DataFrame, entity_name: str) -> pd.DataFrame:
         """
         Validate DataFrame against schema using factory validator.
 
@@ -55,7 +57,7 @@ class ValidationService:
             raise ValueError(f"Validation failed for {entity_name}: {result.errors}")
 
         validated_df = cast(
-            Any,
+            pd.DataFrame,
             (
                 result.validated_data
                 if result.validated_data is not None
