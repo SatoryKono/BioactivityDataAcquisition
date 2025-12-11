@@ -16,7 +16,7 @@ from bioetl.domain.configs.pipeline import (
     PipelineStagesConfig,
     RuntimeConfig,
 )
-from bioetl.domain.configs.transform import TransformConfig
+from bioetl.domain.configs.pipeline_options import TransformConfig
 
 
 class ExecutionConfig(BaseModel):

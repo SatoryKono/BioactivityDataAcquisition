@@ -27,8 +27,8 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol
 
-# Import the canonical NormalizationConfig from configs.normalization
-from bioetl.domain.configs.normalization import NormalizationConfig
+# Import the canonical NormalizationConfig from pipeline_options
+from bioetl.domain.configs.pipeline_options import NormalizationConfig
 from bioetl.domain.data import MutableTabularData, RecordBatch, TabularData
 from bioetl.domain.value_objects import HashDigest
 

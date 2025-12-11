@@ -1,18 +1,22 @@
-"""Normalization configuration for the domain layer."""
+"""DEPRECATED: Normalization config moved to pipeline_options.py.
+
+This module is deprecated and will be removed in v3.0.
+Import from bioetl.domain.configs.pipeline_options instead:
+
+    from bioetl.domain.configs.pipeline_options import NormalizationConfig
+"""
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+import warnings
 
+from bioetl.domain.configs.pipeline_options import NormalizationConfig
 
-class NormalizationConfig(BaseModel):
-    """Data normalization configuration."""
-
-    case_sensitive_fields: list[str] = Field(default_factory=list)
-    id_fields: list[str] = Field(default_factory=list)
-    custom_normalizers: dict[str, str] = Field(default_factory=dict)
-
-    model_config = {"extra": "forbid"}
-
+warnings.warn(
+    "bioetl.domain.configs.normalization is deprecated. "
+    "Import from bioetl.domain.configs.pipeline_options instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 __all__ = ["NormalizationConfig"]
