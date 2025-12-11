@@ -21,17 +21,15 @@ forbidden_modules =
 ignore_imports =
     bioetl.application.config.runtime -> bioetl.infrastructure.config.loader
     bioetl.application.container -> bioetl.infrastructure.config.provider_registry
-    bioetl.application.container -> bioetl.infrastructure.files.csv_record_source
     bioetl.application.container -> bioetl.infrastructure.logging.factories
     bioetl.application.container -> bioetl.infrastructure.output.factories
     bioetl.application.container -> bioetl.infrastructure.output.unified_writer
-    bioetl.application.orchestrator -> bioetl.infrastructure.config.provider_registry
+    bioetl.application.orchestrator -> bioetl.infrastructure.provider_registry
     bioetl.application.pipelines.contracts -> bioetl.infrastructure.output.unified_writer
     bioetl.application.pipelines.hooks_impl -> bioetl.infrastructure.observability.metrics
     bioetl.application.pipelines.base -> bioetl.infrastructure.output.metadata
     bioetl.application.pipelines.base -> bioetl.infrastructure.output.unified_writer
     bioetl.application.pipelines.chembl.base -> bioetl.infrastructure.output.unified_writer
-    bioetl.application.pipelines.chembl.extractor -> bioetl.infrastructure.files.csv_record_source
     bioetl.application.pipelines.chembl.pipeline -> bioetl.infrastructure.output.unified_writer
     bioetl.application.services.chembl_extraction -> bioetl.infrastructure.clients.chembl.impl.chembl_extraction_service_impl
 
