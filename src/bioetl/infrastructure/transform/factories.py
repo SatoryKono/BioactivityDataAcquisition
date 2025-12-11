@@ -19,15 +19,11 @@ from bioetl.domain.transform.contracts import (
     TimestampProviderABC,
 )
 from bioetl.infrastructure.transform.impl import (
-    default_normalization_transformer_impl as norm_impl,
-)
-from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
-from bioetl.infrastructure.transform.impl.hasher import HasherImpl
-from bioetl.infrastructure.transform.impl.index_generator import (
-    SequentialIndexGenerator,
-)
-from bioetl.infrastructure.transform.impl.timestamp_provider import (
+    Blake2bHashService,
     DeterministicTimestampProvider,
+    HasherImpl,
+    NormalizationServiceImpl,
+    SequentialIndexGenerator,
 )
 
 
@@ -78,7 +74,7 @@ def create_normalization_service(
     config: NormalizationConfigProviderProtocol,
 ) -> NormalizationServiceABC:
     """Create a new normalization service."""
-    return norm_impl.NormalizationServiceImpl(config)
+    return NormalizationServiceImpl(config)
 
 
 # Deprecated aliases for backward compatibility
