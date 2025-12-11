@@ -400,7 +400,8 @@ class ConfigMigrator:
             if isinstance(output_val, dict):
                 sink["output"] = output_val
 
-        # Also handle legacy source/sink sections at root (shouldn't happen but defensive)
+        # Also handle legacy source/sink sections at root
+        # (shouldn't happen but defensive)
         if "source" in data:
             existing_source = data.pop("source")
             if isinstance(existing_source, dict):
