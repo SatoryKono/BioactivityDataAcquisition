@@ -2,12 +2,12 @@ from pathlib import Path
 import sys
 from unittest.mock import patch
 
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 
 # Ensure output dir exists
 Path("data/output/target").mkdir(parents=True, exist_ok=True)
 
-logger = default_logging_port().apply_bind(tool="run_cmd")
+logger = create_logging_port().apply_bind(tool="run_cmd")
 
 try:
     # print(f"Container module: {bioetl.application.container.__file__}")

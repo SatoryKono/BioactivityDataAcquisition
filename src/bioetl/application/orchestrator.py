@@ -2,17 +2,16 @@
 Pipeline orchestration utilities for BioETL.
 
 This module provides the main entry point for assembling and executing pipelines.
-The orchestrator acts as a facade that hides the complexity of:
-    - Provider registry resolution and lifecycle
-    - Container assembly and dependency injection
+The orchestrator acts as a facade that coordinates:
+    - ProviderRegistryResolver for registry lifecycle
+    - BackgroundPipelineExecutor for subprocess execution
     - Pipeline factory selection and instantiation
-    - Subprocess execution for background runs
 
 Architecture notes:
-    - Orchestrator is stateless except for registry caching
-    - Uses factory pattern for container and registry creation
+    - Orchestrator delegates registry management to ProviderRegistryResolver
+    - Orchestrator delegates background execution to BackgroundPipelineExecutor
+    - Uses factory pattern for container creation
     - Supports both synchronous and background (subprocess) execution
-    - Registry can be injected directly or via lazy provider callback
 
 Execution modes:
     FULL: Extract → Transform → Validate → Write (default)
@@ -25,6 +24,7 @@ Example::
         "chembl_assay",
         config,
         provider_registry=registry,
+        provider_registry_factory=factory,
     )
     result = orchestrator.run_pipeline(dry_run=False, limit=1000)
 """
@@ -41,6 +41,10 @@ if TYPE_CHECKING:
 from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.registry import get_factory
+from bioetl.application.services.background_executor import BackgroundPipelineExecutor
+from bioetl.application.services.provider_registry_resolver import (
+    ProviderRegistryResolver,
+)
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.pipelines.types import PipelineType
@@ -49,7 +53,7 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryFactory,
     ProviderRegistryLoaderABC,
 )
-from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.domain.providers import ProviderId
 from bioetl.domain.value_objects import EntityName, StageName
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
@@ -57,6 +61,10 @@ ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
 class PipelineOrchestrator:
     """Manages pipeline assembly and execution.
+
+    This class is a thin facade that coordinates specialized services:
+    - ProviderRegistryResolver: handles registry resolution and caching
+    - BackgroundPipelineExecutor: handles subprocess execution
 
     Args:
         pipeline_name: Name of the pipeline to execute.
@@ -88,19 +96,23 @@ class PipelineOrchestrator:
     ) -> None:
         self._pipeline_name = pipeline_name
         self._config = config
-        self._provider_registry = provider_registry
-        self._provider_registry_provider = provider_registry_provider
-        self._provider_registry_factory = provider_registry_factory
         self._container_factory = self._resolve_container_factory(container_factory)
-        self._provider_loader = provider_loader
-        self._provider_loader_factory = provider_loader_factory
+
+        # Delegate registry management to ProviderRegistryResolver
+        self._registry_resolver = ProviderRegistryResolver(
+            provider_registry=provider_registry,
+            provider_registry_provider=provider_registry_provider,
+            provider_registry_factory=provider_registry_factory,
+            provider_loader=provider_loader,
+            provider_loader_factory=provider_loader_factory,
+        )
 
     def build_pipeline(self, *, limit: int | None = None) -> PipelineBase:
         """
         Create a pipeline instance by delegating to the appropriate factory.
 
         This method is the single entry point for pipeline creation. It:
-        1. Resolves the provider registry
+        1. Resolves the provider registry via ProviderRegistryResolver
         2. Creates a dependency container
         3. Delegates pipeline creation to the registered factory
 
@@ -111,7 +123,7 @@ class PipelineOrchestrator:
             Fully configured pipeline ready to run.
         """
         factory = get_factory(self._pipeline_name)
-        registry = self._get_provider_registry()
+        registry = self._registry_resolver.get_registry()
         container: PipelineContainerABC = self._container_factory(
             self._config,
             provider_registry=registry,
@@ -143,7 +155,6 @@ class PipelineOrchestrator:
         pipeline = self.build_pipeline(limit=limit)
 
         if effective_type == PipelineType.TRANSFORM_ONLY:
-            # Execute transform and validate, skipping write
             return pipeline.run(
                 output_path=Path(self._config.sink.output_path),
                 dry_run=True,
@@ -151,36 +162,7 @@ class PipelineOrchestrator:
             )
 
         if effective_type == PipelineType.EXTRACT_ONLY:
-            # Extract only - use public API
-            context = self._build_simple_context()
-            extract_result = pipeline.run_extract_only(limit=limit)
-
-            stage = StageResult(
-                stage_name=StageName.EXTRACT,
-                success=True,
-                records_processed=extract_result.total_rows,
-                chunks_processed=extract_result.total_chunks,
-                duration_sec=0.0,
-                errors=[],
-            )
-
-            return RunResult(
-                run_id=context.run_id,
-                success=True,
-                entity_name=self._config.entity_name,
-                row_count=extract_result.total_rows,
-                output_path=None,
-                duration_sec=0.0,
-                stages=[stage],
-                errors=[],
-                meta={
-                    "run_id": context.run_id,
-                    "provider": self._config.provider,
-                    "entity": self._config.entity_name,
-                    "row_count": extract_result.total_rows,
-                    "dry_run": True,
-                },
-            )
+            return self._run_extract_only(pipeline, limit)
 
         # FULL (default)
         return pipeline.run(
@@ -199,8 +181,7 @@ class PipelineOrchestrator:
         """
         Execute the pipeline asynchronously in a separate process.
 
-        Useful for long-running pipelines to avoid blocking the main thread.
-        The pipeline configuration is serialized and executed in a subprocess.
+        Delegates to BackgroundPipelineExecutor for subprocess management.
 
         Args:
             dry_run: If True, skip the write stage.
@@ -210,59 +191,50 @@ class PipelineOrchestrator:
         Returns:
             Future that resolves to RunResult when pipeline completes.
         """
-        from concurrent.futures import ProcessPoolExecutor
-
-        executor_to_use = executor or ProcessPoolExecutor(max_workers=1)
-        created_executor = executor is None
-        registry_snapshot = self._serialize_provider_registry()
-        future = executor_to_use.submit(
-            self._execute_in_subprocess,
-            self._pipeline_name,
-            self._config.model_dump(by_alias=False),
-            dry_run,
-            limit,
-            self._provider_loader_factory,
-            self._container_factory,
-            registry_snapshot,
-            self._provider_registry_factory,
-        )
-
-        if created_executor:
-            future.add_done_callback(lambda _: executor_to_use.shutdown(wait=False))
-
-        return future
-
-    @staticmethod
-    def _execute_in_subprocess(
-        pipeline_name: str,
-        config_payload: dict,
-        dry_run: bool,
-        limit: int | None,
-        provider_loader_factory: Callable[[], ProviderLoaderProtocol] | None,
-        container_factory: Callable[..., PipelineContainerABC] | None,
-        registry_payload: list[ProviderDefinition] | None,
-        registry_factory: ProviderRegistryFactory,
-    ) -> RunResult:
-        config = PipelineConfig(**config_payload)
-        loader = provider_loader_factory() if provider_loader_factory else None
-        registry = PipelineOrchestrator._build_registry_for_subprocess(
-            loader=loader,
-            registry_payload=registry_payload,
-            registry_factory=registry_factory,
-        )
-        orchestrator = PipelineOrchestrator(
-            pipeline_name,
-            config,
-            provider_registry=registry,
-            provider_registry_factory=registry_factory,
-            provider_loader=loader,
-            provider_loader_factory=provider_loader_factory,
-            container_factory=container_factory,
-        )
-        return orchestrator.run_pipeline(
+        return BackgroundPipelineExecutor.execute(
+            pipeline_name=self._pipeline_name,
+            config=self._config,
+            registry_snapshot=self._registry_resolver.serialize_registry(),
+            registry_factory=self._registry_resolver.registry_factory,
+            provider_loader_factory=self._registry_resolver.provider_loader_factory,
+            container_factory=self._container_factory,
             dry_run=dry_run,
             limit=limit,
-            pipeline_type=config.pipeline_type,
+            executor=executor,
+        )
+
+    def _run_extract_only(
+        self, pipeline: PipelineBase, limit: int | None
+    ) -> RunResult:
+        """Execute extract-only mode."""
+        context = self._build_simple_context()
+        extract_result = pipeline.run_extract_only(limit=limit)
+
+        stage = StageResult(
+            stage_name=StageName.EXTRACT,
+            success=True,
+            records_processed=extract_result.total_rows,
+            chunks_processed=extract_result.total_chunks,
+            duration_sec=0.0,
+            errors=[],
+        )
+
+        return RunResult(
+            run_id=context.run_id,
+            success=True,
+            entity_name=self._config.entity_name,
+            row_count=extract_result.total_rows,
+            output_path=None,
+            duration_sec=0.0,
+            stages=[stage],
+            errors=[],
+            meta={
+                "run_id": context.run_id,
+                "provider": self._config.provider,
+                "entity": self._config.entity_name,
+                "row_count": extract_result.total_rows,
+                "dry_run": True,
+            },
         )
 
     def _build_simple_context(self) -> RunContext:
@@ -283,75 +255,6 @@ class PipelineOrchestrator:
         from bioetl.application.container import create_default_container_factory
 
         return create_default_container_factory()
-
-    def _get_provider_registry(self) -> ProviderRegistryABC:
-        if self._provider_registry is not None:
-            return self._provider_registry
-
-        registry = self._load_registry_via_loader()
-        if registry is not None:
-            return registry
-
-        return self._resolve_registry_from_provider()
-
-    def _serialize_provider_registry(self) -> list[ProviderDefinition] | None:
-        """Provider registry snapshot for subprocess transfer."""
-        if self._provider_registry is None:
-            return None
-        return list(self._provider_registry.list_providers())
-
-    def _load_registry_via_loader(self) -> ProviderRegistryABC | None:
-        """Try to load registry via loader."""
-        loader = self._provider_loader
-        if loader is None and self._provider_loader_factory is not None:
-            loader = self._provider_loader_factory()
-            self._provider_loader = loader
-
-        if loader is None:
-            return None
-
-        registry = loader.get_registry(registry=self._provider_registry_factory())
-        self._provider_registry = registry
-        return registry
-
-    def _resolve_registry_from_provider(self) -> ProviderRegistryABC:
-        """Get registry via provider (fallback)."""
-        if self._provider_registry_provider is None:
-            raise RuntimeError("Provider registry is not configured")
-
-        registry = self._provider_registry_provider()
-        if registry is None:
-            raise RuntimeError("Provider registry provider returned None")
-
-        self._provider_registry = registry
-        return registry
-
-    @staticmethod
-    def _build_registry_for_subprocess(
-        *,
-        loader: ProviderLoaderProtocol | None,
-        registry_payload: list[ProviderDefinition] | None,
-        registry_factory: ProviderRegistryFactory,
-    ) -> ProviderRegistryABC:
-        """Build registry for subprocess execution.
-
-        Args:
-            loader: Optional provider loader.
-            registry_payload: Optional serialized provider definitions.
-            registry_factory: Factory for creating registry instances.
-
-        Returns:
-            Configured provider registry.
-        """
-        if registry_payload is not None:
-            registry = registry_factory()
-            registry.restore_provider_registry(registry_payload)
-            return registry
-
-        if loader is not None:
-            return loader.get_registry(registry=registry_factory())
-
-        return registry_factory()
 
 
 __all__ = ["PipelineOrchestrator"]

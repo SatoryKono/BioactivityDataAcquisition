@@ -1,6 +1,6 @@
 import sys
 
-from bioetl.infrastructure.observability.factories import default_logging_port
+from bioetl.infrastructure.observability.factories import create_logging_port
 from bioetl.interfaces.cli.app import app
 
 # Mock sys.argv
@@ -17,7 +17,7 @@ sys.argv = [
 ]
 
 if __name__ == "__main__":
-    logger = default_logging_port().apply_bind(tool="run_pipeline")
+    logger = create_logging_port().apply_bind(tool="run_pipeline")
     logger.info("Starting pipeline via wrapper script")
     try:
         app()

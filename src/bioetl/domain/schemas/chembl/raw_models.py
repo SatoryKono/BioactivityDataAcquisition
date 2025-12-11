@@ -2,18 +2,11 @@
 
 These models extend SourceRecordModel to provide typed validation
 for ChEMBL API responses at the system boundary.
-
-Model naming:
-    PublicationRawModel: Canonical name for ChEMBL document/publication
-        payloads.
-    DocumentRawModel: Deprecated alias for PublicationRawModel (will be
-        removed in v3.0).
 """
 
 from __future__ import annotations
 
 from typing import Self, TypeAlias
-import warnings
 
 from pydantic import ConfigDict, field_validator, model_validator
 
@@ -209,10 +202,7 @@ class AssayRawModel(SourceRecordModel):
 
 
 class PublicationRawModel(SourceRecordModel):
-    """Raw ChEMBL publication/document payload.
-
-    This is the canonical model name. Previously named DocumentRawModel.
-    """
+    """Raw ChEMBL publication/document payload."""
 
     model_config = ConfigDict(extra="allow")
 
@@ -237,31 +227,12 @@ class PublicationRawModel(SourceRecordModel):
         return str(value)
 
 
-def __getattr__(name: str) -> type[PublicationRawModel]:
-    """Provide deprecated alias for DocumentRawModel."""
-    if name == "DocumentRawModel":
-        warnings.warn(
-            "DocumentRawModel is deprecated, use PublicationRawModel instead. "
-            "Will be removed in v3.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return PublicationRawModel
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-# Deprecated alias for backward compatibility (will be removed in v3.0)
-# Note: Direct class reference for type checkers; runtime uses __getattr__
-DocumentRawModel = PublicationRawModel
-
-
 __all__ = [
     "ActivityRawModel",
     "MoleculeRawModel",
     "TargetRawModel",
     "AssayRawModel",
     "PublicationRawModel",
-    "DocumentRawModel",  # Deprecated alias
     "JsonValue",
     "JsonObject",
     "ScalarValue",

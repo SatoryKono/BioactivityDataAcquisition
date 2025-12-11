@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.clients.base.output.contracts import WriteResult
-from bioetl.domain.configs import QcConfig
+from bioetl.domain.configs import QualityControlConfig
 from bioetl.infrastructure.output.components.metadata_builder import MetadataBuilder
 
 
@@ -116,7 +116,7 @@ def test_build_run_metadata_checksums_dict(builder, mock_context, mock_write_res
 
 def test_build_run_metadata_qc_config(builder, mock_context, mock_write_result):
     """Test QC config is included."""
-    qc_config = QcConfig(
+    qc_config = QualityControlConfig(
         enable_quality_report=True,
         enable_correlation_report=False,
         min_coverage=0.9,
