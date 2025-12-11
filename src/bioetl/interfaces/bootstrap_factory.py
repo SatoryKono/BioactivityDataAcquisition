@@ -1,4 +1,6 @@
-"""Deprecated. Use bioetl.application.bootstrap_factory."""
+"""Deprecated. Use bioetl.application.bootstrap_factory instead."""
+from __future__ import annotations
+
 import warnings
 
 warnings.warn(
