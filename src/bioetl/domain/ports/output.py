@@ -10,8 +10,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
-import pandas as pd
-
 if TYPE_CHECKING:
     from bioetl.domain.clients.base.output.contracts import WriteResult
     from bioetl.domain.configs import QcConfig
@@ -27,7 +25,7 @@ class DataWriterPort(Protocol):
 
     def write(
         self,
-        df: pd.DataFrame,
+        df: Any,
         path: Path,
         *,
         column_order: list[str] | None = None,
@@ -64,9 +62,7 @@ class QcReportGeneratorPort(ABC):
     """
 
     @abstractmethod
-    def build_quality_report(
-        self, df: pd.DataFrame, *, min_coverage: float
-    ) -> pd.DataFrame:
+    def build_quality_report(self, df: Any, *, min_coverage: float) -> Any:
         """Build quality metrics report for DataFrame columns.
 
         Args:
@@ -78,7 +74,7 @@ class QcReportGeneratorPort(ABC):
         """
 
     @abstractmethod
-    def build_correlation_report(self, df: pd.DataFrame) -> pd.DataFrame:
+    def build_correlation_report(self, df: Any) -> Any:
         """Build correlation matrix for numeric columns.
 
         Args:

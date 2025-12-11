@@ -12,8 +12,6 @@ import typer
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.application.use_cases import RunPipelineRequest, RunPipelineResponse
 from bioetl.interfaces.use_case_factory import get_use_case_factory
-from bioetl.application.orchestrator import PipelineOrchestrator
-from bioetl.infrastructure.config.provider_registry import create_provider_loader
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
