@@ -452,7 +452,10 @@ class TestExtractStageIntegration:
         mapper = ChemblRecordMapper(registry=get_chembl_model_registry())
 
         test_cases = [
-            ("activity", {"activity_id": 1, "standard_flag": True, "standard_value": 1.0}),
+            (
+                "activity",
+                {"activity_id": 1, "standard_flag": True, "standard_value": 1.0},
+            ),
             ("molecule", {"molecule_chembl_id": "CHEMBL1"}),
             ("target", {"target_chembl_id": "CHEMBL1"}),
             ("assay", {"assay_chembl_id": "CHEMBL1"}),

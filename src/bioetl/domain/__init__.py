@@ -50,8 +50,10 @@ from bioetl.domain.errors import (
 from bioetl.domain.record_source import (
     InMemoryRecordSource,
     RecordSourceABC,
-    SourceRecord,  # Deprecated alias for SourceRecordModel
     SourceRecordModel,
+)
+from bioetl.domain.record_source import (
+    SourceRecord,  # Deprecated alias for SourceRecordModel
 )
 from bioetl.domain.types import (
     ApiPayload,
