@@ -198,7 +198,10 @@ class PipelineBase(ABC):
 
         Example:
             >>> result = pipeline.run_extract_only(limit=1000)
-            >>> print(f"Extracted {result.total_rows} rows in {result.total_chunks} chunks")
+            >>> print(
+            ...     f"Extracted {result.total_rows} rows "
+            ...     f"in {result.total_chunks} chunks"
+            ... )
         """
         extract_callable = self._get_extract_callable()
         iterator = self._normalize_extract_result(extract_callable(**kwargs))

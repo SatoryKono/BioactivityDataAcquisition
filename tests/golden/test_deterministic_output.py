@@ -7,9 +7,7 @@ even when the input order varies.
 
 from __future__ import annotations
 
-import random
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 import pytest
@@ -25,11 +23,13 @@ from bioetl.infrastructure.output.deterministic import (
 @pytest.fixture
 def sample_data() -> pd.DataFrame:
     """Create sample test data."""
-    return pd.DataFrame({
-        "id": [1, 2, 3, 4, 5],
-        "name": ["Alice", "Bob", "Charlie", "Diana", "Eve"],
-        "value": [100.0, 200.5, 300.25, 400.125, 500.0625],
-    })
+    return pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "name": ["Alice", "Bob", "Charlie", "Diana", "Eve"],
+            "value": [100.0, 200.5, 300.25, 400.125, 500.0625],
+        }
+    )
 
 
 @pytest.fixture
@@ -86,12 +86,8 @@ class TestDeterministicParquetWriter:
         tabular1 = PandasTabularAdapter(sample_data)
         tabular2 = PandasTabularAdapter(shuffled_data)
 
-        result1 = parquet_writer.write_atomic(
-            tabular1, path1, sort_columns=("id",)
-        )
-        result2 = parquet_writer.write_atomic(
-            tabular2, path2, sort_columns=("id",)
-        )
+        result1 = parquet_writer.write_atomic(tabular1, path1, sort_columns=("id",))
+        result2 = parquet_writer.write_atomic(tabular2, path2, sort_columns=("id",))
 
         assert result1.checksum == result2.checksum
         assert path1.read_bytes() == path2.read_bytes()
@@ -146,13 +142,11 @@ class TestDeterministicParquetWriter:
             path = tmp_path / f"shuffled_{i}.parquet"
             tabular = PandasTabularAdapter(shuffled)
 
-            result = parquet_writer.write_atomic(
-                tabular, path, sort_columns=("id",)
-            )
+            result = parquet_writer.write_atomic(tabular, path, sort_columns=("id",))
 
-            assert result.checksum == ref_result.checksum, (
-                f"Shuffle {i} produced different checksum"
-            )
+            assert (
+                result.checksum == ref_result.checksum
+            ), f"Shuffle {i} produced different checksum"
 
 
 class TestDeterministicCSVWriter:
@@ -190,12 +184,8 @@ class TestDeterministicCSVWriter:
         tabular1 = PandasTabularAdapter(sample_data)
         tabular2 = PandasTabularAdapter(shuffled_data)
 
-        result1 = csv_writer.write_atomic(
-            tabular1, path1, sort_columns=("id",)
-        )
-        result2 = csv_writer.write_atomic(
-            tabular2, path2, sort_columns=("id",)
-        )
+        result1 = csv_writer.write_atomic(tabular1, path1, sort_columns=("id",))
+        result2 = csv_writer.write_atomic(tabular2, path2, sort_columns=("id",))
 
         assert result1.checksum == result2.checksum
 
@@ -223,7 +213,8 @@ class TestDeterministicWriteResultVerification:
         sample_data: pd.DataFrame,
         tmp_path: Path,
     ) -> None:
-        """DeterministicWriteResult.verify should return False for mismatched checksum."""
+        """DeterministicWriteResult.verify should return False for mismatched
+        checksum."""
         path = tmp_path / "output.parquet"
         tabular = PandasTabularAdapter(sample_data)
 

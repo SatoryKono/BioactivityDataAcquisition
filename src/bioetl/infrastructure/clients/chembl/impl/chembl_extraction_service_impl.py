@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Any, Iterable
 
 from bioetl.domain.clients.contracts import DataClientABC
-from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.data import RecordBatch
+from bioetl.domain.observability.contracts import LoggingPortABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
     VersionProviderABC,

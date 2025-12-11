@@ -85,7 +85,8 @@ def test_domain_imports_avoid_infrastructure_and_io_clients() -> None:
     # Files with deprecated lazy imports for backward compatibility
     # These files exist only to redirect imports and will be removed
     deprecated_files = {
-        "generator.py",  # domain/schemas/generator.py - deprecated, redirects to infrastructure
+        # domain/schemas/generator.py - deprecated, redirects to infrastructure
+        "generator.py",
     }
 
     violations: list[str] = []
@@ -311,7 +312,13 @@ def _collect_imports_with_context(path: Path) -> list[tuple[str, int, bool]]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                imports.append((alias.name, node.lineno, is_in_type_checking(node.lineno)))
+                imports.append(
+                    (
+                        alias.name,
+                        node.lineno,
+                        is_in_type_checking(node.lineno),
+                    )
+                )
         elif isinstance(node, ast.ImportFrom):
             if node.module:
                 imports.append(
@@ -340,7 +347,9 @@ def test_application_has_no_runtime_infrastructure_imports() -> None:
             if module.startswith("bioetl.infrastructure"):
                 if is_type_checking:
                     continue  # Type hints are OK
-                exception_key = f"{path.relative_to(SRC_ROOT).as_posix().replace('/', '.').replace('.py', '')}:{module}"
+                rel_path = path.relative_to(SRC_ROOT).as_posix()
+                module_path = rel_path.replace("/", ".").replace(".py", "")
+                exception_key = f"{module_path}:{module}"
                 if exception_key not in allowed_exceptions:
                     violations.append(f"{path}:{lineno}: import {module}")
 
@@ -481,9 +490,7 @@ def test_no_cross_module_private_attribute_access() -> None:
                         )
                 elif isinstance(node.value, ast.Attribute):
                     # Chain access like obj.sub._private
-                    violations.append(
-                        f"{path}:{node.lineno}: ....{attr_name}"
-                    )
+                    violations.append(f"{path}:{node.lineno}: ....{attr_name}")
 
     # Filter to keep only likely cross-module violations
     # Some false positives are expected (e.g., testing, internal use)
@@ -510,15 +517,14 @@ def test_no_cross_module_private_attribute_access() -> None:
     }
 
     filtered_violations = [
-        v
-        for v in violations
-        if not any(pattern in v for pattern in allowed_patterns)
+        v for v in violations if not any(pattern in v for pattern in allowed_patterns)
     ]
 
     # Report as warning, not failure (informational)
     if filtered_violations and len(filtered_violations) > 50:
         pytest.fail(
-            f"Found {len(filtered_violations)} potential cross-module private attribute accesses.\n"
+            f"Found {len(filtered_violations)} potential cross-module "
+            "private attribute accesses.\n"
             "Consider using proper public APIs instead of private attributes.\n"
             "First 20 violations:\n" + "\n".join(filtered_violations[:20])
         )

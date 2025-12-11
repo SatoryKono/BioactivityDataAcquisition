@@ -10,6 +10,7 @@ execution logic, making it easier to add, remove, or reorder stages.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 if TYPE_CHECKING:
@@ -168,7 +169,7 @@ class StageRegistry:
         """Return number of registered stages."""
         return len(self._stages)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[StageABC[Any]]:
         """Iterate over stages in execution order."""
         return iter(self.all())
 

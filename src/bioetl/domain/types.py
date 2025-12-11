@@ -68,5 +68,3 @@ Example:
     ...     "normalizer": "chembl_id",
     ... }
 """
-
-

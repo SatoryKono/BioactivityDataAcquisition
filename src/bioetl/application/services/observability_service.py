@@ -35,7 +35,8 @@ class ObservabilityContext:
         ...     run_id="run-123",
         ... )
         >>> context.logger.info("Processing started")
-        # Logs: {"pipeline_id": "chembl.activity", "run_id": "run-123", "message": "Processing started"}
+        # Logs: {"pipeline_id": "chembl.activity", "run_id": "run-123",
+        #        "message": "Processing started"}
     """
 
     _logger: "LoggingPortABC"

@@ -4,10 +4,25 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Protocol
+from typing import Any, Protocol
 
 from bioetl.domain.data import RecordBatch
 from bioetl.domain.types import ApiPayload
+
+# Type aliases for backward compatibility
+RawRecordDict = dict[str, Any]
+"""Type alias for a single raw record dictionary.
+
+Deprecated: Use dict[str, Any] directly or Record from domain.data.
+This alias is maintained for backward compatibility with existing tests.
+"""
+
+RawRecordBatch = RecordBatch
+"""Type alias for a batch of raw records.
+
+Deprecated: Use RecordBatch from domain.data instead.
+This alias is maintained for backward compatibility with existing tests.
+"""
 
 
 class RecordFetcherABC(ABC):
@@ -136,6 +151,9 @@ __all__ = [
     # Canonical type aliases
     "RecordBatch",  # from domain.data
     "ApiPayload",  # from domain.types
+    # Deprecated type aliases (for backward compatibility)
+    "RawRecordDict",
+    "RawRecordBatch",
     # Abstract base classes
     "RecordFetcherABC",
     "VersionProviderABC",
