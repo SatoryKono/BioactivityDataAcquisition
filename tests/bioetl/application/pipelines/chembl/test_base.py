@@ -11,9 +11,7 @@ from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import HasherABC
 from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
-from bioetl.infrastructure.transform.impl.chembl_normalization_service_impl import (
-    ChemblNormalizationServiceImpl,
-)
+from bioetl.infrastructure.transform.impl import NormalizationServiceImpl
 from bioetl.infrastructure.transform.impl.hash_service import Blake2bHashService
 
 
@@ -77,7 +75,9 @@ def mock_dependencies_fixture():
     metadata_builder.build_run_metadata.return_value = {}
     metadata_builder.build_dry_run_metadata.return_value = {}
 
-    normalization_service = ChemblNormalizationServiceImpl(config=config)
+    normalization_service = NormalizationServiceImpl(
+        config, empty_value=None, serialize_array_in_series=False
+    )
 
     return {
         "config": config,
