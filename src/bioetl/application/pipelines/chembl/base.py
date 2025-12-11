@@ -28,6 +28,7 @@ from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
+from bioetl.domain.record_source import RecordSourceABC
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
 from bioetl.domain.services.version_formatter import format_chembl_version
 from bioetl.domain.transform.contracts import (
@@ -59,6 +60,7 @@ class ChemblPipelineBase(PipelineBase):
         hooks: list[PipelineHookABC] | None = None,
         error_policy: ErrorPolicyABC | None = None,
         post_transformer: TransformerABC | None = None,
+        record_source: RecordSourceABC | None = None,
     ) -> None:
         self._extraction_service: ExtractionServiceABC = extraction_service
         self._entity_model_registry: EntityModelRegistryABC = entity_model_registry
@@ -77,6 +79,7 @@ class ChemblPipelineBase(PipelineBase):
             extraction_service=extraction_service,
             record_mapper=ChemblRecordMapper(registry=entity_model_registry),
             entity=config.entity_name,
+            record_source=record_source,
         )
 
         # Create Transformer

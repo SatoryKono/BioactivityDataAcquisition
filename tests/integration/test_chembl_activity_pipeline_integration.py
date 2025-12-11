@@ -74,6 +74,7 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
     )
     logger = container.get_logger()
     extraction_service = container.get_extraction_service()
+    record_source = container.get_record_source(extraction_service, logger=logger)
     pipeline_cls = get_pipeline_class("activity_chembl")
     pipeline = pipeline_cls(
         config=config,
@@ -88,6 +89,7 @@ def test_chembl_activity_pipeline_smoke(tmp_path, monkeypatch):
         normalization_service=container.get_normalization_service(),
         hooks=container.get_hooks(),
         error_policy=container.get_error_policy(),
+        record_source=record_source,
     )
 
     output_path = Path(config.sink.output_path)
