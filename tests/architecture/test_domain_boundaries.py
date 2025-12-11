@@ -479,8 +479,8 @@ class TestDomainForbiddenImports:
                 for forbidden_layer in ("infrastructure", "application", "interfaces"):
                     if forbidden_layer in code:
                         violations.append(
-                            f"{file_path.as_posix()}: dynamic import of {forbidden_layer} "
-                            "via importlib.import_module"
+                            f"{file_path.as_posix()}: dynamic import of "
+                            f"{forbidden_layer} via importlib.import_module"
                         )
                         break
 

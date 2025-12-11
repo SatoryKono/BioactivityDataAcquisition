@@ -34,6 +34,7 @@ import argparse
 import ast
 from collections import defaultdict
 from dataclasses import dataclass, field
+import importlib.util
 import json
 from pathlib import Path
 import sys
@@ -43,9 +44,9 @@ from typing import Iterator
 SRC_PATH = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(SRC_PATH))
 
-# Import directly from _deprecations to avoid loading full domain (which requires pydantic)
-# We use importlib to import just this module without triggering bioetl.domain.__init__
-import importlib.util
+# Import directly from _deprecations to avoid loading full domain
+# (which requires pydantic). We use importlib to import just this module
+# without triggering bioetl.domain.__init__.
 
 _deprecations_path = SRC_PATH / "bioetl" / "domain" / "_deprecations.py"
 spec = importlib.util.spec_from_file_location("_deprecations", _deprecations_path)

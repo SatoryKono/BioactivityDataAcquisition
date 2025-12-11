@@ -104,6 +104,7 @@ class ProviderServiceFactory(ProviderServiceFactoryABC):
         factory = getattr(components, "create_entity_model_registry", None)
         if factory is None:
             raise ValueError(
-                f"Unsupported provider for entity model registry: {self._config.provider}"
+                "Unsupported provider for entity model registry: "
+                f"{self._config.provider}"
             )
         return factory()

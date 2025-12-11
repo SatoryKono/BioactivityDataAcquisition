@@ -43,7 +43,8 @@ def register_schemas(provider: SchemaProviderABC) -> SchemaProviderABC:
             # Register base entity (e.g. "activity")
             provider.register(base_entity, None, column_order=cols)
             # Register input placeholder (e.g. "activity_input")
-            # Using output columns as placeholder since input schema is not strictly enforced yet
+            # Using output columns as placeholder since input schema is not
+            # strictly enforced yet
             provider.register(f"{base_entity}_input", None, column_order=cols)
 
     return provider

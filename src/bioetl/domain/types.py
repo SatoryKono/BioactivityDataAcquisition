@@ -131,7 +131,8 @@ Example:
 # =============================================================================
 
 # Deprecated names are now managed centrally in bioetl.domain._deprecations.
-# This module handles: RecordBatch, RawRecordDict, RawRecordBatch, RawRecordList, RawPayload
+# This module handles: RecordBatch, RawRecordDict, RawRecordBatch,
+# RawRecordList, RawPayload
 # NOTE: RawRecord has been removed completely. Do not add it here.
 # Use Mapping[str, Any] or bioetl.domain.data.Record protocol instead.
 

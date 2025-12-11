@@ -115,7 +115,8 @@ class PipelineOrchestrator:
         Args:
             dry_run: If True, skip the write stage (validate only).
             limit: Optional maximum number of records to process.
-            pipeline_type: Override pipeline execution mode (FULL, TRANSFORM_ONLY, etc.).
+            pipeline_type: Override pipeline execution mode
+                (FULL, TRANSFORM_ONLY, etc.).
 
         Returns:
             RunResult containing execution status, metrics, and metadata.

@@ -114,7 +114,8 @@ class PipelineContainer(PipelineContainerABC):
         self._metadata_builder = metadata_builder or create_noop_metadata_builder()
         self._post_transformer = post_transformer
 
-        # Schema bootstrap service (lazy registration on first validation service access)
+        # Schema bootstrap service (lazy registration on first validation
+        # service access)
         self._schema_bootstrap_service = (
             schema_bootstrap_service
             or create_schema_bootstrap_service(schema_provider=schema_provider)

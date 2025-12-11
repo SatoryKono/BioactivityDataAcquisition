@@ -4,8 +4,10 @@ These models extend SourceRecordModel to provide typed validation
 for ChEMBL API responses at the system boundary.
 
 Model naming:
-    PublicationRawModel: Canonical name for ChEMBL document/publication payloads.
-    DocumentRawModel: Deprecated alias for PublicationRawModel (will be removed in v3.0).
+    PublicationRawModel: Canonical name for ChEMBL document/publication
+        payloads.
+    DocumentRawModel: Deprecated alias for PublicationRawModel (will be
+        removed in v3.0).
 """
 
 from __future__ import annotations

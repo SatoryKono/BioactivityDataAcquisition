@@ -481,7 +481,9 @@ def create_config_migration_service() -> ConfigMigrationServiceProtocol:
             raw config dictionaries into PipelineConfig domain objects.
 
     Example:
-        >>> from bioetl.interfaces.composition_root import create_config_migration_service
+        >>> from bioetl.interfaces.composition_root import (
+        ...     create_config_migration_service,
+        ... )
         >>> service = create_config_migration_service()
         >>> raw = {"entity": "activity", "provider": "chembl", ...}
         >>> config = service.migrate_and_validate(raw)

@@ -43,8 +43,10 @@ class RunContext:
 
     Attributes:
         run_id: Unique run identifier (RunId).
-        entity_name: Entity name (EntityName). Accepts str for backward compatibility.
-        provider: Provider identifier (ProviderId). Accepts str for backward compatibility.
+        entity_name: Entity name (EntityName). Accepts str for backward
+            compatibility.
+        provider: Provider identifier (ProviderId). Accepts str for backward
+            compatibility.
         started_at: Execution start time.
         config: Run configuration.
         dry_run: Test run flag.

@@ -24,8 +24,9 @@ Migration Notes (v3.0)
 - ``SourceRecord`` renamed to ``SourceRecordModel``. Old name available as alias.
 - ``RecordBatch`` moved from ``domain.types`` to ``domain.data``.
   The canonical definition is now ``Sequence[Mapping[str, Any]]``.
-- ``RecordSourceABC.iter_records()`` now returns ``Iterable[Sequence[Mapping[str, Any]]]``
-  instead of ``Iterable[list[SourceRecord]]``.
+- ``RecordSourceABC.iter_records()`` now returns
+  ``Iterable[Sequence[Mapping[str, Any]]]`` instead of
+  ``Iterable[list[SourceRecord]]``.
 """
 
 from bioetl.domain.aggregates import PipelineIdentity
