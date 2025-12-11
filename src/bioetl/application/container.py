@@ -228,21 +228,24 @@ class PipelineContainer(PipelineContainerABC):
         """
         Create a record source for iterating over extracted data.
 
+        Record sources return raw dicts. Domain model conversion should happen
+        via RecordMapperABC in ExtractStage.
+
         Args:
             extraction_service: Service providing raw data extraction.
             limit: Optional maximum number of records to extract.
             logger: Logger instance (defaults to container's logger).
-            model_cls: Optional model class for record conversion.
+            model_cls: Deprecated. Use RecordMapperABC for domain model conversion.
             batch_adapter: Optional adapter for batch processing.
 
         Returns:
-            Record source providing chunked data iteration.
+            Record source providing chunked data iteration (raw dicts).
         """
         return self._get_record_source_factory().create_record_source(
             extraction_service,
             limit=limit,
             logger=logger or self.get_logger(),
-            model_cls=model_cls,
+            model_cls=model_cls,  # Deprecated, triggers warning if not None
             batch_adapter=batch_adapter,
         )
 

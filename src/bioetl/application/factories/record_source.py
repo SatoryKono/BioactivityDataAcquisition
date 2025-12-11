@@ -26,6 +26,10 @@ class RecordSourceFactoryABC(ABC):
 
     Defines the contract for factories that create RecordSourceABC instances
     based on pipeline input configuration (CSV, ID-only, or API mode).
+
+    Note:
+        Record sources return raw dicts. Domain model conversion should happen
+        via RecordMapperABC in ExtractStage.
     """
 
     @abstractmethod
@@ -44,11 +48,11 @@ class RecordSourceFactoryABC(ABC):
             extraction_service: Service for API extraction.
             limit: Maximum number of records to fetch.
             logger: Logger instance.
-            model_cls: Optional Pydantic model class for CSV parsing.
+            model_cls: Deprecated. Use RecordMapperABC for domain model conversion.
             batch_adapter: Optional batch processing callable for API mode.
 
         Returns:
-            Configured RecordSourceABC instance.
+            Configured RecordSourceABC instance returning raw dicts.
         """
 
 
@@ -76,16 +80,19 @@ class RecordSourceFactory(RecordSourceFactoryABC):
     ) -> RecordSourceABC:
         """Create record source based on pipeline input configuration.
 
+        Record sources return raw dicts. Domain model conversion should happen
+        via RecordMapperABC in ExtractStage.
+
         Args:
             extraction_service: Service for API extraction.
             limit: Maximum number of records to fetch.
             logger: Logger instance.
-            model_cls: Optional Pydantic model class for CSV parsing.
+            model_cls: Deprecated. Use RecordMapperABC for domain model conversion.
             batch_adapter: Optional batch processing callable for API mode.
                 If not provided, creates a default PandasBatchAdapter.
 
         Returns:
-            Configured RecordSourceABC instance.
+            Configured RecordSourceABC instance returning raw dicts.
         """
         mode = self._config.source.input_mode
         path = self._config.source.input_path
@@ -97,13 +104,14 @@ class RecordSourceFactory(RecordSourceFactoryABC):
         if mode == "csv":
             if path is None:
                 raise ValueError("input_path is required for CSV mode")
+            # Note: model_cls is deprecated, pass to trigger warning if used
             return CsvRecordSourceImpl(
                 input_path=Path(path),
                 csv_options=self._config.source.csv,
                 limit=limit,
                 logger=logger,
                 chunk_size=chunk_size,
-                model_cls=model_cls,
+                model_cls=model_cls,  # Deprecated, triggers warning if not None
             )
 
         if mode == "id_only":
@@ -133,8 +141,9 @@ class RecordSourceFactory(RecordSourceFactoryABC):
 
         resolved_batch_adapter = batch_adapter
         if resolved_batch_adapter is None:
+            # Note: model_cls is deprecated, pass to trigger warning if used
             resolved_batch_adapter = PandasBatchAdapter(
-                model_cls=model_cls
+                model_cls=model_cls  # Deprecated, triggers warning if not None
             ).process_batch
 
         return ApiRecordSource(
