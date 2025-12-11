@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
 
 from bioetl.domain.configs import BaseProviderConfig, HttpClientConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
-from bioetl.domain.ports.providers import DefaultFieldProviderABC
+from bioetl.domain.ports.filters import FilterEnricherABC
 
 if TYPE_CHECKING:
     from bioetl.domain.transform.contracts import NormalizationServiceABC
@@ -52,7 +52,7 @@ class ProviderComponents(
         config: BaseProviderConfig,
         *,
         client: client_t | None = None,
-        field_provider: DefaultFieldProviderABC | None = None,
+        filter_enricher: FilterEnricherABC | None = None,
         logger: LoggingPortABC | None = None,
         metrics: MetricsPortABC | None = None,
     ) -> extraction_service_t:
