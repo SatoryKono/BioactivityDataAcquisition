@@ -39,7 +39,7 @@ def test_cli_run_dry_run_success(tmp_path, monkeypatch):
             "run",
             "activity_chembl",
             "--config",
-            "chembl_activity_test.yaml",
+            str(Path("tests/fixtures/configs/chembl_activity_test.yaml")),
             "--dry-run",
             "--output",
             str(tmp_path / "output"),
@@ -50,7 +50,7 @@ def test_cli_run_dry_run_success(tmp_path, monkeypatch):
         print(f"CLI Output: {result.stdout}")
 
     assert result.exit_code == 0
-    assert "Starting pipeline" in result.stdout
+    assert "Running pipeline" in result.stdout
     assert "Pipeline finished successfully" in result.stdout
     assert not (tmp_path / "output" / "activity.csv").exists()
 
