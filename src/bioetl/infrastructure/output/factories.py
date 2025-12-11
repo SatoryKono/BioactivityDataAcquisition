@@ -6,8 +6,8 @@ Naming convention:
 - build_*() - uses builder pattern
 """
 
-import warnings
 from typing import Any
+import warnings
 
 from bioetl.domain.clients.base.output.contracts import (
     OutputFrameConverterABC,

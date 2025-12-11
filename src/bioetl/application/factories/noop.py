@@ -72,7 +72,9 @@ def create_noop_validator_factory() -> ValidatorFactoryABC:
     """Return validator factory that treats all data as valid (for tests)."""
 
     def _validate(df: Any) -> ValidationResult:
-        return ValidationResult(is_valid=True, errors=[], warnings=[], validated_df=df)
+        return ValidationResult(
+            is_valid=True, errors=[], warnings=[], validated_data=df
+        )
 
     validator = SimpleNamespace(validate=_validate, is_valid=lambda _df: True)
     return cast(

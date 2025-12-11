@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import Any
+import warnings
 
 from bioetl.domain.ports.parsing import (
     ApiPayload,

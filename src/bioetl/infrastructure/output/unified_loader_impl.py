@@ -32,9 +32,6 @@ from bioetl.infrastructure.output.components.checksum_calculator import (
 )
 from bioetl.infrastructure.output.components.metadata_builder import MetadataBuilder
 from bioetl.infrastructure.output.components.qc_artifact_writer import QcArtifactWriter
-from bioetl.infrastructure.output.components.qc_report_generator import (
-    QcReportGenerator,
-)
 from bioetl.infrastructure.settings.metrics import MetricName
 
 

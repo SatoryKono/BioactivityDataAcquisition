@@ -26,8 +26,8 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, Pipelin
 from bioetl.domain.ports.extraction import (
     ExtractionServiceABC,
 )
-from bioetl.domain.services.version_formatter import format_chembl_version
 from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.services.version_formatter import format_chembl_version
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
     IndexGeneratorABC,

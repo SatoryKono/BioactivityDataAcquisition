@@ -38,9 +38,9 @@ from typing import TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from concurrent.futures import ProcessPoolExecutor
 
+from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.memory_registry import InMemoryProviderRegistry
 from bioetl.application.pipelines.base import PipelineBase
-from bioetl.application.contracts import PipelineContainerABC
 from bioetl.application.pipelines.registry import get_factory
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunContext, RunResult, StageResult
@@ -49,7 +49,8 @@ from bioetl.domain.provider_registry import (
     ProviderRegistryABC,
     ProviderRegistryLoaderABC,
 )
-from bioetl.domain.providers import ProviderDefinition
+from bioetl.domain.providers import ProviderDefinition, ProviderId
+from bioetl.domain.value_objects import EntityName, StageName
 
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
@@ -147,7 +148,7 @@ class PipelineOrchestrator:
                 total_chunks += 1
 
             stage = StageResult(
-                stage_name="extract",
+                stage_name=StageName.EXTRACT,
                 success=True,
                 records_processed=total_rows,
                 chunks_processed=max(total_chunks, 1),
@@ -253,8 +254,8 @@ class PipelineOrchestrator:
 
     def _build_simple_context(self) -> RunContext:
         return RunContext(
-            entity_name=self._config.entity_name,
-            provider=self._config.provider,
+            entity_name=EntityName(self._config.entity_name),
+            provider=ProviderId(self._config.provider),
             config=self._config.model_dump(),
             dry_run=True,
         )

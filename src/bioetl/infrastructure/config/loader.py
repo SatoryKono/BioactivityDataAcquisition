@@ -17,18 +17,18 @@ Legacy usage (deprecated, will be removed):
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 from typing import Any, Iterable
+import warnings
 
 from pydantic import ValidationError
 
 from bioetl.domain.configs import PipelineConfig
-from bioetl.infrastructure.config.migration import ConfigMigrator
 from bioetl.domain.errors import ConfigError, ConfigValidationError
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.infrastructure.config.env import resolve_env_placeholders
+from bioetl.infrastructure.config.migration import ConfigMigrator
 from bioetl.infrastructure.config.provider_registry import (
     ProviderNotConfiguredError,
     ProviderRegistryError,
@@ -572,9 +572,17 @@ def _populate_fields_from_schema(
     try:
         fields = schema_contract_provider.get_field_configs(schema_name)
     except ValueError as exc:
-        raise ConfigValidationError(
-            f"Schema '{schema_name}' is not registered for pipeline '{config.id}'"
-        ) from exc
+        try:
+            from bioetl.domain.schemas.fields import build_field_configs_from_schema
+            from bioetl.domain.schemas.registry import create_default_schema_registry
+
+            registry = create_default_schema_registry()
+            schema = registry.get_schema(schema_name)
+            fields = build_field_configs_from_schema(schema)
+        except Exception:
+            raise ConfigValidationError(
+                f"Schema '{schema_name}' is not registered for pipeline '{config.id}'"
+            ) from exc
     except Exception as exc:  # pragma: no cover - защитный контур
         raise ConfigValidationError(
             f"Failed to derive fields from schema '{schema_name}' "

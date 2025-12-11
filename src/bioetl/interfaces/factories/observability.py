@@ -37,7 +37,9 @@ class DefaultObservabilityFactory(ObservabilityFactoryABC):
     def create_logger(self) -> LoggingPortABC:
         """Create or return cached logger instance."""
         if self._logger is None:
-            from bioetl.infrastructure.observability.factories import create_logging_port
+            from bioetl.infrastructure.observability.factories import (
+                create_logging_port,
+            )
 
             self._logger = create_logging_port()
         return self._logger
@@ -45,7 +47,9 @@ class DefaultObservabilityFactory(ObservabilityFactoryABC):
     def create_metrics(self) -> MetricsPortABC:
         """Create or return cached metrics instance."""
         if self._metrics is None:
-            from bioetl.infrastructure.observability.factories import create_metrics_port
+            from bioetl.infrastructure.observability.factories import (
+                create_metrics_port,
+            )
 
             self._metrics = create_metrics_port()
         return self._metrics

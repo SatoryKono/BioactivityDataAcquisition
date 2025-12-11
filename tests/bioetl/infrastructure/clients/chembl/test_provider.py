@@ -55,7 +55,7 @@ def test_create_normalization_service_uses_factory(monkeypatch, chembl_config):
 
     factory = MagicMock(return_value=stub_service)
     monkeypatch.setattr(
-        "bioetl.infrastructure.clients.chembl.provider.default_normalization_service",
+        "bioetl.infrastructure.clients.chembl.provider.create_normalization_service",
         factory,
     )
 

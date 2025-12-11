@@ -2,15 +2,13 @@
 
 from unittest.mock import Mock
 
-import pytest
-
 from bioetl.domain.errors import ClientRateLimitError
 from bioetl.infrastructure.clients.base.http_error_handler import (
     DefaultHttpErrorHandler,
     ErrorCategory,
     RequestContext,
 )
-from bioetl.infrastructure.errors import ApiClientError, ApiUnexpectedStatusError
+from bioetl.infrastructure.errors import ApiUnexpectedStatusError
 
 
 class TestErrorCategory:

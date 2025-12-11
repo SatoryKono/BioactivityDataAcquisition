@@ -51,7 +51,11 @@ class Blake2bHashService(HashServiceABC):
         Returns:
             HashDigest value object containing the record_hash.
         """
-        return self._hasher.compute_hash(record)
+        if hasattr(self._hasher, "compute_hash"):
+            res = self._hasher.compute_hash(record)
+        else:
+            res = self._hasher.compute_hash_row(record)
+        return res if isinstance(res, HashDigest) else HashDigest(str(res))
 
     def compute_entity_key(
         self,
@@ -67,7 +71,11 @@ class Blake2bHashService(HashServiceABC):
         Returns:
             HashDigest value object containing the business_key_hash.
         """
-        return self._hasher.compute_hash_for_fields(record, key_fields)
+        if hasattr(self._hasher, "compute_hash_for_fields"):
+            res = self._hasher.compute_hash_for_fields(record, key_fields)
+        else:
+            res = self._hasher.compute_hash_columns(record, key_fields)
+        return res if isinstance(res, HashDigest) else HashDigest(str(res))
 
     def add_hashes_to_batch(
         self,
@@ -116,9 +124,15 @@ class Blake2bHashService(HashServiceABC):
             cols_to_hash = [c for c in business_key_cols if c in df.columns]
             if cols_to_hash:
                 df["hash_business_key"] = df.apply(
-                    lambda row: self._hasher.compute_hash_for_fields(
-                        row.to_dict(), cols_to_hash
-                    ).value,
+                    lambda row, _hasher=self._hasher, _cols=cols_to_hash: (
+                        (lambda _res: _res.value if hasattr(_res, "value") else str(_res))(
+                            _hasher.compute_hash_for_fields(row.to_dict(), _cols)
+                        )
+                        if hasattr(_hasher, "compute_hash_for_fields")
+                        else (lambda _res: _res.value if hasattr(_res, "value") else str(_res))(
+                            _hasher.compute_hash_columns(row.to_dict(), _cols)
+                        )
+                    ),
                     axis=1,
                 )
             else:
@@ -126,9 +140,20 @@ class Blake2bHashService(HashServiceABC):
         else:
             df["hash_business_key"] = None
 
-        df["hash_row"] = df.apply(
-            lambda row: self._hasher.compute_hash(row.to_dict()).value, axis=1
-        )
+        def _to_value(x: object) -> str:
+            return x.value if isinstance(x, HashDigest) else str(x)
+
+        def _row_hash(rec: dict) -> str:
+            if hasattr(self._hasher, "compute_hash"):
+                return _to_value(self._hasher.compute_hash(rec))
+            return _to_value(self._hasher.compute_hash_row(rec))
+
+        def _compute_bkh(rec: dict, cols: list[str]) -> str:
+            if hasattr(self._hasher, "compute_hash_for_fields"):
+                return _to_value(self._hasher.compute_hash_for_fields(rec, cols))
+            return _to_value(self._hasher.compute_hash_columns(rec, cols))
+
+        df["hash_row"] = df.apply(lambda row: _row_hash(row.to_dict()), axis=1)
         return df
 
     # Legacy methods for backward compatibility

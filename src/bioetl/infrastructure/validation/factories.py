@@ -12,9 +12,9 @@ Naming convention:
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from typing import TYPE_CHECKING
+import warnings
 
 from bioetl.domain.validation import (
     SchemaProviderABC,

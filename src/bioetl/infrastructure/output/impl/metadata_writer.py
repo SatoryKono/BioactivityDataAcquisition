@@ -1,7 +1,7 @@
 """Writers for pipeline metadata and QC artifacts."""
 
-import warnings
 from pathlib import Path
+import warnings
 
 import pandas as pd
 import yaml

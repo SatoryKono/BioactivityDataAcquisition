@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable
 from typing import Any, cast
 
 from bioetl.application.sources import ApiRecordSource

@@ -8,9 +8,9 @@ Naming convention:
 
 from __future__ import annotations
 
-import warnings
 from types import SimpleNamespace
 from typing import Callable
+import warnings
 
 import pandas as pd
 

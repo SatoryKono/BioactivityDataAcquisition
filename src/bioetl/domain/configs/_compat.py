@@ -13,8 +13,8 @@ Migration guide:
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any
+import warnings
 
 if TYPE_CHECKING:
     from bioetl.domain.configs.pipeline import (

@@ -11,9 +11,9 @@ from bioetl.domain.clients.base.contracts import (
     RateLimiterABC,
     RequestBuilderABC,
 )
-from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.observability import LoggingPortABC
+from bioetl.domain.ports.parsing import ResponseParserPortABC
 from bioetl.infrastructure.clients.base.http_error_handler import (
     DefaultHttpErrorHandler,
     HttpErrorHandlerABC,
@@ -22,7 +22,6 @@ from bioetl.infrastructure.clients.base.http_error_handler import (
 from bioetl.infrastructure.clients.chembl.constants import resolve_endpoint
 from bioetl.infrastructure.clients.chembl.paginator import ChemblPaginatorImpl
 from bioetl.infrastructure.errors import (
-    ApiUnexpectedStatusError,
     wrap_http_errors,
 )
 

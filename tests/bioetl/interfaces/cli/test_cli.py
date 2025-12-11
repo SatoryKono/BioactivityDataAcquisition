@@ -22,6 +22,11 @@ _configs = importlib.import_module("bioetl.domain.configs")
 ChemblSourceConfig = _configs.ChemblSourceConfig
 ClientConfig = _configs.ClientConfig
 PipelineConfig = _configs.PipelineConfig
+DataFlowConfig = _configs.DataFlowConfig
+DataSinkConfig = _configs.DataSinkConfig
+DataSourceConfig = _configs.DataSourceConfig
+PipelineIdentityConfig = _configs.PipelineIdentityConfig
+ProviderHttpConfig = _configs.ProviderHttpConfig
 HashServiceABC = importlib.import_module(
     "bioetl.domain.transform.contracts"
 ).HashServiceABC
@@ -58,17 +63,30 @@ def test_validate_config_missing():
 @patch("bioetl.interfaces.cli.app.build_runtime_config")
 def test_validate_config_success(mock_loader):
     """Test validate-config success."""
+    from bioetl.domain.configs import (
+        DataFlowConfig,
+        DataSinkConfig,
+        DataSourceConfig,
+        PipelineIdentityConfig,
+    )
+    from bioetl.domain.configs.pipeline import ProviderHttpConfig
     mock_loader.return_value = PipelineConfig(
-        id="chembl.test",
-        provider="chembl",
-        entity="test",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="./out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.test",
+            provider="chembl",
+            entity="test",
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="./out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
@@ -101,17 +119,30 @@ def test_run_command(mock_resolve_path, mock_loader, mock_orchestrator_cls):
     # Mock the resolver
     mock_resolve_path.return_value = Path("test.yaml")
 
+    from bioetl.domain.configs import (
+        DataFlowConfig,
+        DataSinkConfig,
+        DataSourceConfig,
+        PipelineIdentityConfig,
+    )
+    from bioetl.domain.configs.pipeline import ProviderHttpConfig
     mock_config = PipelineConfig(
-        id="chembl.activity",
-        provider="chembl",
-        entity="activity",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
@@ -178,16 +209,22 @@ def test_run_with_limit_and_dry_run(
     mock_resolve_path.return_value = Path("inferred.yaml")
 
     mock_config = PipelineConfig(
-        id="chembl.activity",
-        provider="chembl",
-        entity="activity",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
@@ -222,16 +259,22 @@ def test_run_pipeline_failure(mock_resolve_path, mock_loader, mock_orchestrator_
     mock_resolve_path.return_value = Path("inferred.yaml")
 
     mock_loader.return_value = PipelineConfig(
-        id="chembl.activity",
-        provider="chembl",
-        entity="activity",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.activity",
+            provider="chembl",
+            entity="activity",
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,

@@ -6,10 +6,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from datetime import timezone
-from typing import Callable
+from typing import Callable, cast
 
 import pandas as pd
 
+from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
@@ -60,8 +61,11 @@ class HashColumnsTransformerImpl(TransformerABC):
         if df.empty:
             return df.assign(hash_business_key=None, hash_row=None)
 
-        return self._hash_service.add_hash_columns(
-            df, business_key_cols=self._business_key_fields
+        return cast(
+            pd.DataFrame,
+            self._hash_service.add_hash_columns(
+                cast(TabularData, df), business_key_cols=self._business_key_fields
+            ),
         )
 
 

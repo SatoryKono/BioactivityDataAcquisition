@@ -11,6 +11,8 @@ import typer
 from bioetl.application.pipelines.registry import PIPELINE_REGISTRY
 from bioetl.application.use_cases import RunPipelineRequest, RunPipelineResponse
 from bioetl.interfaces.use_case_factory import get_use_case_factory
+from bioetl.application.orchestrator import PipelineOrchestrator
+from bioetl.infrastructure.config.provider_registry import create_provider_loader
 
 app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
@@ -19,7 +21,7 @@ console = Console()
 def _present_result(response: RunPipelineResponse) -> None:
     """Format and display pipeline result."""
     if response.success:
-        console.print("[green]✓ Pipeline completed[/green]")
+        console.print("[green]Pipeline finished successfully[/green]")
         console.print(f"  Rows: {response.row_count}")
         if response.output_path:
             console.print(f"  Output: {response.output_path}")
@@ -37,13 +39,26 @@ def list_pipelines() -> None:
         console.print(f"  - {name}")
 
 
+def build_runtime_config(*args, **kwargs):
+    from bioetl.application.config.runtime import build_runtime_config as _brc
+    return _brc(*args, **kwargs)
+
+
+def _resolve_config_path(config: str | None) -> Path:
+    if not config:
+        raise FileNotFoundError("Config file not found: none provided")
+    p = Path(config)
+    if not p.exists():
+        raise FileNotFoundError(f"Config file not found: {config}")
+    return p
+
+
 @app.command()
 def validate_config(
     config_path: Annotated[str, typer.Argument(help="Path to pipeline config YAML")],
     profile: Annotated[str | None, typer.Option(help="Profile name")] = None,
 ) -> None:
     """Validate a pipeline configuration file."""
-    from bioetl.application.config.runtime import build_runtime_config
     from bioetl.infrastructure.config.sources import get_configs_root
     from bioetl.interfaces.application_context import get_application_context
 
@@ -77,17 +92,26 @@ def run(
 ) -> None:
     """Run a pipeline."""
     try:
-        request = RunPipelineRequest(
-            pipeline_name=pipeline_name,
-            config_path=Path(config) if config else None,
-            output_path=Path(output) if output else None,
-            limit=limit,
-            dry_run=dry_run,
+        resolved = None
+        if config is not None:
+            try:
+                resolved = _resolve_config_path(config)
+            except FileNotFoundError as e:
+                console.print(f"[red]{e}[/red]")
+                raise typer.Exit(1)
+
+        cfg = build_runtime_config(
+            config_path=resolved if resolved else None,
+            configs_root=None,
+            loader=get_use_case_factory()._ensure_context().config_loader,  # reuse context
             profile=profile or "default",
         )
 
-        use_case = get_use_case_factory().create_run_pipeline_use_case()
-        response = use_case.execute(request)
+        orchestrator = PipelineOrchestrator(pipeline_name, cfg)
+        response = orchestrator.run_pipeline(
+            dry_run=dry_run,
+            limit=limit,
+        )
 
         _present_result(response)
         if not response.success:
@@ -115,6 +139,7 @@ def smoke_run(
         config=config,
         limit=10,
         dry_run=True,
+        profile="development",
     )
 
 

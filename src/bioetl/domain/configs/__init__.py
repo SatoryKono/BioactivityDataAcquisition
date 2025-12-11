@@ -35,7 +35,6 @@ from bioetl.domain.configs.defaults import (
 
 # Bounded context configs
 from bioetl.domain.configs.execution import ExecutionConfig
-from bioetl.domain.configs.data_flow import DataFlowConfig
 from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.manifest import PipelineManifest
 from bioetl.domain.configs.normalization import NormalizationConfig
@@ -146,6 +145,7 @@ def __getattr__(name: str) -> Any:
     """
     if name == "ConfigMigrator":
         import warnings
+        from bioetl.domain.configs.migration import ConfigMigrator
 
         warnings.warn(
             "Importing ConfigMigrator from bioetl.domain.configs is deprecated. "
@@ -154,8 +154,6 @@ def __getattr__(name: str) -> Any:
             DeprecationWarning,
             stacklevel=2,
         )
-        from bioetl.infrastructure.config.migration import ConfigMigrator
-
         return ConfigMigrator
 
     if name in _COMPAT_ALL:
@@ -173,7 +171,4 @@ if TYPE_CHECKING:
         HttpClientDefaults as HttpClientDefaults,
         HttpClientSettings as HttpClientSettings,
         QcConfig as QcConfig,
-    )
-    from bioetl.infrastructure.config.migration import (
-        ConfigMigrator as ConfigMigrator,
     )

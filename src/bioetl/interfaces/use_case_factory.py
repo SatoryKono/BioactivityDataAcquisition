@@ -41,7 +41,9 @@ class UseCaseFactory:
         ctx = self._ensure_context()
 
         from bioetl.application.use_cases import RunPipelineUseCase
-        from bioetl.infrastructure.config.provider_registry import create_provider_loader
+        from bioetl.infrastructure.config.provider_registry import (
+            create_provider_loader,
+        )
         from bioetl.infrastructure.config.sources import get_configs_root
         from bioetl.interfaces.composition_root import build_default_container
 

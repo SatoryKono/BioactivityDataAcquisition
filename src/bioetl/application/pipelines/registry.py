@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Type
 
+from bioetl.application.contracts import PipelineFactoryABC
 from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.application.pipelines.chembl.factories import ChemblPipelineFactory
-from bioetl.application.contracts import PipelineFactoryABC
 
 PipelineFactory = Callable[..., PipelineBase]
 

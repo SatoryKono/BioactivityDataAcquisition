@@ -355,8 +355,9 @@ def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
     from bioetl.application.services.schema_contract_provider import (
         SchemaContractProviderImpl,
     )
+    from bioetl.infrastructure.validation.bootstrap import register_schemas
 
-    schema_service = create_schema_bootstrap_service()
+    schema_service = create_schema_bootstrap_service(register_fn=register_schemas)
     schema_provider = schema_service.ensure_registered()
     return SchemaContractProviderImpl(schema_provider)
 

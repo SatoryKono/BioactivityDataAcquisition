@@ -1,11 +1,11 @@
-from bioetl.interfaces.factories.observability import (
-    ObservabilityFactoryABC,
-    DefaultObservabilityFactory,
-    create_observability_factory,
-)
 from bioetl.interfaces.factories.infrastructure import (
-    InfrastructureFactoryABC,
     DefaultInfrastructureFactory,
+    InfrastructureFactoryABC,
+)
+from bioetl.interfaces.factories.observability import (
+    DefaultObservabilityFactory,
+    ObservabilityFactoryABC,
+    create_observability_factory,
 )
 
 __all__ = [

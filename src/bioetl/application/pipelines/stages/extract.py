@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
 from bioetl.application.mappers.contracts import RecordMapperABC
+from bioetl.domain.data import TabularData
+from bioetl.domain.pipelines.contracts import ExtractorABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 
 
-class ExtractStage:
+class ExtractStage(ExtractorABC):
     """Extract stage with optional record mapping.
 
     This stage wraps an ExtractionServiceABC and optionally validates
@@ -75,7 +77,7 @@ class ExtractStage:
         *,
         chunk_size: int | None = None,
         **filters: Any,
-    ) -> Iterable[pd.DataFrame]:
+    ) -> Iterable[TabularData]:
         """Extract and optionally map records to DataFrames.
 
         If mapper is provided, records are validated against domain models
@@ -132,7 +134,7 @@ class ExtractStage:
                 df = pd.DataFrame(batch_records)
 
             if not df.empty:
-                yield df
+                yield cast(TabularData, df)
 
             if remaining is not None:
                 remaining -= len(batch_records)

@@ -294,14 +294,14 @@ import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 
 from bioetl.domain.configs import PipelineConfig  # noqa: E402
-from bioetl.domain.configs.identity import PipelineIdentityConfig  # noqa: E402
 from bioetl.domain.configs.data_flow import DataFlowConfig  # noqa: E402
-from bioetl.domain.configs.source import DataSourceConfig  # noqa: E402
-from bioetl.domain.configs.sink import DataSinkConfig  # noqa: E402
+from bioetl.domain.configs.identity import PipelineIdentityConfig  # noqa: E402
 from bioetl.domain.configs.pipeline import (  # noqa: E402
     ChemblSourceConfig,
     ProviderHttpConfig,
 )
+from bioetl.domain.configs.sink import DataSinkConfig  # noqa: E402
+from bioetl.domain.configs.source import DataSourceConfig  # noqa: E402
 from bioetl.domain.models import RunContext  # noqa: E402
 from bioetl.domain.observability.contracts import LoggingPortABC  # noqa: E402
 from bioetl.domain.validation.service import ValidationService  # noqa: E402
@@ -433,14 +433,14 @@ def mock_metadata_builder():
             "run_id": getattr(context, "run_id", None),
             "row_count": getattr(write_result, "row_count", 0),
             "provider": getattr(context, "provider", None),
-            "entity": getattr(context, "entity_name", None),
+            "entity": str(getattr(context, "entity_name", "")) if getattr(context, "entity_name", None) is not None else None,
         },
         build_dry_run_metadata=lambda context, row_count: {
             "run_id": getattr(context, "run_id", None),
             "row_count": row_count,
             "dry_run": True,
             "provider": getattr(context, "provider", None),
-            "entity": getattr(context, "entity_name", None),
+            "entity": str(getattr(context, "entity_name", "")) if getattr(context, "entity_name", None) is not None else None,
         },
     )
 

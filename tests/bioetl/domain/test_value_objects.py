@@ -1,7 +1,7 @@
 """Tests for domain value objects."""
 
-import pytest
 from pydantic import BaseModel
+import pytest
 
 from bioetl.domain.value_objects import StageName
 

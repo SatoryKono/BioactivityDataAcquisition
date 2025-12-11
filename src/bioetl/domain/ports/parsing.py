@@ -51,15 +51,13 @@ Example migration::
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Generic
+from typing import Any, Generic
+import warnings
 
 from typing_extensions import TypeVar
-
-from collections.abc import Mapping
-from typing import Any
 
 from bioetl.domain.data import RecordBatch
 from bioetl.domain.types import ApiPayload

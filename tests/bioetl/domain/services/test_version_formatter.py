@@ -1,6 +1,5 @@
 """Tests for ChEMBL version formatter."""
 
-import pytest
 
 from bioetl.domain.services.version_formatter import (
     ChemblVersionFormatter,

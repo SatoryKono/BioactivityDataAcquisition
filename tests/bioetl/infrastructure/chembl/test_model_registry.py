@@ -6,8 +6,8 @@ from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.schemas.chembl.raw_models import (
     ActivityRawModel,
     AssayRawModel,
-    DocumentRawModel,
     MoleculeRawModel,
+    PublicationRawModel,
     TargetRawModel,
 )
 from bioetl.infrastructure.chembl.model_registry import (
@@ -43,7 +43,7 @@ class TestChemblEntityModelRegistry:
         assert registry.get_model("molecule") is MoleculeRawModel
         assert registry.get_model("target") is TargetRawModel
         assert registry.get_model("assay") is AssayRawModel
-        assert registry.get_model("document") is DocumentRawModel
+        assert registry.get_model("document") is PublicationRawModel
 
     def test_get_model_raises_for_unknown_entity(self):
         """Test that get_model raises ValueError for unknown entity."""

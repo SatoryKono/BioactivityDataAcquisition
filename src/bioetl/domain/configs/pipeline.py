@@ -16,6 +16,7 @@ from pydantic import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.configs.execution import ExecutionConfig
     from bioetl.domain.configs.manifest import PipelineManifest
     from bioetl.domain.pipelines.types import PipelineType
     from bioetl.domain.transform.contracts import NormalizationConfigProviderProtocol
@@ -630,22 +631,23 @@ class PipelineConfig(BaseModel):
     @property
     def entity(self) -> str:
         """Access entity from identity section."""
-        return self.identity.entity
+        return str(self.identity.entity)
 
     @property
     def provider(self) -> str:
         """Access provider from identity section."""
-        return self.identity.provider
+        prov = self.identity.provider
+        return prov.value if hasattr(prov, "value") else str(prov)
 
     @property
     def entity_name(self) -> str:
         """Alias for entity (backward compatibility)."""
-        return self.identity.entity
+        return str(self.identity.entity)
 
     @property
     def id(self) -> str:
         """Access pipeline_id from identity section."""
-        return self.identity.pipeline_id
+        return str(self.identity.pipeline_id)
 
     # =========================================================================
     # Computed properties
@@ -890,4 +892,11 @@ __all__ = [
     "InterfaceFeaturesConfig",
     "NormalizationConfig",
     "TransformConfig",
+    # Deprecated aliases
+    "ClientConfig",
+    "HttpClientSettings",
 ]
+
+# Deprecated aliases for backward compatibility
+ClientConfig = HttpClientConfig
+HttpClientSettings = HttpClientConfig

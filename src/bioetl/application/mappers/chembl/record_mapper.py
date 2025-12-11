@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.parsing import RecordBatch
@@ -57,7 +59,10 @@ class ChemblRecordMapper(RecordMapperABC):
             ValidationError: If record validation fails (from Pydantic).
         """
         model_class = self._registry.get_model(entity)
-        return [model_class.model_validate(record) for record in raw_records]
+        return [
+            cast(SourceRecord, model_class.model_validate(record))
+            for record in raw_records
+        ]
 
     def get_supported_entities(self) -> frozenset[str]:
         """Return set of entity names this mapper supports.

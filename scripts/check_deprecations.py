@@ -32,11 +32,11 @@ from __future__ import annotations
 
 import argparse
 import ast
-import json
-import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
+import json
 from pathlib import Path
+import sys
 from typing import Iterator
 
 # Add src to path for importing deprecations registry
@@ -347,9 +347,9 @@ def format_markdown(result: ScanResult) -> str:
         for usage in usages:
             rel_path = _make_relative(usage.file_path)
             lines.append(f"- `{rel_path}:{usage.line_number}`")
-            lines.append(f"  ```python")
+            lines.append("  ```python")
             lines.append(f"  {usage.import_statement}")
-            lines.append(f"  ```")
+            lines.append("  ```")
 
         lines.append("")
 

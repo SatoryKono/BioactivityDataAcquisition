@@ -103,7 +103,7 @@ def test_stage_counter_makes_stage_result():
 
     result = counter.make_stage_result("extract")
 
-    assert result.stage_name == "extract"
+    assert result.stage_name.value == "extract"
     assert result.success is True
     assert result.records_processed == 100
     assert result.chunks_processed == 2
@@ -123,7 +123,7 @@ def test_stage_counter_makes_failed_stage_result():
         "extract", success=False, errors=["Error occurred"]
     )
 
-    assert result.stage_name == "extract"
+    assert result.stage_name.value == "extract"
     assert result.success is False
     assert result.records_processed == 0
     assert result.chunks_processed == 0
