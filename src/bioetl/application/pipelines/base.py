@@ -60,7 +60,7 @@ from bioetl.domain.pipelines.contracts import (
     PipelineHookABC,
 )
 from bioetl.domain.providers import ProviderId
-from bioetl.domain.schemas.pipeline_contracts import get_pipeline_contract
+from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
     IndexGeneratorABC,
@@ -97,6 +97,7 @@ class PipelineBase(ABC):
         hash_service: HashServiceABC,
         index_generator: IndexGeneratorABC,
         timestamp_provider: TimestampProviderABC,
+        schema_contract: PipelineSchemaModel,
         metadata_builder: RunMetadataBuilderProtocol | None = None,
         extractor: ExtractorABC | None = None,
         hooks: list[PipelineHookABC] | None = None,
@@ -116,6 +117,7 @@ class PipelineBase(ABC):
         self._hash_service = hash_service
         self._index_generator = index_generator
         self._timestamp_provider = timestamp_provider
+        self._schema_contract = schema_contract
         self._metadata_builder = metadata_builder or DefaultRunMetadataBuilder()
         self._extractor = extractor
         self._transformer = transformer
@@ -129,9 +131,6 @@ class PipelineBase(ABC):
                 business_key_fields=business_key_fields,
                 version_provider=self.get_version,
             )
-        self._schema_contract = get_pipeline_contract(
-            config.id, default_entity=config.entity_name
-        )
         from bioetl.application.pipelines.hooks_impl import (  # pylint: disable=import-outside-toplevel
             FailFastErrorPolicyImpl,
         )
