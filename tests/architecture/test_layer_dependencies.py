@@ -331,3 +331,174 @@ def test_infrastructure_does_not_import_domain_schemas_at_module_level() -> None
                     )
 
     _assert_no_violations(violations)
+
+
+# =============================================================================
+# Additional architecture tests for stricter boundary enforcement
+# =============================================================================
+
+INTERFACES_ROOT = SOURCE_ROOT / "bioetl" / "interfaces"
+
+
+def test_application_does_not_import_domain_schemas_directly() -> None:
+    """Verify application layer imports domain schemas only via contracts.
+
+    Application layer should:
+    - Import from domain.schemas.pipeline_contracts (the contract registry)
+    - Import from domain.ports.schema (the port definition)
+
+    But should NOT import:
+    - domain.schemas.chembl.* (provider-specific models)
+    - domain.schemas.field_specs directly (use ports)
+    """
+    violations: list[str] = []
+
+    forbidden_patterns = [
+        "bioetl.domain.schemas.chembl",
+    ]
+
+    for file_path in sorted(APPLICATION_ROOT.rglob("*.py")):
+        for reference in _collect_imports(file_path):
+            for pattern in forbidden_patterns:
+                if reference.module.startswith(pattern):
+                    violations.append(
+                        _format_violation(
+                            file_path,
+                            reference.lineno,
+                            f"application must not import {pattern} directly "
+                            f"(use ports/contracts). Found: {reference.module}",
+                        )
+                    )
+
+    _assert_no_violations(violations)
+
+
+def test_interfaces_imports_infrastructure_through_factories() -> None:
+    """Verify interfaces layer uses factories for infrastructure creation.
+
+    Interfaces layer (composition root) should:
+    - Import infrastructure factories and adapters
+    - Create concrete implementations via factories
+
+    Check that interfaces does not import low-level infrastructure internals
+    that should be encapsulated.
+    """
+    violations: list[str] = []
+
+    # Internal implementation details that should not leak to interfaces
+    forbidden_internal_patterns = [
+        "bioetl.infrastructure.clients.chembl.impl",
+        "bioetl.infrastructure.validation.schemas.chembl",
+    ]
+
+    for file_path in sorted(INTERFACES_ROOT.rglob("*.py")):
+        for reference in _collect_module_level_imports(file_path):
+            for pattern in forbidden_internal_patterns:
+                if reference.module.startswith(pattern):
+                    violations.append(
+                        _format_violation(
+                            file_path,
+                            reference.lineno,
+                            f"interfaces should not import internal infrastructure "
+                            f"details directly ({pattern}). "
+                            f"Use factories instead. Found: {reference.module}",
+                        )
+                    )
+
+    _assert_no_violations(violations)
+
+
+def test_domain_does_not_import_interfaces() -> None:
+    """Verify domain layer never imports from interfaces."""
+    violations: list[str] = []
+
+    for file_path in sorted(DOMAIN_ROOT.rglob("*.py")):
+        for reference in _collect_imports(file_path):
+            if reference.module.startswith("bioetl.interfaces"):
+                violations.append(
+                    _format_violation(
+                        file_path,
+                        reference.lineno,
+                        "domain must not depend on interfaces "
+                        f"(imported {reference.module})",
+                    )
+                )
+
+    _assert_no_violations(violations)
+
+
+def test_application_does_not_import_interfaces() -> None:
+    """Verify application layer never imports from interfaces."""
+    violations: list[str] = []
+
+    for file_path in sorted(APPLICATION_ROOT.rglob("*.py")):
+        for reference in _collect_imports(file_path):
+            if reference.module.startswith("bioetl.interfaces"):
+                violations.append(
+                    _format_violation(
+                        file_path,
+                        reference.lineno,
+                        "application must not depend on interfaces "
+                        f"(imported {reference.module})",
+                    )
+                )
+
+    _assert_no_violations(violations)
+
+
+def test_infrastructure_does_not_import_interfaces() -> None:
+    """Verify infrastructure layer never imports from interfaces."""
+    violations: list[str] = []
+
+    for file_path in sorted(INFRASTRUCTURE_ROOT.rglob("*.py")):
+        for reference in _collect_imports(file_path):
+            if reference.module.startswith("bioetl.interfaces"):
+                violations.append(
+                    _format_violation(
+                        file_path,
+                        reference.lineno,
+                        "infrastructure must not depend on interfaces "
+                        f"(imported {reference.module})",
+                    )
+                )
+
+    _assert_no_violations(violations)
+
+
+def test_pipeline_contracts_config_matches_hardcoded() -> None:
+    """Verify YAML config contracts match hardcoded fallback.
+
+    This test ensures the configs/pipeline_contracts.yaml stays in sync
+    with the hardcoded PIPELINE_CONTRACTS dictionary during the migration
+    period.
+    """
+    import yaml
+
+    from bioetl.domain.schemas.pipeline_contracts import PIPELINE_CONTRACTS
+
+    config_path = REPO_ROOT / "configs" / "pipeline_contracts.yaml"
+
+    if not config_path.exists():
+        pytest.skip("pipeline_contracts.yaml not found (optional during migration)")
+
+    with config_path.open() as f:
+        config_data = yaml.safe_load(f)
+
+    contracts_from_yaml = config_data.get("contracts", {})
+
+    # Check all hardcoded contracts exist in YAML
+    for code, model in PIPELINE_CONTRACTS.items():
+        assert code in contracts_from_yaml, (
+            f"Hardcoded contract '{code}' not found in pipeline_contracts.yaml"
+        )
+
+        yaml_contract = contracts_from_yaml[code]
+        assert yaml_contract["schema_out"] == model.schema_out, (
+            f"schema_out mismatch for {code}"
+        )
+        assert yaml_contract.get("schema_in") == model.schema_in, (
+            f"schema_in mismatch for {code}"
+        )
+        assert yaml_contract.get("output_schema") == model.output_schema, (
+            f"output_schema mismatch for {code}"
+        )

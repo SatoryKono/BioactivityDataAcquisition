@@ -250,27 +250,44 @@ class ConfigMigrator:
 
     @classmethod
     def _migrate_runtime_client_keys(cls, data: dict[str, Any]) -> None:
-        """Fix legacy client config keys in runtime section."""
+        """Fix legacy client config keys in runtime section.
+
+        Delegates to HttpConfigMigrator for consistent migration logic.
+        """
+        from bioetl.infrastructure.config.http_config_migration import (
+            HttpConfigMigrator,
+        )
+
         runtime = data.get("runtime")
         if not isinstance(runtime, dict):
             return
 
-        client = runtime.get("client")
-        if not isinstance(client, dict):
-            return
+        # Migrate 'client' section (legacy name)
+        if "client" in runtime and isinstance(runtime["client"], dict):
+            runtime["client"] = HttpConfigMigrator.migrate(
+                runtime["client"], warn=False
+            )
 
-        # Legacy key mappings
-        legacy_mappings = {
-            "timeout": "timeout_sec",
-            "rate_limit": "rate_limit_per_sec",
-            "backoff": "backoff_factor",
-        }
+        # Migrate 'http' section (current name)
+        if "http" in runtime and isinstance(runtime["http"], dict):
+            runtime["http"] = HttpConfigMigrator.migrate(
+                runtime["http"], warn=False
+            )
 
-        for old_key, new_key in legacy_mappings.items():
-            if old_key in client and new_key not in client:
-                client[new_key] = client.pop(old_key)
-            elif old_key in client:
-                client.pop(old_key)
+        # Also migrate provider_config.http if present
+        provider_config = data.get("provider_config")
+        if isinstance(provider_config, dict):
+            if "http" in provider_config and isinstance(provider_config["http"], dict):
+                provider_config["http"] = HttpConfigMigrator.migrate(
+                    provider_config["http"], warn=False
+                )
+            # Legacy: http_client section in provider_config
+            if "http_client" in provider_config and isinstance(
+                provider_config["http_client"], dict
+            ):
+                provider_config["http_client"] = HttpConfigMigrator.migrate(
+                    provider_config["http_client"], warn=False
+                )
 
     # =========================================================================
     # Section packing helpers (v2 normalization)
