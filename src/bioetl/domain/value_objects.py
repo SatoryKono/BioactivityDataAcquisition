@@ -66,26 +66,71 @@ class RunId:
 
 
 class StageName:
-    """Value Object для имени стадии pipeline (snake_case).
+    """Value Object для имени стадии pipeline.
 
-    Используется для идентификации стадий в pipeline.
+    Ограниченный набор допустимых стадий с поддержкой aliases.
+
+    Allowed values:
+        - "extract" - стадия извлечения данных
+        - "transform" - стадия трансформации
+        - "validate" - стадия валидации
+        - "export" - стадия экспорта (alias: "load")
+
+    Features:
+        - Case-insensitive: StageName("EXTRACT") → StageName("extract")
+        - Alias support: StageName("load") → StageName("export")
+        - Enum-like access: StageName.EXTRACT, StageName.TRANSFORM, etc.
 
     Examples:
-        - "fetch"
-        - "transform"
-        - "normalize_data"
+        >>> StageName("extract")
+        StageName('extract')
+        >>> StageName("EXTRACT")  # case-insensitive
+        StageName('extract')
+        >>> StageName("load")  # alias for export
+        StageName('export')
+        >>> StageName.EXTRACT
+        StageName('extract')
     """
 
     __slots__ = ("_value",)
-    _pattern = re.compile(r"^[a-z][a-z0-9_]*$")
-    _max_length = 64
+
+    # Allowed stage names
+    _ALLOWED_VALUES: frozenset[str] = frozenset(
+        {"extract", "transform", "validate", "export"}
+    )
+
+    # Aliases mapping (load → export for backward compatibility)
+    _ALIASES: dict[str, str] = {"load": "export"}
+
+    # Class-level constants (initialized after class definition)
+    EXTRACT: StageName
+    TRANSFORM: StageName
+    VALIDATE: StageName
+    EXPORT: StageName
 
     def __init__(self, value: str) -> None:
-        if not self._pattern.match(value):
-            raise ValueError(f"StageName must be snake_case: {value}")
-        if len(value) > self._max_length:
-            raise ValueError(f"StageName too long: {len(value)} > {self._max_length}")
-        self._value = value
+        if not isinstance(value, str):
+            raise TypeError(f"StageName requires str, got {type(value).__name__}")
+
+        normalized = value.lower()
+
+        # Resolve alias
+        if normalized in self._ALIASES:
+            normalized = self._ALIASES[normalized]
+
+        if normalized not in self._ALLOWED_VALUES:
+            allowed = sorted(self._ALLOWED_VALUES | set(self._ALIASES.keys()))
+            raise ValueError(
+                f"Invalid stage name: {value!r}. "
+                f"Allowed values: {', '.join(allowed)}"
+            )
+
+        self._value = normalized
+
+    @classmethod
+    def all_values(cls) -> frozenset[str]:
+        """Return all allowed stage name values."""
+        return cls._ALLOWED_VALUES
 
     @property
     def value(self) -> str:
@@ -115,6 +160,13 @@ class StageName:
             core_schema.str_schema(),
             serialization=core_schema.plain_serializer_function_ser_schema(str),
         )
+
+
+# Initialize enum-like class constants
+StageName.EXTRACT = StageName("extract")
+StageName.TRANSFORM = StageName("transform")
+StageName.VALIDATE = StageName("validate")
+StageName.EXPORT = StageName("export")
 
 
 class EntityName:

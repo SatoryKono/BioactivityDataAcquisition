@@ -1,51 +1,55 @@
-"""Interface layer package.
+"""Interface layer — adapters for CLI, REST, Monitoring.
 
-This layer contains adapters for external communication:
-- CLI (Typer-based command line interface)
-- REST (FastAPI-based HTTP API)
-- Monitoring (Prometheus metrics export)
-
-The interfaces layer depends on:
-- application layer (use cases, orchestration)
-- infrastructure layer (through CompositionRoot)
-
-The interfaces layer should NOT contain business logic.
-All orchestration happens in application layer.
-
-Example usage:
-    # CLI
-    from bioetl.interfaces.cli import app
-    app()
-
-    # REST
-    from bioetl.interfaces.rest import create_rest_app
-    app = create_rest_app()
-
-    # Composition Root (for custom wiring)
-    from bioetl.interfaces import CompositionRoot
-    root = CompositionRoot()
-    container = root.create_pipeline_container(config)
+This layer adapts external requests to application use cases.
+It should NOT contain business logic.
 """
 
+from bioetl.interfaces.application_context import (
+    ApplicationContext,
+    get_application_context,
+    reset_application_context,
+    set_application_context,
+)
 from bioetl.interfaces.composition_root import (
     CompositionRoot,
     ObservabilityStack,
     build_default_container,
     create_config_loader,
-    create_config_path_resolver,
     get_composition_root,
     reset_composition_root,
 )
+from bioetl.interfaces.factories import (
+    DefaultInfrastructureFactory,
+    DefaultObservabilityFactory,
+    InfrastructureFactoryABC,
+    ObservabilityFactoryABC,
+)
+from bioetl.interfaces.use_case_factory import (
+    UseCaseFactory,
+    get_use_case_factory,
+    reset_use_case_factory,
+)
 
 __all__ = [
-    # Core classes
+    # Application context
+    "ApplicationContext",
+    "get_application_context",
+    "set_application_context",
+    "reset_application_context",
+    # Composition root
     "CompositionRoot",
     "ObservabilityStack",
-    # Singleton access
-    "get_composition_root",
-    "reset_composition_root",
-    # Convenience functions
     "build_default_container",
     "create_config_loader",
-    "create_config_path_resolver",
+    "get_composition_root",
+    "reset_composition_root",
+    # Factories
+    "ObservabilityFactoryABC",
+    "DefaultObservabilityFactory",
+    "InfrastructureFactoryABC",
+    "DefaultInfrastructureFactory",
+    # Use cases
+    "UseCaseFactory",
+    "get_use_case_factory",
+    "reset_use_case_factory",
 ]
