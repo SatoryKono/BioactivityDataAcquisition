@@ -104,9 +104,7 @@ class Assay(EntityBase):
         """Validate entity invariants."""
         # Validate ChEMBL ID format
         if not self.assay_chembl_id.startswith("CHEMBL"):
-            raise ValueError(
-                f"Invalid assay_chembl_id format: {self.assay_chembl_id}"
-            )
+            raise ValueError(f"Invalid assay_chembl_id format: {self.assay_chembl_id}")
 
         # Validate assay_type is one of allowed values
         allowed_assay_types = {

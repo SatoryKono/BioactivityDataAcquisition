@@ -56,9 +56,7 @@ class Cell(EntityBase):
         """Validate entity invariants."""
         # Validate ChEMBL ID format
         if not self.cell_chembl_id.startswith("CHEMBL"):
-            raise ValueError(
-                f"Invalid cell_chembl_id format: {self.cell_chembl_id}"
-            )
+            raise ValueError(f"Invalid cell_chembl_id format: {self.cell_chembl_id}")
 
     @property
     def chembl_id(self) -> ChemblId:
