@@ -239,6 +239,105 @@ Key tests:
 | `test_application_does_not_depend_on_interfaces` | Application must not import interfaces layer |
 | `test_application_uses_ports_not_implementations` | Application should use ABCs, not concrete classes |
 
+## Submodule Dependency Graph
+
+The following diagram shows the dependencies between submodules within the application layer.
+This graph is validated by `scripts/check_application_deps.py` to ensure no cyclic dependencies.
+
+```mermaid
+flowchart TD
+    subgraph "Entry Points"
+        __init__["__init__"]
+        bootstrap
+        use_cases
+    end
+
+    subgraph "Core Orchestration"
+        orchestrator
+        container
+        executor
+    end
+
+    subgraph "Pipeline Infrastructure"
+        pipelines
+        factories
+        contracts
+    end
+
+    subgraph "Supporting Modules"
+        services
+        mappers
+        config
+        helpers
+        memory_registry
+    end
+
+    subgraph "Data Layer"
+        sources
+        files
+        transform
+        providers
+    end
+
+    %% Entry point dependencies
+    __init__ --> container
+    __init__ --> contracts
+    __init__ --> orchestrator
+    bootstrap --> services
+    use_cases --> orchestrator
+    use_cases --> pipelines
+
+    %% Core orchestration dependencies
+    orchestrator --> container
+    orchestrator --> contracts
+    orchestrator --> memory_registry
+    orchestrator --> pipelines
+    container --> contracts
+    container --> factories
+    container --> services
+    executor --> pipelines
+
+    %% Pipeline infrastructure dependencies
+    pipelines --> contracts
+    pipelines --> executor
+    pipelines --> factories
+    pipelines --> helpers
+    pipelines --> mappers
+    factories --> files
+    factories --> helpers
+    factories --> pipelines
+    factories --> providers
+    factories --> sources
+    factories --> transform
+    contracts --> pipelines
+
+    %% Styling
+    style container fill:#f9f,stroke:#333
+    style orchestrator fill:#bbf,stroke:#333
+    style bootstrap fill:#bfb,stroke:#333
+    style pipelines fill:#fbb,stroke:#333
+```
+
+> **Note**: The cycles shown above (`pipelines <-> factories`, `pipelines <-> executor`,
+> `pipelines <-> contracts`) are tracked issues that need architectural attention.
+> These are typically caused by TYPE_CHECKING imports or lazy imports that appear
+> as direct dependencies in the graph.
+
+### Dependency Validation
+
+Run the dependency checker to validate the graph:
+
+```bash
+# Text report
+python scripts/check_application_deps.py
+
+# JSON output (for CI)
+python scripts/check_application_deps.py --json
+
+# Generate fresh Mermaid diagram
+python scripts/check_application_deps.py --mermaid
+```
+
 ## Module Structure
 
 ```
