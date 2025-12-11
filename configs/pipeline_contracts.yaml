@@ -1,0 +1,54 @@
+# Pipeline Schema Contracts Configuration
+#
+# This file defines the mapping between pipeline identifiers and their
+# input/output schema names. Moving this configuration from code to YAML
+# allows adding new pipelines without modifying domain code.
+#
+# Structure:
+#   pipeline_code: Unique identifier for the pipeline (e.g., "chembl.activity")
+#   schema_out: Primary output schema name
+#   schema_in: Input schema name (optional, defaults to schema_out)
+#   output_schema: Final output schema name (optional, defaults to schema_out)
+#
+# To add a new pipeline:
+#   1. Add entry to this file
+#   2. Create corresponding Pandera schemas in infrastructure/validation/schemas/
+#   3. Register the pipeline factory in application/pipelines/registry.py
+
+contracts:
+  chembl.activity:
+    pipeline_code: chembl.activity
+    schema_out: activity
+    schema_in: activity_input
+    output_schema: activity_output
+
+  chembl.assay:
+    pipeline_code: chembl.assay
+    schema_out: assay
+    schema_in: assay_input
+    output_schema: assay_output
+
+  chembl.document:
+    pipeline_code: chembl.document
+    schema_out: document
+    schema_in: document_input
+    output_schema: document_output
+
+  chembl.target:
+    pipeline_code: chembl.target
+    schema_out: target
+    schema_in: target_input
+    output_schema: target_output
+
+  chembl.molecule:
+    pipeline_code: chembl.molecule
+    schema_out: molecule
+    schema_in: molecule_input
+    output_schema: molecule_output
+
+# Default contract template for dynamically registered pipelines
+# Used when pipeline_code is not found in contracts
+default_template:
+  use_pipeline_code_as_schema: true
+  schema_suffix_in: _input
+  schema_suffix_out: _output

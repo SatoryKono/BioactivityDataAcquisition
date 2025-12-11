@@ -12,6 +12,10 @@ from bioetl.domain.ports.config_loader_port import (
     ConfigLoaderPortABC,
     ConfigPathResolverPortABC,
 )
+from bioetl.domain.ports.pipeline_contract_loader import (
+    PipelineContractLoaderError,
+    PipelineContractLoaderPortABC,
+)
 from bioetl.domain.ports.entity_models import EntityModelRegistryABC
 from bioetl.domain.ports.extraction import (
     BatchAdapterABC,
@@ -81,6 +85,9 @@ __all__: list[str] = [
     # Configuration ports
     "ConfigLoaderPortABC",
     "ConfigPathResolverPortABC",
+    # Pipeline contract ports
+    "PipelineContractLoaderPortABC",
+    "PipelineContractLoaderError",
     # Infrastructure factory ports
     "ABCRegistryResolverPortABC",
     "InfrastructureFactoryPortABC",

@@ -6,22 +6,29 @@ in the validation infrastructure. It defines:
 - Generated (service) columns that are common to all schemas
 - Base configuration for strict validation, coercion, and ordering
 - Helper functions for building output column orders
+- Deprecation handling for legacy column names (extracted_at -> acquisition_timestamp)
 """
 
 from __future__ import annotations
 
-from typing import Any
+import warnings
+from typing import TYPE_CHECKING, Any
 
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.field_specs import GENERATED_COLUMN_NAMES, HEX_64_PATTERN
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 __all__ = [
     "HEX_64_PATTERN",
     "GENERATED_COLUMN_ORDER",
     "DEPRECATED_COLUMN_ALIASES",
     "build_output_column_order",
+    "migrate_deprecated_columns",
+    "check_deprecated_columns",
     "BaseGeneratedColumnsModel",
     "BaseGeneratedColumnsSchema",
 ]
@@ -37,6 +44,93 @@ GENERATED_COLUMN_ORDER: list[str] = list(GENERATED_COLUMN_NAMES)
 DEPRECATED_COLUMN_ALIASES: dict[str, str] = {
     "extracted_at": "acquisition_timestamp",
 }
+
+
+def check_deprecated_columns(
+    columns: list[str],
+    *,
+    warn: bool = True,
+    stacklevel: int = 3,
+) -> list[str]:
+    """Check for deprecated column names and optionally warn.
+
+    Args:
+        columns: List of column names to check.
+        warn: Whether to emit deprecation warnings.
+        stacklevel: Stack level for warnings.
+
+    Returns:
+        List of deprecated column names found.
+
+    Example:
+        >>> deprecated = check_deprecated_columns(df.columns.tolist())
+        >>> if deprecated:
+        ...     print(f"Found deprecated columns: {deprecated}")
+    """
+    found_deprecated: list[str] = []
+
+    for col in columns:
+        if col in DEPRECATED_COLUMN_ALIASES:
+            found_deprecated.append(col)
+
+    if warn and found_deprecated:
+        canonical_names = [DEPRECATED_COLUMN_ALIASES[c] for c in found_deprecated]
+        warnings.warn(
+            f"Deprecated column names detected: {found_deprecated}. "
+            f"Please rename to canonical names: {canonical_names}. "
+            "Deprecated column names will be removed in v3.0.",
+            DeprecationWarning,
+            stacklevel=stacklevel,
+        )
+
+    return found_deprecated
+
+
+def migrate_deprecated_columns(
+    df: pd.DataFrame,
+    *,
+    inplace: bool = False,
+    warn: bool = True,
+) -> pd.DataFrame:
+    """Migrate deprecated column names to canonical names.
+
+    This function renames columns from deprecated names to their
+    canonical equivalents (e.g., 'extracted_at' -> 'acquisition_timestamp').
+
+    Args:
+        df: DataFrame to migrate.
+        inplace: Whether to modify the DataFrame in place.
+        warn: Whether to emit deprecation warnings.
+
+    Returns:
+        DataFrame with renamed columns (same object if inplace=True).
+
+    Example:
+        >>> df = migrate_deprecated_columns(df)
+        >>> assert "acquisition_timestamp" in df.columns
+        >>> assert "extracted_at" not in df.columns
+    """
+    columns_to_rename: dict[str, str] = {}
+
+    for old_name, new_name in DEPRECATED_COLUMN_ALIASES.items():
+        if old_name in df.columns and new_name not in df.columns:
+            columns_to_rename[old_name] = new_name
+
+    if not columns_to_rename:
+        return df
+
+    if warn:
+        old_names = list(columns_to_rename.keys())
+        new_names = list(columns_to_rename.values())
+        warnings.warn(
+            f"Migrating deprecated columns {old_names} -> {new_names}. "
+            "Please update your data pipelines to use canonical column names. "
+            "Automatic migration will be removed in v3.0.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+
+    return df.rename(columns=columns_to_rename, inplace=inplace) or df
 
 
 def build_output_column_order(business_columns: list[str]) -> list[str]:
