@@ -43,6 +43,10 @@ import requests
 
 from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC
+from bioetl.application.ports import (
+    ABCRegistryResolverPortABC,
+    ConfigPathResolverPortABC,
+)
 from bioetl.application.services.config_migration_service import (
     ConfigMigrationService,
     ConfigMigrationServiceProtocol,
@@ -53,12 +57,12 @@ from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
-from bioetl.infrastructure.clients.base.factories import build_http_client
 from bioetl.interfaces.factories import (
     DefaultInfrastructureFactory,
     DefaultObservabilityFactory,
     InfrastructureFactoryABC,
     ObservabilityFactoryABC,
+    create_provider_registry_factory,
 )
 
 if TYPE_CHECKING:
@@ -142,14 +146,15 @@ class CompositionRoot:
             >>> provider = registry.get_provider(ProviderId("chembl"))
         """
         if self._provider_registry is None:
+            # Use factory from interfaces layer (proper DI)
+            registry_factory = create_provider_registry_factory()
+            self._provider_registry = registry_factory()
+
+            # Bootstrap with providers from config
             from bioetl.infrastructure.config.provider_registry import (
                 ProviderRegistryLoader,
             )
-            from bioetl.infrastructure.provider_registry import (
-                InMemoryProviderRegistry,
-            )
 
-            self._provider_registry = InMemoryProviderRegistry()
             loader = ProviderRegistryLoader()
             loader.get_providers(registry=self._provider_registry)
 
@@ -200,6 +205,9 @@ class CompositionRoot:
         Returns:
             Fully configured HTTP transport instance
         """
+        # Lazy import to keep infrastructure isolated
+        from bioetl.infrastructure.clients.base.factories import build_http_client
+
         return build_http_client(
             provider=provider,
             logger=self.get_logger(),
@@ -317,13 +325,14 @@ class CompositionRoot:
         Returns:
             Fully configured PipelineContainer
         """
-        from bioetl.infrastructure.clients.base.abc_registry_resolver import (
-            ABCRegistryResolver,
-        )
+        # Use adapter from infrastructure/adapters (proper layering)
+        from bioetl.infrastructure.adapters import ABCRegistryResolverAdapter
 
         # Create resolver with both infrastructure and application YAML files
         application_impls_path = Path(__file__).parent / "abc_impls_application.yaml"
-        resolver = ABCRegistryResolver(additional_impls_paths=[application_impls_path])
+        resolver = ABCRegistryResolverAdapter(
+            additional_impls_paths=[application_impls_path]
+        )
 
         # Resolve factories from registry
         loader_factory = resolver.resolve_default_factory("LoaderABC")
@@ -392,11 +401,16 @@ class CompositionRoot:
             ConfigPathResolver instance.
         """
         from bioetl.application.config.resolution import ConfigPathResolver
-        from bioetl.infrastructure.config.sources import get_configs_root
 
-        effective_root = (
-            Path(configs_root) if configs_root is not None else get_configs_root(None)
-        )
+        if configs_root is not None:
+            effective_root = Path(configs_root)
+        else:
+            # Use adapter for path resolution
+            from bioetl.infrastructure.adapters import ConfigPathResolverAdapter
+
+            path_resolver = ConfigPathResolverAdapter()
+            effective_root = path_resolver.get_configs_root()
+
         return ConfigPathResolver(effective_root)
 
 

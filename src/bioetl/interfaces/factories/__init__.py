@@ -9,6 +9,9 @@ from bioetl.interfaces.factories.observability import (
     ObservabilityFactoryABC,
     create_observability_factory,
 )
+from bioetl.interfaces.factories.provider_registry import (
+    create_provider_registry_factory,
+)
 
 __all__ = [
     "DefaultInfrastructureFactory",
@@ -16,4 +19,5 @@ __all__ = [
     "InfrastructureFactoryABC",
     "ObservabilityFactoryABC",
     "create_observability_factory",
+    "create_provider_registry_factory",
 ]

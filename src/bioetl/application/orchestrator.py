@@ -31,6 +31,7 @@ Example::
 
 from __future__ import annotations
 
+import warnings
 from concurrent.futures import Future
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
@@ -55,18 +56,24 @@ from bioetl.domain.value_objects import EntityName, StageName
 ProviderLoaderProtocol = ProviderRegistryLoaderABC
 
 
-def _get_default_registry_factory() -> ProviderRegistryFactory:
-    """Get the default provider registry factory.
+def _get_default_registry_factory_deprecated() -> ProviderRegistryFactory:
+    """Get the default provider registry factory (DEPRECATED).
+
+    .. deprecated:: 1.0
+        Use ``create_provider_registry_factory()`` from
+        ``bioetl.interfaces.factories`` instead.
 
     This function lazily imports from infrastructure to provide backward
-    compatibility. New code should inject the factory explicitly.
+    compatibility. New code should inject the factory explicitly via
+    ``provider_registry_factory`` parameter.
 
     Returns:
         Factory function that creates InMemoryProviderRegistry instances.
     """
-    from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
+    # Import from interfaces layer (proper DI location)
+    from bioetl.interfaces.factories import create_provider_registry_factory
 
-    return InMemoryProviderRegistry
+    return create_provider_registry_factory()
 
 
 class PipelineOrchestrator:
@@ -88,9 +95,20 @@ class PipelineOrchestrator:
         self._config = config
         self._provider_registry = provider_registry
         self._provider_registry_provider = provider_registry_provider
-        self._provider_registry_factory = (
-            provider_registry_factory or _get_default_registry_factory()
-        )
+
+        if provider_registry_factory is None:
+            warnings.warn(
+                "Using default provider_registry_factory is deprecated. "
+                "Pass provider_registry_factory explicitly via "
+                "create_provider_registry_factory() from bioetl.interfaces.factories. "
+                "This will become a required parameter in a future release.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self._provider_registry_factory = _get_default_registry_factory_deprecated()
+        else:
+            self._provider_registry_factory = provider_registry_factory
+
         self._container_factory = self._resolve_container_factory(container_factory)
         self._provider_loader = provider_loader
         self._provider_loader_factory = provider_loader_factory
@@ -151,26 +169,15 @@ class PipelineOrchestrator:
             )
 
         if effective_type == PipelineType.EXTRACT_ONLY:
-            # Extract only
+            # Extract only - use public API
             context = self._build_simple_context()
-            extract_callable = pipeline._get_extract_callable()  # noqa: SLF001
-            iterator = pipeline._normalize_extract_result(
-                extract_callable()
-            )  # noqa: SLF001
-
-            total_rows = 0
-            total_chunks = 0
-            for chunk in iterator:
-                if chunk is None:
-                    continue
-                total_rows += len(chunk)
-                total_chunks += 1
+            extract_result = pipeline.run_extract_only()
 
             stage = StageResult(
                 stage_name=StageName.EXTRACT,
                 success=True,
-                records_processed=total_rows,
-                chunks_processed=max(total_chunks, 1),
+                records_processed=extract_result.total_rows,
+                chunks_processed=extract_result.total_chunks,
                 duration_sec=0.0,
                 errors=[],
             )
@@ -179,7 +186,7 @@ class PipelineOrchestrator:
                 run_id=context.run_id,
                 success=True,
                 entity_name=self._config.entity_name,
-                row_count=total_rows,
+                row_count=extract_result.total_rows,
                 output_path=None,
                 duration_sec=0.0,
                 stages=[stage],
@@ -188,7 +195,7 @@ class PipelineOrchestrator:
                     "run_id": context.run_id,
                     "provider": self._config.provider,
                     "entity": self._config.entity_name,
-                    "row_count": total_rows,
+                    "row_count": extract_result.total_rows,
                     "dry_run": True,
                 },
             )
@@ -339,7 +346,7 @@ class PipelineOrchestrator:
         registry_payload: list[ProviderDefinition] | None,
         registry_factory: ProviderRegistryFactory | None = None,
     ) -> ProviderRegistryABC:
-        factory = registry_factory or _get_default_registry_factory()
+        factory = registry_factory or _get_default_registry_factory_deprecated()
         if registry_payload is not None:
             registry = factory()
             registry.restore_provider_registry(registry_payload)

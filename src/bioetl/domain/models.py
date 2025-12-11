@@ -103,3 +103,19 @@ class StageDescriptor:
     callable: Callable[..., Any]
     skip_on_dry_run: bool = False
     required: bool = True
+
+
+@dataclass(frozen=True)
+class ExtractOnlyResult:
+    """Result of extract-only pipeline execution.
+
+    This result contains statistics from running only the extract stage
+    of a pipeline, without transform/validate/write stages.
+
+    Attributes:
+        total_rows: Total number of rows extracted.
+        total_chunks: Total number of chunks processed.
+    """
+
+    total_rows: int
+    total_chunks: int
