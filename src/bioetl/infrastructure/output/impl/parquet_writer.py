@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from pathlib import Path
+import warnings
 
 import pandas as pd
 

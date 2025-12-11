@@ -50,6 +50,7 @@ from bioetl.domain.clients.base.output.contracts import (
     WriteResult,
 )
 from bioetl.domain.configs import PipelineConfig
+from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext, RunResult, StageResult
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import (
@@ -68,11 +69,14 @@ from bioetl.domain.transform.contracts import (
 from bioetl.domain.transform.factories import default_post_transformer
 from bioetl.domain.transform.transformers import TransformerABC
 from bioetl.domain.validation.service import ValidationService
+from bioetl.domain.value_objects import EntityName
 
 if TYPE_CHECKING:
     pass
 
-ExtractResult: TypeAlias = Iterable[pd.DataFrame] | pd.DataFrame | None
+ExtractResult: TypeAlias = (
+    Iterable[pd.DataFrame] | Iterable[TabularData] | pd.DataFrame | None
+)
 
 
 def _create_default_metadata_builder() -> RunMetadataBuilderProtocol:
@@ -222,8 +226,8 @@ class PipelineBase(ABC):
 
     def _build_context(self, dry_run: bool) -> RunContext:
         context = RunContext(
-            entity_name=self._config.entity_name,
-            provider=self._provider_id.value,
+            entity_name=EntityName(self._config.entity_name),
+            provider=self._provider_id,
             config=self._config.model_dump(),
             dry_run=dry_run,
         )
@@ -259,8 +263,8 @@ class PipelineBase(ABC):
             "transform_chunks": 0,
             "validate_count": 0,
             "validate_chunks": 0,
-            "write_count": 0,
-            "write_chunks": 0,
+            "export_count": 0,
+            "export_chunks": 0,
         }
 
     def _process_extract_stage(
@@ -383,8 +387,8 @@ class PipelineBase(ABC):
         counters: dict[str, int],
         stages_results: list[StageResult],
     ) -> tuple[WriteResult | None, dict[str, int]]:
-        if not self._runtime_manager.get_stage_start("write"):
-            self._runtime_manager.notify_stage_start("write", context)
+        if not self._runtime_manager.get_stage_start("export"):
+            self._runtime_manager.notify_stage_start("export", context)
 
         df_to_write = (
             pd.concat(validated_chunks, ignore_index=True)
@@ -394,7 +398,7 @@ class PipelineBase(ABC):
 
         write_stage = self._get_write_callable(context)
         write_result_obj = self._runtime_manager.execute_stage(
-            "write",
+            "export",
             context,
             lambda: write_stage(df_to_write, output_path, context),
         )
@@ -404,14 +408,14 @@ class PipelineBase(ABC):
             raise TypeError("Writer must return WriteResult or None.")
         write_result = write_result_obj
 
-        counters["write_count"] = write_result.row_count
-        counters["write_chunks"] = max(counters["validate_chunks"], 1)
+        counters["export_count"] = write_result.row_count
+        counters["export_chunks"] = max(counters["validate_chunks"], 1)
 
         self._append_stage_result(
             stages_results,
-            "write",
+            "export",
             write_result.row_count,
-            counters["write_chunks"],
+            counters["export_chunks"],
         )
         return write_result, counters
 
@@ -485,7 +489,7 @@ class PipelineBase(ABC):
         output_columns = self._validation_service.get_schema_columns(output_schema_name)
 
         return self._loader.load(
-            df=df,
+            data=cast(TabularData, df),
             output_path=output_path,
             context=context,
             column_order=output_columns,

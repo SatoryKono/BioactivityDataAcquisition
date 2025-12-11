@@ -6,11 +6,11 @@ import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.configs import PipelineConfig
-from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.data_flow import DataFlowConfig
-from bioetl.domain.configs.source import DataSourceConfig
-from bioetl.domain.configs.sink import DataSinkConfig
+from bioetl.domain.configs.identity import PipelineIdentityConfig
 from bioetl.domain.configs.pipeline import ChemblSourceConfig, ProviderHttpConfig
+from bioetl.domain.configs.sink import DataSinkConfig
+from bioetl.domain.configs.source import DataSourceConfig
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.domain.ports.extraction import ExtractionServiceABC
 

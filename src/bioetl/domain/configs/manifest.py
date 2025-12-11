@@ -128,17 +128,17 @@ class PipelineManifest(BaseModel):
     @property
     def pipeline_id(self) -> str:
         """Shortcut to identity.pipeline_id."""
-        return self.identity.pipeline_id
+        return str(self.identity.pipeline_id)
 
     @property
     def provider(self) -> str:
         """Shortcut to identity.provider."""
-        return self.identity.provider
+        return str(self.identity.provider)
 
     @property
     def entity(self) -> str:
         """Shortcut to identity.entity."""
-        return self.identity.entity
+        return str(self.identity.entity)
 
     @property
     def source(self) -> Any:

@@ -2,7 +2,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.molecule import MoleculeTableSchema
+from bioetl.infrastructure.validation.schemas.chembl.molecule import MoleculeTableSchema
 
 
 @pytest.fixture

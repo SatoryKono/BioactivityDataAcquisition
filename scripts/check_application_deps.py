@@ -20,13 +20,12 @@ from __future__ import annotations
 
 import argparse
 import ast
-import json
-import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
+import json
 from pathlib import Path
+import sys
 from typing import Iterator, NamedTuple
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration

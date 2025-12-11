@@ -1,8 +1,6 @@
 """Contracts for record mapping between layers."""
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
-from typing import Any
 
 from bioetl.domain.ports.parsing import RecordBatch
 from bioetl.domain.record_source import SourceRecordModel

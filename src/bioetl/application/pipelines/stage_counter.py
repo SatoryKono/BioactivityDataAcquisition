@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 
 from bioetl.domain.models import StageResult
+from bioetl.domain.value_objects import StageName
 
 
 class StageCounter:
@@ -72,7 +73,7 @@ class StageCounter:
         )
 
         return StageResult(
-            stage_name=stage,
+            stage_name=StageName(stage),
             success=success,
             records_processed=count if success else 0,
             chunks_processed=chunks if success else 0,

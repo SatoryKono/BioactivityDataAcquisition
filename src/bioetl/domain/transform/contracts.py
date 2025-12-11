@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 # Import the canonical NormalizationConfig from configs.normalization
 from bioetl.domain.configs.normalization import NormalizationConfig
-from bioetl.domain.data import MutableTabularData, Record, RecordBatch, TabularData
+from bioetl.domain.data import MutableTabularData, RecordBatch, TabularData
 from bioetl.domain.value_objects import HashDigest
 
 if TYPE_CHECKING:

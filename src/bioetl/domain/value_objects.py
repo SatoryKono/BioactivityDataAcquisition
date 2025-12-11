@@ -6,8 +6,8 @@ Value Objects для ключевых идентификаторов.
 
 from __future__ import annotations
 
-import re
 from datetime import datetime, timezone
+import re
 from typing import Self
 from urllib.parse import urlparse
 import uuid
@@ -146,6 +146,11 @@ class StageName:
     def __eq__(self, other: object) -> bool:
         if isinstance(other, StageName):
             return self._value == other._value
+        if isinstance(other, str):
+            other_norm = other.lower()
+            if other_norm in self._ALIASES:
+                other_norm = self._ALIASES[other_norm]
+            return self._value == other_norm
         return NotImplemented
 
     def __hash__(self) -> int:
@@ -413,56 +418,6 @@ class ChemblId:
         if isinstance(other, ChemblId):
             return self.numeric_id < other.numeric_id
         return NotImplemented
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: type, handler: GetCoreSchemaHandler
-    ) -> CoreSchema:
-        return core_schema.no_info_after_validator_function(
-            cls,
-            core_schema.str_schema(),
-            serialization=core_schema.plain_serializer_function_ser_schema(str),
-        )
-
-
-class HashDigest:
-    """Value Object для BLAKE2b-256 хеш-дайджеста (64 hex символа)."""
-
-    __slots__ = ("_value",)
-    _pattern = re.compile(r"^[a-f0-9]{64}$")
-
-    def __init__(self, value: str) -> None:
-        normalized = value.lower()
-        if not self._pattern.match(normalized):
-            raise ValueError(
-                f"Invalid HashDigest: '{value}'. "
-                f"Expected 64 lowercase hex characters (BLAKE2b-256)"
-            )
-        self._value = normalized
-
-    def __setattr__(self, name: str, value: object) -> None:
-        if name == "_value" and hasattr(self, "_value"):
-            raise AttributeError("HashDigest is immutable")
-        super().__setattr__(name, value)
-
-    @property
-    def value(self) -> str:
-        """String representation of HashDigest."""
-        return self._value
-
-    def __str__(self) -> str:
-        return self._value
-
-    def __repr__(self) -> str:
-        return f"HashDigest({self._value!r})"
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, HashDigest):
-            return self._value == other._value
-        return NotImplemented
-
-    def __hash__(self) -> int:
-        return hash(self._value)
 
     @classmethod
     def __get_pydantic_core_schema__(

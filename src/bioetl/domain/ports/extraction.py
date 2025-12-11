@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Protocol
+import warnings
 
-from bioetl.domain.data import RecordBatch
-from bioetl.domain.types import ApiPayload
 from bioetl.domain._deprecations import (
     emit_deprecation_warning,
-    resolve_deprecated_type,
     get_deprecated_names_for_module,
+    resolve_deprecated_type,
 )
+from bioetl.domain.data import RecordBatch
+from bioetl.domain.types import ApiPayload
 
 # =============================================================================
 # Deprecated Type Aliases (backward compatibility re-exports)

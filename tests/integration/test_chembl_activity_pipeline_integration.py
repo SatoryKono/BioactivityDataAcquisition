@@ -15,12 +15,12 @@ from bioetl.application.services.schema_contract_provider import (
     SchemaContractProviderImpl,
 )
 from bioetl.infrastructure.clients.chembl import ChemblExtractionServiceImpl
-from bioetl.infrastructure.config.provider_registry import (
-    create_provider_loader,
-)
 from bioetl.infrastructure.config.loader import (
     get_schema_contract_provider,
     set_schema_contract_provider,
+)
+from bioetl.infrastructure.config.provider_registry import (
+    create_provider_loader,
 )
 from bioetl.interfaces.composition_root import (
     build_default_container,

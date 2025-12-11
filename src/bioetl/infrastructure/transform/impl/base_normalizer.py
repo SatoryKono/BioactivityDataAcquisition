@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import Any, Callable, cast
+import warnings
 
 import pandas as pd
 from pandas._typing import DtypeArg

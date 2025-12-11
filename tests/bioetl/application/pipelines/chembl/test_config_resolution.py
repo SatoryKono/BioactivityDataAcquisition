@@ -4,10 +4,13 @@ import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
 from bioetl.domain.configs import (
-    ChemblSourceConfig,
-    ClientConfig,
+    DataFlowConfig,
+    DataSinkConfig,
+    DataSourceConfig,
     PipelineConfig,
+    PipelineIdentityConfig,
 )
+from bioetl.domain.configs.pipeline import ChemblSourceConfig, ProviderHttpConfig
 
 
 @pytest.fixture
@@ -31,21 +34,27 @@ def dependencies():
 def test_pk_resolution_from_field_config(dependencies):
     """Test that primary_key is picked up from the config field (config module)."""
     config = PipelineConfig(
-        id="chembl.test_entity",
-        provider="chembl",
-        entity="test_entity",
-        primary_key="custom_pk_id",
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="/tmp/out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.test_entity",
+            provider="chembl",
+            entity="test_entity",
+            primary_key=["custom_pk_id"],
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="C:/tmp/out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
-            ),
+            )
         ),
     )
 
@@ -57,21 +66,27 @@ def test_pk_resolution_from_field_config(dependencies):
 def test_pk_resolution_from_identity_primary_key_list_config(dependencies):
     """Test resolution from identity.primary_key list (config module)."""
     config = PipelineConfig(
-        id="chembl.test_entity",
-        provider="chembl",
-        entity="test_entity",
-        primary_key=["my_pk_id", "secondary_pk"],  # Uses first element
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="/tmp/out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.test_entity",
+            provider="chembl",
+            entity="test_entity",
+            primary_key=["my_pk_id", "secondary_pk"],
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="C:/tmp/out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
-            ),
+            )
         ),
     )
 
@@ -83,21 +98,27 @@ def test_pk_resolution_from_identity_primary_key_list_config(dependencies):
 def test_pk_resolution_default_config(dependencies):
     """Test fallback to entity_name_id (config module)."""
     config = PipelineConfig(
-        id="chembl.my_entity",
-        provider="chembl",
-        entity="my_entity",
-        primary_key=None,
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="/tmp/out",
-        batch_size=10,
+        identity=PipelineIdentityConfig(
+            pipeline_id="chembl.my_entity",
+            provider="chembl",
+            entity="my_entity",
+            primary_key=[],
+        ),
+        data_flow=DataFlowConfig(
+            source=DataSourceConfig(
+                input_mode="auto_detect",
+                input_path=None,
+                batch_size=10,
+            ),
+            sink=DataSinkConfig(output_path="C:/tmp/out"),
+        ),
         provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
+            http=ProviderHttpConfig(
+                base_url="https://www.ebi.ac.uk/chembl/api/data",
                 timeout_sec=30,
                 max_retries=3,
                 rate_limit_per_sec=10.0,
-            ),
+            )
         ),
     )
 

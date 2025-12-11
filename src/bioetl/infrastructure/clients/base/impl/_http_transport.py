@@ -20,7 +20,6 @@ from bioetl.infrastructure.clients.base.http_error_handler import (
 from bioetl.infrastructure.errors import (
     ApiClientError,
     ApiTimeoutError,
-    ApiUnexpectedStatusError,
     wrap_http_errors,
 )
 from bioetl.infrastructure.http import ExponentialRetryPolicy

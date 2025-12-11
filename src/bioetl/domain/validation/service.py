@@ -1,7 +1,10 @@
 """Validation service orchestrating schema lookup and validators."""
 
+from typing import cast
+
 import pandas as pd
 
+from bioetl.domain.data import TabularData
 from bioetl.domain.validation.contracts import (
     SchemaProviderABC,
     ValidationResult,
@@ -48,15 +51,16 @@ class ValidationService:
         validation_columns = self._extract_validator_columns(schema)
         df_for_validation = df.loc[:, validation_columns] if validation_columns else df
 
-        result: ValidationResult = validator.validate(df_for_validation)
+        result: ValidationResult = validator.validate(cast(TabularData, df_for_validation))
 
         if not result.is_valid:
             raise ValueError(f"Validation failed for {entity_name}: {result.errors}")
 
-        validated_df = (
+        validated_df = cast(
+            pd.DataFrame,
             result.validated_data
             if result.validated_data is not None
-            else df_for_validation
+            else df_for_validation,
         )
 
         output_columns = self._safe_schema_columns(entity_name)

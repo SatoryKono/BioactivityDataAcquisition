@@ -7,7 +7,7 @@ Domain model conversion should happen via RecordMapperABC in ExtractStage.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 from pydantic import BaseModel
@@ -44,7 +44,7 @@ class PandasBatchAdapter(BatchAdapterABC):
             return []
 
         if isinstance(raw_batch, pd.DataFrame):
-            return raw_batch.to_dict("records")
+            return cast(list[Mapping[str, Any]], raw_batch.to_dict("records"))
 
         if isinstance(raw_batch, list):
             normalized: list[Mapping[str, Any]] = []

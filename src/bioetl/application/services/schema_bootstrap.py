@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import Any, TYPE_CHECKING
 
-from bioetl.domain.schemas import register_schemas
 from bioetl.domain.schemas.registry import SchemaRegistry
 from bioetl.domain.validation import SchemaProviderABC
 
@@ -22,7 +22,7 @@ class SchemaBootstrapService:
     It implements a lazy initialization pattern with caching.
 
     Example:
-        >>> service = SchemaBootstrapService()
+        >>> service = SchemaBootstrapService(register_fn=my_register_fn)
         >>> provider = service.ensure_registered()
         >>> # Provider now has all schemas registered
         >>> provider.get_schema("activity")
@@ -30,6 +30,9 @@ class SchemaBootstrapService:
 
     _schema_provider: SchemaProviderABC | None = field(default=None, repr=False)
     _registered: bool = field(default=False, repr=False)
+    _register_fn: Callable[[SchemaProviderABC], Any] | None = field(
+        default=None, repr=False
+    )
 
     def ensure_registered(self) -> SchemaProviderABC:
         """Ensure schemas are registered and return the provider.
@@ -51,7 +54,8 @@ class SchemaBootstrapService:
             self._schema_provider = SchemaRegistry()
 
         if not self._registered:
-            register_schemas(self._schema_provider)
+            if self._register_fn:
+                self._register_fn(self._schema_provider)
             self._registered = True
 
         return self._schema_provider
@@ -78,6 +82,7 @@ class SchemaBootstrapService:
 def create_schema_bootstrap_service(
     *,
     schema_provider: SchemaProviderABC | None = None,
+    register_fn: Callable[[SchemaProviderABC], Any] | None = None,
     auto_register: bool = False,
 ) -> SchemaBootstrapService:
     """Create a schema bootstrap service.
@@ -88,22 +93,17 @@ def create_schema_bootstrap_service(
     Args:
         schema_provider: Optional pre-existing schema provider to use.
             If not provided, a new SchemaRegistry will be created.
+        register_fn: Optional callable to register schemas.
         auto_register: If True, immediately register all schemas.
             Default is False for lazy initialization.
 
     Returns:
         Configured SchemaBootstrapService instance.
-
-    Example:
-        >>> # Create with lazy registration
-        >>> service = create_schema_bootstrap_service()
-        >>> provider = service.ensure_registered()
-        >>>
-        >>> # Create with immediate registration
-        >>> service = create_schema_bootstrap_service(auto_register=True)
-        >>> assert service.is_registered
     """
-    service = SchemaBootstrapService(_schema_provider=schema_provider)
+    service = SchemaBootstrapService(
+        _schema_provider=schema_provider,
+        _register_fn=register_fn,
+    )
     if auto_register:
         service.ensure_registered()
     return service

@@ -6,8 +6,8 @@ path resolution for configuration files, output directories, and input data.
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
+import os
 from pathlib import Path
 
 from bioetl.domain.ports.filesystem import PathResolverABC

@@ -5,7 +5,7 @@ import pandera as pa
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
-from bioetl.domain.schemas.chembl.activity import ActivityTableSchema
+from bioetl.infrastructure.validation.schemas.chembl.activity import ActivityTableSchema
 
 
 @pytest.fixture

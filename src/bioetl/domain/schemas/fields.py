@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-import pandera as pa
+if TYPE_CHECKING:  # type hints only, no runtime import
+    import pandera as pa
 
 DEFAULT_FILTERABLE = False
 
@@ -24,9 +25,7 @@ def _map_dtype_to_field_type(dtype: Any) -> str:
     return "string"
 
 
-def build_field_configs_from_schema(
-    schema: type[pa.DataFrameModel] | pa.DataFrameSchema,
-) -> list[dict[str, Any]]:
+def build_field_configs_from_schema(schema: Any) -> list[dict[str, Any]]:
     """Convert Pandera schema definition to list of field descriptors."""
 
     df_schema = schema.to_schema() if hasattr(schema, "to_schema") else schema

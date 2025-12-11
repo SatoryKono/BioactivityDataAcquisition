@@ -47,6 +47,10 @@ from bioetl.application.factories.transform_factory import (
     TransformComponentFactory,
     TransformComponentFactoryABC,
 )
+from bioetl.application.services.schema_bootstrap import (
+    SchemaBootstrapService,
+    create_schema_bootstrap_service,
+)
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
@@ -54,10 +58,6 @@ from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, Pipelin
 from bioetl.domain.provider_registry import ProviderRegistryABC
 from bioetl.domain.providers import ProviderDefinition, ProviderId
 from bioetl.domain.record_source import RecordSourceABC
-from bioetl.application.services.schema_bootstrap import (
-    SchemaBootstrapService,
-    create_schema_bootstrap_service,
-)
 from bioetl.domain.transform.contracts import (
     HashServiceABC,
     IndexGeneratorABC,

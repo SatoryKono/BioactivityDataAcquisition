@@ -12,7 +12,6 @@ from bioetl.domain.transform.merge import apply_deep_merge
 from bioetl.infrastructure.files.path_resolver import (
     CONFIGS_ROOT_ENV,
     DEFAULT_CONFIGS_ROOT,
-    PathResolver,
     create_config_resolver,
 )
 

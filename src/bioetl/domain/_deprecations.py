@@ -31,11 +31,11 @@ deprecated imports and generate a migration report.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, NamedTuple
+import warnings
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
+    pass
 
 # =============================================================================
 # Constants

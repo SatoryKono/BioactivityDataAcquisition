@@ -544,7 +544,7 @@ class TestDomainStructure:
 
         if missing_inits:
             pytest.fail(
-                f"Domain subdirectories missing __init__.py:\n"
+                "Domain subdirectories missing __init__.py:\n"
                 + "\n".join(f"  - {path}" for path in missing_inits)
             )
 

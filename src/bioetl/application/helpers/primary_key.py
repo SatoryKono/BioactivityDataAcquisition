@@ -41,25 +41,37 @@ def resolve_primary_key(
         >>> pk = resolve_primary_key(config)
         >>> pk = resolve_primary_key(config, fallback="id")
     """
-    # 1. Check explicit primary_key field (now a list in identity section)
     pk: str | None = None
-    primary_keys = config.identity.primary_key
+    try:
+        primary_keys = getattr(config, "identity").primary_key
+    except Exception:
+        primary_keys = getattr(config, "primary_key", None)
     if primary_keys:
-        pk = primary_keys[0]  # Use first element
+        if isinstance(primary_keys, list):
+            if len(primary_keys) > 0 and primary_keys[0]:
+                pk = primary_keys[0]
+        elif isinstance(primary_keys, str) and primary_keys:
+            pk = primary_keys
 
-    # 2. Use entity-based convention
     if not pk:
-        pk = f"{config.entity_name}_id"
+        try:
+            entity_name = getattr(config, "entity_name")
+        except Exception:
+            entity_name = getattr(config, "entity", None)
+        if not entity_name:
+            raise ValueError("Missing entity name in config")
+        pk = f"{entity_name}_id"
 
-    # 3. Use fallback if provided and pk still empty
     if not pk and fallback is not None:
         pk = fallback
 
-    # 4. Raise if still no resolution
     if not pk:
+        try:
+            entity_name = getattr(config, "entity_name")
+        except Exception:
+            entity_name = getattr(config, "entity", "unknown")
         raise ValueError(
-            f"Could not resolve primary key for entity '{config.entity_name}'. "
-            "Please set 'primary_key' in config."
+            f"Could not resolve primary key for entity '{entity_name}'. Please set 'primary_key' in config."
         )
 
     return pk

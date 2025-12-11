@@ -2,7 +2,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from bioetl.domain.schemas.chembl.target import TargetTableSchema
+from bioetl.infrastructure.validation.schemas.chembl.target import TargetTableSchema
 
 
 @pytest.fixture

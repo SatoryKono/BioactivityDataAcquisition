@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from typing import cast
+from typing import Any, cast
 
 from bioetl.application.bootstrap import (
     ApplicationBootstrap,
@@ -27,6 +27,7 @@ from bioetl.application.bootstrap import (
     ProviderClearer,
     ProviderInjector,
 )
+from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.configs.contracts import PipelineConfigLoaderProtocol
 from bioetl.domain.ports.schema import SchemaContractProviderABC
 
@@ -47,10 +48,10 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
             pipeline_id: str,
             *,
             profile: str | None = None,
-            cli_overrides: dict | None = None,
-            env_overrides: dict | None = None,
+            cli_overrides: dict[str, Any] | None = None,
+            env_overrides: dict[str, Any] | None = None,
             base_dir: str | Path | None = None,
-        ):
+        ) -> PipelineConfig:
             return get_pipeline_config(
                 pipeline_id,
                 schema_contract_provider=contract_provider,
@@ -65,9 +66,9 @@ def _create_config_loader_factory() -> ConfigLoaderFactory:
             *,
             profile: str | None = None,
             profiles_root: str | Path | None = None,
-            cli_overrides: dict | None = None,
-            env_overrides: dict | None = None,
-        ):
+            cli_overrides: dict[str, Any] | None = None,
+            env_overrides: dict[str, Any] | None = None,
+        ) -> PipelineConfig:
             return get_pipeline_config_from_path(
                 config_path,
                 schema_contract_provider=contract_provider,

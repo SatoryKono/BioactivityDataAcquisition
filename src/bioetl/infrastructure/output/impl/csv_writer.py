@@ -4,8 +4,8 @@ CSV Writer implementation.
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
+import warnings
 
 import pandas as pd
 

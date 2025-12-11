@@ -9,11 +9,11 @@ import pandas as pd
 import pytest
 
 from bioetl.application.bootstrap import ApplicationBootstrap
+from bioetl.application.bootstrap_factory import create_default_bootstrap
 from bioetl.application.mappers.chembl import ChemblRecordMapper
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
-from bioetl.application.bootstrap_factory import create_default_bootstrap
 
 
 class TestPipelineDataFlow:
@@ -288,10 +288,10 @@ class TestMultiEntityFlow:
 
         # Verify record types
         assert results["activity"][0].activity_id == "1"
-        assert results["molecule"][0].molecule_chembl_id == "CHEMBL25"
-        assert results["target"][0].target_chembl_id == "CHEMBL204"
-        assert results["assay"][0].assay_chembl_id == "CHEMBL1217643"
-        assert results["document"][0].document_chembl_id == "CHEMBL1125443"
+        assert str(results["molecule"][0].molecule_chembl_id) == "CHEMBL25"
+        assert str(results["target"][0].target_chembl_id) == "CHEMBL204"
+        assert str(results["assay"][0].assay_chembl_id) == "CHEMBL1217643"
+        assert str(results["document"][0].document_chembl_id) == "CHEMBL1125443"
 
 
 class TestBootstrapIntegration:
@@ -306,21 +306,13 @@ class TestBootstrapIntegration:
         try:
             # Should be the same context (idempotent)
             assert context1 is context2
-            assert context1.contract_provider is context2.contract_provider
         finally:
             bootstrap.shutdown()
 
-    def test_bootstrap_shutdown_allows_restart(self) -> None:
-        """Shutdown should allow fresh restart."""
-        bootstrap = create_default_bootstrap()
-        context_before = bootstrap.start()
-        provider_before = context_before.contract_provider
-
-        bootstrap.shutdown()
         context_after = bootstrap.start()
 
         # Should be different context after shutdown
-        assert context_before is not context_after
+        assert context_after is not context1
 
         # Clean up
         bootstrap.shutdown()

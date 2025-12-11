@@ -53,7 +53,7 @@ ProviderClearer = Callable[[], None]
 
 
 @dataclass(frozen=True)
-class ApplicationContext:
+class ApplicationServicesContext:
     """Context of an initialized application.
 
     Provides access to all bootstrapped services needed by the application.
@@ -120,7 +120,7 @@ class ApplicationBootstrap:
         provider_clearer: ProviderClearer | None = None,
     ) -> None:
         """Initialize the bootstrap instance with optional infrastructure hooks."""
-        self._context: ApplicationContext | None = None
+        self._context: ApplicationServicesContext | None = None
         self._started: bool = False
         self._schema_bootstrap_service: SchemaBootstrapService | None = None
 
@@ -129,13 +129,13 @@ class ApplicationBootstrap:
         self._provider_injector = provider_injector
         self._provider_clearer = provider_clearer
 
-    def start(self) -> ApplicationContext:
+    def start(self) -> ApplicationServicesContext:
         """Initialize the application and return the context.
 
         Idempotent: subsequent calls return the same context.
 
         Returns:
-            ApplicationContext with all initialized services.
+            ApplicationServicesContext with all initialized services.
         """
         if self._started:
             return self._get_context()
@@ -155,7 +155,7 @@ class ApplicationBootstrap:
         # Create migration service
         migration_service = self._init_migration_service()
 
-        self._context = ApplicationContext(
+        self._context = ApplicationServicesContext(
             schema_provider=schema_provider,
             contract_provider=contract_provider,
             config_loader=config_loader,
@@ -185,15 +185,15 @@ class ApplicationBootstrap:
         return self._started
 
     @property
-    def context(self) -> ApplicationContext | None:
+    def context(self) -> ApplicationServicesContext | None:
         """Get the current context (may be None if not started)."""
         return self._context
 
-    def _get_context(self) -> ApplicationContext:
+    def _get_context(self) -> ApplicationServicesContext:
         """Get context or raise if not started.
 
         Returns:
-            The initialized ApplicationContext.
+            The initialized ApplicationServicesContext.
 
         Raises:
             RuntimeError: If application has not been started.
@@ -275,7 +275,7 @@ def create_application_bootstrap(
 
 __all__ = [
     "ApplicationBootstrap",
-    "ApplicationContext",
+    "ApplicationServicesContext",
     "ConfigLoaderFactory",
     "ConfigMigrationService",
     "ConfigMigrationServiceProtocol",
@@ -284,3 +284,6 @@ __all__ = [
     "create_application_bootstrap",
     "create_config_migration_service",
 ]
+
+# Backward compatibility alias
+ApplicationContext = ApplicationServicesContext

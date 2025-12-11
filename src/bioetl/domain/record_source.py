@@ -64,8 +64,8 @@ from pydantic import BaseModel, ConfigDict
 
 from bioetl.domain._deprecations import (
     emit_deprecation_warning,
-    resolve_deprecated_type,
     get_deprecated_names_for_module,
+    resolve_deprecated_type,
 )
 
 

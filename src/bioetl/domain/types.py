@@ -81,12 +81,12 @@ from typing import TYPE_CHECKING, Any, TypeAlias
 
 from bioetl.domain._deprecations import (
     emit_deprecation_warning,
-    resolve_deprecated_type,
     get_deprecated_names_for_module,
+    resolve_deprecated_type,
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    pass
 
 __all__ = [
     # Canonical type aliases (API-specific)

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -79,7 +79,9 @@ class CsvRecordSourceImpl(RecordSourceABC):
             df = df.head(self._limit)
 
         # Return raw dicts - no model conversion
-        records: list[Mapping[str, Any]] = df.to_dict(orient="records")
+        records: list[Mapping[str, Any]] = cast(
+            list[Mapping[str, Any]], df.to_dict(orient="records")
+        )
 
         if self._chunk_size is None or self._chunk_size <= 0:
             yield records

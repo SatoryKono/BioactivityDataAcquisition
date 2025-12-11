@@ -6,6 +6,7 @@ from typing import Literal, cast
 
 import pandas as pd
 
+from bioetl.domain.data import TabularData
 from bioetl.domain.models import RunContext
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.schemas.pipeline_contracts import PipelineSchemaModel
@@ -44,7 +45,10 @@ class ChemblTransformerImpl(TransformerABC):
         """Apply ChEMBL pipeline transforms to the dataframe."""
         df = self.pre_transform(df)
         df = self.do_transform(df)
-        df = self.normalization_service.normalize(df)
+        df = cast(
+            pd.DataFrame,
+            self.normalization_service.normalize(cast(TabularData, df)),
+        )
         df = self._serialize_nested_fields(df)
         df = self._enforce_schema(df)
         df = self._drop_nulls_in_required_columns(df)

@@ -54,11 +54,12 @@ class RecordingLoader(LoaderABC):
 
     def load(
         self,
-        df: pd.DataFrame,
+        data: pd.DataFrame,
         output_path: Path,
         context: RunContext,
         column_order: list[str] | None = None,
     ) -> WriteResult:
+        df = data
         self.calls.append((df.copy(), output_path, context, column_order))
         return WriteResult(path=output_path, row_count=len(df), duration_sec=0.0)
 
@@ -278,7 +279,7 @@ def test_pipeline_dry_run(
     # Assert
     assert result.success
 
-    stage_names = [s.stage_name for s in result.stages]
+    stage_names = [s.stage_name.value for s in result.stages]
     assert "extract" in stage_names
     assert "transform" in stage_names
     assert "validate" in stage_names
@@ -688,7 +689,7 @@ def _assert_stages(
     expected_names: list[str],
     expected_count: int,
 ) -> None:
-    assert [stage.stage_name for stage in result.stages] == expected_names
+    assert [stage.stage_name.value for stage in result.stages] == expected_names
     assert [stage.records_processed for stage in result.stages] == [
         expected_count for _ in expected_names
     ]
@@ -706,7 +707,7 @@ def _assert_dry_run_meta(
     assert meta["dry_run"] is True
     assert meta["row_count"] == expected_count
     assert meta["provider"] == config.provider
-    assert meta["entity"] == config.entity_name
+    assert meta["entity"] == str(config.entity_name)
 
 
 def _extract_chain_signature(transformer: TransformerABC) -> list[tuple]:

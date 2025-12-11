@@ -9,8 +9,8 @@ Naming convention:
 - build_*() - uses builder pattern
 """
 
-import warnings
 from typing import Any
+import warnings
 
 from bioetl.domain.clients.contracts import DataClientABC
 from bioetl.domain.configs import ChemblSourceConfig, HttpClientConfig

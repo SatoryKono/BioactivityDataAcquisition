@@ -5,9 +5,11 @@ from bioetl.application.helpers import (
     resolve_primary_key_with_filter,
 )
 from bioetl.domain.configs import (
-    ChemblSourceConfig,
-    ClientConfig,
+    DataFlowConfig,
+    DataSinkConfig,
+    DataSourceConfig,
     PipelineConfig,
+    PipelineIdentityConfig,
 )
 
 
@@ -31,23 +33,26 @@ def _make_config(
         else:
             pk_list = list(primary_key)
 
-    return PipelineConfig(
-        id=f"chembl.{entity}",
+    identity = PipelineIdentityConfig(
+        pipeline_id=f"chembl.{entity}",
         provider="chembl",
         entity=entity,
         primary_key=pk_list,
-        input_mode="auto_detect",
-        input_path=None,
-        output_path="/tmp/out",
-        batch_size=100,
-        provider_config=ChemblSourceConfig(
-            base_url="https://www.ebi.ac.uk/chembl/api/data",
-            client=ClientConfig(
-                timeout_sec=30,
-                max_retries=3,
-                rate_limit_per_sec=10.0,
-            ),
+    )
+    data_flow = DataFlowConfig(
+        source=DataSourceConfig(
+            input_mode="auto_detect",
+            input_path=None,
+            batch_size=100,
         ),
+        sink=DataSinkConfig(
+            output_path="C:/tmp/out",
+            dry_run=True,
+        ),
+    )
+    return PipelineConfig(
+        identity=identity,
+        data_flow=data_flow,
     )
 
 

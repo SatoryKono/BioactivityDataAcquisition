@@ -18,7 +18,7 @@ RecordT = TypeVar("RecordT", bound=BaseModel)
 RecordModel = BaseModel
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.parsing import ResponseParserPortABC
+    pass
 
 
 class RequestBuilderABC(ABC):

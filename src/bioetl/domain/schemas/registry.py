@@ -91,7 +91,7 @@ def create_default_schema_registry(
     ----------
     register_fn
         Optional callable that registers schemas into the registry.
-        Defaults to :func:`bioetl.domain.schemas.register_schemas`.
+        If not provided, an empty registry is returned.
         Useful for testing with custom schema sets.
 
     Returns
@@ -102,17 +102,18 @@ def create_default_schema_registry(
     reg = SchemaRegistry()
 
     if register_fn is not None:
-        fn = register_fn
-    else:
-        # Import here to avoid circular dependency
-        from bioetl.domain.schemas import register_schemas
+        register_fn(reg)
 
-        # register_schemas accepts SchemaProviderABC, which is compatible
-        # with SchemaRegistry (subtype), so we cast/ignore to satisfy mypy
-        fn = register_schemas
-
-    fn(reg)
     return reg
+
+
+def register_schemas(provider: SchemaProviderABC) -> SchemaProviderABC:
+    """Register all default schemas into the given provider.
+
+    Thin proxy to avoid import cycles in tests that import from registry.
+    """
+    from . import register_schemas as _register  # local import to prevent cycles
+    return _register(provider)
 
 
 # Lazy-initialized default instance for DI containers
@@ -197,6 +198,7 @@ def default_schema_provider() -> SchemaProviderABC:
 __all__ = [
     "SchemaRegistry",
     "create_default_schema_registry",
+    "register_schemas",
     "get_default_schema_registry",
     "reset_default_schema_registry",
     # Deprecated exports (for backward compatibility)

@@ -17,9 +17,9 @@ Example:
 
 from __future__ import annotations
 
-import logging
 from abc import ABC, abstractmethod
-from typing import Any
+import logging
+from typing import Any, cast
 
 from pydantic import ValidationError
 
@@ -124,7 +124,7 @@ class ConfigMigrationService(ConfigMigrationServiceProtocol):
         """
         self._migrator_class: type | None = None
 
-    def _get_migrator(self) -> type:
+    def _get_migrator(self) -> Any:
         """Lazy import of ConfigMigrator from infrastructure.
 
         Returns:
@@ -149,7 +149,7 @@ class ConfigMigrationService(ConfigMigrationServiceProtocol):
             return raw_config
 
         migrator = self._get_migrator()
-        return migrator.migrate(raw_config)
+        return cast(dict[str, Any], migrator.migrate(raw_config))
 
     def was_migration_applied(self, raw_config: dict[str, Any]) -> bool:
         """Check if migration would be applied to the given config.

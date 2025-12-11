@@ -2,7 +2,6 @@
 
 # pylint: disable=redefined-outer-name, unused-argument, protected-access
 from datetime import datetime, timezone
-from typing import cast
 from unittest.mock import MagicMock
 
 import pandas as pd
