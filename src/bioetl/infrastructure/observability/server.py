@@ -27,7 +27,9 @@ class MetricsServerManager:
 
     Example:
         # Production usage
-        >>> started = start_metrics_server_once(enabled=True, port=8000, address="0.0.0.0")
+        >>> started = start_metrics_server_once(
+        ...     enabled=True, port=8000, address="0.0.0.0"
+        ... )
 
         # Testing with isolated instance
         >>> manager = MetricsServerManager()

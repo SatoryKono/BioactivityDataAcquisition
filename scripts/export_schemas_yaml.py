@@ -21,10 +21,10 @@ Examples:
 from __future__ import annotations
 
 import argparse
-import importlib
-import sys
 from dataclasses import dataclass
+import importlib
 from pathlib import Path
+import sys
 from typing import Any
 
 import yaml
