@@ -13,15 +13,22 @@ import pytest
 from bioetl.application.container import PipelineContainer
 from bioetl.application.contracts import PipelineContainerABC
 from bioetl.domain.configs import (
+    ChemblSourceConfig,
     DataFlowConfig,
     DataSinkConfig,
     DataSourceConfig,
     PipelineConfig,
     PipelineIdentityConfig,
+    ProviderHttpConfig,
 )
 from bioetl.domain.observability import LoggingPortABC
 from bioetl.domain.pipelines.contracts import ErrorPolicyABC, LoaderABC, PipelineHookABC
 from bioetl.domain.provider_registry import ProviderRegistryABC
+from bioetl.domain.providers import (
+    ProviderComponents,
+    ProviderDefinition,
+    ProviderId,
+)
 from bioetl.domain.transform.contracts import HashServiceABC
 from bioetl.domain.validation.service import ValidationService
 
@@ -62,9 +69,15 @@ def minimal_config(
     minimal_data_flow: DataFlowConfig,
 ) -> PipelineConfig:
     """Minimal valid config for chembl provider."""
+    provider_http = ProviderHttpConfig(
+        base_url="https://www.ebi.ac.uk/chembl/api/data"
+    )
+    provider_config = ChemblSourceConfig(provider="chembl", http=provider_http)
+
     return PipelineConfig(
         identity=minimal_identity,
         data_flow=minimal_data_flow,
+        provider_config=provider_config,
     )
 
 
@@ -78,6 +91,18 @@ def mock_loader() -> LoaderABC:
 def mock_provider_registry() -> ProviderRegistryABC:
     """Mock provider registry with chembl provider."""
     registry = create_autospec(ProviderRegistryABC, instance=True)
+
+    # Configure registry to return a valid definition for "chembl"
+    components = create_autospec(ProviderComponents, instance=True)
+
+    definition = ProviderDefinition(
+        id=ProviderId.CHEMBL,
+        config_type=ChemblSourceConfig,
+        components=components,
+    )
+
+    registry.get_provider.return_value = definition
+
     return registry
 
 

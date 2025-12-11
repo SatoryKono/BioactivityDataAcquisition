@@ -306,6 +306,13 @@ class CompositionRoot:
             converter=frame_converter,
         )
 
+        from bioetl.application.services.schema_bootstrap import (
+            create_schema_bootstrap_service,
+        )
+        from bioetl.infrastructure.validation.bootstrap import register_schemas
+
+        schema_bootstrap = create_schema_bootstrap_service(register_fn=register_schemas)
+
         return PipelineContainer(
             config,
             logger=self.get_logger(),
@@ -318,6 +325,7 @@ class CompositionRoot:
             index_generator=index_generator_factory(),
             provider_registry=provider_registry,
             provider_registry_provider=provider_registry_provider,
+            schema_bootstrap_service=schema_bootstrap,
         )
 
     def create_config_loader(self) -> PipelineConfigLoaderProtocol:

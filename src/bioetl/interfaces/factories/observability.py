@@ -1,3 +1,5 @@
+"""Factories for observability ports (logger and metrics)."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
