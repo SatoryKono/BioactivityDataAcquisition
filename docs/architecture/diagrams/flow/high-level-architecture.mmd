@@ -1,4 +1,4 @@
-%%{init: { 'flowchart': { 'htmlLabels': true } }}%%
+%%{init: { 'flowchart': { 'htmlLabels': true, 'useMaxWidth': true } }}%%
 flowchart LR
 
 classDef componentPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px
@@ -6,101 +6,92 @@ classDef componentSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#1
 classDef external           fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px
 classDef group              fill:#e6ecef,stroke:#333,stroke-width:1.5px,color:#111,font-size:22px
 
-subgraph Interfaces["Interfaces (Driving)"]
-    CLI["CLI App (Typer)"]:::componentPrimary
-    RestAPI["REST Server"]:::componentSecondary
-    MQ["MQ Listener"]:::componentSecondary
+subgraph Interfaces["Interfaces (driving ports)"]
+    CLI["CLI (Typer)\ninterfaces.cli.app"]:::componentPrimary
+    REST["REST API (FastAPI)\ninterfaces.rest.server"]:::componentSecondary
 end
 
-subgraph Application["Application Layer"]
-    Orchestrator["PipelineOrchestrator"]:::componentPrimary
-    Container["PipelineContainer"]:::componentPrimary
-    PipelineFactory["PipelineFactory\nChemblPipelineFactory"]:::componentPrimary
-    ConfigResolution["Config Resolution"]:::componentSecondary
-    ConfigRuntime["Config Runtime"]:::componentSecondary
-    StageRuntimeManager["StageRuntimeManager"]:::componentSecondary
-    Hooks["Hooks Implementation"]:::componentSecondary
-    ErrorPolicy["ErrorPolicy"]:::componentSecondary
-    Factories["Factories\nProviderServiceFactory\nRecordSourceFactory\nPipelineHookFactory"]:::componentSecondary
+subgraph Application["Application layer"]
+    UseCase["RunPipelineUseCase\napplication.use_cases.run_pipeline"]:::componentPrimary
+    Orchestrator["PipelineOrchestrator\napplication.orchestrator"]:::componentPrimary
+    Container["PipelineContainer\napplication.container"]:::componentPrimary
+    Registry["Pipeline registry + factories\napplication.pipelines.registry"]:::componentSecondary
+    Executor["PipelineExecutor\napplication.executor"]:::componentPrimary
+    Runtime["StageRuntimeManager\n+ HookNotifier + StageErrorHandler\napplication.pipelines.*"]:::componentSecondary
+    Config["Config resolution/runtime\napplication.config.*"]:::componentSecondary
+    Factories["Service/Transform factories\napplication.factories.*"]:::componentSecondary
 end
 
-subgraph Domain["Domain Layer (Core)"]
-    Validation["ValidationService"]:::componentPrimary
-    ValidationContracts["Validation Contracts\nSchemaProviderABC\nValidatorFactoryABC"]:::componentSecondary
-    Normalization["NormalizationServiceABC"]:::componentPrimary
-    Hashing["HashServiceABC"]:::componentSecondary
-    Transformers["TransformerABC\nTransformerChain"]:::componentSecondary
-    Schemas["SchemaRegistry\nPandera Schemas"]:::componentSecondary
-    PipelineContracts["Pipeline Contracts\nPipelineContainerABC\nExtractorABC\nLoaderABC"]:::componentSecondary
-    ObservabilityContracts["Observability Contracts\nLoggingPortABC\nMetricsPortABC"]:::componentSecondary
+subgraph Domain["Domain layer (core)"]
+    Pipeline["PipelineBase / ChemblPipelineBase"]:::componentPrimary
+    Validation["ValidationService\n+ SchemaProviderABC + ValidatorFactoryABC"]:::componentPrimary
+    Transform["TransformerChainImpl\nHash/Index/DB version/Fulldate"]:::componentPrimary
+    Contracts["Pipeline contracts\nExtractorABC / LoaderABC / Hooks / ErrorPolicy"]:::componentSecondary
+    ProviderRegistry["ProviderRegistry"]:::componentSecondary
+    Schemas["SchemaRegistry\nPandera schemas"]:::componentSecondary
 end
 
-subgraph Infrastructure["Infrastructure (Driven)"]
-    subgraph Input
-        ProviderRegistry["ProviderRegistryLoader"]:::componentSecondary
-        RecordSource["ApiRecordSource\nCsvRecordSource"]:::componentPrimary
-        ChEMBL["ChEMBL Client\nChemblHttpClientImpl\nChemblExtractionServiceImpl"]:::componentPrimary
-    end
-    subgraph Output
-        Writer["UnifiedLoaderImpl\nCsvWriter\nParquetWriter"]:::componentPrimary
-        Metadata["MetadataWriter\nQualityReporter"]:::componentSecondary
-        Logger["Logging Factories\nProgressReporter"]:::componentSecondary
-    end
-    subgraph Observability
-        Metrics["Observability Server\nMetrics\nAdapters"]:::componentSecondary
-    end
-    subgraph Config
-        ConfigLoader["Config Loader\nDefaults Loader"]:::componentSecondary
-        Pydantic["Pydantic Models\nPipelineConfig"]:::componentSecondary
-    end
-    subgraph Transform
-        NormalizationImpl["ChemblNormalizationServiceImpl"]:::componentSecondary
-        Hasher["HasherImpl"]:::componentSecondary
-    end
-    subgraph Validation
-        PanderaValidator["PanderaValidator"]:::componentSecondary
-    end
+subgraph Infrastructure["Infrastructure (driven adapters)"]
+    ConfigLoader["PipelineConfigLoader\ninfrastructure.config.loader"]:::componentSecondary
+    ProviderLoader["ProviderRegistryLoader\ninfrastructure.config.provider_registry"]:::componentSecondary
+    RecordSources["ApiRecordSource / CsvRecordSourceImpl / IdListRecordSourceImpl"]:::componentSecondary
+    Clients["UnifiedAPIClient + ChemblDataClientHTTPImpl\ninfrastructure.clients.chembl.*"]:::componentPrimary
+    Extraction["ChemblExtractionServiceImpl"]:::componentSecondary
+    Output["UnifiedLoaderImpl\n+ DataWriter/Metadata/QC/AtomicFileOperation"]:::componentPrimary
+    Hashing["Blake2bHashService + HasherImpl"]:::componentSecondary
+    Indexing["SequentialIndexGenerator"]:::componentSecondary
+    Timestamp["DeterministicTimestampProvider"]:::componentSecondary
+    Normalization["NormalizationServiceImpl"]:::componentSecondary
+    Logging["UnifiedLogger + ProgressReporter"]:::componentSecondary
+    Metrics["Observability server (Prometheus)"]:::componentSecondary
 end
 
 ExtChEMBL[(ChEMBL REST API)]:::external
-FS[(File system: CSV/Parquet, meta, QC)]:::external
+FS[(Filesystem: CSV/Parquet + meta.yaml + QC)]:::external
+MetricsSink[(Prometheus / HTTP exporters)]:::external
 
-CLI -->|Calls| Orchestrator
-RestAPI --> Orchestrator
-MQ --> Orchestrator
+CLI --> UseCase
+REST --> UseCase
+UseCase --> ConfigLoader
+UseCase --> ProviderLoader
+UseCase --> Orchestrator
 
-Orchestrator -->|Uses| ConfigResolution
-Orchestrator -->|Creates| Container
-Orchestrator -->|Uses| PipelineFactory
-Orchestrator -->|Uses| ConfigRuntime
-PipelineFactory -->|Creates| Container
-Container --> PipelineContracts
-Container --> Validation
-Container --> Normalization
-Container --> Hashing
-Container --> Transformers
-Container --> Hooks
-Container --> ErrorPolicy
+Orchestrator --> Registry
+Orchestrator --> Container
 Container --> Factories
-Validation --> ValidationContracts
-Validation -->|Validates| Schemas
-Validation --> PanderaValidator
-Normalization --> NormalizationImpl
-Normalization -.->|Uses| Schemas
-Hashing --> Hasher
-Container --> RecordSource
-Container --> ChEMBL
-Container --> Writer
-Container --> Logger
-Container --> Metrics
 Container --> ProviderRegistry
-Container --> Pydantic
-Container --> ObservabilityContracts
-ObservabilityContracts --> Metrics
+ProviderLoader --> ProviderRegistry
+Container --> Pipeline
+Container --> Validation
+Container --> Transform
+Container --> Hashing
+Container --> Indexing
+Container --> Timestamp
+Container --> Normalization
+Container --> Output
+Container --> Logging
+Container --> Metrics
+Container --> Config
 
-ChEMBL --> ExtChEMBL
-RecordSource --> ChEMBL
-Writer --> FS
-Metadata --> FS
-Logger --> FS
-Metrics --> RestAPI
+Pipeline --> Executor
+Executor --> Runtime
+Pipeline --> Validation
+Validation --> Schemas
+Pipeline --> Transform
+Transform --> Hashing
+Transform --> Indexing
+Transform --> Timestamp
+Transform --> Normalization
+Pipeline --> Output
+
+ProviderRegistry --> Clients
+ProviderRegistry --> RecordSources
+RecordSources --> Extraction
+Extraction --> Clients
+Clients --> ExtChEMBL
+
+Output --> FS
+Logging --> FS
+Metrics --> MetricsSink
+Runtime --> Logging
+Runtime --> Metrics

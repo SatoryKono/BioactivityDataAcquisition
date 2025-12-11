@@ -1,121 +1,211 @@
 %%{init: { 'classDiagram': { 'useMaxWidth': true } }}%%
 classDiagram
-class PipelineBase {
-    <<Abstract>>
-    +run(output_path, dry_run) RunResult
-    +iter_chunks() Iterable[DataFrame]
-    +extract()* DataFrame
-    +transform()* DataFrame
-    +validate(df) DataFrame
-    +write(df, path, context) WriteResult
-    #_runtime_manager: StageRuntimeManagerImpl
-    #_extractor: ExtractorABC
-    #_transformer: TransformerABC
-    #_post_transformer: TransformerABC
-}
 
-class ChemblPipelineBase {
-    +_extraction_service
-    +_chembl_release
-    +ID_COLUMN: str
-    +API_FILTER_KEY: str
-    +get_version()
-    +get_chembl_release()
-}
+    class PipelineBase {
+        <<Abstract>>
+        +run(output_path, dry_run) RunResult
+        +_process_extract_stage(...)
+        +_perform_write_stage(...)
+        +_normalize_meta(...)
+        #_runtime_manager: StageRuntimeManagerImpl
+        #_extractor: ExtractorABC
+        #_transformer: TransformerABC
+        #_post_transformer: TransformerABC
+    }
 
-class StageRuntimeManagerImpl {
-    +notify_stage_start(stage, context)
-    +notify_stage_end(stage, result)
-    +execute_stage(stage, context, fn, on_retry)
-    +process_chunk(raw_chunk, context, ...)
-    +make_stage_result(stage, count, chunks)
-    +handle_stage_failure(stage, results, context)
-}
+    class ChemblPipelineBase {
+        +_extraction_service
+        +_entity_model_registry
+        +ID_COLUMN: str
+        +API_FILTER_KEY: str
+        +get_version()
+        +get_chembl_release()
+    }
 
-class ValidationService {
-    -_schema_provider: SchemaProviderABC
-    +get_schema(entity_name)
-    +get_schema_columns(entity_name)
-    +validate(df, entity_name)
-}
+    class PipelineExecutor {
+        +execute(pipeline, output_path, dry_run) RunResult
+        -_run_extraction_phase(...)
+        -_run_write_phase(...)
+    }
 
-class HashService {
-    -_hasher: HasherABC
-    +add_hash_columns(df, keys)
-    +add_index_column(df)
-    +add_database_version_column(df, version)
-    +add_fulldate_column(df)
-}
+    class StageRuntimeManagerImpl {
+        +reset()
+        +notify_stage_start(stage, context)
+        +notify_stage_end(stage, result)
+        +execute_stage(stage, context, fn, on_retry)
+        +process_chunk(raw_chunk, context, ...)
+        +make_stage_result(stage, count, chunks)
+        +handle_stage_failure(stage, results, context)
+    }
 
-class UnifiedOutputWriter {
-    -_writer: WriterABC
-    -_metadata_writer: MetadataWriterABC
-    -_atomic_op: AtomicFileOperation
-    +write_result(df, path, context)
-    #_stable_sort(df)
-    #_apply_column_order(df)
-}
+    class HookNotifier {
+        +register_hook(hook)
+        +notify_stage_start(stage, ctx)
+        +notify_stage_end(stage, result)
+        +notify_stage_error(stage, error)
+    }
 
-class ChemblExtractorImpl {
-    +extract(**kwargs) Iterable[DataFrame]
-}
+    class StageCounter {
+        +mark_stage_start(stage)
+        +make_stage_result(stage, ...)
+    }
 
-class ChemblTransformerImpl {
-    +apply(df) DataFrame
-}
+    class StageErrorHandler {
+        +handle_error(stage, exc, ctx, attempt)
+        +should_retry(error)
+        +get_last_error_messages()
+    }
 
-class NormalizationServiceABC
-class RecordSource
-class ExtractorABC
-class TransformerABC
-class PipelineHookABC {
-    <<Interface>>
-    +on_stage_start(stage, context)
-    +on_stage_end(stage, result)
-    +on_error(stage, error)
-}
+    class ErrorPolicyABC {
+        <<Interface>>
+        +handle(error, context) ErrorAction
+        +should_retry(error) bool
+    }
 
-class ErrorPolicyABC {
-    <<Interface>>
-    +handle(error, context) ErrorAction
-    +should_retry(error) bool
-}
+    class PipelineHookABC {
+        <<Interface>>
+        +on_stage_start(stage, context)
+        +on_stage_end(stage, result)
+        +on_error(stage, error)
+    }
 
-PipelineBase <|-- ChemblPipelineBase
+    class ValidationService {
+        -_schema_provider: SchemaProviderABC
+        -_validator_factory: ValidatorFactoryABC
+        +validate(df, entity_name)
+    }
 
-PipelineBase o-- ValidationService : uses
-PipelineBase o-- HashService : uses
-PipelineBase o-- UnifiedOutputWriter : uses
-PipelineBase o-- StageRuntimeManagerImpl : uses
-PipelineBase o-- PipelineHookABC : has many
-PipelineBase o-- ErrorPolicyABC : uses
-PipelineBase o-- TransformerABC : uses
-PipelineBase o-- ExtractorABC : uses
+    class SchemaProviderABC <<Interface>>
+    class ValidatorFactoryABC <<Interface>>
 
-ValidationService ..> SchemaProviderABC : delegates
-HashService ..> HasherABC : delegates
-UnifiedOutputWriter ..> WriterABC : delegates
-UnifiedOutputWriter ..> MetadataWriterABC : writes meta
-UnifiedOutputWriter ..> AtomicFileOperation : atomic IO
-StageRuntimeManagerImpl ..> PipelineHookABC : notifies
-StageRuntimeManagerImpl ..> ErrorPolicyABC : delegates
+    class HashServiceABC <<Interface>>
+    class HasherABC <<Interface>>
+    class Blake2bHashService
+    class HasherImpl
 
-ChemblPipelineBase o-- ChemblExtractorImpl : builds
-ChemblPipelineBase o-- ChemblTransformerImpl : builds
-ChemblPipelineBase o-- NormalizationServiceABC : uses
-ChemblPipelineBase o-- RecordSource : optional
+    class LoaderABC <<Interface>>
+    class UnifiedLoaderImpl {
+        +load(df, path, context) WriteResult
+        +write_metadata(meta, path)
+        +write_qc_report(df, path)
+    }
 
-class PipelineBase domainPrimary
-class ChemblPipelineBase domainPrimary
-class ValidationService domainSecondary
-class HashService domainSecondary
-class UnifiedOutputWriter domainSecondary
-class StageRuntimeManagerImpl domainSecondary
-class ChemblExtractorImpl domainSecondary
-class ChemblTransformerImpl domainSecondary
-class NormalizationServiceABC interface
-class RecordSource interface
-class ExtractorABC interface
-class TransformerABC interface
-class PipelineHookABC interface
-class ErrorPolicyABC interface
+    class TransformerABC <<Interface>>
+    class TransformerChainImpl
+    class HashColumnsTransformerImpl
+    class IndexColumnTransformerImpl
+    class DatabaseVersionTransformerImpl
+    class FulldateTransformerImpl
+    class NormalizationServiceABC <<Interface>>
+    class NormalizationServiceImpl
+
+    class IndexGeneratorABC <<Interface>>
+    class SequentialIndexGenerator
+    class TimestampProviderABC <<Interface>>
+    class DeterministicTimestampProvider
+
+    class ExtractorABC <<Interface>>
+    class ExtractStage {
+        +extract(**kwargs) Iterable[DataFrame]
+    }
+    class ChemblExtractionServiceImpl
+    class RecordSourceABC <<Interface>>
+    class CsvRecordSourceImpl
+    class IdListRecordSourceImpl
+
+    class ChemblTransformerImpl {
+        +apply(df) DataFrame
+    }
+
+    PipelineBase <|-- ChemblPipelineBase
+    PipelineBase o-- PipelineExecutor : uses
+    PipelineBase o-- ValidationService : uses
+    PipelineBase o-- LoaderABC : uses
+    PipelineBase o-- HashServiceABC : uses
+    PipelineBase o-- TransformerABC : uses
+    PipelineBase o-- ExtractorABC : uses
+    PipelineBase o-- PipelineHookABC : hooks
+    PipelineBase o-- ErrorPolicyABC : error policy
+    PipelineBase o-- IndexGeneratorABC : indexes
+    PipelineBase o-- TimestampProviderABC : timestamps
+
+    PipelineExecutor o-- StageRuntimeManagerImpl
+    StageRuntimeManagerImpl *-- HookNotifier
+    StageRuntimeManagerImpl *-- StageCounter
+    StageRuntimeManagerImpl *-- StageErrorHandler
+    StageErrorHandler ..> ErrorPolicyABC
+    HookNotifier ..> PipelineHookABC
+
+    ValidationService ..> SchemaProviderABC : delegates
+    ValidationService ..> ValidatorFactoryABC : delegates
+
+    HashServiceABC <|-- Blake2bHashService
+    HasherABC <|-- HasherImpl
+    Blake2bHashService ..> HasherABC
+
+    LoaderABC <|-- UnifiedLoaderImpl
+
+    TransformerABC <|-- TransformerChainImpl
+    TransformerChainImpl *-- HashColumnsTransformerImpl
+    TransformerChainImpl *-- IndexColumnTransformerImpl
+    TransformerChainImpl *-- DatabaseVersionTransformerImpl
+    TransformerChainImpl *-- FulldateTransformerImpl
+    TransformerChainImpl ..> HashServiceABC
+    TransformerChainImpl ..> IndexGeneratorABC
+    TransformerChainImpl ..> TimestampProviderABC
+
+    NormalizationServiceABC <|-- NormalizationServiceImpl
+    ChemblTransformerImpl --|> TransformerABC
+    ChemblTransformerImpl ..> ValidationService
+    ChemblTransformerImpl ..> NormalizationServiceABC
+
+    IndexGeneratorABC <|-- SequentialIndexGenerator
+    TimestampProviderABC <|-- DeterministicTimestampProvider
+
+    ExtractorABC <|-- ExtractStage
+    ExtractStage ..> ChemblExtractionServiceImpl
+    ExtractStage ..> RecordSourceABC
+    RecordSourceABC <|-- CsvRecordSourceImpl
+    RecordSourceABC <|-- IdListRecordSourceImpl
+
+    ChemblPipelineBase o-- ChemblTransformerImpl
+    ChemblPipelineBase o-- ExtractStage
+    ChemblPipelineBase ..> NormalizationServiceABC
+
+    class PipelineBase domainPrimary
+    class ChemblPipelineBase domainPrimary
+    class PipelineExecutor domainPrimary
+    class StageRuntimeManagerImpl domainSecondary
+    class HookNotifier domainSecondary
+    class StageCounter domainSecondary
+    class StageErrorHandler domainSecondary
+    class ValidationService domainSecondary
+    class Blake2bHashService domainSecondary
+    class HasherImpl domainSecondary
+    class UnifiedLoaderImpl domainSecondary
+    class TransformerChainImpl domainSecondary
+    class HashColumnsTransformerImpl domainSecondary
+    class IndexColumnTransformerImpl domainSecondary
+    class DatabaseVersionTransformerImpl domainSecondary
+    class FulldateTransformerImpl domainSecondary
+    class ChemblTransformerImpl domainSecondary
+    class ExtractStage domainSecondary
+    class ChemblExtractionServiceImpl domainSecondary
+    class CsvRecordSourceImpl domainSecondary
+    class IdListRecordSourceImpl domainSecondary
+    class SequentialIndexGenerator domainSecondary
+    class DeterministicTimestampProvider domainSecondary
+    class NormalizationServiceImpl domainSecondary
+    class SchemaProviderABC interface
+    class ValidatorFactoryABC interface
+    class HashServiceABC interface
+    class HasherABC interface
+    class LoaderABC interface
+    class TransformerABC interface
+    class NormalizationServiceABC interface
+    class IndexGeneratorABC interface
+    class TimestampProviderABC interface
+    class ExtractorABC interface
+    class RecordSourceABC interface
+    class PipelineHookABC interface
+    class ErrorPolicyABC interface
