@@ -190,36 +190,20 @@ class ConfigMigrator:
             data["output_path"] = storage_section["output_path"]
 
     @classmethod
-    def _migrate_batch_size_from_sources(cls, data: dict[str, Any]) -> None:
-        """Extract batch_size from legacy sources section."""
-        if "batch_size" in data:
-            return
+    def _get_source_entry_from_sources(
+        cls, data: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """Extract source entry from legacy sources section.
 
+        Args:
+            data: Pipeline configuration dictionary.
+
+        Returns:
+            Source entry dict if found, None otherwise.
+        """
         sources_section = data.get("sources")
         if not isinstance(sources_section, dict):
-            return
-
-        provider = data.get("provider")
-        source_entry: Any | None = None
-        if provider and provider in sources_section:
-            source_entry = sources_section[provider]
-        elif len(sources_section) == 1:
-            source_entry = next(iter(sources_section.values()))
-
-        if isinstance(source_entry, dict):
-            batch_size = source_entry.get("batch_size")
-            if isinstance(batch_size, int):
-                data["batch_size"] = batch_size
-
-    @classmethod
-    def _migrate_provider_config_from_sources(cls, data: dict[str, Any]) -> None:
-        """Extract provider_config from legacy sources section."""
-        if "provider_config" in data:
-            return
-
-        sources_section = data.get("sources")
-        if not isinstance(sources_section, dict):
-            return
+            return None
 
         provider = data.get("provider")
         source_entry: Any | None = None
@@ -229,9 +213,35 @@ class ConfigMigrator:
             source_entry = next(iter(sources_section.values()))
 
         if not isinstance(source_entry, dict):
+            return None
+        return source_entry
+
+    @classmethod
+    def _migrate_batch_size_from_sources(cls, data: dict[str, Any]) -> None:
+        """Extract batch_size from legacy sources section."""
+        if "batch_size" in data:
+            return
+
+        source_entry = cls._get_source_entry_from_sources(data)
+        if source_entry is None:
+            return
+
+        batch_size = source_entry.get("batch_size")
+        if isinstance(batch_size, int):
+            data["batch_size"] = batch_size
+
+    @classmethod
+    def _migrate_provider_config_from_sources(cls, data: dict[str, Any]) -> None:
+        """Extract provider_config from legacy sources section."""
+        if "provider_config" in data:
+            return
+
+        source_entry = cls._get_source_entry_from_sources(data)
+        if source_entry is None:
             return
 
         provider_config = dict(source_entry)
+        provider = data.get("provider")
         if "provider" not in provider_config and provider:
             provider_config["provider"] = provider
         data["provider_config"] = provider_config
