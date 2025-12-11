@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Annotated
 
@@ -16,17 +17,26 @@ app = typer.Typer(help="BioETL - Bioactivity Data Acquisition ETL")
 console = Console()
 
 
+def _print_start_info(pipeline_name: str, limit: int | None, dry_run: bool) -> None:
+    """Print pipeline start information."""
+    console.print(f"[bold]Running pipeline:[/bold] {pipeline_name}")
+    if limit:
+        console.print(f"[dim]Limit:[/dim] {limit} records")
+    if dry_run:
+        console.print("[dim]Mode:[/dim] dry-run")
+
+
 def _present_result(response: RunPipelineResponse) -> None:
     """Format and display pipeline result."""
     if response.success:
-        console.print("[green]✓ Pipeline completed[/green]")
+        console.print("[green]✓ Pipeline finished successfully[/green]")
         console.print(f"  Rows: {response.row_count}")
         if response.output_path:
             console.print(f"  Output: {response.output_path}")
     else:
         console.print("[red]✗ Pipeline failed[/red]")
-        for err in response.errors:
-            console.print(f"  {err}")
+        for error in response.errors:
+            console.print(f"  [red]Error:[/red] {error}")
 
 
 @app.command()
@@ -53,11 +63,11 @@ def validate_config(
         raise typer.Exit(1)
 
     try:
-        context = get_application_context()
+        ctx = get_application_context()
         build_runtime_config(
             config_path=config_file,
             configs_root=get_configs_root(None),
-            loader=context.config_loader,
+            loader=ctx.config_loader,
             profile=profile,
         )
         console.print("[green]✓[/green] Config is valid")
@@ -68,15 +78,26 @@ def validate_config(
 
 @app.command()
 def run(
-    pipeline_name: Annotated[str, typer.Argument(help="Pipeline name")],
-    config: Annotated[str | None, typer.Option("--config", "-c")] = None,
-    output: Annotated[str | None, typer.Option("--output", "-o")] = None,
-    limit: Annotated[int | None, typer.Option("--limit", "-l")] = None,
-    dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
-    profile: Annotated[str | None, typer.Option("--profile", "-p")] = None,
+    pipeline_name: Annotated[
+        str, typer.Argument(help="Pipeline name (e.g., activity_chembl)")
+    ],
+    config: Annotated[
+        str | None, typer.Option("--config", "-c", help="Path to config YAML")
+    ] = None,
+    output: Annotated[
+        str | None, typer.Option("--output", "-o", help="Output directory")
+    ] = None,
+    limit: Annotated[
+        int | None, typer.Option("--limit", "-l", help="Limit number of records")
+    ] = None,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Dry run mode")] = False,
+    profile: Annotated[
+        str | None, typer.Option("--profile", "-p", help="Profile name")
+    ] = None,
 ) -> None:
     """Run a pipeline."""
     try:
+        # 1. Build request from CLI args
         request = RunPipelineRequest(
             pipeline_name=pipeline_name,
             config_path=Path(config) if config else None,
@@ -86,18 +107,27 @@ def run(
             profile=profile or "default",
         )
 
+        # 2. Get use case via factory
         use_case = get_use_case_factory().create_run_pipeline_use_case()
+
+        # 3. Execute
+        _print_start_info(pipeline_name, limit, dry_run)
         response = use_case.execute(request)
 
+        # 4. Present result
         _present_result(response)
         if not response.success:
             raise typer.Exit(1)
 
     except KeyboardInterrupt:
-        console.print("\n[yellow]Interrupted[/yellow]")
+        console.print("\n[yellow]Interrupted by user[/yellow]")
         raise typer.Exit(130)
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
+        if "--verbose" in sys.argv or "-v" in sys.argv:
+            import traceback
+
+            console.print(traceback.format_exc())
         raise typer.Exit(1)
 
 
