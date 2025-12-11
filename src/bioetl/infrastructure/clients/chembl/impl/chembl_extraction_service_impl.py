@@ -140,6 +140,7 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
             - 'chembl_36' -> '36'
             - 'chembl36' -> '36' (without underscore)
             - '36' -> '36'
+            - ' ChEMBL_36 ' -> '36' (with whitespace)
 
         Args:
             version_str: Raw version string from API.
@@ -150,20 +151,25 @@ class ChemblExtractionServiceImpl(ExtractionServiceABC, VersionProviderABC):
         if not version_str:
             return "unknown"
 
-        lower = version_str.lower()
+        # Strip whitespace from input
+        stripped = version_str.strip()
+        if not stripped:
+            return "unknown"
+
+        lower = stripped.lower()
 
         # Handle 'ChEMBL_XX' or 'chembl_XX' format (with underscore)
         if lower.startswith("chembl_"):
-            result = version_str[7:]  # Remove 'ChEMBL_' or 'chembl_' prefix
+            result = stripped[7:].strip()  # Remove 'ChEMBL_' or 'chembl_' prefix
             return result if result else "unknown"
 
         # Handle 'chemblXX' format (without underscore)
         if lower.startswith("chembl"):
-            result = version_str[6:]  # Remove 'ChEMBL' or 'chembl' prefix
+            result = stripped[6:].strip()  # Remove 'ChEMBL' or 'chembl' prefix
             return result if result else "unknown"
 
         # Already a plain number or other format
-        return version_str
+        return stripped
 
     def _enrich_filters(
         self, entity: str, filters: dict[str, object]

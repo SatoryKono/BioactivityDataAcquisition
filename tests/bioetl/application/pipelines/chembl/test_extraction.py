@@ -127,6 +127,29 @@ class TestParseVersionString:
         assert ChemblExtractionServiceImpl._parse_version_string("chembl_") == "unknown"
         assert ChemblExtractionServiceImpl._parse_version_string("ChEMBL") == "unknown"
 
+    def test_strips_leading_whitespace(self):
+        """Handles leading whitespace in version string."""
+        assert ChemblExtractionServiceImpl._parse_version_string(" ChEMBL_36") == "36"
+        assert ChemblExtractionServiceImpl._parse_version_string("  chembl_36") == "36"
+        assert ChemblExtractionServiceImpl._parse_version_string(" 36") == "36"
+
+    def test_strips_trailing_whitespace(self):
+        """Handles trailing whitespace in version string."""
+        assert ChemblExtractionServiceImpl._parse_version_string("ChEMBL_36 ") == "36"
+        assert ChemblExtractionServiceImpl._parse_version_string("chembl_36  ") == "36"
+        assert ChemblExtractionServiceImpl._parse_version_string("36 ") == "36"
+
+    def test_strips_surrounding_whitespace(self):
+        """Handles whitespace on both sides of version string."""
+        assert ChemblExtractionServiceImpl._parse_version_string(" ChEMBL_36 ") == "36"
+        assert ChemblExtractionServiceImpl._parse_version_string("  chembl36  ") == "36"
+        assert ChemblExtractionServiceImpl._parse_version_string("  34  ") == "34"
+
+    def test_returns_unknown_for_whitespace_only(self):
+        """Returns 'unknown' for whitespace-only string."""
+        assert ChemblExtractionServiceImpl._parse_version_string("   ") == "unknown"
+        assert ChemblExtractionServiceImpl._parse_version_string("\t\n") == "unknown"
+
 
 def test_extract_all_single_page(service, mock_client):
     """Test extraction of a single page."""
