@@ -34,7 +34,9 @@ from typing import Iterator, NamedTuple
 # Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
-APPLICATION_ROOT = Path(__file__).parent.parent.parent / "src" / "bioetl" / "application"
+APPLICATION_ROOT = (
+    Path(__file__).parent.parent.parent / "src" / "bioetl" / "application"
+)
 APPLICATION_MODULE = "bioetl.application"
 INFRASTRUCTURE_MODULE = "bioetl.infrastructure"
 DOMAIN_MODULE = "bioetl.domain"

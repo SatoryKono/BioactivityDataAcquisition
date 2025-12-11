@@ -237,30 +237,54 @@ class YamlPipelineContractLoader(PipelineContractLoaderPortABC):
         # Ensure contracts are loaded to get default_template
         self.load_contracts()
 
-        entity = default_entity
-        if entity is None:
-            # Extract entity from pipeline_code (e.g., "chembl.activity" -> "activity")
-            parts = pipeline_code.split(".")
-            entity = parts[-1] if parts else pipeline_code
-
-        if self._default_template:
-            # Use template configuration
-            suffix_in = self._default_template.get("schema_suffix_in", "_input")
-            suffix_out = self._default_template.get("schema_suffix_out", "_output")
+        # If default_entity was explicitly provided, use it as base
+        # output_schema should be without suffix, but schema_in can have suffix
+        if default_entity is not None:
+            schema_in = default_entity
+            if self._default_template:
+                suffix_in = self._default_template.get("schema_suffix_in", "_input")
+                schema_in = f"{default_entity}{suffix_in}"
 
             return SchemaModel(
                 pipeline_code=pipeline_code,
-                schema_out=entity,
-                schema_in=f"{entity}{suffix_in}",
-                output_schema=f"{entity}{suffix_out}",
+                schema_out=default_entity,
+                schema_in=schema_in,
+                output_schema=default_entity,
             )
 
-        # Simple default: use entity name for all schemas
+        # Extract entity from pipeline_code if format is provider.entity
+        # (has dot and 2+ parts)
+        parts = pipeline_code.split(".")
+        if len(parts) >= 2:
+            # Extract entity from pipeline_code (e.g., "chembl.activity" -> "activity")
+            entity = parts[-1]
+
+            # If template exists, use it for suffixes
+            if self._default_template:
+                suffix_in = self._default_template.get("schema_suffix_in", "_input")
+                suffix_out = self._default_template.get("schema_suffix_out", "_output")
+
+                return SchemaModel(
+                    pipeline_code=pipeline_code,
+                    schema_out=entity,
+                    schema_in=f"{entity}{suffix_in}",
+                    output_schema=f"{entity}{suffix_out}",
+                )
+
+            # Simple default: use entity name without suffixes when no template
+            return SchemaModel(
+                pipeline_code=pipeline_code,
+                schema_out=entity,
+                schema_in=entity,
+                output_schema=entity,
+            )
+
+        # Simple default: use full pipeline_code when non-standard format
         return SchemaModel(
             pipeline_code=pipeline_code,
-            schema_out=entity,
-            schema_in=entity,
-            output_schema=entity,
+            schema_out=pipeline_code,
+            schema_in=pipeline_code,
+            output_schema=pipeline_code,
         )
 
 

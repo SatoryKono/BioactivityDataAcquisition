@@ -458,12 +458,13 @@ def _populate_fields_from_schema(
         try:
             from bioetl.domain.schemas.fields import build_field_configs_from_schema
             from bioetl.domain.schemas.registry import create_default_schema_registry
+            from bioetl.infrastructure.validation.bootstrap import register_schemas
             from bioetl.infrastructure.validation.schema_generator import (
                 PanderaSchemaGenerator,
             )
 
             registry = create_default_schema_registry(
-                schema_generator=PanderaSchemaGenerator()
+                register_fn=register_schemas, schema_generator=PanderaSchemaGenerator()
             )
             schema = registry.get_schema(schema_name)
             fields = build_field_configs_from_schema(schema)

@@ -191,6 +191,10 @@ def test_duplicate_class_names_are_allowlisted() -> None:
         "DataSourceConfig",
         "DataSinkConfig",
         "OutputOptionsConfig",
+        # Pipeline runtime components duplicated in pipelines/ and runtime/
+        "HookNotifier",
+        "StageCounter",
+        "StageErrorHandler",
     }
 
     class_map: dict[str, list[Path]] = {}

@@ -156,7 +156,8 @@ class TestContractLoaderInjection:
 
     @pytest.fixture(autouse=True)
     def cleanup_loader(self) -> Any:
-        """Clear loader after each test."""
+        """Clear loader before and after each test."""
+        clear_contract_loader()
         yield
         clear_contract_loader()
 

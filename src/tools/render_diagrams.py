@@ -196,7 +196,7 @@ def _render_diagram(
             theme,
             "--quiet",
         ]
-    
+
     # Add puppeteer config for sandbox workaround in CI environments
     # Check in current working directory first, then in script directory
     puppeteer_config = Path("puppeteer-config.json")
@@ -205,7 +205,7 @@ def _render_diagram(
         puppeteer_config = script_dir / "puppeteer-config.json"
     if puppeteer_config.exists():
         cmd.extend(["--puppeteerConfigFile", str(puppeteer_config.resolve())])
-    
+
     if config is not None:
         cmd.extend(["--configFile", str(config)])
 

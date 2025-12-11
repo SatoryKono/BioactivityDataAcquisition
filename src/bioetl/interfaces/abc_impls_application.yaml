@@ -13,11 +13,11 @@ PipelineContainerABC:
 PipelineHookABC:
   default_factory: bioetl.application.factories.hooks.PipelineHookFactory
   implementations:
-    Logging: bioetl.application.pipelines.hooks_impl.LoggingPipelineHookImpl
-    Metrics: bioetl.application.pipelines.hooks_impl.MetricsPipelineHookImpl
+    Logging: bioetl.application.factories.hooks_impl.LoggingPipelineHookImpl
+    Metrics: bioetl.application.factories.hooks_impl.MetricsPipelineHookImpl
 
 ErrorPolicyABC:
-  default_factory: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
+  default_factory: bioetl.application.factories.hooks_impl.FailFastErrorPolicyImpl
   implementations:
-    FailFast: bioetl.application.pipelines.hooks_impl.FailFastErrorPolicyImpl
-    ContinueOnError: bioetl.application.pipelines.hooks_impl.ContinueOnErrorPolicyImpl
+    FailFast: bioetl.application.factories.hooks_impl.FailFastErrorPolicyImpl
+    ContinueOnError: bioetl.application.factories.hooks_impl.ContinueOnErrorPolicyImpl

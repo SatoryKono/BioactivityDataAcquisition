@@ -32,7 +32,9 @@ from typing import Iterator, NamedTuple
 # Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
-INFRASTRUCTURE_ROOT = Path(__file__).parent.parent.parent / "src" / "bioetl" / "infrastructure"
+INFRASTRUCTURE_ROOT = (
+    Path(__file__).parent.parent.parent / "src" / "bioetl" / "infrastructure"
+)
 INFRASTRUCTURE_MODULE = "bioetl.infrastructure"
 APPLICATION_MODULE = "bioetl.application"
 DOMAIN_MODULE = "bioetl.domain"

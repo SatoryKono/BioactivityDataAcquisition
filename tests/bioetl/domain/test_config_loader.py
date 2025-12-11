@@ -237,6 +237,26 @@ provider_config:
     )
     provider_registry.clear_provider_registry_cache()
 
+    # Create pipeline_contracts.yaml in base_dir for contract loading
+    configs_root = base_dir / "configs"
+    configs_root.mkdir(parents=True, exist_ok=True)
+    contracts_file = configs_root / "pipeline_contracts.yaml"
+    contracts_file.write_text(
+        """contracts:
+  chembl.activity:
+    pipeline_code: chembl.activity
+    schema_out: activity
+    schema_in: activity_input
+    output_schema: activity_output
+
+default_template:
+  use_pipeline_code_as_schema: true
+  schema_suffix_in: _input
+  schema_suffix_out: _output
+""",
+        encoding="utf-8",
+    )
+
     config = get_pipeline_config("chembl.activity", base_dir=base_dir)
 
     assert config.provider == "chembl"

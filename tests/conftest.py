@@ -603,3 +603,45 @@ def mock_provider_registry():
     from bioetl.infrastructure.provider_registry import InMemoryProviderRegistry
 
     return InMemoryProviderRegistry()
+
+
+@pytest.fixture(autouse=True)
+def setup_contract_loader(tmp_path_factory: pytest.TempPathFactory):
+    """Set up a minimal contract loader for all tests.
+
+    This fixture ensures that get_pipeline_contract() works in tests
+    that use PipelineBase or other components requiring contract loader.
+    """
+    from bioetl.domain.schemas.pipeline_contracts import (
+        clear_contract_loader,
+        set_contract_loader,
+    )
+    from bioetl.infrastructure.config.pipeline_contract_loader import (
+        YamlPipelineContractLoader,
+    )
+
+    # Create a minimal contracts YAML file
+    contracts_file = tmp_path_factory.getbasetemp() / "pipeline_contracts.yaml"
+    contracts_file.parent.mkdir(parents=True, exist_ok=True)
+    contracts_file.write_text(
+        """
+contracts:
+  chembl.test_entity:
+    pipeline_code: chembl.test_entity
+    schema_out: test_entity
+
+default_template:
+  use_pipeline_code_as_schema: true
+  schema_suffix_in: _input
+  schema_suffix_out: _output
+"""
+    )
+
+    # Set up loader
+    loader = YamlPipelineContractLoader(config_path=contracts_file)
+    set_contract_loader(loader)
+
+    yield
+
+    # Clean up after test
+    clear_contract_loader()

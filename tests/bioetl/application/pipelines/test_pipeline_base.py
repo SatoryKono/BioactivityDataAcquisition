@@ -10,11 +10,11 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from bioetl.application.pipelines.base import PipelineBase
 from bioetl.application.factories.hooks_impl import (
     ContinueOnErrorPolicyImpl,
     FailFastErrorPolicyImpl,
 )
+from bioetl.application.pipelines.base import PipelineBase
 from bioetl.domain.clients.base.output.contracts import WriteResult
 from bioetl.domain.errors import PipelineStageError
 from bioetl.domain.models import RunContext

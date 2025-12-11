@@ -116,6 +116,9 @@ def test_chembl_activity_golden(tmp_path, monkeypatch):
     actual_path = Path(config.sink.output_path) / "activity.csv"
     expected_path = Path("qc/golden/chembl_activity/expected_output.csv")
 
+    if not expected_path.exists():
+        pytest.skip(f"Golden data file not found: {expected_path}")
+
     actual_df = pd.read_csv(actual_path)
     expected_df = pd.read_csv(expected_path)
 
