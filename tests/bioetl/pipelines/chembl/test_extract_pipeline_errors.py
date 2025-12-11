@@ -13,6 +13,7 @@ from bioetl.domain.configs.sink import DataSinkConfig
 from bioetl.domain.configs.source import DataSourceConfig
 from bioetl.domain.errors import ClientNetworkError, PipelineStageError
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 
 
 class _LoggerStub:
@@ -103,6 +104,7 @@ def test_extract_stage_wraps_client_error(
         normalization_service=normalization_service,
         index_generator=index_generator,
         timestamp_provider=timestamp_provider,
+        entity_model_registry=get_chembl_model_registry(),
     )
 
     with pytest.raises(PipelineStageError) as exc_info:

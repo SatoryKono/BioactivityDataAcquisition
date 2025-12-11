@@ -59,13 +59,7 @@ def _coerce_phase_value(value: Any) -> int | None:
         return _coerce_phase_value(parsed)
 
     # Handle pandas NAType explicitly
-    try:
-        import pandas as pd
-
-        if value is pd.NA:
-            return None
-    except (ImportError, AttributeError):
-        pass
+    # Use is_missing which handles pd.NA without importing pandas
 
     raise ValueError(
         "Expected numeric value for clinical trial phase, "

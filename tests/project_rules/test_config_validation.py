@@ -7,6 +7,7 @@ import pytest
 import yaml
 
 from bioetl.domain.configs.pipeline import PipelineConfig
+from bioetl.infrastructure.config.migration import ConfigMigrator
 
 
 def _load_yaml(path: Path) -> dict:
@@ -19,8 +20,9 @@ def test_pipeline_configs_validate(configs_root: Path) -> None:
     for config_file in configs_root.glob("pipelines/*/*.yaml"):
         data = _load_yaml(config_file)
         try:
-            # Use model_validate to trigger migration validator
-            PipelineConfig.model_validate(data)
+            # Apply migration before validation (same as loader does)
+            migrated_data = ConfigMigrator.migrate(data)
+            PipelineConfig.model_validate(migrated_data)
         except ValidationError as exc:
             violations.append(f"{config_file.as_posix()}: {exc}")
 

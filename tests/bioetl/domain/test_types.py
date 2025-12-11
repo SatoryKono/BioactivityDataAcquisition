@@ -35,10 +35,10 @@ class TestCustomTypes:
         assert normalize_doi("DOI:10.1000/ABC") == "10.1000/abc"
 
         # Invalid cases
-        with pytest.raises(ValueError, match="Неверный формат DOI"):
+        with pytest.raises(ValueError, match="Invalid DOI format"):
             normalize_doi("INVALID")
 
-        with pytest.raises(ValueError, match="Неверный формат DOI"):
+        with pytest.raises(ValueError, match="Invalid DOI format"):
             normalize_doi("9.1234/567")  # wrong prefix
 
         assert normalize_doi(None) is None
@@ -52,10 +52,10 @@ class TestCustomTypes:
         assert normalize_chembl_id("12345") == "CHEMBL12345"
 
         # Invalid
-        with pytest.raises(ValueError, match="Неверный ChEMBL ID"):
+        with pytest.raises(ValueError, match="Invalid ChEMBL ID"):
             normalize_chembl_id("CHEMBL")  # Missing digits
 
-        with pytest.raises(ValueError, match="Неверный ChEMBL ID"):
+        with pytest.raises(ValueError, match="Invalid ChEMBL ID"):
             normalize_chembl_id("CHEMBL_123")  # Underscore
 
         assert normalize_chembl_id(None) is None
@@ -68,16 +68,16 @@ class TestCustomTypes:
         assert normalize_pmid(" 12345 ") == 12345
 
         # Invalid
-        with pytest.raises(ValueError, match="положительным числом"):
+        with pytest.raises(ValueError, match="positive number"):
             normalize_pmid(-1)
 
-        with pytest.raises(ValueError, match="положительным числом"):
+        with pytest.raises(ValueError, match="positive number"):
             normalize_pmid(0)
 
-        with pytest.raises(ValueError, match="нецифровые символы"):
+        with pytest.raises(ValueError, match="non-digit"):
             normalize_pmid("12A45")
 
-        with pytest.raises(ValueError, match="нецифровые символы"):
+        with pytest.raises(ValueError, match="non-digit"):
             normalize_pmid("PMC123")
 
         assert normalize_pmid(None) is None
@@ -90,10 +90,10 @@ class TestCustomTypes:
         assert normalize_pcid("PCID2244") == 2244
 
         # Invalid
-        with pytest.raises(ValueError, match="Неверный PubChem CID"):
+        with pytest.raises(ValueError, match="Invalid PubChem CID"):
             normalize_pcid("ABC")
 
-        with pytest.raises(ValueError, match="положительным числом"):
+        with pytest.raises(ValueError, match="positive number"):
             normalize_pcid(0)
 
         assert normalize_pcid(None) is None
@@ -105,13 +105,13 @@ class TestCustomTypes:
         assert normalize_uniprot("A0A0P7VRU5") == "A0A0P7VRU5"  # 10 chars
 
         # Invalid
-        with pytest.raises(ValueError, match="Неверный UniProt ID"):
+        with pytest.raises(ValueError, match="Invalid UniProt ID"):
             normalize_uniprot("P1234")  # too short
 
-        with pytest.raises(ValueError, match="Неверный UniProt ID"):
+        with pytest.raises(ValueError, match="Invalid UniProt ID"):
             normalize_uniprot("P1234567")  # wrong length
 
-        with pytest.raises(ValueError, match="Неверный UniProt ID"):
+        with pytest.raises(ValueError, match="Invalid UniProt ID"):
             normalize_uniprot("123456")  # all digits (regex requires letter start)
 
         assert normalize_uniprot(None) is None
@@ -122,10 +122,10 @@ class TestCustomTypes:
         assert normalize_bao_id("bao_0000190") == "BAO_0000190"
 
         # Invalid
-        with pytest.raises(ValueError, match="Неверный BAO ID"):
+        with pytest.raises(ValueError, match="Invalid BAO ID"):
             normalize_bao_id("BAO123")  # Missing underscore
 
-        with pytest.raises(ValueError, match="Неверный BAO ID"):
+        with pytest.raises(ValueError, match="Invalid BAO ID"):
             normalize_bao_id("123")
 
         assert normalize_bao_id(None) is None

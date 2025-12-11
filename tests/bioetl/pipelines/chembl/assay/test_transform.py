@@ -7,6 +7,7 @@ import pandera as pa
 import pytest
 
 from bioetl.application.pipelines.chembl.base import ChemblPipelineBase
+from bioetl.infrastructure.chembl.model_registry import get_chembl_model_registry
 from bioetl.infrastructure.validation.schemas.chembl.assay import AssayTableSchema
 
 
@@ -55,6 +56,7 @@ def pipeline():
         index_generator=index_generator,
         timestamp_provider=timestamp_provider,
         normalization_service=normalization_service,
+        entity_model_registry=get_chembl_model_registry(),
     )
 
 

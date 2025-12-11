@@ -9,6 +9,7 @@ from bioetl.application.services.schema_bootstrap import (
     create_schema_bootstrap_service,
 )
 from bioetl.domain.validation import SchemaProviderABC
+from bioetl.infrastructure.validation.bootstrap import register_schemas
 
 
 class TestSchemaBootstrapService:
@@ -25,7 +26,8 @@ class TestSchemaBootstrapService:
 
     def test_ensure_registered_creates_default_registry_when_none(self) -> None:
         """Test ensure_registered creates default registry when no provider given."""
-        service = create_schema_bootstrap_service()
+        # Pass register_fn to match real-world usage
+        service = create_schema_bootstrap_service(register_fn=register_schemas)
 
         result = service.ensure_registered()
 

@@ -1,17 +1,19 @@
 from bioetl.domain.configs import PipelineConfig
+from bioetl.infrastructure.config.migration import ConfigMigrator
 
 
 def test_pipeline_config_migrates_legacy_flat_keys() -> None:
     """Test that legacy flat keys are migrated to decomposed sections."""
-    config = PipelineConfig(
-        id="test",
-        provider="dummy",
-        entity="entity",
-        input_mode="csv",
-        input_path="/tmp/input.csv",
-        output_path="/tmp/output",
-        batch_size=100,
-        provider_config={
+    # Create config with legacy flat format
+    legacy_data = {
+        "id": "dummy.entity",
+        "provider": "dummy",
+        "entity": "entity",
+        "input_mode": "csv",
+        "input_path": "/tmp/input.csv",
+        "output_path": "/tmp/output",
+        "batch_size": 100,
+        "provider_config": {
             "provider": "dummy",
             "base_url": "http://example.com",
             "client": {
@@ -19,19 +21,23 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
                 "max_retries": 0,
             },
         },
-        logging={"level": "DEBUG"},
-        metrics={"enabled": False},
-        pagination={"limit": 10},
-        hashing={"algorithm": "sha256"},
-        normalization={"id_fields": ["id"]},
-        csv_options={"delimiter": ";"},
-        features={"rest_interface_enabled": True},
-    )
+        "logging": {"level": "DEBUG"},
+        "metrics": {"enabled": False},
+        "pagination": {"limit": 10},
+        "hashing": {"algorithm": "sha256"},
+        "normalization": {"id_fields": ["id"]},
+        "csv_options": {"delimiter": ";"},
+        "features": {"rest_interface_enabled": True},
+    }
+    
+    # Apply migration before validation (same as loader does)
+    migrated_data = ConfigMigrator.migrate(legacy_data)
+    config = PipelineConfig.model_validate(migrated_data)
 
     # Test decomposed identity section
-    assert config.identity.pipeline_id == "test"
-    assert config.identity.provider == "dummy"
-    assert config.identity.entity == "entity"
+    assert str(config.identity.pipeline_id) == "dummy.entity"
+    assert str(config.identity.provider) == "dummy"
+    assert str(config.identity.entity) == "entity"
 
     # Test decomposed source section (csv_options now in source.csv)
     assert config.source.input_mode == "csv"
@@ -58,7 +64,7 @@ def test_pipeline_config_migrates_legacy_flat_keys() -> None:
     assert config.features.interfaces.rest_interface_enabled is True
 
     # Test convenience properties (minimal set retained)
-    assert config.id == "test"
-    assert config.provider == "dummy"
-    assert config.entity == "entity"
-    assert config.entity_name == "entity"
+    assert str(config.id) == "dummy.entity"
+    assert str(config.provider) == "dummy"
+    assert str(config.entity) == "entity"
+    assert str(config.entity_name) == "entity"

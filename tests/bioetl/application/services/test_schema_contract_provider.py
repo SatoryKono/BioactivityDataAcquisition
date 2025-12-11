@@ -107,8 +107,9 @@ class TestSchemaContractProviderIntegration:
     def real_contract_provider(self) -> SchemaContractProviderImpl:
         """Create provider with real schema registry."""
         from bioetl.domain.schemas.registry import create_default_schema_registry
+        from bioetl.infrastructure.validation.bootstrap import register_schemas
 
-        registry = create_default_schema_registry()
+        registry = create_default_schema_registry(register_fn=register_schemas)
         return SchemaContractProviderImpl(registry)
 
     def test_get_field_configs_for_activity_schema(

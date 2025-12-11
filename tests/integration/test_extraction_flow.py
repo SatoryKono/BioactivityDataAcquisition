@@ -51,6 +51,7 @@ class TestExtractionFlow:
                     "assay_chembl_id": "CHEMBL100",
                     "molecule_chembl_id": "CHEMBL25",
                     "standard_flag": True,
+                    "standard_value": 10.0,
                 },
                 {
                     "activity_id": 2,
@@ -63,6 +64,7 @@ class TestExtractionFlow:
                     "assay_chembl_id": "CHEMBL300",
                     "molecule_chembl_id": "CHEMBL75",
                     "standard_flag": True,
+                    "standard_value": 10.0,
                 },
             ],
             "page_meta": {
@@ -108,8 +110,8 @@ class TestExtractionFlow:
 
         assert len(typed_records) == 1
         assert isinstance(typed_records[0], ActivityRawModel)
-        # activity_id is stringified in ActivityRawModel
-        assert typed_records[0].activity_id == "12345"
+        # activity_id is ActivityId object in ActivityRawModel
+        assert str(typed_records[0].activity_id) == "12345"
 
     def test_mapper_handles_multiple_records(
         self, multi_record_response: dict[str, Any]
@@ -123,7 +125,7 @@ class TestExtractionFlow:
 
         assert len(typed_records) == 3
         assert all(isinstance(r, ActivityRawModel) for r in typed_records)
-        assert [r.activity_id for r in typed_records] == ["1", "2", "3"]
+        assert [str(r.activity_id) for r in typed_records] == ["1", "2", "3"]
 
     def test_full_flow_to_dataframe(self, sample_api_response: dict[str, Any]) -> None:
         """Full flow should produce valid DataFrame."""
@@ -172,7 +174,7 @@ class TestExtractionFlow:
         try:
             sample_response = {
                 "activities": [
-                    {"activity_id": 999, "standard_flag": True},
+                    {"activity_id": 999, "standard_flag": True, "standard_value": 10.0},
                 ],
             }
 
@@ -184,7 +186,7 @@ class TestExtractionFlow:
             typed_records = mapper.map_records(raw_records, "activity")
 
             assert len(typed_records) == 1
-            assert typed_records[0].activity_id == "999"
+            assert str(typed_records[0].activity_id) == "999"
         finally:
             bootstrap.shutdown()
 

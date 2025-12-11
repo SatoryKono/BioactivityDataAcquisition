@@ -11,6 +11,7 @@ from bioetl.application.mappers.contracts import RecordMapperABC
 from bioetl.domain.data import TabularData
 from bioetl.domain.pipelines.contracts import ExtractorABC
 from bioetl.domain.ports.extraction import ExtractionServiceABC
+from bioetl.domain.record_source import RecordSourceABC
 
 
 class ExtractStage(ExtractorABC):
@@ -43,6 +44,7 @@ class ExtractStage(ExtractorABC):
         extraction_service: ExtractionServiceABC,
         record_mapper: RecordMapperABC | None = None,
         entity: str | None = None,
+        record_source: RecordSourceABC | None = None,
     ) -> None:
         """Initialize extract stage.
 
@@ -51,10 +53,22 @@ class ExtractStage(ExtractorABC):
             record_mapper: Optional mapper for domain model validation.
             entity: Optional pre-configured entity type. When provided,
                 extract() can be called without entity argument.
+            record_source: Optional record source for file-based extraction.
         """
         self._extraction_service = extraction_service
         self._mapper = record_mapper
         self._entity = entity
+        self._record_source = record_source
+
+    @property
+    def record_source(self) -> RecordSourceABC | None:
+        """Get the record source if configured."""
+        return self._record_source
+
+    @record_source.setter
+    def record_source(self, value: RecordSourceABC | None) -> None:
+        """Set the record source."""
+        self._record_source = value
 
     @property
     def extraction_service(self) -> ExtractionServiceABC:
@@ -107,9 +121,14 @@ class ExtractStage(ExtractorABC):
         limit = filters.pop("limit", None)
         remaining = limit
 
-        for batch in self._extraction_service.iter_extract(
-            resolved_entity, chunk_size=chunk_size, **filters
-        ):
+        if self._record_source:
+            iterator = self._record_source.iter_records()
+        else:
+            iterator = self._extraction_service.iter_extract(
+                resolved_entity, chunk_size=chunk_size, **filters
+            )
+
+        for batch in iterator:
             if remaining is not None and remaining <= 0:
                 break
 

@@ -94,7 +94,9 @@ def test_csv_record_source_reads_dataset(tmp_path: Path) -> None:
     chunks = list(source.iter_records())
 
     assert len(chunks) == 1
-    expected = [ActivityRawModel(activity_id="1", standard_flag=True, standard_value=1.0)]
+    # CsvRecordSource returns raw dicts, ignores model_cls (but warns)
+    # Pandas reads "1" as int 1 by default
+    expected = [{"activity_id": 1, "standard_flag": True}]
     assert chunks[0] == expected
 
 
