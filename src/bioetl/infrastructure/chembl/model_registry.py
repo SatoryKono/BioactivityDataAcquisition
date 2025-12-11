@@ -107,52 +107,62 @@ class ChemblEntityModelRegistry(EntityModelRegistryABC):
         return frozenset(_get_entity_model_map().keys())
 
 
-class _RegistryHolder:
-    """Thread-safe holder for singleton registry instance.
+# =============================================================================
+# Factory and default instance management
+# =============================================================================
 
-    Uses class-level attribute instead of module-level global to
-    improve encapsulation and testability.
+_default_registry: ChemblEntityModelRegistry | None = None
+
+
+def create_chembl_model_registry() -> ChemblEntityModelRegistry:
+    """Factory function for creating a new ChemblEntityModelRegistry instance.
+
+    Use this for dependency injection or when you need an isolated instance.
+
+    Returns:
+        A new ChemblEntityModelRegistry instance.
+
+    Example:
+        >>> registry = create_chembl_model_registry()
+        >>> registry.is_supported("molecule")
+        True
     """
-
-    _instance: ChemblEntityModelRegistry | None = None
-
-    @classmethod
-    def get_or_create(cls) -> ChemblEntityModelRegistry:
-        """Get or create the singleton registry instance."""
-        if cls._instance is None:
-            cls._instance = ChemblEntityModelRegistry()
-        return cls._instance
-
-    @classmethod
-    def reset(cls) -> None:
-        """Reset the singleton (for testing)."""
-        cls._instance = None
+    return ChemblEntityModelRegistry()
 
 
 def get_chembl_model_registry() -> ChemblEntityModelRegistry:
-    """Get the default ChEMBL entity model registry instance.
+    """Get or create the default ChEMBL entity model registry instance.
+
+    This function provides lazy initialization of a shared registry instance.
+    For dependency injection, prefer using create_chembl_model_registry().
 
     Returns:
-        Singleton instance of ChemblEntityModelRegistry.
+        The default ChemblEntityModelRegistry instance.
 
     Example:
         >>> registry = get_chembl_model_registry()
         >>> registry.is_supported("molecule")
         True
     """
-    return _RegistryHolder.get_or_create()
+    global _default_registry
+    if _default_registry is None:
+        _default_registry = create_chembl_model_registry()
+    return _default_registry
 
 
 def reset_chembl_model_registry() -> None:
-    """Reset the registry singleton (for testing).
+    """Reset the default registry instance (for testing).
 
-    This allows tests to start with a fresh registry instance.
+    This clears the cached default instance. The next call to
+    get_chembl_model_registry() will create a fresh instance.
     """
-    _RegistryHolder.reset()
+    global _default_registry
+    _default_registry = None
 
 
 __all__ = [
     "ChemblEntityModelRegistry",
+    "create_chembl_model_registry",
     "get_chembl_model_registry",
     "reset_chembl_model_registry",
 ]
