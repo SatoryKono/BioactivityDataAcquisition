@@ -4,7 +4,7 @@ Value Objects для ключевых идентификаторов.
 Обеспечивают type safety и валидацию на уровне типов.
 
 Этот пакет содержит:
-- identifiers: RunId, PipelineId, EntityName, ChemblId, StageName
+- identifiers: ActivityId, RunId, PipelineId, EntityName, ChemblId, StageName
 - crypto: HashDigest
 - network: HttpUrl
 - temporal: Timestamp
@@ -12,6 +12,7 @@ Value Objects для ключевых идентификаторов.
 
 from bioetl.domain.value_objects.crypto import HashDigest
 from bioetl.domain.value_objects.identifiers import (
+    ActivityId,
     ChemblId,
     EntityName,
     PipelineId,
@@ -23,6 +24,7 @@ from bioetl.domain.value_objects.temporal import Timestamp
 
 __all__ = [
     # Identifiers
+    "ActivityId",
     "RunId",
     "StageName",
     "EntityName",
