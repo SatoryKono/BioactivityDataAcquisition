@@ -14,7 +14,7 @@ from bioetl.domain.schemas.chembl.raw_models import ActivityRawModel
 from bioetl.infrastructure.clients.chembl.response_parser import (
     ChemblGenericResponseParser,
 )
-from bioetl.interfaces.bootstrap_factory import create_default_bootstrap
+from bioetl.application.bootstrap_factory import create_default_bootstrap
 
 
 class TestExtractionFlow:
