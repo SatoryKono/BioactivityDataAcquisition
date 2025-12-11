@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Callable
 from bioetl.application.orchestrator import PipelineOrchestrator
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.models import RunResult
+from bioetl.domain.provider_registry import ProviderRegistryFactory
 
 if TYPE_CHECKING:
     from bioetl.application.pipelines.contracts import PipelineContainerABC
@@ -114,6 +115,7 @@ class RunPipelineUseCase:
         config_loader: "PipelineConfigLoaderProtocol",
         container_factory: Callable[..., "PipelineContainerABC"],
         provider_loader_factory: Callable[[], "ProviderRegistryLoaderABC"],
+        provider_registry_factory: ProviderRegistryFactory,
         configs_root: Path | None = None,
     ) -> None:
         """Initialize use case with required dependencies.
@@ -122,11 +124,13 @@ class RunPipelineUseCase:
             config_loader: Pipeline configuration loader.
             container_factory: Factory for creating dependency container.
             provider_loader_factory: Factory for creating provider loader.
+            provider_registry_factory: Factory for creating provider registries.
             configs_root: Configuration root directory.
         """
         self._config_loader = config_loader
         self._container_factory = container_factory
         self._provider_loader_factory = provider_loader_factory
+        self._provider_registry_factory = provider_registry_factory
         self._configs_root = configs_root
 
     def execute(self, request: RunPipelineRequest) -> RunPipelineResponse:
@@ -226,14 +230,10 @@ class RunPipelineUseCase:
         Returns:
             Configured orchestrator.
         """
-        from bioetl.interfaces.factories.provider_registry import (
-            create_provider_registry_factory,
-        )
-
         return PipelineOrchestrator(
             pipeline_name=pipeline_name,
             config=config,
-            provider_registry_factory=create_provider_registry_factory(),
+            provider_registry_factory=self._provider_registry_factory,
             provider_loader_factory=self._provider_loader_factory,
             container_factory=self._container_factory,
         )
