@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.domain.ports.pipeline_contract_loader import PipelineContractLoaderError
 from bioetl.domain.schemas.pipeline_contracts import (
+    ContractLoaderNotConfiguredError,
     PipelineSchemaModel,
     clear_contract_loader,
     get_contract_loader,
@@ -189,16 +190,30 @@ class TestContractLoaderInjection:
         assert contract.schema_out == "entity"
         assert contract.schema_in == "entity_input"
 
-    def test_get_pipeline_contract_fallback_without_loader(self) -> None:
-        """Test get_pipeline_contract falls back to hardcoded when no loader."""
+    def test_get_pipeline_contract_raises_without_loader(self) -> None:
+        """Test get_pipeline_contract raises error when no loader configured."""
         # Ensure no loader is set
         clear_contract_loader()
 
-        # Should use hardcoded PIPELINE_CONTRACTS
-        contract = get_pipeline_contract("chembl.activity")
+        with pytest.raises(
+            ContractLoaderNotConfiguredError,
+            match="Pipeline contract loader is not configured",
+        ):
+            get_pipeline_contract("chembl.activity")
 
-        assert contract.schema_out == "activity"
-        assert contract.schema_in == "activity_input"
+    def test_list_pipeline_codes_raises_without_loader(self) -> None:
+        """Test list_pipeline_codes raises error when no loader configured."""
+        clear_contract_loader()
+
+        with pytest.raises(ContractLoaderNotConfiguredError):
+            list_pipeline_codes()
+
+    def test_has_pipeline_contract_raises_without_loader(self) -> None:
+        """Test has_pipeline_contract raises error when no loader configured."""
+        clear_contract_loader()
+
+        with pytest.raises(ContractLoaderNotConfiguredError):
+            has_pipeline_contract("chembl.activity")
 
     def test_list_pipeline_codes_uses_injected_loader(
         self, loader_with_sample: YamlPipelineContractLoader
