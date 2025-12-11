@@ -2,94 +2,79 @@
 <!-- generated -->
 
 - `DataClientABC` — `bioetl.domain.clients.contracts.DataClientABC`
-  - Базовый контракт клиента источника данных.
+  - Universal data source client contract. Supports extraction of arbitrary entities through a unified ``fetch`` method with filters, as well as side operations (pagination, metadata, resource release).
 
 - `RequestBuilderABC` — `bioetl.domain.clients.base.contracts.RequestBuilderABC`
-  - Паттерн Builder для создания запросов.
-
-- `ResponseParserABC` — `bioetl.domain.clients.base.contracts.ResponseParserABC`
-  - Разбор ответов API.
+  - Builder pattern for request creation. This ABC provides a fluent interface for constructing API requests. Implementations should support endpoint configuration and pagination. Note: Consider using :class:`bioetl.domain.ports.request_building.RequestBuilderPortABC` for new code - it provides a cleaner port-based contract.
 
 - `ResponseParserPortABC` — `bioetl.domain.ports.parsing.ResponseParserPortABC`
-  - Порт для парсинга сырых ответов API без знания доменных моделей. Реализации в infrastructure слое парсят provider-specific форматы ответов, в то время как domain слой остается независимым от этих деталей.
+  - Port for parsing raw API responses without domain model knowledge. This abstract base class defines the contract for parsing raw API responses into generic record dictionaries. Implementations in infrastructure layer can parse provider-specific response formats while domain layer remains decoupled from those details. Type Parameters: RecordT: The type of records returned by parse_to_records. Defaults to RawRecord (dict[str, Any]) for untyped parsing. Example: >>> # Untyped parser (default) >>> class ChemblParserAdapter(ResponseParserPortABC): ... def parse_to_records(self, raw_response): ... # Extract records from ChEMBL-specific response structure ... for key, value in raw_response.items(): ... if isinstance(value, list): ... return value ... return [] ... ... def extract_pagination(self, raw_response): ... return raw_response.get("page_meta", {}) >>> # Typed parser with Pydantic model >>> class TypedParser(ResponseParserPortABC[MyModel]): ... def parse_to_records(self, raw_response) -> list[MyModel]: ... return [MyModel(**r) for r in raw_response.get("items", [])] ... ... def extract_pagination(self, raw_response): ... return raw_response.get("meta", {})
 
 - `PaginatorABC` — `bioetl.domain.clients.base.contracts.PaginatorABC`
-  - Стратегия пагинации.
+  - Pagination strategy.
 
 - `RateLimiterABC` — `bioetl.domain.clients.base.contracts.RateLimiterABC`
-  - Ограничение частоты запросов.
-
-- `RetryPolicyABC` — `bioetl.domain.clients.base.contracts.RetryPolicyABC`
-  - Политика повторных попыток.
+  - Request rate limiting.
 
 - `CacheABC` — `bioetl.domain.clients.base.contracts.CacheABC`
-  - Интерфейс кэширования.
+  - Caching interface.
 
 - `SecretProviderABC` — `bioetl.domain.clients.base.contracts.SecretProviderABC`
-  - Поставщик секретов (env, vault).
+  - Secret provider (env, vault).
 
-- `SideInputProviderABC` — `bioetl.domain.clients.base.contracts.SideInputProviderABC`
-  - Провайдер побочных данных (справочников).
-
-- `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
-  - Загрузчик реестра провайдеров из конфигурации. Default factory: ``bioetl.infrastructure.config.provider_registry.default_provider_registry_loader``. Implementations: ``ProviderRegistryLoader``.
-
-- `PipelineContainerABC` — `bioetl.application.pipelines.contracts.PipelineContainerABC`
-  - Контейнер пайплайна.
+- `PipelineContainerABC` — `bioetl.application.contracts.PipelineContainerABC`
+  - Dependency container contract for assembling pipelines. Provides factories for core pipeline services, including logging, validation, extraction, normalization, record sourcing, hashing, post-transformation, hooks, and error handling.
 
 - `PipelineHookABC` — `bioetl.domain.pipelines.contracts.PipelineHookABC`
-  - Хуки жизненного цикла пайплайна.
+  - Pipeline lifecycle hooks.
 
 - `ErrorPolicyABC` — `bioetl.domain.pipelines.contracts.ErrorPolicyABC`
-  - Политика обработки ошибок.
-
-- `CLICommandABC` — `bioetl.interfaces.cli.contracts.CLICommandABC`
-  - Интерфейс команды CLI.
-
-- `ProviderRegistryABC` — `bioetl.domain.provider_registry.ProviderRegistryABC`
-  - Порт для чтения и регистрации определений провайдеров (подключается явно без глобального singleton).
-
-- `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
-  - Порт структурированного логгирования. Default factory: ``bioetl.infrastructure.observability.factories.default_logging_port``. Implementations: ``StructuredLoggerImpl``.
-
-- `ProgressReporterABC` — `bioetl.domain.observability.contracts.ProgressReporterABC`
-  - Интерфейс отчетности о прогрессе. Default factory: ``bioetl.infrastructure.logging.factories.default_progress_reporter``. Implementations: ``TqdmProgressReporterImpl``.
-
-- `TracingPortABC` — `bioetl.domain.observability.contracts.TracingPortABC`
-  - Порт для распределенной трассировки. Default factory: ``bioetl.infrastructure.observability.factories.default_tracing_port``. Implementations: ``TracingAdapterImpl``.
-
-- `HasherABC` — `bioetl.domain.transform.contracts.HasherABC`
-  - Хеширование строк.
-
-- `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
-  - Фасад для вычисления hash_row/hash_business_key и служебных колонок. Default factory: `bioetl.infrastructure.transform.factories.default_hash_service`. Implementation: `bioetl.domain.transform.hash_service.HashService`.
-
-- `TimestampProviderABC` — `bioetl.domain.transform.contracts.TimestampProviderABC`
-  - Провайдер временных меток для детерминированных артефактов.
-
-- `IndexGeneratorABC` — `bioetl.domain.transform.contracts.IndexGeneratorABC`
-  - Генератор индексов для строк данных.
-
-- `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
-  - Сервис нормализации данных. Обязательные операции: normalize(df), normalize_record(record), ensure_numeric_columns(df). Default factory: ``bioetl.infrastructure.transform.factories.default_normalization_service``. Implementations: ``DefaultNormalizationTransformerImpl``, ``ChemblNormalizationServiceImpl``.
-
-- `ValidatorABC` — `bioetl.domain.validation.contracts.ValidatorABC`
-  - Валидация данных. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorImpl`` (`bioetl.infrastructure.validation.impl.pandera_validator`).
-
-- `SchemaProviderABC` — `bioetl.domain.validation.contracts.SchemaProviderABC`
-  - Провайдер схем данных. Default factory: ``bioetl.infrastructure.validation.factories.default_schema_provider_factory``. Implementations: ``SchemaRegistry`` (`bioetl.domain.schemas.registry.SchemaRegistry`).
-
-- `ValidatorFactoryABC` — `bioetl.domain.validation.contracts.ValidatorFactoryABC`
-  - Фабрика валидаторов под конкретную схему. Default factory: ``bioetl.infrastructure.validation.factories.default_validator_factory``. Implementations: ``PanderaValidatorFactory``.
-
-- `SchemaProviderFactoryABC` — `bioetl.domain.validation.contracts.SchemaProviderFactoryABC`
-  - Фабрика провайдеров схем. Default factory: ``bioetl.infrastructure.validation.factories.default_schema_provider_factory``. Implementations: ``PanderaSchemaProviderFactory``.
-
-- `QualityReportABC` — `bioetl.domain.clients.base.output.contracts.QualityReportABC`
-  - Порт генератора QC-отчетов.
-
-- `OutputFrameConverterABC` — `bioetl.domain.clients.base.output.contracts.OutputFrameConverterABC`
-  - DataFrame → DataFrame конвертер для пост-обработки перед записью. Default factory: ``bioetl.infrastructure.output.converters.factories.default_output_frame_converter``. Implementations: ``NoopConverter``, ``RenameColumnsConverter``, ``DropNaRowsConverter``.
+  - Error handling policy.
 
 - `LoaderABC` — `bioetl.domain.pipelines.contracts.LoaderABC`
-  - Компонент записи артефактов пайплайна (данные, метаданные, QC).
+  - Component responsible for loading data to destination. Uses domain-level TabularData abstraction for input data.
+
+- `ProviderRegistryLoaderABC` — `bioetl.domain.provider_registry.ProviderRegistryLoaderABC`
+  - Protocol for provider registry loader.
+
+- `ProviderRegistryABC` — `bioetl.domain.provider_registry.ProviderRegistryABC`
+  - Abstract base class for provider registry.
+
+- `ProgressReporterABC` — `bioetl.domain.observability.contracts.ProgressReporterABC`
+  - Progress reporting interface. Concrete implementation is selected by infrastructure and bound to the container.
+
+- `LoggingPortABC` — `bioetl.domain.observability.contracts.LoggingPortABC`
+  - Port describing structured logging operations.
+
+- `TracingPortABC` — `bioetl.domain.observability.contracts.TracingPortABC`
+  - Port describing distributed tracing operations. Experimental: not yet integrated into main pipeline flow.
+
+- `HasherABC` — `bioetl.domain.transform.contracts.HasherABC`
+  - Low-level hashing abstraction. Provides primitive hashing operations used by HashServiceABC. Uses domain-level Record and TabularData instead of pandas types. Infrastructure implementations can work with pandas internally. Note: This is an internal abstraction. Prefer HashServiceABC for domain code.
+
+- `HashServiceABC` — `bioetl.domain.transform.contracts.HashServiceABC`
+  - Stateless service for computing deterministic hashes. Responsible for computing and adding hash columns to data. Does not contain stateful logic (indices, timestamps). Terminology (see module docstring for full mapping): fingerprint: Computes record_hash - hash of entire record. entity_key: Computes business_key_hash - hash of business key fields. Output columns (schema layer): hash_row: Contains the record_hash (fingerprint result). hash_business_key: Contains the business_key_hash (entity_key result). Example: >>> service: HashServiceABC = get_hash_service() >>> digest = service.compute_fingerprint({"id": 1, "name": "test"}) >>> print(digest.value) # hex string
+
+- `TimestampProviderABC` — `bioetl.domain.transform.contracts.TimestampProviderABC`
+  - Timestamp provider for data extraction. Provides deterministic timestamp within a session.
+
+- `IndexGeneratorABC` — `bioetl.domain.transform.contracts.IndexGeneratorABC`
+  - Sequential index generator for data rows. Stateful: maintains counter value between calls.
+
+- `NormalizationServiceABC` — `bioetl.domain.transform.contracts.NormalizationServiceABC`
+  - Data normalization service. Provides batch and record-level normalization operations. Uses domain-level TabularData abstraction.
+
+- `SchemaProviderABC` — `bioetl.domain.validation.contracts.SchemaProviderABC`
+  - Data schema provider (technology-agnostic).
+
+- `ValidatorFactoryABC` — `bioetl.domain.validation.contracts.ValidatorFactoryABC`
+  - Factory for schema-specific validators.
+
+- `SchemaProviderFactoryABC` — `bioetl.domain.validation.contracts.SchemaProviderFactoryABC`
+  - Factory for schema providers.
+
+- `QualityReportABC` — `bioetl.domain.clients.base.output.contracts.QualityReportABC`
+  - QC report generator port. Uses domain-level TabularData abstraction.
+
+- `OutputFrameConverterABC` — `bioetl.domain.clients.base.output.contracts.OutputFrameConverterABC`
+  - Tabular data converter for post-processing before write. Uses domain-level TabularData abstraction.

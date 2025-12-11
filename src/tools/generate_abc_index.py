@@ -21,7 +21,10 @@ def _find_project_root(start: Path) -> Path:
 ROOT = _find_project_root(Path(__file__))
 SRC_DIR = ROOT / "src"
 REGISTRY_PATH = ROOT / "src/bioetl/infrastructure/clients/base/abc_registry.yaml"
-OUTPUT_PATH = ROOT / "docs/ABC_INDEX.md"
+OUTPUT_PATHS = (
+    ROOT / "docs/ABC_INDEX.md",
+    ROOT / "docs/01-ABC/INDEX.md",
+)
 
 
 def load_registry(path: Path) -> dict[str, str]:
@@ -80,7 +83,8 @@ def generate_index() -> None:
         entries.append((name, target, description))
 
     content = "\n".join(build_lines(entries)).rstrip() + "\n"
-    write_atomic(OUTPUT_PATH, content)
+    for path in OUTPUT_PATHS:
+        write_atomic(path, content)
 
 
 if __name__ == "__main__":
