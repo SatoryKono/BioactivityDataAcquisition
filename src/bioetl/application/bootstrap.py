@@ -50,6 +50,7 @@ if TYPE_CHECKING:
 ConfigLoaderFactory = Callable[[SchemaContractProviderABC], PipelineConfigLoaderProtocol]
 ProviderInjector = Callable[[SchemaContractProviderABC], None]
 ProviderClearer = Callable[[], None]
+MigrationServiceFactory = Callable[[], ConfigMigrationServiceProtocol]
 
 
 @dataclass(frozen=True)
@@ -97,6 +98,8 @@ class ApplicationBootstrap:
             into infrastructure for backward compatibility.
         provider_clearer: Optional callback to clear the injected provider
             during shutdown.
+        migration_service_factory: Optional factory for creating migration service.
+            If provided, will be used to create the config migration service.
 
     Example:
         >>> # Basic usage without infrastructure
@@ -118,6 +121,7 @@ class ApplicationBootstrap:
         config_loader_factory: ConfigLoaderFactory | None = None,
         provider_injector: ProviderInjector | None = None,
         provider_clearer: ProviderClearer | None = None,
+        migration_service_factory: MigrationServiceFactory | None = None,
     ) -> None:
         """Initialize the bootstrap instance with optional infrastructure hooks."""
         self._context: ApplicationServicesContext | None = None
@@ -128,6 +132,7 @@ class ApplicationBootstrap:
         self._config_loader_factory = config_loader_factory
         self._provider_injector = provider_injector
         self._provider_clearer = provider_clearer
+        self._migration_service_factory = migration_service_factory
 
     def start(self) -> ApplicationServicesContext:
         """Initialize the application and return the context.
@@ -152,8 +157,10 @@ class ApplicationBootstrap:
         if self._config_loader_factory is not None:
             config_loader = self._config_loader_factory(contract_provider)
 
-        # Create migration service
-        migration_service = self._init_migration_service()
+        # Create migration service if factory provided
+        migration_service: ConfigMigrationServiceProtocol | None = None
+        if self._migration_service_factory is not None:
+            migration_service = self._migration_service_factory()
 
         self._context = ApplicationServicesContext(
             schema_provider=schema_provider,
@@ -226,20 +233,13 @@ class ApplicationBootstrap:
         """
         return SchemaContractProviderImpl(schema_provider)
 
-    def _init_migration_service(self) -> ConfigMigrationServiceProtocol:
-        """Initialize and return the config migration service.
-
-        Returns:
-            ConfigMigrationService for migrating and validating raw configs.
-        """
-        return create_config_migration_service()
-
 
 def create_application_bootstrap(
     *,
     config_loader_factory: ConfigLoaderFactory | None = None,
     provider_injector: ProviderInjector | None = None,
     provider_clearer: ProviderClearer | None = None,
+    migration_service_factory: MigrationServiceFactory | None = None,
 ) -> ApplicationBootstrap:
     """Create an ApplicationBootstrap instance.
 
@@ -251,6 +251,7 @@ def create_application_bootstrap(
         config_loader_factory: Optional factory for creating config loaders.
         provider_injector: Optional callback to inject the contract provider.
         provider_clearer: Optional callback to clear the injected provider.
+        migration_service_factory: Optional factory for creating migration service.
 
     Returns:
         New ApplicationBootstrap instance.
@@ -270,6 +271,7 @@ def create_application_bootstrap(
         config_loader_factory=config_loader_factory,
         provider_injector=provider_injector,
         provider_clearer=provider_clearer,
+        migration_service_factory=migration_service_factory,
     )
 
 
@@ -279,6 +281,7 @@ __all__ = [
     "ConfigLoaderFactory",
     "ConfigMigrationService",
     "ConfigMigrationServiceProtocol",
+    "MigrationServiceFactory",
     "ProviderClearer",
     "ProviderInjector",
     "create_application_bootstrap",
