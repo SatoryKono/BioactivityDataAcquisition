@@ -14,6 +14,12 @@ id: cb06bc9f-659f-4f94-a2ed-9c6d765fe51f
     "activationBorderColor": "#444"
   }
 }}%%
+%% Shared palette (per diagramming policy)
+classDef actorPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef actorSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef actorExternal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
 sequenceDiagram
     autonumber
 
@@ -30,6 +36,20 @@ sequenceDiagram
     participant Validator as ValidationService
     participant Writer as UnifiedOutputWriter
     participant Storage as Deterministic Storage
+
+    class UseCase actorPrimary
+    class ConfigLoader actorSecondary
+    class ProviderLoader actorSecondary
+    class ContainerFactory actorSecondary
+    class Orchestrator actorPrimary
+    class Pipeline actorPrimary
+    class Hooks actorSecondary
+    class ErrorPolicy actorSecondary
+    class Extraction actorSecondary
+    class Transformer actorSecondary
+    class Validator actorSecondary
+    class Writer actorPrimary
+    class Storage actorExternal
 
     UseCase->>ConfigLoader: load config (path or registry) with profile + profiles_root
     ConfigLoader-->>UseCase: PipelineConfig

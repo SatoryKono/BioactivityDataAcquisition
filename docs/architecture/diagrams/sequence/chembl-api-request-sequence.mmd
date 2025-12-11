@@ -9,6 +9,12 @@
     "activationBorderColor": "#444"
   }
 }}%%
+%% Shared palette (per diagramming policy)
+classDef actorPrimary   fill:#f5f5f5,stroke:#444,stroke-width:1.5px,color:#111,font-size:22px;
+classDef actorSecondary fill:#e3e7ec,stroke:#555,stroke-width:1.2px,color:#111,font-size:18px;
+classDef actorExternal  fill:#dde7f2,stroke:#44546a,stroke-width:1.5px,color:#111,font-size:22px;
+linkStyle default stroke:#666,stroke-width:1.2px,color:#111;
+
 sequenceDiagram
     autonumber
     participant Extraction as ChemblExtractionServiceImpl
@@ -16,6 +22,12 @@ sequenceDiagram
     participant Rate as RateLimiter
     participant HTTP as UnifiedAPIClientImpl
     participant API as "ChEMBL REST API"
+
+    class Extraction actorPrimary
+    class Client actorPrimary
+    class Rate actorSecondary
+    class HTTP actorSecondary
+    class API actorExternal
 
     Extraction->>Client: request_activity(filters, offset, limit)
     Client->>Rate: acquire()
