@@ -422,28 +422,39 @@ def _create_default_schema_contract_provider() -> SchemaContractProviderABC:
 
 
 # =============================================================================
-# Module-level singleton
+# Module-level singleton - delegates to ApplicationContext
 # =============================================================================
-
-_default_root: CompositionRoot | None = None
 
 
 def get_composition_root() -> CompositionRoot:
-    """
-    Get the default composition root singleton.
+    """Get the default composition root from ApplicationContext singleton.
 
-    For testing, create a new CompositionRoot with mock dependencies instead.
+    This function delegates to ApplicationContext to ensure a single source
+    of truth for application dependencies. For testing, use
+    set_application_context() to inject a custom context with a
+    custom CompositionRoot.
+
+    Returns:
+        CompositionRoot from the current ApplicationContext.
+
+    Example:
+        >>> root = get_composition_root()
+        >>> registry = root.get_provider_registry()
     """
-    global _default_root
-    if _default_root is None:
-        _default_root = CompositionRoot()
-    return _default_root
+    from bioetl.interfaces.application_context import get_application_context
+
+    return get_application_context().composition_root
 
 
 def reset_composition_root() -> None:
-    """Reset the default composition root (useful for tests)."""
-    global _default_root
-    _default_root = None
+    """Reset the composition root by resetting ApplicationContext.
+
+    Since CompositionRoot is now obtained from ApplicationContext,
+    this function resets the entire ApplicationContext.
+    """
+    from bioetl.interfaces.application_context import reset_application_context
+
+    reset_application_context()
 
 
 # =============================================================================
