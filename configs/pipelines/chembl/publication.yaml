@@ -1,6 +1,7 @@
 # Publication Pipeline Configuration
 
-id: publication_chembl
+# Use provider.entity format expected by PipelineId value object
+id: chembl.publication
 provider: chembl
 entity: publication
 primary_key: "${CHEMBL_PUBLICATION_PRIMARY_KEY:-document_chembl_id}"

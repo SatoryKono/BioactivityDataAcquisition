@@ -1,6 +1,7 @@
 # Target Pipeline Configuration
 
-id: target_chembl
+# Use provider.entity format expected by PipelineId value object
+id: chembl.target
 provider: chembl
 entity: target
 primary_key: "${CHEMBL_TARGET_PRIMARY_KEY:-target_chembl_id}"

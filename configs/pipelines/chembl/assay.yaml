@@ -1,6 +1,7 @@
 # Assay Pipeline Configuration
 
-id: assay_chembl
+# Use provider.entity format expected by PipelineId value object
+id: chembl.assay
 provider: chembl
 entity: assay
 primary_key: "${CHEMBL_ASSAY_PRIMARY_KEY:-assay_chembl_id}"

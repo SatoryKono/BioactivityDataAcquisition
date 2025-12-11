@@ -31,5 +31,11 @@
     "mermaid-editor.generate.scale": 5,
     "mermaid.startOnLoad": true,
     "markdown-mermaid.lightModeTheme": "default",
-    "markdown-mermaid.darkModeTheme": "dark"
+    "markdown-mermaid.darkModeTheme": "dark",
+    "cursorpyright.analysis.exclude": [
+        "**/tests/services/**"
+    ],
+    "cursorpyright.analysis.extraPaths": [
+        "./src"
+    ]
 }
