@@ -106,7 +106,15 @@ def create_default_bootstrap() -> ApplicationBootstrap:
         >>> context = bootstrap.start()
         >>> config = context.config_loader.get_by_id("chembl.activity")
     """
+    from bioetl.domain.schemas.pipeline_contracts import set_contract_loader
+    from bioetl.infrastructure.config.pipeline_contract_loader import (
+        get_default_contract_loader,
+    )
     from bioetl.infrastructure.validation.bootstrap import register_schemas
+
+    # Set up contract loader for domain layer
+    contract_loader = get_default_contract_loader()
+    set_contract_loader(contract_loader)
 
     return ApplicationBootstrap(
         config_loader_factory=_create_config_loader_factory(),

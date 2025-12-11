@@ -120,14 +120,16 @@ def main() -> None:
         print("Available pipelines:")
         for key in sorted(set(p["config"] for p in pipelines.values())):
             # Find entity name for this config
-            entity = next(k for k, v in pipelines.items() if v["config"] == key and "." not in k)
+            entity = next(
+                k for k, v in pipelines.items() if v["config"] == key and "." not in k
+            )
             print(f"  {entity}")
         sys.exit(0 if "--help" in sys.argv or "-h" in sys.argv else 1)
 
     pipeline_key = sys.argv[1]
     if pipeline_key not in pipelines:
         print(f"Error: Unknown pipeline '{pipeline_key}'")
-        print(f"Use --list to see available pipelines")
+        print("Use --list to see available pipelines")
         sys.exit(1)
 
     pipeline = pipelines[pipeline_key]

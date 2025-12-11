@@ -58,10 +58,11 @@ class TestSchemaContractProviderImpl:
     def test_get_output_schema_name_uses_pipeline_code_as_fallback(
         self, contract_provider: SchemaContractProviderImpl
     ) -> None:
-        """Test get_output_schema_name uses pipeline_code when no default_entity."""
+        """Test get_output_schema_name uses entity from pipeline_code with template."""
         schema_name = contract_provider.get_output_schema_name("unknown.pipeline")
 
-        assert schema_name == "unknown.pipeline"
+        # With default_template, entity "pipeline" gets "_output" suffix
+        assert schema_name == "pipeline_output"
 
     def test_get_field_configs_returns_field_list(
         self,
