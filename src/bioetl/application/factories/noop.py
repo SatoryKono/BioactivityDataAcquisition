@@ -5,6 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any, cast
 
+from bioetl.application.metadata.builder import DefaultRunMetadataBuilder
 from bioetl.domain.clients.base.output.contracts import RunMetadataBuilderProtocol
 from bioetl.domain.observability import LoggingPortABC, MetricsPortABC
 from bioetl.domain.validation import ValidatorFactoryABC
@@ -38,20 +39,7 @@ def create_noop_logger() -> LoggingPortABC:
 
 def create_noop_metadata_builder() -> RunMetadataBuilderProtocol:
     """Return metadata builder that emits minimal deterministic payloads."""
-
-    return cast(
-        RunMetadataBuilderProtocol,
-        SimpleNamespace(
-            build_run_metadata=lambda context, write_result: {
-                "run_id": getattr(context, "run_id", None),
-                "row_count": getattr(write_result, "row_count", 0),
-            },
-            build_dry_run_metadata=lambda context, row_count: {
-                "run_id": getattr(context, "run_id", None),
-                "row_count": row_count,
-            },
-        ),
-    )
+    return DefaultRunMetadataBuilder()
 
 
 def create_noop_metrics_port() -> MetricsPortABC:

@@ -3,7 +3,7 @@
 from copy import deepcopy
 import warnings
 
-from bioetl.domain.configs.migration import ConfigMigrator
+from bioetl.infrastructure.config.migration import ConfigMigrator
 
 
 class TestVersionDetection:
