@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, cast
 
 from bioetl.application.providers import ApplicationFieldProvider
+from bioetl.application.services import FilterEnrichmentService
 from bioetl.domain.configs import PipelineConfig
 from bioetl.domain.observability.contracts import LoggingPortABC, MetricsPortABC
 from bioetl.domain.providers import ProviderDefinition
@@ -76,14 +77,15 @@ class ProviderServiceFactory(ProviderServiceFactoryABC):
         source_config = self._resolve_provider_config(self._provider_definition)
         components = self._provider_definition.components
 
-        # Inject application-level defaults
+        # Create filter enricher with application-level field provider
         field_provider = ApplicationFieldProvider()
+        filter_enricher = FilterEnrichmentService(field_provider)
 
         # Pass logger and metrics to create_extraction_service
         # It will create client internally if needed
         return components.create_extraction_service(
             source_config,
-            field_provider=field_provider,
+            filter_enricher=filter_enricher,
             logger=self._logger,
             metrics=self._metrics,
         )
