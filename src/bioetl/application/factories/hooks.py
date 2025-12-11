@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from bioetl.application.pipelines.hooks_impl import (
+from bioetl.application.factories.hooks_impl import (
     LoggingPipelineHookImpl,
     MetricsPipelineHookImpl,
 )
