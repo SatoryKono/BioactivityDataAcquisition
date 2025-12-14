@@ -45,8 +45,14 @@
 src/bioetl/
   ├── infrastructure/
   │   └── adapters/
-  │       ├── pubchem/       # Весь код для работы с PubChem
-  │       └── semantic/      # Semantic Scholar
+  │       ├── chembl/        # ChEMBL (chembl_webresource_client)
+  │       ├── pubchem/       # PubChem (pubchempy)
+  │       ├── uniprot/       # UniProt (unipressed)
+  │       ├── gtop/          # Guide to Pharmacology (pyGtoP или requests)
+  │       ├── openalex/      # OpenAlex (pyalex)
+  │       ├── crossref/      # Crossref (habanero)
+  │       ├── semantic/      # Semantic Scholar (semanticscholar)
+  │       └── pubmed/        # PubMed (Bio.Entrez / metapub)
   ├── application/
   │   └── pipelines/
   │       ├── pubchem/       # Пайплайны PubChem
@@ -61,7 +67,21 @@ src/bioetl/
 - Доки: `docs/providers/pubchem/compounds.md`
 - *Цель*: Файлы документации и кода лежат в предсказуемых, зеркальных местах.
 
-## 7. Стандарты Кода и CI
+## 7. Рекомендованные библиотеки
+Для взаимодействия с внешними API используем готовые клиенты (avoid reinventing the wheel).
+
+| Источник            | Библиотека (Package)        | Комментарий |
+|---------------------|-----------------------------|-------------|
+| **ChEMBL**          | `chembl_webresource_client` | Официальный клиент. |
+| **PubChem**         | `pubchempy`                 | Стандарт де-факто для Python. |
+| **UniProt**         | `unipressed`                | Эффективный клиент для UniProt REST API. |
+| **Guide to Pharm.** | `pyGtoP`                    | *Warning*: Не поддерживается активно. Если сбоит — писать прямой адаптер на `httpx`. |
+| **OpenAlex**        | `pyalex`                    | Удобная обертка с типизацией. |
+| **Crossref**        | `habanero`                  | Предпочтительнее устаревшего `crossrefapi` (поддержка rOpenSci). |
+| **Semantic Scholar**| `semanticscholar`           | Официальная библиотека. |
+| **PubMed**          | `biopython` (`Bio.Entrez`)  | Низкоуровневый стандарт. Для удобства поиска можно рассмотреть `metapub`. |
+
+## 8. Стандарты Кода и CI
 - **Линтеры**: Ruff (объединяет flake8/isort).
 - **Типизация**: MyPy (обязательна для Core логики, желательна для скриптов).
 - **Тесты**:
@@ -69,7 +89,7 @@ src/bioetl/
     - Integration: для Адаптеров (Infrastructure). Используют VCR.py или моки.
     - E2E: Запуск полного пайплайна на сэмпле данных.
 
-## 8. Change Management
+## 9. Change Management
 - **Schema Evolution**: Изменения в Bronze-схемах не считаются Breaking. Изменения в Gold-схемах требуют версионирования.
 - **ADR**: Для важных решений (выбор базы данных, смена оркестратора) создаем ADR в `docs/architecture/decisions/`.
 
