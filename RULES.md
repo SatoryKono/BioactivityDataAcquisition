@@ -1,173 +1,179 @@
 # BioETL: Правила Проекта
-*Версия: 3.0 (Final), 2025-05-20*
+*Версия: 5.0 (Enterprise Operational), 2025-05-20*
 
 ## Глоссарий
 - **Bronze/Silver/Gold**: уровни качества данных (Medallion Architecture).
-- **Port**: интерфейс (Protocol) для инверсии зависимостей.
+- **Capability**: логически законченный набор портов и пайплайнов (например, "chemical activity ingestion"). Единица владения.
+- **Port**: публичный интерфейс (Protocol) для инверсии зависимостей.
 - **Adapter**: реализация Port для конкретного провайдера.
 - **DAG**: Directed Acyclic Graph — модель зависимостей этапов пайплайна.
 
 ## 1. Архитектура и Слои
-**Философия**: "Прагматичная инженерия". Избегаем избыточной сложности (Over-engineering), архитектура должна ускорять вывод продукта на рынок (time-to-market).
+**Философия**: "Прагматичная инженерия". Архитектура диктует строгие ограничения (Negative Rules), чтобы гарантировать предсказуемость.
 **Паттерн**: Слоистая архитектура с инверсией зависимостей (Ports & Adapters).
 
-### 1.1. Слои и Контракты
-- **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
-- **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
-- **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O).
+### 1.1. Ограничения Слоев (Negative Rules)
+| Слой | Ответственность | **ЗАПРЕЩЕНО** |
+|------|-----------------|---------------|
+| **Domain** | Чистая логика, типы | I/O, `time.now()`, `random`, доступ к ENV, FS, Сети. |
+| **Application** | Оркестрация, поток | Бизнес-валидация данных (это роль Domain), прямые вызовы БД (минуя Port). |
+| **Infrastructure** | Реализация адаптеров | Агрегация данных, семантическая логика, бизнес-правила. |
 
-### 1.1.1. Обеспечение Контрактов (Enforcement)
-Интерфейсы определяются в `domain/ports.py` через `typing.Protocol`:
-- **Development**: `mypy --strict` проверяет соответствие типов во время сборки.
-- **Runtime**: Опционально использовать `@runtime_checkable` для критичных адаптеров, где нужна проверка `isinstance`.
-
-```python
-class DataSourcePort(Protocol):
-    def fetch(self, query: Query) -> Iterator[RawRecord]: ...
-    def health_check(self) -> bool: ...
-```
+### 1.2. Стабильность Портов
+- **Port = Публичный Контракт**. Изменение сигнатуры = Major Version bump.
+- **Совместимость**: Адаптеры обязаны поддерживать текущую (N) и предыдущую (N-1) версии порта при миграции.
 
 ## 2. Поток Данных и Стратегия Medallion
-Пайплайны реализуются как направленные ациклические графы (**DAG**).
 
-### 2.1. Архитектура Medallion
-| Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность |
-|---------|--------|-----------|----------------------|-----------------|
-| **Bronze** (Сырые) | JSON/CSV (Blob) | Мин./Нет | 90 дней hot -> Archive (S3 Glacier/Coldline) | Только добавление (Append-only) + `ingestion_ts`. Дубликаты допустимы. |
-| **Silver** (Норм.) | Parquet/Table | Мягкая (учет дрейфа схемы) | Постоянно | Обновление (Upsert) по `(provider, entity_id, version)`. Хранить `updated_at`. |
-| **Gold** (Витрины) | Parquet/Table | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
+### 2.1. Готовность Данных (Data Readiness) и SLA
+| Статус | Уровень | Критерий Готовности | SLA (Пример) |
+|--------|---------|---------------------|--------------|
+| **raw_available** | **Bronze** | Fetch завершён, файл сохранен | Latency: <1h, Completeness: >99% |
+| **validated** | **Silver** | Пройдена схема + DQ пороги | Validity: 100% compliant rows |
+| **published** | **Gold** | Контракт соблюден + Freshness OK | Freshness: <24h, Stability: 0 breaking changes |
+
+*Запрещено прямое потребление Silver внешними системами без явного контракта.*
 
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
-- **Bronze**: Принимает любые поля (schemaless). Цель — сохранить сырой ответ как есть.
-- **Silver**: Падает только при отсутствии *критичных* ключей (например, ID). Новые или неизвестные поля логируются, но не блокируют выполнение пайплайна.
+| Тип Дрейфа | Описание | Действие Системы |
+|------------|----------|------------------|
+| **Additive** | Новое поле | **Continue** (Silver добавляет колонку, warning в лог). |
+| **Mutative** | Изменение типа/семантики | **Fail** (Silver), создание Issue в Jira/GitHub. |
+| **Destructive** | Удаление поля | **Fail** (если поле required), **Warn** (если optional). |
 
-### 2.3. Data Lineage (Происхождение Данных)
-Каждая запись в Silver/Gold должна содержать метаданные происхождения:
-- `_source_file`: путь к файлу в Bronze (S3 path).
-- `_source_record_id`: ID записи в Bronze (номер строки или нативный ID).
-- `_transform_version`: хэш версии логики трансформации (git SHA или semver).
-Хранение lineage осуществляется через встроенные мета-колонки или таблицу `lineage_log`.
+### 2.3. Data Lineage (Происхождение)
+Обязательный набор метаданных lineage:
+- **Record Lineage**: `_source_file`, `_source_record_id`.
+- **Pipeline Lineage**: `_pipeline_run_id`, `_parent_run_ids` (список ID предыдущих этапов).
+- **Versioning**: `_transform_version`, `_schema_version`.
 
 ### 2.4. Политика Backfill / Replay
-- **Bronze**: Неизменяема (Immutable). Backfill = новый fetch с тем же запросом + новый `ingestion_ts`.
-- **Silver/Gold**:
-  - **Partial**: Перезапуск трансформации на указанном диапазоне дат.
-  - **Full Rebuild**: Полное пересоздание таблицы из Bronze (флаг `--full-rebuild`).
-- **Маркировка**: Использовать `_backfill_run_id` для отличия от инкрементальных запусков.
+#### Классы Риска Backfill
+| Класс | Риск | Процедура Запуска |
+|-------|------|-------------------|
+| **A** | Низкий | **Auto**. Запускается оператором без согласования. |
+| **B** | Средний | **Manual Approval**. Требует ревью плана (Impact Analysis). |
+| **C** | Высокий | **Freeze**. Требует Change Window и остановки потребителей. |
 
-## 3. Обработка Ошибок и Наблюдаемость
+- **Diff Metrics**: Любой backfill обязан публиковать метрики изменений: `delta_record_count`, `delta_null_rate`.
 
-### 3.1. Классификация Ошибок
-Вместо тотального подхода "Fail Fast" используем дифференцированный подход:
+### 2.5. Стратегия Партиционирования
+| Уровень | Стратегия партиционирования | Пример |
+|---------|----------------------------|--------|
+| **Bronze** | По `ingestion_date` (YYYY-MM-DD) | `bronze/chembl/activity/2025-05-20/` |
+| **Silver** | По `source_date` или `entity_type` | `silver/chembl/activity/year=2025/month=05/` |
+| **Gold** | По use-case (часто по `target_id` или `date`) | `gold/activity_by_target/target_id=CHEMBL123/` |
 
-| Тип Ошибки | Поведение | Пример |
-|------------|-----------|--------|
-| **Критическая** (Critical) | Падение пайплайна | Ошибка авторизации, несовпадение схемы в Gold, БД недоступна. |
-| **Восстановимая** (Recoverable) | Повтор N раз (Backoff) | 429 Rate Limit, 502/504 Timeout, сетевой сбой. |
-| **Качество данных** (Data Quality) | Лог + Пропуск записи | Невалидный SMILES, отсутствует необязательное поле. Не роняет батч. |
+### 2.6. Генерация ID и Стабильность
+- **Immutable IDs**: Entity ID никогда не переиспользуется для другой сущности.
+- **Versioning**: Изменение логики генерации ID считается Breaking Change и требует инкремента `_id_strategy_version`.
 
-### 3.1.1. Пороги Ошибок Батча (Thresholds)
-- **Soft Threshold**: >10% ошибок качества данных -> Warning в логах, продолжение работы.
-- **Hard Threshold**: >50% ошибок -> Fail Batch (не писать в Silver).
-Конфигурируется в YAML пайплайна (`failure_thresholds`).
+## 3. Обработка Ошибок, DQ и SLO
 
-### 3.2. Наблюдаемость (Observability)
-- **Логи**: Структурированный JSON. Обязательные поля: `ts`, `level`, `trace_id`, `pipeline`, `stage`, `record_count`, `error_type`.
-- **Метрики Пайплайна**: Prometheus-совместимый эндпоинт (`/metrics`). Ключевые метрики: `pipeline_duration_seconds`, `records_processed_total`, `errors_total` (по типам).
-- **Алертинг**: Триггер алерта, если уровень ошибок > 5% за 15-минутное окно.
+### 3.1. Классификация и Бюджет Ошибок
+Вводится понятие **Error Budget** на пайплайн.
+- **Degraded Mode**: При превышении бюджета recoverable-ошибок система переходит в режим деградации (снижение частоты запросов, частичная загрузка) вместо полного падения.
 
-### 3.3. Конкурентность и Блокировки
-- **Pipeline Lock**: Один активный инстанс `{provider}_{entity}` в момент времени.
-- **Механизм**: Advisory lock (Postgres) или Redis SETNX.
-- **Timeout**: 2 часа, затем автоматическое освобождение + Алерт.
-- **Partitioned Runs**: Разрешены параллельные запуски на *непересекающихся* партициях дат.
+### 3.2. Пороги DQ
+| Тип | Порог (Threshold) | Действие |
+|-----|-------------------|----------|
+| **Soft** | >10% DQ ошибок | Warning, алерт инженерам. |
+| **Hard** | >50% DQ ошибок | Fail Batch, блокировка записи в Silver. |
 
-### 3.4. Метрики Качества Данных (DQ Metrics)
-Метрики записываются в таблицу `dq_metrics` для каждого прогона:
-- `null_rate_{column}`: % NULL значений.
-- `unique_count_{column}`: кардинальность.
-- `schema_violations`: количество записей, не прошедших валидацию.
-- `freshness_lag_hours`: разница между `max(updated_at)` и `now()`.
+## 4. Наблюдаемость (Observability) как Gate
+**CI/CD Gate**: Merge Request блокируется, если:
+1. В коде нет отправки метрик.
+2. Отсутствует `trace_id` в логах.
+3. Не определен `dataset_id`.
 
-## 4. Стандарты Кода и Тестирование
+**Метрики**: Обязателен breakdown задержек по стадиям (Latency Breakdown): `extract_duration`, `transform_duration`, `load_duration`.
 
-### 4.1. Стек и Матрица Решений
-| Задача | Инструмент | Альтернатива | Критерий выбора |
-|--------|------------|--------------|-----------------|
-| **Оркестрация** | **Prefect** | Simple Runner | <5 DAG-ов — свой Runner (скрипт). Иначе Prefect. |
-| **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. |
-| **HTTP Клиент** | **httpx** | requests | Поддержка `async` из коробки для высокой производительности. |
-| **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |
+## 5. Безопасность и Классификация Данных
 
-### 4.2. Политика Тестирования
-- **Unit**: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек.
-- **Integration**:
-    - **VCR.py**: Запись ответов API в кассеты (`tests/fixtures/vcr/`).
-    - **Санитизация**: Обязательная очистка секретов (`Authorization`, `X-API-Key`) и PII в хуке `before_record`.
-    - **CI**: Падать, если кассета отсутствует (`pytest --vcr-record=none`), чтобы гарантировать отсутствие сетевых вызовов в CI.
-- **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов.
-
-## 5. Операции (Лимиты, Секреты, Shutdown)
-
-### 5.1. Ограничение скорости (Rate Limiting)
-Каждый адаптер обязан реализовать `TokenBucket` или аналог, соблюдающий лимиты провайдера.
-**Обратное давление (Backpressure)**: Если внутренняя очередь заполнена >80%, адаптер должен замедлить чтение (дросселировать источник).
+### 5.1. Уровни Доступа (Data Classification)
+| Уровень | Описание | Требования к Хранению |
+|---------|----------|-----------------------|
+| **Public** | Открытые данные | Стандартный доступ. |
+| **Internal** | Внутренние технические поля | Доступ только сотрудникам. |
+| **Sensitive** | PII, IP, коммерческая тайна | Хэширование, шифрование at-rest. |
+| **Restricted** | Ключи, пароли | Отдельные бакеты, строгий IAM, Audit Log. |
 
 ### 5.2. Управление Секретами
-- **Источник**: Переменные окружения (`os.environ`).
-- **Формат**: `BIOETL_{PROVIDER}_{KEY}` (например, `BIOETL_PUBCHEM_API_KEY`).
-- **Запрещено**: Хардкод секретов, файлы `.env` в git.
+- **Запрещено**: `.env` в репозитории, хардкод.
+- **Обязательно**: Использование Vault/Secrets Manager.
 
-### 5.3. Graceful Shutdown (Штатное завершение)
-При получении SIGTERM/SIGINT:
-1. Прекратить извлечение (fetch) новых записей.
-2. Дождаться завершения записи текущего батча.
-3. Сохранить чекпоинт (last processed ID) в `{pipeline}_{entity}_checkpoint.json`.
-4. Выйти с кодом 0.
-Таймаут на завершение: 30 секунд, затем SIGKILL.
+## 6. CI/CD Политики и Гейты (Gates)
+CI/CD — это набор обязательных правил, а не рекомендаций. Без прохождения гейтов деплой невозможен.
 
-## 6. Документация (Автоматизация — приоритет)
-- **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
-- **Именование**: Зеркальное (`src/bioetl/.../{provider}/` <-> `docs/providers/{provider}/`).
+**Обязательные CI Gates**:
+1. **Schema Diff Check**: Проверка изменений контрактов (additive/mutative).
+2. **Contract Tests**: Успешное прохождение тестов потребителей.
+3. **DQ Baseline Check**: Сравнение DQ метрик с исторической базой.
+4. **Security Scan**: `pip-audit`, проверка контейнеров и кода (SAST).
 
-## 7. Управление Изменениями
-- **Breaking Changes**: Изменение Gold-схем, смена мажорной версии API провайдера. Требует миграции и ADR.
-- **Non-Breaking**: Добавление полей в Bronze/Silver.
+## 7. Конфигурация и Жизненный Цикл
+- **Конфиг = Контракт**: YAML-конфиг версионируется и валидируется схемой.
+- **Immutability**: Конфиг неизменяем после деплоя. Любое изменение = новый `pipeline_revision`.
 
-## 8. Опыт Разработчика (Developer Experience)
-### 8.1. Локальная настройка
+## 8. Документация и Управление Изменениями
+- **Artifact**: Документация версионируется вместе с кодом.
+- **Traceability**: Каждая версия пайплайна в доках указывает: `schema_version`, `transform_version`, `deprecation_plan`.
+
+### 8.1. Контракты Данных (Data Contracts)
+- **Реестр**: Gold-схемы в `docs/contracts/`.
+- **Notification**: Автоматическое уведомление в Slack при Breaking Change.
+
+## 9. Опыт Разработчика (DevEx)
+### 9.1. Локальная настройка
 ```bash
-make install      # создание venv, установка зависимостей
-make test         # unit + integration (на кассетах)
-make lint         # ruff + mypy
-make run-local    # запуск сэмплового пайплайна на фикстурах
+make install      # venv, dependencies
+make test         # unit + integration + contract
+make lint         # ruff + mypy + security check
+make run-local    # sample pipeline
 ```
-### 8.2. Окружение
-- **Docker Compose**: Для запуска локальных зависимостей (Postgres, Redis).
-- **.env.example**: Шаблон переменных окружения (без секретов).
+### 9.2. Docker
+- `make docker-reset`: Очистка volumes.
+- `make seed-local`: Загрузка фикстур.
 
 ---
 ## Приложение А: Источники и Библиотеки
 
 **Структура папок:** `src/bioetl/infrastructure/adapters/{provider}/`
 
-| Источник | Библиотека | Комментарий |
-|----------|------------|-------------|
-| **ChEMBL** | `chembl_webresource_client` | Официальный клиент. |
-| **PubChem** | `pubchempy` | Стандарт де-факто. |
-| **UniProt** | `unipressed` | Эффективный клиент. |
-| **Guide to Pharm**| `pyGtoP` | *Deprecated*: писать свой адаптер на `httpx`, если сломан. |
-| **OpenAlex** | `pyalex` | Типизированная обертка. |
-| **Crossref** | `habanero` | Поддерживается лучше, чем `crossrefapi`. |
-| **Semantic** | `semanticscholar` | Официальная библиотека. |
-| **PubMed** | `biopython` | Низкоуровневая. Рассмотреть `metapub` для поиска. |
+| Источник | Библиотека | Rate Limit | Retry Strategy |
+|----------|------------|------------|----------------|
+| **ChEMBL** | `chembl_webresource_client` | Нет явного лимита | Exponential backoff |
+| **PubChem** | `pubchempy` | 5 req/sec | 429 -> wait Retry-After |
+| **UniProt** | `unipressed` | 100 req/sec | Exponential backoff |
+| **OpenAlex** | `pyalex` | 10 req/sec | 429 -> backoff |
+| **Semantic** | `semanticscholar` | 100 req/5min | Sliding window |
+| **PubMed** | `biopython` | 3 req/sec | 429 -> backoff |
+| **Crossref** | `habanero` | 50 req/sec | Exponential backoff |
 
-## Приложение B: Политика Зависимостей
-- **Pinning**: Точные версии в `requirements.txt` / `pyproject.toml`.
-- **Обновления**: Ежемесячные PR от Dependabot + ручное ревью.
-- **Безопасность**: `pip-audit` в CI. Блокировка мержа при CVE severity >= HIGH.
+## Приложение B: Конфигурация (Пример)
+```yaml
+pipeline:
+  name: chembl_activity
+  version: "1.2.0"
+  capability: "chemical_activity_ingestion"
+
+source:
+  type: api
+  load_strategy: incremental
+
+sink:
+  silver:
+    path: s3://bioetl/silver/chembl/
+    partition_by: [year, month]
+    classification: public
+
+dq_rules:
+  soft_fail_threshold: 0.1
+  hard_fail_threshold: 0.5
+```
 
 ## История Изменений (Changelog)
-- **3.0** (2025-05-20): Добавлены политики Lineage, Backfill, Concurrency, Graceful Shutdown, Опыт Разработчика. Финализировано.
-- **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский.
-- **1.0** (2025-04-01): Черновик.
+- **5.0** (2025-05-20): Enterprise Operational. Добавлены CI Gates, Data Readiness, Backfill Classes, Negative Rules, Security Classification.
+- **4.0** (2025-05-20): Data Contracts, Partitioning, Null Policy, Recovery Playbook.
+- **3.0** (2025-05-20): Lineage, Backfill, Concurrency.
+- **2.0** (2025-05-20): Перевод и базовые политики.
