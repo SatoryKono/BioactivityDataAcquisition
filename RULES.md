@@ -1,5 +1,11 @@
 # BioETL: Правила Проекта
-*Версия: 2.0 (Расширенная), 2025-05-20*
+*Версия: 3.0 (Final), 2025-05-20*
+
+## Глоссарий
+- **Bronze/Silver/Gold**: уровни качества данных (Medallion Architecture).
+- **Port**: интерфейс (Protocol) для инверсии зависимостей.
+- **Adapter**: реализация Port для конкретного провайдера.
+- **DAG**: Directed Acyclic Graph — модель зависимостей этапов пайплайна.
 
 ## 1. Архитектура и Слои
 **Философия**: "Прагматичная инженерия". Избегаем избыточной сложности (Over-engineering), архитектура должна ускорять вывод продукта на рынок (time-to-market).
@@ -10,15 +16,15 @@
 - **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
 - **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O).
 
-**Явные Контракты (Порты)**:
+### 1.1.1. Обеспечение Контрактов (Enforcement)
 Интерфейсы определяются в `domain/ports.py` через `typing.Protocol`:
+- **Development**: `mypy --strict` проверяет соответствие типов во время сборки.
+- **Runtime**: Опционально использовать `@runtime_checkable` для критичных адаптеров, где нужна проверка `isinstance`.
+
 ```python
 class DataSourcePort(Protocol):
     def fetch(self, query: Query) -> Iterator[RawRecord]: ...
     def health_check(self) -> bool: ...
-
-class TransformPort(Protocol):
-    def apply(self, df: pd.DataFrame) -> pd.DataFrame: ...
 ```
 
 ## 2. Поток Данных и Стратегия Medallion
@@ -27,7 +33,7 @@ class TransformPort(Protocol):
 ### 2.1. Архитектура Medallion
 | Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность |
 |---------|--------|-----------|----------------------|-----------------|
-| **Bronze** (Сырые) | JSON/CSV (Blob) | Мин./Нет | 90 дней + Архив | Только добавление (Append-only) + `ingestion_ts`. Дубликаты допустимы. |
+| **Bronze** (Сырые) | JSON/CSV (Blob) | Мин./Нет | 90 дней hot -> Archive (S3 Glacier/Coldline) | Только добавление (Append-only) + `ingestion_ts`. Дубликаты допустимы. |
 | **Silver** (Норм.) | Parquet/Table | Мягкая (учет дрейфа схемы) | Постоянно | Обновление (Upsert) по `(provider, entity_id, version)`. Хранить `updated_at`. |
 | **Gold** (Витрины) | Parquet/Table | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
 
@@ -35,10 +41,24 @@ class TransformPort(Protocol):
 - **Bronze**: Принимает любые поля (schemaless). Цель — сохранить сырой ответ как есть.
 - **Silver**: Падает только при отсутствии *критичных* ключей (например, ID). Новые или неизвестные поля логируются, но не блокируют выполнение пайплайна.
 
+### 2.3. Data Lineage (Происхождение Данных)
+Каждая запись в Silver/Gold должна содержать метаданные происхождения:
+- `_source_file`: путь к файлу в Bronze (S3 path).
+- `_source_record_id`: ID записи в Bronze (номер строки или нативный ID).
+- `_transform_version`: хэш версии логики трансформации (git SHA или semver).
+Хранение lineage осуществляется через встроенные мета-колонки или таблицу `lineage_log`.
+
+### 2.4. Политика Backfill / Replay
+- **Bronze**: Неизменяема (Immutable). Backfill = новый fetch с тем же запросом + новый `ingestion_ts`.
+- **Silver/Gold**:
+  - **Partial**: Перезапуск трансформации на указанном диапазоне дат.
+  - **Full Rebuild**: Полное пересоздание таблицы из Bronze (флаг `--full-rebuild`).
+- **Маркировка**: Использовать `_backfill_run_id` для отличия от инкрементальных запусков.
+
 ## 3. Обработка Ошибок и Наблюдаемость
 
 ### 3.1. Классификация Ошибок
-Вместо тотального подхода "Fail Fast" (падать сразу) используем дифференцированный подход:
+Вместо тотального подхода "Fail Fast" используем дифференцированный подход:
 
 | Тип Ошибки | Поведение | Пример |
 |------------|-----------|--------|
@@ -46,17 +66,35 @@ class TransformPort(Protocol):
 | **Восстановимая** (Recoverable) | Повтор N раз (Backoff) | 429 Rate Limit, 502/504 Timeout, сетевой сбой. |
 | **Качество данных** (Data Quality) | Лог + Пропуск записи | Невалидный SMILES, отсутствует необязательное поле. Не роняет батч. |
 
+### 3.1.1. Пороги Ошибок Батча (Thresholds)
+- **Soft Threshold**: >10% ошибок качества данных -> Warning в логах, продолжение работы.
+- **Hard Threshold**: >50% ошибок -> Fail Batch (не писать в Silver).
+Конфигурируется в YAML пайплайна (`failure_thresholds`).
+
 ### 3.2. Наблюдаемость (Observability)
 - **Логи**: Структурированный JSON. Обязательные поля: `ts`, `level`, `trace_id`, `pipeline`, `stage`, `record_count`, `error_type`.
-- **Метрики**: Prometheus-совместимый эндпоинт (`/metrics`). Ключевые метрики: `pipeline_duration_seconds`, `records_processed_total`, `errors_total` (по типам).
+- **Метрики Пайплайна**: Prometheus-совместимый эндпоинт (`/metrics`). Ключевые метрики: `pipeline_duration_seconds`, `records_processed_total`, `errors_total` (по типам).
 - **Алертинг**: Триггер алерта, если уровень ошибок > 5% за 15-минутное окно.
+
+### 3.3. Конкурентность и Блокировки
+- **Pipeline Lock**: Один активный инстанс `{provider}_{entity}` в момент времени.
+- **Механизм**: Advisory lock (Postgres) или Redis SETNX.
+- **Timeout**: 2 часа, затем автоматическое освобождение + Алерт.
+- **Partitioned Runs**: Разрешены параллельные запуски на *непересекающихся* партициях дат.
+
+### 3.4. Метрики Качества Данных (DQ Metrics)
+Метрики записываются в таблицу `dq_metrics` для каждого прогона:
+- `null_rate_{column}`: % NULL значений.
+- `unique_count_{column}`: кардинальность.
+- `schema_violations`: количество записей, не прошедших валидацию.
+- `freshness_lag_hours`: разница между `max(updated_at)` и `now()`.
 
 ## 4. Стандарты Кода и Тестирование
 
 ### 4.1. Стек и Матрица Решений
 | Задача | Инструмент | Альтернатива | Критерий выбора |
 |--------|------------|--------------|-----------------|
-| **Оркестрация** | **Prefect** | Dagster, Runner | Prefect для >10 DAG-ов и сложной логики ретраев. |
+| **Оркестрация** | **Prefect** | Simple Runner | <5 DAG-ов — свой Runner (скрипт). Иначе Prefect. |
 | **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. |
 | **HTTP Клиент** | **httpx** | requests | Поддержка `async` из коробки для высокой производительности. |
 | **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |
@@ -65,41 +103,48 @@ class TransformPort(Protocol):
 - **Unit**: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек.
 - **Integration**:
     - **VCR.py**: Запись ответов API в кассеты (`tests/fixtures/vcr/`).
-    - **Политика**: Обновлять кассеты при смене версии API.
+    - **Санитизация**: Обязательная очистка секретов (`Authorization`, `X-API-Key`) и PII в хуке `before_record`.
+    - **CI**: Падать, если кассета отсутствует (`pytest --vcr-record=none`), чтобы гарантировать отсутствие сетевых вызовов в CI.
 - **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов.
 
-## 5. Операции (Лимиты и Секреты)
+## 5. Операции (Лимиты, Секреты, Shutdown)
 
 ### 5.1. Ограничение скорости (Rate Limiting)
 Каждый адаптер обязан реализовать `TokenBucket` или аналог, соблюдающий лимиты провайдера.
-Конфигурация в `configs/providers/{provider}.yaml`:
-```yaml
-rate_limit:
-  requests_per_second: 5
-  burst: 10
-  retry_after_429: true
-  backoff_factor: 1.5
-```
 **Обратное давление (Backpressure)**: Если внутренняя очередь заполнена >80%, адаптер должен замедлить чтение (дросселировать источник).
 
 ### 5.2. Управление Секретами
 - **Источник**: Переменные окружения (`os.environ`).
 - **Формат**: `BIOETL_{PROVIDER}_{KEY}` (например, `BIOETL_PUBCHEM_API_KEY`).
-- **Запрещено**: Хардкод секретов, файлы `.env` в git. Использовать AWS Secrets Manager / Vault для инъекции в Env.
+- **Запрещено**: Хардкод секретов, файлы `.env` в git.
+
+### 5.3. Graceful Shutdown (Штатное завершение)
+При получении SIGTERM/SIGINT:
+1. Прекратить извлечение (fetch) новых записей.
+2. Дождаться завершения записи текущего батча.
+3. Сохранить чекпоинт (last processed ID) в `{pipeline}_{entity}_checkpoint.json`.
+4. Выйти с кодом 0.
+Таймаут на завершение: 30 секунд, затем SIGKILL.
 
 ## 6. Документация (Автоматизация — приоритет)
-
-- **Карта и Схемы**: Генерируются скриптами в CI:
-    - Схемы: `pydantic-to-json-schema` -> `docs/schemas/`.
-    - ER-диаграммы: `eralchemy2` из моделей.
-    - Справка по API: `mkdocs` + `mkdocstrings`.
-- **Именование**:
-    - Код: `src/bioetl/infrastructure/adapters/{provider}/`
-    - Доки: `docs/providers/{provider}/{entity}.md`
+- **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
+- **Именование**: Зеркальное (`src/bioetl/.../{provider}/` <-> `docs/providers/{provider}/`).
 
 ## 7. Управление Изменениями
-- **Breaking Changes (Ломающие изменения)**: Изменение Gold-схем, смена мажорной версии API провайдера. Требует миграции и ADR.
-- **Non-Breaking (Неломающие)**: Добавление полей в Bronze/Silver.
+- **Breaking Changes**: Изменение Gold-схем, смена мажорной версии API провайдера. Требует миграции и ADR.
+- **Non-Breaking**: Добавление полей в Bronze/Silver.
+
+## 8. Developer Experience
+### 8.1. Локальная настройка
+```bash
+make install      # создание venv, установка зависимостей
+make test         # unit + integration (на кассетах)
+make lint         # ruff + mypy
+make run-local    # запуск сэмплового пайплайна на фикстурах
+```
+### 8.2. Окружение
+- **Docker Compose**: Для запуска локальных зависимостей (Postgres, Redis).
+- **.env.example**: Шаблон переменных окружения (без секретов).
 
 ---
 ## Приложение А: Источники и Библиотеки
@@ -116,3 +161,13 @@ rate_limit:
 | **Crossref** | `habanero` | Поддерживается лучше, чем `crossrefapi`. |
 | **Semantic** | `semanticscholar` | Официальная библиотека. |
 | **PubMed** | `biopython` | Низкоуровневая. Рассмотреть `metapub` для поиска. |
+
+## Приложение B: Политика Зависимостей
+- **Pinning**: Точные версии в `requirements.txt` / `pyproject.toml`.
+- **Обновления**: Ежемесячные PR от Dependabot + ручное ревью.
+- **Безопасность**: `pip-audit` в CI. Блокировка мержа при CVE severity >= HIGH.
+
+## Changelog
+- **3.0** (2025-05-20): Добавлены политики Lineage, Backfill, Concurrency, Graceful Shutdown, Developer Experience. Finalized.
+- **2.0** (2025-05-20): Error classification, Medallion, Rate limiting, Translation to Russian.
+- **1.0** (2025-04-01): Initial draft.
