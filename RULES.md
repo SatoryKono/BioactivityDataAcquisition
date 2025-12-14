@@ -134,7 +134,7 @@ class DataSourcePort(Protocol):
 - **Breaking Changes**: Изменение Gold-схем, смена мажорной версии API провайдера. Требует миграции и ADR.
 - **Non-Breaking**: Добавление полей в Bronze/Silver.
 
-## 8. Developer Experience
+## 8. Опыт Разработчика (Developer Experience)
 ### 8.1. Локальная настройка
 ```bash
 make install      # создание venv, установка зависимостей
@@ -167,7 +167,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 - **Обновления**: Ежемесячные PR от Dependabot + ручное ревью.
 - **Безопасность**: `pip-audit` в CI. Блокировка мержа при CVE severity >= HIGH.
 
-## Changelog
-- **3.0** (2025-05-20): Добавлены политики Lineage, Backfill, Concurrency, Graceful Shutdown, Developer Experience. Finalized.
-- **2.0** (2025-05-20): Error classification, Medallion, Rate limiting, Translation to Russian.
-- **1.0** (2025-04-01): Initial draft.
+## История Изменений (Changelog)
+- **3.0** (2025-05-20): Добавлены политики Lineage, Backfill, Concurrency, Graceful Shutdown, Опыт Разработчика. Финализировано.
+- **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский.
+- **1.0** (2025-04-01): Черновик.
