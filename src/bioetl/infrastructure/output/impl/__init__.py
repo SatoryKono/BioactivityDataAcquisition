@@ -1,3 +1,0 @@
-"""
-Output writer implementations.
-"""
