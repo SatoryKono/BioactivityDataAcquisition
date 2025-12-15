@@ -29,6 +29,13 @@ theme:
 plugins:
   - search
   - mermaid2
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_root_heading: yes
+            show_source: true
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -59,6 +66,11 @@ nav:
     - Troubleshooting: 03-guides/troubleshooting.md
   - Reference:
     - CLI: 04-reference/cli.md
+    - API:
+      - Overview: 04-reference/api/index.md
+      - Domain: 04-reference/api/domain.md
+      - Application: 04-reference/api/application.md
+      - Infrastructure: 04-reference/api/infrastructure.md
     - Pipelines:
       - ChEMBL Activity: 04-reference/pipelines/chembl_activity.md
   - Operations:

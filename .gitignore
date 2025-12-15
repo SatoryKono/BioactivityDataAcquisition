@@ -64,11 +64,38 @@ project_rules_failures.txt
 Thumbs.db
 desktop.ini
 
-# Secrets / API keys
+# Secrets / API keys (RULES.md REQ-SECRET-004)
 *.env
+!.env.example
 API_KEY.env
 secrets.json
 credentials.json
+
+# Docker volumes (RULES.md §8.2)
+docker-data/
+docker/volumes/
+
+# Logs directory
+logs/
+*.log
+
+# VCR cassettes (keep for testing, but exclude sensitive ones)
+tests/fixtures/vcr/*_sensitive.yaml
+
+# Delta Lake metadata (local development)
+_delta_log/
+*.checkpoint.parquet
+
+# Bronze/Silver/Gold local storage
+data/bronze/
+data/silver/
+data/gold/
+data/quarantine/
+data/checkpoints/
+
+# Temporary pipeline artifacts
+tmp/
+*.tmp
 
 # Node
 node_modules/
