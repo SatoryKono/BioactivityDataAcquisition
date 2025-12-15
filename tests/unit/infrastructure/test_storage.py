@@ -115,9 +115,9 @@ class TestBronzeWriter:
         # Zstandard frames start with magic bytes 0x28, 0xB5, 0x2F, 0xFD (little-endian)
         assert compressed_data[:4] == b"\x28\xb5\x2f\xfd"
 
-        # Decompress to verify content
+        # Decompress to verify content (use stream reader for streaming-compressed data)
         decompressor = zstd.ZstdDecompressor()
-        decompressed_data = decompressor.decompress(compressed_data)
+        decompressed_data = decompressor.stream_reader(compressed_data).read()
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
     def test_write_bronze_with_no_records(self, mock_s3_client):
