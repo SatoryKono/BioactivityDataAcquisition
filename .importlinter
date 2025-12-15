@@ -1,0 +1,36 @@
+[importlinter]
+root_package = bioetl
+include_external_packages = True
+
+[importlinter:contract:layers]
+name = Layer dependencies (Ports & Adapters)
+type = layers
+layers =
+    bioetl.application
+    bioetl.domain
+    bioetl.infrastructure
+containers =
+    bioetl
+
+[importlinter:contract:domain-independence]
+name = Domain layer independence
+type = forbidden
+source_modules =
+    bioetl.domain
+forbidden_modules =
+    bioetl.infrastructure
+    bioetl.application
+
+[importlinter:contract:application-no-infrastructure-imports]
+name = Application layer does not import infrastructure directly
+type = forbidden
+source_modules =
+    bioetl.application
+forbidden_modules =
+    bioetl.infrastructure.adapters
+    bioetl.infrastructure.storage
+    bioetl.infrastructure.locking
+    bioetl.infrastructure.checkpoint
+    bioetl.infrastructure.quarantine
+ignore_imports =
+    bioetl.application.pipelines.chembl_activity -> bioetl.infrastructure.*
