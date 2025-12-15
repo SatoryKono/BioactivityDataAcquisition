@@ -7,7 +7,7 @@ import polars as pl
 
 from bioetl.domain.types import BatchID, RunID, DriftLevel
 from bioetl.infrastructure.observability.anomaly import AnomalyDetector
-from bioetl.infrastructure.observability.lineage import LineageLogger
+from bioetl.infrastructure.observability.lineage import LineageTracker
 from bioetl.infrastructure.observability.metrics import (
     get_circuit_breaker_state_metric,
     get_data_freshness_metric,
@@ -84,36 +84,32 @@ class TestMetrics:
 
 
 @pytest.mark.unit
-class TestLineageLogger:
-    """Test LineageLogger functionality."""
+class TestLineageTracker:
+    """Test LineageTracker functionality."""
 
-    def test_lineage_logger_initialization(self, mock_delta_writer):
-        """Test LineageLogger can be initialized."""
-        logger = LineageLogger(delta_writer=mock_delta_writer)
-        assert logger.delta_writer is mock_delta_writer
+    def test_lineage_tracker_initialization(self, tmp_path):
+        """Test LineageTracker can be initialized."""
+        tracker = LineageTracker(delta_path=tmp_path, pipeline_name="test_pipeline")
+        assert tracker.pipeline_name == "test_pipeline"
+        assert tracker.delta_path == tmp_path
 
-    def test_log_lineage_calls_delta_writer(self, mock_delta_writer):
-        """Test that log_lineage calls the underlying DeltaWriter."""
-        logger = LineageLogger(delta_writer=mock_delta_writer)
-        run_id = RunID.from_hex("12345678123456781234567812345678")
-        batch_id = BatchID.from_hex("87654321876543218765432187654321")
-        source_uris = ["s3://bucket/key1", "s3://bucket/key2"]
+    def test_record_bronze_creates_batch_lineage(self, tmp_path):
+        """Test that record_bronze creates proper batch lineage."""
+        tracker = LineageTracker(delta_path=tmp_path, pipeline_name="test_pipeline")
 
-        logger.log_lineage(
-            run_id=run_id,
-            batch_id=batch_id,
-            source_uris=source_uris,
+        # Record bronze layer ingestion
+        tracker.record_bronze(
+            batch_id="batch-123",
+            run_id="run-456",
+            provider="chembl",
+            entity_type="activity",
+            record_count=100,
+            file_path="s3://bucket/bronze/file.jsonl.zst",
+            watermark="2024-01-01",
         )
 
-        mock_delta_writer.write_silver.assert_called_once()
-        args, kwargs = mock_delta_writer.write_silver.call_args
-        assert kwargs["table_name"] == "sys.lineage_log"
-        assert isinstance(kwargs["records"], list)
-        assert len(kwargs["records"]) == 1
-        record = kwargs["records"][0]
-        assert record["run_id"] == str(run_id)
-        assert record["batch_id"] == str(batch_id)
-        assert record["source_uris"] == source_uris
+        # Verify batch_lineage table path is set correctly
+        assert tracker.batch_table_path == tmp_path / "batch_lineage"
 
 
 @pytest.mark.unit

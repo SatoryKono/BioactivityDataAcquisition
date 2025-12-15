@@ -21,6 +21,7 @@ from typing import Any
 import pandera as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
+from pandera.polars import DataFrameSchema
 
 
 class GoldWriter:
@@ -65,7 +66,7 @@ class GoldWriter:
         self,
         table_name: str,
         records: list[dict[str, Any]],
-        schema: pa.DataFrameSchema | None = None,
+        schema: DataFrameSchema | None = None,
         mode: str = "overwrite",
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,

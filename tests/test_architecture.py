@@ -3,6 +3,10 @@ import re
 import tomllib
 from pathlib import Path
 import pytest
+import inspect
+from typing import runtime_checkable, Protocol
+
+from bioetl.domain.ports import DataSourcePort, LockPort, CheckpointPort, StoragePort, QuarantinePort
 
 # --- REQ-ARCH-001, REQ-ARCH-003 ---
 def test_domain_layer_purity(src_dir: Path):
@@ -27,6 +31,13 @@ def test_ports_are_protocols(src_dir: Path):
         # Find lines importing from typing
         typing_imports = re.findall(r"from typing import .*", content)
         assert any("Protocol" in line for line in typing_imports), "Protocol not imported from typing"
+
+# --- REQ-ARCH-004 ---
+def test_critical_ports_are_runtime_checkable():
+    """Critical port protocols should be runtime checkable."""
+    critical_ports = [DataSourcePort, LockPort, CheckpointPort, StoragePort, QuarantinePort]
+    for port in critical_ports:
+        assert hasattr(port, "_is_runtime_protocol"), f"{port.__name__} is not runtime checkable, add @runtime_checkable"
 
 # --- REQ-STACK-001 ---
 def test_httpx_is_http_client(pyproject_toml: Path):
