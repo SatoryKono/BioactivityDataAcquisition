@@ -19,7 +19,6 @@ Architecture:
 """
 
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from deltalake import DeltaTable, write_deltalake
@@ -133,7 +132,6 @@ class DeltaWriter:
                 mode="append",
                 partition_by=partition_cols,
                 storage_options=self.storage_options,
-                engine="rust",  # Use delta-rs engine
             )
 
     def _merge_records(

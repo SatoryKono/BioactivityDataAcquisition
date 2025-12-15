@@ -142,7 +142,6 @@ class UnifiedQuarantine:
                 data=[record],
                 mode="append",
                 storage_options=self.storage_options,
-                engine="rust",
             )
         except TableNotFoundError:
             # Table doesn't exist, create it with schema
@@ -152,7 +151,6 @@ class UnifiedQuarantine:
                 mode="append",
                 partition_by=["pipeline"],  # Partition by pipeline for efficient queries
                 storage_options=self.storage_options,
-                engine="rust",
             )
 
         return ContentHash(payload_hash)
