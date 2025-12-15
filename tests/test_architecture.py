@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 import tomllib
 from pathlib import Path
 import pytest
@@ -114,3 +115,41 @@ def test_doc_naming_convention(src_dir: Path, docs_dir: Path):
     docs_providers = {d.name for d in docs_providers_path.iterdir() if d.is_dir()}
 
     assert src_providers.issubset(docs_providers), f"Missing doc folders for providers: {src_providers - docs_providers}"
+
+
+# --- REQ-COMPLEXITY-001 ---
+def test_code_complexity_with_xenon(src_dir: Path):
+    """Code complexity must meet xenon thresholds (max-absolute B, max-modules B, max-average B).
+
+    Runs: xenon --max-absolute B --max-modules B --max-average B --exclude "tests/*,src/tools/*" src
+
+    Grade thresholds:
+    - A: CC <= 5 (simple, low risk)
+    - B: 6 <= CC <= 10 (more complex, moderate risk)
+    - C: 11 <= CC <= 20 (complex, high risk)
+    - D: 21 <= CC <= 30 (very complex, very high risk)
+    - F: CC > 30 (unmaintainable)
+    """
+    try:
+        result = subprocess.run(
+            [
+                "xenon",
+                "--max-absolute", "B",
+                "--max-modules", "B",
+                "--max-average", "B",
+                "--exclude", "tests/*,src/tools/*",
+                str(src_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except FileNotFoundError:
+        pytest.skip("xenon not installed, run: pip install xenon")
+
+    assert result.returncode == 0, (
+        f"Code complexity check failed.\n"
+        f"xenon output:\n{result.stdout}\n{result.stderr}\n\n"
+        f"Functions/modules exceed complexity threshold B (CC > 10).\n"
+        f"Refactor complex code to reduce cyclomatic complexity."
+    )
