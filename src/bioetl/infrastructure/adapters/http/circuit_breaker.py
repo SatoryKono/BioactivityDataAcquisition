@@ -70,6 +70,10 @@ class CircuitBreaker:
         """Get current circuit breaker state."""
         return self._state
 
+    def get_failure_count(self) -> int:
+        """Get current failure count."""
+        return self._failure_count
+
     def get_trips_total(self) -> int:
         """Get total number of times circuit has opened."""
         return self._trips_total

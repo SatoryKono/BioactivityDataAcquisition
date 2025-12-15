@@ -193,8 +193,8 @@ class TestRateLimiter:
         """Test getting available token count."""
         bucket = TokenBucket(rate=10.0, capacity=100)
 
-        available = bucket.get_available_tokens()
-        assert available == 100.0  # Full capacity initially
+        available = bucket.available_tokens()
+        assert available == 100  # Full capacity initially
 
 
 @pytest.mark.unit
@@ -207,22 +207,22 @@ class TestCircuitBreaker:
 
         assert cb.provider == "test"
         assert cb.failure_threshold == 5
-        assert cb.state.value == "CLOSED"
+        assert cb.get_state().value == "CLOSED"
 
     def test_initial_state_is_closed(self):
         """Test circuit breaker starts in CLOSED state."""
         cb = CircuitBreaker(provider="test")
 
-        assert cb.state.value == "CLOSED"
-        assert cb.failure_count == 0
+        assert cb.get_state().value == "CLOSED"
+        assert cb._failure_count == 0
 
     def test_failure_count_tracking(self):
-        """Test failure count increments."""
+        """Test failure count increments via private attribute."""
         cb = CircuitBreaker(provider="test", failure_threshold=3)
 
-        # Simulate failures
-        cb.failure_count = 1
-        assert cb.failure_count == 1
+        # Access private attribute for testing
+        cb._failure_count = 1
+        assert cb._failure_count == 1
 
-        cb.failure_count = 2
-        assert cb.failure_count == 2
+        cb._failure_count = 2
+        assert cb._failure_count == 2
