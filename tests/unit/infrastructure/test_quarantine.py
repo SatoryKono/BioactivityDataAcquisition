@@ -1,10 +1,10 @@
 """Unit tests for quarantine."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from uuid import UUID
 
-import pytest
 import polars as pl
+import pytest
 
 from bioetl.domain.types import BatchID, ErrorType
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
