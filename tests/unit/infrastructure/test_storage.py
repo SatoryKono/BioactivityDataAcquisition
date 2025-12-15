@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from unittest.mock import MagicMock, patch
+import zstandard as zstd
 
 import pytest
 import polars as pl
@@ -65,6 +66,34 @@ class TestBronzeWriter:
         args, kwargs = mock_s3_client.upload_fileobj.call_args
         assert kwargs["Bucket"] == "test-bucket"
         assert kwargs["Key"] == expected_key
+
+    def test_write_bronze_compresses_with_zstd(self, mock_s3_client):
+        """REQ-DATA-001: Test that data is compressed with zstandard."""
+        writer = BronzeWriter(bucket="test-bucket")
+        records = [b'{"id": 1, "data": "test"}\n']
+
+        writer.write_bronze(
+            records=iter(records),
+            provider="test",
+            entity="test",
+            date=datetime.now(),
+            batch_id=BatchID.from_hex("12345678123456781234567812345678"),
+        )
+
+        mock_s3_client.upload_fileobj.assert_called_once()
+        args, kwargs = mock_s3_client.upload_fileobj.call_args
+
+        # The file object passed to upload_fileobj should be a zstd compressed stream
+        compressed_data_obj = kwargs["Fileobj"]
+        compressed_data = compressed_data_obj.read()
+
+        # Zstandard frames start with a magic number
+        assert compressed_data.startswith(zstd.MAGIC_NUMBER)
+
+        # Decompress to verify content
+        decompressor = zstd.ZstdDecompressor()
+        decompressed_data = decompressor.decompress(compressed_data)
+        assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
     def test_write_bronze_with_no_records(self, mock_s3_client):
         """Test that write_bronze does nothing if there are no records."""
