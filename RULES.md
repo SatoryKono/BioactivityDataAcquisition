@@ -34,8 +34,8 @@ class DataSourcePort(Protocol):
 | Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность |
 |---------|--------|-----------|----------------------|-----------------|
 | **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive | Append-only + `ingestion_ts`. CSV запрещен (хрупок). |
-| **Silver** (Норм.) | Parquet/Table | Мягкая (учет дрейфа схемы) | Постоянно | **Append-Only + Compaction**. Upsert на Parquet запрещен (неатомарен). |
-| **Gold** (Витрины) | Parquet/Table | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
+| **Silver** (Норм.) | **Delta Lake / Iceberg** | Мягкая (учет дрейфа схемы) | Постоянно | **Merge/Upsert**. Использовать Table Formats для ACID транзакций и эффективных обновлений. |
+| **Gold** (Витрины) | Delta/Iceberg/Parquet | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
 
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
 - **Bronze**: Принимает любые поля (schemaless). Цель — сохранить сырой ответ как есть.
@@ -92,8 +92,7 @@ class DataSourcePort(Protocol):
 | Сценарий | Стратегия ID |
 |----------|--------------|
 | Источник предоставляет стабильный ID | Использовать как есть (`chembl_id`, `pubchem_cid`) |
-| ID отсутствует, но есть уникальные поля | Детерминированный хэш: `sha256(provider + sorted(unique_fields))` |
-| Нет уникальных полей | Композитный ключ: `{provider}_{ingestion_ts}_{row_number}` + warning в логах |
+| ID отсутствует | **Content Hash**: `sha256(provider + sorted(content_fields))`. Использование временных меток (`ingestion_ts`) запрещено. |
 
 - **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи.
 
@@ -121,7 +120,7 @@ class DataSourcePort(Protocol):
 ### 3.3. Конкурентность и Блокировки
 - **Pipeline Lock**: Один активный инстанс `{provider}_{entity}` в момент времени.
 - **Механизм**: Advisory lock (Postgres) или Redis SETNX.
-- **Timeout**: 2 часа, затем автоматическое освобождение + Алерт.
+- **Timeout**: **15 минут** (с возможностью продления Heartbeat). Существенное сокращение таймаута для предотвращения зомби-блокировок.
 - **Partitioned Runs**: Разрешены параллельные запуски на *непересекающихся* партициях дат.
 
 ### 3.4. Метрики Качества Данных (DQ Metrics)
@@ -148,7 +147,7 @@ class DataSourcePort(Protocol):
 |--------|------------|--------------|-----------------|
 | **Оркестрация** | **Prefect** | Simple Runner | <5 DAG-ов — свой Runner (скрипт). Иначе Prefect. |
 | **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. |
-| **HTTP Клиент** | **httpx** | requests | Поддержка `async` из коробки для высокой производительности. |
+| **HTTP Клиент** | **httpx** | requests | Поддержка `async`. **Для синхронных библиотек (био-пакетов) разрешен запуск в тредах (`run_in_executor`)**. |
 | **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |
 
 ### 4.2. Политика Тестирования
@@ -174,19 +173,19 @@ class DataSourcePort(Protocol):
 При получении SIGTERM/SIGINT:
 1. Прекратить извлечение (fetch) новых записей.
 2. Дождаться завершения записи текущего батча.
-3. Сохранить чекпоинт (last processed ID) в `{pipeline}_{entity}_checkpoint.json`.
+3. Сохранить чекпоинт (last processed ID) в **S3 (Object Storage)**: `s3://bioetl/checkpoints/{pipeline}_{entity}.json`. Локальное хранение запрещено для поддержки stateless K8s подов.
 4. Выйти с кодом 0.
 Таймаут на завершение: 30 секунд, затем SIGKILL.
 
 ### 5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery)
 При запуске пайплайн:
-1. Проверяет наличие файла `{pipeline}_{entity}_checkpoint.json`.
+1. Проверяет наличие чекпоинта в S3.
 2. Если найден и передан флаг `--resume`:
    - Начинает с `last_processed_id + 1`.
    - Логирует: `Resuming from checkpoint: {id}`.
 3. Если найден без флага:
    - Warning: "Stale checkpoint detected. Use --resume or --ignore-checkpoint."
-4. После успешного завершения: удалить файл чекпоинта.
+4. После успешного завершения: удалить файл чекпоинта из S3.
 
 ### 5.4. Политика Чувствительных Данных (Sensitive Data)
 - **PII Поля**: `author_email`, `author_name`, `institution` — маркировать в схеме как `pii=true`.
