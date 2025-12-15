@@ -3,12 +3,13 @@
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-import polars as pl
 import pytest
+import polars as pl
 
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @pytest.fixture
@@ -23,10 +24,8 @@ def mock_s3_client():
 @pytest.fixture
 def mock_deltalake():
     """Fixture for mocking deltalake functions."""
-    with (
-        patch("deltalake.DeltaTable") as mock_delta_table,
-        patch("deltalake.write_deltalake") as mock_write_deltalake,
-    ):
+    with patch("deltalake.DeltaTable") as mock_delta_table, \
+         patch("deltalake.write_deltalake") as mock_write_deltalake:
         yield mock_delta_table, mock_write_deltalake
 
 
@@ -102,7 +101,11 @@ class TestDeltaWriter:
         writer = DeltaWriter(base_path="/tmp/delta")
         records = [{"id": 1, "value": "a"}]
 
-        writer.write_silver(table_name="test_table", records=records, mode="append")
+        writer.write_silver(
+            table_name="test_table",
+            records=records,
+            mode="append"
+        )
 
         mock_write_deltalake.assert_called_once()
         args, kwargs = mock_write_deltalake.call_args
@@ -119,7 +122,10 @@ class TestDeltaWriter:
         records = [{"id": 1, "value": "a"}]
 
         writer.write_silver(
-            table_name="test_table", records=records, mode="merge", primary_keys=["id"]
+            table_name="test_table",
+            records=records,
+            mode="merge",
+            primary_keys=["id"]
         )
 
         mock_table_instance.merge.assert_called_once()
@@ -129,7 +135,36 @@ class TestDeltaWriter:
         writer = DeltaWriter(base_path="/tmp/delta")
         records = [{"id": 1, "value": "a"}]
 
-        with pytest.raises(
-            ValueError, match="Primary keys must be provided for merge mode"
-        ):
-            writer.write_silver(table_name="test_table", records=records, mode="merge")
+        with pytest.raises(ValueError, match="Primary keys must be provided for merge mode"):
+            writer.write_silver(
+                table_name="test_table",
+                records=records,
+                mode="merge"
+            )
+
+
+@pytest.mark.unit
+class TestGoldWriter:
+    """Test GoldWriter functionality."""
+
+    def test_gold_writer_initialization(self):
+        """Test GoldWriter can be initialized."""
+        writer = GoldWriter(base_path="/tmp/gold")
+        assert writer.base_path == "/tmp/gold"
+
+    def test_write_gold_calls_delta_writer(self, mock_deltalake):
+        """Test that write_gold calls the underlying DeltaWriter."""
+        mock_delta_table, mock_write_deltalake = mock_deltalake
+        writer = GoldWriter(base_path="/tmp/gold")
+        records = [{"id": 1, "value": "a"}]
+
+        writer.write_gold(
+            table_name="gold_table",
+            records=records,
+            mode="overwrite"
+        )
+
+        mock_write_deltalake.assert_called_once()
+        args, kwargs = mock_write_deltalake.call_args
+        assert kwargs["mode"] == "overwrite"
+        assert "gold_table" in args[0]
