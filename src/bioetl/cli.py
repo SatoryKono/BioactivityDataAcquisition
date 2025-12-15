@@ -95,28 +95,13 @@ async def _run_chembl_activity(
         resume: Resume from checkpoint
         limit: Max records
     """
-    from bioetl.application.pipelines.chembl_activity import (
-        ChEMBLActivityPipelineFactory,
-    )
-
-    # Load configuration from environment
-    import os
+    from bioetl.bootstrap import ChEMBLActivityPipelineFactory
 
     factory = ChEMBLActivityPipelineFactory()
     pipeline = await factory.create(
         run_type=run_type,
         resume=resume,
-        # From environment variables
-        aws_endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
-        aws_access_key=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        s3_bucket_bronze=os.getenv("BIOETL_S3_BUCKET_BRONZE", "bioetl-bronze"),
-        s3_bucket_silver=os.getenv("BIOETL_S3_BUCKET_SILVER", "bioetl-silver"),
-        s3_bucket_checkpoints=os.getenv(
-            "BIOETL_S3_BUCKET_CHECKPOINTS", "bioetl-checkpoints"
-        ),
-        redis_host=os.getenv("BIOETL_REDIS_HOST", "localhost"),
-        redis_port=int(os.getenv("BIOETL_REDIS_PORT", "6379")),
+        limit=limit,
     )
 
     await run_pipeline_flow(pipeline)

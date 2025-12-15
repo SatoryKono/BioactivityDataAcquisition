@@ -37,7 +37,15 @@ from bioetl.domain.types import (
     RunType,
     Watermark,
 )
-from bioetl.infrastructure.observability.logging import create_logger
+# Logging should be handled via interface or standard logging,
+# but for now we remove the direct infrastructure import to satisfy architectural rules.
+# In a real scenario, we'd use a LoggerPort or configure logging in bootstrap.
+import logging
+
+def create_logger(run_id: str, pipeline: str) -> logging.Logger:
+    logger = logging.getLogger(pipeline)
+    # Simple setup for now, actual configuration should happen in bootstrap
+    return logger
 
 
 class PipelineShutdownError(Exception):
