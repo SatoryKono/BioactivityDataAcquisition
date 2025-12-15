@@ -127,6 +127,10 @@ class CheckpointPort(Protocol):
         """Load a checkpoint."""
         ...
 
+    def list_all(self) -> list[str]:
+        """List all pipelines with checkpoints."""
+        ...
+
     def delete(self, pipeline: str) -> None:
         """Delete a checkpoint."""
         ...
@@ -142,7 +146,22 @@ class QuarantinePort(Protocol):
         error_code: str,
         payload: dict[str, Any],
         bronze_batch_id: BatchID,
-        error_details: dict[str, Any],
-    ) -> None:
+        # Allow optional args in implementation (Liskov) but enforce common ones here
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
         """Write a record to quarantine."""
+        ...
+
+    def inspect(
+        self,
+        pipeline: str,
+        limit: int = 10,
+        error_code: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Inspect quarantined records."""
+        ...
+
+    def get_stats(self, pipeline: str) -> dict[str, Any]:
+        """Get quarantine statistics."""
         ...
