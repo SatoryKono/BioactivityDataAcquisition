@@ -108,6 +108,5 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 
 ## Related Documents
 
-- **ETL Layers**: [02-etl-layers.md](../01-architecture/02-etl-layers.md)
 - **Data Flow**: [data-flow.md](data-flow.md)
-- **Architecture Diagrams**: [06-architecture-diagrams.md](../01-architecture/06-architecture-diagrams.md)
+- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
