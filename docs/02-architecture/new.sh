@@ -1,0 +1,1 @@
+npx @mermaid-js/mermaid-cli -i 'docs/**/*.mermaid' -o 'docs/rendered'
