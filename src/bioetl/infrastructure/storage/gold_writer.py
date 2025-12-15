@@ -14,7 +14,7 @@ Architecture:
 - Enforces data contracts
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import pandera as pa
@@ -186,7 +186,7 @@ class GoldWriter:
         current_flag_col = scd_config.get("current_flag_col", "is_current")
 
         # Add SCD metadata to new records
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         for record in records:
             record[valid_from_col] = now
             record[valid_to_col] = None  # Open-ended (current)
@@ -247,7 +247,7 @@ class GoldWriter:
         )
         merge_condition += f" AND target.{current_flag_col} = true"
 
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
 
         # Merge logic:
         # 1. Close old current records (set valid_to, is_current=False)
