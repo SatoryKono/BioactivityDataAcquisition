@@ -301,10 +301,32 @@ tests/
 
 ```
 docs/
-├── adr/                               # Architecture Decision Records
-│   ├── 001-delta-lake-choice.md
-│   ├── 002-medallion-architecture.md
-│   └── 003-circuit-breaker.md
+├── 00-map.md                          # Project Navigator
+├── 00-project_rules/                  # Project governance
+│   ├── 00-rules-summary.md
+│   ├── 01-project-rules.md
+│   ├── 02-user-rules.md
+│   ├── 03-file-policy.md
+│   ├── 04-extending-bioetl.md
+│   └── 05-cleanup-policy.md
+│
+├── 01-architecture/                   # System architecture
+│   ├── 01-domain-objects.md
+│   ├── 02-etl-layers.md
+│   ├── 03-data-flow.md
+│   ├── 04-duplication-reduction.md
+│   ├── 05-physical-layout.md
+│   ├── 06-architecture-diagrams.md
+│   ├── decisions/                     # Architecture Decision Records
+│   │   ├── 001-delta-lake-choice.md
+│   │   ├── 002-medallion-architecture.md
+│   │   └── 003-circuit-breaker.md
+│   └── diagrams/                      # Diagram source files
+│       └── 00-diagramming-policy.md
+│
+├── application/                       # Pipeline documentation
+│   └── pipelines/
+│       └── {provider}/{entity}/
 │
 ├── contracts/                         # §7.1: Gold schema contracts
 │   └── gold/
@@ -313,6 +335,15 @@ docs/
 │       ├── molecule_v1.0.json
 │       ├── target_v1.0.json
 │       └── publication_v1.0.json
+│
+├── domain/                            # Domain documentation
+│   └── schemas/
+│
+├── guides/                            # How-to guides
+│
+├── infrastructure/                    # Infrastructure docs
+│
+├── interfaces/                        # CLI documentation
 │
 ├── runbooks/                          # §App C, §5.5.1: DR procedures
 │   ├── dr-bronze-corruption.md
@@ -323,13 +354,8 @@ docs/
 │   ├── ops-quarantine-triage.md
 │   └── alert-schema-drift.md
 │
-└── architecture/
-    ├── 01-domain-objects.md
-    ├── 02-etl-layers.md
-    ├── 03-data-flow.md
-    ├── 04-duplication-reduction.md
-    ├── 05-physical-layout.md
-    └── 06-architecture-diagrams.md
+└── templates/                         # Document templates
+    └── pipeline-review-checklist.md
 ```
 
 ---

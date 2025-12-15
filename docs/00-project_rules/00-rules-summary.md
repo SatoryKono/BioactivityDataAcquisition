@@ -7,17 +7,19 @@
 - **MAY** (Опционально): На усмотрение разработчика.
 
 ## Quick Reference
-| Задача | Раздел | Инструмент |
-|--------|--------|------------|
-| Создать новый пайплайн | §1, App D | YAML config |
-| Добавить поле в схему | §3.1 | Pandera + Schema Evolution |
+| Задача | Раздел RULES.md | Инструмент |
+|--------|-----------------|------------|
+| Создать новый пайплайн | App D | YAML config |
+| Добавить поле в схему | §2.2, App E | Pydantic model |
 | Ошибка в проде (Alert) | App C | Runbook |
-| Удалить битые данные | §3.3 | `make quarantine-purge` |
-| Развернуть на Staging | §5.3 | CI/CD |
-| Восстановление при аварии | §5.2 | DR Runbook |
-| Откат релиза | §6 | Rollback Strategy |
-| Backfill с эксклюзивной блокировкой | §4.3 | Lock Mechanism |
-| Deprecation поля | §6, App E | Schema Evolution |
+| Удалить битые данные | §2.6 | `make quarantine-purge` |
+| Развернуть на Staging | §5.6.1 | CI/CD |
+| Восстановление при аварии | §5.5 | DR Runbook |
+| Откат релиза | §7.2 | Rollback Strategy |
+| Безопасность | §5.4 | Security Policy |
+| Forensic retention для таблицы | §2.1.1, App D | Config `forensic_retention` |
+| Backfill с эксклюзивной блокировкой | §2.4 | Lock Mechanism |
+| Deprecation поля | §7.1, App E | Schema Evolution |
 
 ## 1. Архитектура и структура
 
