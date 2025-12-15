@@ -4,6 +4,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from uuid import UUID
+
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
@@ -36,7 +38,7 @@ class TestS3Checkpoint:
         cp = S3Checkpoint(bucket="test-bucket")
         pipeline = "test_pipeline"
         watermark = Watermark("2023-01-01T00:00:00Z")
-        run_id = RunID.from_hex("12345678123456781234567812345678")
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         metadata = {"key": "value"}
 
         cp.save(pipeline, watermark, run_id, metadata)
