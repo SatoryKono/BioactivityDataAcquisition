@@ -117,7 +117,7 @@ class TestBronzeWriter:
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
     def test_write_bronze_with_no_records(self, mock_s3_client):
-        """Test that write_bronze does nothing if there are no records."""
+        """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(bucket="test-bucket")
         records = []
         provider = "test_provider"
@@ -125,15 +125,14 @@ class TestBronzeWriter:
         date = datetime(2023, 1, 1)
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
 
-        writer.write_bronze(
-            records=iter(records),
-            provider=provider,
-            entity=entity,
-            date=date,
-            batch_id=batch_id,
-        )
-
-        mock_s3_client.upload_fileobj.assert_not_called()
+        with pytest.raises(ValueError, match="No records"):
+            writer.write_bronze(
+                records=iter(records),
+                provider=provider,
+                entity=entity,
+                date=date,
+                batch_id=batch_id,
+            )
 
 
 @pytest.mark.unit
