@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 import statistics
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
