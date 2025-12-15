@@ -102,12 +102,11 @@ class TestBronzeWriter:
             batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
         )
 
-        mock_s3_client.upload_fileobj.assert_called_once()
-        args, kwargs = mock_s3_client.upload_fileobj.call_args
+        mock_s3_client.put_object.assert_called_once()
+        args, kwargs = mock_s3_client.put_object.call_args
 
-        # The file object passed to upload_fileobj should be a zstd compressed stream
-        compressed_data_obj = kwargs["Fileobj"]
-        compressed_data = compressed_data_obj.read()
+        # The Body should be zstd compressed data
+        compressed_data = kwargs["Body"]
 
         # Zstandard frames start with a magic number
         assert compressed_data.startswith(zstd.MAGIC_NUMBER)
