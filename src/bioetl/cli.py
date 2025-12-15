@@ -14,6 +14,12 @@ import click
 
 from bioetl.application.pipeline.base import run_pipeline_flow
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.config import (
+    get_aws_config,
+    get_redis_config,
+    get_s3_config,
+    get_storage_options,
+)
 
 
 @click.group()
@@ -99,24 +105,23 @@ async def _run_chembl_activity(
         ChEMBLActivityPipelineFactory,
     )
 
-    # Load configuration from environment
-    import os
+    # Load configuration from centralized config
+    aws_config = get_aws_config()
+    s3_config = get_s3_config()
+    redis_config = get_redis_config()
 
     factory = ChEMBLActivityPipelineFactory()
     pipeline = await factory.create(
         run_type=run_type,
         resume=resume,
-        # From environment variables
-        aws_endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
-        aws_access_key=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        s3_bucket_bronze=os.getenv("BIOETL_S3_BUCKET_BRONZE", "bioetl-bronze"),
-        s3_bucket_silver=os.getenv("BIOETL_S3_BUCKET_SILVER", "bioetl-silver"),
-        s3_bucket_checkpoints=os.getenv(
-            "BIOETL_S3_BUCKET_CHECKPOINTS", "bioetl-checkpoints"
-        ),
-        redis_host=os.getenv("BIOETL_REDIS_HOST", "localhost"),
-        redis_port=int(os.getenv("BIOETL_REDIS_PORT", "6379")),
+        aws_endpoint_url=aws_config.endpoint_url,
+        aws_access_key=aws_config.access_key_id,
+        aws_secret_key=aws_config.secret_access_key,
+        s3_bucket_bronze=s3_config.bucket_bronze,
+        s3_bucket_silver=s3_config.bucket_silver,
+        s3_bucket_checkpoints=s3_config.bucket_checkpoints,
+        redis_host=redis_config.host,
+        redis_port=redis_config.port,
     )
 
     await run_pipeline_flow(pipeline)
@@ -160,21 +165,14 @@ async def _quarantine_inspect(
     error_code: str | None,
 ) -> None:
     """Inspect quarantine implementation."""
-    import os
-
     from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
-    storage_options = {
-        "AWS_ENDPOINT_URL": os.getenv("AWS_ENDPOINT_URL"),
-        "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID"),
-        "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY"),
-    }
+    s3_config = get_s3_config()
+    storage_options = get_storage_options()
 
     quarantine = UnifiedQuarantine(
-        base_path=f"s3://{os.getenv('BIOETL_S3_BUCKET_SILVER', 'bioetl-silver')}/common/quarantine",
-        storage_options=(
-            storage_options if storage_options["AWS_ENDPOINT_URL"] else None
-        ),
+        base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
+        storage_options=storage_options,
     )
 
     records = quarantine.inspect(
@@ -214,21 +212,14 @@ def quarantine_stats(pipeline: str) -> None:
 
 async def _quarantine_stats(pipeline: str) -> None:
     """Get quarantine statistics."""
-    import os
-
     from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
-    storage_options = {
-        "AWS_ENDPOINT_URL": os.getenv("AWS_ENDPOINT_URL"),
-        "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID"),
-        "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY"),
-    }
+    s3_config = get_s3_config()
+    storage_options = get_storage_options()
 
     quarantine = UnifiedQuarantine(
-        base_path=f"s3://{os.getenv('BIOETL_S3_BUCKET_SILVER', 'bioetl-silver')}/common/quarantine",
-        storage_options=(
-            storage_options if storage_options["AWS_ENDPOINT_URL"] else None
-        ),
+        base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
+        storage_options=storage_options,
     )
 
     stats = quarantine.get_stats(pipeline)
@@ -265,15 +256,16 @@ def checkpoint_list() -> None:
 
 async def _checkpoint_list() -> None:
     """List checkpoints implementation."""
-    import os
-
     from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
+    aws_config = get_aws_config()
+    s3_config = get_s3_config()
+
     checkpoint_storage = S3Checkpoint(
-        bucket=os.getenv("BIOETL_S3_BUCKET_CHECKPOINTS", "bioetl-checkpoints"),
-        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
-        access_key=os.getenv("AWS_ACCESS_KEY_ID"),
-        secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        bucket=s3_config.bucket_checkpoints,
+        endpoint_url=aws_config.endpoint_url,
+        access_key=aws_config.access_key_id,
+        secret_key=aws_config.secret_access_key,
     )
 
     pipelines = checkpoint_storage.list_all()
@@ -313,15 +305,16 @@ def checkpoint_delete(pipeline: str) -> None:
 
 async def _checkpoint_delete(pipeline: str) -> None:
     """Delete checkpoint implementation."""
-    import os
-
     from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
+    aws_config = get_aws_config()
+    s3_config = get_s3_config()
+
     checkpoint_storage = S3Checkpoint(
-        bucket=os.getenv("BIOETL_S3_BUCKET_CHECKPOINTS", "bioetl-checkpoints"),
-        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
-        access_key=os.getenv("AWS_ACCESS_KEY_ID"),
-        secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        bucket=s3_config.bucket_checkpoints,
+        endpoint_url=aws_config.endpoint_url,
+        access_key=aws_config.access_key_id,
+        secret_key=aws_config.secret_access_key,
     )
 
     checkpoint_storage.delete(pipeline)
