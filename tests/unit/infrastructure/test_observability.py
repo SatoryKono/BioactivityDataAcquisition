@@ -96,10 +96,12 @@ class TestAnomalyDetector:
     def test_detect_null_rate_anomaly(self, mock_delta_table):
         """Test detection of null rate anomalies."""
         mock_table_instance = MagicMock()
-        mock_table_instance.to_polars.return_value = pl.DataFrame({
-            "null_rate": [0.1, 0.1, 0.1, 0.5],
-            "timestamp": [1, 2, 3, 4],
-        })
+        mock_table_instance.to_polars.return_value = pl.DataFrame(
+            {
+                "null_rate": [0.1, 0.1, 0.1, 0.5],
+                "timestamp": [1, 2, 3, 4],
+            }
+        )
         mock_delta_table.return_value = mock_table_instance
 
         detector = AnomalyDetector(table_uri="/tmp/test_table")
@@ -114,10 +116,12 @@ class TestAnomalyDetector:
     def test_detect_record_count_anomaly(self, mock_delta_table):
         """Test detection of record count anomalies."""
         mock_table_instance = MagicMock()
-        mock_table_instance.to_polars.return_value = pl.DataFrame({
-            "record_count": [100, 100, 100, 30],
-            "timestamp": [1, 2, 3, 4],
-        })
+        mock_table_instance.to_polars.return_value = pl.DataFrame(
+            {
+                "record_count": [100, 100, 100, 30],
+                "timestamp": [1, 2, 3, 4],
+            }
+        )
         mock_delta_table.return_value = mock_table_instance
 
         detector = AnomalyDetector(table_uri="/tmp/test_table")
