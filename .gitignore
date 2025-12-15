@@ -1,38 +1,79 @@
+# Python
 __pycache__/
-*.pyc
-*.pyo
-/.hypothesis
-/data/output
-*.png
-/data/output
-/data/_output
-node_modules
-/.pytest_cache
-/.mypy_cache
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# Type checking / Linting
+.mypy_cache/
 **/.mypy_cache/
-/.ruff_cache
-/*.pyd
-/.coverage*
-/coverage.xml
-/htmlcov/
-/build/
-/dist/
+.ruff_cache/
+.dmypy.json
+
+# Build / Distribution
+build/
+dist/
 *.egg-info/
-/*.log
-/*.tmp
-/*report*.txt
-/full_log.txt
-/final_report*.txt
-/project_rules_failures.txt
-/.idea/
-/.DS_Store
-/Thumbs.db
-/.ipynb_checkpoints/
-/.vercel/
-/.vscode/
-/.cursor/
-/.trae/
-/.windsurf/
-/.cursorrules
+*.egg
+*.whl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data outputs
+data/output/
+data/_output/
+
+# Logs and reports
+*.log
+*.tmp
+*report*.txt
+full_log.txt
+final_report*.txt
+project_rules_failures.txt
+
+# IDE / Editors
+.idea/
+.vscode/
+.cursor/
+.trae/
+.windsurf/
+.cursorrules
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets / API keys
+*.env
 API_KEY.env
+secrets.json
+credentials.json
+
+# Node
+node_modules/
+
+# Other
+.vercel/
 puppeteer-config.json
+*.png
