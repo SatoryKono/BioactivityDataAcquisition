@@ -156,7 +156,7 @@ class AnomalyDetector:
 
         # Keep only last N values (window)
         if len(baseline) > self.baseline_window:
-            self._baselines[metric_name] = baseline[-self.baseline_window :]
+            self._baselines[metric_name] = baseline[-self.baseline_window:]
 
     def add_baseline_value(
         self,
