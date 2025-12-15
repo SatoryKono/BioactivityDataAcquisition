@@ -101,9 +101,7 @@ async def _run_chembl_activity(
         resume: Resume from checkpoint
         limit: Max records
     """
-    from bioetl.application.pipelines.chembl_activity import (
-        ChEMBLActivityPipelineFactory,
-    )
+    from bioetl.infrastructure.factories import ChEMBLActivityPipelineFactory
 
     # Load configuration from centralized config
     aws_config = get_aws_config()
