@@ -1,0 +1,17 @@
+@startuml
+title Pipeline Locking Mechanism
+
+participant "Pipeline Worker" as Worker
+participant "Distributed Lock Manager (e.g., Redis)" as LockManager
+database "Data Lake" as Lake
+
+Worker -> LockManager: Acquire lock for "chembl_activity"
+alt Lock acquired successfully
+    LockManager --> Worker: Lock granted
+    Worker -> Lake: Perform writes
+    Worker -> LockManager: Release lock
+else Lock is already held
+    LockManager --> Worker: Lock denied
+    Worker --> Worker: Abort or retry
+end
+@enduml
