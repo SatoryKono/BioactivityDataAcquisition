@@ -25,8 +25,10 @@ def mock_s3_client():
 @pytest.fixture
 def mock_deltalake():
     """Fixture for mocking deltalake functions."""
-    with patch("deltalake.DeltaTable") as mock_delta_table, \
-        patch("deltalake.write_deltalake") as mock_write_deltalake:
+    with (
+        patch("deltalake.DeltaTable") as mock_delta_table,
+        patch("deltalake.write_deltalake") as mock_write_deltalake,
+    ):
         yield mock_delta_table, mock_write_deltalake
 
 
@@ -127,23 +129,24 @@ class TestDeltaWriter:
     def test_write_silver_creates_new_table(self, mock_deltalake):
         """Test write_silver creates table if not exists."""
         from deltalake.exceptions import TableNotFoundError
+
         mock_delta_table, mock_write_deltalake = mock_deltalake
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
         writer = DeltaWriter(base_path="/tmp/delta")
-        records = [{
-            "id": 1,
-            "value": "a",
-            "_run_id": "test-run",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2024-01-01T00:00:00Z"
-        }]
+        records = [
+            {
+                "id": 1,
+                "value": "a",
+                "_run_id": "test-run",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-1",
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            }
+        ]
 
         writer.write_silver(
-            table_name="test_table",
-            records=records,
-            primary_keys=["id"]
+            table_name="test_table", records=records, primary_keys=["id"]
         )
 
         mock_write_deltalake.assert_called_once()
@@ -155,19 +158,19 @@ class TestDeltaWriter:
         mock_delta_table.return_value = mock_table_instance
 
         writer = DeltaWriter(base_path="/tmp/delta")
-        records = [{
-            "id": 1,
-            "value": "a",
-            "_run_id": "test-run",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-1",
-            "_ingestion_ts": "2024-01-01T00:00:00Z"
-        }]
+        records = [
+            {
+                "id": 1,
+                "value": "a",
+                "_run_id": "test-run",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-1",
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            }
+        ]
 
         writer.write_silver(
-            table_name="test_table",
-            records=records,
-            primary_keys=["id"]
+            table_name="test_table", records=records, primary_keys=["id"]
         )
 
         mock_table_instance.merge.assert_called_once()
@@ -178,9 +181,7 @@ class TestDeltaWriter:
 
         with pytest.raises(ValueError, match="No records to write"):
             writer.write_silver(
-                table_name="test_table",
-                records=[],
-                primary_keys=["id"]
+                table_name="test_table", records=[], primary_keys=["id"]
             )
 
 
@@ -199,11 +200,7 @@ class TestGoldWriter:
         writer = GoldWriter(base_path="/tmp/gold")
         records = [{"id": 1, "value": "a"}]
 
-        writer.write_gold(
-            table_name="gold_table",
-            records=records,
-            mode="overwrite"
-        )
+        writer.write_gold(table_name="gold_table", records=records, mode="overwrite")
 
         mock_write_deltalake.assert_called_once()
         args, kwargs = mock_write_deltalake.call_args
