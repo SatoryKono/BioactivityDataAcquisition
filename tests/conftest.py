@@ -33,8 +33,10 @@ def pytest_configure(config: Any) -> None:
     try:
         import botocore
     except ImportError:
-        sys.modules["botocore"] = MagicMock()
-        sys.modules["botocore.exceptions"] = MagicMock()
+        mock_botocore = MagicMock()
+        mock_botocore.exceptions.ClientError = type('ClientError', (Exception,), {})
+        sys.modules["botocore"] = mock_botocore
+        sys.modules["botocore.exceptions"] = mock_botocore.exceptions
 
     # Mock boto3 if not installed
     try:
