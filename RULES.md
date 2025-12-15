@@ -70,7 +70,7 @@ class DataSourcePort(Protocol):
 ### 2.1.1. Инфраструктура Delta Lake
 - **Engine**: Использовать `delta-rs` (Rust core) для Python-воркеров для производительности.
 - **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
-- **Maintenance**: Обязательный запуск `VACUUM` с `retention_period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения.
+- **Maintenance**: Обязательный запуск `VACUUM` с `retention_period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения. **VACUUM MUST** запускаться еженедельно.
 - **Forensic Retention**: По умолчанию 7 дней. Для таблиц класса critical (Core Data) допустимо увеличение до 30 дней через конфиг (`forensic_retention: true`), если позволяет бюджет.
 
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
@@ -209,13 +209,14 @@ class DataSourcePort(Protocol):
 **Invariant**:
 - Потеря блокировки = Потеря права на запись.
 - Если Heartbeat не прошел, воркер **MUST** аварийно завершиться до попытки коммита данных.
+- **Critical Section Guard**: Воркер **MUST** явно проверить валидность своего Fencing Token в Redis непосредственно перед финализацией транзакции (Commit).
 
 ### 3.4. Метрики Качества Данных (DQ Metrics)
-Метрики записываются в таблицу `dq_metrics` для каждого прогона:
-- `null_rate_{column}`: % NULL значений.
-- `unique_count_{column}`: кардинальность.
-- `schema_violations`: количество записей, не прошедших валидацию.
-- `freshness_lag_hours`: разница между `max(updated_at)` и `now()`.
+Метрики экспортируются в формате Prometheus с использованием лейблов для агрегации:
+- `dq_validation_score{check="null_rate", column="..."}`: % NULL значений.
+- `dq_validation_score{check="unique_count", column="..."}`: кардинальность.
+- `dq_validation_score{check="schema_violations", column="all"}`: кол-во невалидных записей.
+- `data_freshness_seconds`: разница между `now()` и `max(updated_at)`.
 
 ### 3.4.1. Детекция Аномалий DQ
 - **Baseline (Базовая линия)**: Скользящее среднее за последние 30 дней.
@@ -289,7 +290,7 @@ class DataSourcePort(Protocol):
 - **Classification**: Public / Internal / Restricted.
 - **IAM**: Принцип Least Privilege. Разделение ролей `writer` (пайплайн) и `reader` (аналитик).
 - **Bronze**: Хранить как есть (Internal).
-- **Silver**: Хэшировать PII поля: `sha256(lowercase(value) + SALT)` (Restricted).
+- **Silver**: Хэшировать PII поля: `sha256(lowercase(value) + SALT)` (Restricted). **PII fields MUST be salted.**
 - **Gold**: PII исключается или агрегируется (Public/Internal).
 
 ### 5.4.1. Advanced Salt Rotation
