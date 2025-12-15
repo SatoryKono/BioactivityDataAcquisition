@@ -129,7 +129,9 @@ class GoldWriter:
         elif mode in ("overwrite", "append"):
             self._write_simple(table_path, records, mode, partition_cols)
         else:
-            raise ValueError(f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'")
+            raise ValueError(
+                f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'"
+            )
 
     def _write_simple(
         self,
@@ -295,9 +297,7 @@ class GoldWriter:
         if current_only and "is_current" in arrow_table.column_names:
             import pyarrow.compute as pc
 
-            arrow_table = arrow_table.filter(
-                pc.equal(arrow_table["is_current"], True)
-            )
+            arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
 
         # Convert to list of dicts
         return arrow_table.to_pylist()
