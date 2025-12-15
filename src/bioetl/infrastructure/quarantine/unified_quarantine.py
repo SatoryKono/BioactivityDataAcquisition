@@ -19,7 +19,7 @@ Architecture:
 import hashlib
 import json
 from collections.abc import Iterator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
@@ -122,7 +122,7 @@ class UnifiedQuarantine:
 
         # Prepare quarantine record
         record = {
-            "ingestion_ts": datetime.utcnow().isoformat(),
+            "ingestion_ts": datetime.now(timezone.utc).isoformat(),
             "pipeline": pipeline,
             "error_code": error_code,
             "payload": payload_json,
@@ -266,7 +266,7 @@ class UnifiedQuarantine:
             mask = pc.and_(mask, pc.equal(arrow_table["error_code"], error_code))
 
         # Filter by max_age_days
-        cutoff_date = (datetime.utcnow() - timedelta(days=max_age_days)).isoformat()
+        cutoff_date = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
         mask = pc.and_(
             mask,
             pc.greater_equal(arrow_table["ingestion_ts"], cutoff_date),
@@ -314,7 +314,7 @@ class UnifiedQuarantine:
             return 0
 
         # Calculate cutoff date
-        cutoff_date = (datetime.utcnow() - timedelta(days=older_than_days)).isoformat()
+        cutoff_date = (datetime.now(timezone.utc) - timedelta(days=older_than_days)).isoformat()
 
         # Delete old records using Delta Lake delete
         # Build predicate: pipeline = 'X' AND ingestion_ts < 'YYYY-MM-DD'
