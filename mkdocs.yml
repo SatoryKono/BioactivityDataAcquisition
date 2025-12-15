@@ -1,0 +1,54 @@
+# mkdocs.yml
+site_name: BioETL Project
+site_url: https://SatoryKono.github.io/BioactivityDataAcquisition/
+repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition
+repo_name: SatoryKono/BioactivityDataAcquisition
+edit_uri: "edit/main/docs/"
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light vs dark mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - mermaid2
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - toc:
+      permalink: true
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Governance:
+    - Project Rules: 01-governance/rules.md
+  - Architecture:
+    - System Context: 02-architecture/system-context.md
+    - Data Flow: 02-architecture/data-flow.md
+  - Guides:
+    - Quick Start: 03-guides/quick-start.md
+  - Operations:
+    - Runbooks: 05-operations/runbooks/index.md
