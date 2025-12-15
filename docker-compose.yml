@@ -1,0 +1,97 @@
+# BioETL Docker Compose
+# Local development environment: Postgres, Redis, MinIO (S3-compatible)
+
+version: '3.8'
+
+services:
+  # PostgreSQL for metadata storage
+  postgres:
+    image: postgres:16-alpine
+    container_name: bioetl-postgres
+    environment:
+      POSTGRES_DB: bioetl
+      POSTGRES_USER: bioetl
+      POSTGRES_PASSWORD: bioetl_dev_pass
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bioetl"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bioetl-network
+
+  # Redis for distributed locking
+  redis:
+    image: redis:7-alpine
+    container_name: bioetl-redis
+    command: redis-server --appendonly yes --requirepass bioetl_redis_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - bioetl-network
+
+  # MinIO (S3-compatible object storage)
+  minio:
+    image: minio/minio:latest
+    container_name: bioetl-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: bioetl
+      MINIO_ROOT_PASSWORD: bioetl_minio_pass
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bioetl-network
+
+  # MinIO Client (for bucket initialization)
+  minio-init:
+    image: minio/mc:latest
+    container_name: bioetl-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 bioetl bioetl_minio_pass;
+      mc mb --ignore-existing local/bioetl-bronze;
+      mc mb --ignore-existing local/bioetl-silver;
+      mc mb --ignore-existing local/bioetl-gold;
+      mc mb --ignore-existing local/bioetl-checkpoints;
+      mc ilm add --expiry-days 90 local/bioetl-bronze;
+      echo 'Buckets initialized successfully';
+      "
+    networks:
+      - bioetl-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  bioetl-network:
+    driver: bridge

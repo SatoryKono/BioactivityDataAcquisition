@@ -1,0 +1,36 @@
+# ADR-001: Why Delta Lake over Raw Parquet?
+
+*   **Status**: Accepted
+*   **Date**: 2025-05-20 (Implicitly from RULES.md v4.2)
+*   **Context**: The project requires a reliable, high-performance storage format for the Silver (normalized) and Gold (aggregated) layers of the data warehouse. The primary candidates were raw Apache Parquet and Delta Lake.
+
+## The Decision
+
+We have chosen **Delta Lake** as the mandatory format for the Silver and Gold layers. Raw Parquet **MUST NOT** be used for these layers.
+
+This decision is codified in Section 2.1 of `RULES.md`.
+
+## Justification
+
+While Parquet is an excellent columnar storage format, it lacks critical features for building a robust data warehouse. Delta Lake is a storage layer built on top of Parquet that provides these missing features:
+
+1.  **ACID Transactions**: Delta Lake brings atomicity, consistency, isolation, and durability to data lake operations. This is crucial for `MERGE` (upsert) operations, which are the primary mechanism for loading data into the Silver layer. With raw Parquet, handling updates and deletes is complex and prone to race conditions.
+
+2.  **Schema Enforcement & Evolution**:
+    *   **Enforcement**: Delta Lake prevents data with incorrect schemas from being written, which protects the data warehouse from corruption.
+    *   **Evolution**: It provides clear mechanisms for evolving the schema over time (e.g., adding new columns), which is essential for a long-running project.
+
+3.  **Time Travel (Data Versioning)**: The ability to query data "as of" a specific timestamp or version is an invaluable tool for:
+    *   **Auditing**: Understanding how data has changed.
+    *   **Debugging**: Pinpointing when bad data was introduced.
+    *   **Rollbacks**: Quickly reverting the state of a table in case of a faulty data load.
+
+4.  **Unified Batch and Streaming**: Delta Lake is designed to be a single source of truth for both batch and streaming workloads, which provides future-proofing for the architecture.
+
+5.  **Performance Optimizations**: Features like `OPTIMIZE` (file compaction), `Z-ORDER` (data skipping), and caching significantly improve query performance compared to a raw collection of Parquet files, which can suffer from the "small files problem".
+
+## Consequences
+
+*   **Increased Dependency**: The project now has a hard dependency on the `delta-rs` library.
+*   **Operational Overhead**: The database requires regular maintenance (`VACUUM`, `OPTIMIZE`). This is enforced as a weekly job in `RULES.md`.
+*   **Vendor Lock-in**: While Delta Lake is an open format, it is most heavily supported by Databricks. However, the growing ecosystem and open-source Rust core (`delta-rs`) mitigate this risk.
