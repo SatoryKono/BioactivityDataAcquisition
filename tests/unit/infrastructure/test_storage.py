@@ -174,6 +174,11 @@ class TestDeltaWriter:
         mock_delta_table, mock_write_deltalake = mock_delta_writer
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
+        # Set up merge chain
+        mock_merge = MagicMock()
+        mock_table_instance.merge.return_value = mock_merge
+        mock_merge.when_matched_update_all.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
         writer = DeltaWriter(base_path="/tmp/delta")
         records = [
