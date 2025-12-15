@@ -117,8 +117,7 @@ class BronzeWriter:
         # Generate S3 key (path)
         date_str = date.strftime("%Y-%m-%d")
         s3_key = (
-            f"bronze/v1/{provider}/{entity}/{date_str}/"
-            f"batch_{batch_id}.jsonl.zst"
+            f"bronze/v1/{provider}/{entity}/{date_str}/" f"batch_{batch_id}.jsonl.zst"
         )
 
         # Compress data in memory
