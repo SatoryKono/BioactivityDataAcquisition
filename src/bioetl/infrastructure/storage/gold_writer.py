@@ -15,7 +15,6 @@ Architecture:
 """
 
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 import pandera as pa
@@ -153,7 +152,6 @@ class GoldWriter:
             mode=mode,
             partition_by=partition_cols,
             storage_options=self.storage_options,
-            engine="rust",
         )
 
     def _write_scd2(
@@ -208,7 +206,6 @@ class GoldWriter:
                 mode="append",
                 partition_by=partition_cols,
                 storage_options=self.storage_options,
-                engine="rust",
             )
 
     def _merge_scd2(
