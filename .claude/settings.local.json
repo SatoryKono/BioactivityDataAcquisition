@@ -16,7 +16,9 @@
       "Bash(find:*)",
       "Bash(python -m venv:*)",
       "Bash(.venv/Scripts/pip install:*)",
-      "Bash(.venv/Scripts/python -m pytest:*)"
+      "Bash(.venv/Scripts/python -m pytest:*)",
+      "Bash(.venv/Scripts/pip:*)",
+      "Bash(.venv/Scripts/python:*)"
     ]
   }
 }

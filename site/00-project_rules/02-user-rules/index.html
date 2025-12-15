@@ -1,119 +1,231 @@
 
-<!DOCTYPE html>
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://SatoryKono.github.io/BioactivityDataAcquisition/00-project_rules/02-user-rules/">
+      
+      
+        <link rel="prev" href="../01-project-rules/">
+      
+      
+        <link rel="next" href="../03-file-policy/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>User Rules - BioETL Project</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
 
-<html class="no-js" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link href="https://SatoryKono.github.io/BioactivityDataAcquisition/00-project_rules/02-user-rules/" rel="canonical"/>
-<link href="../01-project-rules/" rel="prev"/>
-<link href="../03-file-policy/" rel="next"/>
-<link href="../../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.6.1, mkdocs-material-9.6.22" name="generator"/>
-<title>User Rules - BioETL Project</title>
-<link href="../../assets/stylesheets/main.84d31ad4.min.css" rel="stylesheet"/>
-<link href="../../assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
-<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
-<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-</head>
-<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
-<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
-<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
-<label class="md-overlay" for="__drawer"></label>
-<div data-md-component="skip">
-<a class="md-skip" href="#user-rules">
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/mermaid.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#user-rules" class="md-skip">
           Skip to content
         </a>
-</div>
-<div data-md-component="announce">
-</div>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
 <header class="md-header" data-md-component="header">
-<nav aria-label="Header" class="md-header__inner md-grid">
-<a aria-label="BioETL Project" class="md-header__button md-logo" data-md-component="logo" href="../.." title="BioETL Project">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
-</a>
-<label class="md-header__button md-icon" for="__drawer">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
-</label>
-<div class="md-header__title" data-md-component="header-title">
-<div class="md-header__ellipsis">
-<div class="md-header__topic">
-<span class="md-ellipsis">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BioETL Project" class="md-header__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
             BioETL Project
           </span>
-</div>
-<div class="md-header__topic" data-md-component="header-topic">
-<span class="md-ellipsis">
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
               User Rules
             
           </span>
-</div>
-</div>
-</div>
-<form class="md-header__option" data-md-component="palette">
-<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
-<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
-</label>
-<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
-<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
-</label>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
 </form>
-<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-<label class="md-header__button md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
-</label>
-<div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="__search"></label>
-<div class="md-search__inner" role="search">
-<form class="md-search__form" name="search">
-<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
-<label class="md-search__icon md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
-</label>
-<nav aria-label="Search" class="md-search__options">
-<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
-</button>
-</nav>
-<div class="md-search__suggest" data-md-component="search-suggest"></div>
-</form>
-<div class="md-search__output">
-<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
-<div class="md-search-result" data-md-component="search-result">
-<div class="md-search-result__meta">
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
             Initializing search
           </div>
-<ol class="md-search-result__list" role="presentation"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="md-header__source">
-<a class="md-source" data-md-component="source" href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
-</div>
-<div class="md-source__repository">
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
     SatoryKono/BioactivityDataAcquisition
   </div>
 </a>
-</div>
-</nav>
+      </div>
+    
+  </nav>
+  
 </header>
-<div class="md-container" data-md-component="container">
-<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
-<div class="md-grid">
-<ul class="md-tabs__list">
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../..">
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -122,9 +234,17 @@
   Home
 
       </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../00-map/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../00-map/" class="md-tabs__link">
         
   
   
@@ -133,54 +253,119 @@
   Project Map
 
       </a>
-</li>
-<li class="md-tabs__item md-tabs__item--active">
-<a class="md-tabs__link" href="../00-rules-summary/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../00-rules-summary/" class="md-tabs__link">
           
   
   
   Project Rules
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../02-architecture/system-context/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-architecture/system-context/" class="md-tabs__link">
           
   
   
   Architecture
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../03-guides/getting-started/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-guides/getting-started/" class="md-tabs__link">
           
   
   
   Guides
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../04-reference/cli/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-reference/cli/" class="md-tabs__link">
           
   
   
   Reference
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../05-operations/runbooks/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-operations/runbooks/" class="md-tabs__link">
           
   
   
   Operations
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../mermaid-test/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../mermaid-test/" class="md-tabs__link">
         
   
   
@@ -189,9 +374,17 @@
   Mermaid Test
 
       </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../RULES/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../RULES/" class="md-tabs__link">
         
   
   
@@ -200,9 +393,17 @@
   RULES
 
       </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../01-governance/rules/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../01-governance/rules/" class="md-tabs__link">
         
   
   
@@ -211,892 +412,1953 @@
   Governance Rules
 
       </a>
-</li>
-</ul>
-</div>
+    </li>
+  
+
+      
+    </ul>
+  </div>
 </nav>
-<main class="md-main" data-md-component="main">
-<div class="md-main__inner md-grid">
-<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
-<label class="md-nav__title" for="__drawer">
-<a aria-label="BioETL Project" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="BioETL Project">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
-</a>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BioETL Project" class="md-nav__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
     BioETL Project
   </label>
-<div class="md-nav__source">
-<a class="md-source" data-md-component="source" href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
-</div>
-<div class="md-source__repository">
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
     SatoryKono/BioactivityDataAcquisition
   </div>
 </a>
-</div>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../..">
-<span class="md-ellipsis">
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Home
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-map/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Project Map
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
-<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
     Project Rules
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_3">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
             Project Rules
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../00-rules-summary/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-rules-summary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Summary
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../01-project-rules/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-project-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Full Rules
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
     User Rules
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="./">
-<span class="md-ellipsis">
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
     User Rules
     
   </span>
-</a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#0-bioetl">
-<span class="md-ellipsis">
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-bioetl" class="md-nav__link">
+    <span class="md-ellipsis">
       0. Глобальные инварианты BioETL (обязательно)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#rfc-2119">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#rfc-2119" class="md-nav__link">
+    <span class="md-ellipsis">
       Уровни Требований (RFC 2119)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_1">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
       Назначение
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#1-cursor">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#1-cursor" class="md-nav__link">
+    <span class="md-ellipsis">
       1. Роль пользователя в Cursor
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#2">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
       2. Общие требования при редактировании
     </span>
-</a>
-<nav aria-label="2. Общие требования при редактировании" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#21-must">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Общие требования при редактировании">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.1. Детерминизм (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#22-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#22-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.2. Идентификаторы (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#23-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#23-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.3. Схемы и валидация (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#24-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#24-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.4. Логирование и метаданные (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#25-http-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#25-http-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.5. HTTP/внешние источники (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#26-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#26-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.6. Ввод/вывод данных (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#27-medallion-architecture-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#27-medallion-architecture-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.7. Medallion Architecture (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#28-quarantine-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#28-quarantine-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.8. Quarantine (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#29-backfillreplay-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#29-backfillreplay-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.9. Backfill/Replay (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#210-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#210-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.10. Документация (MUST)
     </span>
-</a>
-<nav aria-label="2.10. Документация (MUST)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#2101-must">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2.10. Документация (MUST)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2101-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.10.1. Именование файлов документации (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#211-should">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#211-should" class="md-nav__link">
+    <span class="md-ellipsis">
       2.11. Диаграммы (SHOULD)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#212-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#212-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.12. Код-стиль (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#213-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#213-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.13. Конкурентность и блокировки (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#214-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#214-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.14. Рефакторинг модулей (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#3-must-not">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#3-must-not" class="md-nav__link">
+    <span class="md-ellipsis">
       3. Чего делать нельзя (MUST NOT)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#4-disaster-recovery-should">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#4-disaster-recovery-should" class="md-nav__link">
+    <span class="md-ellipsis">
       4. Disaster Recovery (SHOULD)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#5-pr-">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#5-pr-" class="md-nav__link">
+    <span class="md-ellipsis">
       5. Шаблон PR-чеклиста
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../03-file-policy/">
-<span class="md-ellipsis">
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-file-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     File Policy
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../04-extending-bioetl/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-extending-bioetl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Extending BioETL
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../05-cleanup-policy/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-cleanup-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Cleanup Policy
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../06-rules-mapping/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-rules-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Rules Mapping
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../07-consistency-check/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-consistency-check/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Consistency Check
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../AUDIT-REPORT/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AUDIT-REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Audit Report
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
-<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Architecture
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_4">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
             Architecture
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/system-context/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/system-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     System Context
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/data-flow/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Data Flow
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/diagrams/00-diagramming-policy/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/diagrams/00-diagramming-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Diagramming Policy
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/diagrams/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/diagrams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Diagrams
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_4_5" type="checkbox"/>
-<label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Decisions
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_4_5_label" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_4_5">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
             Decisions
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-001-delta-lake-vs-parquet/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-001-delta-lake-vs-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-001: Delta Lake
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-002-medallion-architecture/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-002-medallion-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-002: Medallion
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-003-redis-for-distributed-locking/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-003-redis-for-distributed-locking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-003: Redis Locking
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-004: Pydantic
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
-<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Guides
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_5">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
             Guides
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/getting-started/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Getting Started
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/quick-start/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Quick Start
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/running-pipelines/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/running-pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Running Pipelines
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/troubleshooting/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Troubleshooting
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
-<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Reference
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_6">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
             Reference
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/cli/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     CLI
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_6_2" type="checkbox"/>
-<label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     API
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_6_2_label" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_6_2">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
             API
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Overview
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/application/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Application
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/domain/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/domain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Domain
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/infrastructure/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Infrastructure
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_6_3" type="checkbox"/>
-<label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Pipelines
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_6_3_label" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_6_3">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
             Pipelines
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/pipelines/chembl_activity/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/pipelines/chembl_activity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ChEMBL Activity
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
-<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Operations
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_7">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
             Operations
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Overview
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/incident-response/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/incident-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Incident Response
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/data-recovery/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/data-recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Data Recovery
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/scaling/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Scaling
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/pipeline-failure-critical/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/pipeline-failure-critical/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Pipeline Failure: Critical Error
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/pipeline-failure-dq/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/pipeline-failure-dq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Pipeline Failure: High DQ Rate
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/stale-lock/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/stale-lock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Stale Lock Detected
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/backfill-rebuild/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/backfill-rebuild/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Backfill and Rebuild
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/quarantine-management/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/quarantine-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Quarantine Management
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/schema-evolution/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/schema-evolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Schema Evolution
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../mermaid-test/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mermaid-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Mermaid Test
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../RULES/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../RULES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     RULES
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../01-governance/rules/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-governance/rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Governance Rules
     
   </span>
-</a>
-</li>
-</ul>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
 </nav>
-</div>
-</div>
-</div>
-<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#0-bioetl">
-<span class="md-ellipsis">
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-bioetl" class="md-nav__link">
+    <span class="md-ellipsis">
       0. Глобальные инварианты BioETL (обязательно)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#rfc-2119">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#rfc-2119" class="md-nav__link">
+    <span class="md-ellipsis">
       Уровни Требований (RFC 2119)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_1">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
       Назначение
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#1-cursor">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#1-cursor" class="md-nav__link">
+    <span class="md-ellipsis">
       1. Роль пользователя в Cursor
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#2">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
       2. Общие требования при редактировании
     </span>
-</a>
-<nav aria-label="2. Общие требования при редактировании" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#21-must">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Общие требования при редактировании">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.1. Детерминизм (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#22-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#22-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.2. Идентификаторы (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#23-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#23-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.3. Схемы и валидация (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#24-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#24-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.4. Логирование и метаданные (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#25-http-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#25-http-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.5. HTTP/внешние источники (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#26-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#26-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.6. Ввод/вывод данных (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#27-medallion-architecture-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#27-medallion-architecture-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.7. Medallion Architecture (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#28-quarantine-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#28-quarantine-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.8. Quarantine (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#29-backfillreplay-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#29-backfillreplay-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.9. Backfill/Replay (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#210-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#210-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.10. Документация (MUST)
     </span>
-</a>
-<nav aria-label="2.10. Документация (MUST)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#2101-must">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2.10. Документация (MUST)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2101-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.10.1. Именование файлов документации (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#211-should">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#211-should" class="md-nav__link">
+    <span class="md-ellipsis">
       2.11. Диаграммы (SHOULD)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#212-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#212-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.12. Код-стиль (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#213-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#213-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.13. Конкурентность и блокировки (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#214-must">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#214-must" class="md-nav__link">
+    <span class="md-ellipsis">
       2.14. Рефакторинг модулей (MUST)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#3-must-not">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#3-must-not" class="md-nav__link">
+    <span class="md-ellipsis">
       3. Чего делать нельзя (MUST NOT)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#4-disaster-recovery-should">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#4-disaster-recovery-should" class="md-nav__link">
+    <span class="md-ellipsis">
       4. Disaster Recovery (SHOULD)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#5-pr-">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#5-pr-" class="md-nav__link">
+    <span class="md-ellipsis">
       5. Шаблон PR-чеклиста
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</div>
-</div>
-</div>
-<div class="md-content" data-md-component="content">
-<article class="md-content__inner md-typeset">
-<h1 id="user-rules">User Rules<a class="headerlink" href="#user-rules" title="Permanent link">¶</a></h1>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="user-rules">User Rules<a class="headerlink" href="#user-rules" title="Permanent link">&para;</a></h1>
 <p><em>Синхронизировано с RULES.md v5.0 (2025-12-15)</em></p>
 <p>Репозиторий: SatoryKono/BioactivityDataAcquisition</p>
-<h2 id="0-bioetl">0. Глобальные инварианты BioETL (обязательно)<a class="headerlink" href="#0-bioetl" title="Permanent link">¶</a></h2>
+<h2 id="0-bioetl">0. Глобальные инварианты BioETL (обязательно)<a class="headerlink" href="#0-bioetl" title="Permanent link">&para;</a></h2>
 <p>Следующие инварианты применяются во всех задачах и правках, без исключений (выдержка из Core Prompt/Core Principles):</p>
 <ul>
 <li>Делайте «готовые действия»: минимальные патчи/команды/чек-листы, пригодные к CI сразу.</li>
@@ -1107,16 +2369,16 @@
 <li>Секреты — только из переменных окружения/секрет‑менеджера; никаких хардкодов.</li>
 <li>CLI и конфиги — однозначные контракты; единые флаги.</li>
 </ul>
-<h2 id="rfc-2119">Уровни Требований (RFC 2119)<a class="headerlink" href="#rfc-2119" title="Permanent link">¶</a></h2>
+<h2 id="rfc-2119">Уровни Требований (RFC 2119)<a class="headerlink" href="#rfc-2119" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>MUST</strong>: Абсолютное требование. Нарушение = дефект.</li>
 <li><strong>SHOULD</strong>: Сильная рекомендация. Отклонение требует обоснования в PR.</li>
 <li><strong>MAY</strong>: На усмотрение разработчика.</li>
 </ul>
-<h2 id="_1">Назначение<a class="headerlink" href="#_1" title="Permanent link">¶</a></h2>
+<h2 id="_1">Назначение<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>Эти правила описывают, как работать в Cursor с кодом и документацией проекта, сохраняя детерминизм, трассируемость и
 соответствие контрактам данных.</p>
-<h2 id="1-cursor">1. Роль пользователя в Cursor<a class="headerlink" href="#1-cursor" title="Permanent link">¶</a></h2>
+<h2 id="1-cursor">1. Роль пользователя в Cursor<a class="headerlink" href="#1-cursor" title="Permanent link">&para;</a></h2>
 <p>1.1. Вносить минимальные, атомарные правки. Категории:</p>
 <ul>
 <li>Багфикс без изменения контрактов данных.</li>
@@ -1125,8 +2387,8 @@
 <li>Правки документации, синхронизированные с кодом.</li>
 </ul>
 <p>1.2. Не «чинить» чужие подсистемы в том же PR. Отдельный PR для каждой подсистемы.</p>
-<h2 id="2">2. Общие требования при редактировании<a class="headerlink" href="#2" title="Permanent link">¶</a></h2>
-<h3 id="21-must">2.1. Детерминизм (MUST)<a class="headerlink" href="#21-must" title="Permanent link">¶</a></h3>
+<h2 id="2">2. Общие требования при редактировании<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<h3 id="21-must">2.1. Детерминизм (MUST)<a class="headerlink" href="#21-must" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1153,18 +2415,18 @@
 </tr>
 </tbody>
 </table>
-<h3 id="22-must">2.2. Идентификаторы (MUST)<a class="headerlink" href="#22-must" title="Permanent link">¶</a></h3>
+<h3 id="22-must">2.2. Идентификаторы (MUST)<a class="headerlink" href="#22-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Использовать канонические ID: ChEMBL IDs, UniProt accessions, PubChem CIDs, DOI.</li>
 <li>Surrogate ID без явного бизнес-ключа и хэша <strong>MUST NOT</strong>.</li>
 </ul>
-<h3 id="23-must">2.3. Схемы и валидация (MUST)<a class="headerlink" href="#23-must" title="Permanent link">¶</a></h3>
+<h3 id="23-must">2.3. Схемы и валидация (MUST)<a class="headerlink" href="#23-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Любые изменения столбцов/типов/допустимых значений <strong>MUST</strong> проходить через Pandera-схемы.</li>
 <li>Порядок колонок и допустимые NULL фиксированы. Смена = мажорная версия схемы и миграция.</li>
 <li>Sentinel values (-1, "N/A", 9999) <strong>MUST NOT</strong>.</li>
 </ul>
-<h3 id="24-must">2.4. Логирование и метаданные (MUST)<a class="headerlink" href="#24-must" title="Permanent link">¶</a></h3>
+<h3 id="24-must">2.4. Логирование и метаданные (MUST)<a class="headerlink" href="#24-must" title="Permanent link">&para;</a></h3>
 <p>Структурные JSON-логи с полями:</p>
 <ul>
 <li><code>pipeline_version</code></li>
@@ -1185,7 +2447,7 @@
 | <code>dataset</code> | SHOULD |
 | <code>record_count</code> | SHOULD |</p>
 <p>Дополнительно: запрещено использовать <code>print()</code> для логирования; только структурные логи через UnifiedLogger.</p>
-<h3 id="25-http-must">2.5. HTTP/внешние источники (MUST)<a class="headerlink" href="#25-http-must" title="Permanent link">¶</a></h3>
+<h3 id="25-http-must">2.5. HTTP/внешние источники (MUST)<a class="headerlink" href="#25-http-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Только через <code>UnifiedAPIClient</code> или специализированные клиенты.</li>
 <li>Таймауты, ретраи с backoff, TTL-кэш, circuit breaker.</li>
@@ -1197,14 +2459,14 @@
 | Trigger | 5 consecutive errors |
 | Open Duration | 5 минут |
 | Recovery | Half-Open → 1 пробный запрос |</p>
-<h3 id="26-must">2.6. Ввод/вывод данных (MUST)<a class="headerlink" href="#26-must" title="Permanent link">¶</a></h3>
+<h3 id="26-must">2.6. Ввод/вывод данных (MUST)<a class="headerlink" href="#26-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>CSV/Parquet с фиксированным порядком столбцов.</li>
 <li>Нормализованные NA/NULL.</li>
 <li>Финальные файлы неизменяемы.</li>
 <li>Контрольные суммы (BLAKE2), размер, строки, хэш бизнес-ключа — в <code>meta.yaml</code> и QC-отчёте.</li>
 </ul>
-<h3 id="27-medallion-architecture-must">2.7. Medallion Architecture (MUST)<a class="headerlink" href="#27-medallion-architecture-must" title="Permanent link">¶</a></h3>
+<h3 id="27-medallion-architecture-must">2.7. Medallion Architecture (MUST)<a class="headerlink" href="#27-medallion-architecture-must" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1231,25 +2493,25 @@
 </tr>
 </tbody>
 </table>
-<h3 id="28-quarantine-must">2.8. Quarantine (MUST)<a class="headerlink" href="#28-quarantine-must" title="Permanent link">¶</a></h3>
+<h3 id="28-quarantine-must">2.8. Quarantine (MUST)<a class="headerlink" href="#28-quarantine-must" title="Permanent link">&para;</a></h3>
 <p>Битые данные → <code>common.quarantine</code>:</p>
 <ul>
 <li>Retention: 30 дней.</li>
 <li><code>dq_status</code>: <code>NEW</code> → <code>IGNORED</code> / <code>REPROCESSED</code>.</li>
 <li>Операции: <code>make quarantine-inspect/replay/purge</code>.</li>
 </ul>
-<h3 id="29-backfillreplay-must">2.9. Backfill/Replay (MUST)<a class="headerlink" href="#29-backfillreplay-must" title="Permanent link">¶</a></h3>
+<h3 id="29-backfillreplay-must">2.9. Backfill/Replay (MUST)<a class="headerlink" href="#29-backfillreplay-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Обязательные поля: <code>_run_id</code> (UUID), <code>_run_type</code> (<code>incremental</code> | <code>backfill</code> | <code>rebuild</code>).</li>
 <li>Merge Priority: <code>rebuild</code> &gt; <code>backfill</code> &gt; <code>incremental</code>.</li>
 <li>Lock для exclusive backfill: <code>lock:{provider}_{entity}:exclusive</code>.</li>
 </ul>
-<h3 id="210-must">2.10. Документация (MUST)<a class="headerlink" href="#210-must" title="Permanent link">¶</a></h3>
+<h3 id="210-must">2.10. Документация (MUST)<a class="headerlink" href="#210-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Любое изменение контрактов данных <strong>MUST</strong> сопровождаться синхронной правкой в <code>docs/</code> и примеров CLI.</li>
 <li>Breaking changes: лейбл в PR, 14-дневный deprecation period.</li>
 </ul>
-<h4 id="2101-must">2.10.1. Именование файлов документации (MUST)<a class="headerlink" href="#2101-must" title="Permanent link">¶</a></h4>
+<h4 id="2101-must">2.10.1. Именование файлов документации (MUST)<a class="headerlink" href="#2101-must" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Имена — только в нижнем регистре, слова через дефис (kebab‑case), без подчёркиваний.</li>
 <li>Секвенции — двузначный префикс <code>NN-</code> (например, <code>01-overview.md</code>).</li>
@@ -1257,14 +2519,14 @@
 <li>Заголовок H1 должен дублировать имя файла в Title Case.</li>
 <li>Внутренние якоря из <code>##</code> — в kebab‑case.</li>
 </ul>
-<h3 id="211-should">2.11. Диаграммы (SHOULD)<a class="headerlink" href="#211-should" title="Permanent link">¶</a></h3>
+<h3 id="211-should">2.11. Диаграммы (SHOULD)<a class="headerlink" href="#211-should" title="Permanent link">&para;</a></h3>
 <p>Соблюдать <code>docs/architecture/diagrams/00-diagramming-policy.md</code>:</p>
 <ul>
 <li>Хранить первичный текстовый формат (Mermaid/PlantUML).</li>
 <li>Один файл — одна диаграмма.</li>
 <li>Обновлять при архитектурных или pipeline-изменениях.</li>
 </ul>
-<h3 id="212-must">2.12. Код-стиль (MUST)<a class="headerlink" href="#212-must" title="Permanent link">¶</a></h3>
+<h3 id="212-must">2.12. Код-стиль (MUST)<a class="headerlink" href="#212-must" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Форматирование: ruff format (или black с идентичными настройками), длина строки 100, Python 3.10+.</li>
 <li>Импорты: isort (stdlib → third‑party → first‑party), wildcard imports запрещены.</li>
@@ -1274,7 +2536,7 @@
 <li>Минимальный порог <code>pytest --cov=src/bioetl</code> — 85%.</li>
 <li>Запрещены «магические числа» и глобальное мутабельное состояние; предпочтение композиции над наследованием.</li>
 </ul>
-<h3 id="213-must">2.13. Конкурентность и блокировки (MUST)<a class="headerlink" href="#213-must" title="Permanent link">¶</a></h3>
+<h3 id="213-must">2.13. Конкурентность и блокировки (MUST)<a class="headerlink" href="#213-must" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1306,20 +2568,20 @@
 </tbody>
 </table>
 <p><strong>Invariant</strong>: Потеря блокировки = потеря права на запись. Safety Guard <strong>MUST</strong> валидировать <code>owner_id</code> перед записью.</p>
-<h3 id="214-must">2.14. Рефакторинг модулей (MUST)<a class="headerlink" href="#214-must" title="Permanent link">¶</a></h3>
+<h3 id="214-must">2.14. Рефакторинг модулей (MUST)<a class="headerlink" href="#214-must" title="Permanent link">&para;</a></h3>
 <p>Перед рефакторингом модуля X:</p>
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Импорты</span>
-<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">"from bioetl.domain.X import"</span><span class="w"> </span>src/
-<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">"import bioetl.domain.X"</span><span class="w"> </span>src/
-<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>
-<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="c1"># Использования</span>
-<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">"X\."</span><span class="w"> </span>src/<span class="w"> </span>--include<span class="o">=</span><span class="s2">"*.py"</span>
-<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a>
-<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="c1"># Тесты</span>
-<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">"X"</span><span class="w"> </span>tests/<span class="w"> </span>--include<span class="o">=</span><span class="s2">"*.py"</span>
-<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a>
-<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="c1"># Re-exports</span>
-<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">"X"</span><span class="w"> </span>src/bioetl/domain/__init__.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Импорты</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;from bioetl.domain.X import&quot;</span><span class="w"> </span>src/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;import bioetl.domain.X&quot;</span><span class="w"> </span>src/
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Использования</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;X\.&quot;</span><span class="w"> </span>src/<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.py&quot;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Тесты</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;X&quot;</span><span class="w"> </span>tests/<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.py&quot;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Re-exports</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;X&quot;</span><span class="w"> </span>src/bioetl/domain/__init__.py
 </code></pre></div>
 <p><strong>Требования</strong>:</p>
 <ul>
@@ -1338,7 +2600,7 @@
 <li>[ ] <code>CHANGELOG.md</code> обновлён</li>
 <li>[ ] PR description содержит breaking changes</li>
 </ul>
-<h2 id="3-must-not">3. Чего делать нельзя (MUST NOT)<a class="headerlink" href="#3-must-not" title="Permanent link">¶</a></h2>
+<h2 id="3-must-not">3. Чего делать нельзя (MUST NOT)<a class="headerlink" href="#3-must-not" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1393,7 +2655,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="4-disaster-recovery-should">4. Disaster Recovery (SHOULD)<a class="headerlink" href="#4-disaster-recovery-should" title="Permanent link">¶</a></h2>
+<h2 id="4-disaster-recovery-should">4. Disaster Recovery (SHOULD)<a class="headerlink" href="#4-disaster-recovery-should" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1418,7 +2680,7 @@
 | Повреждение Bronze/Silver | Stop → S3 Point-in-Time Restore → <code>--full-rebuild</code> |
 | Потеря чекпоинта | <code>--ignore-checkpoint</code> |
 | Отказ региона | DNS Failover → Terraform в резервном регионе |</p>
-<h2 id="5-pr-">5. Шаблон PR-чеклиста<a class="headerlink" href="#5-pr-" title="Permanent link">¶</a></h2>
+<h2 id="5-pr-">5. Шаблон PR-чеклиста<a class="headerlink" href="#5-pr-" title="Permanent link">&para;</a></h2>
 <ul>
 <li>[ ] Изменены только необходимые файлы; атомарность соблюдена.</li>
 <li>[ ] Схемы Pandera обновлены; версия/column-order/nullable отражены.</li>
@@ -1432,34 +2694,69 @@
 <li>[ ] Документация следует правилам именования (kebab‑case, <code>NN-</code> префикс, H1=имя файла).</li>
 <li>[ ] Отсутствуют вызовы <code>print()</code>; используется UnifiedLogger для структурных логов.</li>
 </ul>
-</article>
-</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
-</div>
-<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
   Back to top
 </button>
-</main>
-<footer class="md-footer">
-<div class="md-footer-meta md-typeset">
-<div class="md-footer-meta__inner md-grid">
-<div class="md-copyright">
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
       Material for MkDocs
     </a>
+  
 </div>
-</div>
-</div>
+      
+    </div>
+  </div>
 </footer>
-</div>
-<div class="md-dialog" data-md-component="dialog">
-<div class="md-dialog__inner md-typeset"></div>
-</div>
-<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
-<script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
-</body>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../assets/javascripts/mermaid.min.js"></script>
+      
+        <script src="../../assets/javascripts/mermaid-init.js"></script>
+      
+    
+  </body>
 </html>

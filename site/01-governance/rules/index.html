@@ -1,118 +1,229 @@
 
-<!DOCTYPE html>
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://SatoryKono.github.io/BioactivityDataAcquisition/01-governance/rules/">
+      
+      
+        <link rel="prev" href="../../RULES/">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>Governance Rules - BioETL Project</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
 
-<html class="no-js" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<link href="https://SatoryKono.github.io/BioactivityDataAcquisition/01-governance/rules/" rel="canonical"/>
-<link href="../../RULES/" rel="prev"/>
-<link href="../../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.6.1, mkdocs-material-9.6.22" name="generator"/>
-<title>Governance Rules - BioETL Project</title>
-<link href="../../assets/stylesheets/main.84d31ad4.min.css" rel="stylesheet"/>
-<link href="../../assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
-<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
-<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-</head>
-<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
-<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
-<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
-<label class="md-overlay" for="__drawer"></label>
-<div data-md-component="skip">
-<a class="md-skip" href="#bioetl">
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/mermaid.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bioetl" class="md-skip">
           Skip to content
         </a>
-</div>
-<div data-md-component="announce">
-</div>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
 <header class="md-header" data-md-component="header">
-<nav aria-label="Header" class="md-header__inner md-grid">
-<a aria-label="BioETL Project" class="md-header__button md-logo" data-md-component="logo" href="../.." title="BioETL Project">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
-</a>
-<label class="md-header__button md-icon" for="__drawer">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
-</label>
-<div class="md-header__title" data-md-component="header-title">
-<div class="md-header__ellipsis">
-<div class="md-header__topic">
-<span class="md-ellipsis">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BioETL Project" class="md-header__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
             BioETL Project
           </span>
-</div>
-<div class="md-header__topic" data-md-component="header-topic">
-<span class="md-ellipsis">
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
               Governance Rules
             
           </span>
-</div>
-</div>
-</div>
-<form class="md-header__option" data-md-component="palette">
-<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
-<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
-</label>
-<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
-<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
-</label>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
 </form>
-<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-<label class="md-header__button md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
-</label>
-<div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="__search"></label>
-<div class="md-search__inner" role="search">
-<form class="md-search__form" name="search">
-<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
-<label class="md-search__icon md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
-</label>
-<nav aria-label="Search" class="md-search__options">
-<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
-</button>
-</nav>
-<div class="md-search__suggest" data-md-component="search-suggest"></div>
-</form>
-<div class="md-search__output">
-<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
-<div class="md-search-result" data-md-component="search-result">
-<div class="md-search-result__meta">
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
             Initializing search
           </div>
-<ol class="md-search-result__list" role="presentation"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="md-header__source">
-<a class="md-source" data-md-component="source" href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
-</div>
-<div class="md-source__repository">
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
     SatoryKono/BioactivityDataAcquisition
   </div>
 </a>
-</div>
-</nav>
+      </div>
+    
+  </nav>
+  
 </header>
-<div class="md-container" data-md-component="container">
-<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
-<div class="md-grid">
-<ul class="md-tabs__list">
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../..">
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -121,9 +232,17 @@
   Home
 
       </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../00-map/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../00-map/" class="md-tabs__link">
         
   
   
@@ -132,54 +251,117 @@
   Project Map
 
       </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../00-project_rules/00-rules-summary/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../00-project_rules/00-rules-summary/" class="md-tabs__link">
           
   
   
   Project Rules
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../02-architecture/system-context/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../02-architecture/system-context/" class="md-tabs__link">
           
   
   
   Architecture
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../03-guides/getting-started/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../03-guides/getting-started/" class="md-tabs__link">
           
   
   
   Guides
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../04-reference/cli/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../04-reference/cli/" class="md-tabs__link">
           
   
   
   Reference
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../05-operations/runbooks/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../05-operations/runbooks/" class="md-tabs__link">
           
   
   
   Operations
 
         </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../mermaid-test/">
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../mermaid-test/" class="md-tabs__link">
         
   
   
@@ -188,9 +370,17 @@
   Mermaid Test
 
       </a>
-</li>
-<li class="md-tabs__item">
-<a class="md-tabs__link" href="../../RULES/">
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../RULES/" class="md-tabs__link">
         
   
   
@@ -199,9 +389,19 @@
   RULES
 
       </a>
-</li>
-<li class="md-tabs__item md-tabs__item--active">
-<a class="md-tabs__link" href="./">
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -210,1553 +410,2817 @@
   Governance Rules
 
       </a>
-</li>
-</ul>
-</div>
+    </li>
+  
+
+      
+    </ul>
+  </div>
 </nav>
-<main class="md-main" data-md-component="main">
-<div class="md-main__inner md-grid">
-<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
-<label class="md-nav__title" for="__drawer">
-<a aria-label="BioETL Project" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="BioETL Project">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
-</a>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BioETL Project" class="md-nav__button md-logo" aria-label="BioETL Project" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
     BioETL Project
   </label>
-<div class="md-nav__source">
-<a class="md-source" data-md-component="source" href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
-</div>
-<div class="md-source__repository">
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SatoryKono/BioactivityDataAcquisition" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
     SatoryKono/BioactivityDataAcquisition
   </div>
 </a>
-</div>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../..">
-<span class="md-ellipsis">
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Home
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-map/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Project Map
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
-<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Project Rules
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_3">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
             Project Rules
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/00-rules-summary/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/00-rules-summary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Summary
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/01-project-rules/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/01-project-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Full Rules
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/02-user-rules/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/02-user-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     User Rules
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/03-file-policy/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/03-file-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     File Policy
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/04-extending-bioetl/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/04-extending-bioetl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Extending BioETL
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/05-cleanup-policy/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/05-cleanup-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Cleanup Policy
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/06-rules-mapping/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/06-rules-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Rules Mapping
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/07-consistency-check/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/07-consistency-check/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Consistency Check
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../00-project_rules/AUDIT-REPORT/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../00-project_rules/AUDIT-REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Audit Report
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
-<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Architecture
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_4">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
             Architecture
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/system-context/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/system-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     System Context
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/data-flow/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Data Flow
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/diagrams/00-diagramming-policy/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/diagrams/00-diagramming-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Diagramming Policy
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/diagrams/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/diagrams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Diagrams
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_4_5" type="checkbox"/>
-<label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Decisions
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_4_5_label" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_4_5">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
             Decisions
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-001-delta-lake-vs-parquet/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-001-delta-lake-vs-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-001: Delta Lake
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-002-medallion-architecture/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-002-medallion-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-002: Medallion
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-003-redis-for-distributed-locking/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-003-redis-for-distributed-locking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-003: Redis Locking
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ADR-004: Pydantic
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
-<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Guides
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_5">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
             Guides
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/getting-started/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Getting Started
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/quick-start/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Quick Start
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/running-pipelines/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/running-pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Running Pipelines
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../03-guides/troubleshooting/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Troubleshooting
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
-<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Reference
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_6">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
             Reference
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/cli/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     CLI
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_6_2" type="checkbox"/>
-<label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     API
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_6_2_label" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_6_2">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
             API
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Overview
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/application/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Application
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/domain/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/domain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Domain
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/api/infrastructure/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/api/infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Infrastructure
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_6_3" type="checkbox"/>
-<label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Pipelines
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_6_3_label" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="__nav_6_3">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
             Pipelines
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../04-reference/pipelines/chembl_activity/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-reference/pipelines/chembl_activity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     ChEMBL Activity
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
-<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
     Operations
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="__nav_7">
-<span class="md-nav__icon md-icon"></span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
             Operations
           </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/">
-<span class="md-ellipsis">
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Overview
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/incident-response/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/incident-response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Incident Response
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/data-recovery/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/data-recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Data Recovery
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/scaling/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Scaling
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/pipeline-failure-critical/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/pipeline-failure-critical/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Pipeline Failure: Critical Error
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/pipeline-failure-dq/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/pipeline-failure-dq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Pipeline Failure: High DQ Rate
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/stale-lock/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/stale-lock/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Stale Lock Detected
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/backfill-rebuild/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/backfill-rebuild/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Backfill and Rebuild
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/quarantine-management/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/quarantine-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Quarantine Management
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../05-operations/runbooks/schema-evolution/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-operations/runbooks/schema-evolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Schema Evolution
     
   </span>
-</a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../mermaid-test/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mermaid-test/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     Mermaid Test
     
   </span>
-</a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../RULES/">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../RULES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
     RULES
     
   </span>
-</a>
-</li>
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
-<span class="md-ellipsis">
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
     Governance Rules
     
   </span>
-<span class="md-nav__icon md-icon"></span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="./">
-<span class="md-ellipsis">
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
     Governance Rules
     
   </span>
-</a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#quick-reference">
-<span class="md-ellipsis">
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
       Введение (Quick Reference)
     </span>
-</a>
-<nav aria-label="Введение (Quick Reference)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#governance">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="Введение (Quick Reference)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#governance" class="md-nav__link">
+    <span class="md-ellipsis">
       Уровни Требований (Governance)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_1">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
       Глоссарий
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#1">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
       1. Архитектура и Слои
     </span>
-</a>
-<nav aria-label="1. Архитектура и Слои" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#11">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Архитектура и Слои">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
       1.1. Слои и Контракты
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#111-enforcement">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#111-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
       1.1.1. Обеспечение Контрактов (Enforcement)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#2-medallion">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#2-medallion" class="md-nav__link">
+    <span class="md-ellipsis">
       2. Поток Данных и Стратегия Medallion
     </span>
-</a>
-<nav aria-label="2. Поток Данных и Стратегия Medallion" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#21-medallion">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Поток Данных и Стратегия Medallion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-medallion" class="md-nav__link">
+    <span class="md-ellipsis">
       2.1. Архитектура Medallion
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#211-delta-lake">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#211-delta-lake" class="md-nav__link">
+    <span class="md-ellipsis">
       2.1.1. Инфраструктура Delta Lake
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#22-schema-drift">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#22-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
       2.2. Политика Дрейфа Схемы (Schema Drift)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#23-data-lineage">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#23-data-lineage" class="md-nav__link">
+    <span class="md-ellipsis">
       2.3. Data Lineage (Происхождение Данных)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#24-backfill-replay">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#24-backfill-replay" class="md-nav__link">
+    <span class="md-ellipsis">
       2.4. Политика Backfill / Replay
     </span>
-</a>
-<nav aria-label="2.4. Политика Backfill / Replay" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#241-backfill-lock-enforcement">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4. Политика Backfill / Replay">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241-backfill-lock-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
       2.4.1. Backfill Lock Enforcement
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#25">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#25" class="md-nav__link">
+    <span class="md-ellipsis">
       2.5. Стратегия Партиционирования
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#26-null">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#26-null" class="md-nav__link">
+    <span class="md-ellipsis">
       2.6. Политика NULL и Пропущенных Значений
     </span>
-</a>
-<nav aria-label="2.6. Политика NULL и Пропущенных Значений" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#unified-quarantine">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6. Политика NULL и Пропущенных Значений">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unified-quarantine" class="md-nav__link">
+    <span class="md-ellipsis">
       Спецификация Unified Quarantine
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_2">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
       Жизненный цикл Карантина
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_3">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
       Операции с карантином
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#27-load-strategy">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#27-load-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
       2.7. Стратегия Загрузки (Load Strategy)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#28-id-entity-id">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#28-id-entity-id" class="md-nav__link">
+    <span class="md-ellipsis">
       2.8. Генерация ID Сущности (Entity ID)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#281-robust-content-hash">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#281-robust-content-hash" class="md-nav__link">
+    <span class="md-ellipsis">
       2.8.1. Robust Content Hash
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#3">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
       3. Обработка Ошибок и Наблюдаемость
     </span>
-</a>
-<nav aria-label="3. Обработка Ошибок и Наблюдаемость" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#31">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Обработка Ошибок и Наблюдаемость">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1. Стратегия Обработки Ошибок
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#311">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#311" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.1. Классификация Ошибок
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#312-thresholds">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#312-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.2. Пороги Ошибок Батча (Thresholds)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#313-retry-backoff">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#313-retry-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.3. Параметры Retry (Backoff)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#314-circuit-breaker">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#314-circuit-breaker" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.4. Circuit Breaker (Размыкатель цепи)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#32-observability">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#32-observability" class="md-nav__link">
+    <span class="md-ellipsis">
       3.2. Наблюдаемость (Observability)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#321-log-schema">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#321-log-schema" class="md-nav__link">
+    <span class="md-ellipsis">
       3.2.1. Log Schema
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#33">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
       3.3. Конкурентность и Блокировки
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#34-dq-metrics">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#34-dq-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
       3.4. Метрики Качества Данных (DQ Metrics)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#341-dq">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#341-dq" class="md-nav__link">
+    <span class="md-ellipsis">
       3.4.1. Детекция Аномалий DQ
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#35-provider-health-monitoring">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#35-provider-health-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
       3.5. Provider Health Monitoring
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#4">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
       4. Стандарты Кода и Тестирование
     </span>
-</a>
-<nav aria-label="4. Стандарты Кода и Тестирование" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#41">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Стандарты Кода и Тестирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
       4.1. Стек и Матрица Решений
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#42">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    <span class="md-ellipsis">
       4.2. Политика Тестирования
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#5-shutdown">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#5-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
       5. Операции (Лимиты, Секреты, Shutdown)
     </span>
-</a>
-<nav aria-label="5. Операции (Лимиты, Секреты, Shutdown)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#51-rate-limiting">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Операции (Лимиты, Секреты, Shutdown)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
       5.1. Ограничение скорости (Rate Limiting)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#52">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
       5.2. Управление Секретами
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#53-graceful-shutdown">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#53-graceful-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
       5.3. Graceful Shutdown (Штатное завершение)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#531-checkpoint-recovery">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#531-checkpoint-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
       5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#54-sensitive-data">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#54-sensitive-data" class="md-nav__link">
+    <span class="md-ellipsis">
       5.4. Политика Чувствительных Данных (Sensitive Data)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#541-advanced-salt-rotation">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#541-advanced-salt-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
       5.4.1. Advanced Salt Rotation
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#55-disaster-recovery-dr">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#55-disaster-recovery-dr" class="md-nav__link">
+    <span class="md-ellipsis">
       5.5. Disaster Recovery (DR)
     </span>
-</a>
-<nav aria-label="5.5. Disaster Recovery (DR)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#551-detailed-dr-procedures-runbook">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5. Disaster Recovery (DR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#551-detailed-dr-procedures-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
       5.5.1. Detailed DR Procedures (Runbook)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#56-environments">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#56-environments" class="md-nav__link">
+    <span class="md-ellipsis">
       5.6. Среды (Environments)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#561-environment-isolation">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#561-environment-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
       5.6.1. Environment Isolation
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#6">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
       6. Документация (Автоматизация — приоритет)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#7">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
       7. Управление Изменениями
     </span>
-</a>
-<nav aria-label="7. Управление Изменениями" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#71-data-contracts">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Управление Изменениями">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-data-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
       7.1. Контракты Данных (Data Contracts)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#72-rollback-strategy">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#72-rollback-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
       7.2. Rollback Strategy
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#8-developer-experience">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#8-developer-experience" class="md-nav__link">
+    <span class="md-ellipsis">
       8. Опыт Разработчика (Developer Experience)
     </span>
-</a>
-<nav aria-label="8. Опыт Разработчика (Developer Experience)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#81">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Опыт Разработчика (Developer Experience)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81" class="md-nav__link">
+    <span class="md-ellipsis">
       8.1. Локальная настройка
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#82">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#82" class="md-nav__link">
+    <span class="md-ellipsis">
       8.2. Окружение
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_4">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение А: Источники и Библиотеки
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#b">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#b" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение B: Политика Зависимостей
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#c-error-recovery-playbook-runbook">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#c-error-recovery-playbook-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение C: Error Recovery Playbook (Runbook)
     </span>
-</a>
-<nav aria-label="Приложение C: Error Recovery Playbook (Runbook)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#severity-levels">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="Приложение C: Error Recovery Playbook (Runbook)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#severity-levels" class="md-nav__link">
+    <span class="md-ellipsis">
       Уровни Серьезности (Severity Levels)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#d">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#d" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение D: Схема Конфигурации Пайплайна
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#e-schema-evolution">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#e-schema-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение E: Примеры Schema Evolution
     </span>
-</a>
-<nav aria-label="Приложение E: Примеры Schema Evolution" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#minor-change">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="Приложение E: Примеры Schema Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minor-change" class="md-nav__link">
+    <span class="md-ellipsis">
       Minor Change (Обратная совместимость)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#major-change-breaking">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#major-change-breaking" class="md-nav__link">
+    <span class="md-ellipsis">
       Major Change (Breaking)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#e3-field-deprecation-workflow">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#e3-field-deprecation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
       E.3. Field Deprecation Workflow
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#changelog">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    <span class="md-ellipsis">
       История Изменений (Changelog)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</li>
-</ul>
+      
+    </li>
+  
+
+    
+  </ul>
 </nav>
-</div>
-</div>
-</div>
-<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#quick-reference">
-<span class="md-ellipsis">
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
       Введение (Quick Reference)
     </span>
-</a>
-<nav aria-label="Введение (Quick Reference)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#governance">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="Введение (Quick Reference)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#governance" class="md-nav__link">
+    <span class="md-ellipsis">
       Уровни Требований (Governance)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_1">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
       Глоссарий
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#1">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
       1. Архитектура и Слои
     </span>
-</a>
-<nav aria-label="1. Архитектура и Слои" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#11">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Архитектура и Слои">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
       1.1. Слои и Контракты
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#111-enforcement">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#111-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
       1.1.1. Обеспечение Контрактов (Enforcement)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#2-medallion">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#2-medallion" class="md-nav__link">
+    <span class="md-ellipsis">
       2. Поток Данных и Стратегия Medallion
     </span>
-</a>
-<nav aria-label="2. Поток Данных и Стратегия Medallion" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#21-medallion">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Поток Данных и Стратегия Medallion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-medallion" class="md-nav__link">
+    <span class="md-ellipsis">
       2.1. Архитектура Medallion
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#211-delta-lake">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#211-delta-lake" class="md-nav__link">
+    <span class="md-ellipsis">
       2.1.1. Инфраструктура Delta Lake
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#22-schema-drift">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#22-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
       2.2. Политика Дрейфа Схемы (Schema Drift)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#23-data-lineage">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#23-data-lineage" class="md-nav__link">
+    <span class="md-ellipsis">
       2.3. Data Lineage (Происхождение Данных)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#24-backfill-replay">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#24-backfill-replay" class="md-nav__link">
+    <span class="md-ellipsis">
       2.4. Политика Backfill / Replay
     </span>
-</a>
-<nav aria-label="2.4. Политика Backfill / Replay" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#241-backfill-lock-enforcement">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4. Политика Backfill / Replay">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241-backfill-lock-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
       2.4.1. Backfill Lock Enforcement
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#25">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#25" class="md-nav__link">
+    <span class="md-ellipsis">
       2.5. Стратегия Партиционирования
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#26-null">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#26-null" class="md-nav__link">
+    <span class="md-ellipsis">
       2.6. Политика NULL и Пропущенных Значений
     </span>
-</a>
-<nav aria-label="2.6. Политика NULL и Пропущенных Значений" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#unified-quarantine">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6. Политика NULL и Пропущенных Значений">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unified-quarantine" class="md-nav__link">
+    <span class="md-ellipsis">
       Спецификация Unified Quarantine
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_2">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
       Жизненный цикл Карантина
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_3">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
       Операции с карантином
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#27-load-strategy">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#27-load-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
       2.7. Стратегия Загрузки (Load Strategy)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#28-id-entity-id">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#28-id-entity-id" class="md-nav__link">
+    <span class="md-ellipsis">
       2.8. Генерация ID Сущности (Entity ID)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#281-robust-content-hash">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#281-robust-content-hash" class="md-nav__link">
+    <span class="md-ellipsis">
       2.8.1. Robust Content Hash
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#3">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
       3. Обработка Ошибок и Наблюдаемость
     </span>
-</a>
-<nav aria-label="3. Обработка Ошибок и Наблюдаемость" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#31">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Обработка Ошибок и Наблюдаемость">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1. Стратегия Обработки Ошибок
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#311">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#311" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.1. Классификация Ошибок
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#312-thresholds">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#312-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.2. Пороги Ошибок Батча (Thresholds)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#313-retry-backoff">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#313-retry-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.3. Параметры Retry (Backoff)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#314-circuit-breaker">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#314-circuit-breaker" class="md-nav__link">
+    <span class="md-ellipsis">
       3.1.4. Circuit Breaker (Размыкатель цепи)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#32-observability">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#32-observability" class="md-nav__link">
+    <span class="md-ellipsis">
       3.2. Наблюдаемость (Observability)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#321-log-schema">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#321-log-schema" class="md-nav__link">
+    <span class="md-ellipsis">
       3.2.1. Log Schema
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#33">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
       3.3. Конкурентность и Блокировки
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#34-dq-metrics">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#34-dq-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
       3.4. Метрики Качества Данных (DQ Metrics)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#341-dq">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#341-dq" class="md-nav__link">
+    <span class="md-ellipsis">
       3.4.1. Детекция Аномалий DQ
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#35-provider-health-monitoring">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#35-provider-health-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
       3.5. Provider Health Monitoring
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#4">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
       4. Стандарты Кода и Тестирование
     </span>
-</a>
-<nav aria-label="4. Стандарты Кода и Тестирование" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#41">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Стандарты Кода и Тестирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
       4.1. Стек и Матрица Решений
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#42">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    <span class="md-ellipsis">
       4.2. Политика Тестирования
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#5-shutdown">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#5-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
       5. Операции (Лимиты, Секреты, Shutdown)
     </span>
-</a>
-<nav aria-label="5. Операции (Лимиты, Секреты, Shutdown)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#51-rate-limiting">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Операции (Лимиты, Секреты, Shutdown)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
       5.1. Ограничение скорости (Rate Limiting)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#52">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#52" class="md-nav__link">
+    <span class="md-ellipsis">
       5.2. Управление Секретами
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#53-graceful-shutdown">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#53-graceful-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
       5.3. Graceful Shutdown (Штатное завершение)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#531-checkpoint-recovery">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#531-checkpoint-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
       5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#54-sensitive-data">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#54-sensitive-data" class="md-nav__link">
+    <span class="md-ellipsis">
       5.4. Политика Чувствительных Данных (Sensitive Data)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#541-advanced-salt-rotation">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#541-advanced-salt-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
       5.4.1. Advanced Salt Rotation
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#55-disaster-recovery-dr">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#55-disaster-recovery-dr" class="md-nav__link">
+    <span class="md-ellipsis">
       5.5. Disaster Recovery (DR)
     </span>
-</a>
-<nav aria-label="5.5. Disaster Recovery (DR)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#551-detailed-dr-procedures-runbook">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5. Disaster Recovery (DR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#551-detailed-dr-procedures-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
       5.5.1. Detailed DR Procedures (Runbook)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#56-environments">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#56-environments" class="md-nav__link">
+    <span class="md-ellipsis">
       5.6. Среды (Environments)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#561-environment-isolation">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#561-environment-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
       5.6.1. Environment Isolation
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#6">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
       6. Документация (Автоматизация — приоритет)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#7">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
       7. Управление Изменениями
     </span>
-</a>
-<nav aria-label="7. Управление Изменениями" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#71-data-contracts">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Управление Изменениями">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-data-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
       7.1. Контракты Данных (Data Contracts)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#72-rollback-strategy">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#72-rollback-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
       7.2. Rollback Strategy
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#8-developer-experience">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#8-developer-experience" class="md-nav__link">
+    <span class="md-ellipsis">
       8. Опыт Разработчика (Developer Experience)
     </span>
-</a>
-<nav aria-label="8. Опыт Разработчика (Developer Experience)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#81">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Опыт Разработчика (Developer Experience)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81" class="md-nav__link">
+    <span class="md-ellipsis">
       8.1. Локальная настройка
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#82">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#82" class="md-nav__link">
+    <span class="md-ellipsis">
       8.2. Окружение
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#_4">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение А: Источники и Библиотеки
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#b">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#b" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение B: Политика Зависимостей
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#c-error-recovery-playbook-runbook">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#c-error-recovery-playbook-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение C: Error Recovery Playbook (Runbook)
     </span>
-</a>
-<nav aria-label="Приложение C: Error Recovery Playbook (Runbook)" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#severity-levels">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="Приложение C: Error Recovery Playbook (Runbook)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#severity-levels" class="md-nav__link">
+    <span class="md-ellipsis">
       Уровни Серьезности (Severity Levels)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#d">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#d" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение D: Схема Конфигурации Пайплайна
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#e-schema-evolution">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#e-schema-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
       Приложение E: Примеры Schema Evolution
     </span>
-</a>
-<nav aria-label="Приложение E: Примеры Schema Evolution" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#minor-change">
-<span class="md-ellipsis">
+  </a>
+  
+    <nav class="md-nav" aria-label="Приложение E: Примеры Schema Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minor-change" class="md-nav__link">
+    <span class="md-ellipsis">
       Minor Change (Обратная совместимость)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#major-change-breaking">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#major-change-breaking" class="md-nav__link">
+    <span class="md-ellipsis">
       Major Change (Breaking)
     </span>
-</a>
+  </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#e3-field-deprecation-workflow">
-<span class="md-ellipsis">
+        
+          <li class="md-nav__item">
+  <a href="#e3-field-deprecation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
       E.3. Field Deprecation Workflow
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#changelog">
-<span class="md-ellipsis">
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    <span class="md-ellipsis">
       История Изменений (Changelog)
     </span>
-</a>
+  </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</div>
-</div>
-</div>
-<div class="md-content" data-md-component="content">
-<article class="md-content__inner md-typeset">
-<h1 id="bioetl">BioETL: Правила Проекта<a class="headerlink" href="#bioetl" title="Permanent link">¶</a></h1>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="bioetl">BioETL: Правила Проекта<a class="headerlink" href="#bioetl" title="Permanent link">&para;</a></h1>
 <p><em>Версия: 5.0 (Production Ready), 2025-12-15</em> </p>
-<h2 id="quick-reference">Введение (Quick Reference)<a class="headerlink" href="#quick-reference" title="Permanent link">¶</a></h2>
+<h2 id="quick-reference">Введение (Quick Reference)<a class="headerlink" href="#quick-reference" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1823,12 +3287,12 @@
 </tr>
 </tbody>
 </table>
-<h3 id="governance">Уровни Требований (Governance)<a class="headerlink" href="#governance" title="Permanent link">¶</a></h3>
+<h3 id="governance">Уровни Требований (Governance)<a class="headerlink" href="#governance" title="Permanent link">&para;</a></h3>
 <p>В документе используются ключевые слова согласно RFC 2119:
 - <strong>MUST</strong> (Обязательно): Абсолютное требование. Нарушение рассматривается как дефект или блокер релиза.
 - <strong>SHOULD</strong> (Рекомендуется): Сильная рекомендация. Отклонение требует явного обоснования (комментарий в PR).
 - <strong>MAY</strong> (Опционально): Разрешено, на усмотрение разработчика.</p>
-<h2 id="_1">Глоссарий<a class="headerlink" href="#_1" title="Permanent link">¶</a></h2>
+<h2 id="_1">Глоссарий<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Bronze/Silver/Gold</strong>: уровни качества данных (Medallion Architecture). </li>
 <li><strong>Port</strong>: интерфейс (Protocol) для инверсии зависимостей. </li>
@@ -1846,26 +3310,26 @@
 <li><strong>Fencing Token</strong>: Идентификатор владельца блокировки (<code>owner_id</code>) для предотвращения split-brain.</li>
 <li><strong>Game Day</strong>: Плановые учения по проверке DR процедур.</li>
 </ul>
-<h2 id="1">1. Архитектура и Слои<a class="headerlink" href="#1" title="Permanent link">¶</a></h2>
+<h2 id="1">1. Архитектура и Слои<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
 <p><strong>Философия</strong>: "Прагматичная инженерия". Избегаем избыточной сложности (Over-engineering), архитектура должна ускорять вывод продукта на рынок (time-to-market). 
 <strong>Паттерн</strong>: Слоистая архитектура с инверсией зависимостей (Ports &amp; Adapters). </p>
-<h3 id="11">1.1. Слои и Контракты<a class="headerlink" href="#11" title="Permanent link">¶</a></h3>
+<h3 id="11">1.1. Слои и Контракты<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Infrastructure (Инфраструктура/Адаптеры)</strong>: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система). </li>
 <li><strong>Application (Приложение/Пайплайны)</strong>: Оркестрация потоков данных. Определяет <em>когда</em> и <em>в каком порядке</em> вызываются порты. </li>
 <li><strong>Domain (Домен/Чистая логика)</strong>: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O). </li>
 </ul>
-<h3 id="111-enforcement">1.1.1. Обеспечение Контрактов (Enforcement)<a class="headerlink" href="#111-enforcement" title="Permanent link">¶</a></h3>
+<h3 id="111-enforcement">1.1.1. Обеспечение Контрактов (Enforcement)<a class="headerlink" href="#111-enforcement" title="Permanent link">&para;</a></h3>
 <p>Интерфейсы определяются в <code>domain/ports.py</code> через <code>typing.Protocol</code>: 
 - <strong>Design-time</strong>: <code>mypy --strict</code> проверяет соответствие типов во время сборки. Основной механизм контроля. 
 - <strong>Runtime Boundary</strong>: Опционально использовать <code>@runtime_checkable</code> только для критичных адаптеров (boundary validation). Семантика поведения в runtime не проверяется типами. </p>
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DataSourcePort</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span> 
-<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Query</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawRecord</span><span class="p">]:</span> <span class="o">...</span> 
-<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">health_check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span> 
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DataSourcePort</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span> 
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Query</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RawRecord</span><span class="p">]:</span> <span class="o">...</span> 
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">health_check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span> 
 </code></pre></div>
-<h2 id="2-medallion">2. Поток Данных и Стратегия Medallion<a class="headerlink" href="#2-medallion" title="Permanent link">¶</a></h2>
+<h2 id="2-medallion">2. Поток Данных и Стратегия Medallion<a class="headerlink" href="#2-medallion" title="Permanent link">&para;</a></h2>
 <p>Пайплайны реализуются как направленные ациклические графы (<strong>DAG</strong>). </p>
-<h3 id="21-medallion">2.1. Архитектура Medallion<a class="headerlink" href="#21-medallion" title="Permanent link">¶</a></h3>
+<h3 id="21-medallion">2.1. Архитектура Medallion<a class="headerlink" href="#21-medallion" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1903,39 +3367,39 @@
 <p><strong>Bronze Lifecycle:</strong>
 - Формат файлов (JSONL) зафиксирован в версии пути (<code>/v1/</code>).
 - Изменение формата требует новой ветки (<code>/v2/</code>). Миграция "in-place" запрещена.</p>
-<h3 id="211-delta-lake">2.1.1. Инфраструктура Delta Lake<a class="headerlink" href="#211-delta-lake" title="Permanent link">¶</a></h3>
+<h3 id="211-delta-lake">2.1.1. Инфраструктура Delta Lake<a class="headerlink" href="#211-delta-lake" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Engine</strong>: Использовать <code>delta-rs</code> (Rust core) для Python-воркеров для производительности. </li>
 <li><strong>Protocol</strong>: Writer Version 2 (поддержка Column Mapping), Reader Version 1. </li>
 <li><strong>Maintenance</strong>: Обязательный запуск <code>VACUUM</code> с <code>retention_period=7 days</code> еженедельно для очистки старых файлов и уменьшения стоимости хранения. <strong>VACUUM MUST</strong> запускаться еженедельно.</li>
 <li><strong>Forensic Retention</strong>: По умолчанию 7 дней. Для таблиц класса critical (Core Data) допустимо увеличение до 30 дней через конфиг (<code>forensic_retention: true</code>), если позволяет бюджет.</li>
 </ul>
-<h3 id="22-schema-drift">2.2. Политика Дрейфа Схемы (Schema Drift)<a class="headerlink" href="#22-schema-drift" title="Permanent link">¶</a></h3>
+<h3 id="22-schema-drift">2.2. Политика Дрейфа Схемы (Schema Drift)<a class="headerlink" href="#22-schema-drift" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Info</strong>: Появление новых опциональных полей. Логируется. </li>
 <li><strong>Warn</strong>: Появление &gt;3 новых полей. Требует ревью. </li>
 <li><strong>Critical</strong>: Исчезновение обязательного поля (ID). Блокирует пайплайн. </li>
 <li><strong>Drift SLA</strong>: Для событий WARN (дрейф схемы) назначается Owner. SLA на реакцию — 48 часов. Нерешенный дрейф блокирует следующий релиз.</li>
 </ul>
-<h3 id="23-data-lineage">2.3. Data Lineage (Происхождение Данных)<a class="headerlink" href="#23-data-lineage" title="Permanent link">¶</a></h3>
+<h3 id="23-data-lineage">2.3. Data Lineage (Происхождение Данных)<a class="headerlink" href="#23-data-lineage" title="Permanent link">&para;</a></h3>
 <p>Оптимизированная схема lineage: 
 - <strong>Silver Record</strong>: Содержит <code>_source_batch_id</code> (FK). 
 - <strong>Lineage Log</strong>: Таблица <code>sys.lineage_log</code> хранит маппинг <code>_source_batch_id</code> -&gt; список файлов Bronze (S3 paths), версия трансформации, параметры запуска. 
 Полные пути к файлам в каждой строке данных хранить запрещено (избыточность). </p>
-<h3 id="24-backfill-replay">2.4. Политика Backfill / Replay<a class="headerlink" href="#24-backfill-replay" title="Permanent link">¶</a></h3>
+<h3 id="24-backfill-replay">2.4. Политика Backfill / Replay<a class="headerlink" href="#24-backfill-replay" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Metadata</strong>: Обязательные поля <code>_run_id</code> (UUID), <code>_run_type</code> (<code>incremental</code> | <code>backfill</code> | <code>rebuild</code>). </li>
 <li><strong>Merge Priority</strong>: <code>rebuild</code> &gt; <code>backfill</code> &gt; <code>incremental</code>. При конфликте версий побеждает более "полный" тип запуска. </li>
 <li><strong>Concurrency Constraint</strong>: В один момент времени для одной сущности допустим только один процесс записи типа <code>rebuild</code> или <code>backfill</code>. Параллельный запуск запрещен (Lock должен это гарантировать).</li>
 </ul>
-<h4 id="241-backfill-lock-enforcement">2.4.1. Backfill Lock Enforcement<a class="headerlink" href="#241-backfill-lock-enforcement" title="Permanent link">¶</a></h4>
+<h4 id="241-backfill-lock-enforcement">2.4.1. Backfill Lock Enforcement<a class="headerlink" href="#241-backfill-lock-enforcement" title="Permanent link">&para;</a></h4>
 <p>Lock key включает тип запуска:
 - <code>incremental</code>: <code>lock:{provider}_{entity}</code>
 - <code>backfill</code>/<code>rebuild</code>: <code>lock:{provider}_{entity}:exclusive</code></p>
 <p>При наличии активного <code>incremental</code> lock попытка взять <code>:exclusive</code>:
 - <strong>Default</strong>: Fail immediately (configurable).
 - <strong>Wait mode</strong>: <code>--wait-for-lock TIMEOUT_SEC</code>. Timeout по умолчанию: 300 секунд.</p>
-<h3 id="25">2.5. Стратегия Партиционирования<a class="headerlink" href="#25" title="Permanent link">¶</a></h3>
+<h3 id="25">2.5. Стратегия Партиционирования<a class="headerlink" href="#25" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1967,7 +3431,7 @@
 <li><strong>Hard Limits</strong>: 50,000 партиций -&gt; Pipeline Fail. Запрещены ключи партиционирования: UUID, Hash, Free-text (высокая кардинальность убивает Delta Log).</li>
 <li><strong>Z-ORDER</strong>: Рекомендуется для полей с высокой кардинальностью в Gold слое (вместо глубокого партиционирования). </li>
 </ul>
-<h3 id="26-null">2.6. Политика NULL и Пропущенных Значений<a class="headerlink" href="#26-null" title="Permanent link">¶</a></h3>
+<h3 id="26-null">2.6. Политика NULL и Пропущенных Значений<a class="headerlink" href="#26-null" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1994,7 +3458,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="unified-quarantine">Спецификация Unified Quarantine<a class="headerlink" href="#unified-quarantine" title="Permanent link">¶</a></h4>
+<h4 id="unified-quarantine">Спецификация Unified Quarantine<a class="headerlink" href="#unified-quarantine" title="Permanent link">&para;</a></h4>
 <p>Единая таблица <code>common.quarantine</code> для всех сущностей. 
 - <code>ingestion_ts</code> (Timestamp): Время инцидента. 
 - <code>pipeline</code> (String): Имя пайплайна (напр., <code>chembl_activity</code>). 
@@ -2007,19 +3471,19 @@
 <li><strong>Запрещено</strong>: Sentinel values (-1, "N/A", 9999) <strong>MUST NOT</strong> использоваться.</li>
 <li><strong>Pandera</strong>: Поля, допускающие NULL, явно маркируются <code>nullable=True</code>. </li>
 </ul>
-<h4 id="_2">Жизненный цикл Карантина<a class="headerlink" href="#_2" title="Permanent link">¶</a></h4>
+<h4 id="_2">Жизненный цикл Карантина<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
 <ul>
 <li><strong>Retention</strong>: 30 дней. Старые записи удаляются автоматически (S3 Lifecycle). </li>
 <li><strong>Triage</strong>: Еженедельный пересмотр (Triage) ошибок аналитиками. Если ошибка системная — правим адаптер, если разовая — игнорируем. </li>
 <li><strong>Source of Truth</strong>: Карантин — это инструмент триажа, а не источник истины. Данные в карантине считаются "отсутствующими" в аналитическом слое.</li>
 <li><strong>Linkage</strong>: Обязательна ссылка на Bronze-файл (<code>bronze_file_uri</code> или <code>batch_id</code>) для возможности перепарсить исходник, если payload был обрезан.</li>
 </ul>
-<h4 id="_3">Операции с карантином<a class="headerlink" href="#_3" title="Permanent link">¶</a></h4>
+<h4 id="_3">Операции с карантином<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
 <p>Для управления "мусорными" данными использовать make-команды: 
 - <code>make quarantine-inspect PIPELINE=...</code>: Выгрузка сэмпла ошибок для анализа. 
 - <code>make quarantine-replay PIPELINE=...</code>: Повторная отправка исправленных записей в пайплайн. 
 - <code>make quarantine-purge PIPELINE=...</code>: Принудительная очистка карантина. </p>
-<h3 id="27-load-strategy">2.7. Стратегия Загрузки (Load Strategy)<a class="headerlink" href="#27-load-strategy" title="Permanent link">¶</a></h3>
+<h3 id="27-load-strategy">2.7. Стратегия Загрузки (Load Strategy)<a class="headerlink" href="#27-load-strategy" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2056,7 +3520,7 @@
 <li><strong>Конфигурация</strong>: <code>load_strategy: incremental | full</code> в YAML пайплайна. </li>
 <li><strong>Hybrid</strong>: Incremental ежедневно + Full еженедельно для обеспечения консистентности. </li>
 </ul>
-<h3 id="28-id-entity-id">2.8. Генерация ID Сущности (Entity ID)<a class="headerlink" href="#28-id-entity-id" title="Permanent link">¶</a></h3>
+<h3 id="28-id-entity-id">2.8. Генерация ID Сущности (Entity ID)<a class="headerlink" href="#28-id-entity-id" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2080,7 +3544,7 @@
 <li><strong>Canonical JSON</strong>: <code>json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)</code>. </li>
 <li><strong>Float Precision</strong>: Все значения типа float принудительно округляются: <code>round(val, 10)</code> для нивелирования различий архитектур процессоров. </li>
 </ul>
-<h3 id="281-robust-content-hash">2.8.1. Robust Content Hash<a class="headerlink" href="#281-robust-content-hash" title="Permanent link">¶</a></h3>
+<h3 id="281-robust-content-hash">2.8.1. Robust Content Hash<a class="headerlink" href="#281-robust-content-hash" title="Permanent link">&para;</a></h3>
 <p>Для обеспечения стабильности хэша перед генерацией ID данные должны быть нормализованы: 
 - <strong>NaN/Inf</strong>: Заменяются на <code>null</code> (None). 
 - <strong>Floats</strong>: Округляются до 10 знаков после запятой. 
@@ -2090,10 +3554,10 @@
 <ul>
 <li><strong>Детекция Коллизий</strong>: При upsert проверять <code>_source_record_id</code>; если отличается — конфликт, логировать обе записи. </li>
 </ul>
-<h2 id="3">3. Обработка Ошибок и Наблюдаемость<a class="headerlink" href="#3" title="Permanent link">¶</a></h2>
-<h3 id="31">3.1. Стратегия Обработки Ошибок<a class="headerlink" href="#31" title="Permanent link">¶</a></h3>
+<h2 id="3">3. Обработка Ошибок и Наблюдаемость<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<h3 id="31">3.1. Стратегия Обработки Ошибок<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
 <p>Вместо тотального подхода "Fail Fast" используем дифференцированный подход.</p>
-<h3 id="311">3.1.1. Классификация Ошибок<a class="headerlink" href="#311" title="Permanent link">¶</a></h3>
+<h3 id="311">3.1.1. Классификация Ошибок<a class="headerlink" href="#311" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2120,31 +3584,31 @@
 </tr>
 </tbody>
 </table>
-<h3 id="312-thresholds">3.1.2. Пороги Ошибок Батча (Thresholds)<a class="headerlink" href="#312-thresholds" title="Permanent link">¶</a></h3>
+<h3 id="312-thresholds">3.1.2. Пороги Ошибок Батча (Thresholds)<a class="headerlink" href="#312-thresholds" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Soft Threshold</strong>: &gt;5% ошибок качества данных -&gt; Warning. </li>
 <li><strong>Hard Threshold</strong>: &gt;20% ошибок -&gt; Fail Batch. </li>
 <li><strong>Metric Scope</strong>: Отслеживать как <code>record_error_rate</code> (доля битых строк), так и <code>entity_error_rate</code> (доля битых уникальных сущностей). </li>
 </ul>
-<h3 id="313-retry-backoff">3.1.3. Параметры Retry (Backoff)<a class="headerlink" href="#313-retry-backoff" title="Permanent link">¶</a></h3>
+<h3 id="313-retry-backoff">3.1.3. Параметры Retry (Backoff)<a class="headerlink" href="#313-retry-backoff" title="Permanent link">&para;</a></h3>
 <p>Для типа ошибок <strong>Recoverable</strong> применять стратегию Exponential Backoff: 
 - <strong>Max Attempts</strong>: 3 
 - <strong>Multiplier</strong>: 2.0 (wait 1s, 2s, 4s...) 
 - <strong>Jitter</strong>: Random(0.1s, 0.5s). Jitter <strong>SHOULD</strong> применяться для избежания thundering herd.</p>
-<h3 id="314-circuit-breaker">3.1.4. Circuit Breaker (Размыкатель цепи)<a class="headerlink" href="#314-circuit-breaker" title="Permanent link">¶</a></h3>
+<h3 id="314-circuit-breaker">3.1.4. Circuit Breaker (Размыкатель цепи)<a class="headerlink" href="#314-circuit-breaker" title="Permanent link">&para;</a></h3>
 <p>Паттерн защиты от каскадных сбоев. 
 - <strong>Trigger</strong>: 5 последовательных ошибок соединения/таймаута. 
 - <strong>Open Duration</strong>: 5 минут (configurable: <code>circuit_breaker.recovery_timeout</code>).
 - <strong>Recovery</strong>: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open +5 мин.
 - <strong>Observability</strong>: Метрики <code>circuit_breaker_state</code> (0=Closed, 1=Half-Open, 2=Open), <code>trips_total</code>. Алерт при зависании в Open &gt; 10 мин. </p>
-<h3 id="32-observability">3.2. Наблюдаемость (Observability)<a class="headerlink" href="#32-observability" title="Permanent link">¶</a></h3>
+<h3 id="32-observability">3.2. Наблюдаемость (Observability)<a class="headerlink" href="#32-observability" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Correlation ID</strong>: <code>run_id</code> обязателен во всех логах, метриках и блокировках. </li>
 <li><strong>Retention</strong>: Логи хранятся 30 дней, метрики — 90 дней. </li>
 <li><strong>Логи</strong>: Структурированный JSON. </li>
 <li><strong>Dataset ID</strong>: В логи и метрики добавляется лейбл <code>dataset</code> (логическое имя таблицы, напр. <code>chembl.activity</code>), так как pipeline может писать в несколько таблиц.</li>
 </ul>
-<h3 id="321-log-schema">3.2.1. Log Schema<a class="headerlink" href="#321-log-schema" title="Permanent link">¶</a></h3>
+<h3 id="321-log-schema">3.2.1. Log Schema<a class="headerlink" href="#321-log-schema" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2196,7 +3660,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="33">3.3. Конкурентность и Блокировки<a class="headerlink" href="#33" title="Permanent link">¶</a></h3>
+<h3 id="33">3.3. Конкурентность и Блокировки<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Механизм</strong>: Redis <code>SETNX</code> + <code>EXPIRE</code>.</li>
 <li><strong>TTL</strong>: 60 секунд.</li>
@@ -2210,13 +3674,13 @@
 - Потеря блокировки = Потеря права на запись.
 - Если Heartbeat не прошел, воркер <strong>MUST</strong> аварийно завершиться до попытки коммита данных.
 - <strong>Safety Guard</strong>: Адаптер <strong>MUST</strong> валидировать наличие блокировки (проверка <code>owner_id</code> в Redis) непосредственно перед отправкой данных в S3/Delta Lake. Если проверка не проходит — операция отменяется, транзакция откатывается.</p>
-<h3 id="34-dq-metrics">3.4. Метрики Качества Данных (DQ Metrics)<a class="headerlink" href="#34-dq-metrics" title="Permanent link">¶</a></h3>
+<h3 id="34-dq-metrics">3.4. Метрики Качества Данных (DQ Metrics)<a class="headerlink" href="#34-dq-metrics" title="Permanent link">&para;</a></h3>
 <p>Метрики экспортируются в формате Prometheus с использованием лейблов для агрегации (<code>pipeline</code>, <code>entity</code>, <code>column</code>, <code>check</code>):
 - <code>dq_validation_score{check="null_rate", column="..."}</code>: % NULL значений.
 - <code>dq_validation_score{check="unique_count", column="..."}</code>: кардинальность.
 - <code>dq_validation_score{check="schema_violations", column="all"}</code>: кол-во невалидных записей.
 - <code>data_freshness_seconds</code>: разница между <code>now()</code> и <code>max(updated_at)</code>.</p>
-<h3 id="341-dq">3.4.1. Детекция Аномалий DQ<a class="headerlink" href="#341-dq" title="Permanent link">¶</a></h3>
+<h3 id="341-dq">3.4.1. Детекция Аномалий DQ<a class="headerlink" href="#341-dq" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Baseline (Базовая линия)</strong>: Скользящее среднее за последние 30 дней. </li>
 <li><strong>Пороги Алертинга</strong>: 
@@ -2231,7 +3695,7 @@
 <li>Days 8-30: Warning only. </li>
 <li>Days 30+: Full Alerting. </li>
 </ul>
-<h3 id="35-provider-health-monitoring">3.5. Provider Health Monitoring<a class="headerlink" href="#35-provider-health-monitoring" title="Permanent link">¶</a></h3>
+<h3 id="35-provider-health-monitoring">3.5. Provider Health Monitoring<a class="headerlink" href="#35-provider-health-monitoring" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2260,8 +3724,8 @@
 </table>
 <p><strong>Recovery</strong>: Unhealthy → Degraded после 1 успешного health_check.
 <strong>Metric</strong>: <code>provider_health_status{provider}</code> (0=Unhealthy, 1=Degraded, 2=Healthy).</p>
-<h2 id="4">4. Стандарты Кода и Тестирование<a class="headerlink" href="#4" title="Permanent link">¶</a></h2>
-<h3 id="41">4.1. Стек и Матрица Решений<a class="headerlink" href="#41" title="Permanent link">¶</a></h3>
+<h2 id="4">4. Стандарты Кода и Тестирование<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<h3 id="41">4.1. Стек и Матрица Решений<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2298,7 +3762,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="42">4.2. Политика Тестирования<a class="headerlink" href="#42" title="Permanent link">¶</a></h3>
+<h3 id="42">4.2. Политика Тестирования<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Unit</strong>: Только доменная логика. In-memory фейки. Никаких моков (mocks) внешних библиотек. </li>
 <li><strong>Integration</strong>: <ul>
@@ -2309,17 +3773,17 @@
 </li>
 <li><strong>Contract Tests</strong>: Ежемесячный запуск против <em>реальных</em> API (Live) в отдельном CI workflow для обнаружения нарушения контрактов. </li>
 </ul>
-<h2 id="5-shutdown">5. Операции (Лимиты, Секреты, Shutdown)<a class="headerlink" href="#5-shutdown" title="Permanent link">¶</a></h2>
-<h3 id="51-rate-limiting">5.1. Ограничение скорости (Rate Limiting)<a class="headerlink" href="#51-rate-limiting" title="Permanent link">¶</a></h3>
+<h2 id="5-shutdown">5. Операции (Лимиты, Секреты, Shutdown)<a class="headerlink" href="#5-shutdown" title="Permanent link">&para;</a></h2>
+<h3 id="51-rate-limiting">5.1. Ограничение скорости (Rate Limiting)<a class="headerlink" href="#51-rate-limiting" title="Permanent link">&para;</a></h3>
 <p>Каждый адаптер обязан реализовать <code>TokenBucket</code> или аналог, соблюдающий лимиты провайдера. 
 <strong>Обратное давление (Backpressure)</strong>: Если внутренняя очередь заполнена &gt;80%, адаптер должен замедлить чтение (дросселировать источник). </p>
-<h3 id="52">5.2. Управление Секретами<a class="headerlink" href="#52" title="Permanent link">¶</a></h3>
+<h3 id="52">5.2. Управление Секретами<a class="headerlink" href="#52" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Источник</strong>: Переменные окружения (<code>os.environ</code>). </li>
 <li><strong>Формат</strong>: <code>BIOETL_{PROVIDER}_{KEY}</code> (например, <code>BIOETL_PUBCHEM_API_KEY</code>). </li>
 <li><strong>Запрещено</strong>: Хардкод секретов <strong>MUST NOT</strong>. Файлы <code>.env</code> в git <strong>MUST NOT</strong>. </li>
 </ul>
-<h3 id="53-graceful-shutdown">5.3. Graceful Shutdown (Штатное завершение)<a class="headerlink" href="#53-graceful-shutdown" title="Permanent link">¶</a></h3>
+<h3 id="53-graceful-shutdown">5.3. Graceful Shutdown (Штатное завершение)<a class="headerlink" href="#53-graceful-shutdown" title="Permanent link">&para;</a></h3>
 <p>При получении SIGTERM/SIGINT: 
 1. Прекратить извлечение (fetch) новых записей. 
 2. Дождаться завершения записи текущего батча. 
@@ -2328,7 +3792,7 @@
 <ul>
 <li><strong>Guarantees</strong>: Система гарантирует At-Least-Once доставку + Дедупликацию в Silver (через Content Hash). Гарантия Exactly-Once на уровне транспорта не требуется.</li>
 </ul>
-<h3 id="531-checkpoint-recovery">5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery)<a class="headerlink" href="#531-checkpoint-recovery" title="Permanent link">¶</a></h3>
+<h3 id="531-checkpoint-recovery">5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery)<a class="headerlink" href="#531-checkpoint-recovery" title="Permanent link">&para;</a></h3>
 <p>При запуске пайплайн: 
 1. Проверяет наличие чекпоинта в S3. 
 2. Если найден и передан флаг <code>--resume</code>: 
@@ -2337,7 +3801,7 @@
 3. Если найден без флага: 
    - Warning: "Stale checkpoint detected. Use --resume or --ignore-checkpoint." 
 4. После успешного завершения: удалить файл чекпоинта из S3. </p>
-<h3 id="54-sensitive-data">5.4. Политика Чувствительных Данных (Sensitive Data)<a class="headerlink" href="#54-sensitive-data" title="Permanent link">¶</a></h3>
+<h3 id="54-sensitive-data">5.4. Политика Чувствительных Данных (Sensitive Data)<a class="headerlink" href="#54-sensitive-data" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Classification</strong>: Public / Internal / Restricted. </li>
 <li><strong>IAM</strong>: Принцип Least Privilege. Разделение ролей <code>writer</code> (пайплайн) и <code>reader</code> (аналитик). </li>
@@ -2345,7 +3809,7 @@
 <li><strong>Silver</strong>: Хэшировать PII поля: <code>sha256(lowercase(value) + SALT)</code> (Restricted). <strong>PII fields MUST be salted.</strong></li>
 <li><strong>Gold</strong>: PII исключается или агрегируется (Public/Internal). </li>
 </ul>
-<h3 id="541-advanced-salt-rotation">5.4.1. Advanced Salt Rotation<a class="headerlink" href="#541-advanced-salt-rotation" title="Permanent link">¶</a></h3>
+<h3 id="541-advanced-salt-rotation">5.4.1. Advanced Salt Rotation<a class="headerlink" href="#541-advanced-salt-rotation" title="Permanent link">&para;</a></h3>
 <p>Стратегия ротации соли без даунтайма ("Dual-Salt Period"). 
 1. <strong>New Salt Generation</strong>: Генерация новой соли, добавление в Secrets Manager как <code>SALT_NEXT</code>. 
 2. <strong>Transition (7 дней)</strong>: 
@@ -2358,13 +3822,13 @@
 <p><strong>Threat Model Scope</strong>:
 - В фокусе: Утечка PII через логи, SQL-инъекции, несанкционированный доступ к S3.
 - Out of Scope: Физический доступ к серверам, компрометация AWS Root Account (управляемый сервис).</p>
-<h3 id="55-disaster-recovery-dr">5.5. Disaster Recovery (DR)<a class="headerlink" href="#55-disaster-recovery-dr" title="Permanent link">¶</a></h3>
+<h3 id="55-disaster-recovery-dr">5.5. Disaster Recovery (DR)<a class="headerlink" href="#55-disaster-recovery-dr" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>RPO</strong>: 24 часа. </li>
 <li><strong>RTO</strong>: 4 часа. </li>
 <li><strong>Game Days</strong>: Game Days <strong>SHOULD</strong> проводиться ежегодно. Обязательные учения по восстановлению. Success criteria: данные идентичны, время &lt; RTO. </li>
 </ul>
-<h4 id="551-detailed-dr-procedures-runbook">5.5.1. Detailed DR Procedures (Runbook)<a class="headerlink" href="#551-detailed-dr-procedures-runbook" title="Permanent link">¶</a></h4>
+<h4 id="551-detailed-dr-procedures-runbook">5.5.1. Detailed DR Procedures (Runbook)<a class="headerlink" href="#551-detailed-dr-procedures-runbook" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -2387,24 +3851,24 @@
 </tr>
 </tbody>
 </table>
-<h3 id="56-environments">5.6. Среды (Environments)<a class="headerlink" href="#56-environments" title="Permanent link">¶</a></h3>
+<h3 id="56-environments">5.6. Среды (Environments)<a class="headerlink" href="#56-environments" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Dev</strong>: Локальная разработка (Docker Compose). Данные: фикстуры или сэмпл Bronze. </li>
 <li><strong>Staging</strong>: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя. </li>
 <li><strong>Prod</strong>: Боевая среда. Доступ на запись только у CI/CD. </li>
 </ul>
-<h3 id="561-environment-isolation">5.6.1. Environment Isolation<a class="headerlink" href="#561-environment-isolation" title="Permanent link">¶</a></h3>
+<h3 id="561-environment-isolation">5.6.1. Environment Isolation<a class="headerlink" href="#561-environment-isolation" title="Permanent link">&para;</a></h3>
 <p>Изоляция ресурсов для предотвращения "Cross-Env Pollution". 
 - <strong>S3</strong>: Разные бакеты (<code>bioetl-dev</code>, <code>bioetl-staging</code>, <code>bioetl-prod</code>). 
 - <strong>Redis</strong>: Разные префиксы ключей или отдельные инстансы DB (<code>db0</code>, <code>db1</code>). 
 - <strong>Configs</strong>: Строгое разделение переменных окружения. Доступ к Prod-секретам только у CI Runner. </p>
-<h2 id="6">6. Документация (Автоматизация — приоритет)<a class="headerlink" href="#6" title="Permanent link">¶</a></h2>
+<h2 id="6">6. Документация (Автоматизация — приоритет)<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Карта и Схемы</strong>: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs). </li>
 <li><strong>Именование</strong>: Зеркальное (<code>src/bioetl/.../{provider}/</code> &lt;-&gt; <code>docs/providers/{provider}/</code>). </li>
 </ul>
-<h2 id="7">7. Управление Изменениями<a class="headerlink" href="#7" title="Permanent link">¶</a></h2>
-<h3 id="71-data-contracts">7.1. Контракты Данных (Data Contracts)<a class="headerlink" href="#71-data-contracts" title="Permanent link">¶</a></h3>
+<h2 id="7">7. Управление Изменениями<a class="headerlink" href="#7" title="Permanent link">&para;</a></h2>
+<h3 id="71-data-contracts">7.1. Контракты Данных (Data Contracts)<a class="headerlink" href="#71-data-contracts" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Реестр Схем</strong>: Gold-схемы публикуются в <code>docs/contracts/gold/{entity}.json</code> (JSON Schema). </li>
 <li><strong>Версионирование</strong>: Семантическое версионирование схем: <code>{entity}_v{major}.{minor}</code>. </li>
@@ -2416,21 +3880,21 @@
 <li>Период депрекации: 2 недели до удаления поля. </li>
 <li><strong>Consumer Tests</strong>: Потребители могут подписаться на <code>contracts/</code> и запускать свои тесты при изменениях. </li>
 </ul>
-<h3 id="72-rollback-strategy">7.2. Rollback Strategy<a class="headerlink" href="#72-rollback-strategy" title="Permanent link">¶</a></h3>
+<h3 id="72-rollback-strategy">7.2. Rollback Strategy<a class="headerlink" href="#72-rollback-strategy" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Scope</strong>: </li>
 <li><strong>Infrastructure/Code</strong>: Auto Rollback при Error Rate &gt; 10%. </li>
 <li><strong>Data DQ</strong>: Ручной анализ и replay. Ошибки качества данных не должны триггерить автоматический откат версии приложения. </li>
 <li><strong>Manual Rollback</strong>: <code>make rollback VERSION=...</code>. </li>
 </ul>
-<h2 id="8-developer-experience">8. Опыт Разработчика (Developer Experience)<a class="headerlink" href="#8-developer-experience" title="Permanent link">¶</a></h2>
-<h3 id="81">8.1. Локальная настройка<a class="headerlink" href="#81" title="Permanent link">¶</a></h3>
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a>make<span class="w"> </span>install<span class="w">      </span><span class="c1"># создание venv, установка зависимостей </span>
-<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>make<span class="w"> </span><span class="nb">test</span><span class="w">         </span><span class="c1"># unit + integration (на кассетах) </span>
-<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>make<span class="w"> </span>lint<span class="w">         </span><span class="c1"># ruff + mypy </span>
-<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a>make<span class="w"> </span>run-local<span class="w">    </span><span class="c1"># запуск сэмплового пайплайна на фикстурах </span>
+<h2 id="8-developer-experience">8. Опыт Разработчика (Developer Experience)<a class="headerlink" href="#8-developer-experience" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1. Локальная настройка<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>install<span class="w">      </span><span class="c1"># создание venv, установка зависимостей </span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>make<span class="w"> </span><span class="nb">test</span><span class="w">         </span><span class="c1"># unit + integration (на кассетах) </span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>make<span class="w"> </span>lint<span class="w">         </span><span class="c1"># ruff + mypy </span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>make<span class="w"> </span>run-local<span class="w">    </span><span class="c1"># запуск сэмплового пайплайна на фикстурах </span>
 </code></pre></div>
-<h3 id="82">8.2. Окружение<a class="headerlink" href="#82" title="Permanent link">¶</a></h3>
+<h3 id="82">8.2. Окружение<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Docker Compose</strong>: Для запуска локальных зависимостей (Postgres, Redis). </li>
 <li><strong>Volumes</strong>: Данные Postgres/Redis персистятся в <code>./docker-data/</code> (добавлен в .gitignore). </li>
@@ -2438,8 +3902,8 @@
 <li><strong>Seed Data</strong>: <code>make seed-local</code> — загрузка сэмпловых фикстур в локальную БД. </li>
 <li><strong>.env.example</strong>: Шаблон переменных окружения (без секретов). </li>
 </ul>
-<hr/>
-<h2 id="_4">Приложение А: Источники и Библиотеки<a class="headerlink" href="#_4" title="Permanent link">¶</a></h2>
+<hr />
+<h2 id="_4">Приложение А: Источники и Библиотеки<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p><strong>Структура папок:</strong> <code>src/bioetl/infrastructure/adapters/{provider}/</code> </p>
 <table>
 <thead>
@@ -2523,14 +3987,14 @@
 <p><strong>Health Check Endpoints</strong>: 
 - <code>GET /health</code> (Liveness) 
 - <code>GET /ready</code> (Readiness: DB/Redis connection) </p>
-<h2 id="b">Приложение B: Политика Зависимостей<a class="headerlink" href="#b" title="Permanent link">¶</a></h2>
+<h2 id="b">Приложение B: Политика Зависимостей<a class="headerlink" href="#b" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Pinning</strong>: Точные версии в <code>requirements.txt</code> / <code>pyproject.toml</code>. </li>
 <li><strong>Обновления</strong>: Ежемесячные PR от Dependabot + ручное ревью. </li>
 <li><strong>Безопасность</strong>: <code>pip-audit</code> в CI. Блокировка мержа при CVE severity &gt;= HIGH. </li>
 </ul>
-<h2 id="c-error-recovery-playbook-runbook">Приложение C: Error Recovery Playbook (Runbook)<a class="headerlink" href="#c-error-recovery-playbook-runbook" title="Permanent link">¶</a></h2>
-<h3 id="severity-levels">Уровни Серьезности (Severity Levels)<a class="headerlink" href="#severity-levels" title="Permanent link">¶</a></h3>
+<h2 id="c-error-recovery-playbook-runbook">Приложение C: Error Recovery Playbook (Runbook)<a class="headerlink" href="#c-error-recovery-playbook-runbook" title="Permanent link">&para;</a></h2>
+<h3 id="severity-levels">Уровни Серьезности (Severity Levels)<a class="headerlink" href="#severity-levels" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2608,77 +4072,77 @@
 </tr>
 </tbody>
 </table>
-<h2 id="d">Приложение D: Схема Конфигурации Пайплайна<a class="headerlink" href="#d" title="Permanent link">¶</a></h2>
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># configs/pipelines/chembl_activity.yaml </span>
-<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chembl_activity</span><span class="w"> </span>
-<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chembl</span><span class="w"> </span>
-<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a><span class="w">  </span><span class="nt">entity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">activity</span><span class="w"> </span>
-<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a>
-<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api</span><span class="w">  </span><span class="c1"># api | csv | parquet </span>
-<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="w">  </span><span class="nt">load_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incremental</span><span class="w">  </span><span class="c1"># incremental | full </span>
-<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="w">  </span><span class="nt">watermark_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">updated_at</span><span class="w"> </span>
-<a href="#__codelineno-2-11" id="__codelineno-2-11" name="__codelineno-2-11"></a>
-<a href="#__codelineno-2-12" id="__codelineno-2-12" name="__codelineno-2-12"></a><span class="nt">transform</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-13" id="__codelineno-2-13" name="__codelineno-2-13"></a><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.2.0"</span><span class="w"> </span>
-<a href="#__codelineno-2-14" id="__codelineno-2-14" name="__codelineno-2-14"></a><span class="w">  </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-15" id="__codelineno-2-15" name="__codelineno-2-15"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">normalize_units</span><span class="w"> </span>
-<a href="#__codelineno-2-16" id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">validate_smiles</span><span class="w"> </span>
-<a href="#__codelineno-2-17" id="__codelineno-2-17" name="__codelineno-2-17"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deduplicate</span><span class="w"> </span>
-<a href="#__codelineno-2-18" id="__codelineno-2-18" name="__codelineno-2-18"></a>
-<a href="#__codelineno-2-19" id="__codelineno-2-19" name="__codelineno-2-19"></a><span class="nt">sink</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-20" id="__codelineno-2-20" name="__codelineno-2-20"></a><span class="w">  </span><span class="nt">silver</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-21" id="__codelineno-2-21" name="__codelineno-2-21"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3://bioetl/silver/chembl/activity/</span><span class="w"> </span>
-<a href="#__codelineno-2-22" id="__codelineno-2-22" name="__codelineno-2-22"></a><span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">delta</span><span class="w">          </span><span class="c1"># Использовать Delta Lake </span>
-<a href="#__codelineno-2-23" id="__codelineno-2-23" name="__codelineno-2-23"></a><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">merge</span><span class="w">            </span><span class="c1"># Стратегия Upsert </span>
-<a href="#__codelineno-2-24" id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="w">    </span><span class="nt">primary_key</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">id</span><span class="p p-Indicator">]</span><span class="w">      </span><span class="c1"># Ключ для merge </span>
-<a href="#__codelineno-2-25" id="__codelineno-2-25" name="__codelineno-2-25"></a><span class="w">    </span><span class="nt">partition_by</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">year</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">month</span><span class="p p-Indicator">]</span><span class="w"> </span>
-<a href="#__codelineno-2-26" id="__codelineno-2-26" name="__codelineno-2-26"></a><span class="w">    </span><span class="nt">classification</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span><span class="w"> </span>
-<a href="#__codelineno-2-27" id="__codelineno-2-27" name="__codelineno-2-27"></a><span class="w">    </span><span class="nt">forensic_retention</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># true = 30 days for Critical tables</span>
-<a href="#__codelineno-2-28" id="__codelineno-2-28" name="__codelineno-2-28"></a><span class="w">    </span><span class="c1"># Example for Critical table (Core Data):</span>
-<a href="#__codelineno-2-29" id="__codelineno-2-29" name="__codelineno-2-29"></a><span class="w">    </span><span class="c1"># forensic_retention: true </span>
-<a href="#__codelineno-2-30" id="__codelineno-2-30" name="__codelineno-2-30"></a>
-<a href="#__codelineno-2-31" id="__codelineno-2-31" name="__codelineno-2-31"></a><span class="w">  </span><span class="nt">gold</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-32" id="__codelineno-2-32" name="__codelineno-2-32"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3://bioetl/gold/chembl/activity_aggregated/</span><span class="w"> </span>
-<a href="#__codelineno-2-33" id="__codelineno-2-33" name="__codelineno-2-33"></a><span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">delta</span><span class="w"> </span>
-<a href="#__codelineno-2-34" id="__codelineno-2-34" name="__codelineno-2-34"></a><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overwrite</span><span class="w">        </span><span class="c1"># Витрины часто перезаписываются целиком или партициями </span>
-<a href="#__codelineno-2-35" id="__codelineno-2-35" name="__codelineno-2-35"></a>
-<a href="#__codelineno-2-36" id="__codelineno-2-36" name="__codelineno-2-36"></a><span class="nt">dq_rules</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-37" id="__codelineno-2-37" name="__codelineno-2-37"></a><span class="w">  </span><span class="nt">soft_fail_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w">  </span><span class="c1"># 5% </span>
-<a href="#__codelineno-2-38" id="__codelineno-2-38" name="__codelineno-2-38"></a><span class="w">  </span><span class="nt">hard_fail_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.20</span><span class="w">  </span><span class="c1"># 20% (Strict) </span>
-<a href="#__codelineno-2-39" id="__codelineno-2-39" name="__codelineno-2-39"></a>
-<a href="#__codelineno-2-40" id="__codelineno-2-40" name="__codelineno-2-40"></a><span class="nt">circuit_breaker</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-41" id="__codelineno-2-41" name="__codelineno-2-41"></a><span class="w">  </span><span class="nt">failure_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span>
-<a href="#__codelineno-2-42" id="__codelineno-2-42" name="__codelineno-2-42"></a><span class="w">  </span><span class="nt">recovery_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span><span class="w">      </span><span class="c1"># 5 min </span>
-<a href="#__codelineno-2-43" id="__codelineno-2-43" name="__codelineno-2-43"></a>
-<a href="#__codelineno-2-44" id="__codelineno-2-44" name="__codelineno-2-44"></a><span class="nt">rate_limit</span><span class="p">:</span><span class="w"> </span>
-<a href="#__codelineno-2-45" id="__codelineno-2-45" name="__codelineno-2-45"></a><span class="w">  </span><span class="nt">requests_per_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span>
-<a href="#__codelineno-2-46" id="__codelineno-2-46" name="__codelineno-2-46"></a><span class="w">  </span><span class="nt">burst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"> </span>
+<h2 id="d">Приложение D: Схема Конфигурации Пайплайна<a class="headerlink" href="#d" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># configs/pipelines/chembl_activity.yaml </span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chembl_activity</span><span class="w"> </span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chembl</span><span class="w"> </span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">entity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">activity</span><span class="w"> </span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api</span><span class="w">  </span><span class="c1"># api | csv | parquet </span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">load_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incremental</span><span class="w">  </span><span class="c1"># incremental | full </span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="nt">watermark_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">updated_at</span><span class="w"> </span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="nt">transform</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.2.0&quot;</span><span class="w"> </span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">normalize_units</span><span class="w"> </span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">validate_smiles</span><span class="w"> </span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deduplicate</span><span class="w"> </span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="nt">sink</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">  </span><span class="nt">silver</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3://bioetl/silver/chembl/activity/</span><span class="w"> </span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">delta</span><span class="w">          </span><span class="c1"># Использовать Delta Lake </span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">merge</span><span class="w">            </span><span class="c1"># Стратегия Upsert </span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="nt">primary_key</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">id</span><span class="p p-Indicator">]</span><span class="w">      </span><span class="c1"># Ключ для merge </span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="nt">partition_by</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">year</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">month</span><span class="p p-Indicator">]</span><span class="w"> </span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="nt">classification</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span><span class="w"> </span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="nt">forensic_retention</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># true = 30 days for Critical tables</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="c1"># Example for Critical table (Core Data):</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">    </span><span class="c1"># forensic_retention: true </span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">  </span><span class="nt">gold</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3://bioetl/gold/chembl/activity_aggregated/</span><span class="w"> </span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">delta</span><span class="w"> </span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overwrite</span><span class="w">        </span><span class="c1"># Витрины часто перезаписываются целиком или партициями </span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="nt">dq_rules</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">  </span><span class="nt">soft_fail_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w">  </span><span class="c1"># 5% </span>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">  </span><span class="nt">hard_fail_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.20</span><span class="w">  </span><span class="c1"># 20% (Strict) </span>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="nt">circuit_breaker</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">  </span><span class="nt">failure_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">  </span><span class="nt">recovery_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span><span class="w">      </span><span class="c1"># 5 min </span>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="nt">rate_limit</span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">  </span><span class="nt">requests_per_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="w">  </span><span class="nt">burst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"> </span>
 </code></pre></div>
-<h2 id="e-schema-evolution">Приложение E: Примеры Schema Evolution<a class="headerlink" href="#e-schema-evolution" title="Permanent link">¶</a></h2>
-<h3 id="minor-change">Minor Change (Обратная совместимость)<a class="headerlink" href="#minor-change" title="Permanent link">¶</a></h3>
+<h2 id="e-schema-evolution">Приложение E: Примеры Schema Evolution<a class="headerlink" href="#e-schema-evolution" title="Permanent link">&para;</a></h2>
+<h3 id="minor-change">Minor Change (Обратная совместимость)<a class="headerlink" href="#minor-change" title="Permanent link">&para;</a></h3>
 <p>Добавление необязательного поля. Не требует пересчета истории. 
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1">// Old Schema </span>
-<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CHEMBL1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"score"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="p">}</span><span class="w"> </span>
-<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>
-<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="c1">// New Schema </span>
-<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CHEMBL1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"score"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"manual"</span><span class="p">}</span><span class="w"> </span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// Old Schema </span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CHEMBL1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="p">}</span><span class="w"> </span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">// New Schema </span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CHEMBL1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual&quot;</span><span class="p">}</span><span class="w"> </span>
 </code></pre></div></p>
-<h3 id="major-change-breaking">Major Change (Breaking)<a class="headerlink" href="#major-change-breaking" title="Permanent link">¶</a></h3>
+<h3 id="major-change-breaking">Major Change (Breaking)<a class="headerlink" href="#major-change-breaking" title="Permanent link">&para;</a></h3>
 <p>Переименование или изменение типа. Требует миграции данных или новой версии таблицы (v2). 
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1">// Old Schema </span>
-<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">}</span><span class="w">  </span><span class="c1">// int </span>
-<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a>
-<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="c1">// New Schema </span>
-<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123"</span><span class="p">}</span><span class="w"> </span><span class="c1">// string </span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Old Schema </span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">}</span><span class="w">  </span><span class="c1">// int </span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// New Schema </span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span><span class="p">}</span><span class="w"> </span><span class="c1">// string </span>
 </code></pre></div></p>
-<h3 id="e3-field-deprecation-workflow">E.3. Field Deprecation Workflow<a class="headerlink" href="#e3-field-deprecation-workflow" title="Permanent link">¶</a></h3>
+<h3 id="e3-field-deprecation-workflow">E.3. Field Deprecation Workflow<a class="headerlink" href="#e3-field-deprecation-workflow" title="Permanent link">&para;</a></h3>
 <p><strong>Day 0</strong>: Пометить поле deprecated в схеме
-<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="nt">fields</span><span class="p">:</span>
-<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="w">  </span><span class="nt">old_field</span><span class="p">:</span>
-<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="w">    </span><span class="nt">deprecated</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="w">    </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">new_field</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">fields</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">old_field</span><span class="p">:</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">deprecated</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">new_field</span>
 </code></pre></div></p>
 <p><strong>Days 1-14</strong>: Dual-write период
 - Писать оба поля: <code>old_field</code> и <code>new_field</code>
@@ -2686,7 +4150,7 @@
 <p><strong>Day 15</strong> (после 14-дневного периода): Удаление <code>old_field</code>
 - Bump major version схемы
 - ADR с обоснованием изменения</p>
-<h2 id="changelog">История Изменений (Changelog)<a class="headerlink" href="#changelog" title="Permanent link">¶</a></h2>
+<h2 id="changelog">История Изменений (Changelog)<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>5.0</strong> (2025-12-15): Production Ready. Final Governance Polish, Circuit Breaker half-open observability, Backfill lock timeouts, Generic Health Probes, Deprecation clarification.</li>
 <li><strong>4.6</strong> (2025-12-15): Governance &amp; Stability. RFC 2119, Entity ID vs Content Hash, Bronze Lifecycle, Hard Limits, Threat Model. Added Log Schema, Provider Health Matrix, Circuit Breaker details, Backfill Locking, and Deprecation workflows.</li>
@@ -2700,34 +4164,69 @@
 <li><strong>2.0</strong> (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский. </li>
 <li><strong>1.0</strong> (2025-04-01): Черновик.</li>
 </ul>
-</article>
-</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
-</div>
-<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
   Back to top
 </button>
-</main>
-<footer class="md-footer">
-<div class="md-footer-meta md-typeset">
-<div class="md-footer-meta__inner md-grid">
-<div class="md-copyright">
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
       Material for MkDocs
     </a>
+  
 </div>
-</div>
-</div>
+      
+    </div>
+  </div>
 </footer>
-</div>
-<div class="md-dialog" data-md-component="dialog">
-<div class="md-dialog__inner md-typeset"></div>
-</div>
-<script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
-<script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
-</body>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../assets/javascripts/mermaid.min.js"></script>
+      
+        <script src="../../assets/javascripts/mermaid-init.js"></script>
+      
+    
+  </body>
 </html>
