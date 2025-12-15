@@ -1,4 +1,5 @@
 # Pipeline Review Checklist
+
 *Synced with RULES.md v5.0 (2025-12-15)*
 
 Use this checklist when reviewing new or modified pipelines.
@@ -24,18 +25,21 @@ Use this checklist when reviewing new or modified pipelines.
 ## 3. Data Flow - Medallion Architecture (RULES.md §2.1)
 
 ### Bronze Layer
+
 - [ ] Format: JSONL + zstd
 - [ ] Path pattern: `bronze/{format_version}/{provider}/{entity}/{date}/`
 - [ ] Append-only mode
 - [ ] No in-place format migrations
 
 ### Silver Layer
+
 - [ ] Format: Delta Lake (NOT raw Parquet)
 - [ ] Mode: Merge/Upsert
 - [ ] `primary_key` defined for deduplication
 - [ ] `partition_by` specified
 
 ### Gold Layer
+
 - [ ] Strict validation (`strict=True`)
 - [ ] SCD Type 2 or partition overwrite strategy documented
 
@@ -111,12 +115,18 @@ Use this checklist when reviewing new or modified pipelines.
   - [ ] `pipeline` (MUST)
   - [ ] `stage` (MUST)
   - [ ] `dataset` (SHOULD)
+  - [ ] `record_count` (SHOULD)
 - [ ] DQ metrics exported (Prometheus format):
   - [ ] `dq_validation_score`
   - [ ] `data_freshness_seconds`
 - [ ] Provider health monitoring configured
 
-## 11. Security (RULES.md §5.2, §5.4)
+## 11. Delta Maintenance (RULES.md §2.1.1)
+
+- [ ] Weekly `VACUUM` scheduled with `retention_period=7 days`
+- [ ] Forensic retention policy set appropriately (7d default; 30d for Critical tables via `forensic_retention: true`)
+
+## 12. Security (RULES.md §5.2, §5.4)
 
 - [ ] No hardcoded secrets
 - [ ] Secrets via environment variables (`BIOETL_{PROVIDER}_{KEY}`)
@@ -124,7 +134,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] PII excluded or aggregated in Gold
 - [ ] No secrets in logs
 
-## 12. Graceful Shutdown (RULES.md §5.3)
+## 13. Graceful Shutdown (RULES.md §5.3)
 
 - [ ] SIGTERM/SIGINT handled
 - [ ] Current batch completed before exit
@@ -132,7 +142,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Lock released on exit
 - [ ] Exit code 0 on success
 
-## 13. Testing (RULES.md §4.2)
+## 14. Testing (RULES.md §4.2)
 
 - [ ] Unit tests for domain logic (no network)
 - [ ] Integration tests with VCR.py cassettes
@@ -141,7 +151,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Coverage ≥85%
 - [ ] Tests in `tests/` mirror `src/` structure
 
-## 14. Documentation
+## 15. Documentation
 
 - [ ] Pipeline docs in `docs/application/pipelines/{provider}/{entity}/`
 - [ ] README with overview
@@ -149,7 +159,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Error handling notes
 - [ ] Runbook for common issues
 
-## 15. Health Check (RULES.md App A)
+## 16. Health Check (RULES.md App A)
 
 - [ ] Health check endpoint configured
 - [ ] Provider health states implemented:
@@ -161,11 +171,11 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## Sign-off
 
-| Role | Name | Date | Approved |
-|------|------|------|----------|
-| Developer | | | [ ] |
-| Reviewer | | | [ ] |
-| Data Engineer | | | [ ] |
+| Role          | Name | Date | Approved |
+|---------------|------|------|----------|
+| Developer     |      |      | [ ]      |
+| Reviewer      |      |      | [ ]      |
+| Data Engineer |      |      | [ ]      |
 
 ---
 
