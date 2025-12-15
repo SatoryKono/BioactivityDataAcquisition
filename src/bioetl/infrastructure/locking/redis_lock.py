@@ -206,16 +206,23 @@ class RedisDistributedLock:
         current_owner = await self.get_owner(key)
         raise LockAcquisitionError(key, current_owner)
 
-    async def release(self, key: str, owner_id: RunID | UUID) -> bool:
+    async def release(
+        self, key: str, owner_id: RunID | UUID, exclusive: bool = False
+    ) -> bool:
         """Release lock (only if owner matches).
 
         Args:
             key: Lock key
             owner_id: Run ID of lock owner (must match)
+            exclusive: Whether this was an exclusive lock
 
         Returns:
             True if released, False if not owned
         """
+        # Delegate to exclusive release if requested
+        if exclusive:
+            return await self.release_exclusive(key, owner_id)
+
         await self._ensure_scripts()
         redis_key = self._make_key(key)
         owner_str = self._owner_to_str(owner_id)
@@ -228,12 +235,15 @@ class RedisDistributedLock:
         )
         return bool(result)
 
-    async def heartbeat(self, key: str, owner_id: RunID | UUID) -> bool:
+    async def heartbeat(
+        self, key: str, owner_id: RunID | UUID, exclusive: bool = False
+    ) -> bool:
         """Refresh lock TTL (keep-alive).
 
         Args:
             key: Lock key
             owner_id: Run ID of lock owner (must match)
+            exclusive: Whether this is an exclusive lock
 
         Returns:
             True if heartbeat successful, False if lock lost
@@ -242,7 +252,13 @@ class RedisDistributedLock:
         before attempting any writes!
         """
         await self._ensure_scripts()
-        redis_key = self._make_key(key)
+
+        # Use exclusive key if exclusive lock
+        if exclusive:
+            redis_key = self._make_key(f"{key}:exclusive")
+        else:
+            redis_key = self._make_key(key)
+
         owner_str = self._owner_to_str(owner_id)
 
         result = await self.redis_client.evalsha(
