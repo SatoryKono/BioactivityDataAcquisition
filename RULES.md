@@ -18,7 +18,7 @@
 | Восстановление при аварии | 5.5 | DR Runbook |
 | Откат релиза | 7.2 | Rollback Strategy |
 | Безопасность | 5.4 | Security Policy |
-| Forensic retention для таблицы | 2.1.1, App D | Config |
+| Forensic retention | 2.1.1, App D | Config |
 | Backfill с эксклюзивной блокировкой | 2.4 | Lock Mechanism |
 | Deprecation поля | 7.1, App E | Workflow |
 
@@ -177,7 +177,7 @@ Lock key для `rebuild`/`backfill` включает суффикс `:exclusive
 
 ## 3. Обработка Ошибок и Наблюдаемость
 
-### 3.1. Классификация Ошибок
+### 3.1.1. Классификация Ошибок
 Вместо тотального подхода "Fail Fast" используем дифференцированный подход:
 
 | Тип Ошибки | Поведение | Пример |
@@ -186,24 +186,24 @@ Lock key для `rebuild`/`backfill` включает суффикс `:exclusive
 | **Восстановимая** (Recoverable) | Повтор N раз (Backoff) | 429 Rate Limit, 502/504 Timeout, сетевой сбой. |
 | **Качество данных** (Data Quality) | Лог + Пропуск записи | Невалидный SMILES, отсутствует необязательное поле. Не роняет батч. |
 
-### 3.1.2. Параметры Retry (Backoff)
+### 3.1.2. Пороги Ошибок Батча (Thresholds)
+- **Soft Threshold**: >5% ошибок качества данных -> Warning.
+- **Hard Threshold**: >20% ошибок -> Fail Batch.
+- **Metric Scope**: Отслеживать как `record_error_rate` (доля битых строк), так и `entity_error_rate` (доля битых уникальных сущностей).
+
+### 3.1.3. Параметры Retry (Backoff)
 Для типа ошибок **Recoverable** применять стратегию Exponential Backoff:
 - **Max Attempts**: 3
 - **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
 - **Jitter**: Random(0.1s, 0.5s) **SHOULD** использоваться для избежания "thundering herd".
 
-### 3.1.3. Circuit Breaker (Размыкатель цепи)
+### 3.1.4. Circuit Breaker (Размыкатель цепи)
 Паттерн защиты от каскадных сбоев.
 - **Trigger**: 5 последовательных ошибок соединения/таймаута.
 - **State**: Переход в состояние `OPEN`.
-- **Open Duration**: 5 минут.
+- **Open Duration**: 5 минут (configurable: `circuit_breaker.recovery_timeout`).
 - **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open +5 мин.
 - **Observability**: Метрики `circuit_breaker_state` (0=Closed, 1=Open), `trips_total`. Алерт при зависании в Open > 10 мин.
-
-### 3.1.1. Пороги Ошибок Батча (Thresholds)
-- **Soft Threshold**: >5% ошибок качества данных -> Warning.
-- **Hard Threshold**: >20% ошибок -> Fail Batch.
-- **Metric Scope**: Отслеживать как `record_error_rate` (доля битых строк), так и `entity_error_rate` (доля битых уникальных сущностей).
 
 ### 3.2. Наблюдаемость (Observability)
 - **Correlation ID**: `run_id` обязателен во всех логах, метриках и блокировках.
@@ -259,7 +259,7 @@ Lock key для `rebuild`/`backfill` включает суффикс `:exclusive
 | Status | Условие | Действие |
 |--------|---------|----------|
 | **Healthy** | 0 errors за 5 мин | Normal |
-| **Degraded** | 1-2 consecutive errors | Timeout ×2, batch ÷2 |
+| **Degraded** | 1-2 consecutive errors | Timeout ×2, batch_size ÷2 |
 | **Unhealthy** | ≥3 errors или health_check fail | Pause, Alert P2 |
 
 - **Transition**: Unhealthy → Degraded после 1 успешного health_check.
@@ -367,7 +367,7 @@ Lock key для `rebuild`/`backfill` включает суффикс `:exclusive
   - Minor: добавление nullable полей.
   - Major: удаление/переименование полей, изменение типов.
 - **Уведомление о Breaking Change**:
-  1. PR с изменением Gold-схемы требует лейбл `breaking-change`.
+  1. PR с изменением Gold-схемы **MUST** иметь лейбл `breaking-change`.
   2. CI генерирует diff схемы и постит в Slack-канал `#bioetl-contracts`.
   3. Период депрекации: 2 недели до удаления поля.
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях.
@@ -468,7 +468,7 @@ sink:
     primary_key: [id]      # Ключ для merge
     partition_by: [year, month]
     classification: public
-    forensic_retention: false  # true для Critical tables (30 days)
+    forensic_retention: false  # true = 30 days for Critical tables
 
   gold:
     path: s3://bioetl/gold/chembl/activity_aggregated/
@@ -481,7 +481,7 @@ dq_rules:
 
 failure_thresholds:
   warn_pct: 5
-  fail_pct: 20               # Synced with Rule 3.1.1
+  fail_pct: 20               # Synced with Rule 3.1.2
 
 circuit_breaker:
   failure_threshold: 5
@@ -524,13 +524,13 @@ fields:
     replacement: new_field
 ```
 
-**Days 1-14**: Dual-write period
-- Write both `old_field` and `new_field`
-- Consumers migrate reads
+**Days 1-14**: Dual-write период
+- Писать оба поля: `old_field` и `new_field`
+- Потребители мигрируют чтение на `new_field`
 
-**Day 15**: Remove old_field
-- Bump major version
-- ADR documenting rationale
+**Day 15**: Удаление `old_field`
+- Bump major version схемы
+- ADR с обоснованием изменения
 
 ## История Изменений (Changelog)
 - **4.6** (2025-05-20): Governance & Stabilization. RFC 2119 Requirements, Hard Limits, Forensic Retention, Threat Model.
