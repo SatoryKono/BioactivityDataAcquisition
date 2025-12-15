@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 import statistics
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -281,7 +281,7 @@ class AnomalyDetector:
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=z_score,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             message=message,
         )
 
@@ -328,7 +328,7 @@ class AnomalyDetector:
             anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
             severity=AnomalySeverity.CRITICAL,
             z_score=z_score,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             message=message,
         )
 
