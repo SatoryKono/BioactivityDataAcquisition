@@ -48,7 +48,21 @@ nav:
   - Architecture:
     - System Context: 02-architecture/system-context.md
     - Data Flow: 02-architecture/data-flow.md
+    - Decisions:
+      - ADR-001: Delta Lake: 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
+      - ADR-002: Medallion: 02-architecture/decisions/ADR-002-medallion-architecture.md
+      - ADR-003: Redis Locking: 02-architecture/decisions/ADR-003-redis-for-distributed-locking.md
+      - ADR-004: Pydantic: 02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md
   - Guides:
-    - Quick Start: 03-guides/quick-start.md
+    - Getting Started: 03-guides/getting-started.md
+    - Running Pipelines: 03-guides/running-pipelines.md
+    - Troubleshooting: 03-guides/troubleshooting.md
+  - Reference:
+    - CLI: 04-reference/cli.md
+    - Pipelines:
+      - ChEMBL Activity: 04-reference/pipelines/chembl_activity.md
   - Operations:
-    - Runbooks: 05-operations/runbooks/index.md
+    - Overview: 05-operations/runbooks/index.md
+    - Incident Response: 05-operations/runbooks/incident-response.md
+    - Data Recovery: 05-operations/runbooks/data-recovery.md
+    - Scaling: 05-operations/runbooks/scaling.md
