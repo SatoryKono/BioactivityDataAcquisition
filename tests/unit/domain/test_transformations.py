@@ -343,7 +343,9 @@ def test_string_strip_properties(text):
 
 
 @pytest.mark.unit
-@given(st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000))
+@given(
+    st.integers(min_value=0, max_value=1000), st.integers(min_value=0, max_value=1000)
+)
 def test_dq_score_bounds(valid, total):
     """Property: DQ score should always be between 0.0 and 1.0."""
     if valid <= total:
