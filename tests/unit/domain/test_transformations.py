@@ -13,7 +13,7 @@ import math
 from datetime import date, datetime
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import HealthCheck, given, settings, strategies as st
 
 from bioetl.domain.transformations import (
     META_FIELDS,
@@ -149,6 +149,7 @@ class TestGenerateContentHash:
         hash2 = generate_content_hash(record2, "test")
         assert hash1 == hash2
 
+    @settings(suppress_health_check=[HealthCheck.too_slow])
     @given(
         st.dictionaries(
             st.text(min_size=1, max_size=20),
