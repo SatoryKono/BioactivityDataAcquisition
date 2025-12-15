@@ -16,6 +16,8 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, ParamSpec, TypeVar
 
+import httpx
+
 from bioetl.domain.types import CircuitBreakerState
 
 P = ParamSpec("P")
@@ -178,8 +180,6 @@ def is_circuit_breaker_error(exc: Exception) -> bool:
     Only connection/timeout errors should trigger circuit breaker,
     not business logic errors (4xx responses except 429).
     """
-    import httpx
-
     if isinstance(exc, httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout):
         return True
 
