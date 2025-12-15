@@ -1,6 +1,7 @@
 """Unit tests for quarantine."""
 
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
 import polars as pl
@@ -31,7 +32,7 @@ class TestUnifiedQuarantine:
         pipeline = "test_pipeline"
         error_code = ErrorType.INVALID_DATA
         payload = {"id": 1, "value": "a"}
-        bronze_batch_id = BatchID.from_hex("12345678123456781234567812345678")
+        bronze_batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         error_details = {"message": "Invalid value"}
 
         quarantine.write(
@@ -62,7 +63,7 @@ class TestUnifiedQuarantine:
             pipeline="test",
             error_code=ErrorType.INVALID_DATA,
             payload=payload,
-            bronze_batch_id=BatchID.from_hex("12345678123456781234567812345678"),
+            bronze_batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
             error_details={},
         )
 
