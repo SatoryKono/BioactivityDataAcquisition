@@ -35,6 +35,8 @@ dependencies = [
     "prometheus-client>=0.20",
     # CLI
     "click>=8.1",
+    # Logging
+    "structlog>=24.0",
 ]
 
 [project.scripts]
