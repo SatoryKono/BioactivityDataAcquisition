@@ -133,6 +133,7 @@ class RedisDistributedLock:
         ttl: int | None = None,
         wait: bool = False,
         wait_timeout: int = 300,
+        exclusive: bool = False,
     ) -> bool:
         """Acquire distributed lock.
 
@@ -142,6 +143,7 @@ class RedisDistributedLock:
             ttl: Time-to-live in seconds (default: default_ttl)
             wait: Wait for lock if unavailable
             wait_timeout: Maximum wait time in seconds (default: 300)
+            exclusive: Acquire exclusive lock for backfill/rebuild
 
         Returns:
             True if lock acquired, False otherwise
@@ -149,9 +151,20 @@ class RedisDistributedLock:
         Raises:
             LockAcquisitionError: If wait=True and timeout exceeded
         """
+        # Delegate to exclusive method if requested
+        if exclusive:
+            return await self.acquire_exclusive(key, owner_id, ttl, wait, wait_timeout)
+
         redis_key = self._make_key(key)
         owner_str = self._owner_to_str(owner_id)
         ttl = ttl or self.default_ttl
+
+        # Check if exclusive lock exists (blocks regular locks)
+        exclusive_key = f"{key}:exclusive"
+        if await self.is_locked(exclusive_key):
+            if not wait:
+                return False
+            # Will timeout waiting for exclusive to release
 
         # Try to acquire lock with SETNX + EXPIRE
         acquired = await self.redis_client.set(
@@ -174,6 +187,10 @@ class RedisDistributedLock:
         while elapsed < wait_timeout:
             await asyncio.sleep(poll_interval)
             elapsed += poll_interval
+
+            # Check exclusive lock again
+            if await self.is_locked(exclusive_key):
+                continue
 
             acquired = await self.redis_client.set(
                 redis_key,
