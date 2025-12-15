@@ -3,10 +3,9 @@
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import UUID
-import zstandard as zstd
 
 import pytest
-import polars as pl
+import zstandard as zstd
 
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -27,7 +26,7 @@ def mock_s3_client():
 def mock_deltalake():
     """Fixture for mocking deltalake functions."""
     with patch("deltalake.DeltaTable") as mock_delta_table, \
-         patch("deltalake.write_deltalake") as mock_write_deltalake:
+        patch("deltalake.write_deltalake") as mock_write_deltalake:
         yield mock_delta_table, mock_write_deltalake
 
 
@@ -78,7 +77,7 @@ class TestBronzeWriter:
             provider="test",
             entity="test",
             date=datetime.now(),
-            batch_id=BatchID.from_hex("12345678123456781234567812345678"),
+            batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
         )
 
         mock_s3_client.upload_fileobj.assert_called_once()
@@ -125,51 +124,63 @@ class TestDeltaWriter:
         writer = DeltaWriter(base_path="/tmp/delta")
         assert writer.base_path == "/tmp/delta"
 
-    def test_write_silver_append_mode(self, mock_deltalake):
-        """Test write_silver in append mode."""
+    def test_write_silver_creates_new_table(self, mock_deltalake):
+        """Test write_silver creates table if not exists."""
+        from deltalake.exceptions import TableNotFoundError
         mock_delta_table, mock_write_deltalake = mock_deltalake
+        mock_delta_table.side_effect = TableNotFoundError("Not found")
+
         writer = DeltaWriter(base_path="/tmp/delta")
-        records = [{"id": 1, "value": "a"}]
+        records = [{
+            "id": 1,
+            "value": "a",
+            "_run_id": "test-run",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch-1",
+            "_ingestion_ts": "2024-01-01T00:00:00Z"
+        }]
 
         writer.write_silver(
             table_name="test_table",
             records=records,
-            mode="append"
+            primary_keys=["id"]
         )
 
         mock_write_deltalake.assert_called_once()
-        args, kwargs = mock_write_deltalake.call_args
-        assert kwargs["mode"] == "append"
-        assert isinstance(kwargs["data"], pl.DataFrame)
 
-    def test_write_silver_merge_mode(self, mock_deltalake):
-        """Test write_silver in merge mode."""
+    def test_write_silver_merge_existing_table(self, mock_deltalake):
+        """Test write_silver merges into existing table."""
         mock_delta_table, mock_write_deltalake = mock_deltalake
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
 
         writer = DeltaWriter(base_path="/tmp/delta")
-        records = [{"id": 1, "value": "a"}]
+        records = [{
+            "id": 1,
+            "value": "a",
+            "_run_id": "test-run",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch-1",
+            "_ingestion_ts": "2024-01-01T00:00:00Z"
+        }]
 
         writer.write_silver(
             table_name="test_table",
             records=records,
-            mode="merge",
             primary_keys=["id"]
         )
 
         mock_table_instance.merge.assert_called_once()
 
-    def test_write_silver_merge_mode_no_keys_raises_error(self, mock_deltalake):
-        """Test merge mode without primary keys raises an error."""
+    def test_write_silver_empty_records_raises_error(self, mock_deltalake):
+        """Test empty records raises an error."""
         writer = DeltaWriter(base_path="/tmp/delta")
-        records = [{"id": 1, "value": "a"}]
 
-        with pytest.raises(ValueError, match="Primary keys must be provided for merge mode"):
+        with pytest.raises(ValueError, match="No records to write"):
             writer.write_silver(
                 table_name="test_table",
-                records=records,
-                mode="merge"
+                records=[],
+                primary_keys=["id"]
             )
 
 

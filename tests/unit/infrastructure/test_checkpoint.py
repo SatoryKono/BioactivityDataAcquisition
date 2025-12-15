@@ -1,10 +1,9 @@
 """Unit tests for checkpointing."""
 
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
-
-from uuid import UUID
 
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
@@ -13,9 +12,9 @@ from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 @pytest.fixture
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
-    with patch("boto3.client") as mock_boto_client:
+    with patch("boto3.Session") as mock_session:
         mock_s3 = MagicMock()
-        mock_boto_client.return_value = mock_s3
+        mock_session.return_value.client.return_value = mock_s3
         yield mock_s3
 
 
@@ -57,7 +56,9 @@ class TestS3Checkpoint:
         cp = S3Checkpoint(bucket="test-bucket")
         pipeline = "test_pipeline"
         json_body = b'{"watermark": "2023-01-01T00:00:00Z", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {}}'
-        mock_s3_client.get_object.return_value = {"Body": MagicMock(read=lambda: json_body)}
+        mock_s3_client.get_object.return_value = {
+            "Body": MagicMock(read=lambda: json_body)
+        }
 
         watermark, run_id, metadata = cp.load(pipeline)
 
