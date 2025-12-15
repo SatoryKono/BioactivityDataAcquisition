@@ -1,7 +1,9 @@
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Any, Generator
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -14,6 +16,19 @@ try:
     VCR_AVAILABLE = True
 except ImportError:
     VCR_AVAILABLE = False
+
+
+def pytest_configure(config: Any) -> None:
+    """Add src directory to Python path and mock missing modules."""
+    project_root = Path(__file__).parent.parent
+    src_dir = project_root / "src"
+    sys.path.insert(0, str(src_dir))
+
+    # Mock pubchempy if not installed
+    try:
+        import pubchempy
+    except ImportError:
+        sys.modules["pubchempy"] = MagicMock()
 
 
 @pytest.fixture(scope="session")
@@ -186,5 +201,5 @@ def circuit_breaker() -> Any:
     return CircuitBreaker(
         provider="test",
         failure_threshold=3,
-        recovery_timeout=1,  # Fast recovery for tests
+        recovery_timeout=1,  # Fast for tests
     )

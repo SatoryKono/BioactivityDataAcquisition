@@ -80,7 +80,7 @@ class ChEMBLActivityPipeline(BasePipeline):
         entity_id = generate_entity_id(
             record={"activity_id": activity_id},
             provider=self.provider,
-            business_key="activity_id",
+            id_field="activity_id",
         )
 
         # Extract measurement data

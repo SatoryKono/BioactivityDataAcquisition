@@ -1,7 +1,8 @@
 # Download mermaid bundle and css into assets (PowerShell)
-# Usage: .\download_mermaid.ps1 -Version 10.4.0
+# Usage: .\download_mermaid.ps1 -Version 10.4.0 -Proxy 'http://proxy:8080'
 param(
-    [string]$Version = '10.4.0'
+    [string]$Version = '10.4.0',
+    [string]$Proxy = ''
 )
 
 Write-Host "Downloading mermaid v$Version to assets/javascripts and assets/stylesheets..."
@@ -16,6 +17,21 @@ catch
     Write-Host "Warning: Could not set SecurityProtocol to TLS1.2, continuing and hoping for the best."
 }
 
+if ($Proxy -ne '')
+{
+    try
+    {
+        Write-Host "Setting default web proxy: $Proxy"
+        $webProxy = New-Object System.Net.WebProxy($Proxy)
+        [System.Net.WebRequest]::DefaultWebProxy = $webProxy
+        [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
+    }
+    catch
+    {
+        Write-Host "Warning: could not set DefaultWebProxy: $( $_.Exception.Message )"
+    }
+}
+
 New-Item -ItemType Directory -Path assets\javascripts -Force | Out-Null
 New-Item -ItemType Directory -Path assets\stylesheets -Force | Out-Null
 
@@ -26,7 +42,14 @@ function TryInvokeWebRequest($url, $outPath)
     try
     {
         Write-Host "[Invoke-WebRequest] $url -> $outPath"
-        Invoke-WebRequest -Uri $url -OutFile $outPath -ErrorAction Stop
+        if ($Proxy -ne '')
+        {
+            Invoke-WebRequest -Uri $url -OutFile $outPath -Proxy $Proxy -ErrorAction Stop
+        }
+        else
+        {
+            Invoke-WebRequest -Uri $url -OutFile $outPath -ErrorAction Stop
+        }
         return $true
     }
     catch
@@ -41,6 +64,7 @@ function TryBitsTransfer($url, $outPath)
     try
     {
         Write-Host "[BITS] $url -> $outPath"
+        # Start-BitsTransfer will typically use system proxy settings
         Start-BitsTransfer -Source $url -Destination $outPath -ErrorAction Stop
         return $true
     }
@@ -58,6 +82,10 @@ function TryWebClient($url, $outPath)
         Write-Host "[WebClient] $url -> $outPath (forcing TLS1.2)"
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         $wc = New-Object System.Net.WebClient
+        if ($Proxy -ne '')
+        {
+            $wc.Proxy = New-Object System.Net.WebProxy($Proxy)
+        }
         $wc.DownloadFile($url, $outPath)
         return $true
     }

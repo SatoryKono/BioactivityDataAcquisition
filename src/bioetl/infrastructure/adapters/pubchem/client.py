@@ -376,8 +376,8 @@ class PubChemClient:
 
             if compound:
                 # Check circuit breaker state
-                cb_state = self.circuit_breaker.state
-                failure_count = self.circuit_breaker.failure_count
+                cb_state = self.circuit_breaker.get_state()
+                failure_count = self.circuit_breaker.get_failure_count()
 
                 if cb_state.value == "CLOSED" and failure_count == 0:
                     return HealthStatus.HEALTHY

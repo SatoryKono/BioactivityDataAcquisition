@@ -177,6 +177,7 @@ class LockPort(Protocol):
         ttl: int = 60,
         wait: bool = False,
         wait_timeout: int = 300,
+        exclusive: bool = False,
     ) -> bool:
         """Acquire distributed lock.
 
@@ -186,6 +187,7 @@ class LockPort(Protocol):
             ttl: Time-to-live in seconds
             wait: Wait for lock if unavailable
             wait_timeout: Maximum wait time (seconds)
+            exclusive: Exclusive lock for backfill/rebuild operations
 
         Returns:
             True if lock acquired, False otherwise
@@ -197,12 +199,13 @@ class LockPort(Protocol):
         """
         ...
 
-    def release(self, key: str, owner_id: RunID) -> bool:
+    def release(self, key: str, owner_id: RunID, exclusive: bool = False) -> bool:
         """Release lock.
 
         Args:
             key: Lock key
             owner_id: Run ID of lock owner (must match)
+            exclusive: Whether this was an exclusive lock
 
         Returns:
             True if released, False if not owned
@@ -212,12 +215,13 @@ class LockPort(Protocol):
         """
         ...
 
-    def heartbeat(self, key: str, owner_id: RunID) -> bool:
+    def heartbeat(self, key: str, owner_id: RunID, exclusive: bool = False) -> bool:
         """Refresh lock TTL (keep-alive).
 
         Args:
             key: Lock key
             owner_id: Run ID of lock owner (must match)
+            exclusive: Whether this is an exclusive lock
 
         Returns:
             True if heartbeat successful, False if lock lost
