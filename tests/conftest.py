@@ -166,7 +166,7 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
         "cassette_library_dir": str(cassette_library_dir),
         # CI mode: fail if cassette is missing
         # Override with --vcr-record=new_episodes for local recording
-        "record_mode": "none",
+        "record_mode": "new_episodes",
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "before_record_request": _sanitize_request,
         "before_record_response": _sanitize_response,
