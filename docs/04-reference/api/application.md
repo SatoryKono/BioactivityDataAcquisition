@@ -1,5 +1,5 @@
 # Application Layer
 
-This layer orchestrates the data flow, using the domain models and calling the port interfaces implemented by the infrastructure layer.
+This layer contains the application services that orchestrate the ETL process.
 
-::: bioetl.application
+> API documentation will be available once the `bioetl.services` module is implemented.

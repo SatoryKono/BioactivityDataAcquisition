@@ -1,7 +1,20 @@
 import os
+import re
 from pathlib import Path
+from typing import Any, Generator
+from uuid import uuid4
+
 import pytest
-from typing import Generator
+
+# VCR.py imports (for API recording)
+try:
+    import vcr
+    from vcr.request import Request
+
+    VCR_AVAILABLE = True
+except ImportError:
+    VCR_AVAILABLE = False
+
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
@@ -24,3 +37,154 @@ def pyproject_toml(project_root: Path) -> Path:
 @pytest.fixture(scope="session")
 def requirements_md(project_root: Path) -> Path:
     return project_root / "REQUIREMENTS.md"
+
+
+# =============================================================================
+# VCR.py Configuration (RULES.md Section 4.2)
+# =============================================================================
+
+
+def _sanitize_request(request: Any) -> Any:
+    """Sanitize secrets from recorded requests.
+
+    Removes:
+    - Authorization headers
+    - API keys from query params and headers
+    - PII data patterns
+
+    Requirements:
+    - REQ-TEST-002: Secret sanitization in before_record hook
+    """
+    if not VCR_AVAILABLE:
+        return request
+
+    # Sanitize headers
+    headers_to_sanitize = [
+        "Authorization",
+        "X-API-Key",
+        "Api-Key",
+        "X-Api-Key",
+        "Cookie",
+        "Set-Cookie",
+    ]
+    for header in headers_to_sanitize:
+        if header in request.headers:
+            request.headers[header] = "REDACTED"
+        # Also check lowercase
+        if header.lower() in request.headers:
+            request.headers[header.lower()] = "REDACTED"
+
+    # Sanitize API keys in query params
+    if "?" in request.uri:
+        base_url, query = request.uri.split("?", 1)
+        # Patterns to sanitize in query string
+        patterns = [
+            (r"api_key=[^&]+", "api_key=REDACTED"),
+            (r"apikey=[^&]+", "apikey=REDACTED"),
+            (r"access_token=[^&]+", "access_token=REDACTED"),
+            (r"token=[^&]+", "token=REDACTED"),
+        ]
+        for pattern, replacement in patterns:
+            query = re.sub(pattern, replacement, query, flags=re.IGNORECASE)
+        request.uri = f"{base_url}?{query}"
+
+    return request
+
+
+def _sanitize_response(response: dict[str, Any]) -> dict[str, Any]:
+    """Sanitize secrets from recorded responses."""
+    # Remove sensitive headers from response
+    headers_to_remove = ["Set-Cookie", "X-Request-Id"]
+    if "headers" in response:
+        for header in headers_to_remove:
+            response["headers"].pop(header, None)
+            response["headers"].pop(header.lower(), None)
+    return response
+
+
+@pytest.fixture(scope="module")
+def vcr_cassette_dir(request: pytest.FixtureRequest, project_root: Path) -> Path:
+    """Return the directory for VCR cassettes based on test module."""
+    # Create cassette directory based on test module path
+    test_file = Path(request.fspath)  # type: ignore[arg-type]
+    relative_path = test_file.relative_to(project_root / "tests")
+    cassette_dir = project_root / "tests" / "fixtures" / "vcr" / relative_path.parent
+    cassette_dir.mkdir(parents=True, exist_ok=True)
+    return cassette_dir
+
+
+@pytest.fixture(scope="module")
+def vcr_config(project_root: Path) -> dict[str, Any]:
+    """VCR.py configuration.
+
+    CI mode: record_mode="none" - fail if cassette missing
+    Local recording: pytest --vcr-record=new_episodes
+    """
+    cassette_library_dir = project_root / "tests" / "fixtures" / "vcr"
+    cassette_library_dir.mkdir(parents=True, exist_ok=True)
+
+    return {
+        "cassette_library_dir": str(cassette_library_dir),
+        # CI mode: fail if cassette is missing
+        # Override with --vcr-record=new_episodes for local recording
+        "record_mode": "none",
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "before_record_request": _sanitize_request,
+        "before_record_response": _sanitize_response,
+        "filter_headers": [
+            "Authorization",
+            "X-API-Key",
+            "Cookie",
+            "Set-Cookie",
+        ],
+        "decode_compressed_response": True,
+    }
+
+
+# =============================================================================
+# Test Fixtures for Infrastructure Components
+# =============================================================================
+
+
+@pytest.fixture
+def run_id() -> Any:
+    """Generate a unique run ID for tests."""
+    from bioetl.domain.types import RunID
+
+    return RunID(uuid4())
+
+
+@pytest.fixture
+def fake_redis() -> Generator[Any, None, None]:
+    """Create a fake Redis instance for testing.
+
+    Uses fakeredis library for in-memory Redis simulation.
+    """
+    try:
+        import fakeredis.aioredis
+
+        server = fakeredis.FakeServer()
+        client = fakeredis.aioredis.FakeRedis(server=server)
+        yield client
+    except ImportError:
+        pytest.skip("fakeredis not installed")
+
+
+@pytest.fixture
+def token_bucket() -> Any:
+    """Create a TokenBucket for testing."""
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+    return TokenBucket(rate=100.0, capacity=100)  # Fast for tests
+
+
+@pytest.fixture
+def circuit_breaker() -> Any:
+    """Create a CircuitBreaker for testing."""
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+
+    return CircuitBreaker(
+        provider="test",
+        failure_threshold=3,
+        recovery_timeout=1,  # Fast recovery for tests
+    )
