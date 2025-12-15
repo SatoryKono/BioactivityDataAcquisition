@@ -82,13 +82,12 @@ class TestBronzeWriter:
             batch_id=batch_id,
         )
 
-        mock_s3_client.upload_fileobj.assert_called_once()
-        args, kwargs = mock_s3_client.upload_fileobj.call_args
+        mock_s3_client.put_object.assert_called_once()
+        args, kwargs = mock_s3_client.put_object.call_args
         assert kwargs["Bucket"] == "test-bucket"
         # Check key contains expected parts
-        assert "test_provider" in kwargs["Key"]
-        assert "test_entity" in kwargs["Key"]
-        assert "2023" in kwargs["Key"]
+        expected_key = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        assert kwargs["Key"] == expected_key
 
     def test_write_bronze_compresses_with_zstd(self, mock_s3_client):
         """REQ-DATA-001: Test that data is compressed with zstandard."""

@@ -14,9 +14,7 @@ from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 @pytest.fixture
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
-    with patch(
-        "bioetl.infrastructure.checkpoint.s3_checkpoint.boto3"
-    ) as mock_boto3:
+    with patch("bioetl.infrastructure.checkpoint.s3_checkpoint.boto3") as mock_boto3:
         mock_s3 = MagicMock()
         mock_boto3.Session.return_value.client.return_value = mock_s3
         mock_boto3.session.Config.return_value = MagicMock()
