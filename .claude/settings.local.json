@@ -21,7 +21,8 @@
       "Bash(.venv/Scripts/python:*)",
       "Bash(cat:*)",
       "Bash(echo:*)",
-      "Bash(PYTHONPATH=\"\" .venv/Scripts/python -m pytest:*)"
+      "Bash(PYTHONPATH=\"\" .venv/Scripts/python -m pytest:*)",
+      "Bash(PYTHONPATH=\"\" .venv/Scripts/python:*)"
     ]
   }
 }

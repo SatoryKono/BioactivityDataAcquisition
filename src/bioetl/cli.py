@@ -12,6 +12,7 @@ import sys
 
 import click
 
+from bioetl.application.pipeline.base import run_pipeline_flow
 from bioetl.domain.types import RunType
 
 
@@ -118,7 +119,7 @@ async def _run_chembl_activity(
         redis_port=int(os.getenv("BIOETL_REDIS_PORT", "6379")),
     )
 
-    await pipeline.run()
+    await run_pipeline_flow(pipeline)
 
 
 @cli.group()
