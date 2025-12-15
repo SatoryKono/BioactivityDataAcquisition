@@ -1,85 +1,74 @@
 # Отчет об Аудите Проекта BioETL
 *Дата: 2025-12-15*
 *Аудитор: Jules*
+*Версия: 2.0 (Deep Dive)*
 
 ## 1. Резюме
-Проект находится в стадии **Phase 4 (Application Layer)**. Реализованы базовые пайплайны, CLI интерфейс и инфраструктурные адаптеры.
-Обнаружено расхождение между кодом и тестами: код функционален и соответствует архитектуре, но тесты устарели или требуют доработки (API mismatch, конфигурация).
+Проект находится в стадии **Phase 4 (Application Layer)**. Реализованы ключевые компоненты архитектуры (Adapters, Pipelines, CLI) и документации.
+Обнаружен технический долг в области тестирования (Test Debt) и незначительные расхождения в конфигурации инфраструктуры. Кодовая база чистая, структура соответствует принципам Domain-Driven Design и Ports & Adapters.
 
-**Текущий статус:** 🟢 **GREEN** (Ready for Pipeline Development)
-
----
-
-## 2. Архитектура и Структура (Architecture)
-
-### 2.1. Соответствие Слоям (Ports & Adapters)
-- **Status:** ✅ **PASS**
-- **Findings:**
-    - Четкое разделение на `domain`, `infrastructure` и `application`.
-    - Порты определены через `typing.Protocol` в `src/bioetl/domain/ports.py`.
-    - Адаптеры корректно разложены по папкам.
-    - Реализован базовый класс пайплайна (`BasePipeline`) с поддержкой чекпоинтов, блокировок и Graceful Shutdown.
-
-### 2.2. Зависимости (Dependencies)
-- **Status:** ⚠️ **WARNING**
-- **Findings:**
-    - В `pyproject.toml` используются диапазоны версий (`>=`), в то время как тесты (`tests/test_architecture.py`) требуют жесткой фиксации (`==`).
-    - Отсутствуют dev-зависимости для тестов: `fakeredis` (требуется для тестов блокировок).
-    - `chembl_webresource_client` указан, но не используется (реализован свой async-клиент).
+**Текущий статус:** 🟢 **GREEN** (Ready for Pipeline Development, with Minor Fixes needed)
 
 ---
 
-## 3. Результаты Тестирования (Test Execution)
+## 2. Глубокий Анализ Архитектуры (Architecture Deep Dive)
 
-Запуск тестов (`pytest`) выявил ряд проблем, указывающих на "Test Debt":
+### 2.1. Структура Кода (Code Structure)
+- **Application Layer:** `src/bioetl/application/` содержит шаблон `BasePipeline` и реализацию `chembl_activity`. Реализована логика оркестрации, управления состоянием (checkpoints) и обработки ошибок.
+- **Domain Layer:** `src/bioetl/domain/` чист от I/O зависимостей. Порты (`ports.py`) определены корректно.
+- **Infrastructure Layer:** `src/bioetl/infrastructure/` содержит адаптеры.
+    - **Observability:** Обнаружено дублирование/неоднозначность: `src/bioetl/observability/` (logging) vs `src/bioetl/infrastructure/observability/` (metrics, anomaly). *Recommendation:* Консолидировать всё в `infrastructure/observability`, так как логирование и метрики являются инфраструктурным концерном.
+- **Services:** `src/bioetl/services/` существует, но пуст (`__init__.py`). *Recommendation:* Удалить, если не планируется использование отдельного сервисного слоя (логика пайплайнов уже в `application`).
 
-### 3.1. Architecture Tests (3 Failures)
-- `test_ports_are_protocols`: Ошибка проверки контента файла (вероятно, из-за docstrings).
-- `test_dotenv_is_gitignored`: Тест ожидает точное совпадение строки `.env`, но в `.gitignore` используется паттерн `*.env`. Код правильный, тест — нет.
-- `test_dependencies_are_pinned`: Конфликт политики версионирования (Range vs Pinned).
-
-### 3.2. Unit Tests (3 Failures)
-- **RateLimiter:** Тест обращается к методу `get_available_tokens()`, который в коде отсутствует (вероятно, заменен на свойство).
-- **CircuitBreaker:** Тесты пытаются получить доступ к приватному атрибуту `state` (вместо `_state` или публичного свойства).
-- **Diagnosis:** Код был обновлен/рефакторен, а юнит-тесты — нет.
-
-### 3.3. Skipped Tests
-- **Integration (ChEMBL):** Пропущены из-за отсутствия VCR-кассет.
-- **Redis Lock:** Пропущены из-за отсутствия `fakeredis`.
-- **Data Storage:** Пропущены из-за ошибок параметризации тестов.
+### 2.2. Соответствие Rules & Governance
+- **Makefile:** Полностью соответствует `RULES.md`. Реализованы команды `install`, `test`, `lint`, `run-local`, а также операционные команды `quarantine-*`, `release-lock`, `dr-restore`.
+- **Docs-as-Code:** Структура `docs/` отличная. Присутствуют ADR (`docs/02-architecture/decisions`), Runbooks (`docs/05-operations/runbooks`), Contracts (`docs/contracts`).
+    - *Finding:* `docs/04-reference/pipelines` зеркалирует структуру кода.
 
 ---
 
-## 4. Реализация Компонентов (Deep Dive)
+## 3. Результаты Тестирования (Test Execution Results)
 
-### 4.1. Application Layer (Pipelines & CLI)
-- **File:** `src/bioetl/application/pipeline/base.py`
-- **Status:** ✅ **PASS**
-- **Features:**
-    - Реализован шаблон `BasePipeline` (Template Method pattern).
-    - Интеграция с `LockPort`, `CheckpointPort`, `QuarantinePort`.
-    - CLI (`src/bioetl/cli.py`) поддерживает команды `run`, `quarantine`, `checkpoint`.
+Запуск тестов показал, что тестовая база отстает от реализации ("Test Rot").
 
-### 4.2. Infrastructure
-- **Redis Lock:** Реализован корректно (SETNX, Heartbeat), но тесты требуют `fakeredis`.
-- **Delta Writer:** Использует `delta-rs`. **Issue:** Конфиг использует схему `s3a://` (Spark), что может быть несовместимо с `delta-rs` (Rust), который ожидает `s3://`.
+### 3.1. Ошибки (Failures)
+1.  **Unit Tests (Adapters):**
+    - `TestRateLimiter`: Вызов несуществующего метода `get_available_tokens()`. В коде используется property `tokens` или подобное.
+    - `TestCircuitBreaker`: Доступ к приватному атрибуту `state` (вместо `_state`).
+2.  **Architecture Tests:**
+    - `test_ports_are_protocols`: Ошибка парсинга файла `ports.py` (тест слишком хрупкий).
+    - `test_dependencies_are_pinned`: Конфликт требований (`>=` в toml vs `==` в тесте).
+
+### 3.2. Пропуски (Skipped)
+- **Integration:** Тесты ChEMBL пропущены из-за отсутствия VCR-кассет.
+- **Redis Lock:** Пропущены из-за отсутствия `fakeredis` в зависимостях.
 
 ---
 
-## 5. Рекомендации (Action Plan)
+## 4. Инфраструктура и Конфигурация
 
-Для устранения "Test Debt" и стабилизации CI рекомендуется:
+### 4.1. Delta Lake Configuration
+- **Issue:** В `configs/pipelines/chembl/activity.yaml` используется схема `s3a://` (Hadoop/Spark).
+- **Impact:** Библиотека `delta-rs` (Rust), используемая в проекте, работает через AWS SDK и ожидает схему `s3://`. Использование `s3a://` приведет к ошибке `ObjectStoreError`.
+- **Fix:** Заменить `s3a://` на `s3://`.
 
-1.  **Fix Tests:**
-    - Обновить юнит-тесты `test_adapters.py` для соответствия актуальному API (`_state`, свойства).
-    - Исправить архитектурные тесты (ослабить regex для gitignore и protocols).
+### 4.2. Dependencies
+- **Warning:** `chembl_webresource_client` в `pyproject.toml` является Dead Dependency (реализован свой `ChemblAdapter` на `httpx`).
+- **Missing Dev Dependency:** `fakeredis` отсутствует в `optional-dependencies.dev`, блокируя запуск юнит-тестов блокировок.
+
+---
+
+## 5. План Действий (Action Plan)
+
+1.  **Refactor Tests:**
+    - Обновить юнит-тесты (`test_adapters.py`) под актуальный API классов.
     - Добавить `fakeredis` в `pyproject.toml`.
-2.  **Configuration:**
-    - Заменить `s3a://` на `s3://` в YAML-конфигах.
-3.  **Dependencies:**
-    - Удалить `chembl_webresource_client`.
-    - Принять решение по пиннингу (рекомендуется зафиксировать версии для воспроизводимости).
-4.  **Integration:**
-    - Сгенерировать VCR-кассеты для интеграционных тестов.
+    - Сгенерировать VCR кассеты для интеграционных тестов.
+2.  **Cleanup:**
+    - Удалить `src/bioetl/services/` (если не используется).
+    - Удалить `chembl_webresource_client` из зависимостей.
+    - Консолидировать `observability` пакеты.
+3.  **Config Fix:**
+    - Заменить `s3a://` на `s3://` во всех YAML конфигах.
 
-**Вывод:** Код проекта написан качественно и соответствует требованиям. Основные усилия сейчас должны быть направлены на актуализацию тестовой базы.
+**Заключение:** Проект готов к активной разработке новой функциональности (новые пайплайны), при условии быстрого устранения "Test Debt".
