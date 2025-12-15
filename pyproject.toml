@@ -33,7 +33,12 @@ dependencies = [
     "pubchempy>=1.0.4",
     # Metrics
     "prometheus-client>=0.20",
+    # CLI
+    "click>=8.1",
 ]
+
+[project.scripts]
+bioetl = "bioetl.cli:main"
 
 [project.optional-dependencies]
 dev = [

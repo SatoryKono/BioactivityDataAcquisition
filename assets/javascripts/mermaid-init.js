@@ -1,61 +1,81 @@
 (function () {
-})();
-  });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-md-color-scheme', 'data-theme'] });
-    });
-      }
-        } catch (e) { /* ignore */ }
-          renderAll();
-          mermaid.initialize({ theme: getMaterialTheme() });
-        try {
-      if (shouldReinit) {
-      });
-        return m.attributeName === 'data-md-color-scheme' || m.attributeName === 'data-theme';
-      var shouldReinit = mutations.some(function (m) {
-    var observer = new MutationObserver(function (mutations) {
-    renderAll();
-    initMermaid();
-  document.addEventListener('DOMContentLoaded', function () {
-
-  }
-    });
-      }
-        // silent
-      } catch (err) {
-        }
-          mermaid.init(undefined, el);
-        } else {
-          mermaid.init(undefined, container);
-          parent.replaceWith(container);
-          container.textContent = text;
-          container.className = 'mermaid';
-          var container = document.createElement('div');
-          var text = el.textContent;
-          var parent = el.parentElement;
-        if (el.tagName.toLowerCase() === 'code') {
-      try {
-    document.querySelectorAll('div.mermaid, code.language-mermaid').forEach(function (el) {
-    // render existing .mermaid containers and fenced code blocks converted by pymdownx
-    if (typeof mermaid === 'undefined') return;
-  function renderAll() {
-
-  }
+    // Offline-compatible Mermaid initializer
+    function getMaterialTheme() {
+        var el = document.documentElement;
+        var themeAttr = el.getAttribute('data-md-color-scheme') || el.getAttribute('data-theme');
+        if (themeAttr === 'dark' || themeAttr === 'slate') return 'dark';
+        return 'default';
     }
-      console.warn('mermaid init error', e);
-    } catch (e) {
-      });
-        securityLevel: 'loose'
-        theme: getMaterialTheme(),
-        startOnLoad: false,
-      mermaid.initialize({
+
+    function initMermaid() {
+        try {
+            if (typeof mermaid === 'undefined') return;
+            mermaid.initialize({
+                startOnLoad: false,
+                securityLevel: 'loose',
+                theme: getMaterialTheme(),
+            });
+        } catch (e) {
+            console.warn('mermaid init error', e);
+        }
+    }
+
+    function renderAll() {
+        try {
+            if (typeof mermaid === 'undefined') return;
+            // render existing .mermaid containers and fenced code blocks converted by pymdownx
+            document.querySelectorAll('div.mermaid, code.language-mermaid').forEach(function (el) {
+                try {
+                    if (el.tagName.toLowerCase() === 'code') {
+                        var text = el.textContent || '';
+                        var container = document.createElement('div');
+                        container.className = 'mermaid';
+                        container.textContent = text;
+                        var parent = el.parentElement;
+                        if (parent) parent.replaceWith(container);
+                        mermaid.init(undefined, container);
+                    } else {
+                        mermaid.init(undefined, el);
+                    }
+                } catch (err) {
+                    // silent per-render error
+                }
+            });
+        } catch (e) {
+            console.warn('mermaid render error', e);
+        }
+    }
+
+    function renderAndInit() {
+        initMermaid();
+        renderAll();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        renderAndInit();
+    });
+
+    // Re-render when Material theme attribute changes (light/dark)
     try {
-    if (typeof mermaid === 'undefined') return;
-  function initMermaid() {
+        var observer = new MutationObserver(function (mutations) {
+            var shouldReinit = mutations.some(function (m) {
+                return m.attributeName === 'data-md-color-scheme' || m.attributeName === 'data-theme';
+            });
+            if (shouldReinit) {
+                try {
+                    initMermaid();
+                    renderAll();
+                } catch (e) {
+                    // ignore
+                }
+            }
+        });
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-md-color-scheme', 'data-theme']
+        });
+    } catch (e) {
+        // ignore if MutationObserver unsupported
+    }
 
-  }
-    return 'default';
-    if (themeAttr === 'dark' || themeAttr === 'slate') return 'dark';
-    var themeAttr = el.getAttribute('data-md-color-scheme') || el.getAttribute('data-theme');
-    var el = document.documentElement;
-  function getMaterialTheme() {
-
+})();

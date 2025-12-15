@@ -1,19 +1,21 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(powershell -Command:*)",
-      "Bash(powershell -ExecutionPolicy Bypass -File \"E:/google_drive/05_AI/github/BioactivityDataAcquisition/setup_ssh.ps1\")",
-      "Bash(rm:*)",
-      "Bash(ssh:*)",
-      "Bash(gh repo list:*)",
-      "Bash(git remote set-url:*)",
-      "Bash(git config:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(dir:*)",
-      "Bash(findstr:*)",
-      "Bash(find:*)"
-    ]
-  }
+    "permissions": {
+        "allow": [
+            "Bash(powershell -Command:*)",
+            "Bash(powershell -ExecutionPolicy Bypass -File \"E:/google_drive/05_AI/github/BioactivityDataAcquisition/setup_ssh.ps1\")",
+            "Bash(rm:*)",
+            "Bash(ssh:*)",
+            "Bash(gh repo list:*)",
+            "Bash(git remote set-url:*)",
+            "Bash(git config:*)",
+            "Bash(git add:*)",
+            "Bash(git commit:*)",
+            "Bash(git push:*)",
+            "Bash(dir:*)",
+            "Bash(findstr:*)",
+            "Bash(find:*)",
+            "Bash(python -m venv:*)",
+            "Bash(.venv/Scripts/pip install:*)"
+        ]
+    }
 }
