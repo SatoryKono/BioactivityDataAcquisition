@@ -112,8 +112,9 @@ class TestBronzeWriter:
         # The Body should be zstd compressed data
         compressed_data = kwargs["Body"]
 
-        # Zstandard frames start with a magic number
-        assert compressed_data.startswith(zstd.MAGIC_NUMBER)
+        # Zstandard frames start with a magic number (0xFD2FB528 in little-endian)
+        zstd_magic_bytes = zstd.MAGIC_NUMBER.to_bytes(4, byteorder="little")
+        assert compressed_data.startswith(zstd_magic_bytes)
 
         # Decompress to verify content
         decompressor = zstd.ZstdDecompressor()
