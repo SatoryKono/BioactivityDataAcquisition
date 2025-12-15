@@ -1,11 +1,37 @@
 # BioETL: Правила Проекта
-*Версия: 4.1 (Storage Fixes), 2025-05-20*
+*Версия: 4.6 (Governance & Stability), 2025-12-15*
+
+## Введение (Quick Reference)
+| Задача | Раздел | Инструмент |
+|--------|--------|------------|
+| Создать новый пайплайн | App D | YAML config |
+| Добавить поле в схему | 2.2, App E | Pydantic model |
+| Ошибка в проде (Alert) | App C | Runbook |
+| Удалить битые данные | 2.6 | `make quarantine-purge` |
+| Развернуть на Staging | 5.6.1 | CI/CD |
+| Восстановление при аварии | 5.5 | DR Runbook |
+| Откат релиза | 7.2 | Rollback Strategy |
+| Безопасность | 5.4 | Security Policy |
+
+### Уровни Требований (Governance)
+В документе используются ключевые слова согласно RFC 2119:
+- **MUST** (Обязательно): Абсолютное требование. Нарушение рассматривается как дефект или блокер релиза.
+- **SHOULD** (Рекомендуется): Сильная рекомендация. Отклонение требует явного обоснования (комментарий в PR).
+- **MAY** (Опционально): Разрешено, на усмотрение разработчика.
 
 ## Глоссарий
 - **Bronze/Silver/Gold**: уровни качества данных (Medallion Architecture).
 - **Port**: интерфейс (Protocol) для инверсии зависимостей.
 - **Adapter**: реализация Port для конкретного провайдера.
 - **DAG**: Directed Acyclic Graph — модель зависимостей этапов пайплайна.
+- **Quarantine**: Изолированное хранилище для данных, не прошедших валидацию (Dead Letter Queue).
+- **Entity ID (Business Key)**: Идентификатор объекта в реальном мире (напр., `chembl_id`). Стабилен во времени.
+- **Content Hash (Version ID)**: Идентификатор конкретного состояния объекта (`sha256`). Изменяется при обновлении атрибутов. Используется для дедупликации и SCD Type 2.
+- **Time Travel**: Возможность запроса данных на определенный момент времени (Delta Lake Feature).
+- **Circuit Breaker**: Паттерн защиты от каскадных сбоев, временно отключающий вызовы к сбойному сервису.
+- **RPO (Recovery Point Objective)**: Максимально допустимый период потери данных при аварии.
+- **RTO (Recovery Time Objective)**: Максимально допустимое время простоя системы.
+- **SCD Type 2**: Slowly Changing Dimension — сохранение истории изменений записи (новые строки для изменений).
 
 ## 1. Архитектура и Слои
 **Философия**: "Прагматичная инженерия". Избегаем избыточной сложности (Over-engineering), архитектура должна ускорять вывод продукта на рынок (time-to-market).
@@ -18,8 +44,8 @@
 
 ### 1.1.1. Обеспечение Контрактов (Enforcement)
 Интерфейсы определяются в `domain/ports.py` через `typing.Protocol`:
-- **Development**: `mypy --strict` проверяет соответствие типов во время сборки.
-- **Runtime**: Опционально использовать `@runtime_checkable` для критичных адаптеров, где нужна проверка `isinstance`.
+- **Design-time**: `mypy --strict` проверяет соответствие типов во время сборки. Основной механизм контроля.
+- **Runtime Boundary**: Опционально использовать `@runtime_checkable` только для критичных адаптеров (boundary validation). Семантика поведения в runtime не проверяется типами.
 
 ```python
 class DataSourcePort(Protocol):
@@ -33,48 +59,79 @@ class DataSourcePort(Protocol):
 ### 2.1. Архитектура Medallion
 | Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность |
 |---------|--------|-----------|----------------------|-----------------|
-| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive | Append-only + `ingestion_ts`. CSV запрещен (хрупок). |
-| **Silver** (Норм.) | **Delta Lake / Iceberg** | Мягкая (учет дрейфа схемы) | Постоянно | **Merge/Upsert**. Использовать Table Formats для ACID транзакций и эффективных обновлений. |
+| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive (S3 Lifecycle) | Path: `bronze/{format_version}/{provider}/{entity}/{date}/`. Append-only. |
+| **Silver** (Норм.) | **Delta Lake / Iceberg** | Мягкая (учет дрейфа схемы) | Постоянно | **Merge/Upsert**. Raw Parquet запрещен. Обязателен ACID. Time Travel — для Ops, не для DR. |
 | **Gold** (Витрины) | Delta/Iceberg/Parquet | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
 
+**Bronze Lifecycle:**
+- Формат файлов (JSONL) зафиксирован в версии пути (`/v1/`).
+- Изменение формата требует новой ветки (`/v2/`). Миграция "in-place" запрещена.
+
+### 2.1.1. Инфраструктура Delta Lake
+- **Engine**: Использовать `delta-rs` (Rust core) для Python-воркеров для производительности.
+- **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
+- **Maintenance**: Обязательный запуск `VACUUM` с `retention_period=7 days` еженедельно для очистки старых файлов и уменьшения стоимости хранения.
+- **Forensic Retention**: По умолчанию 7 дней. Для таблиц класса critical (Core Data) допустимо увеличение до 30 дней через конфиг (`forensic_retention: true`), если позволяет бюджет.
+
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
-- **Bronze**: Принимает любые поля (schemaless). Цель — сохранить сырой ответ как есть.
-- **Silver**: Падает только при отсутствии *критичных* ключей (например, ID). Новые или неизвестные поля логируются, но не блокируют выполнение пайплайна.
+- **Info**: Появление новых опциональных полей. Логируется.
+- **Warn**: Появление >3 новых полей. Требует ревью.
+- **Critical**: Исчезновение обязательного поля (ID). Блокирует пайплайн.
+- **Drift SLA**: Для событий WARN (дрейф схемы) назначается Owner. SLA на реакцию — 48 часов. Нерешенный дрейф блокирует следующий релиз.
 
 ### 2.3. Data Lineage (Происхождение Данных)
-Каждая запись в Silver/Gold должна содержать метаданные происхождения:
-- `_source_file`: путь к файлу в Bronze (S3 path).
-- `_source_record_id`: ID записи в Bronze (номер строки или нативный ID).
-- `_transform_version`: хэш версии логики трансформации (git SHA или semver).
-Хранение lineage осуществляется через встроенные мета-колонки или таблицу `lineage_log`.
+Оптимизированная схема lineage:
+- **Silver Record**: Содержит `_source_batch_id` (FK).
+- **Lineage Log**: Таблица `sys.lineage_log` хранит маппинг `_source_batch_id` -> список файлов Bronze (S3 paths), версия трансформации, параметры запуска.
+Полные пути к файлам в каждой строке данных хранить запрещено (избыточность).
 
 ### 2.4. Политика Backfill / Replay
-- **Bronze**: Неизменяема (Immutable). Backfill = новый fetch с тем же запросом + новый `ingestion_ts`.
-- **Silver/Gold**:
-  - **Partial**: Перезапуск трансформации на указанном диапазоне дат.
-  - **Full Rebuild**: Полное пересоздание таблицы из Bronze (флаг `--full-rebuild`).
-- **Маркировка**: Использовать `_backfill_run_id` для отличия от инкрементальных запусков.
+- **Metadata**: Обязательные поля `_run_id` (UUID), `_run_type` (`incremental` | `backfill` | `rebuild`).
+- **Merge Priority**: `rebuild` > `backfill` > `incremental`. При конфликте версий побеждает более "полный" тип запуска.
+- **Concurrency Constraint**: В один момент времени для одной сущности допустим только один процесс записи типа `rebuild` или `backfill`. Параллельный запуск запрещен (Lock должен это гарантировать).
 
 ### 2.5. Стратегия Партиционирования
 | Уровень | Стратегия партиционирования | Пример |
 |---------|----------------------------|--------|
-| **Bronze** | По `ingestion_date` (YYYY-MM-DD) | `bronze/chembl/activity/2025-05-20/` |
+| **Bronze** | По `ingestion_date` (YYYY-MM-DD) | `bronze/v1/chembl/activity/2025-05-20/` |
 | **Silver** | По `source_date` или `entity_type` | `silver/chembl/activity/year=2025/month=05/` |
 | **Gold** | По use-case (часто по `target_id` или `date`) | `gold/activity_by_target/target_id=CHEMBL123/` |
 
-- **Partition Pruning**: Запросы должны включать ключ партиции для избежания полного сканирования (full scan).
-- **Compaction**: Мелкие файлы в Bronze объединяются еженедельно в CI-джобе.
+- **Soft Limits**: Warning при >10,000 партиций или >100 файлов в партиции.
+- **Hard Limits**: 50,000 партиций -> Pipeline Fail. Запрещены ключи партиционирования: UUID, Hash, Free-text (высокая кардинальность убивает Delta Log).
+- **Z-ORDER**: Рекомендуется для полей с высокой кардинальностью в Gold слое (вместо глубокого партиционирования).
 
 ### 2.6. Политика NULL и Пропущенных Значений
-| Состояние | Представление в Silver/Gold | Пример |
-|-----------|----------------------------|--------|
-| Значение отсутствует в источнике | `NULL` | API вернул `{}` без поля `ic50` |
-| Источник явно указал "нет данных" | `NULL` + флаг `_{field}_explicit_null=true` | API вернул `"ic50": null` |
-| Пустая строка | `""` (сохраняется как есть) | `"name": ""` |
-| Невалидное значение (DQ error) | `NULL` + запись в `dq_errors` | `"ic50": "not_measured"` |
+| Состояние | Действие | Куда попадает |
+|-----------|----------|---------------|
+| Значение отсутствует в источнике | Замена на NULL | Таблица Silver |
+| Некритичная ошибка DQ (warning) | Замена на NULL | Таблица Silver (с флагом `_dq_warn=true`) |
+| Критичная ошибка DQ (error) | Исключение из основного потока | **Таблица Quarantine (Unified)** |
+
+#### Спецификация Unified Quarantine
+Единая таблица `common.quarantine` для всех сущностей.
+- `ingestion_ts` (Timestamp): Время инцидента.
+- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`).
+- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`).
+- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**).
+- `payload_hash` (String): Для дедупликации ошибок.
+- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных.
+- `dq_status` (String): `NEW` | `IGNORED` | `REPROCESSED`.
 
 - **Запрещено**: Использовать значения-заполнители (sentinel values) типа `-1`, `"N/A"`, `9999`.
 - **Pandera**: Поля, допускающие NULL, явно маркируются `nullable=True`.
+
+#### Жизненный цикл Карантина
+- **Retention**: 30 дней. Старые записи удаляются автоматически (S3 Lifecycle).
+- **Triage**: Еженедельный пересмотр (Triage) ошибок аналитиками. Если ошибка системная — правим адаптер, если разовая — игнорируем.
+- **Source of Truth**: Карантин — это инструмент триажа, а не источник истины. Данные в карантине считаются "отсутствующими" в аналитическом слое.
+- **Linkage**: Обязательна ссылка на Bronze-файл (`bronze_file_uri` или `batch_id`) для возможности перепарсить исходник, если payload был обрезан.
+
+#### Операции с карантином
+Для управления "мусорными" данными использовать make-команды:
+- `make quarantine-inspect PIPELINE=...`: Выгрузка сэмпла ошибок для анализа.
+- `make quarantine-replay PIPELINE=...`: Повторная отправка исправленных записей в пайплайн.
+- `make quarantine-purge PIPELINE=...`: Принудительная очистка карантина.
 
 ### 2.7. Стратегия Загрузки (Load Strategy)
 | Критерий | Incremental | Full Load |
@@ -92,7 +149,20 @@ class DataSourcePort(Protocol):
 | Сценарий | Стратегия ID |
 |----------|--------------|
 | Источник предоставляет стабильный ID | Использовать как есть (`chembl_id`, `pubchem_cid`) |
-| ID отсутствует | **Content Hash**: `sha256(provider + sorted(content_fields))`. Использование временных меток (`ingestion_ts`) запрещено. |
+| ID отсутствует | **Content Hash**: `sha256(provider + canonical_json_dumps(record))`. |
+
+- **Алгоритм**: `sha256(provider + canonical_json_dumps(record))`
+- **Canonical JSON**: `json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)`.
+  - **Float Precision**: Все значения типа float принудительно округляются: `round(val, 10)` для нивелирования различий архитектур процессоров.
+
+### 2.8.1. Robust Content Hash
+Для обеспечения стабильности хэша перед генерацией ID данные должны быть нормализованы:
+- **NaN/Inf**: Заменяются на `null` (None).
+- **Floats**: Округляются до 10 знаков после запятой.
+- **Dates**: Приводятся к единому ISO-формату `YYYY-MM-DD`.
+- **Strings**: Удаление пробелов по краям (`strip()`).
+
+**Исключения**: Из расчета хэша исключаются технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`.
 
 - **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи.
 
@@ -107,21 +177,38 @@ class DataSourcePort(Protocol):
 | **Восстановимая** (Recoverable) | Повтор N раз (Backoff) | 429 Rate Limit, 502/504 Timeout, сетевой сбой. |
 | **Качество данных** (Data Quality) | Лог + Пропуск записи | Невалидный SMILES, отсутствует необязательное поле. Не роняет батч. |
 
+### 3.1.2. Параметры Retry (Backoff)
+Для типа ошибок **Recoverable** применять стратегию Exponential Backoff:
+- **Max Attempts**: 3
+- **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
+- **Jitter**: Random(0.1s, 0.5s) для избежания "thundering herd".
+
+### 3.1.3. Circuit Breaker (Размыкатель цепи)
+Паттерн защиты от каскадных сбоев.
+- **Trigger**: 5 последовательных ошибок соединения/таймаута.
+- **State**: Переход в состояние `OPEN`.
+- **Observability**: Метрики `circuit_breaker_state` (0=Closed, 1=Open), `trips_total`. Алерт при зависании в Open > 10 мин.
+
 ### 3.1.1. Пороги Ошибок Батча (Thresholds)
-- **Soft Threshold**: >10% ошибок качества данных -> Warning в логах, продолжение работы.
-- **Hard Threshold**: >50% ошибок -> Fail Batch (не писать в Silver).
-Конфигурируется в YAML пайплайна (`failure_thresholds`).
+- **Soft Threshold**: >5% ошибок качества данных -> Warning.
+- **Hard Threshold**: >20% ошибок -> Fail Batch.
+- **Metric Scope**: Отслеживать как `record_error_rate` (доля битых строк), так и `entity_error_rate` (доля битых уникальных сущностей).
 
 ### 3.2. Наблюдаемость (Observability)
-- **Логи**: Структурированный JSON. Обязательные поля: `ts`, `level`, `trace_id`, `pipeline`, `stage`, `record_count`, `error_type`.
-- **Метрики Пайплайна**: Prometheus-совместимый эндпоинт (`/metrics`). Ключевые метрики: `pipeline_duration_seconds`, `records_processed_total`, `errors_total` (по типам).
-- **Алертинг**: Триггер алерта, если уровень ошибок > 5% за 15-минутное окно.
+- **Correlation ID**: `run_id` обязателен во всех логах, метриках и блокировках.
+- **Retention**: Логи хранятся 30 дней, метрики — 90 дней.
+- **Логи**: Структурированный JSON.
+- **Dataset ID**: В логи и метрики добавляется лейбл `dataset` (логическое имя таблицы, напр. `chembl.activity`), так как pipeline может писать в несколько таблиц.
 
 ### 3.3. Конкурентность и Блокировки
-- **Pipeline Lock**: Один активный инстанс `{provider}_{entity}` в момент времени.
-- **Механизм**: Advisory lock (Postgres) или Redis SETNX.
-- **Timeout**: **15 минут** (с возможностью продления Heartbeat). Существенное сокращение таймаута для предотвращения зомби-блокировок.
+- **Pipeline Lock**: Один активный инстанс `{provider}_{entity}`. Смешивание бэкендов (Redis + DB) запрещено.
+- **Fencing Token**: В тело блокировки записывается `owner_id` (run_id воркера).
+- **Lock Max Duration**: **4 часа**. Принудительное снятие по истечении.
 - **Partitioned Runs**: Разрешены параллельные запуски на *непересекающихся* партициях дат.
+
+**Invariant**:
+- Потеря блокировки = Потеря права на запись.
+- Если Heartbeat не прошел, воркер **MUST** аварийно завершиться до попытки коммита данных.
 
 ### 3.4. Метрики Качества Данных (DQ Metrics)
 Метрики записываются в таблицу `dq_metrics` для каждого прогона:
@@ -139,6 +226,16 @@ class DataSourcePort(Protocol):
   | Падение `record_count` | <70% baseline | <50% baseline |
   | `freshness_lag_hours` | >24h | >72h |
 - **Автоматизация**: CI-джоб `dq-check` сравнивает текущий запуск с базовой линией.
+- **Cold Start**:
+  - Days 1-7: Silence (обучение).
+  - Days 8-30: Warning only.
+  - Days 30+: Full Alerting.
+
+### 3.5. Provider Health Monitoring
+Матрица состояний:
+1. **Healthy**: Штатная работа.
+2. **Degraded**: Ошибки / Throttling. Увеличение backoff.
+3. **Unhealthy**: API недоступен. Pause pipeline execution.
 
 ## 4. Стандарты Кода и Тестирование
 
@@ -147,7 +244,7 @@ class DataSourcePort(Protocol):
 |--------|------------|--------------|-----------------|
 | **Оркестрация** | **Prefect** | Simple Runner | <5 DAG-ов — свой Runner (скрипт). Иначе Prefect. |
 | **Валидация** | **Pandera** | Great Expectations | Pandera нативна для DataFrames, легче интегрируется в CI. |
-| **HTTP Клиент** | **httpx** | requests | Поддержка `async`. **Для синхронных библиотек (био-пакетов) разрешен запуск в тредах (`run_in_executor`)**. |
+| **HTTP Клиент** | **httpx** | requests | Поддержка `async`. **Legacy Wrappers**: Для библиотек без async поддержки (pubchempy, biopython) обязателен запуск в отдельном пуле потоков: `await loop.run_in_executor(thread_pool, fetch_func)`. |
 | **Линтер** | **Ruff** | Flake8/Black | Скорость и решение "все-в-одном". |
 
 ### 4.2. Политика Тестирования
@@ -173,9 +270,10 @@ class DataSourcePort(Protocol):
 При получении SIGTERM/SIGINT:
 1. Прекратить извлечение (fetch) новых записей.
 2. Дождаться завершения записи текущего батча.
-3. Сохранить чекпоинт (last processed ID) в **S3 (Object Storage)**: `s3://bioetl/checkpoints/{pipeline}_{entity}.json`. Локальное хранение запрещено для поддержки stateless K8s подов.
+3. Сохранить чекпоинт в **S3** с использованием **If-Match / ETag** для обеспечения атомарности и предотвращения Lost Updates.
 4. Выйти с кодом 0.
-Таймаут на завершение: 30 секунд, затем SIGKILL.
+
+- **Guarantees**: Система гарантирует At-Least-Once доставку + Дедупликацию в Silver (через Content Hash). Гарантия Exactly-Once на уровне транспорта не требуется.
 
 ### 5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery)
 При запуске пайплайн:
@@ -188,12 +286,47 @@ class DataSourcePort(Protocol):
 4. После успешного завершения: удалить файл чекпоинта из S3.
 
 ### 5.4. Политика Чувствительных Данных (Sensitive Data)
-- **PII Поля**: `author_email`, `author_name`, `institution` — маркировать в схеме как `pii=true`.
-- **Bronze**: Хранить как есть (raw).
-- **Silver**: Хэшировать PII поля: `sha256(lowercase(email))`.
-- **Gold**: PII исключается или агрегируется (напр., `author_count` вместо списка имен).
-- **Логирование**: Запрещено логировать PII; использовать `record_id` для трассировки.
-- **Кассеты VCR**: Обязательная PII-санитизация (см. 4.2).
+- **Classification**: Public / Internal / Restricted.
+- **IAM**: Принцип Least Privilege. Разделение ролей `writer` (пайплайн) и `reader` (аналитик).
+- **Bronze**: Хранить как есть (Internal).
+- **Silver**: Хэшировать PII поля: `sha256(lowercase(value) + SALT)` (Restricted).
+- **Gold**: PII исключается или агрегируется (Public/Internal).
+
+### 5.4.1. Advanced Salt Rotation
+Стратегия ротации соли без даунтайма ("Dual-Salt Period").
+1. **New Salt Generation**: Генерация новой соли, добавление в Secrets Manager как `SALT_NEXT`.
+2. **Transition (7 дней)**:
+   - Писать новые данные с `SALT_NEXT`.
+   - Читать/Джойнить, проверяя оба хэша (с `SALT_CURRENT` и `SALT_NEXT`).
+3. **Finalization**: `SALT_CURRENT` = `SALT_NEXT`, удаление старой соли.
+4. **Resalting**: Фоновый процесс (Lazy Migration). При сбоях — Retry с backoff, мониторинг хвоста немигрированных данных.
+
+**Threat Model Scope**:
+- В фокусе: Утечка PII через логи, SQL-инъекции, несанкционированный доступ к S3.
+- Out of Scope: Физический доступ к серверам, компрометация AWS Root Account (управляемый сервис).
+
+### 5.5. Disaster Recovery (DR)
+- **RPO**: 24 часа.
+- **RTO**: 4 часа.
+- **Game Days**: Обязательные ежегодные учения по восстановлению. Success criteria: данные идентичны, время < RTO.
+
+#### 5.5.1. Detailed DR Procedures (Runbook)
+| Сценарий | Действие |
+|----------|----------|
+| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить S3 бакет из Backup (Point-in-Time Restore). 3. Перезапустить пайплайны с флагом `--full-rebuild` (если затронут Silver). |
+| **Потеря чекпоинта** | Запуск с `--ignore-checkpoint` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
+| **Отказ региона AWS** | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе. |
+
+### 5.6. Среды (Environments)
+- **Dev**: Локальная разработка (Docker Compose). Данные: фикстуры или сэмпл Bronze.
+- **Staging**: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя.
+- **Prod**: Боевая среда. Доступ на запись только у CI/CD.
+
+### 5.6.1. Environment Isolation
+Изоляция ресурсов для предотвращения "Cross-Env Pollution".
+- **S3**: Разные бакеты (`bioetl-dev`, `bioetl-staging`, `bioetl-prod`).
+- **Redis**: Разные префиксы ключей или отдельные инстансы DB (`db0`, `db1`).
+- **Configs**: Строгое разделение переменных окружения. Доступ к Prod-секретам только у CI Runner.
 
 ## 6. Документация (Автоматизация — приоритет)
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
@@ -211,6 +344,12 @@ class DataSourcePort(Protocol):
   2. CI генерирует diff схемы и постит в Slack-канал `#bioetl-contracts`.
   3. Период депрекации: 2 недели до удаления поля.
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях.
+
+### 7.2. Rollback Strategy
+- **Scope**:
+  - **Infrastructure/Code**: Auto Rollback при Error Rate > 10%.
+  - **Data DQ**: Ручной анализ и replay. Ошибки качества данных не должны триггерить автоматический откат версии приложения.
+- **Manual Rollback**: `make rollback VERSION=...`.
 
 ## 8. Опыт Разработчика (Developer Experience)
 ### 8.1. Локальная настройка
@@ -232,16 +371,20 @@ make run-local    # запуск сэмплового пайплайна на ф
 
 **Структура папок:** `src/bioetl/infrastructure/adapters/{provider}/`
 
-| Источник | Библиотека | Rate Limit | Retry Strategy |
-|----------|------------|------------|----------------|
-| **ChEMBL** | `chembl_webresource_client` | Нет явного лимита | Exponential backoff |
-| **PubChem** | `pubchempy` | 5 req/sec | 429 -> wait Retry-After |
-| **UniProt** | `unipressed` | 100 req/sec (c API key) | Exponential backoff |
-| **OpenAlex** | `pyalex` | 10 req/sec (polite pool) | 429 -> backoff |
-| **Semantic** | `semanticscholar` | 100 req/5min | Sliding window |
-| **PubMed** | `biopython` | 3 req/sec (10 c key) | 429 -> backoff |
-| **Crossref** | `habanero` | 50 req/sec (polite pool) | Exponential backoff |
-| **GtoP** | `pyGtoP` (deprecated) | - | - |
+| Источник | Библиотека | Rate Limit | Retry Strategy | Auth Type |
+|----------|------------|------------|----------------|-----------|
+| **ChEMBL** | `chembl_webresource_client` | Нет явного лимита | Exponential backoff | Public |
+| **PubChem** | `pubchempy` | 5 req/sec | 429 -> wait Retry-After | Public |
+| **UniProt** | `unipressed` | 100 req/sec (c API key) | Exponential backoff | API Key |
+| **OpenAlex** | `pyalex` | 10 req/sec (polite pool) | 429 -> backoff | API Key (Email) |
+| **Semantic** | `semanticscholar` | 100 req/5min | Sliding window | API Key |
+| **PubMed** | `biopython` | 3 req/sec (10 c key) | 429 -> backoff | API Key |
+| **Crossref** | `habanero` | 50 req/sec (polite pool) | Exponential backoff | Email |
+| **GtoP** | `pyGtoP` (deprecated) | - | - | None |
+
+**Health Check Endpoints**:
+- `GET /health` (Liveness)
+- `GET /ready` (Readiness: DB/Redis connection)
 
 ## Приложение B: Политика Зависимостей
 - **Pinning**: Точные версии в `requirements.txt` / `pyproject.toml`.
@@ -249,13 +392,22 @@ make run-local    # запуск сэмплового пайплайна на ф
 - **Безопасность**: `pip-audit` в CI. Блокировка мержа при CVE severity >= HIGH.
 
 ## Приложение C: Error Recovery Playbook (Runbook)
+
+### Уровни Серьезности (Severity Levels)
+| Level | Описание | SLA реакции | SLA восстановления |
+|-------|----------|-------------|--------------------|
+| **P0** | Система недоступна или критичные данные потеряны | 15 мин | 1 час |
+| **P1** | Падение критичного пайплайна (Core Data) | 1 час | 4 часа |
+| **P2** | Падение второстепенного пайплайна | 8 часов | 24 часа |
+| **P3** | Warning / DQ аномалии | 24 часа | Next Sprint |
+
 | Ошибка | Симптом | Действие |
 |--------|---------|----------|
 | Auth failure | `401 Unauthorized` в логах | Проверить/обновить `BIOETL_{PROVIDER}_API_KEY` |
 | Rate limit exhausted | `429` + пик `errors_total{type="recoverable"}` | Уменьшить `requests_per_second` в конфиге |
 | Schema mismatch (Gold) | Pipeline fail + `schema_violations` > 0 | Проверить изменения API; обновить Gold-схему через ADR |
 | Stale checkpoint | Warning при старте | `--resume` для продолжения или `--ignore-checkpoint` для рестарта |
-| >50% DQ errors | Batch fail | Проверить источник; возможно API вернул ошибку в теле ответа |
+| >20% DQ errors | Batch fail | Проверить источник; возможно API вернул ошибку в теле ответа |
 | Lock timeout | Alert "Lock expired" | Проверить зомби-процессы; `make release-lock PIPELINE=...` |
 
 ## Приложение D: Схема Конфигурации Пайплайна
@@ -281,25 +433,63 @@ transform:
 sink:
   silver:
     path: s3://bioetl/silver/chembl/activity/
-    format: parquet
+    format: delta          # Использовать Delta Lake
+    mode: merge            # Стратегия Upsert
+    primary_key: [id]      # Ключ для merge
     partition_by: [year, month]
     classification: public
 
+  gold:
+    path: s3://bioetl/gold/chembl/activity_aggregated/
+    format: delta
+    mode: overwrite        # Витрины часто перезаписываются целиком или партициями
+
 dq_rules:
-  soft_fail_threshold: 0.1
-  hard_fail_threshold: 0.5
+  soft_fail_threshold: 0.05  # 5%
+  hard_fail_threshold: 0.20  # 20% (Strict)
 
 failure_thresholds:
-  warn_pct: 10
-  fail_pct: 50
+  warn_pct: 5
+  fail_pct: 20               # Synced with Rule 3.1.1
+
+circuit_breaker:
+  failure_threshold: 5
+  recovery_timeout: 300      # 5 min
 
 rate_limit:
   requests_per_second: 5
   burst: 10
 ```
 
+## Приложение E: Примеры Schema Evolution
+
+### Minor Change (Обратная совместимость)
+Добавление необязательного поля. Не требует пересчета истории.
+```json
+// Old Schema
+{"id": "CHEMBL1", "score": 0.9}
+
+// New Schema
+{"id": "CHEMBL1", "score": 0.9, "source": "manual"}
+```
+
+### Major Change (Breaking)
+Переименование или изменение типа. Требует миграции данных или новой версии таблицы (v2).
+```json
+// Old Schema
+{"id": 123}  // int
+
+// New Schema
+{"id": "123"} // string
+```
+
 ## История Изменений (Changelog)
-- **4.1** (2025-05-20): Storage Fixes. Bronze: JSONL + zstd (no CSV). Silver: Append-Only + Compaction (no Upsert).
+- **4.6** (2025-12-15): Governance & Stability. RFC 2119, Entity ID vs Content Hash, Bronze Lifecycle, Hard Limits, Threat Model.
+- **4.5** (2025-05-20): Final Polish & Governance. Medallion Paths, DQ Levels, Observability, Fencing Tokens, Security IAM.
+- **4.4** (2025-05-20): Resilience & Operations. Circuit Breaker, DR Runbooks, Quarantine Ops, Env Isolation, Salt Rotation.
+- **4.3** (2025-05-20): Security & DR. Salted Hashes, RPO/RTO, Heartbeat Locks, Environments, Delta Infrastructure.
+- **4.2** (2025-05-20): Delta Lake Strategy, Unified Quarantine Schema, Threshold adjustments.
+- **4.1** (2025-05-20): [DEPRECATED] Storage Fixes. (Заменено версией 4.2).
 - **4.0** (2025-05-20): Data Contracts, Partitioning, Null Policy, Recovery Playbook.
 - **3.0** (2025-05-20): Lineage, Backfill, Concurrency, Graceful Shutdown, Dev Experience.
 - **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский.
