@@ -1,0 +1,53 @@
+name: Docs & Diagrams
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'docs/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'docs/**'
+
+jobs:
+  validate-mermaid:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      - name: Validate Mermaid diagrams
+        run: mmdc -i 'docs/**/*.mermaid' --dryRun
+
+  render-diagrams:
+    needs: validate-mermaid
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      - name: Render Mermaid diagrams to SVG
+        run: mmdc -i 'docs/01-architecture/diagrams' -o 'rendered-diagrams' -e svg
+
+      - name: Upload rendered diagrams
+        uses: actions/upload-artifact@v3
+        with:
+          name: rendered-diagrams
+          path: rendered-diagrams
