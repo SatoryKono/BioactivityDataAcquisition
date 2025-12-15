@@ -13,12 +13,12 @@ import sys
 import click
 
 from bioetl.application.pipeline.base import run_pipeline_flow
+from bioetl.bootstrap import bootstrap
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import (
     get_aws_config,
     get_redis_config,
     get_s3_config,
-    get_storage_options,
 )
 
 
@@ -105,6 +105,9 @@ async def _run_chembl_activity(
         ChEMBLActivityPipelineFactory,
     )
 
+    # Initialize dependencies via Composition Root
+    container = bootstrap()
+
     # Load configuration from centralized config
     aws_config = get_aws_config()
     s3_config = get_s3_config()
@@ -114,6 +117,11 @@ async def _run_chembl_activity(
     pipeline = await factory.create(
         run_type=run_type,
         resume=resume,
+        # Inject initialized services
+        checkpoint=container.checkpoint,
+        quarantine=container.quarantine,
+        lock=container.lock,
+        # Configs still needed for storage adapter (until that is also refactored)
         aws_endpoint_url=aws_config.endpoint_url,
         aws_access_key=aws_config.access_key_id,
         aws_secret_key=aws_config.secret_access_key,
@@ -165,17 +173,9 @@ async def _quarantine_inspect(
     error_code: str | None,
 ) -> None:
     """Inspect quarantine implementation."""
-    from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
+    container = bootstrap()
 
-    s3_config = get_s3_config()
-    storage_options = get_storage_options()
-
-    quarantine = UnifiedQuarantine(
-        base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
-        storage_options=storage_options,
-    )
-
-    records = quarantine.inspect(
+    records = container.quarantine.inspect(
         pipeline=pipeline,
         limit=limit,
         error_code=error_code,
@@ -212,17 +212,8 @@ def quarantine_stats(pipeline: str) -> None:
 
 async def _quarantine_stats(pipeline: str) -> None:
     """Get quarantine statistics."""
-    from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
-
-    s3_config = get_s3_config()
-    storage_options = get_storage_options()
-
-    quarantine = UnifiedQuarantine(
-        base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
-        storage_options=storage_options,
-    )
-
-    stats = quarantine.get_stats(pipeline)
+    container = bootstrap()
+    stats = container.quarantine.get_stats(pipeline)
 
     click.echo(f"Quarantine statistics for: {pipeline}\n")
     click.echo(f"Total records: {stats['total_records']}")
@@ -256,17 +247,8 @@ def checkpoint_list() -> None:
 
 async def _checkpoint_list() -> None:
     """List checkpoints implementation."""
-    from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-
-    aws_config = get_aws_config()
-    s3_config = get_s3_config()
-
-    checkpoint_storage = S3Checkpoint(
-        bucket=s3_config.bucket_checkpoints,
-        endpoint_url=aws_config.endpoint_url,
-        access_key=aws_config.access_key_id,
-        secret_key=aws_config.secret_access_key,
-    )
+    container = bootstrap()
+    checkpoint_storage = container.checkpoint
 
     pipelines = checkpoint_storage.list_all()
 
@@ -305,17 +287,8 @@ def checkpoint_delete(pipeline: str) -> None:
 
 async def _checkpoint_delete(pipeline: str) -> None:
     """Delete checkpoint implementation."""
-    from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-
-    aws_config = get_aws_config()
-    s3_config = get_s3_config()
-
-    checkpoint_storage = S3Checkpoint(
-        bucket=s3_config.bucket_checkpoints,
-        endpoint_url=aws_config.endpoint_url,
-        access_key=aws_config.access_key_id,
-        secret_key=aws_config.secret_access_key,
-    )
+    container = bootstrap()
+    checkpoint_storage = container.checkpoint
 
     checkpoint_storage.delete(pipeline)
     click.echo(f"✅ Checkpoint deleted for pipeline: {pipeline}")
