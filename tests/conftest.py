@@ -36,6 +36,12 @@ def pytest_configure(config: Any) -> None:
         sys.modules["botocore"] = MagicMock()
         sys.modules["botocore.exceptions"] = MagicMock()
 
+    # Mock boto3 if not installed
+    try:
+        import boto3
+    except ImportError:
+        sys.modules["boto3"] = MagicMock()
+
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
