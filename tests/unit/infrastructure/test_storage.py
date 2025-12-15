@@ -17,9 +17,10 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
     # Patch boto3.Session at the global level since it's imported inside __init__
-    with patch("boto3.Session") as mock_session, patch(
-        "boto3.session.Config"
-    ) as mock_config:
+    with (
+        patch("boto3.Session") as mock_session,
+        patch("boto3.session.Config") as mock_config,
+    ):
         mock_s3 = MagicMock()
         mock_session.return_value.client.return_value = mock_s3
         mock_config.return_value = MagicMock()
