@@ -34,7 +34,13 @@ def pytest_configure(config: Any) -> None:
         import botocore
     except ImportError:
         mock_botocore = MagicMock()
-        mock_botocore.exceptions.ClientError = type("ClientError", (Exception,), {})
+
+        class ClientError(Exception):
+            def __init__(self, error_response, operation_name):
+                self.response = error_response
+                self.operation_name = operation_name
+
+        mock_botocore.exceptions.ClientError = ClientError
         sys.modules["botocore"] = mock_botocore
         sys.modules["botocore.exceptions"] = mock_botocore.exceptions
 
