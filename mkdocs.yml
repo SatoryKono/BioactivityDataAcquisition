@@ -6,100 +6,107 @@ repo_name: SatoryKono/BioactivityDataAcquisition
 edit_uri: "edit/main/docs/"
 
 theme:
-  name: material
-  palette:
-    # Palette toggle for light vs dark mode
-    - scheme: default
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.top
-    - search.suggest
-    - search.highlight
-    - content.code.copy
-    - content.code.annotate
+    name: material
+    palette:
+        # Palette toggle for light vs dark mode
+        -   scheme: default
+            toggle:
+                icon: material/brightness-7
+                name: Switch to dark mode
+        -   scheme: slate
+            toggle:
+                icon: material/brightness-4
+                name: Switch to light mode
+    features:
+        - navigation.tabs
+        - navigation.sections
+        - navigation.top
+        - search.suggest
+        - search.highlight
+        - content.code.copy
+        - content.code.annotate
 
 plugins:
-  - search
-  - mermaid2
-  - mkdocstrings:
-      handlers:
-        python:
-          options:
-            docstring_style: google
-            show_root_heading: yes
-            show_source: true
+    - search
+    -   mkdocstrings:
+            handlers:
+                python:
+                    options:
+                        docstring_style: google
+                        show_root_heading: yes
+                        show_source: true
 
 markdown_extensions:
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - admonition
-  - toc:
-      permalink: true
+    -   pymdownx.highlight:
+            anchor_linenums: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    -   pymdownx.superfences:
+            custom_fences:
+                -   name: mermaid
+                    class: mermaid
+                    format: !!python/name:pymdownx.superfences.fence_code_format
+    - admonition
+    -   toc:
+            permalink: true
+
+# Add local vendored mermaid assets to ensure offline builds use the local files
+extra_javascript:
+    - 'assets/javascripts/mermaid.min.js'
+    - 'assets/javascripts/mermaid-init.js'
+
+extra_css:
+    - 'assets/stylesheets/mermaid.css'
 
 # Navigation structure
 nav:
-  - Home: index.md
-  - "Project Map": 00-map.md
-  - "Project Rules":
-    - "Summary": 00-project_rules/00-rules-summary.md
-    - "Full Rules": 00-project_rules/01-project-rules.md
-    - "User Rules": 00-project_rules/02-user-rules.md
-    - "File Policy": 00-project_rules/03-file-policy.md
-    - "Extending BioETL": 00-project_rules/04-extending-bioetl.md
-    - "Cleanup Policy": 00-project_rules/05-cleanup-policy.md
-    - "Rules Mapping": 00-project_rules/06-rules-mapping.md
-    - "Consistency Check": 00-project_rules/07-consistency-check.md
-    - "Audit Report": 00-project_rules/AUDIT-REPORT.md
-  - Architecture:
-    - "System Context": 02-architecture/system-context.md
-    - "Data Flow": 02-architecture/data-flow.md
-    - "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
-    - "Diagrams": 02-architecture/diagrams.md
-    - Decisions:
-      - "ADR-001: Delta Lake": 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
-      - "ADR-002: Medallion": 02-architecture/decisions/ADR-002-medallion-architecture.md
-      - "ADR-003: Redis Locking": 02-architecture/decisions/ADR-003-redis-for-distributed-locking.md
-      - "ADR-004: Pydantic": 02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md
-  - Guides:
-    - "Getting Started": 03-guides/getting-started.md
-    - "Quick Start": 03-guides/quick-start.md
-    - "Running Pipelines": 03-guides/running-pipelines.md
-    - "Troubleshooting": 03-guides/troubleshooting.md
-  - Reference:
-    - CLI: 04-reference/cli.md
-    - API:
-      - Overview: 04-reference/api/index.md
-      - Application: 04-reference/api/application.md
-      - Domain: 04-reference/api/domain.md
-      - Infrastructure: 04-reference/api/infrastructure.md
-    - Pipelines:
-      - "ChEMBL Activity": 04-reference/pipelines/chembl_activity.md
-  - Operations:
-    - Overview: 05-operations/runbooks/index.md
-    - "Incident Response": 05-operations/runbooks/incident-response.md
-    - "Data Recovery": 05-operations/runbooks/data-recovery.md
-    - "Scaling": 05-operations/runbooks/scaling.md
-    - "Pipeline Failure: Critical Error": 05-operations/runbooks/pipeline-failure-critical.md
-    - "Pipeline Failure: High DQ Rate": 05-operations/runbooks/pipeline-failure-dq.md
-    - "Stale Lock Detected": 05-operations/runbooks/stale-lock.md
-    - "Backfill and Rebuild": 05-operations/runbooks/backfill-rebuild.md
-    - "Quarantine Management": 05-operations/runbooks/quarantine-management.md
-    - "Schema Evolution": 05-operations/runbooks/schema-evolution.md
-  - "Mermaid Test": mermaid-test.md
-  - "RULES": RULES.md
-  - "Governance Rules": 01-governance/rules.md
+    -   Home: index.md
+    -   "Project Map": 00-map.md
+    -   "Project Rules":
+            -   "Summary": 00-project_rules/00-rules-summary.md
+            -   "Full Rules": 00-project_rules/01-project-rules.md
+            -   "User Rules": 00-project_rules/02-user-rules.md
+            -   "File Policy": 00-project_rules/03-file-policy.md
+            -   "Extending BioETL": 00-project_rules/04-extending-bioetl.md
+            -   "Cleanup Policy": 00-project_rules/05-cleanup-policy.md
+            -   "Rules Mapping": 00-project_rules/06-rules-mapping.md
+            -   "Consistency Check": 00-project_rules/07-consistency-check.md
+            -   "Audit Report": 00-project_rules/AUDIT-REPORT.md
+    -   Architecture:
+            -   "System Context": 02-architecture/system-context.md
+            -   "Data Flow": 02-architecture/data-flow.md
+            -   "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
+            -   "Diagrams": 02-architecture/diagrams.md
+            -   Decisions:
+                    -   "ADR-001: Delta Lake": 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
+                    -   "ADR-002: Medallion": 02-architecture/decisions/ADR-002-medallion-architecture.md
+                    -   "ADR-003: Redis Locking": 02-architecture/decisions/ADR-003-redis-for-distributed-locking.md
+                    -   "ADR-004: Pydantic": 02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md
+    -   Guides:
+            -   "Getting Started": 03-guides/getting-started.md
+            -   "Quick Start": 03-guides/quick-start.md
+            -   "Running Pipelines": 03-guides/running-pipelines.md
+            -   "Troubleshooting": 03-guides/troubleshooting.md
+    -   Reference:
+            -   CLI: 04-reference/cli.md
+            -   API:
+                    -   Overview: 04-reference/api/index.md
+                    -   Application: 04-reference/api/application.md
+                    -   Domain: 04-reference/api/domain.md
+                    -   Infrastructure: 04-reference/api/infrastructure.md
+            -   Pipelines:
+                    -   "ChEMBL Activity": 04-reference/pipelines/chembl_activity.md
+    -   Operations:
+            -   Overview: 05-operations/runbooks/index.md
+            -   "Incident Response": 05-operations/runbooks/incident-response.md
+            -   "Data Recovery": 05-operations/runbooks/data-recovery.md
+            -   "Scaling": 05-operations/runbooks/scaling.md
+            -   "Pipeline Failure: Critical Error": 05-operations/runbooks/pipeline-failure-critical.md
+            -   "Pipeline Failure: High DQ Rate": 05-operations/runbooks/pipeline-failure-dq.md
+            -   "Stale Lock Detected": 05-operations/runbooks/stale-lock.md
+            -   "Backfill and Rebuild": 05-operations/runbooks/backfill-rebuild.md
+            -   "Quarantine Management": 05-operations/runbooks/quarantine-management.md
+            -   "Schema Evolution": 05-operations/runbooks/schema-evolution.md
+    -   "Mermaid Test": mermaid-test.md
+    -   "RULES": RULES.md
+    -   "Governance Rules": 01-governance/rules.md
