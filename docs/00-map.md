@@ -29,7 +29,7 @@ docs/
 │   └── 05-cleanup-policy.md     # Cleanup and retention
 │
 ├── 01-architecture/             # System architecture
-│   ├── 01-domain-objects.md     # Business entities
+│   ├── 01-domain-objects.md     # Business entities (DEPRECATED, see system-context)
 │   ├── 02-etl-layers.md         # Layer responsibilities
 │   ├── 03-data-flow.md          # Pipeline execution flow
 │   ├── 04-duplication-reduction.md  # Code reuse patterns
@@ -39,12 +39,17 @@ docs/
 │   └── diagrams/                # Diagram source files
 │       └── 00-diagramming-policy.md
 │
+├── 02-architecture/             # C4 Model & High-Level Diagrams
+│   ├── system-context.md        # C4 System Context Diagram
+│   └── data-flow.md             # High-level Medallion data flow
+│
 ├── application/                 # Pipeline documentation
 │   └── pipelines/               # Per-provider/entity docs
 │       └── {provider}/
 │           └── {entity}/
 │
 ├── contracts/                   # Data contracts
+│   ├── README.md                # Contract versioning policy
 │   └── gold/                    # Gold schema JSON files
 │       └── {entity}.json
 │
@@ -152,19 +157,16 @@ src/bioetl/
 
 ## Config Files Map
 
-```
-configs/
-├── pipelines/               # Pipeline YAML configs
-│   └── {provider}/
-│       └── {entity}.yaml
-│
-├── schemas/                 # Schema configs
-│   ├── bronze/
-│   ├── silver/
-│   └── gold/
-│
-└── env/
-    └── .env.example         # Environment template
+```mermaid
+graph TD
+    subgraph configs
+        direction LR
+        A(pipelines) --> A1("chembl/activity.yaml")
+        B(schemas) --> B1("bronze/README.md")
+        B --> B2("silver/README.md")
+        B --> B3("gold/README.md")
+        C(env) --> C1(".env.example")
+    end
 ```
 
 ---
@@ -178,6 +180,7 @@ configs/
 | `configs/pipelines/{provider}/{entity}.yaml` | Pipeline configuration |
 | `src/bioetl/domain/ports.py` | Protocol interfaces |
 | `src/bioetl/domain/schemas/{provider}/{entity}.py` | Pandera schemas |
+| `docs/02-architecture/system-context.md` | High-level system diagram |
 | `docs/contracts/gold/{entity}.json` | Gold data contracts |
 
 ---
