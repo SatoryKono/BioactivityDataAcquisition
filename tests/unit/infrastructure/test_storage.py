@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 import zstandard as zstd
 
 import pytest
@@ -51,7 +52,7 @@ class TestBronzeWriter:
         provider = "test_provider"
         entity = "test_entity"
         date = datetime(2023, 1, 1)
-        batch_id = BatchID.from_hex("12345678123456781234567812345678")
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
 
         writer.write_bronze(
             records=iter(records),
@@ -102,7 +103,7 @@ class TestBronzeWriter:
         provider = "test_provider"
         entity = "test_entity"
         date = datetime(2023, 1, 1)
-        batch_id = BatchID.from_hex("12345678123456781234567812345678")
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
 
         writer.write_bronze(
             records=iter(records),
