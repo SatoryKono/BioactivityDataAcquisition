@@ -137,6 +137,7 @@ module = [
     "prometheus_client.*",
     "vcr.*",
     "fakeredis.*",
+    "structlog.*",
 ]
 ignore_missing_imports = true
 
