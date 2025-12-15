@@ -14,9 +14,12 @@ from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 @pytest.fixture
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
-    with patch("boto3.Session") as mock_session:
+    with patch(
+        "bioetl.infrastructure.checkpoint.s3_checkpoint.boto3"
+    ) as mock_boto3:
         mock_s3 = MagicMock()
-        mock_session.return_value.client.return_value = mock_s3
+        mock_boto3.Session.return_value.client.return_value = mock_s3
+        mock_boto3.session.Config.return_value = MagicMock()
         yield mock_s3
 
 
@@ -24,7 +27,7 @@ def mock_s3_client():
 class TestS3Checkpoint:
     """Test S3Checkpoint functionality."""
 
-    def test_s3_checkpoint_initialization(self):
+    def test_s3_checkpoint_initialization(self, mock_s3_client):
         """Test S3Checkpoint can be initialized."""
         cp = S3Checkpoint(
             bucket="test-bucket",
