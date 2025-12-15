@@ -1,0 +1,47 @@
+[project]
+name = "bioetl"
+version = "5.0.0"
+description = "Bioinformatics ETL Pipeline (Medallion Architecture)"
+requires-python = ">=3.11"
+dependencies = [
+    "prefect>=2.19",
+    "httpx>=0.27",
+    "deltalake>=0.17",
+    "polars>=0.20",
+    "pandera>=0.19",
+    "redis>=5.0",
+    "pydantic>=2.7",
+    "orjson>=3.10",
+    "boto3>=1.34",
+    "prometheus-client>=0.20",
+    # Specific specialized libraries per BioETL v5.0 rules
+    "biopython>=1.83",
+    "chembl-webresource-client>=0.10",
+    "pubchempy>=1.0",
+    "unipressed>=1.2",
+    "pyalex>=0.14",
+    "habanero>=1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio",
+    "vcrpy>=6.0",
+    "mypy>=1.10",
+    "ruff>=0.4",
+    "types-redis",
+    "types-boto3",
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = false
+disallow_untyped_defs = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "SIM", "UP"]

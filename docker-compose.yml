@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  minio:
+    image: minio/minio
+    ports: ["9000:9000", "9001:9001"]
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./docker-data/minio:/data
+
+  # Postgres for Lineage Log & Metastore (Optional for Delta)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: bioetl
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bioetl_meta
+    volumes:
+      - ./docker-data/postgres:/var/lib/postgresql/data
