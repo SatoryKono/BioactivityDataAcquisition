@@ -3,46 +3,46 @@
 # Соответствует схеме из RULES.md App D.
 
 pipeline:
-  name: chembl_activity
-  provider: chembl
-  entity: activity
+    name: chembl_activity
+    provider: chembl
+    entity: activity
 
 source:
-  type: api
-  load_strategy: incremental # Инкрементальная загрузка по умолчанию
-  watermark_field: molecule_chembl_id # Пример поля для watermark
+    type: api
+    load_strategy: incremental # Инкрементальная загрузка по умолчанию
+    watermark_field: molecule_chembl_id # Пример поля для watermark
 
 transform:
-  version: "1.0.0"
-  steps:
-    - normalize_values
-    - add_metadata
-    - calculate_content_hash
+    version: "1.0.0"
+    steps:
+        - normalize_values
+        - add_metadata
+        - calculate_content_hash
 
 sink:
-  silver:
-    path: "s3a://bioetl-silver/chembl/activity/" # Используйте s3a:// для Spark
-    format: delta
-    mode: merge
-    primary_key: ["activity_id"]
-    partition_by: ["year", "month"] # Пример партиционирования по дате извлечения
-    classification: public
-    forensic_retention: false
+    silver:
+        path: "s3://bioetl-silver/chembl/activity/" # Используйте s3a:// для Spark
+        format: delta
+        mode: merge
+        primary_key: [ "activity_id" ]
+        partition_by: [ "year", "month" ] # Пример партиционирования по дате извлечения
+        classification: public
+        forensic_retention: false
 
-  gold:
-    enabled: false # Gold-витрины могут быть отключены по умолчанию
-    # path: s3a://bioetl-gold/chembl/activity_aggregated/
-    # format: delta
-    # mode: overwrite
+    gold:
+        enabled: false # Gold-витрины могут быть отключены по умолчанию
+        # path: s3://bioetl-gold/chembl/activity_aggregated/
+        # format: delta
+        # mode: overwrite
 
 dq_rules:
-  soft_fail_threshold: 0.05  # 5% (Warning)
-  hard_fail_threshold: 0.20  # 20% (Fail Batch)
+    soft_fail_threshold: 0.05  # 5% (Warning)
+    hard_fail_threshold: 0.20  # 20% (Fail Batch)
 
 circuit_breaker:
-  failure_threshold: 5
-  recovery_timeout: 300 # 5 минут
+    failure_threshold: 5
+    recovery_timeout: 300 # 5 минут
 
 rate_limit:
-  requests_per_second: 5
-  burst: 10
+    requests_per_second: 5
+    burst: 10

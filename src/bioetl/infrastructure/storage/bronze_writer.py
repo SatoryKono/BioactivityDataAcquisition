@@ -16,12 +16,13 @@ Architecture:
 """
 
 import json
-import zstandard as zstd
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Iterator
 from uuid import UUID
+
+import zstandard as zstd
 
 from bioetl.domain.types import BatchID
 
@@ -159,7 +160,8 @@ class BronzeWriter:
         output = BytesIO()
         compressor = zstd.ZstdCompressor(level=3, threads=-1)  # Auto threads
 
-        with compressor.stream_writer(output) as writer:
+        # close_dest_on_close=False prevents BytesIO from being closed
+        with compressor.stream_writer(output, closefd=False) as writer:
             record_count = 0
             for record in records:
                 writer.write(record)

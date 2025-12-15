@@ -3,17 +3,18 @@
 from unittest.mock import patch
 from uuid import UUID
 
-import polars as pl
 import pytest
 
-from bioetl.domain.types import BatchID, ErrorType
+from bioetl.domain.types import BatchID
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
 
 @pytest.fixture
 def mock_deltalake():
     """Fixture for mocking deltalake functions."""
-    with patch("deltalake.write_deltalake") as mock_write_deltalake:
+    with patch(
+        "bioetl.infrastructure.quarantine.unified_quarantine.write_deltalake"
+    ) as mock_write_deltalake:
         yield mock_write_deltalake
 
 
@@ -30,7 +31,7 @@ class TestUnifiedQuarantine:
         """Test that write calls write_deltalake with correct data."""
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
         pipeline = "test_pipeline"
-        error_code = ErrorType.INVALID_DATA
+        error_code = "INVALID_DATA"
         payload = {"id": 1, "value": "a"}
         bronze_batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         error_details = {"message": "Invalid value"}
@@ -46,22 +47,27 @@ class TestUnifiedQuarantine:
         mock_deltalake.assert_called_once()
         args, kwargs = mock_deltalake.call_args
         assert kwargs["mode"] == "append"
-        assert isinstance(kwargs["data"], pl.DataFrame)
-        df = kwargs["data"]
-        assert df["pipeline"][0] == pipeline
-        assert df["error_code"][0] == error_code.value
-        assert df["payload"][0] == '{"id": 1, "value": "a"}'
-        assert df["bronze_batch_id"][0] == str(bronze_batch_id)
-        assert df["error_details"][0] == '{"message": "Invalid value"}'
+        # Data is passed as a list of dicts
+        data = kwargs["data"]
+        assert isinstance(data, list)
+        assert len(data) == 1
+        record = data[0]
+        assert record["pipeline"] == pipeline
+        assert record["error_code"] == error_code
+        assert record["payload"] == '{"id": 1, "value": "a"}'
+        assert record["bronze_batch_id"] == str(bronze_batch_id)
+        assert record["error_details"] == '{"message": "Invalid value"}'
 
     def test_payload_truncation(self, mock_deltalake):
-        """Test that large payloads are truncated."""
-        quarantine = UnifiedQuarantine(base_path="/tmp/quarantine", max_payload_size=10)
-        payload = {"key": "a" * 20}
+        """Test that large payloads are truncated at 64KB."""
+        quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
+        # Create a payload larger than 64KB
+        large_value = "a" * (70 * 1024)  # 70KB
+        payload = {"key": large_value}
 
         quarantine.write(
             pipeline="test",
-            error_code=ErrorType.INVALID_DATA,
+            error_code="INVALID_DATA",
             payload=payload,
             bronze_batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
             error_details={},
@@ -69,5 +75,8 @@ class TestUnifiedQuarantine:
 
         mock_deltalake.assert_called_once()
         args, kwargs = mock_deltalake.call_args
-        df = kwargs["data"]
-        assert len(df["payload"][0]) <= 10 + 20  # Allow for some overhead
+        data = kwargs["data"]
+        record = data[0]
+        # Payload should be truncated to MAX_PAYLOAD_SIZE (64KB)
+        assert len(record["payload"]) <= UnifiedQuarantine.MAX_PAYLOAD_SIZE
+        assert record["payload_truncated"] is True

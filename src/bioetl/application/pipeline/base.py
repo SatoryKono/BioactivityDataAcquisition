@@ -37,7 +37,7 @@ from bioetl.domain.types import (
     RunType,
     Watermark,
 )
-from bioetl.observability.logging import create_logger
+from bioetl.infrastructure.observability.logging import create_logger
 
 
 class PipelineShutdownError(Exception):
@@ -146,12 +146,12 @@ class BasePipeline(ABC):
                 },
             )
         except PipelineShutdownError:
-            self.logger.warning("Pipeline shutdown requested", extra={"stage": "shutdown"})
+            self.logger.warning(
+                "Pipeline shutdown requested", extra={"stage": "shutdown"}
+            )
             raise
         except Exception as e:
-            self.logger.error(
-                f"Pipeline failed: {e}", exc_info=True
-            )
+            self.logger.error(f"Pipeline failed: {e}", exc_info=True)
             raise
         finally:
             if self.heartbeat_task:
@@ -208,7 +208,9 @@ class BasePipeline(ABC):
     async def _delete_checkpoint_task(self) -> None:
         self.checkpoint.delete(self.pipeline_name)
 
-    async def _extract(self, watermark: Watermark | None) -> AsyncIterator[dict[str, Any]]:
+    async def _extract(
+        self, watermark: Watermark | None
+    ) -> AsyncIterator[dict[str, Any]]:
         async for record in self.data_source.fetch(
             entity_type=self.entity_type, watermark=watermark
         ):
@@ -243,12 +245,14 @@ class BasePipeline(ABC):
 
     async def _load_gold(self, record: dict[str, Any]) -> None:
         table_name = f"{self.provider}.{self.entity_type}_gold"
-        self.storage.write_gold(
-            table_name=table_name, records=[record], mode="append"
-        )
+        self.storage.write_gold(table_name=table_name, records=[record], mode="append")
 
     async def _quarantine_record(
-        self, record: dict[str, Any], error_type: ErrorType, batch_id: BatchID, error_details: str
+        self,
+        record: dict[str, Any],
+        error_type: ErrorType,
+        batch_id: BatchID,
+        error_details: str,
     ) -> None:
         self.quarantine.write(
             pipeline=self.pipeline_name,
@@ -280,8 +284,11 @@ class BasePipeline(ABC):
 
     def _setup_shutdown_handlers(self) -> None:
         def signal_handler(signum: int, frame: Any) -> None:
-            self.logger.warning(f"Received signal {signum}, initiating graceful shutdown")
+            self.logger.warning(
+                f"Received signal {signum}, initiating graceful shutdown"
+            )
             self.shutdown_requested = True
+
         signal.signal(signal.SIGTERM, signal_handler)
         signal.signal(signal.SIGINT, signal_handler)
 
