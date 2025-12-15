@@ -58,6 +58,10 @@ dev = [
     "pytest-vcr>=1.0",
     # Redis testing
     "fakeredis>=2.21",
+    # Code formatting and linting
+    "black>=24.0",
+    "isort>=5.13",
+    "import-linter>=2.0",
 ]
 docs = [
     "mkdocs>=1.6",
