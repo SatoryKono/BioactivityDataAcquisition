@@ -149,7 +149,9 @@ class UnifiedQuarantine:
                 table_or_uri=self.base_path,
                 data=[record],
                 mode="append",
-                partition_by=["pipeline"],  # Partition by pipeline for efficient queries
+                partition_by=[
+                    "pipeline"
+                ],  # Partition by pipeline for efficient queries
                 storage_options=self.storage_options,
             )
 
