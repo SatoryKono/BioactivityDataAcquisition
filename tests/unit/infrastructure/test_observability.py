@@ -129,10 +129,10 @@ class TestAnomalyDetector:
             min_baseline_samples=3,
         )
 
-        # Update baseline with stable values
-        detector.update_baseline("record_count", [100.0, 100.0, 100.0, 100.0])
+        # Update baseline with values that have some variance (needed for stddev calculation)
+        detector.update_baseline("record_count", [100.0, 102.0, 98.0, 101.0])
 
-        # Detect anomaly with much lower value
+        # Detect anomaly with much lower value (significant drop)
         anomaly = detector.detect("record_count", 30.0)
 
         assert anomaly is not None

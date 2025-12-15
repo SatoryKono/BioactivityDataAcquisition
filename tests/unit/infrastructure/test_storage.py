@@ -16,10 +16,13 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 @pytest.fixture
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
-    with patch("bioetl.infrastructure.storage.bronze_writer.boto3") as mock_boto3:
+    # Patch boto3.Session at the global level since it's imported inside __init__
+    with patch("boto3.Session") as mock_session, patch(
+        "boto3.session.Config"
+    ) as mock_config:
         mock_s3 = MagicMock()
-        mock_boto3.Session.return_value.client.return_value = mock_s3
-        mock_boto3.session.Config.return_value = MagicMock()
+        mock_session.return_value.client.return_value = mock_s3
+        mock_config.return_value = MagicMock()
         yield mock_s3
 
 
@@ -228,7 +231,8 @@ class TestGoldWriter:
         mock_write_deltalake.assert_called_once()
         args, kwargs = mock_write_deltalake.call_args
         assert kwargs["mode"] == "overwrite"
-        assert "gold_table" in args[0]
+        # table_or_uri is passed as keyword argument
+        assert "gold_table" in kwargs["table_or_uri"]
 
     def test_write_gold_empty_records_raises_error(self, mock_gold_writer):
         """Test empty records raises an error."""

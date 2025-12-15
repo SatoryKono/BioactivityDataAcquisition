@@ -1,4 +1,3 @@
-import os
 import re
 import sys
 from pathlib import Path
@@ -30,6 +29,13 @@ def pytest_configure(config: Any) -> None:
     except ImportError:
         sys.modules["pubchempy"] = MagicMock()
 
+    # Mock botocore if not installed
+    try:
+        import botocore
+    except ImportError:
+        sys.modules["botocore"] = MagicMock()
+        sys.modules["botocore.exceptions"] = MagicMock()
+
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
@@ -37,17 +43,21 @@ def project_root() -> Path:
     # Assuming tests/conftest.py is one level deep in tests/
     return Path(__file__).parent.parent
 
+
 @pytest.fixture(scope="session")
 def src_dir(project_root: Path) -> Path:
     return project_root / "src"
+
 
 @pytest.fixture(scope="session")
 def docs_dir(project_root: Path) -> Path:
     return project_root / "docs"
 
+
 @pytest.fixture(scope="session")
 def pyproject_toml(project_root: Path) -> Path:
     return project_root / "pyproject.toml"
+
 
 @pytest.fixture(scope="session")
 def requirements_md(project_root: Path) -> Path:
