@@ -41,8 +41,6 @@ def yaml_config_settings_source() -> dict[str, Any]:
 class AWSSettings(BaseSettings):
     """AWS credentials and endpoint configuration."""
 
-    model_config = SettingsConfigDict(frozen=True)
-
     access_key_id: str | None = Field(default=None)
     secret_access_key: SecretStr | None = Field(default=None)
     endpoint_url: str | None = Field(default=None)
@@ -62,8 +60,6 @@ class AWSSettings(BaseSettings):
 class S3Settings(BaseSettings):
     """S3 bucket configuration."""
 
-    model_config = SettingsConfigDict(frozen=True)
-
     bucket_bronze: str = Field(default="bioetl-bronze")
     bucket_silver: str = Field(default="bioetl-silver")
     bucket_gold: str = Field(default="bioetl-gold")
@@ -72,8 +68,6 @@ class S3Settings(BaseSettings):
 
 class RedisSettings(BaseSettings):
     """Redis connection configuration."""
-
-    model_config = SettingsConfigDict(frozen=True)
 
     host: str = Field(default="localhost")
     port: int = Field(default=6379, ge=1, le=65535)
