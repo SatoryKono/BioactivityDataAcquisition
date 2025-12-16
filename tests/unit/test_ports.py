@@ -84,10 +84,14 @@ class TestStoragePortProtocol:
         """Class with all required methods should be StoragePort."""
 
         class ValidStorage:
-            async def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
+            async def write_bronze(
+                self, _records, _provider, _entity, _date, _batch_id
+            ):
                 pass
 
-            async def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
+            async def write_silver(
+                self, _table_name, _records, _primary_keys, _mode="merge"
+            ):
                 pass
 
             async def write_gold(self, _table_name, _records, _mode="overwrite"):
@@ -102,10 +106,14 @@ class TestStoragePortProtocol:
         """Class missing a required method should not be StoragePort."""
 
         class IncompleteStorage:
-            async def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
+            async def write_bronze(
+                self, _records, _provider, _entity, _date, _batch_id
+            ):
                 pass
 
-            async def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
+            async def write_silver(
+                self, _table_name, _records, _primary_keys, _mode="merge"
+            ):
                 pass
 
             # Missing write_gold
