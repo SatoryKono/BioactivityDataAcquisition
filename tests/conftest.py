@@ -265,3 +265,19 @@ def fake_redis():
         pytest.skip("fakeredis not installed, run: pip install fakeredis")
 
     return fakeredis.aioredis.FakeRedis()
+
+
+@pytest.fixture
+def token_bucket():
+    """Token bucket rate limiter for testing."""
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+    return TokenBucket(rate=100.0, capacity=100)
+
+
+@pytest.fixture
+def circuit_breaker():
+    """Circuit breaker for testing."""
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+
+    return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=60)

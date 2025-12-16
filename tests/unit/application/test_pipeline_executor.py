@@ -20,19 +20,23 @@ class ConcretePipeline(BasePipeline):
 @pytest.fixture
 def mock_base_pipeline():
     """Fixture for a mocked BasePipeline."""
+    # Use MagicMock for data_source so fetch() returns async generator directly
+    # (not a coroutine that wraps it)
+    mock_data_source = MagicMock()
+
     pipeline = ConcretePipeline(
         pipeline_name="test_pipeline",
         provider="test_provider",
         entity_type="test_entity",
         run_type=RunType.INCREMENTAL,
-        data_source=MagicMock(),
+        data_source=mock_data_source,
         storage=MagicMock(),
         lock=AsyncMock(),
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
         resume=False,
     )
-    pipeline.orchestrator = AsyncMock()
+    pipeline.orchestrator = MagicMock()
     pipeline.orchestrator.shutdown_requested = False
     pipeline.transform_bronze_to_silver = AsyncMock(return_value={"id": 1})
     pipeline.should_write_gold = MagicMock(return_value=True)
