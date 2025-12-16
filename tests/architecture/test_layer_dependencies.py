@@ -8,6 +8,7 @@ These tests verify that the clean architecture layer boundaries are respected:
 Uses both static analysis and import-linter for comprehensive checks.
 """
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -192,7 +193,7 @@ def test_infrastructure_imports_domain_ports(src_dir: Path) -> None:
     )
 
 
-def test_import_linter_contracts(project_root: Path) -> None:
+def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     """Run import-linter to verify all architectural contracts.
 
     REQ-ARCH-007: All import-linter contracts must pass.
@@ -202,11 +203,16 @@ def test_import_linter_contracts(project_root: Path) -> None:
     if not importlinter_config.exists():
         pytest.skip(".importlinter config not found")
 
+    # Override PYTHONPATH to ensure correct project is used
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(src_dir)
+
     result = subprocess.run(
         ["lint-imports", "--config", str(importlinter_config)],
         capture_output=True,
         text=True,
         cwd=str(project_root),
+        env=env,
     )
 
     if result.returncode != 0:
