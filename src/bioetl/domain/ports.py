@@ -324,11 +324,12 @@ class QuarantinePort(Protocol):
 
 @runtime_checkable
 class MetricsPort(Protocol):
-    """Port for metrics collection.
+    """
+    Port for metrics collection.
 
-    This interface abstracts the metrics collection mechanism, allowing
-    the application layer to record metrics without depending on specific
-    implementations like Prometheus.
+    This interface abstracts the metrics collection mechanism, allowing the
+    application to record metrics without knowing the specific implementation
+    (e.g., Prometheus, StatsD, CloudWatch).
     """
 
     def observe_histogram(
@@ -337,12 +338,13 @@ class MetricsPort(Protocol):
         value: float,
         labels: dict[str, str],
     ) -> None:
-        """Record a histogram observation.
+        """
+        Observe a value for a histogram metric.
 
         Args:
             name: The name of the histogram metric.
             value: The value to observe.
-            labels: Labels to attach to the metric.
+            labels: A dictionary of label names to label values.
         """
         ...
 
@@ -352,11 +354,38 @@ class MetricsPort(Protocol):
         value: int,
         labels: dict[str, str],
     ) -> None:
-        """Increment a counter metric.
+        """
+        Increment a counter metric.
 
         Args:
             name: The name of the counter metric.
             value: The amount to increment by.
-            labels: Labels to attach to the metric.
+            labels: A dictionary of label names to label values.
         """
         ...
+
+
+class NoOpMetrics(MetricsPort):
+    """No-operation metrics implementation.
+
+    Used as default when no metrics backend is configured.
+    All operations are silently ignored.
+    """
+
+    def observe_histogram(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op histogram observation."""
+        pass
+
+    def increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op counter increment."""
+        pass

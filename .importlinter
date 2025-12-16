@@ -30,6 +30,8 @@ forbidden_modules =
     bioetl.infrastructure.checkpoint
     bioetl.infrastructure.quarantine
     bioetl.infrastructure.factories
+    bioetl.infrastructure.observability.metrics
+    bioetl.infrastructure.observability.prometheus_metrics
 
 [importlinter:contract:infrastructure-no-application]
 name = Infrastructure layer must not import application
