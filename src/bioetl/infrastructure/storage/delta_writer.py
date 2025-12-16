@@ -21,15 +21,14 @@ Architecture:
 from datetime import datetime
 from typing import Any
 
-from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import DeltaError, SchemaError, TableNotFoundError
-from pyarrow import ArrowTypeError
-
 from bioetl.infrastructure.storage.exceptions import (
     MergeConflictError,
     SchemaValidationError,
     TableNotFoundError as CustomTableNotFoundError,
 )
+from deltalake import DeltaTable, write_deltalake
+from deltalake.exceptions import DeltaError, TableNotFoundError
+from pyarrow import ArrowTypeError
 
 
 class DeltaWriter:
@@ -144,11 +143,11 @@ class DeltaWriter:
                     partition_by=partition_cols,
                     storage_options=self.storage_options,
                 )
-            except (SchemaError, ArrowTypeError) as schema_exc:
+            except ArrowTypeError as schema_exc:
                 raise SchemaValidationError(
                     table_name, errors=[str(schema_exc)]
                 ) from schema_exc
-        except (SchemaError, ArrowTypeError) as e:
+        except ArrowTypeError as e:
             raise SchemaValidationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
             # Catch potential merge conflicts
