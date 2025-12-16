@@ -89,10 +89,10 @@ class TestUniProtClientErrorPaths:
 
             # Should have logged the error
             assert "UniProt protein fetch failed" in caplog.text
-            # Check extra data via records
+            # Check that the exception info is in the log
             error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
             assert len(error_records) >= 1
-            assert error_records[0].error == "Network error"
+            assert "Network error" in error_records[0].exc_text
 
     @pytest.mark.asyncio
     async def test_fetch_next_page_raises_in_strict_mode(self, mock_http_client):
@@ -145,12 +145,12 @@ class TestUniProtClientErrorPaths:
 
             # Should have logged the warning
             assert "UniProt feature fetch failed" in caplog.text
-            # Check extra data via records
+            # Check that the exception info is in the log
             warning_records = [
                 r for r in caplog.records if r.levelno == logging.WARNING
             ]
             assert len(warning_records) >= 1
-            assert warning_records[0].error == "Request timeout"
+            assert "Request timeout" in warning_records[0].exc_text
 
     @pytest.mark.asyncio
     async def test_fetch_features_raises_in_strict_mode(self, mock_http_client):
@@ -272,10 +272,10 @@ class TestPubChemClientErrorPaths:
 
             # Should continue after error (returns empty due to second mock call)
             assert "PubChem compound batch fetch failed" in caplog.text
-            # Check extra data via records
+            # Check that the exception info is in the log
             error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
             assert len(error_records) >= 1
-            assert error_records[0].error == "PubChem API error"
+            assert "PubChem API error" in error_records[0].exc_text
 
     @pytest.mark.asyncio
     async def test_fetch_compounds_incremental_raises_in_strict_mode(self):
