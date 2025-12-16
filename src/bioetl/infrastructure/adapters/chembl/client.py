@@ -89,7 +89,9 @@ class ChemblAdapter:
             raise ValueError(msg)
         return f"{CHEMBL_API_BASE}/{resource}.json"
 
-    def _build_params(self, entity_type: str, watermark: Watermark | None, offset: int) -> dict[str, Any]:
+    def _build_params(
+        self, entity_type: str, watermark: Watermark | None, offset: int
+    ) -> dict[str, Any]:
         """Build API request parameters."""
         params: dict[str, Any] = {
             "limit": self.batch_size,
@@ -104,7 +106,9 @@ class ChemblAdapter:
                     params["activity_id__gt"] = str(watermark)
         return params
 
-    def _process_response(self, response: Response, entity_type: str) -> tuple[list[dict[str, Any]], bool]:
+    def _process_response(
+        self, response: Response, entity_type: str
+    ) -> tuple[list[dict[str, Any]], bool]:
         """Process API response, extract records and pagination info."""
         data = response.json()
         records = data.get(ENTITY_MAPPING.get(entity_type, entity_type) + "s", [])

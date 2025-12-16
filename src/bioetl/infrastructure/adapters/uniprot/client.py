@@ -142,17 +142,30 @@ class UniProtClient:
             "query": query,
             "size": min(size, (limit - fetched) if limit else size),
             "format": "json",
-            "fields": ",".join([
-                "accession", "id", "gene_names", "organism_name", "organism_id",
-                "protein_name", "length", "sequence", "cc_function", "ft_domain",
-                "xref_pdb", "xref_chembl",
-            ]),
+            "fields": ",".join(
+                [
+                    "accession",
+                    "id",
+                    "gene_names",
+                    "organism_name",
+                    "organism_id",
+                    "protein_name",
+                    "length",
+                    "sequence",
+                    "cc_function",
+                    "ft_domain",
+                    "xref_pdb",
+                    "xref_chembl",
+                ]
+            ),
         }
         if cursor:
             params["cursor"] = cursor
         return params
 
-    async def _process_protein_response(self, response: httpx.Response) -> tuple[list, str | None]:
+    async def _process_protein_response(
+        self, response: httpx.Response
+    ) -> tuple[list, str | None]:
         """Processes the HTTP response from a protein fetch request."""
         if response.status_code != 200:
             return [], None
@@ -193,7 +206,9 @@ class UniProtClient:
         size, fetched, cursor = 500, 0, None
 
         while not limit or fetched < limit:
-            results, cursor = await self._fetch_next_page(query, size, fetched, limit, cursor)
+            results, cursor = await self._fetch_next_page(
+                query, size, fetched, limit, cursor
+            )
             if not results:
                 break
 
@@ -321,10 +336,12 @@ class UniProtClient:
             if line.startswith(">"):
                 # New sequence
                 if current_header:
-                    records.append({
-                        "header": current_header,
-                        "sequence": "".join(current_sequence),
-                    })
+                    records.append(
+                        {
+                            "header": current_header,
+                            "sequence": "".join(current_sequence),
+                        }
+                    )
 
                 current_header = line[1:]  # Remove '>'
                 current_sequence = []
@@ -333,10 +350,12 @@ class UniProtClient:
 
         # Add last sequence
         if current_header:
-            records.append({
-                "header": current_header,
-                "sequence": "".join(current_sequence),
-            })
+            records.append(
+                {
+                    "header": current_header,
+                    "sequence": "".join(current_sequence),
+                }
+            )
 
         return records
 
