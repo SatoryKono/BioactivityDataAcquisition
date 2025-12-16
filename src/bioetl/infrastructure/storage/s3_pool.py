@@ -13,7 +13,7 @@ Architecture:
 from __future__ import annotations
 
 import threading
-from typing import Any
+from typing import Any, ClassVar
 
 import boto3
 from botocore.config import Config
@@ -46,8 +46,8 @@ class S3ClientPool:
         credentials provided.
     """
 
-    _instances: dict[tuple[str | None, str], Any] = {}
-    _lock = threading.Lock()
+    _instances: ClassVar[dict[tuple[str | None, str], Any]] = {}
+    _lock: ClassVar[threading.Lock] = threading.Lock()
 
     @classmethod
     def get_client(
