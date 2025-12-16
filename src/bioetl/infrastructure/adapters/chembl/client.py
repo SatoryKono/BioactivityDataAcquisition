@@ -53,8 +53,6 @@ ENTITY_PLURAL = {
 }
 
 
-
-
 @dataclass
 class ChemblAdapter:
     """ChEMBL data source adapter.
