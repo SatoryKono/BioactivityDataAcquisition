@@ -19,7 +19,6 @@ from typing import Any
 
 from .types import ContentHash, DriftLevel, EntityID
 
-
 # =============================================================================
 # Content Hash Generation (RULES.md §2.8)
 # =============================================================================
@@ -73,14 +72,19 @@ def normalize_for_hash(record: dict[str, Any]) -> dict[str, Any]:
     return normalized
 
 
+def _normalize_float(value: float) -> float | None:
+    """Normalize a float value, handling NaN/Inf."""
+    # NaN/Inf → null (REQ-ID-004)
+    if math.isnan(value) or math.isinf(value):
+        return None
+    # Round to 10 decimals (REQ-ID-003)
+    return round(value, 10)
+
+
 def _normalize_value(value: Any) -> Any:
     """Normalize a single value."""
-    # NaN/Inf → null (REQ-ID-004)
     if isinstance(value, float):
-        if math.isnan(value) or math.isinf(value):
-            return None
-        # Round to 10 decimals (REQ-ID-003)
-        return round(value, 10)
+        return _normalize_float(value)
 
     # Dates → ISO format (REQ-ID-005)
     if isinstance(value, datetime):

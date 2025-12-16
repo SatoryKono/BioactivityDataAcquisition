@@ -134,93 +134,76 @@ class UniProtClient:
                 f"Supported: protein, feature, sequence"
             )
 
+    def _build_protein_fetch_params(
+        self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
+    ) -> dict[str, Any]:
+        """Build the parameter dictionary for a protein fetch request."""
+        params = {
+            "query": query,
+            "size": min(size, (limit - fetched) if limit else size),
+            "format": "json",
+            "fields": ",".join([
+                "accession", "id", "gene_names", "organism_name", "organism_id",
+                "protein_name", "length", "sequence", "cc_function", "ft_domain",
+                "xref_pdb", "xref_chembl",
+            ]),
+        }
+        if cursor:
+            params["cursor"] = cursor
+        return params
+
+    async def _process_protein_response(self, response: httpx.Response) -> tuple[list, str | None]:
+        """Processes the HTTP response from a protein fetch request."""
+        if response.status_code != 200:
+            return [], None
+        data = response.json()
+        results = data.get("results", [])
+        cursor = data.get("nextCursor")
+        return results, cursor
+
+    def _build_query(self, query: str | None, watermark: Watermark | None) -> str:
+        """Build the query string."""
+        query = query or "*"
+        if watermark:
+            query = f"{query} AND accession_id:[{watermark} TO *]"
+        return query
+
+    async def _fetch_next_page(
+        self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
+    ) -> tuple[list, str | None]:
+        """Fetch the next page of protein results."""
+        await self.rate_limiter.acquire()
+        params = self._build_protein_fetch_params(query, size, fetched, limit, cursor)
+        try:
+            response = await self.circuit_breaker.call(
+                self.http_client.get, "/uniprotkb/search", params=params
+            )
+            return await self._process_protein_response(response)
+        except Exception:
+            return [], None
+
     async def _fetch_proteins(
         self,
         query: str | None,
         watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch protein entries from UniProt.
+        """Fetch protein entries from UniProt."""
+        query = self._build_query(query, watermark)
+        size, fetched, cursor = 500, 0, None
 
-        Args:
-            query: Search query (UniProt query syntax)
-            watermark: Last accession for incremental
-            limit: Max records
-
-        Yields:
-            Protein records
-        """
-        if not query:
-            query = "*"  # Match all
-
-        # Add watermark to query if provided
-        if watermark:
-            query = f"{query} AND accession_id:[{watermark} TO *]"
-
-        # UniProt pagination
-        size = 500  # Page size
-        fetched = 0
-        cursor = None
-
-        while True:
-            if limit and fetched >= limit:
+        while not limit or fetched < limit:
+            results, cursor = await self._fetch_next_page(query, size, fetched, limit, cursor)
+            if not results:
                 break
 
-            await self.rate_limiter.acquire()
-
-            # Build URL with pagination
-            params = {
-                "query": query,
-                "size": min(size, (limit - fetched) if limit else size),
-                "format": "json",
-                "fields": ",".join([
-                    "accession",
-                    "id",
-                    "gene_names",
-                    "organism_name",
-                    "organism_id",
-                    "protein_name",
-                    "length",
-                    "sequence",
-                    "cc_function",
-                    "ft_domain",
-                    "xref_pdb",
-                    "xref_chembl",
-                ]),
-            }
-
-            if cursor:
-                params["cursor"] = cursor
-
-            try:
-                response = await self.circuit_breaker.call(
-                    self.http_client.get,
-                    "/uniprotkb/search",
-                    params=params,
-                )
-
-                if response.status_code != 200:
+            for protein in results:
+                yield protein
+                fetched += 1
+                if limit and fetched >= limit:
                     break
 
-                data = response.json()
-                results = data.get("results", [])
-
-                if not results:
-                    break
-
-                for protein in results:
-                    yield protein
-                    fetched += 1
-
-                    if limit and fetched >= limit:
-                        break
-
-                # Get next cursor for pagination
-                cursor = data.get("nextCursor")
-                if not cursor:
-                    break
-
-            except Exception:
+            if not cursor:
                 break
 
     async def _fetch_features(

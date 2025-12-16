@@ -20,6 +20,7 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 if TYPE_CHECKING:
+    from httpx import Response
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 # ChEMBL API base URL
@@ -88,6 +89,29 @@ class ChemblAdapter:
             raise ValueError(msg)
         return f"{CHEMBL_API_BASE}/{resource}.json"
 
+    def _build_params(self, entity_type: str, watermark: Watermark | None, offset: int) -> dict[str, Any]:
+        """Build API request parameters."""
+        params: dict[str, Any] = {
+            "limit": self.batch_size,
+            "offset": offset,
+            "format": "json",
+        }
+        if watermark is not None:
+            if entity_type == "activity":
+                if isinstance(watermark, datetime):
+                    params["updated_on__gte"] = watermark.isoformat()
+                else:
+                    params["activity_id__gt"] = str(watermark)
+        return params
+
+    def _process_response(self, response: Response, entity_type: str) -> tuple[list[dict[str, Any]], bool]:
+        """Process API response, extract records and pagination info."""
+        data = response.json()
+        records = data.get(ENTITY_MAPPING.get(entity_type, entity_type) + "s", [])
+        page_meta = data.get("page_meta", {})
+        has_next = page_meta.get("next") is not None
+        return records, has_next
+
     async def fetch(
         self,
         entity_type: str,
@@ -113,30 +137,11 @@ class ChemblAdapter:
         total_fetched = 0
 
         while True:
-            params: dict[str, Any] = {
-                "limit": self.batch_size,
-                "offset": offset,
-                "format": "json",
-            }
-
-            # Apply watermark filter if provided
-            if watermark is not None:
-                # ChEMBL uses different filter fields per entity
-                if entity_type == "activity":
-                    # Filter by document_chembl_id or assay modification date
-                    if isinstance(watermark, datetime):
-                        params["updated_on__gte"] = watermark.isoformat()
-                    else:
-                        # Assume it's an ID-based watermark
-                        params["activity_id__gt"] = str(watermark)
+            params = self._build_params(entity_type, watermark, offset)
 
             try:
                 response = await self.http_client.get(url, params=params)
-                data = response.json()
-
-                # ChEMBL returns data in a wrapper with pagination info
-                records = data.get(ENTITY_MAPPING.get(entity_type, entity_type) + "s", [])
-                page_meta = data.get("page_meta", {})
+                records, has_next = self._process_response(response, entity_type)
 
                 if not records:
                     break
@@ -144,15 +149,12 @@ class ChemblAdapter:
                 for record in records:
                     yield record
                     total_fetched += 1
-
                     if limit and total_fetched >= limit:
                         return
 
-                # Reset error counter on success
                 self._consecutive_errors = 0
 
-                # Check if there are more pages
-                if not page_meta.get("next"):
+                if not has_next:
                     break
 
                 offset += self.batch_size
