@@ -7,17 +7,26 @@ Usage:
     bioetl checkpoint list
 """
 
+from __future__ import annotations
+
 import asyncio
 import sys
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import click
 
 from bioetl.application.pipeline.base import run_pipeline_flow
-from bioetl.bootstrap import bootstrap
+from bioetl.bootstrap import (
+    ChEMBLActivityPipelineFactory,
+    bootstrap,
+    bootstrap_logger,
+)
 from bioetl.config import get_settings
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.observability.logging import create_logger
+
+if TYPE_CHECKING:
+    import structlog
 
 
 @click.group()
@@ -63,7 +72,7 @@ def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
         bioetl run --pipeline chembl_activity --limit 1000
     """
     run_id = uuid4()
-    logger = create_logger(pipeline=pipeline, run_id=run_id)
+    logger = bootstrap_logger(pipeline=pipeline, run_id=run_id)
     logger.info(
         "Starting pipeline",
         run_type=run_type,
@@ -94,7 +103,7 @@ def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
 async def _run_chembl_activity(
     run_type: RunType,
     resume: bool,
-    logger: "structlog.BoundLogger",
+    logger: structlog.BoundLogger,
 ) -> None:
     """Run ChEMBL Activity pipeline.
 
@@ -103,27 +112,23 @@ async def _run_chembl_activity(
         resume: Resume from checkpoint
         logger: Structured logger
     """
-    from bioetl.application.pipelines.chembl_activity import (
-        ChEMBLActivityPipelineFactory,
-    )
-
     # Initialize dependencies via Composition Root
     container = bootstrap()
 
     # Load configuration from centralized config
     settings = get_settings()
 
-    factory = ChEMBLActivityPipelineFactory()
-    pipeline = await factory.create(
+    pipeline = await ChEMBLActivityPipelineFactory.create(
         run_type=run_type,
         settings=settings,
+        logger=logger,
         resume=resume,
         # Inject initialized services
         checkpoint=container.checkpoint,
         quarantine=container.quarantine,
         lock=container.lock,
     )
-    # Pass logger to the pipeline flow
+
     await run_pipeline_flow(pipeline, logger)
 
 
@@ -156,7 +161,7 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
         bioetl quarantine inspect --pipeline chembl_activity
         bioetl quarantine inspect --pipeline chembl_activity --error-code SCHEMA_VIOLATION
     """
-    logger = create_logger(pipeline=pipeline, run_id=uuid4())
+    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid4())
     asyncio.run(_quarantine_inspect(pipeline, limit, error_code, logger))
 
 
@@ -164,7 +169,7 @@ async def _quarantine_inspect(
     pipeline: str,
     limit: int,
     error_code: str | None,
-    logger: "structlog.BoundLogger",
+    logger: structlog.BoundLogger,
 ) -> None:
     """Inspect quarantine implementation."""
     container = bootstrap()
@@ -181,12 +186,8 @@ async def _quarantine_inspect(
 
     logger.info(f"Found {len(records)} quarantined records")
 
-    for i, record in enumerate(records, 1):
-        click.echo(f"[{i}] Error: {record['error_code']}")
-        click.echo(f"    Time: {record['ingestion_ts']}")
-        click.echo(f"    Status: {record['dq_status']}")
-        click.echo(f"    Payload (truncated): {str(record['payload'])[:200]}...")
-        click.echo()
+    for record in records:
+        logger.info("Quarantined record", **record)
 
 
 @quarantine.command("stats")
@@ -201,11 +202,11 @@ def quarantine_stats(pipeline: str) -> None:
     Examples:
         bioetl quarantine stats --pipeline chembl_activity
     """
-    logger = create_logger(pipeline=pipeline, run_id=uuid4())
+    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid4())
     asyncio.run(_quarantine_stats(pipeline, logger))
 
 
-async def _quarantine_stats(pipeline: str, logger: "structlog.BoundLogger") -> None:
+async def _quarantine_stats(pipeline: str, logger: structlog.BoundLogger) -> None:
     """Get quarantine statistics."""
     container = bootstrap()
     stats = container.quarantine.get_stats(pipeline)
@@ -226,11 +227,11 @@ def checkpoint_list() -> None:
     Examples:
         bioetl checkpoint list
     """
-    logger = create_logger(pipeline="checkpoint", run_id=uuid4())
+    logger = bootstrap_logger(pipeline="checkpoint", run_id=uuid4())
     asyncio.run(_checkpoint_list(logger))
 
 
-async def _checkpoint_list(logger: "structlog.BoundLogger") -> None:
+async def _checkpoint_list(logger: structlog.BoundLogger) -> None:
     """List checkpoints implementation."""
     container = bootstrap()
     checkpoint_storage = container.checkpoint
@@ -269,13 +270,11 @@ def checkpoint_delete(pipeline: str) -> None:
     Examples:
         bioetl checkpoint delete --pipeline chembl_activity
     """
-    logger = create_logger(pipeline=pipeline, run_id=uuid4())
+    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid4())
     asyncio.run(_checkpoint_delete(pipeline, logger))
 
 
-async def _checkpoint_delete(
-    pipeline: str, logger: "structlog.BoundLogger"
-) -> None:
+async def _checkpoint_delete(pipeline: str, logger: structlog.BoundLogger) -> None:
     """Delete checkpoint implementation."""
     container = bootstrap()
     checkpoint_storage = container.checkpoint

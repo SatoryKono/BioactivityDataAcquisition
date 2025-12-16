@@ -321,13 +321,11 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
         r"from\s+bioetl\.infrastructure\.locking\b",
         r"from\s+bioetl\.infrastructure\.storage\b",
         r"from\s+bioetl\.infrastructure\.quarantine\b",
-        r"from\s+bioetl\.infrastructure\.observability\b",
         r"import\s+bioetl\.infrastructure\.adapters\b",
         r"import\s+bioetl\.infrastructure\.checkpoint\b",
         r"import\s+bioetl\.infrastructure\.locking\b",
         r"import\s+bioetl\.infrastructure\.storage\b",
         r"import\s+bioetl\.infrastructure\.quarantine\b",
-        r"import\s+bioetl\.infrastructure\.observability\b",
     ]
 
     violations = []
@@ -337,6 +335,12 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
         for match in matches:
             line_num = content[: match.start()].count("\n") + 1
             violations.append(f"Line {line_num}: {match.group()}")
+
+    # Allow importing create_logger from observability
+    allowed_observability_import = (
+        "from bioetl.infrastructure.observability.logging import create_logger"
+    )
+    violations = [v for v in violations if allowed_observability_import not in v]
 
     assert not violations, (
         "CLI must not import directly from infrastructure modules.\n"

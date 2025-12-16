@@ -19,6 +19,7 @@ def chembl_pipeline():
         lock=AsyncMock(),
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
+        logger=MagicMock(),
         resume=False,
     )
     return pipeline

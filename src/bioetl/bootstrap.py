@@ -22,14 +22,30 @@ from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.factories.storage import StorageAdapter
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+from bioetl.infrastructure.observability.logging import (
+    create_logger as create_infra_logger,
+)
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
+    import structlog
+
     from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
     from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
     from bioetl.domain.types import RunType
+
+
+def bootstrap_logger(
+    pipeline: str, run_id: UUID, log_level: str = "INFO"
+) -> structlog.BoundLogger:
+    """Create a logger for the application layer (e.g., CLI)."""
+    return create_infra_logger(
+        pipeline=pipeline, run_id=run_id, log_level=log_level, json_format=True
+    )
 
 
 @dataclass(frozen=True)
@@ -114,6 +130,7 @@ class ChEMBLActivityPipelineFactory:
     async def create(
         run_type: RunType,
         settings: Settings,
+        logger: structlog.BoundLogger,
         resume: bool = False,
         checkpoint: CheckpointPort | None = None,
         quarantine: QuarantinePort | None = None,
@@ -124,6 +141,7 @@ class ChEMBLActivityPipelineFactory:
         Args:
             run_type: Type of run (incremental, backfill, rebuild)
             settings: Application settings object
+            logger: Structured logger
             resume: Resume from checkpoint if available
             checkpoint: Injected checkpoint service (optional)
             quarantine: Injected quarantine service (optional)
@@ -206,5 +224,6 @@ class ChEMBLActivityPipelineFactory:
             lock=lock,
             checkpoint=checkpoint,
             quarantine=quarantine,
+            logger=logger,
             resume=resume,
         )

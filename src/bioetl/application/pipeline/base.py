@@ -5,10 +5,8 @@ Coordinates the pipeline components.
 
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
-
-import structlog
 
 from bioetl.application.pipeline.checkpoint_manager import CheckpointManager
 from bioetl.application.pipeline.executor import PipelineExecutor
@@ -29,6 +27,9 @@ from bioetl.domain.types import (
     RunType,
     Watermark,
 )
+
+if TYPE_CHECKING:
+    import structlog
 
 
 class BasePipeline(ABC):
