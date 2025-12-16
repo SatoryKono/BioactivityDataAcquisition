@@ -28,7 +28,7 @@ class PipelineRecordProcessor:
     - Bronze layer writing
     - Silver layer transformation and writing
     - Gold layer filtering and writing
-    - Error classification and quarantine
+    - Quarantine of failed records
     """
 
     def __init__(
@@ -111,13 +111,3 @@ class PipelineRecordProcessor:
             bronze_batch_id=batch_id,
             error_details={"message": error_details},
         )
-
-    @staticmethod
-    def classify_error(error: Exception) -> ErrorType:
-        """Classify exception to determine error type."""
-        error_name = type(error).__name__
-        if "Schema" in error_name or "Validation" in error_name:
-            return ErrorType.SCHEMA_VIOLATION
-        elif "Missing" in error_name or "Required" in error_name:
-            return ErrorType.MISSING_REQUIRED_FIELD
-        return ErrorType.INVALID_DATA

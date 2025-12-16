@@ -10,7 +10,9 @@ from bioetl.domain.types import RunType
 
 
 class ConcretePipeline(BasePipeline):
-    async def transform_bronze_to_silver(self, _context: PipelineContext, record: dict) -> dict | None:
+    async def transform_bronze_to_silver(
+        self, _context: PipelineContext, record: dict
+    ) -> dict | None:
         return record
 
 

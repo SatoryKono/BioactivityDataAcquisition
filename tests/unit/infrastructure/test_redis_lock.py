@@ -9,16 +9,18 @@ import pytest
 from bioetl.domain.types import RunID
 
 
+@pytest.mark.parametrize("redis_client_fixture", ["fake_redis", "redis_client"])
 @pytest.mark.unit
 class TestRedisDistributedLock:
     """Tests for Redis-based distributed locking."""
 
     @pytest.mark.asyncio
-    async def test_acquire_lock(self, fake_redis: object, run_id: RunID) -> None:
+    async def test_acquire_lock(self, redis_client_fixture, request, run_id: RunID) -> None:
         """Should successfully acquire an available lock."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
 
         acquired = await lock.acquire("test_key", run_id)
         assert acquired is True
@@ -32,12 +34,13 @@ class TestRedisDistributedLock:
 
     @pytest.mark.asyncio
     async def test_acquire_fails_if_locked(
-        self, fake_redis: object, run_id: RunID
+        self, redis_client_fixture, request, run_id: RunID
     ) -> None:
         """Should fail to acquire if already locked by another owner."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
         other_owner = RunID(uuid4())
 
         # First owner acquires
@@ -48,11 +51,12 @@ class TestRedisDistributedLock:
         assert acquired is False
 
     @pytest.mark.asyncio
-    async def test_release_lock(self, fake_redis: object, run_id: RunID) -> None:
+    async def test_release_lock(self, redis_client_fixture, request, run_id: RunID) -> None:
         """Should successfully release owned lock."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
 
         await lock.acquire("test_key", run_id)
         released = await lock.release("test_key", run_id)
@@ -62,12 +66,13 @@ class TestRedisDistributedLock:
 
     @pytest.mark.asyncio
     async def test_release_fails_if_not_owner(
-        self, fake_redis: object, run_id: RunID
+        self, redis_client_fixture, request, run_id: RunID
     ) -> None:
         """Should fail to release lock owned by another."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
         other_owner = RunID(uuid4())
 
         await lock.acquire("test_key", run_id)
@@ -78,12 +83,13 @@ class TestRedisDistributedLock:
 
     @pytest.mark.asyncio
     async def test_heartbeat_extends_ttl(
-        self, fake_redis: object, run_id: RunID
+        self, redis_client_fixture, request, run_id: RunID
     ) -> None:
         """Heartbeat should extend lock TTL."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
 
         await lock.acquire("test_key", run_id, ttl=10)
 
@@ -93,12 +99,13 @@ class TestRedisDistributedLock:
 
     @pytest.mark.asyncio
     async def test_heartbeat_fails_if_not_owner(
-        self, fake_redis: object, run_id: RunID
+        self, redis_client_fixture, request, run_id: RunID
     ) -> None:
         """Heartbeat should fail if not owner."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
         other_owner = RunID(uuid4())
 
         await lock.acquire("test_key", run_id)
@@ -108,23 +115,25 @@ class TestRedisDistributedLock:
 
     @pytest.mark.asyncio
     async def test_heartbeat_fails_if_lock_expired(
-        self, fake_redis: object, run_id: RunID
+        self, redis_client_fixture, request, run_id: RunID
     ) -> None:
         """Heartbeat should fail if lock has expired."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
 
         # Try heartbeat without acquiring
         success = await lock.heartbeat("nonexistent_key", run_id)
         assert success is False
 
     @pytest.mark.asyncio
-    async def test_exclusive_lock(self, fake_redis: object, run_id: RunID) -> None:
+    async def test_exclusive_lock(self, redis_client_fixture, request, run_id: RunID) -> None:
         """Exclusive lock should block regular locks."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
         other_owner = RunID(uuid4())
 
         # Acquire exclusive lock
@@ -137,12 +146,13 @@ class TestRedisDistributedLock:
 
     @pytest.mark.asyncio
     async def test_exclusive_fails_if_regular_exists(
-        self, fake_redis: object, run_id: RunID
+        self, redis_client_fixture, request, run_id: RunID
     ) -> None:
         """Exclusive lock should fail if regular lock exists."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
-        lock = RedisDistributedLock(redis_client=fake_redis)  # type: ignore[arg-type]
+        redis_client = request.getfixturevalue(redis_client_fixture)
+        lock = RedisDistributedLock(redis_client=redis_client)
         other_owner = RunID(uuid4())
 
         # Acquire regular lock first
@@ -153,17 +163,18 @@ class TestRedisDistributedLock:
         assert exclusive_acquired is False
 
     @pytest.mark.asyncio
-    async def test_key_prefix(self, fake_redis: object, run_id: RunID) -> None:
+    async def test_key_prefix(self, redis_client_fixture, request, run_id: RunID) -> None:
         """Lock keys should use configured prefix."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
+        redis_client = request.getfixturevalue(redis_client_fixture)
         lock = RedisDistributedLock(
-            redis_client=fake_redis,  # type: ignore[arg-type]
+            redis_client=redis_client,
             prefix="bioetl_lock",
         )
 
         await lock.acquire("test_key", run_id)
 
         # Key should be prefixed
-        exists = await fake_redis.exists("bioetl_lock:test_key")  # type: ignore[union-attr]
+        exists = await redis_client.exists("bioetl_lock:test_key")
         assert exists > 0
