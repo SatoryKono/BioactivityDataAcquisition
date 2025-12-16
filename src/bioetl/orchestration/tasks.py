@@ -7,6 +7,7 @@ provides Prefect-specific integration.
 Architecture:
     orchestration/tasks.py (Prefect) -> application/core/executor.py (Pure Python)
                                      -> application/core/orchestrator.py (Pure Python)
+                                     -> application/core/checkpoint_manager.py (Pure Python)
 """
 
 from typing import TYPE_CHECKING
@@ -15,8 +16,14 @@ from prefect import flow, task
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.executor import PipelineExecutor
     from bioetl.domain.types import Watermark
+
+
+# =============================================================================
+# Executor Tasks
+# =============================================================================
 
 
 @task(name="Execute Pipeline")
@@ -36,6 +43,39 @@ async def execute_pipeline_task(
         limit: Optional limit on number of records to process
     """
     await executor.execute(watermark=watermark, limit=limit)
+
+
+# =============================================================================
+# Checkpoint Tasks
+# =============================================================================
+
+
+@task(name="Load Checkpoint", retries=2)
+async def load_checkpoint_task(manager: "CheckpointManager") -> "Watermark | None":
+    """Prefect task wrapper for loading checkpoints.
+
+    Args:
+        manager: The checkpoint manager instance
+
+    Returns:
+        Watermark if checkpoint exists and resume is enabled, None otherwise
+    """
+    return await manager.load_checkpoint()
+
+
+@task(name="Delete Checkpoint")
+async def delete_checkpoint_task(manager: "CheckpointManager") -> None:
+    """Prefect task wrapper for deleting checkpoints.
+
+    Args:
+        manager: The checkpoint manager instance
+    """
+    await manager.delete_checkpoint()
+
+
+# =============================================================================
+# Pipeline Flow
+# =============================================================================
 
 
 @flow(

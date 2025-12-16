@@ -1,46 +1,68 @@
-"""Checkpoint Manager for ETL Pipelines."""
+"""Checkpoint Manager for ETL Pipelines.
 
+This module is framework-agnostic. Prefect integration is provided by
+the orchestration layer (bioetl.orchestration.tasks).
+"""
+
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from prefect import task
-
-from bioetl.domain.types import Watermark
+from bioetl.domain.ports import CheckpointPort
+from bioetl.domain.types import RunID, Watermark
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
+    import structlog
 
 
 class CheckpointManager:
-    """Manages saving, loading, and deleting checkpoints."""
+    """Framework-agnostic checkpoint management."""
 
-    def __init__(self, pipeline: "BasePipeline"):
-        self.pipeline = pipeline
+    def __init__(
+        self,
+        checkpoint_port: CheckpointPort,
+        logger: "structlog.BoundLogger",
+        pipeline_name: str,
+        run_id: RunID,
+        resume: bool,
+        watermark_extractor: Callable[[dict], Watermark],
+    ) -> None:
+        self._checkpoint = checkpoint_port
+        self._logger = logger
+        self._pipeline_name = pipeline_name
+        self._run_id = run_id
+        self._resume = resume
+        self._extract_watermark = watermark_extractor
 
-    @task(name="Load Checkpoint")
     async def load_checkpoint(self) -> Watermark | None:
         """Load checkpoint if resuming."""
-        if self.pipeline.resume:
-            checkpoint_data = self.pipeline.checkpoint.load(self.pipeline.pipeline_name)
+        if self._resume:
+            checkpoint_data = self._checkpoint.load(self._pipeline_name)
             if checkpoint_data:
                 watermark, _, metadata = checkpoint_data
-                self.pipeline.logger.info(
+                self._logger.info(
                     f"Resuming from checkpoint: {watermark}",
                     extra={"metadata": metadata},
                 )
                 return watermark
         return None
 
-    async def save_checkpoint(self, last_record: dict) -> None:
-        """Save checkpoint."""
-        watermark = self.pipeline.extract_watermark(self.pipeline.context, last_record)
-        self.pipeline.checkpoint.save(
-            pipeline=self.pipeline.pipeline_name,
+    async def save_checkpoint(
+        self, last_record: dict, records_processed: int
+    ) -> None:
+        """Save checkpoint.
+
+        Args:
+            last_record: The last processed record (used to extract watermark)
+            records_processed: Count of records processed so far
+        """
+        watermark = self._extract_watermark(last_record)
+        self._checkpoint.save(
+            pipeline=self._pipeline_name,
             watermark=watermark,
-            run_id=self.pipeline.run_id,
-            metadata={"records_processed": self.pipeline.executor.records_fetched},
+            run_id=self._run_id,
+            metadata={"records_processed": records_processed},
         )
 
-    @task(name="Delete Checkpoint")
     async def delete_checkpoint(self) -> None:
         """Delete checkpoint after successful run."""
-        self.pipeline.checkpoint.delete(self.pipeline.pipeline_name)
+        self._checkpoint.delete(self._pipeline_name)

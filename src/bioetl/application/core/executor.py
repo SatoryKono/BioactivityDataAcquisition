@@ -54,7 +54,9 @@ class PipelineExecutor:
             if self.pipeline.orchestrator.shutdown_requested:
                 # Save checkpoint before shutdown
                 if last_record:
-                    await self.pipeline.checkpoint_manager.save_checkpoint(last_record)
+                    await self.pipeline.checkpoint_manager.save_checkpoint(
+                        last_record, self.records_fetched
+                    )
                 raise PipelineShutdownError("Shutdown during extraction")
 
             batch.append(raw_record)
@@ -69,7 +71,9 @@ class PipelineExecutor:
 
             # Checkpoint at intervals
             if self.records_fetched % self.checkpoint_interval == 0:
-                await self.pipeline.checkpoint_manager.save_checkpoint(raw_record)
+                await self.pipeline.checkpoint_manager.save_checkpoint(
+                    raw_record, self.records_fetched
+                )
 
         # Process remaining records
         if batch:

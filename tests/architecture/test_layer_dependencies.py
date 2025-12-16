@@ -476,3 +476,86 @@ def test_dead_code_vulture(src_dir: Path) -> None:
             f"Found {len(unused)} potentially dead code item(s):\n"
             + "\n".join(messages)
         )
+
+
+def test_application_layer_no_orchestration_imports(src_dir: Path) -> None:
+    """Application layer must not import orchestration frameworks directly.
+
+    REQ-ARCH-APP-001: Prefect, Celery, Airflow etc. должны быть изолированы
+    в отдельном слое (bioetl/orchestration/).
+    """
+    application_path = src_dir / "bioetl" / "application"
+    if not application_path.exists():
+        pytest.skip("Application layer not found")
+
+    disallowed = ["prefect", "celery", "airflow", "dagster"]
+    violations = []
+
+    for py_file in application_path.rglob("*.py"):
+        content = py_file.read_text(encoding="utf-8")
+        for lib in disallowed:
+            if f"from {lib}" in content or f"import {lib}" in content:
+                violations.append(f"{py_file.relative_to(src_dir)}: imports {lib}")
+
+    assert not violations, (
+        "Application layer has direct orchestration imports:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+        + "\n\nMove orchestration code to bioetl/orchestration/"
+    )
+
+
+@pytest.mark.xfail(
+    reason="Tech debt: base.py imports NoOpMetrics from infrastructure. TODO: use DI",
+    strict=False,
+)
+def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
+    """Application layer must not import from infrastructure.
+
+    REQ-ARCH-APP-002: Application layer depends on domain ports,
+    not concrete infrastructure implementations.
+
+    Current violations (roadmap for refactoring):
+    - base.py imports NoOpMetrics from infrastructure
+    """
+    application_path = src_dir / "bioetl" / "application"
+    if not application_path.exists():
+        pytest.skip("Application layer not found")
+
+    violations = []
+
+    for py_file in application_path.rglob("*.py"):
+        content = py_file.read_text(encoding="utf-8")
+        for i, line in enumerate(content.splitlines(), 1):
+            stripped = line.strip()
+
+            # Skip docstring examples (>>> prefix)
+            if stripped.startswith(">>>"):
+                continue
+
+            # Skip comments
+            if stripped.startswith("#"):
+                continue
+
+            if "from bioetl.infrastructure" not in line:
+                continue
+
+            # Check if inside TYPE_CHECKING block (allowed for type hints)
+            lines = content.splitlines()
+            in_type_checking = False
+            for j, check_line in enumerate(lines):
+                if "if TYPE_CHECKING:" in check_line:
+                    in_type_checking = True
+                elif in_type_checking and check_line.strip() and not check_line.startswith(
+                    (" ", "\t")
+                ):
+                    in_type_checking = False
+                if j + 1 == i and in_type_checking:
+                    break
+            else:
+                violations.append(f"{py_file.relative_to(src_dir)}:{i}: {stripped}")
+
+    assert not violations, (
+        "Application layer imports infrastructure directly:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+        + "\n\nUse dependency injection via domain ports instead."
+    )
