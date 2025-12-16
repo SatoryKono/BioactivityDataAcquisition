@@ -49,9 +49,7 @@ class PipelineCheckpointManager:
                 return watermark
         return None
 
-    async def save(
-        self, watermark: Watermark, records_processed: int
-    ) -> None:
+    async def save(self, watermark: Watermark, records_processed: int) -> None:
         """Save checkpoint with current progress."""
         self.checkpoint.save(
             pipeline=self.pipeline_name,
