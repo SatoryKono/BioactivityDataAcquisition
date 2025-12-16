@@ -259,6 +259,14 @@ class ChemblAdapter:
         page_meta = data.get("page_meta", {})
         return page_meta.get("total_count", 0)
 
+    async def aclose(self) -> None:
+        """Close resources.
+
+        Implements aclose() required by DataSourcePort protocol.
+        The underlying http_client is managed by the caller.
+        """
+        pass  # HTTP client is managed externally
+
 
 def create_chembl_adapter(
     circuit_breaker: CircuitBreaker,

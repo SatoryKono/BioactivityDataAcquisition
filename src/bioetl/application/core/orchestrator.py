@@ -173,9 +173,9 @@ class PipelineOrchestrator:
             )
             self._logger.info("Lock released", extra={"stage": "cleanup"})
 
-            # Record metrics via port
+            # Record metrics via port (sync methods, no await needed)
             duration = time.time() - start_time
-            await self._services.metrics.observe_histogram(
+            self._services.metrics.observe_histogram(
                 "pipeline_duration_seconds",
                 duration,
                 {
@@ -190,7 +190,7 @@ class PipelineOrchestrator:
                 ("silver", self._executor.records_silver),
                 ("gold", self._executor.records_gold),
             ]:
-                await self._services.metrics.increment_counter(
+                self._services.metrics.increment_counter(
                     "records_processed_total",
                     count,
                     {

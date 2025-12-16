@@ -100,9 +100,9 @@ class PipelineRunner:
             status = "failure"
             raise  # Re-raise after logging
         finally:
-            # Metrics recording
+            # Metrics recording (sync methods, no await needed)
             duration = time.time() - start_time
-            await self._services.metrics.observe_histogram(
+            self._services.metrics.observe_histogram(
                 "pipeline_duration_seconds",
                 duration,
                 {

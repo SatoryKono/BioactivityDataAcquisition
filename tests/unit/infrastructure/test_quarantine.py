@@ -27,7 +27,8 @@ class TestUnifiedQuarantine:
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
         assert quarantine.base_path == "/tmp/quarantine"
 
-    def test_write_calls_write_deltalake(self, mock_deltalake):
+    @pytest.mark.asyncio
+    async def test_write_calls_write_deltalake(self, mock_deltalake):
         """Test that write calls write_deltalake with correct data."""
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
         pipeline = "test_pipeline"
@@ -36,7 +37,7 @@ class TestUnifiedQuarantine:
         bronze_batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         error_details = {"message": "Invalid value"}
 
-        quarantine.write(
+        await quarantine.write(
             pipeline=pipeline,
             error_code=error_code,
             payload=payload,
@@ -58,14 +59,15 @@ class TestUnifiedQuarantine:
         assert record["bronze_batch_id"] == str(bronze_batch_id)
         assert record["error_details"] == '{"message": "Invalid value"}'
 
-    def test_payload_truncation(self, mock_deltalake):
+    @pytest.mark.asyncio
+    async def test_payload_truncation(self, mock_deltalake):
         """Test that large payloads are truncated at 64KB."""
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
         # Create a payload larger than 64KB
         large_value = "a" * (70 * 1024)  # 70KB
         payload = {"key": large_value}
 
-        quarantine.write(
+        await quarantine.write(
             pipeline="test",
             error_code="INVALID_DATA",
             payload=payload,

@@ -227,7 +227,7 @@ class BasePipeline(ABC):
         if self._executor is None:
             from bioetl.application.core.executor import PipelineExecutor
 
-            self._executor = PipelineExecutor.from_components(
+            self._executor = PipelineExecutor(
                 data_source=self._services.data_source,
                 storage=self._services.storage,
                 checkpoint_manager=self.checkpoint_manager,
@@ -342,7 +342,7 @@ class BasePipeline(ABC):
         self, _context: PipelineContext, _record: dict[str, Any]
     ) -> Watermark:
         """Extract watermark value from a record."""
-        return Watermark(datetime.now(UTC))
+        return datetime.now(UTC)
 
 
 async def run_pipeline_flow(
