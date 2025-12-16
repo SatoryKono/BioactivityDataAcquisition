@@ -17,8 +17,8 @@ import click
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.bootstrap import bootstrap_pipeline
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.orchestration.runner import PipelineRunner
-from bioetl.infrastructure.orchestration.signals import setup_shutdown_handlers
+from bioetl.interfaces.orchestration.runner import PipelineRunner
+from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
     import structlog
