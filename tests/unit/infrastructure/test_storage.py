@@ -60,7 +60,8 @@ def mock_gold_writer():
 class TestBronzeWriter:
     """Test BronzeWriter functionality."""
 
-    def test_bronze_writer_initialization(self, _mock_s3_client):
+    @pytest.mark.usefixtures("mock_s3_client")
+    def test_bronze_writer_initialization(self):
         """Test BronzeWriter can be initialized."""
         writer = BronzeWriter(
             bucket="test-bucket",
@@ -123,7 +124,8 @@ class TestBronzeWriter:
 
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
-    def test_write_bronze_with_no_records(self, _mock_s3_client):
+    @pytest.mark.usefixtures("mock_s3_client")
+    def test_write_bronze_with_no_records(self):
         """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(bucket="test-bucket")
         records = []
@@ -205,7 +207,8 @@ class TestDeltaWriter:
 
         mock_table_instance.merge.assert_called_once()
 
-    def test_write_silver_empty_records_raises_error(self, _mock_delta_writer):
+    @pytest.mark.usefixtures("mock_delta_writer")
+    def test_write_silver_empty_records_raises_error(self):
         """Test empty records raises an error."""
         writer = DeltaWriter(base_path="/tmp/delta")
 
@@ -238,7 +241,8 @@ class TestGoldWriter:
         # table_or_uri is passed as keyword argument
         assert "gold_table" in kwargs["table_or_uri"]
 
-    def test_write_gold_empty_records_raises_error(self, _mock_gold_writer):
+    @pytest.mark.usefixtures("mock_gold_writer")
+    def test_write_gold_empty_records_raises_error(self):
         """Test empty records raises an error."""
         writer = GoldWriter(base_path="/tmp/gold")
 
