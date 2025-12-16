@@ -5,7 +5,7 @@ the orchestration layer (bioetl.orchestration.tasks).
 """
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports import CheckpointPort
 from bioetl.domain.types import RunID, Watermark
@@ -24,7 +24,7 @@ class CheckpointManager:
         pipeline_name: str,
         run_id: RunID,
         resume: bool,
-        watermark_extractor: Callable[[dict], Watermark],
+        watermark_extractor: Callable[[dict[str, Any]], Watermark],
     ) -> None:
         self._checkpoint = checkpoint_port
         self._logger = logger
@@ -36,7 +36,7 @@ class CheckpointManager:
     async def load_checkpoint(self) -> Watermark | None:
         """Load checkpoint if resuming."""
         if self._resume:
-            checkpoint_data = self._checkpoint.load(self._pipeline_name)
+            checkpoint_data = await self._checkpoint.load(self._pipeline_name)
             if checkpoint_data:
                 watermark, _, metadata = checkpoint_data
                 self._logger.info(
@@ -47,7 +47,7 @@ class CheckpointManager:
         return None
 
     async def save_checkpoint(
-        self, last_record: dict, records_processed: int
+        self, last_record: dict[str, Any], records_processed: int
     ) -> None:
         """Save checkpoint.
 
@@ -56,7 +56,7 @@ class CheckpointManager:
             records_processed: Count of records processed so far
         """
         watermark = self._extract_watermark(last_record)
-        self._checkpoint.save(
+        await self._checkpoint.save(
             pipeline=self._pipeline_name,
             watermark=watermark,
             run_id=self._run_id,
@@ -65,4 +65,4 @@ class CheckpointManager:
 
     async def delete_checkpoint(self) -> None:
         """Delete checkpoint after successful run."""
-        self._checkpoint.delete(self._pipeline_name)
+        await self._checkpoint.delete(self._pipeline_name)
