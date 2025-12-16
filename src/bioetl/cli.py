@@ -131,6 +131,7 @@ async def _run_chembl_activity(
         checkpoint=container.checkpoint,
         quarantine=container.quarantine,
         lock=container.lock,
+        metrics=container.metrics,
     )
 
     await run_pipeline_flow(pipeline, logger)

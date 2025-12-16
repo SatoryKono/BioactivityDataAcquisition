@@ -135,12 +135,12 @@ class ChEMBLActivityPipelineFactory:
         run_type: RunType,
         settings: Settings,
         logger: structlog.BoundLogger,
+        metrics: MetricsPort,
         resume: bool = False,
         limit: int | None = None,
         checkpoint: CheckpointPort | None = None,
         quarantine: QuarantinePort | None = None,
         lock: LockPort | None = None,
-        metrics: MetricsPort | None = None,
     ) -> ChEMBLActivityPipeline:
         """Create configured ChEMBL Activity pipeline.
 
@@ -148,12 +148,12 @@ class ChEMBLActivityPipelineFactory:
             run_type: Type of run (incremental, backfill, rebuild)
             settings: Application settings object
             logger: Structured logger
+            metrics: Injected metrics service
             resume: Resume from checkpoint if available
             limit: Maximum number of records to process
             checkpoint: Injected checkpoint service (optional)
             quarantine: Injected quarantine service (optional)
             lock: Injected lock service (optional)
-            metrics: Injected metrics service (optional)
 
         Returns:
             Configured pipeline instance
@@ -211,13 +211,6 @@ class ChEMBLActivityPipelineFactory:
                 base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
                 storage_options=storage_options,
             )
-
-        # Metrics - use injected or create based on settings
-        if metrics is None:
-            if getattr(settings, "metrics", None) and not settings.metrics.enabled:
-                metrics = NoOpMetrics(warn_on_use=False)  # Explicitly disabled
-            else:
-                metrics = PrometheusMetrics()
 
         return ChEMBLActivityPipeline(
             run_type=run_type,
