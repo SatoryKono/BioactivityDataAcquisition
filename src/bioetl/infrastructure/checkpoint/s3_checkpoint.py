@@ -43,7 +43,7 @@ class S3Checkpoint:
         >>> run_id = RunID(UUID("12345678-1234-1234-1234-123456789abc"))
         >>> await checkpoint.save(
         ...     pipeline="chembl_activity",
-        ...     watermark=Watermark(datetime(2025, 12, 15)),
+        ...     watermark=datetime(2025, 12, 15),
         ...     run_id=run_id,
         ...     metadata={"records_processed": 1000}
         ... )

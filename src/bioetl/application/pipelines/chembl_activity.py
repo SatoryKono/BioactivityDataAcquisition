@@ -248,9 +248,9 @@ class ChEMBLActivityPipeline(BasePipeline):
         """
         activity_id = record.get("activity_id")
         if activity_id:
-            return Watermark(str(activity_id))
+            return str(activity_id)
 
         # Fallback to timestamp
         from datetime import datetime
 
-        return Watermark(datetime.now(UTC))
+        return datetime.now(UTC)

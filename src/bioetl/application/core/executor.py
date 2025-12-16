@@ -5,6 +5,7 @@ Pipeline Executor: orchestrates the data flow from extraction to processing.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from typing import Any
 from uuid import uuid4
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -31,7 +32,7 @@ class PipelineExecutor:
         data_source: DataSourcePort,
         storage: StoragePort,
         checkpoint_manager: CheckpointManager,
-        quarantine_manager: any,  # Using 'any' to avoid circular import if QuarantineManager is in this file
+        quarantine_manager: Any,  # Using 'Any' to avoid circular import if QuarantineManager is in this file
         error_classifier: ErrorClassifier,
         context: PipelineContext,
         shutdown_signal: ShutdownSignal,
@@ -97,7 +98,7 @@ class PipelineExecutor:
         if batch:
             await self._process_and_update_counts(batch)
 
-    async def _process_and_update_counts(self, batch: list[dict[str, Any]]):
+    async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:
         bronze, silver, gold, quarantined = await self._record_processor.process_batch(
             records=batch, batch_id=BatchID(uuid4())
         )
