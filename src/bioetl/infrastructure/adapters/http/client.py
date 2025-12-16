@@ -17,21 +17,18 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from bioetl.infrastructure.adapters.http.circuit_breaker import (
-    CircuitBreaker,
-    CircuitBreakerOpenError,
-)
+from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
-class RetryExhaustedError(Exception):
-    """Raised when all retry attempts are exhausted."""
+# Import from domain
+from bioetl.domain.exceptions import RetryExhaustedError
 
-    def __init__(
-        self, url: str, attempts: int, last_error: Exception | None = None
+# Legacy definition removed - now imported from domain
     ) -> None:
         self.url = url
         self.attempts = attempts

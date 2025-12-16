@@ -51,6 +51,7 @@ class BasePipeline(ABC):
         logger: "structlog.BoundLogger",
         metrics: MetricsPort | None = None,
         resume: bool = False,
+        limit: int | None = None,
     ) -> None:
         self.pipeline_name = pipeline_name
         self.provider = provider
@@ -63,6 +64,7 @@ class BasePipeline(ABC):
         self.quarantine = quarantine
         self.metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
         self.resume = resume
+        self.limit = limit
         self.run_id = RunID(uuid4())
         self.logger = logger.bind(run_id=str(self.run_id))
 

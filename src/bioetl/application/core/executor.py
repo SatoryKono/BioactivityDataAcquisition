@@ -44,13 +44,13 @@ class PipelineExecutor:
         self.records_quarantined = 0
 
     @task(name="Execute Pipeline")
-    async def execute(self, watermark: Watermark | None) -> None:
+    async def execute(self, watermark: Watermark | None, limit: int | None) -> None:
         """Execute main pipeline logic with batch processing."""
         batch: list[dict[str, Any]] = []
         batch_id = BatchID(uuid4())
         last_record: dict[str, Any] | None = None
 
-        async for raw_record in self._extract(watermark):
+        async for raw_record in self._extract(watermark, limit):
             if self.pipeline.orchestrator.shutdown_requested:
                 # Save checkpoint before shutdown
                 if last_record:
@@ -124,11 +124,13 @@ class PipelineExecutor:
             self.records_gold += len(gold_records)
 
     async def _extract(
-        self, watermark: Watermark | None
+        self, watermark: Watermark | None, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
         """Extract records from data source."""
         async for record in self.pipeline.data_source.fetch(
-            entity_type=self.pipeline.entity_type, watermark=watermark
+            entity_type=self.pipeline.entity_type,
+            watermark=watermark,
+            limit=limit,
         ):
             yield record
 

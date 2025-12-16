@@ -22,6 +22,7 @@ from uuid import UUID
 
 from botocore.exceptions import ClientError
 
+from bioetl.domain.exceptions import CheckpointConflictError
 from bioetl.domain.types import RunID, Watermark
 
 
@@ -326,15 +327,3 @@ class S3Checkpoint:
             raise
 
 
-class CheckpointConflictError(Exception):
-    """Raised when checkpoint write fails due to concurrent modification."""
-
-    def __init__(self, pipeline: str, message: str) -> None:
-        """Initialize error.
-
-        Args:
-            pipeline: Pipeline name
-            message: Error message
-        """
-        self.pipeline = pipeline
-        super().__init__(f"Checkpoint conflict for pipeline '{pipeline}': {message}")

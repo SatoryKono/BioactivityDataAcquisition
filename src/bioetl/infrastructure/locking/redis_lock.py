@@ -23,34 +23,8 @@ if TYPE_CHECKING:
 
     from redis.asyncio import Redis
 
+    from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
     from bioetl.domain.types import RunID
-
-
-class LockAcquisitionError(Exception):
-    """Raised when lock cannot be acquired."""
-
-    def __init__(self, key: str, current_owner: str | None = None) -> None:
-        self.key = key
-        self.current_owner = current_owner
-        msg = f"Failed to acquire lock: {key}"
-        if current_owner:
-            msg += f" (owned by {current_owner})"
-        super().__init__(msg)
-
-
-class LockLostError(Exception):
-    """Raised when lock is lost during execution.
-
-    This is a CRITICAL error - worker MUST terminate before any commit.
-    """
-
-    def __init__(self, key: str, owner_id: str) -> None:
-        self.key = key
-        self.owner_id = owner_id
-        super().__init__(
-            f"Lock lost for key '{key}' by owner '{owner_id}'. "
-            "CRITICAL: Terminate immediately, do not commit!"
-        )
 
 
 # Lua script for atomic release (only if owner matches)
