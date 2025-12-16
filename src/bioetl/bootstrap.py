@@ -74,7 +74,7 @@ def bootstrap() -> ServiceContainer:
     settings = get_settings()
     aws_config = settings.aws
     s3_config = settings.s3
-    storage_options = settings.get_storage_options()
+    storage_options = settings.storage_options
 
     # Initialize Redis Client using the factory
     redis_client = create_redis_client(settings)
@@ -123,6 +123,7 @@ class ChEMBLActivityPipelineFactory:
         settings: Settings,
         logger: structlog.BoundLogger,
         resume: bool = False,
+        limit: int | None = None,
         checkpoint: CheckpointPort | None = None,
         quarantine: QuarantinePort | None = None,
         lock: LockPort | None = None,
@@ -134,6 +135,7 @@ class ChEMBLActivityPipelineFactory:
             settings: Application settings object
             logger: Structured logger
             resume: Resume from checkpoint if available
+            limit: Maximum number of records to process
             checkpoint: Injected checkpoint service (optional)
             quarantine: Injected quarantine service (optional)
             lock: Injected lock service (optional)
@@ -147,7 +149,7 @@ class ChEMBLActivityPipelineFactory:
         # Config shortcuts
         aws_config = settings.aws
         s3_config = settings.s3
-        storage_options = settings.get_storage_options()
+        storage_options = settings.storage_options
 
         # Data source (ChEMBL)
         bucket = TokenBucket(rate=10.0, capacity=20)
@@ -208,4 +210,5 @@ class ChEMBLActivityPipelineFactory:
             logger=logger,
             metrics=metrics,
             resume=resume,
+            limit=limit,
         )
