@@ -228,7 +228,7 @@ def docker_ip():
 
 
 @pytest.fixture(scope="session")
-def docker_services(docker_ip):
+def docker_services(docker_ip):  # noqa: ARG001
     """Get Docker services, skip if Docker not available."""
     pytest.skip("Docker services not available - docker-compose.yml missing")
 
