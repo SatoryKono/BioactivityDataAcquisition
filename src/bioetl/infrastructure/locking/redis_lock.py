@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
     from bioetl.domain.types import RunID
 
-
 # Lua script for atomic release (only if owner matches)
 RELEASE_SCRIPT = """
 if redis.call("get", KEYS[1]) == ARGV[1] then
@@ -117,9 +116,7 @@ class RedisDistributedLock:
             if await self.redis_client.exists(exclusive_key):
                 return False
 
-        return await self.redis_client.set(
-            redis_key, owner_id, nx=True, ex=ttl
-        )
+        return await self.redis_client.set(redis_key, owner_id, nx=True, ex=ttl)
 
     async def _wait_for_lock(
         self, key: str, owner_id: str, ttl: int, timeout: int, exclusive: bool
@@ -154,9 +151,7 @@ class RedisDistributedLock:
         if not wait:
             return False
 
-        if await self._wait_for_lock(
-            key, owner_str, ttl, wait_timeout, exclusive
-        ):
+        if await self._wait_for_lock(key, owner_str, ttl, wait_timeout, exclusive):
             return True
 
         current_owner = await self.get_owner(key, exclusive)
@@ -234,3 +229,13 @@ class RedisDistributedLock:
         if isinstance(owner, bytes):
             return owner.decode("utf-8")
         return owner
+
+    async def aclose(self) -> None:
+        """Close the Redis connection.
+
+        Implements the aclose() method required by LockPort protocol.
+        """
+        if hasattr(self.redis_client, "aclose"):
+            await self.redis_client.aclose()
+        elif hasattr(self.redis_client, "close"):
+            await self.redis_client.close()

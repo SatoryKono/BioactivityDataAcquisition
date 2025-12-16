@@ -10,7 +10,10 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.orchestrator import PipelineOrchestrator
-from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
+from bioetl.application.core.pipeline_config import (
+    PipelineConfig,
+    PipelineRuntimeConfig,
+)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
