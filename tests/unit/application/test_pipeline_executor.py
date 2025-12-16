@@ -46,9 +46,10 @@ def mock_base_pipeline():
     # Mock context with a logger that has .bind() method
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
+    from uuid import uuid4
+
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import RunID
-    from uuid import uuid4
     pipeline.context = PipelineContext(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,

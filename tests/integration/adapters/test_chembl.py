@@ -60,10 +60,10 @@ class TestChemblAdapter:
             async for record in adapter.fetch("activity", limit=5):
                 records.append(record)
 
-            assert len(records) >= 0
+            assert len(records) > 0
             # ChEMBL activity records should have these fields
             for record in records:
-                assert "activity_id" in record or "molecule_chembl_id" in record
+                assert "activity_id" in record
 
     @pytest.mark.vcr
     @pytest.mark.asyncio
