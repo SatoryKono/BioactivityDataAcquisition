@@ -16,11 +16,11 @@ Architecture:
 """
 
 import json
+from collections.abc import Iterator
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Iterator
-from uuid import UUID
+from typing import Any
 
 import zstandard as zstd
 

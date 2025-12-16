@@ -6,12 +6,9 @@ To record new cassettes: pytest --vcr-record=new_episodes
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
-
-if TYPE_CHECKING:
-    from bioetl.domain.types import RunID
 
 
 @pytest.mark.integration
@@ -131,7 +128,7 @@ class TestChemblAdapterUnit:
             ENTITY_MAPPING,
         )
 
-        for entity, resource in ENTITY_MAPPING.items():
+        for _entity, resource in ENTITY_MAPPING.items():
             expected_url = f"{CHEMBL_API_BASE}/{resource}.json"
             # Verify mapping exists
             assert resource in expected_url

@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 
-
 # Infrastructure/I/O libraries that should NOT be in the domain layer
 INFRASTRUCTURE_IMPORTS = {
     "httpx",
@@ -46,7 +45,7 @@ def _check_imports_in_file(file_path: Path, disallowed: set[str]) -> list[str]:
         List of error messages for any disallowed imports found
     """
     errors = []
-    with open(file_path, encoding="utf-8") as f:
+    with file_path.open(encoding="utf-8") as f:
         content = f.read()
 
     for lib in disallowed:
@@ -158,7 +157,7 @@ def test_ports_defined_in_domain_layer(src_dir: Path) -> None:
     ports_file = src_dir / "bioetl" / "domain" / "ports.py"
     assert ports_file.exists(), "Domain ports file (domain/ports.py) not found"
 
-    with open(ports_file, encoding="utf-8") as f:
+    with ports_file.open(encoding="utf-8") as f:
         content = f.read()
 
     # Verify Protocol is used for port definitions
@@ -178,7 +177,7 @@ def test_infrastructure_imports_domain_ports(src_dir: Path) -> None:
     for py_file in adapters_path.rglob("*.py"):
         if py_file.name == "__init__.py":
             continue
-        with open(py_file, encoding="utf-8") as f:
+        with py_file.open(encoding="utf-8") as f:
             content = f.read()
         if "bioetl.domain" in content:
             found_domain_import = True

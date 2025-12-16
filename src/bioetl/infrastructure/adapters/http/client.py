@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import random
+from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -105,11 +106,11 @@ class UnifiedHTTPClient:
         ...     response = await client.get("https://api.example.com/data")
     """
 
-    rate_limiter: "TokenBucket"
+    rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     retry_config: RetryConfig = field(default_factory=RetryConfig)
     timeout: float = 30.0
-    run_id: "RunID | None" = None
+    run_id: RunID | None = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
 
@@ -154,10 +155,8 @@ class UnifiedHTTPClient:
         if response:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
-                try:
+                with suppress(ValueError):
                     delay = float(retry_after)
-                except ValueError:
-                    pass  # Use default delay
         await asyncio.sleep(delay)
 
     async def _request_with_retry(
@@ -177,10 +176,12 @@ class UnifiedHTTPClient:
                     client.request, method, url, **kwargs
                 )
 
-                if _is_retryable_status(response.status_code):
-                    if attempt < self.retry_config.max_attempts - 1:
-                        await self._handle_retry_delay(attempt, response)
-                        continue
+                if (
+                    _is_retryable_status(response.status_code)
+                    and attempt < self.retry_config.max_attempts - 1
+                ):
+                    await self._handle_retry_delay(attempt, response)
+                    continue
 
                 response.raise_for_status()
                 return response

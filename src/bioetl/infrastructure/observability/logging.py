@@ -18,7 +18,7 @@ Requirements:
 import json
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import UUID
@@ -32,7 +32,7 @@ class LogRecord(BaseModel):
     See RULES.md §3.2.1 for complete specification.
     """
 
-    ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    ts: datetime = Field(default_factory=lambda: datetime.now(UTC))
     level: str  # INFO, WARNING, ERROR, CRITICAL
     run_id: UUID  # Correlation ID (MUST)
     pipeline: str  # Pipeline name (MUST)

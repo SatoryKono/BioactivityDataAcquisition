@@ -57,9 +57,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_open_circuit_blocks_calls(self) -> None:
         """Open circuit should block subsequent calls."""
-        cb = CircuitBreaker(
-            provider="test", failure_threshold=2, recovery_timeout=10
-        )
+        cb = CircuitBreaker(provider="test", failure_threshold=2, recovery_timeout=10)
 
         async def fail() -> None:
             msg = "error"

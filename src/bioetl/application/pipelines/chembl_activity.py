@@ -185,7 +185,7 @@ class ChEMBLActivityPipeline(BasePipeline):
             return Watermark(str(activity_id))
 
         # Fallback to timestamp
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
 
         return Watermark(datetime.now(UTC))
 

@@ -1,23 +1,29 @@
 import re
 import sys
 from pathlib import Path
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
 
-# VCR.py imports (for API recording)
-try:
-    import vcr
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from vcr.request import Request
 
-    VCR_AVAILABLE = True
+    from bioetl.domain.types import RunID
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+# VCR.py imports (for API recording)
+try:
+    VCR_AVAILABLE = bool(__import__("vcr"))
 except ImportError:
     VCR_AVAILABLE = False
 
 
-def pytest_configure(config: Any) -> None:
+def pytest_configure() -> None:
     """Add src directory to Python path and mock missing modules."""
     project_root = Path(__file__).parent.parent
     src_dir = project_root / "src"
@@ -25,13 +31,13 @@ def pytest_configure(config: Any) -> None:
 
     # Mock pubchempy if not installed
     try:
-        import pubchempy
+        __import__("pubchempy")
     except ImportError:
         sys.modules["pubchempy"] = MagicMock()
 
     # Mock botocore if not installed
     try:
-        import botocore
+        __import__("botocore")
     except ImportError:
         mock_botocore = MagicMock()
 
@@ -46,7 +52,7 @@ def pytest_configure(config: Any) -> None:
 
     # Mock boto3 if not installed
     try:
-        import boto3
+        __import__("boto3")
     except ImportError:
         sys.modules["boto3"] = MagicMock()
 
@@ -83,7 +89,7 @@ def requirements_md(project_root: Path) -> Path:
 # =============================================================================
 
 
-def _sanitize_request(request: Any) -> Any:
+def _sanitize_request(request: "Request") -> "Request":
     """Sanitize secrets from recorded requests.
 
     Removes:
@@ -145,7 +151,7 @@ def _sanitize_response(response: dict[str, Any]) -> dict[str, Any]:
 def vcr_cassette_dir(request: pytest.FixtureRequest, project_root: Path) -> Path:
     """Return the directory for VCR cassettes based on test module."""
     # Create cassette directory based on test module path
-    test_file = Path(request.fspath)  # type: ignore[arg-type]
+    test_file = Path(request.fspath)
     relative_path = test_file.relative_to(project_root / "tests")
     cassette_dir = project_root / "tests" / "fixtures" / "vcr" / relative_path.parent
     cassette_dir.mkdir(parents=True, exist_ok=True)
@@ -186,7 +192,7 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
 
 
 @pytest.fixture
-def run_id() -> Any:
+def run_id() -> "RunID":
     """Generate a unique run ID for tests."""
     from bioetl.domain.types import RunID
 
@@ -194,7 +200,7 @@ def run_id() -> Any:
 
 
 @pytest.fixture
-def fake_redis() -> Generator[Any, None, None]:
+def fake_redis() -> "Generator[Any, None, None]":
     """Create a fake Redis instance for testing.
 
     Uses fakeredis library for in-memory Redis simulation.
@@ -210,7 +216,7 @@ def fake_redis() -> Generator[Any, None, None]:
 
 
 @pytest.fixture
-def token_bucket() -> Any:
+def token_bucket() -> "TokenBucket":
     """Create a TokenBucket for testing."""
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
@@ -218,7 +224,7 @@ def token_bucket() -> Any:
 
 
 @pytest.fixture
-def circuit_breaker() -> Any:
+def circuit_breaker() -> "CircuitBreaker":
     """Create a CircuitBreaker for testing."""
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
