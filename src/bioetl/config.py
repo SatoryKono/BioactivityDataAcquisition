@@ -13,6 +13,7 @@ Usage:
 
 from __future__ import annotations
 
+import warnings
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
@@ -95,6 +96,9 @@ class PipelineSettings(BaseSettings):
     max_concurrent_batches: int = Field(default=4, ge=1, le=16)
     """Maximum concurrent batch writes."""
 
+    heartbeat_interval: int = Field(default=20, ge=5, le=60)
+    """Lock heartbeat interval in seconds (default: 20s, range: 5-60s)."""
+
 
 class Settings(BaseSettings):
     """Main application settings."""
@@ -159,11 +163,25 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# Compatibility aliases
-AWSConfig = AWSSettings
-S3Config = S3Settings
-RedisConfig = RedisSettings
-PipelineConfig = PipelineSettings
+# Deprecated aliases - use *Settings classes instead
+_DEPRECATED_ALIASES: dict[str, type] = {
+    "AWSConfig": AWSSettings,
+    "S3Config": S3Settings,
+    "RedisConfig": RedisSettings,
+    "PipelineConfig": PipelineSettings,
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Provide deprecation warnings for old config class names."""
+    if name in _DEPRECATED_ALIASES:
+        warnings.warn(
+            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name].__name__} instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _DEPRECATED_ALIASES[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def get_aws_config() -> AWSSettings:

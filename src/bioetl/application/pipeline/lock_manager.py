@@ -4,6 +4,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipeline.orchestrator import PipelineShutdownError
+from bioetl.config import get_settings
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
@@ -44,8 +45,10 @@ class LockManager:
         self.pipeline.logger.info("Lock released", extra={"stage": "cleanup"})
 
     async def _heartbeat_loop(self, lock_key: str, exclusive: bool) -> None:
+        settings = get_settings()
+        interval = settings.pipeline.heartbeat_interval
         while not self.pipeline.orchestrator.shutdown_requested:
-            await asyncio.sleep(20)
+            await asyncio.sleep(interval)
             success = await self.pipeline.lock.heartbeat(
                 lock_key, self.pipeline.run_id, exclusive=exclusive
             )
