@@ -24,6 +24,8 @@ from typing import Any
 from bioetl.infrastructure.storage.exceptions import (
     MergeConflictError,
     SchemaValidationError,
+)
+from bioetl.infrastructure.storage.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
 )
 from deltalake import DeltaTable, write_deltalake
