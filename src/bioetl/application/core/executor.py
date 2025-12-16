@@ -95,7 +95,9 @@ class PipelineExecutor:
         """
         self.pipeline = pipeline
         self.batch_size = batch_size or self.DEFAULT_BATCH_SIZE
-        self.checkpoint_interval = checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
+        self.checkpoint_interval = (
+            checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
+        )
 
         # New: explicit shutdown signal (falls back to orchestrator check)
         self._shutdown_signal = _shutdown_signal
@@ -157,7 +159,9 @@ class PipelineExecutor:
         executor._transform = transform_callback
         executor._gold_filter = gold_filter_callback
         executor.batch_size = batch_size or cls.DEFAULT_BATCH_SIZE
-        executor.checkpoint_interval = checkpoint_interval or cls.DEFAULT_CHECKPOINT_INTERVAL
+        executor.checkpoint_interval = (
+            checkpoint_interval or cls.DEFAULT_CHECKPOINT_INTERVAL
+        )
         executor.pipeline = None  # Not used in new mode
 
         # Counters
@@ -251,7 +255,9 @@ class PipelineExecutor:
             if self._is_shutdown_requested():
                 # Save checkpoint before shutdown
                 if last_record:
-                    await checkpoint_mgr.save_checkpoint(last_record, self.records_fetched)
+                    await checkpoint_mgr.save_checkpoint(
+                        last_record, self.records_fetched
+                    )
                 raise PipelineShutdownError("Shutdown during extraction")
 
             batch.append(raw_record)

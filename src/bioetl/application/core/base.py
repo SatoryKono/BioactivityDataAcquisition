@@ -2,8 +2,10 @@
 
 Coordinates the pipeline components.
 
-NOTE: This module is being refactored per ADR-0005.
-The legacy constructor is deprecated. Use `from_config()` instead.
+Refactored per ADR-0005:
+- BasePipeline.__init__ accepts exactly 3 params: config, runtime, services
+- No self-reference in Executor/Orchestrator
+- Legacy API available via from_params() with DeprecationWarning
 """
 
 from __future__ import annotations
@@ -15,12 +17,10 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.orchestrator import PipelineOrchestrator
 from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports import (
@@ -40,6 +40,9 @@ from bioetl.domain.types import (
 if TYPE_CHECKING:
     import structlog
 
+    from bioetl.application.core.executor import PipelineExecutor
+    from bioetl.application.core.orchestrator import PipelineOrchestrator
+
 
 class BasePipeline(ABC):
     """Base class for ETL pipelines.
@@ -47,36 +50,245 @@ class BasePipeline(ABC):
     This class coordinates pipeline execution by managing configuration,
     services, and decomposed components (orchestrator, executor, etc.).
 
-    There are two ways to create a pipeline:
+    Constructor accepts exactly 3 parameters per ADR-0005:
+    - config: Static pipeline configuration
+    - runtime: Runtime execution parameters
+    - services: I/O port dependencies
 
-    1. **New API (Recommended)**: Use `from_config()` classmethod
-       ```python
-       pipeline = MyPipeline.from_config(
-           config=PipelineConfig(...),
-           runtime=PipelineRuntimeConfig(...),
-           services=PipelineServices(...),
-       )
-       ```
-
-    2. **Legacy API (Deprecated)**: Direct constructor with 13 parameters
-       ```python
-       pipeline = MyPipeline(
-           pipeline_name="...",
-           provider="...",
-           # ... 10 more parameters
-       )
-       ```
-
-    The legacy API will be removed after 2025-01-15.
+    Example:
+        >>> config = PipelineConfig(...)
+        >>> runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+        >>> services = PipelineServices(...)
+        >>> pipeline = ChEMBLActivityPipeline(config, runtime, services)
+        >>> await pipeline.run()
     """
-
-    # Store decomposed config for new API
-    _config: PipelineConfig | None = None
-    _runtime: PipelineRuntimeConfig | None = None
-    _services: PipelineServices | None = None
 
     def __init__(
         self,
+        config: PipelineConfig,
+        runtime: PipelineRuntimeConfig,
+        services: PipelineServices,
+    ) -> None:
+        """Initialize pipeline with decomposed configuration.
+
+        Args:
+            config: Static pipeline configuration (immutable).
+            runtime: Runtime execution parameters.
+            services: Injected I/O port dependencies.
+        """
+        # Store decomposed config
+        self._config = config
+        self._runtime = runtime
+        self._services = services
+
+        # Generate run ID
+        self._run_id = RunID(uuid4())
+
+        # Bind logger with run context
+        self._logger = services.logger.bind(
+            run_id=str(self._run_id),
+            pipeline=config.pipeline_name,
+        )
+
+        # Create context
+        self._context = PipelineContext(
+            run_id=self._run_id,
+            run_type=runtime.run_type,
+            logger=self._logger,
+        )
+
+        # Shared shutdown signal (no circular deps)
+        self._shutdown_signal = ShutdownSignal()
+
+        # Initialize components (lazy - created on first access)
+        self._orchestrator: PipelineOrchestrator | None = None
+        self._executor: PipelineExecutor | None = None
+        self._checkpoint_manager: CheckpointManager | None = None
+        self._quarantine_manager: QuarantineManager | None = None
+        self._error_classifier: ErrorClassifier | None = None
+
+    # --- Properties for accessing config (read-only) ---
+
+    @property
+    def config(self) -> PipelineConfig:
+        """Access pipeline configuration."""
+        return self._config
+
+    @property
+    def runtime(self) -> PipelineRuntimeConfig:
+        """Access runtime configuration."""
+        return self._runtime
+
+    @property
+    def services(self) -> PipelineServices:
+        """Access injected services."""
+        return self._services
+
+    @property
+    def run_id(self) -> RunID:
+        """Access run ID."""
+        return self._run_id
+
+    @property
+    def context(self) -> PipelineContext:
+        """Access pipeline context."""
+        return self._context
+
+    @property
+    def logger(self) -> "structlog.BoundLogger":
+        """Access bound logger."""
+        return self._logger
+
+    @property
+    def shutdown_signal(self) -> ShutdownSignal:
+        """Access shutdown signal."""
+        return self._shutdown_signal
+
+    # --- Convenience properties (delegate to config) ---
+
+    @property
+    def pipeline_name(self) -> str:
+        """Pipeline name (from config)."""
+        return self._config.pipeline_name
+
+    @property
+    def provider(self) -> str:
+        """Provider name (from config)."""
+        return self._config.provider
+
+    @property
+    def entity_type(self) -> str:
+        """Entity type (from config)."""
+        return self._config.entity_type
+
+    @property
+    def run_type(self) -> RunType:
+        """Run type (from runtime)."""
+        return self._runtime.run_type
+
+    @property
+    def resume(self) -> bool:
+        """Resume flag (from runtime)."""
+        return self._runtime.resume
+
+    @property
+    def limit(self) -> int | None:
+        """Record limit (from runtime)."""
+        return self._runtime.limit
+
+    # --- Convenience properties (delegate to services) ---
+
+    @property
+    def data_source(self) -> DataSourcePort:
+        """Data source port (from services)."""
+        return self._services.data_source
+
+    @property
+    def storage(self) -> StoragePort:
+        """Storage port (from services)."""
+        return self._services.storage
+
+    @property
+    def lock(self) -> LockPort:
+        """Lock port (from services)."""
+        return self._services.lock
+
+    @property
+    def checkpoint(self) -> CheckpointPort:
+        """Checkpoint port (from services)."""
+        return self._services.checkpoint
+
+    @property
+    def quarantine(self) -> QuarantinePort:
+        """Quarantine port (from services)."""
+        return self._services.quarantine
+
+    @property
+    def metrics(self) -> MetricsPort:
+        """Metrics port (from services)."""
+        return self._services.metrics
+
+    # --- Lazy-initialized components ---
+
+    @property
+    def error_classifier(self) -> ErrorClassifier:
+        """Get error classifier (lazy init)."""
+        if self._error_classifier is None:
+            self._error_classifier = ErrorClassifier()
+        return self._error_classifier
+
+    @property
+    def checkpoint_manager(self) -> CheckpointManager:
+        """Get checkpoint manager (lazy init)."""
+        if self._checkpoint_manager is None:
+            self._checkpoint_manager = CheckpointManager(
+                checkpoint_port=self._services.checkpoint,
+                logger=self._logger,
+                pipeline_name=self._config.pipeline_name,
+                run_id=self._run_id,
+                resume=self._runtime.resume,
+                watermark_extractor=lambda record: self.extract_watermark(
+                    self._context, record
+                ),
+            )
+        return self._checkpoint_manager
+
+    @property
+    def quarantine_manager(self) -> QuarantineManager:
+        """Get quarantine manager (lazy init)."""
+        if self._quarantine_manager is None:
+            self._quarantine_manager = QuarantineManager(
+                quarantine_port=self._services.quarantine,
+                pipeline_name=self._config.pipeline_name,
+            )
+        return self._quarantine_manager
+
+    @property
+    def executor(self) -> "PipelineExecutor":
+        """Get executor (lazy init, no self-reference)."""
+        if self._executor is None:
+            from bioetl.application.core.executor import PipelineExecutor
+
+            self._executor = PipelineExecutor.from_components(
+                data_source=self._services.data_source,
+                storage=self._services.storage,
+                checkpoint_manager=self.checkpoint_manager,
+                quarantine_manager=self.quarantine_manager,
+                error_classifier=self.error_classifier,
+                context=self._context,
+                shutdown_signal=self._shutdown_signal,
+                provider=self._config.provider,
+                entity_type=self._config.entity_type,
+                transform_callback=self.transform_bronze_to_silver,
+                gold_filter_callback=self.should_write_gold,
+                batch_size=self._config.batch_size,
+                checkpoint_interval=self._config.checkpoint_interval,
+            )
+        return self._executor
+
+    @property
+    def orchestrator(self) -> "PipelineOrchestrator":
+        """Get orchestrator (lazy init, no self-reference)."""
+        if self._orchestrator is None:
+            from bioetl.application.core.orchestrator import PipelineOrchestrator
+
+            self._orchestrator = PipelineOrchestrator.from_components(
+                config=self._config,
+                runtime=self._runtime,
+                services=self._services,
+                context=self._context,
+                executor=self.executor,
+                checkpoint_manager=self.checkpoint_manager,
+                shutdown_signal=self._shutdown_signal,
+                logger=self._logger,
+            )
+        return self._orchestrator
+
+    # --- Legacy API (deprecated) ---
+
+    @classmethod
+    def from_params(
+        cls,
         pipeline_name: str,
         provider: str,
         entity_type: str,
@@ -90,155 +302,44 @@ class BasePipeline(ABC):
         metrics: MetricsPort,
         resume: bool = False,
         limit: int | None = None,
-        *,
-        # Hidden params for new API (set by from_config)
-        _config: PipelineConfig | None = None,
-        _runtime: PipelineRuntimeConfig | None = None,
-        _services: PipelineServices | None = None,
-        _skip_deprecation_warning: bool = False,
-    ) -> None:
-        """Initialize pipeline with legacy parameters.
-
-        DEPRECATED: Use `from_config()` classmethod instead.
-        This constructor will be removed after 2025-01-15.
-        """
-        # Emit deprecation warning unless called from from_config()
-        if not _skip_deprecation_warning:
-            warnings.warn(
-                "Direct BasePipeline constructor is deprecated. "
-                "Use MyPipeline.from_config(config, runtime, services) instead. "
-                "Will be removed after 2025-01-15.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        # Store decomposed structures if provided
-        self._config = _config
-        self._runtime = _runtime
-        self._services = _services
-
-        # Legacy attributes (for backward compatibility)
-        self.pipeline_name = pipeline_name
-        self.provider = provider
-        self.entity_type = entity_type
-        self.run_type = run_type
-        self.data_source = data_source
-        self.storage = storage
-        self.lock = lock
-        self.checkpoint = checkpoint
-        self.quarantine = quarantine
-        self.metrics = metrics
-        self.resume = resume
-        self.limit = limit
-        self.run_id = RunID(uuid4())
-        self.logger = logger.bind(run_id=str(self.run_id))
-
-        self.context = PipelineContext(
-            run_id=self.run_id,
-            run_type=self.run_type,
-            logger=self.logger,
-        )
-
-        # Decomposed components
-        self.orchestrator = PipelineOrchestrator(self)
-        self.executor = PipelineExecutor(self)
-        self.lock_manager = LockManager.from_pipeline(self)
-        self.checkpoint_manager = CheckpointManager(
-            checkpoint_port=self.checkpoint,
-            logger=self.logger,
-            pipeline_name=self.pipeline_name,
-            run_id=self.run_id,
-            resume=self.resume,
-            watermark_extractor=lambda record: self.extract_watermark(
-                self.context, record
-            ),
-        )
-        self.error_classifier = ErrorClassifier()
-        self.quarantine_manager = QuarantineManager(
-            quarantine_port=self.quarantine, pipeline_name=self.pipeline_name
-        )
-
-    @classmethod
-    def from_config(
-        cls,
-        config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
-        services: PipelineServices,
+        primary_keys: list[str] | None = None,
+        silver_table: str | None = None,
     ) -> "BasePipeline":
-        """Create pipeline from decomposed configuration.
+        """Create pipeline from individual parameters (DEPRECATED).
 
-        This is the recommended way to create pipelines.
-
-        Args:
-            config: Static pipeline configuration (immutable).
-            runtime: Runtime execution parameters.
-            services: Injected I/O port dependencies.
-
-        Returns:
-            Configured pipeline instance ready for execution.
-
-        Example:
-            >>> config = PipelineConfig(
-            ...     pipeline_name="chembl_activity",
-            ...     provider="chembl",
-            ...     entity_type="activity",
-            ...     primary_keys=["activity_id"],
-            ...     silver_table="chembl_activity",
-            ... )
-            >>> runtime = PipelineRuntimeConfig(
-            ...     run_type=RunType.INCREMENTAL,
-            ...     resume=True,
-            ... )
-            >>> services = PipelineServices(
-            ...     data_source=chembl_client,
-            ...     storage=delta_storage,
-            ...     lock=redis_lock,
-            ...     checkpoint=s3_checkpoint,
-            ...     quarantine=unified_quarantine,
-            ...     metrics=prometheus_metrics,
-            ...     logger=logger,
-            ... )
-            >>> pipeline = ChEMBLActivityPipeline.from_config(
-            ...     config, runtime, services
-            ... )
+        Use __init__(config, runtime, services) instead.
+        Will be removed after 2025-01-15.
         """
-        return cls(
-            pipeline_name=config.pipeline_name,
-            provider=config.provider,
-            entity_type=config.entity_type,
-            run_type=runtime.run_type,
-            data_source=services.data_source,
-            storage=services.storage,
-            lock=services.lock,
-            checkpoint=services.checkpoint,
-            quarantine=services.quarantine,
-            logger=services.logger,
-            metrics=services.metrics,
-            resume=runtime.resume,
-            limit=runtime.limit,
-            # Pass decomposed structures for future use
-            _config=config,
-            _runtime=runtime,
-            _services=services,
-            _skip_deprecation_warning=True,
+        warnings.warn(
+            "BasePipeline.from_params() is deprecated. "
+            "Use BasePipeline(config, runtime, services) instead. "
+            "Will be removed after 2025-01-15.",
+            DeprecationWarning,
+            stacklevel=2,
         )
 
-    # --- Properties for accessing decomposed config (optional) ---
-
-    @property
-    def config(self) -> PipelineConfig | None:
-        """Access pipeline configuration (None if created via legacy API)."""
-        return self._config
-
-    @property
-    def runtime_config(self) -> PipelineRuntimeConfig | None:
-        """Access runtime configuration (None if created via legacy API)."""
-        return self._runtime
-
-    @property
-    def services(self) -> PipelineServices | None:
-        """Access injected services (None if created via legacy API)."""
-        return self._services
+        config = PipelineConfig(
+            pipeline_name=pipeline_name,
+            provider=provider,
+            entity_type=entity_type,
+            primary_keys=primary_keys or [f"{entity_type}_id"],
+            silver_table=silver_table or f"{provider}.{entity_type}",
+        )
+        runtime = PipelineRuntimeConfig(
+            run_type=run_type,
+            resume=resume,
+            limit=limit,
+        )
+        services = PipelineServices(
+            data_source=data_source,
+            storage=storage,
+            lock=lock,
+            checkpoint=checkpoint,
+            quarantine=quarantine,
+            metrics=metrics,
+            logger=logger,
+        )
+        return cls(config, runtime, services)
 
     # --- Pipeline execution ---
 
@@ -267,13 +368,6 @@ class BasePipeline(ABC):
         """Determine if a Silver record should be written to Gold.
 
         Override in subclass for custom Gold layer filtering logic.
-
-        Args:
-            _context: Pipeline execution context.
-            _record: Transformed Silver record.
-
-        Returns:
-            True if record should be written to Gold layer.
         """
         return True
 
@@ -283,13 +377,6 @@ class BasePipeline(ABC):
         """Extract watermark value from a record.
 
         Override in subclass for custom watermark extraction logic.
-
-        Args:
-            _context: Pipeline execution context.
-            _record: Record to extract watermark from.
-
-        Returns:
-            Watermark value for checkpoint tracking.
         """
         return Watermark(datetime.now(UTC))
 
@@ -304,5 +391,4 @@ async def run_pipeline_flow(
         logger.exception("Pipeline execution failed", error=str(e))
         raise
     finally:
-        if pipeline.services:
-            await pipeline.services.aclose()
+        await pipeline.services.aclose()
