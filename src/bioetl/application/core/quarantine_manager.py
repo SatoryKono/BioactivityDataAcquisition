@@ -3,13 +3,10 @@
 Refactored per ADR-0005 to accept explicit dependencies instead of full pipeline.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from bioetl.domain.ports import QuarantinePort
 from bioetl.domain.types import BatchID, ErrorType
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
 
 
 class QuarantineManager:
@@ -32,17 +29,6 @@ class QuarantineManager:
         """
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
-
-    @classmethod
-    def from_pipeline(cls, pipeline: "BasePipeline") -> "QuarantineManager":
-        """Create QuarantineManager from pipeline (legacy compatibility).
-
-        DEPRECATED: Use direct constructor instead.
-        """
-        return cls(
-            quarantine_port=pipeline.quarantine,
-            pipeline_name=pipeline.pipeline_name,
-        )
 
     async def quarantine_record(
         self,

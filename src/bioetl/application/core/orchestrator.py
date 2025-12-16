@@ -15,7 +15,10 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
+from bioetl.application.core.pipeline_config import (
+    PipelineConfig,
+    PipelineRuntimeConfig,
+)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.config import get_settings
@@ -137,9 +140,7 @@ class PipelineOrchestrator:
             )
 
             watermark = await self._checkpoint_manager.load_checkpoint()
-            await self._executor.execute(
-                watermark=watermark, limit=self._runtime.limit
-            )
+            await self._executor.execute(watermark=watermark, limit=self._runtime.limit)
             await self._checkpoint_manager.delete_checkpoint()
 
             self._logger.info(
