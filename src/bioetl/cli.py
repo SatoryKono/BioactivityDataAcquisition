@@ -95,9 +95,7 @@ async def _run_chembl_activity(
         run_type: Type of run
         resume: Resume from checkpoint
     """
-    from bioetl.application.pipelines.chembl_activity import (
-        ChEMBLActivityPipelineFactory,
-    )
+    from bioetl.bootstrap import ChEMBLActivityPipelineFactory
 
     # Initialize dependencies via Composition Root
     container = bootstrap()
@@ -105,8 +103,7 @@ async def _run_chembl_activity(
     # Load configuration from centralized config
     settings = get_settings()
 
-    factory = ChEMBLActivityPipelineFactory()
-    pipeline = await factory.create(
+    pipeline = await ChEMBLActivityPipelineFactory.create(
         run_type=run_type,
         settings=settings,
         resume=resume,
