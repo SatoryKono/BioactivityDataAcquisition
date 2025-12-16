@@ -181,7 +181,7 @@ def __getattr__(name: str) -> Any:
     """Provide deprecation warnings for old config class names."""
     if name in _DEPRECATED_ALIASES:
         warnings.warn(
-            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name].__name__} instead",
+            f"{name} is deprecated, use {_DEPRECATED_ALIENCES[name].__name__} instead",
             DeprecationWarning,
             stacklevel=2,
         )
