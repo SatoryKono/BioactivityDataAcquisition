@@ -244,14 +244,14 @@ def test_env_var_access_only_in_config(src_dir: Path):
     """os.getenv and os.environ must only be used in config.py.
 
     All environment variable access must be centralized in
-    src/bioetl/infrastructure/config.py to ensure:
+    src/bioetl/config.py to ensure:
     - Single source of truth for configuration
     - Easier testing (mock config functions, not env vars)
     - Clear documentation of required environment variables
 
     Runs: Static analysis of source files
     """
-    config_file = src_dir / "bioetl" / "infrastructure" / "config.py"
+    config_file = src_dir / "bioetl" / "config.py"
     disallowed_patterns = [
         r"\bos\.getenv\s*\(",
         r"\bos\.environ\s*\[",
@@ -281,7 +281,7 @@ def test_env_var_access_only_in_config(src_dir: Path):
     assert not violations, (
         "Environment variable access must be centralized in config.py.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Refactor to use functions from bioetl.infrastructure.config instead:\n"
+                                                                            "Refactor to use functions from bioetl.config instead:\n"
                                                                             "  - get_aws_config()\n"
                                                                             "  - get_s3_config()\n"
                                                                             "  - get_redis_config()\n"
@@ -300,7 +300,7 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
     The CLI should work through:
     - Abstractions (domain ports)
     - Bootstrap/factory patterns
-    - Centralized config (bioetl.infrastructure.config is allowed)
+    - Centralized config (bioetl.config is allowed)
 
     This ensures the CLI remains decoupled from concrete implementations
     and can be easily tested with mocks.
@@ -346,7 +346,7 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
                                                                             "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
                                                                             "  - Bootstrap functions that wire up dependencies\n"
                                                                             "  - Domain ports for type hints\n"
-                                                                            "  - bioetl.infrastructure.config for configuration (allowed)"
+                                                                            "  - bioetl.config for configuration (allowed)"
     )
 
 
@@ -368,7 +368,7 @@ def test_config_parameters_have_defaults_or_validation(src_dir: Path):
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.infrastructure.config import (
+    from bioetl.config import (
         get_aws_config,
         get_redis_config,
         get_s3_config,
@@ -409,7 +409,7 @@ def test_config_dataclasses_are_frozen(src_dir: Path):
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.infrastructure.config import AWSConfig, RedisConfig, S3Config
+    from bioetl.config import AWSConfig, RedisConfig, S3Config
 
     config_classes = [AWSConfig, S3Config, RedisConfig]
 
