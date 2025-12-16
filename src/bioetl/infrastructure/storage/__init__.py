@@ -3,16 +3,16 @@
 Implements RULES.md §2.1 - Medallion Architecture.
 """
 
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-from bioetl.infrastructure.storage.exceptions import (
+from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
-    SchemaValidationError,
+    SchemaViolationError,
     StorageError,
     TableNotFoundError,
     UploadError,
 )
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 __all__ = [
@@ -21,7 +21,7 @@ __all__ = [
     "DeltaWriter",
     "GoldWriter",
     "MergeConflictError",
-    "SchemaValidationError",
+    "SchemaViolationError",
     "StorageError",
     "TableNotFoundError",
     "UploadError",

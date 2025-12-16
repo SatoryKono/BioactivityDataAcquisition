@@ -13,14 +13,12 @@ from pyarrow import ArrowTypeError
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-from bioetl.infrastructure.storage.exceptions import (
+from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
-    SchemaValidationError,
-    UploadError,
-)
-from bioetl.infrastructure.storage.exceptions import (
+    SchemaViolationError,
     TableNotFoundError as CustomTableNotFoundError,
+    UploadError,
 )
 
 
@@ -109,17 +107,17 @@ class TestDeltaWriterExceptions:
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
-    async def test_write_silver_raises_schema_validation_error_on_merge(
+    async def test_write_silver_raises_schema_violation_error_on_merge(
         self, mock_delta_table, valid_record
     ):
-        """Test that SchemaValidationError is raised on merge."""
+        """Test that SchemaViolationError is raised on merge."""
         mock_delta_table.side_effect = SchemaMismatchError("Invalid schema")
         writer = DeltaWriter(base_path="/fake/path")
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
-        with pytest.raises(SchemaValidationError):
+        with pytest.raises(SchemaViolationError):
             await writer.write_silver("test.table", [valid_record], ["id"])
 
     @pytest.mark.asyncio
@@ -153,14 +151,14 @@ class TestDeltaWriterExceptions:
     async def test_write_silver_raises_schema_error_on_create(
         self, _mock_delta_table, mock_write_deltalake, valid_record
     ):
-        """Test SchemaValidationError on table creation."""
+        """Test SchemaViolationError on table creation."""
         mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
         writer = DeltaWriter(base_path="/fake/path")
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
-        with pytest.raises(SchemaValidationError):
+        with pytest.raises(SchemaViolationError):
             await writer.write_silver("test.table", [valid_record], ["id"])
 
     @pytest.mark.asyncio
