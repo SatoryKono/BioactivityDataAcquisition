@@ -132,7 +132,6 @@ class TestRedisDistributedLock:
         assert success is False
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(reason="exclusive parameter not yet implemented")
     async def test_exclusive_lock(
         self, redis_client_fixture, request, run_id: RunID
     ) -> None:
@@ -159,7 +158,6 @@ class TestRedisDistributedLock:
         assert regular_acquired is True
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(reason="exclusive parameter not yet implemented")
     async def test_exclusive_fails_if_regular_exists(
         self, redis_client_fixture, request, run_id: RunID
     ) -> None:
