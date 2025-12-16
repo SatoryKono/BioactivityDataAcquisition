@@ -12,14 +12,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import redis.asyncio as aioredis
-
 from bioetl.config import Settings, get_settings
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from bioetl.infrastructure.factories.clients import (
+    create_redis_client,
+    get_aws_credentials,
+)
 from bioetl.infrastructure.factories.storage import StorageAdapter
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
@@ -32,6 +34,7 @@ from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 if TYPE_CHECKING:
     from uuid import UUID
 
+    import redis.asyncio as aioredis
     import structlog
 
     from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
@@ -70,30 +73,17 @@ def bootstrap() -> ServiceContainer:
     settings = get_settings()
     aws_config = settings.aws
     s3_config = settings.s3
-    redis_config = settings.redis
     storage_options = settings.get_storage_options()
 
-    # Initialize Redis Client (Infrastructure)
-    redis_client = aioredis.Redis(
-        host=redis_config.host,
-        port=redis_config.port,
-        password=(
-            redis_config.password.get_secret_value() if redis_config.password else None
-        ),
-        db=redis_config.db,
-        decode_responses=True,  # Ensure we get strings
-    )
+    # Initialize Redis Client using the factory
+    redis_client = create_redis_client(settings)
 
     # Initialize Adapters
-    secret_key = (
-        aws_config.secret_access_key.get_secret_value()
-        if aws_config.secret_access_key
-        else None
-    )
+    access_key, secret_key = get_aws_credentials(settings)
     checkpoint = S3Checkpoint(
         bucket=s3_config.bucket_checkpoints,
         endpoint_url=aws_config.endpoint_url,
-        access_key=aws_config.access_key_id,
+        access_key=access_key,
         secret_key=secret_key,
     )
 
@@ -156,7 +146,6 @@ class ChEMBLActivityPipelineFactory:
         # Config shortcuts
         aws_config = settings.aws
         s3_config = settings.s3
-        redis_config = settings.redis
         storage_options = settings.get_storage_options()
 
         # Data source (ChEMBL)
@@ -166,15 +155,11 @@ class ChEMBLActivityPipelineFactory:
         data_source = ChemblAdapter(http_client=http_client)
 
         # Storage
-        secret_key = (
-            aws_config.secret_access_key.get_secret_value()
-            if aws_config.secret_access_key
-            else None
-        )
+        access_key, secret_key = get_aws_credentials(settings)
         bronze_writer = BronzeWriter(
             bucket=s3_config.bucket_bronze,
             endpoint_url=aws_config.endpoint_url,
-            access_key=aws_config.access_key_id,
+            access_key=access_key,
             secret_key=secret_key,
         )
         silver_writer = DeltaWriter(
@@ -189,16 +174,8 @@ class ChEMBLActivityPipelineFactory:
 
         # Lock (Redis)
         if lock is None:
-            redis_client = aioredis.Redis(
-                host=redis_config.host,
-                port=redis_config.port,
-                password=(
-                    redis_config.password.get_secret_value()
-                    if redis_config.password
-                    else None
-                ),
-                db=redis_config.db,
-            )
+            # Use the factory to create the client
+            redis_client = create_redis_client(settings)
             lock = RedisDistributedLock(redis_client=redis_client)
 
         # Checkpoint (S3)
@@ -206,7 +183,7 @@ class ChEMBLActivityPipelineFactory:
             checkpoint = S3Checkpoint(
                 bucket=s3_config.bucket_checkpoints,
                 endpoint_url=aws_config.endpoint_url,
-                access_key=aws_config.access_key_id,
+                access_key=access_key,
                 secret_key=secret_key,
             )
 
