@@ -132,7 +132,7 @@ class TestRedisDistributedLock:
         assert success is False
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(reason="acquire_exclusive not yet implemented")
+    @pytest.mark.xfail(reason="exclusive parameter not yet implemented in acquire()")
     async def test_exclusive_lock(
         self, redis_client_fixture, request, run_id: RunID
     ) -> None:
@@ -144,15 +144,15 @@ class TestRedisDistributedLock:
         other_owner = RunID(uuid4())
 
         # Acquire exclusive lock
-        acquired = await lock.acquire_exclusive("test_key", run_id)
+        acquired = await lock.acquire("test_key", run_id, exclusive=True)
         assert acquired is True
 
-        # Regular lock should fail (exclusive key is locked)
-        regular_acquired = await lock.acquire("test_key:exclusive", other_owner)
+        # Regular lock should fail
+        regular_acquired = await lock.acquire("test_key", other_owner)
         assert regular_acquired is False
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(reason="acquire_exclusive not yet implemented")
+    @pytest.mark.xfail(reason="exclusive parameter not yet implemented in acquire()")
     async def test_exclusive_fails_if_regular_exists(
         self, redis_client_fixture, request, run_id: RunID
     ) -> None:
@@ -167,7 +167,7 @@ class TestRedisDistributedLock:
         await lock.acquire("test_key", run_id)
 
         # Exclusive lock should fail
-        exclusive_acquired = await lock.acquire_exclusive("test_key", other_owner)
+        exclusive_acquired = await lock.acquire("test_key", other_owner, exclusive=True)
         assert exclusive_acquired is False
 
     @pytest.mark.asyncio

@@ -43,7 +43,9 @@ class TestChemblAdapter:
 
     @pytest.mark.vcr
     @pytest.mark.asyncio
-    async def test_fetch_activities(self, chembl_client: Any, vcr_cassette: str) -> None:
+    async def test_fetch_activities(
+        self, chembl_client: Any, vcr_cassette: str
+    ) -> None:
         """Test fetching activities from ChEMBL.
 
         This test requires a VCR cassette.
@@ -87,7 +89,9 @@ class TestChemblAdapter:
 
     @pytest.mark.vcr
     @pytest.mark.asyncio
-    async def test_get_entity_count(self, chembl_client: Any, vcr_cassette: str) -> None:
+    async def test_get_entity_count(
+        self, chembl_client: Any, vcr_cassette: str
+    ) -> None:
         """Test getting entity count from ChEMBL.
 
         This test requires a VCR cassette.

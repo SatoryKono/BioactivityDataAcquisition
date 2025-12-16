@@ -1,4 +1,5 @@
 """Integration tests for the ChEMBL Activity pipeline."""
+
 from unittest.mock import AsyncMock
 
 import pytest
