@@ -22,7 +22,14 @@ from datetime import datetime
 from typing import Any
 
 from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import TableNotFoundError
+from deltalake.exceptions import DeltaError, SchemaError, TableNotFoundError
+from pyarrow import ArrowTypeError
+
+from bioetl.infrastructure.storage.exceptions import (
+    MergeConflictError,
+    SchemaValidationError,
+    TableNotFoundError as CustomTableNotFoundError,
+)
 
 
 class DeltaWriter:
@@ -100,7 +107,10 @@ class DeltaWriter:
             partition_cols: Optional partition columns (e.g., ['year', 'month'])
 
         Raises:
-            ValueError: If records list is empty or missing required metadata
+            ValueError: If records list is empty or missing required metadata.
+            SchemaValidationError: If record schema does not match table schema.
+            MergeConflictError: If merge operation fails due to concurrent writes.
+            CustomTableNotFoundError: If the underlying table is not found.
         """
         if not records:
             raise ValueError("No records to write")
@@ -124,15 +134,27 @@ class DeltaWriter:
             # Perform merge/upsert
             self._merge_records(dt, records, primary_keys)
 
-        except TableNotFoundError:
+        except TableNotFoundError as e:
             # Table doesn't exist, create it
-            write_deltalake(
-                table_or_uri=table_path,
-                data=records,
-                mode="append",
-                partition_by=partition_cols,
-                storage_options=self.storage_options,
-            )
+            try:
+                write_deltalake(
+                    table_or_uri=table_path,
+                    data=records,
+                    mode="append",
+                    partition_by=partition_cols,
+                    storage_options=self.storage_options,
+                )
+            except (SchemaError, ArrowTypeError) as schema_exc:
+                raise SchemaValidationError(
+                    table_name, errors=[str(schema_exc)]
+                ) from schema_exc
+        except (SchemaError, ArrowTypeError) as e:
+            raise SchemaValidationError(table_name, errors=[str(e)]) from e
+        except DeltaError as e:
+            # Catch potential merge conflicts
+            if "Merge-conflict" in str(e):
+                raise MergeConflictError(table_name, conflicts=1) from e
+            raise
 
     def _merge_records(
         self,
@@ -220,9 +242,11 @@ class DeltaWriter:
             >>> print(f"Deleted {len(deleted)} files")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = DeltaTable(table_path, storage_options=self.storage_options)
-
-        return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
+        try:
+            dt = DeltaTable(table_path, storage_options=self.storage_options)
+            return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
+        except TableNotFoundError as e:
+            raise CustomTableNotFoundError(table_path) from e
 
     def optimize(
         self,
@@ -246,9 +270,11 @@ class DeltaWriter:
             >>> print(f"Compacted {metrics['numFilesRemoved']} files")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = DeltaTable(table_path, storage_options=self.storage_options)
-
-        return dt.optimize.compact(partition_filters=partition_filters)
+        try:
+            dt = DeltaTable(table_path, storage_options=self.storage_options)
+            return dt.optimize.compact(partition_filters=partition_filters)
+        except TableNotFoundError as e:
+            raise CustomTableNotFoundError(table_path) from e
 
     def get_table_info(self, table_name: str) -> dict[str, Any]:
         """Get table metadata and statistics.
@@ -269,14 +295,16 @@ class DeltaWriter:
             >>> print(f"Table version: {info['version']}")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = DeltaTable(table_path, storage_options=self.storage_options)
-
-        return {
-            "version": dt.version(),
-            "num_files": len(dt.files()),
-            "schema": dt.schema().to_pyarrow(),
-            "metadata": dt.metadata(),
-        }
+        try:
+            dt = DeltaTable(table_path, storage_options=self.storage_options)
+            return {
+                "version": dt.version(),
+                "num_files": len(dt.files()),
+                "schema": dt.schema().to_pyarrow(),
+                "metadata": dt.metadata(),
+            }
+        except TableNotFoundError as e:
+            raise CustomTableNotFoundError(table_path) from e
 
     def time_travel(
         self,
@@ -310,21 +338,24 @@ class DeltaWriter:
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
-        if version is not None:
-            return DeltaTable(
-                table_path,
-                version=version,
-                storage_options=self.storage_options,
-            )
-        elif timestamp is not None:
-            # Convert datetime to ISO format string
-            timestamp_str = timestamp.isoformat()
-            return DeltaTable(
-                table_path,
-                storage_options={
-                    **self.storage_options,
-                    "time_travel": timestamp_str,
-                },
-            )
-        else:
-            raise ValueError("Must specify either version or timestamp")
+        try:
+            if version is not None:
+                return DeltaTable(
+                    table_path,
+                    version=version,
+                    storage_options=self.storage_options,
+                )
+            elif timestamp is not None:
+                # Convert datetime to ISO format string
+                timestamp_str = timestamp.isoformat()
+                return DeltaTable(
+                    table_path,
+                    storage_options={
+                        **self.storage_options,
+                        "time_travel": timestamp_str,
+                    },
+                )
+            else:
+                raise ValueError("Must specify either version or timestamp")
+        except TableNotFoundError as e:
+            raise CustomTableNotFoundError(table_path) from e
