@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
 import httpx
 
+from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
 
 if TYPE_CHECKING:
@@ -26,15 +27,6 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-class CircuitBreakerOpenError(Exception):
-    """Raised when circuit breaker is open and blocking requests."""
-
-    def __init__(self, provider: str, retry_after: float) -> None:
-        self.provider = provider
-        self.retry_after = retry_after
-        super().__init__(
-            f"Circuit breaker for '{provider}' is OPEN. Retry after {retry_after:.1f}s"
-        )
 
 
 @dataclass
