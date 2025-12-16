@@ -96,6 +96,21 @@ class PipelineSettings(BaseSettings):
     """Maximum concurrent batch writes."""
 
 
+class ProviderSettings(BaseSettings):
+    """Base settings for data providers."""
+    model_config = SettingsConfigDict(frozen=True)
+
+    rate_limit: float = Field(default=1.0, gt=0)
+    burst_capacity: int = Field(default=1, ge=1)
+    timeout: float = Field(default=30.0, gt=0)
+
+
+class ChEMBLSettings(ProviderSettings):
+    """ChEMBL provider configuration."""
+    rate_limit: float = Field(default=10.0)  # Replaces hardcoded 10.0
+    burst_capacity: int = Field(default=20)  # Replaces hardcoded 20
+
+
 class Settings(BaseSettings):
     """Main application settings."""
 
@@ -114,6 +129,7 @@ class Settings(BaseSettings):
     s3: S3Settings = Field(default_factory=S3Settings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
+    chembl: ChEMBLSettings = Field(default_factory=ChEMBLSettings)
 
     @model_validator(mode="after")
     def check_s3_endpoint_for_dev(self) -> Settings:
