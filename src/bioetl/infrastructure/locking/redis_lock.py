@@ -119,8 +119,10 @@ class RedisDistributedLock:
                 HEARTBEAT_SCRIPT
             )
 
-    def _make_key(self, key: str) -> str:
+    def _make_key(self, key: str, exclusive: bool = False) -> str:
         """Create full Redis key with prefix."""
+        if exclusive:
+            return f"{self.prefix}:{key}:exclusive"
         return f"{self.prefix}:{key}"
 
     def _owner_to_str(self, owner_id: RunID | UUID) -> str:
@@ -152,18 +154,15 @@ class RedisDistributedLock:
         Raises:
             LockAcquisitionError: If wait=True and timeout exceeded
         """
-        # Delegate to exclusive method if requested
-        if exclusive:
-            return await self.acquire_exclusive(key, owner_id, ttl, wait, wait_timeout)
-
-        redis_key = self._make_key(key)
+        redis_key = self._make_key(key, exclusive)
         owner_str = self._owner_to_str(owner_id)
         ttl = ttl or self.default_ttl
 
-        # Check if exclusive lock exists (blocks regular locks)
-        exclusive_key = f"{key}:exclusive"
-        if await self.is_locked(exclusive_key) and not wait:
-            return False
+        # If exclusive, check for regular lock
+        if exclusive:
+            regular_key = self._make_key(key)
+            if await self.redis_client.exists(regular_key):
+                return False
 
         # Try to acquire lock with SETNX + EXPIRE
         acquired = await self.redis_client.set(
@@ -187,9 +186,10 @@ class RedisDistributedLock:
             await asyncio.sleep(poll_interval)
             elapsed += poll_interval
 
-            # Check exclusive lock again
-            if await self.is_locked(exclusive_key):
-                continue
+            if exclusive:
+                regular_key = self._make_key(key)
+                if await self.redis_client.exists(regular_key):
+                    continue
 
             acquired = await self.redis_client.set(
                 redis_key,
@@ -202,7 +202,7 @@ class RedisDistributedLock:
                 return True
 
         # Timeout exceeded
-        current_owner = await self.get_owner(key)
+        current_owner = await self.get_owner(key, exclusive)
         raise LockAcquisitionError(key, current_owner)
 
     async def release(
@@ -218,12 +218,8 @@ class RedisDistributedLock:
         Returns:
             True if released, False if not owned
         """
-        # Delegate to exclusive release if requested
-        if exclusive:
-            return await self.release_exclusive(key, owner_id)
-
         await self._ensure_scripts()
-        redis_key = self._make_key(key)
+        redis_key = self._make_key(key, exclusive)
         owner_str = self._owner_to_str(owner_id)
 
         result = await self.redis_client.evalsha(
@@ -251,13 +247,7 @@ class RedisDistributedLock:
         before attempting any writes!
         """
         await self._ensure_scripts()
-
-        # Use exclusive key if exclusive lock
-        if exclusive:
-            redis_key = self._make_key(f"{key}:exclusive")
-        else:
-            redis_key = self._make_key(key)
-
+        redis_key = self._make_key(key, exclusive)
         owner_str = self._owner_to_str(owner_id)
 
         result = await self.redis_client.evalsha(
@@ -274,6 +264,7 @@ class RedisDistributedLock:
         key: str,
         owner_id: RunID | UUID,
         on_lost: asyncio.Event | None = None,
+        exclusive: bool = False,
     ) -> None:
         """Run continuous heartbeat loop.
 
@@ -284,6 +275,7 @@ class RedisDistributedLock:
             key: Lock key
             owner_id: Run ID of lock owner
             on_lost: Optional event to set when lock is lost
+            exclusive: Whether this is an exclusive lock
 
         Raises:
             LockLostError: If lock is lost during execution
@@ -297,70 +289,28 @@ class RedisDistributedLock:
             # Check max duration
             if total_duration >= self.max_duration:
                 # Force release after max duration
-                await self.release(key, owner_id)
+                await self.release(key, owner_id, exclusive)
                 if on_lost:
                     on_lost.set()
                 raise LockLostError(key, self._owner_to_str(owner_id))
 
-            success = await self.heartbeat(key, owner_id)
+            success = await self.heartbeat(key, owner_id, exclusive)
             if not success:
                 if on_lost:
                     on_lost.set()
                 raise LockLostError(key, self._owner_to_str(owner_id))
 
-    async def is_locked(self, key: str) -> bool:
+    async def is_locked(self, key: str, exclusive: bool = False) -> bool:
         """Check if lock exists."""
-        redis_key = self._make_key(key)
+        redis_key = self._make_key(key, exclusive)
         return await self.redis_client.exists(redis_key) > 0
 
-    async def get_owner(self, key: str) -> str | None:
+    async def get_owner(self, key: str, exclusive: bool = False) -> str | None:
         """Get current lock owner ID."""
-        redis_key = self._make_key(key)
+        redis_key = self._make_key(key, exclusive)
         owner = await self.redis_client.get(redis_key)
         if owner is None:
             return None
         if isinstance(owner, bytes):
             return owner.decode("utf-8")
         return str(owner)
-
-    async def acquire_exclusive(
-        self,
-        key: str,
-        owner_id: RunID | UUID,
-        ttl: int | None = None,
-        wait: bool = False,
-        wait_timeout: int = 300,
-    ) -> bool:
-        """Acquire exclusive lock (for backfill/rebuild).
-
-        This creates a lock with ':exclusive' suffix that blocks
-        both regular and exclusive locks.
-
-        Args:
-            key: Base lock key
-            owner_id: Run ID
-            ttl: TTL in seconds
-            wait: Wait for lock
-            wait_timeout: Wait timeout
-
-        Returns:
-            True if both locks acquired
-        """
-        exclusive_key = f"{key}:exclusive"
-
-        # First, try to acquire exclusive lock
-        if not await self.acquire(exclusive_key, owner_id, ttl, wait, wait_timeout):
-            return False
-
-        # Then, ensure no regular lock exists
-        if await self.is_locked(key):
-            # Release exclusive and fail
-            await self.release(exclusive_key, owner_id)
-            return False
-
-        return True
-
-    async def release_exclusive(self, key: str, owner_id: RunID | UUID) -> bool:
-        """Release exclusive lock."""
-        exclusive_key = f"{key}:exclusive"
-        return await self.release(exclusive_key, owner_id)
