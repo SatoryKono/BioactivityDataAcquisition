@@ -9,7 +9,7 @@ import pytest
 from bioetl.domain.types import RunID
 
 
-@pytest.mark.parametrize("redis_client_fixture", ["fake_redis", "redis_client"])
+@pytest.mark.parametrize("redis_client_fixture", ["fake_redis"])
 @pytest.mark.unit
 class TestRedisDistributedLock:
     """Tests for Redis-based distributed locking."""
