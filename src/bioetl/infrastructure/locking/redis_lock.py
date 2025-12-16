@@ -129,6 +129,38 @@ class RedisDistributedLock:
         """Convert owner ID to string."""
         return str(owner_id)
 
+    async def _try_acquire(
+        self, key: str, owner_id: str, ttl: int, exclusive: bool
+    ) -> bool:
+        """Attempt to acquire the lock once."""
+        redis_key = self._make_key(key, exclusive)
+        if exclusive:
+            regular_key = self._make_key(key)
+            if await self.redis_client.exists(regular_key):
+                return False
+        else:
+            exclusive_key = self._make_key(key, exclusive=True)
+            if await self.redis_client.exists(exclusive_key):
+                return False
+
+        return await self.redis_client.set(
+            redis_key, owner_id, nx=True, ex=ttl
+        )
+
+    async def _wait_for_lock(
+        self, key: str, owner_id: str, ttl: int, timeout: int, exclusive: bool
+    ) -> bool:
+        """Wait for the lock to become available."""
+        elapsed = 0.0
+        poll_interval = 0.5
+
+        while elapsed < timeout:
+            await asyncio.sleep(poll_interval)
+            elapsed += poll_interval
+            if await self._try_acquire(key, owner_id, ttl, exclusive):
+                return True
+        return False
+
     async def acquire(
         self,
         key: str,
@@ -138,104 +170,37 @@ class RedisDistributedLock:
         wait_timeout: int = 300,
         exclusive: bool = False,
     ) -> bool:
-        """Acquire distributed lock.
-
-        Args:
-            key: Lock key (e.g., 'chembl_activity')
-            owner_id: Run ID of lock owner (fencing token)
-            ttl: Time-to-live in seconds (default: default_ttl)
-            wait: Wait for lock if unavailable
-            wait_timeout: Maximum wait time in seconds (default: 300)
-            exclusive: Acquire exclusive lock for backfill/rebuild
-
-        Returns:
-            True if lock acquired, False otherwise
-
-        Raises:
-            LockAcquisitionError: If wait=True and timeout exceeded
-        """
-        redis_key = self._make_key(key, exclusive)
+        """Acquire distributed lock."""
         owner_str = self._owner_to_str(owner_id)
         ttl = ttl or self.default_ttl
 
-        # If exclusive, check for regular lock
-        if exclusive:
-            regular_key = self._make_key(key)
-            if await self.redis_client.exists(regular_key):
-                return False
-        else:
-            # If regular, check for exclusive lock
-            exclusive_key = self._make_key(key, exclusive=True)
-            if await self.redis_client.exists(exclusive_key):
-                return False
-
-        # Try to acquire lock with SETNX + EXPIRE
-        acquired = await self.redis_client.set(
-            redis_key,
-            owner_str,
-            nx=True,  # Only set if not exists
-            ex=ttl,  # Set expiration
-        )
-
-        if acquired:
+        if await self._try_acquire(key, owner_str, ttl, exclusive):
             return True
 
         if not wait:
             return False
 
-        # Wait mode: poll until lock is available or timeout
-        elapsed = 0.0
-        poll_interval = 0.5  # 500ms polling
+        if await self._wait_for_lock(
+            key, owner_str, ttl, wait_timeout, exclusive
+        ):
+            return True
 
-        while elapsed < wait_timeout:
-            await asyncio.sleep(poll_interval)
-            elapsed += poll_interval
-
-            if exclusive:
-                regular_key = self._make_key(key)
-                if await self.redis_client.exists(regular_key):
-                    continue
-
-            acquired = await self.redis_client.set(
-                redis_key,
-                owner_str,
-                nx=True,
-                ex=ttl,
-            )
-
-            if acquired:
-                return True
-
-        # Timeout exceeded
         current_owner = await self.get_owner(key, exclusive)
         raise LockAcquisitionError(key, current_owner)
 
     async def release(
         self, key: str, owner_id: RunID | UUID, exclusive: bool = False
     ) -> bool:
-        """Release lock (only if owner matches).
-
-        Args:
-            key: Lock key
-            owner_id: Run ID of lock owner (must match)
-            exclusive: Whether this was an exclusive lock
-
-        Returns:
-            True if released, False if not owned
-        """
+        """Release lock (only if owner matches)."""
         await self._ensure_scripts()
         redis_key = self._make_key(key, exclusive)
         owner_str = self._owner_to_str(owner_id)
 
         result = await self.redis_client.evalsha(
-            self._release_script,  # type: ignore[arg-type]
-            1,  # Number of keys
-            redis_key,
-            owner_str,
+            self._release_script, 1, redis_key, owner_str
         )
 
         if exclusive and bool(result):
-            # Also release the regular lock
             regular_key = self._make_key(key)
             await self.redis_client.delete(regular_key)
 
@@ -244,26 +209,14 @@ class RedisDistributedLock:
     async def heartbeat(
         self, key: str, owner_id: RunID | UUID, exclusive: bool = False
     ) -> bool:
-        """Refresh lock TTL (keep-alive).
-
-        Args:
-            key: Lock key
-            owner_id: Run ID of lock owner (must match)
-            exclusive: Whether this is an exclusive lock
-
-        Returns:
-            True if heartbeat successful, False if lock lost
-
-        CRITICAL: If this returns False, worker MUST terminate immediately
-        before attempting any writes!
-        """
+        """Refresh lock TTL (keep-alive)."""
         await self._ensure_scripts()
         redis_key = self._make_key(key, exclusive)
         owner_str = self._owner_to_str(owner_id)
 
         result = await self.redis_client.evalsha(
-            self._heartbeat_script,  # type: ignore[arg-type]
-            1,  # Number of keys
+            self._heartbeat_script,
+            1,
             redis_key,
             owner_str,
             str(self.default_ttl),
@@ -277,36 +230,20 @@ class RedisDistributedLock:
         on_lost: asyncio.Event | None = None,
         exclusive: bool = False,
     ) -> None:
-        """Run continuous heartbeat loop.
-
-        This coroutine should be run as a background task.
-        It will raise LockLostError if the lock is lost.
-
-        Args:
-            key: Lock key
-            owner_id: Run ID of lock owner
-            on_lost: Optional event to set when lock is lost
-            exclusive: Whether this is an exclusive lock
-
-        Raises:
-            LockLostError: If lock is lost during execution
-        """
+        """Run continuous heartbeat loop."""
         total_duration = 0
 
         while True:
             await asyncio.sleep(self.heartbeat_interval)
             total_duration += self.heartbeat_interval
 
-            # Check max duration
             if total_duration >= self.max_duration:
-                # Force release after max duration
                 await self.release(key, owner_id, exclusive)
                 if on_lost:
                     on_lost.set()
                 raise LockLostError(key, self._owner_to_str(owner_id))
 
-            success = await self.heartbeat(key, owner_id, exclusive)
-            if not success:
+            if not await self.heartbeat(key, owner_id, exclusive):
                 if on_lost:
                     on_lost.set()
                 raise LockLostError(key, self._owner_to_str(owner_id))
@@ -320,8 +257,6 @@ class RedisDistributedLock:
         """Get current lock owner ID."""
         redis_key = self._make_key(key, exclusive)
         owner = await self.redis_client.get(redis_key)
-        if owner is None:
-            return None
         if isinstance(owner, bytes):
             return owner.decode("utf-8")
-        return str(owner)
+        return owner
