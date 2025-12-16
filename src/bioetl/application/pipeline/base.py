@@ -33,8 +33,6 @@ from bioetl.domain.types import (
 if TYPE_CHECKING:
     import structlog
 
-    from bioetl.domain.ports import MetricsPort
-
 
 class BasePipeline(ABC):
     """Base class for ETL pipelines."""
@@ -51,9 +49,8 @@ class BasePipeline(ABC):
         checkpoint: CheckpointPort,
         quarantine: QuarantinePort,
         logger: "structlog.BoundLogger",
-        metrics: "MetricsPort | None" = None,
-        resume: bool = False,
         metrics: MetricsPort | None = None,
+        resume: bool = False,
     ) -> None:
         self.pipeline_name = pipeline_name
         self.provider = provider
@@ -64,9 +61,8 @@ class BasePipeline(ABC):
         self.lock = lock
         self.checkpoint = checkpoint
         self.quarantine = quarantine
-        self.metrics = metrics
-        self.resume = resume
         self.metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        self.resume = resume
         self.run_id = RunID(uuid4())
         self.logger = logger.bind(run_id=str(self.run_id))
 

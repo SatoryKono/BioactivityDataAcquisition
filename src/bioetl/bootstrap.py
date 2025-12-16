@@ -39,12 +39,7 @@ if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-    from bioetl.domain.ports import (
-        CheckpointPort,
-        LockPort,
-        MetricsPort,
-        QuarantinePort,
-    )
+    from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
     from bioetl.domain.types import RunType
 
 
@@ -131,7 +126,6 @@ class ChEMBLActivityPipelineFactory:
         checkpoint: CheckpointPort | None = None,
         quarantine: QuarantinePort | None = None,
         lock: LockPort | None = None,
-        metrics: MetricsPort | None = None,
     ) -> ChEMBLActivityPipeline:
         """Create configured ChEMBL Activity pipeline.
 
@@ -143,7 +137,6 @@ class ChEMBLActivityPipelineFactory:
             checkpoint: Injected checkpoint service (optional)
             quarantine: Injected quarantine service (optional)
             lock: Injected lock service (optional)
-            metrics: Injected metrics service (optional)
 
         Returns:
             Configured pipeline instance
@@ -203,8 +196,7 @@ class ChEMBLActivityPipelineFactory:
             )
 
         # Metrics
-        if metrics is None:
-            metrics = PrometheusMetrics()
+        metrics = PrometheusMetrics()
 
         return ChEMBLActivityPipeline(
             run_type=run_type,
@@ -214,6 +206,6 @@ class ChEMBLActivityPipelineFactory:
             checkpoint=checkpoint,
             quarantine=quarantine,
             logger=logger,
-            resume=resume,
             metrics=metrics,
+            resume=resume,
         )
