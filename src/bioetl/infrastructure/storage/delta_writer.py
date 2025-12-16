@@ -29,7 +29,7 @@ from bioetl.infrastructure.storage.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
 )
 from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import DeltaError, TableNotFoundError
+from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
 
@@ -149,7 +149,7 @@ class DeltaWriter:
                 raise SchemaValidationError(
                     table_name, errors=[str(schema_exc)]
                 ) from schema_exc
-        except ArrowTypeError as e:
+        except (ArrowTypeError, SchemaMismatchError) as e:
             raise SchemaValidationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
             # Catch potential merge conflicts
