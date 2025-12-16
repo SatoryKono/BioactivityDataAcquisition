@@ -45,7 +45,7 @@ class TestUnifiedQuarantine:
         )
 
         mock_deltalake.assert_called_once()
-        args, kwargs = mock_deltalake.call_args
+        _args, kwargs = mock_deltalake.call_args
         assert kwargs["mode"] == "append"
         # Data is passed as a list of dicts
         data = kwargs["data"]
@@ -74,7 +74,7 @@ class TestUnifiedQuarantine:
         )
 
         mock_deltalake.assert_called_once()
-        args, kwargs = mock_deltalake.call_args
+        _args, kwargs = mock_deltalake.call_args
         data = kwargs["data"]
         record = data[0]
         # Payload should be truncated to MAX_PAYLOAD_SIZE (64KB)
