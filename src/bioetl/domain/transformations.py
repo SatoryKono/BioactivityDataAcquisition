@@ -72,13 +72,17 @@ def normalize_for_hash(record: dict[str, Any]) -> dict[str, Any]:
     return normalized
 
 
-def _normalize_float(value: float) -> float | None:
+def normalize_float(value: float) -> float | None:
     """Normalize a float value, handling NaN/Inf."""
     # NaN/Inf → null (REQ-ID-004)
     if math.isnan(value) or math.isinf(value):
         return None
     # Round to 10 decimals (REQ-ID-003)
     return round(value, 10)
+
+
+def _normalize_float(value: float) -> float | None:
+    return normalize_float(value)
 
 
 def _normalize_date(value: date) -> str:

@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [project.scripts]
-bioetl = "bioetl.cli:main"
+bioetl = "bioetl.interfaces.cli.main:main"
 
 [project.optional-dependencies]
 dev = [
@@ -99,6 +99,7 @@ markers = [
     "unit: Unit tests (fast, no I/O)",
     "integration: Integration tests (may use I/O)",
     "slow: Slow tests",
+    "e2e: End-to-end tests",
 ]
 asyncio_mode = "auto"
 filterwarnings = [
