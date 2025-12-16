@@ -1,6 +1,6 @@
 """Unified storage adapter for Bronze/Silver/Gold."""
 
-from collections.abc import Iterable
+from collections.abc import Iterator
 from typing import Any
 
 from bioetl.domain.types import BatchID
@@ -19,7 +19,7 @@ class StorageAdapter:
         self,
         bronze_writer: BronzeWriter,
         silver_writer: DeltaWriter,
-        gold_writer: DeltaWriter | GoldWriter,
+        gold_writer: GoldWriter,
     ):
         self.bronze = bronze_writer
         self.silver = silver_writer
@@ -27,7 +27,7 @@ class StorageAdapter:
 
     async def write_bronze(
         self,
-        records: Iterable[bytes],
+        records: Iterator[bytes],
         provider: str,
         entity: str,
         date: Any,

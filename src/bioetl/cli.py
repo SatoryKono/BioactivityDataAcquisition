@@ -17,11 +17,11 @@ import click
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.bootstrap import bootstrap_pipeline
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.orchestration.runner import PipelineRunner
-from bioetl.infrastructure.orchestration.signals import setup_shutdown_handlers
+from bioetl.orchestration.runner import PipelineRunner
+from bioetl.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
-    import structlog
+    pass
 
 
 @click.group()
@@ -90,6 +90,7 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
 # ... (other CLI commands like quarantine, checkpoint remain the same for now)
 # Note: They would also need to be updated to use the new bootstrap/service model
 # if they have complex logic, but for now they are simple and can be addressed later.
+
 
 @cli.group()
 def quarantine() -> None:

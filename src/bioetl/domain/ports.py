@@ -7,7 +7,7 @@ Protocol, allowing for structural subtyping (duck typing) and clear
 separation of concerns between the domain and infrastructure layers.
 """
 
-from collections.abc import AsyncIterator, Iterable
+from collections.abc import AsyncIterator, Iterator
 from typing import Any, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
@@ -38,7 +38,7 @@ class DataSourcePort(Protocol):
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """
-        Fetch records from the data source.
+        Fetch records from the data source (async generator).
 
         Args:
             entity_type: The type of entity to fetch (e.g., 'activity', 'molecule').
@@ -49,7 +49,8 @@ class DataSourcePort(Protocol):
         Yields:
             A dictionary representing a single record from the data source.
         """
-        ...
+        # Async generator stub - yield makes this an async generator, not a coroutine
+        yield {}
 
     async def health_check(self) -> HealthStatus:
         """
@@ -77,7 +78,7 @@ class StoragePort(Protocol):
 
     async def write_bronze(
         self,
-        records: Iterable[bytes],
+        records: Iterator[bytes],
         provider: str,
         entity: str,
         date: Any,

@@ -77,14 +77,12 @@ class ChemblAdapter:
     batch_size: int = 1000
     thread_pool: ThreadPoolExecutor | None = None
 
+    provider_name: str = field(init=False, default="chembl")
+    """Provider identifier (required by DataSourcePort)."""
+
     _consecutive_errors: int = field(init=False, default=0)
     _last_health_check: datetime | None = field(init=False, default=None)
     _cached_health: HealthStatus = field(init=False, default=HealthStatus.HEALTHY)
-
-    @property
-    def provider_name(self) -> str:
-        """Provider identifier."""
-        return "chembl"
 
     def _get_resource_url(self, entity_type: str) -> str:
         """Get ChEMBL API URL for entity type."""

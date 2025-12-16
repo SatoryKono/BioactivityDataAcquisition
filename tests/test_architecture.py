@@ -1,9 +1,7 @@
 import ast
 import inspect
 import re
-import subprocess
 import tomllib
-from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import get_type_hints
 from unittest.mock import patch
@@ -213,11 +211,11 @@ def test_env_var_access_only_in_config(src_dir: Path):
     assert not violations, (
         "Environment variable access must be centralized in config.py.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Refactor to use functions from bioetl.config instead:\n"
-        "  - get_settings().aws\n"
-        "  - get_settings().s3\n"
-        "  - get_settings().redis\n"
-        "  - get_settings().storage_options"
+                                                                            "Refactor to use functions from bioetl.config instead:\n"
+                                                                            "  - get_settings().aws\n"
+                                                                            "  - get_settings().s3\n"
+                                                                            "  - get_settings().redis\n"
+                                                                            "  - get_settings().storage_options"
     )
 
 
@@ -274,11 +272,11 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "CLI must not import directly from infrastructure modules.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Refactor to use:\n"
-        "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
-        "  - Bootstrap functions that wire up dependencies\n"
-        "  - Domain ports for type hints\n"
-        "  - bioetl.config for configuration (allowed)"
+                                                                            "Refactor to use:\n"
+                                                                            "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
+                                                                            "  - Bootstrap functions that wire up dependencies\n"
+                                                                            "  - Domain ports for type hints\n"
+                                                                            "  - bioetl.config for configuration (allowed)"
     )
 
 
@@ -397,10 +395,10 @@ def test_domain_no_asyncio_import(src_dir: Path):
     assert not violations, (
         "Domain layer must not import async runtime libraries.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Use abstract types instead:\n"
-        "  - collections.abc.AsyncIterator (for async generators)\n"
-        "  - typing.Awaitable (for awaitable results)\n"
-        "  - typing.Coroutine (for coroutine type hints)"
+                                                                            "Use abstract types instead:\n"
+                                                                            "  - collections.abc.AsyncIterator (for async generators)\n"
+                                                                            "  - typing.Awaitable (for awaitable results)\n"
+                                                                            "  - typing.Coroutine (for coroutine type hints)"
     )
 
 
@@ -453,10 +451,10 @@ def test_port_async_methods_are_properly_typed():
     assert not violations, (
         "Port async methods must have proper type annotations.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Ensure async methods have:\n"
-        "  - async def with proper return type\n"
-        "  - AsyncIterator[T] for streaming methods\n"
-        "  - Awaitable[T] for single-value async methods"
+                                                                            "Ensure async methods have:\n"
+                                                                            "  - async def with proper return type\n"
+                                                                            "  - AsyncIterator[T] for streaming methods\n"
+                                                                            "  - Awaitable[T] for single-value async methods"
     )
 
 
@@ -494,8 +492,12 @@ def test_io_ports_are_async():
 
             method = getattr(port_class, method_name)
 
-            # Check if it's an async method
-            if not inspect.iscoroutinefunction(method):
+            # Check if it's an async method or async generator
+            is_async = (
+                inspect.iscoroutinefunction(method)
+                or inspect.isasyncgenfunction(method)
+            )
+            if not is_async:
                 violations.append(
                     f"{port_class.__name__}.{method_name}: "
                     "I/O port method should be async"
@@ -504,7 +506,7 @@ def test_io_ports_are_async():
     assert not violations, (
         "I/O ports must have async methods for non-blocking operations.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "All ports performing I/O should use 'async def' for methods."
+                                                                            "All ports performing I/O should use 'async def' for methods."
     )
 
 
