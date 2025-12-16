@@ -11,38 +11,25 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import (
-    CheckpointPort,
-    DataSourcePort,
-    LockPort,
-    MetricsPort,
-    QuarantinePort,
-    StoragePort,
-)
 from bioetl.domain.types import (
     RunID,
-    RunType,
     Watermark,
 )
 
 if TYPE_CHECKING:
     import structlog
-    from bioetl.application.core.executor import PipelineExecutor
 
 
 class BasePipeline(ABC):
     """
-    Base class for ETL pipelines.
-
-    This class is a container for the pipeline's configuration, services,
-    and application-layer components (like the executor). It does not
-    concern itself with how the pipeline is run.
+    Base class for ETL pipelines. A container for configuration and services.
     """
 
     def __init__(
@@ -66,13 +53,10 @@ class BasePipeline(ABC):
         )
         self._shutdown_signal = ShutdownSignal()
 
-        # Lazy-initialized components
         self._executor: PipelineExecutor | None = None
         self._checkpoint_manager: CheckpointManager | None = None
         self._quarantine_manager: QuarantineManager | None = None
         self._error_classifier: ErrorClassifier | None = None
-
-    # --- Properties for accessing config, services, and context ---
 
     @property
     def config(self) -> PipelineConfig:
@@ -101,8 +85,6 @@ class BasePipeline(ABC):
     @property
     def shutdown_signal(self) -> ShutdownSignal:
         return self._shutdown_signal
-
-    # --- Lazy-initialized components ---
 
     @property
     def error_classifier(self) -> ErrorClassifier:
@@ -137,9 +119,7 @@ class BasePipeline(ABC):
     @property
     def executor(self) -> "PipelineExecutor":
         if self._executor is None:
-            from bioetl.application.core.executor import PipelineExecutor
-
-            self._executor = PipelineExecutor.from_components(
+            self._executor = PipelineExecutor(
                 data_source=self._services.data_source,
                 storage=self._services.storage,
                 checkpoint_manager=self.checkpoint_manager,
@@ -155,8 +135,6 @@ class BasePipeline(ABC):
                 checkpoint_interval=self._config.checkpoint_interval,
             )
         return self._executor
-
-    # --- Abstract methods for subclasses ---
 
     @abstractmethod
     async def transform_bronze_to_silver(

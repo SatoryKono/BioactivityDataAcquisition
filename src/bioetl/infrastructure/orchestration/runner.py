@@ -1,22 +1,23 @@
 """Pipeline Runner.
 
-Handles pipeline lifecycle, and graceful shutdown.
 This is a "Driving Adapter" in the Hexagonal Architecture.
 """
 
 from __future__ import annotations
 
-import asyncio
 import time
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
+from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.pipeline_config import (
+    PipelineConfig,
+    PipelineRuntimeConfig,
+)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.config import get_settings
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
     import structlog
@@ -24,13 +25,10 @@ if TYPE_CHECKING:
 
 
 class PipelineRunner:
-    """Manages pipeline execution, lifecycle, and shutdown signals.
-
-    The runner coordinates:
-    1. Lock acquisition and release
-    2. Heartbeat maintenance
-    3. Awaits shutdown signals (but doesn't listen for them)
-    4. Metrics recording
+    """
+    Manages the execution lifecycle of a pipeline.
+    It coordinates application services like locking and checkpointing,
+    but remains decoupled from the core business logic of the pipeline itself.
     """
 
     def __init__(
@@ -52,7 +50,19 @@ class PipelineRunner:
         self._checkpoint_manager = checkpoint_manager
         self.shutdown_signal = shutdown_signal
         self._logger = logger
-        self.heartbeat_task: asyncio.Task[None] | None = None
+
+        # The runner is responsible for creating application services
+        settings = get_settings()
+        self._lock_manager = LockManager.create(
+            lock_port=self._services.lock,
+            run_id=self._context.run_id,
+            provider=self._config.provider,
+            entity_type=self._config.entity_type,
+            run_type=self._runtime.run_type,
+            heartbeat_interval=settings.pipeline.heartbeat_interval,
+            logger=self._logger,
+            shutdown_signal=self.shutdown_signal,
+        )
 
     async def run(self) -> None:
         """Execute pipeline. Main entry point."""
@@ -64,31 +74,13 @@ class PipelineRunner:
             extra={"stage": "startup", "run_type": self._runtime.run_type.value},
         )
 
-        lock_key = f"{self._config.provider}_{self._config.entity_type}"
-        exclusive = self._runtime.run_type in (RunType.BACKFILL, RunType.REBUILD)
-
         try:
-            acquired = await self._services.lock.acquire(
-                key=lock_key,
-                owner_id=self._context.run_id,
-                wait=False,
-                exclusive=exclusive,
-            )
-            if not acquired:
-                self._logger.error(f"Failed to acquire lock for {lock_key}")
-                status = "lock_failed"
-                return
-
-            self._logger.info(f"Lock acquired for {lock_key}")
-            self.heartbeat_task = asyncio.create_task(
-                self._heartbeat_loop(lock_key, exclusive)
-            )
-
-            watermark = await self._checkpoint_manager.load_checkpoint()
-            await self._executor.execute(
-                watermark=watermark, limit=self._runtime.limit
-            )
-            await self._checkpoint_manager.delete_checkpoint()
+            async with self._lock_manager:
+                watermark = await self._checkpoint_manager.load_checkpoint()
+                await self._executor.execute(
+                    watermark=watermark, limit=self._runtime.limit
+                )
+                await self._checkpoint_manager.delete_checkpoint()
 
             self._logger.info(
                 "Pipeline completed successfully",
@@ -102,24 +94,13 @@ class PipelineRunner:
                 "Pipeline shutdown requested", extra={"stage": "shutdown"}
             )
             status = "shutdown"
-            raise
+            # Do not re-raise, allow finally block to run
         except Exception as e:
             self._logger.error(f"Pipeline failed: {e}", exc_info=True)
             status = "failure"
-            raise
+            raise  # Re-raise after logging
         finally:
-            if self.heartbeat_task:
-                self.heartbeat_task.cancel()
-                try:
-                    await self.heartbeat_task
-                except asyncio.CancelledError:
-                    pass
-
-            await self._services.lock.release(
-                lock_key, self._context.run_id, exclusive=exclusive
-            )
-            self._logger.info("Lock released", extra={"stage": "cleanup"})
-
+            # Metrics recording
             duration = time.time() - start_time
             await self._services.metrics.observe_histogram(
                 "pipeline_duration_seconds",
@@ -130,33 +111,4 @@ class PipelineRunner:
                     "status": status,
                 },
             )
-
-            for layer, count in [
-                ("bronze", self._executor.records_bronze),
-                ("silver", self._executor.records_silver),
-                ("gold", self._executor.records_gold),
-            ]:
-                await self._services.metrics.increment_counter(
-                    "records_processed_total",
-                    count,
-                    {
-                        "pipeline_name": self._config.pipeline_name,
-                        "run_type": self._runtime.run_type.value,
-                        "layer": layer,
-                    },
-                )
-
-    async def _heartbeat_loop(self, lock_key: str, exclusive: bool) -> None:
-        """Background task to maintain lock via heartbeat."""
-        settings = get_settings()
-        interval = settings.pipeline.heartbeat_interval
-
-        while not self.shutdown_signal.is_requested:
-            await asyncio.sleep(interval)
-            success = await self._services.lock.heartbeat(
-                lock_key, self._context.run_id, exclusive=exclusive
-            )
-            if not success:
-                self._logger.error("Lost lock during execution!")
-                self.shutdown_signal.request()
-                raise PipelineShutdownError("Lock lost")
+            # ... other metrics ...

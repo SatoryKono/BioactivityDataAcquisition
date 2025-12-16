@@ -96,7 +96,9 @@ class ChEMBLActivityPipelineFactory:
         storage_options = settings.storage_options
         access_key, secret_key = get_aws_credentials(settings)
 
-        http_client = UnifiedHTTPClient(TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl"))
+        http_client = UnifiedHTTPClient(
+            TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
+        )
         data_source = ChemblAdapter(http_client=http_client)
 
         storage = StorageAdapter(
@@ -106,8 +108,14 @@ class ChEMBLActivityPipelineFactory:
                 access_key=access_key,
                 secret_key=secret_key,
             ),
-            DeltaWriter(base_path=f"s3://{s3_config.bucket_silver}", storage_options=storage_options),
-            DeltaWriter(base_path=f"s3://{s3_config.bucket_gold}", storage_options=storage_options),
+            DeltaWriter(
+                base_path=f"s3://{s3_config.bucket_silver}",
+                storage_options=storage_options,
+            ),
+            DeltaWriter(
+                base_path=f"s3://{s3_config.bucket_gold}",
+                storage_options=storage_options,
+            ),
         )
 
         redis_client = create_redis_client(settings)
@@ -122,8 +130,11 @@ class ChEMBLActivityPipelineFactory:
             base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
             storage_options=storage_options,
         )
-        metrics: MetricsPort = PrometheusMetrics() if getattr(settings, "metrics",
-                                                              None) and settings.metrics.enabled else NoOpMetrics()
+        metrics: MetricsPort = (
+            PrometheusMetrics()
+            if getattr(settings, "metrics", None) and settings.metrics.enabled
+            else NoOpMetrics()
+        )
 
         return PipelineServices(
             data_source=data_source,
