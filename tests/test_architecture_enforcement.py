@@ -16,7 +16,6 @@ from typing import Any
 
 import pytest
 
-
 # =============================================================================
 # Архитектурные правила
 # =============================================================================
@@ -50,8 +49,13 @@ ALLOWED_DOMAIN_IMPORTS = {
     "decimal",
     "enum",
     "functools",
+    "hashlib",  # для content hashing (transformations.py)
     "itertools",
+    "json",  # для канонической сериализации (transformations.py)
+    "logging",  # для типов логгера в контексте
+    "math",  # для математических операций (transformations.py)
     "pathlib",
+    "types",  # для typing с GenericAlias (transformations.py)
     "typing",
     "uuid",
     "warnings",
@@ -227,10 +231,10 @@ def test_domain_no_external_frameworks(src_dir: Path):
     assert not violations, (
         "Domain layer must not import external frameworks.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Domain should only use:\n"
-        "  - Standard library\n"
-        "  - Pydantic (for Value Objects)\n"
-        "  - Domain-internal modules"
+                                                                            "Domain should only use:\n"
+                                                                            "  - Standard library\n"
+                                                                            "  - Pydantic (for Value Objects)\n"
+                                                                            "  - Domain-internal modules"
     )
 
 
@@ -266,7 +270,7 @@ def test_domain_no_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "Domain layer must not import from Infrastructure or Application.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Domain should only depend on itself and standard library."
+                                                                            "Domain should only depend on itself and standard library."
     )
 
 
@@ -306,11 +310,9 @@ def test_domain_only_allowed_imports(src_dir: Path):
     if violations:
         pytest.fail(
             "Domain layer imports modules not in allowed list.\n"
-            "Violations found:\n"
-            + "\n".join(f"  - {v}" for v in violations)
-            + "\n\n"
-            f"Allowed imports: {sorted(ALLOWED_DOMAIN_IMPORTS)}\n"
-            "If you need to add a module, update ALLOWED_DOMAIN_IMPORTS in test."
+            "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
+                                                                                f"Allowed imports: {sorted(ALLOWED_DOMAIN_IMPORTS)}\n"
+                                                                                "If you need to add a module, update ALLOWED_DOMAIN_IMPORTS in test."
         )
 
 
@@ -356,10 +358,10 @@ def test_application_no_concrete_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "Application layer must not import concrete Infrastructure implementations.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Application should only depend on:\n"
-        "  - Domain ports (bioetl.domain.ports)\n"
-        "  - Infrastructure factories (bioetl.infrastructure.factories)\n"
-        "  - Infrastructure observability (bioetl.infrastructure.observability)"
+                                                                            "Application should only depend on:\n"
+                                                                            "  - Domain ports (bioetl.domain.ports)\n"
+                                                                            "  - Infrastructure factories (bioetl.infrastructure.factories)\n"
+                                                                            "  - Infrastructure observability (bioetl.infrastructure.observability)"
     )
 
 
@@ -389,10 +391,16 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
             for node in ast.walk(tree):
                 # Определяем блок TYPE_CHECKING
                 if isinstance(node, ast.If):
-                    if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
+                    if (
+                        isinstance(node.test, ast.Name)
+                        and node.test.id == "TYPE_CHECKING"
+                    ):
                         in_type_checking = True
 
-                if isinstance(node, (ast.Import, ast.ImportFrom)) and not in_type_checking:
+                if (
+                    isinstance(node, (ast.Import, ast.ImportFrom))
+                    and not in_type_checking
+                ):
                     if isinstance(node, ast.ImportFrom):
                         module = node.module or ""
                         if module.startswith("bioetl.infrastructure.adapters"):
@@ -410,7 +418,7 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
     assert not violations, (
         "Application must not import directly from infrastructure.adapters.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Use factories or dependency injection instead."
+                                                                            "Use factories or dependency injection instead."
     )
 
 
@@ -452,7 +460,7 @@ def test_no_print_statements(src_dir: Path):
     assert not violations, (
         "Code must not use print() — use logger instead.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Exceptions: cli.py, __main__.py"
+                                                                            "Exceptions: cli.py, __main__.py"
     )
 
 
@@ -516,7 +524,7 @@ def test_infrastructure_no_application_imports(src_dir: Path):
     assert not violations, (
         "Infrastructure must not import from Application layer.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Infrastructure should only depend on Domain (ports, types, exceptions)."
+                                                                            "Infrastructure should only depend on Domain (ports, types, exceptions)."
     )
 
 
