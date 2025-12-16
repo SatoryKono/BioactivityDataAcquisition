@@ -215,6 +215,25 @@ def clear_settings_cache():
 
 
 @pytest.fixture(scope="session")
+def docker_ip():
+    """Get Docker IP address, skip if Docker not available."""
+    try:
+        from pytest_docker.plugin import get_docker_ip
+
+        return get_docker_ip()
+    except ImportError:
+        pytest.skip("pytest-docker not installed, run: pip install pytest-docker")
+    except Exception:
+        pytest.skip("Docker not available")
+
+
+@pytest.fixture(scope="session")
+def docker_services(_docker_ip):
+    """Get Docker services, skip if Docker not available."""
+    pytest.skip("Docker services not available - docker-compose.yml missing")
+
+
+@pytest.fixture(scope="session")
 def minio_service(docker_ip, docker_services):
     """Ensure that MinIO service is up and responsive."""
     port = docker_services.port_for("minio", 9000)
