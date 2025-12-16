@@ -3,7 +3,7 @@
 import pytest
 from click.testing import CliRunner
 
-from bioetl.cli import cli
+from bioetl.interfaces.cli import cli
 
 
 @pytest.fixture

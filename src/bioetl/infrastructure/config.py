@@ -4,7 +4,7 @@ Uses pydantic-settings for type-safe, validated configuration from environment
 variables and YAML files. All settings are loaded once at startup and validated.
 
 Usage:
-    from bioetl.config import get_settings
+    from bioetl.infrastructure.config import get_settings
 
     settings = get_settings()
     print(settings.s3.bucket_bronze)

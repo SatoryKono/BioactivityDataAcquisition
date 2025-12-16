@@ -16,7 +16,7 @@ from bioetl.application.core.pipeline_config import (
 )
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.config import get_settings
+from bioetl.infrastructure.config import get_settings
 from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:
