@@ -170,7 +170,7 @@ class UnifiedQuarantine:
 
         return ContentHash(payload_hash)
 
-    def inspect(
+    async def inspect(
         self,
         pipeline: str,
         limit: int = 100,
