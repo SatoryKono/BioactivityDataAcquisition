@@ -3,7 +3,7 @@
 Handles checkpoint save, load, and delete operations.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from prefect import task
 

@@ -11,9 +11,9 @@ from bioetl.application.pipeline.record_processor import PipelineRecordProcessor
 
 __all__ = [
     "BasePipeline",
-    "PipelineShutdownError",
-    "run_pipeline_flow",
     "PipelineCheckpointManager",
     "PipelineLockManager",
     "PipelineRecordProcessor",
+    "PipelineShutdownError",
+    "run_pipeline_flow",
 ]
