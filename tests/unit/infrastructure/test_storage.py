@@ -7,6 +7,7 @@ from uuid import UUID
 
 import pytest
 import zstandard as zstd
+
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
