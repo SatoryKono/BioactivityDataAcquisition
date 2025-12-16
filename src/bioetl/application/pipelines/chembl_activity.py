@@ -11,6 +11,7 @@ from datetime import UTC
 from typing import Any
 
 from bioetl.application.pipeline.base import BasePipeline
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
 from bioetl.infrastructure.factories.storage import StorageAdapter
@@ -51,11 +52,13 @@ class ChEMBLActivityPipeline(BasePipeline):
 
     async def transform_bronze_to_silver(
         self,
+        _context: PipelineContext,
         record: dict[str, Any],
     ) -> dict[str, Any] | None:
         """Transform raw ChEMBL activity to normalized format.
 
         Args:
+            context: The pipeline context.
             record: Raw activity record from ChEMBL
 
         Returns:
@@ -135,7 +138,9 @@ class ChEMBLActivityPipeline(BasePipeline):
 
         return normalized
 
-    def should_write_gold(self, record: dict[str, Any]) -> bool:
+    def should_write_gold(
+        self, _context: PipelineContext, record: dict[str, Any]
+    ) -> bool:
         """Filter records for Gold layer.
 
         Gold layer criteria:
@@ -146,6 +151,7 @@ class ChEMBLActivityPipeline(BasePipeline):
         - No data validity issues
 
         Args:
+            context: The pipeline context.
             record: Silver record
 
         Returns:
@@ -173,12 +179,15 @@ class ChEMBLActivityPipeline(BasePipeline):
         # Exclude if data validity issues
         return not record.get("data_validity_comment")
 
-    def extract_watermark(self, record: dict[str, Any]) -> Watermark:
+    def extract_watermark(
+        self, _context: PipelineContext, record: dict[str, Any]
+    ) -> Watermark:
         """Extract watermark from record.
 
         Uses activity_id as watermark for incremental loading.
 
         Args:
+            context: The pipeline context.
             record: Activity record
 
         Returns:
