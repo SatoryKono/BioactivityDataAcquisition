@@ -8,7 +8,7 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.executor import GoldFilterCallback, TransformCallback
+from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
