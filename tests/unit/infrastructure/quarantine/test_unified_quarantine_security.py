@@ -60,7 +60,8 @@ def test_update_status_handles_malicious_hash(mock_delta_table):
     # Verify that the predicate is properly escaped
     _args, kwargs = mock_instance.update.call_args
     predicate = kwargs["predicate"]
-    assert f"payload_hash = '{malicious_hash.replace("'", "''")}'" in predicate
+    escaped_hash = malicious_hash.replace("'", "''")
+    assert f"payload_hash = '{escaped_hash}'" in predicate
 
     # Verify that the update value is also escaped
     updates = kwargs["updates"]
