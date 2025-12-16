@@ -6,7 +6,6 @@ to provide a ready-to-use dependency container for the application layer.
 
 from __future__ import annotations
 
-from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
@@ -133,8 +132,8 @@ class ChEMBLActivityPipelineFactory:
             storage_options=storage_options,
         )
         metrics: MetricsPort = (
-            PrometheusMetrics(port=settings.metrics.port)
-            if settings.metrics.enabled
+            PrometheusMetrics()
+            if getattr(settings, "metrics", None) and settings.metrics.enabled
             else NoOpMetrics()
         )
 
@@ -162,14 +161,8 @@ class ChEMBLActivityPipelineFactory:
             settings=settings, logger=logger, **kwargs
         )
 
-        # Inject infrastructure settings into pipeline config
-        config = replace(
-            CHEMBL_ACTIVITY_CONFIG,
-            heartbeat_interval=settings.pipeline.heartbeat_interval,
-        )
-
         return ChEMBLActivityPipeline.create(
             runtime=runtime,
             services=services,
-            config=config,
+            config=CHEMBL_ACTIVITY_CONFIG,
         )
