@@ -8,12 +8,7 @@ from dataclasses import dataclass
 
 import redis.asyncio as aioredis
 
-from bioetl.config import (
-    get_aws_config,
-    get_redis_config,
-    get_s3_config,
-    get_storage_options,
-)
+from bioetl.config import get_settings
 from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
@@ -39,24 +34,34 @@ def bootstrap() -> ServiceContainer:
         ServiceContainer with ready-to-use adapters.
     """
     # Load configuration
-    aws_config = get_aws_config()
-    s3_config = get_s3_config()
-    redis_config = get_redis_config()
-    storage_options = get_storage_options()
+    settings = get_settings()
+    aws_config = settings.aws
+    s3_config = settings.s3
+    redis_config = settings.redis
+    storage_options = settings.get_storage_options()
 
     # Initialize Redis Client (Infrastructure)
     redis_client = aioredis.Redis(
         host=redis_config.host,
         port=redis_config.port,
+        password=(
+            redis_config.password.get_secret_value() if redis_config.password else None
+        ),
+        db=redis_config.db,
         decode_responses=True,  # Ensure we get strings
     )
 
     # Initialize Adapters
+    secret_key = (
+        aws_config.secret_access_key.get_secret_value()
+        if aws_config.secret_access_key
+        else None
+    )
     checkpoint = S3Checkpoint(
         bucket=s3_config.bucket_checkpoints,
         endpoint_url=aws_config.endpoint_url,
         access_key=aws_config.access_key_id,
-        secret_key=aws_config.secret_access_key,
+        secret_key=secret_key,
     )
 
     quarantine = UnifiedQuarantine(
