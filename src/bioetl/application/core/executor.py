@@ -9,9 +9,10 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
+from prefect import task
+
 from bioetl.application.core.orchestrator import PipelineShutdownError
 from bioetl.domain.types import BatchID, Watermark
-from prefect import task
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
