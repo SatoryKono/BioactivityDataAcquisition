@@ -7,9 +7,9 @@ include_external_packages = True
 name = Layer dependencies (Ports & Adapters)
 type = layers
 layers =
-    bioetl.application
-    bioetl.domain
-    bioetl.infrastructure
+    application
+    domain
+    infrastructure
 containers =
     bioetl
 
