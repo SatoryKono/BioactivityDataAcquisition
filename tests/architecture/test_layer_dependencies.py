@@ -4,9 +4,12 @@ These tests verify that the clean architecture layer boundaries are respected:
 - Domain layer: No dependencies on infrastructure or external I/O libraries
 - Application layer: Can depend on Domain, but not on Infrastructure implementations
 - Infrastructure layer: Implements Domain ports, can depend on external libraries
+
+Uses both static analysis and import-linter for comprehensive checks.
 """
 
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -186,4 +189,114 @@ def test_infrastructure_imports_domain_ports(src_dir: Path) -> None:
     assert found_domain_import, (
         "Infrastructure adapters should import from domain layer "
         "(e.g., to implement ports)"
+    )
+
+
+def test_import_linter_contracts(project_root: Path) -> None:
+    """Run import-linter to verify all architectural contracts.
+
+    REQ-ARCH-007: All import-linter contracts must pass.
+    This provides a secondary layer of validation beyond static checks.
+    """
+    importlinter_config = project_root / ".importlinter"
+    if not importlinter_config.exists():
+        pytest.skip(".importlinter config not found")
+
+    result = subprocess.run(
+        ["lint-imports", "--config", str(importlinter_config)],
+        capture_output=True,
+        text=True,
+        cwd=str(project_root),
+    )
+
+    if result.returncode != 0:
+        pytest.fail(
+            f"import-linter contracts violated:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+
+
+def test_infrastructure_does_not_import_application(src_dir: Path) -> None:
+    """Infrastructure layer must not import from application layer.
+
+    REQ-ARCH-008: Infrastructure is at the outer layer and should only
+    implement domain ports, not depend on application services.
+    """
+    infra_path = src_dir / "bioetl" / "infrastructure"
+    if not infra_path.exists():
+        pytest.skip("Infrastructure layer not found")
+
+    all_errors = []
+    forbidden = {"bioetl.application"}
+
+    for py_file in infra_path.rglob("*.py"):
+        errors = _check_imports_in_file(py_file, forbidden)
+        all_errors.extend(errors)
+
+    assert not all_errors, "\n".join(all_errors)
+
+
+def test_domain_layer_uses_protocol_for_ports(src_dir: Path) -> None:
+    """Domain layer should use Protocol for defining ports.
+
+    REQ-ARCH-009: Ports should be defined using typing.Protocol
+    for structural subtyping (duck typing with type safety).
+    """
+    ports_file = src_dir / "bioetl" / "domain" / "ports.py"
+    if not ports_file.exists():
+        pytest.skip("ports.py not found")
+
+    with ports_file.open(encoding="utf-8") as f:
+        content = f.read()
+
+    # Check for Protocol usage
+    assert "from typing" in content and "Protocol" in content, (
+        "Domain ports should use typing.Protocol for interface definitions"
+    )
+
+    # Check that Protocol classes are defined
+    assert "class" in content and "(Protocol)" in content, (
+        "Port interfaces should be classes inheriting from Protocol"
+    )
+
+
+def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
+    """Domain layer functions should have low cyclomatic complexity.
+
+    REQ-ARCH-010: Domain logic should be simple and testable.
+    Maximum CC = 5 for domain layer functions.
+    """
+    try:
+        from radon.complexity import cc_visit
+    except ImportError:
+        pytest.skip("radon not installed")
+
+    domain_path = src_dir / "bioetl" / "domain"
+    if not domain_path.exists():
+        pytest.skip("Domain layer not found")
+
+    violations = []
+    max_cc = 5  # Strict threshold for domain layer
+
+    for py_file in domain_path.rglob("*.py"):
+        if py_file.name.startswith("__"):
+            continue
+
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+
+        try:
+            results = cc_visit(content)
+            for item in results:
+                if item.complexity > max_cc:
+                    violations.append(
+                        f"{py_file}:{item.lineno} - {item.name}() "
+                        f"has CC={item.complexity} (max={max_cc})"
+                    )
+        except SyntaxError:
+            continue
+
+    assert not violations, (
+        f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
     )
