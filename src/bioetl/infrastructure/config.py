@@ -99,15 +99,6 @@ class PipelineSettings(BaseSettings):
     """Lock heartbeat interval in seconds (default: 20s, range: 5-60s)."""
 
 
-class MetricsSettings(BaseSettings):
-    """Metrics configuration."""
-
-    model_config = SettingsConfigDict(frozen=True)
-
-    enabled: bool = Field(default=True)
-    port: int = Field(default=8000, ge=1, le=65535)
-
-
 class Settings(BaseSettings):
     """Main application settings."""
 
@@ -131,7 +122,6 @@ class Settings(BaseSettings):
     s3: S3Settings = Field(default_factory=S3Settings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
-    metrics: MetricsSettings = Field(default_factory=MetricsSettings)
 
     @model_validator(mode="after")
     def check_s3_endpoint_for_dev(self) -> Settings:
