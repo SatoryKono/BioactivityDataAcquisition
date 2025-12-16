@@ -34,7 +34,9 @@
       "Bash(git checkout:*)",
       "Bash(E:/google_drive/05_AI/github/BioactivityDataAcquisition/.venv/Scripts/pip install:*)",
       "Bash(PYTHONPATH=src E:/google_drive/05_AI/github/BioactivityDataAcquisition/.venv/Scripts/python:*)",
-      "Bash(tree:*)"
+        "Bash(tree:*)",
+        "Bash(wc:*)"
     ]
   }
+    1
 }
