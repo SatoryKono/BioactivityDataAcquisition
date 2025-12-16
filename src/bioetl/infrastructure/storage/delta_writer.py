@@ -22,16 +22,16 @@ from datetime import datetime
 from typing import Any
 
 import pyarrow as pa
+from deltalake import DeltaTable, write_deltalake
+from deltalake.exceptions import DeltaError, SchemaMismatchError
+from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+from pyarrow import ArrowTypeError
+
 from bioetl.infrastructure.storage.exceptions import (
     MergeConflictError,
     SchemaValidationError,
+    TableNotFoundError,
 )
-from bioetl.infrastructure.storage.exceptions import (
-    TableNotFoundError as CustomTableNotFoundError,
-)
-from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
-from pyarrow import ArrowTypeError
 
 
 class DeltaWriter:
@@ -137,7 +137,7 @@ class DeltaWriter:
             # Perform merge/upsert
             self._merge_records(dt, arrow_data, primary_keys)
 
-        except TableNotFoundError:
+        except DeltaTableNotFoundError:
             # Table doesn't exist, create it
             try:
                 write_deltalake(
@@ -245,8 +245,8 @@ class DeltaWriter:
         try:
             dt = DeltaTable(table_path, storage_options=self.storage_options)
             return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
-        except TableNotFoundError as e:
-            raise CustomTableNotFoundError(table_path) from e
+        except DeltaTableNotFoundError as e:
+            raise TableNotFoundError(table_path) from e
 
     def optimize(
         self,
@@ -273,8 +273,8 @@ class DeltaWriter:
         try:
             dt = DeltaTable(table_path, storage_options=self.storage_options)
             return dt.optimize.compact(partition_filters=partition_filters)
-        except TableNotFoundError as e:
-            raise CustomTableNotFoundError(table_path) from e
+        except DeltaTableNotFoundError as e:
+            raise TableNotFoundError(table_path) from e
 
     def get_table_info(self, table_name: str) -> dict[str, Any]:
         """Get table metadata and statistics.
@@ -303,8 +303,8 @@ class DeltaWriter:
                 "schema": dt.schema().to_pyarrow(),
                 "metadata": dt.metadata(),
             }
-        except TableNotFoundError as e:
-            raise CustomTableNotFoundError(table_path) from e
+        except DeltaTableNotFoundError as e:
+            raise TableNotFoundError(table_path) from e
 
     def time_travel(
         self,
@@ -357,5 +357,5 @@ class DeltaWriter:
                 )
             else:
                 raise ValueError("Must specify either version or timestamp")
-        except TableNotFoundError as e:
-            raise CustomTableNotFoundError(table_path) from e
+        except DeltaTableNotFoundError as e:
+            raise TableNotFoundError(table_path) from e
