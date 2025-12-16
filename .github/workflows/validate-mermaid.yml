@@ -1,0 +1,30 @@
+name: Validate vendored Mermaid
+
+on:
+    pull_request:
+    push:
+        branches: [ main ]
+
+jobs:
+    check-mermaid:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v4
+
+            -   name: Run mermaid check (warn, don't fail)
+                run: |
+                    set -e
+                    files=("assets/javascripts/mermaid.min.js" "assets/javascripts/mermaid.esm.min.mjs" "assets/stylesheets/mermaid.css")
+                    missing=0
+                    for f in "${files[@]}"; do
+                      if [ ! -f "$f" ]; then
+                        echo "MISSING: $f"
+                        missing=1
+                      fi
+                    done
+                    if [ $missing -eq 1 ]; then
+                      echo "::warning ::Mermaid vendored assets missing; builds will fall back to CDN at runtime. To vendor locally: run 'make vendor-mermaid' and include the files in your PR."
+                    else
+                      echo "Mermaid vendored assets present."
+                    fi

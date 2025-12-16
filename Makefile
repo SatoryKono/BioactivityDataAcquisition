@@ -159,3 +159,18 @@ version: ## Show current version
 
 bump-version: ## Bump version (TYPE=major|minor|patch)
 	$(VENV_PYTHON) -m bumpversion $(TYPE)
+
+# Vendoring mermaid assets
+vendor-mermaid: ## Download mermaid assets into assets/ (PowerShell on Windows)
+	@echo "Running mermaid vendoring script..."
+	@powershell.exe -NoProfile -ExecutionPolicy Bypass -File assets\javascripts\download_mermaid.ps1 -Version "10.4.0" || (echo "PowerShell vendoring failed; try running the script manually on a machine with network access" && exit 1)
+
+check-mermaid: ## Check that vendored mermaid files exist (fails if missing)
+	@echo "Checking vendored mermaid files..."
+	@files="assets/javascripts/mermaid.min.js assets/javascripts/mermaid.esm.min.mjs assets/stylesheets/mermaid.css"; \
+	missing=0; \
+	for f in $$files; do \
+		if [ ! -f $$f ]; then echo "MISSING: $$f"; missing=1; fi; \
+	done; \
+	if [ $$missing -eq 1 ]; then echo "Mermaid vendored assets missing; run 'make vendor-mermaid' locally or add the files to the PR"; exit 1; fi; \
+	echo "Mermaid vendored assets present."

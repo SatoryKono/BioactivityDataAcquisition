@@ -60,7 +60,7 @@ def mock_gold_writer():
 class TestBronzeWriter:
     """Test BronzeWriter functionality."""
 
-    def test_bronze_writer_initialization(self, mock_s3_client):
+    def test_bronze_writer_initialization(self, _mock_s3_client):
         """Test BronzeWriter can be initialized."""
         writer = BronzeWriter(
             bucket="test-bucket",
@@ -88,7 +88,7 @@ class TestBronzeWriter:
         )
 
         mock_s3_client.put_object.assert_called_once()
-        args, kwargs = mock_s3_client.put_object.call_args
+        _args, kwargs = mock_s3_client.put_object.call_args
         assert kwargs["Bucket"] == "test-bucket"
         # Check key contains expected parts
         expected_key = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
@@ -108,7 +108,7 @@ class TestBronzeWriter:
         )
 
         mock_s3_client.put_object.assert_called_once()
-        args, kwargs = mock_s3_client.put_object.call_args
+        _args, kwargs = mock_s3_client.put_object.call_args
 
         # The Body should be zstd compressed data
         compressed_data = kwargs["Body"]
@@ -123,7 +123,7 @@ class TestBronzeWriter:
 
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
-    def test_write_bronze_with_no_records(self, mock_s3_client):
+    def test_write_bronze_with_no_records(self, _mock_s3_client):
         """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(bucket="test-bucket")
         records = []
@@ -178,7 +178,7 @@ class TestDeltaWriter:
 
     def test_write_silver_merge_existing_table(self, mock_delta_writer):
         """Test write_silver merges into existing table."""
-        mock_delta_table, mock_write_deltalake = mock_delta_writer
+        mock_delta_table, _mock_write_deltalake = mock_delta_writer
         mock_table_instance = MagicMock()
         mock_delta_table.return_value = mock_table_instance
         # Set up merge chain
@@ -205,7 +205,7 @@ class TestDeltaWriter:
 
         mock_table_instance.merge.assert_called_once()
 
-    def test_write_silver_empty_records_raises_error(self, mock_delta_writer):
+    def test_write_silver_empty_records_raises_error(self, _mock_delta_writer):
         """Test empty records raises an error."""
         writer = DeltaWriter(base_path="/tmp/delta")
 
@@ -226,19 +226,19 @@ class TestGoldWriter:
 
     def test_write_gold_calls_delta_writer(self, mock_gold_writer):
         """Test that write_gold calls the underlying DeltaWriter."""
-        mock_delta_table, mock_write_deltalake = mock_gold_writer
+        _mock_delta_table, mock_write_deltalake = mock_gold_writer
         writer = GoldWriter(base_path="/tmp/gold")
         records = [{"id": 1, "value": "a"}]
 
         writer.write_gold(table_name="gold_table", records=records, mode="overwrite")
 
         mock_write_deltalake.assert_called_once()
-        args, kwargs = mock_write_deltalake.call_args
+        _args, kwargs = mock_write_deltalake.call_args
         assert kwargs["mode"] == "overwrite"
         # table_or_uri is passed as keyword argument
         assert "gold_table" in kwargs["table_or_uri"]
 
-    def test_write_gold_empty_records_raises_error(self, mock_gold_writer):
+    def test_write_gold_empty_records_raises_error(self, _mock_gold_writer):
         """Test empty records raises an error."""
         writer = GoldWriter(base_path="/tmp/gold")
 
