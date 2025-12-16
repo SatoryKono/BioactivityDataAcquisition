@@ -83,7 +83,7 @@ class UnifiedQuarantine:
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
 
-    def write(
+    async def write(
         self,
         pipeline: str,
         error_code: str,
@@ -389,7 +389,7 @@ class UnifiedQuarantine:
 
         return True
 
-    def get_stats(self, pipeline: str) -> dict[str, Any]:
+    async def get_stats(self, pipeline: str) -> dict[str, Any]:
         """Get quarantine statistics for a pipeline.
 
         Args:
@@ -474,3 +474,11 @@ class UnifiedQuarantine:
             Hex digest of SHA256 hash
         """
         return hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
+
+    async def aclose(self) -> None:
+        """Close resources.
+
+        Implements the aclose() method required by QuarantinePort protocol.
+        Delta Lake doesn't require explicit cleanup.
+        """
+        pass  # No resources to close

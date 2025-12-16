@@ -164,7 +164,9 @@ class S3Checkpoint:
                 ) from e
             raise
 
-    async def load(self, pipeline: str) -> tuple[Watermark, RunID, dict[str, Any]] | None:
+    async def load(
+        self, pipeline: str
+    ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
         """Load last checkpoint.
 
         Requirements:
@@ -197,18 +199,19 @@ class S3Checkpoint:
 
             # Parse watermark (try different types)
             watermark_str = checkpoint_data["watermark"]
+            watermark: Watermark
             try:
                 # Try as datetime
                 from datetime import datetime
 
-                watermark = Watermark(datetime.fromisoformat(watermark_str))
+                watermark = datetime.fromisoformat(watermark_str)
             except (ValueError, TypeError):
                 # Try as int
                 try:
-                    watermark = Watermark(int(watermark_str))
+                    watermark = int(watermark_str)
                 except ValueError:
                     # Use as string
-                    watermark = Watermark(watermark_str)
+                    watermark = watermark_str
 
             # Parse run_id
             run_id = RunID(UUID(checkpoint_data["run_id"]))
