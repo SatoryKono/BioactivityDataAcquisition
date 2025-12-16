@@ -1,6 +1,7 @@
 """
 Processes a batch of records through the Bronze, Silver, and Gold layers.
 """
+
 from __future__ import annotations
 
 import json
@@ -88,7 +89,12 @@ class RecordProcessor:
         if gold_records:
             await self._write_gold_batch(gold_records)
 
-        return records_bronze, len(silver_records), len(gold_records), records_quarantined
+        return (
+            records_bronze,
+            len(silver_records),
+            len(gold_records),
+            records_quarantined,
+        )
 
     async def _write_bronze_batch(
         self, records: list[dict[str, Any]], batch_id: BatchID
