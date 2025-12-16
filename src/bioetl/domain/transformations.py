@@ -13,8 +13,9 @@ All functions are pure (deterministic, side-effect free).
 import hashlib
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import date, datetime
+from functools import singledispatch
 from typing import Any
 
 from .types import ContentHash, DriftLevel, EntityID
@@ -34,6 +35,13 @@ META_FIELDS = {
 }
 
 
+@singledispatch
+def _normalize_value(value: Any) -> Any:
+    """Normalize a single value using singledispatch."""
+    return value
+
+
+@_normalize_value.register(float)
 def _normalize_float(value: float) -> float | None:
     """Normalize a float value, handling NaN/Inf."""
     if math.isnan(value) or math.isinf(value):
@@ -41,21 +49,34 @@ def _normalize_float(value: float) -> float | None:
     return round(value, 10)
 
 
-def _normalize_value(value: Any) -> Any:
-    """Normalize a single value using type dispatch."""
-    if isinstance(value, float):
-        return _normalize_float(value)
-    if isinstance(value, datetime):
-        return value.date().isoformat()
-    if isinstance(value, date):
-        return value.isoformat()
-    if isinstance(value, str):
-        return value.strip()
-    if isinstance(value, Mapping):
-        return {k: _normalize_value(v) for k, v in value.items()}
-    if isinstance(value, Sequence):
-        return [_normalize_value(v) for v in value]
-    return value
+@_normalize_value.register(datetime)
+def _normalize_datetime(value: datetime) -> str:
+    """Normalize datetime to date ISO string."""
+    return value.date().isoformat()
+
+
+@_normalize_value.register(date)
+def _normalize_date(value: date) -> str:
+    """Normalize date to ISO string."""
+    return value.isoformat()
+
+
+@_normalize_value.register(str)
+def _normalize_str(value: str) -> str:
+    """Normalize string by stripping whitespace."""
+    return value.strip()
+
+
+@_normalize_value.register(dict)
+def _normalize_dict(value: dict) -> dict:
+    """Normalize dict by recursively normalizing values."""
+    return {k: _normalize_value(v) for k, v in value.items()}
+
+
+@_normalize_value.register(list)
+def _normalize_list(value: list) -> list:
+    """Normalize list by recursively normalizing elements."""
+    return [_normalize_value(v) for v in value]
 
 
 def normalize_for_hash(record: dict[str, Any]) -> dict[str, Any]:

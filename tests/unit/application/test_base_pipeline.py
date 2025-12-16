@@ -6,6 +6,7 @@ import pytest
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.domain.context import PipelineContext
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.domain.types import RunType
 
 
@@ -30,6 +31,7 @@ def mock_pipeline():
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
         logger=MagicMock(),
+        metrics=NoOpMetrics(warn_on_use=False),
         resume=False,
     )
     pipeline.orchestrator = AsyncMock()

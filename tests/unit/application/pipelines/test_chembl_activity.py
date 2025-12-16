@@ -6,6 +6,7 @@ import pytest
 
 from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.domain.context import PipelineContext
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.domain.types import RunType
 
 
@@ -20,6 +21,7 @@ def chembl_pipeline():
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
         logger=MagicMock(),
+        metrics=NoOpMetrics(warn_on_use=False),
         resume=False,
     )
     return pipeline

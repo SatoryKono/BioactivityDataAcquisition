@@ -1,6 +1,9 @@
 """Pipeline Executor with batch processing.
 
 Handles the Bronze -> Silver -> Gold data flow with efficient batch writes.
+
+This module is framework-agnostic. Prefect integration is provided by
+the orchestration layer (bioetl.orchestration.tasks).
 """
 
 import json
@@ -8,8 +11,6 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
-
-from prefect import task
 
 from bioetl.application.core.orchestrator import PipelineShutdownError
 from bioetl.domain.types import BatchID, Watermark
@@ -43,7 +44,6 @@ class PipelineExecutor:
         self.records_gold = 0
         self.records_quarantined = 0
 
-    @task(name="Execute Pipeline")
     async def execute(self, watermark: Watermark | None, limit: int | None) -> None:
         """Execute main pipeline logic with batch processing."""
         batch: list[dict[str, Any]] = []

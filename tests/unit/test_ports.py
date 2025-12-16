@@ -7,10 +7,10 @@ from bioetl.domain.ports import (
     DataSourcePort,
     LockPort,
     MetricsPort,
-    NoOpMetrics,
     QuarantinePort,
     StoragePort,
 )
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
 
 class TestPortsAreRuntimeCheckable:
@@ -208,12 +208,12 @@ class TestMetricsPortProtocol:
 
     def test_noop_metrics_implements_port(self) -> None:
         """NoOpMetrics should implement MetricsPort protocol."""
-        noop = NoOpMetrics()
+        noop = NoOpMetrics(warn_on_use=False)
         assert isinstance(noop, MetricsPort)
 
     def test_noop_metrics_does_nothing(self) -> None:
         """NoOpMetrics methods should complete without error."""
-        noop = NoOpMetrics()
+        noop = NoOpMetrics(warn_on_use=False)
         # Should not raise
         noop.observe_histogram("test", 1.0, {"label": "value"})
         noop.increment_counter("test", 1, {"label": "value"})

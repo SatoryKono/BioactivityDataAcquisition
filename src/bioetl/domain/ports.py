@@ -365,27 +365,14 @@ class MetricsPort(Protocol):
         ...
 
 
-class NoOpMetrics(MetricsPort):
-    """No-operation metrics implementation.
+# NoOpMetrics moved to infrastructure/observability/noop_metrics.py
+# Import from bioetl.infrastructure.observability.noop_metrics instead
 
-    Used as default when no metrics backend is configured.
-    All operations are silently ignored.
-    """
-
-    def observe_histogram(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op histogram observation."""
-        pass
-
-    def increment_counter(
-        self,
-        name: str,
-        value: int,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op counter increment."""
-        pass
+__all__ = [
+    "DataSourcePort",
+    "StoragePort",
+    "LockPort",
+    "CheckpointPort",
+    "QuarantinePort",
+    "MetricsPort",
+]

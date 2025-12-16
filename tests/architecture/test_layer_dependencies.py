@@ -306,3 +306,173 @@ def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
     assert (
         not violations
     ), f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+
+
+def test_no_empty_source_files(src_dir: Path) -> None:
+    """Source tree must not contain empty Python files (except __init__.py).
+
+    REQ-ARCH-011: Empty files indicate dead code or incomplete implementation.
+    Only __init__.py files are allowed to be empty (for package markers).
+    """
+    bioetl_path = src_dir / "bioetl"
+    if not bioetl_path.exists():
+        pytest.skip("bioetl source not found")
+
+    empty_files = []
+    for py_file in bioetl_path.rglob("*.py"):
+        # Skip __init__.py - allowed to be empty for package markers
+        if py_file.name == "__init__.py":
+            continue
+
+        # Check if file is empty or contains only whitespace/comments
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read().strip()
+
+        # Remove comments and docstrings for content check
+        lines = [
+            line.strip()
+            for line in content.split("\n")
+            if line.strip() and not line.strip().startswith("#")
+        ]
+
+        if not lines:
+            empty_files.append(str(py_file.relative_to(src_dir)))
+
+    assert not empty_files, (
+        f"Found {len(empty_files)} empty source file(s) "
+        "(excluding __init__.py):\n" + "\n".join(f"  - {f}" for f in empty_files)
+    )
+
+
+def test_no_orphan_directories(src_dir: Path) -> None:
+    """Source tree must not contain orphan directories with only empty files.
+
+    REQ-ARCH-012: Directories with only __init__.py or empty files are dead code.
+    Directories that have subdirectories with content are not considered orphan.
+    """
+    bioetl_path = src_dir / "bioetl"
+    if not bioetl_path.exists():
+        pytest.skip("bioetl source not found")
+
+    def has_content_in_subtree(dir_path: Path) -> bool:
+        """Check if directory or any subdirectory has real Python content."""
+        for py_file in dir_path.rglob("*.py"):
+            if py_file.name == "__init__.py":
+                continue
+            with py_file.open(encoding="utf-8") as f:
+                if f.read().strip():
+                    return True
+        return False
+
+    orphan_dirs = []
+    for dir_path in bioetl_path.rglob("*"):
+        if not dir_path.is_dir():
+            continue
+
+        # Skip if this directory has content anywhere in its subtree
+        if has_content_in_subtree(dir_path):
+            continue
+
+        # Check if this is a leaf directory with only __init__.py
+        py_files = list(dir_path.glob("*.py"))
+        subdirs = [d for d in dir_path.iterdir() if d.is_dir()]
+
+        # Only flag leaf directories (no subdirs) with only __init__.py
+        if not subdirs and py_files:
+            init_file = dir_path / "__init__.py"
+            if init_file.exists() and len(py_files) == 1:
+                with init_file.open(encoding="utf-8") as f:
+                    init_content = f.read().strip()
+                # Allow if __init__.py re-exports or has __all__
+                if not init_content or (
+                    "__all__" not in init_content and "import" not in init_content
+                ):
+                    orphan_dirs.append(str(dir_path.relative_to(src_dir)))
+
+    assert not orphan_dirs, (
+        f"Found {len(orphan_dirs)} orphan directory(s) with no real content:\n"
+        + "\n".join(f"  - {d}" for d in orphan_dirs)
+    )
+
+
+def test_dead_code_vulture(src_dir: Path) -> None:
+    """Detect dead code using vulture static analysis.
+
+    REQ-ARCH-013: No unused code should exist in the codebase.
+    """
+    try:
+        from vulture import Vulture
+    except ImportError:
+        pytest.skip("vulture not installed - run: pip install vulture")
+
+    bioetl_path = src_dir / "bioetl"
+    if not bioetl_path.exists():
+        pytest.skip("bioetl source not found")
+
+    v = Vulture()
+    v.scavenge([str(bioetl_path)])
+
+    # Filter results - ignore certain patterns
+    ignored_names = {
+        # Common false positives
+        "__init__",
+        "__str__",
+        "__repr__",
+        "__hash__",
+        "__eq__",
+        "__lt__",
+        "__le__",
+        "__gt__",
+        "__ge__",
+        "__aenter__",
+        "__aexit__",
+        "__enter__",
+        "__exit__",
+        # Context manager parameters (required by signature)
+        "exc_type",
+        "exc_val",
+        "exc_tb",
+        # Protocol methods (interfaces implemented elsewhere)
+        "fetch",
+        "write_bronze",
+        "write_silver",
+        "write_gold",
+        "acquire",
+        "release",
+        "save_checkpoint",
+        "load_checkpoint",
+        "delete_checkpoint",
+        "quarantine_record",
+        # Pydantic/dataclass fields
+        "model_config",
+        # Click CLI
+        "main",
+        # Prefect task decorators
+        "execute",
+    }
+
+    # Get unused code with confidence threshold
+    # Note: TYPE_CHECKING imports often have 90% confidence but are not dead code
+    unused = [
+        item
+        for item in v.get_unused_code(min_confidence=80)
+        if item.name not in ignored_names
+        and not item.name.startswith("_")  # Ignore private
+        and "test" not in str(item.filename).lower()  # Ignore test files
+        # Imports at 90% confidence in TYPE_CHECKING blocks are often false positives
+        and not (item.typ == "import" and item.confidence < 100)
+    ]
+
+    if unused:
+        messages = [
+            f"{item.filename}:{item.first_lineno} - unused {item.typ} '{item.name}' "
+            f"(confidence: {item.confidence}%)"
+            for item in unused[:20]  # Limit output
+        ]
+        if len(unused) > 20:
+            messages.append(f"... and {len(unused) - 20} more")
+
+        pytest.fail(
+            f"Found {len(unused)} potentially dead code item(s):\n"
+            + "\n".join(messages)
+        )
