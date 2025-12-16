@@ -284,11 +284,11 @@ def test_env_var_access_only_in_config(src_dir: Path):
     assert not violations, (
         "Environment variable access must be centralized in config.py.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Refactor to use functions from bioetl.config instead:\n"
-                                                                            "  - get_aws_config()\n"
-                                                                            "  - get_s3_config()\n"
-                                                                            "  - get_redis_config()\n"
-                                                                            "  - get_storage_options()"
+        "Refactor to use functions from bioetl.config instead:\n"
+        "  - get_aws_config()\n"
+        "  - get_s3_config()\n"
+        "  - get_redis_config()\n"
+        "  - get_storage_options()"
     )
 
 
@@ -345,11 +345,11 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "CLI must not import directly from infrastructure modules.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Refactor to use:\n"
-                                                                            "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
-                                                                            "  - Bootstrap functions that wire up dependencies\n"
-                                                                            "  - Domain ports for type hints\n"
-                                                                            "  - bioetl.config for configuration (allowed)"
+        "Refactor to use:\n"
+        "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
+        "  - Bootstrap functions that wire up dependencies\n"
+        "  - Domain ports for type hints\n"
+        "  - bioetl.config for configuration (allowed)"
     )
 
 
