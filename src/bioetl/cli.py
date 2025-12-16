@@ -15,8 +15,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import click
-
-from bioetl.application.pipeline.base import run_pipeline_flow
+from bioetl.application.core.base import run_pipeline_flow
 from bioetl.bootstrap import (
     ChEMBLActivityPipelineFactory,
     bootstrap,
