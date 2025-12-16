@@ -42,7 +42,9 @@ class TestPipelineContext:
 
     def test_context_is_frozen(self, context: PipelineContext) -> None:
         """Context should be immutable (frozen dataclass)."""
-        with pytest.raises(Exception):  # FrozenInstanceError
+        from dataclasses import FrozenInstanceError
+
+        with pytest.raises(FrozenInstanceError):
             context.run_type = RunType.BACKFILL  # type: ignore[misc]
 
     def test_bind_logger_returns_new_context(

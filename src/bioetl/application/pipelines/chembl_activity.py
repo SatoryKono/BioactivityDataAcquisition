@@ -13,13 +13,13 @@ from datetime import UTC
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipeline.base import BasePipeline
-from bioetl.domain.context import PipelineContext
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
 from bioetl.infrastructure.factories.storage import StorageAdapter
 
 if TYPE_CHECKING:
     from bioetl.config import Settings
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
     from bioetl.domain.types import RunType
 
