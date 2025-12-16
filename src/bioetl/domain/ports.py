@@ -2,7 +2,9 @@
 
 Implements RULES.md §1.1 - Ports & Adapters architecture.
 These interfaces define contracts for external systems like data sources,
-storage, and other infrastructure components.
+storage, and other infrastructure components. Each port is defined as a
+Protocol, allowing for structural subtyping (duck typing) and clear
+separation of concerns between the domain and infrastructure layers.
 """
 
 from collections.abc import AsyncIterator, Iterable
@@ -18,9 +20,16 @@ from bioetl.domain.types import (
 
 @runtime_checkable
 class DataSourcePort(Protocol):
-    """Port for data sources (e.g., ChEMBL, PubChem)."""
+    """
+    Port for data sources (e.g., ChEMBL, PubChem).
+
+    This interface abstracts the process of fetching data from an external
+    source, allowing the application to be independent of the specific
+    implementation of the data source client.
+    """
 
     provider_name: str
+    """The unique name of the data provider (e.g., 'chembl')."""
 
     async def fetch(
         self,
@@ -28,17 +37,39 @@ class DataSourcePort(Protocol):
         watermark: Watermark | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from the data source."""
+        """
+        Fetch records from the data source.
+
+        Args:
+            entity_type: The type of entity to fetch (e.g., 'activity', 'molecule').
+            watermark: The point from which to resume fetching data. If None,
+                       fetches from the beginning.
+            limit: The maximum number of records to fetch.
+
+        Yields:
+            A dictionary representing a single record from the data source.
+        """
         ...
 
     async def health_check(self) -> HealthStatus:
-        """Check the health of the data source."""
+        """
+        Check the health of the data source.
+
+        Returns:
+            A HealthStatus object indicating the current status of the source.
+        """
         ...
 
 
 @runtime_checkable
 class StoragePort(Protocol):
-    """Port for data storage (Bronze, Silver, Gold layers)."""
+    """
+    Port for data storage (Bronze, Silver, Gold layers).
+
+    This interface abstracts the underlying storage mechanism (e.g., file system,
+    data lake, data warehouse), allowing the application to write data to
+    different layers without knowing the implementation details.
+    """
 
     def write_bronze(
         self,
@@ -48,7 +79,16 @@ class StoragePort(Protocol):
         date: Any,
         batch_id: BatchID,
     ) -> None:
-        """Write raw records to Bronze layer."""
+        """
+        Write raw records to the Bronze layer.
+
+        Args:
+            records: An iterable of byte strings, where each string is a raw record.
+            provider: The name of the data provider.
+            entity: The type of entity being written.
+            date: The date partition for the data.
+            batch_id: The unique identifier for the batch of records.
+        """
         ...
 
     def write_silver(
@@ -58,7 +98,15 @@ class StoragePort(Protocol):
         primary_keys: list[str],
         mode: str = "merge",
     ) -> None:
-        """Write transformed records to Silver layer."""
+        """
+        Write transformed records to the Silver layer.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries, where each dictionary is a transformed record.
+            primary_keys: A list of column names that form the primary key.
+            mode: The write mode (e.g., 'merge', 'append', 'overwrite').
+        """
         ...
 
     def write_gold(
@@ -67,13 +115,25 @@ class StoragePort(Protocol):
         records: list[dict[str, Any]],
         mode: str = "overwrite",
     ) -> None:
-        """Write aggregated/validated records to Gold layer."""
+        """
+        Write aggregated or validated records to the Gold layer.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries, where each dictionary is a gold record.
+            mode: The write mode (e.g., 'overwrite', 'append').
+        """
         ...
 
 
 @runtime_checkable
 class LockPort(Protocol):
-    """Port for distributed locking."""
+    """
+    Port for distributed locking.
+
+    This interface provides a mechanism for coordinating operations across
+    multiple instances or processes, preventing race conditions.
+    """
 
     async def acquire(
         self,
@@ -84,7 +144,20 @@ class LockPort(Protocol):
         wait_timeout: int = 300,
         exclusive: bool = False,
     ) -> bool:
-        """Acquire a lock."""
+        """
+        Acquire a lock.
+
+        Args:
+            key: The unique key for the lock.
+            owner_id: The ID of the run attempting to acquire the lock.
+            ttl: Time-to-live for the lock in seconds.
+            wait: If True, wait for the lock to be released if it's already held.
+            wait_timeout: Maximum time to wait for the lock in seconds.
+            exclusive: If True, acquire an exclusive lock.
+
+        Returns:
+            True if the lock was acquired, False otherwise.
+        """
         ...
 
     async def release(
@@ -93,7 +166,17 @@ class LockPort(Protocol):
         owner_id: RunID,
         exclusive: bool = False,
     ) -> bool:
-        """Release a lock."""
+        """
+        Release a lock.
+
+        Args:
+            key: The unique key for the lock.
+            owner_id: The ID of the run releasing the lock.
+            exclusive: If True, release an exclusive lock.
+
+        Returns:
+            True if the lock was released, False otherwise.
+        """
         ...
 
     async def heartbeat(
@@ -102,13 +185,28 @@ class LockPort(Protocol):
         owner_id: RunID,
         exclusive: bool = False,
     ) -> bool:
-        """Refresh a lock's TTL."""
+        """
+        Refresh a lock's TTL to prevent it from expiring.
+
+        Args:
+            key: The unique key for the lock.
+            owner_id: The ID of the run refreshing the lock.
+            exclusive: If True, refresh an exclusive lock.
+
+        Returns:
+            True if the heartbeat was successful, False otherwise.
+        """
         ...
 
 
 @runtime_checkable
 class CheckpointPort(Protocol):
-    """Port for pipeline checkpointing."""
+    """
+    Port for pipeline checkpointing.
+
+    This interface allows pipelines to save and load their state, enabling
+    resilience and incremental processing.
+    """
 
     def save(
         self,
@@ -117,28 +215,60 @@ class CheckpointPort(Protocol):
         run_id: RunID,
         metadata: dict[str, Any],
     ) -> None:
-        """Save a checkpoint."""
+        """
+        Save a checkpoint.
+
+        Args:
+            pipeline: The name of the pipeline.
+            watermark: The watermark to save.
+            run_id: The ID of the run creating the checkpoint.
+            metadata: Additional metadata to store with the checkpoint.
+        """
         ...
 
     def load(
         self,
         pipeline: str,
     ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
-        """Load a checkpoint."""
+        """
+        Load a checkpoint.
+
+        Args:
+            pipeline: The name of the pipeline.
+
+        Returns:
+            A tuple containing the watermark, run ID, and metadata, or None
+            if no checkpoint is found.
+        """
         ...
 
     def list_all(self) -> list[str]:
-        """List all pipelines with checkpoints."""
+        """
+        List all pipelines that have checkpoints.
+
+        Returns:
+            A list of pipeline names.
+        """
         ...
 
     def delete(self, pipeline: str) -> None:
-        """Delete a checkpoint."""
+        """
+        Delete a checkpoint.
+
+        Args:
+            pipeline: The name of the pipeline whose checkpoint should be deleted.
+        """
         ...
 
 
 @runtime_checkable
 class QuarantinePort(Protocol):
-    """Port for quarantining failed records."""
+    """
+    Port for quarantining failed records.
+
+    This interface provides a way to isolate records that fail processing
+    for later analysis, preventing them from stopping the entire pipeline.
+    """
 
     def write(
         self,
@@ -146,11 +276,18 @@ class QuarantinePort(Protocol):
         error_code: str,
         payload: dict[str, Any],
         bronze_batch_id: BatchID,
-        # Allow optional args in implementation (Liskov) but enforce common ones here
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        """Write a record to quarantine."""
+        """
+        Write a record to quarantine.
+
+        Args:
+            pipeline: The name of the pipeline where the error occurred.
+            error_code: A code identifying the type of error.
+            payload: The record that failed processing.
+            bronze_batch_id: The ID of the bronze batch containing the record.
+        """
         ...
 
     def inspect(
@@ -159,9 +296,27 @@ class QuarantinePort(Protocol):
         limit: int = 10,
         error_code: str | None = None,
     ) -> list[dict[str, Any]]:
-        """Inspect quarantined records."""
+        """
+        Inspect records in quarantine.
+
+        Args:
+            pipeline: The name of the pipeline to inspect.
+            limit: The maximum number of records to return.
+            error_code: Filter records by a specific error code.
+
+        Returns:
+            A list of quarantined records.
+        """
         ...
 
     def get_stats(self, pipeline: str) -> dict[str, Any]:
-        """Get quarantine statistics."""
+        """
+        Get statistics about the quarantined records for a pipeline.
+
+        Args:
+            pipeline: The name of the pipeline.
+
+        Returns:
+            A dictionary of statistics (e.g., count by error code).
+        """
         ...
