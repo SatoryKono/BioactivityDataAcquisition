@@ -19,6 +19,7 @@ dependencies = [
     "httpx>=0.27",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
+    "pyyaml>=6.0",
     "polars>=1.0",
     "deltalake>=0.18",
     "pyarrow>=15.0",
@@ -60,6 +61,8 @@ dev = [
     "fakeredis>=2.21",
     # AWS testing
     "moto[s3]>=5.0",
+    # Docker testing
+    "pytest-docker>=2.0.0",
     # Code formatting and linting
     "black>=24.0",
     "isort>=5.13",

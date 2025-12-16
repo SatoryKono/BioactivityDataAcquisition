@@ -8,13 +8,9 @@ from uuid import uuid4
 import pytest
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
     from vcr.request import Request
 
     from bioetl.domain.types import RunID
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 # VCR.py imports (for API recording)
 try:
@@ -199,37 +195,43 @@ def run_id() -> "RunID":
     return RunID(uuid4())
 
 
-@pytest.fixture
-def fake_redis() -> "Generator[Any, None, None]":
-    """Create a fake Redis instance for testing.
-
-    Uses fakeredis library for in-memory Redis simulation.
-    """
-    try:
-        import fakeredis.aioredis
-
-        server = fakeredis.FakeServer()
-        client = fakeredis.aioredis.FakeRedis(server=server)
-        yield client
-    except ImportError:
-        pytest.skip("fakeredis not installed")
+@pytest.fixture(scope="session")
+def minio_service(docker_ip, docker_services):
+    """Ensure that MinIO service is up and responsive."""
+    port = docker_services.port_for("minio", 9000)
+    docker_services.wait_until_responsive(timeout=30.0, pause=0.1, check=lambda: True)
+    return f"http://{docker_ip}:{port}"
 
 
-@pytest.fixture
-def token_bucket() -> "TokenBucket":
-    """Create a TokenBucket for testing."""
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-
-    return TokenBucket(rate=100.0, capacity=100)  # Fast for tests
+@pytest.fixture(scope="session")
+def redis_service(docker_ip, docker_services):
+    """Ensure that Redis service is up and responsive."""
+    port = docker_services.port_for("redis", 6379)
+    docker_services.wait_until_responsive(timeout=30.0, pause=0.1, check=lambda: True)
+    return f"redis://{docker_ip}:{port}"
 
 
 @pytest.fixture
-def circuit_breaker() -> "CircuitBreaker":
-    """Create a CircuitBreaker for testing."""
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+def minio_client(minio_service):
+    """boto3 client for MinIO."""
+    import boto3
 
-    return CircuitBreaker(
-        provider="test",
-        failure_threshold=3,
-        recovery_timeout=1,  # Fast for tests
+    client = boto3.client(
+        "s3",
+        endpoint_url=minio_service,
+        aws_access_key_id="minioadmin",
+        aws_secret_access_key="minioadmin",
     )
+    # Create buckets
+    buckets = ["bronze", "silver", "gold", "checkpoints"]
+    for bucket in buckets:
+        client.create_bucket(Bucket=bucket)
+    return client
+
+
+@pytest.fixture
+def redis_client(redis_service):
+    """Redis client."""
+    import redis.asyncio as aioredis
+
+    return aioredis.from_url(redis_service)

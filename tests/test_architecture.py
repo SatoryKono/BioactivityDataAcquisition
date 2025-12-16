@@ -354,47 +354,32 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
 def test_config_parameters_have_defaults_or_validation(src_dir: Path):
     """Configuration parameters should have sensible defaults or validation.
 
-    All os.getenv calls in config.py should either:
-    - Provide a default value for optional settings
-    - Be documented as required (will cause clear error if missing)
-
     This test checks that config functions return valid typed objects
     even with no environment variables set.
-
-    Runs: Import and call config functions
     """
     # Import config module
     import sys
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.config import (
-        get_aws_config,
-        get_redis_config,
-        get_s3_config,
-        get_storage_options,
-    )
+    from bioetl.config import get_settings
 
     # Test that all config functions can be called without environment variables
     # (they should return objects with sensible defaults or None for optional values)
-    aws_config = get_aws_config()
-    assert aws_config is not None
-    assert isinstance(aws_config.region, str)
+    settings = get_settings()
+    assert settings is not None
+    assert isinstance(settings.aws.region, str)
     # endpoint_url can be None (optional)
 
-    s3_config = get_s3_config()
-    assert s3_config is not None
-    assert s3_config.bucket_bronze == "bioetl-bronze"
-    assert s3_config.bucket_silver == "bioetl-silver"
-    assert s3_config.bucket_gold == "bioetl-gold"
-    assert s3_config.bucket_checkpoints == "bioetl-checkpoints"
+    assert settings.s3.bucket_bronze == "bioetl-bronze"
+    assert settings.s3.bucket_silver == "bioetl-silver"
+    assert settings.s3.bucket_gold == "bioetl-gold"
+    assert settings.s3.bucket_checkpoints == "bioetl-checkpoints"
 
-    redis_config = get_redis_config()
-    assert redis_config is not None
-    assert redis_config.host == "localhost"
-    assert redis_config.port == 6379
+    assert settings.redis.host == "localhost"
+    assert settings.redis.port == 6379
 
-    storage_options = get_storage_options()
+    storage_options = settings.get_storage_options()
     # Should be None when endpoint_url is not set
     assert storage_options is None or isinstance(storage_options, dict)
 
@@ -409,39 +394,11 @@ def test_config_dataclasses_are_frozen(src_dir: Path):
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.config import AWSConfig, RedisConfig, S3Config
+    from bioetl.config import AWSSettings, RedisSettings, S3Settings
 
-    config_classes = [AWSConfig, S3Config, RedisConfig]
+    config_classes = [AWSSettings, RedisSettings, S3Settings]
 
     for config_class in config_classes:
-        assert hasattr(
-            config_class, "__dataclass_fields__"
-        ), f"{config_class.__name__} is not a dataclass"
-
-        # Check frozen attribute
-        # In Python 3.10+, we can check __dataclass_params__.frozen
-        if hasattr(config_class, "__dataclass_params__"):
-            assert (
-                config_class.__dataclass_params__.frozen
-            ), f"{config_class.__name__} dataclass must be frozen"
-        else:
-            # Fallback: try to modify an instance and expect error
-            if config_class == AWSConfig:
-                instance = config_class(
-                    endpoint_url=None,
-                    access_key_id=None,
-                    secret_access_key=None,
-                    region="us-east-1",
-                )
-            elif config_class == S3Config:
-                instance = config_class(
-                    bucket_bronze="b",
-                    bucket_silver="s",
-                    bucket_gold="g",
-                    bucket_checkpoints="c",
-                )
-            else:  # RedisConfig
-                instance = config_class(host="localhost", port=6379)
-
-            with pytest.raises((TypeError, AttributeError)):  # FrozenInstanceError
-                instance.region = "changed"  # type: ignore[attr-defined]
+        assert (
+            config_class.model_config["frozen"] is True
+        ), f"{config_class.__name__} must be frozen"

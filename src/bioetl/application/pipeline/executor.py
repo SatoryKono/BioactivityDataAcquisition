@@ -40,16 +40,20 @@ class PipelineExecutor:
             batch_id = await self._write_bronze(raw_record)
             self.records_bronze += 1
 
+            # Create a new context for this record
+            record_context = self.pipeline.context.bind_logger(
+                batch_id=str(batch_id),
+                entity_id=raw_record.get("activity_id"),
+            )
+
             try:
                 transformed = await self.pipeline.transform_bronze_to_silver(
-                    self.pipeline.context, raw_record
+                    record_context, raw_record
                 )
                 if transformed:
                     await self._write_silver(transformed, batch_id)
                     self.records_silver += 1
-                    if self.pipeline.should_write_gold(
-                        self.pipeline.context, transformed
-                    ):
+                    if self.pipeline.should_write_gold(record_context, transformed):
                         await self._write_gold(transformed)
                         self.records_gold += 1
             except Exception as e:
