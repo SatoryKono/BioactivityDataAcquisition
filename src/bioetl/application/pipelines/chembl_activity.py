@@ -7,11 +7,13 @@ Entity: Bioactivity measurements (IC50, Ki, EC50, etc.)
 Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
 """
 
+from datetime import UTC
 from typing import Any
 
 from bioetl.application.pipeline.base import BasePipeline
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
+from bioetl.infrastructure.factories.storage import StorageAdapter
 
 
 class ChEMBLActivityPipeline(BasePipeline):
@@ -40,10 +42,10 @@ class ChEMBLActivityPipeline(BasePipeline):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize ChEMBL Activity pipeline."""
         super().__init__(
+            *args,
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            *args,
             **kwargs,
         )
 
@@ -169,10 +171,7 @@ class ChEMBLActivityPipeline(BasePipeline):
             return False
 
         # Exclude if data validity issues
-        if record.get("data_validity_comment"):
-            return False
-
-        return True
+        return not record.get("data_validity_comment")
 
     def extract_watermark(self, record: dict[str, Any]) -> Watermark:
         """Extract watermark from record.
@@ -190,9 +189,9 @@ class ChEMBLActivityPipeline(BasePipeline):
             return Watermark(str(activity_id))
 
         # Fallback to timestamp
-        from datetime import datetime, timezone
+        from datetime import datetime
 
-        return Watermark(datetime.now(timezone.utc))
+        return Watermark(datetime.now(UTC))
 
 
 class ChEMBLActivityPipelineFactory:
@@ -218,7 +217,7 @@ class ChEMBLActivityPipelineFactory:
         quarantine: Any | None = None,
         lock: Any | None = None,
         # Adapter configurations (legacy)
-        chembl_url: str = "https://www.ebi.ac.uk/chembl/api/data",
+        _chembl_url: str = "https://www.ebi.ac.uk/chembl/api/data",  # Reserved for future use
         s3_bucket_bronze: str = "bioetl-bronze",
         s3_bucket_silver: str = "bioetl-silver",
         s3_bucket_checkpoints: str = "bioetl-checkpoints",
@@ -261,29 +260,6 @@ class ChEMBLActivityPipelineFactory:
         )
         from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-
-        # Create storage adapter wrapper
-        class StorageAdapter:
-            """Unified storage adapter for Bronze/Silver/Gold."""
-
-            def __init__(
-                self,
-                bronze_writer: BronzeWriter,
-                silver_writer: DeltaWriter,
-                gold_writer: DeltaWriter,
-            ):
-                self.bronze = bronze_writer
-                self.silver = silver_writer
-                self.gold = gold_writer
-
-            def write_bronze(self, *args: Any, **kwargs: Any) -> Any:
-                return self.bronze.write_bronze(*args, **kwargs)
-
-            def write_silver(self, *args: Any, **kwargs: Any) -> None:
-                return self.silver.write_silver(*args, **kwargs)
-
-            def write_gold(self, *args: Any, **kwargs: Any) -> None:
-                return self.gold.write_gold(*args, **kwargs)
 
         # Initialize adapters
         storage_options = {
