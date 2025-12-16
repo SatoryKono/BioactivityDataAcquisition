@@ -20,7 +20,6 @@ import json
 from typing import Any
 from uuid import UUID
 
-import boto3
 from botocore.exceptions import ClientError
 
 from bioetl.domain.types import RunID, Watermark
@@ -69,16 +68,14 @@ class S3Checkpoint:
             access_key: AWS access key (optional, uses env vars if None)
             secret_key: AWS secret key (optional, uses env vars if None)
         """
-        session = boto3.Session(
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
-            region_name=region,
-        )
+        from bioetl.infrastructure.storage.s3_pool import S3ClientPool
 
-        self.s3_client = session.client(
-            "s3",
+        # Get S3 client from pool for connection reuse
+        self.s3_client = S3ClientPool.get_client(
             endpoint_url=endpoint_url,
-            config=boto3.session.Config(signature_version="s3v4"),
+            region=region,
+            access_key=access_key,
+            secret_key=secret_key,
         )
         self.bucket = bucket
 
