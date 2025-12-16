@@ -1,0 +1,112 @@
+"""Unit tests for the ChEMBLActivityPipeline."""
+from unittest.mock import MagicMock, AsyncMock
+
+import pytest
+
+from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.types import RunType
+
+
+@pytest.fixture
+def chembl_pipeline():
+    """Fixture for a ChEMBLActivityPipeline."""
+    pipeline = ChEMBLActivityPipeline(
+        run_type=RunType.INCREMENTAL,
+        data_source=AsyncMock(),
+        storage=MagicMock(),
+        lock=AsyncMock(),
+        checkpoint=MagicMock(),
+        quarantine=MagicMock(),
+        resume=False,
+    )
+    return pipeline
+
+
+@pytest.mark.asyncio
+async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
+    """Test the transform_bronze_to_silver method with a valid record."""
+    record = {
+        "activity_id": 123,
+        "molecule_chembl_id": "CHEMBL1",
+        "target_chembl_id": "CHEMBL2",
+        "assay_chembl_id": "CHEMBL3",
+        "standard_type": "IC50",
+        "standard_value": "10.5",
+        "standard_units": "nM",
+    }
+    context = PipelineContext(
+        run_id=chembl_pipeline.context.run_id,
+        run_type=chembl_pipeline.context.run_type,
+        logger=MagicMock(),
+    )
+    transformed = await chembl_pipeline.transform_bronze_to_silver(context, record)
+    assert transformed is not None
+    assert transformed["activity_id"] == "123"
+    assert transformed["standard_value"] == 10.5
+
+
+@pytest.mark.asyncio
+async def test_chembl_transform_bronze_to_silver_no_activity_id(chembl_pipeline):
+    """Test that records with no activity_id are skipped."""
+    record = {"molecule_chembl_id": "CHEMBL1"}
+    context = PipelineContext(
+        run_id=chembl_pipeline.context.run_id,
+        run_type=chembl_pipeline.context.run_type,
+        logger=MagicMock(),
+    )
+    transformed = await chembl_pipeline.transform_bronze_to_silver(context, record)
+    assert transformed is None
+
+
+def test_chembl_should_write_gold_true(chembl_pipeline):
+    """Test the should_write_gold method with a valid record."""
+    record = {
+        "standard_value": 10.5,
+        "standard_units": "nM",
+        "target_chembl_id": "CHEMBL2",
+        "standard_type": "IC50",
+    }
+    context = PipelineContext(
+        run_id=chembl_pipeline.context.run_id,
+        run_type=chembl_pipeline.context.run_type,
+        logger=MagicMock(),
+    )
+    assert chembl_pipeline.should_write_gold(context, record) is True
+
+
+def test_chembl_should_write_gold_false(chembl_pipeline):
+    """Test the should_write_gold method with invalid records."""
+    context = PipelineContext(
+        run_id=chembl_pipeline.context.run_id,
+        run_type=chembl_pipeline.context.run_type,
+        logger=MagicMock(),
+    )
+    # No standard value
+    record1 = {
+        "standard_units": "nM",
+        "target_chembl_id": "CHEMBL2",
+        "standard_type": "IC50",
+    }
+    assert chembl_pipeline.should_write_gold(context, record1) is False
+
+    # No standard units
+    record2 = {
+        "standard_value": 10.5,
+        "target_chembl_id": "CHEMBL2",
+        "standard_type": "IC50",
+    }
+    assert chembl_pipeline.should_write_gold(context, record2) is False
+
+    # No target
+    record3 = {"standard_value": 10.5, "standard_units": "nM", "standard_type": "IC50"}
+    assert chembl_pipeline.should_write_gold(context, record3) is False
+
+    # Wrong type
+    record4 = {
+        "standard_value": 10.5,
+        "standard_units": "nM",
+        "target_chembl_id": "CHEMBL2",
+        "standard_type": "Other",
+    }
+    assert chembl_pipeline.should_write_gold(context, record4) is False
