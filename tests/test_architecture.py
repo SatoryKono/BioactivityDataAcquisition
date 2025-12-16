@@ -493,10 +493,9 @@ def test_io_ports_are_async():
             method = getattr(port_class, method_name)
 
             # Check if it's an async method or async generator
-            is_async = (
-                inspect.iscoroutinefunction(method)
-                or inspect.isasyncgenfunction(method)
-            )
+            is_async = inspect.iscoroutinefunction(
+                method
+            ) or inspect.isasyncgenfunction(method)
             if not is_async:
                 violations.append(
                     f"{port_class.__name__}.{method_name}: "
