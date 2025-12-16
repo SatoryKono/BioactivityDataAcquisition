@@ -1,0 +1,289 @@
+
+    Directory:
+    E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                application
+d-----        12/16/2025   1:57 PM                domain
+d-----        12/16/2025   1:51 PM                infrastructure
+d-----        12/16/2025   1:57 PM                __pycache__
+-a----        12/16/2025   1:46 PM           7290 bootstrap.py
+-a----        12/16/2025   1:46 PM           7756 cli.py
+-a----        12/16/2025   1:57 PM           5366 config.py
+-a----        12/16/2025  12:27 PM             91 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                core
+d-----        12/16/2025   1:09 PM                pipeline
+d-----        12/16/2025   1:51 PM                pipelines
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/15/2025   9:27 PM            103 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application\core
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025  12:50 PM              0 .gitkeep
+-a----        12/16/2025   1:47 PM           3511 base.py
+-a----        12/16/2025  12:51 PM           1662 checkpoint_manager.py
+-a----        12/16/2025   1:47 PM           6696 executor.py
+-a----        12/16/2025  12:51 PM           2465 lock_manager.py
+-a----        12/16/2025   1:47 PM           5684 orchestrator.py
+-a----        12/16/2025  12:51 PM            893 quarantine_manager.py
+-a----        12/16/2025  12:51 PM           3684 record_processor.py
+-a----        12/16/2025  12:52 PM            674 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application\core\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM           5186 base.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           3019 checkpoint_manager.cpython-31
+                                                  3.pyc
+-a----        12/16/2025   1:51 PM           9356 executor.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           4760 lock_manager.cpython-313.pyc
+-a----        12/16/2025   1:51 PM          11505 orchestrator.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           1613 quarantine_manager.cpython-31
+                                                  3.pyc
+-a----        12/16/2025   1:51 PM            809 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application\pipeline
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025  12:54 PM              0 base.py
+-a----        12/16/2025  12:54 PM              0 checkpoint_manager.py
+-a----        12/16/2025  12:54 PM              0 executor.py
+-a----        12/16/2025  12:54 PM              0 lock_manager.py
+-a----        12/16/2025  12:54 PM              0 orchestrator.py
+-a----        12/16/2025  12:54 PM              0 quarantine_manager.py
+-a----        12/16/2025  12:54 PM              0 record_processor.py
+-a----        12/16/2025  12:54 PM              0 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application\pipelines
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025  12:52 PM           7043 chembl_activity.py
+-a----        12/15/2025   9:28 PM             42 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application\pipelines\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM           6665 chembl_activity.cpython-313.p
+                                                  yc
+-a----        12/16/2025   1:51 PM            246 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\application\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM            299 __init__.cpython-313.pyc
+    Directory:
+    E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\domain
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:57 PM                __pycache__
+-a----        12/16/2025   9:12 AM            793 context.py
+-a----        12/16/2025   1:56 PM           4575 error_classifier.py
+-a----        12/16/2025   1:46 PM           7696 exceptions.py
+-a----        12/16/2025  11:52 AM          10868 ports.py
+-a----        12/16/2025   1:57 PM           5650 transformations.py
+-a----        12/16/2025   7:38 AM           6431 types.py
+-a----        12/16/2025   1:50 PM           1662 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\domain\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM           1422 context.cpython-313.pyc
+-a----        12/16/2025   1:57 PM           5240 error_classifier.cpython-313.
+                                                  pyc
+-a----        12/16/2025   1:51 PM          12388 exceptions.cpython-313.pyc
+-a----        12/16/2025   1:51 PM          12668 ports.cpython-313.pyc
+-a----        12/16/2025   1:55 PM           6475 transformations.cpython-313.p
+                                                  yc
+-a----        12/16/2025   1:51 PM           6355 types.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           1364 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                adapters
+d-----        12/16/2025   1:51 PM                checkpoint
+d-----        12/16/2025   1:09 PM                factories
+d-----        12/16/2025   1:51 PM                locking
+d-----        12/16/2025   1:51 PM                observability
+d-----        12/16/2025   1:51 PM                quarantine
+d-----        12/16/2025   1:51 PM                storage
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025  10:26 AM              0 config.py
+-a----        12/16/2025   7:38 AM            311 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                chembl
+d-----        12/16/2025   1:51 PM                http
+d-----        12/16/2025   1:51 PM                pubchem
+d-----        12/16/2025   1:51 PM                uniprot
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   7:39 AM             53 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\chembl
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   1:49 PM           9508 client.py
+-a----        12/16/2025   7:39 AM            253 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\chembl\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          11358 client.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            478 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\http
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   1:48 PM           6166 circuit_breaker.py
+-a----        12/16/2025   1:48 PM           7976 client.py
+-a----        12/16/2025   7:40 AM           4603 rate_limiter.py
+-a----        12/16/2025   7:39 AM            496 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\http\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM           8896 circuit_breaker.cpython-313.p
+                                                  yc
+-a----        12/16/2025   1:51 PM          10699 client.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           6276 rate_limiter.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            713 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\pubchem
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025  12:58 PM          12571 client.py
+-a----        12/15/2025   9:21 PM             92 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\pubchem\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          14993 client.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            305 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\uniprot
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025  12:57 PM          13594 client.py
+-a----        12/15/2025   9:22 PM             92 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\uniprot\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          15341 client.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            305 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\adapters\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM            259 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\checkpoint
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   1:48 PM          11098 s3_checkpoint.py
+-a----        12/15/2025   9:12 PM             92 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\checkpoint\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          11542 s3_checkpoint.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            302 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\factories
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025  11:28 AM           1674 clients.py
+-a----        12/16/2025   8:52 AM            933 storage.py
+-a----        12/16/2025   8:17 AM             52 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\locking
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   1:47 PM           7855 redis_lock.py
+-a----        12/16/2025   7:41 AM            243 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\locking\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          10824 redis_lock.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            453 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\observability
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   7:54 AM          14784 anomaly.py
+-a----        12/16/2025   7:43 AM          14179 lineage.py
+-a----        12/16/2025   9:41 AM           1909 logging.py
+-a----        12/16/2025   8:59 AM           1545 metrics.py
+-a----        12/16/2025  12:24 PM           2147 prometheus_metrics.py
+-a----        12/16/2025   7:42 AM            803 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\observability\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          16158 anomaly.cpython-313.pyc
+-a----        12/16/2025   1:51 PM          16601 lineage.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           2277 metrics.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            918 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\quarantine
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:51 PM                __pycache__
+-a----        12/16/2025   1:32 PM          16966 unified_quarantine.py
+-a----        12/15/2025   9:12 PM            100 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\quarantine\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM          16269 unified_quarantine.cpython-31
+                                                  3.pyc
+-a----        12/16/2025   1:51 PM            310 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\storage
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/16/2025   1:52 PM                __pycache__
+-a----        12/16/2025   1:28 PM           8015 bronze_writer.py
+-a----        12/16/2025   1:38 PM          13337 delta_writer.py
+-a----        12/16/2025   1:51 PM            767 exceptions.py
+-a----        12/16/2025   7:45 AM          12341 gold_writer.py
+-a----        12/16/2025   1:17 PM           4065 s3_pool.py
+-a----        12/16/2025   1:30 PM            749 __init__.py
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\storage\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM           8779 bronze_writer.cpython-313.pyc
+-a----        12/16/2025   1:51 PM          13359 delta_writer.cpython-313.pyc
+-a----        12/16/2025   1:52 PM            795 exceptions.cpython-313.pyc
+-a----        12/16/2025   1:51 PM          12196 gold_writer.cpython-313.pyc
+-a----        12/16/2025   1:51 PM           4739 s3_pool.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            865 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\infrastructure\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:51 PM            504 __init__.cpython-313.pyc
+    Directory: E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioe
+    tl\__pycache__
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/16/2025   1:57 PM           7574 config.cpython-313.pyc
+-a----        12/16/2025   1:51 PM            280 __init__.cpython-313.pyc

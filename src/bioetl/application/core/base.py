@@ -20,10 +20,10 @@ from bioetl.domain.ports import (
     DataSourcePort,
     LockPort,
     MetricsPort,
-    NoOpMetrics,
     QuarantinePort,
     StoragePort,
 )
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.domain.types import (
     RunID,
     RunType,

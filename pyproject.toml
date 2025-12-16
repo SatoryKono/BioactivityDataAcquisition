@@ -73,6 +73,8 @@ dev = [
     # Code complexity analysis (RULES.md)
     "xenon>=0.9",
     "radon>=6.0",
+    # Dead code detection
+    "vulture>=2.11",
     # Mutation testing
     "mutmut>=2.5",
 ]
@@ -108,6 +110,8 @@ asyncio_mode = "auto"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
+    # NoOpMetrics warns when metrics are disabled (expected in tests)
+    "ignore:NoOpMetrics is being used:UserWarning",
 ]
 
 # ============ COVERAGE ============

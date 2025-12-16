@@ -1,14 +1,15 @@
 """Pipeline Orchestrator.
 
-Handles pipeline lifecycle, signals, and Prefect integration.
+Handles pipeline lifecycle, signals, and graceful shutdown.
+
+This module is framework-agnostic. Prefect integration is provided by
+the orchestration layer (bioetl.orchestration.tasks).
 """
 
 import asyncio
 import signal
 import time
 from typing import TYPE_CHECKING, Any
-
-from prefect import flow
 
 from bioetl.config import get_settings
 from bioetl.domain.types import RunType
@@ -19,16 +20,6 @@ if TYPE_CHECKING:
 
 class PipelineShutdownError(Exception):
     """Raised when pipeline receives shutdown signal."""
-
-
-@flow(
-    name="{self.pipeline.pipeline_name}",
-    log_prints=True,
-    validate_parameters=False,
-)
-async def run_pipeline_flow(pipeline: "BasePipeline") -> None:
-    """Prefect flow to run the ETL pipeline."""
-    await pipeline.run()
 
 
 class PipelineOrchestrator:

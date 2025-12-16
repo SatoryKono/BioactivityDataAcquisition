@@ -27,10 +27,14 @@ from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+# MetricsPort imported at runtime for type annotation in bootstrap()
+from bioetl.domain.ports import MetricsPort
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -59,6 +63,7 @@ class ServiceContainer:
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
     lock: LockPort
+    metrics: MetricsPort
     # We expose raw configs/clients if needed by factories, though ideally
     # everything should be behind a Port.
     redis_client: aioredis.Redis
@@ -95,10 +100,18 @@ def bootstrap() -> ServiceContainer:
 
     lock = RedisDistributedLock(redis_client=redis_client)
 
+    # Metrics - use PrometheusMetrics by default, NoOpMetrics only if explicitly disabled
+    metrics: MetricsPort
+    if getattr(settings, "metrics", None) and not settings.metrics.enabled:
+        metrics = NoOpMetrics(warn_on_use=False)  # Explicitly disabled, no warning
+    else:
+        metrics = PrometheusMetrics()
+
     return ServiceContainer(
         checkpoint=checkpoint,
         quarantine=quarantine,
         lock=lock,
+        metrics=metrics,
         redis_client=redis_client,
     )
 
@@ -127,6 +140,7 @@ class ChEMBLActivityPipelineFactory:
         checkpoint: CheckpointPort | None = None,
         quarantine: QuarantinePort | None = None,
         lock: LockPort | None = None,
+        metrics: MetricsPort | None = None,
     ) -> ChEMBLActivityPipeline:
         """Create configured ChEMBL Activity pipeline.
 
@@ -139,6 +153,7 @@ class ChEMBLActivityPipelineFactory:
             checkpoint: Injected checkpoint service (optional)
             quarantine: Injected quarantine service (optional)
             lock: Injected lock service (optional)
+            metrics: Injected metrics service (optional)
 
         Returns:
             Configured pipeline instance
@@ -197,8 +212,12 @@ class ChEMBLActivityPipelineFactory:
                 storage_options=storage_options,
             )
 
-        # Metrics
-        metrics = PrometheusMetrics()
+        # Metrics - use injected or create based on settings
+        if metrics is None:
+            if getattr(settings, "metrics", None) and not settings.metrics.enabled:
+                metrics = NoOpMetrics(warn_on_use=False)  # Explicitly disabled
+            else:
+                metrics = PrometheusMetrics()
 
         return ChEMBLActivityPipeline(
             run_type=run_type,
