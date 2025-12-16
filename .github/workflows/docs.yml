@@ -26,7 +26,13 @@ jobs:
         run: npm install -g @mermaid-js/mermaid-cli
 
       - name: Validate Mermaid diagrams
-        run: mmdc -i 'docs/**/*.mermaid' --dryRun
+        run: |
+          shopt -s globstar nullglob
+          for file in docs/**/*.mermaid; do
+            echo "Validating $file..."
+            mmdc -i "$file" -o /dev/null || exit 1
+          done
+          echo "All Mermaid diagrams validated successfully"
 
   render-diagrams:
     needs: validate-mermaid
