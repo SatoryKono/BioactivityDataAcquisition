@@ -146,7 +146,9 @@ class UnifiedHTTPClient:
             raise RuntimeError(msg)
         return self._client
 
-    async def _handle_retry_delay(self, attempt: int, response: httpx.Response | None = None) -> None:
+    async def _handle_retry_delay(
+        self, attempt: int, response: httpx.Response | None = None
+    ) -> None:
         """Calculate and sleep for the appropriate retry delay."""
         delay = self.retry_config.calculate_delay(attempt)
         if response:
