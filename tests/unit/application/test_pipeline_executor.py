@@ -3,9 +3,8 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
-from bioetl.application.pipeline.base import BasePipeline
-from bioetl.application.pipeline.executor import PipelineExecutor
+from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.executor import PipelineExecutor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
