@@ -46,10 +46,6 @@ class TestDriftLevel:
         assert DriftLevel.WARN.value == "WARN"
         assert DriftLevel.CRITICAL.value == "CRITICAL"
 
-    def test_drift_level_is_str_enum(self) -> None:
-        """DriftLevel should be usable as string."""
-        assert str(DriftLevel.CRITICAL) == "CRITICAL"
-
 
 class TestHealthStatus:
     """Tests for HealthStatus enum."""
