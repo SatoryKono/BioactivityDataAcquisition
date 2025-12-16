@@ -320,3 +320,70 @@ class QuarantinePort(Protocol):
             A dictionary of statistics (e.g., count by error code).
         """
         ...
+
+
+@runtime_checkable
+class MetricsPort(Protocol):
+    """
+    Port for metrics collection.
+
+    This interface abstracts the metrics collection mechanism, allowing the
+    application to record metrics without knowing the specific implementation
+    (e.g., Prometheus, StatsD, CloudWatch).
+    """
+
+    def observe_histogram(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """
+        Observe a value for a histogram metric.
+
+        Args:
+            name: The name of the histogram metric.
+            value: The value to observe.
+            labels: A dictionary of label names to label values.
+        """
+        ...
+
+    def increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: dict[str, str],
+    ) -> None:
+        """
+        Increment a counter metric.
+
+        Args:
+            name: The name of the counter metric.
+            value: The amount to increment by.
+            labels: A dictionary of label names to label values.
+        """
+        ...
+
+
+class NoOpMetrics:
+    """No-operation metrics implementation.
+
+    Used as default when no metrics backend is configured.
+    All operations are silently ignored.
+    """
+
+    def observe_histogram(
+        self,
+        name: str,
+        value: float,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op histogram observation."""
+
+    def increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: dict[str, str],
+    ) -> None:
+        """No-op counter increment."""

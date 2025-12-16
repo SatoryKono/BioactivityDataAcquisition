@@ -25,6 +25,7 @@ from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
@@ -35,7 +36,12 @@ if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-    from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
+    from bioetl.domain.ports import (
+        CheckpointPort,
+        LockPort,
+        MetricsPort,
+        QuarantinePort,
+    )
     from bioetl.domain.types import RunType
 
 
@@ -135,6 +141,7 @@ class ChEMBLActivityPipelineFactory:
         checkpoint: CheckpointPort | None = None,
         quarantine: QuarantinePort | None = None,
         lock: LockPort | None = None,
+        metrics: MetricsPort | None = None,
     ) -> ChEMBLActivityPipeline:
         """Create configured ChEMBL Activity pipeline.
 
@@ -146,6 +153,7 @@ class ChEMBLActivityPipelineFactory:
             checkpoint: Injected checkpoint service (optional)
             quarantine: Injected quarantine service (optional)
             lock: Injected lock service (optional)
+            metrics: Injected metrics service (optional)
 
         Returns:
             Configured pipeline instance
@@ -217,6 +225,10 @@ class ChEMBLActivityPipelineFactory:
                 storage_options=storage_options,
             )
 
+        # Metrics
+        if metrics is None:
+            metrics = PrometheusMetrics()
+
         return ChEMBLActivityPipeline(
             run_type=run_type,
             data_source=data_source,
@@ -226,4 +238,5 @@ class ChEMBLActivityPipelineFactory:
             quarantine=quarantine,
             logger=logger,
             resume=resume,
+            metrics=metrics,
         )
