@@ -13,7 +13,6 @@ All functions are pure (deterministic, side-effect free).
 import hashlib
 import json
 import math
-from collections.abc import Sequence
 from datetime import date, datetime
 from functools import singledispatch
 from typing import Any
@@ -68,13 +67,13 @@ def _normalize_str(value: str) -> str:
 
 
 @_normalize_value.register(dict)
-def _normalize_dict(value: dict) -> dict:
+def _normalize_dict(value: dict[str, Any]) -> dict[str, Any]:
     """Normalize dict by recursively normalizing values."""
     return {k: _normalize_value(v) for k, v in value.items()}
 
 
 @_normalize_value.register(list)
-def _normalize_list(value: list) -> list:
+def _normalize_list(value: list[Any]) -> list[Any]:
     """Normalize list by recursively normalizing elements."""
     return [_normalize_value(v) for v in value]
 

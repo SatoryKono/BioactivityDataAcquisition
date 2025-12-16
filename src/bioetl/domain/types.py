@@ -6,7 +6,7 @@ No I/O operations allowed (REQ-ARCH-003).
 
 from datetime import datetime
 from enum import Enum
-from typing import NewType
+from typing import NewType, TypeAlias
 from uuid import UUID
 
 # Type aliases for semantic clarity
@@ -22,7 +22,7 @@ ContentHash = NewType("ContentHash", str)
 BatchID = NewType("BatchID", UUID)
 """Unique identifier for a data batch."""
 
-Watermark = NewType("Watermark", str | datetime | int)
+Watermark: TypeAlias = str | datetime | int
 """Checkpoint value for incremental loading (timestamp, ID, or offset)."""
 
 
