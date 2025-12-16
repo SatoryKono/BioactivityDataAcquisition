@@ -23,51 +23,113 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
 
 ### Prerequisites
 
-* Python 3.11+
-* Docker & Docker Compose (for local infrastructure)
-* Make
+* **Python**: Version 3.11 or higher.
+* **Docker**: Required for local infrastructure (Postgres, Redis, MinIO).
+* **Make**: For running automation commands.
 
 ### Installation
 
 1. **Clone and Install**:
+   Initialize the virtual environment and install project dependencies.
    ```bash
    git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
    cd BioactivityDataAcquisition
    make install
    ```
 
-2. **Start Infrastructure** (Postgres, Redis, MinIO):
+2. **Configure Environment**:
+   Copy the example configuration.
+   ```bash
+   cp .env.example .env
+   ```
+   *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`.*
+
+3. **Start Infrastructure**:
+   Launch local services (Postgres, Redis, MinIO) via Docker Compose.
    ```bash
    make docker-up
    ```
 
-3. **Run a Pipeline** (Example: ChEMBL Activity):
-   ```bash
-   # Activate virtual environment
-   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+### Running Pipelines
 
-   # Run pipeline
-   python -m bioetl.main run --pipeline chembl_activity
-   ```
-
-## 📚 Documentation
-
-The project documentation is organized as follows:
-
-* **[Project Rules (RULES.md)](docs/RULES.md)**: The "Constitution" of the project. Contains all architectural
-  decisions, coding standards, and operational policies. **Start here.**
-* **[Changelog](CHANGELOG.md)**: History of changes and versioning.
-* **[Developer Guides](docs/03-guides/quick-start.md)**: Detailed setup and development instructions.
-* **[Architecture](docs/02-architecture/system-context.md)**: System design and data flow diagrams.
-
-To view the full documentation site locally:
+Activate the virtual environment:
 
 ```bash
-pip install -e .[docs]
-mkdocs serve
+# Linux/macOS
+source .venv/bin/activate
+
+# Windows
+.venv\Scripts\activate
 ```
 
-## 🛠 Project Structure
+Run the ETL pipeline using the CLI:
+
+```bash
+# Run incremental update for ChEMBL
+bioetl run --pipeline chembl_activity --run-type incremental
+
+# Run backfill with resume capability
+bioetl run --pipeline chembl_activity --run-type backfill --resume
+
+# Inspect quarantined records
+bioetl quarantine inspect --pipeline chembl_activity --limit 10
+
+# List checkpoints
+bioetl checkpoint list
+```
+
+## 🛠 Development
+
+### Testing
+
+The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.
+
+* **Run All Tests**:
+  ```bash
+  make test
+  ```
+* **Run Unit Tests Only** (Fast, no I/O):
+  ```bash
+  make test-unit
+  ```
+* **Run Integration Tests** (Uses Docker/VCR.py):
+  ```bash
+  make test-integration
+  ```
+* **Run Architecture Tests**:
+  ```bash
+  make arch-test
+  ```
+
+### Code Quality
+
+Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
+
+* **Linting & Formatting**:
+  ```bash
+  make lint      # Check only
+  make lint-fix  # Auto-fix and format
+  ```
+* **Type Checking**:
+  ```bash
+  make typecheck # Strict mypy
+  ```
+* **Complexity Check**:
+  ```bash
+  make complexity
+  ```
+
+### Documentation
+
+Build and serve local documentation:
+
+```bash
+make docs-serve
+```
+
+Access the docs at `http://localhost:8000`.
+
+## 📂 Project Structure
 
 ```
 .
@@ -77,11 +139,13 @@ mkdocs serve
 │   └── bioetl/
 │       ├── domain/      # Pure business logic & interfaces (Ports)
 │       ├── application/ # Pipeline orchestration & services
-│       └── infrastructure/ # Adapters (API clients, Delta Lake, Redis)
-├── tests/               # Unit & Integration tests (VCR.py)
-├── RULES.md             # Governance & Standards (v5.0)
+│       ├── infrastructure/ # Adapters (API clients, Delta Lake, Redis)
+│       └── cli.py       # Command-line interface entry point
+├── tests/               # Unit, Integration & Architecture tests
+├── .env.example         # Environment variables template
 ├── Makefile             # Automation commands
-└── pyproject.toml       # Dependencies & Tool configuration
+├── pyproject.toml       # Dependencies & Tool configuration
+└── README.md            # Project documentation
 ```
 
 ## 🤝 Contributing
