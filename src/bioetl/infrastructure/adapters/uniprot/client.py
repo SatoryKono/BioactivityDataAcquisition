@@ -17,7 +17,7 @@ from typing import Any
 
 import httpx
 
-from bioetl.config import get_settings
+from bioetl.infrastructure.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
