@@ -163,6 +163,11 @@ class RedisDistributedLock:
             regular_key = self._make_key(key)
             if await self.redis_client.exists(regular_key):
                 return False
+        else:
+            # If regular, check for exclusive lock
+            exclusive_key = self._make_key(key, exclusive=True)
+            if await self.redis_client.exists(exclusive_key):
+                return False
 
         # Try to acquire lock with SETNX + EXPIRE
         acquired = await self.redis_client.set(
@@ -189,6 +194,10 @@ class RedisDistributedLock:
             if exclusive:
                 regular_key = self._make_key(key)
                 if await self.redis_client.exists(regular_key):
+                    continue
+            else:
+                exclusive_key = self._make_key(key, exclusive=True)
+                if await self.redis_client.exists(exclusive_key):
                     continue
 
             acquired = await self.redis_client.set(
