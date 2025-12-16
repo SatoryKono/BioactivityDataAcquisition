@@ -45,7 +45,7 @@ class QuarantineManager:
             batch_id: ID of the batch containing this record.
             error_details: Human-readable error description.
         """
-        self._quarantine.write(
+        await self._quarantine.write(
             pipeline=self._pipeline_name,
             error_code=error_type.value,
             payload=record,
