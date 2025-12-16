@@ -14,10 +14,6 @@ from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
     from bioetl.application.pipeline.base import BasePipeline
-from bioetl.infrastructure.observability.metrics import (
-    PIPELINE_DURATION_SECONDS,
-    RECORDS_PROCESSED_TOTAL,
-)
 
 
 class PipelineShutdownError(Exception):
@@ -102,29 +98,33 @@ class PipelineOrchestrator:
             )
             self.pipeline.logger.info("Lock released", extra={"stage": "cleanup"})
 
-            # Record metrics
+            # Record metrics via port (if available)
             duration = time.time() - start_time
-            PIPELINE_DURATION_SECONDS.labels(
-                pipeline_name=self.pipeline.pipeline_name,
-                run_type=self.pipeline.run_type.value,
-                status=status,
-            ).observe(duration)
+            if self.pipeline.metrics:
+                self.pipeline.metrics.observe_histogram(
+                    "pipeline_duration_seconds",
+                    duration,
+                    {
+                        "pipeline_name": self.pipeline.pipeline_name,
+                        "run_type": self.pipeline.run_type.value,
+                        "status": status,
+                    },
+                )
 
-            RECORDS_PROCESSED_TOTAL.labels(
-                pipeline_name=self.pipeline.pipeline_name,
-                run_type=self.pipeline.run_type.value,
-                layer="bronze",
-            ).inc(self.pipeline.executor.records_bronze)
-            RECORDS_PROCESSED_TOTAL.labels(
-                pipeline_name=self.pipeline.pipeline_name,
-                run_type=self.pipeline.run_type.value,
-                layer="silver",
-            ).inc(self.pipeline.executor.records_silver)
-            RECORDS_PROCESSED_TOTAL.labels(
-                pipeline_name=self.pipeline.pipeline_name,
-                run_type=self.pipeline.run_type.value,
-                layer="gold",
-            ).inc(self.pipeline.executor.records_gold)
+                for layer, count in [
+                    ("bronze", self.pipeline.executor.records_bronze),
+                    ("silver", self.pipeline.executor.records_silver),
+                    ("gold", self.pipeline.executor.records_gold),
+                ]:
+                    self.pipeline.metrics.increment_counter(
+                        "records_processed_total",
+                        count,
+                        {
+                            "pipeline_name": self.pipeline.pipeline_name,
+                            "run_type": self.pipeline.run_type.value,
+                            "layer": layer,
+                        },
+                    )
 
     async def _heartbeat_loop(self, lock_key: str, exclusive: bool) -> None:
         while not self.shutdown_requested:
