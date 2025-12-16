@@ -1,101 +1,88 @@
 # BasePipeline Dependency Map
 
 **Generated:** 2025-12-16
-**Purpose:** Map all dependencies before refactoring BasePipeline (God Object)
+**Updated:** 2025-12-16 (post-refactoring)
+**Status:** Рефакторинг завершён
 
-## 1. Current State Analysis
+## 1. Current State (After Refactoring)
 
-### 1.1 Constructor Parameters (13 dependencies - God Object)
+### 1.1 New Constructor Signature (3 parameters)
 
 ```python
 def __init__(
     self,
-    pipeline_name: str,          # Config
-    provider: str,               # Config
-    entity_type: str,            # Config
-    run_type: RunType,           # Runtime
-    data_source: DataSourcePort, # Port
-    storage: StoragePort,        # Port
-    lock: LockPort,              # Port
-    checkpoint: CheckpointPort,  # Port
-    quarantine: QuarantinePort,  # Port
-    logger: BoundLogger,         # Infrastructure
-    metrics: MetricsPort,        # Port
-    resume: bool = False,        # Runtime
-    limit: int | None = None,    # Runtime
+    config: PipelineConfig,      # Immutable config
+    runtime: PipelineRuntimeConfig,  # Runtime params
+    services: PipelineServices,  # I/O ports with aclose()
 ) -> None
 ```
 
-**Categorization:**
-| Category | Parameters | Count |
-|----------|------------|-------|
-| Config (static) | `pipeline_name`, `provider`, `entity_type` | 3 |
-| Runtime (dynamic) | `run_type`, `resume`, `limit` | 3 |
-| Ports (I/O) | `data_source`, `storage`, `lock`, `checkpoint`, `quarantine`, `metrics` | 6 |
-| Infrastructure | `logger` | 1 |
-| **Total** | | **13** |
+**Decomposition:**
+| Structure | Fields | Frozen |
+|-----------|--------|--------|
+| `PipelineConfig` | `pipeline_name`, `provider`, `entity_type`, `primary_keys`, `silver_table`, `gold_table`, `batch_size`, `checkpoint_interval` | Yes |
+| `PipelineRuntimeConfig` | `run_type`, `resume`, `limit` | Yes |
+| `PipelineServices` | `data_source`, `storage`, `lock`, `checkpoint`, `quarantine`, `metrics`, `logger` + `aclose()` | Yes |
 
-### 1.2 Internal Components Created
+### 1.2 Internal Components (Lazy-Initialized)
 
 ```python
-self.context = PipelineContext(...)
-self.orchestrator = PipelineOrchestrator(self)    # Circular ref!
-self.executor = PipelineExecutor(self)            # Circular ref!
-self.lock_manager = LockManager(self)             # Circular ref!
-self.checkpoint_manager = CheckpointManager(...)
-self.error_classifier = ErrorClassifier()
-self.quarantine_manager = QuarantineManager(self) # Circular ref!
+# All components created via from_components() - NO circular refs
+self._orchestrator: PipelineOrchestrator | None = None
+self._executor: PipelineExecutor | None = None
+self._checkpoint_manager: CheckpointManager | None = None
+self._quarantine_manager: QuarantineManager | None = None
+self._error_classifier: ErrorClassifier | None = None
 ```
 
-### 1.3 Circular Dependencies
+### 1.3 Circular Dependencies - RESOLVED
 
 ```
+BEFORE (circular):
 BasePipeline ─────creates────► PipelineOrchestrator
      ▲                               │
      └───────────references──────────┘
 
-BasePipeline ─────creates────► PipelineExecutor
-     ▲                               │
-     └───────────references──────────┘
-
-BasePipeline ─────creates────► LockManager
-     ▲                               │
-     └───────────references──────────┘
-
-BasePipeline ─────creates────► QuarantineManager
-     ▲                               │
-     └───────────references──────────┘
+AFTER (no circular refs):
+BasePipeline ─────creates────► PipelineOrchestrator.from_components(
+     │                              config=...,
+     │                              runtime=...,
+     │                              executor=...,  # injected
+     │                          )
+     │
+     └─── NO back-reference ───────────────────────────────────────►
 ```
 
-## 2. File Dependencies
+## 2. File Dependencies (Updated)
 
-### 2.1 Direct Imports from `bioetl.application.core.base`
+### 2.1 New Files Created
+
+| File | Purpose |
+|------|---------|
+| `application/core/pipeline_config.py` | `PipelineConfig`, `PipelineRuntimeConfig` |
+| `application/core/pipeline_services.py` | `PipelineServices` with `aclose()` |
+| `application/core/shutdown.py` | `ShutdownSignal` for graceful shutdown |
+
+### 2.2 Direct Imports from `bioetl.application.core.base`
 
 | File | Import | Usage |
 |------|--------|-------|
-| `cli.py:19` | `run_pipeline_flow` | CLI entry point |
-| `orchestration/tasks.py:18` | `BasePipeline` (TYPE_CHECKING) | Prefect task type hint |
-| `application/pipelines/chembl_activity.py:15` | `BasePipeline` | Inheritance |
-| `application/core/__init__.py:3` | `BasePipeline` | Re-export |
-| `application/core/orchestrator.py:18` | `BasePipeline` (TYPE_CHECKING) | Constructor param |
-| `application/core/executor.py:19` | `BasePipeline` (TYPE_CHECKING) | Constructor param |
-| `application/core/lock_manager.py:11` | `BasePipeline` (TYPE_CHECKING) | Constructor param |
-| `application/core/quarantine_manager.py:8` | `BasePipeline` (TYPE_CHECKING) | Constructor param |
+| `cli.py` | `run_pipeline_flow` | CLI entry point (calls `aclose()`) |
+| `orchestration/tasks.py` | `BasePipeline` (TYPE_CHECKING) | Prefect task type hint |
+| `application/pipelines/chembl_activity.py` | `BasePipeline` | Inheritance |
+| `application/core/__init__.py` | `BasePipeline` | Re-export |
+| `application/core/orchestrator.py` | `BasePipeline` (TYPE_CHECKING) | Type hints only |
+| `application/core/executor.py` | `BasePipeline` (TYPE_CHECKING) | Type hints only |
 
-### 2.2 Test Dependencies
+### 2.3 Test Dependencies (Updated)
 
-| File | Usage |
-|------|-------|
-| `tests/unit/application/test_base_pipeline.py` | Direct tests for BasePipeline |
-| `tests/unit/application/test_pipeline_executor.py` | ConcretePipeline(BasePipeline) mock |
+| File | Fixture Pattern |
+|------|-----------------|
+| `tests/unit/application/test_base_pipeline.py` | `PipelineConfig` + `PipelineRuntimeConfig` + `PipelineServices` |
+| `tests/unit/application/test_pipeline_executor.py` | Same + `from_components()` tests |
+| `tests/unit/application/pipelines/test_chembl_activity.py` | `ChEMBLActivityPipeline.create()` |
 
-### 2.3 Re-exports
-
-| File | Exports |
-|------|---------|
-| `application/core/__init__.py` | `BasePipeline` in `__all__` |
-
-## 3. Dependency Graph
+## 3. Dependency Graph (After Refactoring)
 
 ```
                               cli.py
@@ -103,64 +90,111 @@ BasePipeline ─────creates────► QuarantineManager
                                 ▼
                         run_pipeline_flow()
                                 │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      BasePipeline                           │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │ Config: pipeline_name, provider, entity_type        │   │
-│  │ Runtime: run_type, resume, limit, run_id            │   │
-│  │ Ports: data_source, storage, lock, checkpoint,      │   │
-│  │        quarantine, metrics                          │   │
-│  │ Infra: logger, context                              │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                           │                                 │
-│            ┌──────────────┼──────────────┐                 │
-│            ▼              ▼              ▼                 │
-│     Orchestrator      Executor      LockManager            │
-│            │              │              │                 │
-│            └──────────────┴──────────────┘                 │
-│                    (all reference `self`)                  │
-└─────────────────────────────────────────────────────────────┘
+                                ├─── try: await pipeline.run()
+                                │
+                                └─── finally: await pipeline.services.aclose()
                                 │
                                 ▼
-                    ChEMBLActivityPipeline (inherits)
+┌─────────────────────────────────────────────────────────────────────┐
+│                         BasePipeline                                 │
+│  ┌────────────────┐ ┌──────────────────┐ ┌────────────────────────┐ │
+│  │ PipelineConfig │ │PipelineRuntime   │ │   PipelineServices     │ │
+│  │   (frozen)     │ │   Config         │ │     (frozen)           │ │
+│  └────────────────┘ └──────────────────┘ └────────────────────────┘ │
+│                                                      │               │
+│                                                      ▼               │
+│                                              aclose() ───────────────┼──► Close all I/O
+│                                                                      │
+│         Lazy properties (no circular refs):                          │
+│         ┌──────────────────────────────────────────────────────┐    │
+│         │ @property orchestrator → Orchestrator.from_components │    │
+│         │ @property executor → Executor.from_components         │    │
+│         │ @property checkpoint_manager → CheckpointManager      │    │
+│         └──────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+                    ChEMBLActivityPipeline
+                    ├── CHEMBL_ACTIVITY_CONFIG (default)
+                    └── create(runtime, services) factory
 ```
 
-## 4. Problems Identified
+## 4. Problems - ALL RESOLVED
 
-### 4.1 God Object Anti-pattern
-- 13 constructor parameters
-- Multiple responsibilities: config, runtime, I/O ports
-- Hard to test in isolation
+### 4.1 God Object Anti-pattern ✅
+- **Before:** 13 constructor parameters
+- **After:** 3 structured parameters
 
-### 4.2 Circular Dependencies
-- `BasePipeline` creates managers that reference back to it
-- Tight coupling prevents independent evolution
-- Makes mocking difficult
+### 4.2 Circular Dependencies ✅
+- **Before:** Managers stored `self` reference
+- **After:** `from_components()` injection, no back-refs
 
-### 4.3 Violation of Single Responsibility
-- Holds both configuration AND orchestration logic
-- Mixes data (config) with behavior (managers)
+### 4.3 Violation of Single Responsibility ✅
+- **Before:** Config + Orchestration mixed
+- **After:** Config in dataclasses, behavior in pipeline
 
-## 5. Proposed Solution (ADR-0005)
+### 4.4 Resource Leaks ✅
+- **Before:** No centralized cleanup
+- **After:** `PipelineServices.aclose()` in `finally` block
 
-### 5.1 Split into:
-1. **PipelineConfig** (dataclass) - holds configuration
-2. **PipelineServices** (dataclass) - holds port dependencies
-3. **BasePipeline** (refactored) - behavior only, receives Config + Services
+## 5. Migration Guide
 
-### 5.2 Migration Strategy
-1. Create new structures with compatibility shim
-2. Deprecate old constructor
-3. Migrate concrete pipelines
-4. Remove shim after 14 days
+### For New Pipelines
 
-## 6. Impact Assessment
+```python
+from bioetl.application.core import (
+    BasePipeline,
+    PipelineConfig,
+    PipelineRuntimeConfig,
+    PipelineServices,
+)
 
-| Component | Change Required | Risk |
-|-----------|----------------|------|
-| `ChEMBLActivityPipeline` | Update constructor | Medium |
-| `cli.py` | Update pipeline creation | Low |
-| `orchestration/tasks.py` | Update type hints | Low |
-| Manager classes | Accept Config/Services instead | Medium |
-| Tests | Update fixtures | Medium |
+# 1. Define config
+MY_CONFIG = PipelineConfig(
+    pipeline_name="my_pipeline",
+    provider="my_provider",
+    entity_type="my_entity",
+    primary_keys=["entity_id"],
+    silver_table="my_provider.my_entity",
+)
+
+# 2. Create pipeline class
+class MyPipeline(BasePipeline):
+    @classmethod
+    def create(cls, runtime: PipelineRuntimeConfig, services: PipelineServices):
+        return cls(MY_CONFIG, runtime, services)
+
+    async def transform_bronze_to_silver(self, context, record):
+        # Transform logic
+        return record
+```
+
+### For Tests
+
+```python
+@pytest.fixture
+def pipeline():
+    config = PipelineConfig(...)
+    runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+
+    services = PipelineServices(
+        data_source=AsyncMock(),
+        storage=AsyncMock(),
+        lock=AsyncMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),
+        metrics=MagicMock(),
+        logger=mock_logger,
+    )
+    return ConcretePipeline(config, runtime, services)
+```
+
+## 6. Deprecation Timeline
+
+| Date | Action |
+|------|--------|
+| 2025-12-16 | `from_params()` deprecated with warning |
+| 2025-01-15 | `from_params()` removed |
