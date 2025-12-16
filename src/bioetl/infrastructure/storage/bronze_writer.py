@@ -15,8 +15,9 @@ Architecture:
 - Generates checksums for data integrity
 """
 
+import asyncio
 import json
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -42,7 +43,7 @@ class BronzeWriter:
         ...     secret_key="bioetl_minio_pass"
         ... )
         >>> records = [b'{"id": "CHEMBL123", "value": 5.5}\\n']
-        >>> path = writer.write_bronze(
+        >>> path = await writer.write_bronze(
         ...     records=iter(records),
         ...     provider="chembl",
         ...     entity="activity",
@@ -80,8 +81,9 @@ class BronzeWriter:
             secret_key=secret_key,
         )
         self.bucket = bucket
+        self.loop = asyncio.get_event_loop()
 
-    def write_bronze(
+    async def write_bronze(
         self,
         records: Iterator[bytes],
         provider: str,
@@ -119,25 +121,30 @@ class BronzeWriter:
         )
 
         # Compress data in memory
-        compressed_data = self._compress_records(records)
+        compressed_data = await self.loop.run_in_executor(
+            None, self._compress_records, records
+        )
 
         if not compressed_data:
             raise ValueError("No records to write")
 
         # Upload to S3 (atomic operation)
         try:
-            self.s3_client.put_object(
-                Bucket=self.bucket,
-                Key=s3_key,
-                Body=compressed_data,
-                ContentType="application/zstd",
-                Metadata={
-                    "provider": provider,
-                    "entity": entity,
-                    "batch_id": str(batch_id),
-                    "ingestion_date": date_str,
-                    "format_version": "v1",
-                },
+            await self.loop.run_in_executor(
+                None,
+                lambda: self.s3_client.put_object(
+                    Bucket=self.bucket,
+                    Key=s3_key,
+                    Body=compressed_data,
+                    ContentType="application/zstd",
+                    Metadata={
+                        "provider": provider,
+                        "entity": entity,
+                        "batch_id": str(batch_id),
+                        "ingestion_date": date_str,
+                        "format_version": "v1",
+                    },
+                ),
             )
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "")
@@ -175,7 +182,7 @@ class BronzeWriter:
 
         return output.getvalue()
 
-    def read_bronze(self, s3_key: str) -> Iterator[dict[str, Any]]:
+    async def read_bronze(self, s3_key: str) -> AsyncIterator[dict[str, Any]]:
         """Read and decompress Bronze file (for testing/debugging).
 
         Args:
@@ -186,12 +193,14 @@ class BronzeWriter:
 
         Example:
             >>> writer = BronzeWriter(bucket="bioetl-bronze")
-            >>> records = list(writer.read_bronze(
+            >>> records = [record async for record in writer.read_bronze(
             ...     "bronze/v1/chembl/activity/2025-12-15/batch_xxx.jsonl.zst"
-            ... ))
+            ... )]
         """
         # Download from S3
-        response = self.s3_client.get_object(Bucket=self.bucket, Key=s3_key)
+        response = await self.loop.run_in_executor(
+            None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=s3_key)
+        )
         compressed_data = response["Body"].read()
 
         # Decompress
@@ -203,7 +212,7 @@ class BronzeWriter:
             if line.strip():
                 yield json.loads(line)
 
-    def list_batches(
+    async def list_batches(
         self,
         provider: str,
         entity: str,
@@ -225,9 +234,12 @@ class BronzeWriter:
         else:
             prefix = f"bronze/v1/{provider}/{entity}/"
 
-        response = self.s3_client.list_objects_v2(
-            Bucket=self.bucket,
-            Prefix=prefix,
+        response = await self.loop.run_in_executor(
+            None,
+            lambda: self.s3_client.list_objects_v2(
+                Bucket=self.bucket,
+                Prefix=prefix,
+            ),
         )
 
         return [

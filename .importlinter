@@ -54,3 +54,8 @@ forbidden_modules =
     deltalake
     polars
     sqlalchemy
+    # Async runtime - domain should use collections.abc.AsyncIterator instead
+    asyncio
+    # Other async libraries
+    anyio
+    trio

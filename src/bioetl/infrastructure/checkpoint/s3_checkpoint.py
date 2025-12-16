@@ -16,6 +16,7 @@ Architecture:
 - Metadata includes watermark, run_id, and custom metadata
 """
 
+import asyncio
 import json
 from typing import Any
 from uuid import UUID
@@ -40,13 +41,13 @@ class S3Checkpoint:
         ... )
         >>> from datetime import datetime
         >>> run_id = RunID(UUID("12345678-1234-1234-1234-123456789abc"))
-        >>> checkpoint.save(
+        >>> await checkpoint.save(
         ...     pipeline="chembl_activity",
         ...     watermark=Watermark(datetime(2025, 12, 15)),
         ...     run_id=run_id,
         ...     metadata={"records_processed": 1000}
         ... )
-        >>> loaded = checkpoint.load("chembl_activity")
+        >>> loaded = await checkpoint.load("chembl_activity")
         >>> if loaded:
         ...     watermark, run_id, metadata = loaded
         ...     print(f"Resume from {watermark}")
@@ -79,8 +80,9 @@ class S3Checkpoint:
             secret_key=secret_key,
         )
         self.bucket = bucket
+        self.loop = asyncio.get_event_loop()
 
-    def save(
+    async def save(
         self,
         pipeline: str,
         watermark: Watermark,
@@ -129,7 +131,7 @@ class S3Checkpoint:
         checkpoint_json = json.dumps(checkpoint_data, indent=2)
 
         # Get current ETag if checkpoint exists
-        current_etag = self._get_etag(s3_key)
+        current_etag = await self._get_etag(s3_key)
 
         try:
             # Atomic write with If-Match condition
@@ -148,7 +150,9 @@ class S3Checkpoint:
                 # Checkpoint exists, use If-Match for atomicity
                 put_kwargs["IfMatch"] = current_etag
 
-            self.s3_client.put_object(**put_kwargs)
+            await self.loop.run_in_executor(
+                None, lambda: self.s3_client.put_object(**put_kwargs)
+            )
 
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "")
@@ -160,7 +164,7 @@ class S3Checkpoint:
                 ) from e
             raise
 
-    def load(self, pipeline: str) -> tuple[Watermark, RunID, dict[str, Any]] | None:
+    async def load(self, pipeline: str) -> tuple[Watermark, RunID, dict[str, Any]] | None:
         """Load last checkpoint.
 
         Requirements:
@@ -175,7 +179,7 @@ class S3Checkpoint:
 
         Example:
             >>> checkpoint = S3Checkpoint(bucket="bioetl-checkpoints")
-            >>> result = checkpoint.load("chembl_activity")
+            >>> result = await checkpoint.load("chembl_activity")
             >>> if result:
             ...     watermark, run_id, metadata = result
             ...     print(f"Resume from {watermark}")
@@ -185,7 +189,9 @@ class S3Checkpoint:
         s3_key = self._get_key(pipeline)
 
         try:
-            response = self.s3_client.get_object(Bucket=self.bucket, Key=s3_key)
+            response = await self.loop.run_in_executor(
+                None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=s3_key)
+            )
             checkpoint_json = response["Body"].read().decode("utf-8")
             checkpoint_data = json.loads(checkpoint_json)
 
@@ -219,7 +225,7 @@ class S3Checkpoint:
                 return None
             raise
 
-    def delete(self, pipeline: str) -> None:
+    async def delete(self, pipeline: str) -> None:
         """Delete checkpoint (after successful run).
 
         Requirements:
@@ -234,14 +240,17 @@ class S3Checkpoint:
         s3_key = self._get_key(pipeline)
 
         try:
-            self.s3_client.delete_object(Bucket=self.bucket, Key=s3_key)
+            await self.loop.run_in_executor(
+                None,
+                lambda: self.s3_client.delete_object(Bucket=self.bucket, Key=s3_key),
+            )
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "")
             if error_code != "NoSuchKey":
                 # Ignore if key doesn't exist, raise for other errors
                 raise
 
-    def exists(self, pipeline: str) -> bool:
+    async def exists(self, pipeline: str) -> bool:
         """Check if checkpoint exists.
 
         Args:
@@ -253,7 +262,10 @@ class S3Checkpoint:
         s3_key = self._get_key(pipeline)
 
         try:
-            self.s3_client.head_object(Bucket=self.bucket, Key=s3_key)
+            await self.loop.run_in_executor(
+                None,
+                lambda: self.s3_client.head_object(Bucket=self.bucket, Key=s3_key),
+            )
             return True
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "")
@@ -261,7 +273,7 @@ class S3Checkpoint:
                 return False
             raise
 
-    def list_all(self) -> list[str]:
+    async def list_all(self) -> list[str]:
         """List all checkpoint pipelines.
 
         Returns:
@@ -269,15 +281,18 @@ class S3Checkpoint:
 
         Example:
             >>> checkpoint = S3Checkpoint(bucket="bioetl-checkpoints")
-            >>> pipelines = checkpoint.list_all()
+            >>> pipelines = await checkpoint.list_all()
             >>> print(f"Found checkpoints for: {', '.join(pipelines)}")
         """
         prefix = "checkpoints/"
 
         try:
-            response = self.s3_client.list_objects_v2(
-                Bucket=self.bucket,
-                Prefix=prefix,
+            response = await self.loop.run_in_executor(
+                None,
+                lambda: self.s3_client.list_objects_v2(
+                    Bucket=self.bucket,
+                    Prefix=prefix,
+                ),
             )
 
             pipelines = []
@@ -308,7 +323,7 @@ class S3Checkpoint:
         """
         return f"checkpoints/{pipeline}/latest.json"
 
-    def _get_etag(self, s3_key: str) -> str | None:
+    async def _get_etag(self, s3_key: str) -> str | None:
         """Get current ETag for a checkpoint.
 
         Args:
@@ -318,12 +333,13 @@ class S3Checkpoint:
             ETag string if object exists, None otherwise
         """
         try:
-            response = self.s3_client.head_object(Bucket=self.bucket, Key=s3_key)
+            response = await self.loop.run_in_executor(
+                None,
+                lambda: self.s3_client.head_object(Bucket=self.bucket, Key=s3_key),
+            )
             return response["ETag"].strip('"')  # Remove quotes from ETag
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "")
             if error_code in ("NoSuchKey", "404"):
                 return None
             raise
-
-

@@ -18,6 +18,7 @@ Architecture:
 - ACID guarantees for concurrent writes
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -57,7 +58,7 @@ class DeltaWriter:
         ...         "_source_batch_id": "batch-456"
         ...     }
         ... ]
-        >>> writer.write_silver(
+        >>> await writer.write_silver(
         ...     table_name="chembl.activity",
         ...     records=records,
         ...     primary_keys=["entity_id"],
@@ -82,8 +83,9 @@ class DeltaWriter:
         """
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
+        self.loop = asyncio.get_event_loop()
 
-    def write_silver(
+    async def write_silver(
         self,
         table_name: str,
         records: list[dict[str, Any]],
@@ -132,20 +134,26 @@ class DeltaWriter:
 
         try:
             # Load existing table
-            dt = DeltaTable(table_path, storage_options=self.storage_options)
+            dt = await self.loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            )
 
             # Perform merge/upsert
-            self._merge_records(dt, arrow_data, primary_keys)
+            await self._merge_records(dt, arrow_data, primary_keys)
 
         except DeltaTableNotFoundError:
             # Table doesn't exist, create it
             try:
-                write_deltalake(
-                    table_or_uri=table_path,
-                    data=arrow_data,
-                    mode="append",
-                    partition_by=partition_cols,
-                    storage_options=self.storage_options,
+                await self.loop.run_in_executor(
+                    None,
+                    lambda: write_deltalake(
+                        table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols,
+                        storage_options=self.storage_options,
+                    ),
                 )
             except ArrowTypeError as schema_exc:
                 raise SchemaValidationError(
@@ -161,7 +169,7 @@ class DeltaWriter:
                 raise MergeConflictError(table_name, conflicts=1) from e
             raise
 
-    def _merge_records(
+    async def _merge_records(
         self,
         dt: DeltaTable,
         records: pa.Table,
@@ -190,31 +198,34 @@ class DeltaWriter:
         # Merge with priority check
         # Priority: rebuild (3) > backfill (2) > incremental (1)
         # Only update if new run_type has higher or equal priority
-        (
-            dt.merge(
-                source=records,
-                predicate=merge_condition,
-                source_alias="source",
-                target_alias="target",
-            )
-            .when_matched_update_all(
-                predicate=(
-                    # Update if new run_type has higher priority
-                    "CASE "
-                    "WHEN source._run_type = 'rebuild' THEN 3 "
-                    "WHEN source._run_type = 'backfill' THEN 2 "
-                    "ELSE 1 END >= "
-                    "CASE "
-                    "WHEN target._run_type = 'rebuild' THEN 3 "
-                    "WHEN target._run_type = 'backfill' THEN 2 "
-                    "ELSE 1 END"
+        await self.loop.run_in_executor(
+            None,
+            lambda: (
+                dt.merge(
+                    source=records,
+                    predicate=merge_condition,
+                    source_alias="source",
+                    target_alias="target",
                 )
-            )
-            .when_not_matched_insert_all()
-            .execute()
+                .when_matched_update_all(
+                    predicate=(
+                        # Update if new run_type has higher priority
+                        "CASE "
+                        "WHEN source._run_type = 'rebuild' THEN 3 "
+                        "WHEN source._run_type = 'backfill' THEN 2 "
+                        "ELSE 1 END >= "
+                        "CASE "
+                        "WHEN target._run_type = 'rebuild' THEN 3 "
+                        "WHEN target._run_type = 'backfill' THEN 2 "
+                        "ELSE 1 END"
+                    )
+                )
+                .when_not_matched_insert_all()
+                .execute()
+            ),
         )
 
-    def vacuum(
+    async def vacuum(
         self,
         table_name: str,
         retention_hours: int = 168,  # 7 days default
@@ -238,17 +249,23 @@ class DeltaWriter:
 
         Example:
             >>> writer = DeltaWriter(base_path="s3://bioetl-silver")
-            >>> deleted = writer.vacuum("chembl.activity", retention_hours=168)
+            >>> deleted = await writer.vacuum("chembl.activity", retention_hours=168)
             >>> print(f"Deleted {len(deleted)} files")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         try:
-            dt = DeltaTable(table_path, storage_options=self.storage_options)
-            return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
+            dt = await self.loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            )
+            return await self.loop.run_in_executor(
+                None,
+                lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
+            )
         except DeltaTableNotFoundError as e:
             raise TableNotFoundError(table_path) from e
 
-    def optimize(
+    async def optimize(
         self,
         table_name: str,
         partition_filters: list[tuple[str, str, Any]] | None = None,
@@ -266,17 +283,22 @@ class DeltaWriter:
 
         Example:
             >>> writer = DeltaWriter(base_path="s3://bioetl-silver")
-            >>> metrics = writer.optimize("chembl.activity")
+            >>> metrics = await writer.optimize("chembl.activity")
             >>> print(f"Compacted {metrics['numFilesRemoved']} files")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         try:
-            dt = DeltaTable(table_path, storage_options=self.storage_options)
-            return dt.optimize.compact(partition_filters=partition_filters)
+            dt = await self.loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            )
+            return await self.loop.run_in_executor(
+                None, lambda: dt.optimize.compact(partition_filters=partition_filters)
+            )
         except DeltaTableNotFoundError as e:
             raise TableNotFoundError(table_path) from e
 
-    def get_table_info(self, table_name: str) -> dict[str, Any]:
+    async def get_table_info(self, table_name: str) -> dict[str, Any]:
         """Get table metadata and statistics.
 
         Args:
@@ -291,12 +313,15 @@ class DeltaWriter:
 
         Example:
             >>> writer = DeltaWriter(base_path="s3://bioetl-silver")
-            >>> info = writer.get_table_info("chembl.activity")
+            >>> info = await writer.get_table_info("chembl.activity")
             >>> print(f"Table version: {info['version']}")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
         try:
-            dt = DeltaTable(table_path, storage_options=self.storage_options)
+            dt = await self.loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            )
             return {
                 "version": dt.version(),
                 "num_files": len(dt.files()),
@@ -306,7 +331,7 @@ class DeltaWriter:
         except DeltaTableNotFoundError as e:
             raise TableNotFoundError(table_path) from e
 
-    def time_travel(
+    async def time_travel(
         self,
         table_name: str,
         version: int | None = None,
@@ -328,7 +353,7 @@ class DeltaWriter:
         Example:
             >>> writer = DeltaWriter(base_path="s3://bioetl-silver")
             >>> # Access yesterday's version
-            >>> historical = writer.time_travel(
+            >>> historical = await writer.time_travel(
             ...     "chembl.activity",
             ...     timestamp=datetime(2025, 12, 14)
             ... )
@@ -340,20 +365,26 @@ class DeltaWriter:
 
         try:
             if version is not None:
-                return DeltaTable(
-                    table_path,
-                    version=version,
-                    storage_options=self.storage_options,
+                return await self.loop.run_in_executor(
+                    None,
+                    lambda: DeltaTable(
+                        table_path,
+                        version=version,
+                        storage_options=self.storage_options,
+                    ),
                 )
             elif timestamp is not None:
                 # Convert datetime to ISO format string
                 timestamp_str = timestamp.isoformat()
-                return DeltaTable(
-                    table_path,
-                    storage_options={
-                        **self.storage_options,
-                        "time_travel": timestamp_str,
-                    },
+                return await self.loop.run_in_executor(
+                    None,
+                    lambda: DeltaTable(
+                        table_path,
+                        storage_options={
+                            **self.storage_options,
+                            "time_travel": timestamp_str,
+                        },
+                    ),
                 )
             else:
                 raise ValueError("Must specify either version or timestamp")

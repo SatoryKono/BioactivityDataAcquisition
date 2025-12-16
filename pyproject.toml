@@ -70,6 +70,8 @@ dev = [
     "black>=24.0",
     "isort>=5.13",
     "import-linter>=2.0",
+    # Architecture testing
+    "pytest-archon>=0.0.6",
     # Code complexity analysis (RULES.md)
     "xenon>=0.9",
     "radon>=6.0",
@@ -133,6 +135,11 @@ fail_under = 80
 show_missing = true
 
 # ============ MYPY ============
+# Mypy strict mode validates async/await usage:
+# - Ensures async def methods are awaited (error: "coroutine never awaited")
+# - Validates AsyncIterator return types require "async for"
+# - Checks Awaitable[T] type annotations are properly awaited
+# Architecture tests in tests/test_architecture.py provide additional validation.
 [tool.mypy]
 python_version = "3.11"
 strict = true
