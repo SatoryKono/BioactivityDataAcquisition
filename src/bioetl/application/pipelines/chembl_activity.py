@@ -34,7 +34,6 @@ CHEMBL_ACTIVITY_CONFIG = PipelineConfig(
     gold_table="chembl.activity_gold",
     batch_size=100,
     checkpoint_interval=1000,
-    heartbeat_interval=20.0,
 )
 
 

@@ -21,8 +21,6 @@ COUNTERS = {
 }
 
 
-from prometheus_client import start_http_server
-
 class PrometheusMetrics(MetricsPort):
     """Prometheus implementation of MetricsPort.
 
@@ -36,14 +34,6 @@ class PrometheusMetrics(MetricsPort):
         ...     {"pipeline_name": "chembl_activity", "status": "success"}
         ... )
     """
-
-    def __init__(self, port: int = 8000) -> None:
-        """Initialize metrics server."""
-        try:
-            start_http_server(port)
-        except OSError:
-            # Port already in use - acceptable in tests/restarts
-            pass
 
     def observe_histogram(
         self,
