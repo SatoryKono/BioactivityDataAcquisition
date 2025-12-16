@@ -2,6 +2,20 @@
 
 from bioetl.domain.types import ErrorType
 
+# Keyword to ErrorType mapping (reduces cyclomatic complexity)
+_ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
+    (("Schema", "Validation"), ErrorType.SCHEMA_VIOLATION),
+    (("Missing", "Required"), ErrorType.MISSING_REQUIRED_FIELD),
+]
+
+
+def _match_error_type(error_name: str) -> ErrorType:
+    """Match error name against keyword patterns."""
+    for keywords, error_type in _ERROR_KEYWORDS:
+        if any(kw in error_name for kw in keywords):
+            return error_type
+    return ErrorType.INVALID_DATA
+
 
 class ErrorClassifier:
     """Classifies exceptions into ErrorType categories."""
@@ -13,10 +27,4 @@ class ErrorClassifier:
         pattern to allow for more sophisticated, pipeline-specific
         classifiers.
         """
-        error_name = type(error).__name__
-        if "Schema" in error_name or "Validation" in error_name:
-            return ErrorType.SCHEMA_VIOLATION
-        elif "Missing" in error_name or "Required" in error_name:
-            return ErrorType.MISSING_REQUIRED_FIELD
-        else:
-            return ErrorType.INVALID_DATA
+        return _match_error_type(type(error).__name__)

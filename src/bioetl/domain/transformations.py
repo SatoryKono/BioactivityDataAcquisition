@@ -228,6 +228,35 @@ def generate_entity_id(
 # =============================================================================
 
 
+def _build_drift_details(
+    added: list[str],
+    removed: list[str],
+    missing_required: list[str] | None = None,
+) -> dict[str, Any]:
+    """Build drift details dictionary."""
+    details: dict[str, Any] = {
+        "added_fields": added,
+        "removed_fields": removed,
+        "field_count_delta": len(added) - len(removed),
+    }
+    if missing_required:
+        details["missing_required"] = missing_required
+    return details
+
+
+def _determine_drift_level(
+    added_count: int,
+    has_changes: bool,
+    missing_required: set[str],
+) -> DriftLevel:
+    """Determine drift level based on changes."""
+    if missing_required:
+        return DriftLevel.CRITICAL
+    if added_count > 3:
+        return DriftLevel.WARN
+    return DriftLevel.INFO
+
+
 def detect_schema_drift(
     old_schema: set[str],
     new_schema: set[str],
@@ -250,68 +279,17 @@ def detect_schema_drift(
         - added_fields: List of newly added fields
         - removed_fields: List of removed fields
         - field_count_delta: Change in field count
-
-    Requirements:
-        - REQ-SCHEMA-001: Missing required fields → CRITICAL
-        - REQ-SCHEMA-002: New optional fields → INFO
-        - REQ-SCHEMA-003: >3 new fields → WARN
-
-    Example:
-        >>> old = {"id", "name", "value"}
-        >>> new = {"id", "name", "value", "description"}
-        >>> detect_schema_drift(old, new, required_fields={"id"})
-        (DriftLevel.INFO, {'added_fields': ['description'], ...})
     """
-    if required_fields is None:
-        required_fields = set()
+    required_fields = required_fields or set()
 
-    added_fields = sorted(new_schema - old_schema)
-    removed_fields = sorted(old_schema - new_schema)
+    added = sorted(new_schema - old_schema)
+    removed = sorted(old_schema - new_schema)
+    missing_required = required_fields & set(removed)
 
-    # Check for missing required fields (CRITICAL)
-    missing_required = required_fields & set(removed_fields)
-    if missing_required:
-        return (
-            DriftLevel.CRITICAL,
-            {
-                "added_fields": added_fields,
-                "removed_fields": removed_fields,
-                "missing_required": sorted(missing_required),
-                "field_count_delta": len(added_fields) - len(removed_fields),
-            },
-        )
+    level = _determine_drift_level(len(added), bool(added or removed), missing_required)
+    details = _build_drift_details(added, removed, sorted(missing_required) or None)
 
-    # Check for significant drift (>3 new fields) (WARN)
-    if len(added_fields) > 3:
-        return (
-            DriftLevel.WARN,
-            {
-                "added_fields": added_fields,
-                "removed_fields": removed_fields,
-                "field_count_delta": len(added_fields) - len(removed_fields),
-            },
-        )
-
-    # Minor drift (new optional fields) (INFO)
-    if added_fields or removed_fields:
-        return (
-            DriftLevel.INFO,
-            {
-                "added_fields": added_fields,
-                "removed_fields": removed_fields,
-                "field_count_delta": len(added_fields) - len(removed_fields),
-            },
-        )
-
-    # No drift
-    return (
-        DriftLevel.INFO,
-        {
-            "added_fields": [],
-            "removed_fields": [],
-            "field_count_delta": 0,
-        },
-    )
+    return level, details
 
 
 # =============================================================================
