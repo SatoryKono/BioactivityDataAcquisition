@@ -86,17 +86,22 @@ class ChEMBLActivityPipeline(BasePipeline):
             Configured pipeline instance.
         """
         effective_config = config or CHEMBL_ACTIVITY_CONFIG
-        return cls.from_config(effective_config, runtime, services)
+        return cls(effective_config, runtime, services)
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize ChEMBL Activity pipeline (legacy API)."""
-        super().__init__(
-            *args,
-            pipeline_name="chembl_activity",
-            provider="chembl",
-            entity_type="activity",
-            **kwargs,
-        )
+    def __init__(
+        self,
+        config: PipelineConfig,
+        runtime: PipelineRuntimeConfig,
+        services: PipelineServices,
+    ) -> None:
+        """Initialize ChEMBL Activity pipeline.
+
+        Args:
+            config: Static pipeline configuration (uses CHEMBL_ACTIVITY_CONFIG defaults).
+            runtime: Runtime execution parameters.
+            services: Injected I/O port dependencies.
+        """
+        super().__init__(config, runtime, services)
 
     async def transform_bronze_to_silver(
         self,
