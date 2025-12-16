@@ -7,11 +7,9 @@ from uuid import UUID
 
 import pytest
 import zstandard as zstd
-
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 
 @pytest.fixture
@@ -35,20 +33,6 @@ def mock_delta_writer():
         ) as mock_delta_table,
         patch(
             "bioetl.infrastructure.storage.delta_writer.write_deltalake"
-        ) as mock_write_deltalake,
-    ):
-        yield mock_delta_table, mock_write_deltalake
-
-
-@pytest.fixture
-def mock_gold_writer():
-    """Fixture for mocking gold_writer module."""
-    with (
-        patch(
-            "bioetl.infrastructure.storage.gold_writer.DeltaTable"
-        ) as mock_delta_table,
-        patch(
-            "bioetl.infrastructure.storage.gold_writer.write_deltalake"
         ) as mock_write_deltalake,
     ):
         yield mock_delta_table, mock_write_deltalake
@@ -213,35 +197,3 @@ class TestDeltaWriter:
             writer.write_silver(
                 table_name="test_table", records=[], primary_keys=["id"]
             )
-
-
-@pytest.mark.unit
-class TestGoldWriter:
-    """Test GoldWriter functionality."""
-
-    def test_gold_writer_initialization(self):
-        """Test GoldWriter can be initialized."""
-        writer = GoldWriter(base_path="/tmp/gold")
-        assert writer.base_path == "/tmp/gold"
-
-    def test_write_gold_calls_delta_writer(self, mock_gold_writer):
-        """Test that write_gold calls the underlying DeltaWriter."""
-        _mock_delta_table, mock_write_deltalake = mock_gold_writer
-        writer = GoldWriter(base_path="/tmp/gold")
-        records = [{"id": 1, "value": "a"}]
-
-        writer.write_gold(table_name="gold_table", records=records, mode="overwrite")
-
-        mock_write_deltalake.assert_called_once()
-        _args, kwargs = mock_write_deltalake.call_args
-        assert kwargs["mode"] == "overwrite"
-        # table_or_uri is passed as keyword argument
-        assert "gold_table" in kwargs["table_or_uri"]
-
-    @pytest.mark.usefixtures("mock_gold_writer")
-    def test_write_gold_empty_records_raises_error(self):
-        """Test empty records raises an error."""
-        writer = GoldWriter(base_path="/tmp/gold")
-
-        with pytest.raises(ValueError, match="No records to write"):
-            writer.write_gold(table_name="gold_table", records=[], mode="overwrite")
