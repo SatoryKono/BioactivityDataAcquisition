@@ -78,7 +78,14 @@ class BasePipeline(ABC):
         self.orchestrator = PipelineOrchestrator(self)
         self.executor = PipelineExecutor(self)
         self.lock_manager = LockManager(self)
-        self.checkpoint_manager = CheckpointManager(self)
+        self.checkpoint_manager = CheckpointManager(
+            checkpoint_port=self.checkpoint,
+            logger=self.logger,
+            pipeline_name=self.pipeline_name,
+            run_id=self.run_id,
+            resume=self.resume,
+            watermark_extractor=lambda record: self.extract_watermark(self.context, record),
+        )
         self.error_classifier = ErrorClassifier()
         self.quarantine_manager = QuarantineManager(self)
 
