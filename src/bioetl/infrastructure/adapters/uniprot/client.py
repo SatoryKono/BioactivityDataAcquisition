@@ -11,14 +11,17 @@ Requirements:
 Documentation: https://www.uniprot.org/help/api
 """
 
+import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
-
+from bioetl.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+logger = logging.getLogger(__name__)
 
 
 class UniProtClient:
@@ -192,7 +195,18 @@ class UniProtClient:
                 self.http_client.get, "/uniprotkb/search", params=params
             )
             return await self._process_protein_response(response)
-        except Exception:
+        except Exception as e:
+            logger.error(
+                "UniProt protein fetch failed",
+                extra={
+                    "query": query,
+                    "cursor": cursor,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            )
+            if get_settings().strict_error_handling:
+                raise
             return [], None
 
     async def _fetch_proteins(
@@ -265,8 +279,18 @@ class UniProtClient:
                     }
                     fetched += 1
 
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "UniProt feature fetch failed",
+                extra={
+                    "accession": query,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            )
+            if get_settings().strict_error_handling:
+                raise
+            return
 
     async def _fetch_sequences(
         self,
@@ -312,8 +336,18 @@ class UniProtClient:
                     yield seq_record
                     fetched += 1
 
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "UniProt sequence fetch failed",
+                extra={
+                    "query": query,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            )
+            if get_settings().strict_error_handling:
+                raise
+            return
 
     def _parse_fasta(self, fasta_text: str) -> list[dict[str, Any]]:
         """Parse FASTA format text.

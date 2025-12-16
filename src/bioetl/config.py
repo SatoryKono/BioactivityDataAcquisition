@@ -113,6 +113,11 @@ class Settings(BaseSettings):
     env: Literal["dev", "staging", "prod"] = Field(default="dev")
     debug: bool = Field(default=False)
     test_mode: bool = Field(default=False)
+    strict_error_handling: bool = Field(
+        default=False,
+        description="When True, API client errors raise exceptions instead of being silently ignored. "
+                    "Recommended for dev/staging environments.",
+    )
 
     aws: AWSSettings = Field(default_factory=AWSSettings)
     s3: S3Settings = Field(default_factory=S3Settings)
