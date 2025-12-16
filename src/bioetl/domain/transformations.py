@@ -81,26 +81,50 @@ def _normalize_float(value: float) -> float | None:
     return round(value, 10)
 
 
+def _normalize_date(value: date) -> str:
+    """Normalize a date value to ISO format."""
+    return value.isoformat()
+
+
+def _normalize_datetime(value: datetime) -> str:
+    """Normalize a datetime value to ISO date format."""
+    return value.date().isoformat()
+
+
+def _normalize_mapping(value: Mapping) -> dict:
+    """Recursively normalize a mapping."""
+    return {k: _normalize_value(v) for k, v in value.items()}
+
+
+def _normalize_sequence(value: Sequence) -> list:
+    """Recursively normalize a sequence."""
+    return [_normalize_value(v) for v in value]
+
+
+# Type dispatch table for normalization (reduces cyclomatic complexity)
+_NORMALIZERS: dict[type, Any] = {
+    float: _normalize_float,
+    datetime: _normalize_datetime,
+    date: _normalize_date,
+}
+
+
 def _normalize_value(value: Any) -> Any:
-    """Normalize a single value."""
-    if isinstance(value, float):
-        return _normalize_float(value)
+    """Normalize a single value using type dispatch."""
+    # Check exact type match first
+    normalizer = _NORMALIZERS.get(type(value))
+    if normalizer is not None:
+        return normalizer(value)
 
-    # Dates → ISO format (REQ-ID-005)
-    if isinstance(value, datetime):
-        return value.date().isoformat()
-    if isinstance(value, date):
-        return value.isoformat()
-
-    # Strings → strip (REQ-ID-006)
+    # Handle strings (strip whitespace)
     if isinstance(value, str):
         return value.strip()
 
-    # Recursively normalize nested structures
+    # Handle nested structures
     if isinstance(value, Mapping):
-        return {k: _normalize_value(v) for k, v in value.items()}
-    if isinstance(value, Sequence) and not isinstance(value, str):
-        return [_normalize_value(v) for v in value]
+        return _normalize_mapping(value)
+    if isinstance(value, Sequence):
+        return _normalize_sequence(value)
 
     return value
 
