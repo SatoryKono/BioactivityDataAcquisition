@@ -10,6 +10,7 @@ from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
     LockPort,
+    MetricsPort,
     QuarantinePort,
     StoragePort,
 )
@@ -64,6 +65,7 @@ def test_critical_ports_are_runtime_checkable():
         CheckpointPort,
         StoragePort,
         QuarantinePort,
+        MetricsPort,
     ]
     for port in critical_ports:
         assert hasattr(

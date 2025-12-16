@@ -6,6 +6,8 @@ from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
     LockPort,
+    MetricsPort,
+    NoOpMetrics,
     QuarantinePort,
     StoragePort,
 )
@@ -22,6 +24,7 @@ class TestPortsAreRuntimeCheckable:
             LockPort,
             CheckpointPort,
             QuarantinePort,
+            MetricsPort,
         ],
     )
     def test_port_is_runtime_checkable(self, port: type) -> None:
@@ -175,3 +178,42 @@ class TestQuarantinePortProtocol:
                 return {}
 
         assert isinstance(ValidQuarantine(), QuarantinePort)
+
+
+class TestMetricsPortProtocol:
+    """Tests for MetricsPort protocol compliance."""
+
+    def test_valid_metrics_passes_check(self) -> None:
+        """Class with all required methods should be MetricsPort."""
+
+        class ValidMetrics:
+            def observe_histogram(self, _name, _value, _labels):
+                pass
+
+            def increment_counter(self, _name, _value, _labels):
+                pass
+
+        assert isinstance(ValidMetrics(), MetricsPort)
+
+    def test_missing_method_fails_check(self) -> None:
+        """Class missing a required method should not be MetricsPort."""
+
+        class IncompleteMetrics:
+            def observe_histogram(self, _name, _value, _labels):
+                pass
+
+            # Missing increment_counter
+
+        assert not isinstance(IncompleteMetrics(), MetricsPort)
+
+    def test_noop_metrics_implements_port(self) -> None:
+        """NoOpMetrics should implement MetricsPort protocol."""
+        noop = NoOpMetrics()
+        assert isinstance(noop, MetricsPort)
+
+    def test_noop_metrics_does_nothing(self) -> None:
+        """NoOpMetrics methods should complete without error."""
+        noop = NoOpMetrics()
+        # Should not raise
+        noop.observe_histogram("test", 1.0, {"label": "value"})
+        noop.increment_counter("test", 1, {"label": "value"})
