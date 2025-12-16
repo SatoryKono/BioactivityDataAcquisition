@@ -69,7 +69,7 @@ def test_normalize_for_hash_meta_fields_only():
 def test_canonical_json_dumps():
     """Tests canonical JSON dumping."""
     assert canonical_json_dumps({"b": 2, "a": 1}) == '{"a":1,"b":2}'
-    assert canonical_json_dumps({}) == '{}'
+    assert canonical_json_dumps({}) == "{}"
 
 
 def test_generate_content_hash():
