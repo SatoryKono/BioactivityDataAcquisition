@@ -5,19 +5,19 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
-from botocore.exceptions import ClientError
-
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from botocore.exceptions import ClientError
 
 
 @pytest.fixture
 def mock_s3_client():
-    """Fixture for a mocked S3 client."""
-    with patch("bioetl.infrastructure.checkpoint.s3_checkpoint.boto3") as mock_boto3:
-        mock_s3 = MagicMock()
-        mock_boto3.Session.return_value.client.return_value = mock_s3
-        mock_boto3.session.Config.return_value = MagicMock()
+    """Fixture for a mocked S3 client via S3ClientPool."""
+    mock_s3 = MagicMock()
+    with patch(
+        "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
+    ) as mock_get_client:
+        mock_get_client.return_value = mock_s3
         yield mock_s3
 
 
@@ -25,8 +25,7 @@ def mock_s3_client():
 class TestS3Checkpoint:
     """Test S3Checkpoint functionality."""
 
-    @pytest.mark.usefixtures("mock_s3_client")
-    def test_s3_checkpoint_initialization(self):
+    def test_s3_checkpoint_initialization(self, mock_s3_client):
         """Test S3Checkpoint can be initialized."""
         cp = S3Checkpoint(
             bucket="test-bucket",
@@ -44,6 +43,9 @@ class TestS3Checkpoint:
         )
 
         cp = S3Checkpoint(bucket="test-bucket")
+        # Inject the mock client
+        cp.s3_client = mock_s3_client
+
         pipeline = "test_pipeline"
         watermark = Watermark(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -64,6 +66,9 @@ class TestS3Checkpoint:
     def test_load_returns_correct_data(self, mock_s3_client):
         """Test that load returns the correct data."""
         cp = S3Checkpoint(bucket="test-bucket")
+        # Inject the mock client
+        cp.s3_client = mock_s3_client
+
         pipeline = "test_pipeline"
         json_body = b'{"watermark": "2023-01-01T00:00:00+00:00", "run_id": "12345678-1234-5678-1234-567812345678", "metadata": {}}'
         mock_body = MagicMock()
@@ -81,6 +86,9 @@ class TestS3Checkpoint:
     def test_load_nonexistent_checkpoint_returns_none(self, mock_s3_client):
         """Test that loading a nonexistent checkpoint returns None."""
         cp = S3Checkpoint(bucket="test-bucket")
+        # Inject the mock client
+        cp.s3_client = mock_s3_client
+
         pipeline = "test_pipeline"
         mock_s3_client.get_object.side_effect = ClientError(
             {"Error": {"Code": "NoSuchKey"}}, "GetObject"
@@ -93,6 +101,9 @@ class TestS3Checkpoint:
     def test_delete_calls_s3_delete_object(self, mock_s3_client):
         """Test that delete calls s3:deleteObject."""
         cp = S3Checkpoint(bucket="test-bucket")
+        # Inject the mock client
+        cp.s3_client = mock_s3_client
+
         pipeline = "test_pipeline"
 
         cp.delete(pipeline)
