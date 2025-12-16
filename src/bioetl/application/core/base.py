@@ -23,7 +23,6 @@ from bioetl.domain.ports import (
     QuarantinePort,
     StoragePort,
 )
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.domain.types import (
     RunID,
     RunType,
@@ -49,7 +48,7 @@ class BasePipeline(ABC):
         checkpoint: CheckpointPort,
         quarantine: QuarantinePort,
         logger: "structlog.BoundLogger",
-        metrics: MetricsPort | None = None,
+        metrics: MetricsPort | None,
         resume: bool = False,
         limit: int | None = None,
     ) -> None:
@@ -62,7 +61,9 @@ class BasePipeline(ABC):
         self.lock = lock
         self.checkpoint = checkpoint
         self.quarantine = quarantine
-        self.metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        if metrics is None:
+            raise ValueError("metrics is required. Use NoOpMetrics for testing.")
+        self.metrics: MetricsPort = metrics
         self.resume = resume
         self.limit = limit
         self.run_id = RunID(uuid4())

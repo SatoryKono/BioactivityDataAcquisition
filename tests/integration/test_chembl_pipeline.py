@@ -8,6 +8,7 @@ from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from tests.integration.memory_storage import MemoryStorage
 
 
@@ -62,6 +63,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         lock=lock,
         checkpoint=checkpoint,
         quarantine=AsyncMock(),
+        metrics=NoOpMetrics(warn_on_use=False),
         resume=False,
     )
 

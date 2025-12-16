@@ -17,7 +17,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import BatchID, ErrorType, RunID, RunType, Watermark
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.observability.logging import PipelineLogger
+    import structlog
 
 
 class PipelineRecordProcessor:
@@ -41,7 +41,7 @@ class PipelineRecordProcessor:
         pipeline_name: str,
         run_id: RunID,
         run_type: RunType,
-        logger: "PipelineLogger",
+        logger: "structlog.BoundLogger",
     ) -> None:
         self.data_source = data_source
         self.storage = storage
