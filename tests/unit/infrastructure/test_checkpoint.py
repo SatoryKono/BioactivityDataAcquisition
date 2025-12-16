@@ -5,9 +5,10 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
+from botocore.exceptions import ClientError
+
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from botocore.exceptions import ClientError
 
 
 @pytest.fixture
@@ -25,7 +26,8 @@ def mock_s3_client():
 class TestS3Checkpoint:
     """Test S3Checkpoint functionality."""
 
-    def test_s3_checkpoint_initialization(self, mock_s3_client):
+    @pytest.mark.usefixtures("mock_s3_client")
+    def test_s3_checkpoint_initialization(self):
         """Test S3Checkpoint can be initialized."""
         cp = S3Checkpoint(
             bucket="test-bucket",

@@ -3,6 +3,10 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from botocore.exceptions import ClientError
+from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
+from pyarrow import ArrowTypeError
+
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.exceptions import (
@@ -14,9 +18,6 @@ from bioetl.infrastructure.storage.exceptions import (
 from bioetl.infrastructure.storage.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
 )
-from botocore.exceptions import ClientError
-from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
-from pyarrow import ArrowTypeError
 
 
 @pytest.fixture
