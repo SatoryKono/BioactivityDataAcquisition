@@ -62,9 +62,7 @@ class CircuitBreaker:
     failure_threshold: int = 5
     recovery_timeout: int = 300  # 5 minutes
 
-    _state: CircuitBreakerState = field(
-        init=False, default=CircuitBreakerState.CLOSED
-    )
+    _state: CircuitBreakerState = field(init=False, default=CircuitBreakerState.CLOSED)
     _failure_count: int = field(init=False, default=0)
     _last_failure_time: float = field(init=False, default=0.0)
     _trips_total: int = field(init=False, default=0)

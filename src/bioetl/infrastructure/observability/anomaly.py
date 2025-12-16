@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 import statistics
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -136,7 +136,7 @@ class AnomalyDetector:
     def update_baseline(
         self,
         metric_name: str,
-        values: Sequence[float],
+        values: "Sequence[float]",
     ) -> None:
         """Update baseline with historical data.
 
@@ -246,7 +246,7 @@ class AnomalyDetector:
             anomaly_type=anomaly_type,
             severity=severity,
             z_score=z_score,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             message=message,
         )
 
@@ -280,10 +280,7 @@ class AnomalyDetector:
         baseline_stddev = (max_val - min_val) / 4  # Assume ~95% in range
 
         # Calculate pseudo z-score
-        if baseline_stddev > 0:
-            z_score = abs(current_value - baseline_mean) / baseline_stddev
-        else:
-            z_score = 10.0  # Arbitrarily high for threshold breach
+        z_score = abs(current_value - baseline_mean) / baseline_stddev if baseline_stddev > 0 else 10.0
 
         if current_value < min_val:
             message = f"Value {current_value:.2f} below minimum threshold {min_val:.2f}"
@@ -300,7 +297,7 @@ class AnomalyDetector:
             anomaly_type=AnomalyType.THRESHOLD_EXCEEDED,
             severity=AnomalySeverity.CRITICAL,
             z_score=z_score,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             message=message,
         )
 
@@ -382,7 +379,7 @@ class DataQualityMonitor:
     def add_metric(
         self,
         metric_name: str,
-        baseline: Sequence[float],
+        baseline: "Sequence[float]",
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:
