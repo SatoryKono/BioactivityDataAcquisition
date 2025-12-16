@@ -83,7 +83,7 @@ class HealthStatus(str, Enum):
     """Provider is operational (0 errors)."""
 
     DEGRADED = "DEGRADED"
-    """Provider experiencing issues (1-2 errors). Timeout ×2, batch_size ÷2."""
+    """Provider experiencing issues (1-2 errors). Timeout x2, batch_size ÷2."""
 
     UNHEALTHY = "UNHEALTHY"
     """Provider is down (≥3 errors). Pipeline paused, alert P2."""

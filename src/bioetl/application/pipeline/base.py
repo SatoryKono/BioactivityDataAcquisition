@@ -17,7 +17,7 @@ import json
 import signal
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Any
 from uuid import uuid4
 
@@ -223,7 +223,7 @@ class BasePipeline(ABC):
             records=iter([record_bytes]),
             provider=self.provider,
             entity=self.entity_type,
-            date=datetime.now(timezone.utc),
+            date=datetime.now(UTC),
             batch_id=batch_id,
         )
         return batch_id
@@ -234,7 +234,7 @@ class BasePipeline(ABC):
             "_run_id": str(self.run_id),
             "_run_type": self.run_type.value,
             "_source_batch_id": str(batch_id),
-            "_ingestion_ts": datetime.now(timezone.utc).isoformat(),
+            "_ingestion_ts": datetime.now(UTC).isoformat(),
         }
         table_name = f"{self.provider}.{self.entity_type}"
         self.storage.write_silver(
@@ -283,7 +283,7 @@ class BasePipeline(ABC):
                 raise PipelineShutdownError("Lock lost")
 
     def _setup_shutdown_handlers(self) -> None:
-        def signal_handler(signum: int, frame: Any) -> None:
+        def signal_handler(signum: int, _: Any) -> None:
             self.logger.warning(
                 f"Received signal {signum}, initiating graceful shutdown"
             )
@@ -307,8 +307,8 @@ class BasePipeline(ABC):
     ) -> dict[str, Any] | None:
         pass
 
-    def should_write_gold(self, record: dict[str, Any]) -> bool:
+    def should_write_gold(self, _: dict[str, Any]) -> bool:
         return True
 
-    def extract_watermark(self, record: dict[str, Any]) -> Watermark:
-        return Watermark(datetime.now(timezone.utc))
+    def extract_watermark(self, _: dict[str, Any]) -> Watermark:
+        return Watermark(datetime.now(UTC))

@@ -37,13 +37,12 @@ class ChEMBLActivityPipeline(BasePipeline):
         >>> await pipeline.run()
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize ChEMBL Activity pipeline."""
         super().__init__(
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            *args,
             **kwargs,
         )
 
@@ -168,11 +167,7 @@ class ChEMBLActivityPipeline(BasePipeline):
         if standard_type not in preferred_types:
             return False
 
-        # Exclude if data validity issues
-        if record.get("data_validity_comment"):
-            return False
-
-        return True
+        return not record.get("data_validity_comment")
 
     def extract_watermark(self, record: dict[str, Any]) -> Watermark:
         """Extract watermark from record.
@@ -190,9 +185,9 @@ class ChEMBLActivityPipeline(BasePipeline):
             return Watermark(str(activity_id))
 
         # Fallback to timestamp
-        from datetime import datetime, timezone
+        from datetime import datetime, UTC
 
-        return Watermark(datetime.now(timezone.utc))
+        return Watermark(datetime.now(UTC))
 
 
 class ChEMBLActivityPipelineFactory:
@@ -214,7 +209,6 @@ class ChEMBLActivityPipelineFactory:
         run_type: Any,  # RunType
         resume: bool = False,
         # Adapter configurations
-        chembl_url: str = "https://www.ebi.ac.uk/chembl/api/data",
         s3_bucket_bronze: str = "bioetl-bronze",
         s3_bucket_silver: str = "bioetl-silver",
         s3_bucket_checkpoints: str = "bioetl-checkpoints",
@@ -230,7 +224,6 @@ class ChEMBLActivityPipelineFactory:
         Args:
             run_type: Type of run (incremental, backfill, rebuild)
             resume: Resume from checkpoint if available
-            chembl_url: ChEMBL API base URL
             s3_bucket_bronze: Bronze bucket name
             s3_bucket_silver: Silver bucket name
             s3_bucket_checkpoints: Checkpoints bucket name

@@ -353,7 +353,7 @@ def exceeds_threshold(
 
 
 def detect_hash_collision(
-    content_hash: ContentHash,
+    _: ContentHash,
     source_record_id: str,
     existing_source_id: str | None,
 ) -> bool:

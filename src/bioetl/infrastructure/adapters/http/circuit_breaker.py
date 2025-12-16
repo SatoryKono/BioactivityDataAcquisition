@@ -12,13 +12,15 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
 import httpx
 
 from bioetl.domain.types import CircuitBreakerState
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -128,7 +130,7 @@ class CircuitBreaker:
 
     async def call(
         self,
-        func: Callable[P, Awaitable[T]],
+        func: "Callable[P, Awaitable[T]]",
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> T:

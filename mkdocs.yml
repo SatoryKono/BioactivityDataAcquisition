@@ -54,6 +54,7 @@ markdown_extensions:
 extra_javascript:
     - 'assets/javascripts/mermaid.min.js'
     - 'assets/javascripts/mermaid-init.js'
+    - 'assets/javascripts/mermaid-loader.js'
 
 extra_css:
     - 'assets/stylesheets/mermaid.css'
