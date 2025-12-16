@@ -224,3 +224,211 @@ def test_ruff_check_passes(src_dir: Path, project_root: Path):
         f"ruff output:\n{result.stdout}\n{result.stderr}\n\n"
         f"Fix linting errors before committing."
     )
+
+
+# --- REQ-ENV-001 ---
+def test_env_var_access_only_in_config(src_dir: Path):
+    """os.getenv and os.environ must only be used in config.py.
+
+    All environment variable access must be centralized in
+    src/bioetl/infrastructure/config.py to ensure:
+    - Single source of truth for configuration
+    - Easier testing (mock config functions, not env vars)
+    - Clear documentation of required environment variables
+
+    Runs: Static analysis of source files
+    """
+    config_file = src_dir / "bioetl" / "infrastructure" / "config.py"
+    disallowed_patterns = [
+        r"\bos\.getenv\s*\(",
+        r"\bos\.environ\s*\[",
+        r"\bos\.environ\.get\s*\(",
+    ]
+
+    violations = []
+
+    for py_file in (src_dir / "bioetl").rglob("*.py"):
+        # Skip the config.py file - it's allowed to use os.getenv
+        if py_file.resolve() == config_file.resolve():
+            continue
+
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+
+        for pattern in disallowed_patterns:
+            matches = re.finditer(pattern, content)
+            for match in matches:
+                # Get line number
+                line_num = content[: match.start()].count("\n") + 1
+                violations.append(
+                    f"{py_file.relative_to(src_dir)}:{line_num}: "
+                    f"Disallowed env var access '{match.group()}'"
+                )
+
+    assert not violations, (
+        "Environment variable access must be centralized in config.py.\n"
+        "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
+        "Refactor to use functions from bioetl.infrastructure.config instead:\n"
+        "  - get_aws_config()\n"
+        "  - get_s3_config()\n"
+        "  - get_redis_config()\n"
+        "  - get_storage_options()"
+    )
+
+
+# --- REQ-ARCH-CLI-001 ---
+@pytest.mark.xfail(
+    reason="CLI has direct infrastructure imports - architectural debt to be refactored",
+    strict=False,
+)
+def test_cli_no_direct_infrastructure_imports(src_dir: Path):
+    """CLI module must not import directly from infrastructure adapters.
+
+    The CLI should work through:
+    - Abstractions (domain ports)
+    - Bootstrap/factory patterns
+    - Centralized config (bioetl.infrastructure.config is allowed)
+
+    This ensures the CLI remains decoupled from concrete implementations
+    and can be easily tested with mocks.
+
+    Runs: Static analysis of cli.py
+    """
+    cli_file = src_dir / "bioetl" / "cli.py"
+    if not cli_file.exists():
+        pytest.skip("CLI module not found")
+
+    with cli_file.open(encoding="utf-8") as f:
+        content = f.read()
+
+    # Infrastructure modules that CLI should not import directly
+    # (except for config which is allowed)
+    disallowed_infrastructure_modules = [
+        r"from\s+bioetl\.infrastructure\.adapters\b",
+        r"from\s+bioetl\.infrastructure\.checkpoint\b",
+        r"from\s+bioetl\.infrastructure\.locking\b",
+        r"from\s+bioetl\.infrastructure\.storage\b",
+        r"from\s+bioetl\.infrastructure\.quarantine\b",
+        r"from\s+bioetl\.infrastructure\.observability\b",
+        r"import\s+bioetl\.infrastructure\.adapters\b",
+        r"import\s+bioetl\.infrastructure\.checkpoint\b",
+        r"import\s+bioetl\.infrastructure\.locking\b",
+        r"import\s+bioetl\.infrastructure\.storage\b",
+        r"import\s+bioetl\.infrastructure\.quarantine\b",
+        r"import\s+bioetl\.infrastructure\.observability\b",
+    ]
+
+    violations = []
+
+    for pattern in disallowed_infrastructure_modules:
+        matches = re.finditer(pattern, content)
+        for match in matches:
+            line_num = content[: match.start()].count("\n") + 1
+            violations.append(f"Line {line_num}: {match.group()}")
+
+    assert not violations, (
+        "CLI must not import directly from infrastructure modules.\n"
+        "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
+        "Refactor to use:\n"
+        "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
+        "  - Bootstrap functions that wire up dependencies\n"
+        "  - Domain ports for type hints\n"
+        "  - bioetl.infrastructure.config for configuration (allowed)"
+    )
+
+
+# --- REQ-CONFIG-001 ---
+def test_config_parameters_have_defaults_or_validation(src_dir: Path):
+    """Configuration parameters should have sensible defaults or validation.
+
+    All os.getenv calls in config.py should either:
+    - Provide a default value for optional settings
+    - Be documented as required (will cause clear error if missing)
+
+    This test checks that config functions return valid typed objects
+    even with no environment variables set.
+
+    Runs: Import and call config functions
+    """
+    # Import config module
+    import sys
+
+    sys.path.insert(0, str(src_dir))
+
+    from bioetl.infrastructure.config import (
+        get_aws_config,
+        get_redis_config,
+        get_s3_config,
+        get_storage_options,
+    )
+
+    # Test that all config functions can be called without environment variables
+    # (they should return objects with sensible defaults or None for optional values)
+    aws_config = get_aws_config()
+    assert aws_config is not None
+    assert isinstance(aws_config.region, str)
+    # endpoint_url can be None (optional)
+
+    s3_config = get_s3_config()
+    assert s3_config is not None
+    assert s3_config.bucket_bronze == "bioetl-bronze"
+    assert s3_config.bucket_silver == "bioetl-silver"
+    assert s3_config.bucket_gold == "bioetl-gold"
+    assert s3_config.bucket_checkpoints == "bioetl-checkpoints"
+
+    redis_config = get_redis_config()
+    assert redis_config is not None
+    assert redis_config.host == "localhost"
+    assert redis_config.port == 6379
+
+    storage_options = get_storage_options()
+    # Should be None when endpoint_url is not set
+    assert storage_options is None or isinstance(storage_options, dict)
+
+
+# --- REQ-CONFIG-002 ---
+def test_config_dataclasses_are_frozen(src_dir: Path):
+    """Configuration dataclasses must be immutable (frozen=True).
+
+    This ensures configuration cannot be accidentally modified at runtime.
+    """
+    import sys
+
+    sys.path.insert(0, str(src_dir))
+
+    from bioetl.infrastructure.config import AWSConfig, RedisConfig, S3Config
+
+    config_classes = [AWSConfig, S3Config, RedisConfig]
+
+    for config_class in config_classes:
+        assert hasattr(
+            config_class, "__dataclass_fields__"
+        ), f"{config_class.__name__} is not a dataclass"
+
+        # Check frozen attribute
+        # In Python 3.10+, we can check __dataclass_params__.frozen
+        if hasattr(config_class, "__dataclass_params__"):
+            assert (
+                config_class.__dataclass_params__.frozen
+            ), f"{config_class.__name__} dataclass must be frozen"
+        else:
+            # Fallback: try to modify an instance and expect error
+            if config_class == AWSConfig:
+                instance = config_class(
+                    endpoint_url=None,
+                    access_key_id=None,
+                    secret_access_key=None,
+                    region="us-east-1",
+                )
+            elif config_class == S3Config:
+                instance = config_class(
+                    bucket_bronze="b",
+                    bucket_silver="s",
+                    bucket_gold="g",
+                    bucket_checkpoints="c",
+                )
+            else:  # RedisConfig
+                instance = config_class(host="localhost", port=6379)
+
+            with pytest.raises((TypeError, AttributeError)):  # FrozenInstanceError
+                instance.region = "changed"  # type: ignore[attr-defined]
