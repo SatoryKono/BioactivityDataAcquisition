@@ -20,9 +20,7 @@ class TestChemblAdapter:
     """
 
     @pytest.fixture
-    def chembl_client(
-        self, token_bucket: Any, circuit_breaker: Any
-    ) -> Any:
+    def chembl_client(self, token_bucket: Any, circuit_breaker: Any) -> Any:
         """Create ChEMBL HTTP client for testing."""
         from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
