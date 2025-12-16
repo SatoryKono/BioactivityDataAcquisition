@@ -25,7 +25,11 @@ def reset_settings_cache():
 @pytest.fixture
 def mock_settings_strict():
     """Mock settings with strict_error_handling=True."""
-    with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true"}):
+    env_vars = {
+        "BIOETL_STRICT_ERROR_HANDLING": "true",
+        "BIOETL_ENV": "staging",  # Avoid endpoint_url validation
+    }
+    with patch.dict(os.environ, env_vars):
         from bioetl.config import get_settings
 
         get_settings.cache_clear()
@@ -36,7 +40,11 @@ def mock_settings_strict():
 @pytest.fixture
 def mock_settings_lenient():
     """Mock settings with strict_error_handling=False."""
-    with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false"}):
+    env_vars = {
+        "BIOETL_STRICT_ERROR_HANDLING": "false",
+        "BIOETL_ENV": "staging",  # Avoid endpoint_url validation
+    }
+    with patch.dict(os.environ, env_vars):
         from bioetl.config import get_settings
 
         get_settings.cache_clear()
@@ -69,7 +77,7 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_next_page logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"}):
             client = UniProtClient()
             client.http_client = mock_http_client
 
@@ -99,7 +107,7 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_next_page raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -124,7 +132,7 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_features logs warning when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -157,7 +165,7 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_features raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -180,7 +188,7 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_sequences logs warning when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -213,7 +221,7 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_sequences raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -248,7 +256,7 @@ class TestPubChemClientErrorPaths:
         """Test that _fetch_compounds_incremental logs error when fetch fails."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -282,7 +290,7 @@ class TestPubChemClientErrorPaths:
         """Test that _fetch_compounds_incremental raises exception in strict mode."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"}):
             from bioetl.config import get_settings
 
             get_settings.cache_clear()
@@ -319,7 +327,7 @@ class TestStrictErrorHandlingConfig:
 
     def test_can_be_enabled_via_env_var(self):
         """Test that strict_error_handling can be enabled via env var."""
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true"}):
+        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"}):
             from bioetl.config import Settings
 
             settings = Settings(test_mode=True)
