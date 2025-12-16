@@ -50,6 +50,7 @@ def mock_base_pipeline():
 
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import RunID
+
     pipeline.context = PipelineContext(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
