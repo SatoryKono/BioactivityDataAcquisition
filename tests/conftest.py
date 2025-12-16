@@ -21,9 +21,15 @@ except ImportError:
 
 def pytest_configure() -> None:
     """Add src directory to Python path and mock missing modules."""
+    import os
+
     project_root = Path(__file__).parent.parent
     src_dir = project_root / "src"
     sys.path.insert(0, str(src_dir))
+
+    # Set BIOETL_ENV to staging for tests to avoid dev environment validation
+    # requiring endpoint_url
+    os.environ.setdefault("BIOETL_ENV", "staging")
 
     # Mock pubchempy if not installed
     try:
@@ -193,6 +199,19 @@ def run_id() -> "RunID":
     from bioetl.domain.types import RunID
 
     return RunID(uuid4())
+
+
+@pytest.fixture(autouse=True)
+def clear_settings_cache():
+    """Clear the settings cache before and after each test."""
+    try:
+        from bioetl.config import get_settings
+
+        get_settings.cache_clear()
+        yield
+        get_settings.cache_clear()
+    except ImportError:
+        yield
 
 
 @pytest.fixture(scope="session")

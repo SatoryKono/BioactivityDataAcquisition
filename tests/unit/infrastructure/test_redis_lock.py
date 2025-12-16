@@ -15,7 +15,9 @@ class TestRedisDistributedLock:
     """Tests for Redis-based distributed locking."""
 
     @pytest.mark.asyncio
-    async def test_acquire_lock(self, redis_client_fixture, request, run_id: RunID) -> None:
+    async def test_acquire_lock(
+        self, redis_client_fixture, request, run_id: RunID
+    ) -> None:
         """Should successfully acquire an available lock."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
@@ -51,7 +53,9 @@ class TestRedisDistributedLock:
         assert acquired is False
 
     @pytest.mark.asyncio
-    async def test_release_lock(self, redis_client_fixture, request, run_id: RunID) -> None:
+    async def test_release_lock(
+        self, redis_client_fixture, request, run_id: RunID
+    ) -> None:
         """Should successfully release owned lock."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
@@ -128,7 +132,9 @@ class TestRedisDistributedLock:
         assert success is False
 
     @pytest.mark.asyncio
-    async def test_exclusive_lock(self, redis_client_fixture, request, run_id: RunID) -> None:
+    async def test_exclusive_lock(
+        self, redis_client_fixture, request, run_id: RunID
+    ) -> None:
         """Exclusive lock should block regular locks."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
@@ -163,7 +169,9 @@ class TestRedisDistributedLock:
         assert exclusive_acquired is False
 
     @pytest.mark.asyncio
-    async def test_key_prefix(self, redis_client_fixture, request, run_id: RunID) -> None:
+    async def test_key_prefix(
+        self, redis_client_fixture, request, run_id: RunID
+    ) -> None:
         """Lock keys should use configured prefix."""
         from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 
