@@ -10,17 +10,19 @@ This module now re-exports exceptions from domain for backward compatibility.
 from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
-    SchemaViolationError as SchemaValidationError,
     StorageError,
     TableNotFoundError,
     UploadError,
 )
+from bioetl.domain.exceptions import (
+    SchemaViolationError as SchemaValidationError,
+)
 
 __all__ = [
-    "StorageError",
     "BucketNotFoundError",
-    "UploadError",
-    "SchemaValidationError",
-    "TableNotFoundError",
     "MergeConflictError",
+    "SchemaValidationError",
+    "StorageError",
+    "TableNotFoundError",
+    "UploadError",
 ]

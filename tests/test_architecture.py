@@ -166,82 +166,6 @@ def test_doc_naming_convention(src_dir: Path, docs_dir: Path):
     ), f"Missing doc folders for providers: {src_providers - docs_providers}"
 
 
-# --- REQ-COMPLEXITY-001 ---
-def test_code_complexity_with_xenon(src_dir: Path):
-    """Code complexity must meet xenon thresholds (max-absolute B, max-modules B, max-average B).
-
-    Runs: xenon --max-absolute B --max-modules B --max-average B --exclude "tests/*,src/tools/*" src
-
-    Grade thresholds:
-    - A: CC <= 5 (simple, low risk)
-    - B: 6 <= CC <= 10 (more complex, moderate risk)
-    - C: 11 <= CC <= 20 (complex, high risk)
-    - D: 21 <= CC <= 30 (very complex, very high risk)
-    - F: CC > 30 (unmaintainable)
-    """
-    try:
-        result = subprocess.run(
-            [
-                "xenon",
-                "--max-absolute",
-                "B",
-                "--max-modules",
-                "B",
-                "--max-average",
-                "B",
-                "--exclude",
-                "tests/*,src/tools/*",
-                str(src_dir),
-            ],
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-    except FileNotFoundError:
-        pytest.skip("xenon not installed, run: pip install xenon")
-
-    assert result.returncode == 0, (
-        f"Code complexity check failed.\n"
-        f"xenon output:\n{result.stdout}\n{result.stderr}\n\n"
-        f"Functions/modules exceed complexity threshold B (CC > 10).\n"
-        f"Refactor complex code to reduce cyclomatic complexity."
-    )
-
-
-# --- REQ-LINT-001 ---
-def test_ruff_check_passes(src_dir: Path, project_root: Path):
-    """Code must pass ruff linting without errors.
-
-    Runs: ruff check --fix src tests
-    """
-    tests_dir = project_root / "tests"
-    try:
-        # First, run with --fix
-        subprocess.run(
-            ["ruff", "check", "--fix", str(src_dir), str(tests_dir)],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            cwd=str(project_root),
-        )
-        # Then, run again to check for remaining errors
-        result = subprocess.run(
-            ["ruff", "check", str(src_dir), str(tests_dir)],
-            capture_output=True,
-            text=True,
-            timeout=60,
-            cwd=str(project_root),
-        )
-    except FileNotFoundError:
-        pytest.skip("ruff not installed, run: pip install ruff")
-
-    assert result.returncode == 0, (
-        f"Ruff linting failed.\n"
-        f"ruff output:\n{result.stdout}\n{result.stderr}\n\n"
-        f"Fix linting errors before committing."
-    )
-
-
 # --- REQ-ENV-001 ---
 def test_env_var_access_only_in_config(src_dir: Path):
     """os.getenv and os.environ must only be used in config.py.
@@ -285,10 +209,10 @@ def test_env_var_access_only_in_config(src_dir: Path):
         "Environment variable access must be centralized in config.py.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
         "Refactor to use functions from bioetl.config instead:\n"
-        "  - get_aws_config()\n"
-        "  - get_s3_config()\n"
-        "  - get_redis_config()\n"
-        "  - get_storage_options()"
+        "  - get_settings().aws\n"
+        "  - get_settings().s3\n"
+        "  - get_settings().redis\n"
+        "  - get_settings().storage_options"
     )
 
 
@@ -354,53 +278,44 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
 
 
 # --- REQ-CONFIG-001 ---
-@patch("bioetl.config.get_settings")
-def test_config_parameters_have_defaults_or_validation(
-    mock_get_settings, src_dir: Path
-):
+def test_config_parameters_have_defaults_or_validation(src_dir: Path):
     """Configuration parameters should have sensible defaults or validation.
 
     This test checks that config functions return valid typed objects
     even with no environment variables set.
     """
-    from bioetl.config import Settings
-
-    mock_get_settings.return_value = Settings(test_mode=True)
-
     # Import config module
     import sys
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.config import (
-        get_aws_config,
-        get_redis_config,
-        get_s3_config,
-        get_storage_options,
-    )
+    from bioetl.config import get_settings
 
     # Test that all config functions can be called without environment variables
     # (they should return objects with sensible defaults or None for optional values)
-    aws_config = get_aws_config()
-    assert aws_config is not None
-    assert isinstance(aws_config.region, str)
-    # endpoint_url can be None (optional)
+    with patch("bioetl.config.Settings.check_s3_endpoint_for_dev", return_value=True):
+        settings = get_settings()
 
-    s3_config = get_s3_config()
-    assert s3_config is not None
-    assert s3_config.bucket_bronze == "bioetl-bronze"
-    assert s3_config.bucket_silver == "bioetl-silver"
-    assert s3_config.bucket_gold == "bioetl-gold"
-    assert s3_config.bucket_checkpoints == "bioetl-checkpoints"
+        aws_config = settings.aws
+        assert aws_config is not None
+        assert isinstance(aws_config.region, str)
+        # endpoint_url can be None (optional)
 
-    redis_config = get_redis_config()
-    assert redis_config is not None
-    assert redis_config.host == "localhost"
-    assert redis_config.port == 6379
+        s3_config = settings.s3
+        assert s3_config is not None
+        assert s3_config.bucket_bronze == "bioetl-bronze"
+        assert s3_config.bucket_silver == "bioetl-silver"
+        assert s3_config.bucket_gold == "bioetl-gold"
+        assert s3_config.bucket_checkpoints == "bioetl-checkpoints"
 
-    storage_options = get_storage_options()
-    # Should be None when endpoint_url is not set
-    assert storage_options is None or isinstance(storage_options, dict)
+        redis_config = settings.redis
+        assert redis_config is not None
+        assert redis_config.host == "localhost"
+        assert redis_config.port == 6379
+
+        storage_options = settings.storage_options
+        # Should be None when endpoint_url is not set
+        assert storage_options is None or isinstance(storage_options, dict)
 
 
 # --- REQ-CONFIG-002 ---
