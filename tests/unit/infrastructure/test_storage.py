@@ -17,14 +17,12 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 @pytest.fixture
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
-    # Patch boto3.Session at the global level since it's imported inside __init__
-    with (
-        patch("boto3.Session") as mock_session,
-        patch("boto3.session.Config") as mock_config,
-    ):
+    # Patch S3ClientPool.get_client since BronzeWriter now uses the pool
+    with patch(
+        "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
+    ) as mock_get_client:
         mock_s3 = MagicMock()
-        mock_session.return_value.client.return_value = mock_s3
-        mock_config.return_value = MagicMock()
+        mock_get_client.return_value = mock_s3
         yield mock_s3
 
 
