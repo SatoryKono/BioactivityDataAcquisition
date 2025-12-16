@@ -274,7 +274,7 @@ def checkpoint_delete(pipeline: str) -> None:
     Examples:
         bioetl checkpoint delete --pipeline chembl_activity
     """
-    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid44())
+    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid4())
     asyncio.run(_checkpoint_delete(pipeline, logger))
 
 
