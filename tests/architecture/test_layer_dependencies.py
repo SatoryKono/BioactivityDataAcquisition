@@ -482,7 +482,7 @@ def test_application_layer_no_orchestration_imports(src_dir: Path) -> None:
     """Application layer must not import orchestration frameworks directly.
 
     REQ-ARCH-APP-001: Prefect, Celery, Airflow etc. должны быть изолированы
-    в отдельном слое (bioetl/orchestration/).
+    в отдельном слое (bioetl/interfaces/orchestration/).
     """
     application_path = src_dir / "bioetl" / "application"
     if not application_path.exists():
@@ -500,7 +500,7 @@ def test_application_layer_no_orchestration_imports(src_dir: Path) -> None:
     assert not violations, (
         "Application layer has direct orchestration imports:\n"
         + "\n".join(f"  - {v}" for v in violations)
-        + "\n\nMove orchestration code to bioetl/orchestration/"
+        + "\n\nMove orchestration code to bioetl/interfaces/orchestration/"
     )
 
 

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import redis.asyncio as aioredis
 
 if TYPE_CHECKING:
-    from bioetl.config import Settings
+    from bioetl.infrastructure.config import Settings
 
 
 def create_redis_client(settings: Settings) -> aioredis.Redis:

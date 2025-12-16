@@ -97,12 +97,12 @@ docker-logs: ## Show logs from Docker services
 
 seed-local: ## Load sample fixtures into local DB
 	@echo "$(BLUE)Seeding local database...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.seed --env local
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.seed --env local
 	@echo "$(GREEN)Database seeded!$(NC)"
 
 run-local: ## Run sample pipeline on local fixtures
 	@echo "$(BLUE)Running sample pipeline...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.runner --pipeline sample --env local
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.runner --pipeline sample --env local
 
 clean: ## Clean up generated files
 	@echo "$(YELLOW)Cleaning up...$(NC)"
@@ -118,30 +118,30 @@ clean: ## Clean up generated files
 # Quarantine management (RULES.md §2.6)
 quarantine-inspect: ## Inspect quarantine errors (PIPELINE=...)
 	@echo "$(BLUE)Inspecting quarantine for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.quarantine inspect --pipeline $(PIPELINE)
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.quarantine inspect --pipeline $(PIPELINE)
 
 quarantine-replay: ## Replay quarantine records (PIPELINE=...)
 	@echo "$(BLUE)Replaying quarantine for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.quarantine replay --pipeline $(PIPELINE)
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.quarantine replay --pipeline $(PIPELINE)
 
 quarantine-purge: ## Purge quarantine (PIPELINE=...)
 	@echo "$(YELLOW)Purging quarantine for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.quarantine purge --pipeline $(PIPELINE)
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.quarantine purge --pipeline $(PIPELINE)
 
 # Lock management (RULES.md §3.3)
 release-lock: ## Release stuck lock (PIPELINE=...)
 	@echo "$(YELLOW)Releasing lock for $(PIPELINE)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.lock release --pipeline $(PIPELINE)
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.lock release --pipeline $(PIPELINE)
 
 # Disaster Recovery (RULES.md §5.5)
 dr-restore: ## Restore from backup (SCENARIO=..., DATE=...)
 	@echo "$(BLUE)Running DR restore: scenario=$(SCENARIO), date=$(DATE)$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.dr restore --scenario $(SCENARIO) --date $(DATE)
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.dr restore --scenario $(SCENARIO) --date $(DATE)
 
 # Rollback (RULES.md §7.2)
 rollback: ## Rollback to version (VERSION=...)
 	@echo "$(YELLOW)Rolling back to $(VERSION)...$(NC)"
-	$(VENV_PYTHON) -m bioetl.cli.rollback --version $(VERSION)
+	$(VENV_PYTHON) -m bioetl.interfaces.cli.rollback --version $(VERSION)
 
 # Development helpers
 dev-shell: ## Open Python shell with project context

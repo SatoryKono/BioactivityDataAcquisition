@@ -174,7 +174,7 @@ def test_env_var_access_only_in_config(src_dir: Path):
     """os.getenv and os.environ must only be used in config.py.
 
     All environment variable access must be centralized in
-    src/bioetl/config.py to ensure:
+    src/bioetl.infrastructure.config.py to ensure:
     - Single source of truth for configuration
     - Easier testing (mock config functions, not env vars)
     - Clear documentation of required environment variables
@@ -211,7 +211,7 @@ def test_env_var_access_only_in_config(src_dir: Path):
     assert not violations, (
         "Environment variable access must be centralized in config.py.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Refactor to use functions from bioetl.config instead:\n"
+                                                                            "Refactor to use functions from bioetl.infrastructure.config instead:\n"
                                                                             "  - get_settings().aws\n"
                                                                             "  - get_settings().s3\n"
                                                                             "  - get_settings().redis\n"
@@ -226,7 +226,7 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
     The CLI should work through:
     - Abstractions (domain ports)
     - Bootstrap/factory patterns
-    - Centralized config (bioetl.config is allowed)
+    - Centralized config (bioetl.infrastructure.config is allowed)
 
     This ensures the CLI remains decoupled from concrete implementations
     and can be easily tested with mocks.
@@ -276,7 +276,7 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
                                                                             "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
                                                                             "  - Bootstrap functions that wire up dependencies\n"
                                                                             "  - Domain ports for type hints\n"
-                                                                            "  - bioetl.config for configuration (allowed)"
+                                                                            "  - bioetl.infrastructure.config for configuration (allowed)"
     )
 
 
@@ -292,11 +292,11 @@ def test_config_parameters_have_defaults_or_validation(src_dir: Path):
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.config import get_settings
+    from bioetl.infrastructure.config import get_settings
 
     # Test that all config functions can be called without environment variables
     # (they should return objects with sensible defaults or None for optional values)
-    with patch("bioetl.config.Settings.check_s3_endpoint_for_dev", return_value=True):
+    with patch("bioetl.infrastructure.config.Settings.check_s3_endpoint_for_dev", return_value=True):
         settings = get_settings()
 
         aws_config = settings.aws
@@ -331,7 +331,7 @@ def test_config_dataclasses_are_frozen(src_dir: Path):
 
     sys.path.insert(0, str(src_dir))
 
-    from bioetl.config import AWSSettings, RedisSettings, S3Settings
+    from bioetl.infrastructure.config import AWSSettings, RedisSettings, S3Settings
 
     config_classes = [AWSSettings, RedisSettings, S3Settings]
 
