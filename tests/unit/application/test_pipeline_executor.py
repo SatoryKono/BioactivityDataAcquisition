@@ -7,8 +7,8 @@ import pytest
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.domain.context import PipelineContext
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
 
 class ConcretePipeline(BasePipeline):
