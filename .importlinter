@@ -32,5 +32,4 @@ forbidden_modules =
     bioetl.infrastructure.locking
     bioetl.infrastructure.checkpoint
     bioetl.infrastructure.quarantine
-ignore_imports =
-    bioetl.application.pipelines.chembl_activity -> bioetl.infrastructure.*
+    bioetl.infrastructure.factories
