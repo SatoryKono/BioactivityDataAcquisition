@@ -5,7 +5,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from bioetl.infrastructure.storage.s3_pool import S3ClientPool
 
 
@@ -51,7 +50,7 @@ class TestS3ClientPool:
 
     def test_get_client_reuses_existing_client(self, mock_boto3_session):
         """Test that get_client reuses existing client for same key."""
-        mock_session, mock_client = mock_boto3_session
+        mock_session, _mock_client = mock_boto3_session
 
         client1 = S3ClientPool.get_client(
             endpoint_url="http://localhost:9000",
@@ -109,7 +108,7 @@ class TestS3ClientPool:
 
     def test_clear_pool_removes_all_clients(self, mock_boto3_session):
         """Test that clear_pool removes all cached clients."""
-        mock_session, _ = mock_boto3_session
+        _mock_session, _ = mock_boto3_session
 
         S3ClientPool.get_client(
             endpoint_url="http://localhost:9000",
@@ -128,7 +127,7 @@ class TestS3ClientPool:
 
     def test_pool_size_returns_correct_count(self, mock_boto3_session):
         """Test that pool_size returns correct number of clients."""
-        mock_session, _ = mock_boto3_session
+        _mock_session, _ = mock_boto3_session
 
         assert S3ClientPool.pool_size() == 0
 
@@ -147,7 +146,7 @@ class TestS3ClientPool:
 
     def test_none_endpoint_url_is_valid_key(self, mock_boto3_session):
         """Test that None endpoint_url works for AWS S3."""
-        mock_session, mock_client = mock_boto3_session
+        _mock_session, mock_client = mock_boto3_session
 
         client = S3ClientPool.get_client(
             endpoint_url=None,
@@ -164,7 +163,7 @@ class TestS3ClientPoolConcurrency:
 
     def test_concurrent_access_same_key(self, mock_boto3_session):
         """Test concurrent access to the same key returns same client."""
-        mock_session, mock_client = mock_boto3_session
+        mock_session, _mock_client = mock_boto3_session
         results = []
         errors = []
 
@@ -199,7 +198,7 @@ class TestS3ClientPoolConcurrency:
         # Create unique mock clients for each call
         call_count = 0
 
-        def create_mock_client(*args, **kwargs):
+        def create_mock_client(*_args, **_kwargs):
             nonlocal call_count
             call_count += 1
             return MagicMock(name=f"client_{call_count}")
@@ -238,7 +237,7 @@ class TestS3ClientPoolConcurrency:
         assert len(results) == 10  # 10 different endpoints
 
         # Each endpoint should have 10 results, all the same client
-        for port, clients in results.items():
+        for _port, clients in results.items():
             assert len(clients) == 10
             assert all(c is clients[0] for c in clients)
 
@@ -247,12 +246,12 @@ class TestS3ClientPoolConcurrency:
 
     def test_concurrent_clear_and_get(self, mock_boto3_session):
         """Test concurrent clear and get operations are thread-safe."""
-        mock_session, _ = mock_boto3_session
+        _mock_session, _ = mock_boto3_session
 
-        def create_mock_client(*args, **kwargs):
+        def create_mock_client(*_args, **_kwargs):
             return MagicMock()
 
-        mock_session.return_value.client.side_effect = create_mock_client
+        _mock_session.return_value.client.side_effect = create_mock_client
 
         errors = []
 
@@ -289,7 +288,7 @@ class TestS3ClientPoolConcurrency:
         """Test memory usage is stable with many operations (1000+ simulated batches)."""
         mock_session, _ = mock_boto3_session
 
-        def create_mock_client(*args, **kwargs):
+        def create_mock_client(*_args, **_kwargs):
             return MagicMock()
 
         mock_session.return_value.client.side_effect = create_mock_client
