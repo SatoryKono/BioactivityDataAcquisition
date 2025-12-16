@@ -12,7 +12,7 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl_activity import CHEMBL_ACTIVITY_CONFIG
-from bioetl.config import Settings, get_settings
+from bioetl.infrastructure.config import Settings, get_settings
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
