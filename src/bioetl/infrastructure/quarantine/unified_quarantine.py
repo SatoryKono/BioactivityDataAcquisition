@@ -31,7 +31,8 @@ def _quote_literal(value: Any) -> str:
     """Safely quote a literal value for a Delta Lake predicate."""
     if isinstance(value, str):
         # Escape single quotes by doubling them up
-        return f"'{value.replace("'", "''")}'"
+        escaped = value.replace("'", "''")
+        return f"'{escaped}'"
     if isinstance(value, (int, float)):
         return str(value)
     if isinstance(value, bool):
