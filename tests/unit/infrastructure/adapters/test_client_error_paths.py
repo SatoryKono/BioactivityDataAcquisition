@@ -362,13 +362,19 @@ class TestStrictErrorHandlingConfig:
 
     def test_env_var_case_insensitive(self):
         """Test that env var values are case-insensitive."""
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "True"}):
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "True", "BIOETL_ENV": "staging"},
+        ):
             from bioetl.config import Settings
 
             settings = Settings(test_mode=True)
             assert settings.strict_error_handling is True
 
-        with patch.dict(os.environ, {"BIOETL_STRICT_ERROR_HANDLING": "TRUE"}):
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "TRUE", "BIOETL_ENV": "staging"},
+        ):
             from bioetl.config import Settings
 
             settings = Settings(test_mode=True)
