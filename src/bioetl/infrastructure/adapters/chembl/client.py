@@ -40,6 +40,17 @@ ENTITY_MAPPING = {
     "tissue": "tissue",
 }
 
+# Plural forms for API response keys (ChEMBL uses irregular plurals)
+ENTITY_PLURAL = {
+    "activity": "activities",
+    "assay": "assays",
+    "molecule": "molecules",
+    "target": "targets",
+    "document": "documents",
+    "cell_line": "cell_lines",
+    "tissue": "tissues",
+}
+
 
 class ChemblApiError(Exception):
     """Raised when ChEMBL API returns an error."""
@@ -112,7 +123,9 @@ class ChemblAdapter:
     ) -> tuple[list[dict[str, Any]], bool]:
         """Process API response, extract records and pagination info."""
         data = response.json()
-        records = data.get(ENTITY_MAPPING.get(entity_type, entity_type) + "s", [])
+        resource = ENTITY_MAPPING.get(entity_type, entity_type)
+        plural_key = ENTITY_PLURAL.get(resource, resource + "s")
+        records = data.get(plural_key, [])
         page_meta = data.get("page_meta", {})
         has_next = page_meta.get("next") is not None
         return records, has_next
