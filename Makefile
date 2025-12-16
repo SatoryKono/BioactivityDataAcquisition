@@ -138,10 +138,48 @@ dev-shell: ## Open Python shell with project context
 watch-logs: ## Watch structured logs (tail -f)
 	tail -f logs/bioetl.log | jq '.'
 
-# CI/CD targets
-ci-lint: lint security ## Run all CI linting checks
+# Architecture and Quality Checks
+arch-test: ## Run architecture tests (layer dependencies)
+	@echo "$(BLUE)Running architecture tests...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/architecture/ -v
 
-ci-test: test ## Run all tests for CI
+arch-lint: ## Run import-linter contracts
+	@echo "$(BLUE)Checking import contracts...$(NC)"
+	$(VENV_PYTHON) -m importlinter --config .importlinter
+
+complexity: ## Check cyclomatic complexity (max CC=10)
+	@echo "$(BLUE)Checking code complexity...$(NC)"
+	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules B --max-average A --exclude "tests/*" src/
+	@echo "$(BLUE)Checking domain layer complexity (max CC=5)...$(NC)"
+	$(VENV_PYTHON) -m xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain/
+
+complexity-report: ## Generate detailed complexity report
+	@echo "$(BLUE)Generating complexity report...$(NC)"
+	mkdir -p reports
+	$(VENV_PYTHON) -m radon cc src/ -a -s > reports/complexity.txt
+	$(VENV_PYTHON) -m radon mi src/ -s >> reports/complexity.txt
+	@echo "$(GREEN)Report saved to reports/complexity.txt$(NC)"
+
+mutation-test: ## Run mutation testing (slow, domain layer only)
+	@echo "$(BLUE)Running mutation testing on domain layer...$(NC)"
+	$(VENV_PYTHON) -m mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/
+
+mutation-report: ## Show mutation testing results
+	$(VENV_PYTHON) -m mutmut results
+
+typecheck: ## Run strict type checking
+	@echo "$(BLUE)Running mypy (strict)...$(NC)"
+	$(VENV_PYTHON) -m mypy --config-file pyproject.toml src/bioetl
+
+quality: lint arch-lint complexity typecheck ## Run all quality checks
+	@echo "$(GREEN)All quality checks passed!$(NC)"
+
+# CI/CD targets
+ci-lint: lint security arch-lint ## Run all CI linting checks
+
+ci-test: test arch-test ## Run all tests for CI
+
+ci-quality: quality ## Run full quality gate
 
 ci-build: ## Build distribution packages
 	$(VENV_PYTHON) -m build

@@ -1,0 +1,115 @@
+name: Mutation Testing
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    paths:
+      - 'src/bioetl/domain/**'
+      - 'src/bioetl/application/**'
+      - 'tests/**'
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  mutation-testing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
+
+      - name: Cache mutmut
+        uses: actions/cache@v4
+        with:
+          path: .mutmut-cache
+          key: ${{ runner.os }}-mutmut-${{ hashFiles('src/bioetl/domain/**', 'src/bioetl/application/**') }}
+          restore-keys: |
+            ${{ runner.os }}-mutmut-
+
+      - name: Run mutation testing on domain layer
+        run: |
+          echo "Running mutation testing on domain layer..."
+          mutmut run --paths-to-mutate=src/bioetl/domain/ --tests-dir=tests/ || true
+
+      - name: Generate mutation report
+        run: |
+          mkdir -p reports
+          mutmut results > reports/mutmut_results.txt || true
+          mutmut html || true
+          if [ -d "html" ]; then
+            mv html reports/mutmut_html
+          fi
+
+      - name: Check mutation score threshold
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+          import re
+
+          result = subprocess.run(
+              ["mutmut", "results"],
+              capture_output=True,
+              text=True
+          )
+          output = result.stdout + result.stderr
+
+          # Parse mutation score
+          # Example output: "Killed: 45, Survived: 5, ..."
+          killed_match = re.search(r'Killed[:\s]+(\d+)', output, re.IGNORECASE)
+          survived_match = re.search(r'Survived[:\s]+(\d+)', output, re.IGNORECASE)
+          timeout_match = re.search(r'Timeout[:\s]+(\d+)', output, re.IGNORECASE)
+
+          killed = int(killed_match.group(1)) if killed_match else 0
+          survived = int(survived_match.group(1)) if survived_match else 0
+          timeout = int(timeout_match.group(1)) if timeout_match else 0
+
+          total = killed + survived + timeout
+          if total == 0:
+              print("No mutations generated - skipping threshold check")
+              sys.exit(0)
+
+          score = (killed + timeout) / total * 100
+          print(f"Mutation Score: {score:.1f}%")
+          print(f"  Killed: {killed}")
+          print(f"  Survived: {survived}")
+          print(f"  Timeout: {timeout}")
+          print(f"  Total: {total}")
+
+          # Threshold: 60% minimum mutation score
+          # This is a reasonable starting point; increase as test quality improves
+          THRESHOLD = 60.0
+          if score < THRESHOLD:
+              print(f"\n⚠️  Mutation score {score:.1f}% is below threshold {THRESHOLD}%")
+              print("Consider improving test coverage for the surviving mutants")
+              # Warning only for now - uncomment to enforce
+              # sys.exit(1)
+          else:
+              print(f"\n✅ Mutation score {score:.1f}% meets threshold {THRESHOLD}%")
+          PY
+
+      - name: Upload mutation reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-reports
+          path: reports/
+          if-no-files-found: warn

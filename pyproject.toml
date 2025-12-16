@@ -70,6 +70,8 @@ dev = [
     # Code complexity analysis (RULES.md)
     "xenon>=0.9",
     "radon>=6.0",
+    # Mutation testing
+    "mutmut>=2.5",
 ]
 docs = [
     "mkdocs>=1.6",
@@ -133,6 +135,12 @@ no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 show_error_codes = true
+# Additional strict checks
+disallow_any_generics = true
+disallow_subclassing_any = true
+warn_unreachable = true
+strict_equality = true
+extra_checks = true
 
 
 [[tool.mypy.overrides]]
@@ -177,3 +185,20 @@ ignore = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["bioetl"]
+
+# ============ MUTMUT (Mutation Testing) ============
+[tool.mutmut]
+paths_to_mutate = "src/bioetl/domain/,src/bioetl/application/"
+tests_dir = "tests/"
+runner = "python -m pytest -x --tb=short"
+# Skip infrastructure layer - focus on business logic
+dict_synonyms = "Struct, NamedStruct"
+
+# ============ XENON (Complexity Thresholds) ============
+# Enforced in CI: xenon --max-absolute B --max-modules B --max-average A
+# B = max CC of 10 per function, A = average CC of 5
+
+# ============ BANDIT (Security) ============
+[tool.bandit]
+exclude_dirs = ["tests", "docs"]
+skips = ["B101"]  # assert_used - acceptable in production for invariants
