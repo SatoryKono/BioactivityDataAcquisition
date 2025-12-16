@@ -61,7 +61,7 @@ class TestS3Checkpoint:
         cp.loop.run_in_executor = make_sync_executor(cp.loop)
 
         pipeline = "test_pipeline"
-        watermark = Watermark(datetime(2023, 1, 1, tzinfo=UTC))
+        watermark: Watermark = datetime(2023, 1, 1, tzinfo=UTC)
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         metadata = {"key": "value"}
 
