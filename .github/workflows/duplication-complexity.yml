@@ -33,8 +33,61 @@ jobs:
           radon cc src tests -a -s > reports/radon_cc.txt
           radon cc src tests -a -s -j > reports/radon_cc.json
 
-      - name: Enforce cyclomatic complexity threshold (code only)
-        run: xenon --max-absolute B --max-modules B --max-average B --exclude "tests/*,src/tools/*" src
+      - name: Enforce cyclomatic complexity threshold (CC ≤ 10)
+        run: |
+          echo "Checking overall code complexity (max CC = 10, grade B)..."
+          xenon --max-absolute B --max-modules B --max-average A --exclude "tests/*,src/tools/*" src
+
+      - name: Strict complexity check for domain layer (CC ≤ 5)
+        run: |
+          echo "Checking domain layer complexity (max CC = 5, grade A)..."
+          xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain || {
+            echo "⚠️  Domain layer has functions with CC > 5"
+            echo "Consider refactoring to keep domain logic simple"
+            exit 1
+          }
+
+      - name: Generate detailed complexity report
+        run: |
+          echo "=== Functions with CC > 5 ===" > reports/high_complexity.txt
+          radon cc src -a -s --min C >> reports/high_complexity.txt || true
+          echo "" >> reports/high_complexity.txt
+          echo "=== Maintainability Index ===" >> reports/high_complexity.txt
+          radon mi src -s >> reports/high_complexity.txt
+
+      - name: Check for critical complexity violations
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          # Read radon JSON output
+          report_path = Path("reports/radon_cc.json")
+          if not report_path.exists():
+              print("No complexity report found")
+              sys.exit(0)
+
+          with open(report_path) as f:
+              data = json.load(f)
+
+          violations = []
+          for filepath, functions in data.items():
+              for func in functions:
+                  cc = func.get("complexity", 0)
+                  name = func.get("name", "unknown")
+                  # Fail on CC > 10 (grade C or worse)
+                  if cc > 10:
+                      violations.append(f"{filepath}:{func.get('lineno', '?')} - {name}() has CC={cc}")
+
+          if violations:
+              print("❌ Critical complexity violations (CC > 10):")
+              for v in violations:
+                  print(f"  {v}")
+              sys.exit(1)
+          else:
+              print("✅ No critical complexity violations found")
+          PY
 
       - name: Install Node.js
         uses: actions/setup-node@v4

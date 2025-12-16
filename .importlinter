@@ -33,3 +33,25 @@ forbidden_modules =
     bioetl.infrastructure.checkpoint
     bioetl.infrastructure.quarantine
     bioetl.infrastructure.factories
+
+[importlinter:contract:infrastructure-no-application]
+name = Infrastructure layer must not import application
+type = forbidden
+source_modules =
+    bioetl.infrastructure
+forbidden_modules =
+    bioetl.application
+
+[importlinter:contract:domain-pure]
+name = Domain layer must be pure (no I/O libraries)
+type = forbidden
+source_modules =
+    bioetl.domain
+forbidden_modules =
+    httpx
+    requests
+    boto3
+    redis
+    deltalake
+    polars
+    sqlalchemy
