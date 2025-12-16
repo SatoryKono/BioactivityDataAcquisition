@@ -71,7 +71,7 @@ class StoragePort(Protocol):
     different layers without knowing the implementation details.
     """
 
-    def write_bronze(
+    async def write_bronze(
         self,
         records: Iterable[bytes],
         provider: str,
@@ -91,7 +91,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def write_silver(
+    async def write_silver(
         self,
         table_name: str,
         records: list[dict[str, Any]],
@@ -109,7 +109,7 @@ class StoragePort(Protocol):
         """
         ...
 
-    def write_gold(
+    async def write_gold(
         self,
         table_name: str,
         records: list[dict[str, Any]],
@@ -208,7 +208,7 @@ class CheckpointPort(Protocol):
     resilience and incremental processing.
     """
 
-    def save(
+    async def save(
         self,
         pipeline: str,
         watermark: Watermark,
@@ -226,7 +226,7 @@ class CheckpointPort(Protocol):
         """
         ...
 
-    def load(
+    async def load(
         self,
         pipeline: str,
     ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
@@ -242,7 +242,7 @@ class CheckpointPort(Protocol):
         """
         ...
 
-    def list_all(self) -> list[str]:
+    async def list_all(self) -> list[str]:
         """
         List all pipelines that have checkpoints.
 
@@ -251,7 +251,7 @@ class CheckpointPort(Protocol):
         """
         ...
 
-    def delete(self, pipeline: str) -> None:
+    async def delete(self, pipeline: str) -> None:
         """
         Delete a checkpoint.
 
@@ -270,7 +270,7 @@ class QuarantinePort(Protocol):
     for later analysis, preventing them from stopping the entire pipeline.
     """
 
-    def write(
+    async def write(
         self,
         pipeline: str,
         error_code: str,
@@ -290,7 +290,7 @@ class QuarantinePort(Protocol):
         """
         ...
 
-    def inspect(
+    async def inspect(
         self,
         pipeline: str,
         limit: int = 10,
@@ -309,7 +309,7 @@ class QuarantinePort(Protocol):
         """
         ...
 
-    def get_stats(self, pipeline: str) -> dict[str, Any]:
+    async def get_stats(self, pipeline: str) -> dict[str, Any]:
         """
         Get statistics about the quarantined records for a pipeline.
 
@@ -330,6 +330,10 @@ class MetricsPort(Protocol):
     This interface abstracts the metrics collection mechanism, allowing the
     application to record metrics without knowing the specific implementation
     (e.g., Prometheus, StatsD, CloudWatch).
+
+    Note: MetricsPort uses synchronous methods for low-overhead operations.
+    Unlike I/O ports, metric collection should be fast and non-blocking
+    by design (using thread-safe counters, not I/O).
     """
 
     def observe_histogram(

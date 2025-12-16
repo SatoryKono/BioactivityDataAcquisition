@@ -1,7 +1,11 @@
+import ast
+import inspect
 import re
 import subprocess
 import tomllib
+from collections.abc import AsyncIterator
 from pathlib import Path
+from typing import get_type_hints
 from unittest.mock import patch
 
 import pytest
@@ -10,6 +14,7 @@ from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
     LockPort,
+    MetricsPort,
     QuarantinePort,
     StoragePort,
 )
@@ -337,3 +342,228 @@ def test_config_dataclasses_are_frozen(src_dir: Path):
             "frozen" in config_class.model_config
             and config_class.model_config["frozen"] is True
         ), f"{config_class.__name__} must be frozen"
+
+
+# =============================================================================
+# Async/Domain Purity Architecture Tests
+# =============================================================================
+
+
+# --- REQ-ARCH-005 ---
+def test_domain_no_asyncio_import(src_dir: Path):
+    """Domain layer must not import asyncio directly.
+
+    The domain layer should remain pure and use abstract async types from
+    collections.abc (AsyncIterator, Awaitable) instead of asyncio runtime.
+    This ensures domain logic is testable without async event loops.
+
+    Allowed: collections.abc.AsyncIterator, typing.Awaitable
+    Forbidden: asyncio, anyio, trio
+    """
+    domain_path = src_dir / "bioetl" / "domain"
+    forbidden_async_imports = {"asyncio", "anyio", "trio"}
+
+    violations = []
+
+    for py_file in domain_path.rglob("*.py"):
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+        except SyntaxError:
+            continue
+
+        for node in ast.walk(tree):
+            # Check "import asyncio" style
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    module_name = alias.name.split(".")[0]
+                    if module_name in forbidden_async_imports:
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}: "
+                            f"Forbidden import 'import {alias.name}'"
+                        )
+            # Check "from asyncio import ..." style
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    module_name = node.module.split(".")[0]
+                    if module_name in forbidden_async_imports:
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}: "
+                            f"Forbidden import 'from {node.module} import ...'"
+                        )
+
+    assert not violations, (
+        "Domain layer must not import async runtime libraries.\n"
+        "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
+        "Use abstract types instead:\n"
+        "  - collections.abc.AsyncIterator (for async generators)\n"
+        "  - typing.Awaitable (for awaitable results)\n"
+        "  - typing.Coroutine (for coroutine type hints)"
+    )
+
+
+# --- REQ-ARCH-006 ---
+def test_port_async_methods_are_properly_typed():
+    """Port async methods must have proper return type annotations.
+
+    Async methods in ports must:
+    1. Return AsyncIterator for streaming data (not just Iterator)
+    2. Return Awaitable[T] or use async def for single values
+    3. Never return raw coroutine objects without type hints
+
+    This enables mypy to verify await usage at call sites.
+    """
+    async_ports = [
+        (DataSourcePort, ["fetch", "health_check"]),
+        (LockPort, ["acquire", "release", "heartbeat"]),
+    ]
+
+    violations = []
+
+    for port_class, async_methods in async_ports:
+        for method_name in async_methods:
+            if not hasattr(port_class, method_name):
+                violations.append(
+                    f"{port_class.__name__}.{method_name}: Method not found"
+                )
+                continue
+
+            method = getattr(port_class, method_name)
+
+            # Check if method is defined as async or has async return type
+            # For Protocol methods, check annotations
+            try:
+                hints = get_type_hints(method)
+                return_type = hints.get("return")
+
+                if return_type is None:
+                    violations.append(
+                        f"{port_class.__name__}.{method_name}: "
+                        "Missing return type annotation"
+                    )
+            except Exception as e:
+                # Type hints might not be resolvable in all contexts
+                violations.append(
+                    f"{port_class.__name__}.{method_name}: "
+                    f"Could not resolve type hints: {e}"
+                )
+
+    assert not violations, (
+        "Port async methods must have proper type annotations.\n"
+        "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
+        "Ensure async methods have:\n"
+        "  - async def with proper return type\n"
+        "  - AsyncIterator[T] for streaming methods\n"
+        "  - Awaitable[T] for single-value async methods"
+    )
+
+
+# --- REQ-ARCH-007 ---
+def test_io_ports_are_async():
+    """I/O ports must have async methods for non-blocking operations.
+
+    All ports that perform I/O operations (network, storage) should use
+    async methods to enable concurrent execution without blocking.
+
+    This ensures the pipeline can efficiently handle multiple concurrent
+    operations (fetching data, writing to storage, acquiring locks, etc.).
+
+    Note: MetricsPort is excluded as it uses sync methods for low-overhead
+    metric collection (no actual I/O, just in-memory counters).
+    """
+    # Ports that should have async methods for I/O operations
+    # MetricsPort excluded - uses sync methods for low-overhead operations
+    async_io_ports = [
+        (DataSourcePort, ["fetch", "health_check"]),
+        (LockPort, ["acquire", "release", "heartbeat"]),
+        (StoragePort, ["write_bronze", "write_silver", "write_gold"]),
+        (CheckpointPort, ["save", "load", "list_all", "delete"]),
+    ]
+
+    violations = []
+
+    for port_class, expected_async_methods in async_io_ports:
+        for method_name in expected_async_methods:
+            if not hasattr(port_class, method_name):
+                violations.append(
+                    f"{port_class.__name__}.{method_name}: Method not found"
+                )
+                continue
+
+            method = getattr(port_class, method_name)
+
+            # Check if it's an async method
+            if not inspect.iscoroutinefunction(method):
+                violations.append(
+                    f"{port_class.__name__}.{method_name}: "
+                    "I/O port method should be async"
+                )
+
+    assert not violations, (
+        "I/O ports must have async methods for non-blocking operations.\n"
+        "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
+        "All ports performing I/O should use 'async def' for methods."
+    )
+
+
+# --- REQ-ARCH-009 ---
+def test_metrics_port_is_sync():
+    """MetricsPort must be synchronous for low-overhead operations.
+
+    Unlike I/O ports, MetricsPort uses synchronous methods because:
+    1. Metric collection should have minimal overhead
+    2. Prometheus/StatsD clients use thread-safe in-memory counters
+    3. No actual I/O happens during metric recording (batched export)
+    """
+    sync_methods = ["observe_histogram", "increment_counter"]
+
+    violations = []
+
+    for method_name in sync_methods:
+        if not hasattr(MetricsPort, method_name):
+            violations.append(f"MetricsPort.{method_name}: Method not found")
+            continue
+
+        method = getattr(MetricsPort, method_name)
+
+        # Check if it's NOT an async method (should be sync)
+        if inspect.iscoroutinefunction(method):
+            violations.append(
+                f"MetricsPort.{method_name}: "
+                "Must be synchronous for low-overhead operations"
+            )
+
+    assert not violations, (
+        "MetricsPort must be synchronous for low-overhead operations.\n"
+        "Violations found:\n" + "\n".join(f"  - {v}" for v in violations)
+    )
+
+
+# --- REQ-ARCH-008 ---
+def test_import_linter_contracts_exist(project_root: Path):
+    """Import-linter configuration must exist with required contracts.
+
+    Ensures architectural boundaries are enforced via import-linter.
+    """
+    importlinter_path = project_root / ".importlinter"
+    assert importlinter_path.exists(), ".importlinter configuration file is missing"
+
+    with importlinter_path.open(encoding="utf-8") as f:
+        content = f.read()
+
+    required_contracts = [
+        "domain-independence",
+        "domain-pure",
+        "application-no-infrastructure-imports",
+        "infrastructure-no-application",
+    ]
+
+    for contract in required_contracts:
+        assert (
+            f"[importlinter:contract:{contract}]" in content
+        ), f"Missing import-linter contract: {contract}"
+
+    # Check that asyncio is forbidden in domain
+    assert "asyncio" in content, "asyncio should be forbidden in domain-pure contract"

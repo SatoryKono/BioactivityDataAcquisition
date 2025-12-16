@@ -14,6 +14,7 @@ Architecture:
 - Enforces data contracts
 """
 
+import asyncio
 from datetime import UTC, datetime
 from typing import Any
 
@@ -39,7 +40,7 @@ class GoldWriter:
         ...     storage_options={"AWS_ENDPOINT_URL": "http://localhost:9000"}
         ... )
         >>> records = [{"entity_id": "CHEMBL123", "value": 5.5}]
-        >>> writer.write_gold(
+        >>> await writer.write_gold(
         ...     table_name="chembl.activity_aggregated",
         ...     records=records,
         ...     schema=schema,
@@ -60,8 +61,9 @@ class GoldWriter:
         """
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
+        self.loop = asyncio.get_event_loop()
 
-    def write_gold(
+    async def write_gold(
         self,
         table_name: str,
         records: list[dict[str, Any]],
@@ -114,7 +116,9 @@ class GoldWriter:
             try:
                 # Convert to pandas for Pandera validation
                 pandas_df = df.to_pandas()
-                schema.validate(pandas_df, lazy=False)
+                await self.loop.run_in_executor(
+                    None, lambda: schema.validate(pandas_df, lazy=False)
+                )
             except pa.errors.SchemaError as e:
                 raise ValueError(f"Schema validation failed: {e}") from e
 
@@ -125,15 +129,15 @@ class GoldWriter:
         if mode == "scd2":
             if scd_config is None:
                 raise ValueError("scd_config required for SCD Type 2 mode")
-            self._write_scd2(table_path, records, scd_config, partition_cols)
+            await self._write_scd2(table_path, records, scd_config, partition_cols)
         elif mode in ("overwrite", "append"):
-            self._write_simple(table_path, records, mode, partition_cols)
+            await self._write_simple(table_path, records, mode, partition_cols)
         else:
             raise ValueError(
                 f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'"
             )
 
-    def _write_simple(
+    async def _write_simple(
         self,
         table_path: str,
         records: list[dict[str, Any]],
@@ -148,15 +152,18 @@ class GoldWriter:
             mode: 'overwrite' or 'append'
             partition_cols: Optional partition columns
         """
-        write_deltalake(
-            table_or_uri=table_path,
-            data=records,
-            mode=mode,
-            partition_by=partition_cols,
-            storage_options=self.storage_options,
+        await self.loop.run_in_executor(
+            None,
+            lambda: write_deltalake(
+                table_or_uri=table_path,
+                data=records,
+                mode=mode,
+                partition_by=partition_cols,
+                storage_options=self.storage_options,
+            ),
         )
 
-    def _write_scd2(
+    async def _write_scd2(
         self,
         table_path: str,
         records: list[dict[str, Any]],
@@ -195,22 +202,28 @@ class GoldWriter:
 
         try:
             # Load existing table
-            dt = DeltaTable(table_path, storage_options=self.storage_options)
+            dt = await self.loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            )
 
             # Perform SCD Type 2 merge
-            self._merge_scd2(dt, records, business_key, scd_config)
+            await self._merge_scd2(dt, records, business_key, scd_config)
 
         except TableNotFoundError:
             # Table doesn't exist, create it
-            write_deltalake(
-                table_or_uri=table_path,
-                data=records,
-                mode="append",
-                partition_by=partition_cols,
-                storage_options=self.storage_options,
+            await self.loop.run_in_executor(
+                None,
+                lambda: write_deltalake(
+                    table_or_uri=table_path,
+                    data=records,
+                    mode="append",
+                    partition_by=partition_cols,
+                    storage_options=self.storage_options,
+                ),
             )
 
-    def _merge_scd2(
+    async def _merge_scd2(
         self,
         dt: DeltaTable,
         records: list[dict[str, Any]],
@@ -251,24 +264,27 @@ class GoldWriter:
         # Merge logic:
         # 1. Close old current records (set valid_to, is_current=False)
         # 2. Insert new records as current
-        (
-            dt.merge(
-                source=new_data,
-                predicate=merge_condition,
-                source_alias="source",
-                target_alias="target",
-            )
-            .when_matched_update(
-                updates={
-                    valid_to_col: f"'{now}'",
-                    current_flag_col: "false",
-                }
-            )
-            .when_not_matched_insert_all()
-            .execute()
+        await self.loop.run_in_executor(
+            None,
+            lambda: (
+                dt.merge(
+                    source=new_data,
+                    predicate=merge_condition,
+                    source_alias="source",
+                    target_alias="target",
+                )
+                .when_matched_update(
+                    updates={
+                        valid_to_col: f"'{now}'",
+                        current_flag_col: "false",
+                    }
+                )
+                .when_not_matched_insert_all()
+                .execute()
+            ),
         )
 
-    def read_gold(
+    async def read_gold(
         self,
         table_name: str,
         current_only: bool = True,
@@ -284,13 +300,15 @@ class GoldWriter:
 
         Example:
             >>> writer = GoldWriter(base_path="s3://bioetl-gold")
-            >>> records = writer.read_gold("chembl.activity_aggregated")
+            >>> records = await writer.read_gold("chembl.activity_aggregated")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = DeltaTable(table_path, storage_options=self.storage_options)
+        dt = await self.loop.run_in_executor(
+            None, lambda: DeltaTable(table_path, storage_options=self.storage_options)
+        )
 
         # Convert to PyArrow table
-        arrow_table = dt.to_pyarrow_table()
+        arrow_table = await self.loop.run_in_executor(None, dt.to_pyarrow_table)
 
         # Filter for current records if SCD Type 2
         if current_only and "is_current" in arrow_table.column_names:
@@ -301,7 +319,7 @@ class GoldWriter:
         # Convert to list of dicts
         return arrow_table.to_pylist()
 
-    def get_history(
+    async def get_history(
         self,
         table_name: str,
         business_key_values: dict[str, Any],
@@ -318,7 +336,7 @@ class GoldWriter:
 
         Example:
             >>> writer = GoldWriter(base_path="s3://bioetl-gold")
-            >>> history = writer.get_history(
+            >>> history = await writer.get_history(
             ...     "chembl.activity_aggregated",
             ...     {"entity_id": "CHEMBL123"}
             ... )
@@ -326,10 +344,12 @@ class GoldWriter:
             ...     print(f"Version {version['version']}: {version['valid_from']}")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = DeltaTable(table_path, storage_options=self.storage_options)
+        dt = await self.loop.run_in_executor(
+            None, lambda: DeltaTable(table_path, storage_options=self.storage_options)
+        )
 
         # Convert to PyArrow table
-        arrow_table = dt.to_pyarrow_table()
+        arrow_table = await self.loop.run_in_executor(None, dt.to_pyarrow_table)
 
         # Filter by business key
         import pyarrow.compute as pc
