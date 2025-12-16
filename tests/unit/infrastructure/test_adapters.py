@@ -125,14 +125,16 @@ class TestUniProtClient:
 
         assert client.provider_name == "uniprot"
         assert client.api_key is None
-        assert client.rate_limiter.rate == 10.0  # Lower rate without key
+        # In UnifiedHTTPClient structure, rate_limiter is inside http_client
+        assert client.http_client.rate_limiter.rate == 10.0  # Lower rate without key
 
     def test_client_creation_with_api_key(self):
         """Test UniProt client with API key."""
         client = UniProtClient(api_key="test_key")
 
         assert client.api_key == "test_key"
-        assert client.rate_limiter.rate == 100.0  # Higher rate with key
+        # In UnifiedHTTPClient structure, rate_limiter is inside http_client
+        assert client.http_client.rate_limiter.rate == 100.0  # Higher rate with key
 
     def test_client_with_custom_base_url(self):
         """Test UniProt client with custom base URL."""
