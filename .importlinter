@@ -3,15 +3,11 @@ root_package = bioetl
 root_package_path = src
 include_external_packages = True
 
-[importlinter:contract:layers]
-name = Layer dependencies (Ports & Adapters)
-type = layers
-layers =
-    application
-    domain
-    infrastructure
-containers =
-    bioetl
+# Note: "layers" contract doesn't fit Hexagonal architecture where:
+# - domain is at the center (everyone can import it)
+# - infrastructure implements domain ports
+# - application uses ports, not concrete implementations
+# We use "forbidden" contracts instead to express the proper constraints.
 
 [importlinter:contract:domain-independence]
 name = Domain layer independence
