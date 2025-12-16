@@ -62,6 +62,7 @@ class RetryConfig:
     def calculate_delay(self, attempt: int) -> float:
         """Calculate delay for given attempt number (0-indexed)."""
         delay = self.base_delay * (self.multiplier ** attempt)
+        delay = self.base_delay * (self.multiplier ** attempt)
         delay = min(delay, self.max_delay)
         # Add jitter
         jitter_range = delay * self.jitter
