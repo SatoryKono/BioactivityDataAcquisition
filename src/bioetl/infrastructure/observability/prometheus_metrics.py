@@ -72,19 +72,3 @@ class PrometheusMetrics(MetricsPort):
         """
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
-
-
-class NoOpMetrics(MetricsPort):
-    """No-op implementation of MetricsPort for testing."""
-
-    def observe_histogram(
-        self, name: str, value: float, labels: dict[str, str]
-    ) -> None:
-        """No-op: does nothing."""
-        pass
-
-    def increment_counter(
-        self, name: str, value: int, labels: dict[str, str]
-    ) -> None:
-        """No-op: does nothing."""
-        pass
