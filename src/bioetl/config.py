@@ -81,6 +81,21 @@ class RedisSettings(BaseSettings):
     db: int = Field(default=0, ge=0)
 
 
+class PipelineSettings(BaseSettings):
+    """Pipeline execution configuration."""
+
+    model_config = SettingsConfigDict(frozen=True)
+
+    batch_size: int = Field(default=100, ge=1, le=10000)
+    """Number of records per batch write."""
+
+    checkpoint_interval: int = Field(default=1000, ge=100)
+    """Save checkpoint every N records."""
+
+    max_concurrent_batches: int = Field(default=4, ge=1, le=16)
+    """Maximum concurrent batch writes."""
+
+
 class Settings(BaseSettings):
     """Main application settings."""
 
@@ -98,6 +113,7 @@ class Settings(BaseSettings):
     aws: AWSSettings = Field(default_factory=AWSSettings)
     s3: S3Settings = Field(default_factory=S3Settings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
+    pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
 
     @model_validator(mode="after")
     def check_s3_endpoint_for_dev(self) -> Settings:
@@ -147,6 +163,7 @@ def get_settings() -> Settings:
 AWSConfig = AWSSettings
 S3Config = S3Settings
 RedisConfig = RedisSettings
+PipelineConfig = PipelineSettings
 
 
 def get_aws_config() -> AWSSettings:
@@ -159,6 +176,10 @@ def get_s3_config() -> S3Settings:
 
 def get_redis_config() -> RedisSettings:
     return get_settings().redis
+
+
+def get_pipeline_config() -> PipelineSettings:
+    return get_settings().pipeline
 
 
 def get_storage_options() -> dict[str, str] | None:
