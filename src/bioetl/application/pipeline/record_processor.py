@@ -75,9 +75,7 @@ class PipelineRecordProcessor:
         )
         return batch_id
 
-    async def load_silver(
-        self, record: dict[str, Any], batch_id: BatchID
-    ) -> None:
+    async def load_silver(self, record: dict[str, Any], batch_id: BatchID) -> None:
         """Write transformed record to Silver layer."""
         record_with_meta = {
             **record,
@@ -96,9 +94,7 @@ class PipelineRecordProcessor:
     async def load_gold(self, record: dict[str, Any]) -> None:
         """Write record to Gold layer."""
         table_name = f"{self.provider}.{self.entity_type}_gold"
-        self.storage.write_gold(
-            table_name=table_name, records=[record], mode="append"
-        )
+        self.storage.write_gold(table_name=table_name, records=[record], mode="append")
 
     async def quarantine_record(
         self,

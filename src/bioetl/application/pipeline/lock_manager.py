@@ -1,6 +1,7 @@
 """Lock management for ETL pipelines."""
 
 import asyncio
+import contextlib
 import signal
 from typing import TYPE_CHECKING, Any
 
@@ -59,10 +60,8 @@ class PipelineLockManager:
         """Stop heartbeat and release lock."""
         if self.heartbeat_task:
             self.heartbeat_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self.heartbeat_task
-            except asyncio.CancelledError:
-                pass
         await self.lock.release(lock_key, self.run_id, exclusive=exclusive)
         self.logger.info("Lock released", extra={"stage": "cleanup"})
 
@@ -82,8 +81,10 @@ class PipelineLockManager:
 
     def setup_shutdown_handlers(self) -> None:
         """Setup signal handlers for graceful shutdown."""
+
         def handler(signum: int, _: Any) -> None:
             self.logger.warning(f"Signal {signum}, initiating shutdown")
             self._shutdown_requested = True
+
         signal.signal(signal.SIGTERM, handler)
         signal.signal(signal.SIGINT, handler)

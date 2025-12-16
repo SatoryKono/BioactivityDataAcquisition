@@ -1,10 +1,7 @@
-"""Centralized configuration for BioETL infrastructure.
+"""Infrastructure configuration adapters.
 
-Provides single source of truth for:
-- AWS configuration (credentials, endpoints)
-- S3 bucket configuration
-- Redis configuration
-- Storage options for Delta Lake
+Provides backward-compatible functions for accessing configuration.
+All configuration is loaded from the centralized bioetl.config module.
 
 Usage:
     from bioetl.infrastructure.config import get_aws_config, get_storage_options
@@ -18,13 +15,14 @@ Usage:
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
+
+from bioetl.config import get_settings
 
 
 @dataclass(frozen=True)
 class AWSConfig:
-    """AWS configuration loaded from environment variables.
+    """AWS configuration.
 
     Attributes:
         endpoint_url: Custom endpoint URL (for LocalStack/MinIO)
@@ -75,58 +73,46 @@ class RedisConfig:
 
 
 def get_aws_config() -> AWSConfig:
-    """Load AWS configuration from environment variables.
-
-    Environment variables:
-        AWS_ENDPOINT_URL: Custom endpoint (optional)
-        AWS_ACCESS_KEY_ID: Access key ID
-        AWS_SECRET_ACCESS_KEY: Secret access key
-        AWS_DEFAULT_REGION: Region (default: us-east-1)
+    """Load AWS configuration from centralized settings.
 
     Returns:
         AWSConfig instance
     """
+    aws = get_settings().aws
+    secret = aws.secret_access_key
     return AWSConfig(
-        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
-        access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        region=os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
+        endpoint_url=aws.endpoint_url,
+        access_key_id=aws.access_key_id,
+        secret_access_key=secret.get_secret_value() if secret else None,
+        region=aws.region,
     )
 
 
 def get_s3_config() -> S3Config:
-    """Load S3 bucket configuration from environment variables.
-
-    Environment variables:
-        BIOETL_S3_BUCKET_BRONZE: Bronze bucket (default: bioetl-bronze)
-        BIOETL_S3_BUCKET_SILVER: Silver bucket (default: bioetl-silver)
-        BIOETL_S3_BUCKET_GOLD: Gold bucket (default: bioetl-gold)
-        BIOETL_S3_BUCKET_CHECKPOINTS: Checkpoints bucket (default: bioetl-checkpoints)
+    """Load S3 bucket configuration from centralized settings.
 
     Returns:
         S3Config instance
     """
+    s3 = get_settings().s3
     return S3Config(
-        bucket_bronze=os.getenv("BIOETL_S3_BUCKET_BRONZE", "bioetl-bronze"),
-        bucket_silver=os.getenv("BIOETL_S3_BUCKET_SILVER", "bioetl-silver"),
-        bucket_gold=os.getenv("BIOETL_S3_BUCKET_GOLD", "bioetl-gold"),
-        bucket_checkpoints=os.getenv("BIOETL_S3_BUCKET_CHECKPOINTS", "bioetl-checkpoints"),
+        bucket_bronze=s3.bucket_bronze,
+        bucket_silver=s3.bucket_silver,
+        bucket_gold=s3.bucket_gold,
+        bucket_checkpoints=s3.bucket_checkpoints,
     )
 
 
 def get_redis_config() -> RedisConfig:
-    """Load Redis configuration from environment variables.
-
-    Environment variables:
-        BIOETL_REDIS_HOST: Redis host (default: localhost)
-        BIOETL_REDIS_PORT: Redis port (default: 6379)
+    """Load Redis configuration from centralized settings.
 
     Returns:
         RedisConfig instance
     """
+    redis = get_settings().redis
     return RedisConfig(
-        host=os.getenv("BIOETL_REDIS_HOST", "localhost"),
-        port=int(os.getenv("BIOETL_REDIS_PORT", "6379")),
+        host=redis.host,
+        port=redis.port,
     )
 
 
@@ -139,13 +125,4 @@ def get_storage_options() -> dict[str, str] | None:
     Returns:
         Storage options dict or None
     """
-    aws_config = get_aws_config()
-
-    if not aws_config.endpoint_url:
-        return None
-
-    return {
-        "AWS_ENDPOINT_URL": aws_config.endpoint_url,
-        "AWS_ACCESS_KEY_ID": aws_config.access_key_id or "",
-        "AWS_SECRET_ACCESS_KEY": aws_config.secret_access_key or "",
-    }
+    return get_settings().get_storage_options()
