@@ -244,11 +244,7 @@ def _build_drift_details(
     return details
 
 
-def _determine_drift_level(
-    added_count: int,
-    has_changes: bool,
-    missing_required: set[str],
-) -> DriftLevel:
+def _determine_drift_level(added_count: int, missing_required: set[str]) -> DriftLevel:
     """Determine drift level based on changes."""
     if missing_required:
         return DriftLevel.CRITICAL
@@ -262,32 +258,14 @@ def detect_schema_drift(
     new_schema: set[str],
     required_fields: set[str] | None = None,
 ) -> tuple[DriftLevel, dict[str, Any]]:
-    """Detect schema drift between two schemas.
-
-    Drift Levels (RULES.md §2.2):
-    - INFO: New optional fields appear
-    - WARN: >3 new fields appear (requires review within 48h)
-    - CRITICAL: Required fields (ID) disappear (blocks pipeline)
-
-    Args:
-        old_schema: Set of field names from previous schema
-        new_schema: Set of field names from current schema
-        required_fields: Set of required field names (e.g., {'id', 'entity_id'})
-
-    Returns:
-        (drift_level, drift_details) where drift_details contains:
-        - added_fields: List of newly added fields
-        - removed_fields: List of removed fields
-        - field_count_delta: Change in field count
-    """
-    required_fields = required_fields or set()
-
+    """Detect schema drift between two schemas."""
     added = sorted(new_schema - old_schema)
     removed = sorted(old_schema - new_schema)
-    missing_required = required_fields & set(removed)
+    missing = (required_fields or set()) & set(removed)
 
-    level = _determine_drift_level(len(added), bool(added or removed), missing_required)
-    details = _build_drift_details(added, removed, sorted(missing_required) or None)
+    level = _determine_drift_level(len(added), missing)
+    missing_list = sorted(missing) if missing else None
+    details = _build_drift_details(added, removed, missing_list)
 
     return level, details
 
