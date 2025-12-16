@@ -9,6 +9,7 @@ Usage:
 
 import asyncio
 import sys
+from uuid import uuid4
 
 import click
 
@@ -16,6 +17,7 @@ from bioetl.application.pipeline.base import run_pipeline_flow
 from bioetl.bootstrap import bootstrap
 from bioetl.config import get_settings
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.observability.logging import create_logger
 
 
 @click.group()
@@ -60,42 +62,50 @@ def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
         bioetl run --pipeline chembl_activity --run-type backfill --resume
         bioetl run --pipeline chembl_activity --limit 1000
     """
-    click.echo(f"🚀 Starting pipeline: {pipeline}")
-    click.echo(f"   Run type: {run_type}")
-    click.echo(f"   Resume: {resume}")
+    run_id = uuid4()
+    logger = create_logger(pipeline=pipeline, run_id=run_id)
+    logger.info(
+        "Starting pipeline",
+        run_type=run_type,
+        resume=resume,
+    )
 
     # Convert run_type to enum
     run_type_enum = RunType(run_type)
 
     try:
         if pipeline == "chembl_activity":
-            asyncio.run(_run_chembl_activity(run_type_enum, resume))
+            asyncio.run(_run_chembl_activity(run_type_enum, resume, logger))
         else:
-            click.echo(f"❌ Unknown pipeline: {pipeline}", err=True)
+            logger.error("Unknown pipeline", pipeline=pipeline)
             sys.exit(1)
 
-        click.echo("✅ Pipeline completed successfully")
+        logger.info("Pipeline completed successfully")
 
     except KeyboardInterrupt:
-        click.echo("\n⚠️  Pipeline interrupted by user", err=True)
+        logger.warning("Pipeline interrupted by user")
         sys.exit(130)
 
     except Exception as e:
-        click.echo(f"❌ Pipeline failed: {e}", err=True)
+        logger.exception("Pipeline failed", error=str(e))
         sys.exit(1)
 
 
 async def _run_chembl_activity(
     run_type: RunType,
     resume: bool,
+    logger: "structlog.BoundLogger",
 ) -> None:
     """Run ChEMBL Activity pipeline.
 
     Args:
         run_type: Type of run
         resume: Resume from checkpoint
+        logger: Structured logger
     """
-    from bioetl.bootstrap import ChEMBLActivityPipelineFactory
+    from bioetl.application.pipelines.chembl_activity import (
+        ChEMBLActivityPipelineFactory,
+    )
 
     # Initialize dependencies via Composition Root
     container = bootstrap()
@@ -103,7 +113,8 @@ async def _run_chembl_activity(
     # Load configuration from centralized config
     settings = get_settings()
 
-    pipeline = await ChEMBLActivityPipelineFactory.create(
+    factory = ChEMBLActivityPipelineFactory()
+    pipeline = await factory.create(
         run_type=run_type,
         settings=settings,
         resume=resume,
@@ -112,8 +123,8 @@ async def _run_chembl_activity(
         quarantine=container.quarantine,
         lock=container.lock,
     )
-
-    await run_pipeline_flow(pipeline)
+    # Pass logger to the pipeline flow
+    await run_pipeline_flow(pipeline, logger)
 
 
 @cli.group()
@@ -145,13 +156,15 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
         bioetl quarantine inspect --pipeline chembl_activity
         bioetl quarantine inspect --pipeline chembl_activity --error-code SCHEMA_VIOLATION
     """
-    asyncio.run(_quarantine_inspect(pipeline, limit, error_code))
+    logger = create_logger(pipeline=pipeline, run_id=uuid4())
+    asyncio.run(_quarantine_inspect(pipeline, limit, error_code, logger))
 
 
 async def _quarantine_inspect(
     pipeline: str,
     limit: int,
     error_code: str | None,
+    logger: "structlog.BoundLogger",
 ) -> None:
     """Inspect quarantine implementation."""
     container = bootstrap()
@@ -163,10 +176,10 @@ async def _quarantine_inspect(
     )
 
     if not records:
-        click.echo(f"No quarantined records found for pipeline: {pipeline}")
+        logger.info("No quarantined records found")
         return
 
-    click.echo(f"Found {len(records)} quarantined records:\n")
+    logger.info(f"Found {len(records)} quarantined records")
 
     for i, record in enumerate(records, 1):
         click.echo(f"[{i}] Error: {record['error_code']}")
@@ -188,26 +201,16 @@ def quarantine_stats(pipeline: str) -> None:
     Examples:
         bioetl quarantine stats --pipeline chembl_activity
     """
-    asyncio.run(_quarantine_stats(pipeline))
+    logger = create_logger(pipeline=pipeline, run_id=uuid4())
+    asyncio.run(_quarantine_stats(pipeline, logger))
 
 
-async def _quarantine_stats(pipeline: str) -> None:
+async def _quarantine_stats(pipeline: str, logger: "structlog.BoundLogger") -> None:
     """Get quarantine statistics."""
     container = bootstrap()
     stats = container.quarantine.get_stats(pipeline)
 
-    click.echo(f"Quarantine statistics for: {pipeline}\n")
-    click.echo(f"Total records: {stats['total_records']}")
-    click.echo(f"Oldest record: {stats['oldest_record']}")
-    click.echo(f"Newest record: {stats['newest_record']}")
-    click.echo("\nBy error code:")
-
-    for error_code, count in stats["by_error_code"].items():
-        click.echo(f"  {error_code}: {count}")
-
-    click.echo("\nBy status:")
-    for status, count in stats["by_status"].items():
-        click.echo(f"  {status}: {count}")
+    logger.info("Quarantine statistics", **stats)
 
 
 @cli.group()
@@ -223,10 +226,11 @@ def checkpoint_list() -> None:
     Examples:
         bioetl checkpoint list
     """
-    asyncio.run(_checkpoint_list())
+    logger = create_logger(pipeline="checkpoint", run_id=uuid4())
+    asyncio.run(_checkpoint_list(logger))
 
 
-async def _checkpoint_list() -> None:
+async def _checkpoint_list(logger: "structlog.BoundLogger") -> None:
     """List checkpoints implementation."""
     container = bootstrap()
     checkpoint_storage = container.checkpoint
@@ -234,20 +238,22 @@ async def _checkpoint_list() -> None:
     pipelines = checkpoint_storage.list_all()
 
     if not pipelines:
-        click.echo("No checkpoints found")
+        logger.info("No checkpoints found")
         return
 
-    click.echo(f"Found {len(pipelines)} checkpoint(s):\n")
+    logger.info(f"Found {len(pipelines)} checkpoint(s)")
 
     for pipeline_name in pipelines:
         data = checkpoint_storage.load(pipeline_name)
         if data:
             watermark, run_id, metadata = data
-            click.echo(f"Pipeline: {pipeline_name}")
-            click.echo(f"  Watermark: {watermark}")
-            click.echo(f"  Run ID: {run_id}")
-            click.echo(f"  Metadata: {metadata}")
-            click.echo()
+            logger.info(
+                "Checkpoint details",
+                pipeline_name=pipeline_name,
+                watermark=watermark,
+                run_id=run_id,
+                metadata=metadata,
+            )
 
 
 @checkpoint.command("delete")
@@ -263,16 +269,19 @@ def checkpoint_delete(pipeline: str) -> None:
     Examples:
         bioetl checkpoint delete --pipeline chembl_activity
     """
-    asyncio.run(_checkpoint_delete(pipeline))
+    logger = create_logger(pipeline=pipeline, run_id=uuid4())
+    asyncio.run(_checkpoint_delete(pipeline, logger))
 
 
-async def _checkpoint_delete(pipeline: str) -> None:
+async def _checkpoint_delete(
+    pipeline: str, logger: "structlog.BoundLogger"
+) -> None:
     """Delete checkpoint implementation."""
     container = bootstrap()
     checkpoint_storage = container.checkpoint
 
     checkpoint_storage.delete(pipeline)
-    click.echo(f"✅ Checkpoint deleted for pipeline: {pipeline}")
+    logger.info("Checkpoint deleted")
 
 
 def main() -> None:

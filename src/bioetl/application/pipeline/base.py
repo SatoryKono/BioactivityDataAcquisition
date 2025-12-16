@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+import structlog
+
 from bioetl.application.pipeline.checkpoint_manager import CheckpointManager
 from bioetl.application.pipeline.executor import PipelineExecutor
 from bioetl.application.pipeline.lock_manager import LockManager
@@ -27,7 +29,6 @@ from bioetl.domain.types import (
     RunType,
     Watermark,
 )
-from bioetl.infrastructure.observability.logging import create_logger
 
 
 class BasePipeline(ABC):
@@ -44,6 +45,7 @@ class BasePipeline(ABC):
         lock: LockPort,
         checkpoint: CheckpointPort,
         quarantine: QuarantinePort,
+        logger: "structlog.BoundLogger",
         resume: bool = False,
     ) -> None:
         self.pipeline_name = pipeline_name
@@ -57,17 +59,13 @@ class BasePipeline(ABC):
         self.quarantine = quarantine
         self.resume = resume
         self.run_id = RunID(uuid4())
+        self.logger = logger.bind(run_id=str(self.run_id))
 
-        logger = create_logger(
-            run_id=str(self.run_id),
-            pipeline=pipeline_name,
-        )
         self.context = PipelineContext(
             run_id=self.run_id,
             run_type=self.run_type,
-            logger=logger,
+            logger=self.logger,
         )
-        self.logger = logger
 
         # Decomposed components
         self.orchestrator = PipelineOrchestrator(self)
@@ -96,3 +94,14 @@ class BasePipeline(ABC):
         self, _context: PipelineContext, _record: dict[str, Any]
     ) -> Watermark:
         return Watermark(datetime.now(UTC))
+
+
+async def run_pipeline_flow(
+    pipeline: BasePipeline, logger: "structlog.BoundLogger"
+) -> None:
+    """Run a pipeline with logging and error handling."""
+    try:
+        await pipeline.run()
+    except Exception as e:
+        logger.exception("Pipeline execution failed", error=str(e))
+        raise
