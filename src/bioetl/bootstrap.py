@@ -33,6 +33,7 @@ from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMet
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -112,7 +113,7 @@ class ChEMBLActivityPipelineFactory:
                 base_path=f"s3://{s3_config.bucket_silver}",
                 storage_options=storage_options,
             ),
-            DeltaWriter(
+            GoldWriter(
                 base_path=f"s3://{s3_config.bucket_gold}",
                 storage_options=storage_options,
             ),
