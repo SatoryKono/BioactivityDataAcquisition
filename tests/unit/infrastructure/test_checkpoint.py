@@ -1,6 +1,6 @@
 """Unit tests for checkpointing."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
@@ -25,7 +25,7 @@ def mock_s3_client():
 class TestS3Checkpoint:
     """Test S3Checkpoint functionality."""
 
-    def test_s3_checkpoint_initialization(self, mock_s3_client):
+    def test_s3_checkpoint_initialization(self, _mock_s3_client):
         """Test S3Checkpoint can be initialized."""
         cp = S3Checkpoint(
             bucket="test-bucket",
@@ -44,7 +44,7 @@ class TestS3Checkpoint:
 
         cp = S3Checkpoint(bucket="test-bucket")
         pipeline = "test_pipeline"
-        watermark = Watermark(datetime(2023, 1, 1, tzinfo=timezone.utc))
+        watermark = Watermark(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         metadata = {"key": "value"}
 
@@ -52,7 +52,7 @@ class TestS3Checkpoint:
 
         expected_key = "checkpoints/test_pipeline/latest.json"
         mock_s3_client.put_object.assert_called_once()
-        args, kwargs = mock_s3_client.put_object.call_args
+        _args, kwargs = mock_s3_client.put_object.call_args
         assert kwargs["Bucket"] == "test-bucket"
         assert kwargs["Key"] == expected_key
         # Body is a JSON string
@@ -72,7 +72,7 @@ class TestS3Checkpoint:
         result = cp.load(pipeline)
 
         assert result is not None
-        watermark, run_id, metadata = result
+        watermark, run_id, _metadata = result
         # Watermark is returned as a proper Watermark type
         assert isinstance(watermark, datetime)
         assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))

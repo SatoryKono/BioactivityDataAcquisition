@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
@@ -193,7 +193,7 @@ class LineageTracker:
             file_path=file_path,
             watermark=watermark,
             metadata=metadata or {},
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         self._write_batch_lineage(batch)
@@ -238,7 +238,7 @@ class LineageTracker:
             success_count=success_count,
             failure_count=failure_count,
             metadata=metadata or {},
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         self._write_transformation_lineage(lineage)
@@ -421,7 +421,7 @@ class LineageTracker:
             df = df.filter(pl.col("layer") == layer)
 
             # Filter by date range
-            cutoff = datetime.now(timezone.utc).timestamp() - (days * 86400)
+            cutoff = datetime.now(UTC).timestamp() - (days * 86400)
             df = df.filter(pl.col("timestamp") >= cutoff)
 
             if df.height == 0:

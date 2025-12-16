@@ -136,7 +136,7 @@ class AnomalyDetector:
     def update_baseline(
         self,
         metric_name: str,
-        values: "Sequence[float]",
+        values: Sequence[float],
     ) -> None:
         """Update baseline with historical data.
 
@@ -252,9 +252,12 @@ class AnomalyDetector:
 
     def _get_severity(self, z_score: float) -> AnomalySeverity:
         """Determine the severity of an anomaly based on its Z-score."""
-        if z_score >= 5.0: return AnomalySeverity.CRITICAL
-        if z_score >= 4.0: return AnomalySeverity.HIGH
-        if z_score >= 3.0: return AnomalySeverity.MEDIUM
+        if z_score >= 5.0:
+            return AnomalySeverity.CRITICAL
+        if z_score >= 4.0:
+            return AnomalySeverity.HIGH
+        if z_score >= 3.0:
+            return AnomalySeverity.MEDIUM
         return AnomalySeverity.LOW
 
     def _create_threshold_anomaly(
@@ -379,7 +382,7 @@ class DataQualityMonitor:
     def add_metric(
         self,
         metric_name: str,
-        baseline: "Sequence[float]",
+        baseline: Sequence[float],
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:

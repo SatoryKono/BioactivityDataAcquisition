@@ -1,22 +1,24 @@
-import re
-import pytest
 from pathlib import Path
+
+import pytest
 import yaml
 
 # Assuming pipeline configs are in a 'configs/pipelines' directory
 PIPELINE_CONFIG_PATH = Path(__file__).parent.parent / "configs" / "pipelines"
+
 
 def get_all_pipeline_configs():
     if not PIPELINE_CONFIG_PATH.exists():
         return []
     return list(PIPELINE_CONFIG_PATH.glob("*.yaml"))
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_002_bronze_path_format(config_path):
     """Bronze path must match the format."""
     # This is a conceptual test. A real test would check the output path generation.
     # We check if the config hints at the right structure.
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     # A true test would need to run the pipeline and check S3,
@@ -24,28 +26,31 @@ def test_req_data_002_bronze_path_format(config_path):
     # This test is more of a placeholder for a proper integration test.
     assert "bronze" in config.get("sink", {}), f"No bronze sink in {config_path}"
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_006_007_silver_is_delta(config_path):
     """Silver data must be Delta Lake and not raw Parquet."""
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     assert silver_sink.get("format") == "delta", f"Silver format in {config_path} is not 'delta'"
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_008_silver_is_merge(config_path):
     """Silver strategy must be merge/upsert."""
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     assert silver_sink.get("mode") == "merge", f"Silver mode in {config_path} is not 'merge'"
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_009_gold_is_strict(config_path):
     """Gold data must have strict validation if it exists."""
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     if "gold" in config.get("sink", {}):
@@ -53,19 +58,21 @@ def test_req_data_009_gold_is_strict(config_path):
         # Assuming a 'validation' key or similar
         assert gold_sink.get("validation", {}).get("strict", True), f"Gold validation in {config_path} is not strict"
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_delta_003_forensic_retention(config_path):
     """Forensic retention must be configurable."""
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
     assert "forensic_retention" in silver_sink, f"'forensic_retention' key missing in silver sink of {config_path}"
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_partition_004_no_high_cardinality_keys(config_path):
     """Partition keys must not have high cardinality."""
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     disallowed_patterns = ["id", "uuid", "hash", "text", "desc"]
@@ -78,10 +85,11 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
                     for pattern in disallowed_patterns:
                         assert pattern not in key.lower(), f"High cardinality key '{key}' used for partitioning in {config_path}"
 
+
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_load_001_002_load_strategy(config_path):
     """Load strategy must be defined."""
-    with open(config_path, "r") as f:
+    with config_path.open() as f:
         config = yaml.safe_load(f)
 
     source = config.get("source", {})
@@ -90,6 +98,7 @@ def test_req_load_001_002_load_strategy(config_path):
 
     if source["load_strategy"] == "incremental":
         assert "watermark_field" in source, f"'watermark_field' missing for incremental strategy in {config_path}"
+
 
 # This is a conceptual test for REQ-QUARANTINE-001
 def test_req_quarantine_001_unified_table_exists():

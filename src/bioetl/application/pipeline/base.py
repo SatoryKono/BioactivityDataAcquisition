@@ -17,7 +17,7 @@ import json
 import signal
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 

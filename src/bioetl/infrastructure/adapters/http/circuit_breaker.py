@@ -128,7 +128,7 @@ class CircuitBreaker:
 
     async def call(
         self,
-        func: "Callable[P, Awaitable[T]]",
+        func: Callable[P, Awaitable[T]],
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> T:

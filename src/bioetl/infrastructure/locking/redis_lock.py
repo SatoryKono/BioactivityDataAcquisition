@@ -20,7 +20,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from uuid import UUID
+
     from redis.asyncio import Redis
+
     from bioetl.domain.types import RunID
 
 
@@ -99,7 +101,7 @@ class RedisDistributedLock:
         ...         await lock.release("chembl_activity", run_id)
     """
 
-    redis_client: "Redis"
+    redis_client: Redis
     prefix: str = "lock"
     default_ttl: int = 60
     heartbeat_interval: int = 20
@@ -121,14 +123,14 @@ class RedisDistributedLock:
         """Create full Redis key with prefix."""
         return f"{self.prefix}:{key}"
 
-    def _owner_to_str(self, owner_id: "RunID | UUID") -> str:
+    def _owner_to_str(self, owner_id: RunID | UUID) -> str:
         """Convert owner ID to string."""
         return str(owner_id)
 
     async def acquire(
         self,
         key: str,
-        owner_id: "RunID | UUID",
+        owner_id: RunID | UUID,
         ttl: int | None = None,
         wait: bool = False,
         wait_timeout: int = 300,
@@ -204,7 +206,7 @@ class RedisDistributedLock:
         raise LockAcquisitionError(key, current_owner)
 
     async def release(
-        self, key: str, owner_id: "RunID | UUID", exclusive: bool = False
+        self, key: str, owner_id: RunID | UUID, exclusive: bool = False
     ) -> bool:
         """Release lock (only if owner matches).
 
@@ -233,7 +235,7 @@ class RedisDistributedLock:
         return bool(result)
 
     async def heartbeat(
-        self, key: str, owner_id: "RunID | UUID", exclusive: bool = False
+        self, key: str, owner_id: RunID | UUID, exclusive: bool = False
     ) -> bool:
         """Refresh lock TTL (keep-alive).
 
@@ -270,7 +272,7 @@ class RedisDistributedLock:
     async def heartbeat_loop(
         self,
         key: str,
-        owner_id: "RunID | UUID",
+        owner_id: RunID | UUID,
         on_lost: asyncio.Event | None = None,
     ) -> None:
         """Run continuous heartbeat loop.
@@ -324,7 +326,7 @@ class RedisDistributedLock:
     async def acquire_exclusive(
         self,
         key: str,
-        owner_id: "RunID | UUID",
+        owner_id: RunID | UUID,
         ttl: int | None = None,
         wait: bool = False,
         wait_timeout: int = 300,
@@ -358,7 +360,7 @@ class RedisDistributedLock:
 
         return True
 
-    async def release_exclusive(self, key: str, owner_id: "RunID | UUID") -> bool:
+    async def release_exclusive(self, key: str, owner_id: RunID | UUID) -> bool:
         """Release exclusive lock."""
         exclusive_key = f"{key}:exclusive"
         return await self.release(exclusive_key, owner_id)

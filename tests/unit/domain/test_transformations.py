@@ -13,7 +13,8 @@ import math
 from datetime import date, datetime
 
 import pytest
-from hypothesis import HealthCheck, given, settings, strategies as st
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 from bioetl.domain.transformations import (
     META_FIELDS,
