@@ -151,7 +151,7 @@ class TestRedisDistributedLock:
         assert regular_acquired is False
 
         # Release exclusive lock
-        await lock.release("test_key", run_id)
+        await lock.release("test_key", run_id, exclusive=True)
 
         # Regular lock should now succeed
         regular_acquired = await lock.acquire("test_key", other_owner)
