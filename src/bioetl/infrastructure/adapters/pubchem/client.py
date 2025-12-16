@@ -12,15 +12,19 @@ Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 """
 
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import pubchempy as pcp
 
+from bioetl.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+logger = logging.getLogger(__name__)
 
 
 class PubChemClient:
@@ -144,7 +148,18 @@ class PubChemClient:
                     yield self._compound_to_dict(compound)
                     fetched += 1
                 current_cid += batch_size
-            except Exception:
+            except Exception as e:
+                logger.error(
+                    "PubChem compound batch fetch failed",
+                    extra={
+                        "cid_range_start": current_cid,
+                        "cid_range_end": current_cid + batch_size,
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                    },
+                )
+                if get_settings().strict_error_handling:
+                    raise
                 current_cid += batch_size
                 continue
 
