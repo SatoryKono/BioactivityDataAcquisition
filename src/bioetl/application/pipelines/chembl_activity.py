@@ -7,14 +7,21 @@ Entity: Bioactivity measurements (IC50, Ki, EC50, etc.)
 Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
 """
 
+from __future__ import annotations
+
 from datetime import UTC
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipeline.base import BasePipeline
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
 from bioetl.infrastructure.factories.storage import StorageAdapter
+
+if TYPE_CHECKING:
+    from bioetl.config import Settings
+    from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
+    from bioetl.domain.types import RunType
 
 
 class ChEMBLActivityPipeline(BasePipeline):
@@ -219,41 +226,23 @@ class ChEMBLActivityPipelineFactory:
 
     @staticmethod
     async def create(
-        run_type: Any,  # RunType
+        run_type: RunType,
+        settings: Settings,
         resume: bool = False,
         # Injected adapters (optional)
-        checkpoint: Any | None = None,
-        quarantine: Any | None = None,
-        lock: Any | None = None,
-        # Adapter configurations (legacy)
-        _chembl_url: str = "https://www.ebi.ac.uk/chembl/api/data",  # Reserved for future use
-        s3_bucket_bronze: str = "bioetl-bronze",
-        s3_bucket_silver: str = "bioetl-silver",
-        s3_bucket_checkpoints: str = "bioetl-checkpoints",
-        redis_host: str = "localhost",
-        redis_port: int = 6379,
-        # S3/MinIO config
-        aws_endpoint_url: str | None = None,
-        aws_access_key: str | None = None,
-        aws_secret_key: str | None = None,
+        checkpoint: CheckpointPort | None = None,
+        quarantine: QuarantinePort | None = None,
+        lock: LockPort | None = None,
     ) -> ChEMBLActivityPipeline:
         """Create configured ChEMBL Activity pipeline.
 
         Args:
             run_type: Type of run (incremental, backfill, rebuild)
+            settings: Application settings object
             resume: Resume from checkpoint if available
             checkpoint: Injected checkpoint service
             quarantine: Injected quarantine service
             lock: Injected lock service
-            chembl_url: ChEMBL API base URL
-            s3_bucket_bronze: Bronze bucket name
-            s3_bucket_silver: Silver bucket name
-            s3_bucket_checkpoints: Checkpoints bucket name
-            redis_host: Redis host
-            redis_port: Redis port
-            aws_endpoint_url: S3 endpoint (for MinIO)
-            aws_access_key: AWS access key
-            aws_secret_key: AWS secret key
 
         Returns:
             Configured pipeline instance
@@ -270,12 +259,11 @@ class ChEMBLActivityPipelineFactory:
         from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
         from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
-        # Initialize adapters
-        storage_options = {
-            "AWS_ENDPOINT_URL": aws_endpoint_url,
-            "AWS_ACCESS_KEY_ID": aws_access_key,
-            "AWS_SECRET_ACCESS_KEY": aws_secret_key,
-        }
+        # Config shortcuts
+        aws_config = settings.aws
+        s3_config = settings.s3
+        redis_config = settings.redis
+        storage_options = settings.get_storage_options()
 
         # Data source (ChEMBL)
         bucket = TokenBucket(rate=10.0, capacity=20)
@@ -284,19 +272,24 @@ class ChEMBLActivityPipelineFactory:
         data_source = ChemblAdapter(http_client=http_client)
 
         # Storage
+        secret_key = (
+            aws_config.secret_access_key.get_secret_value()
+            if aws_config.secret_access_key
+            else None
+        )
         bronze_writer = BronzeWriter(
-            bucket=s3_bucket_bronze,
-            endpoint_url=aws_endpoint_url,
-            access_key=aws_access_key,
-            secret_key=aws_secret_key,
+            bucket=s3_config.bucket_bronze,
+            endpoint_url=aws_config.endpoint_url,
+            access_key=aws_config.access_key_id,
+            secret_key=secret_key,
         )
         silver_writer = DeltaWriter(
-            base_path=f"s3://{s3_bucket_silver}",
-            storage_options=storage_options if aws_endpoint_url else None,
+            base_path=f"s3://{s3_config.bucket_silver}",
+            storage_options=storage_options,
         )
         gold_writer = DeltaWriter(
-            base_path=f"s3://{s3_bucket_silver}",  # Same bucket, different tables
-            storage_options=storage_options if aws_endpoint_url else None,
+            base_path=f"s3://{s3_config.bucket_silver}",  # Same bucket, different tables
+            storage_options=storage_options,
         )
         storage = StorageAdapter(bronze_writer, silver_writer, gold_writer)
 
@@ -304,23 +297,32 @@ class ChEMBLActivityPipelineFactory:
         if lock is None:
             import redis.asyncio as aioredis
 
-            redis_client = aioredis.Redis(host=redis_host, port=redis_port)
+            redis_client = aioredis.Redis(
+                host=redis_config.host,
+                port=redis_config.port,
+                password=(
+                    redis_config.password.get_secret_value()
+                    if redis_config.password
+                    else None
+                ),
+                db=redis_config.db,
+            )
             lock = RedisDistributedLock(redis_client=redis_client)
 
         # Checkpoint (S3)
         if checkpoint is None:
             checkpoint = S3Checkpoint(
-                bucket=s3_bucket_checkpoints,
-                endpoint_url=aws_endpoint_url,
-                access_key=aws_access_key,
-                secret_key=aws_secret_key,
+                bucket=s3_config.bucket_checkpoints,
+                endpoint_url=aws_config.endpoint_url,
+                access_key=aws_config.access_key_id,
+                secret_key=secret_key,
             )
 
         # Quarantine
         if quarantine is None:
             quarantine = UnifiedQuarantine(
-                base_path=f"s3://{s3_bucket_silver}/common/quarantine",
-                storage_options=storage_options if aws_endpoint_url else None,
+                base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
+                storage_options=storage_options,
             )
 
         # Create pipeline

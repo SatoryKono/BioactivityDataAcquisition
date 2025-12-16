@@ -14,11 +14,7 @@ import click
 
 from bioetl.application.pipeline.base import run_pipeline_flow
 from bioetl.bootstrap import bootstrap
-from bioetl.config import (
-    get_aws_config,
-    get_redis_config,
-    get_s3_config,
-)
+from bioetl.config import get_settings
 from bioetl.domain.types import RunType
 
 
@@ -107,27 +103,17 @@ async def _run_chembl_activity(
     container = bootstrap()
 
     # Load configuration from centralized config
-    aws_config = get_aws_config()
-    s3_config = get_s3_config()
-    redis_config = get_redis_config()
+    settings = get_settings()
 
     factory = ChEMBLActivityPipelineFactory()
     pipeline = await factory.create(
         run_type=run_type,
+        settings=settings,
         resume=resume,
         # Inject initialized services
         checkpoint=container.checkpoint,
         quarantine=container.quarantine,
         lock=container.lock,
-        # Configs still needed for storage adapter (until that is also refactored)
-        aws_endpoint_url=aws_config.endpoint_url,
-        aws_access_key=aws_config.access_key_id,
-        aws_secret_key=aws_config.secret_access_key,
-        s3_bucket_bronze=s3_config.bucket_bronze,
-        s3_bucket_silver=s3_config.bucket_silver,
-        s3_bucket_checkpoints=s3_config.bucket_checkpoints,
-        redis_host=redis_config.host,
-        redis_port=redis_config.port,
     )
 
     await run_pipeline_flow(pipeline)

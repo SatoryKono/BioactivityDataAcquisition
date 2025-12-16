@@ -41,7 +41,7 @@ class TestDataSourcePortProtocol:
         class ValidDataSource:
             provider_name = "test"
 
-            async def fetch(self, entity_type, watermark=None, limit=None):
+            async def fetch(self, _entity_type, _watermark=None, _limit=None):
                 yield {}
 
             async def health_check(self):
@@ -56,7 +56,7 @@ class TestDataSourcePortProtocol:
         """Class without provider_name should not be DataSourcePort."""
 
         class InvalidDataSource:
-            async def fetch(self, entity_type, watermark=None, limit=None):
+            async def fetch(self, _entity_type, _watermark=None, _limit=None):
                 yield {}
 
             async def health_check(self):
@@ -75,13 +75,13 @@ class TestStoragePortProtocol:
         """Class with all required methods should be StoragePort."""
 
         class ValidStorage:
-            def write_bronze(self, records, provider, entity, date, batch_id):
+            def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
                 pass
 
-            def write_silver(self, table_name, records, primary_keys, mode="merge"):
+            def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
                 pass
 
-            def write_gold(self, table_name, records, mode="overwrite"):
+            def write_gold(self, _table_name, _records, _mode="overwrite"):
                 pass
 
         assert isinstance(ValidStorage(), StoragePort)
@@ -90,10 +90,10 @@ class TestStoragePortProtocol:
         """Class missing a required method should not be StoragePort."""
 
         class IncompleteStorage:
-            def write_bronze(self, records, provider, entity, date, batch_id):
+            def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
                 pass
 
-            def write_silver(self, table_name, records, primary_keys, mode="merge"):
+            def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
                 pass
 
             # Missing write_gold
@@ -110,19 +110,19 @@ class TestLockPortProtocol:
         class ValidLock:
             async def acquire(
                 self,
-                key,
-                owner_id,
-                ttl=None,
-                wait=False,
-                wait_timeout=300,
-                exclusive=False,
+                _key,
+                _owner_id,
+                _ttl=None,
+                _wait=False,
+                _wait_timeout=300,
+                _exclusive=False,
             ):
                 return True
 
-            async def release(self, key, owner_id, exclusive=False):
+            async def release(self, _key, _owner_id, _exclusive=False):
                 return True
 
-            async def heartbeat(self, key, owner_id, exclusive=False):
+            async def heartbeat(self, _key, _owner_id, _exclusive=False):
                 return True
 
         assert isinstance(ValidLock(), LockPort)
@@ -135,16 +135,16 @@ class TestCheckpointPortProtocol:
         """Class with all required methods should be CheckpointPort."""
 
         class ValidCheckpoint:
-            def save(self, pipeline, watermark, run_id, metadata):
+            def save(self, _pipeline, _watermark, _run_id, _metadata):
                 pass
 
-            def load(self, pipeline):
+            def load(self, _pipeline):
                 return None
 
             def list_all(self):
                 return []
 
-            def delete(self, pipeline):
+            def delete(self, _pipeline):
                 pass
 
         assert isinstance(ValidCheckpoint(), CheckpointPort)
@@ -158,14 +158,20 @@ class TestQuarantinePortProtocol:
 
         class ValidQuarantine:
             def write(
-                self, pipeline, error_code, payload, bronze_batch_id, *args, **kwargs
+                self,
+                _pipeline,
+                _error_code,
+                _payload,
+                _bronze_batch_id,
+                *_args,
+                **_kwargs,
             ):
                 pass
 
-            def inspect(self, pipeline, limit=10, error_code=None):
+            def inspect(self, _pipeline, _limit=10, _error_code=None):
                 return []
 
-            def get_stats(self, pipeline):
+            def get_stats(self, _pipeline):
                 return {}
 
         assert isinstance(ValidQuarantine(), QuarantinePort)
