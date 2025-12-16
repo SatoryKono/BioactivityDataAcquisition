@@ -75,7 +75,7 @@ class TestDeltaWriterExceptions:
             "_ingestion_ts": "2024-01-01T00:00:00Z",
         }
 
-    @patch("deltalake.DeltaTable")
+    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
     def test_write_silver_raises_schema_validation_error_on_merge(
         self, mock_delta_table, valid_record
     ):
@@ -85,7 +85,7 @@ class TestDeltaWriterExceptions:
         with pytest.raises(SchemaValidationError):
             writer.write_silver("test.table", [valid_record], ["id"])
 
-    @patch("deltalake.DeltaTable")
+    @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
     def test_write_silver_raises_merge_conflict_error(
         self, mock_delta_table, valid_record
     ):
@@ -95,8 +95,11 @@ class TestDeltaWriterExceptions:
         with pytest.raises(MergeConflictError):
             writer.write_silver("test.table", [valid_record], ["id"])
 
-    @patch("deltalake.write_deltalake")
-    @patch("deltalake.DeltaTable", side_effect=TableNotFoundError)
+    @patch("bioetl.infrastructure.storage.delta_writer.write_deltalake")
+    @patch(
+        "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+        side_effect=TableNotFoundError,
+    )
     def test_write_silver_raises_schema_error_on_create(
         self, _mock_delta_table, mock_write_deltalake, valid_record
     ):
@@ -108,7 +111,10 @@ class TestDeltaWriterExceptions:
 
     def test_vacuum_raises_table_not_found(self):
         """Test that vacuum raises CustomTableNotFoundError."""
-        with patch("deltalake.DeltaTable", side_effect=TableNotFoundError):
+        with patch(
+            "bioetl.infrastructure.storage.delta_writer.DeltaTable",
+            side_effect=TableNotFoundError,
+        ):
             writer = DeltaWriter(base_path="/fake/path")
             with pytest.raises(CustomTableNotFoundError):
                 writer.vacuum("test.table")
