@@ -24,6 +24,8 @@ from typing import Any
 from bioetl.infrastructure.storage.exceptions import (
     MergeConflictError,
     SchemaValidationError,
+)
+from bioetl.infrastructure.storage.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
 )
 from deltalake import DeltaTable, write_deltalake
@@ -133,7 +135,7 @@ class DeltaWriter:
             # Perform merge/upsert
             self._merge_records(dt, records, primary_keys)
 
-        except TableNotFoundError as e:
+        except TableNotFoundError:
             # Table doesn't exist, create it
             try:
                 write_deltalake(

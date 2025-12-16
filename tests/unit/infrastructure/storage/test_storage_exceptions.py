@@ -9,11 +9,13 @@ from bioetl.infrastructure.storage.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
     SchemaValidationError,
-    TableNotFoundError as CustomTableNotFoundError,
     UploadError,
 )
+from bioetl.infrastructure.storage.exceptions import (
+    TableNotFoundError as CustomTableNotFoundError,
+)
 from botocore.exceptions import ClientError
-from deltalake.exceptions import DeltaError, SchemaError, TableNotFoundError
+from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
 
@@ -60,29 +62,32 @@ def delta_writer():
 class TestDeltaWriterExceptions:
     """Tests for exception handling in DeltaWriter."""
 
+    # Valid test record with all required metadata fields
+    VALID_RECORD = {
+        "id": 1,
+        "_run_id": "test-run-id",
+        "_run_type": "incremental",
+        "_source_batch_id": "batch-123",
+        "_ingestion_ts": "2024-01-01T00:00:00Z",
+    }
+
     @patch("deltalake.DeltaTable")
     def test_write_silver_raises_schema_validation_error_on_merge(
         self, mock_delta_table
     ):
         """Test that SchemaValidationError is raised on merge."""
-        mock_delta_table.side_effect = SchemaError("Invalid schema")
+        mock_delta_table.side_effect = SchemaMismatchError("Invalid schema")
         writer = DeltaWriter(base_path="/fake/path")
         with pytest.raises(SchemaValidationError):
-            writer.write_silver(
-                "test.table", [{"_run_id": "1"}], ["id"]
-            )
+            writer.write_silver("test.table", [self.VALID_RECORD], ["id"])
 
     @patch("deltalake.DeltaTable")
     def test_write_silver_raises_merge_conflict_error(self, mock_delta_table):
         """Test that MergeConflictError is raised."""
-        mock_delta_table.return_value.merge.side_effect = DeltaError(
-            "Merge-conflict"
-        )
+        mock_delta_table.return_value.merge.side_effect = DeltaError("Merge-conflict")
         writer = DeltaWriter(base_path="/fake/path")
         with pytest.raises(MergeConflictError):
-            writer.write_silver(
-                "test.table", [{"_run_id": "1"}], ["id"]
-            )
+            writer.write_silver("test.table", [self.VALID_RECORD], ["id"])
 
     @patch("deltalake.write_deltalake")
     @patch("deltalake.DeltaTable", side_effect=TableNotFoundError)
@@ -93,9 +98,7 @@ class TestDeltaWriterExceptions:
         mock_write_deltalake.side_effect = ArrowTypeError("Arrow type error")
         writer = DeltaWriter(base_path="/fake/path")
         with pytest.raises(SchemaValidationError):
-            writer.write_silver(
-                "test.table", [{"_run_id": "1"}], ["id"]
-            )
+            writer.write_silver("test.table", [self.VALID_RECORD], ["id"])
 
     def test_vacuum_raises_table_not_found(self):
         """Test that vacuum raises CustomTableNotFoundError."""

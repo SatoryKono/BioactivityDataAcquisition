@@ -22,10 +22,22 @@ from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from bioetl.domain.types import BatchID, ContentHash, DQStatus
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
-from bioetl.domain.types import BatchID, ContentHash, DQStatus
+
+def _quote_literal(value: Any) -> str:
+    """Safely quote a literal value for a Delta Lake predicate."""
+    if isinstance(value, str):
+        # Escape single quotes by doubling them up
+        return f"'{value.replace("'", "''")}'"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    # For other types, convert to string and quote
+    return f"'{value!s}'"
 
 
 class UnifiedQuarantine:
@@ -186,24 +198,24 @@ class UnifiedQuarantine:
             # Table doesn't exist yet
             return []
 
-        # Convert to PyArrow table
-        arrow_table = dt.to_pyarrow_table()
+        # Build predicate
+        predicate = f"pipeline = {_quote_literal(pipeline)}"
+        if error_code:
+            predicate += f" AND error_code = {_quote_literal(error_code)}"
+        status_filter = dq_status or DQStatus.NEW
+        predicate += f" AND dq_status = {_quote_literal(status_filter.value)}"
+
+        # Load data with filter
+        arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
 
         # Apply filters
         import pyarrow.compute as pc
 
-        # Filter by pipeline
         mask = pc.equal(arrow_table["pipeline"], pipeline)
-
-        # Filter by error_code if specified
         if error_code:
             mask = pc.and_(mask, pc.equal(arrow_table["error_code"], error_code))
-
-        # Filter by dq_status if specified (default: NEW)
-        status_filter = dq_status or DQStatus.NEW
         mask = pc.and_(mask, pc.equal(arrow_table["dq_status"], status_filter.value))
 
-        # Apply filter
         filtered_table = arrow_table.filter(mask)
 
         # Sort by ingestion_ts descending (most recent first)
@@ -251,30 +263,32 @@ class UnifiedQuarantine:
             # Table doesn't exist yet
             return
 
-        # Convert to PyArrow table
-        arrow_table = dt.to_pyarrow_table()
+        # Build predicate
+        cutoff_date = datetime.now(UTC) - timedelta(days=max_age_days)
+        predicate = (
+            f"pipeline = {_quote_literal(pipeline)} "
+            f"AND ingestion_ts >= {_quote_literal(cutoff_date.isoformat())} "
+            f"AND dq_status = {_quote_literal(DQStatus.NEW.value)}"
+        )
+        if error_code:
+            predicate += f" AND error_code = {_quote_literal(error_code)}"
 
-        # Apply filters
+        # Load data with filter
+        arrow_table = dt.to_pyarrow_table(
+            partitions=[("pipeline", "=", pipeline)],
+            filters=[
+                ("ingestion_ts", ">=", cutoff_date),
+                ("dq_status", "=", DQStatus.NEW.value),
+            ],
+        )
+
+        # Apply remaining filters in-memory
         import pyarrow.compute as pc
 
-        # Filter by pipeline
         mask = pc.equal(arrow_table["pipeline"], pipeline)
-
-        # Filter by error_code if specified
         if error_code:
             mask = pc.and_(mask, pc.equal(arrow_table["error_code"], error_code))
 
-        # Filter by max_age_days
-        cutoff_date = (datetime.now(UTC) - timedelta(days=max_age_days)).isoformat()
-        mask = pc.and_(
-            mask,
-            pc.greater_equal(arrow_table["ingestion_ts"], cutoff_date),
-        )
-
-        # Filter by dq_status (only NEW records)
-        mask = pc.and_(mask, pc.equal(arrow_table["dq_status"], DQStatus.NEW.value))
-
-        # Apply filter
         filtered_table = arrow_table.filter(mask)
 
         # Sort by ingestion_ts ascending (oldest first)
@@ -315,22 +329,22 @@ class UnifiedQuarantine:
         # Calculate cutoff date
         cutoff_date = (datetime.now(UTC) - timedelta(days=older_than_days)).isoformat()
 
-        # Delete old records using Delta Lake delete
-        # Build predicate: pipeline = 'X' AND ingestion_ts < 'YYYY-MM-DD'
-        predicate = f"pipeline = '{pipeline}' AND ingestion_ts < '{cutoff_date}'"
+        # Build predicate
+        predicate = (
+            f"pipeline = {_quote_literal(pipeline)} AND "
+            f"ingestion_ts < {_quote_literal(cutoff_date)}"
+        )
 
         # Get count before deletion
-        arrow_table = dt.to_pyarrow_table()
-        import pyarrow.compute as pc
-
-        mask = pc.and_(
-            pc.equal(arrow_table["pipeline"], pipeline),
-            pc.less(arrow_table["ingestion_ts"], cutoff_date),
+        arrow_table = dt.to_pyarrow_table(
+            partitions=[("pipeline", "=", pipeline)],
+            filters=[("ingestion_ts", "<", cutoff_date)],
         )
-        count_before = pc.sum(pc.cast(mask, "int64")).as_py()
+        count_before = len(arrow_table)
 
         # Execute delete
-        dt.delete(predicate)
+        if count_before > 0:
+            dt.delete(predicate)
 
         return count_before
 
@@ -357,23 +371,17 @@ class UnifiedQuarantine:
         except TableNotFoundError:
             return False
 
-        # Update using Delta Lake update
-        # Build predicate: payload_hash = 'X'
-        predicate = f"payload_hash = '{payload_hash}'"
+        # Build predicate
+        predicate = f"payload_hash = {_quote_literal(payload_hash)}"
 
         # Check if record exists
-        arrow_table = dt.to_pyarrow_table()
-        import pyarrow.compute as pc
-
-        mask = pc.equal(arrow_table["payload_hash"], payload_hash)
-        count = pc.sum(pc.cast(mask, "int64")).as_py()
-
-        if count == 0:
+        arrow_table = dt.to_pyarrow_table(filters=[("payload_hash", "=", payload_hash)])
+        if len(arrow_table) == 0:
             return False
 
         # Execute update
         dt.update(
-            updates={"dq_status": f"'{new_status.value}'"},
+            updates={"dq_status": _quote_literal(new_status.value)},
             predicate=predicate,
         )
 
@@ -410,16 +418,10 @@ class UnifiedQuarantine:
                 "newest_record": None,
             }
 
-        # Convert to PyArrow table
-        arrow_table = dt.to_pyarrow_table()
+        # Load data with partition filter
+        arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
 
-        # Filter by pipeline
-        import pyarrow.compute as pc
-
-        mask = pc.equal(arrow_table["pipeline"], pipeline)
-        filtered_table = arrow_table.filter(mask)
-
-        if len(filtered_table) == 0:
+        if len(arrow_table) == 0:
             return {
                 "total_records": 0,
                 "by_error_code": {},
@@ -429,15 +431,33 @@ class UnifiedQuarantine:
             }
 
         # Convert to pandas for easier aggregation
-        df = filtered_table.to_pandas()
+        df = arrow_table.to_pylist()
 
         # Calculate stats
+        total_records = len(df)
+        by_error_code = {}
+        by_status = {}
+        oldest_record = None
+        newest_record = None
+
+        if total_records > 0:
+            for record in df:
+                error_code = record["error_code"]
+                status = record["dq_status"]
+                by_error_code[error_code] = by_error_code.get(error_code, 0) + 1
+                by_status[status] = by_status.get(status, 0) + 1
+
+            # This is inefficient for large datasets, but works for stats
+            df_pandas = arrow_table.to_pandas()
+            oldest_record = df_pandas["ingestion_ts"].min()
+            newest_record = df_pandas["ingestion_ts"].max()
+
         stats = {
-            "total_records": len(df),
-            "by_error_code": df["error_code"].value_counts().to_dict(),
-            "by_status": df["dq_status"].value_counts().to_dict(),
-            "oldest_record": df["ingestion_ts"].min(),
-            "newest_record": df["ingestion_ts"].max(),
+            "total_records": total_records,
+            "by_error_code": by_error_code,
+            "by_status": by_status,
+            "oldest_record": oldest_record,
+            "newest_record": newest_record,
         }
 
         return stats
