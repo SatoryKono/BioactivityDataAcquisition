@@ -25,20 +25,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
-# Import from domain
-from bioetl.domain.exceptions import RetryExhaustedError
-
-# Legacy definition removed - now imported from domain
-    ) -> None:
-        self.url = url
-        self.attempts = attempts
-        self.last_error = last_error
-        super().__init__(
-            f"All {attempts} retry attempts exhausted for {url}. "
-            f"Last error: {last_error}"
-        )
-
-
 @dataclass
 class RetryConfig:
     """Configuration for exponential backoff retry.

@@ -6,11 +6,9 @@ import asyncio
 
 import pytest
 
+from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
-from bioetl.infrastructure.adapters.http.circuit_breaker import (
-    CircuitBreaker,
-    CircuitBreakerOpenError,
-)
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 
 class TestCircuitBreaker:

@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -52,13 +53,6 @@ ENTITY_PLURAL = {
 }
 
 
-class ChemblApiError(Exception):
-    """Raised when ChEMBL API returns an error."""
-
-    def __init__(self, message: str, status_code: int | None = None) -> None:
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
 
 
 @dataclass
