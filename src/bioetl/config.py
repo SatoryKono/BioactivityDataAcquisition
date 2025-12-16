@@ -13,7 +13,6 @@ Usage:
 
 from __future__ import annotations
 
-import warnings
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
@@ -132,7 +131,8 @@ class Settings(BaseSettings):
             raise ValueError("aws.endpoint_url must be set in dev environment")
         return self
 
-    def get_storage_options(self) -> dict[str, str] | None:
+    @property
+    def storage_options(self) -> dict[str, str] | None:
         """Get storage options for Delta Lake/Polars."""
         if not self.aws.endpoint_url:
             return None
@@ -166,44 +166,3 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Get cached application settings."""
     return Settings()
-
-
-# Deprecated aliases - use *Settings classes instead
-_DEPRECATED_ALIASES: dict[str, type] = {
-    "AWSConfig": AWSSettings,
-    "S3Config": S3Settings,
-    "RedisConfig": RedisSettings,
-    "PipelineConfig": PipelineSettings,
-}
-
-
-def __getattr__(name: str) -> Any:
-    """Provide deprecation warnings for old config class names."""
-    if name in _DEPRECATED_ALIASES:
-        warnings.warn(
-            f"{name} is deprecated, use {_DEPRECATED_ALIASES[name].__name__} instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return _DEPRECATED_ALIASES[name]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def get_aws_config() -> AWSSettings:
-    return get_settings().aws
-
-
-def get_s3_config() -> S3Settings:
-    return get_settings().s3
-
-
-def get_redis_config() -> RedisSettings:
-    return get_settings().redis
-
-
-def get_pipeline_config() -> PipelineSettings:
-    return get_settings().pipeline
-
-
-def get_storage_options() -> dict[str, str] | None:
-    return get_settings().get_storage_options()

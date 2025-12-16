@@ -63,7 +63,7 @@ def cli() -> None:
     type=int,
     help="Maximum number of records to process",
 )
-def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
+def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
     """Run an ETL pipeline.
 
     Examples:
@@ -77,6 +77,7 @@ def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
         "Starting pipeline",
         run_type=run_type,
         resume=resume,
+        limit=limit,
     )
 
     # Convert run_type to enum
@@ -84,7 +85,7 @@ def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
 
     try:
         if pipeline == "chembl_activity":
-            asyncio.run(_run_chembl_activity(run_type_enum, resume, logger))
+            asyncio.run(_run_chembl_activity(run_type_enum, resume, limit, logger))
         else:
             logger.error("Unknown pipeline", pipeline=pipeline)
             sys.exit(1)
@@ -103,6 +104,7 @@ def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
 async def _run_chembl_activity(
     run_type: RunType,
     resume: bool,
+    limit: int | None,
     logger: structlog.BoundLogger,
 ) -> None:
     """Run ChEMBL Activity pipeline.
@@ -110,6 +112,7 @@ async def _run_chembl_activity(
     Args:
         run_type: Type of run
         resume: Resume from checkpoint
+        limit: Maximum number of records to process
         logger: Structured logger
     """
     # Initialize dependencies via Composition Root
@@ -123,6 +126,7 @@ async def _run_chembl_activity(
         settings=settings,
         logger=logger,
         resume=resume,
+        limit=limit,
         # Inject initialized services
         checkpoint=container.checkpoint,
         quarantine=container.quarantine,
@@ -270,7 +274,7 @@ def checkpoint_delete(pipeline: str) -> None:
     Examples:
         bioetl checkpoint delete --pipeline chembl_activity
     """
-    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid4())
+    logger = bootstrap_logger(pipeline=pipeline, run_id=uuid44())
     asyncio.run(_checkpoint_delete(pipeline, logger))
 
 
