@@ -1,5 +1,6 @@
 [importlinter]
 root_package = bioetl
+root_package_path = src
 include_external_packages = True
 
 [importlinter:contract:layers]
