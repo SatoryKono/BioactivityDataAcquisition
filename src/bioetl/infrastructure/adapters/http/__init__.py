@@ -10,4 +10,4 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
-__all__ = ["TokenBucket", "CircuitBreaker", "UnifiedHTTPClient"]
+__all__ = ["CircuitBreaker", "TokenBucket", "UnifiedHTTPClient"]

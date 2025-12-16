@@ -20,10 +20,10 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerOpenError,
 )
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunID
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
 class RetryExhaustedError(Exception):
@@ -62,11 +62,10 @@ class RetryConfig:
     def calculate_delay(self, attempt: int) -> float:
         """Calculate delay for given attempt number (0-indexed)."""
         delay = self.base_delay * (self.multiplier ** attempt)
-        delay = self.base_delay * (self.multiplier ** attempt)
         delay = min(delay, self.max_delay)
         # Add jitter
         jitter_range = delay * self.jitter
-        delay += random.uniform(-jitter_range, jitter_range)  # noqa: S311
+        delay += random.uniform(-jitter_range, jitter_range)
         return max(0.0, delay)
 
 
@@ -106,15 +105,15 @@ class UnifiedHTTPClient:
         ...     response = await client.get("https://api.example.com/data")
     """
 
-    rate_limiter: TokenBucket
+    rate_limiter: "TokenBucket"
     circuit_breaker: CircuitBreaker
     retry_config: RetryConfig = field(default_factory=RetryConfig)
     timeout: float = 30.0
-    run_id: RunID | None = None
+    run_id: "RunID | None" = None
 
     _client: httpx.AsyncClient | None = field(init=False, default=None)
 
-    async def __aenter__(self) -> "UnifiedHTTPClient":
+    async def __aenter__(self) -> UnifiedHTTPClient:
         """Enter async context manager."""
         headers: dict[str, str] = {
             "User-Agent": "BioETL/0.1.0 (contact@example.com)",

@@ -56,7 +56,7 @@ def cli() -> None:
     type=int,
     help="Maximum number of records to process",
 )
-def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
+def run(pipeline: str, run_type: str, resume: bool, _: int | None) -> None:
     """Run an ETL pipeline.
 
     Examples:
@@ -73,7 +73,7 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
 
     try:
         if pipeline == "chembl_activity":
-            asyncio.run(_run_chembl_activity(run_type_enum, resume, limit))
+            asyncio.run(_run_chembl_activity(run_type_enum, resume))
         else:
             click.echo(f"❌ Unknown pipeline: {pipeline}", err=True)
             sys.exit(1)
@@ -92,14 +92,12 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
 async def _run_chembl_activity(
     run_type: RunType,
     resume: bool,
-    limit: int | None,
 ) -> None:
     """Run ChEMBL Activity pipeline.
 
     Args:
         run_type: Type of run
         resume: Resume from checkpoint
-        limit: Max records
     """
     from bioetl.application.pipelines.chembl_activity import (
         ChEMBLActivityPipelineFactory,
@@ -228,12 +226,12 @@ async def _quarantine_stats(pipeline: str) -> None:
     click.echo(f"Total records: {stats['total_records']}")
     click.echo(f"Oldest record: {stats['oldest_record']}")
     click.echo(f"Newest record: {stats['newest_record']}")
-    click.echo(f"\nBy error code:")
+    click.echo("\nBy error code:")
 
     for error_code, count in stats["by_error_code"].items():
         click.echo(f"  {error_code}: {count}")
 
-    click.echo(f"\nBy status:")
+    click.echo("\nBy status:")
     for status, count in stats["by_status"].items():
         click.echo(f"  {status}: {count}")
 

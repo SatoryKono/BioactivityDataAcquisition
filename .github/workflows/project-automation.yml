@@ -1,48 +1,48 @@
 name: Project Automation (Cursor Commands)
 
 on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    types: [opened, synchronize, reopened]
+    push:
+        branches: [ main, master, develop ]
+    pull_request:
+        types: [ opened, synchronize, reopened ]
 
 jobs:
-  validate-and-test:
-    name: Run Cursor Commands
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    validate-and-test:
+        name: Run Cursor Commands
+        runs-on: ubuntu-latest
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[dev]
+            -   name: Set up Python 3.11
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
+                    cache: "pip"
 
-      # /run-tests command
-      - name: Run Tests (Coverage)
-        run: |
-          python -m tools.run_tests coverage --min-cov=85
+            -   name: Install dependencies
+                run: |
+                    python -m pip install --upgrade pip
+                    python -m pip install -e .[dev]
 
-      # /render-diagrams command
-      - name: Render Diagrams & Check Consistency
-        run: |
-          python src/tools/render_diagrams.py
-          # Fail if diagrams were modified by the script (meaning they were out of sync)
-          if [[ -n $(git status --porcelain docs/) ]]; then
-            echo "Error: Diagrams are out of sync. Please run 'python src/tools/render_diagrams.py' locally and commit the changes."
-            git diff
-            exit 1
-          fi
+            # /run-tests command
+            -   name: Run Tests (Coverage)
+                run: |
+                    pytest --cov=src --cov-report=term-missing --cov-fail-under=85
 
-      # Architecture checks (implied by project rules)
-      - name: Architecture Linting
-        run: |
-          lint-imports
+            # /render-diagrams command
+            -   name: Render Diagrams & Check Consistency
+                run: |
+                    python src/tools/render_diagrams.py
+                    # Fail if diagrams were modified by the script (meaning they were out of sync)
+                    if [[ -n $(git status --porcelain docs/) ]]; then
+                      echo "Error: Diagrams are out of sync. Please run 'python src/tools/render_diagrams.py' locally and commit the changes."
+                      git diff
+                      exit 1
+                    fi
+
+            # Architecture checks (implied by project rules)
+            -   name: Architecture Linting
+                run: |
+                    lint-imports

@@ -18,8 +18,8 @@ Import individual modules directly to avoid loading unnecessary dependencies:
 
 # Lazy imports - individual modules should be imported directly
 __all__ = [
-    "logging",
-    "metrics",
     "anomaly",
     "lineage",
+    "logging",
+    "metrics",
 ]

@@ -9,8 +9,6 @@ Uses chembl_webresource_client library for API access.
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator, Iterator
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
@@ -20,6 +18,8 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncIterator, Iterator
+    from concurrent.futures import ThreadPoolExecutor
     from httpx import Response
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
@@ -70,7 +70,7 @@ class ChemblAdapter:
 
     http_client: UnifiedHTTPClient
     batch_size: int = 1000
-    thread_pool: ThreadPoolExecutor | None = None
+    thread_pool: "ThreadPoolExecutor | None" = None
 
     _consecutive_errors: int = field(init=False, default=0)
     _last_health_check: datetime | None = field(init=False, default=None)
@@ -98,16 +98,15 @@ class ChemblAdapter:
             "offset": offset,
             "format": "json",
         }
-        if watermark is not None:
-            if entity_type == "activity":
-                if isinstance(watermark, datetime):
-                    params["updated_on__gte"] = watermark.isoformat()
-                else:
-                    params["activity_id__gt"] = str(watermark)
+        if watermark is not None and entity_type == "activity":
+            if isinstance(watermark, datetime):
+                params["updated_on__gte"] = watermark.isoformat()
+            else:
+                params["activity_id__gt"] = str(watermark)
         return params
 
     def _process_response(
-        self, response: Response, entity_type: str
+        self, response: "Response", entity_type: str
     ) -> tuple[list[dict[str, Any]], bool]:
         """Process API response, extract records and pagination info."""
         data = response.json()
@@ -121,7 +120,7 @@ class ChemblAdapter:
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> "AsyncIterator[dict[str, Any]]":
         """Fetch records from ChEMBL.
 
         Args:
@@ -173,7 +172,7 @@ class ChemblAdapter:
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
-    ) -> Iterator[dict[str, Any]]:
+    ) -> "Iterator[dict[str, Any]]":
         """Synchronous version of fetch (for compatibility with DataSourcePort).
 
         This wraps the async fetch method using asyncio.run().
@@ -253,7 +252,7 @@ class ChemblAdapter:
 
 
 def create_chembl_adapter(
-    circuit_breaker: CircuitBreaker,
+    circuit_breaker: "CircuitBreaker",
     run_id: Any = None,
 ) -> tuple[ChemblAdapter, UnifiedHTTPClient]:
     """Factory function to create ChemblAdapter with dependencies.

@@ -109,7 +109,7 @@ class PubChemClient:
             async for record in self._fetch_compounds(query, watermark, limit):
                 yield record
         elif entity_type == "substance":
-            async for record in self._fetch_substances(query, watermark, limit):
+            async for record in self._fetch_substances(query, limit):
                 yield record
         elif entity_type == "assay":
             async for record in self._fetch_assays(query, limit):
@@ -173,14 +173,12 @@ class PubChemClient:
     async def _fetch_substances(
         self,
         query: str | None,
-        watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch substances from PubChem.
 
         Args:
             query: Search query
-            watermark: Last SID for incremental load
             limit: Max records
 
         Yields:
