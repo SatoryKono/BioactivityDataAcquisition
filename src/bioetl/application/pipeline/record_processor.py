@@ -5,7 +5,7 @@ Handles extraction, transformation, and loading of records.
 
 import json
 from collections.abc import AsyncIterator
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
