@@ -1,0 +1,240 @@
+name: Security (SAST)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install bandit[toml] pip-audit safety
+
+      - name: Run Bandit SAST
+        run: |
+          echo "Running Bandit security linter..."
+          mkdir -p reports
+          bandit -r src/bioetl -c pyproject.toml -f json -o reports/bandit-report.json || true
+          bandit -r src/bioetl -c pyproject.toml -f txt -o reports/bandit-report.txt || true
+          echo "--- Bandit Report ---"
+          cat reports/bandit-report.txt
+
+      - name: Run pip-audit (dependency vulnerabilities)
+        run: |
+          echo "Checking for known vulnerabilities in dependencies..."
+          # Install project dependencies first
+          python -m pip install .
+          # Run pip-audit on installed packages
+          pip-audit --format json --output reports/pip-audit.json || true
+          pip-audit || true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: reports/
+          if-no-files-found: warn
+
+      - name: Check for HIGH severity Bandit issues
+        run: |
+          echo "Checking for HIGH severity issues..."
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          report_path = Path("reports/bandit-report.json")
+          if not report_path.exists():
+              print("⚠️  Bandit report not found, skipping severity check")
+              sys.exit(0)
+
+          with open(report_path) as f:
+              data = json.load(f)
+
+          high_issues = [
+              i for i in data.get("results", [])
+              if i.get("issue_severity") == "HIGH"
+          ]
+          medium_issues = [
+              i for i in data.get("results", [])
+              if i.get("issue_severity") == "MEDIUM"
+          ]
+
+          if high_issues:
+              print(f"❌ Found {len(high_issues)} HIGH severity issue(s):")
+              for issue in high_issues:
+                  print(f"  - {issue['filename']}:{issue['line_number']}")
+                  print(f"    {issue['issue_text']}")
+                  print(f"    CWE: {issue.get('issue_cwe', {}).get('id', 'N/A')}")
+              sys.exit(1)
+
+          if medium_issues:
+              print(f"⚠️  Found {len(medium_issues)} MEDIUM severity issue(s):")
+              for issue in medium_issues[:5]:
+                  print(f"  - {issue['filename']}:{issue['line_number']}: {issue['issue_text']}")
+              if len(medium_issues) > 5:
+                  print(f"  ... and {len(medium_issues) - 5} more")
+              print("\nMEDIUM issues are warnings only, not blocking merge.")
+
+          print("✅ No HIGH severity issues found")
+          PY
+
+      - name: Check for critical dependency vulnerabilities
+        run: |
+          echo "Checking for critical vulnerabilities..."
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          report_path = Path("reports/pip-audit.json")
+          if not report_path.exists():
+              print("⚠️  pip-audit report not found, skipping vulnerability check")
+              sys.exit(0)
+
+          with open(report_path) as f:
+              data = json.load(f)
+
+          # pip-audit JSON format: list of vulnerability objects
+          vulnerabilities = data if isinstance(data, list) else data.get("dependencies", [])
+
+          critical_vulns = []
+          high_vulns = []
+
+          for vuln in vulnerabilities:
+              # Handle different pip-audit output formats
+              vulns_list = vuln.get("vulns", [])
+              if not vulns_list:
+                  continue
+
+              pkg_name = vuln.get("name", "unknown")
+              pkg_version = vuln.get("version", "unknown")
+
+              for v in vulns_list:
+                  severity = v.get("fix_versions", [])
+                  vuln_id = v.get("id", "unknown")
+                  # pip-audit doesn't provide severity directly, treat all as high
+                  high_vulns.append({
+                      "package": pkg_name,
+                      "version": pkg_version,
+                      "id": vuln_id,
+                      "description": v.get("description", "No description")[:100]
+                  })
+
+          if high_vulns:
+              print(f"⚠️  Found {len(high_vulns)} dependency vulnerability issue(s):")
+              for v in high_vulns[:10]:
+                  print(f"  - {v['package']}=={v['version']}: {v['id']}")
+              if len(high_vulns) > 10:
+                  print(f"  ... and {len(high_vulns) - 10} more")
+              print("\n⚠️  Please review and update vulnerable dependencies.")
+              # Don't fail on dependency vulnerabilities (may need coordination)
+              # sys.exit(1)
+
+          print("✅ Dependency vulnerability check complete")
+          PY
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Run Gitleaks (secret detection)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Don't fail PR on first run
+
+      - name: Check for hardcoded secrets patterns
+        run: |
+          echo "Checking for common secret patterns..."
+          python - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          # Patterns that might indicate hardcoded secrets
+          secret_patterns = [
+              (r'(?i)(password|passwd|pwd)\s*=\s*["\'][^"\']+["\']', "Hardcoded password"),
+              (r'(?i)(api_key|apikey|api-key)\s*=\s*["\'][^"\']+["\']', "Hardcoded API key"),
+              (r'(?i)(secret|token)\s*=\s*["\'][a-zA-Z0-9]{20,}["\']', "Hardcoded secret/token"),
+              (r'(?i)aws_secret_access_key\s*=\s*["\'][^"\']+["\']', "Hardcoded AWS secret"),
+              (r'-----BEGIN (RSA |DSA |EC )?PRIVATE KEY-----', "Private key in code"),
+          ]
+
+          # Files/paths to skip
+          skip_patterns = [
+              r'\.pyc$',
+              r'__pycache__',
+              r'\.git/',
+              r'\.venv/',
+              r'node_modules/',
+              r'\.env\.example$',
+              r'tests/fixtures/',
+              r'conftest\.py$',  # Test config often has mock secrets
+          ]
+
+          issues = []
+          src_path = Path("src")
+
+          if not src_path.exists():
+              print("Source directory not found")
+              sys.exit(0)
+
+          for py_file in src_path.rglob("*.py"):
+              # Skip excluded paths
+              file_str = str(py_file)
+              if any(re.search(p, file_str) for p in skip_patterns):
+                  continue
+
+              try:
+                  content = py_file.read_text()
+              except Exception:
+                  continue
+
+              for i, line in enumerate(content.split('\n'), 1):
+                  # Skip comments and test assertions
+                  stripped = line.strip()
+                  if stripped.startswith('#') or 'assert' in stripped:
+                      continue
+
+                  for pattern, desc in secret_patterns:
+                      if re.search(pattern, line):
+                          # Additional check: skip if it's a config/env variable reference
+                          if 'os.environ' in line or 'getenv' in line or 'settings.' in line:
+                              continue
+                          issues.append(f"{py_file}:{i}: {desc}")
+
+          if issues:
+              print(f"⚠️  Found {len(issues)} potential hardcoded secret(s):")
+              for issue in issues[:10]:
+                  print(f"  - {issue}")
+              if len(issues) > 10:
+                  print(f"  ... and {len(issues) - 10} more")
+              print("\nPlease review and ensure no real secrets are committed.")
+              # Warning only - manual review needed
+          else:
+              print("✅ No obvious hardcoded secrets found")
+          PY
