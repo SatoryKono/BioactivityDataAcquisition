@@ -254,3 +254,27 @@ def redis_client(redis_service):
     import redis.asyncio as aioredis
 
     return aioredis.from_url(redis_service)
+
+
+@pytest.fixture
+def fake_redis():
+    """Fake Redis client for unit tests."""
+    import fakeredis.aioredis
+
+    return fakeredis.aioredis.FakeRedis()
+
+
+@pytest.fixture
+def token_bucket():
+    """Token bucket rate limiter for testing."""
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+
+    return TokenBucket(rate=100.0, capacity=100)
+
+
+@pytest.fixture
+def circuit_breaker():
+    """Circuit breaker for testing."""
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+
+    return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=60)

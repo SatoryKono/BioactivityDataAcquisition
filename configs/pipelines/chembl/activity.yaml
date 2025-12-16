@@ -20,6 +20,10 @@ transform:
         - calculate_content_hash
 
 sink:
+    bronze:
+        path: "s3://bioetl-bronze/chembl/activity/"
+        format: json
+
     silver:
         path: "s3://bioetl-silver/chembl/activity/" # Используйте s3a:// для Spark
         format: delta
@@ -27,10 +31,12 @@ sink:
         primary_key: [ "activity_id" ]
         partition_by: [ "year", "month" ] # Пример партиционирования по дате извлечения
         classification: public
-        forensic_retention: false
+        forensic_retention: true
 
     gold:
         enabled: false # Gold-витрины могут быть отключены по умолчанию
+        validation:
+            strict: true
         # path: s3://bioetl-gold/chembl/activity_aggregated/
         # format: delta
         # mode: overwrite
