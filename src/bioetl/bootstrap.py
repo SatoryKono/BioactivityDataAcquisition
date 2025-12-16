@@ -292,6 +292,7 @@ class ChEMBLActivityPipelineFactory:
         """Create configured ChEMBL Activity pipeline (legacy API).
 
         DEPRECATED: Use create_with_services() instead.
+        Will be removed after 2025-01-15.
 
         Args:
             run_type: Type of run (incremental, backfill, rebuild)
@@ -307,68 +308,29 @@ class ChEMBLActivityPipelineFactory:
         Returns:
             Configured pipeline instance
         """
-        # Import here to avoid circular imports
-        from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
+        import warnings
 
-        # Config shortcuts
-        aws_config = settings.aws
-        s3_config = settings.s3
-        storage_options = settings.storage_options
-
-        # Data source (ChEMBL)
-        bucket = TokenBucket(rate=10.0, capacity=20)
-        circuit_breaker = CircuitBreaker(provider="chembl")
-        http_client = UnifiedHTTPClient(bucket, circuit_breaker)
-        data_source = ChemblAdapter(http_client=http_client)
-
-        # Storage
-        access_key, secret_key = get_aws_credentials(settings)
-        bronze_writer = BronzeWriter(
-            bucket=s3_config.bucket_bronze,
-            endpoint_url=aws_config.endpoint_url,
-            access_key=access_key,
-            secret_key=secret_key,
+        warnings.warn(
+            "ChEMBLActivityPipelineFactory.create() is deprecated. "
+            "Use create_with_services() instead. "
+            "Will be removed after 2025-01-15.",
+            DeprecationWarning,
+            stacklevel=2,
         )
-        silver_writer = DeltaWriter(
-            base_path=f"s3://{s3_config.bucket_silver}",
-            storage_options=storage_options,
-        )
-        gold_writer = DeltaWriter(
-            base_path=f"s3://{s3_config.bucket_silver}",
-            storage_options=storage_options,
-        )
-        storage = StorageAdapter(bronze_writer, silver_writer, gold_writer)
 
-        # Lock (Redis)
-        if lock is None:
-            redis_client = create_redis_client(settings)
-            lock = RedisDistributedLock(redis_client=redis_client)
-
-        # Checkpoint (S3)
-        if checkpoint is None:
-            checkpoint = S3Checkpoint(
-                bucket=s3_config.bucket_checkpoints,
-                endpoint_url=aws_config.endpoint_url,
-                access_key=access_key,
-                secret_key=secret_key,
-            )
-
-        # Quarantine
-        if quarantine is None:
-            quarantine = UnifiedQuarantine(
-                base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
-                storage_options=storage_options,
-            )
-
-        return ChEMBLActivityPipeline(
+        # Delegate to new API
+        runtime = PipelineRuntimeConfig(
             run_type=run_type,
-            data_source=data_source,
-            storage=storage,
-            lock=lock,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            logger=logger,
-            metrics=metrics,
             resume=resume,
             limit=limit,
+        )
+
+        return await ChEMBLActivityPipelineFactory.create_with_services(
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            metrics=metrics,
+            checkpoint=checkpoint,
+            quarantine=quarantine,
+            lock=lock,
         )

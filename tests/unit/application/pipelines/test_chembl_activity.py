@@ -4,26 +4,38 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
+from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl_activity import (
+    CHEMBL_ACTIVITY_CONFIG,
+    ChEMBLActivityPipeline,
+)
 from bioetl.domain.context import PipelineContext
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
 
 @pytest.fixture
 def chembl_pipeline():
     """Fixture for a ChEMBLActivityPipeline."""
-    pipeline = ChEMBLActivityPipeline(
+    runtime = PipelineRuntimeConfig(
         run_type=RunType.INCREMENTAL,
+        resume=False,
+    )
+    # Mock logger with bind method
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+
+    services = PipelineServices(
         data_source=AsyncMock(),
         storage=MagicMock(),
         lock=AsyncMock(),
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
-        logger=MagicMock(),
         metrics=NoOpMetrics(warn_on_use=False),
-        resume=False,
+        logger=mock_logger,
     )
+    pipeline = ChEMBLActivityPipeline.create(runtime=runtime, services=services)
     return pipeline
 
 
