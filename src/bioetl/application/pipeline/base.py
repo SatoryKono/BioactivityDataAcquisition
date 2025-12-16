@@ -19,6 +19,8 @@ from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
     LockPort,
+    MetricsPort,
+    NoOpMetrics,
     QuarantinePort,
     StoragePort,
 )
@@ -51,6 +53,7 @@ class BasePipeline(ABC):
         logger: "structlog.BoundLogger",
         metrics: "MetricsPort | None" = None,
         resume: bool = False,
+        metrics: MetricsPort | None = None,
     ) -> None:
         self.pipeline_name = pipeline_name
         self.provider = provider
@@ -63,6 +66,7 @@ class BasePipeline(ABC):
         self.quarantine = quarantine
         self.metrics = metrics
         self.resume = resume
+        self.metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
         self.run_id = RunID(uuid4())
         self.logger = logger.bind(run_id=str(self.run_id))
 
