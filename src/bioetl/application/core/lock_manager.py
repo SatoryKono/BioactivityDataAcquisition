@@ -16,8 +16,6 @@ from bioetl.domain.types import RunID, RunType
 if TYPE_CHECKING:
     import structlog
 
-    from bioetl.application.core.base import BasePipeline
-
 
 class LockManager:
     """Manages acquiring, releasing, and maintaining distributed locks.
@@ -56,26 +54,6 @@ class LockManager:
         self._logger = logger
         self._shutdown_signal = shutdown_signal
         self._heartbeat_task: asyncio.Task[None] | None = None
-
-    @classmethod
-    def from_pipeline(cls, pipeline: "BasePipeline") -> "LockManager":
-        """Create LockManager from pipeline (legacy compatibility).
-
-        DEPRECATED: Use direct constructor instead.
-        """
-        from bioetl.application.core.shutdown import ShutdownSignal
-
-        lock_key = f"{pipeline.provider}_{pipeline.entity_type}"
-        exclusive = pipeline.run_type in (RunType.BACKFILL, RunType.REBUILD)
-
-        return cls(
-            lock_port=pipeline.lock,
-            run_id=pipeline.run_id,
-            lock_key=lock_key,
-            exclusive=exclusive,
-            logger=pipeline.logger,
-            shutdown_signal=ShutdownSignal(),  # New signal for legacy mode
-        )
 
     @classmethod
     def create(
