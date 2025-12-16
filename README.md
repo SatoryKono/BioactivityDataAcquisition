@@ -4,7 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready%20(v5.0)-green)](docs/RULES.md)
+[![Version](https://img.shields.io/badge/version-5.0.0-blue)](CHANGELOG.md)
+[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development%20(55%25)-yellow)](IMPLEMENTATION_ROADMAP.md)
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
 from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, analysis-ready **Delta Lake** warehouse.
