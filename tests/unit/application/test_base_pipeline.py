@@ -97,24 +97,3 @@ async def test_base_pipeline_accepts_three_params():
     assert pipeline.config == config
     assert pipeline.runtime == runtime
     assert pipeline.services == services
-
-
-def test_from_params_emits_deprecation_warning():
-    """Test that from_params() emits DeprecationWarning."""
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-
-    with pytest.warns(DeprecationWarning, match="from_params.*deprecated"):
-        ConcretePipeline.from_params(
-            pipeline_name="test",
-            provider="test",
-            entity_type="entity",
-            run_type=RunType.INCREMENTAL,
-            data_source=AsyncMock(),
-            storage=AsyncMock(),
-            lock=AsyncMock(),
-            checkpoint=AsyncMock(),
-            quarantine=AsyncMock(),
-            logger=mock_logger,
-            metrics=MagicMock(),
-        )

@@ -2,11 +2,6 @@
 
 Handles the initialization and wiring of infrastructure components (adapters)
 to provide a ready-to-use dependency container for the application layer.
-
-This is the only place where infrastructure imports are allowed to create
-concrete implementations of domain ports.
-
-Refactored per ADR-0005 to use PipelineConfig, PipelineRuntimeConfig, PipelineServices.
 """
 
 from __future__ import annotations
@@ -14,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl_activity import CHEMBL_ACTIVITY_CONFIG
@@ -59,170 +55,77 @@ def bootstrap_logger(
     )
 
 
-@dataclass(frozen=True)
-class ServiceContainer:
-    """Container for initialized infrastructure services.
-
-    NOTE: Consider using PipelineServices instead for new code.
-    This class is kept for backward compatibility.
+def bootstrap_pipeline(
+    pipeline_name: str,
+    run_id: UUID,
+    run_type: RunType,
+    resume: bool,
+    limit: int | None,
+) -> BasePipeline:
     """
-
-    checkpoint: CheckpointPort
-    quarantine: QuarantinePort
-    lock: LockPort
-    metrics: MetricsPort
-    redis_client: aioredis.Redis
-
-
-def bootstrap() -> ServiceContainer:
-    """Initialize all infrastructure services.
-
-    Returns:
-        ServiceContainer with ready-to-use adapters.
+    Composition Root: Assembles and returns a fully configured pipeline instance.
     """
     settings = get_settings()
-    aws_config = settings.aws
-    s3_config = settings.s3
-    storage_options = settings.storage_options
+    logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
 
-    # Initialize Redis Client using the factory
-    redis_client = create_redis_client(settings)
-
-    # Initialize Adapters
-    access_key, secret_key = get_aws_credentials(settings)
-    checkpoint = S3Checkpoint(
-        bucket=s3_config.bucket_checkpoints,
-        endpoint_url=aws_config.endpoint_url,
-        access_key=access_key,
-        secret_key=secret_key,
+    runtime_config = PipelineRuntimeConfig(
+        run_type=run_type, resume=resume, limit=limit
     )
 
-    quarantine = UnifiedQuarantine(
-        base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
-        storage_options=storage_options,
-    )
-
-    lock = RedisDistributedLock(redis_client=redis_client)
-
-    # Metrics - use PrometheusMetrics by default, NoOpMetrics only if explicitly disabled
-    metrics: MetricsPort
-    if getattr(settings, "metrics", None) and not settings.metrics.enabled:
-        metrics = NoOpMetrics(warn_on_use=False)
+    if pipeline_name == "chembl_activity":
+        pipeline = ChEMBLActivityPipelineFactory.create_with_services(
+            runtime=runtime_config,
+            settings=settings,
+            logger=logger,
+        )
     else:
-        metrics = PrometheusMetrics()
+        raise ValueError(f"Unknown pipeline name: {pipeline_name}")
 
-    return ServiceContainer(
-        checkpoint=checkpoint,
-        quarantine=quarantine,
-        lock=lock,
-        metrics=metrics,
-        redis_client=redis_client,
-    )
+    return pipeline
 
 
 class ChEMBLActivityPipelineFactory:
-    """Factory for creating ChEMBL Activity pipelines.
-
-    This factory lives in the composition root (bootstrap) because it needs
-    to wire up infrastructure components to create a complete pipeline.
-
-    Example (new API - recommended):
-        >>> runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-        >>> pipeline = await ChEMBLActivityPipelineFactory.create_with_services(
-        ...     runtime=runtime,
-        ...     settings=get_settings(),
-        ...     logger=logger,
-        ... )
-        >>> await pipeline.run()
-
-    Example (legacy API - deprecated):
-        >>> pipeline = await ChEMBLActivityPipelineFactory.create(
-        ...     run_type=RunType.INCREMENTAL,
-        ...     settings=get_settings(),
-        ...     logger=logger,
-        ... )
-    """
+    """Factory for creating ChEMBL Activity pipelines."""
 
     @staticmethod
     def build_services(
         settings: Settings,
         logger: "structlog.BoundLogger",
-        metrics: MetricsPort | None = None,
-        checkpoint: "CheckpointPort | None" = None,
-        quarantine: "QuarantinePort | None" = None,
-        lock: "LockPort | None" = None,
+        **kwargs, # Accept and ignore extra ports for now
     ) -> PipelineServices:
-        """Build PipelineServices from settings.
-
-        Creates all necessary infrastructure adapters and returns them
-        wrapped in a PipelineServices container.
-
-        Args:
-            settings: Application settings.
-            logger: Structured logger.
-            metrics: Optional metrics service (creates PrometheusMetrics if None).
-            checkpoint: Optional checkpoint service.
-            quarantine: Optional quarantine service.
-            lock: Optional lock service.
-
-        Returns:
-            PipelineServices with all ports initialized.
-        """
+        """Builds PipelineServices from settings."""
         aws_config = settings.aws
         s3_config = settings.s3
         storage_options = settings.storage_options
         access_key, secret_key = get_aws_credentials(settings)
 
-        # Data source (ChEMBL)
-        bucket = TokenBucket(rate=10.0, capacity=20)
-        circuit_breaker = CircuitBreaker(provider="chembl")
-        http_client = UnifiedHTTPClient(bucket, circuit_breaker)
+        http_client = UnifiedHTTPClient(TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl"))
         data_source = ChemblAdapter(http_client=http_client)
 
-        # Storage
-        bronze_writer = BronzeWriter(
-            bucket=s3_config.bucket_bronze,
+        storage = StorageAdapter(
+            BronzeWriter(
+                bucket=s3_config.bucket_bronze,
+                endpoint_url=aws_config.endpoint_url,
+                access_key=access_key,
+                secret_key=secret_key,
+            ),
+            DeltaWriter(base_path=f"s3://{s3_config.bucket_silver}", storage_options=storage_options),
+            DeltaWriter(base_path=f"s3://{s3_config.bucket_gold}", storage_options=storage_options),
+        )
+
+        redis_client = create_redis_client(settings)
+        lock = RedisDistributedLock(redis_client=redis_client)
+        checkpoint = S3Checkpoint(
+            bucket=s3_config.bucket_checkpoints,
             endpoint_url=aws_config.endpoint_url,
             access_key=access_key,
             secret_key=secret_key,
         )
-        silver_writer = DeltaWriter(
-            base_path=f"s3://{s3_config.bucket_silver}",
+        quarantine = UnifiedQuarantine(
+            base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
             storage_options=storage_options,
         )
-        gold_writer = DeltaWriter(
-            base_path=f"s3://{s3_config.bucket_silver}",
-            storage_options=storage_options,
-        )
-        storage = StorageAdapter(bronze_writer, silver_writer, gold_writer)
-
-        # Lock (Redis)
-        if lock is None:
-            redis_client = create_redis_client(settings)
-            lock = RedisDistributedLock(redis_client=redis_client)
-
-        # Checkpoint (S3)
-        if checkpoint is None:
-            checkpoint = S3Checkpoint(
-                bucket=s3_config.bucket_checkpoints,
-                endpoint_url=aws_config.endpoint_url,
-                access_key=access_key,
-                secret_key=secret_key,
-            )
-
-        # Quarantine
-        if quarantine is None:
-            quarantine = UnifiedQuarantine(
-                base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
-                storage_options=storage_options,
-            )
-
-        # Metrics
-        if metrics is None:
-            if getattr(settings, "metrics", None) and not settings.metrics.enabled:
-                metrics = NoOpMetrics(warn_on_use=False)
-            else:
-                metrics = PrometheusMetrics()
+        metrics: MetricsPort = PrometheusMetrics() if getattr(settings, "metrics", None) and settings.metrics.enabled else NoOpMetrics()
 
         return PipelineServices(
             data_source=data_source,
@@ -235,102 +138,21 @@ class ChEMBLActivityPipelineFactory:
         )
 
     @staticmethod
-    async def create_with_services(
+    def create_with_services(
         runtime: PipelineRuntimeConfig,
         settings: Settings,
         logger: "structlog.BoundLogger",
-        metrics: MetricsPort | None = None,
-        checkpoint: "CheckpointPort | None" = None,
-        quarantine: "QuarantinePort | None" = None,
-        lock: "LockPort | None" = None,
+        **kwargs,
     ) -> "ChEMBLActivityPipeline":
-        """Create ChEMBL Activity pipeline with decomposed config (new API).
-
-        This is the recommended way to create pipelines per ADR-0005.
-
-        Args:
-            runtime: Runtime execution parameters.
-            settings: Application settings.
-            logger: Structured logger.
-            metrics: Optional metrics service.
-            checkpoint: Optional checkpoint service.
-            quarantine: Optional quarantine service.
-            lock: Optional lock service.
-
-        Returns:
-            Configured pipeline instance.
-        """
+        """Creates ChEMBL Activity pipeline with decomposed config."""
         from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 
         services = ChEMBLActivityPipelineFactory.build_services(
-            settings=settings,
-            logger=logger,
-            metrics=metrics,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            lock=lock,
+            settings=settings, logger=logger, **kwargs
         )
 
         return ChEMBLActivityPipeline.create(
             runtime=runtime,
             services=services,
             config=CHEMBL_ACTIVITY_CONFIG,
-        )
-
-    @staticmethod
-    async def create(
-        run_type: "RunType",
-        settings: Settings,
-        logger: "structlog.BoundLogger",
-        metrics: MetricsPort,
-        resume: bool = False,
-        limit: int | None = None,
-        checkpoint: "CheckpointPort | None" = None,
-        quarantine: "QuarantinePort | None" = None,
-        lock: "LockPort | None" = None,
-    ) -> "ChEMBLActivityPipeline":
-        """Create configured ChEMBL Activity pipeline (legacy API).
-
-        DEPRECATED: Use create_with_services() instead.
-        Will be removed after 2025-01-15.
-
-        Args:
-            run_type: Type of run (incremental, backfill, rebuild)
-            settings: Application settings object
-            logger: Structured logger
-            metrics: Injected metrics service
-            resume: Resume from checkpoint if available
-            limit: Maximum number of records to process
-            checkpoint: Injected checkpoint service (optional)
-            quarantine: Injected quarantine service (optional)
-            lock: Injected lock service (optional)
-
-        Returns:
-            Configured pipeline instance
-        """
-        import warnings
-
-        warnings.warn(
-            "ChEMBLActivityPipelineFactory.create() is deprecated. "
-            "Use create_with_services() instead. "
-            "Will be removed after 2025-01-15.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        # Delegate to new API
-        runtime = PipelineRuntimeConfig(
-            run_type=run_type,
-            resume=resume,
-            limit=limit,
-        )
-
-        return await ChEMBLActivityPipelineFactory.create_with_services(
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            metrics=metrics,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            lock=lock,
         )
