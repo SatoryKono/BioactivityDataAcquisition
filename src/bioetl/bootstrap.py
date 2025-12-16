@@ -6,7 +6,6 @@ to provide a ready-to-use dependency container for the application layer.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
@@ -38,11 +37,9 @@ from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 if TYPE_CHECKING:
     from uuid import UUID
 
-    import redis.asyncio as aioredis
     import structlog
 
     from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-    from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
     from bioetl.domain.types import RunType
 
 
@@ -91,7 +88,7 @@ class ChEMBLActivityPipelineFactory:
     def build_services(
         settings: Settings,
         logger: "structlog.BoundLogger",
-        **kwargs, # Accept and ignore extra ports for now
+        **kwargs,  # Accept and ignore extra ports for now
     ) -> PipelineServices:
         """Builds PipelineServices from settings."""
         aws_config = settings.aws
@@ -125,7 +122,8 @@ class ChEMBLActivityPipelineFactory:
             base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
             storage_options=storage_options,
         )
-        metrics: MetricsPort = PrometheusMetrics() if getattr(settings, "metrics", None) and settings.metrics.enabled else NoOpMetrics()
+        metrics: MetricsPort = PrometheusMetrics() if getattr(settings, "metrics",
+                                                              None) and settings.metrics.enabled else NoOpMetrics()
 
         return PipelineServices(
             data_source=data_source,
