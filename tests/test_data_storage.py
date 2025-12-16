@@ -18,7 +18,7 @@ def test_req_data_002_bronze_path_format(config_path):
     """Bronze path must match the format."""
     # This is a conceptual test. A real test would check the output path generation.
     # We check if the config hints at the right structure.
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     # A true test would need to run the pipeline and check S3,
@@ -30,7 +30,7 @@ def test_req_data_002_bronze_path_format(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_006_007_silver_is_delta(config_path):
     """Silver data must be Delta Lake and not raw Parquet."""
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
@@ -42,7 +42,7 @@ def test_req_data_006_007_silver_is_delta(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_008_silver_is_merge(config_path):
     """Silver strategy must be merge/upsert."""
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
@@ -54,7 +54,7 @@ def test_req_data_008_silver_is_merge(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_009_gold_is_strict(config_path):
     """Gold data must have strict validation if it exists."""
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     if "gold" in config.get("sink", {}):
@@ -68,7 +68,7 @@ def test_req_data_009_gold_is_strict(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_delta_003_forensic_retention(config_path):
     """Forensic retention must be configurable."""
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     silver_sink = config.get("sink", {}).get("silver", {})
@@ -80,7 +80,7 @@ def test_req_delta_003_forensic_retention(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_partition_004_no_high_cardinality_keys(config_path):
     """Partition keys must not have high cardinality."""
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     disallowed_patterns = ["id", "uuid", "hash", "text", "desc"]
@@ -99,7 +99,7 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_load_001_002_load_strategy(config_path):
     """Load strategy must be defined."""
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     source = config.get("source", {})

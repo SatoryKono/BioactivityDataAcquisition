@@ -69,7 +69,32 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
     await pipeline.run()
 
     # 4. Verify the results
-    assert len(storage.data) == 3
-    assert "bronze/chembl/activity" in next(iter(storage.data.keys()))
-    assert "chembl.activity" in storage.data
-    assert "chembl.activity_gold" in storage.data
+    assert any("bronze/chembl/activity" in key for key in storage.data.keys())
+    assert any("silver/chembl.activity" in key for key in storage.data.keys())
+    assert any("gold/chembl.activity_gold" in key for key in storage.data.keys())
+
+    # Verify the content of the data
+    bronze_data = next(
+        value
+        for key, value in storage.data.items()
+        if "bronze/chembl/activity" in key
+    )
+    assert len(bronze_data) == 1
+    assert bronze_data[0]["activity_id"] == 1
+
+    silver_data = next(
+        value
+        for key, value in storage.data.items()
+        if "silver/chembl.activity" in key
+    )
+    assert len(silver_data) == 1
+    assert silver_data[0]["activity_id"] == 1
+
+    gold_data = next(
+        value
+        for key, value in storage.data.items()
+        if "gold/chembl.activity_gold" in key
+    )
+    assert len(gold_data) == 1
+    assert gold_data[0]["activity_id"] == 1
+    assert gold_data[0]["pchembl_value"] == 8.0
