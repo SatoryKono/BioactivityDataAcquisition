@@ -25,7 +25,7 @@ def mock_base_pipeline():
         provider="test_provider",
         entity_type="test_entity",
         run_type=RunType.INCREMENTAL,
-        data_source=AsyncMock(),
+        data_source=MagicMock(),
         storage=MagicMock(),
         lock=AsyncMock(),
         checkpoint=MagicMock(),
@@ -39,6 +39,17 @@ def mock_base_pipeline():
     pipeline.checkpoint_manager = AsyncMock()
     pipeline.quarantine_manager = AsyncMock()
     pipeline.error_classifier = MagicMock()
+    # Mock context with a logger that has .bind() method
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import RunID
+    from uuid import uuid4
+    pipeline.context = PipelineContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        logger=mock_logger,
+    )
     return pipeline
 
 
@@ -48,10 +59,13 @@ def executor(mock_base_pipeline):
     return PipelineExecutor(mock_base_pipeline)
 
 
-async def async_iter(data):
-    """Async generator helper for tests."""
-    for item in data:
-        yield item
+class AsyncIterator:
+    def __init__(self, data):
+        self.data = data
+
+    async def __aiter__(self):
+        for item in self.data:
+            yield item
 
 
 @pytest.mark.asyncio
