@@ -32,7 +32,10 @@ def bronze_writer(mock_s3_client):
         "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
     ) as mock_get_client:
         mock_get_client.return_value = mock_s3_client
-        return BronzeWriter(bucket="test-bucket")
+        writer = BronzeWriter(bucket="test-bucket")
+        # Inject the mock client directly to ensure it's used during tests
+        writer.s3_client = mock_s3_client
+        yield writer
 
 
 class TestBronzeWriterExceptions:
@@ -61,19 +64,20 @@ def delta_writer():
     return DeltaWriter(base_path="/fake/path")
 
 
+@pytest.fixture
+def valid_record():
+    """Valid test record with all required metadata fields."""
+    return {
+        "id": 1,
+        "_run_id": "test-run-id",
+        "_run_type": "incremental",
+        "_source_batch_id": "batch-123",
+        "_ingestion_ts": "2024-01-01T00:00:00Z",
+    }
+
+
 class TestDeltaWriterExceptions:
     """Tests for exception handling in DeltaWriter."""
-
-    @pytest.fixture
-    def valid_record(self):
-        """Valid test record with all required metadata fields."""
-        return {
-            "id": 1,
-            "_run_id": "test-run-id",
-            "_run_type": "incremental",
-            "_source_batch_id": "batch-123",
-            "_ingestion_ts": "2024-01-01T00:00:00Z",
-        }
 
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
     def test_write_silver_raises_schema_validation_error_on_merge(
