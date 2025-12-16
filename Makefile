@@ -51,6 +51,18 @@ test-integration: ## Run integration tests
 test-watch: ## Run tests in watch mode
 	$(VENV_PYTHON) -m pytest tests/ --looponfail
 
+test-architecture: ## Run architecture enforcement tests
+	@echo "$(BLUE)Running architecture tests...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/test_architecture_enforcement.py -v --tb=short
+	@echo "$(GREEN)Architecture tests passed!$(NC)"
+
+test-architecture-strict: ## Run architecture tests with import-linter
+	@echo "$(BLUE)Running strict architecture checks...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/test_architecture_enforcement.py -v
+	@echo "$(BLUE)Running import-linter...$(NC)"
+	$(VENV_PYTHON) -m importlinter
+	@echo "$(GREEN)All architecture checks passed!$(NC)"
+
 lint: ## Run ruff and mypy
 	@echo "$(BLUE)Running ruff...$(NC)"
 	$(VENV_PYTHON) -m ruff check src/ tests/

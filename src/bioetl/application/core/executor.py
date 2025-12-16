@@ -4,27 +4,17 @@ Pipeline Executor: orchestrates the data flow from extraction to processing.
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Awaitable
-from typing import Any, Protocol
+from collections.abc import AsyncIterator
 from uuid import uuid4
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports import DataSourcePort, StoragePort
 from bioetl.domain.types import BatchID, Watermark
-
-
-class TransformCallback(Protocol):
-    def __call__(
-        self, context: PipelineContext, record: dict[str, Any]
-    ) -> Awaitable[dict[str, Any] | None]: ...
-
-
-class GoldFilterCallback(Protocol):
-    def __call__(self, context: PipelineContext, record: dict[str, Any]) -> bool: ...
 
 
 class PipelineExecutor:
