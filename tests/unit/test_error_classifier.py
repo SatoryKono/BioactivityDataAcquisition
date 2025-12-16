@@ -24,7 +24,9 @@ class TestErrorClassifier:
             pass
 
         assert classifier.classify(SchemaError()) == ErrorType.SCHEMA_VIOLATION
-        assert classifier.classify(MySchemaValidationError()) == ErrorType.SCHEMA_VIOLATION
+        assert (
+            classifier.classify(MySchemaValidationError()) == ErrorType.SCHEMA_VIOLATION
+        )
 
     def test_classify_validation_error(self, classifier: ErrorClassifier) -> None:
         """Exceptions with 'Validation' in name should be SCHEMA_VIOLATION."""
@@ -47,8 +49,12 @@ class TestErrorClassifier:
         class MissingKeyError(Exception):
             pass
 
-        assert classifier.classify(MissingFieldError()) == ErrorType.MISSING_REQUIRED_FIELD
-        assert classifier.classify(MissingKeyError()) == ErrorType.MISSING_REQUIRED_FIELD
+        assert (
+            classifier.classify(MissingFieldError()) == ErrorType.MISSING_REQUIRED_FIELD
+        )
+        assert (
+            classifier.classify(MissingKeyError()) == ErrorType.MISSING_REQUIRED_FIELD
+        )
 
     def test_classify_required_error(self, classifier: ErrorClassifier) -> None:
         """Exceptions with 'Required' in name should be MISSING_REQUIRED_FIELD."""
@@ -59,14 +65,22 @@ class TestErrorClassifier:
         class RequiredValueError(Exception):
             pass
 
-        assert classifier.classify(RequiredFieldMissing()) == ErrorType.MISSING_REQUIRED_FIELD
-        assert classifier.classify(RequiredValueError()) == ErrorType.MISSING_REQUIRED_FIELD
+        assert (
+            classifier.classify(RequiredFieldMissing())
+            == ErrorType.MISSING_REQUIRED_FIELD
+        )
+        assert (
+            classifier.classify(RequiredValueError())
+            == ErrorType.MISSING_REQUIRED_FIELD
+        )
 
     def test_classify_generic_error(self, classifier: ErrorClassifier) -> None:
         """Generic exceptions should be classified as INVALID_DATA."""
         assert classifier.classify(ValueError("bad value")) == ErrorType.INVALID_DATA
         assert classifier.classify(TypeError("wrong type")) == ErrorType.INVALID_DATA
-        assert classifier.classify(RuntimeError("runtime issue")) == ErrorType.INVALID_DATA
+        assert (
+            classifier.classify(RuntimeError("runtime issue")) == ErrorType.INVALID_DATA
+        )
         assert classifier.classify(Exception("generic")) == ErrorType.INVALID_DATA
 
     def test_classify_builtin_exceptions(self, classifier: ErrorClassifier) -> None:
@@ -85,4 +99,6 @@ class TestErrorClassifier:
 
             pass
 
-        assert classifier.classify(SchemaValidationError()) == ErrorType.SCHEMA_VIOLATION
+        assert (
+            classifier.classify(SchemaValidationError()) == ErrorType.SCHEMA_VIOLATION
+        )

@@ -80,7 +80,9 @@ class TestPipelineContext:
 
         assert new_context.logger is bound_logger
 
-    def test_context_with_different_run_types(self, run_id: RunID, mock_logger: MagicMock) -> None:
+    def test_context_with_different_run_types(
+        self, run_id: RunID, mock_logger: MagicMock
+    ) -> None:
         """Context should work with all RunType values."""
         for run_type in RunType:
             ctx = PipelineContext(
@@ -99,8 +101,12 @@ class TestPipelineContextEquality:
         run_id = RunID(uuid4())
         logger = MagicMock()
 
-        ctx1 = PipelineContext(run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger)
-        ctx2 = PipelineContext(run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger)
+        ctx1 = PipelineContext(
+            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger
+        )
+        ctx2 = PipelineContext(
+            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger
+        )
 
         assert ctx1 == ctx2
 
@@ -108,8 +114,12 @@ class TestPipelineContextEquality:
         """Contexts with different run_id should not be equal."""
         logger = MagicMock()
 
-        ctx1 = PipelineContext(run_id=RunID(uuid4()), run_type=RunType.INCREMENTAL, logger=logger)
-        ctx2 = PipelineContext(run_id=RunID(uuid4()), run_type=RunType.INCREMENTAL, logger=logger)
+        ctx1 = PipelineContext(
+            run_id=RunID(uuid4()), run_type=RunType.INCREMENTAL, logger=logger
+        )
+        ctx2 = PipelineContext(
+            run_id=RunID(uuid4()), run_type=RunType.INCREMENTAL, logger=logger
+        )
 
         assert ctx1 != ctx2
 
@@ -118,7 +128,9 @@ class TestPipelineContextEquality:
         run_id = RunID(uuid4())
         logger = MagicMock()
 
-        ctx1 = PipelineContext(run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger)
+        ctx1 = PipelineContext(
+            run_id=run_id, run_type=RunType.INCREMENTAL, logger=logger
+        )
         ctx2 = PipelineContext(run_id=run_id, run_type=RunType.BACKFILL, logger=logger)
 
         assert ctx1 != ctx2
