@@ -233,7 +233,7 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
 
     Runs: Static analysis of cli.py
     """
-    cli_file = src_dir / "bioetl" / "cli.py"
+    cli_file = src_dir / "bioetl" / "interfaces" / "cli.py"
     if not cli_file.exists():
         pytest.skip("CLI module not found")
 
