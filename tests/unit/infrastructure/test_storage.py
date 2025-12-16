@@ -124,8 +124,7 @@ class TestBronzeWriter:
 
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
-    @pytest.mark.usefixtures("mock_s3_client")
-    def test_write_bronze_with_no_records(self):
+    def test_write_bronze_with_no_records(self, _mock_s3_client):
         """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(bucket="test-bucket")
         records = []
@@ -208,8 +207,7 @@ class TestDeltaWriter:
         mock_table_instance.merge.assert_called_once()
 
     @pytest.mark.usefixtures("mock_delta_writer")
-    def test_write_silver_empty_records_raises_error(self):
-        """Test empty records raises an error."""
+    def test_write_silver_empty_records_raises_error(self, mock_delta_writer):
         writer = DeltaWriter(base_path="/tmp/delta")
 
         with pytest.raises(ValueError, match="No records to write"):
