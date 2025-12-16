@@ -8,9 +8,10 @@ import signal
 import time
 from typing import TYPE_CHECKING, Any
 
+from prefect import flow
+
 from bioetl.config import get_settings
 from bioetl.domain.types import RunType
-from prefect import flow
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline

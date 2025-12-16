@@ -148,14 +148,13 @@ class PubChemClient:
                     yield self._compound_to_dict(compound)
                     fetched += 1
                 current_cid += batch_size
-            except Exception as e:
+            except Exception:
                 logger.error(
                     "PubChem compound batch fetch failed",
+                    exc_info=True,
                     extra={
                         "cid_range_start": current_cid,
                         "cid_range_end": current_cid + batch_size,
-                        "error": str(e),
-                        "error_type": type(e).__name__,
                     },
                 )
                 if get_settings().strict_error_handling:

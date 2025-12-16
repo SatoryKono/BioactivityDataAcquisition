@@ -16,6 +16,7 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
+
 from bioetl.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
@@ -195,15 +196,11 @@ class UniProtClient:
                 self.http_client.get, "/uniprotkb/search", params=params
             )
             return await self._process_protein_response(response)
-        except Exception as e:
+        except Exception:
             logger.error(
                 "UniProt protein fetch failed",
-                extra={
-                    "query": query,
-                    "cursor": cursor,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                },
+                exc_info=True,
+                extra={"query": query, "cursor": cursor},
             )
             if get_settings().strict_error_handling:
                 raise
@@ -279,14 +276,11 @@ class UniProtClient:
                     }
                     fetched += 1
 
-        except Exception as e:
+        except Exception:
             logger.warning(
                 "UniProt feature fetch failed",
-                extra={
-                    "accession": query,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                },
+                exc_info=True,
+                extra={"accession": query},
             )
             if get_settings().strict_error_handling:
                 raise
@@ -336,14 +330,11 @@ class UniProtClient:
                     yield seq_record
                     fetched += 1
 
-        except Exception as e:
+        except Exception:
             logger.warning(
                 "UniProt sequence fetch failed",
-                extra={
-                    "query": query,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                },
+                exc_info=True,
+                extra={"query": query},
             )
             if get_settings().strict_error_handling:
                 raise
