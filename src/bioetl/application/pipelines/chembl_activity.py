@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import UTC
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.pipeline.base import BasePipeline
+from bioetl.application.core.base import BasePipeline
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
 
