@@ -290,10 +290,6 @@ def test_env_var_access_only_in_config(src_dir: Path):
 
 
 # --- REQ-ARCH-CLI-001 ---
-@pytest.mark.xfail(
-    reason="CLI has direct infrastructure imports - architectural debt to be refactored",
-    strict=False,
-)
 def test_cli_no_direct_infrastructure_imports(src_dir: Path):
     """CLI module must not import directly from infrastructure adapters.
 
