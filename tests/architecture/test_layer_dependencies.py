@@ -504,18 +504,11 @@ def test_application_layer_no_orchestration_imports(src_dir: Path) -> None:
     )
 
 
-@pytest.mark.xfail(
-    reason="Tech debt: base.py imports NoOpMetrics from infrastructure. TODO: use DI",
-    strict=False,
-)
 def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
     """Application layer must not import from infrastructure.
 
     REQ-ARCH-APP-002: Application layer depends on domain ports,
     not concrete infrastructure implementations.
-
-    Current violations (roadmap for refactoring):
-    - base.py imports NoOpMetrics from infrastructure
     """
     application_path = src_dir / "bioetl" / "application"
     if not application_path.exists():

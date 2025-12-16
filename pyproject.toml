@@ -112,6 +112,8 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
+    # Pytest cleanup warnings (sockets/event loops not closed during teardown)
+    "ignore::pytest.PytestUnraisableExceptionWarning",
 ]
 
 # ============ COVERAGE ============
