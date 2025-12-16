@@ -23,8 +23,9 @@ from pathlib import Path
 from typing import Any
 
 import zstandard as zstd
-
 from bioetl.domain.types import BatchID
+from bioetl.infrastructure.storage.exceptions import BucketNotFoundError, UploadError
+from botocore.exceptions import ClientError
 
 
 class BronzeWriter:
@@ -112,7 +113,8 @@ class BronzeWriter:
 
         Raises:
             ValueError: If records iterator is empty
-            Exception: S3 upload errors
+            BucketNotFoundError: If the S3 bucket does not exist.
+            UploadError: If the upload to S3 fails for other reasons.
         """
         # Generate S3 key (path)
         date_str = date.strftime("%Y-%m-%d")
@@ -127,19 +129,25 @@ class BronzeWriter:
             raise ValueError("No records to write")
 
         # Upload to S3 (atomic operation)
-        self.s3_client.put_object(
-            Bucket=self.bucket,
-            Key=s3_key,
-            Body=compressed_data,
-            ContentType="application/zstd",
-            Metadata={
-                "provider": provider,
-                "entity": entity,
-                "batch_id": str(batch_id),
-                "ingestion_date": date_str,
-                "format_version": "v1",
-            },
-        )
+        try:
+            self.s3_client.put_object(
+                Bucket=self.bucket,
+                Key=s3_key,
+                Body=compressed_data,
+                ContentType="application/zstd",
+                Metadata={
+                    "provider": provider,
+                    "entity": entity,
+                    "batch_id": str(batch_id),
+                    "ingestion_date": date_str,
+                    "format_version": "v1",
+                },
+            )
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "")
+            if error_code == "NoSuchBucket":
+                raise BucketNotFoundError(self.bucket) from e
+            raise UploadError(s3_key, str(e)) from e
 
         return Path(s3_key)
 
