@@ -19,7 +19,6 @@ import httpx
 from bioetl.infrastructure.adapters.http.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerOpenError,
-    is_circuit_breaker_error,
 )
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
@@ -62,7 +61,7 @@ class RetryConfig:
 
     def calculate_delay(self, attempt: int) -> float:
         """Calculate delay for given attempt number (0-indexed)."""
-        delay = self.base_delay * (self.multiplier**attempt)
+        delay = self.base_delay * (self.multiplier ** attempt)
         delay = min(delay, self.max_delay)
         # Add jitter
         jitter_range = delay * self.jitter
@@ -147,6 +146,18 @@ class UnifiedHTTPClient:
             raise RuntimeError(msg)
         return self._client
 
+    async def _handle_retry_delay(self, attempt: int, response: httpx.Response | None = None) -> None:
+        """Calculate and sleep for the appropriate retry delay."""
+        delay = self.retry_config.calculate_delay(attempt)
+        if response:
+            retry_after = response.headers.get("Retry-After")
+            if retry_after:
+                try:
+                    delay = float(retry_after)
+                except ValueError:
+                    pass  # Use default delay
+        await asyncio.sleep(delay)
+
     async def _request_with_retry(
         self,
         method: str,
@@ -159,50 +170,29 @@ class UnifiedHTTPClient:
 
         for attempt in range(self.retry_config.max_attempts):
             try:
-                # Wait for rate limiter
                 await self.rate_limiter.acquire()
-
-                # Make request through circuit breaker
                 response = await self.circuit_breaker.call(
                     client.request, method, url, **kwargs
                 )
 
-                # Check for retryable status codes
                 if _is_retryable_status(response.status_code):
-                    # Handle Retry-After header
-                    retry_after = response.headers.get("Retry-After")
-                    if retry_after:
-                        try:
-                            delay = float(retry_after)
-                        except ValueError:
-                            delay = self.retry_config.calculate_delay(attempt)
-                    else:
-                        delay = self.retry_config.calculate_delay(attempt)
-
                     if attempt < self.retry_config.max_attempts - 1:
-                        await asyncio.sleep(delay)
+                        await self._handle_retry_delay(attempt, response)
                         continue
 
                 response.raise_for_status()
                 return response
 
             except CircuitBreakerOpenError:
-                # Don't retry if circuit is open
                 raise
 
             except Exception as exc:
                 last_error = exc
-
-                # Update circuit breaker on failures
-                if is_circuit_breaker_error(exc):
-                    pass  # Already handled by circuit breaker
-
                 if not _is_retryable_error(exc):
                     raise
 
                 if attempt < self.retry_config.max_attempts - 1:
-                    delay = self.retry_config.calculate_delay(attempt)
-                    await asyncio.sleep(delay)
+                    await self._handle_retry_delay(attempt)
 
         raise RetryExhaustedError(url, self.retry_config.max_attempts, last_error)
 

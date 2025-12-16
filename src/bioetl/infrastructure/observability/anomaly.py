@@ -192,85 +192,50 @@ class AnomalyDetector:
 
         self._thresholds[metric_name] = (min_val, max_val)
 
-    def detect(
-        self,
-        metric_name: str,
-        current_value: float,
-    ) -> Anomaly | None:
-        """Detect anomaly in current value.
-
-        Args:
-            metric_name: Name of metric
-            current_value: Current observed value
-
-        Returns:
-            Anomaly object if detected, None otherwise
-        """
-        # Check absolute thresholds first
+    def _check_thresholds(self, metric_name: str, current_value: float) -> Anomaly | None:
+        """Check if the current value exceeds the configured thresholds."""
         if metric_name in self._thresholds:
             min_val, max_val = self._thresholds[metric_name]
-            if current_value < min_val or current_value > max_val:
-                return self._create_threshold_anomaly(
-                    metric_name,
-                    current_value,
-                    min_val,
-                    max_val,
-                )
+            if not (min_val <= current_value <= max_val):
+                return self._create_threshold_anomaly(metric_name, current_value, min_val, max_val)
+        return None
 
-        # Check statistical anomaly
+    def _get_z_score(self, metric_name: str, current_value: float) -> tuple[float, float, float] | None:
+        """Calculate the Z-score for the current value."""
         baseline = self._baselines.get(metric_name, [])
         if len(baseline) < self.min_baseline_samples:
-            # Not enough baseline data
             return None
 
-        # Calculate statistics
         mean = statistics.mean(baseline)
+        stddev = statistics.stdev(baseline) if len(baseline) >= 2 else 0.0
 
-        # Need at least 2 samples for stdev
-        if len(baseline) < 2:
-            stddev = 0.0
-        else:
-            stddev = statistics.stdev(baseline)
-
-        # If stddev is 0, use percentage-based detection
         if stddev == 0:
             if mean == 0:
-                # Can't detect anomaly without baseline
                 return None
-            # Use 50% deviation as threshold
             deviation_pct = abs(current_value - mean) / abs(mean)
-            if deviation_pct < 0.5:
-                return None
-            # Convert to pseudo z-score
-            z_score = deviation_pct * 2  # Scale to similar range
-        else:
-            # Calculate Z-score
-            z_score = abs(current_value - mean) / stddev
+            return (deviation_pct * 2, mean, stddev) if deviation_pct >= 0.5 else None
 
-        # Check if anomalous
+        z_score = abs(current_value - mean) / stddev
+        return (z_score, mean, stddev)
+
+    def detect(self, metric_name: str, current_value: float) -> Anomaly | None:
+        """Detect anomaly in current value."""
+        if anomaly := self._check_thresholds(metric_name, current_value):
+            return anomaly
+
+        z_score_data = self._get_z_score(metric_name, current_value)
+        if not z_score_data:
+            return None
+
+        z_score, mean, stddev = z_score_data
         if z_score < self.z_score_threshold:
             return None
 
-        # Determine anomaly type
-        if current_value > mean:
-            anomaly_type = AnomalyType.SPIKE
-        else:
-            anomaly_type = AnomalyType.DROP
-
-        # Determine severity based on Z-score
-        if z_score >= 5.0:
-            severity = AnomalySeverity.CRITICAL
-        elif z_score >= 4.0:
-            severity = AnomalySeverity.HIGH
-        elif z_score >= 3.0:
-            severity = AnomalySeverity.MEDIUM
-        else:
-            severity = AnomalySeverity.LOW
-
+        anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
+        severity = self._get_severity(z_score)
         message = (
-            f"{anomaly_type.value.capitalize()} detected: "
-            f"value {current_value:.2f} is {z_score:.2f} std deviations "
-            f"from baseline mean {mean:.2f}"
+            f"{anomaly_type.value.capitalize()} detected: value {current_value:.2f} is "
+            f"{z_score:.2f} std deviations from baseline mean {mean:.2f}"
         )
 
         return Anomaly(
@@ -284,6 +249,13 @@ class AnomalyDetector:
             timestamp=datetime.now(timezone.utc),
             message=message,
         )
+
+    def _get_severity(self, z_score: float) -> AnomalySeverity:
+        """Determine the severity of an anomaly based on its Z-score."""
+        if z_score >= 5.0: return AnomalySeverity.CRITICAL
+        if z_score >= 4.0: return AnomalySeverity.HIGH
+        if z_score >= 3.0: return AnomalySeverity.MEDIUM
+        return AnomalySeverity.LOW
 
     def _create_threshold_anomaly(
         self,

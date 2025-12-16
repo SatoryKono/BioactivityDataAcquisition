@@ -120,86 +120,55 @@ class PubChemClient:
                 f"Supported: compound, substance, assay"
             )
 
+    async def _fetch_compounds_incremental(
+        self, watermark: Watermark, limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds incrementally using a watermark."""
+        fetched = 0
+        start_cid = int(watermark) if isinstance(watermark, (int, str)) else 1
+        batch_size = 100
+        current_cid = start_cid
+
+        while not limit or fetched < limit:
+            await self.rate_limiter.acquire()
+            cid_batch = list(range(current_cid, current_cid + batch_size))
+            try:
+                compounds = await self.circuit_breaker.call(
+                    self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+                )
+                if not compounds:
+                    break
+                for compound in compounds:
+                    if limit and fetched >= limit:
+                        break
+                    yield self._compound_to_dict(compound)
+                    fetched += 1
+                current_cid += batch_size
+            except Exception:
+                current_cid += batch_size
+                continue
+
     async def _fetch_compounds(
         self,
         query: str | None,
         watermark: Watermark | None,
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds from PubChem.
-
-        Args:
-            query: Search query (name, formula, SMILES)
-            watermark: Last CID for incremental load
-            limit: Max records
-
-        Yields:
-            Compound records
-        """
-        fetched = 0
-
+        """Fetch compounds from PubChem."""
         if query:
-            # Search by query
             await self.rate_limiter.acquire()
-
             compounds = await self.circuit_breaker.call(
-                self._run_in_executor,
-                pcp.get_compounds,
-                query,
-                "name",
+                self._run_in_executor, pcp.get_compounds, query, "name"
             )
-
-            for compound in compounds or []:
-                if limit and fetched >= limit:
+            for i, compound in enumerate(compounds or []):
+                if limit and i >= limit:
                     break
-
                 yield self._compound_to_dict(compound)
-                fetched += 1
-
         elif watermark:
-            # Incremental load by CID range
-            start_cid = int(watermark) if isinstance(watermark, (int, str)) else 1
-
-            # Fetch in batches of 100 CIDs
-            batch_size = 100
-            current_cid = start_cid
-
-            while True:
-                if limit and fetched >= limit:
-                    break
-
-                await self.rate_limiter.acquire()
-
-                # Get batch of CIDs
-                cid_batch = list(range(current_cid, current_cid + batch_size))
-
-                try:
-                    compounds = await self.circuit_breaker.call(
-                        self._run_in_executor,
-                        pcp.get_compounds,
-                        cid_batch,
-                        "cid",
-                    )
-
-                    if not compounds:
-                        break
-
-                    for compound in compounds:
-                        if limit and fetched >= limit:
-                            break
-
-                        yield self._compound_to_dict(compound)
-                        fetched += 1
-
-                    current_cid += batch_size
-
-                except Exception:
-                    # Skip failed batch, continue with next
-                    current_cid += batch_size
-                    continue
-
+            async for compound in self._fetch_compounds_incremental(watermark, limit):
+                yield compound
         else:
-            raise ValueError("Either query or watermark must be provided")
+            raise ValueError("Either query or watermark must be provided for compounds")
 
     async def _fetch_substances(
         self,
