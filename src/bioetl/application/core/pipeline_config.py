@@ -44,6 +44,7 @@ class PipelineConfig:
     gold_table: str | None = None
     batch_size: int = 100
     checkpoint_interval: int = 1000
+    heartbeat_interval: float = 20.0
 
     def __post_init__(self) -> None:
         """Validate configuration on creation."""

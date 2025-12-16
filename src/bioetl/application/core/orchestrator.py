@@ -21,7 +21,6 @@ from bioetl.application.core.pipeline_config import (
 )
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.infrastructure.config import get_settings
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -202,8 +201,8 @@ class PipelineOrchestrator:
 
     async def _heartbeat_loop(self, lock_key: str, exclusive: bool) -> None:
         """Background task to maintain lock via heartbeat."""
-        settings = get_settings()
-        interval = settings.pipeline.heartbeat_interval
+        # Use heartbeat_interval from configuration
+        interval = self._config.heartbeat_interval
 
         while not self.shutdown_signal.is_requested:
             await asyncio.sleep(interval)

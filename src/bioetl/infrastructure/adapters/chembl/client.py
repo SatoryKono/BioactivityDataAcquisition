@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 if TYPE_CHECKING:
@@ -54,10 +55,11 @@ ENTITY_PLURAL = {
 
 
 @dataclass
-class ChemblAdapter:
+class ChemblAdapter(PaginatedFetcherMixin):
     """ChEMBL data source adapter.
 
     Implements DataSourcePort for fetching data from ChEMBL database.
+    Uses PaginatedFetcherMixin for offset-based pagination.
 
     Args:
         http_client: UnifiedHTTPClient instance
@@ -141,36 +143,47 @@ class ChemblAdapter:
             ValueError: On unknown entity type
         """
         url = self._get_resource_url(entity_type)
+        resource = ENTITY_MAPPING.get(entity_type, entity_type)
+        plural_key = ENTITY_PLURAL.get(resource, resource + "s")
         offset = 0
-        total_fetched = 0
 
-        while True:
-            params = self._build_params(entity_type, watermark, offset)
+        initial_params = self._build_params(entity_type, watermark, offset)
 
-            try:
-                response = await self.http_client.get(url, params=params)
-                records, has_next = self._process_response(response, entity_type)
+        def extract_items(response: Response) -> list[dict[str, Any]]:
+            data = response.json()
+            return data.get(plural_key, [])
 
-                if not records:
-                    break
+        def next_page_params(
+            response: Response, current_params: dict[str, Any]
+        ) -> dict[str, Any] | None:
+            data = response.json()
+            page_meta = data.get("page_meta", {})
+            if not page_meta.get("next"):
+                return None
 
-                for record in records:
-                    yield record
-                    total_fetched += 1
-                    if limit and total_fetched >= limit:
-                        return
+            # Update offset
+            new_params = current_params.copy()
+            new_params["offset"] = current_params["offset"] + self.batch_size
+            return new_params
 
-                self._consecutive_errors = 0
+        try:
+            async for record in self.fetch_paginated(
+                url=url,
+                initial_params=initial_params,
+                extract_items=extract_items,
+                next_page_params=next_page_params,
+                limit=limit,
+            ):
+                self._consecutive_errors = 0  # Reset on success
+                yield record
 
-                if not has_next:
-                    break
-
-                offset += self.batch_size
-
-            except Exception as e:
-                self._consecutive_errors += 1
-                self._update_health()
+        except Exception as e:
+            self._consecutive_errors += 1
+            self._update_health()
+            # Wrap generic errors in domain exception
+            if not isinstance(e, ChemblApiError):
                 raise ChemblApiError(str(e)) from e
+            raise
 
     def fetch_sync(
         self,
