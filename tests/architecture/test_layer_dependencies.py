@@ -257,14 +257,14 @@ def test_domain_layer_uses_protocol_for_ports(src_dir: Path) -> None:
         content = f.read()
 
     # Check for Protocol usage
-    assert "from typing" in content and "Protocol" in content, (
-        "Domain ports should use typing.Protocol for interface definitions"
-    )
+    assert (
+        "from typing" in content and "Protocol" in content
+    ), "Domain ports should use typing.Protocol for interface definitions"
 
     # Check that Protocol classes are defined
-    assert "class" in content and "(Protocol)" in content, (
-        "Port interfaces should be classes inheriting from Protocol"
-    )
+    assert (
+        "class" in content and "(Protocol)" in content
+    ), "Port interfaces should be classes inheriting from Protocol"
 
 
 def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
@@ -303,6 +303,6 @@ def test_cyclomatic_complexity_domain_layer(src_dir: Path) -> None:
         except SyntaxError:
             continue
 
-    assert not violations, (
-        f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
-    )
+    assert (
+        not violations
+    ), f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
