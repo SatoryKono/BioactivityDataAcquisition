@@ -34,117 +34,41 @@ META_FIELDS = {
 }
 
 
-def normalize_for_hash(record: dict[str, Any]) -> dict[str, Any]:
-    """Normalize record before hashing to ensure consistency.
-
-    Requirements:
-    - REQ-ID-004: NaN/Inf → null
-    - REQ-ID-003: Floats → round(10)
-    - REQ-ID-005: Dates → ISO format (YYYY-MM-DD)
-    - REQ-ID-006: Strings → strip()
-    - REQ-ID-007: Exclude meta-fields
-
-    Args:
-        record: Raw record dictionary
-
-    Returns:
-        Normalized record ready for canonical JSON
-
-    Example:
-        >>> normalize_for_hash({
-        ...     "value": 3.141592653589793,
-        ...     "date": datetime(2025, 12, 15),
-        ...     "name": "  aspirin  ",
-        ...     "_run_id": "uuid-123"
-        ... })
-        {'value': 3.1415926536, 'date': '2025-12-15', 'name': 'aspirin'}
-    """
-    normalized = {}
-
-    for key, value in record.items():
-        # Skip meta-fields (REQ-ID-007)
-        if key in META_FIELDS:
-            continue
-
-        # Normalize value
-        normalized[key] = _normalize_value(value)
-
-    return normalized
-
-
 def _normalize_float(value: float) -> float | None:
     """Normalize a float value, handling NaN/Inf."""
-    # NaN/Inf → null (REQ-ID-004)
     if math.isnan(value) or math.isinf(value):
         return None
-    # Round to 10 decimals (REQ-ID-003)
     return round(value, 10)
-
-
-def _normalize_date(value: date) -> str:
-    """Normalize a date value to ISO format."""
-    return value.isoformat()
-
-
-def _normalize_datetime(value: datetime) -> str:
-    """Normalize a datetime value to ISO date format."""
-    return value.date().isoformat()
-
-
-def _normalize_mapping(value: Mapping) -> dict:
-    """Recursively normalize a mapping."""
-    return {k: _normalize_value(v) for k, v in value.items()}
-
-
-def _normalize_sequence(value: Sequence) -> list:
-    """Recursively normalize a sequence."""
-    return [_normalize_value(v) for v in value]
-
-
-# Type dispatch table for normalization (reduces cyclomatic complexity)
-_NORMALIZERS: dict[type, Any] = {
-    float: _normalize_float,
-    datetime: _normalize_datetime,
-    date: _normalize_date,
-}
 
 
 def _normalize_value(value: Any) -> Any:
     """Normalize a single value using type dispatch."""
-    # Check exact type match first
-    normalizer = _NORMALIZERS.get(type(value))
-    if normalizer is not None:
-        return normalizer(value)
-
-    # Handle strings (strip whitespace)
+    if isinstance(value, float):
+        return _normalize_float(value)
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
     if isinstance(value, str):
         return value.strip()
-
-    # Handle nested structures
     if isinstance(value, Mapping):
-        return _normalize_mapping(value)
+        return {k: _normalize_value(v) for k, v in value.items()}
     if isinstance(value, Sequence):
-        return _normalize_sequence(value)
-
+        return [_normalize_value(v) for v in value]
     return value
 
 
+def normalize_for_hash(record: dict[str, Any]) -> dict[str, Any]:
+    """Normalize record before hashing to ensure consistency."""
+    return {
+        key: _normalize_value(value)
+        for key, value in record.items()
+        if key not in META_FIELDS
+    }
+
+
 def canonical_json_dumps(obj: dict[str, Any]) -> str:
-    """Convert object to canonical JSON representation.
-
-    Requirements:
-    - REQ-ID-002: sort_keys=True, separators=(',', ':'), ensure_ascii=True
-
-    Args:
-        obj: Normalized dictionary
-
-    Returns:
-        Canonical JSON string
-
-    Example:
-        >>> canonical_json_dumps({"b": 2, "a": 1})
-        '{"a":1,"b":2}'
-    """
+    """Convert object to canonical JSON representation."""
     return json.dumps(
         obj,
         sort_keys=True,
@@ -154,34 +78,11 @@ def canonical_json_dumps(obj: dict[str, Any]) -> str:
 
 
 def generate_content_hash(record: dict[str, Any], provider: str) -> ContentHash:
-    """Generate SHA256 content hash for record versioning.
-
-    Requirements:
-    - REQ-ID-001: sha256(provider + canonical_json(record))
-
-    Args:
-        record: Raw record dictionary
-        provider: Provider name (e.g., 'chembl', 'pubchem')
-
-    Returns:
-        SHA256 hex digest as ContentHash
-
-    Example:
-        >>> record = {"id": "CHEMBL123", "value": 5.5}
-        >>> hash_val = generate_content_hash(record, "chembl")
-        >>> len(hash_val)  # SHA256 hex = 64 chars
-        64
-    """
-    # Normalize record
+    """Generate SHA256 content hash for record versioning."""
     normalized = normalize_for_hash(record)
-
-    # Canonical JSON
     canonical = canonical_json_dumps(normalized)
-
-    # Hash: sha256(provider + canonical_json)
     data = f"{provider}{canonical}"
     hash_digest = hashlib.sha256(data.encode("utf-8")).hexdigest()
-
     return ContentHash(hash_digest)
 
 
@@ -190,67 +91,17 @@ def generate_entity_id(
     provider: str,
     id_field: str | None = None,
 ) -> EntityID:
-    """Generate stable entity ID (business key).
-
-    Strategy (RULES.md §2.8):
-    - If source provides stable ID: use as-is (e.g., chembl_id, pubchem_cid)
-    - Otherwise: use content hash
-
-    Args:
-        record: Raw record
-        provider: Provider name
-        id_field: Field containing stable ID (None = use content hash)
-
-    Returns:
-        Entity ID
-
-    Example:
-        >>> # With stable ID
-        >>> generate_entity_id({"chembl_id": "CHEMBL123"}, "chembl", "chembl_id")
-        EntityID('chembl:CHEMBL123')
-
-        >>> # Without stable ID (fallback to hash)
-        >>> generate_entity_id({"name": "aspirin"}, "custom", None)
-        EntityID('custom:a3f2...')  # Content hash
-    """
+    """Generate stable entity ID (business key)."""
     if id_field and id_field in record:
-        # Use stable ID from source
         stable_id = str(record[id_field])
         return EntityID(f"{provider}:{stable_id}")
-
-    # Fallback: content hash
     content_hash = generate_content_hash(record, provider)
-    return EntityID(f"{provider}:{content_hash[:16]}")  # First 16 chars
+    return EntityID(f"{provider}:{content_hash[:16]}")
 
 
 # =============================================================================
 # Schema Drift Detection (RULES.md §2.2)
 # =============================================================================
-
-
-def _build_drift_details(
-    added: list[str],
-    removed: list[str],
-    missing_required: list[str] | None = None,
-) -> dict[str, Any]:
-    """Build drift details dictionary."""
-    details: dict[str, Any] = {
-        "added_fields": added,
-        "removed_fields": removed,
-        "field_count_delta": len(added) - len(removed),
-    }
-    if missing_required:
-        details["missing_required"] = missing_required
-    return details
-
-
-def _determine_drift_level(added_count: int, missing_required: set[str]) -> DriftLevel:
-    """Determine drift level based on changes."""
-    if missing_required:
-        return DriftLevel.CRITICAL
-    if added_count > 3:
-        return DriftLevel.WARN
-    return DriftLevel.INFO
 
 
 def detect_schema_drift(
@@ -261,11 +112,21 @@ def detect_schema_drift(
     """Detect schema drift between two schemas."""
     added = sorted(new_schema - old_schema)
     removed = sorted(old_schema - new_schema)
-    missing = (required_fields or set()) & set(removed)
+    missing_required = sorted((required_fields or set()) & set(removed))
 
-    level = _determine_drift_level(len(added), missing)
-    missing_list = sorted(missing) if missing else None
-    details = _build_drift_details(added, removed, missing_list)
+    level = DriftLevel.INFO
+    if missing_required:
+        level = DriftLevel.CRITICAL
+    elif len(added) > 3:
+        level = DriftLevel.WARN
+
+    details = {
+        "added_fields": added,
+        "removed_fields": removed,
+        "field_count_delta": len(added) - len(removed),
+    }
+    if missing_required:
+        details["missing_required"] = missing_required
 
     return level, details
 
@@ -276,19 +137,7 @@ def detect_schema_drift(
 
 
 def calculate_dq_score(valid_count: int, total_count: int) -> float:
-    """Calculate data quality score (0.0 to 1.0).
-
-    Args:
-        valid_count: Number of valid records
-        total_count: Total number of records
-
-    Returns:
-        Quality score (1.0 = perfect, 0.0 = all invalid)
-
-    Example:
-        >>> calculate_dq_score(95, 100)
-        0.95
-    """
+    """Calculate data quality score (0.0 to 1.0)."""
     if total_count == 0:
         return 1.0
     return valid_count / total_count
@@ -300,36 +149,11 @@ def exceeds_threshold(
     soft_threshold: float = 0.05,
     hard_threshold: float = 0.20,
 ) -> tuple[bool, bool]:
-    """Check if error rate exceeds thresholds.
-
-    Requirements:
-    - REQ-THRESHOLD-001: >5% → Warning (soft)
-    - REQ-THRESHOLD-002: >20% → Fail (hard)
-
-    Args:
-        error_count: Number of errors
-        total_count: Total records
-        soft_threshold: Warning threshold (default 5%)
-        hard_threshold: Critical threshold (default 20%)
-
-    Returns:
-        (soft_exceeded, hard_exceeded)
-
-    Example:
-        >>> exceeds_threshold(6, 100)  # 6% error rate
-        (True, False)  # Soft threshold exceeded
-
-        >>> exceeds_threshold(25, 100)  # 25% error rate
-        (True, True)  # Both thresholds exceeded
-    """
+    """Check if error rate exceeds thresholds."""
     if total_count == 0:
-        return (False, False)
-
+        return False, False
     error_rate = error_count / total_count
-    soft_exceeded = error_rate > soft_threshold
-    hard_exceeded = error_rate > hard_threshold
-
-    return (soft_exceeded, hard_exceeded)
+    return error_rate > soft_threshold, error_rate > hard_threshold
 
 
 def detect_hash_collision(
@@ -337,27 +161,5 @@ def detect_hash_collision(
     source_record_id: str,
     existing_source_id: str | None,
 ) -> bool:
-    """Detect content hash collision.
-
-    Requirements:
-    - REQ-ID-008: Log both records if collision detected
-
-    Args:
-        content_hash: Generated content hash
-        source_record_id: ID from source record
-        existing_source_id: ID from existing record with same hash
-
-    Returns:
-        True if collision detected (different source IDs, same hash)
-
-    Example:
-        >>> detect_hash_collision("abc123", "id_1", "id_2")
-        True  # Collision: same hash, different IDs
-
-        >>> detect_hash_collision("abc123", "id_1", "id_1")
-        False  # No collision: same record
-    """
-    if existing_source_id is None:
-        return False
-
-    return source_record_id != existing_source_id
+    """Detect content hash collision."""
+    return existing_source_id is not None and source_record_id != existing_source_id
