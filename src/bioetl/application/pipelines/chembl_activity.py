@@ -37,12 +37,13 @@ class ChEMBLActivityPipeline(BasePipeline):
         >>> await pipeline.run()
     """
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize ChEMBL Activity pipeline."""
         super().__init__(
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
+            *args,
             **kwargs,
         )
 
@@ -167,7 +168,11 @@ class ChEMBLActivityPipeline(BasePipeline):
         if standard_type not in preferred_types:
             return False
 
-        return not record.get("data_validity_comment")
+        # Exclude if data validity issues
+        if record.get("data_validity_comment"):
+            return False
+
+        return True
 
     def extract_watermark(self, record: dict[str, Any]) -> Watermark:
         """Extract watermark from record.
@@ -185,9 +190,9 @@ class ChEMBLActivityPipeline(BasePipeline):
             return Watermark(str(activity_id))
 
         # Fallback to timestamp
-        from datetime import UTC, datetime
+        from datetime import datetime, timezone
 
-        return Watermark(datetime.now(UTC))
+        return Watermark(datetime.now(timezone.utc))
 
 
 class ChEMBLActivityPipelineFactory:
@@ -208,7 +213,12 @@ class ChEMBLActivityPipelineFactory:
     async def create(
         run_type: Any,  # RunType
         resume: bool = False,
-        # Adapter configurations
+        # Injected adapters (optional)
+        checkpoint: Any | None = None,
+        quarantine: Any | None = None,
+        lock: Any | None = None,
+        # Adapter configurations (legacy)
+        chembl_url: str = "https://www.ebi.ac.uk/chembl/api/data",
         s3_bucket_bronze: str = "bioetl-bronze",
         s3_bucket_silver: str = "bioetl-silver",
         s3_bucket_checkpoints: str = "bioetl-checkpoints",
@@ -224,6 +234,10 @@ class ChEMBLActivityPipelineFactory:
         Args:
             run_type: Type of run (incremental, backfill, rebuild)
             resume: Resume from checkpoint if available
+            checkpoint: Injected checkpoint service
+            quarantine: Injected quarantine service
+            lock: Injected lock service
+            chembl_url: ChEMBL API base URL
             s3_bucket_bronze: Bronze bucket name
             s3_bucket_silver: Silver bucket name
             s3_bucket_checkpoints: Checkpoints bucket name
@@ -302,24 +316,27 @@ class ChEMBLActivityPipelineFactory:
         storage = StorageAdapter(bronze_writer, silver_writer, gold_writer)
 
         # Lock (Redis)
-        import redis.asyncio as aioredis
+        if lock is None:
+            import redis.asyncio as aioredis
 
-        redis_client = aioredis.Redis(host=redis_host, port=redis_port)
-        lock = RedisDistributedLock(redis_client=redis_client)
+            redis_client = aioredis.Redis(host=redis_host, port=redis_port)
+            lock = RedisDistributedLock(redis_client=redis_client)
 
         # Checkpoint (S3)
-        checkpoint = S3Checkpoint(
-            bucket=s3_bucket_checkpoints,
-            endpoint_url=aws_endpoint_url,
-            access_key=aws_access_key,
-            secret_key=aws_secret_key,
-        )
+        if checkpoint is None:
+            checkpoint = S3Checkpoint(
+                bucket=s3_bucket_checkpoints,
+                endpoint_url=aws_endpoint_url,
+                access_key=aws_access_key,
+                secret_key=aws_secret_key,
+            )
 
         # Quarantine
-        quarantine = UnifiedQuarantine(
-            base_path=f"s3://{s3_bucket_silver}/common/quarantine",
-            storage_options=storage_options if aws_endpoint_url else None,
-        )
+        if quarantine is None:
+            quarantine = UnifiedQuarantine(
+                base_path=f"s3://{s3_bucket_silver}/common/quarantine",
+                storage_options=storage_options if aws_endpoint_url else None,
+            )
 
         # Create pipeline
         return ChEMBLActivityPipeline(
