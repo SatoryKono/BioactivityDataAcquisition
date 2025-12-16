@@ -29,6 +29,7 @@ def mock_pipeline():
         lock=AsyncMock(),
         checkpoint=MagicMock(),
         quarantine=MagicMock(),
+        logger=MagicMock(),
         resume=False,
     )
     pipeline.orchestrator = AsyncMock()
