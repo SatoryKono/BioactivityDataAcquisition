@@ -21,10 +21,6 @@ Architecture:
 from datetime import datetime
 from typing import Any
 
-from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
-from pyarrow import ArrowTypeError
-
 from bioetl.infrastructure.storage.exceptions import (
     MergeConflictError,
     SchemaValidationError,
@@ -32,6 +28,9 @@ from bioetl.infrastructure.storage.exceptions import (
 from bioetl.infrastructure.storage.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
 )
+from deltalake import DeltaTable, write_deltalake
+from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
+from pyarrow import ArrowTypeError
 
 
 class DeltaWriter:

@@ -22,10 +22,9 @@ from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from bioetl.domain.types import BatchID, ContentHash, DQStatus
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
-
-from bioetl.domain.types import BatchID, ContentHash, DQStatus
 
 
 def _quote_literal(value: Any) -> str:
