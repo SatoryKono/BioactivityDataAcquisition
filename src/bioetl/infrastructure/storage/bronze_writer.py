@@ -23,9 +23,10 @@ from pathlib import Path
 from typing import Any
 
 import zstandard as zstd
+from botocore.exceptions import ClientError
+
 from bioetl.domain.types import BatchID
 from bioetl.infrastructure.storage.exceptions import BucketNotFoundError, UploadError
-from botocore.exceptions import ClientError
 
 
 class BronzeWriter:

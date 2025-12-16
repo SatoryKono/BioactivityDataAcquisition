@@ -5,9 +5,10 @@ from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
+from botocore.exceptions import ClientError
+
 from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from botocore.exceptions import ClientError
 
 
 @pytest.fixture
