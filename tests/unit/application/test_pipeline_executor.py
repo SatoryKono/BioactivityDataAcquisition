@@ -25,16 +25,19 @@ def mock_base_pipeline():
     # (not a coroutine that wraps it)
     mock_data_source = MagicMock()
 
+    # Storage methods are now async per ADR-0005
+    mock_storage = AsyncMock()
+
     pipeline = ConcretePipeline(
         pipeline_name="test_pipeline",
         provider="test_provider",
         entity_type="test_entity",
         run_type=RunType.INCREMENTAL,
         data_source=mock_data_source,
-        storage=MagicMock(),
+        storage=mock_storage,
         lock=AsyncMock(),
-        checkpoint=MagicMock(),
-        quarantine=MagicMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),  # Use AsyncMock for quarantine as well
         logger=MagicMock(),
         metrics=NoOpMetrics(warn_on_use=False),
         resume=False,

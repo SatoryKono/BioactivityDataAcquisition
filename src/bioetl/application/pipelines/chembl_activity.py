@@ -13,11 +13,28 @@ from datetime import UTC
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.pipeline_config import (
+    PipelineConfig,
+    PipelineRuntimeConfig,
+)
+from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+
+# Default configuration for ChEMBL Activity pipeline
+CHEMBL_ACTIVITY_CONFIG = PipelineConfig(
+    pipeline_name="chembl_activity",
+    provider="chembl",
+    entity_type="activity",
+    primary_keys=["activity_id"],
+    silver_table="chembl.activity",
+    gold_table="chembl.activity_gold",
+    batch_size=100,
+    checkpoint_interval=1000,
+)
 
 
 class ChEMBLActivityPipeline(BasePipeline):
@@ -28,10 +45,19 @@ class ChEMBLActivityPipeline(BasePipeline):
     - Silver: Normalized with entity_id, content_hash, metadata
     - Gold: Filtered high-quality activities (optional)
 
-    Example:
-        >>> from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-        >>> from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-        >>> # ... initialize adapters
+    Example (new API - recommended):
+        >>> from bioetl.application.core import PipelineRuntimeConfig, PipelineServices
+        >>> from bioetl.domain.types import RunType
+        >>> runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+        >>> services = PipelineServices(...)
+        >>> pipeline = ChEMBLActivityPipeline.from_config(
+        ...     config=CHEMBL_ACTIVITY_CONFIG,
+        ...     runtime=runtime,
+        ...     services=services,
+        ... )
+        >>> await pipeline.run()
+
+    Example (legacy API - deprecated):
         >>> pipeline = ChEMBLActivityPipeline(
         ...     run_type=RunType.INCREMENTAL,
         ...     data_source=chembl_adapter,
@@ -40,11 +66,30 @@ class ChEMBLActivityPipeline(BasePipeline):
         ...     checkpoint=s3_checkpoint,
         ...     quarantine=quarantine,
         ... )
-        >>> await pipeline.run()
     """
 
+    @classmethod
+    def create(
+        cls,
+        runtime: PipelineRuntimeConfig,
+        services: PipelineServices,
+        config: PipelineConfig | None = None,
+    ) -> "ChEMBLActivityPipeline":
+        """Create ChEMBL Activity pipeline with decomposed config (new API).
+
+        Args:
+            runtime: Runtime execution parameters.
+            services: Injected I/O port dependencies.
+            config: Pipeline configuration (uses default if None).
+
+        Returns:
+            Configured pipeline instance.
+        """
+        effective_config = config or CHEMBL_ACTIVITY_CONFIG
+        return cls.from_config(effective_config, runtime, services)
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize ChEMBL Activity pipeline."""
+        """Initialize ChEMBL Activity pipeline (legacy API)."""
         super().__init__(
             *args,
             pipeline_name="chembl_activity",
