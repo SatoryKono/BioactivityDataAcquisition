@@ -48,13 +48,10 @@ def executor(mock_base_pipeline):
     return PipelineExecutor(mock_base_pipeline)
 
 
-class AsyncIterator:
-    def __init__(self, data):
-        self.data = data
-
-    async def __aiter__(self):
-        for item in self.data:
-            yield item
+async def async_iter(data):
+    """Async generator helper for tests."""
+    for item in data:
+        yield item
 
 
 @pytest.mark.asyncio
