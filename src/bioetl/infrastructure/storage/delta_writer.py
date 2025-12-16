@@ -21,10 +21,7 @@ Architecture:
 from datetime import datetime
 from typing import Any
 
-from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
-from pyarrow import ArrowTypeError
-
+import pyarrow as pa
 from bioetl.infrastructure.storage.exceptions import (
     MergeConflictError,
     SchemaValidationError,
@@ -32,6 +29,9 @@ from bioetl.infrastructure.storage.exceptions import (
 from bioetl.infrastructure.storage.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
 )
+from deltalake import DeltaTable, write_deltalake
+from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
+from pyarrow import ArrowTypeError
 
 
 class DeltaWriter:
@@ -128,20 +128,21 @@ class DeltaWriter:
 
         # Construct table path
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        arrow_data = pa.Table.from_pylist(records)
 
         try:
             # Load existing table
             dt = DeltaTable(table_path, storage_options=self.storage_options)
 
             # Perform merge/upsert
-            self._merge_records(dt, records, primary_keys)
+            self._merge_records(dt, arrow_data, primary_keys)
 
         except TableNotFoundError:
             # Table doesn't exist, create it
             try:
                 write_deltalake(
                     table_or_uri=table_path,
-                    data=records,
+                    data=arrow_data,
                     mode="append",
                     partition_by=partition_cols,
                     storage_options=self.storage_options,
@@ -150,7 +151,9 @@ class DeltaWriter:
                 raise SchemaValidationError(
                     table_name, errors=[str(schema_exc)]
                 ) from schema_exc
-        except (ArrowTypeError, SchemaMismatchError) as e:
+        except SchemaMismatchError as e:
+            raise SchemaValidationError(table_name, errors=[str(e)]) from e
+        except ArrowTypeError as e:
             raise SchemaValidationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
             # Catch potential merge conflicts
@@ -161,7 +164,7 @@ class DeltaWriter:
     def _merge_records(
         self,
         dt: DeltaTable,
-        records: list[dict[str, Any]],
+        records: pa.Table,
         primary_keys: list[str],
     ) -> None:
         """Merge records into existing Delta table.
@@ -176,14 +179,9 @@ class DeltaWriter:
 
         Args:
             dt: Delta table instance
-            records: New records to merge
+            records: New records to merge as a PyArrow Table
             primary_keys: Keys for matching records
         """
-        import pyarrow as pa
-
-        # Convert records to PyArrow table
-        new_data = pa.Table.from_pylist(records)
-
         # Build merge condition (match on primary keys)
         merge_condition = " AND ".join(
             f"target.{key} = source.{key}" for key in primary_keys
@@ -194,7 +192,7 @@ class DeltaWriter:
         # Only update if new run_type has higher or equal priority
         (
             dt.merge(
-                source=new_data,
+                source=records,
                 predicate=merge_condition,
                 source_alias="source",
                 target_alias="target",
