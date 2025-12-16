@@ -10,7 +10,7 @@ PIPELINE_CONFIG_PATH = Path(__file__).parent.parent / "configs" / "pipelines"
 def get_all_pipeline_configs():
     if not PIPELINE_CONFIG_PATH.exists():
         return []
-    return list(PIPELINE_CONFIG_PATH.glob("*.yaml"))
+    return list(PIPELINE_CONFIG_PATH.glob("**/*.yaml"))
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
