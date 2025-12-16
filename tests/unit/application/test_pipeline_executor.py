@@ -48,9 +48,13 @@ def executor(mock_base_pipeline):
     return PipelineExecutor(mock_base_pipeline)
 
 
-async def async_generator(data):
-    for item in data:
-        yield item
+class AsyncIterator:
+    def __init__(self, data):
+        self.data = data
+
+    async def __aiter__(self):
+        for item in self.data:
+            yield item
 
 
 @pytest.mark.asyncio
@@ -66,7 +70,7 @@ async def test_executor_initialization(executor):
 @pytest.mark.asyncio
 async def test_executor_execute_happy_path(executor, mock_base_pipeline):
     """Test the execute method with a single record."""
-    mock_base_pipeline.data_source.fetch.return_value = async_generator([{"id": 1}])
+    mock_base_pipeline.data_source.fetch.return_value = AsyncIterator([{"id": 1}])
     await executor.execute(watermark=None)
 
     assert executor.records_fetched == 1
@@ -84,7 +88,7 @@ async def test_executor_execute_happy_path(executor, mock_base_pipeline):
 @pytest.mark.asyncio
 async def test_executor_execute_with_checkpoint(executor, mock_base_pipeline):
     """Test that the checkpoint is saved every 1000 records."""
-    mock_base_pipeline.data_source.fetch.return_value = async_generator(
+    mock_base_pipeline.data_source.fetch.return_value = AsyncIterator(
         [{"id": i} for i in range(1000)]
     )
     await executor.execute(watermark=None)

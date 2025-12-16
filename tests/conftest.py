@@ -254,3 +254,14 @@ def redis_client(redis_service):
     import redis.asyncio as aioredis
 
     return aioredis.from_url(redis_service)
+
+
+@pytest.fixture
+def fake_redis():
+    """Fake Redis client for unit tests using fakeredis."""
+    try:
+        import fakeredis.aioredis
+    except ImportError:
+        pytest.skip("fakeredis not installed, run: pip install fakeredis")
+
+    return fakeredis.aioredis.FakeRedis()

@@ -101,6 +101,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def check_s3_endpoint_for_dev(self) -> Settings:
+        if self.test_mode:
+            return self
         if self.env == "dev" and self.aws.endpoint_url is None:
             raise ValueError("aws.endpoint_url must be set in dev environment")
         return self

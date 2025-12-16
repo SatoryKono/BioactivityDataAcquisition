@@ -41,9 +41,9 @@ class TestChemblAdapter:
         """Adapter should have correct provider name."""
         assert chembl_adapter.provider_name == "chembl"
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     @pytest.mark.asyncio
-    async def test_fetch_activities(self, chembl_client: Any) -> None:
+    async def test_fetch_activities(self, chembl_client: Any, vcr_cassette: str) -> None:
         """Test fetching activities from ChEMBL.
 
         This test requires a VCR cassette.
@@ -63,9 +63,9 @@ class TestChemblAdapter:
             for record in records:
                 assert "activity_id" in record or "molecule_chembl_id" in record
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     @pytest.mark.asyncio
-    async def test_health_check(self, chembl_client: Any) -> None:
+    async def test_health_check(self, chembl_client: Any, vcr_cassette: str) -> None:
         """Test ChEMBL health check endpoint.
 
         This test requires a VCR cassette.
@@ -85,9 +85,9 @@ class TestChemblAdapter:
                 HealthStatus.UNHEALTHY,
             ]
 
-    @pytest.mark.vcr()
+    @pytest.mark.vcr
     @pytest.mark.asyncio
-    async def test_get_entity_count(self, chembl_client: Any) -> None:
+    async def test_get_entity_count(self, chembl_client: Any, vcr_cassette: str) -> None:
         """Test getting entity count from ChEMBL.
 
         This test requires a VCR cassette.
