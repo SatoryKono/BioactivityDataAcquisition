@@ -1,5 +1,17 @@
 ## История Изменений (Changelog)
 
+- **5.0.0** (2025-12-16): Актуализация версий и документации. Версия проекта синхронизирована с RULES.md v5.0.
+  Обновлены pyproject.toml и __init__.py. Актуализированы документы: CHANGELOG.md, IMPLEMENTATION_ROADMAP.md,
+  AUDIT_REPORT.md, README.md, docs/00-map.md для отражения реального прогресса разработки (Фазы 0-4 завершены).
+- **5.0-implementation-phase4** (2025-12-15): Завершена Phase 4 (Application Layer). Реализованы BasePipeline,
+  ChEMBLActivityPipeline, CLI (bioetl run/quarantine/checkpoint). Добавлена поддержка incremental/backfill/rebuild
+  режимов с graceful shutdown и checkpoint recovery. ~990 строк кода.
+- **5.0-implementation-phase3** (2025-12-15): Завершена Phase 3 (Provider Adapters). Реализованы адаптеры для
+  ChEMBL, PubChem, UniProt с rate limiting, circuit breaker, health checks. HTTP infrastructure с async httpx,
+  TokenBucket, exponential backoff. ~1,300 строк кода.
+- **5.0-implementation-phase2** (2025-12-15): Завершена Phase 2 (Infrastructure Adapters). Реализованы BronzeWriter
+  (JSONL+zstd), DeltaWriter (merge/upsert), GoldWriter (SCD Type 2), S3CheckpointAdapter, UnifiedQuarantine.
+  Redis distributed locking с heartbeat и fencing tokens. ~2,110 строк кода.
 - **5.0-docs-sync** (2025-12-15): Синхронизация документации с RULES.md v5.0: обновлены `00-rules-summary.md`,
   `02-user-rules.md`, чек‑лист пайплайнов; добавлены документы `06-rules-mapping.md` и `07-consistency-check.md`;
   уточнены Bronze lifecycle, еженедельный Delta VACUUM (7d), Forensic retention, стратегия партиционирования,

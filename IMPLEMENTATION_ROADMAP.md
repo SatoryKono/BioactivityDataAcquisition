@@ -1,13 +1,14 @@
 # BioETL: Implementation Roadmap
 
-*Updated: 2025-12-15*
+*Updated: 2025-12-16*
 *Based on: RULES.md v5.0 (Production Ready)*
+*Project Version: 5.0.0*
 
 ## 🎯 Project Status
 
-**Current Phase**: Phase 3 (Provider Adapters) ✅ COMPLETED
-**Overall Progress**: ~50% (Phase 0, 1, 2, 3 COMPLETED; Phase 6 advanced)
-**MVP Target**: 8-10 weeks (on track)
+**Current Phase**: Phase 5 (Data Quality & Observability) 🔄 IN PROGRESS
+**Overall Progress**: ~55% (Phases 0-4 COMPLETED; Phase 5 started, Phase 6 advanced)
+**MVP Target**: 8-10 weeks (on track for Week 7)
 **Production-Ready Target**: 16-20 weeks
 
 ---
@@ -528,14 +529,36 @@ bioetl checkpoint delete --pipeline <name>
 
 ### Phase 5: Data Quality & Observability (2-3 weeks)
 
-**Status**: 🔴 Not Started
+**Status**: 🔄 IN PROGRESS (~25% завершено)
 
-**Tasks**:
+**Completed**:
 
-- [ ] Prometheus metrics exporter
+- [x] **Structured Logging** (`src/bioetl/infrastructure/observability/logging.py`)
+  - JSON format с обязательными полями (ts, level, run_id, pipeline, stage)
+  - Реализованы REQ-OBS-001, REQ-OBS-004, REQ-OBS-005
+  - Factory function: `create_logger()`
+  - Логирование в консоль + файл с настраиваемыми уровнями
+
+**In Progress**:
+
+- [ ] **Prometheus metrics exporter**
+  - Метрики: dq_validation_score, data_freshness_seconds, circuit_breaker_state
+  - Endpoint `/metrics` для scraping
+
+**Pending**:
+
 - [ ] Anomaly detection (baseline, thresholds)
+  - Baseline: скользящее среднее за 30 дней
+  - Warning: >2x baseline для null_rate, <70% для record_count
+  - Critical: >5x baseline для null_rate, <50% для record_count
+  - Cold Start период (Days 1-30)
 - [ ] Lineage tracking implementation
+  - Таблица `sys.lineage_log` (batch_id → Bronze files)
+  - `_source_batch_id` в Silver записях
 - [ ] Grafana dashboards
+  - DQ metrics dashboard
+  - Pipeline health dashboard
+  - Provider status dashboard
 
 ---
 
