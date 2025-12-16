@@ -10,9 +10,13 @@ from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from tests.integration.memory_storage import MemoryStorage
 
 
-async def async_generator(data):
-    for item in data:
-        yield item
+class AsyncIterator:
+    def __init__(self, data):
+        self.data = data
+
+    async def __aiter__(self):
+        for item in self.data:
+            yield item
 
 
 @pytest.mark.integration
@@ -26,7 +30,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
     """
     # 1. Mock the data source
     mock_data_source = AsyncMock()
-    mock_data_source.fetch.return_value = async_generator(
+    mock_data_source.fetch.return_value = AsyncIterator(
         [
             {
                 "activity_id": 1,
