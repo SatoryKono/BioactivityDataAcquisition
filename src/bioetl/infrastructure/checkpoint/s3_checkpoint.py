@@ -343,3 +343,11 @@ class S3Checkpoint:
             if error_code in ("NoSuchKey", "404"):
                 return None
             raise
+
+    async def aclose(self) -> None:
+        """Close resources.
+
+        Implements the aclose() method required by CheckpointPort protocol.
+        S3 client doesn't need explicit closing, but this satisfies the protocol.
+        """
+        pass  # S3 clients are stateless and don't need closing
