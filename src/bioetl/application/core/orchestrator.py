@@ -71,7 +71,9 @@ class PipelineOrchestrator:
             )
 
             watermark = await self.pipeline.checkpoint_manager.load_checkpoint()
-            await self.pipeline.executor.execute(watermark)
+            await self.pipeline.executor.execute(
+                watermark=watermark, limit=self.pipeline.limit
+            )
             await self.pipeline.checkpoint_manager.delete_checkpoint()
 
             self.pipeline.logger.info(
