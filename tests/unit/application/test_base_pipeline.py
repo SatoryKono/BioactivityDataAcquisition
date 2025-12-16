@@ -1,16 +1,23 @@
 """Unit tests for the BasePipeline class."""
-from unittest.mock import MagicMock, AsyncMock
+
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from bioetl.application.pipeline.base import BasePipeline
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+
+
+class ConcretePipeline(BasePipeline):
+    async def transform_bronze_to_silver(self, _context: PipelineContext, record: dict) -> dict | None:
+        return record
 
 
 @pytest.fixture
 def mock_pipeline():
     """Fixture for a mocked BasePipeline."""
-    pipeline = BasePipeline(
+    pipeline = ConcretePipeline(
         pipeline_name="test_pipeline",
         provider="test_provider",
         entity_type="test_entity",

@@ -1,17 +1,24 @@
 """Unit tests for the PipelineExecutor class."""
-from unittest.mock import MagicMock, AsyncMock
+
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from bioetl.application.pipeline.base import BasePipeline
 from bioetl.application.pipeline.executor import PipelineExecutor
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+
+
+class ConcretePipeline(BasePipeline):
+    async def transform_bronze_to_silver(self, _context: PipelineContext, record: dict) -> dict | None:
+        return record
 
 
 @pytest.fixture
 def mock_base_pipeline():
     """Fixture for a mocked BasePipeline."""
-    pipeline = BasePipeline(
+    pipeline = ConcretePipeline(
         pipeline_name="test_pipeline",
         provider="test_provider",
         entity_type="test_entity",
@@ -39,6 +46,11 @@ def executor(mock_base_pipeline):
     return PipelineExecutor(mock_base_pipeline)
 
 
+async def async_generator(data):
+    for item in data:
+        yield item
+
+
 @pytest.mark.asyncio
 async def test_executor_initialization(executor):
     """Test that the PipelineExecutor initializes correctly."""
@@ -52,7 +64,7 @@ async def test_executor_initialization(executor):
 @pytest.mark.asyncio
 async def test_executor_execute_happy_path(executor, mock_base_pipeline):
     """Test the execute method with a single record."""
-    mock_base_pipeline.data_source.fetch.return_value = [{"id": 1}]
+    mock_base_pipeline.data_source.fetch.return_value = async_generator([{"id": 1}])
     await executor.execute(watermark=None)
 
     assert executor.records_fetched == 1
@@ -70,7 +82,7 @@ async def test_executor_execute_happy_path(executor, mock_base_pipeline):
 @pytest.mark.asyncio
 async def test_executor_execute_with_checkpoint(executor, mock_base_pipeline):
     """Test that the checkpoint is saved every 1000 records."""
-    mock_base_pipeline.data_source.fetch.return_value = [{"id": i} for i in range(1000)]
+    mock_base_pipeline.data_source.fetch.return_value = async_generator([{"id": i} for i in range(1000)])
     await executor.execute(watermark=None)
 
     assert executor.records_fetched == 1000
