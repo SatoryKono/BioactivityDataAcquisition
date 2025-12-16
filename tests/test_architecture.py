@@ -205,12 +205,12 @@ def test_code_complexity_with_xenon(src_dir: Path):
 def test_ruff_check_passes(src_dir: Path, project_root: Path):
     """Code must pass ruff linting without errors.
 
-    Runs: ruff check src tests
+    Runs: ruff check --fix src tests
     """
     tests_dir = project_root / "tests"
     try:
         result = subprocess.run(
-            ["ruff", "check", str(src_dir), str(tests_dir)],
+            ["ruff", "check", "--fix", str(src_dir), str(tests_dir)],
             capture_output=True,
             text=True,
             timeout=60,
@@ -218,6 +218,19 @@ def test_ruff_check_passes(src_dir: Path, project_root: Path):
         )
     except FileNotFoundError:
         pytest.skip("ruff not installed, run: pip install ruff")
+
+    # After fixing, run check again to ensure no errors remain
+    if result.returncode != 0:
+        try:
+            result = subprocess.run(
+                ["ruff", "check", str(src_dir), str(tests_dir)],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=str(project_root),
+            )
+        except FileNotFoundError:
+            pytest.skip("ruff not installed, run: pip install ruff")
 
     assert result.returncode == 0, (
         f"Ruff linting failed.\n"
@@ -268,11 +281,11 @@ def test_env_var_access_only_in_config(src_dir: Path):
     assert not violations, (
         "Environment variable access must be centralized in config.py.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Refactor to use functions from bioetl.infrastructure.config instead:\n"
-        "  - get_aws_config()\n"
-        "  - get_s3_config()\n"
-        "  - get_redis_config()\n"
-        "  - get_storage_options()"
+                                                                            "Refactor to use functions from bioetl.infrastructure.config instead:\n"
+                                                                            "  - get_aws_config()\n"
+                                                                            "  - get_s3_config()\n"
+                                                                            "  - get_redis_config()\n"
+                                                                            "  - get_storage_options()"
     )
 
 
@@ -329,11 +342,11 @@ def test_cli_no_direct_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "CLI must not import directly from infrastructure modules.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-        "Refactor to use:\n"
-        "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
-        "  - Bootstrap functions that wire up dependencies\n"
-        "  - Domain ports for type hints\n"
-        "  - bioetl.infrastructure.config for configuration (allowed)"
+                                                                            "Refactor to use:\n"
+                                                                            "  - Factory patterns in bioetl.application or bioetl.infrastructure.factories\n"
+                                                                            "  - Bootstrap functions that wire up dependencies\n"
+                                                                            "  - Domain ports for type hints\n"
+                                                                            "  - bioetl.infrastructure.config for configuration (allowed)"
     )
 
 

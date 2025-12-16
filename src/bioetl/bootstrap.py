@@ -5,7 +5,6 @@ to provide a ready-to-use dependency container for the application layer.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 import redis.asyncio as aioredis
 
