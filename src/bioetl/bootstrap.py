@@ -8,14 +8,14 @@ from dataclasses import dataclass
 
 import redis.asyncio as aioredis
 
-from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.config import (
+from bioetl.config import (
     get_aws_config,
     get_redis_config,
     get_s3_config,
     get_storage_options,
 )
+from bioetl.domain.ports import CheckpointPort, LockPort, QuarantinePort
+from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 

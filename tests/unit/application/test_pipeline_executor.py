@@ -1,0 +1,77 @@
+"""Unit tests for the PipelineExecutor class."""
+from unittest.mock import MagicMock, AsyncMock
+
+import pytest
+
+from bioetl.application.pipeline.base import BasePipeline
+from bioetl.application.pipeline.executor import PipelineExecutor
+from bioetl.domain.types import RunType
+
+
+@pytest.fixture
+def mock_base_pipeline():
+    """Fixture for a mocked BasePipeline."""
+    pipeline = BasePipeline(
+        pipeline_name="test_pipeline",
+        provider="test_provider",
+        entity_type="test_entity",
+        run_type=RunType.INCREMENTAL,
+        data_source=AsyncMock(),
+        storage=MagicMock(),
+        lock=AsyncMock(),
+        checkpoint=MagicMock(),
+        quarantine=MagicMock(),
+        resume=False,
+    )
+    pipeline.orchestrator = AsyncMock()
+    pipeline.orchestrator.shutdown_requested = False
+    pipeline.transform_bronze_to_silver = AsyncMock(return_value={"id": 1})
+    pipeline.should_write_gold = MagicMock(return_value=True)
+    pipeline.checkpoint_manager = AsyncMock()
+    pipeline.quarantine_manager = AsyncMock()
+    pipeline.error_classifier = MagicMock()
+    return pipeline
+
+
+@pytest.fixture
+def executor(mock_base_pipeline):
+    """Fixture for a PipelineExecutor."""
+    return PipelineExecutor(mock_base_pipeline)
+
+
+@pytest.mark.asyncio
+async def test_executor_initialization(executor):
+    """Test that the PipelineExecutor initializes correctly."""
+    assert executor.records_fetched == 0
+    assert executor.records_bronze == 0
+    assert executor.records_silver == 0
+    assert executor.records_gold == 0
+    assert executor.records_quarantined == 0
+
+
+@pytest.mark.asyncio
+async def test_executor_execute_happy_path(executor, mock_base_pipeline):
+    """Test the execute method with a single record."""
+    mock_base_pipeline.data_source.fetch.return_value = [{"id": 1}]
+    await executor.execute(watermark=None)
+
+    assert executor.records_fetched == 1
+    assert executor.records_bronze == 1
+    assert executor.records_silver == 1
+    assert executor.records_gold == 1
+    assert executor.records_quarantined == 0
+
+    mock_base_pipeline.storage.write_bronze.assert_called_once()
+    mock_base_pipeline.storage.write_silver.assert_called_once()
+    mock_base_pipeline.storage.write_gold.assert_called_once()
+    mock_base_pipeline.checkpoint_manager.save_checkpoint.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_executor_execute_with_checkpoint(executor, mock_base_pipeline):
+    """Test that the checkpoint is saved every 1000 records."""
+    mock_base_pipeline.data_source.fetch.return_value = [{"id": i} for i in range(1000)]
+    await executor.execute(watermark=None)
+
+    assert executor.records_fetched == 1000
+    mock_base_pipeline.checkpoint_manager.save_checkpoint.assert_called_once()

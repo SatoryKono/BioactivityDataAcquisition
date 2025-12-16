@@ -14,12 +14,12 @@ import click
 
 from bioetl.application.pipeline.base import run_pipeline_flow
 from bioetl.bootstrap import bootstrap
-from bioetl.domain.types import RunType
-from bioetl.infrastructure.config import (
+from bioetl.config import (
     get_aws_config,
     get_redis_config,
     get_s3_config,
 )
+from bioetl.domain.types import RunType
 
 
 @click.group()
