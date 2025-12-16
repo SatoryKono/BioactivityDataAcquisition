@@ -60,6 +60,10 @@ class DataSourcePort(Protocol):
         """
         ...
 
+    async def aclose(self) -> None:
+        """Gracefully close the data source and release resources."""
+        ...
+
 
 @runtime_checkable
 class StoragePort(Protocol):
@@ -123,6 +127,10 @@ class StoragePort(Protocol):
             records: A list of dictionaries, where each dictionary is a gold record.
             mode: The write mode (e.g., 'overwrite', 'append').
         """
+        ...
+
+    async def aclose(self) -> None:
+        """Gracefully close the storage connection and release resources."""
         ...
 
 
@@ -198,6 +206,10 @@ class LockPort(Protocol):
         """
         ...
 
+    async def aclose(self) -> None:
+        """Gracefully close the lock connection and release resources."""
+        ...
+
 
 @runtime_checkable
 class CheckpointPort(Protocol):
@@ -260,6 +272,10 @@ class CheckpointPort(Protocol):
         """
         ...
 
+    async def aclose(self) -> None:
+        """Gracefully close the checkpoint connection and release resources."""
+        ...
+
 
 @runtime_checkable
 class QuarantinePort(Protocol):
@@ -319,6 +335,10 @@ class QuarantinePort(Protocol):
         Returns:
             A dictionary of statistics (e.g., count by error code).
         """
+        ...
+
+    async def aclose(self) -> None:
+        """Gracefully close the quarantine connection and release resources."""
         ...
 
 

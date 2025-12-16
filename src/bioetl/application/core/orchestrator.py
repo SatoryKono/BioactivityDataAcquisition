@@ -2,15 +2,17 @@
 
 Handles pipeline lifecycle, signals, and graceful shutdown.
 
-This module is framework-agnostic. Prefect integration is provided by
-the orchestration layer (bioetl.orchestration.tasks).
+Refactored per ADR-0005 to use ShutdownSignal for coordination.
 """
+
+from __future__ import annotations
 
 import asyncio
 import signal
 import time
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.config import get_settings
 from bioetl.domain.types import RunType
 
@@ -18,17 +20,37 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
 
 
-class PipelineShutdownError(Exception):
-    """Raised when pipeline receives shutdown signal."""
-
-
 class PipelineOrchestrator:
-    """Manages pipeline execution, lifecycle, and shutdown signals."""
+    """Manages pipeline execution, lifecycle, and shutdown signals.
 
-    def __init__(self, pipeline: "BasePipeline"):
+    The orchestrator coordinates:
+    1. Lock acquisition and release
+    2. Heartbeat maintenance
+    3. Shutdown signal handling
+    4. Metrics recording
+    """
+
+    def __init__(
+        self,
+        pipeline: "BasePipeline",
+        *,
+        shutdown_signal: ShutdownSignal | None = None,
+    ) -> None:
+        """Initialize orchestrator.
+
+        Args:
+            pipeline: The pipeline to orchestrate.
+            shutdown_signal: Shared signal for shutdown coordination.
+                           If None, creates a new signal (legacy mode).
+        """
         self.pipeline = pipeline
-        self.shutdown_requested = False
+        self.shutdown_signal = shutdown_signal or ShutdownSignal()
         self.heartbeat_task: asyncio.Task[None] | None = None
+
+    @property
+    def shutdown_requested(self) -> bool:
+        """Check if shutdown was requested (backward compatibility)."""
+        return self.shutdown_signal.is_requested
 
     async def run(self) -> None:
         """Execute pipeline. Main entry point."""
@@ -87,6 +109,11 @@ class PipelineOrchestrator:
         finally:
             if self.heartbeat_task:
                 self.heartbeat_task.cancel()
+                try:
+                    await self.heartbeat_task
+                except asyncio.CancelledError:
+                    pass
+
             await self.pipeline.lock.release(
                 lock_key, self.pipeline.run_id, exclusive=exclusive
             )
@@ -95,7 +122,7 @@ class PipelineOrchestrator:
             # Record metrics via port (if available)
             duration = time.time() - start_time
             if self.pipeline.metrics:
-                self.pipeline.metrics.observe_histogram(
+                await self.pipeline.metrics.observe_histogram(
                     "pipeline_duration_seconds",
                     duration,
                     {
@@ -110,7 +137,7 @@ class PipelineOrchestrator:
                     ("silver", self.pipeline.executor.records_silver),
                     ("gold", self.pipeline.executor.records_gold),
                 ]:
-                    self.pipeline.metrics.increment_counter(
+                    await self.pipeline.metrics.increment_counter(
                         "records_processed_total",
                         count,
                         {
@@ -121,24 +148,32 @@ class PipelineOrchestrator:
                     )
 
     async def _heartbeat_loop(self, lock_key: str, exclusive: bool) -> None:
+        """Background task to maintain lock via heartbeat."""
         settings = get_settings()
         interval = settings.pipeline.heartbeat_interval
-        while not self.shutdown_requested:
+
+        while not self.shutdown_signal.is_requested:
             await asyncio.sleep(interval)
             success = await self.pipeline.lock.heartbeat(
                 lock_key, self.pipeline.run_id, exclusive=exclusive
             )
             if not success:
                 self.pipeline.logger.error("Lost lock during execution!")
-                self.shutdown_requested = True
+                self.shutdown_signal.request()
                 raise PipelineShutdownError("Lock lost")
 
     def _setup_shutdown_handlers(self) -> None:
+        """Setup signal handlers for graceful shutdown."""
+
         def signal_handler(signum: int, _: Any) -> None:
             self.pipeline.logger.warning(
                 f"Received signal {signum}, initiating graceful shutdown"
             )
-            self.shutdown_requested = True
+            self.shutdown_signal.request()
 
         signal.signal(signal.SIGTERM, signal_handler)
         signal.signal(signal.SIGINT, signal_handler)
+
+
+# Re-export for backward compatibility
+__all__ = ["PipelineOrchestrator", "PipelineShutdownError"]

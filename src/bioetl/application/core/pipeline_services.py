@@ -1,0 +1,87 @@
+"""Pipeline services - injected dependencies.
+
+Part of BasePipeline decomposition (ADR-0005).
+Separates I/O port dependencies from pipeline logic.
+"""
+
+import asyncio
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from bioetl.domain.ports import (
+    CheckpointPort,
+    DataSourcePort,
+    LockPort,
+    MetricsPort,
+    QuarantinePort,
+    StoragePort,
+)
+
+if TYPE_CHECKING:
+    import structlog
+
+
+@dataclass(frozen=True)
+class PipelineServices:
+    """Injected dependencies for pipeline execution.
+
+    All fields are Protocol-typed for testability and flexibility.
+    This enables easy mocking in tests and swapping implementations.
+
+    Frozen dataclass ensures services can't be accidentally replaced
+    during pipeline execution.
+
+    Attributes:
+        data_source: Port for fetching data from external sources.
+        storage: Port for writing to Bronze/Silver/Gold layers.
+        lock: Port for distributed locking coordination.
+        checkpoint: Port for pipeline state persistence.
+        quarantine: Port for failed record isolation.
+        metrics: Port for observability metrics collection.
+        logger: Structured logger for pipeline events.
+
+    Example:
+        >>> services = PipelineServices(
+        ...     data_source=chembl_client,
+        ...     storage=delta_storage,
+        ...     lock=redis_lock,
+        ...     checkpoint=s3_checkpoint,
+        ...     quarantine=unified_quarantine,
+        ...     metrics=prometheus_metrics,
+        ...     logger=logger,
+        ... )
+    """
+
+    data_source: DataSourcePort
+    storage: StoragePort
+    lock: LockPort
+    checkpoint: CheckpointPort
+    quarantine: QuarantinePort
+    metrics: MetricsPort
+    logger: "structlog.BoundLogger"
+
+    def __post_init__(self) -> None:
+        """Validate that all services are provided."""
+        # Validation is implicit - dataclass requires all non-default fields
+        # Runtime checks happen via Protocol structural typing
+        pass
+
+    async def aclose(self) -> None:
+        """Gracefully close all I/O resources."""
+        self.logger.info("Closing pipeline services...")
+        results = await asyncio.gather(
+            self.data_source.aclose(),
+            self.storage.aclose(),
+            self.lock.aclose(),
+            self.checkpoint.aclose(),
+            self.quarantine.aclose(),
+            return_exceptions=True,
+        )
+
+        for result in results:
+            if isinstance(result, Exception):
+                self.logger.error("Error during service shutdown", error=result)
+        self.logger.info("Pipeline services closed.")
+
+
+__all__ = ["PipelineServices"]

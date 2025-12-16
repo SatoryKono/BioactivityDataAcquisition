@@ -52,6 +52,9 @@ class TestDataSourcePortProtocol:
 
                 return HealthStatus.HEALTHY
 
+            async def aclose(self):
+                pass
+
         # Should pass isinstance check
         assert isinstance(ValidDataSource(), DataSourcePort)
 
@@ -67,6 +70,9 @@ class TestDataSourcePortProtocol:
 
                 return HealthStatus.HEALTHY
 
+            async def aclose(self):
+                pass
+
         # Should fail isinstance check
         assert not isinstance(InvalidDataSource(), DataSourcePort)
 
@@ -78,13 +84,16 @@ class TestStoragePortProtocol:
         """Class with all required methods should be StoragePort."""
 
         class ValidStorage:
-            def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
+            async def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
                 pass
 
-            def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
+            async def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
                 pass
 
-            def write_gold(self, _table_name, _records, _mode="overwrite"):
+            async def write_gold(self, _table_name, _records, _mode="overwrite"):
+                pass
+
+            async def aclose(self):
                 pass
 
         assert isinstance(ValidStorage(), StoragePort)
@@ -93,13 +102,16 @@ class TestStoragePortProtocol:
         """Class missing a required method should not be StoragePort."""
 
         class IncompleteStorage:
-            def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
+            async def write_bronze(self, _records, _provider, _entity, _date, _batch_id):
                 pass
 
-            def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
+            async def write_silver(self, _table_name, _records, _primary_keys, _mode="merge"):
                 pass
 
             # Missing write_gold
+
+            async def aclose(self):
+                pass
 
         assert not isinstance(IncompleteStorage(), StoragePort)
 
@@ -128,6 +140,9 @@ class TestLockPortProtocol:
             async def heartbeat(self, _key, _owner_id, _exclusive=False):
                 return True
 
+            async def aclose(self):
+                pass
+
         assert isinstance(ValidLock(), LockPort)
 
 
@@ -138,16 +153,19 @@ class TestCheckpointPortProtocol:
         """Class with all required methods should be CheckpointPort."""
 
         class ValidCheckpoint:
-            def save(self, _pipeline, _watermark, _run_id, _metadata):
+            async def save(self, _pipeline, _watermark, _run_id, _metadata):
                 pass
 
-            def load(self, _pipeline):
+            async def load(self, _pipeline):
                 return None
 
-            def list_all(self):
+            async def list_all(self):
                 return []
 
-            def delete(self, _pipeline):
+            async def delete(self, _pipeline):
+                pass
+
+            async def aclose(self):
                 pass
 
         assert isinstance(ValidCheckpoint(), CheckpointPort)
@@ -160,7 +178,7 @@ class TestQuarantinePortProtocol:
         """Class with all required methods should be QuarantinePort."""
 
         class ValidQuarantine:
-            def write(
+            async def write(
                 self,
                 _pipeline,
                 _error_code,
@@ -171,11 +189,14 @@ class TestQuarantinePortProtocol:
             ):
                 pass
 
-            def inspect(self, _pipeline, _limit=10, _error_code=None):
+            async def inspect(self, _pipeline, _limit=10, _error_code=None):
                 return []
 
-            def get_stats(self, _pipeline):
+            async def get_stats(self, _pipeline):
                 return {}
+
+            async def aclose(self):
+                pass
 
         assert isinstance(ValidQuarantine(), QuarantinePort)
 

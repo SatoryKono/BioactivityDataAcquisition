@@ -1,7 +1,11 @@
-"""Quarantine Manager for ETL Pipelines."""
+"""Quarantine Manager for ETL Pipelines.
 
-from typing import TYPE_CHECKING
+Refactored per ADR-0005 to accept explicit dependencies instead of full pipeline.
+"""
 
+from typing import TYPE_CHECKING, Any
+
+from bioetl.domain.ports import QuarantinePort
 from bioetl.domain.types import BatchID, ErrorType
 
 if TYPE_CHECKING:
@@ -9,21 +13,54 @@ if TYPE_CHECKING:
 
 
 class QuarantineManager:
-    """Manages quarantining of records that fail processing."""
+    """Manages quarantining of records that fail processing.
 
-    def __init__(self, pipeline: "BasePipeline"):
-        self.pipeline = pipeline
+    This manager handles writing failed records to quarantine storage
+    for later analysis and potential reprocessing.
+    """
+
+    def __init__(
+        self,
+        quarantine_port: QuarantinePort,
+        pipeline_name: str,
+    ) -> None:
+        """Initialize QuarantineManager with explicit dependencies.
+
+        Args:
+            quarantine_port: Port for writing to quarantine storage.
+            pipeline_name: Name of the pipeline for identification.
+        """
+        self._quarantine = quarantine_port
+        self._pipeline_name = pipeline_name
+
+    @classmethod
+    def from_pipeline(cls, pipeline: "BasePipeline") -> "QuarantineManager":
+        """Create QuarantineManager from pipeline (legacy compatibility).
+
+        DEPRECATED: Use direct constructor instead.
+        """
+        return cls(
+            quarantine_port=pipeline.quarantine,
+            pipeline_name=pipeline.pipeline_name,
+        )
 
     async def quarantine_record(
         self,
-        record: dict,
+        record: dict[str, Any],
         error_type: ErrorType,
         batch_id: BatchID,
         error_details: str,
     ) -> None:
-        """Write a record to the quarantine."""
-        self.pipeline.quarantine.write(
-            pipeline=self.pipeline.pipeline_name,
+        """Write a record to the quarantine.
+
+        Args:
+            record: The raw record that failed processing.
+            error_type: Classification of the error.
+            batch_id: ID of the batch containing this record.
+            error_details: Human-readable error description.
+        """
+        self._quarantine.write(
+            pipeline=self._pipeline_name,
             error_code=error_type.value,
             payload=record,
             bronze_batch_id=batch_id,
