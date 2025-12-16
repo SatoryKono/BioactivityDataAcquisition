@@ -27,7 +27,7 @@ import zstandard as zstd
 from botocore.exceptions import ClientError
 
 from bioetl.domain.types import BatchID
-from bioetl.infrastructure.storage.exceptions import BucketNotFoundError, UploadError
+from bioetl.domain.exceptions import BucketNotFoundError, UploadError
 
 
 class BronzeWriter:

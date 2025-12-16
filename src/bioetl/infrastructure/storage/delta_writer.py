@@ -28,9 +28,9 @@ from deltalake.exceptions import DeltaError, SchemaMismatchError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from pyarrow import ArrowTypeError
 
-from bioetl.infrastructure.storage.exceptions import (
+from bioetl.domain.exceptions import (
     MergeConflictError,
-    SchemaValidationError,
+    SchemaViolationError,
     TableNotFoundError,
 )
 
@@ -112,7 +112,7 @@ class DeltaWriter:
 
         Raises:
             ValueError: If records list is empty or missing required metadata.
-            SchemaValidationError: If record schema does not match table schema.
+            SchemaViolationError: If record schema does not match table schema.
             MergeConflictError: If merge operation fails due to concurrent writes.
             CustomTableNotFoundError: If the underlying table is not found.
         """
@@ -156,13 +156,13 @@ class DeltaWriter:
                     ),
                 )
             except ArrowTypeError as schema_exc:
-                raise SchemaValidationError(
+                raise SchemaViolationError(
                     table_name, errors=[str(schema_exc)]
                 ) from schema_exc
         except SchemaMismatchError as e:
-            raise SchemaValidationError(table_name, errors=[str(e)]) from e
+            raise SchemaViolationError(table_name, errors=[str(e)]) from e
         except ArrowTypeError as e:
-            raise SchemaValidationError(table_name, errors=[str(e)]) from e
+            raise SchemaViolationError(table_name, errors=[str(e)]) from e
         except DeltaError as e:
             # Catch potential merge conflicts
             if "Merge-conflict" in str(e):
