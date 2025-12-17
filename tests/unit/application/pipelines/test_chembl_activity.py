@@ -6,12 +6,10 @@ import pytest
 
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.chembl_activity import (
-    CHEMBL_ACTIVITY_CONFIG,
-    ChEMBLActivityPipeline,
-)
+from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.config import get_pipeline_config
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 
 
@@ -35,7 +33,10 @@ def chembl_pipeline():
         metrics=NoOpMetrics(warn_on_use=False),
         logger=mock_logger,
     )
-    pipeline = ChEMBLActivityPipeline.create(runtime=runtime, services=services)
+    config = get_pipeline_config("chembl_activity")
+    pipeline = ChEMBLActivityPipeline.create(
+        runtime=runtime, services=services, config=config
+    )
     return pipeline
 
 

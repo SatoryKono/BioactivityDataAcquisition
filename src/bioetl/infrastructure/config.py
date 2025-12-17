@@ -25,8 +25,10 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
+from bioetl.application.core.pipeline_config import PipelineConfig
 
-def yaml_config_settings_source() -> dict[str, Any]:
+
+def yaml_config_settings_source(settings: BaseSettings) -> dict[str, Any]:
     """
     A simple settings source that loads variables from a YAML file
     at the project's root.
@@ -69,6 +71,43 @@ def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
             config["source"] = source_config.get("source", source_config)
 
     return config
+
+
+@lru_cache(maxsize=10)
+def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
+    """Get PipelineConfig object from YAML configuration.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
+
+    Returns:
+        PipelineConfig instance
+
+    Raises:
+        ValueError: If pipeline configuration not found
+    """
+    config_data = load_pipeline_config(pipeline_name)
+    if not config_data:
+        raise ValueError(f"Pipeline configuration not found: {pipeline_name}")
+
+    # Extract field names from source config
+    source_fields = [
+        field['name']
+        for field in config_data.get("source", {}).get("fields", [])
+    ]
+
+    # Map YAML config to PipelineConfig
+    return PipelineConfig(
+        pipeline_name=pipeline_name,
+        provider=config_data.get("provider", pipeline_name.split("_")[0]),
+        entity_type=config_data.get("entity_type", pipeline_name.split("_")[-1]),
+        primary_keys=config_data.get("primary_keys", ["id"]),
+        silver_table=config_data.get("silver_table", f"{pipeline_name}.data"),
+        gold_table=config_data.get("gold_table", f"{pipeline_name}.data_gold"),
+        batch_size=config_data.get("batch_size", 100),
+        checkpoint_interval=config_data.get("checkpoint_interval", 1000),
+        fields=source_fields,
+    )
 
 
 class AWSSettings(BaseSettings):
@@ -148,7 +187,7 @@ class Settings(BaseSettings):
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
-                    "Recommended for dev/staging environments.",
+        "Recommended for dev/staging environments.",
     )
 
     aws: AWSSettings = Field(default_factory=AWSSettings)
@@ -180,7 +219,7 @@ class Settings(BaseSettings):
     @classmethod
     def settings_customise_sources(
         cls,
-        _settings_cls: type[BaseSettings],
+        settings_cls: type[BaseSettings],
         init_settings: PydanticBaseSettingsSource,
         env_settings: PydanticBaseSettingsSource,
         dotenv_settings: PydanticBaseSettingsSource,
@@ -189,7 +228,7 @@ class Settings(BaseSettings):
         return (
             env_settings,
             dotenv_settings,
-            yaml_config_settings_source,
+            PydanticBaseSettingsSource(settings_cls, yaml_config_settings_source(settings_cls)),
             init_settings,
             file_secret_settings,
         )

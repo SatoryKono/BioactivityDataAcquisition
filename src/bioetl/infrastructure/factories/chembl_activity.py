@@ -4,14 +4,13 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.chembl_activity import CHEMBL_ACTIVITY_CONFIG
 from bioetl.domain.ports import LockPort, MetricsPort
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.config import Settings, load_pipeline_config
+from bioetl.infrastructure.config import Settings, get_pipeline_config
 from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
@@ -200,8 +199,9 @@ class ChEMBLActivityPipelineFactory:
             settings=settings, logger=logger, **kwargs
         )
 
+        config = get_pipeline_config("chembl_activity")
         return ChEMBLActivityPipeline.create(
             runtime=runtime,
             services=services,
-            config=CHEMBL_ACTIVITY_CONFIG,
+            config=config,
         )
