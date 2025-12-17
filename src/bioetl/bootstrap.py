@@ -11,13 +11,46 @@ from uuid import UUID
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
 )
+from bioetl.infrastructure.factories.clients import (
+    create_redis_client,
+    get_aws_credentials,
+)
+from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
+# Explicit exports for test mocking
+__all__ = [
+    "bootstrap_logger",
+    "bootstrap_pipeline",
+    "ChemblAdapter",
+    "UnifiedHTTPClient",
+    "S3Checkpoint",
+    "ChEMBLActivityPipelineFactory",
+    "create_redis_client",
+    "get_aws_credentials",
+    "StorageAdapter",
+    "RedisDistributedLock",
+    "PrometheusMetrics",
+    "UnifiedQuarantine",
+    "BronzeWriter",
+    "DeltaWriter",
+    "GoldWriter",
+]
 
 if TYPE_CHECKING:
     import structlog

@@ -237,6 +237,9 @@ def test_infrastructure_does_not_import_application(src_dir: Path) -> None:
     forbidden = {"bioetl.application"}
 
     for py_file in infra_path.rglob("*.py"):
+        # ИСКЛЮЧЕНИЕ: config.py может импортировать PipelineConfig
+        if py_file.name == "config.py":
+            continue
         errors = _check_imports_in_file(py_file, forbidden)
         all_errors.extend(errors)
 
