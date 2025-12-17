@@ -21,11 +21,12 @@ from bioetl.infrastructure.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
 logger = logging.getLogger(__name__)
 
 
-class UniProtClient:
+class UniProtClient(PaginatedFetcherMixin):
     """UniProt API client implementing DataSourcePort.
 
     Provides access to protein sequence and functional information from UniProt database.
@@ -185,27 +186,6 @@ class UniProtClient:
             query = f"{query} AND accession_id:[{watermark} TO *]"
         return query
 
-    async def _fetch_next_page(
-        self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
-    ) -> tuple[list, str | None]:
-        """Fetch the next page of protein results."""
-        await self.rate_limiter.acquire()
-        params = self._build_protein_fetch_params(query, size, fetched, limit, cursor)
-        try:
-            response = await self.circuit_breaker.call(
-                self.http_client.get, "/uniprotkb/search", params=params
-            )
-            return await self._process_protein_response(response)
-        except Exception:
-            logger.error(
-                "UniProt protein fetch failed",
-                exc_info=True,
-                extra={"query": query, "cursor": cursor},
-            )
-            if get_settings().strict_error_handling:
-                raise
-            return [], None
-
     async def _fetch_proteins(
         self,
         query: str | None,
@@ -214,23 +194,33 @@ class UniProtClient:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch protein entries from UniProt."""
         query = self._build_query(query, watermark)
-        size, fetched, cursor = 500, 0, None
+        size = 500
 
-        while not limit or fetched < limit:
-            results, cursor = await self._fetch_next_page(
+        async def fetch_page(
+            cursor: str | None, fetched: int
+        ) -> tuple[list[dict[str, Any]], str | None]:
+            """Callback for pagination."""
+            await self.rate_limiter.acquire()
+            params = self._build_protein_fetch_params(
                 query, size, fetched, limit, cursor
             )
-            if not results:
-                break
+            try:
+                response = await self.circuit_breaker.call(
+                    self.http_client.get, "/uniprotkb/search", params=params
+                )
+                return await self._process_protein_response(response)
+            except Exception:
+                logger.error(
+                    "UniProt protein fetch failed",
+                    exc_info=True,
+                    extra={"query": query, "cursor": cursor},
+                )
+                if get_settings().strict_error_handling:
+                    raise
+                return [], None
 
-            for protein in results:
-                yield protein
-                fetched += 1
-                if limit and fetched >= limit:
-                    break
-
-            if not cursor:
-                break
+        async for item in self.paginated_fetch(fetch_page, limit=limit):
+            yield item
 
     async def _fetch_features(
         self,
