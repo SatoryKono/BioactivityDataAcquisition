@@ -1,0 +1,30 @@
+pipeline_name: "pubchem_compound"
+provider: "pubchem"
+entity_type: "compound"
+description: "Pipeline for ingesting PubChem compounds"
+version: "1.0.0"
+
+source:
+  api:
+    base_url: "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+    rate_limit: 5.0
+    timeout: 30
+
+sink:
+  bronze:
+    format: "jsonl"
+    compression: "zstd"
+  silver:
+    table_name: "pubchem_compound"
+    primary_keys: ["cid"]
+    partition_by: ["batch_date"]
+  gold:
+    table_name: "dim_compound"
+    primary_keys: ["cid"]
+
+processing:
+  batch_size: 1000
+  deduplication: true
+
+validation:
+  strict_mode: false

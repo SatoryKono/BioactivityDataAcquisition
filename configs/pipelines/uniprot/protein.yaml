@@ -1,0 +1,30 @@
+pipeline_name: "uniprot_protein"
+provider: "uniprot"
+entity_type: "protein"
+description: "Pipeline for ingesting UniProt proteins"
+version: "1.0.0"
+
+source:
+  api:
+    base_url: "https://rest.uniprot.org"
+    rate_limit: 10.0
+    timeout: 30
+
+sink:
+  bronze:
+    format: "jsonl"
+    compression: "zstd"
+  silver:
+    table_name: "uniprot_protein"
+    primary_keys: ["accession"]
+    partition_by: ["batch_date"]
+  gold:
+    table_name: "dim_target"
+    primary_keys: ["accession"]
+
+processing:
+  batch_size: 500
+  deduplication: true
+
+validation:
+  strict_mode: false
