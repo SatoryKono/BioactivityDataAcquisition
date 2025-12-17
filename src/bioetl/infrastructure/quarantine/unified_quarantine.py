@@ -89,8 +89,8 @@ class UnifiedQuarantine:
         error_code: str,
         payload: dict[str, Any],
         bronze_batch_id: BatchID,
-        bronze_file_uri: str | None = None,
-        error_details: dict[str, Any] | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> ContentHash:
         """Write record to quarantine.
 
@@ -142,8 +142,8 @@ class UnifiedQuarantine:
             "payload_hash": payload_hash,
             "payload_truncated": truncated,
             "bronze_batch_id": str(bronze_batch_id),
-            "bronze_file_uri": bronze_file_uri or "",
-            "error_details": json.dumps(error_details or {}),
+            "bronze_file_uri": kwargs.get("bronze_file_uri", ""),
+            "error_details": json.dumps(kwargs.get("error_details", {})),
             "dq_status": DQStatus.NEW.value,
         }
 

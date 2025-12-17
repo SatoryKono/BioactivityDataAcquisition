@@ -186,7 +186,7 @@ class Settings(BaseSettings):
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
-                    "Recommended for dev/staging environments.",
+        "Recommended for dev/staging environments.",
     )
 
     aws: AWSSettings = Field(default_factory=AWSSettings)
