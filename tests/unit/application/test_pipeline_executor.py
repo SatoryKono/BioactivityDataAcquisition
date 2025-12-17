@@ -5,8 +5,8 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
@@ -69,7 +69,6 @@ def executor(mock_components):
     return PipelineExecutor(**mock_components)
 
 
-@pytest.mark.asyncio
 async def test_executor_initialization(executor):
     """Test that the PipelineExecutor initializes correctly."""
     assert executor.records_fetched == 0
@@ -79,7 +78,6 @@ async def test_executor_initialization(executor):
     assert executor.records_quarantined == 0
 
 
-@pytest.mark.asyncio
 async def test_executor_execute_happy_path(executor, mock_components):
     """Test the execute method with a single record."""
     mock_components["data_source"].fetch.return_value = AsyncIterator([{"id": 1}])
@@ -90,7 +88,6 @@ async def test_executor_execute_happy_path(executor, mock_components):
     # Silver/Gold counts depend on RecordProcessor implementation
 
 
-@pytest.mark.asyncio
 async def test_executor_execute_with_checkpoint(executor, mock_components):
     """Test that the checkpoint is saved every 1000 records."""
     mock_components["data_source"].fetch.return_value = AsyncIterator(

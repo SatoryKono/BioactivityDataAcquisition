@@ -83,7 +83,9 @@ class TestBootstrapPipeline:
         mock_pipeline = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
 
-        with patch("bioetl.interfaces.bootstrap.bootstrap_logger", return_value=mock_logger):
+        with patch(
+            "bioetl.interfaces.bootstrap.bootstrap_logger", return_value=mock_logger
+        ):
             result = bootstrap_pipeline(
                 pipeline_name="chembl_activity",
                 run_id=uuid4(),
