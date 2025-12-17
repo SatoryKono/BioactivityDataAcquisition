@@ -42,6 +42,11 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.schemas.silver import (
+    CHEMBL_ACTIVITY_SCHEMA,
+    PUBCHEM_COMPOUND_SCHEMA,
+    UNIPROT_PROTEIN_SCHEMA,
+)
 
 # Explicit exports for test mocking
 __all__ = [
@@ -123,24 +128,28 @@ def bootstrap_pipeline(
     )
 
     # 1. Create the pipeline definition (Logic + Config + Services)
+    silver_schema = None
     if pipeline_name == "chembl_activity":
         pipeline = ChEMBLActivityPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
         )
+        silver_schema = CHEMBL_ACTIVITY_SCHEMA
     elif pipeline_name == "pubchem_compound":
         pipeline = PubChemCompoundPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
         )
+        silver_schema = PUBCHEM_COMPOUND_SCHEMA
     elif pipeline_name == "uniprot_protein":
         pipeline = UniProtProteinPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
         )
+        silver_schema = UNIPROT_PROTEIN_SCHEMA
     else:
         raise ValueError(f"Unknown pipeline name: {pipeline_name}")
 
@@ -176,6 +185,7 @@ def bootstrap_pipeline(
         entity_type=pipeline.config.entity_type,
         transform_callback=pipeline.transform_bronze_to_silver,
         gold_filter_callback=pipeline.should_write_gold,
+        silver_schema=silver_schema,
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )
