@@ -1,1180 +1,1449 @@
-Select-String : The file
-E:\google_drive\05_AI\github\BioactivityDataAcquisition\nul cannot be read:
-FileStream was asked to open a device that was not a file. For support for
-devices like 'com1:' or 'lpt1:', call CreateFile, then use the FileStream
-constructors that take an OS handle as an IntPtr.
-At line:1 char:34
-+ ... Path . -Recurse | Select-String "bioetl.infrastructure.orchestration"
-+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidArgument: (:) [Select-String], ArgumentEx
-   ception
-    + FullyQualifiedErrorId : ProcessingFile,Microsoft.PowerShell.Commands.Sel
-   ectStringCommand
+......F...F.F...........................F..............s............F... [  9%]
+........................................................................ [ 19%]
+..............................F......................................... [ 29%]
+........................................................................ [ 39%]
+................................FFFFFFFFFFF............................. [ 49%]
+........................................................................ [ 58%]
+........................................................................ [ 68%]
+........................................................................ [ 78%]
+........................................................................ [ 88%]
+...FF................................................................... [ 98%]
+.............                                                            [100%]
+================================== FAILURES ===================================
+________________________ test_import_linter_contracts _________________________
+project_root = WindowsPath('E:/google_drive/05_AI/github/BioactivityDataAcquisition')
+src_dir = WindowsPath('E:/google_drive/05_AI/github/BioactivityDataAcquisition/src')
+    def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
+        """Run import-linter to verify all architectural contracts.
 
-.idea\workspace.xml:15:      <change
-beforePath="$PROJECT_DIR$/src/bioetl/infrastructure/orchestration/runner.py"
-beforeDir="false"
-afterPath="$PROJECT_DIR$/src/bioetl/infrastructure/orchestration/runner.py"
-afterDir="false" />
-.import_linter_cache\020bf9a579f422a2334140ee2267ca0d0306daa1.data.json:1:{"bio
-etl.infrastructure.adapters": [], "bioetl.infrastructure.locking":
-[["bioetl.infrastructure.locking.redis_lock", 7, "from
-bioetl.infrastructure.locking.redis_lock import RedisDistributedLock"]],
-"bioetl.application.core.base": [["bioetl.application.core.orchestrator", 251,
-"from bioetl.application.core.orchestrator import PipelineOrchestrator"],
-["bioetl.application.core.pipeline_services", 24, "from
-bioetl.application.core.pipeline_services import PipelineServices"],
-["warnings", 13, "import warnings"],
-["bioetl.application.core.pipeline_config", 20, "from
-bioetl.application.core.pipeline_config import ("], ["uuid", 17, "from uuid
-import uuid4"], ["typing", 16, "from typing import TYPE_CHECKING, Any"],
-["bioetl.application.core.executor", 46, "from
-bioetl.application.core.executor import PipelineExecutor"],
-["bioetl.domain.ports", 29, "from bioetl.domain.ports import ("],
-["bioetl.domain.types", 37, "from bioetl.domain.types import ("], ["datetime",
-15, "from datetime import UTC, datetime"],
-["bioetl.application.core.shutdown", 26, "from
-bioetl.application.core.shutdown import ShutdownSignal"], ["structlog", 44,
-"import structlog"], ["bioetl.domain.error_classifier", 28, "from
-bioetl.domain.error_classifier import ErrorClassifier"],
-["bioetl.application.core.executor", 228, "from
-bioetl.application.core.executor import PipelineExecutor"], ["__future__", 11,
-"from __future__ import annotations"],
-["bioetl.application.core.orchestrator", 47, "from
-bioetl.application.core.orchestrator import PipelineOrchestrator"],
-["bioetl.application.core.quarantine_manager", 25, "from
-bioetl.application.core.quarantine_manager import QuarantineManager"],
-["bioetl.application.core.checkpoint_manager", 19, "from
-bioetl.application.core.checkpoint_manager import CheckpointManager"], ["abc",
-14, "from abc import ABC, abstractmethod"], ["bioetl.domain.context", 27,
-"from bioetl.domain.context import PipelineContext"]], "bioetl.cli":
-[["__future__", 8, "from __future__ import annotations"], ["typing", 12, "from
-typing import TYPE_CHECKING"], ["bioetl.infrastructure.orchestration.signals",
-21, "from bioetl.infrastructure.orchestration.signals import
-setup_shutdown_handlers"], ["sys", 11, "import sys"], ["click", 15, "import
-click"], ["bioetl.bootstrap", 18, "from bioetl.bootstrap import
-bootstrap_pipeline"], ["bioetl.application.core.shutdown", 17, "from
-bioetl.application.core.shutdown import PipelineShutdownError"],
-["bioetl.infrastructure.orchestration.runner", 20, "from
-bioetl.infrastructure.orchestration.runner import PipelineRunner"],
-["asyncio", 10, "import asyncio"], ["structlog", 24, "import structlog"],
-["uuid", 13, "from uuid import uuid4"], ["bioetl.domain.types", 19, "from
-bioetl.domain.types import RunType"]], "bioetl.infrastructure.observability":
-[], "bioetl.infrastructure.orchestration.prefect.tasks":
-[["bioetl.application.core.checkpoint_manager", 17, "from
-bioetl.application.core.checkpoint_manager import CheckpointManager"],
-["bioetl.domain.types", 19, "from bioetl.domain.types import Watermark"],
-["bioetl.infrastructure.orchestration.runner", 20, "from
-bioetl.infrastructure.orchestration.runner import PipelineRunner"],
-["prefect", 14, "from prefect import flow, task"], ["typing", 12, "from typing
-import TYPE_CHECKING"], ["bioetl.application.core.executor", 18, "from
-bioetl.application.core.executor import PipelineExecutor"]],
-"bioetl.infrastructure.storage.gold_writer": [["datetime", 18, "from datetime
-import UTC, datetime"], ["polars", 113, "import polars as pl"], ["pyarrow",
-355, "import pyarrow.compute as pc"], ["pandera", 24, "from pandera.polars
-import DataFrameSchema"], ["pandera", 21, "import pandera as pa"], ["typing",
-19, "from typing import Any"], ["asyncio", 17, "import asyncio"], ["pyarrow",
-241, "import pyarrow as pa"], ["deltalake", 23, "from deltalake.exceptions
-import TableNotFoundError"], ["deltalake", 22, "from deltalake import
-DeltaTable, write_deltalake"], ["pyarrow", 315, "import pyarrow.compute as
-pc"]], "bioetl.infrastructure.quarantine.unified_quarantine":
-[["bioetl.domain.types", 28, "from bioetl.domain.types import BatchID,
-ContentHash, DQStatus"], ["collections", 21, "from collections.abc import
-Iterator"], ["typing", 23, "from typing import Any"], ["json", 20, "import
-json"], ["pyarrow", 214, "import pyarrow.compute as pc"], ["pyarrow", 288,
-"import pyarrow.compute as pc"], ["datetime", 22, "from datetime import UTC,
-datetime, timedelta"], ["deltalake", 25, "from deltalake import DeltaTable,
-write_deltalake"], ["hashlib", 19, "import hashlib"], ["deltalake", 26, "from
-deltalake.exceptions import TableNotFoundError"]],
-"bioetl.infrastructure.adapters.http.rate_limiter": [["__future__", 7, "from
-__future__ import annotations"], ["dataclasses", 11, "from dataclasses import
-dataclass, field"], ["time", 10, "import time"], ["asyncio", 9, "import
-asyncio"]], "bioetl.application.core.pipeline_config": [["dataclasses", 7,
-"from dataclasses import dataclass"], ["bioetl.domain.types", 9, "from
-bioetl.domain.types import RunType"]], "bioetl.domain.exceptions": [],
-"bioetl.domain.transformations": [["typing", 18, "from typing import Any"],
-["json", 14, "import json"], ["datetime", 16, "from datetime import date,
-datetime"], ["math", 15, "import math"], ["hashlib", 13, "import hashlib"],
-["functools", 17, "from functools import singledispatch"],
-["bioetl.domain.types", 20, "from .types import ContentHash, DriftLevel,
-EntityID"]], "bioetl.infrastructure.factories.clients": [["__future__", 7,
-"from __future__ import annotations"], ["bioetl.config", 14, "from
-bioetl.config import Settings"], ["redis", 11, "import redis.asyncio as
-aioredis"], ["typing", 9, "from typing import TYPE_CHECKING"]],
-"bioetl.infrastructure.storage.delta_writer": [["datetime", 22, "from datetime
-import datetime"], ["deltalake", 27, "from deltalake.exceptions import
-DeltaError, SchemaMismatchError"], ["pyarrow", 29, "from pyarrow import
-ArrowTypeError"], ["asyncio", 21, "import asyncio"], ["deltalake", 28, "from
-deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError"],
-["typing", 23, "from typing import Any"], ["pyarrow", 25, "import pyarrow as
-pa"], ["bioetl.domain.exceptions", 31, "from bioetl.domain.exceptions import
-("], ["deltalake", 26, "from deltalake import DeltaTable, write_deltalake"]],
-"bioetl.infrastructure.storage.bronze_writer": [["asyncio", 18, "import
-asyncio"], ["json", 19, "import json"], ["typing", 24, "from typing import
-Any"], ["botocore", 27, "from botocore.exceptions import ClientError"],
-["pathlib", 23, "from pathlib import Path"], ["bioetl.domain.types", 29, "from
-bioetl.domain.types import BatchID"], ["collections", 20, "from
-collections.abc import AsyncIterator, Iterator"],
-["bioetl.infrastructure.storage.s3_pool", 87, "from
-bioetl.infrastructure.storage.s3_pool import S3ClientPool"], ["datetime", 21,
-"from datetime import datetime"], ["bioetl.domain.exceptions", 30, "from
-bioetl.domain.exceptions import BucketNotFoundError, UploadError"],
-["zstandard", 26, "import zstandard as zstd"], ["io", 22, "from io import
-BytesIO"]], "bioetl.infrastructure.adapters.http":
-[["bioetl.infrastructure.adapters.http.client", 10, "from
-bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient"],
-["bioetl.infrastructure.adapters.http.rate_limiter", 11, "from
-bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket"],
-["bioetl.infrastructure.adapters.http.circuit_breaker", 9, "from
-bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker"]],
-"bioetl.application.core.protocols": [["typing", 7, "from typing import Any,
-Protocol"], ["collections", 6, "from collections.abc import Awaitable"],
-["__future__", 4, "from __future__ import annotations"],
-["bioetl.domain.context", 9, "from bioetl.domain.context import
-PipelineContext"]], "bioetl.application.core.shutdown": [["asyncio", 7,
-"import asyncio"], ["dataclasses", 8, "from dataclasses import dataclass,
-field"]], "bioetl.domain.context": [["typing", 4, "from typing import Any,
-Protocol"], ["bioetl.domain.types", 6, "from bioetl.domain.types import RunID,
-RunType"], ["dataclasses", 3, "from dataclasses import dataclass"]],
-"bioetl.application.core.checkpoint_manager": [["typing", 8, "from typing
-import TYPE_CHECKING, Any"], ["bioetl.domain.types", 11, "from
-bioetl.domain.types import RunID, Watermark"], ["structlog", 14, "import
-structlog"], ["collections", 7, "from collections.abc import Callable"],
-["bioetl.domain.ports", 10, "from bioetl.domain.ports import
-CheckpointPort"]], "bioetl.infrastructure.observability.noop_metrics":
-[["typing", 11, "from typing import TYPE_CHECKING"], ["warnings", 10, "import
-warnings"], ["bioetl.domain.ports", 13, "from bioetl.domain.ports import
-MetricsPort"]], "bioetl.infrastructure.adapters.chembl.client":
-[["bioetl.infrastructure.adapters.http.rate_limiter", 19, "from
-bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket"],
-["bioetl.domain.exceptions", 16, "from bioetl.domain.exceptions import
-ChemblApiError"], ["__future__", 9, "from __future__ import annotations"],
-["bioetl.infrastructure.adapters.http.client", 18, "from
-bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient"],
-["bioetl.domain.types", 17, "from bioetl.domain.types import HealthStatus,
-Watermark"], ["concurrent", 23, "from concurrent.futures import
-ThreadPoolExecutor"], ["asyncio", 11, "import asyncio"],
-["bioetl.infrastructure.adapters.http.circuit_breaker", 27, "from
-bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker"],
-["httpx", 25, "from httpx import Response"], ["datetime", 13, "from datetime
-import datetime"], ["collections", 22, "from collections.abc import
-AsyncIterator, Iterator"], ["dataclasses", 12, "from dataclasses import
-dataclass, field"], ["typing", 14, "from typing import TYPE_CHECKING, Any"]],
-"bioetl.infrastructure": [], "bioetl.application.core.orchestrator":
-[["bioetl.application.core.shutdown", 23, "from
-bioetl.application.core.shutdown import PipelineShutdownError,
-ShutdownSignal"], ["bioetl.application.core.checkpoint_manager", 17, "from
-bioetl.application.core.checkpoint_manager import CheckpointManager"],
-["bioetl.application.core.executor", 31, "from
-bioetl.application.core.executor import PipelineExecutor"], ["asyncio", 12,
-"import asyncio"], ["structlog", 29, "import structlog"], ["time", 14, "import
-time"], ["bioetl.config", 24, "from bioetl.config import get_settings"],
-["typing", 15, "from typing import TYPE_CHECKING, Any"],
-["bioetl.domain.types", 26, "from bioetl.domain.types import RunType"],
-["bioetl.domain.context", 25, "from bioetl.domain.context import
-PipelineContext"], ["__future__", 10, "from __future__ import annotations"],
-["signal", 13, "import signal"], ["bioetl.application.core.pipeline_config",
-18, "from bioetl.application.core.pipeline_config import ("],
-["bioetl.application.core.pipeline_services", 22, "from
-bioetl.application.core.pipeline_services import PipelineServices"]],
-"bioetl.infrastructure.adapters.pubchem": [],
-"bioetl.infrastructure.observability.logging": [["typing", 20, "from typing
-import Any"], ["structlog", 23, "import structlog"], ["uuid", 21, "from uuid
-import UUID"], ["logging", 18, "import logging"], ["sys", 19, "import sys"]],
-"bioetl.infrastructure.adapters.chembl":
-[["bioetl.infrastructure.adapters.chembl.client", 7, "from
-bioetl.infrastructure.adapters.chembl.client import ChemblAdapter"]],
-"bioetl.infrastructure.storage.s3_pool": [["boto3", 18, "import boto3"],
-["threading", 15, "import threading"], ["typing", 16, "from typing import Any,
-ClassVar"], ["__future__", 13, "from __future__ import annotations"],
-["botocore", 19, "from botocore.config import Config"]],
-"bioetl.infrastructure.storage":
-[["bioetl.infrastructure.storage.gold_writer", 16, "from
-bioetl.infrastructure.storage.gold_writer import GoldWriter"],
-["bioetl.infrastructure.storage.delta_writer", 15, "from
-bioetl.infrastructure.storage.delta_writer import DeltaWriter"],
-["bioetl.domain.exceptions", 6, "from bioetl.domain.exceptions import ("],
-["bioetl.infrastructure.storage.bronze_writer", 14, "from
-bioetl.infrastructure.storage.bronze_writer import BronzeWriter"]],
-"bioetl.config": [["pydantic", 21, "from pydantic import Field, SecretStr,
-model_validator"], ["functools", 16, "from functools import lru_cache"],
-["__future__", 14, "from __future__ import annotations"],
-["pydantic_settings", 22, "from pydantic_settings import ("], ["typing", 18,
-"from typing import Any, Literal"], ["pathlib", 17, "from pathlib import
-Path"], ["yaml", 20, "import yaml"]],
-"bioetl.infrastructure.adapters.uniprot.client":
-[["bioetl.infrastructure.adapters.http.circuit_breaker", 22, "from
-bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker"],
-["bioetl.infrastructure.adapters.http.rate_limiter", 23, "from
-bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket"],
-["bioetl.config", 20, "from bioetl.config import get_settings"], ["logging",
-14, "import logging"], ["httpx", 18, "import httpx"], ["collections", 15,
-"from collections.abc import AsyncIterator"], ["bioetl.domain.types", 21,
-"from bioetl.domain.types import HealthStatus, Watermark"], ["typing", 16,
-"from typing import Any"]], "bioetl.domain.error_classifier":
-[["bioetl.domain.types", 14, "from bioetl.domain.types import ErrorType"],
-["bioetl.domain.exceptions", 8, "from bioetl.domain.exceptions import ("]],
-"bioetl.infrastructure.adapters.pubchem.client": [["asyncio", 14, "import
-asyncio"], ["logging", 15, "import logging"], ["bioetl.domain.types", 23,
-"from bioetl.domain.types import HealthStatus, Watermark"], ["bioetl.config",
-22, "from bioetl.config import get_settings"], ["collections", 16, "from
-collections.abc import AsyncIterator"], ["typing", 18, "from typing import
-Any"], ["bioetl.infrastructure.adapters.http.circuit_breaker", 24, "from
-bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker"],
-["concurrent", 17, "from concurrent.futures import ThreadPoolExecutor"],
-["pubchempy", 20, "import pubchempy as pcp"],
-["bioetl.infrastructure.adapters.http.rate_limiter", 25, "from
-bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket"]],
-"bioetl": [], "bioetl.application.core.record_processor": [["json", 7, "import
-json"], ["bioetl.domain.types", 16, "from bioetl.domain.types import
-BatchID"], ["bioetl.domain.error_classifier", 14, "from
-bioetl.domain.error_classifier import ErrorClassifier"],
-["bioetl.application.core.quarantine_manager", 12, "from
-bioetl.application.core.quarantine_manager import QuarantineManager"],
-["__future__", 5, "from __future__ import annotations"],
-["bioetl.domain.ports", 15, "from bioetl.domain.ports import StoragePort"],
-["typing", 9, "from typing import TYPE_CHECKING, Any"], ["datetime", 8, "from
-datetime import UTC, datetime"], ["bioetl.domain.context", 13, "from
-bioetl.domain.context import PipelineContext"],
-["bioetl.application.core.protocols", 11, "from
-bioetl.application.core.protocols import GoldFilterCallback,
-TransformCallback"]], "bioetl.application.core.lock_manager":
-[["bioetl.domain.ports", 9, "from bioetl.domain.ports import LockPort"],
-["__future__", 3, "from __future__ import annotations"], ["typing", 6, "from
-typing import TYPE_CHECKING"], ["bioetl.domain.types", 10, "from
-bioetl.domain.types import RunID, RunType"], ["asyncio", 5, "import asyncio"],
-["bioetl.application.core.shutdown", 8, "from bioetl.application.core.shutdown
-import PipelineShutdownError, ShutdownSignal"], ["structlog", 13, "import
-structlog"]], "bioetl.application": [], "bioetl.infrastructure.orchestration":
-[], "bioetl.infrastructure.orchestration.signals":
-[["bioetl.application.core.shutdown", 12, "from
-bioetl.application.core.shutdown import ShutdownSignal"], ["typing", 8, "from
-typing import Any"], ["structlog", 10, "import structlog"], ["signal", 7,
-"import signal"]], "bioetl.infrastructure.quarantine": [],
-"bioetl.infrastructure.orchestration.prefect": [],
-"bioetl.infrastructure.observability.anomaly": [["collections", 33, "from
-collections.abc import Sequence"], ["dataclasses", 27, "from dataclasses
-import dataclass"], ["typing", 30, "from typing import TYPE_CHECKING"],
-["enum", 29, "from enum import Enum"], ["datetime", 28, "from datetime import
-UTC, datetime"], ["__future__", 23, "from __future__ import annotations"],
-["statistics", 26, "import statistics"], ["logging", 25, "import logging"]],
-"bioetl.infrastructure.locking.redis_lock": [["__future__", 15, "from
-__future__ import annotations"], ["redis", 24, "from redis.asyncio import
-Redis"], ["bioetl.domain.exceptions", 26, "from bioetl.domain.exceptions
-import LockAcquisitionError, LockLostError"], ["asyncio", 17, "import
-asyncio"], ["bioetl.domain.types", 27, "from bioetl.domain.types import
-RunID"], ["dataclasses", 18, "from dataclasses import dataclass, field"],
-["uuid", 22, "from uuid import UUID"], ["typing", 19, "from typing import
-TYPE_CHECKING"]], "bioetl.application.pipelines.chembl_activity":
-[["bioetl.domain.types", 22, "from bioetl.domain.types import Watermark"],
-["bioetl.application.core.base", 15, "from bioetl.application.core.base import
-BasePipeline"], ["bioetl.domain.context", 25, "from bioetl.domain.context
-import PipelineContext"], ["__future__", 10, "from __future__ import
-annotations"], ["datetime", 254, "from datetime import datetime"],
-["datetime", 12, "from datetime import UTC"],
-["bioetl.application.core.pipeline_config", 16, "from
-bioetl.application.core.pipeline_config import ("],
-["bioetl.application.core.pipeline_services", 20, "from
-bioetl.application.core.pipeline_services import PipelineServices"],
-["bioetl.domain.transformations", 21, "from bioetl.domain.transformations
-import generate_content_hash, generate_entity_id"], ["typing", 13, "from
-typing import TYPE_CHECKING, Any"]], "bioetl.application.core.executor":
-[["bioetl.domain.context", 15, "from bioetl.domain.context import
-PipelineContext"], ["uuid", 9, "from uuid import uuid4"],
-["bioetl.application.core.checkpoint_manager", 11, "from
-bioetl.application.core.checkpoint_manager import CheckpointManager"],
-["__future__", 5, "from __future__ import annotations"],
-["bioetl.application.core.record_processor", 13, "from
-bioetl.application.core.record_processor import RecordProcessor"],
-["collections", 7, "from collections.abc import AsyncIterator"],
-["bioetl.application.core.protocols", 12, "from
-bioetl.application.core.protocols import GoldFilterCallback,
-TransformCallback"], ["bioetl.domain.types", 18, "from bioetl.domain.types
-import BatchID, Watermark"], ["typing", 8, "from typing import Any"],
-["bioetl.application.core.shutdown", 14, "from
-bioetl.application.core.shutdown import PipelineShutdownError,
-ShutdownSignal"], ["bioetl.domain.error_classifier", 16, "from
-bioetl.domain.error_classifier import ErrorClassifier"],
-["bioetl.domain.ports", 17, "from bioetl.domain.ports import DataSourcePort,
-StoragePort"]], "bioetl.infrastructure.factories.storage":
-[["bioetl.infrastructure.storage.delta_writer", 8, "from
-bioetl.infrastructure.storage.delta_writer import DeltaWriter"],
-["bioetl.infrastructure.storage.bronze_writer", 7, "from
-bioetl.infrastructure.storage.bronze_writer import BronzeWriter"], ["typing",
-4, "from typing import Any"], ["bioetl.infrastructure.storage.gold_writer", 9,
-"from bioetl.infrastructure.storage.gold_writer import GoldWriter"],
-["collections", 3, "from collections.abc import Iterable"],
-["bioetl.domain.types", 6, "from bioetl.domain.types import BatchID"]],
-"bioetl.infrastructure.orchestration.runner": [["typing", 9, "from typing
-import TYPE_CHECKING"], ["structlog", 23, "import structlog"],
-["bioetl.config", 19, "from bioetl.config import get_settings"], ["time", 8,
-"import time"], ["__future__", 6, "from __future__ import annotations"],
-["bioetl.application.core.checkpoint_manager", 11, "from
-bioetl.application.core.checkpoint_manager import CheckpointManager"],
-["bioetl.domain.context", 20, "from bioetl.domain.context import
-PipelineContext"], ["bioetl.application.core.shutdown", 18, "from
-bioetl.application.core.shutdown import PipelineShutdownError,
-ShutdownSignal"], ["bioetl.application.core.pipeline_config", 13, "from
-bioetl.application.core.pipeline_config import ("],
-["bioetl.application.core.executor", 24, "from
-bioetl.application.core.executor import PipelineExecutor"],
-["bioetl.application.core.lock_manager", 12, "from
-bioetl.application.core.lock_manager import LockManager"],
-["bioetl.application.core.pipeline_services", 17, "from
-bioetl.application.core.pipeline_services import PipelineServices"]],
-"bioetl.infrastructure.adapters.uniprot": [],
-"bioetl.infrastructure.adapters.http.circuit_breaker": [["dataclasses", 15,
-"from dataclasses import dataclass, field"], ["__future__", 11, "from
-__future__ import annotations"], ["asyncio", 13, "import asyncio"], ["typing",
-16, "from typing import TYPE_CHECKING, ParamSpec, TypeVar"], ["collections",
-24, "from collections.abc import Awaitable, Callable"], ["httpx", 18, "import
-httpx"], ["bioetl.domain.exceptions", 20, "from bioetl.domain.exceptions
-import CircuitBreakerOpenError"], ["time", 14, "import time"],
-["bioetl.domain.types", 21, "from bioetl.domain.types import
-CircuitBreakerState"]], "bioetl.domain.types": [["enum", 8, "from enum import
-Enum"], ["typing", 9, "from typing import NewType, TypeAlias"], ["datetime",
-7, "from datetime import datetime"], ["uuid", 10, "from uuid import UUID"]],
-"bioetl.application.core.pipeline_services": [["bioetl.domain.ports", 11,
-"from bioetl.domain.ports import ("], ["typing", 9, "from typing import
-TYPE_CHECKING"], ["asyncio", 7, "import asyncio"], ["dataclasses", 8, "from
-dataclasses import dataclass"], ["structlog", 21, "import structlog"]],
-"bioetl.domain": [["bioetl.domain.exceptions", 4, "from
-bioetl.domain.exceptions import ("], ["bioetl.domain.types", 28, "from
-bioetl.domain.types import ("]], "bioetl.infrastructure.factories": [],
-"bioetl.application.pipelines": [], "bioetl.bootstrap": [["structlog", 40,
-"import structlog"], ["bioetl.infrastructure.storage.bronze_writer", 34, "from
-bioetl.infrastructure.storage.bronze_writer import BronzeWriter"],
-["bioetl.application.core.pipeline_services", 13, "from
-bioetl.application.core.pipeline_services import PipelineServices"],
-["bioetl.infrastructure.adapters.http.circuit_breaker", 18, "from
-bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker"],
-["uuid", 38, "from uuid import UUID"], ["bioetl.domain.types", 43, "from
-bioetl.domain.types import RunType"],
-["bioetl.application.pipelines.chembl_activity", 42, "from
-bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline"],
-["bioetl.infrastructure.observability.noop_metrics", 31, "from
-bioetl.infrastructure.observability.noop_metrics import NoOpMetrics"],
-["bioetl.config", 15, "from bioetl.config import Settings, get_settings"],
-["__future__", 7, "from __future__ import annotations"],
-["bioetl.infrastructure.factories.clients", 22, "from
-bioetl.infrastructure.factories.clients import ("],
-["bioetl.infrastructure.observability.logging", 28, "from
-bioetl.infrastructure.observability.logging import ("],
-["bioetl.infrastructure.storage.delta_writer", 35, "from
-bioetl.infrastructure.storage.delta_writer import DeltaWriter"],
-["bioetl.infrastructure.checkpoint.s3_checkpoint", 21, "from
-bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint"],
-["bioetl.infrastructure.quarantine.unified_quarantine", 33, "from
-bioetl.infrastructure.quarantine.unified_quarantine import
-UnifiedQuarantine"],
-["bioetl.infrastructure.observability.prometheus_metrics", 32, "from
-bioetl.infrastructure.observability.prometheus_metrics import
-PrometheusMetrics"], ["bioetl.domain.ports", 16, "from bioetl.domain.ports
-import MetricsPort"], ["bioetl.infrastructure.adapters.http.client", 19, "from
-bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient"],
-["bioetl.application.pipelines.chembl_activity", 14, "from
-bioetl.application.pipelines.chembl_activity import CHEMBL_ACTIVITY_CONFIG"],
-["bioetl.infrastructure.adapters.http.rate_limiter", 20, "from
-bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket"],
-["bioetl.application.core.base", 11, "from bioetl.application.core.base import
-BasePipeline"], ["bioetl.infrastructure.adapters.chembl.client", 17, "from
-bioetl.infrastructure.adapters.chembl.client import ChemblAdapter"],
-["bioetl.infrastructure.locking.redis_lock", 27, "from
-bioetl.infrastructure.locking.redis_lock import RedisDistributedLock"],
-["bioetl.infrastructure.factories.storage", 26, "from
-bioetl.infrastructure.factories.storage import StorageAdapter"],
-["bioetl.application.core.pipeline_config", 12, "from
-bioetl.application.core.pipeline_config import PipelineRuntimeConfig"],
-["typing", 9, "from typing import TYPE_CHECKING"],
-["bioetl.application.pipelines.chembl_activity", 157, "from
-bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline"]],
-"bioetl.infrastructure.observability.prometheus_metrics":
-[["bioetl.infrastructure.observability.metrics", 8, "from
-bioetl.infrastructure.observability.metrics import ("],
-["bioetl.domain.ports", 7, "from bioetl.domain.ports import MetricsPort"]],
-"bioetl.application.core.quarantine_manager": [["typing", 6, "from typing
-import Any"], ["bioetl.domain.types", 9, "from bioetl.domain.types import
-BatchID, ErrorType"], ["bioetl.domain.ports", 8, "from bioetl.domain.ports
-import QuarantinePort"]], "bioetl.infrastructure.adapters.http.client":
-[["typing", 16, "from typing import TYPE_CHECKING, Any"], ["__future__", 10,
-"from __future__ import annotations"], ["contextlib", 14, "from contextlib
-import suppress"], ["asyncio", 12, "import asyncio"],
-["bioetl.domain.exceptions", 20, "from bioetl.domain.exceptions import
-CircuitBreakerOpenError, RetryExhaustedError"], ["dataclasses", 15, "from
-dataclasses import dataclass, field"], ["random", 13, "import random"],
-["httpx", 18, "import httpx"], ["bioetl.domain.types", 24, "from
-bioetl.domain.types import RunID"],
-["bioetl.infrastructure.adapters.http.rate_limiter", 25, "from
-bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket"],
-["bioetl.infrastructure.adapters.http.circuit_breaker", 21, "from
-bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker"]],
-"bioetl.infrastructure.observability.lineage": [["pathlib", 153, "from pathlib
-import Path"], ["typing", 40, "from typing import TYPE_CHECKING, Any"],
-["uuid", 41, "from uuid import uuid4"], ["datetime", 39, "from datetime import
-UTC, datetime"], ["deltalake", 44, "from deltalake import DeltaTable,
-write_deltalake"], ["logging", 37, "import logging"], ["dataclasses", 38,
-"from dataclasses import asdict, dataclass"], ["pathlib", 47, "from pathlib
-import Path"], ["polars", 43, "import polars as pl"], ["__future__", 35, "from
-__future__ import annotations"]],
-"bioetl.infrastructure.observability.metrics": [["prometheus_client", 5, "from
-prometheus_client import Counter, Histogram"], ["prometheus_client", 8, "from
-prometheus_client import CollectorRegistry"], ["typing", 3, "from typing
-import TYPE_CHECKING"]], "bioetl.domain.ports": [["collections", 10, "from
-collections.abc import AsyncIterator, Iterable"], ["typing", 11, "from typing
-import Any, Protocol, runtime_checkable"], ["bioetl.domain.types", 13, "from
-bioetl.domain.types import ("]], "bioetl.application.core":
-[["bioetl.application.core.checkpoint_manager", 8, "from
-bioetl.application.core.checkpoint_manager import CheckpointManager"],
-["bioetl.application.core.pipeline_config", 12, "from
-bioetl.application.core.pipeline_config import ("],
-["bioetl.application.core.orchestrator", 11, "from
-bioetl.application.core.orchestrator import PipelineOrchestrator"],
-["bioetl.application.core.base", 19, "from bioetl.application.core.base import
-BasePipeline"], ["bioetl.application.core.shutdown", 18, "from
-bioetl.application.core.shutdown import PipelineShutdownError,
-ShutdownSignal"], ["bioetl.application.core.executor", 9, "from
-bioetl.application.core.executor import PipelineExecutor"],
-["bioetl.application.core.pipeline_services", 16, "from
-bioetl.application.core.pipeline_services import PipelineServices"],
-["bioetl.application.core.lock_manager", 10, "from
-bioetl.application.core.lock_manager import LockManager"],
-["bioetl.application.core.quarantine_manager", 17, "from
-bioetl.application.core.quarantine_manager import QuarantineManager"]],
-"bioetl.infrastructure.checkpoint.s3_checkpoint": [["datetime", 205, "from
-datetime import datetime"], ["asyncio", 19, "import asyncio"],
-["bioetl.infrastructure.storage.s3_pool", 73, "from
-bioetl.infrastructure.storage.s3_pool import S3ClientPool"],
-["bioetl.domain.types", 27, "from bioetl.domain.types import RunID,
-Watermark"], ["botocore", 24, "from botocore.exceptions import ClientError"],
-["typing", 21, "from typing import Any"], ["uuid", 22, "from uuid import
-UUID"], ["json", 20, "import json"], ["bioetl.domain.exceptions", 26, "from
-bioetl.domain.exceptions import CheckpointConflictError"]],
-"bioetl.infrastructure.checkpoint": []}
-.import_linter_cache\bioetl.meta.json:1:{"bioetl.infrastructure.adapters":
-1765859941.3806627, "bioetl.infrastructure.locking": 1765860090.2279656,
-"bioetl.application.core.base": 1765901096.7378933, "bioetl.cli":
-1765899725.623967, "bioetl.infrastructure.observability": 1765860132.3171563,
-"bioetl.infrastructure.orchestration.prefect.tasks": 1765899199.3599923,
-"bioetl.infrastructure.storage.gold_writer": 1765894547.799188,
-"bioetl.infrastructure.quarantine.unified_quarantine": 1765900908.1108317,
-"bioetl.infrastructure.adapters.http.rate_limiter": 1765860054.127681,
-"bioetl.application.core.pipeline_config": 1765897155.3023179,
-"bioetl.domain.exceptions": 1765882014.188965,
-"bioetl.domain.transformations": 1765900622.8615494,
-"bioetl.infrastructure.factories.clients": 1765873712.023164,
-"bioetl.infrastructure.storage.delta_writer": 1765899661.961374,
-"bioetl.infrastructure.storage.bronze_writer": 1765899641.2905285,
-"bioetl.infrastructure.adapters.http": 1765859983.8529382,
-"bioetl.application.core.protocols": 1765900457.8208692,
-"bioetl.application.core.shutdown": 1765897533.6879022,
-"bioetl.domain.context": 1765900622.8804984,
-"bioetl.application.core.checkpoint_manager": 1765900477.1222322,
-"bioetl.infrastructure.observability.noop_metrics": 1765886997.1688893,
-"bioetl.infrastructure.adapters.chembl.client": 1765901287.2574599,
-"bioetl.infrastructure": 1765859933.735997,
-"bioetl.application.core.orchestrator": 1765901131.5659456,
-"bioetl.infrastructure.adapters.pubchem": 1765822907.4441223,
-"bioetl.infrastructure.observability.logging": 1765867269.4585629,
-"bioetl.infrastructure.adapters.chembl": 1765859951.1219223,
-"bioetl.infrastructure.storage.s3_pool": 1765880237.1501608,
-"bioetl.infrastructure.storage": 1765899619.398183, "bioetl.config":
-1765892496.2025397, "bioetl.infrastructure.adapters.uniprot.client":
-1765879057.4958577, "bioetl.domain.error_classifier": 1765882619.8661692,
-"bioetl.infrastructure.adapters.pubchem.client": 1765879085.5142486, "bioetl":
-1765877256.2466967, "bioetl.application.core.record_processor":
-1765900270.0987837, "bioetl.application.core.lock_manager":
-1765899945.3860617, "bioetl.application": 1765823233.7033825,
-"bioetl.infrastructure.orchestration": 1765899160.8544319,
-"bioetl.infrastructure.orchestration.signals": 1765899182.1245668,
-"bioetl.infrastructure.quarantine": 1765822379.0133438,
-"bioetl.infrastructure.orchestration.prefect": 1765899187.2563083,
-"bioetl.infrastructure.observability.anomaly": 1765860882.017495,
-"bioetl.infrastructure.locking.redis_lock": 1765900725.107079,
-"bioetl.application.pipelines.chembl_activity": 1765900994.4262502,
-"bioetl.application.core.executor": 1765901066.9601808,
-"bioetl.infrastructure.factories.storage": 1765901212.3595164,
-"bioetl.infrastructure.orchestration.runner": 1765901156.5455992,
-"bioetl.infrastructure.adapters.uniprot": 1765822963.1110911,
-"bioetl.infrastructure.adapters.http.circuit_breaker": 1765882133.6893947,
-"bioetl.domain.types": 1765900551.7545962,
-"bioetl.application.core.pipeline_services": 1765897961.4898043,
-"bioetl.domain": 1765882257.7151134, "bioetl.infrastructure.factories":
-1765862275.2201588, "bioetl.application.pipelines": 1765823300.2981966,
-"bioetl.bootstrap": 1765899922.8518946,
-"bioetl.infrastructure.observability.prometheus_metrics": 1765877079.239441,
-"bioetl.application.core.quarantine_manager": 1765900502.1524882,
-"bioetl.infrastructure.adapters.http.client": 1765882113.6973178,
-"bioetl.infrastructure.observability.lineage": 1765860204.2969503,
-"bioetl.infrastructure.observability.metrics": 1765864778.1515348,
-"bioetl.domain.ports": 1765897942.433441, "bioetl.application.core":
-1765900741.9979782, "bioetl.infrastructure.checkpoint.s3_checkpoint":
-1765901068.2179837, "bioetl.infrastructure.checkpoint": 1765822326.9349895}
-.mypy_cache\3.11\bioetl\cli.data.json:1:{".class":"MypyFile","_fullname":"bioet
-l.cli","future_import_flags":["annotations"],"is_partial_stub_package":false,"i
-s_stub":false,"names":{".class":"SymbolTable","PipelineRunner":{".class":"Symbo
-lTableNode","cross_ref":"bioetl.infrastructure.orchestration.runner.PipelineRun
-ner","kind":"Gdef","module_hidden":true,"module_public":false},"PipelineShutdow
-nError":{".class":"SymbolTableNode","cross_ref":"bioetl.application.core.shutdo
-wn.PipelineShutdownError","kind":"Gdef","module_hidden":true,"module_public":fa
-lse},"RunType":{".class":"SymbolTableNode","cross_ref":"bioetl.domain.types.Run
-Type","kind":"Gdef","module_hidden":true,"module_public":false},"TYPE_CHECKING"
-:{".class":"SymbolTableNode","cross_ref":"typing.TYPE_CHECKING","kind":"Gdef","
-module_hidden":true,"module_public":false},"__annotations__":{".class":"SymbolT
-ableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":
-"bioetl.cli.__annotations__","name":"__annotations__","setter_type":null,"type"
-:{".class":"Instance","args":["builtins.str",{".class":"AnyType","missing_impor
-t_name":null,"source_any":null,"type_of_any":6}],"extra_attrs":null,"type_ref":
-"builtins.dict"}}},"__doc__":{".class":"SymbolTableNode","kind":"Gdef","node":{
-".class":"Var","flags":["is_ready"],"fullname":"bioetl.cli.__doc__","name":"__d
-oc__","setter_type":null,"type":"builtins.str"}},"__file__":{".class":"SymbolTa
-bleNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"
-bioetl.cli.__file__","name":"__file__","setter_type":null,"type":"builtins.str"
-}},"__name__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var",
-"flags":["is_ready"],"fullname":"bioetl.cli.__name__","name":"__name__","setter
-_type":null,"type":"builtins.str"}},"__package__":{".class":"SymbolTableNode","
-kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.cli
-.__package__","name":"__package__","setter_type":null,"type":"builtins.str"}},"
-__spec__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","fla
-gs":["is_ready"],"fullname":"bioetl.cli.__spec__","name":"__spec__","setter_typ
-e":null,"type":"_frozen_importlib.ModuleSpec"}},"annotations":{".class":"Symbol
-TableNode","cross_ref":"__future__.annotations","kind":"Gdef","module_hidden":t
-rue,"module_public":false},"asyncio":{".class":"SymbolTableNode","cross_ref":"a
-syncio","kind":"Gdef","module_hidden":true,"module_public":false},"bootstrap_pi
-peline":{".class":"SymbolTableNode","cross_ref":"bioetl.bootstrap.bootstrap_pip
-eline","kind":"Gdef","module_hidden":true,"module_public":false},"checkpoint":{
-".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Decorator","func":{"
-.class":"FuncDef","abstract_status":0,"arg_kinds":[],"arg_names":[],"dataclass_
-transform_spec":null,"deprecated":null,"flags":["is_decorated"],"fullname":"bio
-etl.cli.checkpoint","name":"checkpoint","original_first_arg":null,"type":{".cla
-ss":"CallableType","arg_kinds":[],"arg_names":[],"arg_types":[],"fallback":"bui
-ltins.function","from_concatenate":false,"implicit":false,"imprecise_arg_kinds"
-:false,"is_bound":false,"is_ellipsis_args":false,"name":"checkpoint","ret_type"
-:{".class":"NoneType"},"type_guard":null,"type_is":null,"unpack_kwargs":false,"
-variables":[]}},"is_overload":false,"var":{".class":"Var","flags":["is_ready","
-is_inferred"],"fullname":"bioetl.cli.checkpoint","name":"checkpoint","setter_ty
-pe":null,"type":"click.core.Group"}}},"checkpoint_list":{".class":"SymbolTableN
-ode","kind":"Gdef","node":{".class":"Decorator","func":{".class":"FuncDef","abs
-tract_status":0,"arg_kinds":[],"arg_names":[],"dataclass_transform_spec":null,"
-deprecated":null,"flags":["is_decorated"],"fullname":"bioetl.cli.checkpoint_lis
-t","name":"checkpoint_list","original_first_arg":null,"type":{".class":"Callabl
-eType","arg_kinds":[],"arg_names":[],"arg_types":[],"fallback":"builtins.functi
-on","from_concatenate":false,"implicit":false,"imprecise_arg_kinds":false,"is_b
-ound":false,"is_ellipsis_args":false,"name":"checkpoint_list","ret_type":{".cla
-ss":"NoneType"},"type_guard":null,"type_is":null,"unpack_kwargs":false,"variabl
-es":[]}},"is_overload":false,"var":{".class":"Var","flags":["is_ready","is_infe
-rred"],"fullname":"bioetl.cli.checkpoint_list","name":"checkpoint_list","setter
-_type":null,"type":"click.core.Command"}}},"cli":{".class":"SymbolTableNode","k
-ind":"Gdef","node":{".class":"Decorator","func":{".class":"FuncDef","abstract_s
-tatus":0,"arg_kinds":[],"arg_names":[],"dataclass_transform_spec":null,"depreca
-ted":null,"flags":["is_decorated"],"fullname":"bioetl.cli.cli","name":"cli","or
-iginal_first_arg":null,"type":{".class":"CallableType","arg_kinds":[],"arg_name
-s":[],"arg_types":[],"fallback":"builtins.function","from_concatenate":false,"i
-mplicit":false,"imprecise_arg_kinds":false,"is_bound":false,"is_ellipsis_args":
-false,"name":"cli","ret_type":{".class":"NoneType"},"type_guard":null,"type_is"
-:null,"unpack_kwargs":false,"variables":[]}},"is_overload":false,"var":{".class
-":"Var","flags":["is_ready","is_inferred"],"fullname":"bioetl.cli.cli","name":"
-cli","setter_type":null,"type":"click.core.Group"}}},"click":{".class":"SymbolT
-ableNode","cross_ref":"click","kind":"Gdef","module_hidden":true,"module_public
-":false},"main":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Fun
-cDef","abstract_status":0,"arg_kinds":[],"arg_names":[],"dataclass_transform_sp
-ec":null,"deprecated":null,"flags":[],"fullname":"bioetl.cli.main","name":"main
-","original_first_arg":null,"type":{".class":"CallableType","arg_kinds":[],"arg
-_names":[],"arg_types":[],"fallback":"builtins.function","from_concatenate":fal
-se,"implicit":false,"imprecise_arg_kinds":false,"is_bound":false,"is_ellipsis_a
-rgs":false,"name":"main","ret_type":{".class":"NoneType"},"type_guard":null,"ty
-pe_is":null,"unpack_kwargs":false,"variables":[]}}},"quarantine":{".class":"Sym
-bolTableNode","kind":"Gdef","node":{".class":"Decorator","func":{".class":"Func
-Def","abstract_status":0,"arg_kinds":[],"arg_names":[],"dataclass_transform_spe
-c":null,"deprecated":null,"flags":["is_decorated"],"fullname":"bioetl.cli.quara
-ntine","name":"quarantine","original_first_arg":null,"type":{".class":"Callable
-Type","arg_kinds":[],"arg_names":[],"arg_types":[],"fallback":"builtins.functio
-n","from_concatenate":false,"implicit":false,"imprecise_arg_kinds":false,"is_bo
-und":false,"is_ellipsis_args":false,"name":"quarantine","ret_type":{".class":"N
-oneType"},"type_guard":null,"type_is":null,"unpack_kwargs":false,"variables":[]
-}},"is_overload":false,"var":{".class":"Var","flags":["is_ready","is_inferred"]
-,"fullname":"bioetl.cli.quarantine","name":"quarantine","setter_type":null,"typ
-e":"click.core.Group"}}},"quarantine_inspect":{".class":"SymbolTableNode","kind
-":"Gdef","node":{".class":"Decorator","func":{".class":"FuncDef","abstract_stat
-us":0,"arg_kinds":[0,0],"arg_names":["pipeline","limit"],"dataclass_transform_s
-pec":null,"deprecated":null,"flags":["is_decorated"],"fullname":"bioetl.cli.qua
-rantine_inspect","name":"quarantine_inspect","original_first_arg":"pipeline","t
-ype":{".class":"CallableType","arg_kinds":[0,0],"arg_names":["pipeline","limit"
-],"arg_types":["builtins.str","builtins.int"],"fallback":"builtins.function","f
-rom_concatenate":false,"implicit":false,"imprecise_arg_kinds":false,"is_bound":
-false,"is_ellipsis_args":false,"name":"quarantine_inspect","ret_type":{".class"
-:"NoneType"},"type_guard":null,"type_is":null,"unpack_kwargs":false,"variables"
-:[]}},"is_overload":false,"var":{".class":"Var","flags":["is_ready","is_inferre
-d"],"fullname":"bioetl.cli.quarantine_inspect","name":"quarantine_inspect","set
-ter_type":null,"type":"click.core.Command"}}},"run":{".class":"SymbolTableNode"
-,"kind":"Gdef","node":{".class":"Decorator","func":{".class":"FuncDef","abstrac
-t_status":0,"arg_kinds":[0,0,0,0],"arg_names":["pipeline","run_type","resume","
-limit"],"dataclass_transform_spec":null,"deprecated":null,"flags":["is_decorate
-d"],"fullname":"bioetl.cli.run","name":"run","original_first_arg":"pipeline","t
-ype":{".class":"CallableType","arg_kinds":[0,0,0,0],"arg_names":["pipeline","ru
-n_type","resume","limit"],"arg_types":["builtins.str","builtins.str","builtins.
-bool",{".class":"UnionType","items":["builtins.int",{".class":"NoneType"}],"use
-s_pep604_syntax":true}],"fallback":"builtins.function","from_concatenate":false
-,"implicit":false,"imprecise_arg_kinds":false,"is_bound":false,"is_ellipsis_arg
-s":false,"name":"run","ret_type":{".class":"NoneType"},"type_guard":null,"type_
-is":null,"unpack_kwargs":false,"variables":[]}},"is_overload":false,"var":{".cl
-ass":"Var","flags":["is_ready","is_inferred"],"fullname":"bioetl.cli.run","name
-":"run","setter_type":null,"type":"click.core.Command"}}},"setup_shutdown_handl
-ers":{".class":"SymbolTableNode","cross_ref":"bioetl.infrastructure.orchestrati
-on.signals.setup_shutdown_handlers","kind":"Gdef","module_hidden":true,"module_
-public":false},"structlog":{".class":"SymbolTableNode","cross_ref":"structlog",
-"kind":"Gdef","module_hidden":true,"module_public":false},"sys":{".class":"Symb
-olTableNode","cross_ref":"sys","kind":"Gdef","module_hidden":true,"module_publi
-c":false},"uuid4":{".class":"SymbolTableNode","cross_ref":"uuid.uuid4","kind":"
-Gdef","module_hidden":true,"module_public":false}},"path":"E:\\google_drive\\05
-_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\cli.py"}
-.mypy_cache\3.11\bioetl\cli.meta.json:1:{"data_mtime":1765900396,"dep_hashes":[
-"07c1ad2f96e28d65ec9b3cdc90fd1027db6725fc","a481101cba38d3647fadcd31bb87f2a0660
-4dba9","40e2c7e7d17e02ac7549a86ea5a86433d9c37a68","49365a562ae220620212ab845dea
-b8268fdd503c","56a80ffd9cb86f3c6287306f6fe7ce13915071bb","b192acd387e25a54d1b49
-77260acdccf4206e00a","29093079851ce0fbc22980a6da426c35fe7f8850","eafb45d4b2c3ae
-3422a19325c9b705ee6639e475","5c40e41626032d06003afc218993343c04740a1d","927dadc
-2480999d859f24b5ad405354dcd78a9da","49aa0bbaa2d0e261c2057acd9991d03ed4a5447c","
-4cfa63420ac89fe2707ce1d9a1aba1c59692148f","23f58c32ce2d07e607e91fb23ebcaf70da3d
-dba5","1e64270de40c311626ddc6145cab965592b2ff2b","8c8ca484e105a7537e256b85953e8
-e46d9cee7c6","f452a3d193376123019c885250680acbda8d15e5","78284bf8f443833ac6fddf
-39310d1166284d47a0","47ae28dbacb158e6770097b670da593482e68e5b","f8e5aaad48c7eb9
-730962790e8cab87da3d4054c","75974ccc90a79935b3e057c09391f399b8cddece","d0455576
-076350adbd689b92d9af7b4dea512678","ae9c64b1f28a27f0a8bae180e424975d9a8cff3f","3
-b3394c56ec4ea040a08c42d0beef8b98d7cd58b","13b3c51fd010e548f963008a114f98e051d9e
-c56","8f3ebda7c5e399764122fc78a6c3f1c2a7b6dcc6","96a1141fd71b2d07cc94104851c838
-4e60f55074","82a7a191f686d2b88255300ed9d442729cc4abfc","02140bcd64982909136447c
-c887ee659a6521c4f","bd008650031051733e62eb9cb26218d7964a134a","8c7f8a92309ffecf
-138b0a842f1cd587cbdd52f7"],"dep_lines":[17,20,21,19,18,8,10,11,12,13,15,24,1,1,
-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"dep_prios":[5,5,5,5,5,5,10,10,5,5,10,25,5,30,
-30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30],"dependencies":["bioetl.applic
-ation.core.shutdown","bioetl.infrastructure.orchestration.runner","bioetl.infra
-structure.orchestration.signals","bioetl.domain.types","bioetl.bootstrap","__fu
-ture__","asyncio","sys","typing","uuid","click","structlog","builtins","_typesh
-ed","abc","asyncio.runners","bioetl.application.core.base","bioetl.application.
-core.checkpoint_manager","bioetl.application.core.executor","bioetl.application
-.core.pipeline_config","bioetl.application.core.pipeline_services","bioetl.doma
-in.context","click.core","click.decorators","click.types","click.utils","enum",
-"structlog._base","structlog._generic","typing_extensions"],"error_lines":[],"h
-ash":"443f3e6563dbeab705f1c515190a0f88added053","id":"bioetl.cli","ignore_all":
-false,"interface_hash":"5be1309822485e8dbb9bfb1c87a1437933b74764","mtime":17658
-99725,"options":{"other_options":"6facb2de3093de5bd45751992837246ddce757ce","pl
-atform":"win32"},"path":"E:\\google_drive\\05_AI\\github\\BioactivityDataAcquis
-ition\\src\\bioetl\\cli.py","plugin_data":null,"size":3901,"suppressed":[],"ver
-sion_id":"1.19.1"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\runner.data.json:1:{".clas
-s":"MypyFile","_fullname":"bioetl.infrastructure.orchestration.runner","future_
-import_flags":["annotations"],"is_partial_stub_package":false,"is_stub":false,"
-names":{".class":"SymbolTable","CheckpointManager":{".class":"SymbolTableNode",
-"cross_ref":"bioetl.application.core.checkpoint_manager.CheckpointManager","kin
-d":"Gdef","module_hidden":true,"module_public":false},"LockManager":{".class":"
-SymbolTableNode","cross_ref":"bioetl.application.core.lock_manager.LockManager"
-,"kind":"Gdef","module_hidden":true,"module_public":false},"PipelineConfig":{".
-class":"SymbolTableNode","cross_ref":"bioetl.application.core.pipeline_config.P
-ipelineConfig","kind":"Gdef","module_hidden":true,"module_public":false},"Pipel
-ineContext":{".class":"SymbolTableNode","cross_ref":"bioetl.domain.context.Pipe
-lineContext","kind":"Gdef","module_hidden":true,"module_public":false},"Pipelin
-eExecutor":{".class":"SymbolTableNode","cross_ref":"bioetl.application.core.exe
-cutor.PipelineExecutor","kind":"Gdef","module_hidden":true,"module_public":fals
-e},"PipelineRunner":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":
-"TypeInfo","_promote":[],"abstract_attributes":[],"alt_promote":null,"bases":["
-builtins.object"],"dataclass_transform_spec":null,"declared_metaclass":null,"de
-fn":{".class":"ClassDef","fullname":"bioetl.infrastructure.orchestration.runner
-.PipelineRunner","name":"PipelineRunner","type_vars":[]},"deletable_attributes"
-:[],"deprecated":null,"flags":[],"fullname":"bioetl.infrastructure.orchestratio
-n.runner.PipelineRunner","has_param_spec_type":false,"metaclass_type":null,"met
-adata":{},"module_name":"bioetl.infrastructure.orchestration.runner","mro":["bi
-oetl.infrastructure.orchestration.runner.PipelineRunner","builtins.object"],"na
-mes":{".class":"SymbolTable","__init__":{".class":"SymbolTableNode","kind":"Mde
-f","node":{".class":"FuncDef","abstract_status":0,"arg_kinds":[0,0,0,0,0,0,0,0,
-0],"arg_names":["self","config","runtime","services","context","executor","chec
-kpoint_manager","shutdown_signal","logger"],"dataclass_transform_spec":null,"de
-precated":null,"flags":["is_trivial_self"],"fullname":"bioetl.infrastructure.or
-chestration.runner.PipelineRunner.__init__","name":"__init__","original_first_a
-rg":"self","type":{".class":"CallableType","arg_kinds":[0,0,0,0,0,0,0,0,0],"arg
-_names":["self","config","runtime","services","context","executor","checkpoint_
-manager","shutdown_signal","logger"],"arg_types":["bioetl.infrastructure.orches
-tration.runner.PipelineRunner","bioetl.application.core.pipeline_config.Pipelin
-eConfig","bioetl.application.core.pipeline_config.PipelineRuntimeConfig","bioet
-l.application.core.pipeline_services.PipelineServices","bioetl.domain.context.P
-ipelineContext","bioetl.application.core.executor.PipelineExecutor","bioetl.app
-lication.core.checkpoint_manager.CheckpointManager","bioetl.application.core.sh
-utdown.ShutdownSignal","structlog._generic.BoundLogger"],"fallback":"builtins.f
-unction","from_concatenate":false,"implicit":false,"imprecise_arg_kinds":false,
-"is_bound":false,"is_ellipsis_args":false,"name":"__init__ of PipelineRunner","
-ret_type":{".class":"NoneType"},"type_guard":null,"type_is":null,"unpack_kwargs
-":false,"variables":[]}}},"_checkpoint_manager":{".class":"SymbolTableNode","im
-plicit":true,"kind":"Mdef","node":{".class":"Var","flags":["is_ready","is_infer
-red"],"fullname":"bioetl.infrastructure.orchestration.runner.PipelineRunner._ch
-eckpoint_manager","name":"_checkpoint_manager","setter_type":null,"type":"bioet
-l.application.core.checkpoint_manager.CheckpointManager"}},"_config":{".class":
-"SymbolTableNode","implicit":true,"kind":"Mdef","node":{".class":"Var","flags":
-["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orchestration.runn
-er.PipelineRunner._config","name":"_config","setter_type":null,"type":"bioetl.a
-pplication.core.pipeline_config.PipelineConfig"}},"_context":{".class":"SymbolT
-ableNode","implicit":true,"kind":"Mdef","node":{".class":"Var","flags":["is_rea
-dy","is_inferred"],"fullname":"bioetl.infrastructure.orchestration.runner.Pipel
-ineRunner._context","name":"_context","setter_type":null,"type":"bioetl.domain.
-context.PipelineContext"}},"_executor":{".class":"SymbolTableNode","implicit":t
-rue,"kind":"Mdef","node":{".class":"Var","flags":["is_ready","is_inferred"],"fu
-llname":"bioetl.infrastructure.orchestration.runner.PipelineRunner._executor","
-name":"_executor","setter_type":null,"type":"bioetl.application.core.executor.P
-ipelineExecutor"}},"_lock_manager":{".class":"SymbolTableNode","implicit":true,
-"kind":"Mdef","node":{".class":"Var","flags":["is_ready","is_inferred"],"fullna
-me":"bioetl.infrastructure.orchestration.runner.PipelineRunner._lock_manager","
-name":"_lock_manager","setter_type":null,"type":"bioetl.application.core.lock_m
-anager.LockManager"}},"_logger":{".class":"SymbolTableNode","implicit":true,"ki
-nd":"Mdef","node":{".class":"Var","flags":["is_ready","is_inferred"],"fullname"
-:"bioetl.infrastructure.orchestration.runner.PipelineRunner._logger","name":"_l
-ogger","setter_type":null,"type":"structlog._generic.BoundLogger"}},"_runtime":
-{".class":"SymbolTableNode","implicit":true,"kind":"Mdef","node":{".class":"Var
-","flags":["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orchestr
-ation.runner.PipelineRunner._runtime","name":"_runtime","setter_type":null,"typ
-e":"bioetl.application.core.pipeline_config.PipelineRuntimeConfig"}},"_services
-":{".class":"SymbolTableNode","implicit":true,"kind":"Mdef","node":{".class":"V
-ar","flags":["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orches
-tration.runner.PipelineRunner._services","name":"_services","setter_type":null,
-"type":"bioetl.application.core.pipeline_services.PipelineServices"}},"run":{".
-class":"SymbolTableNode","kind":"Mdef","node":{".class":"FuncDef","abstract_sta
-tus":0,"arg_kinds":[0],"arg_names":["self"],"dataclass_transform_spec":null,"de
-precated":null,"flags":["is_coroutine","is_trivial_self"],"fullname":"bioetl.in
-frastructure.orchestration.runner.PipelineRunner.run","name":"run","original_fi
-rst_arg":"self","type":{".class":"CallableType","arg_kinds":[0],"arg_names":["s
-elf"],"arg_types":["bioetl.infrastructure.orchestration.runner.PipelineRunner"]
-,"fallback":"builtins.function","from_concatenate":false,"implicit":false,"impr
-ecise_arg_kinds":false,"is_bound":false,"is_ellipsis_args":false,"name":"run
-of PipelineRunner","ret_type":{".class":"Instance","args":[{".class":"AnyType",
-"missing_import_name":null,"source_any":null,"type_of_any":6},{".class":"AnyTyp
-e","missing_import_name":null,"source_any":null,"type_of_any":6},{".class":"Non
-eType"}],"extra_attrs":null,"type_ref":"typing.Coroutine"},"type_guard":null,"t
-ype_is":null,"unpack_kwargs":false,"variables":[]}}},"shutdown_signal":{".class
-":"SymbolTableNode","implicit":true,"kind":"Mdef","node":{".class":"Var","flags
-":["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orchestration.ru
-nner.PipelineRunner.shutdown_signal","name":"shutdown_signal","setter_type":nul
-l,"type":"bioetl.application.core.shutdown.ShutdownSignal"}}},"self_type":{".cl
-ass":"TypeVarType","default":{".class":"AnyType","missing_import_name":null,"so
-urce_any":null,"type_of_any":4},"fullname":"bioetl.infrastructure.orchestration
-.runner.PipelineRunner.Self","id":0,"name":"Self","namespace":"","upper_bound":
-"bioetl.infrastructure.orchestration.runner.PipelineRunner","values":[],"varian
-ce":0},"slots":null,"tuple_type":null,"type_vars":[],"typeddict_type":null}},"P
-ipelineRuntimeConfig":{".class":"SymbolTableNode","cross_ref":"bioetl.applicati
-on.core.pipeline_config.PipelineRuntimeConfig","kind":"Gdef","module_hidden":tr
-ue,"module_public":false},"PipelineServices":{".class":"SymbolTableNode","cross
-_ref":"bioetl.application.core.pipeline_services.PipelineServices","kind":"Gdef
-","module_hidden":true,"module_public":false},"PipelineShutdownError":{".class"
-:"SymbolTableNode","cross_ref":"bioetl.application.core.shutdown.PipelineShutdo
-wnError","kind":"Gdef","module_hidden":true,"module_public":false},"ShutdownSig
-nal":{".class":"SymbolTableNode","cross_ref":"bioetl.application.core.shutdown.
-ShutdownSignal","kind":"Gdef","module_hidden":true,"module_public":false},"TYPE
-_CHECKING":{".class":"SymbolTableNode","cross_ref":"typing.TYPE_CHECKING","kind
-":"Gdef","module_hidden":true,"module_public":false},"__annotations__":{".class
-":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"
-fullname":"bioetl.infrastructure.orchestration.runner.__annotations__","name":"
-__annotations__","setter_type":null,"type":{".class":"Instance","args":["builti
-ns.str",{".class":"AnyType","missing_import_name":null,"source_any":null,"type_
-of_any":6}],"extra_attrs":null,"type_ref":"builtins.dict"}}},"__doc__":{".class
-":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"
-fullname":"bioetl.infrastructure.orchestration.runner.__doc__","name":"__doc__"
-,"setter_type":null,"type":"builtins.str"}},"__file__":{".class":"SymbolTableNo
-de","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioet
-l.infrastructure.orchestration.runner.__file__","name":"__file__","setter_type"
-:null,"type":"builtins.str"}},"__name__":{".class":"SymbolTableNode","kind":"Gd
-ef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructu
-re.orchestration.runner.__name__","name":"__name__","setter_type":null,"type":"
-builtins.str"}},"__package__":{".class":"SymbolTableNode","kind":"Gdef","node":
-{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orchestr
-ation.runner.__package__","name":"__package__","setter_type":null,"type":"built
-ins.str"}},"__spec__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class
-":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orchestration.ru
-nner.__spec__","name":"__spec__","setter_type":null,"type":"_frozen_importlib.M
-oduleSpec"}},"annotations":{".class":"SymbolTableNode","cross_ref":"__future__.
-annotations","kind":"Gdef","module_hidden":true,"module_public":false},"get_set
-tings":{".class":"SymbolTableNode","cross_ref":"bioetl.config.get_settings","ki
-nd":"Gdef","module_hidden":true,"module_public":false},"structlog":{".class":"S
-ymbolTableNode","cross_ref":"structlog","kind":"Gdef","module_hidden":true,"mod
-ule_public":false},"time":{".class":"SymbolTableNode","cross_ref":"time","kind"
-:"Gdef","module_hidden":true,"module_public":false}},"path":"E:\\google_drive\\
-05_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\orchest
-ration\\runner.py"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\runner.meta.json:1:{"data_
-mtime":1765900380,"dep_hashes":["47ae28dbacb158e6770097b670da593482e68e5b","ddc
-0628e873dd82ce12964cc9ed011c55ee553cd","75974ccc90a79935b3e057c09391f399b8cddec
-e","d0455576076350adbd689b92d9af7b4dea512678","07c1ad2f96e28d65ec9b3cdc90fd1027
-db6725fc","f8e5aaad48c7eb9730962790e8cab87da3d4054c","ae9c64b1f28a27f0a8bae180e
-424975d9a8cff3f","a0654e75a911e9c0ad74c9593e1a0a97bc8c6ca1","b192acd387e25a54d1
-b4977260acdccf4206e00a","a8b0647093dcc27bef21498c4c6310fa4d9cc44c","5c40e416260
-32d06003afc218993343c04740a1d","4cfa63420ac89fe2707ce1d9a1aba1c59692148f","23f5
-8c32ce2d07e607e91fb23ebcaf70da3ddba5","8c8ca484e105a7537e256b85953e8e46d9cee7c6
-","b77fbe7b4cdd9723956231fd8522d602ee135f98","49365a562ae220620212ab845deab8268
-fdd503c","5d6c9ff6f2bad583d898481ae82cc17fa626f904","82a7a191f686d2b88255300ed9
-d442729cc4abfc","e89c2f28ab6ac756b058de0c4166917f95ac8c23","2ce7c8559de7c36ebf9
-57b494841de242281a585","2bcd93092310e81c2bb6bb2af9cf19e9d5e66cf1","0f7e142b3dc8
-b2e1e4e00b655c805420b38bcda9","02140bcd64982909136447cc887ee659a6521c4f","bd008
-650031051733e62eb9cb26218d7964a134a","927dadc2480999d859f24b5ad405354dcd78a9da"
-],"dep_lines":[11,12,13,17,18,24,20,19,6,8,9,23,1,1,1,1,1,1,1,1,1,1,1,1,1],"dep
-_prios":[5,5,5,5,5,25,5,5,5,10,5,25,5,30,30,30,30,30,30,30,30,30,30,30,30],"dep
-endencies":["bioetl.application.core.checkpoint_manager","bioetl.application.co
-re.lock_manager","bioetl.application.core.pipeline_config","bioetl.application.
-core.pipeline_services","bioetl.application.core.shutdown","bioetl.application.
-core.executor","bioetl.domain.context","bioetl.config","__future__","time","typ
-ing","structlog","builtins","abc","bioetl.domain.ports","bioetl.domain.types","
-datetime","enum","functools","pydantic._internal._model_construction","pydantic
-.main","pydantic_settings.main","structlog._base","structlog._generic","uuid"],
-"error_lines":[],"hash":"11e45cb39aed513085b3de63c2ce8f2e82961b62","id":"bioetl
-.infrastructure.orchestration.runner","ignore_all":false,"interface_hash":"a481
-101cba38d3647fadcd31bb87f2a06604dba9","mtime":1765901156,"options":{"other_opti
-ons":"6facb2de3093de5bd45751992837246ddce757ce","platform":"win32"},"path":"E:\
-\google_drive\\05_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastr
-ucture\\orchestration\\runner.py","plugin_data":null,"size":4144,"suppressed":[
-],"version_id":"1.19.1"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\signals.data.json:1:{".cla
-ss":"MypyFile","_fullname":"bioetl.infrastructure.orchestration.signals","futur
-e_import_flags":[],"is_partial_stub_package":false,"is_stub":false,"names":{".c
-lass":"SymbolTable","Any":{".class":"SymbolTableNode","cross_ref":"typing.Any",
-"kind":"Gdef","module_hidden":true,"module_public":false},"ShutdownSignal":{".c
-lass":"SymbolTableNode","cross_ref":"bioetl.application.core.shutdown.ShutdownS
-ignal","kind":"Gdef","module_hidden":true,"module_public":false},"__annotations
-__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["
-is_ready"],"fullname":"bioetl.infrastructure.orchestration.signals.__annotation
-s__","name":"__annotations__","setter_type":null,"type":{".class":"Instance","a
-rgs":["builtins.str",{".class":"AnyType","missing_import_name":null,"source_any
-":null,"type_of_any":6}],"extra_attrs":null,"type_ref":"builtins.dict"}}},"__do
-c__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":[
-"is_ready"],"fullname":"bioetl.infrastructure.orchestration.signals.__doc__","n
-ame":"__doc__","setter_type":null,"type":"builtins.str"}},"__file__":{".class":
-"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fu
-llname":"bioetl.infrastructure.orchestration.signals.__file__","name":"__file__
-","setter_type":null,"type":"builtins.str"}},"__name__":{".class":"SymbolTableN
-ode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioe
-tl.infrastructure.orchestration.signals.__name__","name":"__name__","setter_typ
-e":null,"type":"builtins.str"}},"__package__":{".class":"SymbolTableNode","kind
-":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrast
-ructure.orchestration.signals.__package__","name":"__package__","setter_type":n
-ull,"type":"builtins.str"}},"__spec__":{".class":"SymbolTableNode","kind":"Gdef
-","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure
-.orchestration.signals.__spec__","name":"__spec__","setter_type":null,"type":"_
-frozen_importlib.ModuleSpec"}},"setup_shutdown_handlers":{".class":"SymbolTable
-Node","kind":"Gdef","node":{".class":"FuncDef","abstract_status":0,"arg_kinds":
-[0],"arg_names":["shutdown_signal"],"dataclass_transform_spec":null,"deprecated
-":null,"flags":[],"fullname":"bioetl.infrastructure.orchestration.signals.setup
-_shutdown_handlers","name":"setup_shutdown_handlers","original_first_arg":"shut
-down_signal","type":{".class":"CallableType","arg_kinds":[0],"arg_names":["shut
-down_signal"],"arg_types":["bioetl.application.core.shutdown.ShutdownSignal"],"
-fallback":"builtins.function","from_concatenate":false,"implicit":false,"imprec
-ise_arg_kinds":false,"is_bound":false,"is_ellipsis_args":false,"name":"setup_sh
-utdown_handlers","ret_type":{".class":"NoneType"},"type_guard":null,"type_is":n
-ull,"unpack_kwargs":false,"variables":[]}}},"signal":{".class":"SymbolTableNode
-","cross_ref":"signal","kind":"Gdef","module_hidden":true,"module_public":false
-},"structlog":{".class":"SymbolTableNode","cross_ref":"structlog","kind":"Gdef"
-,"module_hidden":true,"module_public":false}},"path":"E:\\google_drive\\05_AI\\
-github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\orchestration\
-\signals.py"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\signals.meta.json:1:{"data
-_mtime":1765900179,"dep_hashes":["07c1ad2f96e28d65ec9b3cdc90fd1027db6725fc","b5
-62583a704700b84fb45aa84fe4e21ec450ab32","5c40e41626032d06003afc218993343c04740a
-1d","4cfa63420ac89fe2707ce1d9a1aba1c59692148f","23f58c32ce2d07e607e91fb23ebcaf7
-0da3ddba5","8c8ca484e105a7537e256b85953e8e46d9cee7c6","82a7a191f686d2b88255300e
-d9d442729cc4abfc","47a12f030746c047d1270fb9c1b57178adbf8184","e0b9e1f59727a95fc
-91298338f2d135d6ed033cc"],"dep_lines":[12,7,8,10,1,1,1,1,1],"dep_prios":[5,10,5
-,10,5,30,30,30,30],"dependencies":["bioetl.application.core.shutdown","signal",
-"typing","structlog","builtins","abc","enum","structlog._config","types"],"erro
-r_lines":[],"hash":"ff1b0221069d8c7c9861d515eaad1cc55776aa59","id":"bioetl.infr
-astructure.orchestration.signals","ignore_all":false,"interface_hash":"40e2c7e7
-d17e02ac7549a86ea5a86433d9c37a68","mtime":1765899182,"options":{"other_options"
-:"6facb2de3093de5bd45751992837246ddce757ce","platform":"win32"},"path":"E:\\goo
-gle_drive\\05_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructu
-re\\orchestration\\signals.py","plugin_data":null,"size":1137,"suppressed":[],"
-version_id":"1.19.1"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\__init__.data.json:1:{".cl
-ass":"MypyFile","_fullname":"bioetl.infrastructure.orchestration","future_impor
-t_flags":[],"is_partial_stub_package":false,"is_stub":false,"names":{".class":"
-SymbolTable","__annotations__":{".class":"SymbolTableNode","kind":"Gdef","node"
-:{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orchest
-ration.__annotations__","name":"__annotations__","setter_type":null,"type":{".c
-lass":"Instance","args":["builtins.str",{".class":"AnyType","missing_import_nam
-e":null,"source_any":null,"type_of_any":6}],"extra_attrs":null,"type_ref":"buil
-tins.dict"}}},"__doc__":{".class":"SymbolTableNode","kind":"Gdef","node":{".cla
-ss":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orchestration.
-__doc__","name":"__doc__","setter_type":null,"type":"builtins.str"}},"__file__"
-:{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_
-ready"],"fullname":"bioetl.infrastructure.orchestration.__file__","name":"__fil
-e__","setter_type":null,"type":"builtins.str"}},"__name__":{".class":"SymbolTab
-leNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"b
-ioetl.infrastructure.orchestration.__name__","name":"__name__","setter_type":nu
-ll,"type":"builtins.str"}},"__package__":{".class":"SymbolTableNode","kind":"Gd
-ef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructu
-re.orchestration.__package__","name":"__package__","setter_type":null,"type":"b
-uiltins.str"}},"__path__":{".class":"SymbolTableNode","kind":"Gdef","node":{".c
-lass":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orchestratio
-n.__path__","name":"__path__","setter_type":null,"type":{".class":"Instance","a
-rgs":["builtins.str"],"extra_attrs":null,"type_ref":"builtins.list"}}},"__spec_
-_":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["i
-s_ready"],"fullname":"bioetl.infrastructure.orchestration.__spec__","name":"__s
-pec__","setter_type":null,"type":"_frozen_importlib.ModuleSpec"}}},"path":"E:\\
-google_drive\\05_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastru
-cture\\orchestration\\__init__.py"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\__init__.meta.json:1:{"dat
-a_mtime":1765900118,"dep_hashes":["23f58c32ce2d07e607e91fb23ebcaf70da3ddba5"],"
-dep_lines":[1],"dep_prios":[5],"dependencies":["builtins"],"error_lines":[],"ha
-sh":"da39a3ee5e6b4b0d3255bfef95601890afd80709","id":"bioetl.infrastructure.orch
-estration","ignore_all":false,"interface_hash":"ee603e45aad50a1df195e65f55e2eaa
-dbeb8be09","mtime":1765899160,"options":{"other_options":"6facb2de3093de5bd4575
-1992837246ddce757ce","platform":"win32"},"path":"E:\\google_drive\\05_AI\\githu
-b\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\orchestration\\__in
-it__.py","plugin_data":null,"size":0,"suppressed":[],"version_id":"1.19.1"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\prefect\tasks.data.json:1:
-{".class":"MypyFile","_fullname":"bioetl.infrastructure.orchestration.prefect.t
-asks","future_import_flags":[],"is_partial_stub_package":false,"is_stub":false,
-"names":{".class":"SymbolTable","CheckpointManager":{".class":"SymbolTableNode"
-,"cross_ref":"bioetl.application.core.checkpoint_manager.CheckpointManager","ki
-nd":"Gdef","module_hidden":true,"module_public":false},"PipelineExecutor":{".cl
-ass":"SymbolTableNode","cross_ref":"bioetl.application.core.executor.PipelineEx
-ecutor","kind":"Gdef","module_hidden":true,"module_public":false},"PipelineRunn
-er":{".class":"SymbolTableNode","cross_ref":"bioetl.infrastructure.orchestratio
-n.runner.PipelineRunner","kind":"Gdef","module_hidden":true,"module_public":fal
-se},"TYPE_CHECKING":{".class":"SymbolTableNode","cross_ref":"typing.TYPE_CHECKI
-NG","kind":"Gdef","module_hidden":true,"module_public":false},"Watermark":{".cl
-ass":"SymbolTableNode","cross_ref":"bioetl.domain.types.Watermark","kind":"Gdef
-","module_hidden":true,"module_public":false},"__annotations__":{".class":"Symb
-olTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullnam
-e":"bioetl.infrastructure.orchestration.prefect.tasks.__annotations__","name":"
-__annotations__","setter_type":null,"type":{".class":"Instance","args":["builti
-ns.str",{".class":"AnyType","missing_import_name":null,"source_any":null,"type_
-of_any":6}],"extra_attrs":null,"type_ref":"builtins.dict"}}},"__doc__":{".class
-":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"
-fullname":"bioetl.infrastructure.orchestration.prefect.tasks.__doc__","name":"_
-_doc__","setter_type":null,"type":"builtins.str"}},"__file__":{".class":"Symbol
-TableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname"
-:"bioetl.infrastructure.orchestration.prefect.tasks.__file__","name":"__file__"
-,"setter_type":null,"type":"builtins.str"}},"__name__":{".class":"SymbolTableNo
-de","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioet
-l.infrastructure.orchestration.prefect.tasks.__name__","name":"__name__","sette
-r_type":null,"type":"builtins.str"}},"__package__":{".class":"SymbolTableNode",
-"kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.in
-frastructure.orchestration.prefect.tasks.__package__","name":"__package__","set
-ter_type":null,"type":"builtins.str"}},"__spec__":{".class":"SymbolTableNode","
-kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.inf
-rastructure.orchestration.prefect.tasks.__spec__","name":"__spec__","setter_typ
-e":null,"type":"_frozen_importlib.ModuleSpec"}},"delete_checkpoint_task":{".cla
-ss":"SymbolTableNode","kind":"Gdef","node":{".class":"Decorator","func":{".clas
-s":"FuncDef","abstract_status":0,"arg_kinds":[0],"arg_names":["manager"],"datac
-lass_transform_spec":null,"deprecated":null,"flags":["is_coroutine","is_decorat
-ed"],"fullname":"bioetl.infrastructure.orchestration.prefect.tasks.delete_check
-point_task","name":"delete_checkpoint_task","original_first_arg":"manager","typ
-e":{".class":"CallableType","arg_kinds":[0],"arg_names":["manager"],"arg_types"
-:["bioetl.application.core.checkpoint_manager.CheckpointManager"],"fallback":"b
-uiltins.function","from_concatenate":false,"implicit":false,"imprecise_arg_kind
-s":false,"is_bound":false,"is_ellipsis_args":false,"name":"delete_checkpoint_ta
-sk","ret_type":{".class":"Instance","args":[{".class":"AnyType","missing_import
-_name":null,"source_any":null,"type_of_any":6},{".class":"AnyType","missing_imp
-ort_name":null,"source_any":null,"type_of_any":6},{".class":"NoneType"}],"extra
-_attrs":null,"type_ref":"typing.Coroutine"},"type_guard":null,"type_is":null,"u
-npack_kwargs":false,"variables":[]}},"is_overload":false,"var":{".class":"Var",
-"flags":["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orchestrat
-ion.prefect.tasks.delete_checkpoint_task","name":"delete_checkpoint_task","sett
-er_type":null,"type":{".class":"Instance","args":[{".class":"Parameters","arg_k
-inds":[0],"arg_names":["manager"],"arg_types":["bioetl.application.core.checkpo
-int_manager.CheckpointManager"],"imprecise_arg_kinds":false,"variables":[]},{".
-class":"Instance","args":[{".class":"AnyType","missing_import_name":null,"sourc
-e_any":{".class":"AnyType","missing_import_name":null,"source_any":null,"type_o
-f_any":6},"type_of_any":7},{".class":"AnyType","missing_import_name":null,"sour
-ce_any":{".class":"AnyType","missing_import_name":null,"source_any":null,"type_
-of_any":6},"type_of_any":7},{".class":"NoneType"}],"extra_attrs":null,"type_ref
-":"typing.Coroutine"}],"extra_attrs":null,"type_ref":"prefect.tasks.Task"}}}},"
-execute_pipeline_task":{".class":"SymbolTableNode","kind":"Gdef","node":{".clas
-s":"Decorator","func":{".class":"FuncDef","abstract_status":0,"arg_kinds":[0,0,
-0],"arg_names":["executor","watermark","limit"],"dataclass_transform_spec":null
-,"deprecated":null,"flags":["is_coroutine","is_decorated"],"fullname":"bioetl.i
-nfrastructure.orchestration.prefect.tasks.execute_pipeline_task","name":"execut
-e_pipeline_task","original_first_arg":"executor","type":{".class":"CallableType
-","arg_kinds":[0,0,0],"arg_names":["executor","watermark","limit"],"arg_types":
-["bioetl.application.core.executor.PipelineExecutor",{".class":"UnionType","ite
-ms":[{".class":"TypeAliasType","args":[],"type_ref":"bioetl.domain.types.Waterm
-ark"},{".class":"NoneType"}],"uses_pep604_syntax":true},{".class":"UnionType","
-items":["builtins.int",{".class":"NoneType"}],"uses_pep604_syntax":true}],"fall
-back":"builtins.function","from_concatenate":false,"implicit":false,"imprecise_
-arg_kinds":false,"is_bound":false,"is_ellipsis_args":false,"name":"execute_pipe
-line_task","ret_type":{".class":"Instance","args":[{".class":"AnyType","missing
-_import_name":null,"source_any":null,"type_of_any":6},{".class":"AnyType","miss
-ing_import_name":null,"source_any":null,"type_of_any":6},{".class":"NoneType"}]
-,"extra_attrs":null,"type_ref":"typing.Coroutine"},"type_guard":null,"type_is":
-null,"unpack_kwargs":false,"variables":[]}},"is_overload":false,"var":{".class"
-:"Var","flags":["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orc
-hestration.prefect.tasks.execute_pipeline_task","name":"execute_pipeline_task",
-"setter_type":null,"type":{".class":"Instance","args":[{".class":"Parameters","
-arg_kinds":[0,0,0],"arg_names":["executor","watermark","limit"],"arg_types":["b
-ioetl.application.core.executor.PipelineExecutor",{".class":"UnionType","items"
-:[{".class":"TypeAliasType","args":[],"type_ref":"bioetl.domain.types.Watermark
-"},{".class":"NoneType"}],"uses_pep604_syntax":true},{".class":"UnionType","ite
-ms":["builtins.int",{".class":"NoneType"}],"uses_pep604_syntax":true}],"impreci
-se_arg_kinds":false,"variables":[]},{".class":"Instance","args":[{".class":"Any
-Type","missing_import_name":null,"source_any":{".class":"AnyType","missing_impo
-rt_name":null,"source_any":null,"type_of_any":6},"type_of_any":7},{".class":"An
-yType","missing_import_name":null,"source_any":{".class":"AnyType","missing_imp
-ort_name":null,"source_any":null,"type_of_any":6},"type_of_any":7},{".class":"N
-oneType"}],"extra_attrs":null,"type_ref":"typing.Coroutine"}],"extra_attrs":nul
-l,"type_ref":"prefect.tasks.Task"}}}},"flow":{".class":"SymbolTableNode","cross
-_ref":"prefect.flows.flow","kind":"Gdef","module_hidden":true,"module_public":f
-alse},"load_checkpoint_task":{".class":"SymbolTableNode","kind":"Gdef","node":{
-".class":"Decorator","func":{".class":"FuncDef","abstract_status":0,"arg_kinds"
-:[0],"arg_names":["manager"],"dataclass_transform_spec":null,"deprecated":null,
-"flags":["is_coroutine","is_decorated"],"fullname":"bioetl.infrastructure.orche
-stration.prefect.tasks.load_checkpoint_task","name":"load_checkpoint_task","ori
-ginal_first_arg":"manager","type":{".class":"CallableType","arg_kinds":[0],"arg
-_names":["manager"],"arg_types":["bioetl.application.core.checkpoint_manager.Ch
-eckpointManager"],"fallback":"builtins.function","from_concatenate":false,"impl
-icit":false,"imprecise_arg_kinds":false,"is_bound":false,"is_ellipsis_args":fal
-se,"name":"load_checkpoint_task","ret_type":{".class":"Instance","args":[{".cla
-ss":"AnyType","missing_import_name":null,"source_any":null,"type_of_any":6},{".
-class":"AnyType","missing_import_name":null,"source_any":null,"type_of_any":6},
-{".class":"UnionType","items":[{".class":"TypeAliasType","args":[],"type_ref":"
-bioetl.domain.types.Watermark"},{".class":"NoneType"}],"uses_pep604_syntax":tru
-e}],"extra_attrs":null,"type_ref":"typing.Coroutine"},"type_guard":null,"type_i
-s":null,"unpack_kwargs":false,"variables":[]}},"is_overload":false,"var":{".cla
-ss":"Var","flags":["is_ready","is_inferred"],"fullname":"bioetl.infrastructure.
-orchestration.prefect.tasks.load_checkpoint_task","name":"load_checkpoint_task"
-,"setter_type":null,"type":{".class":"Instance","args":[{".class":"Parameters",
-"arg_kinds":[0],"arg_names":["manager"],"arg_types":["bioetl.application.core.c
-heckpoint_manager.CheckpointManager"],"imprecise_arg_kinds":false,"variables":[
-]},{".class":"Instance","args":[{".class":"AnyType","missing_import_name":null,
-"source_any":{".class":"AnyType","missing_import_name":null,"source_any":null,"
-type_of_any":6},"type_of_any":7},{".class":"AnyType","missing_import_name":null
-,"source_any":{".class":"AnyType","missing_import_name":null,"source_any":null,
-"type_of_any":6},"type_of_any":7},{".class":"UnionType","items":[{".class":"Typ
-eAliasType","args":[],"type_ref":"bioetl.domain.types.Watermark"},{".class":"No
-neType"}],"uses_pep604_syntax":true}],"extra_attrs":null,"type_ref":"typing.Cor
-outine"}],"extra_attrs":null,"type_ref":"prefect.tasks.Task"}}}},"run_pipeline_
-flow":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Decorator","f
-unc":{".class":"FuncDef","abstract_status":0,"arg_kinds":[0],"arg_names":["runn
-er"],"dataclass_transform_spec":null,"deprecated":null,"flags":["is_coroutine",
-"is_decorated"],"fullname":"bioetl.infrastructure.orchestration.prefect.tasks.r
-un_pipeline_flow","name":"run_pipeline_flow","original_first_arg":"runner","typ
-e":{".class":"CallableType","arg_kinds":[0],"arg_names":["runner"],"arg_types":
-["bioetl.infrastructure.orchestration.runner.PipelineRunner"],"fallback":"built
-ins.function","from_concatenate":false,"implicit":false,"imprecise_arg_kinds":f
-alse,"is_bound":false,"is_ellipsis_args":false,"name":"run_pipeline_flow","ret_
-type":{".class":"Instance","args":[{".class":"AnyType","missing_import_name":nu
-ll,"source_any":null,"type_of_any":6},{".class":"AnyType","missing_import_name"
-:null,"source_any":null,"type_of_any":6},{".class":"NoneType"}],"extra_attrs":n
-ull,"type_ref":"typing.Coroutine"},"type_guard":null,"type_is":null,"unpack_kwa
-rgs":false,"variables":[]}},"is_overload":false,"var":{".class":"Var","flags":[
-"is_ready","is_inferred"],"fullname":"bioetl.infrastructure.orchestration.prefe
-ct.tasks.run_pipeline_flow","name":"run_pipeline_flow","setter_type":null,"type
-":{".class":"Instance","args":[{".class":"Parameters","arg_kinds":[0],"arg_name
-s":["runner"],"arg_types":["bioetl.infrastructure.orchestration.runner.Pipeline
-Runner"],"imprecise_arg_kinds":false,"variables":[]},{".class":"Instance","args
-":[{".class":"AnyType","missing_import_name":null,"source_any":{".class":"AnyTy
-pe","missing_import_name":null,"source_any":null,"type_of_any":6},"type_of_any"
-:7},{".class":"AnyType","missing_import_name":null,"source_any":{".class":"AnyT
-ype","missing_import_name":null,"source_any":null,"type_of_any":6},"type_of_any
-":7},{".class":"NoneType"}],"extra_attrs":null,"type_ref":"typing.Coroutine"}],
-"extra_attrs":null,"type_ref":"prefect.flows.Flow"}}}},"task":{".class":"Symbol
-TableNode","cross_ref":"prefect.tasks.task","kind":"Gdef","module_hidden":true,
-"module_public":false}},"path":"E:\\google_drive\\05_AI\\github\\BioactivityDat
-aAcquisition\\src\\bioetl\\infrastructure\\orchestration\\prefect\\tasks.py"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\prefect\tasks.meta.json:1:
-{"data_mtime":1765900645,"dep_hashes":["47ae28dbacb158e6770097b670da593482e68e5
-b","f8e5aaad48c7eb9730962790e8cab87da3d4054c","a481101cba38d3647fadcd31bb87f2a0
-6604dba9","49365a562ae220620212ab845deab8268fdd503c","5c40e41626032d06003afc218
-993343c04740a1d","49e1228cdca1802727698b47288e9c4e494df14b","23f58c32ce2d07e607
-e91fb23ebcaf70da3ddba5","8c8ca484e105a7537e256b85953e8e46d9cee7c6","5d6c9ff6f2b
-ad583d898481ae82cc17fa626f904","6f93b6a226cae8fd07f83d0cdbc852f3962f1cca","3c91
-a2d00d5777375acc865d4c651ea11ccfc663","1208cc56ba240e76d0daa06fcc746d75a3f4a54f
-","f287b5f1c14825192a3a08fb030ab274c96ace68","436889bc9052841213b8cb96d2e85111a
-97f3537","ec19e8ad511bbcb7cd64fbac248627c8b644e7f7","dc07f2f6f22f1fbd5c7ed6258f
-f4571d54eab599","582ba8827775e1b082ee15f15af2eb7bd6dd5e37","14cd78c3d72d14b6686
-2f6189b821b7625b193e4","573cdea1bce04cca4cb6d45e0d6e2cbf1949b351","d8a2f88642db
-0fd98087edef40ed1ce7aef6cde5","6579131a06f901fb20b69934ad18a8e3ef730ed6","7d3a9
-9553e45eaa61154882f25a8320bcf472357","42c2fef43fd0cc738d5cd4e5416028ebc6aef4d6"
-,"2ce7c8559de7c36ebf957b494841de242281a585","2bcd93092310e81c2bb6bb2af9cf19e9d5
-e66cf1"],"dep_lines":[17,18,20,19,12,14,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-"dep_prios":[25,25,25,25,5,5,5,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,
-30,30],"dependencies":["bioetl.application.core.checkpoint_manager","bioetl.app
-lication.core.executor","bioetl.infrastructure.orchestration.runner","bioetl.do
-main.types","typing","prefect","builtins","abc","datetime","os","pathlib","pref
-ect._internal.schemas.bases","prefect.assets.core","prefect.blocks.core","prefe
-ct.cache_policies","prefect.client.schemas.objects","prefect.context","prefect.
-filesystems","prefect.flows","prefect.results","prefect.serializers","prefect.t
-asks","prefect.utilities.annotations","pydantic._internal._model_construction",
-"pydantic.main"],"error_lines":[],"hash":"fc0f16eb11ff6c20612edc34919c3d194d070
-4d1","id":"bioetl.infrastructure.orchestration.prefect.tasks","ignore_all":fals
-e,"interface_hash":"be0c04f7faf64dba50c6eb48aa29ff9e2378825d","mtime":176589919
-9,"options":{"other_options":"6facb2de3093de5bd45751992837246ddce757ce","platfo
-rm":"win32"},"path":"E:\\google_drive\\05_AI\\github\\BioactivityDataAcquisitio
-n\\src\\bioetl\\infrastructure\\orchestration\\prefect\\tasks.py","plugin_data"
-:null,"size":2564,"suppressed":[],"version_id":"1.19.1"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\prefect\__init__.data.json
-:1:{".class":"MypyFile","_fullname":"bioetl.infrastructure.orchestration.prefec
-t","future_import_flags":[],"is_partial_stub_package":false,"is_stub":false,"na
-mes":{".class":"SymbolTable","__annotations__":{".class":"SymbolTableNode","kin
-d":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infras
-tructure.orchestration.prefect.__annotations__","name":"__annotations__","sette
-r_type":null,"type":{".class":"Instance","args":["builtins.str",{".class":"AnyT
-ype","missing_import_name":null,"source_any":null,"type_of_any":6}],"extra_attr
-s":null,"type_ref":"builtins.dict"}}},"__doc__":{".class":"SymbolTableNode","ki
-nd":"Gdef","node":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infra
-structure.orchestration.prefect.__doc__","name":"__doc__","setter_type":null,"t
-ype":"builtins.str"}},"__file__":{".class":"SymbolTableNode","kind":"Gdef","nod
-e":{".class":"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orche
-stration.prefect.__file__","name":"__file__","setter_type":null,"type":"builtin
-s.str"}},"__name__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":
-"Var","flags":["is_ready"],"fullname":"bioetl.infrastructure.orchestration.pref
-ect.__name__","name":"__name__","setter_type":null,"type":"builtins.str"}},"__p
-ackage__":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","fla
-gs":["is_ready"],"fullname":"bioetl.infrastructure.orchestration.prefect.__pack
-age__","name":"__package__","setter_type":null,"type":"builtins.str"}},"__path_
-_":{".class":"SymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["i
-s_ready"],"fullname":"bioetl.infrastructure.orchestration.prefect.__path__","na
-me":"__path__","setter_type":null,"type":{".class":"Instance","args":["builtins
-.str"],"extra_attrs":null,"type_ref":"builtins.list"}}},"__spec__":{".class":"S
-ymbolTableNode","kind":"Gdef","node":{".class":"Var","flags":["is_ready"],"full
-name":"bioetl.infrastructure.orchestration.prefect.__spec__","name":"__spec__",
-"setter_type":null,"type":"_frozen_importlib.ModuleSpec"}}},"path":"E:\\google_
-drive\\05_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\
-orchestration\\prefect\\__init__.py"}
-.mypy_cache\3.11\bioetl\infrastructure\orchestration\prefect\__init__.meta.json
-:1:{"data_mtime":1765900118,"dep_hashes":["23f58c32ce2d07e607e91fb23ebcaf70da3d
-dba5"],"dep_lines":[1],"dep_prios":[5],"dependencies":["builtins"],"error_lines
-":[],"hash":"da39a3ee5e6b4b0d3255bfef95601890afd80709","id":"bioetl.infrastruct
-ure.orchestration.prefect","ignore_all":false,"interface_hash":"0d3140f66d9153f
-25dcf94a471ec4c378495708f","mtime":1765899187,"options":{"other_options":"6facb
-2de3093de5bd45751992837246ddce757ce","platform":"win32"},"path":"E:\\google_dri
-ve\\05_AI\\github\\BioactivityDataAcquisition\\src\\bioetl\\infrastructure\\orc
-hestration\\prefect\\__init__.py","plugin_data":null,"size":0,"suppressed":[],"
-version_id":"1.19.1"}
-Select-String : The file E:\google_drive\05_AI\github\BioactivityDataAcquisitio
-n\.venv\Lib\site-packages\deltalake\_internal.pyd cannot be read: Data error
-(cyclic redundancy check).
-At line:1 char:34
-+ ... Path . -Recurse | Select-String "bioetl.infrastructure.orchestration"
-+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidArgument: (:) [Select-String], ArgumentEx
-   ception
-    + FullyQualifiedErrorId : ProcessingFile,Microsoft.PowerShell.Commands.Sel
-   ectStringCommand
+        REQ-ARCH-007: All import-linter contracts must pass.
+        This provides a secondary layer of validation beyond static checks.
+        """
+        importlinter_config = project_root / ".importlinter"
+        if not importlinter_config.exists():
+            pytest.skip(".importlinter config not found")
 
-docs\refactoring\architectural_review.md:72:  * Переместить
-`src/bioetl/orchestration` -> `src/bioetl/infrastructure/orchestration`.
-src\bioetl\cli.py:20:from bioetl.infrastructure.orchestration.runner import
-PipelineRunner
-src\bioetl\cli.py:21:from bioetl.infrastructure.orchestration.signals import
-setup_shutdown_handlers
-src\bioetl\infrastructure\orchestration\prefect\tasks.py:20:    from
-bioetl.infrastructure.orchestration.runner import PipelineRunner
-src\bioetl\infrastructure\orchestration\__pycache__\runner.cpython-313.pyc:19:
-          �iE:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioet
-l\infrastructure\orchestration\runner.py__init__�PipelineRunner.__init__"
-s����
-     ��
-src\bioetl\infrastructure\orchestration\__pycache__\signals.cpython-313.pyc:14:
-�loggerrs  ���jE:\google_drive\05_AI\github\BioactivityDataAcquisit
-ion\src\bioetl\infrastructure\orchestration\signals.py�/setup_shutdown_han
-dlers.<locals>.signal_handlers6������v�/�/��7�8�8V�
-                                                   W�
-src\bioetl\infrastructure\orchestration\__pycache__\__init__.cpython-313.pyc:3:
-�{Ai���g)N�r��kE:\google_drive\05_A
-I\github\BioactivityDataAcquisition\src\bioetl\infrastructure\orchestration\__i
-nit__.py<module>rs�r
-src\bioetl\__pycache__\cli.cpython-313.pyc:40:__future__rr+r.�typing
-r�uuidrr<� bioetl.application.core.shutdownr�bioetl.bootstrapr
-�bioetl.domain.types�*bioetl.infrastructure.orchestration.runnerr
-�+bioetl.infrastructure.orchestration.signalsr
+        # Override PYTHONPATH to ensure correct project is used
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(src_dir)
+
+        result = subprocess.run(
+            ["lint-imports", "--config", str(importlinter_config)],
+            capture_output=True,
+            text=True,
+            cwd=str(project_root),
+            env=env,
+        )
+
+        if result.returncode != 0:
+>           pytest.fail(
+                f"import-linter contracts violated:\n"
+                f"stdout: {result.stdout}\n"
+                f"stderr: {result.stderr}"
+            )
+E           Failed: import-linter contracts violated:
+E           stdout: =============
+E           Import Linter
+E           =============
+E
+E           ---------
+E           Contracts
+E           ---------
+E
+E           Analyzed 112 files, 373 dependencies.
+E           -------------------------------------
+E
+E           Domain layer independence KEPT
+E           Application layer does not import infrastructure directly KEPT
+E           Infrastructure layer must not import application BROKEN
+E           Domain layer must be pure (no I/O libraries) KEPT
+E
+E           Contracts: 3 kept, 1 broken.
+E
+E
+E           ----------------
+E           Broken contracts
+E           ----------------
+E
+E           Infrastructure layer must not import application
+E           ------------------------------------------------
+E
+E           bioetl.infrastructure is not allowed to import bioetl.application:
+E
+E           -   bioetl.infrastructure.config -> bioetl.application.core.pipeline_config (l.28)
+E
+E
+E
+E           stderr:
+tests\architecture\test_layer_dependencies.py:219: Failed
+_________________________ test_no_empty_source_files __________________________
+src_dir = WindowsPath('E:/google_drive/05_AI/github/BioactivityDataAcquisition/src')
+    def test_no_empty_source_files(src_dir: Path) -> None:
+        """Source tree must not contain empty Python files (except __init__.py).
+
+        REQ-ARCH-011: Empty files indicate dead code or incomplete implementation.
+        Only __init__.py files are allowed to be empty (for package markers).
+        """
+        bioetl_path = src_dir / "bioetl"
+        if not bioetl_path.exists():
+            pytest.skip("bioetl source not found")
+
+        empty_files = []
+        for py_file in bioetl_path.rglob("*.py"):
+            # Skip __init__.py - allowed to be empty for package markers
+            if py_file.name == "__init__.py":
+                continue
+
+            # Check if file is empty or contains only whitespace/comments
+            with py_file.open(encoding="utf-8") as f:
+                content = f.read().strip()
+
+            # Remove comments and docstrings for content check
+            lines = [
+                line.strip()
+                for line in content.split("\n")
+                if line.strip() and not line.strip().startswith("#")
+            ]
+
+            if not lines:
+                empty_files.append(str(py_file.relative_to(src_dir)))
+
+>       assert not empty_files, (
+            f"Found {len(empty_files)} empty source file(s) "
+            "(excluding __init__.py):\n" + "\n".join(f"  - {f}" for f in empty_files)
+        )
+E       AssertionError: Found 1 empty source file(s) (excluding __init__.py):
+E           - bioetl\infrastructure\factories\chembl_activity.py
+E       assert not ['bioetl\\infrastructure\\factories\\chembl_activity.py']
+tests\architecture\test_layer_dependencies.py:344: AssertionError
+___________________________ test_dead_code_vulture ____________________________
+src_dir = WindowsPath('E:/google_drive/05_AI/github/BioactivityDataAcquisition/src')
+    def test_dead_code_vulture(src_dir: Path) -> None:
+        """Detect dead code using vulture static analysis.
+
+        REQ-ARCH-013: No unused code should exist in the codebase.
+        """
+        try:
+            from vulture import Vulture
+        except ImportError:
+            pytest.skip("vulture not installed - run: pip install vulture")
+
+        bioetl_path = src_dir / "bioetl"
+        if not bioetl_path.exists():
+            pytest.skip("bioetl source not found")
+
+        v = Vulture()
+        v.scavenge([str(bioetl_path)])
+
+        # Filter results - ignore certain patterns
+        ignored_names = {
+            # Common false positives
+            "__init__",
+            "__str__",
+            "__repr__",
+            "__hash__",
+            "__eq__",
+            "__lt__",
+            "__le__",
+            "__gt__",
+            "__ge__",
+            "__aenter__",
+            "__aexit__",
+            "__enter__",
+            "__exit__",
+            # Context manager parameters (required by signature)
+            "exc_type",
+            "exc_val",
+            "exc_tb",
+            # Protocol methods (interfaces implemented elsewhere)
+            "fetch",
+            "write_bronze",
+            "write_silver",
+            "write_gold",
+            "acquire",
+            "release",
+            "save_checkpoint",
+            "load_checkpoint",
+            "delete_checkpoint",
+            "quarantine_record",
+            # Pydantic/dataclass fields
+            "model_config",
+            # Click CLI
+            "main",
+            # Prefect task decorators
+            "execute",
+        }
+
+        # Get unused code with confidence threshold
+        # Note: TYPE_CHECKING imports often have 90% confidence but are not dead code
+        unused = [
+            item
+            for item in v.get_unused_code(min_confidence=80)
+            if item.name not in ignored_names
+            and not item.name.startswith("_")  # Ignore private
+            and "test" not in str(item.filename).lower()  # Ignore test files
+            # Imports at 90% confidence in TYPE_CHECKING blocks are often false positives
+            and not (item.typ == "import" and item.confidence < 100)
+        ]
+
+        if unused:
+            messages = [
+                f"{item.filename}:{item.first_lineno} - unused {item.typ} '{item.name}' "
+                f"(confidence: {item.confidence}%)"
+                for item in unused[:20]  # Limit output
+            ]
+            if len(unused) > 20:
+                messages.append(f"... and {len(unused) - 20} more")
+
+>           pytest.fail(
+                f"Found {len(unused)} potentially dead code item(s):\n"
+                + "\n".join(messages)
+            )
+E           Failed: Found 1 potentially dead code item(s):
+E           E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\config.py:53 - unused variable 'value_is_complex' (confidence: 100%)
+tests\architecture\test_layer_dependencies.py:478: Failed
+_________________________ test_write_simple_overwrite _________________________
+gold_writer = <bioetl.infrastructure.storage.gold_writer.GoldWriter object at 0x0000018A35260050>
+valid_records = [{'id': 1, 'value': 10.5}, {'id': 2, 'value': 20.0}]
+    async def test_write_simple_overwrite(gold_writer, valid_records):
+        """Test simple overwrite mode."""
+        with patch(
+            "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+        ) as mock_write:
+            await gold_writer.write_gold("test_table", valid_records, mode="overwrite")
+
+            mock_write.assert_called_once()
+            call_kwargs = mock_write.call_args[1]
+            assert call_kwargs["mode"] == "overwrite"
+            assert call_kwargs["table_or_uri"] == "s3://test-bucket/gold/test_table"
+>           assert call_kwargs["data"] == valid_records
+E           AssertionError: assert pyarrow.Table...e: [[10.5,20]] == [{'id': 1, 'v...value': 20.0}]
+E
+E             Use -v to get more diff
+tests\infrastructure\storage\test_gold_writer_integration.py:75: AssertionError
+_____________ test_config_parameters_have_defaults_or_validation ______________
+src_dir = WindowsPath('E:/google_drive/05_AI/github/BioactivityDataAcquisition/src')
+    def test_config_parameters_have_defaults_or_validation(src_dir: Path):
+        """Configuration parameters should have sensible defaults or validation.
+
+        This test checks that config functions return valid typed objects
+        even with no environment variables set.
+        """
+        # Import config module
+        import sys
+
+        sys.path.insert(0, str(src_dir))
+
+        from bioetl.infrastructure.config import get_settings
+
+        # Test that all config functions can be called without environment variables
+        # (they should return objects with sensible defaults or None for optional values)
+        with patch("bioetl.infrastructure.config.Settings.check_s3_endpoint_for_dev", return_value=True):
+>           settings = get_settings()
+                       ^^^^^^^^^^^^^^
+tests\test_architecture.py:300:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A3524E510>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+____________________ test_base_pipeline_quarantine_manager ____________________
+mock_pipeline = <test_base_pipeline.ConcretePipeline object at 0x0000018A34ECBF00>
+    @pytest.mark.asyncio
+    async def test_base_pipeline_quarantine_manager(mock_pipeline):
+        """Test quarantine manager lazy initialization."""
+>       manager = mock_pipeline.quarantine_manager
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\application\test_base_pipeline.py:153:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <test_base_pipeline.ConcretePipeline object at 0x0000018A34ECBF00>
+    @property
+    def quarantine_manager(self) -> QuarantineManager:
+        """Get quarantine manager (lazy init)."""
+        if self._quarantine_manager is None:
+>           self._quarantine_manager = QuarantineManager(
+                                       ^^^^^^^^^^^^^^^^^
+                quarantine_port=self._services.quarantine,
+                pipeline_name=self._config.pipeline_name,
+            )
+E           NameError: name 'QuarantineManager' is not defined
+src\bioetl\application\core\base.py:216: NameError
+___ TestUniProtClientErrorPaths.test_fetch_next_page_logs_error_on_failure ____
+self = UniProtClient(base_url='https://rest.uniprot.org', without API key)
+query = 'test', size = 10, fetched = 0, limit = 100, cursor = None
+    async def _fetch_next_page(
+        self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
+    ) -> tuple[list, str | None]:
+        """Fetch the next page of protein results."""
+        await self.rate_limiter.acquire()
+        params = self._build_protein_fetch_params(query, size, fetched, limit, cursor)
+        try:
+>           response = await self.circuit_breaker.call(
+                self.http_client.get, "/uniprotkb/search", params=params
+            )
+src\bioetl\infrastructure\adapters\uniprot\client.py:195:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693108724000'>
+args = (<AsyncMock name='mock.get' id='1693108727696'>, '/uniprotkb/search')
+kwargs = {'params': {'fields': 'accession,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl', 'format': 'json', 'query': 'test', 'size': 10}}
+_call = call(<AsyncMock name='mock.get' id='1693108727696'>, '/uniprotkb/search', params={'query': 'test', 'size': 10, 'format...sion,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl'})
+effect = ConnectionError('Network error')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               ConnectionError: Network error
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: ConnectionError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestUniProtClientErrorPaths object at 0x0000018A3267DD10>
+mock_http_client = <AsyncMock spec='AsyncClient' id='1693108727360'>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x0000018A3524F8C0>
+    async def test_fetch_next_page_logs_error_on_failure(
+        self, mock_http_client, caplog
+    ):
+        """Test that _fetch_next_page logs error when fetch fails."""
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
+        ):
+            client = UniProtClient()
+            client.http_client = mock_http_client
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=ConnectionError("Network error")
+            )
+
+            with caplog.at_level(logging.ERROR):
+>               results, cursor = await client._fetch_next_page(
+                    query="test", size=10, fetched=0, limit=100, cursor=None
+                )
+tests\unit\infrastructure\adapters\test_client_error_paths.py:92:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\uniprot\client.py:205: in _fetch_next_page
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A36927C50>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:38.189 | ERROR   | bioetl.infrastructure.adapters.uniprot.client - UniProt protein fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 195, in _fetch_next_page
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.http_client.get, "/uniprotkb/search", params=params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+ConnectionError: Network error
+------------------------------ Captured log call ------------------------------
+ERROR    bioetl.infrastructure.adapters.uniprot.client:client.py:200 UniProt protein fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 195, in _fetch_next_page
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.http_client.get, "/uniprotkb/search", params=params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+ConnectionError: Network error
+___ TestUniProtClientErrorPaths.test_fetch_next_page_raises_in_strict_mode ____
+self = UniProtClient(base_url='https://rest.uniprot.org', without API key)
+query = 'test', size = 10, fetched = 0, limit = 100, cursor = None
+    async def _fetch_next_page(
+        self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
+    ) -> tuple[list, str | None]:
+        """Fetch the next page of protein results."""
+        await self.rate_limiter.acquire()
+        params = self._build_protein_fetch_params(query, size, fetched, limit, cursor)
+        try:
+>           response = await self.circuit_breaker.call(
+                self.http_client.get, "/uniprotkb/search", params=params
+            )
+src\bioetl\infrastructure\adapters\uniprot\client.py:195:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693108420688'>
+args = (<AsyncMock name='mock.get' id='1693108425728'>, '/uniprotkb/search')
+kwargs = {'params': {'fields': 'accession,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl', 'format': 'json', 'query': 'test', 'size': 10}}
+_call = call(<AsyncMock name='mock.get' id='1693108425728'>, '/uniprotkb/search', params={'query': 'test', 'size': 10, 'format...sion,id,gene_names,organism_name,organism_id,protein_name,length,sequence,cc_function,ft_domain,xref_pdb,xref_chembl'})
+effect = ConnectionError('Network error')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               ConnectionError: Network error
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: ConnectionError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestUniProtClientErrorPaths object at 0x0000018A3267DBD0>
+mock_http_client = <AsyncMock spec='AsyncClient' id='1693108422032'>
+    async def test_fetch_next_page_raises_in_strict_mode(self, mock_http_client):
+        """Test that _fetch_next_page raises exception in strict mode."""
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = UniProtClient()
+            client.http_client = mock_http_client
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=ConnectionError("Network error")
+            )
+
+            with pytest.raises(ConnectionError, match="Network error"):
+>               await client._fetch_next_page(
+                    query="test", size=10, fetched=0, limit=100, cursor=None
+                )
+tests\unit\infrastructure\adapters\test_client_error_paths.py:128:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\uniprot\client.py:205: in _fetch_next_page
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A36926AD0>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:39.154 | ERROR   | bioetl.infrastructure.adapters.uniprot.client - UniProt protein fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 195, in _fetch_next_page
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.http_client.get, "/uniprotkb/search", params=params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+ConnectionError: Network error
+------------------------------ Captured log call ------------------------------
+ERROR    bioetl.infrastructure.adapters.uniprot.client:client.py:200 UniProt protein fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 195, in _fetch_next_page
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.http_client.get, "/uniprotkb/search", params=params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+ConnectionError: Network error
+___ TestUniProtClientErrorPaths.test_fetch_features_logs_warning_on_failure ___
+self = UniProtClient(base_url='https://rest.uniprot.org', without API key)
+query = 'P12345', limit = 10
+    async def _fetch_features(
+        self,
+        query: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch protein features from UniProt.
+
+        Args:
+            query: Protein accession or search query
+            limit: Max records
+
+        Yields:
+            Feature records
+        """
+        if not query:
+            raise ValueError("Query is required for feature search")
+
+        fetched = 0
+
+        # Get protein first
+        await self.rate_limiter.acquire()
+
+        try:
+>           response = await self.circuit_breaker.call(
+                self.http_client.get,
+                f"/uniprotkb/{query}.json",
+            )
+src\bioetl\infrastructure\adapters\uniprot\client.py:258:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693108423376'>
+args = (<AsyncMock name='mock.get' id='1693113752880'>, '/uniprotkb/P12345.json')
+kwargs = {}
+_call = call(<AsyncMock name='mock.get' id='1693113752880'>, '/uniprotkb/P12345.json')
+effect = TimeoutError('Request timeout')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               TimeoutError: Request timeout
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: TimeoutError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestUniProtClientErrorPaths object at 0x0000018A326D63F0>
+mock_http_client = <AsyncMock spec='AsyncClient' id='1693108434128'>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x0000018A36926C10>
+    async def test_fetch_features_logs_warning_on_failure(
+        self, mock_http_client, caplog
+    ):
+        """Test that _fetch_features logs warning when fetch fails."""
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = UniProtClient()
+            client.http_client = mock_http_client
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=TimeoutError("Request timeout")
+            )
+
+            with caplog.at_level(logging.WARNING):
+>               results = [r async for r in client._fetch_features("P12345", limit=10)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\infrastructure\adapters\test_client_error_paths.py:155:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\uniprot\client.py:285: in _fetch_features
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A35260FC0>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:40.083 | WARNING | bioetl.infrastructure.adapters.uniprot.client - UniProt feature fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 258, in _fetch_features
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+TimeoutError: Request timeout
+------------------------------ Captured log call ------------------------------
+WARNING  bioetl.infrastructure.adapters.uniprot.client:client.py:280 UniProt feature fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 258, in _fetch_features
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+TimeoutError: Request timeout
+____ TestUniProtClientErrorPaths.test_fetch_features_raises_in_strict_mode ____
+self = UniProtClient(base_url='https://rest.uniprot.org', without API key)
+query = 'P12345', limit = 10
+    async def _fetch_features(
+        self,
+        query: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch protein features from UniProt.
+
+        Args:
+            query: Protein accession or search query
+            limit: Max records
+
+        Yields:
+            Feature records
+        """
+        if not query:
+            raise ValueError("Query is required for feature search")
+
+        fetched = 0
+
+        # Get protein first
+        await self.rate_limiter.acquire()
+
+        try:
+>           response = await self.circuit_breaker.call(
+                self.http_client.get,
+                f"/uniprotkb/{query}.json",
+            )
+src\bioetl\infrastructure\adapters\uniprot\client.py:258:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693113750528'>
+args = (<AsyncMock name='mock.get' id='1693113752544'>, '/uniprotkb/P12345.json')
+kwargs = {}
+_call = call(<AsyncMock name='mock.get' id='1693113752544'>, '/uniprotkb/P12345.json')
+effect = TimeoutError('Request timeout')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               TimeoutError: Request timeout
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: TimeoutError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestUniProtClientErrorPaths object at 0x0000018A326D6060>
+mock_http_client = <AsyncMock spec='AsyncClient' id='1693113751200'>
+    async def test_fetch_features_raises_in_strict_mode(self, mock_http_client):
+        """Test that _fetch_features raises exception in strict mode."""
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = UniProtClient()
+            client.http_client = mock_http_client
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=TimeoutError("Request timeout")
+            )
+
+            with pytest.raises(TimeoutError, match="Request timeout"):
+>               _ = [r async for r in client._fetch_features("P12345", limit=10)]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\infrastructure\adapters\test_client_error_paths.py:190:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\uniprot\client.py:285: in _fetch_features
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A352615B0>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:41.007 | WARNING | bioetl.infrastructure.adapters.uniprot.client - UniProt feature fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 258, in _fetch_features
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+TimeoutError: Request timeout
+------------------------------ Captured log call ------------------------------
+WARNING  bioetl.infrastructure.adapters.uniprot.client:client.py:280 UniProt feature fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 258, in _fetch_features
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+TimeoutError: Request timeout
+__ TestUniProtClientErrorPaths.test_fetch_sequences_logs_warning_on_failure ___
+self = UniProtClient(base_url='https://rest.uniprot.org', without API key)
+query = 'gene:TP53', limit = 10
+    async def _fetch_sequences(
+        self,
+        query: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch protein sequences from UniProt.
+
+        Args:
+            query: Protein accession or search query
+            limit: Max records
+
+        Yields:
+            Sequence records
+        """
+        if not query:
+            raise ValueError("Query is required for sequence fetch")
+
+        fetched = 0
+
+        # Fetch in FASTA format
+        await self.rate_limiter.acquire()
+
+        try:
+>           response = await self.circuit_breaker.call(
+                self.http_client.get,
+                "/uniprotkb/stream",
+                params={
+                    "query": query,
+                    "format": "fasta",
+                },
+            )
+src\bioetl\infrastructure\adapters\uniprot\client.py:312:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693108420688'>
+args = (<AsyncMock name='mock.get' id='1693108425728'>, '/uniprotkb/stream')
+kwargs = {'params': {'format': 'fasta', 'query': 'gene:TP53'}}
+_call = call(<AsyncMock name='mock.get' id='1693108425728'>, '/uniprotkb/stream', params={'query': 'gene:TP53', 'format': 'fasta'})
+effect = HTTPStatusError('Server error')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               httpx.HTTPStatusError: Server error
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: HTTPStatusError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestUniProtClientErrorPaths object at 0x0000018A32705910>
+mock_http_client = <AsyncMock spec='AsyncClient' id='1693108423376'>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x0000018A36926C10>
+    async def test_fetch_sequences_logs_warning_on_failure(
+        self, mock_http_client, caplog
+    ):
+        """Test that _fetch_sequences logs warning when fetch fails."""
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = UniProtClient()
+            client.http_client = mock_http_client
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=httpx.HTTPStatusError(
+                    "Server error",
+                    request=MagicMock(),
+                    response=MagicMock(status_code=500),
+                )
+            )
+
+            with caplog.at_level(logging.WARNING):
+>               results = [
+                    r async for r in client._fetch_sequences("gene:TP53", limit=10)
+                ]
+tests\unit\infrastructure\adapters\test_client_error_paths.py:219:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\uniprot\client.py:339: in _fetch_sequences
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A34F58950>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:41.925 | WARNING | bioetl.infrastructure.adapters.uniprot.client - UniProt sequence fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 312, in _fetch_sequences
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+httpx.HTTPStatusError: Server error
+------------------------------ Captured log call ------------------------------
+WARNING  bioetl.infrastructure.adapters.uniprot.client:client.py:334 UniProt sequence fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 312, in _fetch_sequences
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+httpx.HTTPStatusError: Server error
+___ TestUniProtClientErrorPaths.test_fetch_sequences_raises_in_strict_mode ____
+self = UniProtClient(base_url='https://rest.uniprot.org', without API key)
+query = 'gene:TP53', limit = 10
+    async def _fetch_sequences(
+        self,
+        query: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch protein sequences from UniProt.
+
+        Args:
+            query: Protein accession or search query
+            limit: Max records
+
+        Yields:
+            Sequence records
+        """
+        if not query:
+            raise ValueError("Query is required for sequence fetch")
+
+        fetched = 0
+
+        # Fetch in FASTA format
+        await self.rate_limiter.acquire()
+
+        try:
+>           response = await self.circuit_breaker.call(
+                self.http_client.get,
+                "/uniprotkb/stream",
+                params={
+                    "query": query,
+                    "format": "fasta",
+                },
+            )
+src\bioetl\infrastructure\adapters\uniprot\client.py:312:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693113745824'>
+args = (<AsyncMock name='mock.get' id='1693113752208'>, '/uniprotkb/stream')
+kwargs = {'params': {'format': 'fasta', 'query': 'gene:TP53'}}
+_call = call(<AsyncMock name='mock.get' id='1693113752208'>, '/uniprotkb/stream', params={'query': 'gene:TP53', 'format': 'fasta'})
+effect = HTTPStatusError('Server error')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               httpx.HTTPStatusError: Server error
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: HTTPStatusError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestUniProtClientErrorPaths object at 0x0000018A32549F20>
+mock_http_client = <AsyncMock spec='AsyncClient' id='1693108421360'>
+    async def test_fetch_sequences_raises_in_strict_mode(self, mock_http_client):
+        """Test that _fetch_sequences raises exception in strict mode."""
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = UniProtClient()
+            client.http_client = mock_http_client
+
+            # Make circuit_breaker.call raise an exception
+            error = httpx.HTTPStatusError(
+                "Server error",
+                request=MagicMock(),
+                response=MagicMock(status_code=500),
+            )
+            client.circuit_breaker.call = AsyncMock(side_effect=error)
+
+            with pytest.raises(httpx.HTTPStatusError):
+>               _ = [r async for r in client._fetch_sequences("gene:TP53", limit=10)]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\infrastructure\adapters\test_client_error_paths.py:253:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\uniprot\client.py:339: in _fetch_sequences
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A352538A0>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:42.865 | WARNING | bioetl.infrastructure.adapters.uniprot.client - UniProt sequence fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 312, in _fetch_sequences
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+httpx.HTTPStatusError: Server error
+------------------------------ Captured log call ------------------------------
+WARNING  bioetl.infrastructure.adapters.uniprot.client:client.py:334 UniProt sequence fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\uniprot\client.py", line 312, in _fetch_sequences
+    response = await self.circuit_breaker.call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+httpx.HTTPStatusError: Server error
+_ TestPubChemClientErrorPaths.test_fetch_compounds_incremental_logs_error_on_failure _
+self = PubChemClient(rate=5.0), watermark = 1000, limit = 50
+    async def _fetch_compounds_incremental(
+        self, watermark: Watermark, limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds incrementally using a watermark."""
+        fetched = 0
+        start_cid = int(watermark) if isinstance(watermark, (int, str)) else 1
+        batch_size = 100
+        current_cid = start_cid
+
+        while not limit or fetched < limit:
+            await self.rate_limiter.acquire()
+            cid_batch = list(range(current_cid, current_cid + batch_size))
+            try:
+>               compounds = await self.circuit_breaker.call(
+                    self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+                )
+src\bioetl\infrastructure\adapters\pubchem\client.py:140:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693113749520'>
+args = (<bound method PubChemClient._run_in_executor of PubChemClient(rate=5.0)>, <function get_compounds at 0x0000018A06B579C0>, [1000, 1001, 1002, 1003, 1004, 1005, ...], 'cid')
+kwargs = {}
+_call = call(<bound method PubChemClient._run_in_executor of PubChemClient(rate=5.0)>, <function get_compounds at 0x0000018A06...81, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099], 'cid')
+effect = <list_iterator object at 0x0000018A36942B30>
+result = ConnectionError('PubChem API error')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+                raise effect
+            elif not _callable(effect):
+                try:
+                    result = next(effect)
+                except StopIteration:
+                    # It is impossible to propagate a StopIteration
+                    # through coroutines because of PEP 479
+                    raise StopAsyncIteration
+                if _is_exception(result):
+>                   raise result
+E                   ConnectionError: PubChem API error
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2330: ConnectionError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestPubChemClientErrorPaths object at 0x0000018A3267DE50>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x0000018A35261220>
+    async def test_fetch_compounds_incremental_logs_error_on_failure(self, caplog):
+        """Test that _fetch_compounds_incremental logs error when fetch fails."""
+        from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "false", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = PubChemClient()
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=[
+                    ConnectionError("PubChem API error"),
+                    [],  # Second call returns empty to break loop
+                ]
+            )
+
+            with caplog.at_level(logging.ERROR):
+                results = []
+>               async for result in client._fetch_compounds_incremental(
+                    watermark=1000, limit=50
+                ):
+tests\unit\infrastructure\adapters\test_client_error_paths.py:290:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\pubchem\client.py:160: in _fetch_compounds_incremental
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A36A44D10>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:43.043 | ERROR   | bioetl.infrastructure.adapters.pubchem.client - PubChem compound batch fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\pubchem\client.py", line 140, in _fetch_compounds_incremental
+    compounds = await self.circuit_breaker.call(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2330, in _execute_mock_call
+    raise result
+ConnectionError: PubChem API error
+------------------------------ Captured log call ------------------------------
+ERROR    bioetl.infrastructure.adapters.pubchem.client:client.py:152 PubChem compound batch fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\pubchem\client.py", line 140, in _fetch_compounds_incremental
+    compounds = await self.circuit_breaker.call(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2330, in _execute_mock_call
+    raise result
+ConnectionError: PubChem API error
+_ TestPubChemClientErrorPaths.test_fetch_compounds_incremental_raises_in_strict_mode _
+self = PubChemClient(rate=5.0), watermark = 1000, limit = 50
+    async def _fetch_compounds_incremental(
+        self, watermark: Watermark, limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds incrementally using a watermark."""
+        fetched = 0
+        start_cid = int(watermark) if isinstance(watermark, (int, str)) else 1
+        batch_size = 100
+        current_cid = start_cid
+
+        while not limit or fetched < limit:
+            await self.rate_limiter.acquire()
+            cid_batch = list(range(current_cid, current_cid + batch_size))
+            try:
+>               compounds = await self.circuit_breaker.call(
+                    self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+                )
+src\bioetl\infrastructure\adapters\pubchem\client.py:140:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <AsyncMock id='1693108421360'>
+args = (<bound method PubChemClient._run_in_executor of PubChemClient(rate=5.0)>, <function get_compounds at 0x0000018A06B579C0>, [1000, 1001, 1002, 1003, 1004, 1005, ...], 'cid')
+kwargs = {}
+_call = call(<bound method PubChemClient._run_in_executor of PubChemClient(rate=5.0)>, <function get_compounds at 0x0000018A06...81, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099], 'cid')
+effect = ConnectionError('PubChem API error')
+    async def _execute_mock_call(self, /, *args, **kwargs):
+        # This is nearly just like super(), except for special handling
+        # of coroutines
+
+        _call = _Call((args, kwargs), two=True)
+        self.await_count += 1
+        self.await_args = _call
+        self.await_args_list.append(_call)
+
+        effect = self.side_effect
+        if effect is not None:
+            if _is_exception(effect):
+>               raise effect
+E               ConnectionError: PubChem API error
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:2321: ConnectionError
+During handling of the above exception, another exception occurred:
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestPubChemClientErrorPaths object at 0x0000018A3267DF90>
+    async def test_fetch_compounds_incremental_raises_in_strict_mode(self):
+        """Test that _fetch_compounds_incremental raises exception in strict mode."""
+        from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
+
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import get_settings
+
+            get_settings.cache_clear()
+
+            client = PubChemClient()
+
+            # Make circuit_breaker.call raise an exception
+            client.circuit_breaker.call = AsyncMock(
+                side_effect=ConnectionError("PubChem API error")
+            )
+
+            with pytest.raises(ConnectionError, match="PubChem API error"):
+>               _ = [
+                    r
+                    async for r in client._fetch_compounds_incremental(
+                        watermark=1000, limit=50
+                    )
+                ]
+tests\unit\infrastructure\adapters\test_client_error_paths.py:322:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\infrastructure\adapters\pubchem\client.py:160: in _fetch_compounds_incremental
+    if get_settings().strict_error_handling:
+       ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A3698F650>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+---------------------------- Captured stderr call -----------------------------
+18:31:43.200 | ERROR   | bioetl.infrastructure.adapters.pubchem.client - PubChem compound batch fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\pubchem\client.py", line 140, in _fetch_compounds_incremental
+    compounds = await self.circuit_breaker.call(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+ConnectionError: PubChem API error
+------------------------------ Captured log call ------------------------------
+ERROR    bioetl.infrastructure.adapters.pubchem.client:client.py:152 PubChem compound batch fetch failed
+Traceback (most recent call last):
+  File "E:\google_drive\05_AI\github\BioactivityDataAcquisition\src\bioetl\infrastructure\adapters\pubchem\client.py", line 140, in _fetch_compounds_incremental
+    compounds = await self.circuit_breaker.call(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self._run_in_executor, pcp.get_compounds, cid_batch, "cid"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 2321, in _execute_mock_call
+    raise effect
+ConnectionError: PubChem API error
+_____________ TestStrictErrorHandlingConfig.test_default_is_false _____________
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestStrictErrorHandlingConfig object at 0x0000018A3267E0D0>
+    def test_default_is_false(self):
+        """Test that strict_error_handling defaults to False."""
+        with patch.dict(os.environ, {}, clear=True):
+            # Clear any existing env vars that might affect the test
+            os.environ.pop("BIOETL_STRICT_ERROR_HANDLING", None)
+
+            from bioetl.infrastructure.config import Settings
+
+>           settings = Settings(test_mode=True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\infrastructure\adapters\test_client_error_paths.py:341:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A3698FB50>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+________ TestStrictErrorHandlingConfig.test_can_be_enabled_via_env_var ________
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestStrictErrorHandlingConfig object at 0x0000018A3267E210>
+    def test_can_be_enabled_via_env_var(self):
+        """Test that strict_error_handling can be enabled via env var."""
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import Settings
+
+>           settings = Settings(test_mode=True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\infrastructure\adapters\test_client_error_paths.py:352:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A369AC7D0>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+_________ TestStrictErrorHandlingConfig.test_env_var_case_insensitive _________
+self = <tests.unit.infrastructure.adapters.test_client_error_paths.TestStrictErrorHandlingConfig object at 0x0000018A326D6520>
+    def test_env_var_case_insensitive(self):
+        """Test that env var values are case-insensitive."""
+        with patch.dict(
+            os.environ,
+            {"BIOETL_STRICT_ERROR_HANDLING": "True", "BIOETL_ENV": "staging"},
+        ):
+            from bioetl.infrastructure.config import Settings
+
+>           settings = Settings(test_mode=True)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\infrastructure\adapters\test_client_error_paths.py:363:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A369AD7C0>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+____ TestBootstrapPipeline.test_bootstrap_pipeline_unknown_pipeline_raises ____
+self = <tests.unit.test_bootstrap.TestBootstrapPipeline object at 0x0000018A34C18B90>
+    def test_bootstrap_pipeline_unknown_pipeline_raises(self):
+        """Test that unknown pipeline name raises ValueError."""
+        from bioetl.interfaces.bootstrap import bootstrap_pipeline
+
+        with pytest.raises(ValueError, match="Unknown pipeline name"):
+>           bootstrap_pipeline(
+                pipeline_name="unknown_pipeline",
+                run_id=uuid4(),
+                run_type=RunType.INCREMENTAL,
+                resume=False,
+                limit=None,
+            )
+tests\unit\test_bootstrap.py:66:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\bioetl\interfaces\bootstrap.py:79: in bootstrap_pipeline
+    settings = get_settings()
+               ^^^^^^^^^^^^^^
+src\bioetl\infrastructure\config.py:270: in get_settings
+    return Settings()
+           ^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:194: in __init__
+    **__pydantic_self__._settings_build_values(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic_settings\main.py:436: in _settings_build_values
+    source_state = source()
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+self = <bioetl.infrastructure.config.YamlSettingsSource object at 0x0000018A36A38050>
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+>           field_value, field_key = self.get_field_value(field, field_name)
+            ^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: cannot unpack non-iterable NoneType object
+src\bioetl\infrastructure\config.py:64: TypeError
+________ TestBootstrapPipeline.test_bootstrap_pipeline_chembl_activity ________
+self = <tests.unit.test_bootstrap.TestBootstrapPipeline object at 0x0000018A34C18CD0>
+mock_factory = <MagicMock name='ChEMBLActivityPipelineFactory' id='1693108434800'>
+mock_get_settings = <MagicMock name='get_settings' id='1693108433120'>
+mock_settings = <MagicMock name='get_settings()' id='1693108432112'>
+mock_logger = <MagicMock id='1693108428752'>
+    @patch("bioetl.interfaces.bootstrap.get_settings")
+    @patch("bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipelineFactory")
+    def test_bootstrap_pipeline_chembl_activity(
+        self, mock_factory, mock_get_settings, mock_settings, mock_logger
+    ):
+        """Test bootstrap_pipeline creates chembl_activity pipeline."""
+        from bioetl.interfaces.bootstrap import bootstrap_pipeline
+
+        mock_get_settings.return_value = mock_settings
+        mock_pipeline = MagicMock()
+        mock_factory.create_with_services.return_value = mock_pipeline
+
+        with patch(
+            "bioetl.interfaces.bootstrap.bootstrap_logger", return_value=mock_logger
+        ):
+            result = bootstrap_pipeline(
+                pipeline_name="chembl_activity",
+                run_id=uuid4(),
+                run_type=RunType.INCREMENTAL,
+                resume=False,
+                limit=100,
+>           )
+E           AssertionError: assert <bioetl.application.pipelines.chembl_activity.ChEMBLActivityPipeline object at 0x0000018A35082EA0> == <MagicMock name='ChEMBLActivityPipelineFactory.create_with_services()' id='1693108432448'>
+tests\unit\test_bootstrap.py:95: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_chembl_pipeline.py:23: Docker services not available - docker-compose.yml missing
+FAILED tests/architecture/test_layer_dependencies.py::test_import_linter_contracts - Failed: import-linter contracts violated:
+FAILED tests/architecture/test_layer_dependencies.py::test_no_empty_source_files - AssertionError: Found 1 empty source file(s) (excluding __init__.py):
+FAILED tests/architecture/test_layer_dependencies.py::test_dead_code_vulture - Failed: Found 1 potentially dead code item(s):
+FAILED tests/infrastructure/storage/test_gold_writer_integration.py::test_write_simple_overwrite - AssertionError: assert pyarrow.Table...e: [[10.5,20]] == [{'id': 1, 'v...va...
+FAILED tests/test_architecture.py::test_config_parameters_have_defaults_or_validation - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/application/test_base_pipeline.py::test_base_pipeline_quarantine_manager - NameError: name 'QuarantineManager' is not defined
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestUniProtClientErrorPaths::test_fetch_next_page_logs_error_on_failure - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestUniProtClientErrorPaths::test_fetch_next_page_raises_in_strict_mode - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestUniProtClientErrorPaths::test_fetch_features_logs_warning_on_failure - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestUniProtClientErrorPaths::test_fetch_features_raises_in_strict_mode - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestUniProtClientErrorPaths::test_fetch_sequences_logs_warning_on_failure - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestUniProtClientErrorPaths::test_fetch_sequences_raises_in_strict_mode - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestPubChemClientErrorPaths::test_fetch_compounds_incremental_logs_error_on_failure - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestPubChemClientErrorPaths::test_fetch_compounds_incremental_raises_in_strict_mode - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestStrictErrorHandlingConfig::test_default_is_false - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestStrictErrorHandlingConfig::test_can_be_enabled_via_env_var - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/infrastructure/adapters/test_client_error_paths.py::TestStrictErrorHandlingConfig::test_env_var_case_insensitive - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/test_bootstrap.py::TestBootstrapPipeline::test_bootstrap_pipeline_unknown_pipeline_raises - TypeError: cannot unpack non-iterable NoneType object
+FAILED tests/unit/test_bootstrap.py::TestBootstrapPipeline::test_bootstrap_pipeline_chembl_activity - AssertionError: assert <bioetl.application.pipelines.chembl_activity.ChEMBL...
+19 failed, 713 passed, 1 skipped in 56.19s

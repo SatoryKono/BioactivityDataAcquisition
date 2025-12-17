@@ -53,7 +53,6 @@ def mock_pipeline():
     return pipeline
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_initialization(mock_pipeline):
     """Test that the BasePipeline initializes correctly."""
     assert mock_pipeline.pipeline_name == "test_pipeline"
@@ -65,14 +64,12 @@ async def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.context.logger is not None
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_run_calls_orchestrator(mock_pipeline):
     """Test that the run method calls the orchestrator."""
     await mock_pipeline.run()
     mock_pipeline._orchestrator.run.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_accepts_three_params():
     """Test that BasePipeline.__init__ accepts exactly 3 parameters."""
     config = PipelineConfig(
@@ -102,7 +99,6 @@ async def test_base_pipeline_accepts_three_params():
     assert pipeline.services == services
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_properties(mock_pipeline):
     """Test all convenience properties."""
     # Test run_id property
@@ -126,7 +122,6 @@ async def test_base_pipeline_properties(mock_pipeline):
     assert mock_pipeline.limit is None
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_error_classifier(mock_pipeline):
     """Test error classifier lazy initialization."""
     # First access should initialize
@@ -137,7 +132,6 @@ async def test_base_pipeline_error_classifier(mock_pipeline):
     assert mock_pipeline.error_classifier is classifier
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_checkpoint_manager(mock_pipeline):
     """Test checkpoint manager lazy initialization."""
     manager = mock_pipeline.checkpoint_manager
@@ -147,7 +141,6 @@ async def test_base_pipeline_checkpoint_manager(mock_pipeline):
     assert mock_pipeline.checkpoint_manager is manager
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_quarantine_manager(mock_pipeline):
     """Test quarantine manager lazy initialization."""
     manager = mock_pipeline.quarantine_manager
@@ -157,14 +150,12 @@ async def test_base_pipeline_quarantine_manager(mock_pipeline):
     assert mock_pipeline.quarantine_manager is manager
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_should_write_gold(mock_pipeline):
     """Test default should_write_gold returns True."""
     result = mock_pipeline.should_write_gold(mock_pipeline.context, {})
     assert result is True
 
 
-@pytest.mark.asyncio
 async def test_base_pipeline_extract_watermark(mock_pipeline):
     """Test default extract_watermark returns datetime."""
     from datetime import datetime
@@ -173,7 +164,6 @@ async def test_base_pipeline_extract_watermark(mock_pipeline):
     assert isinstance(result, datetime)
 
 
-@pytest.mark.asyncio
 async def test_run_pipeline_flow():
     """Test run_pipeline_flow helper function."""
     from bioetl.application.core.base import run_pipeline_flow
@@ -205,7 +195,6 @@ async def test_run_pipeline_flow():
     mock_services.aclose.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_run_pipeline_flow_with_exception():
     """Test run_pipeline_flow handles exceptions."""
     from bioetl.application.core.base import run_pipeline_flow
