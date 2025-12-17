@@ -4,9 +4,8 @@ import pytest
 import respx
 from httpx import Response
 
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerOpenError
+from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
 
 @pytest.fixture
