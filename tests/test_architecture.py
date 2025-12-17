@@ -26,6 +26,7 @@ from bioetl.domain.ports import (
     QuarantinePort,
     StoragePort,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 # =============================================================================
 # Constants & Rules
@@ -265,10 +266,10 @@ def test_ports_are_protocols(src_dir: Path):
 
 
 def test_io_ports_are_async():
-    """I/O ports must use async methods."""
+    """I/O ports must use async methods (including context managers)."""
     # Exclude MetricsPort which is intentionally sync
     async_io_ports = [
-        (DataSourcePort, ["fetch", "health_check"]),
+        (DataSourcePort, ["fetch", "health_check", "__aenter__", "__aexit__"]),
         (LockPort, ["acquire", "release", "heartbeat"]),
         (StoragePort, ["write_bronze", "write_silver", "write_gold"]),
         (CheckpointPort, ["save", "load"]),
@@ -277,8 +278,14 @@ def test_io_ports_are_async():
     for port, methods in async_io_ports:
         for method_name in methods:
             if not hasattr(port, method_name):
+                # __aenter__ and __aexit__ are sometimes implicit in Protocol but should be checked if defined
+                if method_name.startswith("__"):
+                    continue
+                violations.append(f"{port.__name__} missing method {method_name}")
                 continue
+
             method = getattr(port, method_name)
+            # Check if it's an async function (coroutine or async generator)
             is_async = inspect.iscoroutinefunction(method) or inspect.isasyncgenfunction(
                 method
             )
@@ -329,8 +336,6 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
             content = f.read()
             if "TYPE_CHECKING" in content:
                 # Simplistic check: if imports are guarded, we assume they are safe for now
-                # A proper AST check for TYPE_CHECKING block is complex to merge here,
-                # but we rely on the previous test logic which was stricter.
                 pass
 
             # Re-implement strict AST check for non-TYPE_CHECKING blocks
@@ -446,9 +451,30 @@ def test_deprecated_files(project_root: Path):
     deprecated = [
         "src/bioetl/bootstrap.py",
         "src/bioetl/factories",
+        "src/bioetl/application/core/orchestrator.py", # Removed in refactoring
     ]
     for p in deprecated:
         assert not (project_root / p).exists(), f"Deprecated path exists: {p}"
+
+
+def test_pipeline_configs_schema(project_root: Path):
+    """Validate all pipeline YAMLs against the strict schema."""
+    import yaml
+
+    config_dir = project_root / "configs" / "pipelines"
+    if not config_dir.exists():
+        return
+
+    for yaml_file in config_dir.rglob("*.yaml"):
+        with yaml_file.open() as f:
+            data = yaml.safe_load(f)
+
+        # Use source file for merging if present, simplified for test
+        try:
+            # We just check if it instantiates without error, basic validation
+            PipelineYamlConfig(**data)
+        except Exception as e:
+            pytest.fail(f"Config {yaml_file} failed schema validation: {e}")
 
 
 # =============================================================================
