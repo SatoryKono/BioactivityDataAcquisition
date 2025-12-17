@@ -1,0 +1,72 @@
+---
+title: "Observability — Class Diagram"
+---
+%% File: src/bioetl/infrastructure/observability/*.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class MetricsPort {
+        <<Protocol>>
+        +observe_histogram(name, value, labels)
+        +increment_counter(name, value, labels)
+    }
+
+    class PrometheusMetrics {
+        -_histograms: dict
+        -_counters: dict
+        +observe_histogram(name, value, labels)
+        +increment_counter(name, value, labels)
+    }
+
+    class NoOpMetrics {
+        +observe_histogram(name, value, labels)
+        +increment_counter(name, value, labels)
+    }
+
+    class LineageTracker {
+        -_table_path: str
+        -_delta_table: deltalake.DeltaTable
+        +record(batch_id, source, target, record_count, metadata)
+        +get_lineage(batch_id) list~LineageRecord~
+        +get_downstream(batch_id) list~BatchID~
+    }
+
+    class LineageRecord {
+        <<dataclass>>
+        +batch_id: BatchID
+        +source_layer: str
+        +target_layer: str
+        +record_count: int
+        +timestamp: datetime
+        +metadata: dict
+    }
+
+    class AnomalyDetector {
+        -_window_size: int
+        -_threshold_sigma: float
+        -_history: deque
+        +detect(metric_name, value) Anomaly | None
+        +add_baseline(metric_name, values)
+    }
+
+    class Anomaly {
+        <<dataclass>>
+        +metric_name: str
+        +value: float
+        +expected_range: tuple
+        +severity: AnomalySeverity
+        +anomaly_type: AnomalyType
+    }
+
+    MetricsPort <|.. PrometheusMetrics : implements
+    MetricsPort <|.. NoOpMetrics : implements
+    LineageTracker --> LineageRecord : creates
+    AnomalyDetector --> Anomaly : detects
+
+    note for PrometheusMetrics "Production metrics"
+    note for NoOpMetrics "Testing/development"
+    note for LineageTracker "Data provenance tracking"
+    note for AnomalyDetector "Statistical anomaly detection"

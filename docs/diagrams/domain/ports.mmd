@@ -1,0 +1,63 @@
+---
+title: "Domain Ports — Class Diagram"
+---
+%% File: src/bioetl/domain/ports.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class DataSourcePort {
+        <<Protocol>>
+        +provider_name: str
+        +fetch(entity_type, watermark, limit) AsyncIterator~dict~
+        +health_check() HealthStatus
+        +aclose() None
+    }
+
+    class StoragePort {
+        <<Protocol>>
+        +write_bronze(records, provider, entity, date, batch_id) None
+        +write_silver(table_name, records, primary_keys, mode) None
+        +write_gold(table_name, records, mode) None
+        +aclose() None
+    }
+
+    class LockPort {
+        <<Protocol>>
+        +acquire(key, owner_id, ttl, wait, wait_timeout, exclusive) bool
+        +release(key, owner_id, exclusive) bool
+        +heartbeat(key, owner_id, exclusive) bool
+        +aclose() None
+    }
+
+    class CheckpointPort {
+        <<Protocol>>
+        +save(pipeline, watermark, run_id, metadata) None
+        +load(pipeline) tuple | None
+        +list_all() list~str~
+        +delete(pipeline) None
+        +aclose() None
+    }
+
+    class QuarantinePort {
+        <<Protocol>>
+        +write(pipeline, error_code, payload, bronze_batch_id) Any
+        +inspect(pipeline, limit, error_code) list~dict~
+        +get_stats(pipeline) dict
+        +aclose() None
+    }
+
+    class MetricsPort {
+        <<Protocol>>
+        +observe_histogram(name, value, labels) None
+        +increment_counter(name, value, labels) None
+    }
+
+    note for DataSourcePort "External data sources (ChEMBL, PubChem, UniProt)"
+    note for StoragePort "Medallion architecture (Bronze/Silver/Gold)"
+    note for LockPort "Distributed locking with heartbeat"
+    note for CheckpointPort "Pipeline state persistence"
+    note for QuarantinePort "Failed records isolation"
+    note for MetricsPort "Prometheus/StatsD metrics"

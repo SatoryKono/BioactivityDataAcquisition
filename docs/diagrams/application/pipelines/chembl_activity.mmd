@@ -1,0 +1,30 @@
+---
+title: "ChEMBLActivityPipeline — Class Diagram"
+---
+%% File: src/bioetl/application/pipelines/chembl_activity.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class BasePipeline {
+        <<abstract>>
+        +run() async
+        +transform_bronze_to_silver()* async
+        +should_write_gold() bool
+        +extract_watermark() Watermark
+    }
+
+    class ChEMBLActivityPipeline {
+        +SILVER_TABLE: str = "chembl_activity"
+        +GOLD_TABLE: str = "chembl_activity_gold"
+        +PRIMARY_KEYS: list = ["activity_id"]
+        +transform_bronze_to_silver(context, record) dict
+        +should_write_gold(context, record) bool
+        +extract_watermark(context, record) Watermark
+    }
+
+    BasePipeline <|-- ChEMBLActivityPipeline
+
+    note for ChEMBLActivityPipeline "Concrete pipeline for ChEMBL activity data"
