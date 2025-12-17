@@ -36,8 +36,8 @@ class TestMemoryLock:
             owner_id="owner_1",
             wait=False,
         )
-        # When wait=False, returns lock status (False = not locked)
-        assert result is False
+        # When wait=False and lock is not held, acquire succeeds immediately
+        assert result is True
 
     @pytest.mark.asyncio
     async def test_acquire_timeout(self, memory_lock):

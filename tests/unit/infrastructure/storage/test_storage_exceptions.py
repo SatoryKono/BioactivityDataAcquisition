@@ -42,7 +42,12 @@ def bronze_writer(mock_s3_client):
         "bioetl.infrastructure.storage.s3_pool.S3ClientPool.get_client"
     ) as mock_get_client:
         mock_get_client.return_value = mock_s3_client
-        writer = BronzeWriter(bucket="test-bucket")
+        writer = BronzeWriter(
+            bucket="test-bucket",
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+        )
         # Inject the mock client directly to ensure it's used during tests
         writer.s3_client = mock_s3_client
         yield writer

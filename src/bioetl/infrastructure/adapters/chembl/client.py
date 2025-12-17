@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import ChemblApiError
 from bioetl.domain.types import HealthStatus, Watermark
@@ -83,6 +83,15 @@ class ChemblAdapter:
     _consecutive_errors: int = field(init=False, default=0)
     _last_health_check: datetime | None = field(init=False, default=None)
     _cached_health: HealthStatus = field(init=False, default=HealthStatus.HEALTHY)
+
+    async def __aenter__(self) -> Self:
+        """Enter async context manager."""
+        await self.http_client.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Exit async context manager."""
+        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
 
     def _get_resource_url(self, entity_type: str) -> str:
         """Get ChEMBL API URL for entity type."""

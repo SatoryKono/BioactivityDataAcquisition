@@ -65,7 +65,12 @@ class TestBronzeWriter:
     @pytest.mark.asyncio
     async def test_write_bronze_generates_correct_key(self, mock_s3_client):
         """Test that write_bronze generates the correct S3 key."""
-        writer = BronzeWriter(bucket="test-bucket")
+        writer = BronzeWriter(
+            bucket="test-bucket",
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+        )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
@@ -94,7 +99,12 @@ class TestBronzeWriter:
     @pytest.mark.asyncio
     async def test_write_bronze_compresses_with_zstd(self, mock_s3_client):
         """REQ-DATA-001: Test that data is compressed with zstandard."""
-        writer = BronzeWriter(bucket="test-bucket")
+        writer = BronzeWriter(
+            bucket="test-bucket",
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+        )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
@@ -126,10 +136,14 @@ class TestBronzeWriter:
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
     @pytest.mark.asyncio
-    @pytest.mark.usefixtures("mock_s3_client")
-    async def test_write_bronze_with_no_records(self):
+    async def test_write_bronze_with_no_records(self, mock_s3_client):
         """Test that write_bronze raises error if there are no records."""
-        writer = BronzeWriter(bucket="test-bucket")
+        writer = BronzeWriter(
+            bucket="test-bucket",
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+        )
         # Make run_in_executor execute synchronously for testing
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
@@ -148,6 +162,127 @@ class TestBronzeWriter:
                 date=date,
                 batch_id=batch_id,
             )
+
+
+@pytest.mark.unit
+class TestBronzeWriterLocal:
+    """Tests for BronzeWriter in local mode."""
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_local_creates_file(self, tmp_path):
+        """Test write_bronze creates file in local mode."""
+        writer = BronzeWriter(bucket=str(tmp_path))
+        writer.loop = asyncio.get_event_loop()
+        writer.loop.run_in_executor = make_sync_executor(writer.loop)
+
+        records = [b'{"id": 1, "data": "test"}\n']
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        date = datetime(2023, 1, 1)
+
+        path = await writer.write_bronze(
+            records=iter(records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+        )
+
+        expected_file = tmp_path / path
+        assert expected_file.exists()
+
+    @pytest.mark.asyncio
+    async def test_write_bronze_local_compresses_data(self, tmp_path):
+        """Test write_bronze compresses data in local mode."""
+        writer = BronzeWriter(bucket=str(tmp_path))
+        writer.loop = asyncio.get_event_loop()
+        writer.loop.run_in_executor = make_sync_executor(writer.loop)
+
+        records = [b'{"id": 1, "data": "test"}\n']
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        date = datetime(2023, 1, 1)
+
+        path = await writer.write_bronze(
+            records=iter(records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+        )
+
+        file_path = tmp_path / path
+        with open(file_path, "rb") as f:
+            compressed_data = f.read()
+
+        # Verify zstd magic bytes
+        assert compressed_data.startswith(b"\x28\xb5\x2f\xfd")
+
+    @pytest.mark.asyncio
+    async def test_read_bronze_local(self, tmp_path):
+        """Test read_bronze reads file in local mode."""
+        # Create a compressed file manually for deterministic testing
+        import json
+
+        import zstandard as zstd
+
+        records_data = [{"id": 1, "data": "test"}, {"id": 2, "data": "test2"}]
+        jsonl_data = "\n".join(json.dumps(r) for r in records_data) + "\n"
+
+        # Compress with zstd
+        compressor = zstd.ZstdCompressor(level=3)
+        compressed = compressor.compress(jsonl_data.encode("utf-8"))
+
+        # Create directory structure
+        bronze_dir = tmp_path / "bronze" / "v1" / "test_provider" / "test_entity" / "2023-01-01"
+        bronze_dir.mkdir(parents=True)
+        test_file = bronze_dir / "batch_test.jsonl.zst"
+        test_file.write_bytes(compressed)
+
+        writer = BronzeWriter(bucket=str(tmp_path))
+        writer.loop = asyncio.get_event_loop()
+        writer.loop.run_in_executor = make_sync_executor(writer.loop)
+
+        # Read it back
+        read_records = []
+        async for record in writer.read_bronze("bronze/v1/test_provider/test_entity/2023-01-01/batch_test.jsonl.zst"):
+            read_records.append(record)
+
+        assert len(read_records) == 2
+        assert read_records[0]["id"] == 1
+
+    @pytest.mark.asyncio
+    async def test_list_batches_local(self, tmp_path):
+        """Test list_batches in local mode."""
+        writer = BronzeWriter(bucket=str(tmp_path))
+        writer.loop = asyncio.get_event_loop()
+        writer.loop.run_in_executor = make_sync_executor(writer.loop)
+
+        # Write two batches
+        date = datetime(2023, 1, 1)
+        for i in range(2):
+            batch_id = BatchID(UUID(f"12345678-1234-5678-1234-56781234567{i}"))
+            await writer.write_bronze(
+                records=iter([b'{"id": 1}\n']),
+                provider="test_provider",
+                entity="test_entity",
+                date=date,
+                batch_id=batch_id,
+            )
+
+        batches = await writer.list_batches("test_provider", "test_entity", date)
+
+        assert len(batches) == 2
+        assert all(b.endswith(".jsonl.zst") for b in batches)
+
+    @pytest.mark.asyncio
+    async def test_list_batches_local_nonexistent(self, tmp_path):
+        """Test list_batches returns empty for nonexistent path."""
+        writer = BronzeWriter(bucket=str(tmp_path))
+        writer.loop = asyncio.get_event_loop()
+        writer.loop.run_in_executor = make_sync_executor(writer.loop)
+
+        batches = await writer.list_batches("nonexistent", "entity", datetime.now())
+
+        assert batches == []
 
 
 @pytest.mark.unit
