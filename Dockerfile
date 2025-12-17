@@ -56,14 +56,12 @@ CMD ["bioetl", "--help"]
 # ============ Development Stage ============
 FROM base AS development
 
-# Install development dependencies
-COPY pyproject.toml uv.lock ./
-
-RUN pip install uv && \
-    uv pip install --system -e ".[dev,docs]"
-
 # Copy application source
 COPY . /app/
+
+# Install development dependencies
+RUN pip install uv && \
+    uv pip install --system -e ".[dev,docs]"
 
 # Create non-root user
 RUN useradd -m -u 1000 bioetl && \

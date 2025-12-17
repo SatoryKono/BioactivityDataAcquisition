@@ -101,8 +101,8 @@ class TestErrorClassifier:
             (CircuitBreakerOpenError("p", 1.0), ErrorType.TIMEOUT),
             (RetryExhaustedError("u", 1), ErrorType.NETWORK_ERROR),
             (
-                    ApiError("fail"),
-                    ErrorType.NETWORK_ERROR,
+                ApiError("fail"),
+                ErrorType.NETWORK_ERROR,
             ),  # Fallback hierarchy -> RecoverableError -> NETWORK_ERROR
             # Data Quality
             (SchemaViolationError("t", []), ErrorType.SCHEMA_VIOLATION),
