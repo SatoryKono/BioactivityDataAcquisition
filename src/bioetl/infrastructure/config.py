@@ -28,16 +28,47 @@ from pydantic_settings import (
 from bioetl.application.core.pipeline_config import PipelineConfig
 
 
-def yaml_config_settings_source(settings: BaseSettings) -> dict[str, Any]:
+class YamlSettingsSource(PydanticBaseSettingsSource):
     """
-    A simple settings source that loads variables from a YAML file
-    at the project's root.
+    A settings source that loads variables from a YAML file.
     """
-    try:
-        with Path("config.yaml").open() as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError:
-        return {}
+
+    def get_field_value(
+        self, field: Field, field_name: str
+    ) -> tuple[Any, str] | None:
+        """
+        Get value of a field from YAML file.
+        """
+        encoding = self.config.get("env_file_encoding")
+        try:
+            with Path("config.yaml").open(encoding=encoding) as f:
+                file_content = yaml.safe_load(f)
+        except FileNotFoundError:
+            return None
+
+        field_value = file_content.get(field_name)
+        return field_value, field_name
+
+    def prepare_field_value(
+        self, field_name: str, field: Field, value: Any, value_is_complex: bool
+    ) -> Any:
+        """
+        Prepare value of a field.
+        """
+        return value
+
+    def __call__(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
+
+        for field_name, field in self.settings_cls.model_fields.items():
+            field_value, field_key = self.get_field_value(field, field_name)
+            if field_value is not None:
+                field_value = self.prepare_field_value(
+                    field_name, field, field_value, False
+                )
+                d[field_key] = field_value
+
+        return d
 
 
 def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
@@ -227,9 +258,7 @@ class Settings(BaseSettings):
         return (
             env_settings,
             dotenv_settings,
-            PydanticBaseSettingsSource(
-                settings_cls, yaml_config_settings_source(settings_cls)
-            ),
+            YamlSettingsSource(settings_cls),
             init_settings,
             file_secret_settings,
         )
