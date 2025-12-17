@@ -123,14 +123,6 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
     asyncio.run(_inspect())
 
 
-@quarantine.command("stats")
-@click.option("--pipeline", required=True, help="Pipeline name")
-def quarantine_stats(pipeline: str) -> None:
-    """Get quarantine statistics."""
-    # This part would also be refactored to use a dedicated service
-    click.echo(f"Getting quarantine statistics for {pipeline}...")
-
-
 @cli.group()
 def checkpoint() -> None:
     """Manage checkpoints."""
