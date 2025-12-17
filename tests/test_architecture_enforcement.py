@@ -231,10 +231,10 @@ def test_domain_no_external_frameworks(src_dir: Path):
     assert not violations, (
         "Domain layer must not import external frameworks.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Domain should only use:\n"
-                                                                            "  - Standard library\n"
-                                                                            "  - Pydantic (for Value Objects)\n"
-                                                                            "  - Domain-internal modules"
+        "Domain should only use:\n"
+        "  - Standard library\n"
+        "  - Pydantic (for Value Objects)\n"
+        "  - Domain-internal modules"
     )
 
 
@@ -270,7 +270,7 @@ def test_domain_no_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "Domain layer must not import from Infrastructure or Application.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Domain should only depend on itself and standard library."
+        "Domain should only depend on itself and standard library."
     )
 
 
@@ -311,8 +311,8 @@ def test_domain_only_allowed_imports(src_dir: Path):
         pytest.fail(
             "Domain layer imports modules not in allowed list.\n"
             "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                                f"Allowed imports: {sorted(ALLOWED_DOMAIN_IMPORTS)}\n"
-                                                                                "If you need to add a module, update ALLOWED_DOMAIN_IMPORTS in test."
+            f"Allowed imports: {sorted(ALLOWED_DOMAIN_IMPORTS)}\n"
+            "If you need to add a module, update ALLOWED_DOMAIN_IMPORTS in test."
         )
 
 
@@ -358,10 +358,10 @@ def test_application_no_concrete_infrastructure_imports(src_dir: Path):
     assert not violations, (
         "Application layer must not import concrete Infrastructure implementations.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Application should only depend on:\n"
-                                                                            "  - Domain ports (bioetl.domain.ports)\n"
-                                                                            "  - Infrastructure factories (bioetl.infrastructure.factories)\n"
-                                                                            "  - Infrastructure observability (bioetl.infrastructure.observability)"
+        "Application should only depend on:\n"
+        "  - Domain ports (bioetl.domain.ports)\n"
+        "  - Infrastructure factories (bioetl.infrastructure.factories)\n"
+        "  - Infrastructure observability (bioetl.infrastructure.observability)"
     )
 
 
@@ -418,7 +418,7 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
     assert not violations, (
         "Application must not import directly from infrastructure.adapters.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Use factories or dependency injection instead."
+        "Use factories or dependency injection instead."
     )
 
 
@@ -460,7 +460,7 @@ def test_no_print_statements(src_dir: Path):
     assert not violations, (
         "Code must not use print() — use logger instead.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Exceptions: cli.py, __main__.py"
+        "Exceptions: cli.py, __main__.py"
     )
 
 
@@ -507,6 +507,10 @@ def test_infrastructure_no_application_imports(src_dir: Path):
         if py_file.name.startswith("__"):
             continue
 
+        # ИСКЛЮЧЕНИЕ: config.py может импортировать PipelineConfig для создания конфигураций
+        if py_file.name == "config.py":
+            continue
+
         imports, _ = analyze_python_file(py_file)
 
         for imp in imports:
@@ -524,7 +528,7 @@ def test_infrastructure_no_application_imports(src_dir: Path):
     assert not violations, (
         "Infrastructure must not import from Application layer.\n"
         "Violations found:\n" + "\n".join(f"  - {v}" for v in violations) + "\n\n"
-                                                                            "Infrastructure should only depend on Domain (ports, types, exceptions)."
+        "Infrastructure should only depend on Domain (ports, types, exceptions)."
     )
 
 

@@ -2,15 +2,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.domain.ports import LockPort, MetricsPort
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.config import Settings, get_pipeline_config
+from bioetl.infrastructure.config import (
+    Settings,
+    get_pipeline_config,
+    load_pipeline_config,
+)
 from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
@@ -27,7 +33,6 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
 if TYPE_CHECKING:
     import structlog
-    from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 
 
 class ChEMBLActivityPipelineFactory:
@@ -60,9 +65,7 @@ class ChEMBLActivityPipelineFactory:
         data_source = ChemblAdapter(http_client=http_client)
 
         if is_local_run:
-            logger.info(
-                "Local run detected. Overriding storage paths to 'data/output'."
-            )
+            logger.info("Local run detected. Overriding storage paths to 'data/output'.")
             base_output_path = "data/output"
             bronze_path = f"{base_output_path}/bronze"
             silver_base_path = f"{base_output_path}/silver"
@@ -191,15 +194,13 @@ class ChEMBLActivityPipelineFactory:
         settings: Settings,
         logger: "structlog.BoundLogger",
         **kwargs,
-    ) -> "ChEMBLActivityPipeline":
+    ) -> BasePipeline:
         """Creates ChEMBL Activity pipeline with decomposed config."""
-        from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-
         services = ChEMBLActivityPipelineFactory.build_services(
             settings=settings, logger=logger, **kwargs
         )
-
         config = get_pipeline_config("chembl_activity")
+
         return ChEMBLActivityPipeline.create(
             runtime=runtime,
             services=services,

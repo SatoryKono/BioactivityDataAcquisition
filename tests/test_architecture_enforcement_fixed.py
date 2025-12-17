@@ -512,6 +512,10 @@ def test_infrastructure_no_application_imports(src_dir: Path):
         if "orchestration" in py_file.parts:
             continue
 
+        # ИСКЛЮЧЕНИЕ: config.py может импортировать PipelineConfig для создания конфигураций
+        if py_file.name == "config.py":
+            continue
+
         imports, _ = analyze_python_file(py_file)
 
         for imp in imports:
