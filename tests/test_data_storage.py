@@ -8,9 +8,30 @@ PIPELINE_CONFIG_PATH = Path(__file__).parent.parent / "configs" / "pipelines"
 
 
 def get_all_pipeline_configs():
+    """Get all main pipeline config files, excluding source configs."""
     if not PIPELINE_CONFIG_PATH.exists():
         return []
-    return list(PIPELINE_CONFIG_PATH.glob("**/*.yaml"))
+    # Exclude files in 'sources/' subdirectories (they are source configs, not pipeline configs)
+    return [
+        p for p in PIPELINE_CONFIG_PATH.glob("**/*.yaml")
+        if "sources" not in p.parts
+    ]
+
+
+def load_config_with_source(config_path: Path) -> dict:
+    """Load pipeline config and merge source config if referenced."""
+    with config_path.open(encoding="utf-8") as f:
+        config = yaml.safe_load(f) or {}
+
+    # Load source config from separate file if specified
+    if source_file := config.get("source_file"):
+        source_path = config_path.parent / source_file
+        if source_path.exists():
+            with source_path.open(encoding="utf-8") as f:
+                source_config = yaml.safe_load(f) or {}
+            config["source"] = source_config.get("source", source_config)
+
+    return config
 
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
@@ -99,8 +120,7 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_load_001_002_load_strategy(config_path):
     """Load strategy must be defined."""
-    with config_path.open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    config = load_config_with_source(config_path)
 
     source = config.get("source", {})
     assert (

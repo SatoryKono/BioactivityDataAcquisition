@@ -117,6 +117,7 @@ filterwarnings = [
     # Pytest cleanup warnings (sockets/event loops not closed during teardown)
     "ignore::pytest.PytestUnraisableExceptionWarning",
 ]
+norecursedirs = ["tests/infrastructure"]
 
 # ============ COVERAGE ============
 [tool.coverage.run]

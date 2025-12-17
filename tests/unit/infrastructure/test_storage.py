@@ -14,13 +14,6 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 
 
-def make_sync_executor(loop: asyncio.AbstractEventLoop):
-    """Create a run_in_executor replacement that returns awaitable sync results."""
-    async def sync_executor(_, fn, *args):
-        return fn(*args)
-    return sync_executor
-
-
 @pytest.fixture
 def mock_s3_client():
     """Fixture for a mocked S3 client."""
@@ -163,8 +156,6 @@ class TestBronzeWriterLocal:
     async def test_write_bronze_local_creates_file(self, tmp_path):
         """Test write_bronze creates file in local mode."""
         writer = BronzeWriter(bucket=str(tmp_path))
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = [b'{"id": 1, "data": "test"}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -185,8 +176,6 @@ class TestBronzeWriterLocal:
     async def test_write_bronze_local_compresses_data(self, tmp_path):
         """Test write_bronze compresses data in local mode."""
         writer = BronzeWriter(bucket=str(tmp_path))
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = [b'{"id": 1, "data": "test"}\n']
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
@@ -222,19 +211,17 @@ class TestBronzeWriterLocal:
         compressor = zstd.ZstdCompressor(level=3)
         compressed = compressor.compress(jsonl_data.encode("utf-8"))
 
-        # Create directory structure
-        bronze_dir = tmp_path / "bronze" / "v1" / "test_provider" / "test_entity" / "2023-01-01"
+        # Create directory structure (new path format: {provider}/{entity}/batch_*.jsonl.zst)
+        bronze_dir = tmp_path / "test_provider" / "test_entity"
         bronze_dir.mkdir(parents=True)
         test_file = bronze_dir / "batch_test.jsonl.zst"
         test_file.write_bytes(compressed)
 
         writer = BronzeWriter(bucket=str(tmp_path))
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         # Read it back
         read_records = []
-        async for record in writer.read_bronze("bronze/v1/test_provider/test_entity/2023-01-01/batch_test.jsonl.zst"):
+        async for record in writer.read_bronze("test_provider/test_entity/batch_test.jsonl.zst"):
             read_records.append(record)
 
         assert len(read_records) == 2
@@ -244,8 +231,6 @@ class TestBronzeWriterLocal:
     async def test_list_batches_local(self, tmp_path):
         """Test list_batches in local mode."""
         writer = BronzeWriter(bucket=str(tmp_path))
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         # Write two batches
         date = datetime(2023, 1, 1)
@@ -268,8 +253,6 @@ class TestBronzeWriterLocal:
     async def test_list_batches_local_nonexistent(self, tmp_path):
         """Test list_batches returns empty for nonexistent path."""
         writer = BronzeWriter(bucket=str(tmp_path))
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         batches = await writer.list_batches("nonexistent", "entity", datetime.now())
 
@@ -294,9 +277,6 @@ class TestDeltaWriter:
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
         writer = DeltaWriter(base_path="/tmp/delta")
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = [
             {
@@ -328,9 +308,6 @@ class TestDeltaWriter:
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
         writer = DeltaWriter(base_path="/tmp/delta")
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = [
             {
@@ -353,9 +330,6 @@ class TestDeltaWriter:
     @pytest.mark.usefixtures("mock_delta_writer")
     async def test_write_silver_empty_records_raises_error(self):
         writer = DeltaWriter(base_path="/tmp/delta")
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
