@@ -1,0 +1,39 @@
+---
+title: "Domain Transformations — Function Diagram"
+---
+%% File: src/bioetl/domain/transformations.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+flowchart TB
+    subgraph "Hash Generation"
+        A[normalize_for_hash] --> B[canonical_json_dumps]
+        B --> C[generate_content_hash]
+        C --> D[ContentHash SHA256]
+    end
+
+    subgraph "Entity ID Generation"
+        E[generate_entity_id] --> F[EntityID]
+        F --> G["provider:entity_id format"]
+    end
+
+    subgraph "Schema Drift Detection"
+        H[detect_schema_drift] --> I{Compare Fields}
+        I -->|New optional| J[DriftLevel.INFO]
+        I -->|>3 new fields| K[DriftLevel.WARN]
+        I -->|Missing required| L[DriftLevel.CRITICAL]
+    end
+
+    subgraph "Data Quality"
+        M[calculate_dq_score] --> N[0.0 - 1.0 score]
+        O[exceeds_threshold] --> P{score >= threshold}
+        Q[detect_hash_collision] --> R{hash matches, content differs}
+    end
+
+    subgraph "Normalization Helpers"
+        S[_normalize_value] --> T[_normalize_float]
+        S --> U[_normalize_datetime]
+        S --> V[_normalize_str]
+        S --> W[_normalize_dict]
+        S --> X[_normalize_list]
+    end

@@ -1,0 +1,111 @@
+---
+title: "Domain Exceptions — Class Diagram"
+---
+%% File: src/bioetl/domain/exceptions.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class BioETLError {
+        <<Base>>
+        +message: str
+        +error_type: ErrorType
+    }
+
+    class CriticalError {
+        <<Abstract>>
+        Stops pipeline immediately
+    }
+
+    class RecoverableError {
+        <<Abstract>>
+        Retry with backoff
+    }
+
+    class DataQualityError {
+        <<Abstract>>
+        Skip record, quarantine
+    }
+
+    %% Critical Errors
+    class LockLostError {
+        Lock lost during execution
+    }
+
+    class LockAcquisitionError {
+        Failed to acquire lock
+    }
+
+    class AuthError {
+        API auth failed (401/403)
+    }
+
+    %% Recoverable Errors
+    class RateLimitError {
+        +retry_after: int
+        API rate limit (429)
+    }
+
+    class RetryExhaustedError {
+        Max retries exceeded
+    }
+
+    class CircuitBreakerOpenError {
+        Circuit breaker tripped
+    }
+
+    class ApiError {
+        Generic API error
+    }
+
+    %% Data Quality Errors
+    class SchemaViolationError {
+        +field: str
+        Record schema invalid
+    }
+
+    class MissingRequiredFieldError {
+        +field: str
+        Required field null/missing
+    }
+
+    class InvalidDataFormatError {
+        +field: str
+        Invalid data format
+    }
+
+    %% Storage Errors
+    class StorageError {
+        Generic storage error
+    }
+
+    class BucketNotFoundError {
+        S3 bucket not found
+    }
+
+    class TableNotFoundError {
+        Delta table not found
+    }
+
+    BioETLError <|-- CriticalError
+    BioETLError <|-- RecoverableError
+    BioETLError <|-- DataQualityError
+    BioETLError <|-- StorageError
+
+    CriticalError <|-- LockLostError
+    CriticalError <|-- LockAcquisitionError
+    CriticalError <|-- AuthError
+
+    RecoverableError <|-- RateLimitError
+    RecoverableError <|-- RetryExhaustedError
+    RecoverableError <|-- CircuitBreakerOpenError
+    RecoverableError <|-- ApiError
+
+    DataQualityError <|-- SchemaViolationError
+    DataQualityError <|-- MissingRequiredFieldError
+    DataQualityError <|-- InvalidDataFormatError
+
+    StorageError <|-- BucketNotFoundError
+    StorageError <|-- TableNotFoundError

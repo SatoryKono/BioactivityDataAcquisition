@@ -1,0 +1,83 @@
+---
+title: "BasePipeline — Class Diagram"
+---
+%% File: src/bioetl/application/core/base.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class BasePipeline {
+        <<abstract>>
+        -_config: PipelineConfig
+        -_runtime: PipelineRuntimeConfig
+        -_services: PipelineServices
+        -_run_id: RunID
+        -_logger: BoundLogger
+        -_context: PipelineContext
+        -_shutdown_signal: ShutdownSignal
+        +config: PipelineConfig
+        +runtime: PipelineRuntimeConfig
+        +services: PipelineServices
+        +run_id: RunID
+        +context: PipelineContext
+        +logger: BoundLogger
+        +shutdown_signal: ShutdownSignal
+        +pipeline_name: str
+        +provider: str
+        +entity_type: str
+        +run_type: RunType
+        +data_source: DataSourcePort
+        +storage: StoragePort
+        +lock: LockPort
+        +checkpoint: CheckpointPort
+        +quarantine: QuarantinePort
+        +metrics: MetricsPort
+        +error_classifier: ErrorClassifier
+        +checkpoint_manager: CheckpointManager
+        +quarantine_manager: QuarantineManager
+        +executor: PipelineExecutor
+        +orchestrator: PipelineOrchestrator
+        +run()* async
+        +transform_bronze_to_silver(context, record)* dict
+        +should_write_gold(context, record) bool
+        +extract_watermark(context, record) Watermark
+    }
+
+    class PipelineConfig {
+        <<frozen dataclass>>
+        +pipeline_name: str
+        +provider: str
+        +entity_type: str
+        +batch_size: int
+        +checkpoint_interval: int
+    }
+
+    class PipelineRuntimeConfig {
+        <<frozen dataclass>>
+        +run_type: RunType
+        +resume: bool
+        +limit: int | None
+    }
+
+    class PipelineServices {
+        <<frozen dataclass>>
+        +data_source: DataSourcePort
+        +storage: StoragePort
+        +lock: LockPort
+        +checkpoint: CheckpointPort
+        +quarantine: QuarantinePort
+        +metrics: MetricsPort
+        +logger: BoundLogger
+        +aclose() async
+    }
+
+    BasePipeline --> PipelineConfig : config
+    BasePipeline --> PipelineRuntimeConfig : runtime
+    BasePipeline --> PipelineServices : services
+    BasePipeline --> PipelineOrchestrator : orchestrator (lazy)
+    BasePipeline --> PipelineExecutor : executor (lazy)
+    BasePipeline --> CheckpointManager : checkpoint_manager (lazy)
+
+    note for BasePipeline "ADR-0005: 3-param constructor"

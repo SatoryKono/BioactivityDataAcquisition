@@ -1,0 +1,46 @@
+---
+title: "PipelineExecutor — Flowchart"
+---
+%% File: src/bioetl/application/core/executor.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+flowchart TB
+    subgraph "PipelineExecutor.execute_batch"
+        A[Start] --> B[Fetch records from DataSource]
+        B --> C{Records available?}
+
+        C -->|No| D[Return current watermark]
+
+        C -->|Yes| E[Create batch_id]
+        E --> F[Process batch with RecordProcessor]
+
+        F --> G[Bronze: Write raw JSONL]
+        G --> H[Transform: Bronze → Silver]
+
+        H --> I{Transform success?}
+        I -->|No| J[Quarantine record]
+        I -->|Yes| K[Silver: Merge/Upsert]
+
+        K --> L{Should write Gold?}
+        L -->|Yes| M[Gold: Write aggregated]
+        L -->|No| N[Skip Gold]
+
+        M --> O[Update watermark]
+        N --> O
+        J --> O
+
+        O --> P{Checkpoint interval?}
+        P -->|Yes| Q[Save checkpoint]
+        P -->|No| R[Continue]
+
+        Q --> R
+        R --> S{More records?}
+        S -->|Yes| B
+        S -->|No| D
+    end
+
+    style G fill:#FFA500
+    style K fill:#C0C0C0
+    style M fill:#FFD700
+    style J fill:#FF6B6B

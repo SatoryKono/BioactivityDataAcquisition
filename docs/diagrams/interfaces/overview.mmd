@@ -1,0 +1,56 @@
+---
+title: "Interfaces Layer — Class Diagram"
+---
+%% File: src/bioetl/interfaces/*.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class CLI {
+        <<Click Group>>
+        +cli() group
+        +run(pipeline, run_type, resume, limit) command
+        +quarantine() group
+        +checkpoint() group
+    }
+
+    class PipelineRunner {
+        -_config: Settings
+        -_logger: BoundLogger
+        +run(pipeline_name, run_type, resume, limit)
+        +setup_signals()
+        -_create_pipeline(pipeline_name) BasePipeline
+    }
+
+    class ChEMBLActivityPipelineFactory {
+        +create(config, runtime) ChEMBLActivityPipeline
+        -_create_services(config) PipelineServices
+        -_create_data_source() ChemblAdapter
+        -_create_storage() StorageAdapter
+        -_create_lock() LockPort
+        -_create_checkpoint() CheckpointPort
+        -_create_quarantine() QuarantinePort
+        -_create_metrics() MetricsPort
+    }
+
+    class SignalHandlers {
+        <<module>>
+        +setup_shutdown_handlers(signal: ShutdownSignal)
+    }
+
+    class PrefectTasks {
+        <<module>>
+        +execute_pipeline_task(pipeline_name, run_type)
+        +load_checkpoint_task(pipeline_name) Watermark
+        +run_pipeline_flow() Flow
+    }
+
+    CLI --> PipelineRunner : invokes
+    PipelineRunner --> ChEMBLActivityPipelineFactory : uses
+    PipelineRunner --> SignalHandlers : configures
+    PrefectTasks --> PipelineRunner : uses
+
+    note for CLI "Entry point: bioetl CLI"
+    note for ChEMBLActivityPipelineFactory "Composition root"

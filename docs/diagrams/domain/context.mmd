@@ -1,0 +1,44 @@
+---
+title: "Domain Context — Class Diagram"
+---
+%% File: src/bioetl/domain/context.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction LR
+
+    class PipelineContext {
+        <<dataclass>>
+        +run_id: RunID
+        +run_type: RunType
+        +logger: BoundLogger
+        +start_time: datetime
+        +metadata: dict
+    }
+
+    class BoundLogger {
+        <<Protocol>>
+        +info(msg, **kwargs) None
+        +warning(msg, **kwargs) None
+        +error(msg, **kwargs) None
+        +bind(**kwargs) BoundLogger
+    }
+
+    class RunID {
+        <<NewType>>
+        UUID
+    }
+
+    class RunType {
+        <<Enum>>
+        INCREMENTAL
+        BACKFILL
+        REBUILD
+    }
+
+    PipelineContext --> RunID : run_id
+    PipelineContext --> RunType : run_type
+    PipelineContext --> BoundLogger : logger
+
+    note for PipelineContext "Immutable context passed through pipeline"

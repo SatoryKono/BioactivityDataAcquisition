@@ -1,0 +1,43 @@
+---
+title: "LockManager — Sequence Diagram"
+---
+%% File: src/bioetl/application/core/lock_manager.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+sequenceDiagram
+    participant Pipeline
+    participant LockManager
+    participant LockPort as LockPort (Redis/Memory)
+    participant Heartbeat as Heartbeat Task
+
+    Pipeline->>LockManager: async with acquire(key, ttl)
+
+    LockManager->>LockPort: acquire(key, owner_id, ttl)
+
+    alt Lock acquired
+        LockPort-->>LockManager: True
+
+        %% Start heartbeat
+        LockManager->>Heartbeat: start_heartbeat(interval=ttl/3)
+
+        loop Every ttl/3 seconds
+            Heartbeat->>LockPort: heartbeat(key, owner_id)
+            LockPort-->>Heartbeat: True/False
+
+            alt Heartbeat failed
+                Heartbeat->>LockManager: notify_lock_lost()
+                LockManager->>Pipeline: raise LockLostError
+            end
+        end
+
+        Note over Pipeline: Execute protected code
+
+        Pipeline->>LockManager: __aexit__()
+        LockManager->>Heartbeat: cancel()
+        LockManager->>LockPort: release(key, owner_id)
+
+    else Lock not acquired
+        LockPort-->>LockManager: False
+        LockManager->>Pipeline: raise LockAcquisitionError
+    end
