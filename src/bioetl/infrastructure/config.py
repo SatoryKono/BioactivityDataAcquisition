@@ -92,8 +92,7 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
 
     # Extract field names from source config
     source_fields = [
-        field['name']
-        for field in config_data.get("source", {}).get("fields", [])
+        field["name"] for field in config_data.get("source", {}).get("fields", [])
     ]
 
     # Map YAML config to PipelineConfig
@@ -187,7 +186,7 @@ class Settings(BaseSettings):
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
-        "Recommended for dev/staging environments.",
+                    "Recommended for dev/staging environments.",
     )
 
     aws: AWSSettings = Field(default_factory=AWSSettings)
@@ -228,7 +227,9 @@ class Settings(BaseSettings):
         return (
             env_settings,
             dotenv_settings,
-            PydanticBaseSettingsSource(settings_cls, yaml_config_settings_source(settings_cls)),
+            PydanticBaseSettingsSource(
+                settings_cls, yaml_config_settings_source(settings_cls)
+            ),
             init_settings,
             file_secret_settings,
         )
