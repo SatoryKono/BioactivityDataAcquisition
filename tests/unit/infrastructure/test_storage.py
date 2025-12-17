@@ -1,6 +1,5 @@
 """Unit tests for storage writers."""
 
-import asyncio
 import io
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -55,7 +54,6 @@ class TestBronzeWriter:
         )
         assert writer.bucket == "test-bucket"
 
-    @pytest.mark.asyncio
     async def test_write_bronze_generates_correct_key(self, mock_s3_client):
         """Test that write_bronze generates the correct S3 key."""
         writer = BronzeWriter(
@@ -86,7 +84,6 @@ class TestBronzeWriter:
         expected_key = "test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         assert kwargs["Key"] == expected_key
 
-    @pytest.mark.asyncio
     async def test_write_bronze_compresses_with_zstd(self, mock_s3_client):
         """REQ-DATA-001: Test that data is compressed with zstandard."""
         writer = BronzeWriter(
@@ -122,7 +119,6 @@ class TestBronzeWriter:
 
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
-    @pytest.mark.asyncio
     async def test_write_bronze_with_no_records(self, mock_s3_client):
         """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(
@@ -152,7 +148,6 @@ class TestBronzeWriter:
 class TestBronzeWriterLocal:
     """Tests for BronzeWriter in local mode."""
 
-    @pytest.mark.asyncio
     async def test_write_bronze_local_creates_file(self, tmp_path):
         """Test write_bronze creates file in local mode."""
         writer = BronzeWriter(bucket=str(tmp_path))
@@ -172,7 +167,6 @@ class TestBronzeWriterLocal:
         expected_file = tmp_path / path
         assert expected_file.exists()
 
-    @pytest.mark.asyncio
     async def test_write_bronze_local_compresses_data(self, tmp_path):
         """Test write_bronze compresses data in local mode."""
         writer = BronzeWriter(bucket=str(tmp_path))
@@ -196,7 +190,6 @@ class TestBronzeWriterLocal:
         # Verify zstd magic bytes
         assert compressed_data.startswith(b"\x28\xb5\x2f\xfd")
 
-    @pytest.mark.asyncio
     async def test_read_bronze_local(self, tmp_path):
         """Test read_bronze reads file in local mode."""
         # Create a compressed file manually for deterministic testing
@@ -227,7 +220,6 @@ class TestBronzeWriterLocal:
         assert len(read_records) == 2
         assert read_records[0]["id"] == 1
 
-    @pytest.mark.asyncio
     async def test_list_batches_local(self, tmp_path):
         """Test list_batches in local mode."""
         writer = BronzeWriter(bucket=str(tmp_path))
@@ -249,7 +241,6 @@ class TestBronzeWriterLocal:
         assert len(batches) == 2
         assert all(b.endswith(".jsonl.zst") for b in batches)
 
-    @pytest.mark.asyncio
     async def test_list_batches_local_nonexistent(self, tmp_path):
         """Test list_batches returns empty for nonexistent path."""
         writer = BronzeWriter(bucket=str(tmp_path))
@@ -268,7 +259,6 @@ class TestDeltaWriter:
         writer = DeltaWriter(base_path="/tmp/delta")
         assert writer.base_path == "/tmp/delta"
 
-    @pytest.mark.asyncio
     async def test_write_silver_creates_new_table(self, mock_delta_writer):
         """Test write_silver creates table if not exists."""
         from deltalake.exceptions import TableNotFoundError
@@ -295,7 +285,6 @@ class TestDeltaWriter:
 
         mock_write_deltalake.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_write_silver_merge_existing_table(self, mock_delta_writer):
         """Test write_silver merges into existing table."""
         mock_delta_table, _mock_write_deltalake = mock_delta_writer
@@ -326,7 +315,6 @@ class TestDeltaWriter:
 
         mock_table_instance.merge.assert_called_once()
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("mock_delta_writer")
     async def test_write_silver_empty_records_raises_error(self):
         writer = DeltaWriter(base_path="/tmp/delta")
