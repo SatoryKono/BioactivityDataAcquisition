@@ -18,9 +18,9 @@ Architecture:
 
 import asyncio
 import json
+from pathlib import Path
 from typing import Any
 from uuid import UUID
-from pathlib import Path
 
 from botocore.exceptions import ClientError
 
@@ -165,6 +165,34 @@ class S3Checkpoint:
             except ClientError as e:
                 if e.response.get("Error", {}).get("Code") != "NoSuchKey":
                     raise
+
+    async def list_all(self) -> list[str]:
+        """List all pipelines with checkpoints."""
+        prefix = "checkpoints/"
+        pipelines = set()
+        if self.is_local:
+            root = Path(self.bucket) / prefix
+            if root.exists():
+                for path in root.iterdir():
+                    if path.is_dir():
+                        pipelines.add(path.name)
+        else:
+            loop = asyncio.get_running_loop()
+            paginator = self.s3_client.get_paginator("list_objects_v2")
+            pages = await loop.run_in_executor(
+                None,
+                lambda: paginator.paginate(
+                    Bucket=self.bucket, Prefix=prefix, Delimiter="/"
+                ),
+            )
+            for page in pages:
+                for common_prefix in page.get("CommonPrefixes", []):
+                    pipeline_name = (
+                        common_prefix.get("Prefix", "").strip(prefix).strip("/")
+                    )
+                    if pipeline_name:
+                        pipelines.add(pipeline_name)
+        return sorted(list(pipelines))
 
     async def exists(self, pipeline: str) -> bool:
         """Check if checkpoint exists."""
