@@ -12,18 +12,19 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl_activity import CHEMBL_ACTIVITY_CONFIG
-from bioetl.infrastructure.config import Settings, get_settings
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import LockPort, MetricsPort
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from bioetl.infrastructure.config import Settings, get_settings
 from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
 from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
 from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
@@ -119,8 +120,15 @@ class ChEMBLActivityPipelineFactory:
             ),
         )
 
-        redis_client = create_redis_client(settings)
-        lock = RedisDistributedLock(redis_client=redis_client)
+        lock: LockPort
+        if settings.env == "prod":
+            logger.info("Using RedisDistributedLock for production environment.")
+            redis_client = create_redis_client(settings)
+            lock = RedisDistributedLock(redis_client=redis_client)
+        else:
+            logger.warning("Using MemoryLock. Locking is NOT distributed. Suitable for dev/testing only.")
+            lock = MemoryLock()
+
         checkpoint = S3Checkpoint(
             bucket=s3_config.bucket_checkpoints,
             endpoint_url=aws_config.endpoint_url,
