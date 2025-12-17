@@ -449,3 +449,62 @@ def test_deprecated_files(project_root: Path):
     ]
     for p in deprecated:
         assert not (project_root / p).exists(), f"Deprecated path exists: {p}"
+
+
+# =============================================================================
+# Observability & Metrics Tests
+# =============================================================================
+
+
+def test_observability_library_isolation(src_dir: Path):
+    """Prometheus client must only be used in infrastructure.observability."""
+    # This ensures no other part of the system couples to Prometheus directly.
+    violations = []
+
+    for py_file in (src_dir / "bioetl").rglob("*.py"):
+        # Skip the observability module itself (bioetl/infrastructure/observability)
+        if "observability" in py_file.parts and "infrastructure" in py_file.parts:
+            continue
+
+        imports, _ = analyze_python_file(py_file)
+        for imp in imports:
+            if imp["module"].startswith("prometheus_client"):
+                violations.append(
+                    format_violation(
+                        py_file,
+                        imp["lineno"],
+                        "Forbidden import 'prometheus_client' outside observability",
+                        src_dir,
+                    )
+                )
+
+    assert not violations, "\n".join(violations)
+
+
+def test_metrics_implementations_are_compliant(src_dir: Path):
+    """Metrics adapters must implement MetricsPort."""
+    # This is a regression test to ensure new metrics adapters follow the contract.
+    observability_dir = src_dir / "bioetl" / "infrastructure" / "observability"
+    violations = []
+
+    if not observability_dir.exists():
+        return
+
+    for py_file in observability_dir.glob("*_metrics.py"):
+        with py_file.open(encoding="utf-8") as f:
+            content = f.read()
+
+        try:
+            tree = ast.parse(content)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name.endswith("Metrics"):
+                    # Check base classes
+                    bases = [b.id for b in node.bases if isinstance(b, ast.Name)]
+                    if "MetricsPort" not in bases:
+                        violations.append(
+                            f"{node.name} in {py_file.name} must implement MetricsPort"
+                        )
+        except SyntaxError:
+            pass
+
+    assert not violations, "\n".join(violations)
