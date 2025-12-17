@@ -47,6 +47,7 @@ class StorageAdapter:
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
+        schema: Any,
         mode: str = "merge",
     ) -> None:
         """Write transformed records to Silver layer."""
@@ -54,6 +55,7 @@ class StorageAdapter:
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
+            schema=schema,
         )
 
     async def write_gold(

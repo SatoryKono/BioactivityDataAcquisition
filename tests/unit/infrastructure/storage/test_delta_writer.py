@@ -68,11 +68,15 @@ class TestDeltaWriterValidation:
 
         writer = DeltaWriter(base_path="s3://bucket")
 
+        import pyarrow as pa
+        dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
+
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
                 table_name="test.table",
                 records=[],
                 primary_keys=["entity_id"],
+                schema=dummy_schema,
             )
 
     @pytest.mark.asyncio
@@ -83,11 +87,15 @@ class TestDeltaWriterValidation:
         writer = DeltaWriter(base_path="s3://bucket")
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
 
+        import pyarrow as pa
+        dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
+
         with pytest.raises(ValueError, match="Records missing required metadata"):
             await writer.write_silver(
                 table_name="test.table",
                 records=records,
                 primary_keys=["entity_id"],
+                schema=dummy_schema,
             )
 
     @pytest.mark.asyncio
@@ -105,11 +113,15 @@ class TestDeltaWriterValidation:
             }
         ]
 
+        import pyarrow as pa
+        dummy_schema = pa.schema([pa.field("entity_id", pa.string())])
+
         with pytest.raises(ValueError, match="Records missing required metadata"):
             await writer.write_silver(
                 table_name="test.table",
                 records=records,
                 primary_keys=["entity_id"],
+                schema=dummy_schema,
             )
 
 
