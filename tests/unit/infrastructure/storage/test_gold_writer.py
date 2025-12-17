@@ -346,7 +346,9 @@ class TestGoldWriterHistory:
     """Tests for history retrieval."""
 
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
-    async def test_get_history_returns_all_versions(self, mock_delta_table, gold_writer):
+    async def test_get_history_returns_all_versions(
+        self, mock_delta_table, gold_writer
+    ):
         """Test get_history returns all historical versions."""
         import pyarrow as pa
 
@@ -364,9 +366,7 @@ class TestGoldWriterHistory:
         )
         mock_table_instance.to_pyarrow_table.return_value = mock_arrow_table
 
-        result = await gold_writer.get_history(
-            "test.table", {"entity_id": "CHEMBL123"}
-        )
+        result = await gold_writer.get_history("test.table", {"entity_id": "CHEMBL123"})
 
         # Should return both versions of CHEMBL123
         assert len(result) == 2
