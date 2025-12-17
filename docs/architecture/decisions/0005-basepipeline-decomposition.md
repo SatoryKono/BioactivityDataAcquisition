@@ -38,7 +38,8 @@ def __init__(
 
 1. **God Object Anti-pattern**: 13 параметров конструктора смешивают конфигурацию, runtime параметры и I/O порты
 
-2. **Циклические зависимости**: `BasePipeline` создаёт менеджеры (`PipelineOrchestrator`, `PipelineExecutor`, `LockManager`, `QuarantineManager`), которые хранят ссылку на `self`
+2. **Циклические зависимости**: `BasePipeline` создаёт менеджеры (`PipelineOrchestrator`, `PipelineExecutor`,
+   `LockManager`, `QuarantineManager`), которые хранят ссылку на `self`
 
 3. **Нарушение SRP**: Класс отвечает за хранение конфигурации И координацию выполнения
 
@@ -65,6 +66,7 @@ def __init__(
 ### 1. Разделить на три структуры
 
 #### PipelineConfig (immutable dataclass)
+
 ```python
 @dataclass(frozen=True)
 class PipelineConfig:
@@ -80,6 +82,7 @@ class PipelineConfig:
 ```
 
 #### PipelineRuntimeConfig (immutable dataclass)
+
 ```python
 @dataclass(frozen=True)
 class PipelineRuntimeConfig:
@@ -90,6 +93,7 @@ class PipelineRuntimeConfig:
 ```
 
 #### PipelineServices (immutable dataclass with lifecycle)
+
 ```python
 @dataclass(frozen=True)
 class PipelineServices:
@@ -174,29 +178,6 @@ async def run_pipeline_flow(
         await pipeline.services.aclose()  # Always cleanup!
 ```
 
-### 5. Compatibility Shim
-
-```python
-class BasePipeline(ABC):
-    @classmethod
-    def from_params(
-        cls,
-        pipeline_name: str,
-        provider: str,
-        # ... все старые параметры
-    ) -> "BasePipeline":
-        """DEPRECATED: Use __init__(config, runtime, services) instead.
-
-        Will be removed after 2025-01-15.
-        """
-        warnings.warn(
-            "BasePipeline.from_params() is deprecated.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # ... construct new objects
-```
-
 ## Последствия
 
 ### Положительные
@@ -211,63 +192,69 @@ class BasePipeline(ABC):
 ### Отрицательные
 
 1. **Breaking change**: Требуется миграция всех наследников `BasePipeline`
-2. **Временная сложность**: Два API существуют параллельно до 2025-01-15
-3. **Рефакторинг тестов**: Нужно обновить test fixtures
+2. **Рефакторинг тестов**: Нужно обновить test fixtures
 
 ### Риски
 
-| Риск | Митигация | Статус |
-|------|-----------|--------|
+| Риск                | Митигация                             | Статус |
+|---------------------|---------------------------------------|--------|
 | Пропуск зависимости | Dependency map + полный тест coverage | Закрыт |
-| Регрессии | Baseline metrics + integration tests | Закрыт |
-| Resource leaks | `PipelineServices.aclose()` в finally | Закрыт |
-| Долгая миграция | Compatibility shim с deadline | В процессе |
+| Регрессии           | Baseline metrics + integration tests  | Закрыт |
+| Resource leaks      | `PipelineServices.aclose()` в finally | Закрыт |
 
 ## План миграции
 
 ### Фаза 1: Подготовка
+
 - [x] Карта зависимостей
 - [x] ADR документ
 - [x] Baseline метрики
 
 ### Фаза 2: Создание структур
+
 - [x] `PipelineConfig` dataclass
 - [x] `PipelineRuntimeConfig` dataclass
 - [x] `PipelineServices` dataclass с `aclose()`
 
 ### Фаза 3: Рефакторинг BasePipeline
+
 - [x] Новый конструктор `__init__(config, runtime, services)`
-- [x] Compatibility shim `from_params()`
 - [x] Обновление менеджеров (`from_components()`)
 - [x] Lazy initialization компонентов
 - [x] `ShutdownSignal` для graceful shutdown
 
 ### Фаза 4: Миграция наследников
+
 - [x] `ChEMBLActivityPipeline` (использует `create()` factory)
 - [ ] Будущие пайплайны
 
 ### Фаза 5: Обновление тестов
+
 - [x] `test_base_pipeline.py`
 - [x] `test_pipeline_executor.py`
 - [x] `test_chembl_activity.py`
 
-### Фаза 6: Удаление shim (после 2025-01-15)
-- [ ] Удалить `from_params()`
-- [ ] Финальное обновление документации
+### Фаза 6: Удаление shim
+
+- [x] Удалить `from_params()`
+- [x] Финальное обновление документации
 
 ## Альтернативы рассмотренные
 
 ### 1. Builder Pattern
+
 - **Плюсы**: Fluent API
 - **Минусы**: Больше кода, неявные зависимости
 - **Решение**: Отклонено
 
 ### 2. Factory + DI Container
+
 - **Плюсы**: Полная инверсия зависимостей
 - **Минусы**: Over-engineering для текущего масштаба
 - **Решение**: Отклонено, рассмотреть позже
 
 ### 3. Оставить как есть
+
 - **Плюсы**: Нет breaking changes
 - **Минусы**: Технический долг растёт
 - **Решение**: Отклонено

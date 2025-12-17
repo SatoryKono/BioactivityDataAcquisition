@@ -191,10 +191,3 @@ def pipeline():
     )
     return ConcretePipeline(config, runtime, services)
 ```
-
-## 6. Deprecation Timeline
-
-| Date | Action |
-|------|--------|
-| 2025-12-16 | `from_params()` deprecated with warning |
-| 2025-01-15 | `from_params()` removed |

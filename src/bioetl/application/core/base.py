@@ -10,7 +10,6 @@ Refactored per ADR-0005:
 
 from __future__ import annotations
 
-import warnings
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
@@ -22,7 +21,6 @@ from bioetl.application.core.pipeline_config import (
     PipelineRuntimeConfig,
 )
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -261,63 +259,6 @@ class BasePipeline(ABC):
                 logger=self._logger,
             )
         return self._orchestrator
-
-    # --- Legacy API (deprecated) ---
-
-    @classmethod
-    def from_params(
-        cls,
-        pipeline_name: str,
-        provider: str,
-        entity_type: str,
-        run_type: RunType,
-        data_source: DataSourcePort,
-        storage: StoragePort,
-        lock: LockPort,
-        checkpoint: CheckpointPort,
-        quarantine: QuarantinePort,
-        logger: "structlog.BoundLogger",
-        metrics: MetricsPort,
-        resume: bool = False,
-        limit: int | None = None,
-        primary_keys: list[str] | None = None,
-        silver_table: str | None = None,
-    ) -> "BasePipeline":
-        """Create pipeline from individual parameters (DEPRECATED).
-
-        Use __init__(config, runtime, services) instead.
-        Will be removed after 2025-01-15.
-        """
-        warnings.warn(
-            "BasePipeline.from_params() is deprecated. "
-            "Use BasePipeline(config, runtime, services) instead. "
-            "Will be removed after 2025-01-15.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        config = PipelineConfig(
-            pipeline_name=pipeline_name,
-            provider=provider,
-            entity_type=entity_type,
-            primary_keys=primary_keys or [f"{entity_type}_id"],
-            silver_table=silver_table or f"{provider}.{entity_type}",
-        )
-        runtime_cfg = PipelineRuntimeConfig(
-            run_type=run_type,
-            resume=resume,
-            limit=limit,
-        )
-        services = PipelineServices(
-            data_source=data_source,
-            storage=storage,
-            lock=lock,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            metrics=metrics,
-            logger=logger,
-        )
-        return cls(config, runtime_cfg, services)
 
     # --- Pipeline execution ---
 
