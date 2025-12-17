@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_config import (
+from bioetl.domain.config import (
     PipelineConfig,
     PipelineRuntimeConfig,
 )

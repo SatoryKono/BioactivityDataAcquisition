@@ -22,7 +22,6 @@ import asyncio
 from datetime import datetime
 from typing import Any
 from pathlib import Path
-import pyarrow.csv as pv
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import DeltaError, SchemaMismatchError
@@ -34,6 +33,8 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
     TableNotFoundError,
 )
+from bioetl.domain.schemas.base import SchemaProvider
+from bioetl.infrastructure.storage.csv_exporter import CsvExporter
 
 
 class DeltaWriter:
@@ -48,6 +49,7 @@ class DeltaWriter:
         storage_options: dict[str, str] | None = None,
         csv_path: str | None = None,
         csv_options: dict[str, Any] | None = None,
+        schema_provider: SchemaProvider | None = None,
     ) -> None:
         """Initialize Delta writer.
 
@@ -55,15 +57,16 @@ class DeltaWriter:
             base_path: Base path for Delta tables
             storage_options: Storage options for S3/MinIO
             csv_path: Path for CSV export (None to disable)
-            csv_options: CSV export options:
-                - delimiter: Field delimiter (default: ",")
-                - header: Include header row (default: True)
-                - encoding: File encoding (default: "utf-8")
+            csv_options: CSV export options
+            schema_provider: Optional provider for entity schemas
         """
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
         self.csv_path = csv_path
-        self.csv_options = csv_options or {}
+        self._schema_provider = schema_provider
+
+        # Initialize CSV exporter if path is provided
+        self._csv_exporter = CsvExporter(csv_options) if csv_path else None
 
     async def write_silver(
         self,
@@ -71,6 +74,7 @@ class DeltaWriter:
         records: list[dict[str, Any]],
         primary_keys: list[str],
         partition_cols: list[str] | None = None,
+        schema: pa.Schema | None = None,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert)."""
         if not records:
@@ -82,30 +86,16 @@ class DeltaWriter:
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("activity_id", pa.string()),
-            pa.field("molecule_chembl_id", pa.string()),
-            pa.field("target_chembl_id", pa.string()),
-            pa.field("assay_chembl_id", pa.string()),
-            pa.field("standard_type", pa.string()),
-            pa.field("standard_value", pa.float64()),
-            pa.field("standard_units", pa.string()),
-            pa.field("standard_relation", pa.string()),
-            pa.field("assay_type", pa.string()),
-            pa.field("assay_description", pa.string()),
-            pa.field("document_chembl_id", pa.string()),
-            pa.field("document_year", pa.int64()),
-            pa.field("pchembl_value", pa.float64()),
-            pa.field("activity_comment", pa.string()),
-            pa.field("data_validity_comment", pa.string()),
-            pa.field("content_hash", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        # Resolve schema: argument > provider
+        if schema is None and self._schema_provider:
+             try:
+                 # Extract entity type from table name (e.g. "chembl.activity" -> "activity")
+                 entity_type = table_name.split('.')[-1]
+                 schema = self._schema_provider.get_schema(entity_type)
+             except (ValueError, IndexError):
+                 pass
 
+        # Use provided schema or infer
         arrow_data = pa.Table.from_pylist(records, schema=schema)
 
         loop = asyncio.get_running_loop()
@@ -137,23 +127,9 @@ class DeltaWriter:
                 raise MergeConflictError(table_name, conflicts=1) from e
             raise
 
-        if self.csv_path:
-            csv_full_path = Path(self.csv_path) / f"{table_name}.csv"
-            csv_full_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Build CSV write options from config
-            delimiter = self.csv_options.get("delimiter", ",")
-            include_header = self.csv_options.get("header", True)
-
-            write_options = pv.WriteOptions(
-                include_header=include_header,
-                delimiter=delimiter,
-            )
-
-            await loop.run_in_executor(
-                None,
-                lambda: pv.write_csv(arrow_data, csv_full_path, write_options=write_options)
-            )
+        if self._csv_exporter and self.csv_path:
+            csv_full_path = f"{self.csv_path}/{table_name}.csv"
+            await self._csv_exporter.export(arrow_data, csv_full_path)
 
     async def _merge_records(
         self,
@@ -190,7 +166,6 @@ class DeltaWriter:
             ),
         )
 
-    # ... (the rest of the file remains the same)
     async def vacuum(
         self,
         table_name: str,

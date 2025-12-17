@@ -25,7 +25,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.application.core.pipeline_config import PipelineConfig
+from bioetl.domain.config import PipelineConfig
 
 
 class YamlSettingsSource(PydanticBaseSettingsSource):

@@ -2,6 +2,7 @@
 
 Part of BasePipeline decomposition (ADR-0005).
 Separates static configuration from runtime behavior.
+Moved to domain layer to avoid circular dependencies and enforce strict layering.
 """
 
 from dataclasses import dataclass, field
