@@ -11,13 +11,13 @@ from uuid import UUID
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.factories.chembl_activity import (
+    ChEMBLActivityPipelineFactory,
+)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.factories.chembl_activity import (
-    ChEMBLActivityPipelineFactory,
-)
 from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
