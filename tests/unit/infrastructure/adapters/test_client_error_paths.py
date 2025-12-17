@@ -70,10 +70,10 @@ class TestUniProtClientErrorPaths:
         cb.call = AsyncMock(side_effect=ConnectionError("Network error"))
         return cb
 
-    async def test_fetch_next_page_logs_error_on_failure(
+    async def test_fetch_proteins_logs_error_on_failure(
         self, mock_http_client, caplog
     ):
-        """Test that _fetch_next_page logs error when fetch fails."""
+        """Test that _fetch_proteins logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         with patch.dict(
@@ -89,13 +89,15 @@ class TestUniProtClientErrorPaths:
             )
 
             with caplog.at_level(logging.ERROR):
-                results, cursor = await client._fetch_next_page(
-                    query="test", size=10, fetched=0, limit=100, cursor=None
-                )
+                results = [
+                    r
+                    async for r in client._fetch_proteins(
+                        query="test", watermark=None, limit=100
+                    )
+                ]
 
             # Should return empty results on failure
             assert results == []
-            assert cursor is None
 
             # Should have logged the error
             assert "UniProt protein fetch failed" in caplog.text
@@ -104,8 +106,8 @@ class TestUniProtClientErrorPaths:
             assert len(error_records) >= 1
             assert "Network error" in error_records[0].exc_text
 
-    async def test_fetch_next_page_raises_in_strict_mode(self, mock_http_client):
-        """Test that _fetch_next_page raises exception in strict mode."""
+    async def test_fetch_proteins_raises_in_strict_mode(self, mock_http_client):
+        """Test that _fetch_proteins raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
         with patch.dict(
@@ -125,9 +127,12 @@ class TestUniProtClientErrorPaths:
             )
 
             with pytest.raises(ConnectionError, match="Network error"):
-                await client._fetch_next_page(
-                    query="test", size=10, fetched=0, limit=100, cursor=None
-                )
+                _ = [
+                    r
+                    async for r in client._fetch_proteins(
+                        query="test", watermark=None, limit=100
+                    )
+                ]
 
     async def test_fetch_features_logs_warning_on_failure(
         self, mock_http_client, caplog
