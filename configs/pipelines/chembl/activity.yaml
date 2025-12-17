@@ -1,13 +1,14 @@
 # configs/pipelines/chembl/activity.yaml
 # Конфигурация пайплайна для сущности Activity из ChEMBL.
 
-pipeline:
-    name: chembl_activity
-    provider: chembl
-    entity: activity
-    version: "1.0.0"
-    owner: "Data Acquisition Team"
-    description: "Extract biological activity records from ChEMBL API"
+pipeline_name: chembl_activity
+provider: chembl
+entity_type: activity
+version: "1.0.0"
+description: "Extract biological activity records from ChEMBL API"
+
+primary_keys: ["activity_id"]
+silver_table: "chembl_activity"
 
 # Ссылка на файл с конфигурацией источника данных
 source_file: ../../sources/chembl.yaml
@@ -22,7 +23,7 @@ transform:
 sink:
     bronze:
         path: "data/output/bronze"
-        format: json
+        format: jsonl
         save_json: true  # Also save uncompressed JSONL copy
 
     silver:
@@ -57,3 +58,7 @@ sink:
 dq_rules:
     soft_fail_threshold: 0.05
     hard_fail_threshold: 0.20
+
+circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
