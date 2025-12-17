@@ -1,10 +1,6 @@
-"""Factory for creating ChEMBL Activity pipelines."""
-
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-from pathlib import Path
-import yaml
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
@@ -29,32 +25,11 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.bootstrap import load_pipeline_config
 
 if TYPE_CHECKING:
     import structlog
     from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-
-
-def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
-    """Load pipeline configuration from YAML file.
-
-    Args:
-        pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
-
-    Returns:
-        Dictionary with pipeline configuration
-    """
-    # Map pipeline name to config path
-    config_paths = {
-        "chembl_activity": Path("configs/pipelines/chembl/activity.yaml"),
-    }
-
-    config_path = config_paths.get(pipeline_name)
-    if not config_path or not config_path.exists():
-        return {}
-
-    with open(config_path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
 
 
 class ChEMBLActivityPipelineFactory:
@@ -78,6 +53,8 @@ class ChEMBLActivityPipelineFactory:
         pipeline_config = load_pipeline_config("chembl_activity")
         sink_config = pipeline_config.get("sink", {})
         bronze_config = sink_config.get("bronze", {})
+        silver_config = sink_config.get("silver", {})
+        gold_config = sink_config.get("gold", {})
 
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
@@ -91,21 +68,46 @@ class ChEMBLActivityPipelineFactory:
             silver_base_path = f"{base_output_path}/silver"
             gold_base_path = f"{base_output_path}/gold"
             checkpoints_path = f"{base_output_path}/checkpoints"
-            csv_path = f"{base_output_path}/csv"
             json_path = f"{base_output_path}/json" if bronze_config.get("save_json") else None
+
+            # Get CSV export config for each layer
+            silver_csv_config = silver_config.get("csv_export", {})
+            silver_csv_path = silver_csv_config.get("path") if silver_csv_config.get("enabled") else None
+            silver_csv_options = {
+                "delimiter": silver_csv_config.get("delimiter", ","),
+                "header": silver_csv_config.get("header", True),
+                "encoding": silver_csv_config.get("encoding", "utf-8"),
+            } if silver_csv_path else None
+
+            gold_csv_config = gold_config.get("csv_export", {})
+            gold_csv_path = gold_csv_config.get("path") if gold_csv_config.get("enabled") else None
+            gold_csv_options = {
+                "delimiter": gold_csv_config.get("delimiter", ","),
+                "header": gold_csv_config.get("header", True),
+                "encoding": gold_csv_config.get("encoding", "utf-8"),
+            } if gold_csv_path else None
         else:
             # For cloud runs, use S3 paths from config
             bronze_path = s3_config.bucket_bronze
             silver_base_path = f"s3://{s3_config.bucket_silver}"
             gold_base_path = f"s3://{s3_config.bucket_gold}"
             checkpoints_path = s3_config.bucket_checkpoints
-            csv_path = None  # No CSV export for cloud runs by default
             json_path = None  # JSON path is handled differently for S3
+            silver_csv_path = None  # No CSV export for cloud runs by default
+            silver_csv_options = None
+            gold_csv_path = None
+            gold_csv_options = None
 
         # Get save_json flag from bronze config
         save_json = bronze_config.get("save_json", False)
         if save_json:
             logger.info("JSON export enabled for Bronze layer")
+
+        if silver_csv_path:
+            logger.info(f"CSV export enabled for Silver layer: {silver_csv_path}")
+
+        if gold_csv_path:
+            logger.info(f"CSV export enabled for Gold layer: {gold_csv_path}")
 
         storage = StorageAdapter(
             BronzeWriter(
@@ -119,12 +121,14 @@ class ChEMBLActivityPipelineFactory:
             DeltaWriter(
                 base_path=silver_base_path,
                 storage_options=storage_options,
-                csv_path=csv_path,
+                csv_path=silver_csv_path,
+                csv_options=silver_csv_options,
             ),
             GoldWriter(
                 base_path=gold_base_path,
                 storage_options=storage_options,
-                csv_path=csv_path,
+                csv_path=gold_csv_path,
+                csv_options=gold_csv_options,
             ),
         )
 
