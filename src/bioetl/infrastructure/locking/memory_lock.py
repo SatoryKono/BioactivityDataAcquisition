@@ -28,7 +28,11 @@ class MemoryLock(LockPort):
     ) -> bool:
         try:
             if not wait:
-                return self._lock.locked()
+                if self._lock.locked():
+                    return False
+                await self._lock.acquire()
+                return True
+
             await asyncio.wait_for(self._lock.acquire(), timeout=timeout)
             return True
         except asyncio.TimeoutError:

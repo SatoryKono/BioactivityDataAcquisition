@@ -20,6 +20,7 @@ import asyncio
 import json
 from typing import Any
 from uuid import UUID
+from pathlib import Path
 
 from botocore.exceptions import ClientError
 
@@ -31,26 +32,6 @@ class S3Checkpoint:
     """Checkpoint storage using S3 with atomic writes.
 
     Implements CheckpointPort interface from domain/ports.py.
-
-    Example:
-        >>> checkpoint = S3Checkpoint(
-        ...     bucket="bioetl-checkpoints",
-        ...     endpoint_url="http://localhost:9000",
-        ...     access_key="bioetl",
-        ...     secret_key="bioetl_minio_pass"
-        ... )
-        >>> from datetime import datetime
-        >>> run_id = RunID(UUID("12345678-1234-1234-1234-123456789abc"))
-        >>> await checkpoint.save(
-        ...     pipeline="chembl_activity",
-        ...     watermark=datetime(2025, 12, 15),
-        ...     run_id=run_id,
-        ...     metadata={"records_processed": 1000}
-        ... )
-        >>> loaded = await checkpoint.load("chembl_activity")
-        >>> if loaded:
-        ...     watermark, run_id, metadata = loaded
-        ...     print(f"Resume from {watermark}")
     """
 
     def __init__(
@@ -61,26 +42,20 @@ class S3Checkpoint:
         access_key: str | None = None,
         secret_key: str | None = None,
     ) -> None:
-        """Initialize S3 checkpoint storage.
-
-        Args:
-            bucket: S3 bucket name (e.g., 'bioetl-checkpoints')
-            endpoint_url: S3 endpoint URL (for MinIO)
-            region: AWS region
-            access_key: AWS access key (optional, uses env vars if None)
-            secret_key: AWS secret key (optional, uses env vars if None)
-        """
-        from bioetl.infrastructure.storage.s3_pool import S3ClientPool
-
-        # Get S3 client from pool for connection reuse
-        self.s3_client = S3ClientPool.get_client(
-            endpoint_url=endpoint_url,
-            region=region,
-            access_key=access_key,
-            secret_key=secret_key,
-        )
+        """Initialize S3 checkpoint storage."""
         self.bucket = bucket
+        self.endpoint_url = endpoint_url
         self.loop = asyncio.get_event_loop()
+        self.is_local = not endpoint_url
+
+        if not self.is_local:
+            from bioetl.infrastructure.storage.s3_pool import S3ClientPool
+            self.s3_client = S3ClientPool.get_client(
+                endpoint_url=endpoint_url,
+                region=region,
+                access_key=access_key,
+                secret_key=secret_key,
+            )
 
     async def save(
         self,
@@ -89,36 +64,14 @@ class S3Checkpoint:
         run_id: RunID,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Save checkpoint atomically.
+        """Save checkpoint atomically."""
+        key = self._get_key(pipeline)
 
-        Requirements:
-        - REQ-SHUTDOWN-003: Atomic save with If-Match/ETag
-
-        Uses S3 ETags for optimistic concurrency control:
-        1. Load current checkpoint (if exists) to get ETag
-        2. Write new checkpoint with If-Match condition
-        3. If ETag changed, write fails (another process updated it)
-
-        Args:
-            pipeline: Pipeline name (e.g., 'chembl_activity')
-            watermark: Checkpoint value (timestamp, ID, or offset)
-            run_id: Current run ID
-            metadata: Optional metadata (e.g., records_processed, last_batch_id)
-
-        Raises:
-            CheckpointConflictError: If checkpoint was modified by another process
-            ClientError: S3 errors
-        """
-        s3_key = self._get_key(pipeline)
-
-        # Serialize watermark (handle datetime, int, str)
         if isinstance(watermark, (int, str)):
             watermark_str = str(watermark)
         else:
-            # Assume datetime-like
             watermark_str = watermark.isoformat()
 
-        # Prepare checkpoint data
         checkpoint_data = {
             "pipeline": pipeline,
             "watermark": watermark_str,
@@ -126,231 +79,119 @@ class S3Checkpoint:
             "metadata": metadata or {},
             "version": "1.0",
         }
-
-        # Serialize to JSON
         checkpoint_json = json.dumps(checkpoint_data, indent=2)
 
-        # Get current ETag if checkpoint exists
-        current_etag = await self._get_etag(s3_key)
-
-        try:
-            # Atomic write with If-Match condition
-            put_kwargs: dict[str, Any] = {
-                "Bucket": self.bucket,
-                "Key": s3_key,
-                "Body": checkpoint_json.encode("utf-8"),
-                "ContentType": "application/json",
-                "Metadata": {
-                    "pipeline": pipeline,
-                    "run_id": str(run_id),
-                },
-            }
-
-            if current_etag:
-                # Checkpoint exists, use If-Match for atomicity
-                put_kwargs["IfMatch"] = current_etag
-
-            await self.loop.run_in_executor(
-                None, lambda: self.s3_client.put_object(**put_kwargs)
-            )
-
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code == "PreconditionFailed":
-                # ETag mismatch - checkpoint was modified by another process
-                raise CheckpointConflictError(
-                    pipeline,
-                    "Checkpoint was modified by another process",
-                ) from e
-            raise
+        if self.is_local:
+            full_path = Path(self.bucket) / key
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(full_path, "w") as f:
+                f.write(checkpoint_json)
+        else:
+            current_etag = await self._get_etag(key)
+            try:
+                put_kwargs: dict[str, Any] = {
+                    "Bucket": self.bucket,
+                    "Key": key,
+                    "Body": checkpoint_json.encode("utf-8"),
+                    "ContentType": "application/json",
+                }
+                if current_etag:
+                    put_kwargs["IfMatch"] = current_etag
+                await self.loop.run_in_executor(
+                    None, lambda: self.s3_client.put_object(**put_kwargs)
+                )
+            except ClientError as e:
+                if e.response.get("Error", {}).get("Code") == "PreconditionFailed":
+                    raise CheckpointConflictError(pipeline, "Checkpoint was modified") from e
+                raise
 
     async def load(
         self, pipeline: str
     ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
-        """Load last checkpoint.
+        """Load last checkpoint."""
+        key = self._get_key(pipeline)
 
-        Requirements:
-        - REQ-CHECKPOINT-001: Check existence on startup
-
-        Args:
-            pipeline: Pipeline name
-
-        Returns:
-            Tuple of (watermark, run_id, metadata) if checkpoint exists,
-            None otherwise
-
-        Example:
-            >>> checkpoint = S3Checkpoint(bucket="bioetl-checkpoints")
-            >>> result = await checkpoint.load("chembl_activity")
-            >>> if result:
-            ...     watermark, run_id, metadata = result
-            ...     print(f"Resume from {watermark}")
-            ... else:
-            ...     print("No checkpoint found, starting fresh")
-        """
-        s3_key = self._get_key(pipeline)
-
-        try:
-            response = await self.loop.run_in_executor(
-                None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=s3_key)
-            )
-            checkpoint_json = response["Body"].read().decode("utf-8")
-            checkpoint_data = json.loads(checkpoint_json)
-
-            # Parse watermark (try different types)
-            watermark_str = checkpoint_data["watermark"]
-            watermark: Watermark
-            try:
-                # Try as datetime
-                from datetime import datetime
-
-                watermark = datetime.fromisoformat(watermark_str)
-            except (ValueError, TypeError):
-                # Try as int
-                try:
-                    watermark = int(watermark_str)
-                except ValueError:
-                    # Use as string
-                    watermark = watermark_str
-
-            # Parse run_id
-            run_id = RunID(UUID(checkpoint_data["run_id"]))
-
-            # Get metadata
-            metadata = checkpoint_data.get("metadata", {})
-
-            return (watermark, run_id, metadata)
-
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code == "NoSuchKey":
-                # Checkpoint doesn't exist
+        if self.is_local:
+            full_path = Path(self.bucket) / key
+            if not full_path.exists():
                 return None
-            raise
-
-    async def delete(self, pipeline: str) -> None:
-        """Delete checkpoint (after successful run).
-
-        Requirements:
-        - REQ-CHECKPOINT-004: Delete after success
-
-        Args:
-            pipeline: Pipeline name
-
-        Note:
-            Does not raise error if checkpoint doesn't exist.
-        """
-        s3_key = self._get_key(pipeline)
-
-        try:
-            await self.loop.run_in_executor(
-                None,
-                lambda: self.s3_client.delete_object(Bucket=self.bucket, Key=s3_key),
-            )
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code != "NoSuchKey":
-                # Ignore if key doesn't exist, raise for other errors
+            with open(full_path, "r") as f:
+                checkpoint_json = f.read()
+        else:
+            try:
+                response = await self.loop.run_in_executor(
+                    None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=key)
+                )
+                checkpoint_json = response["Body"].read().decode("utf-8")
+            except ClientError as e:
+                if e.response.get("Error", {}).get("Code") == "NoSuchKey":
+                    return None
                 raise
 
+        checkpoint_data = json.loads(checkpoint_json)
+        watermark_str = checkpoint_data["watermark"]
+        watermark: Watermark
+        try:
+            from datetime import datetime
+            watermark = datetime.fromisoformat(watermark_str)
+        except (ValueError, TypeError):
+            try:
+                watermark = int(watermark_str)
+            except ValueError:
+                watermark = watermark_str
+        run_id = RunID(UUID(checkpoint_data["run_id"]))
+        metadata = checkpoint_data.get("metadata", {})
+        return (watermark, run_id, metadata)
+
+    async def delete(self, pipeline: str) -> None:
+        """Delete checkpoint."""
+        key = self._get_key(pipeline)
+        if self.is_local:
+            full_path = Path(self.bucket) / key
+            if full_path.exists():
+                full_path.unlink()
+        else:
+            try:
+                await self.loop.run_in_executor(
+                    None,
+                    lambda: self.s3_client.delete_object(Bucket=self.bucket, Key=key),
+                )
+            except ClientError as e:
+                if e.response.get("Error", {}).get("Code") != "NoSuchKey":
+                    raise
+
     async def exists(self, pipeline: str) -> bool:
-        """Check if checkpoint exists.
-
-        Args:
-            pipeline: Pipeline name
-
-        Returns:
-            True if checkpoint exists, False otherwise
-        """
-        s3_key = self._get_key(pipeline)
-
-        try:
-            await self.loop.run_in_executor(
-                None,
-                lambda: self.s3_client.head_object(Bucket=self.bucket, Key=s3_key),
-            )
-            return True
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code in ("NoSuchKey", "404"):
-                return False
-            raise
-
-    async def list_all(self) -> list[str]:
-        """List all checkpoint pipelines.
-
-        Returns:
-            List of pipeline names that have checkpoints
-
-        Example:
-            >>> checkpoint = S3Checkpoint(bucket="bioetl-checkpoints")
-            >>> pipelines = await checkpoint.list_all()
-            >>> print(f"Found checkpoints for: {', '.join(pipelines)}")
-        """
-        prefix = "checkpoints/"
-
-        try:
-            response = await self.loop.run_in_executor(
-                None,
-                lambda: self.s3_client.list_objects_v2(
-                    Bucket=self.bucket,
-                    Prefix=prefix,
-                ),
-            )
-
-            pipelines = []
-            for obj in response.get("Contents", []):
-                key = obj["Key"]
-                if key.endswith("/latest.json"):
-                    # Extract pipeline name from path
-                    # Format: checkpoints/{pipeline}/latest.json
-                    pipeline = key.replace(prefix, "").replace("/latest.json", "")
-                    pipelines.append(pipeline)
-
-            return pipelines
-
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code == "NoSuchBucket":
-                return []
-            raise
+        """Check if checkpoint exists."""
+        key = self._get_key(pipeline)
+        if self.is_local:
+            return (Path(self.bucket) / key).exists()
+        else:
+            try:
+                await self.loop.run_in_executor(
+                    None,
+                    lambda: self.s3_client.head_object(Bucket=self.bucket, Key=key),
+                )
+                return True
+            except ClientError as e:
+                if e.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
+                    return False
+                raise
 
     def _get_key(self, pipeline: str) -> str:
-        """Generate S3 key for checkpoint.
-
-        Args:
-            pipeline: Pipeline name
-
-        Returns:
-            S3 key (e.g., 'checkpoints/chembl_activity/latest.json')
-        """
         return f"checkpoints/{pipeline}/latest.json"
 
     async def _get_etag(self, s3_key: str) -> str | None:
-        """Get current ETag for a checkpoint.
-
-        Args:
-            s3_key: S3 key
-
-        Returns:
-            ETag string if object exists, None otherwise
-        """
+        """Get current ETag for a checkpoint."""
         try:
             response = await self.loop.run_in_executor(
                 None,
                 lambda: self.s3_client.head_object(Bucket=self.bucket, Key=s3_key),
             )
-            return response["ETag"].strip('"')  # Remove quotes from ETag
+            return response["ETag"].strip('"')
         except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code", "")
-            if error_code in ("NoSuchKey", "404"):
+            if e.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
                 return None
             raise
 
     async def aclose(self) -> None:
-        """Close resources.
-
-        Implements the aclose() method required by CheckpointPort protocol.
-        S3 client doesn't need explicit closing, but this satisfies the protocol.
-        """
-        pass  # S3 clients are stateless and don't need closing
+        pass
