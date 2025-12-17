@@ -11,7 +11,7 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.config import Settings, load_pipeline_config
 from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
@@ -25,7 +25,6 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.bootstrap import load_pipeline_config
 
 if TYPE_CHECKING:
     import structlog
