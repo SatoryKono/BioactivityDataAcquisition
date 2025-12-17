@@ -1,4 +1,4 @@
-# Архитектурный аудит кодовой базы
+# Архитектурный аудит кодовой базы BioETL
 
 ## Входные данные
 *   **Язык/стек**: Python 3.11+, httpx, Polars, Delta Lake, Redis, Prefect
@@ -9,108 +9,138 @@
 
 ## 1. Количественная оценка (Score Card)
 
-| # | Категория | Вес | Оценка (1–10) | Обоснование |
-|---|-----------|-----|---------------|-------------|
-| 1 | **Архитектура слоёв** | 0.15 | 10 | Границы слоёв строго соблюдаются и защищены автоматическими AST-тестами (`test_architecture.py`). Import fix в `BasePipeline` восстановил целостность. |
-| 2 | **Модульность и связность** | 0.12 | 9 | Высокая cohesion. Введение `OrchestrationPort` уменьшило coupling с Prefect. Фабрики пайплайнов изолируют создание графа зависимостей. |
-| 3 | **Качество доменной модели** | 0.12 | 8 | Используются Value Objects (RunID, Watermark), Ports (Protocols). Бизнес-логика трансформаций выделена, но есть тенденция к анемичной модели в пайплайнах. |
-| 4 | **Тестовое покрытие и качество** | 0.12 | 9 | Архитектурные тесты консолидированы и строги. Unit-тесты покрывают базовую логику. Новые пайплайны имеют базовую реализацию, требуют расширения тестов. |
-| 5 | **Обработка ошибок и устойчивость** | 0.10 | 9 | Единая иерархия исключений, Circuit Breaker, Rate Limiter. Исправлен критический баг с импортом `QuarantineManager`. |
-| 6 | **Логирование и observability** | 0.08 | 8 | Structlog, Prometheus метрики. Введены stubs для CLI-инспекции карантина, но полная реализация требует доработки сервиса. |
-| 7 | **Производительность и масштабируемость** | 0.08 | 7 | Async I/O используется корректно. Новые адаптеры (PubChem/UniProt) используют пагинацию. Масштабирование ограничено одним воркером (нет distributed execution). |
-| 8 | **Безопасность** | 0.08 | 8 | Pydantic validation, secrets management через env. Отсутствуют явные уязвимости. Запрет unsafe builtins контролируется тестами. |
-| 9 | **Документация** | 0.08 | 9 | Подробная документация (RULES.md, ADRs). Код снабжен docstrings. Новые пайплайны имеют YAML-конфигурации. |
-| 10 | **Технический долг** | 0.07 | 9 | Критические ошибки исправлены. Дублирование тестов устранено. `BasePipeline` требует рефакторинга (God Object), но это не блокирует работу. |
+**Интегральный балл: 8.9 / 10** (Хорошее состояние)
 
-**Интегральный балл: 8.78** (Хорошее состояние)
+| Категория | Вес | Оценка (1–10) | Обоснование |
+| :--- | :---: | :---: | :--- |
+| **Архитектура слоёв** | 1.0 | **10** | Строгое соблюдение Hexagonal Architecture. Границы слоёв контролируются AST-тестами (`test_architecture.py`). Чистый Domain слой. |
+| **Модульность и связность** | 0.9 | **8** | Высокая связность внутри модулей. Зависимости инвертированы через Ports (`PipelineServices`). **Минус**: `DeltaWriter` содержит хардкод схемы, что повышает зацепление. |
+| **Качество доменной модели** | 0.8 | **9** | Использование DDD (Value Objects, Entities). Порты определены как `Protocol`. Отсутствие I/O в домене. |
+| **Тестовое покрытие и качество** | 0.9 | **9** | Строгие настройки `pytest`, наличие архитектурных тестов, мутационное тестирование (`mutmut`), высокие требования к покрытию (80%+). |
+| **Обработка ошибок** | 0.8 | **9** | Типизированные исключения (`bioetl.domain.exceptions`), использование Circuit Breaker и Retry политик на уровне инфраструктуры. |
+| **Логирование и наблюдаемость** | 0.7 | **9** | Структурированное логирование (`structlog`), метрики через `MetricsPort`. Отличная изоляция библиотек мониторинга. |
+| **Производительность и масштабируемость** | 0.8 | **9** | Асинхронный I/O (`asyncio`), потоковая обработка (`zstd` streaming), использование Delta Lake и Polars. |
+| **Безопасность** | 0.7 | **9** | `bandit` в CI, секреты через `pydantic-settings`, отсутствие хардкода. Безопасные практики (хэширование PII). |
+| **Документация** | 0.6 | **9** | Docs-as-Code (`RULES.md` как источник правды), подробные docstrings, ADR. |
+| **Технический долг** | 0.8 | **8** | Кодбаза чистая после рефакторинга. Основной долг — нарушение принципа единственной ответственности в `DeltaWriter`. |
 
 ---
 
 ## 2. Качественный анализ архитектуры
 
-*   **Соблюдение границ слоёв**: ✅ Строго соблюдается. AST-тесты гарантируют, что Domain не зависит от внешних библиотек, а Infrastructure не протекает в Application (за исключением `bootstrap` как Composition Root).
-*   **Направление зависимостей**: ✅ Правильное. Application зависит от Domain Ports. Infrastructure реализует эти порты.
-*   **Ports & Adapters**: ✅ Выделены. `OrchestrationPort` добавлен как Protocol. Адаптеры (PubChem, UniProt) реализованы в infrastructure и инжектируются через фабрики.
-*   **Единообразие именования**: ✅ Соблюдается (`*Pipeline`, `*Factory`, `*Port`).
-*   **Структура пакетов**: ✅ Функциональное разделение (pipelines, core) внутри слоев.
+### Диаграмма текущего состояния
+
+```mermaid
+graph TD
+    subgraph Interfaces ["Interfaces Layer"]
+        CLI[CLI / Bootstrap]
+    end
+
+    subgraph Application ["Application Layer"]
+        Pipe[Pipelines]
+        PS[PipelineServices]
+    end
+
+    subgraph Domain ["Domain Layer"]
+        Ports[Ports (Protocols)]
+        Entities[Entities & VOs]
+        Exceptions[Exceptions]
+    end
+
+    subgraph Infrastructure ["Infrastructure Layer"]
+        subgraph Adapters
+            Chembl[ChemblAdapter]
+        end
+        subgraph Storage
+            BW[BronzeWriter]
+            DW[DeltaWriter]
+        end
+        Config[Config & Settings]
+    end
+
+    %% Dependency Direction
+    CLI --> |Injects Dependencies| Pipe
+    Pipe --> |Uses| PS
+    PS --> |Depends on| Ports
+
+    Chembl -.-> |Implements| Ports
+    BW -.-> |Implements| Ports
+    DW -.-> |Implements| Ports
+
+    Pipe --> |Manipulates| Entities
+    Ports --> |Uses| Entities
+    Ports --> |Raises| Exceptions
+
+    Chembl --> |Uses| Config
+```
+
+### Анализ соблюдения принципов
+*   **Соблюдение границ слоёв**: Реализовано образцово. `src/bioetl/domain` изолирован от внешнего мира. `src/bioetl/application` зависит только от абстракций.
+*   **Направление зависимостей**: Строго внутрь (к Домену). Инфраструктура зависит от Домена (реализует порты), но Домен не знает об Инфраструктуре. Нарушения пресекаются `test_architecture.py`.
+*   **Ports & Adapters**: Порты явно выделены (`bioetl.domain.ports`) как протоколы. Адаптеры (`ChemblAdapter`) реализуют их неявно (Duck Typing), что идиоматично для Python.
+*   **Единообразие именования**: Классы и модули именуются консистентно (`*Adapter`, `*Writer`, `*Port`).
+*   **Структура пакетов**: Соответствует техническому разделению (hexagonal), внутри — функциональное деление.
+
+---
 
 ## 3. Реестр проблем
 
 | ID | Тип | Локация | Описание | Severity | Effort |
-|----|-----|---------|----------|----------|--------|
-| P-002 | GOD_OBJECT | `application/core/base.py` | `BasePipeline` содержит множество convenience properties и ленивую инициализацию 5 компонентов. | Medium | M |
-| P-006 | STUB_IMPL | `interfaces/orchestration` | `PrefectOrchestrationAdapter` реализован как заглушка (stub). Требуется реальная интеграция. | Medium | L |
-| P-011 | MISSING_TESTS | `tests/unit/pipelines` | Отсутствуют специфичные unit-тесты для логики трансформации новых пайплайнов (PubChem/UniProt). | Low | S |
-| P-012 | CLI_LIMITATION | `interfaces/cli.py` | Команды `quarantine inspect` используют bootstrap, но выводят имитационные данные, т.к. сервис карантина не имеет публичного API для инспекции. | Low | M |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **P-001** | `LEAKY_ABSTRACTION` | `infra/storage/delta_writer.py` | Метод `write_silver` содержит явное определение схемы Arrow для ChEMBL (`molecule_chembl_id` и т.д.). Инфраструктурный класс знает о деталях конкретного домена, что делает его непригодным для других сущностей. | **High** | **M** |
+| **P-002** | `DUPLICATION` | `infra/adapters/chembl/client.py` | Реализована собственная логика пагинации. В проекте существует практика использования `PaginatedFetcherMixin` (согласно `AGENTS.md`), здесь же она не применена. | **Low** | **S** |
+| **P-003** | `CONFIG_LEAK` | `infra/storage/bronze_writer.py` | Логика формирования путей (`bronze/v1/...`) зашита в код писателя. Это нарушает принцип разделения ответственности: писатель должен писать байты, а не определять структуру каталогов. | **Medium** | **S** |
+
+---
 
 ## 4. План рефакторинга
 
-### Фаза 0 — Quick wins (Завершено)
-*   **[HOTFIX] Исправление импортов**: `BasePipeline` исправлен.
-*   **[CLEANUP] Оптимизация тестов**: Архитектурные тесты объединены.
-*   **[FEAT] Базовые пайплайны**: PubChem и UniProt подключены.
+### Фаза 0 — Quick wins
+#### [R-01] Decouple DeltaWriter Schema
+- **Цель**: Сделать `DeltaWriter` агностичным к бизнес-сущностям.
+- **Затрагиваемые модули**: `src/bioetl/infrastructure/storage/delta_writer.py`, фабрики пайплайнов.
+- **Действия**:
+  1. Изменить сигнатуру `write_silver`, чтобы схема передавалась как аргумент (или `contract`).
+  2. Вынести определение схемы пайплайна ChEMBL в конфигурацию или Application слой (как Data Contract).
+- **Риски**: `SchemaViolationError` если передаваемая схема не совпадет с данными.
+- **DoD**: В `delta_writer.py` нет упоминаний полей ChEMBL; тесты проходят с моковой схемой.
+- **Влияние на Score Card**: Модульность +1.
 
-### Фаза 1 — Критические исправления (Текущий приоритет)
-*   **[TEST-001] Тесты для новых пайплайнов**
-    *   **Цель**: Обеспечить покрытие бизнес-логики трансформации.
-    *   **Модули**: `tests/unit/pipelines/test_pubchem.py`, `tests/unit/pipelines/test_uniprot.py`.
-    *   **Действия**: Написать тесты на `transform_bronze_to_silver`.
-    *   **Влияние**: Тестовое покрытие (+0.2).
+### Фаза 1 — Архитектурные улучшения
+#### [R-02] Unify Pagination Logic
+- **Цель**: Устранить дублирование кода пагинации.
+- **Затрагиваемые модули**: `src/bioetl/infrastructure/adapters/chembl/client.py`.
+- **Действия**:
+  1. Проверить существование `PaginatedFetcherMixin` в `infra/adapters/http/`.
+  2. Рефакторить `ChemblAdapter` для использования миксина.
+- **Риски**: Поломка специфичной обработки курсоров ChEMBL.
+- **DoD**: Адаптер использует стандартный миксин.
 
-### Фаза 2 — Архитектурные улучшения
-*   **[AR-002] Декомпозиция BasePipeline**
-    *   **Цель**: Устранить God Object, вынести конфигурацию и доступ к сервисам.
-    *   **Модули**: `application/core/base.py`.
-    *   **Действия**: Выделить `PipelineContextAccessor`.
-    *   **Влияние**: Модульность (+0.5).
+#### [R-03] Implement Storage Path Strategy
+- **Цель**: Вынести логику путей S3 в отдельную стратегию.
+- **Затрагиваемые модули**: `BronzeWriter`.
+- **Действия**:
+  1. Выделить интерфейс `PathStrategy`.
+  2. Реализовать дефолтную стратегию (текущая логика).
+  3. Инжектировать стратегию в `BronzeWriter`.
+- **DoD**: `BronzeWriter` не содержит строковых литералов путей.
 
-*   **[AR-004] Реализация Orchestration Adapter**
-    *   **Цель**: Полноценная интеграция с Prefect.
-    *   **Модули**: `infrastructure/orchestration/adapters/prefect_adapter.py`.
-    *   **Действия**: Реализовать методы `trigger`, `schedule` через Prefect Client API.
-    *   **Влияние**: Производительность/Масштабируемость (+0.5).
-
-### Фаза 3 — Улучшения качества
-*   **[CLI-001] Полноценная инспекция карантина**
-    *   **Цель**: Реальный вывод данных из S3/Delta.
-    *   **Модули**: `infrastructure/quarantine/unified_quarantine.py`.
-    *   **Действия**: Реализовать метод `inspect()` в сервисе.
+---
 
 ## 5. Метрики и контроль регресса
 
-*   **Статические метрики**: `mypy --strict` (уже используется), `ruff`.
-*   **Архитектурные тесты**: `tests/test_architecture.py` (AST-based) — **Critical Gate**.
-*   **CI-гейты**:
-    *   Pass Architecture Tests (Blocker)
-    *   Coverage > 80% (Warning)
-    *   No Dead Code (Vulture)
+Для поддержания достигнутого уровня качества (8.9) предлагается:
 
-### Прогноз Score Card после выполнения фаз 1–2
-Ожидается рост интегрального балла до **9.1**. Устранение God Object и реализация реальной оркестрации значительно повысят модульность и масштабируемость.
+1.  **Расширенные Архитектурные Тесты**:
+    *   Добавить правило в `test_architecture.py`: запретить инстанцирование `pa.schema` с конкретными полями внутри пакета `infrastructure.storage` (разрешить только передачу извне).
+    *   Проверять, что классы в `adapters` не имеют методов `fetch` без использования общих абстракций пагинации (где применимо).
 
-```mermaid
-graph TB
-    subgraph "Application"
-        BP[BasePipeline]
-        P_PC[PubChemPipeline]
-        P_UP[UniProtPipeline]
-    end
-    subgraph "Domain"
-        Ports[Ports Protocol]
-        OrchPort[OrchestrationPort]
-    end
-    subgraph "Infrastructure"
-        PC_Adp[PubChemClient]
-        UP_Adp[UniProtClient]
-        Prefect_Adp[PrefectAdapter]
-    end
+2.  **Статические метрики (CI Gates)**:
+    *   **Import Linter**: Строго запретить импорт `bioetl.application` в `bioetl.infrastructure` (уже есть, но усилить проверкой транзитивных зависимостей).
+    *   **Cyclomatic Complexity**: Удерживать < 10 для методов Writer'ов.
 
-    P_PC --|> BP
-    P_UP --|> BP
-    BP --> Ports
-    BP --> OrchPort
+3.  **Тестовое покрытие**:
+    *   Удерживать покрытие Domain слоя на уровне 100%.
+    *   Infrastructure: не менее 85% (с учетом интеграционных тестов на `fakeredis`/`moto`).
 
-    PC_Adp ..|> Ports
-    UP_Adp ..|> Ports
-    Prefect_Adp ..|> OrchPort
-```
+**Прогноз**: Выполнение Фазы 0 и 1 повысит интегральный балл до **9.2** за счет улучшения модульности и устранения утечек абстракций.
