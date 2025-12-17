@@ -326,7 +326,7 @@ class PubChemClient:
         Returns:
             Function result
         """
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         return await loop.run_in_executor(self.thread_pool, func, *args)
 
     async def health_check(self) -> HealthStatus:

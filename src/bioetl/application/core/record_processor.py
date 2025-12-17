@@ -129,7 +129,8 @@ class RecordProcessor:
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
-        table_name = f"{self._provider}.{self._entity_type}_gold"
+        # Use the same table name as silver for gold, as requested
+        table_name = f"{self._provider}.{self._entity_type}"
         await self._storage.write_gold(
             table_name=table_name, records=records, mode="append"
         )

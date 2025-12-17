@@ -154,6 +154,14 @@ class ChEMBLActivityPipeline(BasePipeline):
             except (ValueError, TypeError):
                 standard_value = None
 
+        # Convert pchembl_value to float if present
+        pchembl_value = record.get("pchembl_value")
+        if pchembl_value is not None:
+            try:
+                pchembl_value = float(pchembl_value)
+            except (ValueError, TypeError):
+                pchembl_value = None
+
         # Extract assay information
         assay_type = record.get("assay_type")
         assay_description = record.get("assay_description")
@@ -178,9 +186,7 @@ class ChEMBLActivityPipeline(BasePipeline):
             "document_chembl_id": document_chembl_id,
             "document_year": document_year,
             # Additional fields
-            "pchembl_value": record.get(
-                "pchembl_value"
-            ),  # -log10(molar IC50, XC50, etc)
+            "pchembl_value": pchembl_value,
             "activity_comment": record.get("activity_comment"),
             "data_validity_comment": record.get("data_validity_comment"),
         }
