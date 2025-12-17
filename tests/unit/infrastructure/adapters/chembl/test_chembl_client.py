@@ -1,6 +1,6 @@
 """Unit tests for ChEMBL client adapter."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -63,7 +63,6 @@ class TestChemblAdapterResourceUrl:
 class TestChemblAdapterContextManager:
     """Tests for async context manager."""
 
-    @pytest.mark.asyncio
     async def test_aenter_aexit(self, chembl_adapter, mock_http_client):
         """Test async context manager enters and exits correctly."""
         async with chembl_adapter as adapter:
