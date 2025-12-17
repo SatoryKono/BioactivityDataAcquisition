@@ -58,9 +58,16 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
-    def test_bootstrap_pipeline_unknown_pipeline_raises(self):
+    @patch("bioetl.interfaces.bootstrap.get_settings")
+    @patch("bioetl.interfaces.bootstrap.bootstrap_logger")
+    def test_bootstrap_pipeline_unknown_pipeline_raises(
+        self, mock_bootstrap_logger, mock_get_settings, mock_settings, mock_logger
+    ):
         """Test that unknown pipeline name raises ValueError."""
         from bioetl.interfaces.bootstrap import bootstrap_pipeline
+
+        mock_get_settings.return_value = mock_settings
+        mock_bootstrap_logger.return_value = mock_logger
 
         with pytest.raises(ValueError, match="Unknown pipeline name"):
             bootstrap_pipeline(
@@ -72,7 +79,7 @@ class TestBootstrapPipeline:
             )
 
     @patch("bioetl.interfaces.bootstrap.get_settings")
-    @patch("bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipelineFactory")
+    @patch("bioetl.interfaces.bootstrap.ChEMBLActivityPipelineFactory")
     def test_bootstrap_pipeline_chembl_activity(
         self, mock_factory, mock_get_settings, mock_settings, mock_logger
     ):
