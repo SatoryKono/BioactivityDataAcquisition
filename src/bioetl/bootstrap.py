@@ -7,6 +7,7 @@ to provide a ready-to-use dependency container for the application layer.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from pathlib import Path
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
@@ -93,9 +94,11 @@ class ChEMBLActivityPipelineFactory:
         **kwargs,  # Accept and ignore extra ports for now
     ) -> PipelineServices:
         """Builds PipelineServices from settings."""
+        is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
+
         aws_config = settings.aws
         s3_config = settings.s3
-        storage_options = settings.storage_options
+        storage_options = settings.storage_options if not is_local_run else None
         access_key, secret_key = get_aws_credentials(settings)
 
         http_client = UnifiedHTTPClient(
@@ -103,19 +106,26 @@ class ChEMBLActivityPipelineFactory:
         )
         data_source = ChemblAdapter(http_client=http_client)
 
+        # Use local paths if no S3 endpoint is configured for dev/staging
+        base_data_path = "data/output" if is_local_run else ""
+        bronze_path = f"{base_data_path}/{s3_config.bucket_bronze}" if is_local_run else s3_config.bucket_bronze
+        silver_base_path = f"{base_data_path}/silver" if is_local_run else f"s3://{s3_config.bucket_silver}"
+        gold_base_path = f"{base_data_path}/gold" if is_local_run else f"s3://{s3_config.bucket_gold}"
+        checkpoints_path = f"{base_data_path}/{s3_config.bucket_checkpoints}" if is_local_run else s3_config.bucket_checkpoints
+
         storage = StorageAdapter(
             BronzeWriter(
-                bucket=s3_config.bucket_bronze,
-                endpoint_url=aws_config.endpoint_url,
+                bucket=bronze_path,
+                endpoint_url=aws_config.endpoint_url if not is_local_run else None,
                 access_key=access_key,
                 secret_key=secret_key,
             ),
             DeltaWriter(
-                base_path=f"s3://{s3_config.bucket_silver}",
+                base_path=silver_base_path,
                 storage_options=storage_options,
             ),
             GoldWriter(
-                base_path=f"s3://{s3_config.bucket_gold}",
+                base_path=gold_base_path,
                 storage_options=storage_options,
             ),
         )
@@ -130,13 +140,13 @@ class ChEMBLActivityPipelineFactory:
             lock = MemoryLock()
 
         checkpoint = S3Checkpoint(
-            bucket=s3_config.bucket_checkpoints,
-            endpoint_url=aws_config.endpoint_url,
+            bucket=checkpoints_path,
+            endpoint_url=aws_config.endpoint_url if not is_local_run else None,
             access_key=access_key,
             secret_key=secret_key,
         )
         quarantine = UnifiedQuarantine(
-            base_path=f"s3://{s3_config.bucket_silver}/common/quarantine",
+            base_path=f"{silver_base_path}/common/quarantine",
             storage_options=storage_options,
         )
         metrics: MetricsPort = (

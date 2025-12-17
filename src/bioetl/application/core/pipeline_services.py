@@ -6,7 +6,7 @@ Separates I/O port dependencies from pipeline logic.
 
 import asyncio
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -65,6 +65,15 @@ class PipelineServices:
         # Validation is implicit - dataclass requires all non-default fields
         # Runtime checks happen via Protocol structural typing
         pass
+
+    async def __aenter__(self) -> Self:
+        """Enter the async context manager, initializing services."""
+        await self.data_source.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Exit the async context manager, closing services."""
+        await self.aclose()
 
     async def aclose(self) -> None:
         """Gracefully close all I/O resources."""
