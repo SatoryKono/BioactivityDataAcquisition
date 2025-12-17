@@ -1,6 +1,5 @@
 """Unit tests for the PipelineOrchestrator class."""
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -166,7 +165,6 @@ class TestPipelineOrchestrator:
         shutdown_signal.request()
         assert orchestrator.shutdown_requested is True
 
-    @pytest.mark.asyncio
     async def test_run_success(self, orchestrator, mock_services, mock_executor):
         """Test successful pipeline run."""
         with patch.object(orchestrator, "_setup_shutdown_handlers"):
@@ -177,7 +175,6 @@ class TestPipelineOrchestrator:
         mock_services.lock.release.assert_called_once()
         mock_services.metrics.observe_histogram.assert_called()
 
-    @pytest.mark.asyncio
     async def test_run_lock_acquisition_failure(
         self, orchestrator, mock_services, mock_logger
     ):
@@ -191,7 +188,6 @@ class TestPipelineOrchestrator:
         # Executor should not be called if lock fails
         orchestrator._executor.execute.assert_not_called()
 
-    @pytest.mark.asyncio
     async def test_run_exclusive_lock_for_backfill(
         self, orchestrator, mock_services, runtime_config
     ):
@@ -207,7 +203,6 @@ class TestPipelineOrchestrator:
         call_kwargs = mock_services.lock.acquire.call_args.kwargs
         assert call_kwargs["exclusive"] is True
 
-    @pytest.mark.asyncio
     async def test_run_exclusive_lock_for_rebuild(
         self, orchestrator, mock_services, runtime_config
     ):
@@ -222,7 +217,6 @@ class TestPipelineOrchestrator:
         call_kwargs = mock_services.lock.acquire.call_args.kwargs
         assert call_kwargs["exclusive"] is True
 
-    @pytest.mark.asyncio
     async def test_run_shared_lock_for_incremental(self, orchestrator, mock_services):
         """Test that incremental acquires shared lock."""
         with patch.object(orchestrator, "_setup_shutdown_handlers"):
@@ -231,7 +225,6 @@ class TestPipelineOrchestrator:
         call_kwargs = mock_services.lock.acquire.call_args.kwargs
         assert call_kwargs["exclusive"] is False
 
-    @pytest.mark.asyncio
     async def test_run_with_shutdown_error(
         self, orchestrator, mock_executor, mock_logger
     ):
@@ -244,7 +237,6 @@ class TestPipelineOrchestrator:
 
         mock_logger.warning.assert_called()
 
-    @pytest.mark.asyncio
     async def test_run_with_general_exception(
         self, orchestrator, mock_executor, mock_logger
     ):
@@ -257,7 +249,6 @@ class TestPipelineOrchestrator:
 
         mock_logger.error.assert_called()
 
-    @pytest.mark.asyncio
     async def test_heartbeat_task_created_and_cancelled(
         self, orchestrator, mock_services
     ):
@@ -268,7 +259,6 @@ class TestPipelineOrchestrator:
         # Heartbeat task should have been created and then cancelled
         assert orchestrator.heartbeat_task is not None
 
-    @pytest.mark.asyncio
     async def test_heartbeat_loop_stops_on_shutdown(self, orchestrator, shutdown_signal):
         """Test heartbeat loop stops when shutdown is requested."""
         shutdown_signal.request()
@@ -276,7 +266,6 @@ class TestPipelineOrchestrator:
         # Should return immediately when shutdown is requested
         await orchestrator._heartbeat_loop("test_key", exclusive=False)
 
-    @pytest.mark.asyncio
     async def test_heartbeat_loop_requests_shutdown_on_lock_lost(
         self, orchestrator, mock_services, shutdown_signal
     ):
@@ -288,7 +277,6 @@ class TestPipelineOrchestrator:
 
         assert shutdown_signal.is_requested
 
-    @pytest.mark.asyncio
     async def test_metrics_recorded_on_completion(
         self, orchestrator, mock_services, mock_executor
     ):
@@ -300,7 +288,6 @@ class TestPipelineOrchestrator:
         # Check increment_counter called for bronze, silver, gold
         assert mock_services.metrics.increment_counter.call_count == 3
 
-    @pytest.mark.asyncio
     async def test_checkpoint_deleted_on_success(
         self, orchestrator, mock_checkpoint_manager
     ):

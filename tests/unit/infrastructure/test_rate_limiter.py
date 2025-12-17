@@ -37,7 +37,6 @@ class TestTokenBucket:
         assert bucket.available_tokens() == 5  # Unchanged
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_acquire_immediate(self) -> None:
         """acquire should return immediately when tokens available."""
         bucket = TokenBucket(rate=5.0, capacity=10)
@@ -50,7 +49,6 @@ class TestTokenBucket:
         assert bucket.available_tokens() == 5
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_acquire_waits_for_tokens(self) -> None:
         """acquire should wait when insufficient tokens."""
         bucket = TokenBucket(rate=10.0, capacity=1)  # 10 tokens/sec
@@ -67,7 +65,6 @@ class TestTokenBucket:
         assert elapsed < 0.5  # But not too long
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_acquire_exceeds_capacity_raises(self) -> None:
         """acquire should raise if tokens > capacity."""
         bucket = TokenBucket(rate=5.0, capacity=5)

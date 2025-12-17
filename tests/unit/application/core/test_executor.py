@@ -10,7 +10,7 @@ from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import RunID, RunType
 
 
 @pytest.fixture
@@ -165,7 +165,6 @@ class TestPipelineExecutorInit:
 class TestPipelineExecutorExecute:
     """Tests for execute method."""
 
-    @pytest.mark.asyncio
     async def test_execute_processes_records(self, executor, mock_data_source):
         """Test that execute processes records correctly."""
 
@@ -182,7 +181,6 @@ class TestPipelineExecutorExecute:
         assert executor.records_silver == 3
         assert executor.records_gold == 3  # All records have value > 5
 
-    @pytest.mark.asyncio
     async def test_execute_batches_records(self, executor, mock_data_source, mock_storage):
         """Test that execute batches records correctly."""
 
@@ -197,7 +195,6 @@ class TestPipelineExecutorExecute:
         # Should have called write_silver twice (batch of 10 + batch of 5)
         assert mock_storage.write_silver.call_count == 2
 
-    @pytest.mark.asyncio
     async def test_execute_checkpoints_at_interval(
         self, executor, mock_data_source, mock_checkpoint_manager
     ):
@@ -214,7 +211,6 @@ class TestPipelineExecutorExecute:
         # With checkpoint_interval=5, should checkpoint at record 5 and 10
         assert mock_checkpoint_manager.save_checkpoint.call_count == 2
 
-    @pytest.mark.asyncio
     async def test_execute_handles_shutdown_with_last_record(
         self, executor, mock_data_source, mock_checkpoint_manager, shutdown_signal
     ):
@@ -240,7 +236,6 @@ class TestPipelineExecutorExecute:
         last_call_args = mock_checkpoint_manager.save_checkpoint.call_args
         assert last_call_args[0][0]["id"] == "2"  # Last record before shutdown
 
-    @pytest.mark.asyncio
     async def test_execute_shutdown_without_records(
         self, executor, mock_data_source, mock_checkpoint_manager, shutdown_signal
     ):
@@ -255,7 +250,6 @@ class TestPipelineExecutorExecute:
         with pytest.raises(PipelineShutdownError):
             await executor.execute(watermark=None, limit=None)
 
-    @pytest.mark.asyncio
     async def test_execute_empty_data(self, executor, mock_data_source, mock_storage):
         """Test execute with no data."""
 
@@ -270,7 +264,6 @@ class TestPipelineExecutorExecute:
         assert executor.records_fetched == 0
         mock_storage.write_silver.assert_not_called()
 
-    @pytest.mark.asyncio
     async def test_execute_passes_watermark_and_limit(self, executor, mock_data_source):
         """Test that watermark and limit are passed to data source."""
         watermark = "2024-01-01"  # Watermark is a TypeAlias for str | datetime | int

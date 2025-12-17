@@ -153,7 +153,6 @@ class TestStorageAdapter:
         assert storage_adapter.silver == mock_silver_writer
         assert storage_adapter.gold == mock_gold_writer
 
-    @pytest.mark.asyncio
     async def test_write_bronze_delegates(
         self, storage_adapter, mock_bronze_writer
     ):
@@ -173,7 +172,6 @@ class TestStorageAdapter:
 
         mock_bronze_writer.write_bronze.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_write_silver_delegates(
         self, storage_adapter, mock_silver_writer
     ):
@@ -193,7 +191,6 @@ class TestStorageAdapter:
             primary_keys=["id"],
         )
 
-    @pytest.mark.asyncio
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):
         """Test write_gold delegates to gold writer."""
         records = [{"metric": "count", "value": 100}]
@@ -210,7 +207,6 @@ class TestStorageAdapter:
             mode="overwrite",
         )
 
-    @pytest.mark.asyncio
     async def test_aclose_completes(self, storage_adapter):
         """Test aclose completes without error."""
         await storage_adapter.aclose()

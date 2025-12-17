@@ -84,7 +84,6 @@ class TestPubChemClient:
         assert client.thread_pool is not None
         assert client.thread_pool._max_workers == 2
 
-    @pytest.mark.asyncio
     async def test_compound_to_dict(self):
         """Test compound conversion to dictionary."""
         client = PubChemClient()

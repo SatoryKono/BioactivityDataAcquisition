@@ -70,7 +70,6 @@ class TestUniProtClientErrorPaths:
         cb.call = AsyncMock(side_effect=ConnectionError("Network error"))
         return cb
 
-    @pytest.mark.asyncio
     async def test_fetch_next_page_logs_error_on_failure(
         self, mock_http_client, caplog
     ):
@@ -105,7 +104,6 @@ class TestUniProtClientErrorPaths:
             assert len(error_records) >= 1
             assert "Network error" in error_records[0].exc_text
 
-    @pytest.mark.asyncio
     async def test_fetch_next_page_raises_in_strict_mode(self, mock_http_client):
         """Test that _fetch_next_page raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
@@ -131,7 +129,6 @@ class TestUniProtClientErrorPaths:
                     query="test", size=10, fetched=0, limit=100, cursor=None
                 )
 
-    @pytest.mark.asyncio
     async def test_fetch_features_logs_warning_on_failure(
         self, mock_http_client, caplog
     ):
@@ -169,7 +166,6 @@ class TestUniProtClientErrorPaths:
             assert len(warning_records) >= 1
             assert "Request timeout" in warning_records[0].exc_text
 
-    @pytest.mark.asyncio
     async def test_fetch_features_raises_in_strict_mode(self, mock_http_client):
         """Test that _fetch_features raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
@@ -193,7 +189,6 @@ class TestUniProtClientErrorPaths:
             with pytest.raises(TimeoutError, match="Request timeout"):
                 _ = [r async for r in client._fetch_features("P12345", limit=10)]
 
-    @pytest.mark.asyncio
     async def test_fetch_sequences_logs_warning_on_failure(
         self, mock_http_client, caplog
     ):
@@ -231,7 +226,6 @@ class TestUniProtClientErrorPaths:
             # Should have logged the warning
             assert "UniProt sequence fetch failed" in caplog.text
 
-    @pytest.mark.asyncio
     async def test_fetch_sequences_raises_in_strict_mode(self, mock_http_client):
         """Test that _fetch_sequences raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
@@ -269,7 +263,6 @@ class TestPubChemClientErrorPaths:
         mock_pcp.get_compounds = MagicMock(return_value=[])
         return mock_pcp
 
-    @pytest.mark.asyncio
     async def test_fetch_compounds_incremental_logs_error_on_failure(self, caplog):
         """Test that _fetch_compounds_incremental logs error when fetch fails."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
@@ -306,7 +299,6 @@ class TestPubChemClientErrorPaths:
             assert len(error_records) >= 1
             assert "PubChem API error" in error_records[0].exc_text
 
-    @pytest.mark.asyncio
     async def test_fetch_compounds_incremental_raises_in_strict_mode(self):
         """Test that _fetch_compounds_incremental raises exception in strict mode."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient

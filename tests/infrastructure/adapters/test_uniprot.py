@@ -61,7 +61,6 @@ def mock_fasta_response():
     return ">sp|P12345|TEST_HUMAN Test Protein OS=Homo sapiens OX=9606 GN=TEST1 PE=1 SV=1\nMKTLLLLAVV\nLLLGAAQA"
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_fetch_protein_success(uniprot_client, mock_protein_response):
     """Test fetching proteins successfully."""
@@ -78,7 +77,6 @@ async def test_fetch_protein_success(uniprot_client, mock_protein_response):
     assert route.called
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_fetch_protein_pagination(uniprot_client, mock_protein_response_page1, mock_protein_response):
     """Test fetching proteins with pagination."""
@@ -100,7 +98,6 @@ async def test_fetch_protein_pagination(uniprot_client, mock_protein_response_pa
     assert len(results) == 2
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_fetch_features(uniprot_client, mock_feature_response):
     """Test fetching protein features."""
@@ -117,7 +114,6 @@ async def test_fetch_features(uniprot_client, mock_feature_response):
     assert results[0]["accession"] == "P12345"
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_fetch_sequences(uniprot_client, mock_fasta_response):
     """Test fetching protein sequences."""
@@ -133,7 +129,6 @@ async def test_fetch_sequences(uniprot_client, mock_fasta_response):
     assert "MKTLLLLAVVLLLGAAQA" in results[0]["sequence"]
 
 
-@pytest.mark.asyncio
 async def test_fetch_unsupported_entity(uniprot_client):
     """Test fetching unsupported entity raises ValueError."""
     with pytest.raises(ValueError, match="Unsupported entity type"):
@@ -141,7 +136,6 @@ async def test_fetch_unsupported_entity(uniprot_client):
             pass
 
 
-@pytest.mark.asyncio
 async def test_fetch_features_missing_query(uniprot_client):
     """Test fetching features without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
@@ -149,7 +143,6 @@ async def test_fetch_features_missing_query(uniprot_client):
             pass
 
 
-@pytest.mark.asyncio
 async def test_fetch_sequences_missing_query(uniprot_client):
     """Test fetching sequences without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
@@ -157,7 +150,6 @@ async def test_fetch_sequences_missing_query(uniprot_client):
             pass
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_health_check_healthy(uniprot_client):
     """Test health check returns HEALTHY."""
@@ -168,7 +160,6 @@ async def test_health_check_healthy(uniprot_client):
     assert status == HealthStatus.HEALTHY
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_health_check_degraded(uniprot_client):
     """Test health check returns DEGRADED on non-200."""
@@ -179,7 +170,6 @@ async def test_health_check_degraded(uniprot_client):
     assert status == HealthStatus.DEGRADED
 
 
-@pytest.mark.asyncio
 @respx.mock
 async def test_health_check_unhealthy(uniprot_client):
     """Test health check returns UNHEALTHY on connection error."""

@@ -21,10 +21,14 @@ from collections.abc import AsyncIterator, Iterator
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+import structlog
 import zstandard as zstd
 from botocore.exceptions import ClientError
+
+if TYPE_CHECKING:
+    from structlog.stdlib import BoundLogger
 
 from bioetl.domain.types import BatchID
 from bioetl.domain.exceptions import BucketNotFoundError, UploadError

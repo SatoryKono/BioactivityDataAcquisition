@@ -59,7 +59,6 @@ def mock_pcp_assay():
     }
 
 
-@pytest.mark.asyncio
 async def test_fetch_compound_by_query(pubchem_client, mock_pcp_compound):
     """Test fetching compounds by query."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]) as mock_get:
@@ -73,7 +72,6 @@ async def test_fetch_compound_by_query(pubchem_client, mock_pcp_compound):
         mock_get.assert_called_with("aspirin", "name")
 
 
-@pytest.mark.asyncio
 async def test_fetch_compound_incremental(pubchem_client, mock_pcp_compound):
     """Test fetching compounds via watermark incremental load."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]) as mock_get:
@@ -89,7 +87,6 @@ async def test_fetch_compound_incremental(pubchem_client, mock_pcp_compound):
         assert 120 in args[0]
 
 
-@pytest.mark.asyncio
 async def test_fetch_substance(pubchem_client, mock_pcp_substance):
     """Test fetching substances."""
     with patch("pubchempy.get_substances", return_value=[mock_pcp_substance]) as mock_get:
@@ -103,7 +100,6 @@ async def test_fetch_substance(pubchem_client, mock_pcp_substance):
         mock_get.assert_called_with("aspirin", "name")
 
 
-@pytest.mark.asyncio
 async def test_fetch_assay(pubchem_client, mock_pcp_assay):
     """Test fetching assays."""
     with patch("pubchempy.get_assays", return_value=[mock_pcp_assay]) as mock_get:
@@ -116,7 +112,6 @@ async def test_fetch_assay(pubchem_client, mock_pcp_assay):
         mock_get.assert_called_with("12345")
 
 
-@pytest.mark.asyncio
 async def test_fetch_unsupported_entity(pubchem_client):
     """Test fetching unsupported entity raises ValueError."""
     with pytest.raises(ValueError, match="Unsupported entity type"):
@@ -124,7 +119,6 @@ async def test_fetch_unsupported_entity(pubchem_client):
             pass
 
 
-@pytest.mark.asyncio
 async def test_fetch_compound_missing_query_watermark(pubchem_client):
     """Test fetching compound without query or watermark raises ValueError."""
     with pytest.raises(ValueError, match="Either query or watermark must be provided"):
@@ -132,7 +126,6 @@ async def test_fetch_compound_missing_query_watermark(pubchem_client):
             pass
 
 
-@pytest.mark.asyncio
 async def test_fetch_substance_missing_query(pubchem_client):
     """Test fetching substance without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
@@ -140,7 +133,6 @@ async def test_fetch_substance_missing_query(pubchem_client):
             pass
 
 
-@pytest.mark.asyncio
 async def test_fetch_assay_missing_query(pubchem_client):
     """Test fetching assay without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
@@ -148,7 +140,6 @@ async def test_fetch_assay_missing_query(pubchem_client):
             pass
 
 
-@pytest.mark.asyncio
 async def test_health_check_healthy(pubchem_client, mock_pcp_compound):
     """Test health check returns HEALTHY."""
     with patch("pubchempy.get_compounds", return_value=[mock_pcp_compound]):
@@ -156,7 +147,6 @@ async def test_health_check_healthy(pubchem_client, mock_pcp_compound):
         assert status == HealthStatus.HEALTHY
 
 
-@pytest.mark.asyncio
 async def test_health_check_unhealthy(pubchem_client):
     """Test health check returns UNHEALTHY on exception."""
     with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
@@ -164,7 +154,6 @@ async def test_health_check_unhealthy(pubchem_client):
         assert status == HealthStatus.UNHEALTHY
 
 
-@pytest.mark.asyncio
 async def test_circuit_breaker(pubchem_client):
     """Test circuit breaker opens after failures."""
     # Set low threshold
