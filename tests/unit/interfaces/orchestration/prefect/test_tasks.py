@@ -1,6 +1,6 @@
 """Unit tests for Prefect tasks and flows."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -41,7 +41,6 @@ def mock_runner():
 class TestExecutePipelineTask:
     """Tests for execute_pipeline_task."""
 
-    @pytest.mark.asyncio
     async def test_calls_executor_execute(self, mock_executor):
         """Test that the task calls executor.execute."""
         await execute_pipeline_task.fn(
@@ -55,7 +54,6 @@ class TestExecutePipelineTask:
             limit=100,
         )
 
-    @pytest.mark.asyncio
     async def test_with_none_watermark(self, mock_executor):
         """Test with None watermark."""
         await execute_pipeline_task.fn(
@@ -74,7 +72,6 @@ class TestExecutePipelineTask:
 class TestLoadCheckpointTask:
     """Tests for load_checkpoint_task."""
 
-    @pytest.mark.asyncio
     async def test_returns_watermark(self, mock_checkpoint_manager):
         """Test that the task returns watermark from manager."""
         result = await load_checkpoint_task.fn(manager=mock_checkpoint_manager)
@@ -82,7 +79,6 @@ class TestLoadCheckpointTask:
         assert result == "2025-01-15T00:00:00Z"
         mock_checkpoint_manager.load_checkpoint.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_returns_none_when_no_checkpoint(self, mock_checkpoint_manager):
         """Test returns None when no checkpoint exists."""
         mock_checkpoint_manager.load_checkpoint.return_value = None
@@ -96,7 +92,6 @@ class TestLoadCheckpointTask:
 class TestDeleteCheckpointTask:
     """Tests for delete_checkpoint_task."""
 
-    @pytest.mark.asyncio
     async def test_calls_delete_checkpoint(self, mock_checkpoint_manager):
         """Test that the task calls manager.delete_checkpoint."""
         await delete_checkpoint_task.fn(manager=mock_checkpoint_manager)
@@ -108,7 +103,6 @@ class TestDeleteCheckpointTask:
 class TestRunPipelineFlow:
     """Tests for run_pipeline_flow."""
 
-    @pytest.mark.asyncio
     async def test_calls_runner_run(self, mock_runner):
         """Test that the flow calls runner.run."""
         await run_pipeline_flow.fn(runner=mock_runner)

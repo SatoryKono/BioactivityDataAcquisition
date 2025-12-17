@@ -34,7 +34,6 @@ def lock_manager(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> LockM
 
 
 class TestLockManager:
-    @pytest.mark.asyncio
     async def test_acquire_lock_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
@@ -50,7 +49,6 @@ class TestLockManager:
             exclusive=False,
         )
 
-    @pytest.mark.asyncio
     async def test_acquire_lock_failure(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
@@ -61,7 +59,6 @@ class TestLockManager:
 
         assert result is False
 
-    @pytest.mark.asyncio
     async def test_release_lock_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
@@ -74,7 +71,6 @@ class TestLockManager:
             "lock:test_pipeline", "run_123", exclusive=False
         )
 
-    @pytest.mark.asyncio
     async def test_heartbeat_loop_loss(
         self,
         lock_manager: LockManager,
@@ -99,7 +95,6 @@ class TestLockManager:
 
         assert mock_shutdown_signal.request.called
 
-    @pytest.mark.asyncio
     async def test_context_manager_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
@@ -118,7 +113,6 @@ class TestLockManager:
             or lock_manager._heartbeat_task.cancelled()
         )
 
-    @pytest.mark.asyncio
     async def test_context_manager_failure(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:

@@ -50,7 +50,9 @@ async def test_write_gold_schema_validation_failure(gold_writer, strict_schema):
     invalid_records = [{"id": "not_int", "value": 10.5}]
 
     with pytest.raises(ValueError, match="Schema validation failed"):
-        await gold_writer.write_gold("test_table", invalid_records, schema=strict_schema)
+        await gold_writer.write_gold(
+            "test_table", invalid_records, schema=strict_schema
+        )
 
 
 async def test_write_gold_invalid_mode(gold_writer, valid_records):
@@ -61,7 +63,9 @@ async def test_write_gold_invalid_mode(gold_writer, valid_records):
 
 async def test_write_simple_overwrite(gold_writer, valid_records):
     """Test simple overwrite mode."""
-    with patch("bioetl.infrastructure.storage.gold_writer.write_deltalake") as mock_write:
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+    ) as mock_write:
         await gold_writer.write_gold("test_table", valid_records, mode="overwrite")
 
         mock_write.assert_called_once()
@@ -73,7 +77,9 @@ async def test_write_simple_overwrite(gold_writer, valid_records):
 
 async def test_write_simple_append(gold_writer, valid_records):
     """Test simple append mode."""
-    with patch("bioetl.infrastructure.storage.gold_writer.write_deltalake") as mock_write:
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+    ) as mock_write:
         await gold_writer.write_gold("test_table", valid_records, mode="append")
 
         mock_write.assert_called_once()
@@ -91,11 +97,17 @@ async def test_write_scd2_new_table(gold_writer, valid_records):
     """Test SCD2 write when table does not exist (creates new)."""
     scd_config = {"business_key": "id"}
 
-    with patch("bioetl.infrastructure.storage.gold_writer.DeltaTable") as mock_dt, \
-        patch("bioetl.infrastructure.storage.gold_writer.write_deltalake") as mock_write:
+    with (
+        patch("bioetl.infrastructure.storage.gold_writer.DeltaTable") as mock_dt,
+        patch(
+            "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+        ) as mock_write,
+    ):
         mock_dt.side_effect = TableNotFoundError("Table not found")
 
-        await gold_writer.write_gold("test_table", valid_records, mode="scd2", scd_config=scd_config)
+        await gold_writer.write_gold(
+            "test_table", valid_records, mode="scd2", scd_config=scd_config
+        )
 
         # Should call write_deltalake to create table
         mock_write.assert_called_once()
@@ -121,8 +133,13 @@ async def test_write_scd2_existing_table(gold_writer, valid_records):
     mock_merge_builder.when_matched_update.return_value = mock_merge_builder
     mock_merge_builder.when_not_matched_insert_all.return_value = mock_merge_builder
 
-    with patch("bioetl.infrastructure.storage.gold_writer.DeltaTable", return_value=mock_dt_instance):
-        await gold_writer.write_gold("test_table", valid_records, mode="scd2", scd_config=scd_config)
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.DeltaTable",
+        return_value=mock_dt_instance,
+    ):
+        await gold_writer.write_gold(
+            "test_table", valid_records, mode="scd2", scd_config=scd_config
+        )
 
         # Should call merge
         mock_dt_instance.merge.assert_called_once()
@@ -151,8 +168,13 @@ async def test_read_gold(gold_writer):
     mock_arrow_table.filter.return_value = mock_arrow_table
 
     # We need to mock pyarrow.compute functions because they type check arguments
-    with patch("bioetl.infrastructure.storage.gold_writer.DeltaTable", return_value=mock_dt_instance), \
-        patch("pyarrow.compute.equal") as mock_equal:
+    with (
+        patch(
+            "bioetl.infrastructure.storage.gold_writer.DeltaTable",
+            return_value=mock_dt_instance,
+        ),
+        patch("pyarrow.compute.equal") as mock_equal,
+    ):
         mock_equal.return_value = MagicMock()  # Return a mask
 
         result = await gold_writer.read_gold("test_table", current_only=True)
@@ -169,7 +191,7 @@ async def test_get_history(gold_writer):
     mock_arrow_table.column_names = ["id", "valid_from"]
     mock_arrow_table.to_pylist.return_value = [
         {"id": 1, "valid_from": "2023-01-01"},
-        {"id": 1, "valid_from": "2023-01-02"}
+        {"id": 1, "valid_from": "2023-01-02"},
     ]
 
     # Mock __getitem__ for column access
@@ -179,9 +201,14 @@ async def test_get_history(gold_writer):
     mock_arrow_table.filter.return_value = mock_arrow_table
     mock_arrow_table.sort_by.return_value = mock_arrow_table
 
-    with patch("bioetl.infrastructure.storage.gold_writer.DeltaTable", return_value=mock_dt_instance), \
-        patch("pyarrow.compute.equal") as mock_equal, \
-        patch("pyarrow.compute.and_") as mock_and:
+    with (
+        patch(
+            "bioetl.infrastructure.storage.gold_writer.DeltaTable",
+            return_value=mock_dt_instance,
+        ),
+        patch("pyarrow.compute.equal") as mock_equal,
+        patch("pyarrow.compute.and_") as mock_and,
+    ):
         mock_equal.return_value = MagicMock()
         mock_and.return_value = MagicMock()
 
