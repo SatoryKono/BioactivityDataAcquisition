@@ -15,7 +15,7 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import Any, Self
 
 import pubchempy as pcp
 
@@ -72,6 +72,20 @@ class PubChemClient:
 
         # Thread pool for sync API calls
         self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+
+    async def __aenter__(self) -> Self:
+        """Enter async context manager.
+
+        Initializes resources if needed (currently just ThreadPool which is init in __init__).
+        """
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Exit async context manager.
+
+        Closes the thread pool.
+        """
+        await self.close()
 
     async def fetch(
         self,
