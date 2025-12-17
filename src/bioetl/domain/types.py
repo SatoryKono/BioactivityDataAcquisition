@@ -6,7 +6,7 @@ No I/O operations allowed (REQ-ARCH-003).
 
 from datetime import datetime
 from enum import Enum
-from typing import NewType, TypeAlias
+from typing import NewType, TypeAlias, TypedDict, NotRequired
 from uuid import UUID
 
 # Type aliases for semantic clarity
@@ -216,3 +216,25 @@ class DQStatus(str, Enum):
 
     REPROCESSED = "REPROCESSED"
     """Successfully reprocessed and moved to Silver."""
+
+
+# =============================================================================
+# TypedDicts for Transformations
+# =============================================================================
+
+
+class SilverRecord(TypedDict):
+    """Generic Silver layer record structure."""
+
+    entity_id: str
+    content_hash: str
+    source_batch_id: str
+    updated_at: str  # ISO8601
+
+
+class GoldRecord(TypedDict):
+    """Generic Gold layer record structure."""
+
+    entity_id: str
+    content_hash: str
+    updated_at: str

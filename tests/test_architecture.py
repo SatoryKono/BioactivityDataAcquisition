@@ -456,6 +456,25 @@ def test_deprecated_files(project_root: Path):
     for p in deprecated:
         assert not (project_root / p).exists(), f"Deprecated path exists: {p}"
 
+    # Also check that there are no remaining references to deleted files
+    # Specifically PipelineOrchestrator in __init__.py
+    core_init = project_root / "src/bioetl/application/core/__init__.py"
+    if core_init.exists():
+        with core_init.open() as f:
+            content = f.read()
+        assert "PipelineOrchestrator" not in content, "Dead reference to PipelineOrchestrator found"
+
+
+def test_runner_no_direct_settings_access(src_dir: Path):
+    """PipelineRunner must not call get_settings() directly (DI violation)."""
+    runner_file = src_dir / "bioetl" / "interfaces" / "orchestration" / "runner.py"
+    with runner_file.open() as f:
+        content = f.read()
+
+    assert "get_settings" not in content, (
+        "PipelineRunner should receive config via DI, not call get_settings()"
+    )
+
 
 def test_pipeline_configs_schema(project_root: Path):
     """Validate all pipeline YAMLs against the strict schema."""

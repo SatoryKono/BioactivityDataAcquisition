@@ -18,8 +18,7 @@ from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.domain.types import RunType
 from bioetl.interfaces.bootstrap import (
     bootstrap_pipeline,
-    bootstrap_quarantine,
-    bootstrap_checkpoint,
+    bootstrap_maintenance,
 )
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
@@ -97,15 +96,10 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
     """Inspect quarantined records."""
     click.echo(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
-    # Initialize infrastructure directly via bootstrap (read-only op)
-    quarantine_service = bootstrap_quarantine()
+    maintenance = bootstrap_maintenance(pipeline)
 
-    # Run async inspection
     async def _inspect() -> None:
-        # Note: In a real implementation, we would call quarantine_service.inspect(pipeline, limit)
-        # But UnifiedQuarantine currently lacks a high-level inspect method in the interface
-        # exposed via bootstrapping. For now, we simulate the output or call get_stats if available.
-        stats = await quarantine_service.get_stats()
+        stats = await maintenance.get_quarantine_stats()
         click.echo(f"Quarantine Stats: {stats}")
 
     asyncio.run(_inspect())
@@ -123,10 +117,10 @@ def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints."""
     click.echo(f"Listing checkpoints for {pipeline}...")
 
-    checkpoint_service = bootstrap_checkpoint(pipeline)
+    maintenance = bootstrap_maintenance(pipeline)
 
     async def _list() -> None:
-        checkpoints = await checkpoint_service.list_all()
+        checkpoints = await maintenance.list_checkpoints()
         for cp in checkpoints:
             click.echo(f"- {cp}")
 

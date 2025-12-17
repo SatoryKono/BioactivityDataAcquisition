@@ -21,6 +21,7 @@ class PipelineRuntimeConfig:
     resume: bool = False
     limit: int | None = None
     heartbeat_interval: float = 30.0
+    """Interval in seconds for lock heartbeat."""
 
     def __post_init__(self) -> None:
         """Validate runtime config."""

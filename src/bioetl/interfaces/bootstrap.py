@@ -60,33 +60,38 @@ __all__ = [
     "BronzeWriter",
     "DeltaWriter",
     "GoldWriter",
-    "bootstrap_quarantine",
-    "bootstrap_checkpoint",
+    "bootstrap_maintenance",
 ]
 
 if TYPE_CHECKING:
     import structlog
     from bioetl.domain.types import RunType
-    from bioetl.domain.ports import QuarantinePort, CheckpointPort
+    from bioetl.application.services.maintenance import MaintenanceService
 
 
-def bootstrap_quarantine() -> QuarantinePort:
-    """Bootstrap the quarantine service for CLI inspection."""
+def bootstrap_maintenance(pipeline_name: str | None = None) -> "MaintenanceService":
+    """Bootstrap the maintenance service for CLI operations."""
+    from bioetl.application.services.maintenance import MaintenanceService
+
     settings = get_settings()
-    return UnifiedQuarantine(
-        s3_bucket=settings.s3.bucket_bronze,  # Using bronze bucket for quarantine dumps by default
-        fs_impl=None  # Use default S3FileSystem
+
+    # We default to a generic pipeline name if not provided,
+    # though checkpoint service usually needs a specific one.
+    # For global quarantine stats, pipeline name might be optional.
+    effective_pipeline = pipeline_name or "global"
+
+    quarantine = UnifiedQuarantine(
+        s3_bucket=settings.s3.bucket_bronze,
+        fs_impl=None
     )
 
-
-def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
-    """Bootstrap the checkpoint service for CLI inspection."""
-    settings = get_settings()
-    return S3Checkpoint(
+    checkpoint = S3Checkpoint(
         bucket=settings.s3.bucket_checkpoints,
-        pipeline_name=pipeline_name,
+        pipeline_name=effective_pipeline,
         endpoint_url=settings.aws.endpoint_url
     )
+
+    return MaintenanceService(quarantine=quarantine, checkpoint=checkpoint)
 
 
 def bootstrap_logger(
@@ -119,7 +124,10 @@ def bootstrap_pipeline(
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
 
     runtime_config = PipelineRuntimeConfig(
-        run_type=run_type, resume=resume, limit=limit
+        run_type=run_type,
+        resume=resume,
+        limit=limit,
+        heartbeat_interval=settings.pipeline.heartbeat_interval,
     )
 
     # 1. Create the pipeline definition (Logic + Config + Services)
