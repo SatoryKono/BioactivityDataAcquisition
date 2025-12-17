@@ -1,0 +1,34 @@
+---
+title: "ShutdownSignal — Class Diagram"
+---
+%% File: src/bioetl/application/core/shutdown.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction LR
+
+    class ShutdownSignal {
+        -_event: asyncio.Event
+        -_reason: str | None
+        +is_set() bool
+        +set(reason: str) None
+        +wait() async
+        +reason: str | None
+    }
+
+    class PipelineShutdownError {
+        <<Exception>>
+        +reason: str
+        +checkpoint_saved: bool
+    }
+
+    class SignalHandlers {
+        <<module>>
+        +setup_shutdown_handlers(signal: ShutdownSignal)
+    }
+
+    ShutdownSignal --> PipelineShutdownError : raises
+    SignalHandlers --> ShutdownSignal : configures
+
+    note for ShutdownSignal "Thread-safe via asyncio.Event"

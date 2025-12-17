@@ -61,7 +61,11 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         d: dict[str, Any] = {}
 
         for field_name, field in self.settings_cls.model_fields.items():
-            field_value, field_key = self.get_field_value(field, field_name)
+            result = self.get_field_value(field, field_name)
+            if result is None:
+                continue
+
+            field_value, field_key = result
             if field_value is not None:
                 field_value = self.prepare_field_value(
                     field_name, field, field_value, False
