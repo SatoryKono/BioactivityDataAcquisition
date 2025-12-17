@@ -52,7 +52,7 @@ class PipelineOrchestrator:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: "structlog.BoundLogger",
-        heartbeat_interval: int,
+        heartbeat_interval: float = 20.0,
     ) -> None:
         """Initialize orchestrator with explicit dependencies.
 
@@ -65,7 +65,7 @@ class PipelineOrchestrator:
             checkpoint_manager: Checkpoint manager.
             shutdown_signal: Shared shutdown signal.
             logger: Bound logger.
-            heartbeat_interval: Interval for lock heartbeat.
+            heartbeat_interval: Interval for lock heartbeat in seconds.
         """
         self._config = config
         self._runtime = runtime
@@ -75,7 +75,7 @@ class PipelineOrchestrator:
         self._checkpoint_manager = checkpoint_manager
         self.shutdown_signal = shutdown_signal
         self._logger = logger
-        self.heartbeat_interval = heartbeat_interval
+        self._heartbeat_interval = heartbeat_interval
         self.heartbeat_task: asyncio.Task[None] | None = None
 
     @classmethod
@@ -89,7 +89,7 @@ class PipelineOrchestrator:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: "structlog.BoundLogger",
-        heartbeat_interval: int,
+        heartbeat_interval: float = 20.0,
     ) -> "PipelineOrchestrator":
         """Create orchestrator from explicit components (new API).
 
@@ -207,7 +207,7 @@ class PipelineOrchestrator:
     async def _heartbeat_loop(self, lock_key: str, exclusive: bool) -> None:
         """Background task to maintain lock via heartbeat."""
         while not self.shutdown_signal.is_requested:
-            await asyncio.sleep(self.heartbeat_interval)
+            await asyncio.sleep(self._heartbeat_interval)
             success = await self._services.lock.heartbeat(
                 lock_key, self._context.run_id, exclusive=exclusive
             )
