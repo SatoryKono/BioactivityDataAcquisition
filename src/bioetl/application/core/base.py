@@ -1,11 +1,9 @@
 """Base ETL Pipeline class.
 
-Coordinates the pipeline components.
+Defines the structure and logic of a pipeline (config, transformations, filters).
+Does NOT handle execution orchestration.
 
-Refactored per ADR-0005:
-- BasePipeline.__init__ accepts exactly 3 params: config, runtime, services
-- No self-reference in Executor/Orchestrator
-- Legacy API available via from_params() with DeprecationWarning
+Refactored per ADR-0005.
 """
 
 from __future__ import annotations
@@ -15,16 +13,16 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.quarantine_manager import QuarantineManager
-from bioetl.application.core.pipeline_config import (
-    PipelineRuntimeConfig,
-)
-from bioetl.domain.pipeline_config import PipelineConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.domain.types import (
+    RunID,
+    RunType,
+    Watermark,
+)
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -33,26 +31,21 @@ from bioetl.domain.ports import (
     QuarantinePort,
     StoragePort,
 )
-from bioetl.domain.types import (
-    RunID,
-    RunType,
-    Watermark,
-)
+
 
 if TYPE_CHECKING:
     import structlog
-
-    from bioetl.application.core.executor import PipelineExecutor
-    from bioetl.application.core.orchestrator import PipelineOrchestrator
 
 
 class BasePipeline(ABC):
     """Base class for ETL pipelines.
 
-    Constructor accepts exactly 3 parameters per ADR-0005:
-    - config: Static pipeline configuration
-    - runtime: Runtime execution parameters
-    - services: I/O port dependencies
+    Acts as a container for:
+    - Configuration (Static & Runtime)
+    - Services (Ports)
+    - Business Logic (Transformations, Filtering, Watermark Extraction)
+
+    It does NOT orchestrate execution. See PipelineRunner for execution logic.
     """
 
     def __init__(
@@ -61,7 +54,7 @@ class BasePipeline(ABC):
         runtime: PipelineRuntimeConfig,
         services: PipelineServices,
     ) -> None:
-        """Initialize pipeline with decomposed configuration."""
+        """Initialize pipeline definition."""
         self._config = config
         self._runtime = runtime
         self._services = services
@@ -76,13 +69,6 @@ class BasePipeline(ABC):
             logger=self._logger,
         )
         self._shutdown_signal = ShutdownSignal()
-
-        # Lazy-initialized components
-        self._orchestrator: PipelineOrchestrator | None = None
-        self._executor: PipelineExecutor | None = None
-        self._checkpoint_manager: CheckpointManager | None = None
-        self._quarantine_manager: QuarantineManager | None = None
-        self._error_classifier: ErrorClassifier | None = None
 
     # --- Properties for accessing config (read-only) ---
 
@@ -185,87 +171,7 @@ class BasePipeline(ABC):
         """Metrics port (from services)."""
         return self._services.metrics
 
-    # --- Lazy-initialized components ---
-
-    @property
-    def error_classifier(self) -> ErrorClassifier:
-        """Get error classifier (lazy init)."""
-        if self._error_classifier is None:
-            self._error_classifier = ErrorClassifier()
-        return self._error_classifier
-
-    @property
-    def checkpoint_manager(self) -> CheckpointManager:
-        """Get checkpoint manager (lazy init)."""
-        if self._checkpoint_manager is None:
-            self._checkpoint_manager = CheckpointManager(
-                checkpoint_port=self._services.checkpoint,
-                logger=self._logger,
-                pipeline_name=self._config.pipeline_name,
-                run_id=self._run_id,
-                resume=self._runtime.resume,
-                watermark_extractor=lambda record: self.extract_watermark(
-                    self._context, record
-                ),
-            )
-        return self._checkpoint_manager
-
-    @property
-    def quarantine_manager(self) -> QuarantineManager:
-        """Get quarantine manager (lazy init)."""
-        if self._quarantine_manager is None:
-            self._quarantine_manager = QuarantineManager(
-                quarantine_port=self._services.quarantine,
-                pipeline_name=self._config.pipeline_name,
-            )
-        return self._quarantine_manager
-
-    @property
-    def executor(self) -> "PipelineExecutor":
-        """Get executor (lazy init, no self-reference)."""
-        if self._executor is None:
-            from bioetl.application.core.executor import PipelineExecutor
-
-            self._executor = PipelineExecutor(
-                data_source=self._services.data_source,
-                storage=self._services.storage,
-                checkpoint_manager=self.checkpoint_manager,
-                quarantine_manager=self.quarantine_manager,
-                error_classifier=self.error_classifier,
-                context=self._context,
-                shutdown_signal=self._shutdown_signal,
-                provider=self._config.provider,
-                entity_type=self._config.entity_type,
-                transform_callback=self.transform_bronze_to_silver,
-                gold_filter_callback=self.should_write_gold,
-                batch_size=self._config.batch_size,
-                checkpoint_interval=self._config.checkpoint_interval,
-            )
-        return self._executor
-
-    @property
-    def orchestrator(self) -> "PipelineOrchestrator":
-        """Get orchestrator (lazy init, no self-reference)."""
-        if self._orchestrator is None:
-            from bioetl.application.core.orchestrator import PipelineOrchestrator
-
-            self._orchestrator = PipelineOrchestrator.from_components(
-                config=self._config,
-                runtime=self._runtime,
-                services=self._services,
-                context=self._context,
-                executor=self.executor,
-                checkpoint_manager=self.checkpoint_manager,
-                shutdown_signal=self._shutdown_signal,
-                logger=self._logger,
-            )
-        return self._orchestrator
-
-    # --- Pipeline execution ---
-
-    async def run(self) -> None:
-        """Execute pipeline. Main entry point."""
-        await self.orchestrator.run()
+    # --- Logic Methods (to be used by Executor) ---
 
     @abstractmethod
     async def transform_bronze_to_silver(
@@ -285,16 +191,3 @@ class BasePipeline(ABC):
     ) -> Watermark:
         """Extract watermark value from a record."""
         return datetime.now(UTC)
-
-
-async def run_pipeline_flow(
-    pipeline: BasePipeline, logger: "structlog.BoundLogger"
-) -> None:
-    """Run a pipeline with logging and error handling."""
-    try:
-        await pipeline.run()
-    except Exception as e:
-        logger.exception("Pipeline execution failed", error=str(e))
-        raise
-    finally:
-        await pipeline.services.aclose()

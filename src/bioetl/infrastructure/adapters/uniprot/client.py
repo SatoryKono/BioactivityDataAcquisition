@@ -13,7 +13,7 @@ Documentation: https://www.uniprot.org/help/api
 
 import logging
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import Any, Self
 
 import httpx
 
@@ -86,6 +86,30 @@ class UniProtClient(PaginatedFetcherMixin):
             headers=headers,
             timeout=30.0,
         )
+
+    async def __aenter__(self) -> Self:
+        """Enter async context manager.
+
+        Initializes HTTP client if not already active.
+        """
+        if self.http_client.is_closed:
+             # Re-initialize if closed
+            headers = {}
+            if self.api_key:
+                headers["Authorization"] = f"Bearer {self.api_key}"
+            self.http_client = httpx.AsyncClient(
+                base_url=self.base_url,
+                headers=headers,
+                timeout=30.0,
+            )
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Exit async context manager.
+
+        Closes HTTP client.
+        """
+        await self.http_client.aclose()
 
     async def fetch(
         self,

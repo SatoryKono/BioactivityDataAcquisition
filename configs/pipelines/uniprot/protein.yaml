@@ -4,6 +4,9 @@ entity_type: "protein"
 description: "Pipeline for ingesting UniProt proteins"
 version: "1.0.0"
 
+primary_keys: ["accession"]
+silver_table: "uniprot_protein"
+
 source:
   load_strategy: "incremental"
   api:

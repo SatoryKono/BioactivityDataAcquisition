@@ -21,7 +21,6 @@ from bioetl.interfaces.bootstrap import (
     bootstrap_quarantine,
     bootstrap_checkpoint,
 )
-from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
@@ -55,29 +54,18 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
     run_id = uuid4()
 
     # Bootstrap the entire pipeline with all its dependencies
-    pipeline_obj = bootstrap_pipeline(
+    # Now returns a fully configured PipelineRunner
+    runner = bootstrap_pipeline(
         pipeline_name=pipeline,
         run_id=run_id,
         run_type=RunType(run_type),
         resume=resume,
         limit=limit,
     )
-    logger = pipeline_obj.logger
-
-    # The runner is the infrastructure component that executes the pipeline
-    runner = PipelineRunner(
-        config=pipeline_obj.config,
-        runtime=pipeline_obj.runtime,
-        services=pipeline_obj.services,
-        context=pipeline_obj.context,
-        executor=pipeline_obj.executor,
-        checkpoint_manager=pipeline_obj.checkpoint_manager,
-        shutdown_signal=pipeline_obj.shutdown_signal,
-        logger=logger,
-    )
+    logger = runner._logger  # Access logger from runner (or bootstrap logging separately if needed)
 
     # Set up OS signal handlers to gracefully trigger the shutdown signal
-    setup_shutdown_handlers(pipeline_obj.shutdown_signal)
+    setup_shutdown_handlers(runner.shutdown_signal)
 
     logger.info("Starting pipeline run")
     try:
