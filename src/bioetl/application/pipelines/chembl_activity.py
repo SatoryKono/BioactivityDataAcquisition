@@ -119,4 +119,5 @@ class ChEMBLActivityPipeline(BasePipeline):
         if activity_id:
             return str(activity_id)
         from datetime import datetime
+
         return datetime.now(UTC)
