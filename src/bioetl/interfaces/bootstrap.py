@@ -14,6 +14,12 @@ from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.interfaces.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
 )
+from bioetl.interfaces.factories.pubchem_compound import (
+    PubChemCompoundPipelineFactory,
+)
+from bioetl.interfaces.factories.uniprot_protein import (
+    UniProtProteinPipelineFactory,
+)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
@@ -50,11 +56,33 @@ __all__ = [
     "BronzeWriter",
     "DeltaWriter",
     "GoldWriter",
+    "bootstrap_quarantine",
+    "bootstrap_checkpoint",
 ]
 
 if TYPE_CHECKING:
     import structlog
     from bioetl.domain.types import RunType
+    from bioetl.domain.ports import QuarantinePort, CheckpointPort
+
+
+def bootstrap_quarantine() -> QuarantinePort:
+    """Bootstrap the quarantine service for CLI inspection."""
+    settings = get_settings()
+    return UnifiedQuarantine(
+        s3_bucket=settings.s3.bucket_bronze,  # Using bronze bucket for quarantine dumps by default
+        fs_impl=None  # Use default S3FileSystem
+    )
+
+
+def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
+    """Bootstrap the checkpoint service for CLI inspection."""
+    settings = get_settings()
+    return S3Checkpoint(
+        bucket=settings.s3.bucket_checkpoints,
+        pipeline_name=pipeline_name,
+        endpoint_url=settings.aws.endpoint_url
+    )
 
 
 def bootstrap_logger(
@@ -85,6 +113,18 @@ def bootstrap_pipeline(
 
     if pipeline_name == "chembl_activity":
         pipeline = ChEMBLActivityPipelineFactory.create_with_services(
+            runtime=runtime_config,
+            settings=settings,
+            logger=logger,
+        )
+    elif pipeline_name == "pubchem_compound":
+        pipeline = PubChemCompoundPipelineFactory.create_with_services(
+            runtime=runtime_config,
+            settings=settings,
+            logger=logger,
+        )
+    elif pipeline_name == "uniprot_protein":
+        pipeline = UniProtProteinPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,

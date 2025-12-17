@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.pipeline_config import (
     PipelineConfig,
     PipelineRuntimeConfig,

@@ -400,4 +400,40 @@ __all__ = [
     "CheckpointPort",
     "QuarantinePort",
     "MetricsPort",
+    "OrchestrationPort",
 ]
+
+
+@runtime_checkable
+class OrchestrationPort(Protocol):
+    """
+    Port for pipeline orchestration.
+
+    Abstracts the workflow engine (e.g., Prefect, Airflow) to allow
+    triggering runs, checking status, and scheduling.
+    """
+
+    async def schedule(
+        self,
+        pipeline_name: str,
+        schedule: str,
+        params: dict[str, Any] | None = None
+    ) -> None:
+        """Schedule a pipeline execution."""
+        ...
+
+    async def trigger(
+        self,
+        pipeline_name: str,
+        params: dict[str, Any] | None = None
+    ) -> Any:
+        """Trigger an immediate pipeline execution. Returns Run ID."""
+        ...
+
+    async def get_status(self, run_id: Any) -> str:
+        """Get the status of a pipeline run."""
+        ...
+
+    async def aclose(self) -> None:
+        """Close connection to orchestration backend."""
+        ...
