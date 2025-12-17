@@ -65,7 +65,9 @@ class ChEMBLActivityPipelineFactory:
         data_source = ChemblAdapter(http_client=http_client)
 
         if is_local_run:
-            logger.info("Local run detected. Overriding storage paths to 'data/output'.")
+            logger.info(
+                "Local run detected. Overriding storage paths to 'data/output'."
+            )
             base_output_path = "data/output"
             bronze_path = f"{base_output_path}/bronze"
             silver_base_path = f"{base_output_path}/silver"
