@@ -1,6 +1,6 @@
 """Unit tests for the CLI module."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 from click.testing import CliRunner
@@ -17,19 +17,30 @@ def runner():
 class TestCheckpointCommands:
     """Tests for checkpoint CLI commands."""
 
-    def test_checkpoint_list_command(self, runner):
+    @patch("bioetl.interfaces.cli.bootstrap_checkpoint")
+    def test_checkpoint_list_command(self, mock_bootstrap_checkpoint, runner):
         """Test that checkpoint list command works."""
-        result = runner.invoke(cli, ["checkpoint", "list"])
+        mock_checkpoint_service = AsyncMock()
+        mock_checkpoint_service.list_all.return_value = ["cp1", "cp2"]
+        mock_bootstrap_checkpoint.return_value = mock_checkpoint_service
+
+        result = runner.invoke(cli, ["checkpoint", "list", "--pipeline", "dummy"])
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
         assert "Listing checkpoints" in result.output
+        assert "cp1" in result.output
 
 
 class TestQuarantineCommands:
     """Tests for quarantine CLI commands."""
 
-    def test_quarantine_inspect_command(self, runner):
+    @patch("bioetl.interfaces.cli.bootstrap_quarantine")
+    def test_quarantine_inspect_command(self, mock_bootstrap_quarantine, runner):
         """Test that quarantine inspect command works."""
+        mock_quarantine_service = AsyncMock()
+        mock_quarantine_service.get_stats.return_value = {"errors": 10}
+        mock_bootstrap_quarantine.return_value = mock_quarantine_service
+
         result = runner.invoke(
             cli,
             ["quarantine", "inspect", "--pipeline", "test_pipeline"],
@@ -37,6 +48,7 @@ class TestQuarantineCommands:
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
         assert "Inspecting quarantine for test_pipeline" in result.output
+        assert "errors" in result.output
 
 
 class TestRunCommand:
