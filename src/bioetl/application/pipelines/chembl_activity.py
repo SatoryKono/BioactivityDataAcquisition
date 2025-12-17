@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from datetime import UTC
 from typing import TYPE_CHECKING, Any
-import yaml
+
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import (
     PipelineConfig,
@@ -24,25 +24,6 @@ from bioetl.domain.types import Watermark
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
 
-# Load fields from YAML configuration
-with open("configs/pipelines/chembl/activity.yaml", "r", encoding="utf-8") as f:
-    config_data = yaml.safe_load(f)
-    # Extract just the names of the fields
-    SOURCE_FIELDS = [field['name'] for field in config_data.get("source", {}).get("fields", [])]
-
-# Default configuration for ChEMBL Activity pipeline
-CHEMBL_ACTIVITY_CONFIG = PipelineConfig(
-    pipeline_name="chembl_activity",
-    provider="chembl",
-    entity_type="activity",
-    primary_keys=["activity_id"],
-    silver_table="chembl.activity",
-    gold_table="chembl.activity_gold",
-    batch_size=100,
-    checkpoint_interval=1000,
-    fields=SOURCE_FIELDS,
-)
-
 
 class ChEMBLActivityPipeline(BasePipeline):
     """Pipeline for ChEMBL bioactivity data."""
@@ -52,11 +33,10 @@ class ChEMBLActivityPipeline(BasePipeline):
         cls,
         runtime: PipelineRuntimeConfig,
         services: PipelineServices,
-        config: PipelineConfig | None = None,
+        config: PipelineConfig,
     ) -> "ChEMBLActivityPipeline":
         """Create ChEMBL Activity pipeline with decomposed config (new API)."""
-        effective_config = config or CHEMBL_ACTIVITY_CONFIG
-        return cls(effective_config, runtime, services)
+        return cls(config, runtime, services)
 
     def __init__(
         self,
