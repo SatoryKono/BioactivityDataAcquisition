@@ -416,7 +416,6 @@ class OrchestrationPort(Protocol):
     async def schedule(
         self,
         pipeline_name: str,
-        schedule: str,
         params: dict[str, Any] | None = None
     ) -> None:
         """Schedule a pipeline execution."""

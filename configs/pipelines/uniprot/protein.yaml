@@ -5,6 +5,7 @@ description: "Pipeline for ingesting UniProt proteins"
 version: "1.0.0"
 
 source:
+  load_strategy: "incremental"
   api:
     base_url: "https://rest.uniprot.org"
     rate_limit: 10.0
@@ -18,6 +19,9 @@ sink:
     table_name: "uniprot_protein"
     primary_keys: ["accession"]
     partition_by: ["batch_date"]
+    format: "delta"
+    mode: "merge"
+    forensic_retention: "7d"
   gold:
     table_name: "dim_target"
     primary_keys: ["accession"]

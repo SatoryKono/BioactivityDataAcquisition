@@ -4,7 +4,8 @@ from __future__ import annotations
 from typing import Any
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_config import PipelineConfig, PipelineRuntimeConfig
+from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import Watermark

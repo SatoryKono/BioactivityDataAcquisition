@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import (
-    PipelineConfig,
     PipelineRuntimeConfig,
 )
+from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import Watermark

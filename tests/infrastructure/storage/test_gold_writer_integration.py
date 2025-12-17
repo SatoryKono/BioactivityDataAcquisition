@@ -6,6 +6,7 @@ import pandera.polars as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import DataFrameSchema
+import pyarrow as pa_arrow
 
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 
@@ -72,7 +73,10 @@ async def test_write_simple_overwrite(gold_writer, valid_records):
         call_kwargs = mock_write.call_args[1]
         assert call_kwargs["mode"] == "overwrite"
         assert call_kwargs["table_or_uri"] == "s3://test-bucket/gold/test_table"
-        assert call_kwargs["data"] == valid_records
+
+        # Convert expected data to pyarrow table for comparison
+        expected_table = pa_arrow.Table.from_pylist(valid_records)
+        assert call_kwargs["data"] == expected_table
 
 
 async def test_write_simple_append(gold_writer, valid_records):
@@ -115,7 +119,7 @@ async def test_write_scd2_new_table(gold_writer, valid_records):
         assert call_kwargs["mode"] == "append"
 
         # Verify SCD columns added
-        written_data = call_kwargs["data"]
+        written_data = call_kwargs["data"].to_pylist()
         assert "valid_from" in written_data[0]
         assert "valid_to" in written_data[0]
         assert "is_current" in written_data[0]

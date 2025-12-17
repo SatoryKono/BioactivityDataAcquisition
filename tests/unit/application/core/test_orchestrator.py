@@ -8,9 +8,9 @@ import pytest
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.orchestrator import PipelineOrchestrator
 from bioetl.application.core.pipeline_config import (
-    PipelineConfig,
     PipelineRuntimeConfig,
 )
+from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.context import PipelineContext

@@ -25,7 +25,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.application.core.pipeline_config import PipelineConfig
+from bioetl.domain.pipeline_config import PipelineConfig
 
 
 class YamlSettingsSource(PydanticBaseSettingsSource):
@@ -46,11 +46,14 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         except FileNotFoundError:
             return None
 
+        if not isinstance(file_content, dict):
+            return None
+
         field_value = file_content.get(field_name)
         return field_value, field_name
 
     def prepare_field_value(
-        self, field_name: str, field: Field, value: Any, value_is_complex: bool
+        self, field_name: str, field: Field, value: Any
     ) -> Any:
         """
         Prepare value of a field.
@@ -61,10 +64,14 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         d: dict[str, Any] = {}
 
         for field_name, field in self.settings_cls.model_fields.items():
-            field_value, field_key = self.get_field_value(field, field_name)
+            field_value_and_key = self.get_field_value(field, field_name)
+            if field_value_and_key is None:
+                continue
+
+            field_value, field_key = field_value_and_key
             if field_value is not None:
                 field_value = self.prepare_field_value(
-                    field_name, field, field_value, False
+                    field_name, field, field_value
                 )
                 d[field_key] = field_value
 
