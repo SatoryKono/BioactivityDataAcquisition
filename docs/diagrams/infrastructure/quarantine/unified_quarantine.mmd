@@ -1,0 +1,34 @@
+---
+title: "UnifiedQuarantine — Class Diagram"
+---
+%% File: src/bioetl/infrastructure/quarantine/unified_quarantine.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class QuarantinePort {
+        <<Protocol>>
+        +write(pipeline, error_code, payload, batch_id)
+        +inspect(pipeline, limit, error_code) list
+        +get_stats(pipeline) dict
+        +aclose() None
+    }
+
+    class UnifiedQuarantine {
+        -_table_path: str
+        -_delta_table: deltalake.DeltaTable
+        +write(pipeline, error_code, payload, batch_id, **kwargs)
+        +inspect(pipeline, limit, error_code) list~dict~
+        +get_stats(pipeline) dict
+        +reprocess(pipeline, record_ids) int
+        +mark_ignored(pipeline, record_ids) int
+        +aclose() None
+        -_generate_record_id(payload) str
+        -_serialize_payload(payload) str
+    }
+
+    QuarantinePort <|.. UnifiedQuarantine : implements
+
+    note for UnifiedQuarantine "Unified Delta Lake table for all pipelines\nSchema: pipeline, error_code, payload, batch_id, status, created_at"
