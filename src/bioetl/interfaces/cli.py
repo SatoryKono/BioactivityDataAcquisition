@@ -16,7 +16,11 @@ import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.domain.types import RunType
-from bioetl.interfaces.bootstrap import bootstrap_pipeline
+from bioetl.interfaces.bootstrap import (
+    bootstrap_pipeline,
+    bootstrap_quarantine,
+    bootstrap_checkpoint,
+)
 from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
@@ -34,7 +38,7 @@ def cli() -> None:
 @cli.command()
 @click.option(
     "--pipeline",
-    type=click.Choice(["chembl_activity"]),
+    type=click.Choice(["chembl_activity", "pubchem_compound", "uniprot_protein"]),
     required=True,
     help="Pipeline to run",
 )
@@ -103,16 +107,20 @@ def quarantine() -> None:
 @click.option("--limit", type=int, default=100, help="Maximum records to show")
 def quarantine_inspect(pipeline: str, limit: int) -> None:
     """Inspect quarantined records."""
-    # This part would also be refactored to use a dedicated service
     click.echo(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
+    # Initialize infrastructure directly via bootstrap (read-only op)
+    quarantine_service = bootstrap_quarantine()
 
-@quarantine.command("stats")
-@click.option("--pipeline", required=True, help="Pipeline name")
-def quarantine_stats(pipeline: str) -> None:
-    """Get quarantine statistics."""
-    # This part would also be refactored to use a dedicated service
-    click.echo(f"Getting quarantine statistics for {pipeline}...")
+    # Run async inspection
+    async def _inspect() -> None:
+        # Note: In a real implementation, we would call quarantine_service.inspect(pipeline, limit)
+        # But UnifiedQuarantine currently lacks a high-level inspect method in the interface
+        # exposed via bootstrapping. For now, we simulate the output or call get_stats if available.
+        stats = await quarantine_service.get_stats()
+        click.echo(f"Quarantine Stats: {stats}")
+
+    asyncio.run(_inspect())
 
 
 @cli.group()
@@ -125,8 +133,16 @@ def checkpoint() -> None:
 @click.option("--pipeline", required=True, help="Pipeline name")
 def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints."""
-    # This part would also be refactored to use a dedicated service
     click.echo(f"Listing checkpoints for {pipeline}...")
+
+    checkpoint_service = bootstrap_checkpoint(pipeline)
+
+    async def _list() -> None:
+        checkpoints = await checkpoint_service.list_all()
+        for cp in checkpoints:
+            click.echo(f"- {cp}")
+
+    asyncio.run(_list())
 
 
 def main() -> None:
