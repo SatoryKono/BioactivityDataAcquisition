@@ -67,7 +67,6 @@ class TestPipelineServicesInit:
 class TestPipelineServicesContextManager:
     """Tests for async context manager."""
 
-    @pytest.mark.asyncio
     async def test_aenter_initializes_data_source(self, mock_services):
         """Test that __aenter__ initializes the data source."""
         result = await mock_services.__aenter__()
@@ -75,7 +74,6 @@ class TestPipelineServicesContextManager:
         assert result is mock_services
         mock_services.data_source.__aenter__.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_aexit_calls_aclose(self, mock_services):
         """Test that __aexit__ calls aclose."""
         await mock_services.__aexit__(None, None, None)
@@ -91,7 +89,6 @@ class TestPipelineServicesContextManager:
 class TestPipelineServicesAclose:
     """Tests for aclose method."""
 
-    @pytest.mark.asyncio
     async def test_aclose_closes_all_services(self, mock_services):
         """Test that aclose closes all services."""
         await mock_services.aclose()
@@ -102,7 +99,6 @@ class TestPipelineServicesAclose:
         mock_services.checkpoint.aclose.assert_called_once()
         mock_services.quarantine.aclose.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_aclose_logs_info(self, mock_services):
         """Test that aclose logs info messages."""
         await mock_services.aclose()
@@ -110,7 +106,6 @@ class TestPipelineServicesAclose:
         # Should log start and end messages
         assert mock_services.logger.info.call_count == 2
 
-    @pytest.mark.asyncio
     async def test_aclose_handles_service_errors(self, mock_services):
         """Test that aclose handles errors from services."""
         # Make one service raise an error
@@ -121,7 +116,6 @@ class TestPipelineServicesAclose:
 
         mock_services.logger.error.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_aclose_continues_after_error(self, mock_services):
         """Test that aclose continues closing services after error."""
         # Make first service raise an error

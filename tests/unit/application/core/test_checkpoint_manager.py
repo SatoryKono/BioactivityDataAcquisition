@@ -30,8 +30,10 @@ def mock_logger():
 @pytest.fixture
 def watermark_extractor():
     """Create a simple watermark extractor."""
+
     def extract(record):
         return record.get("timestamp", "2025-01-01")
+
     return extract
 
 
@@ -75,7 +77,6 @@ class TestCheckpointManagerInit:
 class TestCheckpointManagerLoadCheckpoint:
     """Tests for CheckpointManager.load_checkpoint method."""
 
-    @pytest.mark.asyncio
     async def test_load_checkpoint_when_resume_true_and_exists(
         self, mock_checkpoint_port, mock_logger, watermark_extractor
     ):
@@ -101,7 +102,6 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.assert_called_once_with("test_pipeline")
         mock_logger.info.assert_called()
 
-    @pytest.mark.asyncio
     async def test_load_checkpoint_when_resume_true_but_no_checkpoint(
         self, mock_checkpoint_port, mock_logger, watermark_extractor
     ):
@@ -122,7 +122,6 @@ class TestCheckpointManagerLoadCheckpoint:
         assert result is None
         mock_checkpoint_port.load.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_load_checkpoint_when_resume_false(
         self, mock_checkpoint_port, mock_logger, watermark_extractor
     ):
@@ -146,7 +145,6 @@ class TestCheckpointManagerLoadCheckpoint:
 class TestCheckpointManagerSaveCheckpoint:
     """Tests for CheckpointManager.save_checkpoint method."""
 
-    @pytest.mark.asyncio
     async def test_save_checkpoint_extracts_watermark(
         self, checkpoint_manager, mock_checkpoint_port
     ):
@@ -164,7 +162,6 @@ class TestCheckpointManagerSaveCheckpoint:
         assert call_kwargs["watermark"] == "2025-01-20T12:00:00Z"
         assert call_kwargs["metadata"] == {"records_processed": 500}
 
-    @pytest.mark.asyncio
     async def test_save_checkpoint_with_default_watermark(
         self, checkpoint_manager, mock_checkpoint_port
     ):
@@ -184,7 +181,6 @@ class TestCheckpointManagerSaveCheckpoint:
 class TestCheckpointManagerDeleteCheckpoint:
     """Tests for CheckpointManager.delete_checkpoint method."""
 
-    @pytest.mark.asyncio
     async def test_delete_checkpoint(self, checkpoint_manager, mock_checkpoint_port):
         """Test delete_checkpoint calls port.delete."""
         await checkpoint_manager.delete_checkpoint()

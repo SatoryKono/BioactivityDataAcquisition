@@ -214,7 +214,9 @@ class TestBronzeWriterLocal:
 
         # Read it back
         read_records = []
-        async for record in writer.read_bronze("test_provider/test_entity/batch_test.jsonl.zst"):
+        async for record in writer.read_bronze(
+            "test_provider/test_entity/batch_test.jsonl.zst"
+        ):
             read_records.append(record)
 
         assert len(read_records) == 2
