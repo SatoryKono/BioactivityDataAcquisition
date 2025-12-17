@@ -114,10 +114,9 @@ class GoldWriter:
 
             df = pl.DataFrame(records)
             try:
-                # Convert to pandas for Pandera validation
-                pandas_df = df.to_pandas()
-                await self.loop.run_in_executor(
-                    None, lambda: schema.validate(pandas_df, lazy=False)
+                # Pass polars DataFrame directly to schema.validate
+                await self._run_in_executor(
+                    lambda: schema.validate(df, lazy=False)
                 )
             except pa.errors.SchemaError as e:
                 raise ValueError(f"Schema validation failed: {e}") from e
@@ -137,6 +136,19 @@ class GoldWriter:
                 f"Invalid mode: {mode}. Use 'overwrite', 'append', or 'scd2'"
             )
 
+    async def _run_in_executor(self, func, *args):
+        """Run a function in the executor.
+
+        Handles event loop mismatch issues in tests by ensuring we use the
+        current running loop if available, or fallback to the loop captured at init.
+        """
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = self.loop
+
+        return await loop.run_in_executor(None, func, *args)
+
     async def _write_simple(
         self,
         table_path: str,
@@ -152,15 +164,14 @@ class GoldWriter:
             mode: 'overwrite' or 'append'
             partition_cols: Optional partition columns
         """
-        await self.loop.run_in_executor(
-            None,
+        await self._run_in_executor(
             lambda: write_deltalake(
                 table_or_uri=table_path,
                 data=records,
                 mode=mode,
                 partition_by=partition_cols,
                 storage_options=self.storage_options,
-            ),
+            )
         )
 
     async def _write_scd2(
@@ -202,9 +213,8 @@ class GoldWriter:
 
         try:
             # Load existing table
-            dt = await self.loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path, storage_options=self.storage_options),
+            dt = await self._run_in_executor(
+                lambda: DeltaTable(table_path, storage_options=self.storage_options)
             )
 
             # Perform SCD Type 2 merge
@@ -212,15 +222,14 @@ class GoldWriter:
 
         except TableNotFoundError:
             # Table doesn't exist, create it
-            await self.loop.run_in_executor(
-                None,
+            await self._run_in_executor(
                 lambda: write_deltalake(
                     table_or_uri=table_path,
                     data=records,
                     mode="append",
                     partition_by=partition_cols,
                     storage_options=self.storage_options,
-                ),
+                )
             )
 
     async def _merge_scd2(
@@ -264,8 +273,7 @@ class GoldWriter:
         # Merge logic:
         # 1. Close old current records (set valid_to, is_current=False)
         # 2. Insert new records as current
-        await self.loop.run_in_executor(
-            None,
+        await self._run_in_executor(
             lambda: (
                 dt.merge(
                     source=new_data,
@@ -281,7 +289,7 @@ class GoldWriter:
                 )
                 .when_not_matched_insert_all()
                 .execute()
-            ),
+            )
         )
 
     async def read_gold(
@@ -303,12 +311,12 @@ class GoldWriter:
             >>> records = await writer.read_gold("chembl.activity_aggregated")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = await self.loop.run_in_executor(
-            None, lambda: DeltaTable(table_path, storage_options=self.storage_options)
+        dt = await self._run_in_executor(
+            lambda: DeltaTable(table_path, storage_options=self.storage_options)
         )
 
         # Convert to PyArrow table
-        arrow_table = await self.loop.run_in_executor(None, dt.to_pyarrow_table)
+        arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
 
         # Filter for current records if SCD Type 2
         if current_only and "is_current" in arrow_table.column_names:
@@ -344,12 +352,12 @@ class GoldWriter:
             ...     print(f"Version {version['version']}: {version['valid_from']}")
         """
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-        dt = await self.loop.run_in_executor(
-            None, lambda: DeltaTable(table_path, storage_options=self.storage_options)
+        dt = await self._run_in_executor(
+            lambda: DeltaTable(table_path, storage_options=self.storage_options)
         )
 
         # Convert to PyArrow table
-        arrow_table = await self.loop.run_in_executor(None, dt.to_pyarrow_table)
+        arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
 
         # Filter by business key
         import pyarrow.compute as pc
