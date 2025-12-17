@@ -61,30 +61,48 @@ class ChEMBLActivityPipelineFactory:
         data_source = ChemblAdapter(http_client=http_client)
 
         if is_local_run:
-            logger.info("Local run detected. Overriding storage paths to 'data/output'.")
+            logger.info(
+                "Local run detected. Overriding storage paths to 'data/output'."
+            )
             base_output_path = "data/output"
             bronze_path = f"{base_output_path}/bronze"
             silver_base_path = f"{base_output_path}/silver"
             gold_base_path = f"{base_output_path}/gold"
             checkpoints_path = f"{base_output_path}/checkpoints"
-            json_path = f"{base_output_path}/json" if bronze_config.get("save_json") else None
+            json_path = (
+                f"{base_output_path}/json" if bronze_config.get("save_json") else None
+            )
 
             # Get CSV export config for each layer
             silver_csv_config = silver_config.get("csv_export", {})
-            silver_csv_path = silver_csv_config.get("path") if silver_csv_config.get("enabled") else None
-            silver_csv_options = {
-                "delimiter": silver_csv_config.get("delimiter", ","),
-                "header": silver_csv_config.get("header", True),
-                "encoding": silver_csv_config.get("encoding", "utf-8"),
-            } if silver_csv_path else None
+            silver_csv_path = (
+                silver_csv_config.get("path")
+                if silver_csv_config.get("enabled")
+                else None
+            )
+            silver_csv_options = (
+                {
+                    "delimiter": silver_csv_config.get("delimiter", ","),
+                    "header": silver_csv_config.get("header", True),
+                    "encoding": silver_csv_config.get("encoding", "utf-8"),
+                }
+                if silver_csv_path
+                else None
+            )
 
             gold_csv_config = gold_config.get("csv_export", {})
-            gold_csv_path = gold_csv_config.get("path") if gold_csv_config.get("enabled") else None
-            gold_csv_options = {
-                "delimiter": gold_csv_config.get("delimiter", ","),
-                "header": gold_csv_config.get("header", True),
-                "encoding": gold_csv_config.get("encoding", "utf-8"),
-            } if gold_csv_path else None
+            gold_csv_path = (
+                gold_csv_config.get("path") if gold_csv_config.get("enabled") else None
+            )
+            gold_csv_options = (
+                {
+                    "delimiter": gold_csv_config.get("delimiter", ","),
+                    "header": gold_csv_config.get("header", True),
+                    "encoding": gold_csv_config.get("encoding", "utf-8"),
+                }
+                if gold_csv_path
+                else None
+            )
         else:
             # For cloud runs, use S3 paths from config
             bronze_path = s3_config.bucket_bronze
@@ -137,7 +155,9 @@ class ChEMBLActivityPipelineFactory:
             redis_client = create_redis_client(settings)
             lock = RedisDistributedLock(redis_client=redis_client)
         else:
-            logger.warning("Using MemoryLock. Locking is NOT distributed. Suitable for dev/testing only.")
+            logger.warning(
+                "Using MemoryLock. Locking is NOT distributed. Suitable for dev/testing only."
+            )
             lock = MemoryLock()
 
         checkpoint = S3Checkpoint(
