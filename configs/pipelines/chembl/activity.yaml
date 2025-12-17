@@ -1,6 +1,5 @@
 # configs/pipelines/chembl/activity.yaml
 # Конфигурация пайплайна для сущности Activity из ChEMBL.
-# Соответствует схеме из RULES.md App D.
 
 pipeline:
     name: chembl_activity
@@ -9,9 +8,285 @@ pipeline:
 
 source:
     type: api
-    load_strategy: incremental # Инкрементальная загрузка по умолчанию
-    watermark_field: molecule_chembl_id # Пример поля для watermark
+    load_strategy: incremental
+    watermark_field: molecule_chembl_id
+    # Список полей для извлечения с метаданными
+    fields:
+        -   name: action_type
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Тип действия (agonist, antagonist и т.п.)
 
+        -   name: activity_comment
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Комментарий к активности
+
+        -   name: activity_id
+            data_type: integer
+            is_nullable: false
+            is_filterable: false
+            description: Внутренний ID активности
+
+        -   name: activity_properties
+            data_type: array
+            is_nullable: true
+            is_filterable: false
+            description: Список дополнительных свойств активности
+
+        -   name: assay_chembl_id
+            data_type: string
+            is_nullable: false
+            is_filterable: true
+            description: ChEMBL ID ассая
+
+        -   name: assay_description
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Текстовое описание ассая
+
+        -   name: assay_type
+            data_type: string
+            is_nullable: false
+            is_filterable: true
+            description: Тип ассая (B, F, A, P и т.п.)
+
+        -   name: assay_variant_accession
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Accession варианта белка
+
+        -   name: assay_variant_mutation
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Описание мутаций варианта белка
+
+        -   name: bao_endpoint
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: BAO endpoint term
+
+        -   name: bao_format
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: BAO format term
+
+        -   name: bao_label
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Человекочитаемый label для BAO endpoint/format
+
+        -   name: canonical_smiles
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Канонический SMILES молекулы
+
+        -   name: data_validity_comment
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Комментарий о качестве/валидности
+
+        -   name: data_validity_description
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Нормализованное описание проблем с данными
+
+        -   name: document_chembl_id
+            data_type: string
+            is_nullable: false
+            is_filterable: true
+            description: Документ ChEMBL, откуда пришла активность
+
+        -   name: document_journal
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Название журнала
+
+        -   name: document_year
+            data_type: integer
+            is_nullable: true
+            is_filterable: true
+            description: Год публикации
+
+        -   name: ligand_efficiency
+            data_type: object
+            is_nullable: true
+            is_filterable: false
+            description: Объект с метриками LE/BEI/LLE/SEI
+
+        -   name: molecule_chembl_id
+            data_type: string
+            is_nullable: false
+            is_filterable: true
+            description: ChEMBL ID молекулы
+
+        -   name: molecule_pref_name
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Название молекулы
+
+        -   name: parent_molecule_chembl_id
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: ChEMBL ID родительской молекулы (без соли/формы)
+
+        -   name: pchembl_value
+            data_type: number
+            is_nullable: true
+            is_filterable: true
+            description: Нормализованная активность (−log10(M) для стандартных типов)
+
+        -   name: potential_duplicate
+            data_type: boolean
+            is_nullable: true
+            is_filterable: false
+            description: Флаг потенциального дубликата записи
+
+        -   name: qudt_units
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: URI единиц в QUDT
+
+        -   name: record_id
+            data_type: integer
+            is_nullable: true
+            is_filterable: true
+            description: FK на запись compound_record (соединение × документ)
+
+        -   name: relation
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: Исходное отношение (=, >, <, >=, <=, ~)
+
+        -   name: src_id
+            data_type: integer
+            is_nullable: true
+            is_filterable: true
+            description: Источник данных (PubChem, журнал, депозиты и т.п.)
+
+        -   name: standard_flag
+            data_type: boolean
+            is_nullable: false
+            is_filterable: false
+            description: Признак, что тип/значение/единицы нормализованы
+
+        -   name: standard_relation
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: Нормализованное отношение
+
+        -   name: standard_text_value
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Нормализованный текст для качественных readout'ов
+
+        -   name: standard_type
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: Нормализованный тип активности
+
+        -   name: standard_units
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: Нормализованные единицы
+
+        -   name: standard_upper_value
+            data_type: number
+            is_nullable: true
+            is_filterable: false
+            description: Верхняя граница интервала в нормализованных единицах
+
+        -   name: standard_value
+            data_type: number
+            is_nullable: true
+            is_filterable: true
+            description: Числовое нормализованное значение
+
+        -   name: target_chembl_id
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: ChEMBL ID таргета
+
+        -   name: target_organism
+            data_type: string
+            is_nullable: true
+            is_filterable: true
+            description: Организм таргета
+
+        -   name: target_pref_name
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Название таргета
+
+        -   name: target_tax_id
+            data_type: integer
+            is_nullable: true
+            is_filterable: true
+            description: NCBI TaxID таргета
+
+        -   name: text_value
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Исходное текстовое значение
+
+        -   name: toid
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: ID из Target Ontology
+
+        -   name: type
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Исходный тип активности (как в источнике)
+
+        -   name: units
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: Исходные единицы измерения
+
+        -   name: uo_units
+            data_type: string
+            is_nullable: true
+            is_filterable: false
+            description: ID из Unit Ontology (UO)
+
+        -   name: upper_value
+            data_type: number
+            is_nullable: true
+            is_filterable: false
+            description: Верхняя граница исходного интервала
+
+        -   name: value
+            data_type: number
+            is_nullable: true
+            is_filterable: true
+            description: Исходное числовое значение
 transform:
     version: "1.0.0"
     steps:
@@ -23,13 +298,14 @@ sink:
     bronze:
         path: "data/output/bronze"
         format: json
+        save_json: true  # Also save uncompressed JSONL copy
 
     silver:
         path: "data/output/silver"
         format: delta
         mode: merge
         primary_key: [ "activity_id" ]
-        partition_by: [ "year", "month" ] # Пример партиционирования по дате извлечения
+        partition_by: [ "year", "month" ]
         classification: public
         forensic_retention: true
 
@@ -46,12 +322,12 @@ sink:
         path: "data/output/csv"
 
 dq_rules:
-    soft_fail_threshold: 0.05  # 5% (Warning)
-    hard_fail_threshold: 0.20  # 20% (Fail Batch)
+    soft_fail_threshold: 0.05
+    hard_fail_threshold: 0.20
 
 circuit_breaker:
     failure_threshold: 5
-    recovery_timeout: 300 # 5 минут
+    recovery_timeout: 300
 
 rate_limit:
     requests_per_second: 5

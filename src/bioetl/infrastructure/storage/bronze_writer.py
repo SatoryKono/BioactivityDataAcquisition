@@ -31,7 +31,10 @@ from bioetl.domain.exceptions import BucketNotFoundError, UploadError
 
 
 class BronzeWriter:
-    """Writer for Bronze layer (raw data in JSONL + zstd)."""
+    """Writer for Bronze layer (raw data in JSONL + zstd).
+
+    Optionally saves uncompressed JSON copy when save_json=True.
+    """
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
@@ -44,11 +47,25 @@ class BronzeWriter:
         region: str = "us-east-1",
         access_key: str | None = None,
         secret_key: str | None = None,
+        save_json: bool = False,
+        json_path: str | None = None,
     ) -> None:
-        """Initialize Bronze writer."""
+        """Initialize Bronze writer.
+
+        Args:
+            bucket: S3 bucket name or local path for compressed files
+            endpoint_url: S3 endpoint URL (None for local storage)
+            region: AWS region
+            access_key: AWS access key
+            secret_key: AWS secret key
+            save_json: If True, also save uncompressed JSON copy
+            json_path: Path for JSON files (defaults to bucket/json/)
+        """
         self.bucket = bucket
         self.endpoint_url = endpoint_url
         self.is_local = not endpoint_url
+        self.save_json = save_json
+        self.json_path = json_path or (str(Path(bucket) / "json") if self.is_local else None)
 
         if not self.is_local:
             from bioetl.infrastructure.storage.s3_pool import S3ClientPool
@@ -67,19 +84,27 @@ class BronzeWriter:
         date: datetime,
         batch_id: BatchID,
     ) -> Path:
-        """Write raw records to Bronze layer (JSONL + zstd)."""
+        """Write raw records to Bronze layer (JSONL + zstd).
+
+        If save_json is enabled, also writes uncompressed JSONL file.
+        """
         date_str = date.strftime("%Y-%m-%d")
-        # New, cleaner path structure as requested
         relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl.zst"
 
         loop = asyncio.get_running_loop()
+
+        # Buffer records since iterator can only be consumed once
+        # and we may need it for both compressed and JSON output
+        record_list = list(records)
+
         compressed_data = await loop.run_in_executor(
-            None, self._compress_records, records
+            None, self._compress_records, iter(record_list)
         )
 
         if not compressed_data:
             raise ValueError("No records to write")
 
+        # Write compressed file
         if self.is_local:
             full_path = Path(self.bucket) / relative_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -102,7 +127,48 @@ class BronzeWriter:
                     raise BucketNotFoundError(self.bucket) from e
                 raise UploadError(relative_path, str(e)) from e
 
+        # Optionally write uncompressed JSON
+        if self.save_json:
+            await self._write_json_copy(record_list, provider, entity, date_str, batch_id)
+
         return Path(relative_path)
+
+    async def _write_json_copy(
+        self,
+        records: list[bytes],
+        provider: str,
+        entity: str,
+        date_str: str,
+        batch_id: BatchID,
+    ) -> None:
+        """Write uncompressed JSONL copy of records."""
+        json_relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl"
+
+        # Combine all records into single JSONL content
+        jsonl_content = b"".join(records)
+
+        if self.is_local and self.json_path:
+            json_full_path = Path(self.json_path) / json_relative_path
+            json_full_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(json_full_path, "wb") as f:
+                f.write(jsonl_content)
+        elif not self.is_local:
+            # For S3, save JSON in a separate prefix
+            s3_json_key = f"json/{json_relative_path}"
+            loop = asyncio.get_running_loop()
+            try:
+                await loop.run_in_executor(
+                    None,
+                    lambda: self.s3_client.put_object(
+                        Bucket=self.bucket,
+                        Key=s3_json_key,
+                        Body=jsonl_content,
+                        ContentType="application/x-ndjson",
+                    ),
+                )
+            except ClientError as e:
+                # Log but don't fail the main write
+                pass
 
     def _compress_records(self, records: Iterator[bytes]) -> bytes:
         """Compress JSONL records using zstandard with streaming."""

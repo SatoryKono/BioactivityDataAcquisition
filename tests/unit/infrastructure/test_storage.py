@@ -71,9 +71,6 @@ class TestBronzeWriter:
             access_key="test",
             secret_key="test",
         )
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = [b'{"id": 1}\n']
         provider = "test_provider"
@@ -92,8 +89,8 @@ class TestBronzeWriter:
         mock_s3_client.put_object.assert_called_once()
         _args, kwargs = mock_s3_client.put_object.call_args
         assert kwargs["Bucket"] == "test-bucket"
-        # Check key contains expected parts
-        expected_key = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        # Check key contains expected parts (new path format: {provider}/{entity}/batch_{date}_{id}.jsonl.zst)
+        expected_key = "test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         assert kwargs["Key"] == expected_key
 
     @pytest.mark.asyncio
@@ -105,9 +102,6 @@ class TestBronzeWriter:
             access_key="test",
             secret_key="test",
         )
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = [b'{"id": 1, "data": "test"}\n']
 
@@ -144,9 +138,6 @@ class TestBronzeWriter:
             access_key="test",
             secret_key="test",
         )
-        # Make run_in_executor execute synchronously for testing
-        writer.loop = asyncio.get_event_loop()
-        writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
         records = []
         provider = "test_provider"

@@ -6,8 +6,10 @@ to provide a ready-to-use dependency container for the application layer.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from pathlib import Path
+
+import yaml
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
@@ -53,6 +55,28 @@ def bootstrap_logger(
     return create_infra_logger(
         pipeline=pipeline, run_id=run_id, log_level=log_level, json_format=True
     )
+
+
+def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
+    """Load pipeline configuration from YAML file.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
+
+    Returns:
+        Dictionary with pipeline configuration
+    """
+    # Map pipeline name to config path
+    config_paths = {
+        "chembl_activity": Path("configs/pipelines/chembl/activity.yaml"),
+    }
+
+    config_path = config_paths.get(pipeline_name)
+    if not config_path or not config_path.exists():
+        return {}
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
 
 
 def bootstrap_pipeline(
@@ -101,6 +125,11 @@ class ChEMBLActivityPipelineFactory:
         storage_options = settings.storage_options if not is_local_run else None
         access_key, secret_key = get_aws_credentials(settings)
 
+        # Load pipeline config from YAML
+        pipeline_config = load_pipeline_config("chembl_activity")
+        sink_config = pipeline_config.get("sink", {})
+        bronze_config = sink_config.get("bronze", {})
+
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
         )
@@ -114,13 +143,20 @@ class ChEMBLActivityPipelineFactory:
             gold_base_path = f"{base_output_path}/gold"
             checkpoints_path = f"{base_output_path}/checkpoints"
             csv_path = f"{base_output_path}/csv"
+            json_path = f"{base_output_path}/json" if bronze_config.get("save_json") else None
         else:
             # For cloud runs, use S3 paths from config
             bronze_path = s3_config.bucket_bronze
             silver_base_path = f"s3://{s3_config.bucket_silver}"
             gold_base_path = f"s3://{s3_config.bucket_gold}"
             checkpoints_path = s3_config.bucket_checkpoints
-            csv_path = None # No CSV export for cloud runs by default
+            csv_path = None  # No CSV export for cloud runs by default
+            json_path = None  # JSON path is handled differently for S3
+
+        # Get save_json flag from bronze config
+        save_json = bronze_config.get("save_json", False)
+        if save_json:
+            logger.info("JSON export enabled for Bronze layer")
 
         storage = StorageAdapter(
             BronzeWriter(
@@ -128,6 +164,8 @@ class ChEMBLActivityPipelineFactory:
                 endpoint_url=aws_config.endpoint_url if not is_local_run else None,
                 access_key=access_key,
                 secret_key=secret_key,
+                save_json=save_json,
+                json_path=json_path,
             ),
             DeltaWriter(
                 base_path=silver_base_path,
