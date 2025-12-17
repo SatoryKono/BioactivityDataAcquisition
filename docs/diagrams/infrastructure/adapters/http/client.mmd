@@ -1,0 +1,56 @@
+---
+title: "UnifiedHTTPClient — Class Diagram"
+---
+%% File: src/bioetl/infrastructure/adapters/http/client.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class UnifiedHTTPClient {
+        -_client: httpx.AsyncClient
+        -_rate_limiter: TokenBucket
+        -_circuit_breaker: CircuitBreaker
+        -_retry_config: RetryConfig
+        +get(url, params, headers) Response
+        +post(url, json, headers) Response
+        +request(method, url, **kwargs) Response
+        +aclose() None
+    }
+
+    class RetryConfig {
+        <<dataclass>>
+        +max_retries: int = 3
+        +base_delay: float = 1.0
+        +max_delay: float = 60.0
+        +exponential_base: float = 2.0
+        +jitter: bool = True
+    }
+
+    class TokenBucket {
+        -_capacity: float
+        -_tokens: float
+        -_refill_rate: float
+        -_last_refill: float
+        +acquire(tokens) async bool
+        +_refill() None
+    }
+
+    class CircuitBreaker {
+        -_state: CircuitBreakerState
+        -_failure_count: int
+        -_failure_threshold: int
+        -_recovery_timeout: float
+        -_last_failure_time: float
+        +call(func, *args) async T
+        +_on_success() None
+        +_on_failure(error) None
+        +state: CircuitBreakerState
+    }
+
+    UnifiedHTTPClient --> TokenBucket : rate limiting
+    UnifiedHTTPClient --> CircuitBreaker : fault tolerance
+    UnifiedHTTPClient --> RetryConfig : retry policy
+
+    note for UnifiedHTTPClient "Combines rate limiting + circuit breaker + retries"

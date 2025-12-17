@@ -1,0 +1,92 @@
+---
+title: "Domain Types — Class Diagram"
+---
+%% File: src/bioetl/domain/types.py
+%% Updated: 2025-12-17
+%% Author: Claude
+
+classDiagram
+    direction TB
+
+    class RunID {
+        <<NewType>>
+        UUID
+    }
+
+    class EntityID {
+        <<NewType>>
+        str
+    }
+
+    class ContentHash {
+        <<NewType>>
+        str (SHA256)
+    }
+
+    class BatchID {
+        <<NewType>>
+        UUID
+    }
+
+    class Watermark {
+        <<TypeAlias>>
+        str | datetime | int
+    }
+
+    class RunType {
+        <<Enum>>
+        INCREMENTAL
+        BACKFILL
+        REBUILD
+        +priority() int
+    }
+
+    class DriftLevel {
+        <<Enum>>
+        INFO
+        WARN
+        CRITICAL
+    }
+
+    class HealthStatus {
+        <<Enum>>
+        HEALTHY
+        DEGRADED
+        UNHEALTHY
+        +to_metric_value() int
+    }
+
+    class CircuitBreakerState {
+        <<Enum>>
+        CLOSED
+        OPEN
+        HALF_OPEN
+        +to_metric_value() int
+    }
+
+    class ErrorType {
+        <<Enum>>
+        AUTH_FAILURE
+        SCHEMA_MISMATCH_GOLD
+        DB_UNAVAILABLE
+        LOCK_LOST
+        RATE_LIMIT
+        TIMEOUT
+        NETWORK_ERROR
+        SCHEMA_VIOLATION
+        INVALID_DATA
+        MISSING_REQUIRED_FIELD
+        +is_critical() bool
+        +is_recoverable() bool
+        +is_data_quality() bool
+    }
+
+    class DQStatus {
+        <<Enum>>
+        NEW
+        IGNORED
+        REPROCESSED
+    }
+
+    note for RunType "REBUILD > BACKFILL > INCREMENTAL priority"
+    note for ErrorType "Determines pipeline behavior"
