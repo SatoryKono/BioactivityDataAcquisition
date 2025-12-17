@@ -1,12 +1,12 @@
 """Tests for PubChem Client."""
 
-import asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
-from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
+
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerOpenError
+from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
 
 @pytest.fixture
@@ -169,5 +169,5 @@ async def test_circuit_breaker(pubchem_client):
 
         # Second call should raise CircuitBreakerOpenError
         with pytest.raises(CircuitBreakerOpenError):
-             async for _ in pubchem_client.fetch("compound", query="fail"):
+            async for _ in pubchem_client.fetch("compound", query="fail"):
                 pass

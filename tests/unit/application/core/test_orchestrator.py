@@ -259,7 +259,9 @@ class TestPipelineOrchestrator:
         # Heartbeat task should have been created and then cancelled
         assert orchestrator.heartbeat_task is not None
 
-    async def test_heartbeat_loop_stops_on_shutdown(self, orchestrator, shutdown_signal):
+    async def test_heartbeat_loop_stops_on_shutdown(
+        self, orchestrator, shutdown_signal
+    ):
         """Test heartbeat loop stops when shutdown is requested."""
         shutdown_signal.request()
 

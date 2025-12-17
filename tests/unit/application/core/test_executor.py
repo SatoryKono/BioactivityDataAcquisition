@@ -181,7 +181,9 @@ class TestPipelineExecutorExecute:
         assert executor.records_silver == 3
         assert executor.records_gold == 3  # All records have value > 5
 
-    async def test_execute_batches_records(self, executor, mock_data_source, mock_storage):
+    async def test_execute_batches_records(
+        self, executor, mock_data_source, mock_storage
+    ):
         """Test that execute batches records correctly."""
 
         async def mock_fetch(**kwargs):
