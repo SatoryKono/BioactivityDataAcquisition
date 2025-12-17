@@ -42,7 +42,6 @@ class TestChemblAdapter:
         assert chembl_adapter.provider_name == "chembl"
 
     @pytest.mark.vcr
-    @pytest.mark.asyncio
     async def test_fetch_activities(
         self, chembl_client: Any
     ) -> None:
@@ -66,7 +65,6 @@ class TestChemblAdapter:
                 assert "activity_id" in record
 
     @pytest.mark.vcr
-    @pytest.mark.asyncio
     async def test_health_check(self, chembl_client: Any) -> None:
         """Test ChEMBL health check endpoint.
 
@@ -88,7 +86,6 @@ class TestChemblAdapter:
             ]
 
     @pytest.mark.vcr
-    @pytest.mark.asyncio
     async def test_get_entity_count(
         self, chembl_client: Any
     ) -> None:

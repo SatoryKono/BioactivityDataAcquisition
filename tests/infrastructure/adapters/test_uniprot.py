@@ -77,7 +77,9 @@ async def test_fetch_protein_success(uniprot_client, mock_protein_response):
 
 
 @respx.mock
-async def test_fetch_protein_pagination(uniprot_client, mock_protein_response_page1, mock_protein_response):
+async def test_fetch_protein_pagination(
+    uniprot_client, mock_protein_response_page1, mock_protein_response
+):
     """Test fetching proteins with pagination."""
     # Mocking exact params is tricky due to size calc and defaults.
     # We'll use a regex or looser matching if possible, but respx strict matching requires exact params.
@@ -87,7 +89,7 @@ async def test_fetch_protein_pagination(uniprot_client, mock_protein_response_pa
     route = respx.get("https://rest.uniprot.org/uniprotkb/search")
     route.side_effect = [
         Response(200, json=mock_protein_response_page1),
-        Response(200, json=mock_protein_response)
+        Response(200, json=mock_protein_response),
     ]
 
     results = []

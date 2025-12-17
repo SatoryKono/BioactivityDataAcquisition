@@ -25,7 +25,9 @@ def mock_pcp_compound():
     compound.molecular_weight = 180.16
     compound.canonical_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
     compound.isomeric_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-    compound.inchi = "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
+    compound.inchi = (
+        "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
+    )
     compound.inchikey = "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
     compound.iupac_name = "2-acetyloxybenzoic acid"
     compound.charge = 0
@@ -89,7 +91,9 @@ async def test_fetch_compound_incremental(pubchem_client, mock_pcp_compound):
 
 async def test_fetch_substance(pubchem_client, mock_pcp_substance):
     """Test fetching substances."""
-    with patch("pubchempy.get_substances", return_value=[mock_pcp_substance]) as mock_get:
+    with patch(
+        "pubchempy.get_substances", return_value=[mock_pcp_substance]
+    ) as mock_get:
         results = []
         async for record in pubchem_client.fetch("substance", query="aspirin"):
             results.append(record)

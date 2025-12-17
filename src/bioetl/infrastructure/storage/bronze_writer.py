@@ -53,6 +53,7 @@ class BronzeWriter:
         secret_key: str | None = None,
         save_json: bool = False,
         json_path: str | None = None,
+        logger: "BoundLogger | None" = None,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -64,12 +65,14 @@ class BronzeWriter:
             secret_key: AWS secret key
             save_json: If True, also save uncompressed JSON copy
             json_path: Path for JSON files (defaults to bucket/json/)
+            logger: Structured logger for observability
         """
         self.bucket = bucket
         self.endpoint_url = endpoint_url
         self.is_local = not endpoint_url
         self.save_json = save_json
         self.json_path = json_path or (str(Path(bucket) / "json") if self.is_local else None)
+        self.logger = logger or structlog.get_logger(__name__)
 
         if not self.is_local:
             from bioetl.infrastructure.storage.s3_pool import S3ClientPool
@@ -171,8 +174,15 @@ class BronzeWriter:
                     ),
                 )
             except ClientError as e:
-                # Log but don't fail the main write
-                pass
+                # Log but don't fail the main write (JSON copy is optional)
+                error_code = e.response.get("Error", {}).get("Code", "Unknown")
+                self.logger.warning(
+                    "json_copy_write_failed",
+                    error_code=error_code,
+                    s3_key=s3_json_key,
+                    bucket=self.bucket,
+                    error=str(e),
+                )
 
     def _compress_records(self, records: Iterator[bytes]) -> bytes:
         """Compress JSONL records using zstandard with streaming."""
