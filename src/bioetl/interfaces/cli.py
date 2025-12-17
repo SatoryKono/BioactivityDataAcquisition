@@ -107,6 +107,14 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
     click.echo(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
 
+@quarantine.command("stats")
+@click.option("--pipeline", required=True, help="Pipeline name")
+def quarantine_stats(pipeline: str) -> None:
+    """Get quarantine statistics."""
+    # This part would also be refactored to use a dedicated service
+    click.echo(f"Getting quarantine statistics for {pipeline}...")
+
+
 @cli.group()
 def checkpoint() -> None:
     """Manage checkpoints."""
@@ -114,9 +122,11 @@ def checkpoint() -> None:
 
 
 @checkpoint.command("list")
-def checkpoint_list() -> None:
+@click.option("--pipeline", required=True, help="Pipeline name")
+def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints."""
-    click.echo("Listing checkpoints...")
+    # This part would also be refactored to use a dedicated service
+    click.echo(f"Listing checkpoints for {pipeline}...")
 
 
 def main() -> None:
