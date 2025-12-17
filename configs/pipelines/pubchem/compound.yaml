@@ -5,6 +5,7 @@ description: "Pipeline for ingesting PubChem compounds"
 version: "1.0.0"
 
 source:
+  load_strategy: "incremental"
   api:
     base_url: "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
     rate_limit: 5.0
@@ -18,6 +19,9 @@ sink:
     table_name: "pubchem_compound"
     primary_keys: ["cid"]
     partition_by: ["batch_date"]
+    format: "delta"
+    mode: "merge"
+    forensic_retention: "7d"
   gold:
     table_name: "dim_compound"
     primary_keys: ["cid"]
