@@ -35,6 +35,7 @@ class RecordProcessor:
         entity_type: str,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
+        silver_schema: Any,
     ):
         self._storage = storage
         self._quarantine_manager = quarantine_manager
@@ -44,6 +45,7 @@ class RecordProcessor:
         self._entity_type = entity_type
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
+        self._silver_schema = silver_schema
 
     async def process_batch(
         self,
@@ -126,6 +128,7 @@ class RecordProcessor:
             table_name=table_name,
             records=records_with_meta,
             primary_keys=["entity_id"],
+            schema=self._silver_schema,
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:

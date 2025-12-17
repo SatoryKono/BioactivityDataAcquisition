@@ -114,6 +114,7 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
+        schema: Any,  # Using Any to avoid strict dependency on pyarrow in domain
         mode: Literal["merge", "append", "delete"] = "merge",
     ) -> None:
         """
@@ -123,6 +124,7 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries, where each dictionary is a transformed record.
             primary_keys: A list of column names that form the primary key.
+            schema: The schema definition (e.g., PyArrow schema) for the records.
             mode: The write mode (e.g., 'merge', 'append', 'delete').
         """
         ...
