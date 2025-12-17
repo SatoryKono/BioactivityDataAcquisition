@@ -1,9 +1,11 @@
 """Unit tests for the CLI module."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 from click.testing import CliRunner
 
-from bioetl.interfaces.cli import cli
+from bioetl.interfaces.cli import cli, main
 
 
 @pytest.fixture
@@ -35,3 +37,164 @@ class TestQuarantineCommands:
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
         assert "Inspecting quarantine for test_pipeline" in result.output
+
+
+class TestRunCommand:
+    """Tests for the run CLI command."""
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.PipelineRunner")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    def test_run_command_success(
+        self,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_runner_class,
+        mock_bootstrap,
+        runner,
+    ):
+        """Test that run command works with valid arguments."""
+        mock_pipeline = MagicMock()
+        mock_pipeline.logger = MagicMock()
+        mock_bootstrap.return_value = mock_pipeline
+
+        mock_runner_instance = MagicMock()
+        mock_runner_class.return_value = mock_runner_instance
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity"],
+        )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        mock_bootstrap.assert_called_once()
+        mock_runner_class.assert_called_once()
+        mock_asyncio_run.assert_called_once()
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.PipelineRunner")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    def test_run_command_with_options(
+        self,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_runner_class,
+        mock_bootstrap,
+        runner,
+    ):
+        """Test run command with all options."""
+        mock_pipeline = MagicMock()
+        mock_pipeline.logger = MagicMock()
+        mock_bootstrap.return_value = mock_pipeline
+
+        result = runner.invoke(
+            cli,
+            [
+                "run",
+                "--pipeline",
+                "chembl_activity",
+                "--run-type",
+                "backfill",
+                "--resume",
+                "--limit",
+                "1000",
+            ],
+        )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        call_kwargs = mock_bootstrap.call_args[1]
+        assert call_kwargs["resume"] is True
+        assert call_kwargs["limit"] == 1000
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.PipelineRunner")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    def test_run_command_shutdown_error(
+        self,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_runner_class,
+        mock_bootstrap,
+        runner,
+    ):
+        """Test run command handles shutdown error."""
+        from bioetl.application.core.shutdown import PipelineShutdownError
+
+        mock_pipeline = MagicMock()
+        mock_pipeline.logger = MagicMock()
+        mock_bootstrap.return_value = mock_pipeline
+        mock_asyncio_run.side_effect = PipelineShutdownError()
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity"],
+        )
+
+        assert result.exit_code == 130  # Shutdown exit code
+
+    @patch("bioetl.interfaces.cli.bootstrap_pipeline")
+    @patch("bioetl.interfaces.cli.PipelineRunner")
+    @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
+    @patch("bioetl.interfaces.cli.asyncio.run")
+    def test_run_command_exception(
+        self,
+        mock_asyncio_run,
+        mock_setup_handlers,
+        mock_runner_class,
+        mock_bootstrap,
+        runner,
+    ):
+        """Test run command handles general exceptions."""
+        mock_pipeline = MagicMock()
+        mock_pipeline.logger = MagicMock()
+        mock_bootstrap.return_value = mock_pipeline
+        mock_asyncio_run.side_effect = RuntimeError("Test error")
+
+        result = runner.invoke(
+            cli,
+            ["run", "--pipeline", "chembl_activity"],
+        )
+
+        assert result.exit_code == 1  # Error exit code
+
+
+class TestMainFunction:
+    """Tests for main entry point."""
+
+    @patch("bioetl.interfaces.cli.cli")
+    def test_main_calls_cli(self, mock_cli):
+        """Test main function calls cli()."""
+        main()
+        mock_cli.assert_called_once()
+
+
+class TestCliVersion:
+    """Tests for CLI version."""
+
+    def test_version_option(self, runner):
+        """Test --version option."""
+        result = runner.invoke(cli, ["--version"])
+
+        assert result.exit_code == 0
+        assert "0.1.0" in result.output
+
+
+class TestCliHelp:
+    """Tests for CLI help."""
+
+    def test_help_option(self, runner):
+        """Test --help option."""
+        result = runner.invoke(cli, ["--help"])
+
+        assert result.exit_code == 0
+        assert "BioETL" in result.output
+
+    def test_run_help(self, runner):
+        """Test run --help option."""
+        result = runner.invoke(cli, ["run", "--help"])
+
+        assert result.exit_code == 0
+        assert "--pipeline" in result.output

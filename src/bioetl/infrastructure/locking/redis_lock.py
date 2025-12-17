@@ -18,12 +18,13 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
+
 if TYPE_CHECKING:
     from uuid import UUID
 
     from redis.asyncio import Redis
 
-    from bioetl.domain.exceptions import LockAcquisitionError, LockLostError
     from bioetl.domain.types import RunID
 
 # Lua script for atomic release (only if owner matches)
