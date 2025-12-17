@@ -12,10 +12,12 @@ from uuid import UUID
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.factories.chembl_activity import (
+from bioetl.infrastructure.observability.logging import (
+    create_logger as create_infra_logger,
+)
+from bioetl.interfaces.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
 )
-from bioetl.infrastructure.observability.logging import (
     create_logger as create_infra_logger,
 )
 
