@@ -21,7 +21,6 @@ class TestCircuitBreaker:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_success_keeps_closed(self) -> None:
         """Successful calls should keep circuit CLOSED."""
         cb = CircuitBreaker(provider="test", failure_threshold=3)
@@ -34,7 +33,6 @@ class TestCircuitBreaker:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_failures_open_circuit(self) -> None:
         """Consecutive failures should open circuit."""
         cb = CircuitBreaker(provider="test", failure_threshold=3)
@@ -52,7 +50,6 @@ class TestCircuitBreaker:
         assert cb.get_trips_total() == 1
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_open_circuit_blocks_calls(self) -> None:
         """Open circuit should block subsequent calls."""
         cb = CircuitBreaker(provider="test", failure_threshold=2, recovery_timeout=10)
@@ -79,7 +76,6 @@ class TestCircuitBreaker:
         assert exc_info.value.retry_after > 0
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_half_open_after_timeout(self) -> None:
         """Circuit should transition to HALF_OPEN after recovery timeout."""
         cb = CircuitBreaker(
@@ -111,7 +107,6 @@ class TestCircuitBreaker:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_half_open_failure_reopens(self) -> None:
         """Failed probe request in HALF_OPEN should reopen circuit."""
         cb = CircuitBreaker(
@@ -147,7 +142,6 @@ class TestCircuitBreaker:
         assert cb.get_trips_total() == initial_trips + 1
 
     @pytest.mark.unit
-    @pytest.mark.asyncio
     async def test_success_resets_failure_count(self) -> None:
         """Successful call should reset consecutive failure count."""
         cb = CircuitBreaker(provider="test", failure_threshold=3)
