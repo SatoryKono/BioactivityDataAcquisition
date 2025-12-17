@@ -79,11 +79,13 @@ class PipelineRuntimeConfig:
         run_type: Execution mode (incremental/backfill/rebuild).
         resume: Whether to resume from last checkpoint.
         limit: Maximum records to process (None = unlimited).
+        heartbeat_interval: Seconds between lock heartbeats.
     """
 
     run_type: RunType
     resume: bool = False
     limit: int | None = None
+    heartbeat_interval: float = 30.0
 
     def __post_init__(self) -> None:
         """Validate runtime config."""

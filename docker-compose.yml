@@ -1,8 +1,6 @@
 # BioETL Docker Compose
 # Local development environment: Postgres, Redis, MinIO (S3-compatible)
 
-version: '3.8'
-
 services:
   # PostgreSQL for metadata storage
   postgres:
