@@ -27,7 +27,6 @@ class TestUnifiedQuarantine:
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
         assert quarantine.base_path == "/tmp/quarantine"
 
-    @pytest.mark.asyncio
     async def test_write_calls_write_deltalake(self, mock_deltalake):
         """Test that write calls write_deltalake with correct data."""
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
@@ -59,7 +58,6 @@ class TestUnifiedQuarantine:
         assert record["bronze_batch_id"] == str(bronze_batch_id)
         assert record["error_details"] == '{"message": "Invalid value"}'
 
-    @pytest.mark.asyncio
     async def test_payload_truncation(self, mock_deltalake):
         """Test that large payloads are truncated at 64KB."""
         quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
