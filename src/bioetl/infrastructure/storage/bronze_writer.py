@@ -71,11 +71,14 @@ class BronzeWriter:
         self.endpoint_url = endpoint_url
         self.is_local = not endpoint_url
         self.save_json = save_json
-        self.json_path = json_path or (str(Path(bucket) / "json") if self.is_local else None)
+        self.json_path = json_path or (
+            str(Path(bucket) / "json") if self.is_local else None
+        )
         self.logger = logger or structlog.get_logger(__name__)
 
         if not self.is_local:
             from bioetl.infrastructure.storage.s3_pool import S3ClientPool
+
             self.s3_client = S3ClientPool.get_client(
                 endpoint_url=endpoint_url,
                 region=region,
@@ -136,7 +139,9 @@ class BronzeWriter:
 
         # Optionally write uncompressed JSON
         if self.save_json:
-            await self._write_json_copy(record_list, provider, entity, date_str, batch_id)
+            await self._write_json_copy(
+                record_list, provider, entity, date_str, batch_id
+            )
 
         return Path(relative_path)
 

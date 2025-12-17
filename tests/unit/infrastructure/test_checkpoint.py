@@ -261,12 +261,16 @@ class TestS3CheckpointLocal:
         checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
         checkpoint_dir.mkdir(parents=True)
         checkpoint_file = checkpoint_dir / "latest.json"
-        checkpoint_file.write_text(json.dumps({
-            "pipeline": "test_pipeline",
-            "watermark": "2023-01-01T00:00:00+00:00",
-            "run_id": "12345678-1234-5678-1234-567812345678",
-            "metadata": {},
-        }))
+        checkpoint_file.write_text(
+            json.dumps(
+                {
+                    "pipeline": "test_pipeline",
+                    "watermark": "2023-01-01T00:00:00+00:00",
+                    "run_id": "12345678-1234-5678-1234-567812345678",
+                    "metadata": {},
+                }
+            )
+        )
 
         cp = S3Checkpoint(bucket=str(tmp_path))
         cp.loop = asyncio.get_event_loop()

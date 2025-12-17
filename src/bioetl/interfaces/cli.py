@@ -15,8 +15,8 @@ from uuid import uuid4
 import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.bootstrap import bootstrap_pipeline
 from bioetl.domain.types import RunType
+from bioetl.interfaces.bootstrap import bootstrap_pipeline
 from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
