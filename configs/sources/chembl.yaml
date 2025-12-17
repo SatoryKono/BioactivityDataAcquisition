@@ -1,0 +1,26 @@
+# configs/sources/chembl.yaml
+# Конфигурация источника данных ChEMBL API.
+
+source:
+    type: api
+    load_strategy: incremental
+    watermark_field: molecule_chembl_id
+    batch_size: 20
+    provider_config:
+        provider: chembl
+        base_url: https://www.ebi.ac.uk/chembl/api/data
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        max_url_length: 2000
+        batch_size: 20
+        page_size: 1000
+        api_version: null
+
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    rate_limit:
+        requests_per_second: 5
+        burst: 10

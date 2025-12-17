@@ -47,11 +47,23 @@ class DeltaWriter:
         base_path: str,
         storage_options: dict[str, str] | None = None,
         csv_path: str | None = None,
+        csv_options: dict[str, Any] | None = None,
     ) -> None:
-        """Initialize Delta writer."""
+        """Initialize Delta writer.
+
+        Args:
+            base_path: Base path for Delta tables
+            storage_options: Storage options for S3/MinIO
+            csv_path: Path for CSV export (None to disable)
+            csv_options: CSV export options:
+                - delimiter: Field delimiter (default: ",")
+                - header: Include header row (default: True)
+                - encoding: File encoding (default: "utf-8")
+        """
         self.base_path = base_path.rstrip("/")
         self.storage_options = storage_options or {}
         self.csv_path = csv_path
+        self.csv_options = csv_options or {}
 
     async def write_silver(
         self,
@@ -128,9 +140,19 @@ class DeltaWriter:
         if self.csv_path:
             csv_full_path = Path(self.csv_path) / f"{table_name}.csv"
             csv_full_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Build CSV write options from config
+            delimiter = self.csv_options.get("delimiter", ",")
+            include_header = self.csv_options.get("header", True)
+
+            write_options = pv.WriteOptions(
+                include_header=include_header,
+                delimiter=delimiter,
+            )
+
             await loop.run_in_executor(
                 None,
-                lambda: pv.write_csv(arrow_data, csv_full_path)
+                lambda: pv.write_csv(arrow_data, csv_full_path, write_options=write_options)
             )
 
     async def _merge_records(
