@@ -1,9 +1,7 @@
 """Unit tests for GoldWriter."""
 
-from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
-import pandera as pa
 import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import Column, DataFrameSchema
@@ -74,7 +72,6 @@ class TestGoldWriterInit:
 class TestGoldWriterValidation:
     """Tests for GoldWriter validation."""
 
-    @pytest.mark.asyncio
     async def test_write_gold_empty_records_raises(self, gold_writer):
         """Test write_gold raises ValueError for empty records."""
         with pytest.raises(ValueError, match="No records to write"):
@@ -84,7 +81,6 @@ class TestGoldWriterValidation:
                 mode="overwrite",
             )
 
-    @pytest.mark.asyncio
     async def test_write_gold_non_strict_schema_raises(
         self, gold_writer, non_strict_schema, valid_records
     ):
@@ -97,7 +93,6 @@ class TestGoldWriterValidation:
                 mode="overwrite",
             )
 
-    @pytest.mark.asyncio
     async def test_write_gold_invalid_mode_raises(self, gold_writer, valid_records):
         """Test write_gold raises ValueError for invalid mode."""
         with pytest.raises(ValueError, match="Invalid mode"):
@@ -107,7 +102,6 @@ class TestGoldWriterValidation:
                 mode="invalid",
             )
 
-    @pytest.mark.asyncio
     async def test_write_gold_scd2_without_config_raises(
         self, gold_writer, valid_records
     ):
@@ -124,7 +118,6 @@ class TestGoldWriterValidation:
 class TestGoldWriterWriteSimple:
     """Tests for simple write operations."""
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_overwrite_mode(
         self, mock_write_deltalake, gold_writer, valid_records
@@ -141,7 +134,6 @@ class TestGoldWriterWriteSimple:
         assert call_kwargs["mode"] == "overwrite"
         assert call_kwargs["table_or_uri"] == "s3://test-bucket/gold/test/table"
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_append_mode(
         self, mock_write_deltalake, gold_writer, valid_records
@@ -157,7 +149,6 @@ class TestGoldWriterWriteSimple:
         call_kwargs = mock_write_deltalake.call_args[1]
         assert call_kwargs["mode"] == "append"
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_with_partitions(
         self, mock_write_deltalake, gold_writer, valid_records
@@ -179,7 +170,6 @@ class TestGoldWriterWriteSimple:
 class TestGoldWriterSCD2:
     """Tests for SCD Type 2 operations."""
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_scd2_creates_new_table(
@@ -208,7 +198,6 @@ class TestGoldWriterSCD2:
         call_kwargs = mock_write_deltalake.call_args[1]
         assert call_kwargs["mode"] == "append"
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_merge_existing_table(
         self, mock_delta_table, gold_writer, valid_records
@@ -236,7 +225,6 @@ class TestGoldWriterSCD2:
         mock_merge.when_matched_update.assert_called_once()
         mock_merge.when_not_matched_insert_all.assert_called_once()
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_write_gold_scd2_with_list_business_key(
         self, mock_delta_table, gold_writer, valid_records
@@ -271,7 +259,6 @@ class TestGoldWriterSCD2:
 class TestGoldWriterSchemaValidation:
     """Tests for schema validation."""
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_with_valid_schema(
         self, mock_write_deltalake, gold_writer, strict_schema, valid_records
@@ -286,7 +273,6 @@ class TestGoldWriterSchemaValidation:
 
         mock_write_deltalake.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_write_gold_schema_validation_failure(
         self, gold_writer, strict_schema
     ):
@@ -308,7 +294,6 @@ class TestGoldWriterSchemaValidation:
 class TestGoldWriterRead:
     """Tests for read operations."""
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_read_gold_returns_records(self, mock_delta_table, gold_writer):
         """Test read_gold returns records from table."""
@@ -331,7 +316,6 @@ class TestGoldWriterRead:
         assert len(result) == 2
         assert result[0]["entity_id"] == "CHEMBL123"
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_read_gold_filters_current_only(self, mock_delta_table, gold_writer):
         """Test read_gold filters for current records when is_current column exists."""
@@ -361,7 +345,6 @@ class TestGoldWriterRead:
 class TestGoldWriterHistory:
     """Tests for history retrieval."""
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_get_history_returns_all_versions(self, mock_delta_table, gold_writer):
         """Test get_history returns all historical versions."""
@@ -389,7 +372,6 @@ class TestGoldWriterHistory:
         assert len(result) == 2
         assert all(r["entity_id"] == "CHEMBL123" for r in result)
 
-    @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
     async def test_get_history_with_multiple_keys(self, mock_delta_table, gold_writer):
         """Test get_history with multiple business key values."""
