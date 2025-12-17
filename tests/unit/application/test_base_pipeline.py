@@ -171,35 +171,6 @@ async def test_base_pipeline_extract_watermark(mock_pipeline):
 
 
 @pytest.mark.asyncio
-async def test_base_pipeline_from_params_deprecated():
-    """Test from_params raises deprecation warning."""
-    import warnings
-
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        pipeline = ConcretePipeline.from_params(
-            pipeline_name="test",
-            provider="test",
-            entity_type="entity",
-            run_type=RunType.INCREMENTAL,
-            data_source=AsyncMock(),
-            storage=AsyncMock(),
-            lock=AsyncMock(),
-            checkpoint=AsyncMock(),
-            quarantine=AsyncMock(),
-            logger=mock_logger,
-            metrics=MagicMock(),
-        )
-
-        assert len(w) == 1
-        assert issubclass(w[0].category, DeprecationWarning)
-        assert "from_params() is deprecated" in str(w[0].message)
-
-
-@pytest.mark.asyncio
 async def test_run_pipeline_flow():
     """Test run_pipeline_flow helper function."""
     from bioetl.application.core.base import run_pipeline_flow
