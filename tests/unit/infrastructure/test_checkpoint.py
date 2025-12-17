@@ -14,8 +14,10 @@ from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
     """Create a run_in_executor replacement that returns awaitable sync results."""
+
     async def sync_executor(_, fn, *args):
         return fn(*args)
+
     return sync_executor
 
 
@@ -45,7 +47,6 @@ class TestS3Checkpoint:
         )
         assert cp.bucket == "test-bucket"
 
-    @pytest.mark.asyncio
     async def test_save_generates_correct_key_and_body(self, mock_s3_client):
         """Test that save generates the correct S3 key and body."""
         # Mock head_object to return no existing checkpoint
@@ -82,7 +83,6 @@ class TestS3Checkpoint:
         assert "2023-01-01T00:00:00" in body
         assert "12345678-1234-5678-1234-567812345678" in body
 
-    @pytest.mark.asyncio
     async def test_load_returns_correct_data(self, mock_s3_client):
         """Test that load returns the correct data."""
         cp = S3Checkpoint(
@@ -111,7 +111,6 @@ class TestS3Checkpoint:
         assert isinstance(watermark, datetime)
         assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
-    @pytest.mark.asyncio
     async def test_load_nonexistent_checkpoint_returns_none(self, mock_s3_client):
         """Test that loading a nonexistent checkpoint returns None."""
         cp = S3Checkpoint(
@@ -135,7 +134,6 @@ class TestS3Checkpoint:
 
         assert result is None
 
-    @pytest.mark.asyncio
     async def test_delete_calls_s3_delete_object(self, mock_s3_client):
         """Test that delete calls s3:deleteObject."""
         cp = S3Checkpoint(
@@ -159,7 +157,6 @@ class TestS3Checkpoint:
             Bucket="test-bucket", Key=expected_key
         )
 
-    @pytest.mark.asyncio
     async def test_exists_returns_true(self, mock_s3_client):
         """Test that exists returns True when checkpoint exists."""
         cp = S3Checkpoint(
@@ -179,7 +176,6 @@ class TestS3Checkpoint:
 
         assert result is True
 
-    @pytest.mark.asyncio
     async def test_exists_returns_false(self, mock_s3_client):
         """Test that exists returns False when checkpoint doesn't exist."""
         cp = S3Checkpoint(
@@ -200,7 +196,6 @@ class TestS3Checkpoint:
 
         assert result is False
 
-    @pytest.mark.asyncio
     async def test_save_with_existing_etag(self, mock_s3_client):
         """Test that save uses If-Match when ETag exists."""
         cp = S3Checkpoint(
@@ -227,7 +222,6 @@ class TestS3Checkpoint:
         call_kwargs = mock_s3_client.put_object.call_args[1]
         assert call_kwargs.get("IfMatch") == "abc123"
 
-    @pytest.mark.asyncio
     async def test_aclose(self, mock_s3_client):
         """Test aclose completes without error."""
         cp = S3Checkpoint(
@@ -244,7 +238,6 @@ class TestS3Checkpoint:
 class TestS3CheckpointLocal:
     """Tests for S3Checkpoint in local mode."""
 
-    @pytest.mark.asyncio
     async def test_save_local_creates_file(self, tmp_path):
         """Test save creates checkpoint file locally."""
         cp = S3Checkpoint(bucket=str(tmp_path))
@@ -260,7 +253,6 @@ class TestS3CheckpointLocal:
         checkpoint_file = tmp_path / "checkpoints" / "test_pipeline" / "latest.json"
         assert checkpoint_file.exists()
 
-    @pytest.mark.asyncio
     async def test_load_local_reads_file(self, tmp_path):
         """Test load reads checkpoint from local file."""
         import json
@@ -286,7 +278,6 @@ class TestS3CheckpointLocal:
         watermark, run_id, _ = result
         assert isinstance(watermark, datetime)
 
-    @pytest.mark.asyncio
     async def test_load_local_nonexistent_returns_none(self, tmp_path):
         """Test load returns None for nonexistent local checkpoint."""
         cp = S3Checkpoint(bucket=str(tmp_path))
@@ -297,7 +288,6 @@ class TestS3CheckpointLocal:
 
         assert result is None
 
-    @pytest.mark.asyncio
     async def test_delete_local_removes_file(self, tmp_path):
         """Test delete removes local checkpoint file."""
         import json
@@ -316,7 +306,6 @@ class TestS3CheckpointLocal:
 
         assert not checkpoint_file.exists()
 
-    @pytest.mark.asyncio
     async def test_exists_local_returns_true(self, tmp_path):
         """Test exists returns True for local checkpoint."""
         # Create checkpoint file
@@ -333,7 +322,6 @@ class TestS3CheckpointLocal:
 
         assert result is True
 
-    @pytest.mark.asyncio
     async def test_exists_local_returns_false(self, tmp_path):
         """Test exists returns False for nonexistent local checkpoint."""
         cp = S3Checkpoint(bucket=str(tmp_path))

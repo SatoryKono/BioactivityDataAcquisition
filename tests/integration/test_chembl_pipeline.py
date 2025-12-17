@@ -21,7 +21,6 @@ class AsyncIterator:
 
 
 @pytest.mark.integration
-@pytest.mark.asyncio
 async def test_chembl_pipeline_e2e(minio_service, redis_client):
     """
     End-to-end test for the ChEMBL Activity pipeline.

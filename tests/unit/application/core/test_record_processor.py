@@ -8,7 +8,7 @@ import pytest
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
+from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.types import BatchID, RunID, RunType
 
@@ -104,7 +104,6 @@ class TestRecordProcessorInit:
 class TestRecordProcessorProcessBatch:
     """Tests for process_batch method."""
 
-    @pytest.mark.asyncio
     async def test_process_batch_writes_to_all_layers(
         self, record_processor, mock_storage
     ):
@@ -127,7 +126,6 @@ class TestRecordProcessorProcessBatch:
         mock_storage.write_silver.assert_called_once()
         mock_storage.write_gold.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_process_batch_no_gold_records(self, record_processor, mock_storage):
         """Test process_batch when no records pass gold filter."""
         records = [
@@ -143,7 +141,6 @@ class TestRecordProcessorProcessBatch:
         assert gold == 0
         mock_storage.write_gold.assert_not_called()
 
-    @pytest.mark.asyncio
     async def test_process_batch_handles_transform_error(
         self, mock_storage, mock_quarantine_manager, mock_error_classifier, mock_context
     ):
@@ -180,7 +177,6 @@ class TestRecordProcessorProcessBatch:
         assert quarantined == 1
         mock_quarantine_manager.quarantine_record.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_process_batch_raises_non_data_quality_errors(
         self, mock_storage, mock_quarantine_manager, mock_error_classifier, mock_context
     ):
@@ -207,7 +203,6 @@ class TestRecordProcessorProcessBatch:
         with pytest.raises(LockLostError):
             await processor.process_batch(records, batch_id)
 
-    @pytest.mark.asyncio
     async def test_process_batch_empty_records(self, record_processor, mock_storage):
         """Test process_batch with empty records list."""
         records = []
