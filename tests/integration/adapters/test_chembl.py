@@ -42,9 +42,7 @@ class TestChemblAdapter:
         assert chembl_adapter.provider_name == "chembl"
 
     @pytest.mark.vcr
-    async def test_fetch_activities(
-        self, chembl_client: Any
-    ) -> None:
+    async def test_fetch_activities(self, chembl_client: Any) -> None:
         """Test fetching activities from ChEMBL.
 
         This test requires a VCR cassette.
@@ -86,9 +84,7 @@ class TestChemblAdapter:
             ]
 
     @pytest.mark.vcr
-    async def test_get_entity_count(
-        self, chembl_client: Any
-    ) -> None:
+    async def test_get_entity_count(self, chembl_client: Any) -> None:
         """Test getting entity count from ChEMBL.
 
         This test requires a VCR cassette.

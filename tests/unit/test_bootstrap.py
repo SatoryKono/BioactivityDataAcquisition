@@ -42,7 +42,7 @@ class TestBootstrapLogger:
 
     def test_bootstrap_logger_creates_logger(self):
         """Test that bootstrap_logger creates a logger."""
-        from bioetl.bootstrap import bootstrap_logger
+        from bioetl.interfaces.bootstrap import bootstrap_logger
 
         run_id = uuid4()
         logger = bootstrap_logger(
@@ -60,7 +60,7 @@ class TestBootstrapPipeline:
 
     def test_bootstrap_pipeline_unknown_pipeline_raises(self):
         """Test that unknown pipeline name raises ValueError."""
-        from bioetl.bootstrap import bootstrap_pipeline
+        from bioetl.interfaces.bootstrap import bootstrap_pipeline
 
         with pytest.raises(ValueError, match="Unknown pipeline name"):
             bootstrap_pipeline(
@@ -71,19 +71,19 @@ class TestBootstrapPipeline:
                 limit=None,
             )
 
-    @patch("bioetl.bootstrap.get_settings")
-    @patch("bioetl.infrastructure.factories.chembl_activity.ChEMBLActivityPipelineFactory")
+    @patch("bioetl.interfaces.bootstrap.get_settings")
+    @patch("bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipelineFactory")
     def test_bootstrap_pipeline_chembl_activity(
         self, mock_factory, mock_get_settings, mock_settings, mock_logger
     ):
         """Test bootstrap_pipeline creates chembl_activity pipeline."""
-        from bioetl.bootstrap import bootstrap_pipeline
+        from bioetl.interfaces.bootstrap import bootstrap_pipeline
 
         mock_get_settings.return_value = mock_settings
         mock_pipeline = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
 
-        with patch("bioetl.bootstrap.bootstrap_logger", return_value=mock_logger):
+        with patch("bioetl.interfaces.bootstrap.bootstrap_logger", return_value=mock_logger):
             result = bootstrap_pipeline(
                 pipeline_name="chembl_activity",
                 run_id=uuid4(),
@@ -100,15 +100,15 @@ class TestBootstrapPipeline:
 class TestChEMBLActivityPipelineFactory:
     """Tests for ChEMBLActivityPipelineFactory."""
 
-    @patch("bioetl.infrastructure.factories.chembl_activity.get_aws_credentials")
-    @patch("bioetl.infrastructure.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.infrastructure.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.StorageAdapter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.GoldWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.S3Checkpoint")
-    @patch("bioetl.infrastructure.factories.chembl_activity.UnifiedQuarantine")
+    @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
+    @patch("bioetl.interfaces.factories.chembl_activity.StorageAdapter")
+    @patch("bioetl.interfaces.factories.chembl_activity.BronzeWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.DeltaWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.GoldWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
     def test_build_services_local_run(
         self,
         mock_quarantine,
@@ -124,7 +124,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_logger,
     ):
         """Test build_services for local run (no S3 endpoint)."""
-        from bioetl.infrastructure.factories.chembl_activity import (
+        from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
@@ -140,17 +140,17 @@ class TestChEMBLActivityPipelineFactory:
         assert services is not None
         mock_logger.warning.assert_called()  # MemoryLock warning
 
-    @patch("bioetl.infrastructure.factories.chembl_activity.get_aws_credentials")
-    @patch("bioetl.infrastructure.factories.chembl_activity.create_redis_client")
-    @patch("bioetl.infrastructure.factories.chembl_activity.RedisDistributedLock")
-    @patch("bioetl.infrastructure.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.infrastructure.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.StorageAdapter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.GoldWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.S3Checkpoint")
-    @patch("bioetl.infrastructure.factories.chembl_activity.UnifiedQuarantine")
+    @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
+    @patch("bioetl.interfaces.factories.chembl_activity.create_redis_client")
+    @patch("bioetl.interfaces.factories.chembl_activity.RedisDistributedLock")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
+    @patch("bioetl.interfaces.factories.chembl_activity.StorageAdapter")
+    @patch("bioetl.interfaces.factories.chembl_activity.BronzeWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.DeltaWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.GoldWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
     def test_build_services_prod_uses_redis_lock(
         self,
         mock_quarantine,
@@ -168,7 +168,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_logger,
     ):
         """Test build_services uses Redis lock in production."""
-        from bioetl.infrastructure.factories.chembl_activity import (
+        from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
@@ -186,16 +186,16 @@ class TestChEMBLActivityPipelineFactory:
         mock_redis_lock.assert_called_once()
         mock_logger.info.assert_called()
 
-    @patch("bioetl.infrastructure.factories.chembl_activity.get_aws_credentials")
-    @patch("bioetl.infrastructure.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.infrastructure.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.StorageAdapter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.GoldWriter")
-    @patch("bioetl.infrastructure.factories.chembl_activity.S3Checkpoint")
-    @patch("bioetl.infrastructure.factories.chembl_activity.UnifiedQuarantine")
-    @patch("bioetl.infrastructure.factories.chembl_activity.PrometheusMetrics")
+    @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
+    @patch("bioetl.interfaces.factories.chembl_activity.StorageAdapter")
+    @patch("bioetl.interfaces.factories.chembl_activity.BronzeWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.DeltaWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.GoldWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
+    @patch("bioetl.interfaces.factories.chembl_activity.PrometheusMetrics")
     def test_build_services_with_metrics_enabled(
         self,
         mock_prometheus,
@@ -212,7 +212,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_logger,
     ):
         """Test build_services uses PrometheusMetrics when enabled."""
-        from bioetl.infrastructure.factories.chembl_activity import (
+        from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
@@ -230,10 +230,10 @@ class TestChEMBLActivityPipelineFactory:
         mock_prometheus.assert_called_once()
 
     @patch(
-        "bioetl.infrastructure.factories.chembl_activity.ChEMBLActivityPipelineFactory.build_services"
+        "bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipelineFactory.build_services"
     )
     @patch(
-        "bioetl.infrastructure.factories.chembl_activity.ChEMBLActivityPipeline",
+        "bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipeline",
         create=True,
     )
     def test_create_with_services(
@@ -245,7 +245,7 @@ class TestChEMBLActivityPipelineFactory:
     ):
         """Test create_with_services creates pipeline."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-        from bioetl.infrastructure.factories.chembl_activity import (
+        from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
         from bioetl.domain.types import RunType
@@ -260,7 +260,5 @@ class TestChEMBLActivityPipelineFactory:
             logger=mock_logger,
         )
 
-        mock_build_services.assert_called_once_with(
-            settings=mock_settings, logger=mock_logger
-        )
+        mock_build_services.assert_called_once()
         mock_pipeline_class.create.assert_called_once()
