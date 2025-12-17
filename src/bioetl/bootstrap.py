@@ -106,12 +106,21 @@ class ChEMBLActivityPipelineFactory:
         )
         data_source = ChemblAdapter(http_client=http_client)
 
-        # Use local paths if no S3 endpoint is configured for dev/staging
-        base_data_path = "data/output" if is_local_run else ""
-        bronze_path = f"{base_data_path}/{s3_config.bucket_bronze}" if is_local_run else s3_config.bucket_bronze
-        silver_base_path = f"{base_data_path}/silver" if is_local_run else f"s3://{s3_config.bucket_silver}"
-        gold_base_path = f"{base_data_path}/gold" if is_local_run else f"s3://{s3_config.bucket_gold}"
-        checkpoints_path = f"{base_data_path}/{s3_config.bucket_checkpoints}" if is_local_run else s3_config.bucket_checkpoints
+        if is_local_run:
+            logger.info("Local run detected. Overriding storage paths to 'data/output'.")
+            base_output_path = "data/output"
+            bronze_path = f"{base_output_path}/bronze"
+            silver_base_path = f"{base_output_path}/silver"
+            gold_base_path = f"{base_output_path}/gold"
+            checkpoints_path = f"{base_output_path}/checkpoints"
+            csv_path = f"{base_output_path}/csv"
+        else:
+            # For cloud runs, use S3 paths from config
+            bronze_path = s3_config.bucket_bronze
+            silver_base_path = f"s3://{s3_config.bucket_silver}"
+            gold_base_path = f"s3://{s3_config.bucket_gold}"
+            checkpoints_path = s3_config.bucket_checkpoints
+            csv_path = None # No CSV export for cloud runs by default
 
         storage = StorageAdapter(
             BronzeWriter(
@@ -123,10 +132,12 @@ class ChEMBLActivityPipelineFactory:
             DeltaWriter(
                 base_path=silver_base_path,
                 storage_options=storage_options,
+                csv_path=csv_path,
             ),
             GoldWriter(
                 base_path=gold_base_path,
                 storage_options=storage_options,
+                csv_path=csv_path,
             ),
         )
 

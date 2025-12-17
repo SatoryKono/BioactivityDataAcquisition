@@ -31,41 +31,11 @@ from bioetl.domain.exceptions import BucketNotFoundError, UploadError
 
 
 class BronzeWriter:
-    """Writer for Bronze layer (raw data in JSONL + zstd).
+    """Writer for Bronze layer (raw data in JSONL + zstd)."""
 
-    Path format: bronze/v1/{provider}/{entity}/{date}/batch_{batch_id}.jsonl.zst
-
-    Performance Configuration:
-        COMPRESSION_CHUNK_SIZE: Size of chunks for streaming compression (default: 256KB)
-                                Larger chunks = better compression ratio
-                                Smaller chunks = lower memory usage
-        COMPRESSION_LEVEL: zstd compression level (default: 3)
-                          Range: 1 (fastest) to 22 (best compression)
-                          Level 3 is optimal for speed/ratio balance
-
-    Example:
-        >>> writer = BronzeWriter(
-        ...     bucket="bioetl-bronze",
-        ...     endpoint_url="http://localhost:9000",
-        ...     access_key="bioetl",
-        ...     secret_key="bioetl_minio_pass"
-        ... )
-        >>> records = [b'{"id": "CHEMBL123", "value": 5.5}\\n']
-        >>> path = await writer.write_bronze(
-        ...     records=iter(records),
-        ...     provider="chembl",
-        ...     entity="activity",
-        ...     date=datetime(2025, 12, 15),
-        ...     batch_id=BatchID(UUID("12345678-1234-1234-1234-123456789abc"))
-        ... )
-        >>> print(path)
-        bronze/v1/chembl/activity/2025-12-15/batch_12345678-1234-1234-1234-123456789abc.jsonl.zst
-    """
-
-    # Performance tuning constants (REQ-RATE-002: Backpressure support)
-    COMPRESSION_CHUNK_SIZE = 256 * 1024  # 256KB chunks for optimal I/O
-    COMPRESSION_LEVEL = 3  # Balance between speed and compression ratio
-    COMPRESSION_THREADS = -1  # Auto-detect CPU cores
+    COMPRESSION_CHUNK_SIZE = 256 * 1024
+    COMPRESSION_LEVEL = 3
+    COMPRESSION_THREADS = -1
 
     def __init__(
         self,
@@ -75,18 +45,9 @@ class BronzeWriter:
         access_key: str | None = None,
         secret_key: str | None = None,
     ) -> None:
-        """Initialize Bronze writer.
-
-        Args:
-            bucket: S3 bucket name (e.g., 'bioetl-bronze') or local path
-            endpoint_url: S3 endpoint URL (for MinIO, e.g., 'http://localhost:9000')
-            region: AWS region (default: 'us-east-1')
-            access_key: AWS access key ID (optional, uses env vars if None)
-            secret_key: AWS secret access key (optional, uses env vars if None)
-        """
+        """Initialize Bronze writer."""
         self.bucket = bucket
         self.endpoint_url = endpoint_url
-        self.loop = asyncio.get_event_loop()
         self.is_local = not endpoint_url
 
         if not self.is_local:
@@ -108,11 +69,11 @@ class BronzeWriter:
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd)."""
         date_str = date.strftime("%Y-%m-%d")
-        relative_path = (
-            f"bronze/v1/{provider}/{entity}/{date_str}/" f"batch_{batch_id}.jsonl.zst"
-        )
+        # New, cleaner path structure as requested
+        relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl.zst"
 
-        compressed_data = await self.loop.run_in_executor(
+        loop = asyncio.get_running_loop()
+        compressed_data = await loop.run_in_executor(
             None, self._compress_records, records
         )
 
@@ -126,7 +87,7 @@ class BronzeWriter:
                 f.write(compressed_data)
         else:
             try:
-                await self.loop.run_in_executor(
+                await loop.run_in_executor(
                     None,
                     lambda: self.s3_client.put_object(
                         Bucket=self.bucket,
@@ -176,12 +137,13 @@ class BronzeWriter:
 
     async def read_bronze(self, path: str) -> AsyncIterator[dict[str, Any]]:
         """Read and decompress Bronze file (for testing/debugging)."""
+        loop = asyncio.get_running_loop()
         if self.is_local:
             full_path = Path(self.bucket) / path
             with open(full_path, "rb") as f:
                 compressed_data = f.read()
         else:
-            response = await self.loop.run_in_executor(
+            response = await loop.run_in_executor(
                 None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=path)
             )
             compressed_data = response["Body"].read()
@@ -200,30 +162,39 @@ class BronzeWriter:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        if date:
-            date_str = date.strftime("%Y-%m-%d")
-            prefix = f"bronze/v1/{provider}/{entity}/{date_str}/"
-        else:
-            prefix = f"bronze/v1/{provider}/{entity}/"
+        # This method might need adjustment based on the new path structure
+        # For now, it will search inside the provider/entity folder
+        prefix = f"{provider}/{entity}/"
 
         if self.is_local:
             base_path = Path(self.bucket) / prefix
             if not base_path.exists():
                 return []
-            return [
-                str(p.relative_to(self.bucket))
-                for p in base_path.glob("*.jsonl.zst")
-            ]
+
+            files = list(base_path.glob("batch_*.jsonl.zst"))
+            if date:
+                date_str = date.strftime("%Y-%m-%d")
+                files = [p for p in files if f"batch_{date_str}" in p.name]
+
+            return [str(p.relative_to(self.bucket)) for p in files]
         else:
-            response = await self.loop.run_in_executor(
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(
                 None,
                 lambda: self.s3_client.list_objects_v2(
                     Bucket=self.bucket,
                     Prefix=prefix,
                 ),
             )
-            return [
+
+            all_files = [
                 obj["Key"]
                 for obj in response.get("Contents", [])
                 if obj["Key"].endswith(".jsonl.zst")
             ]
+
+            if date:
+                date_str = date.strftime("%Y-%m-%d")
+                return [key for key in all_files if f"batch_{date_str}" in key]
+
+            return all_files

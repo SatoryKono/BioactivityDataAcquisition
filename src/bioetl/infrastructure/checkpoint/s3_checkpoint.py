@@ -45,11 +45,11 @@ class S3Checkpoint:
         """Initialize S3 checkpoint storage."""
         self.bucket = bucket
         self.endpoint_url = endpoint_url
-        self.loop = asyncio.get_event_loop()
         self.is_local = not endpoint_url
 
         if not self.is_local:
             from bioetl.infrastructure.storage.s3_pool import S3ClientPool
+
             self.s3_client = S3ClientPool.get_client(
                 endpoint_url=endpoint_url,
                 region=region,
@@ -87,6 +87,7 @@ class S3Checkpoint:
             with open(full_path, "w") as f:
                 f.write(checkpoint_json)
         else:
+            loop = asyncio.get_running_loop()
             current_etag = await self._get_etag(key)
             try:
                 put_kwargs: dict[str, Any] = {
@@ -97,12 +98,14 @@ class S3Checkpoint:
                 }
                 if current_etag:
                     put_kwargs["IfMatch"] = current_etag
-                await self.loop.run_in_executor(
+                await loop.run_in_executor(
                     None, lambda: self.s3_client.put_object(**put_kwargs)
                 )
             except ClientError as e:
                 if e.response.get("Error", {}).get("Code") == "PreconditionFailed":
-                    raise CheckpointConflictError(pipeline, "Checkpoint was modified") from e
+                    raise CheckpointConflictError(
+                        pipeline, "Checkpoint was modified"
+                    ) from e
                 raise
 
     async def load(
@@ -118,8 +121,9 @@ class S3Checkpoint:
             with open(full_path, "r") as f:
                 checkpoint_json = f.read()
         else:
+            loop = asyncio.get_running_loop()
             try:
-                response = await self.loop.run_in_executor(
+                response = await loop.run_in_executor(
                     None, lambda: self.s3_client.get_object(Bucket=self.bucket, Key=key)
                 )
                 checkpoint_json = response["Body"].read().decode("utf-8")
@@ -133,6 +137,7 @@ class S3Checkpoint:
         watermark: Watermark
         try:
             from datetime import datetime
+
             watermark = datetime.fromisoformat(watermark_str)
         except (ValueError, TypeError):
             try:
@@ -151,8 +156,9 @@ class S3Checkpoint:
             if full_path.exists():
                 full_path.unlink()
         else:
+            loop = asyncio.get_running_loop()
             try:
-                await self.loop.run_in_executor(
+                await loop.run_in_executor(
                     None,
                     lambda: self.s3_client.delete_object(Bucket=self.bucket, Key=key),
                 )
@@ -166,8 +172,9 @@ class S3Checkpoint:
         if self.is_local:
             return (Path(self.bucket) / key).exists()
         else:
+            loop = asyncio.get_running_loop()
             try:
-                await self.loop.run_in_executor(
+                await loop.run_in_executor(
                     None,
                     lambda: self.s3_client.head_object(Bucket=self.bucket, Key=key),
                 )
@@ -182,8 +189,9 @@ class S3Checkpoint:
 
     async def _get_etag(self, s3_key: str) -> str | None:
         """Get current ETag for a checkpoint."""
+        loop = asyncio.get_running_loop()
         try:
-            response = await self.loop.run_in_executor(
+            response = await loop.run_in_executor(
                 None,
                 lambda: self.s3_client.head_object(Bucket=self.bucket, Key=s3_key),
             )
