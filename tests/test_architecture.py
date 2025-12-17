@@ -568,3 +568,29 @@ def test_import_linter_contracts_exist(project_root: Path):
 
     # Check that asyncio is forbidden in domain
     assert "asyncio" in content, "asyncio should be forbidden in domain-pure contract"
+
+
+# --- REQ-DEPR-001 ---
+def test_no_deprecated_wrappers(project_root: Path):
+    """Ensure deprecated wrapper files do not exist.
+
+    The following files were removed in v5.0.0 and should not be re-introduced:
+    - src/bioetl/bootstrap.py
+    - src/bioetl/factories/*
+    """
+    src_dir = project_root / "src"
+    deprecated_paths = [
+        src_dir / "bioetl" / "bootstrap.py",
+        src_dir / "bioetl" / "factories",
+    ]
+
+    violations = []
+    for path in deprecated_paths:
+        if path.exists():
+            violations.append(str(path.relative_to(src_dir)))
+
+    assert not violations, (
+        "Deprecated files found! These were removed in v5.0.0:\n"
+        + "\n".join(f"  - {v}" for v in violations)
+        + "\n\nUse bioetl.interfaces.* instead."
+    )
