@@ -48,6 +48,7 @@ data/_output/
 full_log.txt
 final_report*.txt
 project_rules_failures.txt
+llm_context.txt
 
 # IDE / Editors
 .idea/

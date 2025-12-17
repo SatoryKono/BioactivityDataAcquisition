@@ -27,6 +27,12 @@ help: ## Show this help message
 	@echo "$(BLUE)BioETL - Available Commands:$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 
+setup: ## Full developer setup (check python, install deps, hooks, env)
+	@./scripts/setup.sh
+
+llm-context: ## Generate codebase context for LLM (output: llm_context.txt)
+	@./scripts/generate_llm_context.py
+
 install: ## Create venv and install dependencies
 	@echo "$(BLUE)Creating virtual environment...$(NC)"
 	$(PYTHON) -m venv $(VENV)
