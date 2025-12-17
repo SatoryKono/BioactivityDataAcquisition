@@ -104,3 +104,4 @@ node_modules/
 .vercel/
 puppeteer-config.json
 *.png
+nul
