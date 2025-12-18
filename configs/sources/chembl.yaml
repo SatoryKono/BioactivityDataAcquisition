@@ -4,7 +4,7 @@
 source:
     type: api
     load_strategy: incremental
-    watermark_field: molecule_chembl_id
+    watermark_field: updated_on
     batch_size: 20
     provider_config:
         provider: chembl

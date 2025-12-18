@@ -24,6 +24,7 @@ class PipelineConfig:
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: List[str] = field(default_factory=list)
+    watermark_field: str | None = None
     dq: DQConfig = field(default_factory=DQConfig)
 
     def __post_init__(self) -> None:
