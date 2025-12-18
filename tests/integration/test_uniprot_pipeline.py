@@ -151,6 +151,8 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["gene_names"] == ["MYC", "BHLHE39"]
         assert silver_record["organism_id"] == 9606
         assert silver_record["sequence_length"] == 439
+        assert "entity_id" in silver_record
+        assert "content_hash" in silver_record
 
     async def test_transform_bronze_to_silver_minimal_record(
         self,
@@ -186,6 +188,33 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["gene_names"] == []
         assert silver_record["organism_id"] is None
         assert silver_record["sequence_length"] is None
+        assert "entity_id" in silver_record
+        assert "content_hash" in silver_record
+
+    async def test_transform_bronze_to_silver_missing_accession_returns_none(
+        self,
+        uniprot_config,
+        uniprot_runtime,
+        mock_uniprot_services,
+    ):
+        """Тест: запись без primaryAccession возвращает None."""
+        pipeline = UniProtProteinPipeline(
+            config=uniprot_config,
+            runtime=uniprot_runtime,
+            services=mock_uniprot_services,
+        )
+
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_uniprot_services.logger,
+        )
+
+        bronze_record = {"uniProtkbId": "NO_ACCESSION"}  # No primaryAccession
+
+        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+
+        assert silver_record is None
 
     async def test_transform_bronze_to_silver_missing_protein_description(
         self,
@@ -220,6 +249,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["accession"] == "A0A000"
         assert silver_record["protein_name"] is None
         assert silver_record["gene_names"] == ["GENE1"]
+        assert "entity_id" in silver_record
 
     async def test_transform_bronze_to_silver_empty_genes(
         self,
