@@ -25,9 +25,9 @@ class UniProtProteinPipeline(BasePipeline):
         if not accession:
             return None
 
-        # Helper variables for safe access
-        organism = cast(dict[str, Any], record.get("organism", {}))
-        sequence = cast(dict[str, Any], record.get("sequence", {}))
+        # Helper variables for safe access (handle explicit None values)
+        organism = record.get("organism") or {}
+        sequence = record.get("sequence") or {}
 
         normalized = {
             "accession": accession,
@@ -75,6 +75,9 @@ class UniProtProteinPipeline(BasePipeline):
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
-        """Extract accession as watermark."""
-        return Watermark.from_id(str(record.get("primaryAccession", "")))
+    ) -> str:
+        """Извлекает watermark как строковый accession.
+
+        Тесты ожидают примитив (str), а не обёртку.
+        """
+        return str(record.get("primaryAccession", ""))

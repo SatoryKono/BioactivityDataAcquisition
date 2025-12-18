@@ -210,6 +210,8 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест извлечения watermark из записи."""
+        from bioetl.domain.types import Watermark
+
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
@@ -225,7 +227,8 @@ class TestPubChemCompoundPipelineTransform:
         record = {"cid": 54321, "molecular_weight": 100.0}
         watermark = pipeline.extract_watermark(context, record)
 
-        assert watermark == 54321
+        assert isinstance(watermark, Watermark)
+        assert watermark.value == 54321
 
     async def test_extract_watermark_missing_cid(
         self,
@@ -234,6 +237,8 @@ class TestPubChemCompoundPipelineTransform:
         mock_pubchem_services,
     ):
         """Тест извлечения watermark при отсутствии CID."""
+        from bioetl.domain.types import Watermark
+
         pipeline = PubChemCompoundPipeline(
             config=pubchem_config,
             runtime=pubchem_runtime,
@@ -249,7 +254,8 @@ class TestPubChemCompoundPipelineTransform:
         record = {"molecular_weight": 100.0}  # No CID
         watermark = pipeline.extract_watermark(context, record)
 
-        assert watermark == 0
+        assert isinstance(watermark, Watermark)
+        assert watermark.value == 0
 
 
 @pytest.mark.integration

@@ -288,6 +288,8 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест извлечения watermark из записи."""
+        from bioetl.domain.types import Watermark
+
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -303,7 +305,8 @@ class TestUniProtProteinPipelineTransform:
         record = {"primaryAccession": "P12345"}
         watermark = pipeline.extract_watermark(context, record)
 
-        assert watermark == "P12345"
+        assert isinstance(watermark, Watermark)
+        assert watermark.value == "P12345"
 
     async def test_extract_watermark_missing_accession(
         self,
@@ -312,6 +315,8 @@ class TestUniProtProteinPipelineTransform:
         mock_uniprot_services,
     ):
         """Тест извлечения watermark при отсутствии accession."""
+        from bioetl.domain.types import Watermark
+
         pipeline = UniProtProteinPipeline(
             config=uniprot_config,
             runtime=uniprot_runtime,
@@ -327,7 +332,8 @@ class TestUniProtProteinPipelineTransform:
         record = {}  # No primaryAccession
         watermark = pipeline.extract_watermark(context, record)
 
-        assert watermark == ""
+        assert isinstance(watermark, Watermark)
+        assert watermark.value == ""
 
 
 @pytest.mark.integration
