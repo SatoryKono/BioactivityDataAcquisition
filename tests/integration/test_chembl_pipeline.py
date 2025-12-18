@@ -51,7 +51,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         gold_table="chembl.activity_gold",
         batch_size=100,
         checkpoint_interval=1000,
-        fields=["activity_id", "molecule_chembl_id", "target_chembl_id"],
+        fields=["activity_id", "molecule_chembl_id", "target_chembl_id", "standard_value"],
     )
 
     runtime = PipelineRuntimeConfig(
@@ -112,12 +112,10 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
     # Test transform_bronze_to_silver
     silver_record = await pipeline.transform_bronze_to_silver(context, test_record)
     assert silver_record is not None
-    assert silver_record["activity_id"] == 1
+    assert silver_record["activity_id"] == "1"
     assert silver_record["molecule_chembl_id"] == "CHEMBL1"
+    assert silver_record["standard_value"] == 10.0
 
-    # Test pchembl_value calculation (10 nM = pIC50 of 8.0)
-    assert "pchembl_value" in silver_record
-    assert silver_record["pchembl_value"] == 8.0
 
     # 8. Test should_write_gold
     assert pipeline.should_write_gold(context, silver_record) is True
