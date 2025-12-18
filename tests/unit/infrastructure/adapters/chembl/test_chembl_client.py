@@ -123,16 +123,6 @@ async def test_get_entity_count(adapter, mock_http_client):
     assert count == 100
 
 
-def test_fetch_sync():
-    """Test fetch_sync wrapper."""
-    # We can't easily test the sync wrapper with async mocks in the same loop context
-    # unless we use separate thread or process, but here we just want to ensure coverage
-    # of the method definition.
-    # However, running `asyncio.run` inside a test that is already async (pytest-asyncio) fails.
-    # So we skip actual execution or mock asyncio.new_event_loop.
-    pass
-
-
 def test_create_chembl_adapter():
     """Test factory function."""
     cb = MagicMock()
