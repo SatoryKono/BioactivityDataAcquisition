@@ -14,38 +14,30 @@ from moto import mock_aws
 from bioetl.domain.exceptions import CheckpointConflictError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+from bioetl.infrastructure.storage.s3_pool import S3ClientPool
 
 TEST_BUCKET = "test-checkpoints-bucket"
 TEST_REGION = "us-east-1"
 
 
 @pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    return {
-        "aws_access_key_id": "testing",
-        "aws_secret_access_key": "testing",
-        "aws_session_token": "testing",
-    }
-
-
-@pytest.fixture(scope="function")
-def s3_client(aws_credentials):
+def s3_client():
     """Fixture to create a mocked S3 client and bucket."""
+    # Clear pool to ensure we get a new client inside the mock context
+    S3ClientPool.clear_pool()
     with mock_aws():
         client = boto3.client("s3", region_name=TEST_REGION)
         client.create_bucket(Bucket=TEST_BUCKET)
         yield client
+    S3ClientPool.clear_pool()
 
 
 @pytest.fixture
 def checkpoint_storage(s3_client):
     """Fixture to create an S3Checkpoint instance configured for moto."""
-    # We must provide a dummy endpoint_url to prevent the class
-    # from falling back to local file mode. Moto intercepts the boto3 calls.
     return S3Checkpoint(
         bucket=TEST_BUCKET,
-        endpoint_url="http://localhost:5000",  # Dummy URL for moto
+        endpoint_url="https://s3.us-east-1.amazonaws.com",  # Use standard URL for moto interception
         region=TEST_REGION,
         access_key="testing",
         secret_key="testing",
@@ -161,7 +153,11 @@ class TestS3Checkpoint:
 
         # Monkey-patch _get_etag to return the stale ETag for this one call
         original_get_etag = checkpoint_storage._get_etag
-        checkpoint_storage._get_etag = asyncio.coroutine(lambda k: old_etag)
+
+        async def mock_get_etag(k):
+            return old_etag
+
+        checkpoint_storage._get_etag = mock_get_etag
 
         # Act & Assert
         with pytest.raises(CheckpointConflictError):
