@@ -419,6 +419,45 @@ interfaces             ✅          ✅              ✅             ✅        
 
 **Статус:** ✅ Полностью соблюдается (проверяется import-linter и архитектурными тестами)
 
+### 3.4 Ключевые архитектурные решения (ADR)
+
+| ADR | Название | Статус | Влияние |
+|-----|----------|--------|---------|
+| [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Accepted | Silver/Gold storage format |
+| [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Accepted | Bronze → Silver → Gold layers |
+| [ADR-003](../02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis for Distributed Locking | Accepted | LockPort implementation |
+| [ADR-004](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Accepted | Validation strategy |
+| [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md) | **Composition Layer Separation** | Accepted | Layer structure |
+| [ADR-0005](../architecture/decisions/0005-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | Application core structure |
+
+#### ADR-005: Composition Layer Separation (новое решение)
+
+**Вопрос:** Следует ли объединить `composition/` с `interfaces/`?
+
+**Решение:** **НЕТ** — Composition Root остаётся отдельным модулем.
+
+**Обоснование:**
+
+1. **Разная ответственность:**
+   - `interfaces/` — Driving Adapters (обработка входящих запросов)
+   - `composition/` — DI wiring (сборка графа зависимостей)
+
+2. **Разные права импорта:**
+   - `composition/` может импортировать из infrastructure (это его работа)
+   - `interfaces/` НЕ должен импортировать infrastructure напрямую
+
+3. **Множественные потребители:**
+   - CLI, Prefect flows, тесты — все используют `bootstrap_pipeline()`
+   - Composition Root не привязан к конкретному интерфейсу
+
+4. **Явность архитектуры:**
+   ```
+   composition/  → "Как система СОБИРАЕТСЯ" (DI)
+   interfaces/   → "Как пользователи ВЗАИМОДЕЙСТВУЮТ" (CLI, API)
+   ```
+
+См. полное обоснование в [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md).
+
 ---
 
 ## 4. Выявленные проблемы
