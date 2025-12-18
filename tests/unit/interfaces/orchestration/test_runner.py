@@ -101,16 +101,6 @@ def shutdown_signal():
 
 
 @pytest.fixture
-def mock_settings():
-    """Mock get_settings function."""
-    with patch("bioetl.interfaces.orchestration.runner.get_settings") as mock:
-        settings = MagicMock()
-        settings.pipeline.heartbeat_interval = 20.0
-        mock.return_value = settings
-        yield mock
-
-
-@pytest.fixture
 def mock_lock_manager():
     """Mock LockManager class."""
     with patch("bioetl.interfaces.orchestration.runner.LockManager") as mock:
@@ -131,7 +121,6 @@ def runner(
     mock_checkpoint_manager,
     shutdown_signal,
     mock_logger,
-    mock_settings,
     mock_lock_manager,
 ):
     """Create a PipelineRunner instance."""
@@ -161,7 +150,6 @@ class TestPipelineRunnerInit:
         mock_checkpoint_manager,
         shutdown_signal,
         mock_logger,
-        mock_settings,
         mock_lock_manager,
     ):
         """Test runner initializes correctly."""
@@ -190,7 +178,6 @@ class TestPipelineRunnerInit:
         mock_checkpoint_manager,
         shutdown_signal,
         mock_logger,
-        mock_settings,
         mock_lock_manager,
     ):
         """Test LockManager is created during initialization."""
@@ -206,6 +193,8 @@ class TestPipelineRunnerInit:
         )
 
         mock_lock_manager.create.assert_called_once()
+        call_kwargs = mock_lock_manager.create.call_args.kwargs
+        assert call_kwargs["heartbeat_interval"] == runtime_config.heartbeat_interval
 
 
 @pytest.mark.unit
@@ -330,7 +319,6 @@ class TestPipelineRunnerRun:
         mock_checkpoint_manager,
         shutdown_signal,
         mock_logger,
-        mock_settings,
         mock_lock_manager,
     ):
         """Test run passes limit to executor."""
