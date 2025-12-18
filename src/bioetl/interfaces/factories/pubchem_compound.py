@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
-from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import (
     Settings,
@@ -16,6 +15,7 @@ from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
+from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.factories.storage_factory import StorageFactory
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
@@ -51,8 +51,10 @@ class PubChemCompoundPipelineFactory:
         pipeline_config = config or load_pipeline_config("pubchem_compound")
 
         # Configure data source
-        data_source = PubChemClient(
-            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0)
+        data_source = DataSourceFactory.create(
+            "pubchem",
+            http_client=None,
+            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0),
         )
 
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)

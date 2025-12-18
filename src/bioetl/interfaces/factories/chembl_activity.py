@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -19,6 +18,7 @@ from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
+from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.factories.storage_factory import StorageFactory
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
@@ -67,7 +67,7 @@ class ChEMBLActivityPipelineFactory:
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
         )
-        data_source = ChemblAdapter(http_client=http_client)
+        data_source = DataSourceFactory.create("chembl", http_client=http_client)
 
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
 
