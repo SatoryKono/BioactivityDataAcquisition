@@ -209,7 +209,7 @@ class UniProtClient(PaginatedFetcherMixin):
         """Build the query string."""
         query = query or "*"
         if watermark:
-            query = f"{query} AND accession_id:[{watermark} TO *]"
+            query = f"{query} AND accession_id:[{watermark.to_api_param()} TO *]"
         return query
 
     async def _fetch_proteins(

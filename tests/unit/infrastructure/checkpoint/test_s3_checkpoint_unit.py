@@ -3,12 +3,13 @@
 import asyncio
 from unittest.mock import MagicMock, patch
 from uuid import UUID
+from datetime import datetime
 
 import pytest
 from botocore.exceptions import ClientError
 
 from bioetl.domain.exceptions import CheckpointConflictError
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 
 
@@ -60,7 +61,8 @@ async def test_save_new_checkpoint(checkpoint_store, mock_s3_client):
     )
 
     run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-    await checkpoint_store.save("pipeline1", 100, run_id)
+    watermark = Watermark.from_offset(100)
+    await checkpoint_store.save("pipeline1", watermark, run_id)
 
     mock_s3_client.put_object.assert_called_once()
     _args, kwargs = mock_s3_client.put_object.call_args
@@ -77,7 +79,8 @@ async def test_save_existing_checkpoint_with_etag(checkpoint_store, mock_s3_clie
     mock_s3_client.head_object.return_value = {"ETag": '"current-etag"'}
 
     run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
-    await checkpoint_store.save("pipeline1", 100, run_id)
+    watermark = Watermark.from_offset(100)
+    await checkpoint_store.save("pipeline1", watermark, run_id)
 
     mock_s3_client.put_object.assert_called_once()
     _args, kwargs = mock_s3_client.put_object.call_args
@@ -96,9 +99,10 @@ async def test_save_conflict(checkpoint_store, mock_s3_client):
     )
 
     run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
+    watermark = Watermark.from_offset(100)
 
     with pytest.raises(CheckpointConflictError):
-        await checkpoint_store.save("pipeline1", 100, run_id)
+        await checkpoint_store.save("pipeline1", watermark, run_id)
 
 
 @pytest.mark.asyncio
@@ -112,7 +116,8 @@ async def test_load_exists(checkpoint_store, mock_s3_client):
 
     assert result is not None
     watermark, run_id, metadata = result
-    assert watermark == 100
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == 100
     assert str(run_id) == "12345678-1234-5678-1234-567812345678"
     assert metadata == {"a": 1}
 
@@ -188,13 +193,20 @@ class TestS3CheckpointLocal:
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
         # Save
-        await store.save("p1", "2024-01-01", run_id)
+        watermark = Watermark.from_id("2024-01-01")
+        await store.save("p1", watermark, run_id)
         assert (tmp_path / "checkpoints/p1/latest.json").exists()
 
         # Load
         watermark, loaded_run_id, _ = await store.load("p1")
         from datetime import datetime
-        assert watermark == datetime(2024, 1, 1, 0, 0)
+        # 2024-01-01 could be parsed as date if ISO format
+        # But here we saved "2024-01-01" as string/ID if passed as ID.
+        # Wait, from_id("2024-01-01") -> value="2024-01-01".
+        # to_api_param -> "2024-01-01".
+        # load -> "2024-01-01" -> datetime.fromisoformat works!
+        assert isinstance(watermark, Watermark)
+        assert watermark.value == datetime(2024, 1, 1, 0, 0)
         assert loaded_run_id == run_id
 
         # List
