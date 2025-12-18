@@ -139,38 +139,6 @@ class BasePipeline(ABC):
         """Record limit (from runtime)."""
         return self._runtime.limit
 
-    # --- Convenience properties (delegate to services) ---
-
-    @property
-    def data_source(self) -> DataSourcePort:
-        """Data source port (from services)."""
-        return self._services.data_source
-
-    @property
-    def storage(self) -> StoragePort:
-        """Storage port (from services)."""
-        return self._services.storage
-
-    @property
-    def lock(self) -> LockPort:
-        """Lock port (from services)."""
-        return self._services.lock
-
-    @property
-    def checkpoint(self) -> CheckpointPort:
-        """Checkpoint port (from services)."""
-        return self._services.checkpoint
-
-    @property
-    def quarantine(self) -> QuarantinePort:
-        """Quarantine port (from services)."""
-        return self._services.quarantine
-
-    @property
-    def metrics(self) -> MetricsPort:
-        """Metrics port (from services)."""
-        return self._services.metrics
-
     # --- Logic Methods (to be used by Executor) ---
 
     @abstractmethod
