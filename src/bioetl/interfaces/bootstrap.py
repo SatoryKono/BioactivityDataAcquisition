@@ -124,7 +124,10 @@ def bootstrap_pipeline(
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
 
     runtime_config = PipelineRuntimeConfig(
-        run_type=run_type, resume=resume, limit=limit
+        run_type=run_type,
+        resume=resume,
+        limit=limit,
+        heartbeat_interval=settings.pipeline.heartbeat_interval,
     )
 
     # 1. Create the pipeline definition (Logic + Config + Services)
