@@ -69,7 +69,7 @@ class TestBronzeWriterInit:
 
         assert writer.json_path == custom_path
 
-    @patch("bioetl.infrastructure.storage.bronze_writer.S3ClientPool")
+    @patch("bioetl.infrastructure.storage.s3_pool.S3ClientPool")
     def test_init_s3_storage(self, mock_pool: MagicMock) -> None:
         """Test initialization for S3 storage."""
         mock_pool.get_client.return_value = MagicMock()
@@ -101,9 +101,10 @@ class TestBronzeWriterCompress:
         assert compressed is not None
         assert len(compressed) > 0
 
-        # Verify we can decompress
+        # Verify we can decompress (use streaming for robustness)
         decompressor = zstd.ZstdDecompressor()
-        decompressed = decompressor.decompress(compressed)
+        with decompressor.stream_reader(compressed) as reader:
+            decompressed = reader.read()
         expected = b"".join(sample_records)
         assert decompressed == expected
 
@@ -152,21 +153,23 @@ class TestBronzeWriterWriteLocal:
             batch_id=batch_id,
         )
 
-        # Verify path format
-        assert "bronze/v1/chembl/activity/2024-01-15" in str(path)
-        assert str(batch_id) in str(path)
-        assert str(path).endswith(".jsonl.zst")
+        # Verify path format (use as_posix for cross-platform compatibility)
+        path_str = path.as_posix()
+        assert "bronze/v1/chembl/activity/2024-01-15" in path_str
+        assert str(batch_id) in path_str
+        assert path_str.endswith(".jsonl.zst")
 
         # Verify file exists
         full_path = Path(temp_dir) / path
         assert full_path.exists()
 
-        # Verify content
+        # Verify content (use streaming decompression for robustness)
         with open(full_path, "rb") as f:
             compressed_data = f.read()
 
         decompressor = zstd.ZstdDecompressor()
-        decompressed = decompressor.decompress(compressed_data)
+        with decompressor.stream_reader(compressed_data) as reader:
+            decompressed = reader.read()
         expected = b"".join(sample_records)
         assert decompressed == expected
 
@@ -244,9 +247,9 @@ class TestBronzeWriterReadLocal:
             batch_id=batch_id,
         )
 
-        # Read back
+        # Read back (use as_posix for cross-platform compatibility)
         records = []
-        async for record in writer.read_bronze(str(path)):
+        async for record in writer.read_bronze(path.as_posix()):
             records.append(record)
 
         assert len(records) == 3
@@ -337,7 +340,7 @@ class TestBronzeWriterS3:
     """Tests for BronzeWriter S3 operations."""
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.bronze_writer.S3ClientPool")
+    @patch("bioetl.infrastructure.storage.s3_pool.S3ClientPool")
     async def test_write_bronze_s3(
         self,
         mock_pool: MagicMock,
@@ -370,7 +373,7 @@ class TestBronzeWriterS3:
         assert call_kwargs["ContentType"] == "application/zstd"
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.bronze_writer.S3ClientPool")
+    @patch("bioetl.infrastructure.storage.s3_pool.S3ClientPool")
     async def test_write_bronze_s3_bucket_not_found(
         self,
         mock_pool: MagicMock,
@@ -405,7 +408,7 @@ class TestBronzeWriterS3:
             )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.bronze_writer.S3ClientPool")
+    @patch("bioetl.infrastructure.storage.s3_pool.S3ClientPool")
     async def test_write_bronze_s3_upload_error(
         self,
         mock_pool: MagicMock,
@@ -440,7 +443,7 @@ class TestBronzeWriterS3:
             )
 
     @pytest.mark.asyncio
-    @patch("bioetl.infrastructure.storage.bronze_writer.S3ClientPool")
+    @patch("bioetl.infrastructure.storage.s3_pool.S3ClientPool")
     async def test_list_batches_s3(self, mock_pool: MagicMock) -> None:
         """Test listing batches from S3."""
         mock_client = MagicMock()

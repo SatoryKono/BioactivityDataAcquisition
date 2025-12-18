@@ -15,12 +15,15 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
     CircuitBreakerOpenError,
     ApiError,
+    ChemblApiError,
     BucketNotFoundError,
+    StorageError,
     UploadError,
     TableNotFoundError,
     SchemaViolationError,
     MissingRequiredFieldError,
     InvalidDataFormatError,
+    DataQualityThresholdError,
 )
 from bioetl.domain.types import ErrorType
 
@@ -31,6 +34,68 @@ class TestExceptions:
         assert issubclass(CriticalError, BioETLError)
         assert issubclass(RecoverableError, BioETLError)
         assert issubclass(DataQualityError, BioETLError)
+
+    def test_lock_lost_error_without_run_id(self) -> None:
+        """Test LockLostError without run_id."""
+        e = LockLostError("my_key")
+        assert e.key == "my_key"
+        assert e.run_id is None
+        assert "Lock lost: my_key" in str(e)
+        assert "run_id" not in str(e)
+
+    def test_lock_acquisition_error_without_owner(self) -> None:
+        """Test LockAcquisitionError without owner."""
+        e = LockAcquisitionError("my_key")
+        assert e.key == "my_key"
+        assert e.current_owner is None
+        assert "Failed to acquire lock: my_key" in str(e)
+        assert "owned by" not in str(e)
+
+    def test_api_error_without_status_code(self) -> None:
+        """Test ApiError without status code."""
+        e = ApiError("Something went wrong")
+        assert e.message == "Something went wrong"
+        assert e.status_code is None
+        assert str(e) == "Something went wrong"
+
+    def test_retry_exhausted_error_without_last_error(self) -> None:
+        """Test RetryExhaustedError without last_error."""
+        e = RetryExhaustedError("http://example.com/api", 5)
+        assert e.url == "http://example.com/api"
+        assert e.attempts == 5
+        assert e.last_error is None
+        assert "Exhausted 5 retry attempts" in str(e)
+
+    def test_missing_required_field_without_record_id(self) -> None:
+        """Test MissingRequiredFieldError without record_id."""
+        e = MissingRequiredFieldError("activity_id")
+        assert e.field == "activity_id"
+        assert e.record_id is None
+        assert "Missing required field: activity_id" in str(e)
+        assert "record_id" not in str(e)
+
+    def test_chembl_api_error_inheritance(self) -> None:
+        """Test ChemblApiError inherits from ApiError."""
+        e = ChemblApiError("ChEMBL service unavailable", 503)
+        assert isinstance(e, ApiError)
+        assert isinstance(e, RecoverableError)
+        assert e.status_code == 503
+        assert "[503]" in str(e)
+
+    def test_storage_error_inheritance(self) -> None:
+        """Test StorageError inheritance."""
+        e = StorageError("Storage operation failed")
+        assert isinstance(e, RecoverableError)
+        assert isinstance(e, BioETLError)
+
+    def test_data_quality_threshold_error(self) -> None:
+        """Test DataQualityThresholdError."""
+        e = DataQualityThresholdError(error_rate=0.25, threshold=0.20)
+        assert e.error_rate == 0.25
+        assert e.threshold == 0.20
+        assert "25.00% errors" in str(e)
+        assert "20.00%" in str(e)
+        assert isinstance(e, BioETLError)
 
     def test_critical_errors(self) -> None:
         """Test initialization of critical errors."""
