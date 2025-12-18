@@ -25,20 +25,21 @@ class PipelineConfig:
 
     def __post_init__(self) -> None:
         """Validate configuration on creation."""
-        if not self.pipeline_name:
-            raise ValueError("pipeline_name cannot be empty")
-        if not self.provider:
-            raise ValueError("provider cannot be empty")
-        if not self.entity_type:
-            raise ValueError("entity_type cannot be empty")
-        if self.batch_size <= 0:
-            raise ValueError(f"batch_size must be positive, got {self.batch_size}")
-        if self.checkpoint_interval <= 0:
-            raise ValueError(
-                f"checkpoint_interval must be positive, got {self.checkpoint_interval}"
-            )
-        if not self.primary_keys:
-            raise ValueError("primary_keys cannot be empty")
+        # Data-driven validation to reduce cyclomatic complexity
+        validations = [
+            (not self.pipeline_name, "pipeline_name cannot be empty"),
+            (not self.provider, "provider cannot be empty"),
+            (not self.entity_type, "entity_type cannot be empty"),
+            (self.batch_size <= 0, f"batch_size must be positive, got {self.batch_size}"),
+            (
+                self.checkpoint_interval <= 0,
+                f"checkpoint_interval must be positive, got {self.checkpoint_interval}",
+            ),
+            (not self.primary_keys, "primary_keys cannot be empty"),
+        ]
+        for condition, message in validations:
+            if condition:
+                raise ValueError(message)
 
     @property
     def lock_key(self) -> str:

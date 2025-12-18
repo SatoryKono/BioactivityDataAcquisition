@@ -60,6 +60,7 @@ def mock_components():
         "entity_type": "test_entity",
         "transform_callback": transform_callback,
         "gold_filter_callback": gold_filter_callback,
+        "silver_schema": MagicMock(),
     }
 
 
