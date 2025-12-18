@@ -53,8 +53,7 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
     """Run an ETL pipeline."""
     run_id = uuid4()
 
-    # Bootstrap the entire pipeline with all its dependencies
-    # Now returns a fully configured PipelineRunner
+    # Bootstrap returns a fully constructed runner
     runner = bootstrap_pipeline(
         pipeline_name=pipeline,
         run_id=run_id,
@@ -62,10 +61,10 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
         resume=resume,
         limit=limit,
     )
-    logger = runner._logger  # Access logger from runner (or bootstrap logging separately if needed)
+    logger = getattr(runner, "_logger", None)
 
     # Set up OS signal handlers to gracefully trigger the shutdown signal
-    setup_shutdown_handlers(runner.shutdown_signal)
+    setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
 
     logger.info("Starting pipeline run")
     try:
