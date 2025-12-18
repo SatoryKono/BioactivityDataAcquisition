@@ -29,5 +29,6 @@ __all__ = [
     # Components
     "CheckpointManager",
     "LockManager",
+    "PipelineExecutor",
     "QuarantineManager",
 ]
