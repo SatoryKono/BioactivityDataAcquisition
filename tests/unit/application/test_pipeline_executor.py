@@ -7,10 +7,10 @@ import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import RunID, RunType
 
 
@@ -35,39 +35,44 @@ def mock_components():
         logger=mock_logger,
     )
 
+    # Create mock services
     data_source = MagicMock()
     storage = AsyncMock()
+
+    services = MagicMock(spec=PipelineServices)
+    services.data_source = data_source
+    services.storage = storage
+    services.logger = mock_logger
+
+    # Create mock record processor
+    record_processor = AsyncMock(spec=RecordProcessor)
+    record_processor.process_batch = AsyncMock(return_value=(1, 1, 1, 0))
+
     checkpoint_manager = AsyncMock(spec=CheckpointManager)
-    quarantine_manager = AsyncMock(spec=QuarantineManager)
-    error_classifier = MagicMock(spec=ErrorClassifier)
     shutdown_signal = ShutdownSignal()
 
-    async def transform_callback(ctx, record):
-        return {"id": record.get("id", 1)}
-
-    def gold_filter_callback(ctx, record):
-        return True
-
     return {
-        "data_source": data_source,
-        "storage": storage,
+        "services": services,
+        "record_processor": record_processor,
         "checkpoint_manager": checkpoint_manager,
-        "quarantine_manager": quarantine_manager,
-        "error_classifier": error_classifier,
-        "context": context,
         "shutdown_signal": shutdown_signal,
-        "provider": "test_provider",
         "entity_type": "test_entity",
-        "transform_callback": transform_callback,
-        "gold_filter_callback": gold_filter_callback,
-        "silver_schema": MagicMock(),
+        # Keep data_source reference for test assertions
+        "_data_source": data_source,
     }
 
 
 @pytest.fixture
 def executor(mock_components):
     """Fixture for a PipelineExecutor."""
-    return PipelineExecutor(**mock_components)
+    # Extract only the args needed for PipelineExecutor
+    return PipelineExecutor(
+        services=mock_components["services"],
+        record_processor=mock_components["record_processor"],
+        checkpoint_manager=mock_components["checkpoint_manager"],
+        shutdown_signal=mock_components["shutdown_signal"],
+        entity_type=mock_components["entity_type"],
+    )
 
 
 async def test_executor_initialization(executor):
@@ -81,7 +86,7 @@ async def test_executor_initialization(executor):
 
 async def test_executor_execute_happy_path(executor, mock_components):
     """Test the execute method with a single record."""
-    mock_components["data_source"].fetch.return_value = AsyncIterator([{"id": 1}])
+    mock_components["_data_source"].fetch.return_value = AsyncIterator([{"id": 1}])
     await executor.execute(watermark=None, limit=None)
 
     assert executor.records_fetched == 1
@@ -91,7 +96,7 @@ async def test_executor_execute_happy_path(executor, mock_components):
 
 async def test_executor_execute_with_checkpoint(executor, mock_components):
     """Test that the checkpoint is saved every 1000 records."""
-    mock_components["data_source"].fetch.return_value = AsyncIterator(
+    mock_components["_data_source"].fetch.return_value = AsyncIterator(
         [{"id": i} for i in range(1000)]
     )
     await executor.execute(watermark=None, limit=None)

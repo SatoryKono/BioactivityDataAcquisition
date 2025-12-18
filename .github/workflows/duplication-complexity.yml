@@ -117,7 +117,7 @@ jobs:
           python-version: "3.11"
 
       - name: Check constructor argument counts
-        # TODO: Remove --warn-only after refactoring PipelineExecutor (currently 17 args)
+        # TODO: Remove --warn-only after refactoring RecordProcessor (currently 11 args)
         run: python scripts/check_constructor_args.py --warn-only
 
   executor-complexity:
