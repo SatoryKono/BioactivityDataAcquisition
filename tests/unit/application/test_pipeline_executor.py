@@ -1,17 +1,12 @@
 """Unit tests for the PipelineExecutor class."""
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import ShutdownSignal
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunID, RunType
 
 
 class AsyncIterator:
@@ -24,54 +19,45 @@ class AsyncIterator:
 
 
 @pytest.fixture
-def mock_components():
-    """Fixture for creating executor with explicit dependencies."""
+def mock_services():
+    """Create mock PipelineServices."""
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
 
-    context = PipelineContext(
-        run_id=RunID(uuid4()),
-        run_type=RunType.INCREMENTAL,
-        logger=mock_logger,
-    )
-
-    # Create mock services
     data_source = MagicMock()
     storage = AsyncMock()
 
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock()
     services.data_source = data_source
     services.storage = storage
     services.logger = mock_logger
 
-    # Create mock record processor
-    record_processor = AsyncMock(spec=RecordProcessor)
-    record_processor.process_batch = AsyncMock(return_value=(1, 1, 1, 0))
-
-    checkpoint_manager = AsyncMock(spec=CheckpointManager)
-    shutdown_signal = ShutdownSignal()
-
-    return {
-        "services": services,
-        "record_processor": record_processor,
-        "checkpoint_manager": checkpoint_manager,
-        "shutdown_signal": shutdown_signal,
-        "entity_type": "test_entity",
-        # Keep data_source reference for test assertions
-        "_data_source": data_source,
-    }
+    return services
 
 
 @pytest.fixture
-def executor(mock_components):
+def mock_record_processor():
+    """Create mock RecordProcessor."""
+    processor = AsyncMock()
+    processor.process_batch = AsyncMock(return_value=(1, 1, 1, 0))
+    return processor
+
+
+@pytest.fixture
+def mock_checkpoint_manager():
+    """Create mock CheckpointManager."""
+    return AsyncMock(spec=CheckpointManager)
+
+
+@pytest.fixture
+def executor(mock_services, mock_record_processor, mock_checkpoint_manager):
     """Fixture for a PipelineExecutor."""
-    # Extract only the args needed for PipelineExecutor
     return PipelineExecutor(
-        services=mock_components["services"],
-        record_processor=mock_components["record_processor"],
-        checkpoint_manager=mock_components["checkpoint_manager"],
-        shutdown_signal=mock_components["shutdown_signal"],
-        entity_type=mock_components["entity_type"],
+        services=mock_services,
+        record_processor=mock_record_processor,
+        checkpoint_manager=mock_checkpoint_manager,
+        shutdown_signal=ShutdownSignal(),
+        entity_type="test_entity",
     )
 
 
@@ -84,9 +70,9 @@ async def test_executor_initialization(executor):
     assert executor.records_quarantined == 0
 
 
-async def test_executor_execute_happy_path(executor, mock_components):
+async def test_executor_execute_happy_path(executor, mock_services):
     """Test the execute method with a single record."""
-    mock_components["_data_source"].fetch.return_value = AsyncIterator([{"id": 1}])
+    mock_services.data_source.fetch.return_value = AsyncIterator([{"id": 1}])
     await executor.execute(watermark=None, limit=None)
 
     assert executor.records_fetched == 1
@@ -94,12 +80,12 @@ async def test_executor_execute_happy_path(executor, mock_components):
     # Silver/Gold counts depend on RecordProcessor implementation
 
 
-async def test_executor_execute_with_checkpoint(executor, mock_components):
+async def test_executor_execute_with_checkpoint(executor, mock_services, mock_checkpoint_manager):
     """Test that the checkpoint is saved every 1000 records."""
-    mock_components["_data_source"].fetch.return_value = AsyncIterator(
+    mock_services.data_source.fetch.return_value = AsyncIterator(
         [{"id": i} for i in range(1000)]
     )
     await executor.execute(watermark=None, limit=None)
 
     assert executor.records_fetched == 1000
-    mock_components["checkpoint_manager"].save_checkpoint.assert_called_once()
+    mock_checkpoint_manager.save_checkpoint.assert_called_once()
