@@ -9,7 +9,7 @@ Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
 
 from __future__ import annotations
 
-from datetime import UTC
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base import BasePipeline
@@ -118,6 +118,21 @@ class ChEMBLActivityPipeline(BasePipeline):
         activity_id = record.get("activity_id")
         if activity_id:
             return str(activity_id)
-        from datetime import datetime
+        fallback_field = self.config.watermark_field
+        fallback_value = record.get(fallback_field) if fallback_field else None
+        if fallback_value is None:
+            return ""
 
-        return datetime.now(UTC)
+        if isinstance(fallback_value, datetime):
+            return fallback_value.replace(tzinfo=fallback_value.tzinfo or UTC)
+
+        if isinstance(fallback_value, str):
+            try:
+                parsed = datetime.fromisoformat(fallback_value)
+            except ValueError:
+                return fallback_value
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=UTC)
+            return parsed
+
+        return fallback_value
