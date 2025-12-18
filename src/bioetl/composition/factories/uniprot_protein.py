@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.pipelines.uniprot_protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.silver import UNIPROT_PROTEIN_SCHEMA
