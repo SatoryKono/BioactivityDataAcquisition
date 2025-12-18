@@ -17,7 +17,6 @@ from typing import Any, Self
 
 import httpx
 
-from bioetl.infrastructure.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -48,6 +47,7 @@ class UniProtClient(PaginatedFetcherMixin):
         rate: float = 100.0,  # 100 req/sec with API key
         circuit_breaker_threshold: int = 5,
         circuit_breaker_timeout: int = 300,
+        strict_error_handling: bool = False,
     ) -> None:
         """Initialize UniProt client.
 
@@ -57,10 +57,12 @@ class UniProtClient(PaginatedFetcherMixin):
             rate: Requests per second (default: 100.0 with API key, 10.0 without)
             circuit_breaker_threshold: Failures before opening circuit
             circuit_breaker_timeout: Recovery timeout in seconds
+            strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
         """
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.provider_name = "uniprot"
+        self.strict_error_handling = strict_error_handling
 
         # Adjust rate if no API key
         if not api_key:
@@ -239,7 +241,7 @@ class UniProtClient(PaginatedFetcherMixin):
                     exc_info=True,
                     extra={"query": query, "cursor": cursor},
                 )
-                if get_settings().strict_error_handling:
+                if self.strict_error_handling:
                     raise
                 return [], None
 
@@ -296,7 +298,7 @@ class UniProtClient(PaginatedFetcherMixin):
                 exc_info=True,
                 extra={"accession": query},
             )
-            if get_settings().strict_error_handling:
+            if self.strict_error_handling:
                 raise
             return
 
@@ -350,7 +352,7 @@ class UniProtClient(PaginatedFetcherMixin):
                 exc_info=True,
                 extra={"query": query},
             )
-            if get_settings().strict_error_handling:
+            if self.strict_error_handling:
                 raise
             return
 

@@ -52,7 +52,8 @@ class PubChemCompoundPipelineFactory:
 
         # Configure data source
         data_source = PubChemClient(
-            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0)
+            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0),
+            strict_error_handling=settings.strict_error_handling,
         )
 
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
