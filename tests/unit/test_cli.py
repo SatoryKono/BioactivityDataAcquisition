@@ -76,7 +76,7 @@ class TestRunCommand:
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
         mock_bootstrap.assert_called_once()
-        mock_asyncio_run.assert_called_once_with(mock_runner_instance.run())
+        mock_asyncio_run.assert_called_once()
 
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")

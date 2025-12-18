@@ -201,5 +201,7 @@ def bootstrap_pipeline(
         shutdown_signal=pipeline.shutdown_signal,
         logger=logger,
     )
+    # Expose original pipeline for tests/introspection
+    setattr(runner, "pipeline", pipeline)
 
     return runner
