@@ -7,19 +7,21 @@ Enforces Medallion Architecture constraints and operational limits.
 from typing import Any, Literal
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from bioetl.domain.config import DQConfig as DomainDQConfig
+
 
 class DQConfig(BaseModel):
     """Data Quality configuration."""
 
-    soft_fail_threshold: float = Field(default=0.05, ge=0.0, le=1.0)
-    hard_fail_threshold: float = Field(default=0.20, ge=0.0, le=1.0)
+    soft_fail_threshold: float = Field(default=0.05)
+    hard_fail_threshold: float = Field(default=0.20)
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> "DQConfig":
-        if self.soft_fail_threshold >= self.hard_fail_threshold:
-            raise ValueError(
-                "soft_fail_threshold must be strictly less than hard_fail_threshold"
-            )
+        DomainDQConfig.validate_thresholds(
+            soft_fail_threshold=self.soft_fail_threshold,
+            hard_fail_threshold=self.hard_fail_threshold,
+        )
         return self
 
 
