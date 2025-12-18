@@ -16,7 +16,6 @@ from bioetl.application.core.pipeline_config import (
 from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.infrastructure.config import get_settings
 from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:
@@ -52,14 +51,13 @@ class PipelineRunner:
         self._logger = logger
 
         # The runner is responsible for creating application services
-        settings = get_settings()
         self._lock_manager = LockManager.create(
             lock_port=self._services.lock,
             run_id=self._context.run_id,
             provider=self._config.provider,
             entity_type=self._config.entity_type,
             run_type=self._runtime.run_type,
-            heartbeat_interval=settings.pipeline.heartbeat_interval,
+            heartbeat_interval=self._runtime.heartbeat_interval,
             logger=self._logger,
             shutdown_signal=self.shutdown_signal,
         )
