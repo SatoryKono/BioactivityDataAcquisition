@@ -112,9 +112,22 @@ class BronzeWriter:
         Returns:
             Path to the written file (relative to bucket).
         """
+        from datetime import UTC
+
         date_str = date.strftime("%Y-%m-%d")
         # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
         relative_path = f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+        ingestion_ts = datetime.now(UTC)
+
+        # Build metadata for lineage tracking
+        metadata = {
+            "run_id": str(run_id),
+            "run_type": run_type.value,
+            "ingestion_ts": ingestion_ts.isoformat(),
+            "provider": provider,
+            "entity": entity,
+            "batch_id": str(batch_id),
+        }
 
         loop = asyncio.get_running_loop()
 
@@ -142,6 +155,10 @@ class BronzeWriter:
             full_path.parent.mkdir(parents=True, exist_ok=True)
             with open(full_path, "wb") as f:
                 f.write(compressed_data)
+            # Write sidecar metadata file for local storage
+            meta_path = full_path.with_suffix(".zst.meta.json")
+            with open(meta_path, "w") as f:
+                json.dump(metadata, f)
         else:
             # Include run metadata in S3 object metadata for traceability
             s3_metadata = {

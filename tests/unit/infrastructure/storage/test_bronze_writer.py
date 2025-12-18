@@ -179,6 +179,19 @@ class TestBronzeWriterWriteLocal:
         full_path = Path(temp_dir) / path
         assert full_path.exists()
 
+        # Verify metadata file exists
+        meta_path = full_path.with_suffix(".zst.meta.json")
+        assert meta_path.exists()
+
+        # Verify metadata content
+        with open(meta_path) as f:
+            metadata = json.load(f)
+        assert metadata["run_id"] == str(run_id)
+        assert metadata["run_type"] == run_type.value
+        assert metadata["provider"] == "chembl"
+        assert metadata["entity"] == "activity"
+        assert metadata["batch_id"] == str(batch_id)
+
         # Verify content (use streaming decompression for robustness)
         with open(full_path, "rb") as f:
             compressed_data = f.read()
@@ -416,6 +429,7 @@ class TestBronzeWriterS3:
         assert "bronze/v1/chembl/activity" in call_kwargs["Key"]
         assert call_kwargs["ContentType"] == "application/zstd"
         # Verify run metadata is included in S3 object metadata
+        assert "Metadata" in call_kwargs
         assert call_kwargs["Metadata"]["run_id"] == str(run_id)
         assert call_kwargs["Metadata"]["run_type"] == run_type.value
 

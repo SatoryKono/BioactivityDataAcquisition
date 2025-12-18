@@ -8,9 +8,14 @@ from uuid import UUID
 import pytest
 import zstandard as zstd
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+
+
+# Default test run metadata
+TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
+TEST_RUN_TYPE = RunType.INCREMENTAL
 
 
 @pytest.fixture
@@ -75,6 +80,8 @@ class TestBronzeWriter:
             entity=entity,
             date=date,
             batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
         )
 
         mock_s3_client.put_object.assert_called_once()
@@ -101,6 +108,8 @@ class TestBronzeWriter:
             entity="test",
             date=datetime.now(),
             batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
         )
 
         mock_s3_client.put_object.assert_called_once()
@@ -141,6 +150,8 @@ class TestBronzeWriter:
                 entity=entity,
                 date=date,
                 batch_id=batch_id,
+                run_id=TEST_RUN_ID,
+                run_type=TEST_RUN_TYPE,
             )
 
     async def test_write_bronze_save_json_copy(self, mock_s3_client):
@@ -163,6 +174,8 @@ class TestBronzeWriter:
             entity="test_entity",
             date=date,
             batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
         )
 
         # Should call put_object twice: once for zstd, once for json
@@ -210,6 +223,8 @@ class TestBronzeWriter:
             entity="test_entity",
             date=date,
             batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
         )
 
         # Should log warning
@@ -235,6 +250,8 @@ class TestBronzeWriterLocal:
             entity="test_entity",
             date=date,
             batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
         )
 
         expected_file = tmp_path / path
@@ -254,6 +271,8 @@ class TestBronzeWriterLocal:
             entity="test_entity",
             date=date,
             batch_id=batch_id,
+            run_id=TEST_RUN_ID,
+            run_type=TEST_RUN_TYPE,
         )
 
         file_path = tmp_path / path
@@ -309,6 +328,8 @@ class TestBronzeWriterLocal:
                 entity="test_entity",
                 date=date,
                 batch_id=batch_id,
+                run_id=TEST_RUN_ID,
+                run_type=TEST_RUN_TYPE,
             )
 
         batches = await writer.list_batches("test_provider", "test_entity", date)
