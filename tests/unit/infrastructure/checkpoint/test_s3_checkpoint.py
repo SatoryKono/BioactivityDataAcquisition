@@ -156,7 +156,7 @@ async def test_list_all(checkpoint_store, mock_s3_client):
     ]
 
     pipelines = await checkpoint_store.list_all()
-    assert pipelines == ["1", "2", "3"]
+    assert pipelines == ["p1", "p2", "p3"]
 
 
 @pytest.mark.asyncio
