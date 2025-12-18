@@ -17,6 +17,7 @@ def pipeline():
     # Mocks for BasePipeline.__init__
     config.pipeline_name = "pubchem"
     config.dataset_name = "compound"
+    config.provider = "pubchem"
     runtime.run_type = "batch" # Mock run_type
 
     return PubChemCompoundPipeline(config=config, runtime=runtime, services=services)
@@ -38,6 +39,7 @@ def test_create_pipeline():
     config = MagicMock() # Relax spec to allow attributes
     config.pipeline_name = "pubchem"
     config.dataset_name = "compound"
+    config.provider = "pubchem"
 
     pipeline = PubChemCompoundPipeline.create(runtime, services, config)
     assert isinstance(pipeline, PubChemCompoundPipeline)
@@ -59,7 +61,7 @@ async def test_transform_bronze_to_silver_valid(pipeline, context):
 
     result = await pipeline.transform_bronze_to_silver(context, record)
 
-    assert result["cid"] == 12345
+    assert result["cid"] == "12345"  # CID is now string
     assert result["molecular_formula"] == "C6H12O6"
     assert result["molecular_weight"] == 180.16
     assert result["canonical_smiles"] == "CCCCCC"
@@ -67,7 +69,8 @@ async def test_transform_bronze_to_silver_valid(pipeline, context):
     assert result["inchi"] == "InChI=1S/..."
     assert result["inchikey"] == "KEY123"
     assert result["iupac_name"] == "Hexane"
-    assert result["updated_at"] == "run_123"
+    assert "entity_id" in result
+    assert "content_hash" in result
 
 
 @pytest.mark.asyncio
@@ -79,11 +82,24 @@ async def test_transform_bronze_to_silver_missing_fields(pipeline, context):
 
     result = await pipeline.transform_bronze_to_silver(context, record)
 
-    assert result["cid"] == 67890
+    assert result["cid"] == "67890"  # CID is now string
     assert result["molecular_formula"] is None
     assert result["molecular_weight"] is None
     assert result["canonical_smiles"] is None
-    assert result["updated_at"] == "run_123"
+    assert "entity_id" in result
+    assert "content_hash" in result
+
+
+@pytest.mark.asyncio
+async def test_transform_bronze_to_silver_missing_cid(pipeline, context):
+    """Test transformation returns None when CID is missing."""
+    record = {
+        "molecular_formula": "C6H12O6",
+    }
+
+    result = await pipeline.transform_bronze_to_silver(context, record)
+
+    assert result is None
 
 
 def test_extract_watermark(pipeline, context):

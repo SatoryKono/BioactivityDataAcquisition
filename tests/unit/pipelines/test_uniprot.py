@@ -17,6 +17,7 @@ def pipeline():
     # Mocks for BasePipeline.__init__
     config.pipeline_name = "uniprot"
     config.dataset_name = "protein"
+    config.provider = "uniprot"
     runtime.run_type = "batch"
 
     return UniProtProteinPipeline(config=config, runtime=runtime, services=services)
@@ -38,6 +39,7 @@ def test_create_pipeline():
     config = MagicMock() # Relax spec to allow attributes
     config.pipeline_name = "uniprot"
     config.dataset_name = "protein"
+    config.provider = "uniprot"
 
     pipeline = UniProtProteinPipeline.create(runtime, services, config)
     assert isinstance(pipeline, UniProtProteinPipeline)
@@ -84,7 +86,8 @@ async def test_transform_bronze_to_silver_valid(pipeline, context):
     assert result["gene_names"] == ["GENE1", "GENE2"]
     assert result["organism_id"] == 9606
     assert result["sequence_length"] == 300
-    assert result["updated_at"] == "run_456"
+    assert "entity_id" in result
+    assert "content_hash" in result
 
 
 @pytest.mark.asyncio
@@ -102,7 +105,8 @@ async def test_transform_bronze_to_silver_minimal(pipeline, context):
     assert result["gene_names"] == []
     assert result["organism_id"] is None
     assert result["sequence_length"] is None
-    assert result["updated_at"] == "run_456"
+    assert "entity_id" in result
+    assert "content_hash" in result
 
 
 @pytest.mark.asyncio
@@ -127,6 +131,8 @@ async def test_transform_bronze_to_silver_malformed_nested(pipeline, context):
     assert result["accession"] == "P99999"
     assert result["protein_name"] is None
     assert result["gene_names"] == []
+    assert "entity_id" in result
+    assert "content_hash" in result
 
 
 @pytest.mark.asyncio
@@ -143,6 +149,36 @@ async def test_transform_bronze_to_silver_exceptions(pipeline, context):
     assert result["accession"] == "P_ERR"
     assert result["protein_name"] is None
     assert result["gene_names"] == []
+    assert "entity_id" in result
+    assert "content_hash" in result
+
+
+@pytest.mark.asyncio
+async def test_transform_bronze_to_silver_organism_none(pipeline, context):
+    """Test transformation when organism is explicitly None."""
+    record = {
+        "primaryAccession": "P_ORG_NONE",
+        "organism": None,
+    }
+
+    result = await pipeline.transform_bronze_to_silver(context, record)
+
+    assert result["accession"] == "P_ORG_NONE"
+    assert result["organism_id"] is None
+    assert "entity_id" in result
+    assert "content_hash" in result
+
+
+@pytest.mark.asyncio
+async def test_transform_bronze_to_silver_missing_accession(pipeline, context):
+    """Test transformation returns None when accession is missing."""
+    record = {
+        "uniProtkbId": "PROT_HUMAN",
+    }
+
+    result = await pipeline.transform_bronze_to_silver(context, record)
+
+    assert result is None
 
 
 def test_extract_watermark(pipeline, context):
