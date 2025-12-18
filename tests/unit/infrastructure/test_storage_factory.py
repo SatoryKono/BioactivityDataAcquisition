@@ -6,12 +6,15 @@ import pytest
 
 from bioetl.infrastructure.factories.storage_factory import StorageContext, StorageFactory
 from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.infrastructure.config import Settings
 
 
 @pytest.fixture
 def mock_logger():
     """Create a mock logger."""
-    return MagicMock()
+    logger = MagicMock()
+    logger.info = MagicMock()
+    return logger
 
 
 @pytest.fixture
