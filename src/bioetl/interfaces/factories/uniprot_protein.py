@@ -55,10 +55,11 @@ class UniProtProteinPipelineFactory:
         runtime: PipelineRuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> BasePipeline:
         """Creates UniProt Protein pipeline."""
-        config_model = load_pipeline_config("uniprot_protein")
+        config_model = config or load_pipeline_config("uniprot_protein")
         services = UniProtProteinPipelineFactory.build_services(
             settings=settings, logger=logger, config=config_model, **kwargs
         )

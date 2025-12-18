@@ -27,7 +27,7 @@ from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
-from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
@@ -116,6 +116,9 @@ def bootstrap_pipeline(
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
 
+    # Load validated YAML config
+    yaml_config = load_pipeline_config(pipeline_name)
+
     runtime_config = PipelineRuntimeConfig(
         run_type=run_type,
         resume=resume,
@@ -129,6 +132,7 @@ def bootstrap_pipeline(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
+            config=yaml_config,
         )
         silver_schema = CHEMBL_ACTIVITY_SCHEMA
     elif pipeline_name == "pubchem_compound":
@@ -136,6 +140,7 @@ def bootstrap_pipeline(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
+            config=yaml_config,
         )
         silver_schema = PUBCHEM_COMPOUND_SCHEMA
     elif pipeline_name == "uniprot_protein":
@@ -143,6 +148,7 @@ def bootstrap_pipeline(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
+            config=yaml_config,
         )
         silver_schema = UNIPROT_PROTEIN_SCHEMA
     else:
@@ -169,8 +175,8 @@ def bootstrap_pipeline(
     dq_config = {
         "silver_table": pipeline.config.silver_table,
         "gold_table": pipeline.config.gold_table,
-        "soft_fail_threshold": 0.05,
-        "hard_fail_threshold": 0.20,
+        "soft_fail_threshold": yaml_config.dq.soft_fail_threshold,
+        "hard_fail_threshold": yaml_config.dq.hard_fail_threshold,
     }
 
     executor = PipelineExecutor(
