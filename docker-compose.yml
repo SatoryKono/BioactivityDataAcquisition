@@ -1,10 +1,31 @@
+version: '3.8'
+
 services:
+  bioetl:
+    build:
+      context: .
+      target: development
+    volumes:
+      - ./src:/app/src
+      - ./configs:/app/configs
+      - ./data:/app/data
+      - ./.env:/app/.env
+    ports:
+      - "8000:8000" # For Prometheus metrics
+    depends_on:
+      - minio
+      - redis
+    environment:
+      - BIOETL_ENV=docker
+
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     ports:
-      - "9000"
-      - "9001"
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -17,9 +38,39 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379"
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+volumes:
+  minio_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
