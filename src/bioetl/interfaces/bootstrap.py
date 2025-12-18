@@ -48,7 +48,6 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
-# Explicit exports for test mocking
 __all__ = [
     "bootstrap_logger",
     "bootstrap_pipeline",
@@ -78,7 +77,6 @@ if TYPE_CHECKING:
 def bootstrap_quarantine() -> QuarantinePort:
     """Bootstrap the quarantine service for CLI inspection."""
     settings = get_settings()
-    # Using silver bucket/common/quarantine as per design
     base_path = f"s3://{settings.s3.bucket_silver}/common/quarantine"
     return UnifiedQuarantine(
         base_path=base_path,
@@ -114,13 +112,6 @@ def bootstrap_pipeline(
 ) -> PipelineRunner:
     """
     Composition Root: Assembles and returns a fully configured PipelineRunner.
-
-    This function wires together:
-    1. Infrastructure Adapters (via PipelineServices)
-    2. Domain Logic (via BasePipeline subclass)
-    3. Application Managers (Checkpoint, Quarantine, ErrorClassifier)
-    4. Execution Engine (PipelineExecutor)
-    5. Orchestration (PipelineRunner)
     """
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
@@ -132,7 +123,6 @@ def bootstrap_pipeline(
         heartbeat_interval=settings.pipeline.heartbeat_interval,
     )
 
-    # 1. Create the pipeline definition (Logic + Config + Services)
     silver_schema = None
     if pipeline_name == "chembl_activity":
         pipeline = ChEMBLActivityPipelineFactory.create_with_services(
@@ -158,7 +148,6 @@ def bootstrap_pipeline(
     else:
         raise ValueError(f"Unknown pipeline name: {pipeline_name}")
 
-    # 2. Instantiate Application Managers
     checkpoint_manager = CheckpointManager(
         checkpoint_port=pipeline.services.checkpoint,
         logger=logger,
@@ -177,11 +166,9 @@ def bootstrap_pipeline(
 
     error_classifier = ErrorClassifier()
 
-    # 3. Instantiate Executor
     dq_config = {
         "silver_table": pipeline.config.silver_table,
         "gold_table": pipeline.config.gold_table,
-        # Default thresholds; could be exposed in config later
         "soft_fail_threshold": 0.05,
         "hard_fail_threshold": 0.20,
     }
@@ -205,7 +192,6 @@ def bootstrap_pipeline(
         dq_config=dq_config,
     )
 
-    # 4. Instantiate Runner
     runner = PipelineRunner(
         config=pipeline.config,
         runtime=pipeline.runtime,
@@ -216,7 +202,6 @@ def bootstrap_pipeline(
         shutdown_signal=pipeline.shutdown_signal,
         logger=logger,
     )
-    # Expose original pipeline for tests/introspection
     setattr(runner, "pipeline", pipeline)
 
     return runner
