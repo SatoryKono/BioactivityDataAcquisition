@@ -145,6 +145,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         field["name"]
         for field in yaml_config.source.get("fields", [])
     ]
+    watermark_field = yaml_config.source.get("watermark_field")
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
@@ -156,6 +157,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=source_fields,
+        watermark_field=watermark_field,
         dq=DomainDQConfig(
             soft_fail_threshold=yaml_config.dq_rules.soft_fail_threshold,
             hard_fail_threshold=yaml_config.dq_rules.hard_fail_threshold,
