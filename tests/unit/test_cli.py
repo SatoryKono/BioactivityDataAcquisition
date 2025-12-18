@@ -38,7 +38,7 @@ class TestQuarantineCommands:
     def test_quarantine_inspect_command(self, mock_bootstrap_quarantine, runner):
         """Test that quarantine inspect command works."""
         mock_quarantine_service = AsyncMock()
-        mock_quarantine_service.get_stats.return_value = {"errors": 10}
+        mock_quarantine_service.inspect.return_value = [{"error_code": "ERR01", "payload": "{}"}]
         mock_bootstrap_quarantine.return_value = mock_quarantine_service
 
         result = runner.invoke(
@@ -48,7 +48,7 @@ class TestQuarantineCommands:
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
         assert "Inspecting quarantine for test_pipeline" in result.output
-        assert "errors" in result.output
+        assert "ERR01" in result.output
 
 
 class TestRunCommand:
