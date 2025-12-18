@@ -40,7 +40,7 @@ class ChEMBLActivityPipelineFactory:
     def build_services(
         settings: Settings,
         logger: "structlog.BoundLogger",
-        raw_config: dict[str, Any] | None = None,
+        config: PipelineYamlConfig | None = None,
         **kwargs,  # Accept and ignore extra ports for now
     ) -> PipelineServices:
         """Builds PipelineServices from settings.
@@ -48,7 +48,7 @@ class ChEMBLActivityPipelineFactory:
         Args:
             settings: Application settings
             logger: Structured logger
-            raw_config: Pre-loaded pipeline config dict (avoids duplicate I/O)
+            config: Pre-loaded pipeline config (avoids duplicate I/O)
             **kwargs: Additional keyword arguments (ignored)
 
         Returns:
@@ -62,17 +62,7 @@ class ChEMBLActivityPipelineFactory:
         access_key, secret_key = get_aws_credentials(settings)
 
         # Use provided config or load from YAML
-        raw_config = raw_config or load_pipeline_config("chembl_activity")
-
-        # Convert raw config to typed config for StorageFactory
-        pipeline_config = PipelineYamlConfig(
-            pipeline_name="chembl_activity",
-            provider=raw_config.get("provider", "chembl"),
-            entity_type=raw_config.get("entity_type", "activity"),
-            primary_keys=raw_config.get("primary_keys", ["activity_id"]),
-            silver_table=raw_config.get("silver_table", "chembl.activity"),
-            sink=raw_config.get("sink", {}),
-        )
+        pipeline_config = config or load_pipeline_config("chembl_activity")
 
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
@@ -130,10 +120,10 @@ class ChEMBLActivityPipelineFactory:
         Loads config once and passes it through to avoid duplicate I/O.
         """
         # Load config once
-        raw_config = load_pipeline_config("chembl_activity")
+        config_model = load_pipeline_config("chembl_activity")
 
         services = ChEMBLActivityPipelineFactory.build_services(
-            settings=settings, logger=logger, raw_config=raw_config, **kwargs
+            settings=settings, logger=logger, config=config_model, **kwargs
         )
         # get_pipeline_config uses @lru_cache, so this is cheap
         config = get_pipeline_config("chembl_activity")

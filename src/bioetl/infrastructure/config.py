@@ -79,8 +79,8 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         return d
 
 
-def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
-    """Load pipeline configuration from YAML file.
+def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
+    """Load pipeline configuration from YAML file and return typed model.
 
     Dynamically resolves the configuration file path based on the pipeline name.
     The pipeline name is expected to follow the pattern '{provider}_{entity}'.
@@ -90,7 +90,10 @@ def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
 
     Returns:
-        Dictionary with pipeline configuration (including merged source config)
+        PipelineYamlConfig: Validated pipeline configuration
+
+    Raises:
+        ValueError: If config file is missing or validation fails
     """
     # 1. Try dynamic resolution: {provider}_{entity}
     try:
@@ -102,9 +105,7 @@ def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
 
     # 2. Check if file exists
     if not config_path.exists():
-        # Fallback: explicit search for non-standard names or complex paths
-        # For now, we return empty dict if not found, consistent with previous behavior
-        return {}
+        raise ValueError(f"Configuration file not found: {config_path}")
 
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
@@ -118,7 +119,8 @@ def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
             # Merge source config into main config
             config["source"] = source_config.get("source", source_config)
 
-    return config
+    # Validate against strict schema
+    return PipelineYamlConfig.model_validate(config)
 
 
 @lru_cache(maxsize=10)
@@ -134,39 +136,24 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
     Raises:
         ValueError: If pipeline configuration not found
     """
-    config_data = load_pipeline_config(pipeline_name)
-    if not config_data:
-        raise ValueError(f"Pipeline configuration not found: {pipeline_name}")
+    pipeline_yaml_config = load_pipeline_config(pipeline_name)
 
     # Extract field names from source config
     source_fields = [
-        field["name"] for field in config_data.get("source", {}).get("fields", [])
+        field["name"]
+        for field in pipeline_yaml_config.source.get("fields", [])
     ]
-
-    # Validate against strict schema
-    # Use default values if keys are missing to allow partial configs during migration
-    validated_config = PipelineYamlConfig(
-        pipeline_name=pipeline_name,
-        provider=config_data.get("provider", pipeline_name.split("_")[0]),
-        entity_type=config_data.get("entity_type", pipeline_name.split("_")[-1]),
-        primary_keys=config_data.get("primary_keys", ["id"]),
-        silver_table=config_data.get("silver_table", f"{pipeline_name}.data"),
-        gold_table=config_data.get("gold_table", f"{pipeline_name}.data_gold"),
-        batch_size=config_data.get("batch_size", 100),
-        checkpoint_interval=config_data.get("checkpoint_interval", 1000),
-        # Pass other fields if needed or allow default
-    )
 
     # Map validated config to Domain PipelineConfig
     return PipelineConfig(
-        pipeline_name=validated_config.pipeline_name,
-        provider=validated_config.provider,
-        entity_type=validated_config.entity_type,
-        primary_keys=validated_config.primary_keys,
-        silver_table=validated_config.silver_table,
-        gold_table=validated_config.gold_table,
-        batch_size=validated_config.batch_size,
-        checkpoint_interval=validated_config.checkpoint_interval,
+        pipeline_name=pipeline_yaml_config.pipeline_name,
+        provider=pipeline_yaml_config.provider,
+        entity_type=pipeline_yaml_config.entity_type,
+        primary_keys=pipeline_yaml_config.primary_keys,
+        silver_table=pipeline_yaml_config.silver_table,
+        gold_table=pipeline_yaml_config.gold_table,
+        batch_size=pipeline_yaml_config.batch_size,
+        checkpoint_interval=pipeline_yaml_config.checkpoint_interval,
         fields=source_fields,
     )
 

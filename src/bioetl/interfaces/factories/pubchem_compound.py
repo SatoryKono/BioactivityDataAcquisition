@@ -37,7 +37,7 @@ class PubChemCompoundPipelineFactory:
     def build_services(
         settings: Settings,
         logger: "structlog.BoundLogger",
-        raw_config: dict[str, Any] | None = None,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> PipelineServices:
         """Builds PipelineServices from settings."""
@@ -48,21 +48,11 @@ class PubChemCompoundPipelineFactory:
         access_key, secret_key = get_aws_credentials(settings)
 
         # Use provided config or load from YAML
-        raw_config = raw_config or load_pipeline_config("pubchem_compound")
-
-        # Convert raw config to typed config for StorageFactory
-        pipeline_config = PipelineYamlConfig(
-            pipeline_name="pubchem_compound",
-            provider=raw_config.get("provider", "pubchem"),
-            entity_type=raw_config.get("entity_type", "compound"),
-            primary_keys=raw_config.get("primary_keys", ["cid"]),
-            silver_table=raw_config.get("silver_table", "pubchem.compound"),
-            sink=raw_config.get("sink", {}),
-        )
+        pipeline_config = config or load_pipeline_config("pubchem_compound")
 
         # Configure data source
         data_source = PubChemClient(
-            rate=raw_config.get("source", {}).get("api", {}).get("rate_limit", 5.0)
+            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0)
         )
 
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
@@ -108,9 +98,9 @@ class PubChemCompoundPipelineFactory:
         **kwargs,
     ) -> BasePipeline:
         """Creates PubChem Compound pipeline."""
-        raw_config = load_pipeline_config("pubchem_compound")
+        config_model = load_pipeline_config("pubchem_compound")
         services = PubChemCompoundPipelineFactory.build_services(
-            settings=settings, logger=logger, raw_config=raw_config, **kwargs
+            settings=settings, logger=logger, config=config_model, **kwargs
         )
         config = get_pipeline_config("pubchem_compound")
 
