@@ -111,10 +111,10 @@ class ChemblAdapter:
             "format": "json",
         }
         if watermark is not None and entity_type == "activity":
-            if isinstance(watermark, datetime):
-                params["updated_on__gte"] = watermark.isoformat()
+            if isinstance(watermark.value, datetime):
+                params["updated_on__gte"] = watermark.value.isoformat()
             else:
-                params["activity_id__gt"] = str(watermark)
+                params["activity_id__gt"] = str(watermark.value)
         return params
 
     def _process_response(

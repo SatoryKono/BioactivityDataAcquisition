@@ -67,10 +67,7 @@ class S3Checkpoint:
         """Save checkpoint atomically."""
         key = self._get_key(pipeline)
 
-        if isinstance(watermark, (int, str)):
-            watermark_str = str(watermark)
-        else:
-            watermark_str = watermark.isoformat()
+        watermark_str = watermark.to_api_param()
 
         checkpoint_data = {
             "pipeline": pipeline,
@@ -134,16 +131,22 @@ class S3Checkpoint:
 
         checkpoint_data = json.loads(checkpoint_json)
         watermark_str = checkpoint_data["watermark"]
-        watermark: Watermark
+
+        # Determine type and wrap in Watermark object
+        value: Any
         try:
             from datetime import datetime
 
-            watermark = datetime.fromisoformat(watermark_str)
+            value = datetime.fromisoformat(watermark_str)
+            watermark = Watermark.from_timestamp(value)
         except (ValueError, TypeError):
             try:
-                watermark = int(watermark_str)
+                value = int(watermark_str)
+                watermark = Watermark.from_offset(value)
             except ValueError:
-                watermark = watermark_str
+                value = watermark_str
+                watermark = Watermark.from_id(value)
+
         run_id = RunID(UUID(checkpoint_data["run_id"]))
         metadata = checkpoint_data.get("metadata", {})
         return (watermark, run_id, metadata)

@@ -158,4 +158,4 @@ class BasePipeline(ABC):
         self, _context: PipelineContext, _record: dict[str, Any]
     ) -> Watermark:
         """Extract watermark value from a record."""
-        return datetime.now(UTC)
+        return Watermark.from_timestamp(datetime.now(UTC))

@@ -145,7 +145,7 @@ class PubChemClient:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds incrementally using a watermark."""
         fetched = 0
-        start_cid = int(watermark) if isinstance(watermark, (int, str)) else 1
+        start_cid = int(watermark) if watermark else 1
         batch_size = 100
         current_cid = start_cid
 
