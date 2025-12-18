@@ -82,21 +82,28 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
 def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
     """Load pipeline configuration from YAML file.
 
+    Dynamically resolves the configuration file path based on the pipeline name.
+    The pipeline name is expected to follow the pattern '{provider}_{entity}'.
+    Example: 'chembl_activity' -> 'configs/pipelines/chembl/activity.yaml'
+
     Args:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
 
     Returns:
         Dictionary with pipeline configuration (including merged source config)
     """
-    # Map pipeline name to config path
-    config_paths = {
-        "chembl_activity": Path("configs/pipelines/chembl/activity.yaml"),
-        "pubchem_compound": Path("configs/pipelines/pubchem/compound.yaml"),
-        "uniprot_protein": Path("configs/pipelines/uniprot/protein.yaml"),
-    }
+    # 1. Try dynamic resolution: {provider}_{entity}
+    try:
+        provider, entity = pipeline_name.split("_", 1)
+        config_path = Path(f"configs/pipelines/{provider}/{entity}.yaml")
+    except ValueError:
+        # Fallback for names that don't match the pattern (no underscore)
+        config_path = Path(f"configs/pipelines/{pipeline_name}.yaml")
 
-    config_path = config_paths.get(pipeline_name)
-    if not config_path or not config_path.exists():
+    # 2. Check if file exists
+    if not config_path.exists():
+        # Fallback: explicit search for non-standard names or complex paths
+        # For now, we return empty dict if not found, consistent with previous behavior
         return {}
 
     with open(config_path, "r", encoding="utf-8") as f:
