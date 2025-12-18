@@ -12,6 +12,49 @@ import pytest
 from bioetl.domain.types import RunType
 
 
+# =============================================================================
+# Re-exports from interfaces.factories Tests
+# =============================================================================
+
+
+@pytest.mark.unit
+class TestInterfacesFactoriesReexports:
+    """Test that interfaces.factories re-exports work correctly."""
+
+    def test_chembl_activity_factory_reexport(self):
+        """Test ChEMBLActivityPipelineFactory is re-exported."""
+        from bioetl.interfaces.factories import ChEMBLActivityPipelineFactory
+
+        assert ChEMBLActivityPipelineFactory is not None
+        assert hasattr(ChEMBLActivityPipelineFactory, "build_services")
+        assert hasattr(ChEMBLActivityPipelineFactory, "create_with_services")
+
+    def test_pubchem_compound_factory_reexport(self):
+        """Test PubChemCompoundPipelineFactory is re-exported."""
+        from bioetl.interfaces.factories import PubChemCompoundPipelineFactory
+
+        assert PubChemCompoundPipelineFactory is not None
+        assert hasattr(PubChemCompoundPipelineFactory, "build_services")
+        assert hasattr(PubChemCompoundPipelineFactory, "create_with_services")
+
+    def test_uniprot_protein_factory_reexport(self):
+        """Test UniProtProteinPipelineFactory is re-exported."""
+        from bioetl.interfaces.factories import UniProtProteinPipelineFactory
+
+        assert UniProtProteinPipelineFactory is not None
+        assert hasattr(UniProtProteinPipelineFactory, "build_services")
+        assert hasattr(UniProtProteinPipelineFactory, "create_with_services")
+
+    def test_all_exports_in_module(self):
+        """Test __all__ contains expected factories."""
+        from bioetl import interfaces
+
+        factory_module = interfaces.factories
+        assert "ChEMBLActivityPipelineFactory" in factory_module.__all__
+        assert "PubChemCompoundPipelineFactory" in factory_module.__all__
+        assert "UniProtProteinPipelineFactory" in factory_module.__all__
+
+
 @pytest.fixture
 def mock_settings():
     """Create mock application settings."""
