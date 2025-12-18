@@ -1,11 +1,13 @@
 """Unit tests for infrastructure factories."""
 
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
+import pyarrow as pa
 import pytest
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunType
 
 
 @pytest.mark.unit
@@ -157,8 +159,6 @@ class TestStorageAdapter:
         self, storage_adapter, mock_bronze_writer
     ):
         """Test write_bronze delegates to bronze writer."""
-        from datetime import datetime
-
         batch_id = BatchID(uuid4())
         records = iter([b"record1", b"record2"])
 
@@ -176,12 +176,36 @@ class TestStorageAdapter:
         self, storage_adapter, mock_silver_writer
     ):
         """Test write_silver delegates to silver writer."""
-        records = [{"id": 1, "value": "test"}]
+        run_id = uuid4()
+        batch_id = BatchID(uuid4())
+        ts = datetime.now(timezone.utc)
+
+        records = [
+            {
+                "id": 1,
+                "value": "test",
+                "_run_id": str(run_id),
+                "_run_type": RunType.INCREMENTAL.value,
+                "_source_batch_id": str(batch_id),
+                "_ingestion_ts": ts,
+            }
+        ]
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("value", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.timestamp("us", tz="UTC")),
+            ]
+        )
 
         await storage_adapter.write_silver(
             table_name="test.table",
             records=records,
             primary_keys=["id"],
+            schema=schema,
             mode="merge",
         )
 
@@ -189,6 +213,7 @@ class TestStorageAdapter:
             table_name="test.table",
             records=records,
             primary_keys=["id"],
+            schema=schema,
         )
 
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):

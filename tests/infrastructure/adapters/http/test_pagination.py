@@ -18,7 +18,7 @@ async def test_paginated_fetch_basic():
     # Page 1: [1, 2], next='c2'
     # Page 2: [3, 4], next=None
 
-    async def fetch_page(cursor):
+    async def fetch_page(cursor, _):
         if cursor is None:
             return [1, 2], 'c2'
         elif cursor == 'c2':
@@ -37,7 +37,7 @@ async def test_paginated_fetch_with_limit():
     """Test pagination with limit."""
     fetcher = MockFetcher()
 
-    async def fetch_page(cursor):
+    async def fetch_page(cursor, _):
         # Always return 2 items
         # Since we don't have 'fetched' count passed in, we use cursor state or internal state
         # But 'cursor' here is just passed back.
@@ -60,7 +60,7 @@ async def test_paginated_fetch_empty():
     """Test fetching empty results."""
     fetcher = MockFetcher()
 
-    async def fetch_page(cursor):
+    async def fetch_page(cursor, _):
         return [], None
 
     results = []
@@ -79,7 +79,7 @@ async def test_paginated_fetch_empty_page_with_cursor():
     fetcher = MockFetcher()
 
     count = 0
-    async def fetch_page(cursor):
+    async def fetch_page(cursor, _):
         nonlocal count
         count += 1
         if count == 1:

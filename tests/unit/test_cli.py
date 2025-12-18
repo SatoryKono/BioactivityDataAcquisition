@@ -55,24 +55,19 @@ class TestRunCommand:
     """Tests for the run CLI command."""
 
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
-    @patch("bioetl.interfaces.cli.PipelineRunner")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_command_success(
         self,
         mock_asyncio_run,
         mock_setup_handlers,
-        mock_runner_class,
         mock_bootstrap,
         runner,
     ):
         """Test that run command works with valid arguments."""
-        mock_pipeline = MagicMock()
-        mock_pipeline.logger = MagicMock()
-        mock_bootstrap.return_value = mock_pipeline
-
         mock_runner_instance = MagicMock()
-        mock_runner_class.return_value = mock_runner_instance
+        mock_runner_instance.run = AsyncMock()
+        mock_bootstrap.return_value = mock_runner_instance
 
         result = runner.invoke(
             cli,
@@ -81,25 +76,22 @@ class TestRunCommand:
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
         mock_bootstrap.assert_called_once()
-        mock_runner_class.assert_called_once()
-        mock_asyncio_run.assert_called_once()
+        mock_asyncio_run.assert_called_once_with(mock_runner_instance.run())
 
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
-    @patch("bioetl.interfaces.cli.PipelineRunner")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_command_with_options(
         self,
         mock_asyncio_run,
         mock_setup_handlers,
-        mock_runner_class,
         mock_bootstrap,
         runner,
     ):
         """Test run command with all options."""
-        mock_pipeline = MagicMock()
-        mock_pipeline.logger = MagicMock()
-        mock_bootstrap.return_value = mock_pipeline
+        mock_runner_instance = MagicMock()
+        mock_runner_instance.run = AsyncMock()
+        mock_bootstrap.return_value = mock_runner_instance
 
         result = runner.invoke(
             cli,
@@ -121,24 +113,23 @@ class TestRunCommand:
         assert call_kwargs["limit"] == 1000
 
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
-    @patch("bioetl.interfaces.cli.PipelineRunner")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_command_shutdown_error(
         self,
         mock_asyncio_run,
         mock_setup_handlers,
-        mock_runner_class,
         mock_bootstrap,
         runner,
     ):
         """Test run command handles shutdown error."""
         from bioetl.application.core.shutdown import PipelineShutdownError
 
-        mock_pipeline = MagicMock()
-        mock_pipeline.logger = MagicMock()
-        mock_bootstrap.return_value = mock_pipeline
-        mock_asyncio_run.side_effect = PipelineShutdownError()
+        mock_runner_instance = MagicMock()
+        mock_runner_instance.run = AsyncMock(side_effect=PipelineShutdownError())
+        mock_bootstrap.return_value = mock_runner_instance
+        mock_asyncio_run.side_effect = PipelineShutdownError("Shutdown")
+
 
         result = runner.invoke(
             cli,
@@ -148,21 +139,19 @@ class TestRunCommand:
         assert result.exit_code == 130  # Shutdown exit code
 
     @patch("bioetl.interfaces.cli.bootstrap_pipeline")
-    @patch("bioetl.interfaces.cli.PipelineRunner")
     @patch("bioetl.interfaces.cli.setup_shutdown_handlers")
     @patch("bioetl.interfaces.cli.asyncio.run")
     def test_run_command_exception(
         self,
         mock_asyncio_run,
         mock_setup_handlers,
-        mock_runner_class,
         mock_bootstrap,
         runner,
     ):
         """Test run command handles general exceptions."""
-        mock_pipeline = MagicMock()
-        mock_pipeline.logger = MagicMock()
-        mock_bootstrap.return_value = mock_pipeline
+        mock_runner_instance = MagicMock()
+        mock_runner_instance.run = AsyncMock(side_effect=RuntimeError("Test error"))
+        mock_bootstrap.return_value = mock_runner_instance
         mock_asyncio_run.side_effect = RuntimeError("Test error")
 
         result = runner.invoke(
