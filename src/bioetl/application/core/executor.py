@@ -40,6 +40,7 @@ class PipelineExecutor:
         entity_type: str,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
+        silver_schema: Any,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
     ):
@@ -61,6 +62,7 @@ class PipelineExecutor:
             entity_type=entity_type,
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
+            silver_schema=silver_schema,
         )
 
         # Counters

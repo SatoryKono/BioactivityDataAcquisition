@@ -4,6 +4,9 @@ entity_type: "compound"
 description: "Pipeline for ingesting PubChem compounds"
 version: "1.0.0"
 
+primary_keys: ["cid"]
+silver_table: "pubchem_compound"
+
 source:
   load_strategy: "incremental"
   watermark_field: "cid"
