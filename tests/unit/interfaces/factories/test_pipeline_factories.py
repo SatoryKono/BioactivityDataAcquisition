@@ -209,7 +209,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_load_config.assert_not_called()
 
     @patch("bioetl.interfaces.factories.pubchem_compound.PubChemCompoundPipeline")
-    @patch("bioetl.interfaces.factories.pubchem_compound.get_pipeline_config")
+    @patch("bioetl.interfaces.factories.pubchem_compound.yaml_config_to_domain")
     @patch("bioetl.interfaces.factories.pubchem_compound.load_pipeline_config")
     @patch("bioetl.interfaces.factories.pubchem_compound.BaseServicesFactory")
     @patch("bioetl.interfaces.factories.pubchem_compound.DataSourceFactory")
@@ -218,7 +218,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_data_source_factory,
         mock_base_services,
         mock_load_config,
-        mock_get_config,
+        mock_yaml_to_domain,
         mock_pipeline_class,
         mock_settings,
         mock_logger,
@@ -234,7 +234,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
-        mock_get_config.return_value = mock_domain_config
+        mock_yaml_to_domain.return_value = mock_domain_config
 
         runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
         PubChemCompoundPipelineFactory.create_with_services(
@@ -396,7 +396,7 @@ class TestUniProtProteinPipelineFactory:
         mock_load_config.assert_not_called()
 
     @patch("bioetl.interfaces.factories.uniprot_protein.UniProtProteinPipeline")
-    @patch("bioetl.interfaces.factories.uniprot_protein.get_pipeline_config")
+    @patch("bioetl.interfaces.factories.uniprot_protein.yaml_config_to_domain")
     @patch("bioetl.interfaces.factories.uniprot_protein.load_pipeline_config")
     @patch("bioetl.interfaces.factories.uniprot_protein.BaseServicesFactory")
     @patch("bioetl.interfaces.factories.uniprot_protein.DataSourceFactory")
@@ -405,7 +405,7 @@ class TestUniProtProteinPipelineFactory:
         mock_data_source_factory,
         mock_base_services,
         mock_load_config,
-        mock_get_config,
+        mock_yaml_to_domain,
         mock_pipeline_class,
         mock_settings,
         mock_logger,
@@ -421,7 +421,7 @@ class TestUniProtProteinPipelineFactory:
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
-        mock_get_config.return_value = mock_domain_config
+        mock_yaml_to_domain.return_value = mock_domain_config
 
         runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
         UniProtProteinPipelineFactory.create_with_services(
