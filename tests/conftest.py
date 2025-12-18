@@ -230,6 +230,9 @@ def docker_ip():
 @pytest.fixture(scope="session")
 def docker_compose_file(project_root: Path) -> str:
     """Path to docker-compose.yml for pytest-docker."""
+    test_compose = project_root / "docker-compose.test.yml"
+    if test_compose.exists():
+        return str(test_compose)
     return str(project_root / "docker-compose.yml")
 
 
