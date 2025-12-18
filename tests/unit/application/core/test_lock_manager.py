@@ -5,7 +5,7 @@ import pytest
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.shutdown import ShutdownSignal, PipelineShutdownError
 from bioetl.domain.ports import LockPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, RunType
 
 
 @pytest.fixture
@@ -17,6 +17,7 @@ def mock_lock_port() -> AsyncMock:
 def mock_shutdown_signal() -> Mock:
     signal = Mock(spec=ShutdownSignal)
     signal.is_requested = False
+    signal.request = Mock()
     return signal
 
 
@@ -27,6 +28,9 @@ def lock_manager(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> LockM
         run_id=RunID("run_123"),
         lock_key="lock:test_pipeline",
         exclusive=False,
+        lock_ttl=60,
+        wait_for_lock=False,
+        wait_timeout=300,
         heartbeat_interval=60,
         logger=Mock(),
         shutdown_signal=mock_shutdown_signal,
@@ -45,7 +49,9 @@ class TestLockManager:
         mock_lock_port.acquire.assert_called_once_with(
             key="lock:test_pipeline",
             owner_id="run_123",
+            ttl=60,
             wait=False,
+            wait_timeout=300,
             exclusive=False,
         )
 
@@ -101,6 +107,7 @@ class TestLockManager:
         """Test usage as async context manager."""
         mock_lock_port.acquire.return_value = True
         mock_lock_port.release.return_value = True
+        mock_lock_port.heartbeat.return_value = True
 
         async with lock_manager:
             assert lock_manager._heartbeat_task is not None
@@ -113,6 +120,18 @@ class TestLockManager:
             or lock_manager._heartbeat_task.cancelled()
         )
 
+    async def test_start_heartbeat_failure(
+        self, lock_manager: LockManager, mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
+    ) -> None:
+        """Heartbeat failure on start triggers shutdown before work begins."""
+
+        mock_lock_port.heartbeat.return_value = False
+
+        with pytest.raises(PipelineShutdownError):
+            await lock_manager.start_heartbeat()
+
+        mock_shutdown_signal.request.assert_called_once()
+
     async def test_context_manager_failure(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
@@ -122,3 +141,42 @@ class TestLockManager:
         with pytest.raises(PipelineShutdownError):
             async with lock_manager:
                 pass
+
+
+def test_lock_key_format_incremental(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> None:
+    manager = LockManager.create(
+        lock_port=mock_lock_port,
+        run_id=RunID("run_123"),
+        provider="chembl",
+        entity_type="activity",
+        run_type=RunType.INCREMENTAL,
+        lock_ttl=60,
+        wait_for_lock=False,
+        wait_timeout=300,
+        heartbeat_interval=20,
+        logger=Mock(),
+        shutdown_signal=mock_shutdown_signal,
+    )
+
+    assert manager._lock_key == "lock:chembl_activity"
+    assert manager._exclusive is False
+
+
+def test_lock_key_format_exclusive(mock_lock_port: AsyncMock, mock_shutdown_signal: Mock) -> None:
+    manager = LockManager.create(
+        lock_port=mock_lock_port,
+        run_id=RunID("run_123"),
+        provider="chembl",
+        entity_type="activity",
+        run_type=RunType.BACKFILL,
+        lock_ttl=60,
+        wait_for_lock=True,
+        wait_timeout=120,
+        heartbeat_interval=20,
+        logger=Mock(),
+        shutdown_signal=mock_shutdown_signal,
+    )
+
+    assert manager._lock_key == "lock:chembl_activity:exclusive"
+    assert manager._exclusive is True
+    assert manager._wait_for_lock is True
