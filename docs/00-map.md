@@ -15,6 +15,18 @@
 
 ---
 
+## Language Policy
+
+| Category | Language | Examples |
+|----------|----------|----------|
+| **Public-facing** | English | README.md, CONTRIBUTING.md, CHANGELOG.md |
+| **User guides** | English | docs/03-guides/*, docs/04-reference/* |
+| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project_rules/* |
+| **Architecture docs** | Russian | docs/02-architecture/* |
+| **Code comments** | Russian | Docstrings, inline comments |
+
+---
+
 ## Documentation Structure
 
 ```
