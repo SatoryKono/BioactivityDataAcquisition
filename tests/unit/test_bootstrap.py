@@ -237,7 +237,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_load_config.assert_not_called()
 
     @patch("bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipeline")
-    @patch("bioetl.interfaces.factories.chembl_activity.get_pipeline_config")
+    @patch("bioetl.interfaces.factories.chembl_activity.yaml_config_to_domain")
     @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
     @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
@@ -248,7 +248,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_data_source_factory,
         mock_base_services,
         mock_load_config,
-        mock_get_config,
+        mock_yaml_to_domain,
         mock_pipeline_class,
         mock_settings,
         mock_logger,
@@ -264,7 +264,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_load_config.return_value = mock_pipeline_config
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
-        mock_get_config.return_value = mock_domain_config
+        mock_yaml_to_domain.return_value = mock_domain_config
 
         runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
         ChEMBLActivityPipelineFactory.create_with_services(

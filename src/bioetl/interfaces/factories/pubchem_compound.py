@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
 from bioetl.infrastructure.config import (
     Settings,
-    get_pipeline_config,
     load_pipeline_config,
+    yaml_config_to_domain,
 )
 from bioetl.infrastructure.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
@@ -56,15 +56,23 @@ class PubChemCompoundPipelineFactory:
         logger: structlog.BoundLogger,
         **kwargs,
     ) -> BasePipeline:
-        """Creates PubChem Compound pipeline."""
-        config_model = load_pipeline_config("pubchem_compound")
+        """Creates PubChem Compound pipeline.
+
+        Loads config once and reuses it for both services and pipeline.
+        """
+        # Load YAML config once (cached)
+        yaml_config = load_pipeline_config("pubchem_compound")
+
+        # Build services with YAML config
         services = PubChemCompoundPipelineFactory.build_services(
-            settings=settings, logger=logger, config=config_model, **kwargs
+            settings=settings, logger=logger, config=yaml_config, **kwargs
         )
-        config = get_pipeline_config("pubchem_compound")
+
+        # Map to domain config for pipeline
+        domain_config = yaml_config_to_domain(yaml_config)
 
         return PubChemCompoundPipeline.create(
             runtime=runtime,
             services=services,
-            config=config,
+            config=domain_config,
         )

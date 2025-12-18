@@ -79,12 +79,15 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         return d
 
 
+@lru_cache(maxsize=10)
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline configuration from YAML file and return typed model.
 
     Dynamically resolves the configuration file path based on the pipeline name.
     The pipeline name is expected to follow the pattern '{provider}_{entity}'.
     Example: 'chembl_activity' -> 'configs/pipelines/chembl/activity.yaml'
+
+    Results are cached for efficiency - YAML files are only read once per pipeline.
 
     Args:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
@@ -123,9 +126,44 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     return PipelineYamlConfig.model_validate(config)
 
 
+def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
+    """Map PipelineYamlConfig to domain PipelineConfig.
+
+    This is the boundary mapping function that converts validated infrastructure
+    schema to domain model. All validation has already been done by Pydantic
+    in PipelineYamlConfig.
+
+    Args:
+        yaml_config: Validated PipelineYamlConfig from infrastructure layer
+
+    Returns:
+        PipelineConfig: Immutable domain configuration
+    """
+    # Extract field names from source config
+    source_fields = [
+        field["name"]
+        for field in yaml_config.source.get("fields", [])
+    ]
+
+    return PipelineConfig(
+        pipeline_name=yaml_config.pipeline_name,
+        provider=yaml_config.provider,
+        entity_type=yaml_config.entity_type,
+        primary_keys=yaml_config.primary_keys,
+        silver_table=yaml_config.silver_table,
+        gold_table=yaml_config.gold_table,
+        batch_size=yaml_config.batch_size,
+        checkpoint_interval=yaml_config.checkpoint_interval,
+        fields=source_fields,
+    )
+
+
 @lru_cache(maxsize=10)
 def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
     """Get PipelineConfig object from YAML configuration.
+
+    Convenience function that loads and maps config in one step.
+    Results are cached for efficiency.
 
     Args:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
@@ -136,26 +174,8 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
     Raises:
         ValueError: If pipeline configuration not found
     """
-    pipeline_yaml_config = load_pipeline_config(pipeline_name)
-
-    # Extract field names from source config
-    source_fields = [
-        field["name"]
-        for field in pipeline_yaml_config.source.get("fields", [])
-    ]
-
-    # Map validated config to Domain PipelineConfig
-    return PipelineConfig(
-        pipeline_name=pipeline_yaml_config.pipeline_name,
-        provider=pipeline_yaml_config.provider,
-        entity_type=pipeline_yaml_config.entity_type,
-        primary_keys=pipeline_yaml_config.primary_keys,
-        silver_table=pipeline_yaml_config.silver_table,
-        gold_table=pipeline_yaml_config.gold_table,
-        batch_size=pipeline_yaml_config.batch_size,
-        checkpoint_interval=pipeline_yaml_config.checkpoint_interval,
-        fields=source_fields,
-    )
+    yaml_config = load_pipeline_config(pipeline_name)
+    return yaml_config_to_domain(yaml_config)
 
 
 class AWSSettings(BaseSettings):
