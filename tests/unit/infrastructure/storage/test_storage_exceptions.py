@@ -21,6 +21,10 @@ from bioetl.domain.exceptions import (
     UploadError,
 )
 
+# Default test run metadata
+TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
+TEST_RUN_TYPE = RunType.INCREMENTAL
+
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
     """Create a run_in_executor replacement that returns awaitable sync results."""
