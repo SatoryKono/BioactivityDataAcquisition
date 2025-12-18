@@ -36,6 +36,8 @@ class RecordProcessor:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         silver_schema: Any,
+        metrics: Any = None,  # Injected MetricsPort
+        dq_config: Any = None,  # Injected DQ config
     ):
         self._storage = storage
         self._quarantine_manager = quarantine_manager
@@ -46,6 +48,8 @@ class RecordProcessor:
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
         self._silver_schema = silver_schema
+        self._metrics = metrics
+        self._dq_config = dq_config
 
     async def process_batch(
         self,
@@ -53,9 +57,17 @@ class RecordProcessor:
         batch_id: BatchID,
     ) -> tuple[int, int, int, int]:
         """Process a batch of records through Bronze -> Silver -> Gold."""
+        # Capture consistent timestamp for this batch
+        ingestion_ts = datetime.now(UTC)
+
         # 1. Write to Bronze
-        await self._write_bronze_batch(records, batch_id)
+        # Pass ingestion_ts to ensure Bronze path matches metadata
+        await self._write_bronze_batch(records, batch_id, ingestion_ts)
         records_bronze = len(records)
+        if self._metrics:
+            self._metrics.increment_counter(
+                "records_bronze_total", records_bronze, {"pipeline": f"{self._provider}_{self._entity_type}"}
+            )
 
         # 2. Transform and collect Silver/Gold
         silver_records: list[dict[str, Any]] = []
@@ -83,9 +95,23 @@ class RecordProcessor:
                 else:
                     raise
 
+        # Check DQ thresholds
+        if self._dq_config and records:
+            error_rate = records_quarantined / len(records)
+            if self._dq_config.get("hard_fail_threshold") and error_rate >= self._dq_config["hard_fail_threshold"]:
+                 raise RuntimeError(f"DQ Hard Threshold exceeded: {error_rate:.2%} errors")
+            if self._dq_config.get("soft_fail_threshold") and error_rate >= self._dq_config["soft_fail_threshold"]:
+                 self._context.logger.warning("DQ Soft Threshold exceeded", error_rate=error_rate)
+
+        if self._metrics:
+            pipeline_label = f"{self._provider}_{self._entity_type}"
+            self._metrics.increment_counter("records_quarantined_total", records_quarantined, {"pipeline": pipeline_label})
+            self._metrics.increment_counter("records_silver_total", len(silver_records), {"pipeline": pipeline_label})
+            self._metrics.increment_counter("records_gold_total", len(gold_records), {"pipeline": pipeline_label})
+
         # 3. Write to Silver
         if silver_records:
-            await self._write_silver_batch(silver_records, batch_id)
+            await self._write_silver_batch(silver_records, batch_id, ingestion_ts)
 
         # 4. Write to Gold
         if gold_records:
@@ -99,19 +125,20 @@ class RecordProcessor:
         )
 
     async def _write_bronze_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID
+        self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
     ) -> None:
-        record_bytes = [(json.dumps(r) + "\n").encode("utf-8") for r in records]
+        # Sort keys for deterministic output
+        record_bytes = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in records]
         await self._storage.write_bronze(
             records=iter(record_bytes),
             provider=self._provider,
             entity=self._entity_type,
-            date=datetime.now(UTC),
+            date=ingestion_ts,
             batch_id=batch_id,
         )
 
     async def _write_silver_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID
+        self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
     ) -> None:
         records_with_meta = [
             {
@@ -119,11 +146,12 @@ class RecordProcessor:
                 "_run_id": str(self._context.run_id),
                 "_run_type": self._context.run_type.value,
                 "_source_batch_id": str(batch_id),
-                "_ingestion_ts": datetime.now(UTC).isoformat(),
+                "_ingestion_ts": ingestion_ts.isoformat(),
             }
             for r in records
         ]
-        table_name = f"{self._provider}.{self._entity_type}"
+        # Use configured table name or default
+        table_name = self._dq_config.get("silver_table") if self._dq_config else f"{self._provider}.{self._entity_type}"
         await self._storage.write_silver(
             table_name=table_name,
             records=records_with_meta,
@@ -132,8 +160,8 @@ class RecordProcessor:
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
-        # Use the same table name as silver for gold, as requested
-        table_name = f"{self._provider}.{self._entity_type}"
+        # Use configured table name or default
+        table_name = self._dq_config.get("gold_table") if self._dq_config else f"{self._provider}.{self._entity_type}"
         await self._storage.write_gold(
             table_name=table_name, records=records, mode="append"
         )

@@ -91,6 +91,8 @@ def load_pipeline_config(pipeline_name: str) -> dict[str, Any]:
     # Map pipeline name to config path
     config_paths = {
         "chembl_activity": Path("configs/pipelines/chembl/activity.yaml"),
+        "pubchem_compound": Path("configs/pipelines/pubchem/compound.yaml"),
+        "uniprot_protein": Path("configs/pipelines/uniprot/protein.yaml"),
     }
 
     config_path = config_paths.get(pipeline_name)
