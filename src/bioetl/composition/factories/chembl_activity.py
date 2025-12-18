@@ -6,89 +6,36 @@ from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.config import (
-    Settings,
-    load_pipeline_config,
-    yaml_config_to_domain,
-)
-from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
+from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
 
 if TYPE_CHECKING:
-    import structlog
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.domain.ports import DataSourcePort
 
 
-class ChEMBLActivityPipelineFactory:
+class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline]):
     """Factory for creating ChEMBL Activity pipelines."""
 
-    @staticmethod
-    def build_services(
+    pipeline_name = "chembl_activity"
+    pipeline_class = ChEMBLActivityPipeline
+    silver_schema = CHEMBL_ACTIVITY_SCHEMA
+
+    @classmethod
+    def create_data_source(
+        cls,
         settings: Settings,
-        logger: structlog.BoundLogger,
-        config: PipelineYamlConfig | None = None,
-        **_kwargs,  # Accept and ignore extra ports for now
-    ) -> PipelineServices:
-        """Builds PipelineServices from settings.
-
-        Args:
-            settings: Application settings
-            logger: Structured logger
-            config: Pre-loaded pipeline config (avoids duplicate I/O)
-            **kwargs: Additional keyword arguments (ignored)
-
-        Returns:
-            Configured PipelineServices instance
-        """
-        # Use provided config or load from YAML
-        pipeline_config = config or load_pipeline_config("chembl_activity")
-
+        pipeline_config: PipelineYamlConfig,
+    ) -> DataSourcePort:
+        """Create ChEMBL data source."""
+        # ChEMBL specific HTTP client setup
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
         )
-        data_source = DataSourceFactory.create("chembl", http_client=http_client)
-
-        return BaseServicesFactory.create_common_services(
-            settings=settings,
-            logger=logger,
-            data_source=data_source,
-            pipeline_config=pipeline_config,
-        )
-
-    @staticmethod
-    def create_with_services(
-        runtime: PipelineRuntimeConfig,
-        settings: Settings,
-        logger: structlog.BoundLogger,
-        config: PipelineYamlConfig | None = None,
-        **kwargs,
-    ) -> BasePipeline:
-        """Creates ChEMBL Activity pipeline with decomposed config.
-
-        Loads config once and reuses it for both services and pipeline.
-        """
-        # Use provided config or load YAML config (cached)
-        yaml_config = config or load_pipeline_config("chembl_activity")
-
-        # Build services with YAML config
-        services = ChEMBLActivityPipelineFactory.build_services(
-            settings=settings, logger=logger, config=yaml_config, **kwargs
-        )
-
-        # Map to domain config for pipeline
-        domain_config = yaml_config_to_domain(yaml_config)
-
-        return ChEMBLActivityPipeline.create(
-            runtime=runtime,
-            services=services,
-            config=domain_config,
-        )
+        return DataSourceFactory.create("chembl", http_client=http_client)
 
 
 PipelineRegistry.register(
