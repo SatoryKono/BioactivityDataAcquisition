@@ -126,6 +126,8 @@ async def test_base_pipeline_should_write_gold(mock_pipeline):
 async def test_base_pipeline_extract_watermark(mock_pipeline):
     """Test default extract_watermark returns datetime."""
     from datetime import datetime
+    from bioetl.domain.types import Watermark
 
     result = mock_pipeline.extract_watermark(mock_pipeline.context, {})
-    assert isinstance(result, datetime)
+    assert isinstance(result, Watermark)
+    assert isinstance(result.value, datetime)

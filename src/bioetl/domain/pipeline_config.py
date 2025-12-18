@@ -21,6 +21,7 @@ class PipelineConfig:
     primary_keys: list[str]
     silver_table: str
     gold_table: str | None = None
+    gold_filter_types: List[str] = field(default_factory=list)
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: List[str] = field(default_factory=list)
