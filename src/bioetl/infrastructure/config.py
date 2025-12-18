@@ -154,6 +154,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         primary_keys=yaml_config.primary_keys,
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
+        gold_filter_types=yaml_config.gold_filter_types,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=source_fields,
@@ -303,10 +304,10 @@ class Settings(BaseSettings):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (
+            init_settings,
             env_settings,
             dotenv_settings,
             YamlSettingsSource(settings_cls),
-            init_settings,
             file_secret_settings,
         )
 
