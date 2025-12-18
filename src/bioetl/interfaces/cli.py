@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     pass
 
 
-def validate_pipeline_name(ctx, param, value):
+def validate_pipeline_name(_ctx, _param, value):
     """Validate pipeline name against the registry at runtime."""
     # Ensure all factories are loaded. In this architecture, bootstrap imports them.
     # However, bootstrap_pipeline is called inside the command.
