@@ -355,7 +355,7 @@ We have significantly advanced the documentation phase, originally scheduled for
 - [x] **UnifiedHTTPClient** (`src/bioetl/infrastructure/adapters/http/client.py`)
   - Async httpx-based client
   - Integrated rate limiting and circuit breaker
-  - Exponential backoff with jitter (RULES.md §3.1.3)
+  - [x] Exponential backoff with jitter (RULES.md §3.1.3)
   - Max attempts: 3, Multiplier: 2.0, Jitter: 0.1-0.5s
   - ~200 lines
 
@@ -521,9 +521,9 @@ bioetl checkpoint delete --pipeline <name>
 
 **Remaining Tasks**:
 
-- [ ] Integration tests for pipelines
+- [ ] **Integration tests for pipelines** (CRITICAL DEBT)
 - [ ] End-to-end pipeline testing
-- [ ] Additional concrete pipelines (PubChem, UniProt)
+- [x] Additional concrete pipelines (PubChem, UniProt)
 
 ---
 
@@ -542,8 +542,8 @@ bioetl checkpoint delete --pipeline <name>
 **In Progress**:
 
 - [ ] **Prometheus metrics exporter**
-  - Метрики: dq_validation_score, data_freshness_seconds, circuit_breaker_state
-  - Endpoint `/metrics` для scraping
+  - [x] Metrics Port Adapter (PrometheusMetrics)
+  - [ ] Endpoint `/metrics` for scraping (CRITICAL DEBT)
 
 **Pending**:
 
