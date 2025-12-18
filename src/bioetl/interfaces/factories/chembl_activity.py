@@ -30,6 +30,7 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
     import structlog
@@ -42,7 +43,7 @@ class ChEMBLActivityPipelineFactory:
     def build_services(
         settings: Settings,
         logger: "structlog.BoundLogger",
-        raw_config: dict[str, Any] | None = None,
+        config: PipelineYamlConfig | None = None,
         **kwargs,  # Accept and ignore extra ports for now
     ) -> PipelineServices:
         """Builds PipelineServices from settings.
@@ -50,7 +51,7 @@ class ChEMBLActivityPipelineFactory:
         Args:
             settings: Application settings
             logger: Structured logger
-            raw_config: Pre-loaded pipeline config dict (avoids duplicate I/O)
+            config: Pre-loaded pipeline config (avoids duplicate I/O)
             **kwargs: Additional keyword arguments (ignored)
 
         Returns:
@@ -64,11 +65,11 @@ class ChEMBLActivityPipelineFactory:
         access_key, secret_key = get_aws_credentials(settings)
 
         # Use provided config or load from YAML
-        pipeline_config = raw_config or load_pipeline_config("chembl_activity")
-        sink_config = pipeline_config.get("sink", {})
-        bronze_config = sink_config.get("bronze", {})
-        silver_config = sink_config.get("silver", {})
-        gold_config = sink_config.get("gold", {})
+        pipeline_config = config or load_pipeline_config("chembl_activity")
+        sink_config = pipeline_config.sink
+        bronze_config = sink_config.get("bronze")
+        silver_config = sink_config.get("silver")
+        gold_config = sink_config.get("gold")
 
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
@@ -84,38 +85,40 @@ class ChEMBLActivityPipelineFactory:
             silver_base_path = f"{base_output_path}/silver"
             gold_base_path = f"{base_output_path}/gold"
             checkpoints_path = f"{base_output_path}/checkpoints"
+
+            save_json = bronze_config.save_json if bronze_config else False
             json_path = (
-                f"{base_output_path}/json" if bronze_config.get("save_json") else None
+                f"{base_output_path}/json" if save_json else None
             )
 
             # Get CSV export config for each layer
-            silver_csv_config = silver_config.get("csv_export", {})
+            silver_csv_config = silver_config.csv_export if silver_config else None
             silver_csv_path = (
-                silver_csv_config.get("path")
-                if silver_csv_config.get("enabled")
+                silver_csv_config.path
+                if silver_csv_config and silver_csv_config.enabled
                 else None
             )
             silver_csv_options = (
                 {
-                    "delimiter": silver_csv_config.get("delimiter", ","),
-                    "header": silver_csv_config.get("header", True),
-                    "encoding": silver_csv_config.get("encoding", "utf-8"),
+                    "delimiter": silver_csv_config.delimiter,
+                    "header": silver_csv_config.header,
+                    "encoding": silver_csv_config.encoding,
                 }
-                if silver_csv_path
+                if silver_csv_path and silver_csv_config
                 else None
             )
 
-            gold_csv_config = gold_config.get("csv_export", {})
+            gold_csv_config = gold_config.csv_export if gold_config else None
             gold_csv_path = (
-                gold_csv_config.get("path") if gold_csv_config.get("enabled") else None
+                gold_csv_config.path if gold_csv_config and gold_csv_config.enabled else None
             )
             gold_csv_options = (
                 {
-                    "delimiter": gold_csv_config.get("delimiter", ","),
-                    "header": gold_csv_config.get("header", True),
-                    "encoding": gold_csv_config.get("encoding", "utf-8"),
+                    "delimiter": gold_csv_config.delimiter,
+                    "header": gold_csv_config.header,
+                    "encoding": gold_csv_config.encoding,
                 }
-                if gold_csv_path
+                if gold_csv_path and gold_csv_config
                 else None
             )
         else:
@@ -131,7 +134,7 @@ class ChEMBLActivityPipelineFactory:
             gold_csv_options = None
 
         # Get save_json flag from bronze config
-        save_json = bronze_config.get("save_json", False)
+        save_json = bronze_config.save_json if bronze_config else False
         if save_json:
             logger.info("JSON export enabled for Bronze layer")
 
@@ -214,10 +217,10 @@ class ChEMBLActivityPipelineFactory:
         Loads config once and passes it through to avoid duplicate I/O.
         """
         # Load config once
-        raw_config = load_pipeline_config("chembl_activity")
+        config_model = load_pipeline_config("chembl_activity")
 
         services = ChEMBLActivityPipelineFactory.build_services(
-            settings=settings, logger=logger, raw_config=raw_config, **kwargs
+            settings=settings, logger=logger, config=config_model, **kwargs
         )
         # get_pipeline_config uses @lru_cache, so this is cheap
         config = get_pipeline_config("chembl_activity")

@@ -30,6 +30,16 @@ class CircuitBreakerConfig(BaseModel):
     recovery_timeout: int = Field(default=300, ge=60)
 
 
+class CsvExportConfig(BaseModel):
+    """Configuration for CSV export."""
+
+    enabled: bool = True
+    path: str | None = None
+    delimiter: str = ","
+    header: bool = True
+    encoding: str = "utf-8"
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
 
@@ -37,6 +47,8 @@ class SinkLayerConfig(BaseModel):
     path: str | None = None
     format: Literal["jsonl", "delta", "parquet"] = "delta"
     mode: str | None = None  # Validated by specific layer validators
+    save_json: bool = False
+    csv_export: CsvExportConfig | None = None
 
 
 class PipelineYamlConfig(BaseModel):
@@ -65,6 +77,9 @@ class PipelineYamlConfig(BaseModel):
 
     # Medallion Layers
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
+
+    # Source Config (Preserved from merge)
+    source: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("batch_size")
     @classmethod
