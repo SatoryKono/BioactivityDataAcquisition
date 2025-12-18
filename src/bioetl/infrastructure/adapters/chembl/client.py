@@ -19,7 +19,7 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Iterator
+    from collections.abc import AsyncIterator
     from concurrent.futures import ThreadPoolExecutor
 
     from httpx import Response
@@ -180,32 +180,6 @@ class ChemblAdapter:
                 self._consecutive_errors += 1
                 self._update_health()
                 raise ChemblApiError(str(e)) from e
-
-    def fetch_sync(
-        self,
-        entity_type: str,
-        watermark: Watermark | None = None,
-        limit: int | None = None,
-    ) -> Iterator[dict[str, Any]]:
-        """Synchronous version of fetch (for compatibility with DataSourcePort).
-
-        This wraps the async fetch method using asyncio.run().
-        For better performance, use the async version directly.
-        """
-
-        async def _fetch_all() -> list[dict[str, Any]]:
-            results = []
-            async for record in self.fetch(entity_type, watermark, limit):
-                results.append(record)
-            return results
-
-        # Run in event loop
-        loop = asyncio.new_event_loop()
-        try:
-            results = loop.run_until_complete(_fetch_all())
-            yield from results
-        finally:
-            loop.close()
 
     async def health_check(self) -> HealthStatus:
         """Check ChEMBL API health status.
