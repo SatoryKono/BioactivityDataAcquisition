@@ -142,20 +142,13 @@ class TestStoragePortProtocol:
 
         assert isinstance(ValidStorage(), StoragePort)
 
+        # Note: @runtime_checkable protocols only check for method presence,
+        # not signatures. Test missing methods instead.
         class InvalidStorage:
             async def write_bronze(self, *args, **kwargs):
                 pass
 
-            # Missing 'schema' argument
-            async def write_silver(
-                self,
-                table_name: str,
-                records: list[dict[str, Any]],
-                primary_keys: list[str],
-                mode: str = "merge",
-            ):
-                pass
-
+            # Missing write_silver method entirely
             async def write_gold(self, *args, **kwargs):
                 pass
 

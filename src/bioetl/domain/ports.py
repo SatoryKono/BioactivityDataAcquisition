@@ -9,7 +9,6 @@ separation of concerns between the domain and infrastructure layers.
 
 from collections.abc import AsyncIterator, Iterator
 from typing import Any, Literal, Protocol, Self, runtime_checkable
-from abc import ABC
 
 from bioetl.domain.types import (
     BatchID,
@@ -149,30 +148,6 @@ class StoragePort(Protocol):
     async def aclose(self) -> None:
         """Gracefully close the storage connection and release resources."""
         ...
-
-    # Enable runtime structural validation via ABC subclass hook
-    @classmethod
-    def __subclasshook__(cls, subclass: type) -> bool:
-        """Allow isinstance/issubclass checks based on structure.
-
-        We validate presence of required methods and that `write_silver`
-        explicitly declares a `schema` parameter in its signature.
-        """
-        import inspect
-
-        required_methods = ("write_bronze", "write_silver", "write_gold", "aclose")
-        for name in required_methods:
-            if not any(name in C.__dict__ for C in subclass.__mro__):
-                return False
-
-        write_silver = getattr(subclass, "write_silver", None)
-        if write_silver is None:
-            return False
-        try:
-            sig = inspect.signature(write_silver)
-        except (TypeError, ValueError):
-            return False
-        return "schema" in sig.parameters
 
 
 @runtime_checkable
@@ -327,16 +302,16 @@ class QuarantinePort(Protocol):
     for later analysis, preventing them from stopping the entire pipeline.
     """
 
-    async def write(
-        self,
-        pipeline: str,
-        error_code: str,
-        payload: dict[str, Any],
-        bronze_batch_id: BatchID,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Any:
-        """
+async def write(
+    self,
+    pipeline: str,
+    error_code: str,
+    payload: dict[str, Any],
+    bronze_batch_id: BatchID,
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+    """
         Write a record to quarantine.
 
         Args:
