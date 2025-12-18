@@ -95,3 +95,22 @@ def test_load_fallback_no_underscore(setup_configs):
     config = load_pipeline_config("simple")
     assert isinstance(config, PipelineYamlConfig)
     assert config.pipeline_name == "simple"
+
+
+def test_dq_thresholds_are_validated_once(setup_configs):
+    """DQ thresholds must satisfy domain invariants even in YAML schema."""
+    pipelines_dir = setup_configs
+
+    invalid_config = {
+        "pipeline_name": "dummy_invalid",
+        "provider": "dummy",
+        "entity_type": "invalid",
+        "primary_keys": ["id"],
+        "silver_table": "dummy.test_silver",
+        "dq_rules": {"soft_fail_threshold": 0.3, "hard_fail_threshold": 0.2},
+    }
+
+    (pipelines_dir / "dummy" / "invalid.yaml").write_text(yaml.dump(invalid_config))
+
+    with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
+        load_pipeline_config("dummy_invalid")
