@@ -78,9 +78,10 @@ if TYPE_CHECKING:
 def bootstrap_quarantine() -> QuarantinePort:
     """Bootstrap the quarantine service for CLI inspection."""
     settings = get_settings()
+    # Fixed argument names per user feedback
     return UnifiedQuarantine(
-        s3_bucket=settings.s3.bucket_bronze,  # Using bronze bucket for quarantine dumps by default
-        fs_impl=None  # Use default S3FileSystem
+        base_path=f"s3://{settings.s3.bucket_silver}/common/quarantine",
+        storage_options=settings.storage_options,
     )
 
 

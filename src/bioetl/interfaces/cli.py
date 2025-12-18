@@ -101,11 +101,14 @@ def quarantine_inspect(pipeline: str, limit: int) -> None:
 
     # Run async inspection
     async def _inspect() -> None:
-        # Note: In a real implementation, we would call quarantine_service.inspect(pipeline, limit)
-        # But UnifiedQuarantine currently lacks a high-level inspect method in the interface
-        # exposed via bootstrapping. For now, we simulate the output or call get_stats if available.
-        stats = await quarantine_service.get_stats()
-        click.echo(f"Quarantine Stats: {stats}")
+        records = await quarantine_service.inspect(pipeline=pipeline, limit=limit)
+        if not records:
+            click.echo("No records found in quarantine.")
+            return
+
+        click.echo(f"Found {len(records)} records:")
+        for rec in records:
+            click.echo(f"[{rec['ingestion_ts']}] {rec['error_code']}: {str(rec['payload'])[:100]}...")
 
     asyncio.run(_inspect())
 
