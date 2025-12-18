@@ -99,7 +99,8 @@ class BronzeWriter:
         If save_json is enabled, also writes uncompressed JSONL file.
         """
         date_str = date.strftime("%Y-%m-%d")
-        relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl.zst"
+        # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
+        relative_path = f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
 
         loop = asyncio.get_running_loop()
 
@@ -247,20 +248,30 @@ class BronzeWriter:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        # This method might need adjustment based on the new path structure
-        # For now, it will search inside the provider/entity folder
-        prefix = f"{provider}/{entity}/"
+        # New path structure: bronze/v1/{provider}/{entity}/...
+        # If date is provided: bronze/v1/{provider}/{entity}/{date}/
+        # If not: bronze/v1/{provider}/{entity}/ (recursive search needed)
+
+        prefix = f"bronze/v1/{provider}/{entity}/"
+        if date:
+            date_str = date.strftime("%Y-%m-%d")
+            prefix = f"{prefix}{date_str}/"
 
         if self.is_local:
             base_path = Path(self.bucket) / prefix
             if not base_path.exists():
                 return []
 
-            files = list(base_path.glob("batch_*.jsonl.zst"))
+            # Recursive search if no date specified
+            pattern = "**/*.jsonl.zst"
+            # If date is specified, prefix already includes date, so search direct children
             if date:
-                date_str = date.strftime("%Y-%m-%d")
-                files = [p for p in files if f"batch_{date_str}" in p.name]
+                pattern = "batch_*.jsonl.zst"
 
+            files = list(base_path.glob(pattern))
+
+            # Note: The original code used relative_to(self.bucket).
+            # With the new nested structure, this returns paths like 'bronze/v1/...'.
             return [str(p.relative_to(self.bucket)) for p in files]
         else:
             loop = asyncio.get_running_loop()

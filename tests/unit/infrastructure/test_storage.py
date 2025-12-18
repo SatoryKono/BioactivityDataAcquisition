@@ -80,8 +80,8 @@ class TestBronzeWriter:
         mock_s3_client.put_object.assert_called_once()
         _args, kwargs = mock_s3_client.put_object.call_args
         assert kwargs["Bucket"] == "test-bucket"
-        # Check key contains expected parts (new path format: {provider}/{entity}/batch_{date}_{id}.jsonl.zst)
-        expected_key = "test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        # Check key contains expected parts (new path format: bronze/v1/{provider}/{entity}/{date}/batch_{id}.jsonl.zst)
+        expected_key = "bronze/v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
         assert kwargs["Key"] == expected_key
 
     async def test_write_bronze_compresses_with_zstd(self, mock_s3_client):
@@ -173,6 +173,7 @@ class TestBronzeWriter:
         # Verify JSON call
         json_call = next(c for c in calls if c[1]["Key"].endswith(".jsonl"))
         _args, kwargs = json_call
+        assert kwargs["Bucket"] == "test-bucket"
         assert kwargs["Bucket"] == "test-bucket"
         assert kwargs["Key"] == "json/test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
         assert kwargs["Body"] == b'{"id": 1}\n'
@@ -312,6 +313,9 @@ class TestBronzeWriterLocal:
 
         batches = await writer.list_batches("test_provider", "test_entity", date)
 
+        # In local mode, list_batches glob might need adjustment or the test should expect paths relative to bucket
+        # Current implementation returns str(p.relative_to(self.bucket))
+        # With new structure, we expect 2 files
         assert len(batches) == 2
         assert all(b.endswith(".jsonl.zst") for b in batches)
 
