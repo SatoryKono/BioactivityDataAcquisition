@@ -3,7 +3,7 @@
 from collections.abc import Iterator
 from typing import Any
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -35,6 +35,8 @@ class StorageAdapter:
         entity: str,
         date: Any,
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Write raw records to Bronze layer."""
         await self.bronze.write_bronze(
@@ -43,6 +45,8 @@ class StorageAdapter:
             entity=entity,
             date=date,
             batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
         )
 
     async def write_silver(

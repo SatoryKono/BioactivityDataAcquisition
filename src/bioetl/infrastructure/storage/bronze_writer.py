@@ -30,7 +30,7 @@ from botocore.exceptions import ClientError
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.exceptions import BucketNotFoundError, UploadError
 
 
@@ -93,10 +93,24 @@ class BronzeWriter:
         entity: str,
         date: datetime,
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
 
         If save_json is enabled, also writes uncompressed JSONL file.
+
+        Args:
+            records: Iterator of JSONL bytes to write.
+            provider: Data provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'activity').
+            date: Ingestion timestamp for date partitioning.
+            batch_id: Unique batch identifier.
+            run_id: Pipeline run ID for traceability.
+            run_type: Type of run (incremental, backfill, rebuild).
+
+        Returns:
+            Path to the written file (relative to bucket).
         """
         date_str = date.strftime("%Y-%m-%d")
         # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
@@ -129,6 +143,13 @@ class BronzeWriter:
             with open(full_path, "wb") as f:
                 f.write(compressed_data)
         else:
+            # Include run metadata in S3 object metadata for traceability
+            s3_metadata = {
+                "run_id": str(run_id),
+                "run_type": run_type.value,
+                "batch_id": str(batch_id),
+                "ingestion_ts": date.isoformat(),
+            }
             try:
                 await loop.run_in_executor(
                     None,
@@ -137,6 +158,7 @@ class BronzeWriter:
                         Key=relative_path,
                         Body=compressed_data,
                         ContentType="application/zstd",
+                        Metadata=s3_metadata,
                     ),
                 )
             except ClientError as e:
@@ -144,6 +166,17 @@ class BronzeWriter:
                 if error_code == "NoSuchBucket":
                     raise BucketNotFoundError(self.bucket) from e
                 raise UploadError(relative_path, str(e)) from e
+
+        # Log successful write with run_id for traceability
+        self.logger.info(
+            "bronze_write_complete",
+            path=relative_path,
+            provider=provider,
+            entity=entity,
+            batch_id=str(batch_id),
+            run_id=str(run_id),
+            run_type=run_type.value,
+        )
 
         # Optionally write uncompressed JSON
         if self.save_json:
