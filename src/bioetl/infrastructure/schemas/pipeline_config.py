@@ -5,7 +5,7 @@ Enforces Medallion Architecture constraints and operational limits.
 """
 
 from typing import Any, Literal
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class DQConfig(BaseModel):
@@ -45,6 +45,8 @@ class PipelineYamlConfig(BaseModel):
     Enforces rules from RULES.md.
     """
 
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
     pipeline_name: str
     provider: str
     entity_type: str
@@ -55,7 +57,11 @@ class PipelineYamlConfig(BaseModel):
     checkpoint_interval: int = Field(default=1000, ge=100)
 
     # DQ & Reliability
-    dq: DQConfig = Field(default_factory=DQConfig)
+    dq_rules: DQConfig = Field(
+        default_factory=DQConfig,
+        validation_alias=AliasChoices("dq_rules", "dq"),
+        serialization_alias="dq_rules",
+    )
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
 
     # Storage

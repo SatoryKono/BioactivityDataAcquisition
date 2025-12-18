@@ -169,8 +169,8 @@ def bootstrap_pipeline(
     dq_config = {
         "silver_table": pipeline.config.silver_table,
         "gold_table": pipeline.config.gold_table,
-        "soft_fail_threshold": 0.05,
-        "hard_fail_threshold": 0.20,
+        "soft_fail_threshold": pipeline.config.dq_rules.soft_fail_threshold,
+        "hard_fail_threshold": pipeline.config.dq_rules.hard_fail_threshold,
     }
 
     executor = PipelineExecutor(
