@@ -254,3 +254,18 @@ class InvalidDataFormatError(DataQualityError):
         super().__init__(
             f"Invalid format for '{field}': got '{value}', expected {expected_format}"
         )
+
+
+class DataQualityThresholdError(BioETLError):
+    """Raised when Data Quality error rate exceeds the hard threshold.
+
+    This error indicates that the quality of the batch is too low to proceed,
+    requiring the pipeline or batch to stop.
+    """
+
+    def __init__(self, error_rate: float, threshold: float) -> None:
+        self.error_rate = error_rate
+        self.threshold = threshold
+        super().__init__(
+            f"DQ Hard Threshold exceeded: {error_rate:.2%} errors (limit: {threshold:.2%})"
+        )
