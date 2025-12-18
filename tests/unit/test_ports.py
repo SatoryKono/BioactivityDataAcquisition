@@ -166,3 +166,277 @@ class TestStoragePortProtocol:
                 pass
 
         assert not isinstance(InvalidStorage(), StoragePort)
+
+
+@pytest.mark.unit
+class TestLockPortProtocol:
+    """Tests for the LockPort protocol."""
+
+    def test_valid_lock_implementation(self) -> None:
+        """LockPort should accept valid implementations."""
+
+        class ValidLock:
+            async def acquire(
+                self,
+                key: str,
+                owner_id: RunID,
+                ttl: int | None = None,
+                wait: bool = False,
+                wait_timeout: int = 300,
+                exclusive: bool = False,
+            ) -> bool:
+                return True
+
+            async def release(
+                self,
+                key: str,
+                owner_id: RunID,
+                exclusive: bool = False,
+            ) -> bool:
+                return True
+
+            async def heartbeat(
+                self,
+                key: str,
+                owner_id: RunID,
+                exclusive: bool = False,
+            ) -> bool:
+                return True
+
+            async def aclose(self) -> None:
+                pass
+
+        assert isinstance(ValidLock(), LockPort)
+
+    def test_missing_method_fails(self) -> None:
+        """LockPort should reject implementations missing methods."""
+
+        class InvalidLock:
+            async def acquire(self, key: str, owner_id: RunID) -> bool:
+                return True
+
+            # Missing release, heartbeat, aclose
+            async def aclose(self) -> None:
+                pass
+
+        assert not isinstance(InvalidLock(), LockPort)
+
+
+@pytest.mark.unit
+class TestCheckpointPortProtocol:
+    """Tests for the CheckpointPort protocol."""
+
+    def test_valid_checkpoint_implementation(self) -> None:
+        """CheckpointPort should accept valid implementations."""
+
+        class ValidCheckpoint:
+            async def save(
+                self,
+                pipeline: str,
+                watermark: Watermark,
+                run_id: RunID,
+                metadata: dict[str, Any],
+            ) -> None:
+                pass
+
+            async def load(
+                self,
+                pipeline: str,
+            ) -> tuple[Watermark, RunID, dict[str, Any]] | None:
+                return None
+
+            async def list_all(self) -> list[str]:
+                return []
+
+            async def delete(self, pipeline: str) -> None:
+                pass
+
+            async def aclose(self) -> None:
+                pass
+
+        assert isinstance(ValidCheckpoint(), CheckpointPort)
+
+    def test_missing_save_fails(self) -> None:
+        """CheckpointPort should reject implementations missing save."""
+
+        class InvalidCheckpoint:
+            # Missing save method
+            async def load(self, pipeline: str) -> None:
+                return None
+
+            async def list_all(self) -> list[str]:
+                return []
+
+            async def delete(self, pipeline: str) -> None:
+                pass
+
+            async def aclose(self) -> None:
+                pass
+
+        assert not isinstance(InvalidCheckpoint(), CheckpointPort)
+
+
+@pytest.mark.unit
+class TestQuarantinePortProtocol:
+    """Tests for the QuarantinePort protocol."""
+
+    def test_valid_quarantine_implementation(self) -> None:
+        """QuarantinePort should accept valid implementations."""
+
+        class ValidQuarantine:
+            async def write(
+                self,
+                pipeline: str,
+                error_code: str,
+                payload: dict[str, Any],
+                bronze_batch_id: BatchID,
+                *args: Any,
+                **kwargs: Any,
+            ) -> Any:
+                pass
+
+            async def inspect(
+                self,
+                pipeline: str,
+                limit: int = 10,
+                error_code: str | None = None,
+            ) -> list[dict[str, Any]]:
+                return []
+
+            async def get_stats(self, pipeline: str) -> dict[str, Any]:
+                return {}
+
+            async def aclose(self) -> None:
+                pass
+
+        assert isinstance(ValidQuarantine(), QuarantinePort)
+
+    def test_missing_write_fails(self) -> None:
+        """QuarantinePort should reject implementations missing write."""
+
+        class InvalidQuarantine:
+            # Missing write method
+            async def inspect(
+                self,
+                pipeline: str,
+                limit: int = 10,
+                error_code: str | None = None,
+            ) -> list[dict[str, Any]]:
+                return []
+
+            async def get_stats(self, pipeline: str) -> dict[str, Any]:
+                return {}
+
+            async def aclose(self) -> None:
+                pass
+
+        assert not isinstance(InvalidQuarantine(), QuarantinePort)
+
+
+@pytest.mark.unit
+class TestMetricsPortProtocol:
+    """Tests for the MetricsPort protocol."""
+
+    def test_valid_metrics_implementation(self) -> None:
+        """MetricsPort should accept valid implementations."""
+
+        class ValidMetrics:
+            def observe_histogram(
+                self,
+                name: str,
+                value: float,
+                labels: dict[str, str],
+            ) -> None:
+                pass
+
+            def increment_counter(
+                self,
+                name: str,
+                value: int,
+                labels: dict[str, str],
+            ) -> None:
+                pass
+
+        assert isinstance(ValidMetrics(), MetricsPort)
+
+    def test_missing_observe_histogram_fails(self) -> None:
+        """MetricsPort should reject implementations missing observe_histogram."""
+
+        class InvalidMetrics:
+            # Missing observe_histogram
+            def increment_counter(
+                self,
+                name: str,
+                value: int,
+                labels: dict[str, str],
+            ) -> None:
+                pass
+
+        assert not isinstance(InvalidMetrics(), MetricsPort)
+
+    def test_missing_increment_counter_fails(self) -> None:
+        """MetricsPort should reject implementations missing increment_counter."""
+
+        class InvalidMetrics:
+            def observe_histogram(
+                self,
+                name: str,
+                value: float,
+                labels: dict[str, str],
+            ) -> None:
+                pass
+
+            # Missing increment_counter
+
+        assert not isinstance(InvalidMetrics(), MetricsPort)
+
+
+@pytest.mark.unit
+class TestOrchestrationPortProtocol:
+    """Tests for the OrchestrationPort protocol."""
+
+    def test_valid_orchestration_implementation(self) -> None:
+        """OrchestrationPort should accept valid implementations."""
+
+        class ValidOrchestration:
+            async def schedule(
+                self,
+                pipeline_name: str,
+                params: dict[str, Any] | None = None,
+            ) -> None:
+                pass
+
+            async def trigger(
+                self,
+                pipeline_name: str,
+                params: dict[str, Any] | None = None,
+            ) -> Any:
+                return "run-123"
+
+            async def get_status(self, run_id: Any) -> str:
+                return "running"
+
+            async def aclose(self) -> None:
+                pass
+
+        assert isinstance(ValidOrchestration(), OrchestrationPort)
+
+    def test_missing_schedule_fails(self) -> None:
+        """OrchestrationPort should reject implementations missing schedule."""
+
+        class InvalidOrchestration:
+            # Missing schedule
+            async def trigger(
+                self,
+                pipeline_name: str,
+                params: dict[str, Any] | None = None,
+            ) -> Any:
+                return "run-123"
+
+            async def get_status(self, run_id: Any) -> str:
+                return "running"
+
+            async def aclose(self) -> None:
+                pass
+
+        assert not isinstance(InvalidOrchestration(), OrchestrationPort)
