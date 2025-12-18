@@ -53,7 +53,8 @@ class UniProtProteinPipelineFactory:
         source_config = pipeline_config.source.get("api", {})
         data_source = UniProtClient(
             rate=source_config.get("rate_limit", 10.0),
-            base_url=source_config.get("base_url", "https://rest.uniprot.org")
+            base_url=source_config.get("base_url", "https://rest.uniprot.org"),
+            strict_error_handling=settings.strict_error_handling,
         )
 
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
