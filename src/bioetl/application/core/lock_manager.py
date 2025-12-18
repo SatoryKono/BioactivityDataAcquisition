@@ -25,6 +25,9 @@ class LockManager:
         run_id: RunID,
         lock_key: str,
         exclusive: bool,
+        lock_ttl: int,
+        wait_for_lock: bool,
+        wait_timeout: int,
         heartbeat_interval: int,
         logger: "structlog.BoundLogger",
         shutdown_signal: ShutdownSignal,
@@ -37,6 +40,9 @@ class LockManager:
         self._run_id = run_id
         self._lock_key = lock_key
         self._exclusive = exclusive
+        self._lock_ttl = lock_ttl
+        self._wait_for_lock = wait_for_lock
+        self._wait_timeout = wait_timeout
         self._heartbeat_interval = heartbeat_interval
         self._logger = logger
         self._shutdown_signal = shutdown_signal
@@ -50,19 +56,27 @@ class LockManager:
         provider: str,
         entity_type: str,
         run_type: RunType,
+        lock_ttl: int,
+        wait_for_lock: bool,
+        wait_timeout: int,
         heartbeat_interval: int,
         logger: "structlog.BoundLogger",
         shutdown_signal: ShutdownSignal,
     ) -> "LockManager":
         """Factory method for creating LockManager."""
-        lock_key = f"{provider}_{entity_type}"
         exclusive = run_type in (RunType.BACKFILL, RunType.REBUILD)
+        lock_key = f"lock:{provider}_{entity_type}"
+        if exclusive:
+            lock_key = f"{lock_key}:exclusive"
 
         return cls(
             lock_port=lock_port,
             run_id=run_id,
             lock_key=lock_key,
             exclusive=exclusive,
+            lock_ttl=lock_ttl,
+            wait_for_lock=wait_for_lock,
+            wait_timeout=wait_timeout,
             heartbeat_interval=heartbeat_interval,
             logger=logger,
             shutdown_signal=shutdown_signal,
@@ -72,7 +86,9 @@ class LockManager:
         acquired = await self._lock.acquire(
             key=self._lock_key,
             owner_id=self._run_id,
-            wait=False,
+            ttl=self._lock_ttl,
+            wait=self._wait_for_lock,
+            wait_timeout=self._wait_timeout,
             exclusive=self._exclusive,
         )
         if acquired:
@@ -93,7 +109,15 @@ class LockManager:
         )
         self._logger.info("Lock released", extra={"stage": "cleanup"})
 
-    def start_heartbeat(self) -> None:
+    async def start_heartbeat(self) -> None:
+        initial_success = await self._lock.heartbeat(
+            self._lock_key, self._run_id, exclusive=self._exclusive
+        )
+        if not initial_success:
+            self._logger.error("Heartbeat failed on start; shutting down")
+            self._shutdown_signal.request()
+            raise PipelineShutdownError("Lock lost on heartbeat start")
+
         self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
 
     async def _heartbeat_loop(self) -> None:
@@ -111,7 +135,7 @@ class LockManager:
         acquired = await self.acquire()
         if not acquired:
             raise PipelineShutdownError(f"Failed to acquire lock for {self._lock_key}")
-        self.start_heartbeat()
+        await self.start_heartbeat()
         return self
 
     async def __aexit__(
