@@ -40,6 +40,8 @@ class UniProtClient(PaginatedFetcherMixin):
         >>> print(f"UniProt is {status}")
     """
 
+    provider_name: str = "uniprot"
+
     def __init__(
         self,
         api_key: str | None = None,
@@ -440,6 +442,13 @@ class UniProtClient(PaginatedFetcherMixin):
     async def close(self) -> None:
         """Close HTTP client connections."""
         await self.http_client.aclose()
+
+    async def aclose(self) -> None:
+        """Gracefully close resources.
+
+        Implements DataSourcePort.aclose().
+        """
+        await self.close()
 
     def __repr__(self) -> str:
         """String representation."""
