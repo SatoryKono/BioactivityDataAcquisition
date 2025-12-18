@@ -10,7 +10,7 @@ from botocore.exceptions import ClientError
 from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.domain.exceptions import (
@@ -67,9 +67,11 @@ class TestBronzeWriterExceptions:
             {"Error": {"Code": "NoSuchBucket"}}, "PutObject"
         )
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         with pytest.raises(BucketNotFoundError):
             await bronze_writer.write_bronze(
-                iter([b"{}"]), "p", "e", datetime.now(), batch_id
+                iter([b"{}"]), "p", "e", datetime.now(), batch_id,
+                run_id=run_id, run_type=RunType.INCREMENTAL
             )
 
     @pytest.mark.asyncio
@@ -83,9 +85,11 @@ class TestBronzeWriterExceptions:
             {"Error": {"Code": "AccessDenied"}}, "PutObject"
         )
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
         with pytest.raises(UploadError):
             await bronze_writer.write_bronze(
-                iter([b"{}"]), "p", "e", datetime.now(), batch_id
+                iter([b"{}"]), "p", "e", datetime.now(), batch_id,
+                run_id=run_id, run_type=RunType.INCREMENTAL
             )
 
 

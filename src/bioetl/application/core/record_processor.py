@@ -141,6 +141,8 @@ class RecordProcessor:
             entity=self._entity_type,
             date=ingestion_ts,
             batch_id=batch_id,
+            run_id=self._context.run_id,
+            run_type=self._context.run_type,
         )
 
     async def _write_silver_batch(
