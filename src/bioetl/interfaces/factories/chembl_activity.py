@@ -64,6 +64,7 @@ class ChEMBLActivityPipelineFactory:
         runtime: PipelineRuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> BasePipeline:
         """Creates ChEMBL Activity pipeline with decomposed config.
@@ -71,7 +72,7 @@ class ChEMBLActivityPipelineFactory:
         Loads config once and passes it through to avoid duplicate I/O.
         """
         # Load config once
-        config_model = load_pipeline_config("chembl_activity")
+        config_model = config or load_pipeline_config("chembl_activity")
 
         services = ChEMBLActivityPipelineFactory.build_services(
             settings=settings, logger=logger, config=config_model, **kwargs

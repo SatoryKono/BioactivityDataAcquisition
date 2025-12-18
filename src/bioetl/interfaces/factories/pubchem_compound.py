@@ -54,10 +54,11 @@ class PubChemCompoundPipelineFactory:
         runtime: PipelineRuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> BasePipeline:
         """Creates PubChem Compound pipeline."""
-        config_model = load_pipeline_config("pubchem_compound")
+        config_model = config or load_pipeline_config("pubchem_compound")
         services = PubChemCompoundPipelineFactory.build_services(
             settings=settings, logger=logger, config=config_model, **kwargs
         )

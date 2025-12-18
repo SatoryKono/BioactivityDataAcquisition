@@ -205,13 +205,34 @@ def run_id() -> "RunID":
 def clear_settings_cache():
     """Clear the settings cache before and after each test."""
     try:
-        from bioetl.infrastructure.config import get_settings
+        from bioetl.infrastructure.config import get_settings, get_pipeline_config
 
         get_settings.cache_clear()
+        get_pipeline_config.cache_clear()
         yield
         get_settings.cache_clear()
+        get_pipeline_config.cache_clear()
     except ImportError:
         yield
+
+
+@pytest.fixture(autouse=True)
+def cleanup_infrastructure_state():
+    """
+    Ensure infrastructure state is cleared between tests.
+
+    This prevents state leakage between tests, specifically for:
+    - S3ClientPool: Contains boto3 clients that might be bound to mocks or real endpoints.
+    """
+    yield
+
+    # Teardown
+    try:
+        from bioetl.infrastructure.storage.s3_client_pool import S3ClientPool
+
+        S3ClientPool.clear_pool()
+    except ImportError:
+        pass
 
 
 @pytest.fixture(scope="session")
