@@ -6,7 +6,7 @@ import pytest
 
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
+from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_pipeline_config

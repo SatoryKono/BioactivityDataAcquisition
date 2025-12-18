@@ -10,7 +10,7 @@ Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import (
@@ -23,7 +23,7 @@ from bioetl.domain.transformations import (
     generate_entity_id,
     safe_float,
 )
-from bioetl.domain.types import Watermark
+from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -32,30 +32,14 @@ if TYPE_CHECKING:
 class ChEMBLActivityPipeline(BasePipeline):
     """Pipeline for ChEMBL bioactivity data."""
 
-    @classmethod
-    def create(
-        cls,
-        runtime: PipelineRuntimeConfig,
-        services: PipelineServices,
-        config: PipelineConfig,
-    ) -> "ChEMBLActivityPipeline":
-        """Create ChEMBL Activity pipeline with decomposed config (new API)."""
-        return cls(config, runtime, services)
-
-    def __init__(
-        self,
-        config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
-        services: PipelineServices,
-    ) -> None:
-        """Initialize ChEMBL Activity pipeline."""
-        super().__init__(config, runtime, services)
+    # Note: create() method removed as BasePipelineFactory handles instantiation
+    # via standard __init__ inherited from BasePipeline.
 
     async def transform_bronze_to_silver(
         self,
         _context: PipelineContext,
-        record: dict[str, Any],
-    ) -> dict[str, Any] | None:
+        record: BronzeRecord,
+    ) -> SilverRecord | None:
         """Transform raw ChEMBL activity to normalized format."""
         if not record.get("activity_id"):
             return None
@@ -65,10 +49,10 @@ class ChEMBLActivityPipeline(BasePipeline):
             normalized = {field: record.get(field) for field in self.config.fields}
         else:
             # Fallback to extracting all fields if none are specified
-            normalized = record.copy()
+            normalized = cast(dict[str, Any], record.copy())
 
         # Ensure critical fields are present and correctly typed
-        activity_id = str(record["activity_id"])
+        activity_id = str(record.get("activity_id"))
         normalized["activity_id"] = activity_id
 
         entity_id = generate_entity_id(
@@ -89,7 +73,7 @@ class ChEMBLActivityPipeline(BasePipeline):
         content_hash = generate_content_hash(normalized, self.provider)
         normalized["content_hash"] = content_hash
 
-        return normalized
+        return cast(SilverRecord, normalized)
 
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]
@@ -123,22 +107,24 @@ class ChEMBLActivityPipeline(BasePipeline):
         """Extract watermark from record."""
         activity_id = record.get("activity_id")
         if activity_id:
-            return str(activity_id)
+            return Watermark.from_id(str(activity_id))
         fallback_field = self.config.watermark_field
         fallback_value = record.get(fallback_field) if fallback_field else None
         if fallback_value is None:
-            return ""
+            return Watermark.from_id("")
 
         if isinstance(fallback_value, datetime):
-            return fallback_value.replace(tzinfo=fallback_value.tzinfo or UTC)
+            return Watermark.from_timestamp(
+                fallback_value.replace(tzinfo=fallback_value.tzinfo or UTC)
+            )
 
         if isinstance(fallback_value, str):
             try:
                 parsed = datetime.fromisoformat(fallback_value)
             except ValueError:
-                return fallback_value
+                return Watermark.from_id(fallback_value)
             if parsed.tzinfo is None:
                 parsed = parsed.replace(tzinfo=UTC)
-            return parsed
+            return Watermark.from_timestamp(parsed)
 
-        return fallback_value
+        return Watermark.from_id(str(fallback_value))

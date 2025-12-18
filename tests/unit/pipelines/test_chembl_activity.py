@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
+from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.pipeline_config import PipelineConfig

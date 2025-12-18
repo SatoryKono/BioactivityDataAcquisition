@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.uniprot_protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.pipeline_config import PipelineConfig

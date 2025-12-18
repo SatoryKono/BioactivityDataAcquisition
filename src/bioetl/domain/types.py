@@ -7,7 +7,7 @@ No I/O operations allowed (REQ-ARCH-003).
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import NewType, Self
+from typing import Any, NewType, Self, TypedDict
 from uuid import UUID
 
 # Type aliases for semantic clarity
@@ -22,6 +22,23 @@ ContentHash = NewType("ContentHash", str)
 
 BatchID = NewType("BatchID", UUID)
 """Unique identifier for a data batch."""
+
+
+class BronzeRecord(TypedDict):
+    """Untyped dictionary representing a raw record from source."""
+
+    # We use NotRequired for dynamic fields, but TypedDict doesn't allow mixing optional/required well in old python
+    # For now, we assume keys are strings and values Any
+    # This is a marker type for clarity in signatures
+    pass
+
+
+class SilverRecord(TypedDict, total=False):
+    """Normalized record for Silver layer."""
+
+    entity_id: str
+    content_hash: str
+    # Other fields are dynamic based on entity type
 
 
 @dataclass(frozen=True)
