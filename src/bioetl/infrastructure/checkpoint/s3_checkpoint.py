@@ -188,7 +188,9 @@ class S3Checkpoint:
             for page in pages:
                 for common_prefix in page.get("CommonPrefixes", []):
                     pipeline_name = (
-                        common_prefix.get("Prefix", "").strip(prefix).strip("/")
+                        common_prefix.get("Prefix", "")
+                        .removeprefix(prefix)
+                        .strip("/")
                     )
                     if pipeline_name:
                         pipelines.add(pipeline_name)
