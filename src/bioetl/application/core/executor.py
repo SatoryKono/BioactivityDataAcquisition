@@ -4,18 +4,24 @@ Pipeline Executor: orchestrates the data flow from extraction to processing.
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import DataSourcePort, StoragePort
 from bioetl.domain.types import BatchID, Watermark
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+    import pyarrow as pa
+
+    from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
+    from bioetl.application.core.quarantine_manager import QuarantineManager
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports import DataSourcePort, MetricsPort, StoragePort
 
 
 class PipelineExecutor:
@@ -32,7 +38,7 @@ class PipelineExecutor:
         data_source: DataSourcePort,
         storage: StoragePort,
         checkpoint_manager: CheckpointManager,
-        quarantine_manager: Any,  # Using 'Any' to avoid circular import if QuarantineManager is in this file
+        quarantine_manager: QuarantineManager,
         error_classifier: ErrorClassifier,
         context: PipelineContext,
         shutdown_signal: ShutdownSignal,
@@ -40,10 +46,10 @@ class PipelineExecutor:
         entity_type: str,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
-        silver_schema: Any,
+        silver_schema: pa.Schema,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
-        metrics: Any = None,
+        metrics: MetricsPort | None = None,
         dq_config: dict[str, Any] | None = None,
     ):
         self._data_source = data_source
