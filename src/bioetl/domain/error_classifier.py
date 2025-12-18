@@ -37,6 +37,7 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
     (("Schema", "Validation", "SchemaValidation"), ErrorType.SCHEMA_VIOLATION),
     (("Missing", "Required", "MissingRequired"), ErrorType.MISSING_REQUIRED_FIELD),
     (("Invalid", "Malformed"), ErrorType.INVALID_DATA),
+    (("DataQualityThreshold",), ErrorType.DATA_QUALITY),
 ]
 
 

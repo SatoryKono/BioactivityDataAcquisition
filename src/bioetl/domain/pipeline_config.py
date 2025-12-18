@@ -4,6 +4,8 @@
 from dataclasses import dataclass, field
 from typing import List
 
+from bioetl.domain.config import DQConfig
+
 
 @dataclass(frozen=True)
 class PipelineConfig:
@@ -22,6 +24,7 @@ class PipelineConfig:
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: List[str] = field(default_factory=list)
+    dq: DQConfig = field(default_factory=DQConfig)
 
     def __post_init__(self) -> None:
         """Validate configuration on creation."""

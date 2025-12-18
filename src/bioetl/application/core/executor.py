@@ -12,9 +12,10 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import DataSourcePort, StoragePort
+from bioetl.domain.ports import DataSourcePort, MetricsPort, StoragePort
 from bioetl.domain.types import BatchID, Watermark
 
 
@@ -43,8 +44,9 @@ class PipelineExecutor:
         silver_schema: Any,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
-        metrics: Any = None,
-        dq_config: dict[str, Any] | None = None,
+        metrics: MetricsPort | None = None,
+        dq_config: DQConfig | None = None,
+        table_config: TableConfig | None = None,
     ):
         self._data_source = data_source
         self._checkpoint_manager = checkpoint_manager
@@ -67,6 +69,7 @@ class PipelineExecutor:
             silver_schema=silver_schema,
             metrics=metrics,
             dq_config=dq_config,
+            table_config=table_config,
         )
 
         # Counters
