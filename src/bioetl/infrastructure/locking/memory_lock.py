@@ -22,9 +22,10 @@ class MemoryLock(LockPort):
         self,
         key: Key,
         owner_id: Owner,
+        ttl: int | None = None,
         wait: bool = True,
+        wait_timeout: Optional[Union[int, float]] = None,
         exclusive: bool = True,
-        timeout: Optional[Union[int, float]] = None,
     ) -> bool:
         try:
             if not wait:
@@ -33,7 +34,7 @@ class MemoryLock(LockPort):
                 await self._lock.acquire()
                 return True
 
-            await asyncio.wait_for(self._lock.acquire(), timeout=timeout)
+            await asyncio.wait_for(self._lock.acquire(), timeout=wait_timeout)
             return True
         except asyncio.TimeoutError:
             return False
