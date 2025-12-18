@@ -103,13 +103,14 @@ async def test_base_pipeline_properties(mock_pipeline):
     # Test shutdown_signal property
     assert mock_pipeline.shutdown_signal is not None
 
-    # Test service delegate properties
-    assert mock_pipeline.data_source is mock_pipeline.services.data_source
-    assert mock_pipeline.storage is mock_pipeline.services.storage
-    assert mock_pipeline.lock is mock_pipeline.services.lock
-    assert mock_pipeline.checkpoint is mock_pipeline.services.checkpoint
-    assert mock_pipeline.quarantine is mock_pipeline.services.quarantine
-    assert mock_pipeline.metrics is mock_pipeline.services.metrics
+    # Test services property provides access to injected services
+    assert mock_pipeline.services is not None
+    assert mock_pipeline.services.data_source is not None
+    assert mock_pipeline.services.storage is not None
+    assert mock_pipeline.services.lock is not None
+    assert mock_pipeline.services.checkpoint is not None
+    assert mock_pipeline.services.quarantine is not None
+    assert mock_pipeline.services.metrics is not None
 
     # Test limit property
     assert mock_pipeline.limit is None
