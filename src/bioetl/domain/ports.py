@@ -89,6 +89,10 @@ class StoragePort(Protocol):
     different layers without knowing the implementation details.
     """
 
+    # Marker to enforce presence of 'schema' in write_silver signature at runtime
+    # Implementations MUST define this attribute.
+    REQUIRES_SILVER_SCHEMA: bool
+
     async def write_bronze(
         self,
         records: Iterator[bytes],
