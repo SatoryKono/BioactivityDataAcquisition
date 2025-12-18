@@ -43,6 +43,8 @@ class PipelineExecutor:
         silver_schema: Any,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
+        metrics: Any = None,
+        dq_config: dict[str, Any] | None = None,
     ):
         self._data_source = data_source
         self._checkpoint_manager = checkpoint_manager
@@ -63,6 +65,8 @@ class PipelineExecutor:
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
             silver_schema=silver_schema,
+            metrics=metrics,
+            dq_config=dq_config,
         )
 
         # Counters
