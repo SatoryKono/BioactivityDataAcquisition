@@ -25,7 +25,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.domain.pipeline_config import DQRulesConfig, PipelineConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -155,6 +155,10 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
         batch_size=pipeline_yaml_config.batch_size,
         checkpoint_interval=pipeline_yaml_config.checkpoint_interval,
         fields=source_fields,
+        dq_rules=DQRulesConfig(
+            soft_fail_threshold=pipeline_yaml_config.dq_rules.soft_fail_threshold,
+            hard_fail_threshold=pipeline_yaml_config.dq_rules.hard_fail_threshold,
+        ),
     )
 
 

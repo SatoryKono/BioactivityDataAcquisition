@@ -6,6 +6,28 @@ from typing import List
 
 
 @dataclass(frozen=True)
+class DQRulesConfig:
+    """Пороговые значения правил DQ."""
+
+    soft_fail_threshold: float = 0.05
+    hard_fail_threshold: float = 0.20
+
+    def __post_init__(self) -> None:
+        if not 0 <= self.soft_fail_threshold < 1:
+            raise ValueError(
+                "soft_fail_threshold must be between 0 and 1 (exclusive of 1)"
+            )
+        if not 0 <= self.hard_fail_threshold <= 1:
+            raise ValueError(
+                "hard_fail_threshold must be between 0 and 1"
+            )
+        if self.soft_fail_threshold >= self.hard_fail_threshold:
+            raise ValueError(
+                "soft_fail_threshold must be strictly less than hard_fail_threshold"
+            )
+
+
+@dataclass(frozen=True)
 class PipelineConfig:
     """Immutable pipeline configuration.
 
@@ -22,6 +44,7 @@ class PipelineConfig:
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: List[str] = field(default_factory=list)
+    dq_rules: DQRulesConfig = field(default_factory=DQRulesConfig)
 
     def __post_init__(self) -> None:
         """Validate configuration on creation."""
