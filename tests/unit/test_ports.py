@@ -1,10 +1,20 @@
 """Unit tests for domain ports (Protocols)."""
 
 from typing import Any
+from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.ports import DataSourcePort, StoragePort
+from bioetl.domain.ports import (
+    CheckpointPort,
+    DataSourcePort,
+    LockPort,
+    MetricsPort,
+    OrchestrationPort,
+    QuarantinePort,
+    StoragePort,
+)
+from bioetl.domain.types import BatchID, RunID, Watermark
 
 
 @pytest.mark.unit
