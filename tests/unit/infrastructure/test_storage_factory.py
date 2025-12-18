@@ -250,122 +250,108 @@ class TestStorageFactoryLocal:
 class TestStorageFactoryCloud:
     """Tests for StorageFactory.create() in cloud mode."""
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
     def test_cloud_run_uses_s3_paths(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_cloud,
         mock_config_minimal,
         mock_logger,
     ):
         """Test that cloud runs use S3 bucket paths."""
-        result = StorageFactory.create(
-            settings=mock_settings_cloud,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
 
-        assert isinstance(result, StorageContext)
-        assert result.bronze_path == "prod-bronze-bucket"
-        assert result.silver_path == "s3://prod-silver-bucket"
-        assert result.gold_path == "s3://prod-gold-bucket"
-        assert result.checkpoints_path == "prod-checkpoints-bucket"
+            result = StorageFactory.create(
+                settings=mock_settings_cloud,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            assert isinstance(result, StorageContext)
+            assert result.bronze_path == "prod-bronze-bucket"
+            assert result.silver_path == "s3://prod-silver-bucket"
+            assert result.gold_path == "s3://prod-gold-bucket"
+            assert result.checkpoints_path == "prod-checkpoints-bucket"
+
     def test_cloud_run_uses_endpoint_url(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_cloud,
         mock_config_minimal,
         mock_logger,
     ):
         """Test that cloud runs pass endpoint_url to BronzeWriter."""
-        StorageFactory.create(
-            settings=mock_settings_cloud,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
 
-        mock_bronze_writer.assert_called_once()
-        call_kwargs = mock_bronze_writer.call_args[1]
-        assert call_kwargs["endpoint_url"] == "https://s3.amazonaws.com"
+            StorageFactory.create(
+                settings=mock_settings_cloud,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            mock_bronze.assert_called_once()
+            call_kwargs = mock_bronze.call_args[1]
+            assert call_kwargs["endpoint_url"] == "https://s3.amazonaws.com"
+
     def test_cloud_run_uses_storage_options(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_cloud,
         mock_config_minimal,
         mock_logger,
     ):
         """Test that cloud runs pass storage_options to writers."""
-        StorageFactory.create(
-            settings=mock_settings_cloud,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
 
-        # DeltaWriter should receive storage_options
-        mock_delta_writer.assert_called_once()
-        delta_kwargs = mock_delta_writer.call_args[1]
-        assert delta_kwargs["storage_options"] == {"AWS_ACCESS_KEY_ID": "prod_key"}
+            StorageFactory.create(
+                settings=mock_settings_cloud,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
 
-        # GoldWriter should receive storage_options
-        mock_gold_writer.assert_called_once()
-        gold_kwargs = mock_gold_writer.call_args[1]
-        assert gold_kwargs["storage_options"] == {"AWS_ACCESS_KEY_ID": "prod_key"}
+            # DeltaWriter should receive storage_options
+            mock_delta.assert_called_once()
+            delta_kwargs = mock_delta.call_args[1]
+            assert delta_kwargs["storage_options"] == {"AWS_ACCESS_KEY_ID": "prod_key"}
+
+            # GoldWriter should receive storage_options
+            mock_gold.assert_called_once()
+            gold_kwargs = mock_gold.call_args[1]
+            assert gold_kwargs["storage_options"] == {"AWS_ACCESS_KEY_ID": "prod_key"}
 
 
 @pytest.mark.unit
 class TestStorageFactoryEdgeCases:
     """Edge case tests for StorageFactory."""
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
     def test_empty_sink_config(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_local,
         mock_config_empty_sink,
         mock_logger,
     ):
         """Test handling of empty sink configuration."""
-        result = StorageFactory.create(
-            settings=mock_settings_local,
-            config=mock_config_empty_sink,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
 
-        # Should still create context with default settings
-        assert isinstance(result, StorageContext)
-        # BronzeWriter should be called with save_json=False
-        mock_bronze_writer.assert_called_once()
-        call_kwargs = mock_bronze_writer.call_args[1]
-        assert call_kwargs["save_json"] is False
+            result = StorageFactory.create(
+                settings=mock_settings_local,
+                config=mock_config_empty_sink,
+                logger=mock_logger,
+            )
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            # Should still create context with default settings
+            assert isinstance(result, StorageContext)
+            # BronzeWriter should be called with save_json=False
+            mock_bronze.assert_called_once()
+            call_kwargs = mock_bronze.call_args[1]
+            assert call_kwargs["save_json"] is False
+
     def test_dev_env_with_endpoint_url_is_cloud(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_config_minimal,
         mock_logger,
     ):
@@ -381,25 +367,23 @@ class TestStorageFactoryEdgeCases:
         settings.s3.bucket_checkpoints = "dev-checkpoints"
         settings.storage_options = {}
 
-        result = StorageFactory.create(
-            settings=settings,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
 
-        # Should use S3 paths because endpoint_url is set
-        assert result.bronze_path == "dev-bronze"
-        assert result.silver_path == "s3://dev-silver"
-        assert result.gold_path == "s3://dev-gold"
+            result = StorageFactory.create(
+                settings=settings,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            # Should use S3 paths because endpoint_url is set
+            assert result.bronze_path == "dev-bronze"
+            assert result.silver_path == "s3://dev-silver"
+            assert result.gold_path == "s3://dev-gold"
+
     def test_adapter_is_properly_composed(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_local,
         mock_config_minimal,
         mock_logger,
@@ -409,16 +393,20 @@ class TestStorageFactoryEdgeCases:
         silver_instance = MagicMock()
         gold_instance = MagicMock()
 
-        mock_bronze_writer.return_value = bronze_instance
-        mock_delta_writer.return_value = silver_instance
-        mock_gold_writer.return_value = gold_instance
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
 
-        result = StorageFactory.create(
-            settings=mock_settings_local,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+            mock_bronze.return_value = bronze_instance
+            mock_delta.return_value = silver_instance
+            mock_gold.return_value = gold_instance
 
-        assert result.adapter.bronze is bronze_instance
-        assert result.adapter.silver is silver_instance
-        assert result.adapter.gold is gold_instance
+            result = StorageFactory.create(
+                settings=mock_settings_local,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
+
+            assert result.adapter.bronze is bronze_instance
+            assert result.adapter.silver is silver_instance
+            assert result.adapter.gold is gold_instance
