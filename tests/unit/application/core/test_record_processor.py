@@ -1,5 +1,6 @@
 """Unit tests for RecordProcessor."""
 
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -11,6 +12,39 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.config import get_pipeline_config
+
+
+def _write_temp_pipeline_config(
+    base_path: Path, pipeline_name: str, soft_threshold: float, hard_threshold: float
+) -> Path:
+    """Создаёт временную YAML-конфигурацию пайплайна с кастомными DQ-порогами."""
+
+    provider, entity = pipeline_name.split("_", 1)
+    config_dir = base_path / "configs" / "pipelines" / provider
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_path = config_dir / f"{entity}.yaml"
+
+    config_path.write_text(
+        "\n".join(
+            [
+                f"pipeline_name: {pipeline_name}",
+                f"provider: {provider}",
+                f"entity_type: {entity}",
+                "primary_keys: ['id']",
+                "silver_table: 'tmp_silver'",
+                "batch_size: 10",
+                "checkpoint_interval: 100",
+                "sink: {}",
+                "dq_rules:",
+                f"  soft_fail_threshold: {soft_threshold}",
+                f"  hard_fail_threshold: {hard_threshold}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    return config_path
 
 
 @pytest.fixture
@@ -220,3 +254,114 @@ class TestRecordProcessorProcessBatch:
         assert gold == 0
         mock_storage.write_silver.assert_not_called()
         mock_storage.write_gold.assert_not_called()
+
+    async def test_dq_thresholds_follow_yaml_hard_fail(
+        self,
+        tmp_path,
+        monkeypatch,
+        mock_storage,
+        mock_quarantine_manager,
+        mock_error_classifier,
+        mock_context,
+    ):
+        """DQ hard threshold берётся из YAML и вызывает ошибку при превышении."""
+
+        pipeline_name = "tmp_pipeline"
+        _write_temp_pipeline_config(tmp_path, pipeline_name, 0.1, 0.4)
+        monkeypatch.chdir(tmp_path)
+        get_pipeline_config.cache_clear()
+
+        config = get_pipeline_config(pipeline_name)
+        dq_config = {
+            "silver_table": config.silver_table,
+            "gold_table": config.gold_table,
+            "soft_fail_threshold": config.dq_rules.soft_fail_threshold,
+            "hard_fail_threshold": config.dq_rules.hard_fail_threshold,
+        }
+
+        async def transform(ctx, record):
+            if record.get("id") == "bad":
+                raise DataQualityError("invalid")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        processor = RecordProcessor(
+            storage=mock_storage,
+            quarantine_manager=mock_quarantine_manager,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            provider="test",
+            entity_type="test",
+            transform_callback=transform,
+            gold_filter_callback=lambda c, r: True,
+            silver_schema=MagicMock(),
+            dq_config=dq_config,
+        )
+
+        records = [
+            {"id": "good", "value": 1},
+            {"id": "bad", "value": 2},
+        ]
+
+        with pytest.raises(RuntimeError):
+            await processor.process_batch(records, BatchID(uuid4()))
+
+        get_pipeline_config.cache_clear()
+
+    async def test_dq_thresholds_follow_yaml_soft_threshold_prevents_warning(
+        self,
+        tmp_path,
+        monkeypatch,
+        mock_storage,
+        mock_quarantine_manager,
+        mock_error_classifier,
+        mock_context,
+    ):
+        """Высокий soft-порог из YAML отключает предупреждения при низкой доле ошибок."""
+
+        pipeline_name = "tmp_pipeline_alt"
+        _write_temp_pipeline_config(tmp_path, pipeline_name, 0.8, 0.95)
+        monkeypatch.chdir(tmp_path)
+        get_pipeline_config.cache_clear()
+
+        config = get_pipeline_config(pipeline_name)
+        dq_config = {
+            "silver_table": config.silver_table,
+            "gold_table": config.gold_table,
+            "soft_fail_threshold": config.dq_rules.soft_fail_threshold,
+            "hard_fail_threshold": config.dq_rules.hard_fail_threshold,
+        }
+
+        async def transform(ctx, record):
+            if record.get("id") == "bad":
+                raise DataQualityError("invalid")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        processor = RecordProcessor(
+            storage=mock_storage,
+            quarantine_manager=mock_quarantine_manager,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            provider="test",
+            entity_type="test",
+            transform_callback=transform,
+            gold_filter_callback=lambda c, r: True,
+            silver_schema=MagicMock(),
+            dq_config=dq_config,
+        )
+
+        records = [
+            {"id": "good", "value": 1},
+            {"id": "bad", "value": 2},
+        ]
+
+        bronze, silver, gold, quarantined = await processor.process_batch(
+            records, BatchID(uuid4())
+        )
+
+        assert bronze == 2
+        assert silver == 1
+        assert gold == 1
+        assert quarantined == 1
+        mock_context.logger.warning.assert_not_called()
+
+        get_pipeline_config.cache_clear()
