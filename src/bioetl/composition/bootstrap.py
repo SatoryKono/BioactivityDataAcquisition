@@ -13,15 +13,17 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.registry import PipelineRegistry
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.interfaces.factories.chembl_activity import (
+# Factories are imported to ensure registration happens
+from bioetl.composition.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
 )
-from bioetl.interfaces.factories.pubchem_compound import (
+from bioetl.composition.factories.pubchem_compound import (
     PubChemCompoundPipelineFactory,
 )
-from bioetl.interfaces.factories.uniprot_protein import (
+from bioetl.composition.factories.uniprot_protein import (
     UniProtProteinPipelineFactory,
 )
 from bioetl.interfaces.orchestration.runner import PipelineRunner
@@ -43,11 +45,6 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.schemas.silver import (
-    CHEMBL_ACTIVITY_SCHEMA,
-    PUBCHEM_COMPOUND_SCHEMA,
-    UNIPROT_PROTEIN_SCHEMA,
-)
 
 __all__ = [
     "bootstrap_logger",
@@ -127,33 +124,17 @@ def bootstrap_pipeline(
         heartbeat_interval=settings.pipeline.heartbeat_interval,
     )
 
-    silver_schema = None
-    if pipeline_name == "chembl_activity":
-        pipeline = ChEMBLActivityPipelineFactory.create_with_services(
-            runtime=runtime_config,
-            settings=settings,
-            logger=logger,
-            config=yaml_config,
-        )
-        silver_schema = CHEMBL_ACTIVITY_SCHEMA
-    elif pipeline_name == "pubchem_compound":
-        pipeline = PubChemCompoundPipelineFactory.create_with_services(
-            runtime=runtime_config,
-            settings=settings,
-            logger=logger,
-            config=yaml_config,
-        )
-        silver_schema = PUBCHEM_COMPOUND_SCHEMA
-    elif pipeline_name == "uniprot_protein":
-        pipeline = UniProtProteinPipelineFactory.create_with_services(
-            runtime=runtime_config,
-            settings=settings,
-            logger=logger,
-            config=yaml_config,
-        )
-        silver_schema = UNIPROT_PROTEIN_SCHEMA
-    else:
-        raise ValueError(f"Unknown pipeline name: {pipeline_name}")
+    # Resolve pipeline factory from registry
+    pipeline_def = PipelineRegistry.get(pipeline_name)
+    factory = pipeline_def.factory
+    silver_schema = pipeline_def.silver_schema
+
+    pipeline = factory.create_with_services(
+        runtime=runtime_config,
+        settings=settings,
+        logger=logger,
+        config=yaml_config,
+    )
 
     checkpoint_manager = CheckpointManager(
         checkpoint_port=pipeline.services.checkpoint,

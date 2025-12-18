@@ -8,8 +8,10 @@ from bioetl.infrastructure.config import (
     load_pipeline_config,
     yaml_config_to_domain,
 )
-from bioetl.interfaces.factories.base_services_factory import BaseServicesFactory
+from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
+from bioetl.application.registry import PipelineRegistry
+from bioetl.infrastructure.schemas.silver import UNIPROT_PROTEIN_SCHEMA
 
 if TYPE_CHECKING:
     import structlog
@@ -78,3 +80,8 @@ class UniProtProteinPipelineFactory:
             services=services,
             config=domain_config,
         )
+
+
+PipelineRegistry.register(
+    "uniprot_protein", UniProtProteinPipelineFactory, UNIPROT_PROTEIN_SCHEMA
+)
