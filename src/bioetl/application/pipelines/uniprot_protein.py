@@ -37,7 +37,7 @@ class UniProtProteinPipeline(BasePipeline):
             "entry_name": record.get("uniProtkbId"),
             "protein_name": self._extract_protein_name(record),
             "gene_names": self._extract_gene_names(record),
-            "organism_id": record.get("organism", {}).get("taxonId"),
+            "organism_id": (record.get("organism") or {}).get("taxonId"),
             "sequence_length": record.get("sequence", {}).get("length"),
         }
 
