@@ -16,7 +16,7 @@ import click
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.domain.types import RunType
-from bioetl.interfaces.bootstrap import (
+from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
     bootstrap_quarantine,
     bootstrap_checkpoint,
