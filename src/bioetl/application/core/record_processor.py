@@ -103,9 +103,9 @@ class RecordProcessor:
         if self._dq_config and records:
             error_rate = records_quarantined / len(records)
             if self._dq_config.hard_fail_threshold and error_rate >= self._dq_config.hard_fail_threshold:
-                 raise DataQualityThresholdError(error_rate, self._dq_config.hard_fail_threshold)
+                raise DataQualityThresholdError(error_rate, self._dq_config.hard_fail_threshold)
             if self._dq_config.soft_fail_threshold and error_rate >= self._dq_config.soft_fail_threshold:
-                 self._context.logger.warning("DQ Soft Threshold exceeded", error_rate=error_rate)
+                self._context.logger.warning("DQ Soft Threshold exceeded", error_rate=error_rate)
 
         if self._metrics:
             pipeline_label = f"{self._provider}_{self._entity_type}"

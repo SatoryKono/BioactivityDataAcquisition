@@ -168,10 +168,7 @@ def bootstrap_pipeline(
     error_classifier = ErrorClassifier()
 
     # 3. Instantiate Executor with typed configs
-    dq_config = DQConfig(
-        soft_fail_threshold=0.05,
-        hard_fail_threshold=0.20,
-    )
+    dq_config = pipeline.config.dq
 
     table_config = TableConfig(
         primary_keys=pipeline.config.primary_keys,
