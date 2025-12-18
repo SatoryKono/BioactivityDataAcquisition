@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
-from bioetl.domain.ports import LockPort, MetricsPort
 from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import (
@@ -29,6 +27,9 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 if TYPE_CHECKING:
     import structlog
 
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.domain.ports import LockPort, MetricsPort
+
 
 class PubChemCompoundPipelineFactory:
     """Factory for creating PubChem Compound pipelines."""
@@ -43,7 +44,6 @@ class PubChemCompoundPipelineFactory:
         """Builds PipelineServices from settings."""
         is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
         aws_config = settings.aws
-        s3_config = settings.s3
         storage_options = settings.storage_options if not is_local_run else None
         access_key, secret_key = get_aws_credentials(settings)
 
@@ -94,7 +94,7 @@ class PubChemCompoundPipelineFactory:
     def create_with_services(
         runtime: PipelineRuntimeConfig,
         settings: Settings,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         **kwargs,
     ) -> BasePipeline:
         """Creates PubChem Compound pipeline."""

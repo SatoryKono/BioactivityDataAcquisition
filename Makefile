@@ -164,6 +164,8 @@ complexity: ## Check cyclomatic complexity (max CC=10)
 	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules B --max-average A --exclude "tests/*" src/
 	@echo "$(BLUE)Checking domain layer complexity (max CC=5)...$(NC)"
 	$(VENV_PYTHON) -m xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain/
+	@echo "$(BLUE)Checking factories complexity (strict A/A/B)...$(NC)"
+	$(VENV_PYTHON) -m xenon --max-absolute B --max-modules A --max-average A src/bioetl/interfaces/factories/
 
 complexity-report: ## Generate detailed complexity report
 	@echo "$(BLUE)Generating complexity report...$(NC)"
