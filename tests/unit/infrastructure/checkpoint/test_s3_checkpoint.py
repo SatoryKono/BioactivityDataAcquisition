@@ -151,12 +151,12 @@ async def test_list_all(checkpoint_store, mock_s3_client):
     """Test listing all checkpoints."""
     paginator = mock_s3_client.get_paginator.return_value
     paginator.paginate.return_value = [
-        {"CommonPrefixes": [{"Prefix": "checkpoints/p1/"}, {"Prefix": "checkpoints/p2/"}]},
-        {"CommonPrefixes": [{"Prefix": "checkpoints/p3/"}]}
+        {"CommonPrefixes": [{"Prefix": "checkpoints/pipeline1/"}, {"Prefix": "checkpoints/pipeline2/"}]},
+        {"CommonPrefixes": [{"Prefix": "checkpoints/pipeline3/"}]}
     ]
 
     pipelines = await checkpoint_store.list_all()
-    assert pipelines == ["p1", "p2", "p3"]
+    assert pipelines == ["pipeline1", "pipeline2", "pipeline3"]
 
 
 @pytest.mark.asyncio
