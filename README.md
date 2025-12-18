@@ -134,19 +134,28 @@ Access the docs at `http://localhost:8000`.
 
 ```
 .
-├── configs/             # YAML pipeline configurations
-├── docs/                # Documentation (Architecture, Guides, Runbooks)
+├── configs/                  # YAML pipeline configurations
+├── docs/                     # Documentation (Architecture, Guides, Runbooks)
 ├── src/
 │   └── bioetl/
-│       ├── domain/      # Pure business logic & interfaces (Ports)
-│       ├── application/ # Pipeline orchestration & services
-│       ├── infrastructure/ # Adapters (API clients, Delta Lake, Redis)
-│       └── cli.py       # Command-line interface entry point
-├── tests/               # Unit, Integration & Architecture tests
-├── .env.example         # Environment variables template
-├── Makefile             # Automation commands
-├── pyproject.toml       # Dependencies & Tool configuration
-└── README.md            # Project documentation
+│       ├── domain/           # Pure business logic & interfaces (Ports)
+│       ├── application/      # Pipeline orchestration & services
+│       │   ├── core/         # Base pipeline, executor, shutdown
+│       │   └── pipelines/    # Concrete pipelines (ChEMBL, etc.)
+│       ├── composition/      # Composition Root (DI, bootstrap)
+│       │   └── factories/    # Pipeline factories
+│       ├── infrastructure/   # Adapters (API clients, Delta Lake, Redis)
+│       │   ├── adapters/     # HTTP clients (ChEMBL, PubChem, UniProt)
+│       │   ├── storage/      # Bronze/Silver/Gold writers
+│       │   └── locking/      # Distributed locks
+│       └── interfaces/       # External interfaces
+│           ├── cli.py        # Click CLI entry point
+│           └── orchestration/ # Runner, signals, Prefect
+├── tests/                    # Unit, Integration & Architecture tests
+├── .env.example              # Environment variables template
+├── Makefile                  # Automation commands
+├── pyproject.toml            # Dependencies & Tool configuration
+└── README.md                 # Project documentation
 ```
 
 ## 🤝 Contributing
