@@ -47,12 +47,17 @@ class TestDQConfig:
         config_set = {config1, config2}
         assert len(config_set) == 1  # Same values = same hash
 
-    def test_zero_thresholds(self) -> None:
-        """Test with zero thresholds."""
-        config = DQConfig(soft_fail_threshold=0.0, hard_fail_threshold=0.0)
+    def test_zero_soft_threshold(self) -> None:
+        """Test with zero soft threshold (hard must be greater)."""
+        config = DQConfig(soft_fail_threshold=0.0, hard_fail_threshold=0.01)
 
         assert config.soft_fail_threshold == 0.0
-        assert config.hard_fail_threshold == 0.0
+        assert config.hard_fail_threshold == 0.01
+
+    def test_invalid_equal_thresholds(self) -> None:
+        """Test that equal thresholds raise ValueError."""
+        with pytest.raises(ValueError, match="strictly less than"):
+            DQConfig(soft_fail_threshold=0.1, hard_fail_threshold=0.1)
 
     def test_threshold_ordering(self) -> None:
         """Test that thresholds can be compared."""
@@ -105,13 +110,13 @@ class TestTableConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_hashable(self) -> None:
-        """Test that TableConfig is hashable."""
-        config1 = TableConfig(silver_table="test")
-        config2 = TableConfig(silver_table="test")
+    def test_not_hashable_due_to_list(self) -> None:
+        """Test that TableConfig is not hashable due to list field."""
+        config = TableConfig(silver_table="test")
 
-        config_set = {config1, config2}
-        assert len(config_set) == 1
+        # Lists are not hashable, so frozen dataclass with list field isn't hashable
+        with pytest.raises(TypeError, match="unhashable"):
+            hash(config)
 
     def test_empty_primary_keys(self) -> None:
         """Test with empty primary keys list."""

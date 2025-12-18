@@ -301,16 +301,9 @@ class TestPipelineConfig:
         assert config1 == config2
         assert config1 != config3
 
-    def test_hashable(self) -> None:
-        """Test that PipelineConfig is hashable."""
-        config1 = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-        )
-        config2 = PipelineConfig(
+    def test_not_hashable_due_to_list(self) -> None:
+        """Test that PipelineConfig is not hashable due to list fields."""
+        config = PipelineConfig(
             pipeline_name="test",
             provider="test",
             entity_type="test",
@@ -318,5 +311,6 @@ class TestPipelineConfig:
             silver_table="silver",
         )
 
-        config_set = {config1, config2}
-        assert len(config_set) == 1
+        # Lists (primary_keys, fields) are not hashable
+        with pytest.raises(TypeError, match="unhashable"):
+            hash(config)

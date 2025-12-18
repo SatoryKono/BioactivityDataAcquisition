@@ -235,7 +235,9 @@ class BronzeWriter:
             compressed_data = response["Body"].read()
 
         decompressor = zstd.ZstdDecompressor()
-        decompressed_data = decompressor.decompress(compressed_data)
+        # Use streaming decompression since content size may not be in frame header
+        with decompressor.stream_reader(compressed_data) as reader:
+            decompressed_data = reader.read()
 
         for line in decompressed_data.decode("utf-8").splitlines():
             if line.strip():
