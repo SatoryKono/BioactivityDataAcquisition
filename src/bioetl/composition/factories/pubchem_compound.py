@@ -3,81 +3,36 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
-from bioetl.infrastructure.config import (
-    Settings,
-    load_pipeline_config,
-    yaml_config_to_domain,
-)
-from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.silver import PUBCHEM_COMPOUND_SCHEMA
+from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
 
 if TYPE_CHECKING:
-    import structlog
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.domain.ports import DataSourcePort
 
 
-class PubChemCompoundPipelineFactory:
+class PubChemCompoundPipelineFactory(BasePipelineFactory[PubChemCompoundPipeline]):
     """Factory for creating PubChem Compound pipelines."""
 
-    @staticmethod
-    def build_services(
-        settings: Settings,
-        logger: structlog.BoundLogger,
-        config: PipelineYamlConfig | None = None,
-        **_kwargs,
-    ) -> PipelineServices:
-        """Builds PipelineServices from settings."""
-        # Use provided config or load from YAML
-        pipeline_config = config or load_pipeline_config("pubchem_compound")
+    pipeline_name = "pubchem_compound"
+    pipeline_class = PubChemCompoundPipeline
+    silver_schema = PUBCHEM_COMPOUND_SCHEMA
 
-        # Configure data source
-        data_source = DataSourceFactory.create(
+    @classmethod
+    def create_data_source(
+        cls,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+    ) -> DataSourcePort:
+        """Create PubChem data source."""
+        return DataSourceFactory.create(
             "pubchem",
             http_client=None,
             rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0),
             strict_error_handling=settings.strict_error_handling,
-        )
-
-        return BaseServicesFactory.create_common_services(
-            settings=settings,
-            logger=logger,
-            data_source=data_source,
-            pipeline_config=pipeline_config,
-        )
-
-    @staticmethod
-    def create_with_services(
-        runtime: PipelineRuntimeConfig,
-        settings: Settings,
-        logger: structlog.BoundLogger,
-        config: PipelineYamlConfig | None = None,
-        **kwargs,
-    ) -> BasePipeline:
-        """Creates PubChem Compound pipeline.
-
-        Loads config once and reuses it for both services and pipeline.
-        """
-        # Use provided config or load YAML config (cached)
-        yaml_config = config or load_pipeline_config("pubchem_compound")
-
-        # Build services with YAML config
-        services = PubChemCompoundPipelineFactory.build_services(
-            settings=settings, logger=logger, config=yaml_config, **kwargs
-        )
-
-        # Map to domain config for pipeline
-        domain_config = yaml_config_to_domain(yaml_config)
-
-        return PubChemCompoundPipeline.create(
-            runtime=runtime,
-            services=services,
-            config=domain_config,
         )
 
 
