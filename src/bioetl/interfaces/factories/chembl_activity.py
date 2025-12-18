@@ -1,37 +1,26 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import (
     Settings,
     get_pipeline_config,
     load_pipeline_config,
 )
-from bioetl.infrastructure.factories.clients import (
-    create_redis_client,
-    get_aws_credentials,
-)
+from bioetl.infrastructure.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
-from bioetl.infrastructure.factories.storage_factory import StorageFactory
-from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
-from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
     import structlog
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.domain.ports import LockPort, MetricsPort
+    from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class ChEMBLActivityPipelineFactory:
@@ -40,9 +29,9 @@ class ChEMBLActivityPipelineFactory:
     @staticmethod
     def build_services(
         settings: Settings,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
-        **kwargs,  # Accept and ignore extra ports for now
+        **_kwargs,  # Accept and ignore extra ports for now
     ) -> PipelineServices:
         """Builds PipelineServices from settings.
 
@@ -55,12 +44,6 @@ class ChEMBLActivityPipelineFactory:
         Returns:
             Configured PipelineServices instance
         """
-        is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
-
-        aws_config = settings.aws
-        storage_options = settings.storage_options if not is_local_run else None
-        access_key, secret_key = get_aws_credentials(settings)
-
         # Use provided config or load from YAML
         pipeline_config = config or load_pipeline_config("chembl_activity")
 
@@ -69,43 +52,11 @@ class ChEMBLActivityPipelineFactory:
         )
         data_source = DataSourceFactory.create("chembl", http_client=http_client)
 
-        storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
-
-        lock: LockPort
-        if settings.env == "prod":
-            logger.info("Using RedisDistributedLock for production environment.")
-            redis_client = create_redis_client(settings)
-            lock = RedisDistributedLock(redis_client=redis_client)
-        else:
-            logger.warning(
-                "Using MemoryLock. Locking is NOT distributed. Suitable for dev/testing only."
-            )
-            lock = MemoryLock()
-
-        checkpoint = S3Checkpoint(
-            bucket=storage_ctx.checkpoints_path,
-            endpoint_url=aws_config.endpoint_url if not is_local_run else None,
-            access_key=access_key,
-            secret_key=secret_key,
-        )
-        quarantine = UnifiedQuarantine(
-            base_path=f"{storage_ctx.silver_path}/common/quarantine",
-            storage_options=storage_options,
-        )
-        metrics: MetricsPort = (
-            PrometheusMetrics()
-            if getattr(settings, "metrics", None) and settings.metrics.enabled
-            else NoOpMetrics()
-        )
-
-        return PipelineServices(
-            data_source=data_source,
-            storage=storage_ctx.adapter,
-            lock=lock,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            metrics=metrics,
+        return BaseServicesFactory.create_common_services(
+            settings=settings,
             logger=logger,
+            data_source=data_source,
+            pipeline_config=pipeline_config,
         )
 
     @staticmethod
