@@ -100,6 +100,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
         logger=logger,
+        pipeline_name="chembl_activity",
     )
 
     test_record = {
