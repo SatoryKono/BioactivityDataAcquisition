@@ -16,7 +16,7 @@ Architecture:
 
 import asyncio
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 from pathlib import Path
 import pyarrow.csv as pv
 import pyarrow as pa
@@ -61,7 +61,7 @@ class GoldWriter:
         table_name: str,
         records: list[dict[str, Any]],
         schema: DataFrameSchema | None = None,
-        mode: str = "overwrite",
+        mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
     ) -> None:

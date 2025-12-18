@@ -1,7 +1,7 @@
 """Composition Root for BioETL.
 
 Handles the initialization and wiring of infrastructure components (adapters)
-to provide a ready-to-use dependency container for the application layer.
+to provide a ready-to-use PipelineRunner for execution.
 """
 
 from __future__ import annotations
@@ -9,8 +9,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.interfaces.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
 )
@@ -20,6 +23,7 @@ from bioetl.interfaces.factories.pubchem_compound import (
 from bioetl.interfaces.factories.uniprot_protein import (
     UniProtProteinPipelineFactory,
 )
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
@@ -38,6 +42,11 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.schemas.silver import (
+    CHEMBL_ACTIVITY_SCHEMA,
+    PUBCHEM_COMPOUND_SCHEMA,
+    UNIPROT_PROTEIN_SCHEMA,
+)
 
 # Explicit exports for test mocking
 __all__ = [
@@ -100,9 +109,16 @@ def bootstrap_pipeline(
     run_type: RunType,
     resume: bool,
     limit: int | None,
-) -> BasePipeline:
+) -> PipelineRunner:
     """
-    Composition Root: Assembles and returns a fully configured pipeline instance.
+    Composition Root: Assembles and returns a fully configured PipelineRunner.
+
+    This function wires together:
+    1. Infrastructure Adapters (via PipelineServices)
+    2. Domain Logic (via BasePipeline subclass)
+    3. Application Managers (Checkpoint, Quarantine, ErrorClassifier)
+    4. Execution Engine (PipelineExecutor)
+    5. Orchestration (PipelineRunner)
     """
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
@@ -111,25 +127,79 @@ def bootstrap_pipeline(
         run_type=run_type, resume=resume, limit=limit
     )
 
+    # 1. Create the pipeline definition (Logic + Config + Services)
+    silver_schema = None
     if pipeline_name == "chembl_activity":
         pipeline = ChEMBLActivityPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
         )
+        silver_schema = CHEMBL_ACTIVITY_SCHEMA
     elif pipeline_name == "pubchem_compound":
         pipeline = PubChemCompoundPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
         )
+        silver_schema = PUBCHEM_COMPOUND_SCHEMA
     elif pipeline_name == "uniprot_protein":
         pipeline = UniProtProteinPipelineFactory.create_with_services(
             runtime=runtime_config,
             settings=settings,
             logger=logger,
         )
+        silver_schema = UNIPROT_PROTEIN_SCHEMA
     else:
         raise ValueError(f"Unknown pipeline name: {pipeline_name}")
 
-    return pipeline
+    # 2. Instantiate Application Managers
+    checkpoint_manager = CheckpointManager(
+        checkpoint_port=pipeline.services.checkpoint,
+        logger=logger,
+        pipeline_name=pipeline.config.pipeline_name,
+        run_id=run_id,
+        resume=resume,
+        watermark_extractor=lambda record: pipeline.extract_watermark(
+            pipeline.context, record
+        ),
+    )
+
+    quarantine_manager = QuarantineManager(
+        quarantine_port=pipeline.services.quarantine,
+        pipeline_name=pipeline.config.pipeline_name,
+    )
+
+    error_classifier = ErrorClassifier()
+
+    # 3. Instantiate Executor
+    executor = PipelineExecutor(
+        data_source=pipeline.services.data_source,
+        storage=pipeline.services.storage,
+        checkpoint_manager=checkpoint_manager,
+        quarantine_manager=quarantine_manager,
+        error_classifier=error_classifier,
+        context=pipeline.context,
+        shutdown_signal=pipeline.shutdown_signal,
+        provider=pipeline.config.provider,
+        entity_type=pipeline.config.entity_type,
+        transform_callback=pipeline.transform_bronze_to_silver,
+        gold_filter_callback=pipeline.should_write_gold,
+        silver_schema=silver_schema,
+        batch_size=pipeline.config.batch_size,
+        checkpoint_interval=pipeline.config.checkpoint_interval,
+    )
+
+    # 4. Instantiate Runner
+    runner = PipelineRunner(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        services=pipeline.services,
+        context=pipeline.context,
+        executor=executor,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=pipeline.shutdown_signal,
+        logger=logger,
+    )
+
+    return runner

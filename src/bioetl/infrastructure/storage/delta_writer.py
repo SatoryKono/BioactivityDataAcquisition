@@ -20,7 +20,7 @@ Architecture:
 
 import asyncio
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from pathlib import Path
 import pyarrow.csv as pv
 import pyarrow as pa
@@ -70,6 +70,8 @@ class DeltaWriter:
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
+        schema: pa.Schema,
+        mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert)."""
@@ -81,30 +83,6 @@ class DeltaWriter:
             raise ValueError(f"Records missing required metadata fields: {missing_fields}")
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
-
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("activity_id", pa.string()),
-            pa.field("molecule_chembl_id", pa.string()),
-            pa.field("target_chembl_id", pa.string()),
-            pa.field("assay_chembl_id", pa.string()),
-            pa.field("standard_type", pa.string()),
-            pa.field("standard_value", pa.float64()),
-            pa.field("standard_units", pa.string()),
-            pa.field("standard_relation", pa.string()),
-            pa.field("assay_type", pa.string()),
-            pa.field("assay_description", pa.string()),
-            pa.field("document_chembl_id", pa.string()),
-            pa.field("document_year", pa.int64()),
-            pa.field("pchembl_value", pa.float64()),
-            pa.field("activity_comment", pa.string()),
-            pa.field("data_validity_comment", pa.string()),
-            pa.field("content_hash", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
 
         arrow_data = pa.Table.from_pylist(records, schema=schema)
 

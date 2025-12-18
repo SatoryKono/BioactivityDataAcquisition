@@ -26,6 +26,7 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class YamlSettingsSource(PydanticBaseSettingsSource):
@@ -133,8 +134,9 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
         field["name"] for field in config_data.get("source", {}).get("fields", [])
     ]
 
-    # Map YAML config to PipelineConfig
-    return PipelineConfig(
+    # Validate against strict schema
+    # Use default values if keys are missing to allow partial configs during migration
+    validated_config = PipelineYamlConfig(
         pipeline_name=pipeline_name,
         provider=config_data.get("provider", pipeline_name.split("_")[0]),
         entity_type=config_data.get("entity_type", pipeline_name.split("_")[-1]),
@@ -143,6 +145,19 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
         gold_table=config_data.get("gold_table", f"{pipeline_name}.data_gold"),
         batch_size=config_data.get("batch_size", 100),
         checkpoint_interval=config_data.get("checkpoint_interval", 1000),
+        # Pass other fields if needed or allow default
+    )
+
+    # Map validated config to Domain PipelineConfig
+    return PipelineConfig(
+        pipeline_name=validated_config.pipeline_name,
+        provider=validated_config.provider,
+        entity_type=validated_config.entity_type,
+        primary_keys=validated_config.primary_keys,
+        silver_table=validated_config.silver_table,
+        gold_table=validated_config.gold_table,
+        batch_size=validated_config.batch_size,
+        checkpoint_interval=validated_config.checkpoint_interval,
         fields=source_fields,
     )
 

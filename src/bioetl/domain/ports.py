@@ -8,7 +8,7 @@ separation of concerns between the domain and infrastructure layers.
 """
 
 from collections.abc import AsyncIterator, Iterator
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Literal, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import (
     BatchID,
@@ -30,6 +30,19 @@ class DataSourcePort(Protocol):
 
     provider_name: str
     """The unique name of the data provider (e.g., 'chembl')."""
+
+    async def __aenter__(self) -> Self:
+        """Enter the async context manager."""
+        ...
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        """Exit the async context manager."""
+        ...
 
     async def fetch(
         self,
@@ -101,7 +114,8 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
-        mode: str = "merge",
+        schema: Any,  # Using Any to avoid strict dependency on pyarrow in domain
+        mode: Literal["merge", "append", "delete"] = "merge",
     ) -> None:
         """
         Write transformed records to the Silver layer.
@@ -110,7 +124,8 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries, where each dictionary is a transformed record.
             primary_keys: A list of column names that form the primary key.
-            mode: The write mode (e.g., 'merge', 'append', 'overwrite').
+            schema: The schema definition (e.g., PyArrow schema) for the records.
+            mode: The write mode (e.g., 'merge', 'append', 'delete').
         """
         ...
 
@@ -118,7 +133,7 @@ class StoragePort(Protocol):
         self,
         table_name: str,
         records: list[dict[str, Any]],
-        mode: str = "overwrite",
+        mode: Literal["overwrite", "append", "scd2"] = "overwrite",
     ) -> None:
         """
         Write aggregated or validated records to the Gold layer.
@@ -126,7 +141,7 @@ class StoragePort(Protocol):
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries, where each dictionary is a gold record.
-            mode: The write mode (e.g., 'overwrite', 'append').
+            mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
         """
         ...
 
@@ -390,20 +405,6 @@ class MetricsPort(Protocol):
         ...
 
 
-# NoOpMetrics moved to infrastructure/observability/noop_metrics.py
-# Import from bioetl.infrastructure.observability.noop_metrics instead
-
-__all__ = [
-    "DataSourcePort",
-    "StoragePort",
-    "LockPort",
-    "CheckpointPort",
-    "QuarantinePort",
-    "MetricsPort",
-    "OrchestrationPort",
-]
-
-
 @runtime_checkable
 class OrchestrationPort(Protocol):
     """
@@ -436,3 +437,14 @@ class OrchestrationPort(Protocol):
     async def aclose(self) -> None:
         """Close connection to orchestration backend."""
         ...
+
+
+__all__ = [
+    "CheckpointPort",
+    "DataSourcePort",
+    "LockPort",
+    "MetricsPort",
+    "OrchestrationPort",
+    "QuarantinePort",
+    "StoragePort",
+]
