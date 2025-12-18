@@ -82,6 +82,7 @@ class PipelineYamlConfig(BaseModel):
     primary_keys: list[str]
     silver_table: str
     gold_table: str | None = None
+    gold_filter_types: list[str] = Field(default_factory=list)
 
     # Medallion Layers
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
