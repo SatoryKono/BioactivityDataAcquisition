@@ -30,6 +30,16 @@ class CircuitBreakerConfig(BaseModel):
     recovery_timeout: int = Field(default=300, ge=60)
 
 
+class CsvExportConfig(BaseModel):
+    """Configuration for CSV export (primarily for local dev/analysts)."""
+
+    enabled: bool = False
+    path: str | None = None
+    delimiter: str = ","
+    header: bool = True
+    encoding: str = "utf-8"
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
 
@@ -37,6 +47,8 @@ class SinkLayerConfig(BaseModel):
     path: str | None = None
     format: Literal["jsonl", "delta", "parquet"] = "delta"
     mode: str | None = None  # Validated by specific layer validators
+    save_json: bool = False  # For Bronze layer debug
+    csv_export: CsvExportConfig = Field(default_factory=CsvExportConfig)
 
 
 class PipelineYamlConfig(BaseModel):
