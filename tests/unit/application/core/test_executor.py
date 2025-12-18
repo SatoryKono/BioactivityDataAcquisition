@@ -108,6 +108,7 @@ def executor(
         entity_type="test_entity",
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
+        silver_schema=MagicMock(),
         batch_size=10,
         checkpoint_interval=5,
     )
@@ -149,6 +150,7 @@ class TestPipelineExecutorInit:
             entity_type="test",
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
+            silver_schema=MagicMock(),
         )
         assert executor.batch_size == PipelineExecutor.DEFAULT_BATCH_SIZE
 
