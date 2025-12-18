@@ -16,6 +16,7 @@ from bioetl.application.core.pipeline_config import (
 from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.observability.observer import PipelineObserver
 from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:
@@ -64,49 +65,40 @@ class PipelineRunner:
 
     async def run(self) -> None:
         """Execute pipeline. Main entry point."""
-        start_time = time.time()
-        status = "success"
-
         self._logger.info(
             f"Starting pipeline: {self._config.pipeline_name}",
             extra={"stage": "startup", "run_type": self._runtime.run_type.value},
         )
 
-        try:
-            async with self._services, self._lock_manager:
-                watermark = await self._checkpoint_manager.load_checkpoint()
-                await self._executor.execute(
-                    watermark=watermark, limit=self._runtime.limit
-                )
-                await self._checkpoint_manager.delete_checkpoint()
+        # Initialize observer for automated metrics collection
+        observer = PipelineObserver(
+            metrics=self._services.metrics,
+            logger=self._logger,
+            pipeline_name=self._config.pipeline_name,
+            run_type=self._runtime.run_type.value,
+        )
 
-            self._logger.info(
-                "Pipeline completed successfully",
-                extra={
-                    "stage": "complete",
-                    "records_fetched": self._executor.records_fetched,
-                },
-            )
-        except PipelineShutdownError:
-            self._logger.warning(
-                "Pipeline shutdown requested", extra={"stage": "shutdown"}
-            )
-            status = "shutdown"
-            # Do not re-raise, allow finally block to run
-        except Exception as e:
-            self._logger.error(f"Pipeline failed: {e}", exc_info=True)
-            status = "failure"
-            raise  # Re-raise after logging
-        finally:
-            # Metrics recording (sync methods, no await needed)
-            duration = time.time() - start_time
-            self._services.metrics.observe_histogram(
-                "pipeline_duration_seconds",
-                duration,
-                {
-                    "pipeline_name": self._config.pipeline_name,
-                    "run_type": self._runtime.run_type.value,
-                    "status": status,
-                },
-            )
-            # ... other metrics ...
+        with observer:
+            try:
+                async with self._services, self._lock_manager:
+                    watermark = await self._checkpoint_manager.load_checkpoint()
+                    await self._executor.execute(
+                        watermark=watermark, limit=self._runtime.limit
+                    )
+                    await self._checkpoint_manager.delete_checkpoint()
+
+                # Add extra info to logs if needed, though observer handles success/failure logging
+                self._logger.debug(
+                    "Pipeline execution finished",
+                    extra={"records_fetched": self._executor.records_fetched},
+                )
+
+            except PipelineShutdownError:
+                observer.set_status("shutdown")
+                self._logger.warning(
+                    "Pipeline shutdown requested", extra={"stage": "shutdown"}
+                )
+                # Do not re-raise, allow observer to record shutdown status
+            except Exception as e:
+                self._logger.error(f"Pipeline failed: {e}", exc_info=True)
+                raise  # Re-raise, observer will record 'failure' status automatically
