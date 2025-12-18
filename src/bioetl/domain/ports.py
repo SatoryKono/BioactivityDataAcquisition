@@ -62,8 +62,7 @@ class DataSourcePort(Protocol):
         Yields:
             A dictionary representing a single record from the data source.
         """
-        # Async generator stub - yield makes this an async generator, not a coroutine
-        yield {}
+        ...
 
     async def health_check(self) -> HealthStatus:
         """
