@@ -301,17 +301,16 @@ class QuarantinePort(Protocol):
     This interface provides a way to isolate records that fail processing
     for later analysis, preventing them from stopping the entire pipeline.
     """
-
-async def write(
-    self,
-    pipeline: str,
-    error_code: str,
-    payload: dict[str, Any],
-    bronze_batch_id: BatchID,
-    *args: Any,
-    **kwargs: Any,
-) -> Any:
-    """
+    async def write(
+        self,
+        pipeline: str,
+        error_code: str,
+        payload: dict[str, Any],
+        bronze_batch_id: BatchID,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
+        """
         Write a record to quarantine.
 
         Args:
