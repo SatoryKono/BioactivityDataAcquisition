@@ -2,17 +2,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
 from bioetl.infrastructure.config import (
     Settings,
     load_pipeline_config,
     yaml_config_to_domain,
 )
-from bioetl.interfaces.factories.base_services_factory import BaseServicesFactory
+from bioetl.composition.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
+from bioetl.application.registry import PipelineRegistry
+from bioetl.infrastructure.schemas.silver import PUBCHEM_COMPOUND_SCHEMA
 
 if TYPE_CHECKING:
     import structlog
@@ -23,34 +22,27 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
-class ChEMBLActivityPipelineFactory:
-    """Factory for creating ChEMBL Activity pipelines."""
+class PubChemCompoundPipelineFactory:
+    """Factory for creating PubChem Compound pipelines."""
 
     @staticmethod
     def build_services(
         settings: Settings,
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
-        **_kwargs,  # Accept and ignore extra ports for now
+        **_kwargs,
     ) -> PipelineServices:
-        """Builds PipelineServices from settings.
-
-        Args:
-            settings: Application settings
-            logger: Structured logger
-            config: Pre-loaded pipeline config (avoids duplicate I/O)
-            **kwargs: Additional keyword arguments (ignored)
-
-        Returns:
-            Configured PipelineServices instance
-        """
+        """Builds PipelineServices from settings."""
         # Use provided config or load from YAML
-        pipeline_config = config or load_pipeline_config("chembl_activity")
+        pipeline_config = config or load_pipeline_config("pubchem_compound")
 
-        http_client = UnifiedHTTPClient(
-            TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
+        # Configure data source
+        data_source = DataSourceFactory.create(
+            "pubchem",
+            http_client=None,
+            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0),
+            strict_error_handling=settings.strict_error_handling,
         )
-        data_source = DataSourceFactory.create("chembl", http_client=http_client)
 
         return BaseServicesFactory.create_common_services(
             settings=settings,
@@ -67,23 +59,28 @@ class ChEMBLActivityPipelineFactory:
         config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> BasePipeline:
-        """Creates ChEMBL Activity pipeline with decomposed config.
+        """Creates PubChem Compound pipeline.
 
         Loads config once and reuses it for both services and pipeline.
         """
         # Use provided config or load YAML config (cached)
-        yaml_config = config or load_pipeline_config("chembl_activity")
+        yaml_config = config or load_pipeline_config("pubchem_compound")
 
         # Build services with YAML config
-        services = ChEMBLActivityPipelineFactory.build_services(
+        services = PubChemCompoundPipelineFactory.build_services(
             settings=settings, logger=logger, config=yaml_config, **kwargs
         )
 
         # Map to domain config for pipeline
         domain_config = yaml_config_to_domain(yaml_config)
 
-        return ChEMBLActivityPipeline.create(
+        return PubChemCompoundPipeline.create(
             runtime=runtime,
             services=services,
             config=domain_config,
         )
+
+
+PipelineRegistry.register(
+    "pubchem_compound", PubChemCompoundPipelineFactory, PUBCHEM_COMPOUND_SCHEMA
+)
