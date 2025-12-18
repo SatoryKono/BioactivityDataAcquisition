@@ -7,7 +7,8 @@
 
 ### Архитектура
 - **Стиль**: Ports & Adapters (Hexagonal), слоистая архитектура
-- **Слои**: Infrastructure (адаптеры) → Application (пайплайны) → Domain (чистая логика, без I/O)
+- **Слои**: Domain → Application → Composition → Infrastructure → Interfaces
+- **Composition Root**: `composition/bootstrap.py` — сборка зависимостей
 - **Контракты**: `typing.Protocol` в `domain/ports.py`, проверка `mypy --strict`
 
 ### Medallion Architecture (Поток Данных)
@@ -208,9 +209,11 @@ make docker-reset  # clean start
 - Domain Ports: `src/bioetl/domain/ports.py`
 - Adapters: `src/bioetl/infrastructure/adapters/{provider}/`
 - Pipelines: `src/bioetl/application/pipelines/`
+- Factories: `src/bioetl/composition/factories/`
+- Bootstrap: `src/bioetl/composition/bootstrap.py`
+- CLI: `src/bioetl/interfaces/cli.py`
 - Tests: `tests/` (unit + integration)
-- VCR Cassettes: `tests/fixtures/vcr/`
-- Configs: `configs/pipelines/{pipeline}.yaml`
+- Configs: `configs/pipelines/{provider}/{entity}.yaml`
 
 ## Приоритеты при Разработке
 
