@@ -68,10 +68,12 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
     mock_storage.aclose = AsyncMock()
 
     # 4. Create real infrastructure components
+    import structlog
+    logger = structlog.get_logger()
+
     lock = RedisDistributedLock(redis_client)
     checkpoint = S3Checkpoint(
         bucket="checkpoints",
-        pipeline_name="chembl_activity",
         endpoint_url=minio_service,
         access_key="minioadmin",
         secret_key="minioadmin",
@@ -85,6 +87,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         checkpoint=checkpoint,
         quarantine=AsyncMock(),
         metrics=PrometheusMetrics(),
+        logger=logger,
     )
 
     # 6. Create pipeline instance
@@ -96,7 +99,7 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
     context = PipelineContext(
         run_id=uuid4(),
         run_type=RunType.INCREMENTAL,
-        pipeline_name="chembl_activity",
+        logger=logger,
     )
 
     test_record = {
