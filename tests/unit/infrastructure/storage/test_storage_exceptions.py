@@ -122,8 +122,16 @@ class TestDeltaWriterExceptions:
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
+        import pyarrow as pa
+        schema = pa.schema([
+            pa.field("id", pa.int64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
         with pytest.raises(SchemaViolationError):
-            await writer.write_silver("test.table", [valid_record], ["id"])
+            await writer.write_silver("test.table", [valid_record], ["id"], schema=schema)
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.DeltaTable")
@@ -144,8 +152,16 @@ class TestDeltaWriterExceptions:
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
+        import pyarrow as pa
+        schema = pa.schema([
+            pa.field("id", pa.int64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
         with pytest.raises(MergeConflictError):
-            await writer.write_silver("test.table", [valid_record], ["id"])
+            await writer.write_silver("test.table", [valid_record], ["id"], schema=schema)
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.delta_writer.write_deltalake")
@@ -163,8 +179,16 @@ class TestDeltaWriterExceptions:
         writer.loop = asyncio.get_event_loop()
         writer.loop.run_in_executor = make_sync_executor(writer.loop)
 
+        import pyarrow as pa
+        schema = pa.schema([
+            pa.field("id", pa.int64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
         with pytest.raises(SchemaViolationError):
-            await writer.write_silver("test.table", [valid_record], ["id"])
+            await writer.write_silver("test.table", [valid_record], ["id"], schema=schema)
 
     @pytest.mark.asyncio
     async def test_vacuum_raises_table_not_found(self):
