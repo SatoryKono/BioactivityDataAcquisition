@@ -114,3 +114,21 @@ def test_dq_thresholds_are_validated_once(setup_configs):
 
     with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
         load_pipeline_config("dummy_invalid")
+
+def test_gold_filter_types_loading(setup_configs):
+    """Verify loading of gold_filter_types from YAML."""
+    pipelines_dir = setup_configs
+
+    config_data = {
+        "pipeline_name": "chembl_filters",
+        "provider": "chembl",
+        "entity_type": "filters",
+        "primary_keys": ["id"],
+        "silver_table": "chembl.filters",
+        "gold_filter_types": ["TYPE1", "TYPE2"]
+    }
+
+    (pipelines_dir / "chembl" / "filters.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("chembl_filters")
+    assert config.gold_filter_types == ["TYPE1", "TYPE2"]
