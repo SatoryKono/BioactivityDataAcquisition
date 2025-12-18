@@ -11,7 +11,7 @@ from bioetl.application.core.pipeline_config import (
 from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunType, Watermark
 
 
 class ConcretePipeline(BasePipeline):
@@ -128,4 +128,5 @@ async def test_base_pipeline_extract_watermark(mock_pipeline):
     from datetime import datetime
 
     result = mock_pipeline.extract_watermark(mock_pipeline.context, {})
-    assert isinstance(result, datetime)
+    assert isinstance(result, Watermark)
+    assert isinstance(result.value, datetime)
