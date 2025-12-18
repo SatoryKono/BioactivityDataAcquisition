@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
@@ -56,13 +57,27 @@ def mock_storage():
     storage.write_gold = AsyncMock()
     return storage
 
+@pytest.fixture
+def mock_metrics():
+    """Create mock metrics."""
+    metrics = AsyncMock()
+    return metrics
 
 @pytest.fixture
-def mock_quarantine_manager():
-    """Create mock quarantine manager."""
-    manager = MagicMock(spec=QuarantineManager)
-    manager.quarantine_record = AsyncMock()
-    return manager
+def mock_quarantine_port():
+    """Create mock quarantine port."""
+    port = AsyncMock()
+    port.write = AsyncMock()
+    return port
+
+@pytest.fixture
+def mock_services(mock_storage, mock_metrics, mock_quarantine_port):
+    """Create mock pipeline services."""
+    services = MagicMock(spec=PipelineServices)
+    services.storage = mock_storage
+    services.metrics = mock_metrics
+    services.quarantine = mock_quarantine_port
+    return services
 
 
 @pytest.fixture
@@ -105,8 +120,7 @@ def gold_filter_callback():
 
 @pytest.fixture
 def record_processor(
-    mock_storage,
-    mock_quarantine_manager,
+    mock_services,
     mock_error_classifier,
     mock_context,
     transform_callback,
@@ -114,10 +128,10 @@ def record_processor(
 ):
     """Create RecordProcessor instance."""
     return RecordProcessor(
-        storage=mock_storage,
-        quarantine_manager=mock_quarantine_manager,
+        services=mock_services,
         error_classifier=mock_error_classifier,
         context=mock_context,
+        pipeline_name="test_provider_test_entity",
         provider="test_provider",
         entity_type="test_entity",
         transform_callback=transform_callback,
@@ -177,7 +191,7 @@ class TestRecordProcessorProcessBatch:
         mock_storage.write_gold.assert_not_called()
 
     async def test_process_batch_handles_transform_error(
-        self, mock_storage, mock_quarantine_manager, mock_error_classifier, mock_context
+        self, mock_services, mock_error_classifier, mock_context
     ):
         """Test that transform errors result in quarantine."""
 
@@ -187,10 +201,10 @@ class TestRecordProcessorProcessBatch:
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         processor = RecordProcessor(
-            storage=mock_storage,
-            quarantine_manager=mock_quarantine_manager,
+            services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
+            pipeline_name="test",
             provider="test",
             entity_type="test",
             transform_callback=failing_transform,
@@ -211,10 +225,11 @@ class TestRecordProcessorProcessBatch:
         assert bronze == 2
         assert silver == 1
         assert quarantined == 1
-        mock_quarantine_manager.quarantine_record.assert_called_once()
+        # Quarantine logic is now internal to Processor via QuarantineManager -> Port
+        mock_services.quarantine.write.assert_called_once()
 
     async def test_process_batch_raises_non_data_quality_errors(
-        self, mock_storage, mock_quarantine_manager, mock_error_classifier, mock_context
+        self, mock_services, mock_error_classifier, mock_context
     ):
         """Test that non-data-quality errors are re-raised."""
         from bioetl.domain.exceptions import LockLostError
@@ -223,10 +238,10 @@ class TestRecordProcessorProcessBatch:
             raise LockLostError("resource_key", "test_run_id")
 
         processor = RecordProcessor(
-            storage=mock_storage,
-            quarantine_manager=mock_quarantine_manager,
+            services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
+            pipeline_name="test",
             provider="test",
             entity_type="test",
             transform_callback=failing_transform,
@@ -259,8 +274,7 @@ class TestRecordProcessorProcessBatch:
         self,
         tmp_path,
         monkeypatch,
-        mock_storage,
-        mock_quarantine_manager,
+        mock_services,
         mock_error_classifier,
         mock_context,
     ):
@@ -279,10 +293,10 @@ class TestRecordProcessorProcessBatch:
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         processor = RecordProcessor(
-            storage=mock_storage,
-            quarantine_manager=mock_quarantine_manager,
+            services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
+            pipeline_name="test",
             provider="test",
             entity_type="test",
             transform_callback=transform,
@@ -305,8 +319,7 @@ class TestRecordProcessorProcessBatch:
         self,
         tmp_path,
         monkeypatch,
-        mock_storage,
-        mock_quarantine_manager,
+        mock_services,
         mock_error_classifier,
         mock_context,
     ):
@@ -325,10 +338,10 @@ class TestRecordProcessorProcessBatch:
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         processor = RecordProcessor(
-            storage=mock_storage,
-            quarantine_manager=mock_quarantine_manager,
+            services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
+            pipeline_name="test",
             provider="test",
             entity_type="test",
             transform_callback=transform,

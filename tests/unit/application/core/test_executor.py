@@ -7,27 +7,25 @@ import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
+from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.context import PipelineContext
-from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.types import RunID, RunType
 
 
 @pytest.fixture
-def mock_data_source():
-    """Create mock data source."""
-    source = AsyncMock()
-    return source
+def mock_services():
+    """Create mock pipeline services."""
+    services = MagicMock(spec=PipelineServices)
+    services.data_source = AsyncMock()
+    return services
 
 
 @pytest.fixture
-def mock_storage():
-    """Create mock storage."""
-    storage = AsyncMock()
-    storage.write_bronze = AsyncMock()
-    storage.write_silver = AsyncMock()
-    storage.write_gold = AsyncMock()
-    return storage
+def mock_record_processor():
+    """Create mock record processor."""
+    processor = MagicMock(spec=RecordProcessor)
+    processor.process_batch = AsyncMock(return_value=(0, 0, 0, 0))
+    return processor
 
 
 @pytest.fixture
@@ -39,76 +37,25 @@ def mock_checkpoint_manager():
 
 
 @pytest.fixture
-def mock_quarantine_manager():
-    """Create mock quarantine manager."""
-    manager = MagicMock()
-    manager.quarantine_record = AsyncMock()
-    return manager
-
-
-@pytest.fixture
-def mock_context():
-    """Create mock pipeline context."""
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-    return PipelineContext(
-        run_id=RunID(uuid4()),
-        run_type=RunType.INCREMENTAL,
-        logger=mock_logger,
-    )
-
-
-@pytest.fixture
 def shutdown_signal():
     """Create shutdown signal."""
     return ShutdownSignal()
 
 
 @pytest.fixture
-def transform_callback():
-    """Create mock transform callback."""
-
-    async def transform(ctx, record):
-        return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
-
-    return transform
-
-
-@pytest.fixture
-def gold_filter_callback():
-    """Create mock gold filter callback."""
-
-    def filter_gold(ctx, record):
-        return record.get("value", 0) > 5
-
-    return filter_gold
-
-
-@pytest.fixture
 def executor(
-    mock_data_source,
-    mock_storage,
+    mock_services,
+    mock_record_processor,
     mock_checkpoint_manager,
-    mock_quarantine_manager,
-    mock_context,
     shutdown_signal,
-    transform_callback,
-    gold_filter_callback,
 ):
     """Create PipelineExecutor instance."""
     return PipelineExecutor(
-        data_source=mock_data_source,
-        storage=mock_storage,
+        services=mock_services,
+        record_processor=mock_record_processor,
         checkpoint_manager=mock_checkpoint_manager,
-        quarantine_manager=mock_quarantine_manager,
-        error_classifier=ErrorClassifier(),
-        context=mock_context,
         shutdown_signal=shutdown_signal,
-        provider="test_provider",
         entity_type="test_entity",
-        transform_callback=transform_callback,
-        gold_filter_callback=gold_filter_callback,
-        silver_schema=MagicMock(),
         batch_size=10,
         checkpoint_interval=5,
     )
@@ -128,29 +75,18 @@ class TestPipelineExecutorInit:
 
     def test_init_default_batch_size(
         self,
-        mock_data_source,
-        mock_storage,
+        mock_services,
+        mock_record_processor,
         mock_checkpoint_manager,
-        mock_quarantine_manager,
-        mock_context,
         shutdown_signal,
-        transform_callback,
-        gold_filter_callback,
     ):
         """Test default batch size when not specified."""
         executor = PipelineExecutor(
-            data_source=mock_data_source,
-            storage=mock_storage,
+            services=mock_services,
+            record_processor=mock_record_processor,
             checkpoint_manager=mock_checkpoint_manager,
-            quarantine_manager=mock_quarantine_manager,
-            error_classifier=ErrorClassifier(),
-            context=mock_context,
             shutdown_signal=shutdown_signal,
-            provider="test",
             entity_type="test",
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            silver_schema=MagicMock(),
         )
         assert executor.batch_size == PipelineExecutor.DEFAULT_BATCH_SIZE
 
@@ -167,24 +103,26 @@ class TestPipelineExecutorInit:
 class TestPipelineExecutorExecute:
     """Tests for execute method."""
 
-    async def test_execute_processes_records(self, executor, mock_data_source):
+    async def test_execute_processes_records(self, executor, mock_services, mock_record_processor):
         """Test that execute processes records correctly."""
 
         async def mock_fetch(**kwargs):
             for i in range(3):
                 yield {"id": str(i), "value": 10}
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
+        mock_record_processor.process_batch.return_value = (3, 3, 3, 0)
 
         await executor.execute(watermark=None, limit=None)
 
         assert executor.records_fetched == 3
         assert executor.records_bronze == 3
         assert executor.records_silver == 3
-        assert executor.records_gold == 3  # All records have value > 5
+        assert executor.records_gold == 3
+        mock_record_processor.process_batch.assert_called()
 
     async def test_execute_batches_records(
-        self, executor, mock_data_source, mock_storage
+        self, executor, mock_services, mock_record_processor
     ):
         """Test that execute batches records correctly."""
 
@@ -192,15 +130,15 @@ class TestPipelineExecutorExecute:
             for i in range(15):  # More than batch size of 10
                 yield {"id": str(i), "value": 10}
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
 
         await executor.execute(watermark=None, limit=None)
 
-        # Should have called write_silver twice (batch of 10 + batch of 5)
-        assert mock_storage.write_silver.call_count == 2
+        # Should have called process_batch twice (batch of 10 + batch of 5)
+        assert mock_record_processor.process_batch.call_count == 2
 
     async def test_execute_checkpoints_at_interval(
-        self, executor, mock_data_source, mock_checkpoint_manager
+        self, executor, mock_services, mock_checkpoint_manager
     ):
         """Test that execute checkpoints at configured interval."""
 
@@ -208,7 +146,7 @@ class TestPipelineExecutorExecute:
             for i in range(10):
                 yield {"id": str(i), "value": 10}
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
 
         await executor.execute(watermark=None, limit=None)
 
@@ -216,7 +154,7 @@ class TestPipelineExecutorExecute:
         assert mock_checkpoint_manager.save_checkpoint.call_count == 2
 
     async def test_execute_handles_shutdown_with_last_record(
-        self, executor, mock_data_source, mock_checkpoint_manager, shutdown_signal
+        self, executor, mock_services, mock_checkpoint_manager, shutdown_signal
     ):
         """Test shutdown saves checkpoint with last record."""
         records_yielded = 0
@@ -230,7 +168,7 @@ class TestPipelineExecutorExecute:
                     # Trigger shutdown after 3 records
                     shutdown_signal.request()
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
 
         with pytest.raises(PipelineShutdownError):
             await executor.execute(watermark=None, limit=None)
@@ -241,7 +179,7 @@ class TestPipelineExecutorExecute:
         assert last_call_args[0][0]["id"] == "2"  # Last record before shutdown
 
     async def test_execute_shutdown_without_records(
-        self, executor, mock_data_source, mock_checkpoint_manager, shutdown_signal
+        self, executor, mock_services, mock_checkpoint_manager, shutdown_signal
     ):
         """Test shutdown without any processed records."""
 
@@ -249,26 +187,26 @@ class TestPipelineExecutorExecute:
             shutdown_signal.request()
             yield {"id": "0", "value": 10}
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
 
         with pytest.raises(PipelineShutdownError):
             await executor.execute(watermark=None, limit=None)
 
-    async def test_execute_empty_data(self, executor, mock_data_source, mock_storage):
+    async def test_execute_empty_data(self, executor, mock_services, mock_record_processor):
         """Test execute with no data."""
 
         async def mock_fetch(**kwargs):
             if False:  # Empty generator
                 yield {}
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
 
         await executor.execute(watermark=None, limit=None)
 
         assert executor.records_fetched == 0
-        mock_storage.write_silver.assert_not_called()
+        mock_record_processor.process_batch.assert_not_called()
 
-    async def test_execute_passes_watermark_and_limit(self, executor, mock_data_source):
+    async def test_execute_passes_watermark_and_limit(self, executor, mock_services):
         """Test that watermark and limit are passed to data source."""
         watermark = "2024-01-01"  # Watermark is a TypeAlias for str | datetime | int
 
@@ -279,7 +217,7 @@ class TestPipelineExecutorExecute:
             if False:
                 yield {}
 
-        mock_data_source.fetch = mock_fetch
+        mock_services.data_source.fetch = mock_fetch
 
         await executor.execute(watermark=watermark, limit=100)
 

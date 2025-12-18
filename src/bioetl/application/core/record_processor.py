@@ -8,13 +8,13 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityThresholdError
-from bioetl.domain.ports import MetricsPort, StoragePort
 from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
@@ -29,21 +29,24 @@ class RecordProcessor:
 
     def __init__(
         self,
-        storage: StoragePort,
-        quarantine_manager: QuarantineManager,
+        services: PipelineServices,
         error_classifier: ErrorClassifier,
         context: PipelineContext,
+        pipeline_name: str,
         provider: str,
         entity_type: str,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         silver_schema: Any,
-        metrics: MetricsPort | None = None,
         dq_config: DQConfig | None = None,
         table_config: TableConfig | None = None,
     ):
-        self._storage = storage
-        self._quarantine_manager = quarantine_manager
+        self._storage = services.storage
+        self._metrics = services.metrics
+        self._quarantine_manager = QuarantineManager(
+            quarantine_port=services.quarantine,
+            pipeline_name=pipeline_name,
+        )
         self._error_classifier = error_classifier
         self._context = context
         self._provider = provider
@@ -51,7 +54,6 @@ class RecordProcessor:
         self._transform = transform_callback
         self._gold_filter = gold_filter_callback
         self._silver_schema = silver_schema
-        self._metrics = metrics
         self._dq_config = dq_config
         self._table_config = table_config or TableConfig()
 
