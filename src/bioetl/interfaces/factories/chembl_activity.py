@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
-from bioetl.domain.ports import LockPort, MetricsPort
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -32,6 +30,9 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 if TYPE_CHECKING:
     import structlog
 
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.domain.ports import LockPort, MetricsPort
+
 
 class ChEMBLActivityPipelineFactory:
     """Factory for creating ChEMBL Activity pipelines."""
@@ -39,7 +40,7 @@ class ChEMBLActivityPipelineFactory:
     @staticmethod
     def build_services(
         settings: Settings,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         raw_config: dict[str, Any] | None = None,
         **kwargs,  # Accept and ignore extra ports for now
     ) -> PipelineServices:
@@ -57,7 +58,6 @@ class ChEMBLActivityPipelineFactory:
         is_local_run = settings.env != "prod" and not settings.aws.endpoint_url
 
         aws_config = settings.aws
-        s3_config = settings.s3
         storage_options = settings.storage_options if not is_local_run else None
         access_key, secret_key = get_aws_credentials(settings)
 
@@ -122,7 +122,7 @@ class ChEMBLActivityPipelineFactory:
     def create_with_services(
         runtime: PipelineRuntimeConfig,
         settings: Settings,
-        logger: "structlog.BoundLogger",
+        logger: structlog.BoundLogger,
         **kwargs,
     ) -> BasePipeline:
         """Creates ChEMBL Activity pipeline with decomposed config.
