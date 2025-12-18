@@ -229,8 +229,12 @@ def docker_ip():
 
 @pytest.fixture(scope="session")
 def docker_compose_file(project_root: Path) -> str:
-    """Path to docker-compose.yml for pytest-docker."""
-    return str(project_root / "docker-compose.yml")
+    """Path to docker-compose.test.yml for pytest-docker.
+
+    Uses a separate test-specific compose file with only minio and redis,
+    and dynamic port allocation to avoid conflicts.
+    """
+    return str(project_root / "docker-compose.test.yml")
 
 
 @pytest.fixture(scope="session")
