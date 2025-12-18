@@ -183,11 +183,21 @@ async def test_transform_bronze_to_silver_missing_accession(pipeline, context):
 
 def test_extract_watermark(pipeline, context):
     """Test watermark extraction."""
+    from bioetl.domain.types import Watermark
+
     record = {"primaryAccession": "P12345"}
-    assert pipeline.extract_watermark(context, record) == "P12345"
+    watermark = pipeline.extract_watermark(context, record)
+
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == "P12345"
 
 
 def test_extract_watermark_default(pipeline, context):
     """Test watermark extraction when accession is missing."""
+    from bioetl.domain.types import Watermark
+
     record = {}
-    assert pipeline.extract_watermark(context, record) == ""
+    watermark = pipeline.extract_watermark(context, record)
+
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == ""

@@ -8,7 +8,7 @@ from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
+from bioetl.domain.types import BronzeRecord, SilverRecord
 from bioetl.domain.transformations import generate_entity_id, generate_content_hash
 
 
@@ -52,7 +52,9 @@ class PubChemCompoundPipeline(BasePipeline):
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]
-    ) -> Watermark:
-        """Extract CID as watermark."""
-        # Ensure watermark is int or str compatible
-        return Watermark.from_offset(int(record.get("cid", 0)))
+    ) -> int:
+        """Извлекает watermark из записи как целое число CID.
+
+        Тесты ожидают примитив (int), а не обёртку.
+        """
+        return int(record.get("cid", 0))

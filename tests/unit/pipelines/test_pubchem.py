@@ -104,11 +104,21 @@ async def test_transform_bronze_to_silver_missing_cid(pipeline, context):
 
 def test_extract_watermark(pipeline, context):
     """Test watermark extraction."""
+    from bioetl.domain.types import Watermark
+
     record = {"cid": 999}
-    assert pipeline.extract_watermark(context, record) == 999
+    watermark = pipeline.extract_watermark(context, record)
+
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == 999
 
 
 def test_extract_watermark_default(pipeline, context):
     """Test watermark extraction when cid is missing."""
+    from bioetl.domain.types import Watermark
+
     record = {}
-    assert pipeline.extract_watermark(context, record) == 0
+    watermark = pipeline.extract_watermark(context, record)
+
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == 0

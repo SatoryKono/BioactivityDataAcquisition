@@ -62,37 +62,43 @@ def context(chembl_pipeline: ChEMBLActivityPipeline) -> PipelineContext:
 def test_extract_watermark_with_activity_id(
     chembl_pipeline: ChEMBLActivityPipeline, context: PipelineContext
 ) -> None:
-    """Возвращает activity_id как строку."""
+    """Возвращает activity_id как строку wrapped в Watermark."""
+    from bioetl.domain.types import Watermark
 
     record = {"activity_id": 123, "updated_on": "2024-01-01T00:00:00+00:00"}
 
     watermark = chembl_pipeline.extract_watermark(context, record)
 
-    assert watermark == "123"
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == "123"
 
 
 def test_extract_watermark_with_fallback_field(
     chembl_pipeline: ChEMBLActivityPipeline, context: PipelineContext
 ) -> None:
-    """Парсит updated_on из конфигурации в datetime UTC."""
+    """Парсит updated_on из конфигурации в datetime UTC wrapped в Watermark."""
+    from bioetl.domain.types import Watermark
 
     record = {"updated_on": "2024-02-02T10:00:00"}
 
     watermark = chembl_pipeline.extract_watermark(context, record)
 
-    assert isinstance(watermark, datetime)
-    assert watermark.tzinfo is UTC
-    assert watermark == datetime(2024, 2, 2, 10, 0, tzinfo=UTC)
+    assert isinstance(watermark, Watermark)
+    assert isinstance(watermark.value, datetime)
+    assert watermark.value.tzinfo is UTC
+    assert watermark.value == datetime(2024, 2, 2, 10, 0, tzinfo=UTC)
 
 
 def test_extract_watermark_without_cursor_fields(
     chembl_pipeline: ChEMBLActivityPipeline, context: PipelineContext
 ) -> None:
-    """Возвращает пустую строку без доступных курсоров."""
+    """Возвращает пустую строку wrapped в Watermark без доступных курсоров."""
+    from bioetl.domain.types import Watermark
 
     watermark = chembl_pipeline.extract_watermark(context, {})
 
-    assert watermark == ""
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == ""
 
 
 @pytest.mark.asyncio
