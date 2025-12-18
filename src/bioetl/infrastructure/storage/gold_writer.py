@@ -15,15 +15,17 @@ Architecture:
 """
 
 import asyncio
+import random
 from datetime import UTC, datetime
-from typing import Any, Literal
 from pathlib import Path
-import pyarrow.csv as pv
+from typing import Any, Literal
+
+import pandera as pandera_pa
 import pyarrow as pa
+import pyarrow.csv as pv
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 from pandera.polars import DataFrameSchema
-import pandera as pandera_pa
 
 
 class GoldWriter:
@@ -101,21 +103,31 @@ class GoldWriter:
         records: list[dict[str, Any]],
         mode: str,
         partition_cols: list[str] | None,
-        schema: DataFrameSchema | None = None,
+        _schema: DataFrameSchema | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
         # Let pyarrow infer schema from data - pandera validation already done
         arrow_data = pa.Table.from_pylist(records)
 
-        await self._run_in_executor(
-            lambda: write_deltalake(
-                table_or_uri=table_path,
-                data=arrow_data,
-                mode=mode,
-                partition_by=partition_cols,
-                storage_options=self.storage_options,
-            )
-        )
+        for attempt in range(3):
+            try:
+                await self._run_in_executor(
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
+                        table_or_uri=table_or_uri,
+                        data=data,
+                        mode=mode,
+                        partition_by=partition_by,
+                        storage_options=storage_options,
+                    )
+                )
+                break
+            except Exception as e:
+                # Retry on potential concurrency/protocol errors
+                if attempt == 2:
+                    raise e
+                # Exponential backoff with jitter (Base 0.5s, Multiplier 2, Jitter 0.1s)
+                delay = 0.5 * (2 ** attempt) + random.uniform(0, 0.1)
+                await asyncio.sleep(delay)
 
         if self.csv_path:
             csv_full_path = Path(self.csv_path) / f"{table_path.replace(self.base_path, '')}.csv"
@@ -155,22 +167,33 @@ class GoldWriter:
             record[current_flag_col] = True
             record[version_col] = record.get(version_col, 1)
 
-        try:
-            dt = await self._run_in_executor(
-                lambda: DeltaTable(table_path, storage_options=self.storage_options)
-            )
-            await self._merge_scd2(dt, records, business_key, scd_config)
-        except TableNotFoundError:
-            arrow_data = pa.Table.from_pylist(records)
-            await self._run_in_executor(
-                lambda: write_deltalake(
-                    table_or_uri=table_path,
-                    data=arrow_data,
-                    mode="append",
-                    partition_by=partition_cols,
-                    storage_options=self.storage_options,
-                )
-            )
+        for attempt in range(3):
+            try:
+                try:
+                    dt = await self._run_in_executor(
+                        lambda table_path=table_path, storage_options=self.storage_options: DeltaTable(
+                            table_path, storage_options=storage_options
+                        )
+                    )
+                    await self._merge_scd2(dt, records, business_key, scd_config)
+                except TableNotFoundError:
+                    arrow_data = pa.Table.from_pylist(records)
+                    await self._run_in_executor(
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
+                            table_or_uri=table_or_uri,
+                            data=data,
+                            mode=mode,
+                            partition_by=partition_by,
+                            storage_options=storage_options,
+                        )
+                    )
+                break
+            except Exception as e:
+                if attempt == 2:
+                    raise e
+                # Exponential backoff with jitter
+                delay = 0.5 * (2 ** attempt) + random.uniform(0, 0.1)
+                await asyncio.sleep(delay)
 
     async def _merge_scd2(
         self,
