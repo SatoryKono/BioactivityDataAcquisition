@@ -1,11 +1,27 @@
 """Prometheus Metrics for BioETL."""
 
+from contextlib import suppress
 from typing import TYPE_CHECKING
 
-from prometheus_client import Counter, Histogram
+from prometheus_client import Counter, Histogram, start_http_server
 
 if TYPE_CHECKING:
     from prometheus_client import CollectorRegistry
+
+
+def start_metrics_server(port: int = 8000) -> bool:
+    """Start Prometheus metrics HTTP server.
+
+    Args:
+        port: Port to bind the HTTP server (default: 8000)
+
+    Returns:
+        True if server started successfully, False if port is in use
+    """
+    with suppress(OSError):
+        start_http_server(port)
+        return True
+    return False
 
 # Generic pipeline metrics
 PIPELINE_DURATION_SECONDS = Histogram(

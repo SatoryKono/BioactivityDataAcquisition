@@ -238,7 +238,6 @@ class TestChEMBLActivityPipelineFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.application.pipelines.chembl_activity.ChEMBLActivityPipeline")
     @patch("bioetl.composition.factories.base_pipeline_factory.yaml_config_to_domain")
     @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
     @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
@@ -251,7 +250,6 @@ class TestChEMBLActivityPipelineFactory:
         mock_base_services,
         mock_load_config,
         mock_yaml_to_domain,
-        mock_pipeline_class,
         mock_settings,
         mock_logger,
         mock_services,
@@ -268,15 +266,24 @@ class TestChEMBLActivityPipelineFactory:
         mock_domain_config = MagicMock()
         mock_yaml_to_domain.return_value = mock_domain_config
 
-        runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-        ChEMBLActivityPipelineFactory.create_with_services(
-            runtime=runtime,
-            settings=mock_settings,
-            logger=mock_logger,
-        )
+        # Save and patch pipeline_class on the factory to use our mock
+        original_class = ChEMBLActivityPipelineFactory.pipeline_class
+        mock_pipeline_class = MagicMock()
+        ChEMBLActivityPipelineFactory.pipeline_class = mock_pipeline_class
 
-        mock_pipeline_class.create.assert_called_once_with(
-            runtime=runtime,
-            services=mock_services,
-            config=mock_domain_config,
-        )
+        try:
+            runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
+            ChEMBLActivityPipelineFactory.create_with_services(
+                runtime=runtime,
+                settings=mock_settings,
+                logger=mock_logger,
+            )
+
+            mock_pipeline_class.create.assert_called_once_with(
+                runtime=runtime,
+                services=mock_services,
+                config=mock_domain_config,
+            )
+        finally:
+            # Restore original class
+            ChEMBLActivityPipelineFactory.pipeline_class = original_class

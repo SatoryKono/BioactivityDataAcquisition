@@ -8,22 +8,21 @@ are assembled and the pipeline is executed.
 from __future__ import annotations
 
 import asyncio
-import os
 import sys
-from contextlib import suppress
 from uuid import uuid4
 
 import click
-from prometheus_client import start_http_server
 
 from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.application.registry import PipelineRegistry
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
     bootstrap_pipeline,
     bootstrap_quarantine,
 )
-from bioetl.application.registry import PipelineRegistry
 from bioetl.domain.types import RunType
+from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.observability.metrics import start_metrics_server
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 
@@ -85,11 +84,9 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
     setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
 
     # Start Prometheus metrics server
-    metrics_port = int(os.environ.get("METRICS_PORT", 8000))
-    with suppress(OSError):
-        # Allow failure if port is in use (e.g. multiple pipelines on same host)
-        start_http_server(metrics_port)
-        logger.info(f"Prometheus metrics server started on port {metrics_port}")
+    settings = get_settings()
+    if start_metrics_server(settings.metrics_port):
+        logger.info(f"Prometheus metrics server started on port {settings.metrics_port}")
 
     logger.info("Starting pipeline run")
     try:

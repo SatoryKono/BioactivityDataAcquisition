@@ -97,6 +97,89 @@ class GoldWriter:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
+    def _sanitize_type_for_delta(self, dtype: pa.DataType) -> pa.DataType:
+        """Recursively replace null types with string (Delta Lake doesn't support null)."""
+        if pa.types.is_null(dtype):
+            return pa.string()
+        elif pa.types.is_list(dtype):
+            inner = self._sanitize_type_for_delta(dtype.value_type)
+            return pa.list_(inner)
+        elif pa.types.is_large_list(dtype):
+            inner = self._sanitize_type_for_delta(dtype.value_type)
+            return pa.large_list(inner)
+        elif pa.types.is_struct(dtype):
+            new_fields = [
+                pa.field(f.name, self._sanitize_type_for_delta(f.type), f.nullable)
+                for f in dtype
+            ]
+            return pa.struct(new_fields)
+        elif pa.types.is_map(dtype):
+            key_type = self._sanitize_type_for_delta(dtype.key_type)
+            item_type = self._sanitize_type_for_delta(dtype.item_type)
+            return pa.map_(key_type, item_type)
+        return dtype
+
+    def _flatten_for_csv(self, table: pa.Table) -> pa.Table:
+        """Convert complex types (list, struct) to JSON strings for CSV export."""
+        import json as json_module
+
+        new_columns = []
+        for i, field in enumerate(table.schema):
+            col = table.column(i)
+            if pa.types.is_list(field.type) or pa.types.is_large_list(field.type) or pa.types.is_struct(field.type):
+                # Convert to JSON strings
+                json_strings = [
+                    json_module.dumps(val.as_py()) if val.as_py() is not None else None
+                    for val in col
+                ]
+                new_columns.append(pa.array(json_strings, type=pa.string()))
+            else:
+                new_columns.append(col)
+
+        new_schema = pa.schema([
+            pa.field(f.name, pa.string() if pa.types.is_list(f.type) or pa.types.is_large_list(f.type) or pa.types.is_struct(f.type) else f.type, f.nullable)
+            for f in table.schema
+        ])
+        return pa.Table.from_arrays(new_columns, schema=new_schema)
+
+    def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
+        """Convert records to PyArrow table, handling null types.
+
+        Delta Lake doesn't support null type, so we convert null columns to string.
+        This includes nested null types (e.g., list<null>).
+        """
+        arrow_data = pa.Table.from_pylist(records)
+
+        # Check if schema needs sanitization (contains null types anywhere)
+        # Use lowercase check since PyArrow may print "null" or "Null"
+        schema_str = str(arrow_data.schema).lower()
+        if "null" in schema_str:
+            # Can't cast null to string directly, need to rebuild columns
+            new_columns = []
+            new_fields = []
+            for i, field in enumerate(arrow_data.schema):
+                col = arrow_data.column(i)
+                new_type = self._sanitize_type_for_delta(field.type)
+                if pa.types.is_null(field.type):
+                    # Create string array with all nulls
+                    new_col = pa.array([None] * len(col), type=pa.string())
+                    new_columns.append(new_col)
+                elif new_type != field.type:
+                    # Try to cast for nested types
+                    try:
+                        new_columns.append(col.cast(new_type))
+                    except pa.ArrowInvalid:
+                        # If cast fails, convert to string via Python
+                        new_columns.append(pa.array([str(v) if v is not None else None for v in col.to_pylist()], type=pa.string()))
+                else:
+                    new_columns.append(col)
+                new_fields.append(pa.field(field.name, new_type, field.nullable))
+
+            new_schema = pa.schema(new_fields)
+            arrow_data = pa.Table.from_arrays(new_columns, schema=new_schema)
+
+        return arrow_data
+
     async def _write_simple(
         self,
         table_path: str,
@@ -106,8 +189,7 @@ class GoldWriter:
         _schema: DataFrameSchema | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
-        # Let pyarrow infer schema from data - pandera validation already done
-        arrow_data = pa.Table.from_pylist(records)
+        arrow_data = self._to_arrow_table(records)
 
         for attempt in range(3):
             try:
@@ -142,8 +224,11 @@ class GoldWriter:
                 delimiter=delimiter,
             )
 
+            # Convert list/struct columns to JSON strings for CSV compatibility
+            csv_data = self._flatten_for_csv(arrow_data)
+
             await self._run_in_executor(
-                lambda: pv.write_csv(arrow_data, csv_full_path, write_options=write_options)
+                lambda: pv.write_csv(csv_data, csv_full_path, write_options=write_options)
             )
 
     async def _write_scd2(
@@ -177,7 +262,7 @@ class GoldWriter:
                     )
                     await self._merge_scd2(dt, records, business_key, scd_config)
                 except TableNotFoundError:
-                    arrow_data = pa.Table.from_pylist(records)
+                    arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
                         lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                             table_or_uri=table_or_uri,
@@ -208,7 +293,7 @@ class GoldWriter:
         else:
             business_keys = business_key
 
-        new_data = pa.Table.from_pylist(records)
+        new_data = self._to_arrow_table(records)
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
         current_flag_col = scd_config.get("current_flag_col", "is_current")
         merge_condition = " AND ".join(f"target.{key} = source.{key}" for key in business_keys)

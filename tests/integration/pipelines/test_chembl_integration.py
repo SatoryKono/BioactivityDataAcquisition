@@ -1,15 +1,19 @@
 """Integration tests for ChEMBL Activity Pipeline using VCR.py."""
 
-import json
-from typing import AsyncGenerator
-import pytest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from uuid import uuid4
-from bioetl.application.pipelines.chembl_activity import ChEMBLActivityPipeline
 from bioetl.domain.types import RunType
 from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.infrastructure.factories.storage_factory import StorageContext
+from bioetl.infrastructure.factories.storage import StorageAdapter
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
 
 # Integration tests need real infrastructure or highly realistic mocks (VCR)
 @pytest.mark.integration
@@ -39,38 +43,79 @@ class TestChEMBLIntegration:
         return p
 
     @pytest.fixture
-    async def pipeline(
+    def checkpoints_path(self, tmp_path) -> Path:
+        """Temporary path for checkpoints."""
+        p = tmp_path / "checkpoints"
+        p.mkdir()
+        return p
+
+    @pytest.fixture
+    def pipeline(
         self,
         monkeypatch,
         bronze_path,
         silver_path,
         gold_path,
-    ) -> AsyncGenerator[ChEMBLActivityPipeline, None]:
+        checkpoints_path,
+    ):
         """Bootstrap the pipeline with temporary storage paths."""
+        # Enable test mode to skip endpoint validation
+        monkeypatch.setenv("BIOETL_TEST_MODE", "true")
+        monkeypatch.setenv("BIOETL_ENV", "dev")
 
-        # Override storage paths in configuration using environment vars
-        # This assumes ProviderSettings/PipelineConfig pick these up or we mock the factory
-        monkeypatch.setenv("STORAGE_BRONZE_BUCKET", str(bronze_path))
-        monkeypatch.setenv("STORAGE_SILVER_PATH", str(silver_path))
-        monkeypatch.setenv("STORAGE_GOLD_PATH", str(gold_path))
+        # Clear settings cache so new env vars take effect
+        from bioetl.infrastructure.config import get_settings
+        get_settings.cache_clear()
 
-        # Disable metrics server for tests
-        monkeypatch.setenv("METRICS_ENABLED", "false")
-
-        # Use fake redis if not provided by docker (but docker-compose usually provides it)
-        # For this test, we assume the environment is set up (make test-integration)
-
-        runner = bootstrap_pipeline(
-            pipeline_name="chembl_activity",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=5  # Small batch for VCR
+        # Create real storage writers pointing to tmp paths
+        bronze_writer = BronzeWriter(
+            bucket=str(bronze_path),
+            endpoint_url=None,
+            access_key=None,
+            secret_key=None,
+            save_json=True,
+            json_path=str(bronze_path / "json"),
+            logger=MagicMock(),
+        )
+        silver_writer = DeltaWriter(
+            base_path=str(silver_path),
+            storage_options=None,
+        )
+        gold_writer = GoldWriter(
+            base_path=str(gold_path),
+            storage_options=None,
         )
 
-        # The runner has the pipeline services. We can extract the pipeline or run the runner.
-        # But runner.run() is complex. Let's just run the runner to test the full flow.
-        return runner
+        storage_adapter = StorageAdapter(
+            bronze_writer=bronze_writer,
+            silver_writer=silver_writer,
+            gold_writer=gold_writer,
+        )
+
+        storage_context = StorageContext(
+            adapter=storage_adapter,
+            bronze_path=str(bronze_path),
+            silver_path=str(silver_path),
+            gold_path=str(gold_path),
+            checkpoints_path=str(checkpoints_path),
+        )
+
+        # Patch StorageFactory to return our test storage context
+        with patch(
+            "bioetl.composition.factories.base_services_factory.StorageFactory.create",
+            return_value=storage_context,
+        ):
+            runner = bootstrap_pipeline(
+                pipeline_name="chembl_activity",
+                run_id=uuid4(),
+                run_type=RunType.INCREMENTAL,
+                resume=False,
+                limit=5,  # Small batch for VCR
+            )
+            yield runner
+
+        # Cleanup: clear settings cache
+        get_settings.cache_clear()
 
     async def test_chembl_extract_transform_load(self, pipeline, silver_path):
         """Test full ETL flow for ChEMBL activity."""
@@ -79,16 +124,10 @@ class TestChEMBLIntegration:
 
         # 2. Verify Silver Output
         # The table should be created at silver_path / chembl / activity
-        # Note: DeltaTable path depends on how the config resolves it.
-        # Assuming defaults: silver/chembl/activity
-
-        # We need to find where it actually wrote.
-        # Based on pipeline logic, it writes to silver_table defined in yaml.
-
-        # Since we can't easily query DeltaTable without knowing exact path,
-        # let's list files in the silver directory.
+        # Check for Delta Lake files (parquet + _delta_log)
         files = list(silver_path.rglob("*.parquet"))
         assert len(files) > 0, "No parquet files produced in Silver layer"
 
-        # We can also check that checkpoints were created
-        # (Assuming checkpoint storage was also redirected to tmp or mocked)
+        # Verify Delta log was created
+        delta_logs = list(silver_path.rglob("_delta_log"))
+        assert len(delta_logs) > 0, "No Delta log created in Silver layer"
