@@ -104,9 +104,19 @@ class TestStoragePortProtocol:
 
     def test_write_silver_signature(self) -> None:
         """StoragePort should require a specific write_silver signature."""
+        from collections.abc import Iterator
+        from typing import Literal
+        from bioetl.domain.types import BatchID
 
         class ValidStorage:
-            async def write_bronze(self, *args, **kwargs):
+            async def write_bronze(
+                self,
+                records: Iterator[bytes],
+                provider: str,
+                entity: str,
+                date: Any,
+                batch_id: BatchID,
+            ) -> None:
                 pass
 
             async def write_silver(
@@ -115,14 +125,19 @@ class TestStoragePortProtocol:
                 records: list[dict[str, Any]],
                 primary_keys: list[str],
                 schema: Any,
-                mode: str = "merge",
-            ):
+                mode: Literal["merge", "append", "delete"] = "merge",
+            ) -> None:
                 pass
 
-            async def write_gold(self, *args, **kwargs):
+            async def write_gold(
+                self,
+                table_name: str,
+                records: list[dict[str, Any]],
+                mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+            ) -> None:
                 pass
 
-            async def aclose(self):
+            async def aclose(self) -> None:
                 pass
 
         assert isinstance(ValidStorage(), StoragePort)
