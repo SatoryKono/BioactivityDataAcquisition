@@ -134,12 +134,14 @@ class TestPubChemCompoundPipelineTransform:
         silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
 
         assert silver_record is not None
-        assert silver_record["cid"] == 2244
+        assert silver_record["cid"] == "2244"  # Now string
         assert silver_record["molecular_formula"] == "C9H8O4"
         assert silver_record["molecular_weight"] == 180.16
         assert silver_record["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
         assert silver_record["inchikey"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
         assert silver_record["iupac_name"] == "2-acetyloxybenzoic acid"
+        assert "entity_id" in silver_record
+        assert "content_hash" in silver_record
 
     async def test_transform_bronze_to_silver_partial_record(
         self,
@@ -169,10 +171,37 @@ class TestPubChemCompoundPipelineTransform:
         silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
 
         assert silver_record is not None
-        assert silver_record["cid"] == 123456
+        assert silver_record["cid"] == "123456"  # Now string
         assert silver_record["molecular_weight"] == 250.5
         assert silver_record["molecular_formula"] is None
         assert silver_record["canonical_smiles"] is None
+        assert "entity_id" in silver_record
+        assert "content_hash" in silver_record
+
+    async def test_transform_bronze_to_silver_missing_cid_returns_none(
+        self,
+        pubchem_config,
+        pubchem_runtime,
+        mock_pubchem_services,
+    ):
+        """Тест: запись без CID возвращает None."""
+        pipeline = PubChemCompoundPipeline(
+            config=pubchem_config,
+            runtime=pubchem_runtime,
+            services=mock_pubchem_services,
+        )
+
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_pubchem_services.logger,
+        )
+
+        bronze_record = {"molecular_weight": 100.0}  # No CID
+
+        silver_record = await pipeline.transform_bronze_to_silver(context, bronze_record)
+
+        assert silver_record is None
 
     async def test_extract_watermark(
         self,
