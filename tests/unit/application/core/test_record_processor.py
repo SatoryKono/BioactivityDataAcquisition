@@ -175,6 +175,30 @@ class TestRecordProcessorProcessBatch:
         mock_storage.write_silver.assert_called_once()
         mock_storage.write_gold.assert_called_once()
 
+    async def test_process_batch_propagates_run_id_to_all_layers(
+        self, record_processor, mock_storage, mock_context
+    ):
+        """Test that the same run_id is passed to Bronze and Silver writes.
+
+        This verifies the requirement: one run = one UUID everywhere.
+        """
+        records = [{"id": "1", "value": 10}]
+        batch_id = BatchID(uuid4())
+
+        await record_processor.process_batch(records, batch_id)
+
+        # Verify Bronze write received run_id and run_type from context
+        bronze_call_kwargs = mock_storage.write_bronze.call_args[1]
+        assert bronze_call_kwargs["run_id"] == mock_context.run_id
+        assert bronze_call_kwargs["run_type"] == mock_context.run_type
+
+        # Verify Silver records contain the same run_id
+        silver_call_kwargs = mock_storage.write_silver.call_args[1]
+        silver_records = silver_call_kwargs["records"]
+        for record in silver_records:
+            assert record["_run_id"] == str(mock_context.run_id)
+            assert record["_run_type"] == mock_context.run_type.value
+
     async def test_process_batch_no_gold_records(self, record_processor, mock_storage):
         """Test process_batch when no records pass gold filter."""
         records = [

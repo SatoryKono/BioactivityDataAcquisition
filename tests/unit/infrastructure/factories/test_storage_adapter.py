@@ -7,7 +7,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.ports import StoragePort
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.factories.storage import StorageAdapter
 
 
@@ -95,6 +95,8 @@ class TestStorageAdapterWriteBronze:
         records = iter([b'{"id": 1}\n', b'{"id": 2}\n'])
         date = datetime(2024, 1, 15)
         batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
+        run_type = RunType.INCREMENTAL
 
         await storage_adapter.write_bronze(
             records=records,
@@ -102,6 +104,8 @@ class TestStorageAdapterWriteBronze:
             entity="activity",
             date=date,
             batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
         )
 
         mock_bronze_writer.write_bronze.assert_called_once()
@@ -110,6 +114,8 @@ class TestStorageAdapterWriteBronze:
         assert call_kwargs["entity"] == "activity"
         assert call_kwargs["date"] == date
         assert call_kwargs["batch_id"] == batch_id
+        assert call_kwargs["run_id"] == run_id
+        assert call_kwargs["run_type"] == run_type
 
 
 @pytest.mark.unit
