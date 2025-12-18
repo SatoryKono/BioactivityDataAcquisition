@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.domain.types import Watermark
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -144,13 +143,8 @@ def bootstrap_pipeline(
         pipeline_name=pipeline.config.pipeline_name,
         run_id=run_id,
         resume=resume,
-        watermark_extractor=lambda record: (
-            (wm if isinstance((wm := pipeline.extract_watermark(pipeline.context, record)), Watermark)
-             else (
-                 Watermark.from_timestamp(wm) if hasattr(wm, 'isoformat') and callable(getattr(wm, 'isoformat'))
-                 else Watermark.from_offset(wm) if isinstance(wm, int)
-                 else Watermark.from_id(str(wm))
-             ))
+        watermark_extractor=lambda record: pipeline.extract_watermark(
+            pipeline.context, record
         ),
     )
 
