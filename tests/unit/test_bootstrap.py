@@ -14,10 +14,13 @@ def mock_settings():
     """Create mock settings."""
     settings = MagicMock()
     settings.env = "staging"
+    settings.strict_error_handling = False
+    settings.aws = MagicMock()
     settings.aws.endpoint_url = None
     settings.aws.region = "us-east-1"
     settings.aws.access_key_id = None
     settings.aws.secret_access_key = None
+    settings.s3 = MagicMock()
     settings.s3.bucket_bronze = "bronze"
     settings.s3.bucket_silver = "silver"
     settings.s3.bucket_gold = "gold"
@@ -35,6 +38,27 @@ def mock_logger():
     logger.info = MagicMock()
     logger.warning = MagicMock()
     return logger
+
+
+@pytest.fixture
+def mock_services():
+    """Create mock PipelineServices."""
+    services = MagicMock()
+    services.data_source = MagicMock()
+    services.storage = MagicMock()
+    services.lock = MagicMock()
+    services.checkpoint = MagicMock()
+    services.quarantine = MagicMock()
+    services.metrics = MagicMock()
+    return services
+
+
+@pytest.fixture
+def mock_pipeline_config():
+    """Create mock pipeline config."""
+    config = MagicMock()
+    config.source = {"api": {"rate_limit": 10.0}}
+    return config
 
 
 @pytest.mark.unit
@@ -111,46 +135,30 @@ class TestBootstrapPipeline:
 class TestChEMBLActivityPipelineFactory:
     """Tests for ChEMBLActivityPipelineFactory."""
 
-    @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
+    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.StorageFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
     @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
-    def test_build_services_local_run(
+    def test_build_services_creates_data_source(
         self,
         mock_load_config,
-        mock_quarantine,
-        mock_checkpoint,
-        mock_storage_factory,
-        mock_chembl,
-        mock_http,
-        mock_aws_creds,
+        mock_http_client,
+        mock_data_source_factory,
+        mock_base_services,
         mock_settings,
         mock_logger,
+        mock_services,
+        mock_pipeline_config,
     ):
-        """Test build_services for local run (no S3 endpoint)."""
+        """Test build_services creates data source through DataSourceFactory."""
         from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
-        mock_aws_creds.return_value = (None, None)
-        mock_settings.env = "dev"
-        mock_settings.aws.endpoint_url = None
-        mock_load_config.return_value = {
-            "provider": "chembl",
-            "entity_type": "activity",
-            "primary_keys": ["activity_id"],
-            "silver_table": "chembl.activity",
-            "sink": {},
-        }
-        # Configure StorageFactory mock
-        mock_storage_ctx = MagicMock()
-        mock_storage_ctx.checkpoints_path = "checkpoints"
-        mock_storage_ctx.silver_path = "silver"
-        mock_storage_ctx.adapter = MagicMock()
-        mock_storage_factory.create.return_value = mock_storage_ctx
+        mock_load_config.return_value = mock_pipeline_config
+        mock_base_services.create_common_services.return_value = mock_services
+        mock_data_source = MagicMock()
+        mock_data_source_factory.create.return_value = mock_data_source
 
         services = ChEMBLActivityPipelineFactory.build_services(
             settings=mock_settings,
@@ -158,138 +166,105 @@ class TestChEMBLActivityPipelineFactory:
         )
 
         assert services is not None
-        mock_logger.warning.assert_called()  # MemoryLock warning
+        mock_data_source_factory.create.assert_called_once()
 
-    @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
-    @patch("bioetl.interfaces.factories.chembl_activity.create_redis_client")
-    @patch("bioetl.interfaces.factories.chembl_activity.RedisDistributedLock")
+    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.StorageFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
     @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
-    def test_build_services_prod_uses_redis_lock(
+    def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
-        mock_quarantine,
-        mock_checkpoint,
-        mock_storage_factory,
-        mock_chembl,
-        mock_http,
-        mock_redis_lock,
-        mock_redis_client,
-        mock_aws_creds,
+        mock_http_client,
+        mock_data_source_factory,
+        mock_base_services,
         mock_settings,
         mock_logger,
+        mock_services,
+        mock_pipeline_config,
     ):
-        """Test build_services uses Redis lock in production."""
+        """Test build_services uses BaseServicesFactory."""
         from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
-        mock_aws_creds.return_value = ("key", "secret")
-        mock_settings.env = "prod"
-        mock_settings.aws.endpoint_url = "http://s3.example.com"
-        mock_load_config.return_value = {
-            "provider": "chembl",
-            "entity_type": "activity",
-            "primary_keys": ["activity_id"],
-            "silver_table": "chembl.activity",
-            "sink": {},
-        }
-        # Configure StorageFactory mock
-        mock_storage_ctx = MagicMock()
-        mock_storage_ctx.checkpoints_path = "checkpoints"
-        mock_storage_ctx.silver_path = "silver"
-        mock_storage_ctx.adapter = MagicMock()
-        mock_storage_factory.create.return_value = mock_storage_ctx
+        mock_load_config.return_value = mock_pipeline_config
+        mock_base_services.create_common_services.return_value = mock_services
+        mock_data_source = MagicMock()
+        mock_data_source_factory.create.return_value = mock_data_source
 
-        services = ChEMBLActivityPipelineFactory.build_services(
+        ChEMBLActivityPipelineFactory.build_services(
             settings=mock_settings,
             logger=mock_logger,
         )
 
-        assert services is not None
-        mock_redis_client.assert_called_once()
-        mock_redis_lock.assert_called_once()
-        mock_logger.info.assert_called()
+        mock_base_services.create_common_services.assert_called_once_with(
+            settings=mock_settings,
+            logger=mock_logger,
+            data_source=mock_data_source,
+            pipeline_config=mock_pipeline_config,
+        )
 
-    @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
+    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.StorageFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
-    @patch("bioetl.interfaces.factories.chembl_activity.PrometheusMetrics")
     @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
-    def test_build_services_with_metrics_enabled(
+    def test_build_services_uses_provided_config(
         self,
         mock_load_config,
-        mock_prometheus,
-        mock_quarantine,
-        mock_checkpoint,
-        mock_storage_factory,
-        mock_chembl,
-        mock_http,
-        mock_aws_creds,
+        mock_http_client,
+        mock_data_source_factory,
+        mock_base_services,
         mock_settings,
         mock_logger,
+        mock_services,
+        mock_pipeline_config,
     ):
-        """Test build_services uses PrometheusMetrics when enabled."""
+        """Test build_services uses provided config."""
         from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
-        mock_aws_creds.return_value = (None, None)
-        mock_settings.env = "staging"
-        mock_settings.metrics = MagicMock()
-        mock_settings.metrics.enabled = True
-        mock_load_config.return_value = {
-            "provider": "chembl",
-            "entity_type": "activity",
-            "primary_keys": ["activity_id"],
-            "silver_table": "chembl.activity",
-            "sink": {},
-        }
-        # Configure StorageFactory mock
-        mock_storage_ctx = MagicMock()
-        mock_storage_ctx.checkpoints_path = "checkpoints"
-        mock_storage_ctx.silver_path = "silver"
-        mock_storage_ctx.adapter = MagicMock()
-        mock_storage_factory.create.return_value = mock_storage_ctx
+        mock_base_services.create_common_services.return_value = mock_services
 
-        services = ChEMBLActivityPipelineFactory.build_services(
+        ChEMBLActivityPipelineFactory.build_services(
             settings=mock_settings,
             logger=mock_logger,
+            config=mock_pipeline_config,
         )
 
-        assert services is not None
-        mock_prometheus.assert_called_once()
+        # Should NOT call load_pipeline_config when config is provided
+        mock_load_config.assert_not_called()
 
-    @patch(
-        "bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipelineFactory.build_services"
-    )
-    @patch(
-        "bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipeline",
-        create=True,
-    )
+    @patch("bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipeline")
+    @patch("bioetl.interfaces.factories.chembl_activity.get_pipeline_config")
+    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
+    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
+    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
     def test_create_with_services(
         self,
+        mock_http_client,
+        mock_data_source_factory,
+        mock_base_services,
+        mock_load_config,
+        mock_get_config,
         mock_pipeline_class,
-        mock_build_services,
         mock_settings,
         mock_logger,
+        mock_services,
+        mock_pipeline_config,
     ):
         """Test create_with_services creates pipeline."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
         from bioetl.interfaces.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
-        from bioetl.domain.types import RunType
 
-        mock_services = MagicMock()
-        mock_build_services.return_value = mock_services
+        mock_load_config.return_value = mock_pipeline_config
+        mock_base_services.create_common_services.return_value = mock_services
+        mock_domain_config = MagicMock()
+        mock_get_config.return_value = mock_domain_config
 
         runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
         ChEMBLActivityPipelineFactory.create_with_services(
@@ -298,5 +273,8 @@ class TestChEMBLActivityPipelineFactory:
             logger=mock_logger,
         )
 
-        mock_build_services.assert_called_once()
-        mock_pipeline_class.create.assert_called_once()
+        mock_pipeline_class.create.assert_called_once_with(
+            runtime=runtime,
+            services=mock_services,
+            config=mock_domain_config,
+        )

@@ -1,0 +1,9 @@
+{
+  "pipeline": "test-pipeline-b54aa90b-ea15-4ec3-920a-cdd30c9420f2",
+  "watermark": "12345",
+  "run_id": "44ad7744-a3e9-499c-bdb6-4513ab0719bb",
+  "metadata": {
+    "foo": "bar"
+  },
+  "version": "1.0"
+}

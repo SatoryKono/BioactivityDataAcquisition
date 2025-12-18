@@ -7,10 +7,12 @@ from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipelin
 from bioetl.application.pipelines.uniprot_protein import UniProtProteinPipeline
 from bioetl.domain.context import PipelineContext
 
+
 # Mock context object for tests
 @pytest.fixture
 def mock_context() -> PipelineContext:
     return MagicMock(spec=PipelineContext)
+
 
 # Mock pipeline base for instantiation
 @pytest.fixture
@@ -19,11 +21,14 @@ def mock_pipeline_base():
     mock.provider = "test_provider"
     return mock
 
+
 class TestPubChemCompoundPipeline:
-    def test_transform_bronze_to_silver_success(self, mock_context, mock_pipeline_base):
+    @pytest.mark.asyncio
+    async def test_transform_bronze_to_silver_success(self, mock_context, mock_pipeline_base):
         # Arrange
-        pipeline = PubChemCompoundPipeline(config=MagicMock(), runtime=MagicMock(), services=MagicMock())
-        pipeline.provider = "pubchem"  # Set provider for hash generation
+        config = MagicMock()
+        config.provider = "pubchem"
+        pipeline = PubChemCompoundPipeline(config=config, runtime=MagicMock(), services=MagicMock())
 
         record = {
             "cid": 123,
@@ -33,7 +38,7 @@ class TestPubChemCompoundPipeline:
         }
 
         # Act
-        result = pipeline.transform_bronze_to_silver(mock_context, record)
+        result = await pipeline.transform_bronze_to_silver(mock_context, record)
 
         # Assert
         assert result is not None
@@ -44,22 +49,26 @@ class TestPubChemCompoundPipeline:
         assert result["entity_id"] is not None
         assert result["content_hash"] is not None
 
-    def test_transform_bronze_to_silver_no_cid(self, mock_context, mock_pipeline_base):
+    @pytest.mark.asyncio
+    async def test_transform_bronze_to_silver_no_cid(self, mock_context, mock_pipeline_base):
         # Arrange
         pipeline = PubChemCompoundPipeline(config=MagicMock(), runtime=MagicMock(), services=MagicMock())
         record = {"molecular_formula": "C6H6"}
 
         # Act
-        result = pipeline.transform_bronze_to_silver(mock_context, record)
+        result = await pipeline.transform_bronze_to_silver(mock_context, record)
 
         # Assert
         assert result is None
 
+
 class TestUniProtProteinPipeline:
-    def test_transform_bronze_to_silver_success(self, mock_context, mock_pipeline_base):
+    @pytest.mark.asyncio
+    async def test_transform_bronze_to_silver_success(self, mock_context, mock_pipeline_base):
         # Arrange
-        pipeline = UniProtProteinPipeline(config=MagicMock(), runtime=MagicMock(), services=MagicMock())
-        pipeline.provider = "uniprot" # Set provider for hash generation
+        config = MagicMock()
+        config.provider = "uniprot"
+        pipeline = UniProtProteinPipeline(config=config, runtime=MagicMock(), services=MagicMock())
 
         record = {
             "primaryAccession": "P12345",
@@ -71,7 +80,7 @@ class TestUniProtProteinPipeline:
         }
 
         # Act
-        result = pipeline.transform_bronze_to_silver(mock_context, record)
+        result = await pipeline.transform_bronze_to_silver(mock_context, record)
 
         # Assert
         assert result is not None
@@ -82,13 +91,14 @@ class TestUniProtProteinPipeline:
         assert result["entity_id"] is not None
         assert result["content_hash"] is not None
 
-    def test_transform_bronze_to_silver_no_accession(self, mock_context, mock_pipeline_base):
+    @pytest.mark.asyncio
+    async def test_transform_bronze_to_silver_no_accession(self, mock_context, mock_pipeline_base):
         # Arrange
         pipeline = UniProtProteinPipeline(config=MagicMock(), runtime=MagicMock(), services=MagicMock())
         record = {"uniProtkbId": "TEST_ID"}
 
         # Act
-        result = pipeline.transform_bronze_to_silver(mock_context, record)
+        result = await pipeline.transform_bronze_to_silver(mock_context, record)
 
         # Assert
         assert result is None
