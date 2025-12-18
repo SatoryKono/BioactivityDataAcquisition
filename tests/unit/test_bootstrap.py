@@ -94,7 +94,8 @@ class TestBootstrapPipeline:
         mock_get_settings.return_value = mock_settings
         mock_bootstrap_logger.return_value = mock_logger
 
-        with pytest.raises(ValueError, match="Unknown pipeline name"):
+        # Now raises "Configuration file not found" because load_pipeline_config is called first
+        with pytest.raises(ValueError, match="Configuration file not found"):
             bootstrap_pipeline(
                 pipeline_name="unknown_pipeline",
                 run_id=uuid4(),

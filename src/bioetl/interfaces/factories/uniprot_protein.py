@@ -55,14 +55,15 @@ class UniProtProteinPipelineFactory:
         runtime: PipelineRuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> BasePipeline:
         """Creates UniProt Protein pipeline.
 
         Loads config once and reuses it for both services and pipeline.
         """
-        # Load YAML config once (cached)
-        yaml_config = load_pipeline_config("uniprot_protein")
+        # Use provided config or load YAML config (cached)
+        yaml_config = config or load_pipeline_config("uniprot_protein")
 
         # Build services with YAML config
         services = UniProtProteinPipelineFactory.build_services(
