@@ -103,3 +103,40 @@ jobs:
           name: duplication-complexity-reports
           path: reports
           if-no-files-found: error
+
+  constructor-args-check:
+    name: Constructor Arguments Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check constructor argument counts
+        # TODO: Remove --warn-only after refactoring PipelineExecutor (currently 17 args)
+        run: python scripts/check_constructor_args.py --warn-only
+
+  executor-complexity:
+    name: Executor Complexity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: pip install xenon radon
+
+      - name: Check executor.py complexity (max CC = 10)
+        run: |
+          echo "Checking executor.py complexity..."
+          xenon --max-absolute B --max-modules B --max-average A \
+            src/bioetl/application/core/executor.py
