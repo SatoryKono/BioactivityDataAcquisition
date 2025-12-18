@@ -179,6 +179,9 @@ class ErrorType(str, Enum):
     MISSING_REQUIRED_FIELD = "MISSING_REQUIRED_FIELD"
     """Required field is missing or null."""
 
+    DATA_QUALITY = "DATA_QUALITY"
+    """General data quality error (e.g. thresholds)."""
+
     def is_critical(self) -> bool:
         """Check if error should fail pipeline."""
         return self in {
@@ -202,6 +205,7 @@ class ErrorType(str, Enum):
             ErrorType.SCHEMA_VIOLATION,
             ErrorType.INVALID_DATA,
             ErrorType.MISSING_REQUIRED_FIELD,
+            ErrorType.DATA_QUALITY,
         }
 
 

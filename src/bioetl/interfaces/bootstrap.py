@@ -13,6 +13,7 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.interfaces.factories.chembl_activity import (
     ChEMBLActivityPipelineFactory,
@@ -166,12 +167,17 @@ def bootstrap_pipeline(
 
     error_classifier = ErrorClassifier()
 
-    dq_config = {
-        "silver_table": pipeline.config.silver_table,
-        "gold_table": pipeline.config.gold_table,
-        "soft_fail_threshold": 0.05,
-        "hard_fail_threshold": 0.20,
-    }
+    # 3. Instantiate Executor with typed configs
+    dq_config = DQConfig(
+        soft_fail_threshold=0.05,
+        hard_fail_threshold=0.20,
+    )
+
+    table_config = TableConfig(
+        primary_keys=pipeline.config.primary_keys,
+        silver_table=pipeline.config.silver_table,
+        gold_table=pipeline.config.gold_table,
+    )
 
     executor = PipelineExecutor(
         data_source=pipeline.services.data_source,
@@ -190,6 +196,7 @@ def bootstrap_pipeline(
         checkpoint_interval=pipeline.config.checkpoint_interval,
         metrics=pipeline.services.metrics,
         dq_config=dq_config,
+        table_config=table_config,
     )
 
     runner = PipelineRunner(

@@ -9,6 +9,7 @@ from uuid import uuid4
 
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.types import BatchID, Watermark
 
 if TYPE_CHECKING:
@@ -50,7 +51,8 @@ class PipelineExecutor:
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         metrics: MetricsPort | None = None,
-        dq_config: dict[str, Any] | None = None,
+        dq_config: DQConfig | None = None,
+        table_config: TableConfig | None = None,
     ):
         self._data_source = data_source
         self._checkpoint_manager = checkpoint_manager
@@ -73,6 +75,7 @@ class PipelineExecutor:
             silver_schema=silver_schema,
             metrics=metrics,
             dq_config=dq_config,
+            table_config=table_config,
         )
 
         # Counters
