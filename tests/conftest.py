@@ -229,8 +229,13 @@ def docker_ip():
 
 @pytest.fixture(scope="session")
 def docker_compose_file(project_root: Path) -> str:
-    """Path to docker-compose.yml for pytest-docker."""
-    return str(project_root / "docker-compose.yml")
+    """Path to docker-compose.test.yml for pytest-docker.
+
+    Uses a separate compose file with only the minimal services (minio, redis)
+    required for testing. This avoids issues with directory sharing for
+    services like Grafana that mount local directories.
+    """
+    return str(project_root / "docker-compose.test.yml")
 
 
 @pytest.fixture(scope="session")
