@@ -1,15 +1,23 @@
 import pytest
-import boto3
-from moto import mock_aws
 from uuid import uuid4, UUID
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
-from botocore.exceptions import ClientError
+
+try:
+    import boto3
+    from moto import mock_aws
+    from botocore.exceptions import ClientError
+    MOTO_AVAILABLE = True
+except ImportError:
+    MOTO_AVAILABLE = False
 
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.storage.s3_pool import S3ClientPool
 from bioetl.domain.types import RunID
 from bioetl.domain.exceptions import CheckpointConflictError
+
+pytestmark = pytest.mark.skipif(not MOTO_AVAILABLE, reason="moto and boto3 are not installed")
+
 
 BUCKET_NAME = "test-checkpoints"
 # Use a valid AWS endpoint so moto intercepts it automatically
