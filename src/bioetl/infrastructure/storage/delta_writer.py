@@ -42,6 +42,29 @@ class DeltaWriter:
     Implements merge/upsert strategy to handle updates and deduplication.
     """
 
+    @staticmethod
+    def _flatten_for_csv(table: pa.Table) -> pa.Table:
+        """Convert complex types (list, struct) to JSON strings for CSV export."""
+        import json as json_module
+
+        new_columns = []
+        for i, field in enumerate(table.schema):
+            col = table.column(i)
+            if pa.types.is_list(field.type) or pa.types.is_large_list(field.type) or pa.types.is_struct(field.type):
+                json_strings = [
+                    json_module.dumps(val.as_py()) if val.as_py() is not None else None
+                    for val in col
+                ]
+                new_columns.append(pa.array(json_strings, type=pa.string()))
+            else:
+                new_columns.append(col)
+
+        new_schema = pa.schema([
+            pa.field(f.name, pa.string() if pa.types.is_list(f.type) or pa.types.is_large_list(f.type) or pa.types.is_struct(f.type) else f.type, f.nullable)
+            for f in table.schema
+        ])
+        return pa.Table.from_arrays(new_columns, schema=new_schema)
+
     def __init__(
         self,
         base_path: str,
@@ -84,7 +107,13 @@ class DeltaWriter:
 
         table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
 
-        arrow_data = pa.Table.from_pylist(records, schema=schema)
+        # Filter records to only include fields in schema to avoid null type columns
+        schema_fields = set(schema.names)
+        filtered_records = [
+            {k: v for k, v in rec.items() if k in schema_fields}
+            for rec in records
+        ]
+        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
         loop = asyncio.get_running_loop()
 
@@ -128,9 +157,12 @@ class DeltaWriter:
                 delimiter=delimiter,
             )
 
+            # Convert list/struct columns to JSON strings for CSV compatibility
+            csv_data = self._flatten_for_csv(arrow_data)
+
             await loop.run_in_executor(
                 None,
-                lambda: pv.write_csv(arrow_data, csv_full_path, write_options=write_options)
+                lambda: pv.write_csv(csv_data, csv_full_path, write_options=write_options)
             )
 
     async def _merge_records(

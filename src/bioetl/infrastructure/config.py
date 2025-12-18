@@ -259,6 +259,8 @@ class Settings(BaseSettings):
     env: Literal["dev", "staging", "prod"] = Field(default="dev")
     debug: bool = Field(default=False)
     test_mode: bool = Field(default=False)
+    metrics_port: int = Field(default=8000, ge=1, le=65535)
+    """Port for Prometheus metrics HTTP server (default: 8000)."""
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
