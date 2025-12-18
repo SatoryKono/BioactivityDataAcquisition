@@ -109,7 +109,7 @@ class TestS3Checkpoint:
         # Arrange
         pipelines_to_create = ["pipeline_a", "pipeline_b", "pipeline_c"]
         for name in pipelines_to_create:
-            await checkpoint_storage.save(name, 1, RunID(uuid4()), {})
+            await checkpoint_storage.save(name, Watermark.from_offset(1), RunID(uuid4()), {})
 
         # Act
         listed_pipelines = await checkpoint_storage.list_all()
@@ -122,7 +122,7 @@ class TestS3Checkpoint:
         # Arrange
         existing_pipeline = "existing_one"
         non_existing_pipeline = "non_existing_one"
-        await checkpoint_storage.save(existing_pipeline, 1, RunID(uuid4()), {})
+        await checkpoint_storage.save(existing_pipeline, Watermark.from_offset(1), RunID(uuid4()), {})
 
         # Act & Assert
         assert await checkpoint_storage.exists(existing_pipeline) is True
@@ -164,7 +164,7 @@ class TestS3Checkpoint:
 
         # Act & Assert
         with pytest.raises(CheckpointConflictError):
-            await checkpoint_storage.save(pipeline_name, 123, RunID(uuid4()), {})
+            await checkpoint_storage.save(pipeline_name, Watermark.from_offset(123), RunID(uuid4()), {})
 
         # Restore original method
         checkpoint_storage._get_etag = original_get_etag

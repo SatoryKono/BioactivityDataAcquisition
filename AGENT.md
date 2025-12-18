@@ -53,18 +53,20 @@ make lint && make test && git add . && git commit
 src/bioetl/
 ├── domain/          # Чистая логика, Protocols (Ports), бизнес-модели
 ├── application/     # Пайплайны, Use Cases, оркестрация
+├── composition/     # Composition Root (DI-контейнер, factories, bootstrap)
 ├── infrastructure/  # Адаптеры (HTTP, S3, Redis), реализация портов
-└── interfaces/      # CLI, bootstrap.py (Composition Root)
+└── interfaces/      # CLI, PipelineRunner
 ```
 
 ### 3.2. Матрица Импортов (ОБЯЗАТЕЛЬНО)
 
-| Из ↓ / В → | domain | application | infrastructure | interfaces |
-|------------|--------|-------------|----------------|------------|
-| **domain** | ✅ | ❌ | ❌ | ❌ |
-| **application** | ✅ | ✅ | ❌ | ❌ |
-| **infrastructure** | ✅ | ❌ | ✅ | ❌ |
-| **interfaces** | ✅ | ✅ | ✅ | ✅ |
+| Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
+|------------|--------|-------------|-------------|----------------|------------|
+| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **infrastructure** | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **Нарушение = Блокер PR.** Используй `import-linter` для проверки.
 
@@ -72,7 +74,7 @@ src/bioetl/
 
 - **Правило:** Зависимости (клиенты, конфиги) передаются в конструктор.
 - **Запрет:** Создание зависимостей внутри классов (`S3Storage()`, `httpx.AsyncClient()`).
-- **Composition Root:** `src/bioetl/interfaces/bootstrap.py` — единственное место сборки зависимостей.
+- **Composition Root:** `src/bioetl/composition/bootstrap.py` — единственное место сборки зависимостей.
 
 ---
 
@@ -163,10 +165,10 @@ flowchart TD
     - **MUST** соблюдать rate limits провайдера.
 
 ### 7.2. Создание Нового Пайплайна
-1.  **Конфиг:** Создай `configs/pipelines/{provider}_{entity}.yaml`. Определи `load_strategy` (`incremental` или `full`).
+1.  **Конфиг:** Создай `configs/pipelines/{provider}/{entity}.yaml`. Определи `load_strategy` (`incremental` или `full`).
 2.  **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
-3.  **Оркестрация:** Пайплайн получает адаптеры через DI и управляет потоком данных (Extract → Transform → Load).
-4.  **Сборка:** Добавь пайплайн в `bootstrap.py`.
+3.  **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.
+4.  **Регистрация:** Зарегистрируй в `PipelineRegistry` (через декоратор `@register`).
 5.  **Тесты:** Напиши `unit` и `integration` тесты.
 
 ---
@@ -202,7 +204,7 @@ git commit -m "..."
 ### Архитектура
 - [ ] Нет запрещенных импортов между слоями.
 - [ ] Зависимости инжектируются через конструктор.
-- [ ] `bootstrap.py` — единственное место сборки.
+- [ ] `composition/` — единственное место сборки (фабрики, bootstrap).
 
 ### Код
 - [ ] `make lint` проходит без ошибок.
