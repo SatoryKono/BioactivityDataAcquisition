@@ -437,10 +437,50 @@ class OrchestrationPort(Protocol):
         ...
 
 
+class LoggerPort(Protocol):
+    """Port for structured logging.
+
+    This interface abstracts the logging mechanism, allowing the application
+    to log messages without depending on a specific logging library
+    (e.g., structlog, loguru, stdlib logging).
+
+    Note: LoggerPort uses synchronous methods as logging operations
+    should be fast and non-blocking by design.
+    """
+
+    def bind(self, **kwargs: Any) -> "LoggerPort":
+        """Bind additional context to the logger.
+
+        Returns a new logger instance with the bound context.
+        """
+        ...
+
+    def info(self, msg: str, **kwargs: Any) -> None:
+        """Log an informational message."""
+        ...
+
+    def warning(self, msg: str, **kwargs: Any) -> None:
+        """Log a warning message."""
+        ...
+
+    def error(self, msg: str, **kwargs: Any) -> None:
+        """Log an error message."""
+        ...
+
+    def debug(self, msg: str, **kwargs: Any) -> None:
+        """Log a debug message."""
+        ...
+
+    def exception(self, msg: str, **kwargs: Any) -> None:
+        """Log an exception with traceback."""
+        ...
+
+
 __all__ = [
     "CheckpointPort",
     "DataSourcePort",
     "LockPort",
+    "LoggerPort",
     "MetricsPort",
     "OrchestrationPort",
     "QuarantinePort",
