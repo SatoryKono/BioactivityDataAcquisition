@@ -161,10 +161,11 @@ class GoldWriter:
             )
             await self._merge_scd2(dt, records, business_key, scd_config)
         except TableNotFoundError:
+            arrow_data = pa.Table.from_pylist(records)
             await self._run_in_executor(
                 lambda: write_deltalake(
                     table_or_uri=table_path,
-                    data=records,
+                    data=arrow_data,
                     mode="append",
                     partition_by=partition_cols,
                     storage_options=self.storage_options,

@@ -6,6 +6,7 @@ version: "1.0.0"
 
 source:
   load_strategy: "incremental"
+  watermark_field: "cid"
   api:
     base_url: "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
     rate_limit: 5.0

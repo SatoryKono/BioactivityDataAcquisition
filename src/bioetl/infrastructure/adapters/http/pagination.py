@@ -13,12 +13,13 @@ class PageFetcher(Protocol[T]):
     """Protocol for the fetch function passed to paginated_fetch."""
 
     async def __call__(
-        self, cursor: Any | None
+        self, cursor: Any | None, fetched: int
     ) -> tuple[list[T], Any | None]:
         """Fetch a page of items.
 
         Args:
             cursor: The cursor/offset for the next page.
+            fetched: Number of items already fetched (for adaptive page sizing).
 
         Returns:
             A tuple containing:
@@ -33,7 +34,7 @@ class PaginatedFetcherMixin:
 
     async def paginated_fetch(
         self,
-        fetch_func: Callable[[Any | None], Awaitable[tuple[list[T], Any | None]]],
+        fetch_func: Callable[[Any | None, int], Awaitable[tuple[list[T], Any | None]]],
         limit: int | None = None,
         initial_cursor: Any | None = None,
     ) -> AsyncIterator[T]:
@@ -42,7 +43,7 @@ class PaginatedFetcherMixin:
         This method encapsulates the common 'while has_next' loop pattern.
 
         Args:
-            fetch_func: Async callable that takes a cursor
+            fetch_func: Async callable that takes (cursor, fetched_count)
                         and returns (items, next_cursor).
             limit: Maximum number of items to yield globally across all pages.
             initial_cursor: Starting cursor value (default: None).
@@ -59,7 +60,7 @@ class PaginatedFetcherMixin:
                 break
 
             # Fetch next batch
-            items, next_cursor = await fetch_func(cursor)
+            items, next_cursor = await fetch_func(cursor, fetched)
 
             if not items:
                 # If no items returned, we are usually done.
