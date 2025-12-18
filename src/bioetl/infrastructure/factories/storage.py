@@ -15,6 +15,9 @@ class StorageAdapter:
     Implements StoragePort protocol from domain/ports.py.
     """
 
+    # Protocol compliance marker
+    REQUIRES_SILVER_SCHEMA: bool = True
+
     def __init__(
         self,
         bronze_writer: BronzeWriter,
