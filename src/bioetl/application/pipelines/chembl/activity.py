@@ -32,8 +32,23 @@ if TYPE_CHECKING:
 class ChEMBLActivityPipeline(BasePipeline):
     """Pipeline for ChEMBL bioactivity data."""
 
-    # Note: create() method removed as BasePipelineFactory handles instantiation
-    # via standard __init__ inherited from BasePipeline.
+    def __init__(
+        self,
+        config: PipelineConfig,
+        runtime: PipelineRuntimeConfig,
+        services: PipelineServices,
+    ) -> None:
+        """Initialize pipeline and pre-compute filter sets."""
+        super().__init__(config, runtime, services)
+        # Pre-compute set for O(1) lookups in hot path
+        self._preferred_types = set(self.config.gold_filter_types) or {
+            "IC50",
+            "Ki",
+            "EC50",
+            "Kd",
+            "AC50",
+            "GI50",
+        }
 
     async def transform_bronze_to_silver(
         self,
@@ -87,16 +102,8 @@ class ChEMBLActivityPipeline(BasePipeline):
             return False
 
         standard_type = record.get("standard_type")
-        # Use configured types or fallback to default
-        preferred_types = set(self.config.gold_filter_types) or {
-            "IC50",
-            "Ki",
-            "EC50",
-            "Kd",
-            "AC50",
-            "GI50",
-        }
-        if standard_type not in preferred_types:
+        # Use pre-computed set for fast lookup
+        if standard_type not in self._preferred_types:
             return False
 
         return not record.get("data_validity_comment")
