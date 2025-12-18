@@ -39,6 +39,7 @@ class PubChemCompoundPipelineFactory:
             "pubchem",
             http_client=None,
             rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0),
+            strict_error_handling=settings.strict_error_handling,
         )
 
         return BaseServicesFactory.create_common_services(

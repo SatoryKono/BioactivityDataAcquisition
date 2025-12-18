@@ -19,7 +19,6 @@ from typing import Any, Self
 
 import pubchempy as pcp
 
-from bioetl.infrastructure.config import get_settings
 from bioetl.domain.types import HealthStatus, Watermark
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -49,6 +48,7 @@ class PubChemClient:
         circuit_breaker_threshold: int = 5,
         circuit_breaker_timeout: int = 300,
         max_workers: int = 4,
+        strict_error_handling: bool = False,
     ) -> None:
         """Initialize PubChem client.
 
@@ -57,8 +57,10 @@ class PubChemClient:
             circuit_breaker_threshold: Failures before opening circuit
             circuit_breaker_timeout: Recovery timeout in seconds
             max_workers: Thread pool size for sync operations
+            strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
         """
         self.provider_name = "pubchem"
+        self.strict_error_handling = strict_error_handling
 
         # Rate limiter (5 req/sec)
         self.rate_limiter = TokenBucket(rate=rate, capacity=int(rate * 2))
@@ -171,7 +173,7 @@ class PubChemClient:
                         "cid_range_end": current_cid + batch_size,
                     },
                 )
-                if get_settings().strict_error_handling:
+                if self.strict_error_handling:
                     raise
                 current_cid += batch_size
                 continue
