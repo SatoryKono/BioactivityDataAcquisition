@@ -1,40 +1,13 @@
 """Domain context objects."""
 
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import RunID, RunType
 
-
-class BoundLogger(Protocol):
-    """Protocol for structured loggers with bind capability.
-
-    This allows the domain layer to work with structlog without importing it.
-    """
-
-    def bind(self, **kwargs: Any) -> "BoundLogger":
-        """Bind additional context to the logger."""
-        ...
-
-    def info(self, msg: str, **kwargs: Any) -> None:
-        """Log info message."""
-        ...
-
-    def warning(self, msg: str, **kwargs: Any) -> None:
-        """Log warning message."""
-        ...
-
-    def error(self, msg: str, **kwargs: Any) -> None:
-        """Log error message."""
-        ...
-
-    def debug(self, msg: str, **kwargs: Any) -> None:
-        """Log debug message."""
-        ...
-
-    def exception(self, msg: str, **kwargs: Any) -> None:
-        """Log exception with traceback."""
-        ...
+# Backward compatibility alias
+BoundLogger = LoggerPort
 
 
 @dataclass(frozen=True)
@@ -46,7 +19,7 @@ class PipelineContext:
 
     run_id: RunID
     run_type: RunType
-    logger: BoundLogger
+    logger: LoggerPort
 
     def bind_logger(self, **kwargs: Any) -> "PipelineContext":
         """Bind additional context to the logger.
