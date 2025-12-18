@@ -208,7 +208,7 @@ graph TD
 | 00-rules-summary.md      | 2025-12-15   | v5.0 Synced                 |
 | 00-map.md                | 2025-12-18   | Updated (code map fixed)    |
 | CHANGELOG.md             | 2025-12-16   | Updated (v5.0.0)            |
-| AUDIT_REPORT.md          | 2025-05-20   | Architecture Audit (9.25/10)|
+| 02-architecture/AUDIT_REPORT.md | 2025-05-20 | Architecture Audit (9.25/10)|
 | All architecture docs    | 2025-12-15   | Synced with v5.0            |
 | pyproject.toml           | 2025-12-16   | Version 5.0.0               |
 

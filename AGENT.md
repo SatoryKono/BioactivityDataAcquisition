@@ -40,8 +40,8 @@ make lint && make test && git add . && git commit
 
 **Перед любой задачей:**
 1. Прочти `docs/RULES.md` — это Конституция проекта.
-2. Освежи знания из `docs/agent/` по теме задачи.
-3. Изучи существующий код в затрагиваемых модулях.
+2. Изучи существующий код в затрагиваемых модулях.
+3. Проверь `.claude/PROJECT_CONTEXT.md` для быстрой справки.
 
 ---
 
@@ -102,6 +102,36 @@ src/bioetl/
 - **Ключ:** `lock:{provider}_{entity}`.
 - **Heartbeat:** Воркер **MUST** обновлять TTL блокировки каждые 20 секунд.
 - **Fencing:** Потеря блокировки = немедленное аварийное завершение воркера **ДО** записи данных.
+
+### 4.4. Стек Технологий
+
+| Категория | Инструмент | Назначение |
+|-----------|------------|------------|
+| **Данные** | Polars, Delta Lake, Pandera | Обработка, хранение, валидация |
+| **Сеть** | `httpx` (async) | HTTP-клиент |
+| **Оркестрация** | Prefect | Запуск пайплайнов |
+| **Блокировки** | Redis | Распределённые локи |
+| **Метрики** | Prometheus | Observability |
+| **Типизация** | mypy, `typing.Protocol` | Строгая статическая проверка |
+| **Линтинг** | Ruff | Форматирование и линтинг |
+
+### 4.5. Асинхронность
+
+- **Блокирующие операции** (Delta Lake, Pandera): `await loop.run_in_executor(None, func, *args)`
+- **Event Loop:** Не создавать новые loops — использовать `asyncio.get_running_loop()`
+- **Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
+
+### 4.6. Тестирование
+
+| Уровень | Директория | Правила |
+|---------|------------|---------|
+| **Unit** | `tests/unit/` | Изолированные, мокать порты, **не мокать** доменные сущности |
+| **Integration** | `tests/integration/` | VCR.py для HTTP, очистка секретов из кассет |
+| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
+| **Architecture** | `tests/test_architecture.py` | Проверка слоёв, imports, именования |
+
+**Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
+**Цель покрытия:** >95% line coverage
 
 ---
 
