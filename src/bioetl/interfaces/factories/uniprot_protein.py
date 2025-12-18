@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.uniprot_protein import UniProtProteinPipeline
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.config import (
     Settings,
@@ -16,6 +15,7 @@ from bioetl.infrastructure.factories.clients import (
     create_redis_client,
     get_aws_credentials,
 )
+from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.infrastructure.factories.storage_factory import StorageFactory
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
@@ -51,9 +51,11 @@ class UniProtProteinPipelineFactory:
 
         # Configure data source
         source_config = pipeline_config.source.get("api", {})
-        data_source = UniProtClient(
+        data_source = DataSourceFactory.create(
+            "uniprot",
+            http_client=None,
             rate=source_config.get("rate_limit", 10.0),
-            base_url=source_config.get("base_url", "https://rest.uniprot.org")
+            base_url=source_config.get("base_url", "https://rest.uniprot.org"),
         )
 
         storage_ctx = StorageFactory.create(settings, pipeline_config, logger)
