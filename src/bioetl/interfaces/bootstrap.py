@@ -78,9 +78,11 @@ if TYPE_CHECKING:
 def bootstrap_quarantine() -> QuarantinePort:
     """Bootstrap the quarantine service for CLI inspection."""
     settings = get_settings()
+    # Using silver bucket/common/quarantine as per design
+    base_path = f"s3://{settings.s3.bucket_silver}/common/quarantine"
     return UnifiedQuarantine(
-        s3_bucket=settings.s3.bucket_bronze,  # Using bronze bucket for quarantine dumps by default
-        fs_impl=None  # Use default S3FileSystem
+        base_path=base_path,
+        storage_options=settings.storage_options,
     )
 
 
@@ -176,6 +178,14 @@ def bootstrap_pipeline(
     error_classifier = ErrorClassifier()
 
     # 3. Instantiate Executor
+    dq_config = {
+        "silver_table": pipeline.config.silver_table,
+        "gold_table": pipeline.config.gold_table,
+        # Default thresholds; could be exposed in config later
+        "soft_fail_threshold": 0.05,
+        "hard_fail_threshold": 0.20,
+    }
+
     executor = PipelineExecutor(
         data_source=pipeline.services.data_source,
         storage=pipeline.services.storage,
@@ -191,6 +201,8 @@ def bootstrap_pipeline(
         silver_schema=silver_schema,
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
+        metrics=pipeline.services.metrics,
+        dq_config=dq_config,
     )
 
     # 4. Instantiate Runner
