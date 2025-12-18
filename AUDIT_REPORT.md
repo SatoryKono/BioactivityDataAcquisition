@@ -49,16 +49,16 @@
 
 | ID | Тип | Локация | Описание | Severity | Effort |
 |----|-----|---------|----------|----------|--------|
-| PRB-001 | CONFIG_LEAK | `src/bioetl/infrastructure/config.py` | Глобальный `get_settings()` иногда вызывается внутри классов вместо инъекции config объекта. (В Runner вызывается `get_settings()`). | Low | S |
-| PRB-002 | CLEANUP | `src/bioetl/domain/ports.py` | Устаревший комментарий про импорт `noop_metrics`. | Low | S |
+| PRB-001 | CONFIG_LEAK | `src/bioetl/interfaces/orchestration/runner.py:55` | Глобальный `get_settings()` вызывается в `PipelineRunner.__init__` вместо инъекции config объекта. | Low | S |
+| PRB-002 | CLEANUP | `src/bioetl/domain/ports.py:408-409` | Устаревший комментарий про импорт `noop_metrics`. | Low | S |
 | PRB-003 | TEST_GAP | `tests/` | Отсутствуют интеграционные тесты для `LockManager` и `CheckpointManager` (только unit). | Medium | M |
-| PRB-004 | OBSERVABILITY | `src/bioetl/interfaces/orchestration/runner.py` | Метрики собираются вручную в `finally` блоке. Лучше использовать декоратор или Context Manager для автоматического учета времени. | Low | S |
+| PRB-004 | OBSERVABILITY | `src/bioetl/interfaces/orchestration/runner.py:102-113` | Метрики собираются вручную в `finally` блоке. Лучше использовать декоратор или Context Manager для автоматического учета времени. | Low | S |
 
 ---
 
 ## 4. План Рефакторинга
 
-### Фаза 0: Quick Wins (≤1 день)
+### Фаза 0: Quick Wins
 - **[REF-01] Очистка Domain**: Удалить устаревшие комментарии в `ports.py`.
 - **[REF-02] Инъекция Config в Runner**: Передать `heartbeat_interval` через `PipelineRuntimeConfig` или конструктор, убрать `get_settings()` из `PipelineRunner.__init__`.
 
