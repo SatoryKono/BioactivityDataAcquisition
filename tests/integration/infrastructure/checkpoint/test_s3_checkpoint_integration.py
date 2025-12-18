@@ -23,12 +23,13 @@ TEST_REGION = "us-east-1"
 @pytest.fixture(scope="function")
 def s3_client():
     """Fixture to create a mocked S3 client and bucket."""
-    # Clear pool to ensure we get a new client inside the mock context
+    # Ensure S3ClientPool is cleared before to avoid using cached clients from other tests
     S3ClientPool.clear_pool()
     with mock_aws():
         client = boto3.client("s3", region_name=TEST_REGION)
         client.create_bucket(Bucket=TEST_BUCKET)
         yield client
+    # Ensure S3ClientPool is cleared after to avoid leaking mocked clients
     S3ClientPool.clear_pool()
 
 
@@ -37,7 +38,7 @@ def checkpoint_storage(s3_client):
     """Fixture to create an S3Checkpoint instance configured for moto."""
     return S3Checkpoint(
         bucket=TEST_BUCKET,
-        endpoint_url="https://s3.us-east-1.amazonaws.com",  # Use standard URL for moto interception
+        endpoint_url="https://s3.us-east-1.amazonaws.com",  # Standard URL for moto interception
         region=TEST_REGION,
         access_key="testing",
         secret_key="testing",
