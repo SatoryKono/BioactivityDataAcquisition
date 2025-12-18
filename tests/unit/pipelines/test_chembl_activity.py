@@ -12,7 +12,7 @@ from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.pipeline_config import PipelineConfig
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunID, RunType, Watermark
 
 
 @pytest.fixture
@@ -68,7 +68,8 @@ def test_extract_watermark_with_activity_id(
 
     watermark = chembl_pipeline.extract_watermark(context, record)
 
-    assert watermark == "123"
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == "123"
 
 
 def test_extract_watermark_with_fallback_field(
@@ -80,9 +81,10 @@ def test_extract_watermark_with_fallback_field(
 
     watermark = chembl_pipeline.extract_watermark(context, record)
 
-    assert isinstance(watermark, datetime)
-    assert watermark.tzinfo is UTC
-    assert watermark == datetime(2024, 2, 2, 10, 0, tzinfo=UTC)
+    assert isinstance(watermark, Watermark)
+    assert isinstance(watermark.value, datetime)
+    assert watermark.value.tzinfo is UTC
+    assert watermark.value == datetime(2024, 2, 2, 10, 0, tzinfo=UTC)
 
 
 def test_extract_watermark_without_cursor_fields(
@@ -92,7 +94,8 @@ def test_extract_watermark_without_cursor_fields(
 
     watermark = chembl_pipeline.extract_watermark(context, {})
 
-    assert watermark == ""
+    assert isinstance(watermark, Watermark)
+    assert watermark.value == ""
 
 
 @pytest.mark.asyncio
