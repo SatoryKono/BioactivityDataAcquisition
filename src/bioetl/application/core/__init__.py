@@ -6,7 +6,6 @@ direct constructor.
 """
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_config import (
     PipelineRuntimeConfig,

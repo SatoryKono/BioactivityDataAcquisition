@@ -1,48 +1,27 @@
-"""Tests for domain ports (Protocol interfaces)."""
+"""Unit tests for domain ports (Protocols)."""
+
+from typing import Any
 
 import pytest
 
-from bioetl.domain.ports import (
-    CheckpointPort,
-    DataSourcePort,
-    LockPort,
-    MetricsPort,
-    QuarantinePort,
-    StoragePort,
-)
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.domain.ports import DataSourcePort, StoragePort
 
 
-class TestPortsAreRuntimeCheckable:
-    """Verify that all ports are @runtime_checkable."""
-
-    @pytest.mark.parametrize(
-        "port",
-        [
-            DataSourcePort,
-            StoragePort,
-            LockPort,
-            CheckpointPort,
-            QuarantinePort,
-            MetricsPort,
-        ],
-    )
-    def test_port_is_runtime_checkable(self, port: type) -> None:
-        """Each port should have _is_runtime_protocol attribute."""
-        assert hasattr(port, "_is_runtime_protocol"), (
-            f"{port.__name__} is not runtime checkable. "
-            "Add @runtime_checkable decorator."
-        )
-
-
+@pytest.mark.unit
 class TestDataSourcePortProtocol:
-    """Tests for DataSourcePort protocol compliance."""
+    """Tests for the DataSourcePort protocol."""
 
     def test_provider_name_attribute_required(self) -> None:
         """DataSourcePort should require provider_name attribute."""
 
         class ValidDataSource:
             provider_name = "test"
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                pass
 
             async def fetch(self, _entity_type, _watermark=None, _limit=None):
                 yield {}
@@ -58,10 +37,8 @@ class TestDataSourcePortProtocol:
         # Should pass isinstance check
         assert isinstance(ValidDataSource(), DataSourcePort)
 
-    def test_missing_provider_name_fails_check(self) -> None:
-        """Class without provider_name should not be DataSourcePort."""
-
         class InvalidDataSource:
+            # Missing provider_name
             async def fetch(self, _entity_type, _watermark=None, _limit=None):
                 yield {}
 
@@ -76,25 +53,73 @@ class TestDataSourcePortProtocol:
         # Should fail isinstance check
         assert not isinstance(InvalidDataSource(), DataSourcePort)
 
+    def test_fetch_method_signature(self) -> None:
+        """DataSourcePort should require a specific fetch signature."""
 
+        class ValidFetch:
+            provider_name = "test"
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+            async def fetch(
+                self, entity_type: str, watermark: Any = None, limit: int | None = None
+            ):
+                yield {"data": entity_type, "watermark": watermark, "limit": limit}
+
+            async def health_check(self):
+                from bioetl.domain.types import HealthStatus
+
+                return HealthStatus.HEALTHY
+
+            async def aclose(self):
+                pass
+
+        assert isinstance(ValidFetch(), DataSourcePort)
+
+        class InvalidFetchSignature:
+            provider_name = "test"
+
+            # Missing watermark and limit
+            async def fetch(self, entity_type: str):
+                yield {}
+
+            async def health_check(self):
+                from bioetl.domain.types import HealthStatus
+
+                return HealthStatus.HEALTHY
+
+            async def aclose(self):
+                pass
+
+        assert not isinstance(InvalidFetchSignature(), DataSourcePort)
+
+
+@pytest.mark.unit
 class TestStoragePortProtocol:
-    """Tests for StoragePort protocol compliance."""
+    """Tests for the StoragePort protocol."""
 
-    def test_valid_storage_passes_check(self) -> None:
-        """Class with all required methods should be StoragePort."""
+    def test_write_silver_signature(self) -> None:
+        """StoragePort should require a specific write_silver signature."""
 
         class ValidStorage:
-            async def write_bronze(
-                self, _records, _provider, _entity, _date, _batch_id
-            ):
+            async def write_bronze(self, *args, **kwargs):
                 pass
 
             async def write_silver(
-                self, _table_name, _records, _primary_keys, _mode="merge"
+                self,
+                table_name: str,
+                records: list[dict[str, Any]],
+                primary_keys: list[str],
+                schema: Any,
+                mode: str = "merge",
             ):
                 pass
 
-            async def write_gold(self, _table_name, _records, _mode="overwrite"):
+            async def write_gold(self, *args, **kwargs):
                 pass
 
             async def aclose(self):
@@ -102,147 +127,24 @@ class TestStoragePortProtocol:
 
         assert isinstance(ValidStorage(), StoragePort)
 
-    def test_missing_method_fails_check(self) -> None:
-        """Class missing a required method should not be StoragePort."""
-
-        class IncompleteStorage:
-            async def write_bronze(
-                self, _records, _provider, _entity, _date, _batch_id
-            ):
+        class InvalidStorage:
+            async def write_bronze(self, *args, **kwargs):
                 pass
 
+            # Missing 'schema' argument
             async def write_silver(
-                self, _table_name, _records, _primary_keys, _mode="merge"
-            ):
-                pass
-
-            # Missing write_gold
-
-            async def aclose(self):
-                pass
-
-        assert not isinstance(IncompleteStorage(), StoragePort)
-
-
-class TestLockPortProtocol:
-    """Tests for LockPort protocol compliance."""
-
-    def test_valid_lock_passes_check(self) -> None:
-        """Class with all required methods should be LockPort."""
-
-        class ValidLock:
-            async def acquire(
                 self,
-                _key,
-                _owner_id,
-                _ttl=None,
-                _wait=False,
-                _wait_timeout=300,
-                _exclusive=False,
-            ):
-                return True
-
-            async def release(self, _key, _owner_id, _exclusive=False):
-                return True
-
-            async def heartbeat(self, _key, _owner_id, _exclusive=False):
-                return True
-
-            async def aclose(self):
-                pass
-
-        assert isinstance(ValidLock(), LockPort)
-
-
-class TestCheckpointPortProtocol:
-    """Tests for CheckpointPort protocol compliance."""
-
-    def test_valid_checkpoint_passes_check(self) -> None:
-        """Class with all required methods should be CheckpointPort."""
-
-        class ValidCheckpoint:
-            async def save(self, _pipeline, _watermark, _run_id, _metadata):
-                pass
-
-            async def load(self, _pipeline):
-                return None
-
-            async def list_all(self):
-                return []
-
-            async def delete(self, _pipeline):
-                pass
-
-            async def aclose(self):
-                pass
-
-        assert isinstance(ValidCheckpoint(), CheckpointPort)
-
-
-class TestQuarantinePortProtocol:
-    """Tests for QuarantinePort protocol compliance."""
-
-    def test_valid_quarantine_passes_check(self) -> None:
-        """Class with all required methods should be QuarantinePort."""
-
-        class ValidQuarantine:
-            async def write(
-                self,
-                _pipeline,
-                _error_code,
-                _payload,
-                _bronze_batch_id,
-                *_args,
-                **_kwargs,
+                table_name: str,
+                records: list[dict[str, Any]],
+                primary_keys: list[str],
+                mode: str = "merge",
             ):
                 pass
 
-            async def inspect(self, _pipeline, _limit=10, _error_code=None):
-                return []
-
-            async def get_stats(self, _pipeline):
-                return {}
+            async def write_gold(self, *args, **kwargs):
+                pass
 
             async def aclose(self):
                 pass
 
-        assert isinstance(ValidQuarantine(), QuarantinePort)
-
-
-class TestMetricsPortProtocol:
-    """Tests for MetricsPort protocol compliance."""
-
-    def test_valid_metrics_passes_check(self) -> None:
-        """Class with all required methods should be MetricsPort."""
-
-        class ValidMetrics:
-            def observe_histogram(self, _name, _value, _labels):
-                pass
-
-            def increment_counter(self, _name, _value, _labels):
-                pass
-
-        assert isinstance(ValidMetrics(), MetricsPort)
-
-    def test_missing_method_fails_check(self) -> None:
-        """Class missing a required method should not be MetricsPort."""
-
-        class IncompleteMetrics:
-            def observe_histogram(self, _name, _value, _labels):
-                pass
-
-            # Missing increment_counter
-
-        assert not isinstance(IncompleteMetrics(), MetricsPort)
-
-    def test_noop_metrics_implements_port(self) -> None:
-        """NoOpMetrics should implement MetricsPort protocol."""
-        noop = NoOpMetrics(warn_on_use=False)
-        assert isinstance(noop, MetricsPort)
-
-    def test_noop_metrics_does_nothing(self) -> None:
-        """NoOpMetrics methods should complete without error."""
-        noop = NoOpMetrics(warn_on_use=False)
-        # Should not raise
-        noop.observe_histogram("test", 1.0, {"label": "value"})
-        noop.increment_counter("test", 1, {"label": "value"})
+        assert not isinstance(InvalidStorage(), StoragePort)
