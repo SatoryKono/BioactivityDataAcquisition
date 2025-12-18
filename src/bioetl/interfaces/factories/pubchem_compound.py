@@ -54,14 +54,15 @@ class PubChemCompoundPipelineFactory:
         runtime: PipelineRuntimeConfig,
         settings: Settings,
         logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> BasePipeline:
         """Creates PubChem Compound pipeline.
 
         Loads config once and reuses it for both services and pipeline.
         """
-        # Load YAML config once (cached)
-        yaml_config = load_pipeline_config("pubchem_compound")
+        # Use provided config or load YAML config (cached)
+        yaml_config = config or load_pipeline_config("pubchem_compound")
 
         # Build services with YAML config
         services = PubChemCompoundPipelineFactory.build_services(
