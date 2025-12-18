@@ -183,3 +183,21 @@ def detect_hash_collision(
 ) -> bool:
     """Detect content hash collision."""
     return existing_source_id is not None and source_record_id != existing_source_id
+
+
+def safe_float(value: Any, default: float | None = None) -> float | None:
+    """Safely convert value to float.
+
+    Args:
+        value: Input value to convert
+        default: Default value if conversion fails (default: None)
+
+    Returns:
+        Converted float or default value
+    """
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default

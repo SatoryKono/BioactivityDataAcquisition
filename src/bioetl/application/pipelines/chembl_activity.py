@@ -18,7 +18,11 @@ from bioetl.application.core.pipeline_config import (
 )
 from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.domain.transformations import generate_content_hash, generate_entity_id
+from bioetl.domain.transformations import (
+    generate_content_hash,
+    generate_entity_id,
+    safe_float,
+)
 from bioetl.domain.types import Watermark
 
 if TYPE_CHECKING:
@@ -75,17 +79,11 @@ class ChEMBLActivityPipeline(BasePipeline):
         normalized["entity_id"] = entity_id
 
         # Type conversions for numeric fields
-        if "standard_value" in normalized and normalized["standard_value"] is not None:
-            try:
-                normalized["standard_value"] = float(normalized["standard_value"])
-            except (ValueError, TypeError):
-                normalized["standard_value"] = None
+        if "standard_value" in normalized:
+            normalized["standard_value"] = safe_float(normalized["standard_value"])
 
-        if "pchembl_value" in normalized and normalized["pchembl_value"] is not None:
-            try:
-                normalized["pchembl_value"] = float(normalized["pchembl_value"])
-            except (ValueError, TypeError):
-                normalized["pchembl_value"] = None
+        if "pchembl_value" in normalized:
+            normalized["pchembl_value"] = safe_float(normalized["pchembl_value"])
 
         # Generate content_hash for versioning
         content_hash = generate_content_hash(normalized, self.provider)
@@ -105,7 +103,15 @@ class ChEMBLActivityPipeline(BasePipeline):
             return False
 
         standard_type = record.get("standard_type")
-        preferred_types = {"IC50", "Ki", "EC50", "Kd", "AC50", "GI50"}
+        # Use configured types or fallback to default
+        preferred_types = set(self.config.gold_filter_types) or {
+            "IC50",
+            "Ki",
+            "EC50",
+            "Kd",
+            "AC50",
+            "GI50",
+        }
         if standard_type not in preferred_types:
             return False
 
