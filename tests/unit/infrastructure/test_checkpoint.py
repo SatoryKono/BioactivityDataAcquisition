@@ -108,7 +108,8 @@ class TestS3Checkpoint:
         assert result is not None
         watermark, run_id, _metadata = result
         # Watermark is returned as a proper Watermark type
-        assert isinstance(watermark, datetime)
+        assert isinstance(watermark, Watermark)
+        assert isinstance(watermark.value, datetime)
         assert run_id == RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
     async def test_load_nonexistent_checkpoint_returns_none(self, mock_s3_client):
@@ -212,7 +213,7 @@ class TestS3Checkpoint:
         mock_s3_client.head_object.return_value = {"ETag": '"abc123"'}
 
         pipeline = "test_pipeline"
-        watermark: Watermark = datetime(2023, 1, 1, tzinfo=UTC)
+        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
         await cp.save(pipeline, watermark, run_id, {})
@@ -245,7 +246,7 @@ class TestS3CheckpointLocal:
         cp.loop.run_in_executor = make_sync_executor(cp.loop)
 
         pipeline = "test_pipeline"
-        watermark: Watermark = datetime(2023, 1, 1, tzinfo=UTC)
+        watermark = Watermark.from_timestamp(datetime(2023, 1, 1, tzinfo=UTC))
         run_id = RunID(UUID("12345678-1234-5678-1234-567812345678"))
 
         await cp.save(pipeline, watermark, run_id, {"key": "value"})
@@ -280,7 +281,8 @@ class TestS3CheckpointLocal:
 
         assert result is not None
         watermark, run_id, _ = result
-        assert isinstance(watermark, datetime)
+        assert isinstance(watermark, Watermark)
+        assert isinstance(watermark.value, datetime)
 
     async def test_load_local_nonexistent_returns_none(self, tmp_path):
         """Test load returns None for nonexistent local checkpoint."""

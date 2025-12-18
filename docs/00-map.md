@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.0 (2025-12-15)*
+*Synced with RULES.md v5.0 | Last updated: 2025-12-18*
 
 ## Quick Links
 
@@ -106,28 +106,56 @@ docs/
 
 ```
 src/bioetl/
-├── domain/                  # Pure logic, no I/O
-│   ├── ports.py             # Protocol interfaces (§1.1.1)
-│   ├── models/              # Pydantic models
-│   ├── schemas/             # Pandera schemas
-│   └── services/            # Hash, Validation, Normalization
+├── domain/                      # Pure logic, no I/O (§1.1)
+│   ├── ports.py                 # Protocol interfaces (DataSourcePort, etc.)
+│   ├── config.py                # Domain config models
+│   ├── exceptions.py            # Domain exceptions hierarchy
+│   ├── transformations.py       # Pure transformation functions
+│   └── types.py                 # Value objects (RunType, ErrorCode)
 │
-├── services/             # Orchestration
-│   ├── pipelines/           # {provider}/{entity}/
-│   ├── services/            # Extraction, Bootstrap
-│   └── observers/           # Metrics, Circuit Breaker, Health
+├── application/                 # Pipeline orchestration (§1.1)
+│   ├── core/                    # Core pipeline infrastructure
+│   │   ├── executor.py          # Batch executor
+│   │   ├── pipeline_services.py # Service container
+│   │   ├── shutdown.py          # Graceful shutdown handling
+│   │   └── base_pipeline.py     # Abstract base pipeline
+│   ├── pipelines/               # Concrete pipeline implementations
+│   │   └── chembl_activity.py   # ChEMBL Activity pipeline
+│   └── observability/           # Application-level observability
 │
-├── infrastructure/          # I/O adapters
-│   ├── adapters/            # API clients
-│   ├── storage/             # Delta Lake, Bronze, S3
-│   ├── locking/             # Redis locks
-│   ├── security/            # Salt manager
-│   ├── quarantine/          # DQ failure handling
-│   ├── config/              # YAML → Pydantic
-│   └── logging/             # UnifiedLogger
+├── composition/                 # Composition Root (DI container)
+│   ├── bootstrap.py             # Pipeline bootstrap & wiring
+│   └── factories/               # Pipeline-specific factories
+│       ├── base_pipeline_factory.py
+│       ├── base_services_factory.py
+│       └── chembl_activity.py
 │
-└── interfaces/              # External interfaces
-    └── cli/                 # Typer CLI
+├── infrastructure/              # I/O adapters (§1.1)
+│   ├── adapters/                # External API clients
+│   │   ├── http/                # HTTP client infrastructure
+│   │   ├── chembl/              # ChEMBL API adapter
+│   │   ├── pubchem/             # PubChem API adapter
+│   │   └── uniprot/             # UniProt API adapter
+│   ├── storage/                 # Data persistence
+│   │   ├── bronze_writer.py     # JSONL + zstd writer
+│   │   ├── delta_writer.py      # Delta Lake merge/upsert
+│   │   └── gold_writer.py       # SCD Type 2 writer
+│   ├── locking/                 # Distributed locking
+│   │   ├── redis_lock.py        # Redis SETNX + heartbeat
+│   │   └── memory_lock.py       # In-memory (dev/test)
+│   ├── checkpoint/              # Checkpoint persistence
+│   ├── quarantine/              # DQ failure handling
+│   ├── observability/           # Metrics, logging
+│   ├── schemas/                 # Pydantic config schemas
+│   ├── factories/               # Infrastructure factories
+│   └── config.py                # Settings (Pydantic)
+│
+└── interfaces/                  # External interfaces
+    ├── cli.py                   # Click CLI (bioetl run/quarantine/checkpoint)
+    └── orchestration/           # Pipeline orchestration
+        ├── runner.py            # PipelineRunner
+        ├── signals.py           # OS signal handlers
+        └── prefect/             # Prefect integration
 ```
 
 ---
@@ -152,11 +180,12 @@ graph TD
 
 | File                                               | Purpose                   |
 |----------------------------------------------------|---------------------------|
-| `docs/00-project_rules/01-project-rules.md`        | Master rules document     |
+| `docs/RULES.md`                                    | Master rules document     |
 | `CHANGELOG.md`                                     | Version history           |
 | `configs/pipelines/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports.py`                       | Protocol interfaces       |
-| `src/bioetl/domain/schemas/{provider}/{entity}.py` | Pandera schemas           |
+| `src/bioetl/composition/bootstrap.py`              | Composition root          |
+| `src/bioetl/infrastructure/config.py`              | Application settings      |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
 | `docs/contracts/gold/{entity}.json`                | Gold data contracts       |
 
@@ -174,15 +203,15 @@ graph TD
 
 | Document                 | Last Updated | Status                      |
 |--------------------------|--------------|----------------------------|
-| RULES.md (root)          | 2025-12-15   | v5.0 (Production Ready)     |
-| 01-project-rules.md      | 2025-12-15   | v5.0 Synced                 |
+| RULES.md (docs/)         | 2025-12-15   | v5.0 (Production Ready)     |
+| 01-project-rules.md      | 2025-12-18   | Redirect to RULES.md        |
 | 00-rules-summary.md      | 2025-12-15   | v5.0 Synced                 |
-| IMPLEMENTATION_ROADMAP   | 2025-12-16   | Updated (55% progress)      |
+| 00-map.md                | 2025-12-18   | Updated (code map fixed)    |
 | CHANGELOG.md             | 2025-12-16   | Updated (v5.0.0)            |
-| AUDIT_REPORT.md          | 2025-12-16   | Marked as outdated          |
+| AUDIT_REPORT.md          | 2025-05-20   | Architecture Audit (9.25/10)|
 | All architecture docs    | 2025-12-15   | Synced with v5.0            |
 | pyproject.toml           | 2025-12-16   | Version 5.0.0               |
 
 ---
 
-*This navigator is auto-generated. Update when adding new documentation.*
+*Last updated: 2025-12-18. Update when adding new documentation.*

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from moto import mock_aws
 
 from bioetl.domain.exceptions import CheckpointConflictError
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, Watermark
 from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
 from bioetl.infrastructure.storage.s3_pool import S3ClientPool
 
@@ -54,7 +54,8 @@ class TestS3Checkpoint:
         # Arrange
         pipeline_name = "test_pipeline_1"
         run_id = RunID(uuid4())
-        watermark = datetime.now(timezone.utc)
+        watermark_ts = datetime.now(timezone.utc)
+        watermark = Watermark.from_timestamp(watermark_ts)
         metadata = {"key": "value", "run_type": "incremental"}
 
         # Act
@@ -65,8 +66,9 @@ class TestS3Checkpoint:
         assert loaded_data is not None
         loaded_watermark, loaded_run_id, loaded_metadata = loaded_data
 
-        # Compare datetimes carefully
-        assert loaded_watermark.replace(microsecond=0) == watermark.replace(
+        # Compare datetimes carefully (loaded_watermark is a Watermark object)
+        assert isinstance(loaded_watermark, Watermark)
+        assert loaded_watermark.value.replace(microsecond=0) == watermark_ts.replace(
             microsecond=0
         )
         assert loaded_run_id == run_id
@@ -90,7 +92,7 @@ class TestS3Checkpoint:
         # Arrange
         pipeline_name = "test_pipeline_to_delete"
         run_id = RunID(uuid4())
-        watermark = 12345
+        watermark = Watermark.from_offset(12345)
 
         await checkpoint_storage.save(pipeline_name, watermark, run_id, {})
         assert await checkpoint_storage.exists(pipeline_name) is True
