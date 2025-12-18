@@ -126,6 +126,8 @@ class TestStoragePortProtocol:
                 entity: str,
                 date: Any,
                 batch_id: BatchID,
+                run_id: Any,
+                run_type: Any,
             ) -> None:
                 pass
 

@@ -10,7 +10,7 @@ from botocore.exceptions import ClientError
 from deltalake.exceptions import DeltaError, SchemaMismatchError, TableNotFoundError
 from pyarrow import ArrowTypeError
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.domain.exceptions import (
@@ -20,6 +20,10 @@ from bioetl.domain.exceptions import (
     TableNotFoundError as CustomTableNotFoundError,
     UploadError,
 )
+
+# Default test run metadata
+TEST_RUN_ID = RunID(UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
+TEST_RUN_TYPE = RunType.INCREMENTAL
 
 
 def make_sync_executor(loop: asyncio.AbstractEventLoop):
@@ -69,7 +73,8 @@ class TestBronzeWriterExceptions:
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         with pytest.raises(BucketNotFoundError):
             await bronze_writer.write_bronze(
-                iter([b"{}"]), "p", "e", datetime.now(), batch_id
+                iter([b"{}"]), "p", "e", datetime.now(), batch_id,
+                run_id=TEST_RUN_ID, run_type=TEST_RUN_TYPE
             )
 
     @pytest.mark.asyncio
@@ -85,7 +90,8 @@ class TestBronzeWriterExceptions:
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         with pytest.raises(UploadError):
             await bronze_writer.write_bronze(
-                iter([b"{}"]), "p", "e", datetime.now(), batch_id
+                iter([b"{}"]), "p", "e", datetime.now(), batch_id,
+                run_id=TEST_RUN_ID, run_type=TEST_RUN_TYPE
             )
 
 
