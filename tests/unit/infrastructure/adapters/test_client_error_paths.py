@@ -110,29 +110,21 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_proteins raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(
-            os.environ,
-            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
-        ):
-            from bioetl.infrastructure.config import get_settings
+        client = UniProtClient(strict_error_handling=True)
+        client.http_client = mock_http_client
 
-            get_settings.cache_clear()
+        # Make circuit_breaker.call raise an exception
+        client.circuit_breaker.call = AsyncMock(
+            side_effect=ConnectionError("Network error")
+        )
 
-            client = UniProtClient()
-            client.http_client = mock_http_client
-
-            # Make circuit_breaker.call raise an exception
-            client.circuit_breaker.call = AsyncMock(
-                side_effect=ConnectionError("Network error")
-            )
-
-            with pytest.raises(ConnectionError, match="Network error"):
-                _ = [
-                    r
-                    async for r in client._fetch_proteins(
-                        query="test", watermark=None, limit=100
-                    )
-                ]
+        with pytest.raises(ConnectionError, match="Network error"):
+            _ = [
+                r
+                async for r in client._fetch_proteins(
+                    query="test", watermark=None, limit=100
+                )
+            ]
 
     async def test_fetch_features_logs_warning_on_failure(
         self, mock_http_client, caplog
@@ -175,24 +167,16 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_features raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(
-            os.environ,
-            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
-        ):
-            from bioetl.infrastructure.config import get_settings
+        client = UniProtClient(strict_error_handling=True)
+        client.http_client = mock_http_client
 
-            get_settings.cache_clear()
+        # Make circuit_breaker.call raise an exception
+        client.circuit_breaker.call = AsyncMock(
+            side_effect=TimeoutError("Request timeout")
+        )
 
-            client = UniProtClient()
-            client.http_client = mock_http_client
-
-            # Make circuit_breaker.call raise an exception
-            client.circuit_breaker.call = AsyncMock(
-                side_effect=TimeoutError("Request timeout")
-            )
-
-            with pytest.raises(TimeoutError, match="Request timeout"):
-                _ = [r async for r in client._fetch_features("P12345", limit=10)]
+        with pytest.raises(TimeoutError, match="Request timeout"):
+            _ = [r async for r in client._fetch_features("P12345", limit=10)]
 
     async def test_fetch_sequences_logs_warning_on_failure(
         self, mock_http_client, caplog
@@ -235,27 +219,19 @@ class TestUniProtClientErrorPaths:
         """Test that _fetch_sequences raises exception in strict mode."""
         from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
-        with patch.dict(
-            os.environ,
-            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
-        ):
-            from bioetl.infrastructure.config import get_settings
+        client = UniProtClient(strict_error_handling=True)
+        client.http_client = mock_http_client
 
-            get_settings.cache_clear()
+        # Make circuit_breaker.call raise an exception
+        error = httpx.HTTPStatusError(
+            "Server error",
+            request=MagicMock(),
+            response=MagicMock(status_code=500),
+        )
+        client.circuit_breaker.call = AsyncMock(side_effect=error)
 
-            client = UniProtClient()
-            client.http_client = mock_http_client
-
-            # Make circuit_breaker.call raise an exception
-            error = httpx.HTTPStatusError(
-                "Server error",
-                request=MagicMock(),
-                response=MagicMock(status_code=500),
-            )
-            client.circuit_breaker.call = AsyncMock(side_effect=error)
-
-            with pytest.raises(httpx.HTTPStatusError):
-                _ = [r async for r in client._fetch_sequences("gene:TP53", limit=10)]
+        with pytest.raises(httpx.HTTPStatusError):
+            _ = [r async for r in client._fetch_sequences("gene:TP53", limit=10)]
 
 
 class TestPubChemClientErrorPaths:
@@ -308,28 +284,20 @@ class TestPubChemClientErrorPaths:
         """Test that _fetch_compounds_incremental raises exception in strict mode."""
         from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
 
-        with patch.dict(
-            os.environ,
-            {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
-        ):
-            from bioetl.infrastructure.config import get_settings
+        client = PubChemClient(strict_error_handling=True)
 
-            get_settings.cache_clear()
+        # Make circuit_breaker.call raise an exception
+        client.circuit_breaker.call = AsyncMock(
+            side_effect=ConnectionError("PubChem API error")
+        )
 
-            client = PubChemClient()
-
-            # Make circuit_breaker.call raise an exception
-            client.circuit_breaker.call = AsyncMock(
-                side_effect=ConnectionError("PubChem API error")
-            )
-
-            with pytest.raises(ConnectionError, match="PubChem API error"):
-                _ = [
-                    r
-                    async for r in client._fetch_compounds_incremental(
-                        watermark=1000, limit=50
-                    )
-                ]
+        with pytest.raises(ConnectionError, match="PubChem API error"):
+            _ = [
+                r
+                async for r in client._fetch_compounds_incremental(
+                    watermark=1000, limit=50
+                )
+            ]
 
 
 class TestStrictErrorHandlingConfig:

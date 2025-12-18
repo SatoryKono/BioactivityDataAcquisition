@@ -11,7 +11,7 @@ from bioetl.infrastructure.config import (
     load_pipeline_config,
     yaml_config_to_domain,
 )
-from bioetl.infrastructure.factories.base_services_factory import BaseServicesFactory
+from bioetl.interfaces.factories.base_services_factory import BaseServicesFactory
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 
 if TYPE_CHECKING:
