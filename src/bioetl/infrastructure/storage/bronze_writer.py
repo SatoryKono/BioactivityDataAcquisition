@@ -30,7 +30,7 @@ from botocore.exceptions import ClientError
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.exceptions import BucketNotFoundError, UploadError
 
 
@@ -93,14 +93,41 @@ class BronzeWriter:
         entity: str,
         date: datetime,
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> Path:
         """Write raw records to Bronze layer (JSONL + zstd).
 
         If save_json is enabled, also writes uncompressed JSONL file.
+
+        Args:
+            records: Iterator of raw record bytes (JSONL lines).
+            provider: Data provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'activity').
+            date: Date partition for the data.
+            batch_id: Unique identifier for this batch.
+            run_id: Unique identifier for the pipeline run.
+            run_type: Type of pipeline run (incremental, backfill, rebuild).
+
+        Returns:
+            Path to the written file.
         """
+        from datetime import UTC
+
         date_str = date.strftime("%Y-%m-%d")
         # Fixed path format: bronze/v1/{provider}/{entity}/{date}/...
         relative_path = f"bronze/v1/{provider}/{entity}/{date_str}/batch_{batch_id}.jsonl.zst"
+        ingestion_ts = datetime.now(UTC)
+
+        # Build metadata for lineage tracking
+        metadata = {
+            "run_id": str(run_id),
+            "run_type": run_type.value,
+            "ingestion_ts": ingestion_ts.isoformat(),
+            "provider": provider,
+            "entity": entity,
+            "batch_id": str(batch_id),
+        }
 
         loop = asyncio.get_running_loop()
 
@@ -128,6 +155,10 @@ class BronzeWriter:
             full_path.parent.mkdir(parents=True, exist_ok=True)
             with open(full_path, "wb") as f:
                 f.write(compressed_data)
+            # Write sidecar metadata file for local storage
+            meta_path = full_path.with_suffix(".zst.meta.json")
+            with open(meta_path, "w") as f:
+                json.dump(metadata, f)
         else:
             try:
                 await loop.run_in_executor(
@@ -137,6 +168,7 @@ class BronzeWriter:
                         Key=relative_path,
                         Body=compressed_data,
                         ContentType="application/zstd",
+                        Metadata=metadata,
                     ),
                 )
             except ClientError as e:
@@ -144,6 +176,17 @@ class BronzeWriter:
                 if error_code == "NoSuchBucket":
                     raise BucketNotFoundError(self.bucket) from e
                 raise UploadError(relative_path, str(e)) from e
+
+        # Log with run_id for traceability
+        self.logger.info(
+            "bronze_batch_written",
+            path=relative_path,
+            run_id=str(run_id),
+            run_type=run_type.value,
+            batch_id=str(batch_id),
+            provider=provider,
+            entity=entity,
+        )
 
         # Optionally write uncompressed JSON
         if self.save_json:

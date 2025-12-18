@@ -14,6 +14,7 @@ from bioetl.domain.types import (
     BatchID,
     HealthStatus,
     RunID,
+    RunType,
     Watermark,
 )
 
@@ -95,6 +96,8 @@ class StoragePort(Protocol):
         entity: str,
         date: Any,
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """
         Write raw records to the Bronze layer.
@@ -105,6 +108,8 @@ class StoragePort(Protocol):
             entity: The type of entity being written.
             date: The date partition for the data.
             batch_id: The unique identifier for the batch of records.
+            run_id: The unique identifier for the pipeline run.
+            run_type: The type of pipeline run (incremental, backfill, rebuild).
         """
         ...
 

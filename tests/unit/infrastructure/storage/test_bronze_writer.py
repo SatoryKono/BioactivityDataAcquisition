@@ -10,7 +10,7 @@ from uuid import uuid4
 import pytest
 import zstandard as zstd
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 
@@ -18,6 +18,18 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 def batch_id() -> BatchID:
     """Generate a unique batch ID."""
     return BatchID(uuid4())
+
+
+@pytest.fixture
+def run_id() -> RunID:
+    """Generate a unique run ID."""
+    return RunID(uuid4())
+
+
+@pytest.fixture
+def run_type() -> RunType:
+    """Default run type for tests."""
+    return RunType.INCREMENTAL
 
 
 @pytest.fixture
@@ -140,6 +152,8 @@ class TestBronzeWriterWriteLocal:
         temp_dir: str,
         sample_records: list[bytes],
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test writing Bronze data to local storage."""
         writer = BronzeWriter(bucket=temp_dir)
@@ -151,6 +165,8 @@ class TestBronzeWriterWriteLocal:
             entity="activity",
             date=date,
             batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
         )
 
         # Verify path format (use as_posix for cross-platform compatibility)
@@ -162,6 +178,19 @@ class TestBronzeWriterWriteLocal:
         # Verify file exists
         full_path = Path(temp_dir) / path
         assert full_path.exists()
+
+        # Verify metadata file exists
+        meta_path = full_path.with_suffix(".zst.meta.json")
+        assert meta_path.exists()
+
+        # Verify metadata content
+        with open(meta_path) as f:
+            metadata = json.load(f)
+        assert metadata["run_id"] == str(run_id)
+        assert metadata["run_type"] == run_type.value
+        assert metadata["provider"] == "chembl"
+        assert metadata["entity"] == "activity"
+        assert metadata["batch_id"] == str(batch_id)
 
         # Verify content (use streaming decompression for robustness)
         with open(full_path, "rb") as f:
@@ -179,6 +208,8 @@ class TestBronzeWriterWriteLocal:
         temp_dir: str,
         sample_records: list[bytes],
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test writing Bronze data with JSON copy."""
         writer = BronzeWriter(bucket=temp_dir, save_json=True)
@@ -190,6 +221,8 @@ class TestBronzeWriterWriteLocal:
             entity="compound",
             date=date,
             batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
         )
 
         # Verify JSON copy exists
@@ -208,6 +241,8 @@ class TestBronzeWriterWriteLocal:
         self,
         temp_dir: str,
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test that empty records raise ValueError."""
         writer = BronzeWriter(bucket=temp_dir)
@@ -220,6 +255,8 @@ class TestBronzeWriterWriteLocal:
                 entity="test",
                 date=date,
                 batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
             )
 
 
@@ -233,6 +270,8 @@ class TestBronzeWriterReadLocal:
         temp_dir: str,
         sample_records: list[bytes],
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test reading Bronze data from local storage."""
         writer = BronzeWriter(bucket=temp_dir)
@@ -245,6 +284,8 @@ class TestBronzeWriterReadLocal:
             entity="activity",
             date=date,
             batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
         )
 
         # Read back (use as_posix for cross-platform compatibility)
@@ -267,6 +308,8 @@ class TestBronzeWriterListBatches:
         self,
         temp_dir: str,
         sample_records: list[bytes],
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test listing batches from local storage."""
         writer = BronzeWriter(bucket=temp_dir)
@@ -281,6 +324,8 @@ class TestBronzeWriterListBatches:
             entity="activity",
             date=date1,
             batch_id=BatchID(uuid4()),
+            run_id=run_id,
+            run_type=run_type,
         )
         await writer.write_bronze(
             records=iter(sample_records),
@@ -288,6 +333,8 @@ class TestBronzeWriterListBatches:
             entity="activity",
             date=date2,
             batch_id=BatchID(uuid4()),
+            run_id=run_id,
+            run_type=run_type,
         )
 
         # List all batches
@@ -299,6 +346,8 @@ class TestBronzeWriterListBatches:
         self,
         temp_dir: str,
         sample_records: list[bytes],
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test listing batches with date filter."""
         writer = BronzeWriter(bucket=temp_dir)
@@ -312,6 +361,8 @@ class TestBronzeWriterListBatches:
             entity="activity",
             date=date1,
             batch_id=BatchID(uuid4()),
+            run_id=run_id,
+            run_type=run_type,
         )
         await writer.write_bronze(
             records=iter(sample_records),
@@ -319,6 +370,8 @@ class TestBronzeWriterListBatches:
             entity="activity",
             date=date2,
             batch_id=BatchID(uuid4()),
+            run_id=run_id,
+            run_type=run_type,
         )
 
         # List with date filter
@@ -346,6 +399,8 @@ class TestBronzeWriterS3:
         mock_pool: MagicMock,
         sample_records: list[bytes],
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test writing Bronze data to S3."""
         mock_client = MagicMock()
@@ -363,6 +418,8 @@ class TestBronzeWriterS3:
             entity="activity",
             date=date,
             batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
         )
 
         # Verify S3 put was called
@@ -371,6 +428,10 @@ class TestBronzeWriterS3:
         assert call_kwargs["Bucket"] == "test-bucket"
         assert "bronze/v1/chembl/activity" in call_kwargs["Key"]
         assert call_kwargs["ContentType"] == "application/zstd"
+        # Verify metadata is included
+        assert "Metadata" in call_kwargs
+        assert call_kwargs["Metadata"]["run_id"] == str(run_id)
+        assert call_kwargs["Metadata"]["run_type"] == run_type.value
 
     @pytest.mark.asyncio
     @patch("bioetl.infrastructure.storage.s3_pool.S3ClientPool")
@@ -379,6 +440,8 @@ class TestBronzeWriterS3:
         mock_pool: MagicMock,
         sample_records: list[bytes],
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test S3 write with missing bucket raises BucketNotFoundError."""
         from botocore.exceptions import ClientError
@@ -405,6 +468,8 @@ class TestBronzeWriterS3:
                 entity="activity",
                 date=date,
                 batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
             )
 
     @pytest.mark.asyncio
@@ -414,6 +479,8 @@ class TestBronzeWriterS3:
         mock_pool: MagicMock,
         sample_records: list[bytes],
         batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
     ) -> None:
         """Test S3 write error raises UploadError."""
         from botocore.exceptions import ClientError
@@ -440,6 +507,8 @@ class TestBronzeWriterS3:
                 entity="activity",
                 date=date,
                 batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
             )
 
     @pytest.mark.asyncio
