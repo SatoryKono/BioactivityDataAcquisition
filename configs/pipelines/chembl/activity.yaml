@@ -16,10 +16,6 @@ source_file: ../../sources/chembl.yaml
 gold_filter_types:
     - IC50
     - Ki
-    - EC50
-    - Kd
-    - AC50
-    - GI50
 
 transform:
     version: "1.0.0"
