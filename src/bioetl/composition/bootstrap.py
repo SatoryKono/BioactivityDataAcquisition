@@ -13,8 +13,9 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.registry import PipelineRegistry
-from bioetl.domain.config import DQConfig, TableConfig
+from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 # Factories are imported to ensure registration happens
 from bioetl.composition.factories.chembl_activity import (
@@ -147,11 +148,6 @@ def bootstrap_pipeline(
         ),
     )
 
-    quarantine_manager = QuarantineManager(
-        quarantine_port=pipeline.services.quarantine,
-        pipeline_name=pipeline.config.pipeline_name,
-    )
-
     error_classifier = ErrorClassifier()
 
     # 3. Instantiate Executor with typed configs
@@ -163,24 +159,28 @@ def bootstrap_pipeline(
         gold_table=pipeline.config.gold_table,
     )
 
-    executor = PipelineExecutor(
-        data_source=pipeline.services.data_source,
-        storage=pipeline.services.storage,
-        checkpoint_manager=checkpoint_manager,
-        quarantine_manager=quarantine_manager,
+    record_processor = RecordProcessor(
+        services=pipeline.services,
         error_classifier=error_classifier,
         context=pipeline.context,
-        shutdown_signal=pipeline.shutdown_signal,
+        pipeline_name=pipeline.config.pipeline_name,
         provider=pipeline.config.provider,
         entity_type=pipeline.config.entity_type,
         transform_callback=pipeline.transform_bronze_to_silver,
         gold_filter_callback=pipeline.should_write_gold,
         silver_schema=silver_schema,
-        batch_size=pipeline.config.batch_size,
-        checkpoint_interval=pipeline.config.checkpoint_interval,
-        metrics=pipeline.services.metrics,
         dq_config=dq_config,
         table_config=table_config,
+    )
+
+    executor = PipelineExecutor(
+        services=pipeline.services,
+        record_processor=record_processor,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=pipeline.shutdown_signal,
+        entity_type=pipeline.config.entity_type,
+        batch_size=pipeline.config.batch_size,
+        checkpoint_interval=pipeline.config.checkpoint_interval,
     )
 
     runner = PipelineRunner(
