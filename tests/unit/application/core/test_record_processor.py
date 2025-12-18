@@ -10,7 +10,7 @@ from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.exceptions import DataQualityError
+from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.config import get_pipeline_config
 
@@ -272,12 +272,6 @@ class TestRecordProcessorProcessBatch:
         get_pipeline_config.cache_clear()
 
         config = get_pipeline_config(pipeline_name)
-        dq_config = {
-            "silver_table": config.silver_table,
-            "gold_table": config.gold_table,
-            "soft_fail_threshold": config.dq_rules.soft_fail_threshold,
-            "hard_fail_threshold": config.dq_rules.hard_fail_threshold,
-        }
 
         async def transform(ctx, record):
             if record.get("id") == "bad":
@@ -294,7 +288,7 @@ class TestRecordProcessorProcessBatch:
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
             silver_schema=MagicMock(),
-            dq_config=dq_config,
+            dq_config=config.dq,
         )
 
         records = [
@@ -302,7 +296,7 @@ class TestRecordProcessorProcessBatch:
             {"id": "bad", "value": 2},
         ]
 
-        with pytest.raises(RuntimeError):
+        with pytest.raises(DataQualityThresholdError):
             await processor.process_batch(records, BatchID(uuid4()))
 
         get_pipeline_config.cache_clear()
@@ -324,12 +318,6 @@ class TestRecordProcessorProcessBatch:
         get_pipeline_config.cache_clear()
 
         config = get_pipeline_config(pipeline_name)
-        dq_config = {
-            "silver_table": config.silver_table,
-            "gold_table": config.gold_table,
-            "soft_fail_threshold": config.dq_rules.soft_fail_threshold,
-            "hard_fail_threshold": config.dq_rules.hard_fail_threshold,
-        }
 
         async def transform(ctx, record):
             if record.get("id") == "bad":
@@ -346,7 +334,7 @@ class TestRecordProcessorProcessBatch:
             transform_callback=transform,
             gold_filter_callback=lambda c, r: True,
             silver_schema=MagicMock(),
-            dq_config=dq_config,
+            dq_config=config.dq,
         )
 
         records = [
