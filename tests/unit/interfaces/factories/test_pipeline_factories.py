@@ -259,9 +259,9 @@ class TestPubChemCompoundPipelineFactory:
 class TestUniProtProteinPipelineFactory:
     """Тесты для UniProtProteinPipelineFactory."""
 
-    @patch("bioetl.interfaces.factories.uniprot_protein.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.load_pipeline_config")
+    @patch("bioetl.composition.factories.uniprot_protein.BaseServicesFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.DataSourceFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -296,9 +296,9 @@ class TestUniProtProteinPipelineFactory:
             strict_error_handling=False,
         )
 
-    @patch("bioetl.interfaces.factories.uniprot_protein.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.load_pipeline_config")
+    @patch("bioetl.composition.factories.uniprot_protein.BaseServicesFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.DataSourceFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -331,9 +331,9 @@ class TestUniProtProteinPipelineFactory:
             pipeline_config=mock_pipeline_config,
         )
 
-    @patch("bioetl.interfaces.factories.uniprot_protein.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.load_pipeline_config")
+    @patch("bioetl.composition.factories.uniprot_protein.BaseServicesFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.DataSourceFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.load_pipeline_config")
     def test_build_services_uses_default_parameters(
         self,
         mock_load_config,
@@ -366,9 +366,9 @@ class TestUniProtProteinPipelineFactory:
             strict_error_handling=False,
         )
 
-    @patch("bioetl.interfaces.factories.uniprot_protein.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.load_pipeline_config")
+    @patch("bioetl.composition.factories.uniprot_protein.BaseServicesFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.DataSourceFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -395,11 +395,11 @@ class TestUniProtProteinPipelineFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.interfaces.factories.uniprot_protein.UniProtProteinPipeline")
-    @patch("bioetl.interfaces.factories.uniprot_protein.yaml_config_to_domain")
-    @patch("bioetl.interfaces.factories.uniprot_protein.load_pipeline_config")
-    @patch("bioetl.interfaces.factories.uniprot_protein.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.uniprot_protein.DataSourceFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.UniProtProteinPipeline")
+    @patch("bioetl.composition.factories.uniprot_protein.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.uniprot_protein.load_pipeline_config")
+    @patch("bioetl.composition.factories.uniprot_protein.BaseServicesFactory")
+    @patch("bioetl.composition.factories.uniprot_protein.DataSourceFactory")
     def test_create_with_services(
         self,
         mock_data_source_factory,
