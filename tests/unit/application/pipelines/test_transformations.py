@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import MagicMock
 
-from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
-from bioetl.application.pipelines.uniprot_protein import UniProtProteinPipeline
+from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.domain.context import PipelineContext
 
 
