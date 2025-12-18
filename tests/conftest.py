@@ -228,24 +228,49 @@ def docker_ip():
 
 
 @pytest.fixture(scope="session")
-def docker_services(docker_ip):  # noqa: ARG001
-    """Get Docker services, skip if Docker not available."""
-    pytest.skip("Docker services not available - docker-compose.yml missing")
+def docker_compose_file(project_root: Path) -> str:
+    """Path to docker-compose.yml for pytest-docker."""
+    return str(project_root / "docker-compose.yml")
 
 
 @pytest.fixture(scope="session")
 def minio_service(docker_ip, docker_services):
     """Ensure that MinIO service is up and responsive."""
+    import urllib.request
+    import urllib.error
+
     port = docker_services.port_for("minio", 9000)
-    docker_services.wait_until_responsive(timeout=30.0, pause=0.1, check=lambda: True)
-    return f"http://{docker_ip}:{port}"
+    url = f"http://{docker_ip}:{port}"
+
+    def is_responsive():
+        try:
+            urllib.request.urlopen(f"{url}/minio/health/live", timeout=2)
+            return True
+        except (urllib.error.URLError, ConnectionError):
+            return False
+
+    docker_services.wait_until_responsive(timeout=30.0, pause=0.5, check=is_responsive)
+    return url
 
 
 @pytest.fixture(scope="session")
 def redis_service(docker_ip, docker_services):
     """Ensure that Redis service is up and responsive."""
+    import socket
+
     port = docker_services.port_for("redis", 6379)
-    docker_services.wait_until_responsive(timeout=30.0, pause=0.1, check=lambda: True)
+
+    def is_responsive():
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            sock.connect((docker_ip, port))
+            sock.close()
+            return True
+        except (socket.error, ConnectionError):
+            return False
+
+    docker_services.wait_until_responsive(timeout=30.0, pause=0.5, check=is_responsive)
     return f"redis://{docker_ip}:{port}"
 
 
