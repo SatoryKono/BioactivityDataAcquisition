@@ -2,23 +2,23 @@
 
 Part of BasePipeline decomposition (ADR-0005).
 Separates I/O port dependencies from pipeline logic.
+
+Logger and Metrics are formalized as ports (ADR-005).
 """
 
 import asyncio
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Self
+from typing import Self
 
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
     LockPort,
+    LoggerPort,
     MetricsPort,
     QuarantinePort,
     StoragePort,
 )
-
-if TYPE_CHECKING:
-    import structlog
 
 
 @dataclass(frozen=True)
@@ -58,7 +58,7 @@ class PipelineServices:
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
     metrics: MetricsPort
-    logger: "structlog.BoundLogger"
+    logger: LoggerPort
 
     def __post_init__(self) -> None:
         """Validate that all services are provided."""
