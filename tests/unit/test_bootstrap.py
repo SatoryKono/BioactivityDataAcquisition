@@ -67,7 +67,7 @@ class TestBootstrapLogger:
 
     def test_bootstrap_logger_creates_logger(self):
         """Test that bootstrap_logger creates a logger."""
-        from bioetl.interfaces.bootstrap import bootstrap_logger
+        from bioetl.composition.bootstrap import bootstrap_logger
 
         run_id = uuid4()
         logger = bootstrap_logger(
@@ -83,13 +83,13 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
-    @patch("bioetl.interfaces.bootstrap.get_settings")
-    @patch("bioetl.interfaces.bootstrap.bootstrap_logger")
+    @patch("bioetl.composition.bootstrap.get_settings")
+    @patch("bioetl.composition.bootstrap.bootstrap_logger")
     def test_bootstrap_pipeline_unknown_pipeline_raises(
         self, mock_bootstrap_logger, mock_get_settings, mock_settings, mock_logger
     ):
         """Test that unknown pipeline name raises ValueError."""
-        from bioetl.interfaces.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline
 
         mock_get_settings.return_value = mock_settings
         mock_bootstrap_logger.return_value = mock_logger
@@ -104,20 +104,20 @@ class TestBootstrapPipeline:
                 limit=None,
             )
 
-    @patch("bioetl.interfaces.bootstrap.get_settings")
-    @patch("bioetl.interfaces.bootstrap.ChEMBLActivityPipelineFactory")
+    @patch("bioetl.composition.bootstrap.get_settings")
+    @patch("bioetl.composition.bootstrap.ChEMBLActivityPipelineFactory")
     def test_bootstrap_pipeline_chembl_activity(
         self, mock_factory, mock_get_settings, mock_settings, mock_logger
     ):
         """Test bootstrap_pipeline creates chembl_activity pipeline."""
-        from bioetl.interfaces.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline
 
         mock_get_settings.return_value = mock_settings
         mock_pipeline = MagicMock()
         mock_factory.create_with_services.return_value = mock_pipeline
 
         with patch(
-            "bioetl.interfaces.bootstrap.bootstrap_logger", return_value=mock_logger
+            "bioetl.composition.bootstrap.bootstrap_logger", return_value=mock_logger
         ):
             result = bootstrap_pipeline(
                 pipeline_name="chembl_activity",
@@ -136,10 +136,10 @@ class TestBootstrapPipeline:
 class TestChEMBLActivityPipelineFactory:
     """Tests for ChEMBLActivityPipelineFactory."""
 
-    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
+    @patch("bioetl.composition.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.composition.factories.chembl_activity.DataSourceFactory")
+    @patch("bioetl.composition.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.composition.factories.chembl_activity.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -152,7 +152,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_pipeline_config,
     ):
         """Test build_services creates data source through DataSourceFactory."""
-        from bioetl.interfaces.factories.chembl_activity import (
+        from bioetl.composition.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
@@ -169,10 +169,10 @@ class TestChEMBLActivityPipelineFactory:
         assert services is not None
         mock_data_source_factory.create.assert_called_once()
 
-    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
+    @patch("bioetl.composition.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.composition.factories.chembl_activity.DataSourceFactory")
+    @patch("bioetl.composition.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.composition.factories.chembl_activity.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -185,7 +185,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_pipeline_config,
     ):
         """Test build_services uses BaseServicesFactory."""
-        from bioetl.interfaces.factories.chembl_activity import (
+        from bioetl.composition.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
@@ -206,10 +206,10 @@ class TestChEMBLActivityPipelineFactory:
             pipeline_config=mock_pipeline_config,
         )
 
-    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
-    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
+    @patch("bioetl.composition.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.composition.factories.chembl_activity.DataSourceFactory")
+    @patch("bioetl.composition.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.composition.factories.chembl_activity.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -222,7 +222,7 @@ class TestChEMBLActivityPipelineFactory:
         mock_pipeline_config,
     ):
         """Test build_services uses provided config."""
-        from bioetl.interfaces.factories.chembl_activity import (
+        from bioetl.composition.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 
@@ -237,12 +237,12 @@ class TestChEMBLActivityPipelineFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.interfaces.factories.chembl_activity.ChEMBLActivityPipeline")
-    @patch("bioetl.interfaces.factories.chembl_activity.yaml_config_to_domain")
-    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
-    @patch("bioetl.interfaces.factories.chembl_activity.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.composition.factories.chembl_activity.ChEMBLActivityPipeline")
+    @patch("bioetl.composition.factories.chembl_activity.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.chembl_activity.load_pipeline_config")
+    @patch("bioetl.composition.factories.chembl_activity.BaseServicesFactory")
+    @patch("bioetl.composition.factories.chembl_activity.DataSourceFactory")
+    @patch("bioetl.composition.factories.chembl_activity.UnifiedHTTPClient")
     def test_create_with_services(
         self,
         mock_http_client,
@@ -258,7 +258,7 @@ class TestChEMBLActivityPipelineFactory:
     ):
         """Test create_with_services creates pipeline."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-        from bioetl.interfaces.factories.chembl_activity import (
+        from bioetl.composition.factories.chembl_activity import (
             ChEMBLActivityPipelineFactory,
         )
 

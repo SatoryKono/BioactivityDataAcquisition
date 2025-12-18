@@ -74,9 +74,9 @@ def mock_services():
 class TestPubChemCompoundPipelineFactory:
     """Тесты для PubChemCompoundPipelineFactory."""
 
-    @patch("bioetl.interfaces.factories.pubchem_compound.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.load_pipeline_config")
+    @patch("bioetl.composition.factories.pubchem_compound.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.DataSourceFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -88,7 +88,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_services,
     ):
         """Тест build_services создаёт data source через DataSourceFactory."""
-        from bioetl.interfaces.factories.pubchem_compound import (
+        from bioetl.composition.factories.pubchem_compound import (
             PubChemCompoundPipelineFactory,
         )
 
@@ -110,9 +110,9 @@ class TestPubChemCompoundPipelineFactory:
             strict_error_handling=False,
         )
 
-    @patch("bioetl.interfaces.factories.pubchem_compound.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.load_pipeline_config")
+    @patch("bioetl.composition.factories.pubchem_compound.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.DataSourceFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -124,7 +124,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_services,
     ):
         """Тест build_services использует BaseServicesFactory."""
-        from bioetl.interfaces.factories.pubchem_compound import (
+        from bioetl.composition.factories.pubchem_compound import (
             PubChemCompoundPipelineFactory,
         )
 
@@ -145,9 +145,9 @@ class TestPubChemCompoundPipelineFactory:
             pipeline_config=mock_pipeline_config,
         )
 
-    @patch("bioetl.interfaces.factories.pubchem_compound.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.load_pipeline_config")
+    @patch("bioetl.composition.factories.pubchem_compound.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.DataSourceFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.load_pipeline_config")
     def test_build_services_uses_default_rate_limit(
         self,
         mock_load_config,
@@ -158,7 +158,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_services,
     ):
         """Тест build_services использует дефолтный rate_limit."""
-        from bioetl.interfaces.factories.pubchem_compound import (
+        from bioetl.composition.factories.pubchem_compound import (
             PubChemCompoundPipelineFactory,
         )
 
@@ -179,9 +179,9 @@ class TestPubChemCompoundPipelineFactory:
             strict_error_handling=False,
         )
 
-    @patch("bioetl.interfaces.factories.pubchem_compound.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.DataSourceFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.load_pipeline_config")
+    @patch("bioetl.composition.factories.pubchem_compound.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.DataSourceFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -193,7 +193,7 @@ class TestPubChemCompoundPipelineFactory:
         mock_services,
     ):
         """Тест build_services использует переданную конфигурацию."""
-        from bioetl.interfaces.factories.pubchem_compound import (
+        from bioetl.composition.factories.pubchem_compound import (
             PubChemCompoundPipelineFactory,
         )
 
@@ -208,11 +208,11 @@ class TestPubChemCompoundPipelineFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.interfaces.factories.pubchem_compound.PubChemCompoundPipeline")
-    @patch("bioetl.interfaces.factories.pubchem_compound.yaml_config_to_domain")
-    @patch("bioetl.interfaces.factories.pubchem_compound.load_pipeline_config")
-    @patch("bioetl.interfaces.factories.pubchem_compound.BaseServicesFactory")
-    @patch("bioetl.interfaces.factories.pubchem_compound.DataSourceFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.PubChemCompoundPipeline")
+    @patch("bioetl.composition.factories.pubchem_compound.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.pubchem_compound.load_pipeline_config")
+    @patch("bioetl.composition.factories.pubchem_compound.BaseServicesFactory")
+    @patch("bioetl.composition.factories.pubchem_compound.DataSourceFactory")
     def test_create_with_services(
         self,
         mock_data_source_factory,
@@ -227,7 +227,7 @@ class TestPubChemCompoundPipelineFactory:
     ):
         """Тест create_with_services создаёт пайплайн."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-        from bioetl.interfaces.factories.pubchem_compound import (
+        from bioetl.composition.factories.pubchem_compound import (
             PubChemCompoundPipelineFactory,
         )
 
@@ -273,7 +273,7 @@ class TestUniProtProteinPipelineFactory:
         mock_services,
     ):
         """Тест build_services создаёт data source через DataSourceFactory."""
-        from bioetl.interfaces.factories.uniprot_protein import (
+        from bioetl.composition.factories.uniprot_protein import (
             UniProtProteinPipelineFactory,
         )
 
@@ -310,7 +310,7 @@ class TestUniProtProteinPipelineFactory:
         mock_services,
     ):
         """Тест build_services использует BaseServicesFactory."""
-        from bioetl.interfaces.factories.uniprot_protein import (
+        from bioetl.composition.factories.uniprot_protein import (
             UniProtProteinPipelineFactory,
         )
 
@@ -344,7 +344,7 @@ class TestUniProtProteinPipelineFactory:
         mock_services,
     ):
         """Тест build_services использует дефолтные параметры."""
-        from bioetl.interfaces.factories.uniprot_protein import (
+        from bioetl.composition.factories.uniprot_protein import (
             UniProtProteinPipelineFactory,
         )
 
@@ -380,7 +380,7 @@ class TestUniProtProteinPipelineFactory:
         mock_services,
     ):
         """Тест build_services использует переданную конфигурацию."""
-        from bioetl.interfaces.factories.uniprot_protein import (
+        from bioetl.composition.factories.uniprot_protein import (
             UniProtProteinPipelineFactory,
         )
 
@@ -414,7 +414,7 @@ class TestUniProtProteinPipelineFactory:
     ):
         """Тест create_with_services создаёт пайплайн."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-        from bioetl.interfaces.factories.uniprot_protein import (
+        from bioetl.composition.factories.uniprot_protein import (
             UniProtProteinPipelineFactory,
         )
 
