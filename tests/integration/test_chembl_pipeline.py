@@ -51,7 +51,14 @@ async def test_chembl_pipeline_e2e(minio_service, redis_client):
         gold_table="chembl.activity_gold",
         batch_size=100,
         checkpoint_interval=1000,
-        fields=["activity_id", "molecule_chembl_id", "target_chembl_id", "standard_value"],
+        fields=[
+            "activity_id",
+            "molecule_chembl_id",
+            "target_chembl_id",
+            "standard_value",
+            "standard_type",
+            "standard_units",
+        ],
     )
 
     runtime = PipelineRuntimeConfig(
