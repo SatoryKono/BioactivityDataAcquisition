@@ -75,9 +75,7 @@ class UniProtProteinPipeline(BasePipeline):
 
     def extract_watermark(
         self, context: PipelineContext, record: dict[str, Any]
-    ) -> str:
-        """Извлекает watermark как строковый accession.
-
-        Тесты ожидают примитив (str), а не обёртку.
-        """
-        return str(record.get("primaryAccession", ""))
+    ) -> Watermark:
+        """Extract watermark as accession string wrapped in Watermark."""
+        accession = str(record.get("primaryAccession", ""))
+        return Watermark.from_id(accession)

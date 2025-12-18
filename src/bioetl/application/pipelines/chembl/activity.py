@@ -23,7 +23,7 @@ from bioetl.domain.transformations import (
     generate_entity_id,
     safe_float,
 )
-from bioetl.domain.types import BronzeRecord, SilverRecord
+from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -103,36 +103,38 @@ class ChEMBLActivityPipeline(BasePipeline):
 
     def extract_watermark(
         self, _context: PipelineContext, record: dict[str, Any]
-    ) -> str | datetime:
-        """Извлекает watermark как примитивное значение.
+    ) -> Watermark:
+        """Извлекает watermark и возвращает обёртку Watermark.
 
-        Логика соответствуют ожиданиям тестов:
-        - при наличии activity_id: вернуть его как строку;
+        Поведение:
+        - при наличии activity_id: Watermark.from_id(str(activity_id));
         - иначе использовать поле из конфигурации (например, updated_on) и вернуть
-          datetime с таймзоной UTC (если строка — распарсить ISO8601, добавить UTC при отсутствии tz);
-        - если ничего нет — вернуть пустую строку.
+          Watermark.from_timestamp(datetime в UTC) при корректном ISO8601;
+        - если значение не похоже на дату — Watermark.from_id(str(value));
+        - если ничего нет — Watermark.from_id("").
         """
         activity_id = record.get("activity_id")
         if activity_id is not None:
-            return str(activity_id)
+            return Watermark.from_id(str(activity_id))
 
         fallback_field = self.config.watermark_field
         fallback_value = record.get(fallback_field) if fallback_field else None
 
         if fallback_value is None:
-            return ""
+            return Watermark.from_id("")
 
         if isinstance(fallback_value, datetime):
-            return fallback_value.replace(tzinfo=fallback_value.tzinfo or UTC)
+            return Watermark.from_timestamp(
+                fallback_value.replace(tzinfo=fallback_value.tzinfo or UTC)
+            )
 
         if isinstance(fallback_value, str):
             try:
                 parsed = datetime.fromisoformat(fallback_value)
             except ValueError:
-                # Не дата — возвращаем как строку
-                return fallback_value
+                return Watermark.from_id(fallback_value)
             if parsed.tzinfo is None:
                 parsed = parsed.replace(tzinfo=UTC)
-            return parsed
+            return Watermark.from_timestamp(parsed)
 
-        return str(fallback_value)
+        return Watermark.from_id(str(fallback_value))
