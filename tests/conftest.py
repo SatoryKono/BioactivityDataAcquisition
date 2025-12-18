@@ -229,15 +229,13 @@ def docker_ip():
 
 @pytest.fixture(scope="session")
 def docker_compose_file(project_root: Path) -> str:
-    """Path to docker-compose file for pytest-docker.
+    """Path to docker-compose.test.yml for pytest-docker.
 
-    Uses docker-compose.test.yml if available (with dynamic ports),
-    otherwise falls back to main docker-compose.yml.
+    Uses a separate compose file with only the minimal services (minio, redis)
+    required for testing. This avoids port conflicts and issues with
+    services like Grafana that mount local directories.
     """
-    test_compose = project_root / "docker-compose.test.yml"
-    if test_compose.exists():
-        return str(test_compose)
-    return str(project_root / "docker-compose.yml")
+    return str(project_root / "docker-compose.test.yml")
 
 
 @pytest.fixture(scope="session")
