@@ -21,10 +21,29 @@ from bioetl.composition.bootstrap import (
     bootstrap_quarantine,
     bootstrap_checkpoint,
 )
+from bioetl.application.registry import PipelineRegistry
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 if TYPE_CHECKING:
     pass
+
+
+def validate_pipeline_name(ctx, param, value):
+    """Validate pipeline name against the registry at runtime."""
+    # Ensure all factories are loaded. In this architecture, bootstrap imports them.
+    # However, bootstrap_pipeline is called inside the command.
+    # We must ensure registry is populated before validation if we want strict validation here.
+    # Or, we can rely on bootstrap to fail.
+    # But to provide a helpful error message, we should check registry.
+    # Since we can't easily force imports here without duplicating bootstrap logic,
+    # we will rely on the fact that 'bootstrap' module imports factories at top level.
+    # So importing bootstrap (which we did) should populate the registry.
+
+    # Reload registry state just in case
+    available = PipelineRegistry.list_pipelines()
+    if value not in available:
+        raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")
+    return value
 
 
 @click.group()
@@ -37,7 +56,7 @@ def cli() -> None:
 @cli.command()
 @click.option(
     "--pipeline",
-    type=click.Choice(["chembl_activity", "pubchem_compound", "uniprot_protein"]),
+    callback=validate_pipeline_name,
     required=True,
     help="Pipeline to run",
 )
@@ -76,11 +95,6 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
     except Exception:
         logger.exception("Pipeline failed with an unhandled exception.")
         sys.exit(1)
-
-
-# ... (other CLI commands like quarantine, checkpoint remain the same for now)
-# Note: They would also need to be updated to use the new bootstrap/service model
-# if they have complex logic, but for now they are simple and can be addressed later.
 
 
 @cli.group()

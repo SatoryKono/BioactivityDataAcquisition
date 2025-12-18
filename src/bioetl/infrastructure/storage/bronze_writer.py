@@ -104,12 +104,19 @@ class BronzeWriter:
 
         loop = asyncio.get_running_loop()
 
-        # Buffer records since iterator can only be consumed once
-        # and we may need it for both compressed and JSON output
-        record_list = list(records)
+        # Optimize memory usage: Only buffer if we need to write both formats.
+        # If save_json is False (default production), we stream directly to compression.
+        if self.save_json:
+            # Buffer records since iterator can only be consumed once
+            # and we may need it for both compressed and JSON output
+            record_list = list(records)
+            records_iter = iter(record_list)
+        else:
+            record_list = []  # Not used
+            records_iter = records
 
         compressed_data = await loop.run_in_executor(
-            None, self._compress_records, iter(record_list)
+            None, self._compress_records, records_iter
         )
 
         if not compressed_data:
