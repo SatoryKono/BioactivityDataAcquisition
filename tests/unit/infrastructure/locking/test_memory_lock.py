@@ -54,7 +54,7 @@ class TestMemoryLock:
             key="test_key",
             owner_id="owner_2",
             wait=True,
-            timeout=0.01,
+            wait_timeout=0.01,
         )
         assert result is False
 
