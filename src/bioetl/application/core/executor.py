@@ -7,22 +7,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
+from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.types import BatchID, Watermark
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    import pyarrow as pa
-
     from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
-    from bioetl.application.core.quarantine_manager import QuarantineManager
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.ports import DataSourcePort, MetricsPort, StoragePort
 
 
 class PipelineExecutor:
@@ -36,25 +29,15 @@ class PipelineExecutor:
 
     def __init__(
         self,
-        data_source: DataSourcePort,
-        storage: StoragePort,
+        services: PipelineServices,
+        record_processor: RecordProcessor,
         checkpoint_manager: CheckpointManager,
-        quarantine_manager: QuarantineManager,
-        error_classifier: ErrorClassifier,
-        context: PipelineContext,
         shutdown_signal: ShutdownSignal,
-        provider: str,
         entity_type: str,
-        transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        silver_schema: pa.Schema,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
-        metrics: MetricsPort | None = None,
-        dq_config: DQConfig | None = None,
-        table_config: TableConfig | None = None,
     ):
-        self._data_source = data_source
+        self._data_source = services.data_source
         self._checkpoint_manager = checkpoint_manager
         self._shutdown_signal = shutdown_signal
         self._entity_type = entity_type
@@ -63,20 +46,7 @@ class PipelineExecutor:
             checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
         )
 
-        self._record_processor = RecordProcessor(
-            storage=storage,
-            quarantine_manager=quarantine_manager,
-            error_classifier=error_classifier,
-            context=context,
-            provider=provider,
-            entity_type=entity_type,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            silver_schema=silver_schema,
-            metrics=metrics,
-            dq_config=dq_config,
-            table_config=table_config,
-        )
+        self._record_processor = record_processor
 
         # Counters
         self.records_fetched = 0
