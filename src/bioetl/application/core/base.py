@@ -19,8 +19,10 @@ from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.types import (
+    BronzeRecord,
     RunID,
     RunType,
+    SilverRecord,
     Watermark,
 )
 from bioetl.domain.ports import (
@@ -47,6 +49,19 @@ class BasePipeline(ABC):
 
     It does NOT orchestrate execution. See PipelineRunner for execution logic.
     """
+
+    @classmethod
+    def create(
+        cls,
+        runtime: PipelineRuntimeConfig,
+        services: PipelineServices,
+        config: PipelineConfig,
+    ) -> BasePipeline:
+        """Create pipeline instance.
+
+        Default factory method. Subclasses can override if custom initialization is needed.
+        """
+        return cls(config, runtime, services)
 
     def __init__(
         self,
@@ -143,8 +158,8 @@ class BasePipeline(ABC):
 
     @abstractmethod
     async def transform_bronze_to_silver(
-        self, context: PipelineContext, record: dict[str, Any]
-    ) -> dict[str, Any] | None:
+        self, context: PipelineContext, record: BronzeRecord
+    ) -> SilverRecord | None:
         """Transform a raw record from Bronze to Silver format."""
         pass
 

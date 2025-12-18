@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.pipelines.pubchem_compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
 from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.silver import PUBCHEM_COMPOUND_SCHEMA
