@@ -143,6 +143,78 @@ class TestBronzeWriter:
                 batch_id=batch_id,
             )
 
+    async def test_write_bronze_save_json_copy(self, mock_s3_client):
+        """Test that write_bronze saves JSON copy if save_json is True."""
+        writer = BronzeWriter(
+            bucket="test-bucket",
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            save_json=True,
+        )
+
+        records = [b'{"id": 1}\n']
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        date = datetime(2023, 1, 1)
+
+        await writer.write_bronze(
+            records=iter(records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+        )
+
+        # Should call put_object twice: once for zstd, once for json
+        assert mock_s3_client.put_object.call_count == 2
+
+        calls = mock_s3_client.put_object.call_args_list
+
+        # Verify JSON call
+        json_call = next(c for c in calls if c[1]["Key"].endswith(".jsonl"))
+        _args, kwargs = json_call
+        assert kwargs["Bucket"] == "test-bucket"
+        assert kwargs["Key"] == "json/test_provider/test_entity/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
+        assert kwargs["Body"] == b'{"id": 1}\n'
+        assert kwargs["ContentType"] == "application/x-ndjson"
+
+    async def test_write_bronze_save_json_copy_failure_logs_warning(self, mock_s3_client):
+        """Test that JSON copy failure logs warning but doesn't raise."""
+        from botocore.exceptions import ClientError
+
+        mock_logger = MagicMock()
+
+        writer = BronzeWriter(
+            bucket="test-bucket",
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            save_json=True,
+            logger=mock_logger
+        )
+
+        # First call (compressed) succeeds, second call (json) fails
+        mock_s3_client.put_object.side_effect = [
+            None,
+            ClientError({"Error": {"Code": "AccessDenied"}}, "PutObject")
+        ]
+
+        records = [b'{"id": 1}\n']
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        date = datetime(2023, 1, 1)
+
+        await writer.write_bronze(
+            records=iter(records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+        )
+
+        # Should log warning
+        mock_logger.warning.assert_called_once()
+        assert "json_copy_write_failed" in str(mock_logger.warning.call_args)
+
 
 @pytest.mark.unit
 class TestBronzeWriterLocal:
@@ -281,8 +353,17 @@ class TestDeltaWriter:
             }
         ]
 
+        import pyarrow as pa
+        schema = pa.schema([
+            pa.field("id", pa.int64()),
+            pa.field("value", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
         await writer.write_silver(
-            table_name="test_table", records=records, primary_keys=["id"]
+            table_name="test_table", records=records, primary_keys=["id"], schema=schema
         )
 
         mock_write_deltalake.assert_called_once()
@@ -311,8 +392,17 @@ class TestDeltaWriter:
             }
         ]
 
+        import pyarrow as pa
+        schema = pa.schema([
+            pa.field("id", pa.int64()),
+            pa.field("value", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
         await writer.write_silver(
-            table_name="test_table", records=records, primary_keys=["id"]
+            table_name="test_table", records=records, primary_keys=["id"], schema=schema
         )
 
         mock_table_instance.merge.assert_called_once()
@@ -323,5 +413,5 @@ class TestDeltaWriter:
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
-                table_name="test_table", records=[], primary_keys=["id"]
+                table_name="test_table", records=[], primary_keys=["id"], schema=MagicMock()
             )

@@ -88,6 +88,7 @@ def record_processor(
         entity_type="test_entity",
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
+        silver_schema=MagicMock(),
     )
 
 
@@ -160,6 +161,7 @@ class TestRecordProcessorProcessBatch:
             entity_type="test",
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            silver_schema=MagicMock(),
         )
 
         records = [
@@ -195,6 +197,7 @@ class TestRecordProcessorProcessBatch:
             entity_type="test",
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
+            silver_schema=MagicMock(),
         )
 
         records = [{"id": "test", "value": 5}]

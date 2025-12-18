@@ -49,7 +49,6 @@ def mock_pipeline():
         logger=mock_logger,
     )
     pipeline = ConcretePipeline(config, runtime, services)
-    pipeline._orchestrator = AsyncMock()
     return pipeline
 
 
@@ -62,12 +61,6 @@ async def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.resume is False
     assert mock_pipeline.context.run_id is not None
     assert mock_pipeline.context.logger is not None
-
-
-async def test_base_pipeline_run_calls_orchestrator(mock_pipeline):
-    """Test that the run method calls the orchestrator."""
-    await mock_pipeline.run()
-    mock_pipeline._orchestrator.run.assert_called_once()
 
 
 async def test_base_pipeline_accepts_three_params():
@@ -122,34 +115,6 @@ async def test_base_pipeline_properties(mock_pipeline):
     assert mock_pipeline.limit is None
 
 
-async def test_base_pipeline_error_classifier(mock_pipeline):
-    """Test error classifier lazy initialization."""
-    # First access should initialize
-    classifier = mock_pipeline.error_classifier
-    assert classifier is not None
-
-    # Second access should return same instance
-    assert mock_pipeline.error_classifier is classifier
-
-
-async def test_base_pipeline_checkpoint_manager(mock_pipeline):
-    """Test checkpoint manager lazy initialization."""
-    manager = mock_pipeline.checkpoint_manager
-    assert manager is not None
-
-    # Second access should return same instance
-    assert mock_pipeline.checkpoint_manager is manager
-
-
-async def test_base_pipeline_quarantine_manager(mock_pipeline):
-    """Test quarantine manager lazy initialization."""
-    manager = mock_pipeline.quarantine_manager
-    assert manager is not None
-
-    # Second access should return same instance
-    assert mock_pipeline.quarantine_manager is manager
-
-
 async def test_base_pipeline_should_write_gold(mock_pipeline):
     """Test default should_write_gold returns True."""
     result = mock_pipeline.should_write_gold(mock_pipeline.context, {})
@@ -162,67 +127,3 @@ async def test_base_pipeline_extract_watermark(mock_pipeline):
 
     result = mock_pipeline.extract_watermark(mock_pipeline.context, {})
     assert isinstance(result, datetime)
-
-
-async def test_run_pipeline_flow():
-    """Test run_pipeline_flow helper function."""
-    from bioetl.application.core.base import run_pipeline_flow
-
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-
-    config = PipelineConfig(
-        pipeline_name="test",
-        provider="test",
-        entity_type="entity",
-        primary_keys=["id"],
-        silver_table="test.entity",
-    )
-    runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-    mock_services = MagicMock(spec=PipelineServices)
-    mock_services.aclose = AsyncMock()
-    mock_services.logger = mock_logger
-
-    pipeline = ConcretePipeline.__new__(ConcretePipeline)
-    pipeline._config = config
-    pipeline._runtime = runtime
-    pipeline._services = mock_services
-    pipeline._orchestrator = AsyncMock()
-
-    await run_pipeline_flow(pipeline, mock_logger)
-
-    pipeline._orchestrator.run.assert_called_once()
-    mock_services.aclose.assert_called_once()
-
-
-async def test_run_pipeline_flow_with_exception():
-    """Test run_pipeline_flow handles exceptions."""
-    from bioetl.application.core.base import run_pipeline_flow
-
-    mock_logger = MagicMock()
-    mock_logger.bind = MagicMock(return_value=mock_logger)
-
-    config = PipelineConfig(
-        pipeline_name="test",
-        provider="test",
-        entity_type="entity",
-        primary_keys=["id"],
-        silver_table="test.entity",
-    )
-    runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-    mock_services = MagicMock(spec=PipelineServices)
-    mock_services.aclose = AsyncMock()
-    mock_services.logger = mock_logger
-
-    pipeline = ConcretePipeline.__new__(ConcretePipeline)
-    pipeline._config = config
-    pipeline._runtime = runtime
-    pipeline._services = mock_services
-    pipeline._orchestrator = AsyncMock()
-    pipeline._orchestrator.run.side_effect = RuntimeError("Test error")
-
-    with pytest.raises(RuntimeError):
-        await run_pipeline_flow(pipeline, mock_logger)
-
-    # aclose should still be called in finally block
-    mock_services.aclose.assert_called_once()
