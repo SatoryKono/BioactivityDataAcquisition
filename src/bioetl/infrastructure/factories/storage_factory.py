@@ -118,7 +118,7 @@ class StorageFactory:
         save_json = bronze_config.save_json if bronze_config else False
 
         adapter = StorageAdapter(
-            bronze=BronzeWriter(
+            bronze_writer=BronzeWriter(
                 bucket=bronze_path,
                 endpoint_url=aws_config.endpoint_url if not is_local_run else None,
                 access_key=access_key,
@@ -127,13 +127,13 @@ class StorageFactory:
                 json_path=json_path,
                 logger=logger,
             ),
-            silver=DeltaWriter(
+            silver_writer=DeltaWriter(
                 base_path=silver_base_path,
                 storage_options=storage_options,
                 csv_path=silver_csv_path,
                 csv_options=silver_csv_options,
             ),
-            gold=GoldWriter(
+            gold_writer=GoldWriter(
                 base_path=gold_base_path,
                 storage_options=storage_options,
                 csv_path=gold_csv_path,
