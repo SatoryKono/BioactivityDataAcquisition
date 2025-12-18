@@ -27,6 +27,7 @@ from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantin
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
     import structlog
@@ -39,7 +40,7 @@ class PubChemCompoundPipelineFactory:
     def build_services(
         settings: Settings,
         logger: "structlog.BoundLogger",
-        raw_config: dict[str, Any] | None = None,
+        config: PipelineYamlConfig | None = None,
         **kwargs,
     ) -> PipelineServices:
         """Builds PipelineServices from settings."""
@@ -50,11 +51,11 @@ class PubChemCompoundPipelineFactory:
         access_key, secret_key = get_aws_credentials(settings)
 
         # Use provided config or load from YAML
-        pipeline_config = raw_config or load_pipeline_config("pubchem_compound")
+        pipeline_config = config or load_pipeline_config("pubchem_compound")
 
         # Configure data source
         data_source = PubChemClient(
-            rate=pipeline_config.get("source", {}).get("api", {}).get("rate_limit", 5.0)
+            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0)
         )
 
         # Configure storage paths
@@ -123,9 +124,9 @@ class PubChemCompoundPipelineFactory:
         **kwargs,
     ) -> BasePipeline:
         """Creates PubChem Compound pipeline."""
-        raw_config = load_pipeline_config("pubchem_compound")
+        config_model = load_pipeline_config("pubchem_compound")
         services = PubChemCompoundPipelineFactory.build_services(
-            settings=settings, logger=logger, raw_config=raw_config, **kwargs
+            settings=settings, logger=logger, config=config_model, **kwargs
         )
         config = get_pipeline_config("pubchem_compound")
 
