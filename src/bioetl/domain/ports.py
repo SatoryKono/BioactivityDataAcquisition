@@ -405,20 +405,6 @@ class MetricsPort(Protocol):
         ...
 
 
-# NoOpMetrics moved to infrastructure/observability/noop_metrics.py
-# Import from bioetl.infrastructure.observability.noop_metrics instead
-
-__all__ = [
-    "DataSourcePort",
-    "StoragePort",
-    "LockPort",
-    "CheckpointPort",
-    "QuarantinePort",
-    "MetricsPort",
-    "OrchestrationPort",
-]
-
-
 @runtime_checkable
 class OrchestrationPort(Protocol):
     """
@@ -451,3 +437,14 @@ class OrchestrationPort(Protocol):
     async def aclose(self) -> None:
         """Close connection to orchestration backend."""
         ...
+
+
+__all__ = [
+    "CheckpointPort",
+    "DataSourcePort",
+    "LockPort",
+    "MetricsPort",
+    "OrchestrationPort",
+    "QuarantinePort",
+    "StoragePort",
+]
