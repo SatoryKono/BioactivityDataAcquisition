@@ -145,113 +145,105 @@ class TestStorageContext:
 class TestStorageFactoryLocal:
     """Tests for StorageFactory.create() in local mode."""
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
     def test_local_run_uses_data_output_paths(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_local,
         mock_config_minimal,
         mock_logger,
     ):
         """Test that local runs use data/output paths."""
-        result = StorageFactory.create(
-            settings=mock_settings_local,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
 
-        assert isinstance(result, StorageContext)
-        assert result.bronze_path == "data/output/bronze"
-        assert result.silver_path == "data/output/silver"
-        assert result.gold_path == "data/output/gold"
-        assert result.checkpoints_path == "data/output/checkpoints"
+            result = StorageFactory.create(
+                settings=mock_settings_local,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            assert isinstance(result, StorageContext)
+            assert result.bronze_path == "data/output/bronze"
+            assert result.silver_path == "data/output/silver"
+            assert result.gold_path == "data/output/gold"
+            assert result.checkpoints_path == "data/output/checkpoints"
+
     def test_local_run_with_json_export(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_local,
         mock_config_with_exports,
         mock_logger,
     ):
         """Test local run with JSON export enabled."""
-        StorageFactory.create(
-            settings=mock_settings_local,
-            config=mock_config_with_exports,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
 
-        # Verify BronzeWriter was called with json_path
-        mock_bronze_writer.assert_called_once()
-        call_kwargs = mock_bronze_writer.call_args[1]
-        assert call_kwargs["save_json"] is True
-        assert call_kwargs["json_path"] == "data/output/json"
+            StorageFactory.create(
+                settings=mock_settings_local,
+                config=mock_config_with_exports,
+                logger=mock_logger,
+            )
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            # Verify BronzeWriter was called with json_path
+            mock_bronze.assert_called_once()
+            call_kwargs = mock_bronze.call_args[1]
+            assert call_kwargs["save_json"] is True
+            assert call_kwargs["json_path"] == "data/output/json"
+
     def test_local_run_with_csv_exports(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_local,
         mock_config_with_exports,
         mock_logger,
     ):
         """Test local run with CSV export enabled for Silver and Gold."""
-        StorageFactory.create(
-            settings=mock_settings_local,
-            config=mock_config_with_exports,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter") as mock_bronze, \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter") as mock_delta, \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter") as mock_gold:
 
-        # Verify DeltaWriter (Silver) was called with csv options
-        mock_delta_writer.assert_called_once()
-        silver_call_kwargs = mock_delta_writer.call_args[1]
-        assert silver_call_kwargs["csv_path"] == "data/export/silver.csv"
-        assert silver_call_kwargs["csv_options"]["delimiter"] == ","
+            StorageFactory.create(
+                settings=mock_settings_local,
+                config=mock_config_with_exports,
+                logger=mock_logger,
+            )
 
-        # Verify GoldWriter was called with csv options
-        mock_gold_writer.assert_called_once()
-        gold_call_kwargs = mock_gold_writer.call_args[1]
-        assert gold_call_kwargs["csv_path"] == "data/export/gold.csv"
-        assert gold_call_kwargs["csv_options"]["delimiter"] == ";"
+            # Verify DeltaWriter (Silver) was called with csv options
+            mock_delta.assert_called_once()
+            silver_call_kwargs = mock_delta.call_args[1]
+            assert silver_call_kwargs["csv_path"] == "data/export/silver.csv"
+            assert silver_call_kwargs["csv_options"]["delimiter"] == ","
 
-    @patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter")
-    @patch("bioetl.infrastructure.factories.storage_factory.GoldWriter")
+            # Verify GoldWriter was called with csv options
+            mock_gold.assert_called_once()
+            gold_call_kwargs = mock_gold.call_args[1]
+            assert gold_call_kwargs["csv_path"] == "data/export/gold.csv"
+            assert gold_call_kwargs["csv_options"]["delimiter"] == ";"
+
     def test_local_run_logs_info(
         self,
-        mock_gold_writer,
-        mock_delta_writer,
-        mock_bronze_writer,
         mock_settings_local,
         mock_config_minimal,
         mock_logger,
     ):
         """Test that local run logs appropriate info message."""
-        StorageFactory.create(
-            settings=mock_settings_local,
-            config=mock_config_minimal,
-            logger=mock_logger,
-        )
+        with patch("bioetl.infrastructure.factories.storage_factory.BronzeWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.DeltaWriter"), \
+             patch("bioetl.infrastructure.factories.storage_factory.GoldWriter"):
 
-        mock_logger.info.assert_called()
-        # Find the call with "Local run detected"
-        local_run_calls = [
-            call for call in mock_logger.info.call_args_list
-            if "Local run detected" in str(call)
-        ]
-        assert len(local_run_calls) >= 1
+            StorageFactory.create(
+                settings=mock_settings_local,
+                config=mock_config_minimal,
+                logger=mock_logger,
+            )
+
+            mock_logger.info.assert_called()
+            # Find the call with "Local run detected"
+            local_run_calls = [
+                call for call in mock_logger.info.call_args_list
+                if "Local run detected" in str(call)
+            ]
+            assert len(local_run_calls) >= 1
 
 
 @pytest.mark.unit
