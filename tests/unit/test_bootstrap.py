@@ -6,6 +6,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.types import RunType
+from bioetl.interfaces.orchestration.runner import PipelineRunner
 
 
 @pytest.fixture
@@ -101,7 +102,8 @@ class TestBootstrapPipeline:
                 limit=100,
             )
 
-        assert result == mock_pipeline
+        assert isinstance(result, PipelineRunner)
+        assert result.pipeline == mock_pipeline
         mock_factory.create_with_services.assert_called_once()
 
 
