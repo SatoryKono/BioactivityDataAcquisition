@@ -114,20 +114,16 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
     @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.StorageAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.BronzeWriter")
-    @patch("bioetl.interfaces.factories.chembl_activity.DeltaWriter")
-    @patch("bioetl.interfaces.factories.chembl_activity.GoldWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.StorageFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
+    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
     def test_build_services_local_run(
         self,
+        mock_load_config,
         mock_quarantine,
         mock_checkpoint,
-        mock_gold,
-        mock_delta,
-        mock_bronze,
-        mock_storage,
+        mock_storage_factory,
         mock_chembl,
         mock_http,
         mock_aws_creds,
@@ -142,6 +138,19 @@ class TestChEMBLActivityPipelineFactory:
         mock_aws_creds.return_value = (None, None)
         mock_settings.env = "dev"
         mock_settings.aws.endpoint_url = None
+        mock_load_config.return_value = {
+            "provider": "chembl",
+            "entity_type": "activity",
+            "primary_keys": ["activity_id"],
+            "silver_table": "chembl.activity",
+            "sink": {},
+        }
+        # Configure StorageFactory mock
+        mock_storage_ctx = MagicMock()
+        mock_storage_ctx.checkpoints_path = "checkpoints"
+        mock_storage_ctx.silver_path = "silver"
+        mock_storage_ctx.adapter = MagicMock()
+        mock_storage_factory.create.return_value = mock_storage_ctx
 
         services = ChEMBLActivityPipelineFactory.build_services(
             settings=mock_settings,
@@ -156,20 +165,16 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.interfaces.factories.chembl_activity.RedisDistributedLock")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
     @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.StorageAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.BronzeWriter")
-    @patch("bioetl.interfaces.factories.chembl_activity.DeltaWriter")
-    @patch("bioetl.interfaces.factories.chembl_activity.GoldWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.StorageFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
+    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
     def test_build_services_prod_uses_redis_lock(
         self,
+        mock_load_config,
         mock_quarantine,
         mock_checkpoint,
-        mock_gold,
-        mock_delta,
-        mock_bronze,
-        mock_storage,
+        mock_storage_factory,
         mock_chembl,
         mock_http,
         mock_redis_lock,
@@ -186,6 +191,19 @@ class TestChEMBLActivityPipelineFactory:
         mock_aws_creds.return_value = ("key", "secret")
         mock_settings.env = "prod"
         mock_settings.aws.endpoint_url = "http://s3.example.com"
+        mock_load_config.return_value = {
+            "provider": "chembl",
+            "entity_type": "activity",
+            "primary_keys": ["activity_id"],
+            "silver_table": "chembl.activity",
+            "sink": {},
+        }
+        # Configure StorageFactory mock
+        mock_storage_ctx = MagicMock()
+        mock_storage_ctx.checkpoints_path = "checkpoints"
+        mock_storage_ctx.silver_path = "silver"
+        mock_storage_ctx.adapter = MagicMock()
+        mock_storage_factory.create.return_value = mock_storage_ctx
 
         services = ChEMBLActivityPipelineFactory.build_services(
             settings=mock_settings,
@@ -200,22 +218,18 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.interfaces.factories.chembl_activity.get_aws_credentials")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedHTTPClient")
     @patch("bioetl.interfaces.factories.chembl_activity.ChemblAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.StorageAdapter")
-    @patch("bioetl.interfaces.factories.chembl_activity.BronzeWriter")
-    @patch("bioetl.interfaces.factories.chembl_activity.DeltaWriter")
-    @patch("bioetl.interfaces.factories.chembl_activity.GoldWriter")
+    @patch("bioetl.interfaces.factories.chembl_activity.StorageFactory")
     @patch("bioetl.interfaces.factories.chembl_activity.S3Checkpoint")
     @patch("bioetl.interfaces.factories.chembl_activity.UnifiedQuarantine")
     @patch("bioetl.interfaces.factories.chembl_activity.PrometheusMetrics")
+    @patch("bioetl.interfaces.factories.chembl_activity.load_pipeline_config")
     def test_build_services_with_metrics_enabled(
         self,
+        mock_load_config,
         mock_prometheus,
         mock_quarantine,
         mock_checkpoint,
-        mock_gold,
-        mock_delta,
-        mock_bronze,
-        mock_storage,
+        mock_storage_factory,
         mock_chembl,
         mock_http,
         mock_aws_creds,
@@ -231,6 +245,19 @@ class TestChEMBLActivityPipelineFactory:
         mock_settings.env = "staging"
         mock_settings.metrics = MagicMock()
         mock_settings.metrics.enabled = True
+        mock_load_config.return_value = {
+            "provider": "chembl",
+            "entity_type": "activity",
+            "primary_keys": ["activity_id"],
+            "silver_table": "chembl.activity",
+            "sink": {},
+        }
+        # Configure StorageFactory mock
+        mock_storage_ctx = MagicMock()
+        mock_storage_ctx.checkpoints_path = "checkpoints"
+        mock_storage_ctx.silver_path = "silver"
+        mock_storage_ctx.adapter = MagicMock()
+        mock_storage_factory.create.return_value = mock_storage_ctx
 
         services = ChEMBLActivityPipelineFactory.build_services(
             settings=mock_settings,

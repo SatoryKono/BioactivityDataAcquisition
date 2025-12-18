@@ -1,6 +1,6 @@
-# AGENT.md: Инструкции для Агента BioETL
+# AGENT.md: Инструкции для Агента BioETL (v2)
 
-Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта.
+Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/RULES.md`.
 
 ---
 
@@ -12,8 +12,7 @@ make lint && make test
 
 # Основные команды
 make install      # установка зависимостей
-make test         # все тесты
-make unit         # только unit-тесты
+make test         # все тесты (unit + integration)
 make lint         # ruff + mypy
 make run-local    # запуск на фикстурах
 
@@ -21,7 +20,7 @@ make run-local    # запуск на фикстурах
 make lint && make test && git add . && git commit
 ```
 
-**Главное правило:** Читай → Планируй → Делай → Проверяй → Документируй
+**Главное правило:** Читай `RULES.md` → Планируй → Делай → Проверяй → Документируй
 
 ---
 
@@ -31,7 +30,7 @@ make lint && make test && git add . && git commit
 |--------|------------|
 | **Профессионализм** | Качественный, поддерживаемый код. Никаких "костылей". |
 | **Язык** | Русский — для документации, комментариев и общения. |
-| **Стиль** | Сухой, технический, структурированный. Списки > Абзацы. |
+| **Стиль** | Сухой, технический, структурированный. Списки и таблицы > Абзацы. |
 | **Автономность** | Диагностика перед изменениями. Внимательное чтение ошибок. |
 | **Скромность** | Спрашивай, если что-то неясно. Признавай ошибки. |
 
@@ -39,36 +38,22 @@ make lint && make test && git add . && git commit
 
 ## 2. Обязательные Ресурсы
 
-### 2.1. Иерархия Документов
-
-```
-RULES.md (Конституция)
-    ↓
-docs/agent/
-    ├── ARCHITECTURE.md  — Гексагональная архитектура, DDD, DI
-    ├── CODING.md        — Python, AsyncIO, Typing, Error Handling
-    ├── TESTING.md       — Pytest, Mocking, VCR
-    └── DOCUMENTATION.md — Docs-as-Code, Mermaid, стиль
-```
-
-### 2.2. Правило Чтения
-
 **Перед любой задачей:**
-1. Прочти `docs/RULES.md` — это Конституция
-2. Освежи знания из `docs/agent/` по теме задачи
-3. Изучи существующий код в затрагиваемых модулях
+1. Прочти `docs/RULES.md` — это Конституция проекта.
+2. Освежи знания из `docs/agent/` по теме задачи.
+3. Изучи существующий код в затрагиваемых модулях.
 
 ---
 
 ## 3. Архитектура: Критические Ограничения
 
-### 3.1. Структура Слоёв
+### 3.1. Структура Слоёв (Ports & Adapters)
 
 ```
 src/bioetl/
-├── domain/          # Чистая логика, Protocols (Ports)
-├── application/     # Пайплайны, Use Cases
-├── infrastructure/  # Адаптеры (HTTP, S3, Redis)
+├── domain/          # Чистая логика, Protocols (Ports), бизнес-модели
+├── application/     # Пайплайны, Use Cases, оркестрация
+├── infrastructure/  # Адаптеры (HTTP, S3, Redis), реализация портов
 └── interfaces/      # CLI, bootstrap.py (Composition Root)
 ```
 
@@ -81,28 +66,44 @@ src/bioetl/
 | **infrastructure** | ✅ | ❌ | ✅ | ❌ |
 | **interfaces** | ✅ | ✅ | ✅ | ✅ |
 
-**Нарушение = Блокер PR**
+**Нарушение = Блокер PR.** Используй `import-linter` для проверки.
 
-### 3.3. Dependency Injection
+### 3.3. Dependency Injection (DI)
 
-```python
-# ✅ ПРАВИЛЬНО — Зависимости передаются извне
-class ChemblPipeline:
-    def __init__(self, storage: StoragePort, metrics: MetricsPort):
-        self._storage = storage
-        self._metrics = metrics
-
-# ❌ НЕПРАВИЛЬНО — Создание зависимостей внутри
-class ChemblPipeline:
-    def __init__(self):
-        self._storage = S3Storage()  # Прямая зависимость!
-```
-
-**Composition Root:** `src/bioetl/interfaces/bootstrap.py` — единственное место сборки.
+- **Правило:** Зависимости (клиенты, конфиги) передаются в конструктор.
+- **Запрет:** Создание зависимостей внутри классов (`S3Storage()`, `httpx.AsyncClient()`).
+- **Composition Root:** `src/bioetl/interfaces/bootstrap.py` — единственное место сборки зависимостей.
 
 ---
 
-## 4. Процесс Работы (Workflow)
+## 4. Ключевые Концепции из `RULES.md`
+
+### 4.1. Medallion Architecture
+
+| Уровень | Описание | Формат | Идемпотентность |
+|---------|----------|--------|-----------------|
+| **Bronze** | Сырые, неизменные данные | JSONL | Append-only |
+| **Silver** | Очищенные, нормализованные | Delta Lake | Merge/Upsert по `content_hash` |
+| **Gold** | Агрегированные витрины | Delta/Parquet | Overwrite/Append |
+
+### 4.2. Обработка Ошибок
+
+| Тип Ошибки | Поведение | Пример |
+|------------|-----------|--------|
+| **Critical** | Падение пайплайна | Ошибка авторизации, недоступность БД |
+| **Recoverable** | Повтор с Exponential Backoff | 429 Rate Limit, 5xx Timeout |
+| **Data Quality** | Запись в Quarantine, пропуск | Невалидный SMILES, отсутствие поля |
+
+### 4.3. Конкурентность и Блокировки
+
+- **Механизм:** Redis (`SETNX` + `EXPIRE`).
+- **Ключ:** `lock:{provider}_{entity}`.
+- **Heartbeat:** Воркер **MUST** обновлять TTL блокировки каждые 20 секунд.
+- **Fencing:** Потеря блокировки = немедленное аварийное завершение воркера **ДО** записи данных.
+
+---
+
+## 5. Процесс Работы (Workflow)
 
 ```mermaid
 flowchart LR
@@ -117,259 +118,113 @@ flowchart LR
     I --> J[🚀 Коммит]
 ```
 
-### Фаза 1: Исследование (Deep Dive)
-
-**Чек-лист:**
-- [ ] Прочитал `RULES.md` и релевантные `docs/agent/*.md`
-- [ ] Изучил существующий код в затрагиваемых модулях
-- [ ] Понял контекст и историю (git log, связанные PR)
-- [ ] Выявил все зависимости и побочные эффекты
-
-**Если неясно → СПРОСИ.** Не угадывай.
-
-### Фаза 2: Планирование
-
-**Чек-лист:**
-- [ ] Составил Step-by-Step план
-- [ ] Определил затрагиваемые файлы
-- [ ] Продумал тесты (TDD)
-- [ ] Оценил риски и rollback-стратегию
-
-**Для сложных задач** — запроси подтверждение плана.
-
-### Фаза 3: Реализация
-
-**Чек-лист:**
-- [ ] Verify First: проверил состояние до изменений
-- [ ] TDD: написал/обновил тесты перед кодом
-- [ ] Atomic Changes: маленькие шаги с верификацией
-- [ ] No Broken Windows: нет TODO, закомментированного кода, lint-ошибок
-
-### Фаза 4: Завершение
-
-**Чек-лист:**
-- [ ] `make lint` — проходит без ошибок
-- [ ] `make test` — все тесты зелёные
-- [ ] Документация обновлена (если код изменился)
-- [ ] `AUDIT_REPORT.md` обновлён (если был рефакторинг)
-- [ ] Коммит с осмысленным сообщением
+- **Исследование:** Прочитай `RULES.md`, изучи существующий код, пойми `git log`.
+- **Планирование:** Составь пошаговый план, определи файлы, продумай тесты (TDD).
+- **Реализация:** Пиши тесты до кода, делай атомарные изменения, соблюдай архитектуру.
+- **Тестирование:** `make test`. Для HTTP-взаимодействий **MUST** использовать VCR.py.
+- **Завершение:** `make lint`, обнови документацию, напиши осмысленный коммит.
 
 ---
 
-## 5. Anti-Patterns: Что ЗАПРЕЩЕНО
+## 6. Anti-Patterns: Что ЗАПРЕЩЕНО
 
-### 5.1. Архитектурные Нарушения
+### 6.1. Архитектурные Нарушения
+- **Неверные импорты:** Импорт `infrastructure` в `domain` или `application`.
+- **Прямое создание зависимостей:** Инстанцирование клиентов/сервисов внутри классов.
 
-```python
-# ❌ Импорт infrastructure в domain
-# src/bioetl/domain/services.py
-from bioetl.infrastructure.adapters import S3Storage  # ЗАПРЕЩЕНО!
+### 6.2. Код Низкого Качества
+- **Sentinel values:** Использование `-1`, `"N/A"`. **MUST** использовать `None`.
+- **Блокирующий I/O в async:** Использование `requests.get()` в `async def`. **MUST** использовать `httpx.AsyncClient` или `loop.run_in_executor`.
+- **Хардкод секретов:** `API_KEY = "..."`. **MUST** использовать переменные окружения.
+- **`print()` вместо логгера:** **MUST** использовать `structlog` с `run_id`.
+- **Игнорирование Rate Limits:** Отсутствие `TokenBucket` или аналога в адаптерах.
 
-# ❌ Импорт application в infrastructure
-# src/bioetl/infrastructure/adapters/chembl.py
-from bioetl.application.pipelines import ChemblPipeline  # ЗАПРЕЩЕНО!
-
-# ❌ Прямое создание зависимостей
-class MyService:
-    def __init__(self):
-        self.client = httpx.AsyncClient()  # Передавай через DI!
-```
-
-### 5.2. Код Низкого Качества
-
-```python
-# ❌ Sentinel values
-if value == -1:  # Используй None!
-    ...
-
-# ❌ Блокирующий I/O в async
-async def fetch_data():
-    result = sync_blocking_call()  # Блокирует Event Loop!
-    # ✅ ПРАВИЛЬНО:
-    # result = await loop.run_in_executor(None, sync_blocking_call)
-
-# ❌ Хардкод секретов
-API_KEY = "sk-secret123"  # В .env!
-
-# ❌ print() вместо логгера
-print(f"Processing {item}")  # Используй structlog!
-```
-
-### 5.3. Тестирование
-
-```python
-# ❌ Мокаем доменные сущности
-mock_activity = Mock(spec=Activity)  # Используй реальные Value Objects!
-
-# ❌ Тесты без VCR для HTTP
-async def test_chembl_fetch():
-    result = await real_api_call()  # Записывай в кассету!
-```
+### 6.3. Тестирование
+- **Мокинг доменных сущностей:** `mock_activity = Mock(spec=Activity)`. **MUST** использовать реальные Value Objects.
+- **Тесты без VCR для HTTP:** `real_api_call()`. **MUST** записывать HTTP-ответы в VCR-кассеты.
+- **Секреты в кассетах:** Забыть очистить `Authorization` или `X-API-Key` из фикстур.
 
 ---
 
-## 6. Работа с Компонентами
+## 7. Работа с Компонентами
 
-### 6.1. Создание Нового Пайплайна
+### 7.1. Создание Нового Адаптера
+1.  **Порт:** Убедись, что в `domain/ports.py` есть подходящий `Protocol`.
+2.  **Адаптер:** Создай класс в `src/bioetl/infrastructure/adapters/{provider}/`
+3.  **Реализация:**
+    - Класс **MUST** реализовывать порт.
+    - Зависимости (`httpx.AsyncClient`, `config`) **MUST** приниматься в `__init__`.
+    - **MUST** реализовывать `health_check()`.
+    - **MUST** соблюдать rate limits провайдера.
 
-1. **Конфиг:** `configs/pipelines/{provider}_{entity}.yaml`
-2. **Адаптер:** `src/bioetl/infrastructure/adapters/{provider}/`
-3. **Пайплайн:** `src/bioetl/application/pipelines/{provider}.py`
-4. **Тесты:** `tests/unit/`, `tests/integration/`
-5. **Документация:** `docs/providers/{provider}/`
-
-### 6.2. Создание Нового Адаптера
-
-```python
-# src/bioetl/infrastructure/adapters/my_provider/client.py
-from bioetl.domain.ports import DataSourcePort
-
-class MyProviderAdapter(DataSourcePort):
-    """Адаптер для MyProvider API.
-
-    Args:
-        http_client: Асинхронный HTTP клиент.
-        config: Конфигурация провайдера.
-    """
-
-    def __init__(
-        self,
-        http_client: httpx.AsyncClient,
-        config: MyProviderConfig,
-    ) -> None:
-        self._client = http_client
-        self._config = config
-
-    async def fetch(self, query: Query) -> AsyncIterator[RawRecord]:
-        # Реализация...
-        pass
-
-    async def health_check(self) -> bool:
-        # Проверка доступности API
-        pass
-```
-
-### 6.3. Работа с Delta Lake
-
-```python
-# ✅ ПРАВИЛЬНО — в executor (блокирующая операция)
-import asyncio
-
-async def write_to_delta(df: pl.DataFrame, path: str) -> None:
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(
-        None,
-        lambda: df.write_delta(path, mode="merge")
-    )
-```
+### 7.2. Создание Нового Пайплайна
+1.  **Конфиг:** Создай `configs/pipelines/{provider}_{entity}.yaml`. Определи `load_strategy` (`incremental` или `full`).
+2.  **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
+3.  **Оркестрация:** Пайплайн получает адаптеры через DI и управляет потоком данных (Extract → Transform → Load).
+4.  **Сборка:** Добавь пайплайн в `bootstrap.py`.
+5.  **Тесты:** Напиши `unit` и `integration` тесты.
 
 ---
 
-## 7. Git Workflow
+## 8. Git Workflow
 
-### 7.1. Формат Коммитов
+### 8.1. Формат Коммитов (`Conventional Commits`)
 
 ```
 <type>(<scope>): <description>
-
-[optional body]
-
-[optional footer]
 ```
+- **Типы:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
+- **Примеры:**
+  - `feat(chembl): add activity pipeline`
+  - `fix(pubchem): handle rate limit 429`
+  - `docs(agent): update architecture diagram`
 
-**Типы:**
-- `feat` — новая функциональность
-- `fix` — исправление бага
-- `refactor` — рефакторинг без изменения поведения
-- `docs` — только документация
-- `test` — только тесты
-- `chore` — инфраструктура, CI/CD
-
-**Примеры:**
-```bash
-git commit -m "feat(chembl): add activity pipeline"
-git commit -m "fix(pubchem): handle rate limit 429"
-git commit -m "refactor(domain): extract validation logic"
-git commit -m "docs(agent): update ARCHITECTURE.md"
-```
-
-### 7.2. Перед Коммитом
+### 8.2. Перед Коммитом
 
 ```bash
 # Обязательная последовательность
-make lint         # Проверка стиля
-make test         # Все тесты
-git status        # Проверка файлов
+make lint
+make test
+git status
 git diff --staged # Ревью изменений
 git commit -m "..."
 ```
 
 ---
 
-## 8. Диагностика Проблем
-
-### 8.1. Частые Ошибки и Решения
-
-| Симптом | Причина | Решение |
-|---------|---------|---------|
-| `ImportError: cannot import from domain` | Нарушение слоёв | Проверь матрицу импортов |
-| `RuntimeError: Event loop is closed` | Блокирующий I/O в async | Используй `run_in_executor` |
-| `mypy: Incompatible types` | Неверная типизация | Проверь Protocol соответствие |
-| Тесты падают в CI | VCR кассета отсутствует | Запиши кассету локально |
-| `401 Unauthorized` | Протухший API ключ | Обнови в `.env` |
-
-### 8.2. Полезные Команды Диагностики
-
-```bash
-# Проверить импорты между слоями
-import-linter
-
-# Проверить типизацию
-mypy src/bioetl --strict
-
-# Запустить конкретный тест
-python -m pytest tests/unit/test_specific.py -v
-
-# Посмотреть coverage
-python -m pytest --cov=bioetl --cov-report=html
-```
-
----
-
 ## 9. Чек-Лист Ревью (Self-Review)
 
-Перед отправкой PR проверь:
-
 ### Архитектура
-- [ ] Нет импортов infrastructure → domain
-- [ ] Зависимости инжектируются через конструктор
-- [ ] Новые порты определены в `domain/ports.py`
+- [ ] Нет запрещенных импортов между слоями.
+- [ ] Зависимости инжектируются через конструктор.
+- [ ] `bootstrap.py` — единственное место сборки.
 
 ### Код
-- [ ] `make lint` проходит
-- [ ] `make test` проходит
-- [ ] Типизация полная (no `Any` без причины)
-- [ ] Логирование через `structlog`
-- [ ] Нет хардкода секретов
+- [ ] `make lint` проходит без ошибок.
+- [ ] Типизация полная (нет `Any` без веской причины).
+- [ ] Логирование через `structlog`, везде есть `run_id`.
+- [ ] Нет хардкода секретов, путей или конфигурации.
+- [ ] Реализован Graceful Shutdown (обработка `SIGTERM`).
 
 ### Тесты
-- [ ] Unit-тесты для новой логики
-- [ ] VCR кассеты для HTTP вызовов
-- [ ] Кассеты очищены от секретов
+- [ ] `make test` проходит.
+- [ ] Для новой логики есть `unit`-тесты.
+- [ ] Для HTTP-вызовов есть `integration`-тесты с VCR.
+- [ ] VCR-кассеты очищены от секретов.
 
 ### Документация
-- [ ] Docstrings в Google Style (русский)
-- [ ] Обновлены релевантные docs/
-- [ ] AUDIT_REPORT.md актуален (если рефакторинг)
+- [ ] Docstrings в Google Style (на русском).
+- [ ] Обновлены релевантные документы в `docs/`.
 
 ---
 
-## 10. Контакты и Эскалация
+## 10. Диагностика и Эскалация
 
-- **Вопросы по архитектуре:** `docs/agent/ARCHITECTURE.md`
-- **Вопросы по данным:** `docs/RULES.md` (раздел 2)
-- **Неясности в задаче:** **СПРОСИ ПОЛЬЗОВАТЕЛЯ**
-- **Баги в правилах:** Предложи исправление в `RULES.md`
+- **`ImportError: cannot import from domain`**: Нарушение слоёв. Проверь матрицу импортов.
+- **`RuntimeError: Event loop is closed`**: Блокирующий I/O в async-коде. Используй `run_in_executor`.
+- **Тесты падают в CI, но не локально**: Вероятно, отсутствует VCR-кассета. Запиши её.
+- **Неясности в задаче**: **СПРОСИ ПОЛЬЗОВАТЕЛЯ**.
+- **Баги в правилах**: Предложи исправление в `docs/RULES.md`.
 
 ---
 
