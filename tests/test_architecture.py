@@ -509,23 +509,87 @@ def test_observability_library_isolation(src_dir: Path):
 
 def test_adapters_implement_protocols(src_dir: Path):
     """Infrastructure adapters must implement Domain Protocols."""
-    adapters_dir = src_dir / "bioetl" / "infrastructure" / "adapters"
-    if not adapters_dir.exists():
-        return
 
-    # Scan for adapter classes
+    # Import Protocols
+    from bioetl.domain.ports import (
+        DataSourcePort,
+        CheckpointPort,
+        LockPort,
+        QuarantinePort,
+        StoragePort,
+        MetricsPort,
+    )
+
+    # Import Adapters (Lazy import to avoid import errors if deps are missing)
+    try:
+        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+        from bioetl.infrastructure.adapters.pubchem.client import PubChemClient
+        from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+        from bioetl.infrastructure.checkpoint.s3_checkpoint import S3Checkpoint
+        from bioetl.infrastructure.locking.redis_lock import RedisDistributedLock
+        from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
+        from bioetl.infrastructure.factories.storage import StorageAdapter
+        from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+        from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+    except ImportError as e:
+        pytest.fail(f"Could not import adapters for protocol check: {e}")
+
+    # Define Expectations
+    expectations = [
+        (ChemblAdapter, DataSourcePort),
+        (PubChemClient, DataSourcePort),
+        (UniProtClient, DataSourcePort),
+        (S3Checkpoint, CheckpointPort),
+        (RedisDistributedLock, LockPort),
+        (UnifiedQuarantine, QuarantinePort),
+        (StorageAdapter, StoragePort),
+        (PrometheusMetrics, MetricsPort),
+        (NoOpMetrics, MetricsPort),
+    ]
+
     violations = []
+    for adapter_cls, protocol in expectations:
+        # Custom check because some protocols have non-callable members
+        # causing TypeError with issubclass()
 
-    # Heuristic: Check for specific known adapters and their compliance
-    # This is a bit tricky with AST because we need type resolution to know what Protocol they inherit.
-    # Instead, we will do a simpler check:
-    # 1. Find all classes in adapters/ that end with 'Client' or 'Adapter'
-    # 2. Check if they implement methods from their likely Protocol.
+        # Get all members of the protocol
+        # We look at annotations for fields and dir() for methods
+        proto_annotations = get_type_hints(protocol)
+        proto_dir = set(dir(protocol))
 
-    # We'll skip complex AST analysis for inheritance in this step and focus on
-    # ensuring they don't have empty/missing methods if they claim to implement a protocol.
-    # This test is a placeholder for a more robust mypy/runtime check.
-    pass
+        cls_dir = set(dir(adapter_cls))
+
+        # Robustly get annotations (handle TYPE_CHECKING imports)
+        try:
+            cls_annotations = get_type_hints(adapter_cls)
+        except NameError:
+            # Fallback to raw __annotations__ if resolution fails
+            cls_annotations = getattr(adapter_cls, "__annotations__", {})
+
+        missing = []
+
+        # Check methods/properties in dir()
+        for member in proto_dir:
+            if member.startswith("_") and member not in ("__aenter__", "__aexit__"):
+                continue
+            if member not in cls_dir:
+                missing.append(member)
+
+        # Check fields in annotations (e.g. provider_name)
+        for field in proto_annotations:
+            if field.startswith("_"):
+                continue
+            # It should be either in annotations (dataclass) or in dir (property/attribute)
+            # Note: Protocol fields might be implemented as properties, so checking cls_dir is important
+            if field not in cls_dir and field not in cls_annotations:
+                 missing.append(field)
+
+        if missing:
+            violations.append(
+                f"{adapter_cls.__name__} does not implement {protocol.__name__}. Missing members: {missing}"
+            )
+
+    assert not violations, "\n".join(violations)
 
 
 def test_public_methods_have_docstrings(src_dir: Path):
