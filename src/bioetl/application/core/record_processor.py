@@ -10,9 +10,11 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.protocols import GoldFilterCallback, TransformCallback
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import StoragePort
+from bioetl.domain.exceptions import DataQualityThresholdError
+from bioetl.domain.ports import MetricsPort, StoragePort
 from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
@@ -36,8 +38,9 @@ class RecordProcessor:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         silver_schema: Any,
-        metrics: Any = None,  # Injected MetricsPort
-        dq_config: Any = None,  # Injected DQ config
+        metrics: MetricsPort | None = None,
+        dq_config: DQConfig | None = None,
+        table_config: TableConfig | None = None,
     ):
         self._storage = storage
         self._quarantine_manager = quarantine_manager
@@ -50,6 +53,7 @@ class RecordProcessor:
         self._silver_schema = silver_schema
         self._metrics = metrics
         self._dq_config = dq_config
+        self._table_config = table_config or TableConfig()
 
     async def process_batch(
         self,
@@ -98,9 +102,9 @@ class RecordProcessor:
         # Check DQ thresholds
         if self._dq_config and records:
             error_rate = records_quarantined / len(records)
-            if self._dq_config.get("hard_fail_threshold") and error_rate >= self._dq_config["hard_fail_threshold"]:
-                 raise RuntimeError(f"DQ Hard Threshold exceeded: {error_rate:.2%} errors")
-            if self._dq_config.get("soft_fail_threshold") and error_rate >= self._dq_config["soft_fail_threshold"]:
+            if self._dq_config.hard_fail_threshold and error_rate >= self._dq_config.hard_fail_threshold:
+                 raise DataQualityThresholdError(error_rate, self._dq_config.hard_fail_threshold)
+            if self._dq_config.soft_fail_threshold and error_rate >= self._dq_config.soft_fail_threshold:
                  self._context.logger.warning("DQ Soft Threshold exceeded", error_rate=error_rate)
 
         if self._metrics:
@@ -151,17 +155,17 @@ class RecordProcessor:
             for r in records
         ]
         # Use configured table name or default
-        table_name = self._dq_config.get("silver_table") if self._dq_config else f"{self._provider}.{self._entity_type}"
+        table_name = self._table_config.silver_table or f"{self._provider}.{self._entity_type}"
         await self._storage.write_silver(
             table_name=table_name,
             records=records_with_meta,
-            primary_keys=["entity_id"],
+            primary_keys=self._table_config.primary_keys,
             schema=self._silver_schema,
         )
 
     async def _write_gold_batch(self, records: list[dict[str, Any]]) -> None:
         # Use configured table name or default
-        table_name = self._dq_config.get("gold_table") if self._dq_config else f"{self._provider}.{self._entity_type}"
+        table_name = self._table_config.gold_table or f"{self._provider}.{self._entity_type}"
         await self._storage.write_gold(
             table_name=table_name, records=records, mode="append"
         )
