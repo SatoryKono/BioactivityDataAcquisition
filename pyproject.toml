@@ -213,6 +213,7 @@ dict_synonyms = "Struct, NamedStruct"
 
 # ============ XENON (Complexity Thresholds) ============
 # Enforced in CI: xenon --max-absolute B --max-modules B --max-average A
+# Factories: xenon --max-absolute B --max-modules A --max-average A
 # B = max CC of 10 per function, A = average CC of 5
 
 # ============ BANDIT (Security) ============
