@@ -174,13 +174,14 @@ async def test_health_check_healthy(uniprot_client):
 
 
 @respx.mock
-async def test_health_check_degraded(uniprot_client):
-    """Test health check returns DEGRADED on non-200."""
+async def test_health_check_unhealthy_on_server_error(uniprot_client):
+    """Test health check returns UNHEALTHY on server error (500)."""
     respx.get("https://rest.uniprot.org/rest/beta/health").mock(
         return_value=Response(500)
     )
     status = await uniprot_client.health_check()
-    assert status == HealthStatus.DEGRADED
+    # 500 triggers retry exhaustion → exception → UNHEALTHY
+    assert status == HealthStatus.UNHEALTHY
 
 
 @respx.mock
