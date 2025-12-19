@@ -23,8 +23,13 @@ def mock_services():
 @pytest.fixture
 def mock_record_processor():
     """Create mock record processor."""
+    from bioetl.application.core.record_processor import BatchResult
     processor = MagicMock(spec=RecordProcessor)
-    processor.process_batch = AsyncMock(return_value=(0, 0, 0, 0))
+    processor.process_batch = AsyncMock(
+        return_value=BatchResult(
+            bronze_count=0, silver_count=0, gold_count=0, quarantined_count=0
+        )
+    )
     return processor
 
 
@@ -105,13 +110,16 @@ class TestPipelineExecutorExecute:
 
     async def test_execute_processes_records(self, executor, mock_services, mock_record_processor):
         """Test that execute processes records correctly."""
+        from bioetl.application.core.record_processor import BatchResult
 
         async def mock_fetch(**kwargs):
             for i in range(3):
                 yield {"id": str(i), "value": 10}
 
         mock_services.data_source.fetch = mock_fetch
-        mock_record_processor.process_batch.return_value = (3, 3, 3, 0)
+        mock_record_processor.process_batch.return_value = BatchResult(
+            bronze_count=3, silver_count=3, gold_count=3, quarantined_count=0
+        )
 
         await executor.execute(watermark=None, limit=None)
 
