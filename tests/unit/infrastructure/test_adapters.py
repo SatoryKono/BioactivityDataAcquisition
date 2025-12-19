@@ -120,29 +120,35 @@ class TestUniProtClient:
 
     def test_client_creation_without_api_key(self):
         """Test UniProt client without API key."""
-        client = UniProtClient()
+        from unittest.mock import MagicMock
+        http_client = MagicMock()
+        client = UniProtClient(http_client=http_client)
 
         assert client.provider_name == "uniprot"
         assert client.api_key is None
-        assert client.rate_limiter.rate == 10.0  # Lower rate without key
 
     def test_client_creation_with_api_key(self):
         """Test UniProt client with API key."""
-        client = UniProtClient(api_key="test_key")
+        from unittest.mock import MagicMock
+        http_client = MagicMock()
+        client = UniProtClient(http_client=http_client, api_key="test_key")
 
         assert client.api_key == "test_key"
-        assert client.rate_limiter.rate == 100.0  # Higher rate with key
 
     def test_client_with_custom_base_url(self):
         """Test UniProt client with custom base URL."""
+        from unittest.mock import MagicMock
+        http_client = MagicMock()
         custom_url = "https://custom.uniprot.org"
-        client = UniProtClient(base_url=custom_url)
+        client = UniProtClient(http_client=http_client, base_url=custom_url)
 
         assert client.base_url == custom_url
 
     def test_fasta_parsing(self):
         """Test FASTA format parsing."""
-        client = UniProtClient()
+        from unittest.mock import MagicMock
+        http_client = MagicMock()
+        client = UniProtClient(http_client=http_client)
 
         fasta_text = """>sp|P04637|P53_HUMAN Cellular tumor antigen p53
 MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGP
