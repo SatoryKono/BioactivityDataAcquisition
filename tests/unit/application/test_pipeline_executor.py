@@ -6,6 +6,7 @@ import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.executor import PipelineExecutor
+from bioetl.application.core.record_processor import BatchResult
 from bioetl.application.core.shutdown import ShutdownSignal
 
 
@@ -39,7 +40,11 @@ def mock_services():
 def mock_record_processor():
     """Create mock RecordProcessor."""
     processor = AsyncMock()
-    processor.process_batch = AsyncMock(return_value=(1, 1, 1, 0))
+    processor.process_batch = AsyncMock(
+        return_value=BatchResult(
+            bronze_count=1, silver_count=1, gold_count=1, quarantined_count=0
+        )
+    )
     return processor
 
 
