@@ -647,5 +647,64 @@ jobs:
 
 ---
 
+## Приложение A: Дополнительный Анализ (2025-12-19)
+
+### A.1. Второй Независимый Обзор
+
+Проведён повторный архитектурный обзор с незначительно отличающимися весами категорий.
+
+**Результат**: 8.55/10 (vs 8.19 в основном обзоре)
+
+Разница объясняется:
+- Более высокой оценкой тестирования (наличие 600+ строк AST-based архитектурных тестов)
+- Учётом качества обработки ошибок (ErrorClassifier, Circuit Breaker)
+
+### A.2. Дополнительные Выявленные Проблемы
+
+| # | Проблема | Файл | Влияние |
+|---|----------|------|---------|
+| P8 | Factory-функция `create_chembl_adapter` в infrastructure | `adapters/chembl/client.py:336` | Нарушает SRP composition |
+| P9 | `date: Any` в StoragePort.write_bronze | `domain/ports.py:127` | Type safety |
+| P10 | `_cached_health` mutable state без lock | `adapters/chembl/client.py:86` | Race condition |
+
+### A.2.1. ADRs Найдены
+
+**Примечание**: При повторном обзоре обнаружены ADRs в `docs/02-architecture/decisions/`:
+- ADR-001: Delta Lake vs Parquet
+- ADR-002: Medallion Architecture
+- ADR-003: Redis for Distributed Locking
+- ADR-004: Pydantic vs Dataclasses
+- ADR-005: Composition Layer Separation
+- ADR-005: Logger/Metrics Ports (дублирующийся номер)
+
+**Вывод**: Пункт R3 (Формализация ADRs) из основного плана рефакторинга **уже выполнен**.
+Оценка категории "Качество документации" повышается с 9 до **10** (ADRs существуют и качественные).
+
+### A.3. Дополнительные Архитектурные Тесты
+
+Рекомендуется добавить:
+
+```python
+def test_no_factories_in_infrastructure(src_dir: Path):
+    """Factory functions must be in composition/, not infrastructure/."""
+    infra_path = src_dir / "bioetl" / "infrastructure"
+    violations = []
+    for py_file in infra_path.rglob("*.py"):
+        with py_file.open() as f:
+            content = f.read()
+        if re.search(r"def create_\w+_adapter", content):
+            violations.append(f"{py_file.name}: contains factory function")
+    assert not violations, "\n".join(violations)
+```
+
+### A.4. Консолидированный Прогноз
+
+После выполнения **всех** рефакторингов (R1-R6 + P8-P10):
+- Текущий балл: 8.19 - 8.55
+- Целевой балл: **9.1 - 9.3**
+
+---
+
 *Документ подготовлен: 2025-12-19*
 *Автор: Архитектурный Обзор Claude*
+*Обновлено: 2025-12-19 (Appendix A)*
