@@ -238,14 +238,20 @@ def cleanup_infrastructure_state():
 @pytest.fixture(scope="session")
 def docker_ip():
     """Get Docker IP address, skip if Docker not available."""
+    import shutil
+    if not shutil.which("docker"):
+        pytest.skip("Docker executable not found")
+
     try:
         from pytest_docker.plugin import get_docker_ip
-
+        # Try to execute a docker command to verify connectivity
+        import subprocess
+        subprocess.check_call(["docker", "ps"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return get_docker_ip()
     except ImportError:
         pytest.skip("pytest-docker not installed, run: pip install pytest-docker")
     except Exception:
-        pytest.skip("Docker not available")
+        pytest.skip("Docker not available or not running")
 
 
 @pytest.fixture(scope="session")
