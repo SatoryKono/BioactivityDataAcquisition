@@ -3,8 +3,17 @@
 This module defines configuration value objects used within the Domain and Application layers.
 These are distinct from Infrastructure configuration schemas (Pydantic) to maintain
 strict layer separation.
+
+Consolidated configuration classes (post-refactoring):
+- DQConfig: Data Quality thresholds
+- TableConfig: Database tables and keys
+- PipelineConfig: Complete immutable pipeline configuration
+- RuntimeConfig: CLI/runtime parameters (Value Object)
 """
 from dataclasses import dataclass, field
+from typing import List
+
+from bioetl.domain.types import RunType
 
 
 @dataclass(frozen=True)
@@ -45,3 +54,110 @@ class TableConfig:
     primary_keys: list[str] = field(default_factory=lambda: ["entity_id"])
     silver_table: str | None = None
     gold_table: str | None = None
+
+
+@dataclass(frozen=True)
+class PipelineConfig:
+    """Immutable pipeline configuration.
+
+    Contains static configuration that doesn't change during execution.
+    Frozen dataclass ensures immutability after creation.
+
+    This is the consolidated domain configuration object that combines
+    identity, data quality, table, and processing settings.
+    """
+
+    # Identity
+    pipeline_name: str
+    provider: str
+    entity_type: str
+
+    # Table configuration
+    primary_keys: list[str]
+    silver_table: str
+    gold_table: str | None = None
+
+    # Processing
+    gold_filter_types: List[str] = field(default_factory=list)
+    batch_size: int = 100
+    checkpoint_interval: int = 1000
+    fields: List[str] = field(default_factory=list)
+    watermark_field: str | None = None
+
+    # Data Quality
+    dq: DQConfig = field(default_factory=DQConfig)
+
+    def __post_init__(self) -> None:
+        """Validate configuration on creation."""
+        validations = [
+            (not self.pipeline_name, "pipeline_name cannot be empty"),
+            (not self.provider, "provider cannot be empty"),
+            (not self.entity_type, "entity_type cannot be empty"),
+            (self.batch_size <= 0, f"batch_size must be positive, got {self.batch_size}"),
+            (
+                self.checkpoint_interval <= 0,
+                f"checkpoint_interval must be positive, got {self.checkpoint_interval}",
+            ),
+            (not self.primary_keys, "primary_keys cannot be empty"),
+        ]
+        for condition, message in validations:
+            if condition:
+                raise ValueError(message)
+
+    @property
+    def lock_key(self) -> str:
+        """Generate lock key for distributed locking."""
+        return f"pipeline:{self.pipeline_name}"
+
+    @property
+    def table(self) -> TableConfig:
+        """Get TableConfig for backward compatibility."""
+        return TableConfig(
+            primary_keys=self.primary_keys,
+            silver_table=self.silver_table,
+            gold_table=self.gold_table,
+        )
+
+
+@dataclass(frozen=True)
+class RuntimeConfig:
+    """Runtime execution parameters.
+
+    Contains parameters that may vary between pipeline runs
+    but are fixed during a single execution. These are typically
+    passed via CLI arguments.
+
+    This is a Value Object that belongs in the domain layer because
+    it has no I/O dependencies and represents immutable runtime state.
+    """
+
+    run_type: RunType
+    resume: bool = False
+    limit: int | None = None
+    heartbeat_interval: int = 30
+    wait_for_lock: bool = False
+    lock_wait_timeout: int = 300
+    lock_ttl: int | None = None
+    query: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate runtime config."""
+        if self.limit is not None and self.limit <= 0:
+            raise ValueError(f"limit must be positive or None, got {self.limit}")
+        if self.heartbeat_interval <= 0:
+            raise ValueError(
+                f"heartbeat_interval must be positive, got {self.heartbeat_interval}"
+            )
+        if self.lock_wait_timeout <= 0:
+            raise ValueError(
+                f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}"
+            )
+
+    @property
+    def effective_lock_ttl(self) -> int:
+        """Derived TTL for lock renewal based on runtime config."""
+        return self.lock_ttl or self.heartbeat_interval * 3
+
+
+# Backward compatibility alias
+PipelineRuntimeConfig = RuntimeConfig

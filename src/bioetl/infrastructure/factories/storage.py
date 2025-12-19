@@ -1,9 +1,10 @@
 """Unified storage adapter for Bronze/Silver/Gold."""
 
 from collections.abc import Iterator
-from typing import Any
+from datetime import datetime
+from typing import Any, Literal
 
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_writer import DeltaWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -33,7 +34,7 @@ class StorageAdapter:
         records: Iterator[bytes],
         provider: str,
         entity: str,
-        date: Any,
+        date: datetime,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
@@ -54,8 +55,8 @@ class StorageAdapter:
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
-        schema: Any,
-        mode: str = "merge",
+        schema: ArrowSchema,
+        mode: Literal["merge", "append", "delete"] = "merge",
     ) -> None:
         """Write transformed records to Silver layer."""
         await self.silver.write_silver(
@@ -69,7 +70,7 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[dict[str, Any]],
-        mode: str = "overwrite",
+        mode: Literal["overwrite", "append", "scd2"] = "overwrite",
     ) -> None:
         """Write aggregated records to Gold layer."""
         await self.gold.write_gold(

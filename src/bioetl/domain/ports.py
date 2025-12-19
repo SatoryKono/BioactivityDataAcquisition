@@ -8,6 +8,7 @@ separation of concerns between the domain and infrastructure layers.
 """
 
 from collections.abc import AsyncIterator, Iterator
+from datetime import datetime
 from typing import Any, Literal, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import (
@@ -126,7 +127,7 @@ class StoragePort(Protocol):
         records: Iterator[bytes],
         provider: str,
         entity: str,
-        date: Any,
+        date: datetime,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
@@ -138,7 +139,7 @@ class StoragePort(Protocol):
             records: An iterable of byte strings, where each string is a raw record.
             provider: The name of the data provider.
             entity: The type of entity being written.
-            date: The date partition for the data.
+            date: The datetime for the data partition.
             batch_id: The unique identifier for the batch of records.
             run_id: The unique identifier for the pipeline run (for traceability).
             run_type: The type of pipeline run (incremental, backfill, rebuild).
