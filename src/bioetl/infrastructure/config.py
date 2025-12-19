@@ -3,6 +3,10 @@
 Uses pydantic-settings for type-safe, validated configuration from environment
 variables and YAML files. All settings are loaded once at startup and validated.
 
+Consolidated configuration (post-refactoring):
+- Settings: Main application settings (pydantic-settings)
+- RuntimeConfig: Re-exported from domain.config for CLI convenience
+
 Usage:
     from bioetl.infrastructure.config import get_settings
 
@@ -25,8 +29,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.pipeline_config import PipelineConfig
+from bioetl.domain.config import DQConfig as DomainDQConfig, PipelineConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -368,3 +371,22 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Get cached application settings."""
     return Settings()
+
+
+# =============================================================================
+# Re-exports for CLI/interfaces convenience
+# =============================================================================
+
+# RuntimeConfig is defined in domain.config but re-exported here
+# for convenience when used in CLI/interfaces layer
+from bioetl.domain.config import RuntimeConfig, PipelineRuntimeConfig
+
+__all__ = [
+    "Settings",
+    "get_settings",
+    "get_pipeline_config",
+    "load_pipeline_config",
+    "yaml_config_to_domain",
+    "RuntimeConfig",
+    "PipelineRuntimeConfig",
+]
