@@ -285,14 +285,8 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
 
     # Aliases: Schema Field -> Entity Field
     # This documents where the Domain Language differs slightly from Persistence Schema
-    aliases = {
-        # Activity
-        "molecule_chembl_id": "molecule_id",
-        "target_chembl_id": "target_id",
-        "assay_chembl_id": "assay_id",
-        # Compound
-        # Protein
-    }
+    # Currently empty - schema and entity field names are aligned
+    aliases: dict[str, str] = {}
 
     violations = []
 
