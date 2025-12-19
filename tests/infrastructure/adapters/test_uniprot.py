@@ -6,11 +6,23 @@ from httpx import Response
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 
 
 @pytest.fixture
-def uniprot_client():
-    return UniProtClient(rate=100.0)
+def unified_http_client():
+    """Fixture for UnifiedHTTPClient."""
+    rate_limiter = TokenBucket(rate=100.0, capacity=100)
+    circuit_breaker = CircuitBreaker(provider="uniprot")
+    return UnifiedHTTPClient(rate_limiter=rate_limiter, circuit_breaker=circuit_breaker)
+
+
+@pytest.fixture
+def uniprot_client(unified_http_client):
+    """Fixture for UniProtClient."""
+    return UniProtClient(http_client=unified_http_client)
 
 
 @pytest.fixture
@@ -68,8 +80,9 @@ async def test_fetch_protein_success(uniprot_client, mock_protein_response):
     )
 
     results = []
-    async for record in uniprot_client.fetch("protein", query="gene:TEST1"):
-        results.append(record)
+    async with uniprot_client:
+        async for record in uniprot_client.fetch("protein", query="gene:TEST1"):
+            results.append(record)
 
     assert len(results) == 1
     assert results[0]["primaryAccession"] == "P12345"
@@ -93,8 +106,9 @@ async def test_fetch_protein_pagination(
     ]
 
     results = []
-    async for record in uniprot_client.fetch("protein", query="gene:TEST1"):
-        results.append(record)
+    async with uniprot_client:
+        async for record in uniprot_client.fetch("protein", query="gene:TEST1"):
+            results.append(record)
 
     assert len(results) == 2
 
@@ -107,8 +121,9 @@ async def test_fetch_features(uniprot_client, mock_feature_response):
     )
 
     results = []
-    async for record in uniprot_client.fetch("feature", query="P12345"):
-        results.append(record)
+    async with uniprot_client:
+        async for record in uniprot_client.fetch("feature", query="P12345"):
+            results.append(record)
 
     assert len(results) == 1
     assert results[0]["type"] == "Domain"
@@ -123,8 +138,9 @@ async def test_fetch_sequences(uniprot_client, mock_fasta_response):
     )
 
     results = []
-    async for record in uniprot_client.fetch("sequence", query="P12345"):
-        results.append(record)
+    async with uniprot_client:
+        async for record in uniprot_client.fetch("sequence", query="P12345"):
+            results.append(record)
 
     assert len(results) == 1
     assert "MKTLLLLAVVLLLGAAQA" in results[0]["sequence"]
@@ -132,23 +148,26 @@ async def test_fetch_sequences(uniprot_client, mock_fasta_response):
 
 async def test_fetch_unsupported_entity(uniprot_client):
     """Test fetching unsupported entity raises ValueError."""
-    with pytest.raises(ValueError, match="Unsupported entity type"):
-        async for _ in uniprot_client.fetch("invalid_entity"):
-            pass
+    async with uniprot_client:
+        with pytest.raises(ValueError, match="Unsupported entity type"):
+            async for _ in uniprot_client.fetch("invalid_entity"):
+                pass
 
 
 async def test_fetch_features_missing_query(uniprot_client):
     """Test fetching features without query raises ValueError."""
-    with pytest.raises(ValueError, match="Query is required"):
-        async for _ in uniprot_client.fetch("feature"):
-            pass
+    async with uniprot_client:
+        with pytest.raises(ValueError, match="Query is required"):
+            async for _ in uniprot_client.fetch("feature"):
+                pass
 
 
 async def test_fetch_sequences_missing_query(uniprot_client):
     """Test fetching sequences without query raises ValueError."""
-    with pytest.raises(ValueError, match="Query is required"):
-        async for _ in uniprot_client.fetch("sequence"):
-            pass
+    async with uniprot_client:
+        with pytest.raises(ValueError, match="Query is required"):
+            async for _ in uniprot_client.fetch("sequence"):
+                pass
 
 
 @respx.mock
@@ -157,7 +176,8 @@ async def test_health_check_healthy(uniprot_client):
     respx.get("https://rest.uniprot.org/rest/beta/health").mock(
         return_value=Response(200)
     )
-    status = await uniprot_client.health_check()
+    async with uniprot_client:
+        status = await uniprot_client.health_check()
     assert status == HealthStatus.HEALTHY
 
 
@@ -167,7 +187,8 @@ async def test_health_check_degraded(uniprot_client):
     respx.get("https://rest.uniprot.org/rest/beta/health").mock(
         return_value=Response(500)
     )
-    status = await uniprot_client.health_check()
+    async with uniprot_client:
+        status = await uniprot_client.health_check()
     assert status == HealthStatus.DEGRADED
 
 
@@ -177,5 +198,6 @@ async def test_health_check_unhealthy(uniprot_client):
     respx.get("https://rest.uniprot.org/rest/beta/health").mock(
         side_effect=Exception("Connection error")
     )
-    status = await uniprot_client.health_check()
+    async with uniprot_client:
+        status = await uniprot_client.health_check()
     assert status == HealthStatus.UNHEALTHY
