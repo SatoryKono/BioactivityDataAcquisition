@@ -130,7 +130,7 @@ class TestChEMBLPipelineE2E:
 
 @pytest.mark.e2e
 @pytest.mark.slow
-#@pytest.mark.skip(reason="PubChem pipeline requires query parameter configuration")
+@pytest.mark.skip(reason="PubChem pipeline requires query parameter in bootstrap_pipeline")
 async def test_pubchem_compound_pipeline(
     e2e_temp_storage,
     e2e_redis_client,
