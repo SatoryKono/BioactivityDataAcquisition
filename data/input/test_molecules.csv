@@ -1,0 +1,4 @@
+molecule_chembl_id,name,notes
+CHEMBL25,Aspirin,test compound
+CHEMBL612,Caffeine,reference
+CHEMBL1201585,Metformin,control
