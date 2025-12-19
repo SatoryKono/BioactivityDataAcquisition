@@ -42,6 +42,34 @@ class CsvExportConfig(BaseModel):
     encoding: str = "utf-8"
 
 
+class InputFilterConfig(BaseModel):
+    """Configuration for input ID filtering from CSV.
+
+    Allows filtering API requests by IDs loaded from a CSV file.
+    CLI options can override these defaults.
+    """
+
+    enabled: bool = False
+    source_path: str | None = Field(
+        default=None,
+        description="Path to CSV file with filter IDs",
+    )
+    column_name: str = Field(
+        default="id",
+        description="Column name in CSV containing filter IDs",
+    )
+    filter_field: str = Field(
+        default="molecule_chembl_id",
+        description="API field name to filter by",
+    )
+    batch_size: int = Field(
+        default=100,
+        ge=1,
+        le=1000,
+        description="Number of IDs per API request",
+    )
+
+
 class SourceConfig(BaseModel):
     """Configuration for the data source."""
     load_strategy: Literal["full", "incremental"] = "full"
@@ -100,6 +128,9 @@ class PipelineYamlConfig(BaseModel):
 
     # Source Config
     source: SourceConfig = Field(default_factory=SourceConfig)
+
+    # Input Filter Config (for CSV-based ID filtering)
+    input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
 
     @field_validator("batch_size")
     @classmethod

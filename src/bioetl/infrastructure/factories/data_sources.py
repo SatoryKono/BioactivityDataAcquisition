@@ -45,9 +45,13 @@ class DataSourceFactory:
         module = importlib.import_module(module_path)
         adapter_cls = getattr(module, class_name)
 
+        # Remove filter_config from kwargs - it's handled by FilteredDataSource wrapper,
+        # not by the adapters themselves
+        adapter_kwargs = {k: v for k, v in kwargs.items() if k != "filter_config"}
+
         if provider == "chembl":
-            return adapter_cls(http_client=http_client, **kwargs)
+            return adapter_cls(http_client=http_client, **adapter_kwargs)
 
         # PubChem and UniProt manage their own clients or have different signatures
         # so we don't pass http_client to them.
-        return adapter_cls(**kwargs)
+        return adapter_cls(**adapter_kwargs)

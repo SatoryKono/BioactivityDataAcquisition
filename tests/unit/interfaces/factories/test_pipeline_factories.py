@@ -151,6 +151,7 @@ class TestPubChemCompoundPipelineFactory:
             http_client=None,
             rate=5.0,
             strict_error_handling=False,
+            filter_config=None,
         )
 
     @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
@@ -220,6 +221,7 @@ class TestPubChemCompoundPipelineFactory:
             http_client=None,
             rate=5.0,  # Default rate
             strict_error_handling=False,
+            filter_config=None,
         )
 
     @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
