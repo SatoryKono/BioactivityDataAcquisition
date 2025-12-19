@@ -196,11 +196,10 @@ class PubChemClient:
                 if limit and i >= limit:
                     break
                 yield self._compound_to_dict(compound)
-        elif watermark:
+        else:
+            # watermark can be None (starts from CID 1)
             async for compound in self._fetch_compounds_incremental(watermark, limit):
                 yield compound
-        else:
-            raise ValueError("Either query or watermark must be provided for compounds")
 
     async def _fetch_substances(
         self,

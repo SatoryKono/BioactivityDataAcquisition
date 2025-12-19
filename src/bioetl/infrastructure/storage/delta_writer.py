@@ -131,6 +131,8 @@ class DeltaWriter:
             for rec in records
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+        # Use RecordBatchReader for better compatibility with delta-rs Arrow C Data interface
+        arrow_reader = pa.RecordBatchReader.from_batches(schema, arrow_data.to_batches())
 
         loop = asyncio.get_running_loop()
 
@@ -139,14 +141,16 @@ class DeltaWriter:
                 None,
                 lambda: DeltaTable(table_path, storage_options=self.storage_options),
             )
-            await self._merge_records(dt, arrow_data, primary_keys)
+            await self._merge_records(dt, arrow_reader, primary_keys)
         except DeltaTableNotFoundError:
             try:
+                # Re-create reader as it might have been consumed
+                arrow_reader = pa.RecordBatchReader.from_batches(schema, arrow_data.to_batches())
                 await loop.run_in_executor(
                     None,
                     lambda: write_deltalake(
                         table_or_uri=table_path,
-                        data=arrow_data,
+                        data=arrow_reader,
                         mode="append",
                         partition_by=partition_cols,
                         storage_options=self.storage_options,
@@ -220,7 +224,7 @@ class DeltaWriter:
     async def _merge_records(
         self,
         dt: DeltaTable,
-        records: pa.Table,
+        records: pa.Table | pa.RecordBatchReader,
         primary_keys: list[str],
     ) -> None:
         """Merge records into existing Delta table."""
