@@ -11,6 +11,7 @@ from collections.abc import AsyncIterator, Iterator
 from typing import Any, Literal, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import (
+    ArrowSchema,
     BatchID,
     HealthStatus,
     RunID,
@@ -149,7 +150,7 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
-        schema: Any,  # Using Any to avoid strict dependency on pyarrow in domain
+        schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
     ) -> None:
         """
@@ -159,7 +160,7 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries, where each dictionary is a transformed record.
             primary_keys: A list of column names that form the primary key.
-            schema: The schema definition (e.g., PyArrow schema) for the records.
+            schema: The PyArrow schema definition for the records (ArrowSchema alias).
             mode: The write mode (e.g., 'merge', 'append', 'delete').
         """
         ...
@@ -342,9 +343,9 @@ class QuarantinePort(Protocol):
         error_code: str,
         payload: dict[str, Any],
         bronze_batch_id: BatchID,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Any:
+        run_id: RunID | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
         """
         Write a record to quarantine.
 
@@ -353,6 +354,8 @@ class QuarantinePort(Protocol):
             error_code: A code identifying the type of error.
             payload: The record that failed processing.
             bronze_batch_id: The ID of the bronze batch containing the record.
+            run_id: Optional ID of the pipeline run for traceability.
+            metadata: Optional additional metadata (e.g., error_details, bronze_file_uri).
         """
         ...
 

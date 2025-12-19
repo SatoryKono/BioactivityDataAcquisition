@@ -54,7 +54,7 @@ class TestUnifiedQuarantine:
             error_code=error_code,
             payload=payload,
             bronze_batch_id=bronze_batch_id,
-            error_details=error_details,
+            metadata={"error_details": error_details},
         )
 
         mock_deltalake.assert_called_once()
@@ -80,7 +80,6 @@ class TestUnifiedQuarantine:
             error_code="INVALID_DATA",
             payload=payload,
             bronze_batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
-            error_details={},
         )
 
         mock_deltalake.assert_called_once()
