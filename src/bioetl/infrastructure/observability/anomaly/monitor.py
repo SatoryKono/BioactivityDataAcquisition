@@ -1,0 +1,93 @@
+"""Data quality monitoring using anomaly detection.
+
+Combines multiple detectors to monitor data quality metrics.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING
+
+from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
+from bioetl.infrastructure.observability.anomaly.types import Anomaly, AnomalySeverity
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+logger = logging.getLogger(__name__)
+
+
+class DataQualityMonitor:
+    """Monitor data quality metrics and detect issues.
+
+    Combines multiple detectors to monitor:
+    - Record count stability
+    - Processing time consistency
+    - Error rate thresholds
+    - Validation failure rates
+
+    Usage:
+        monitor = DataQualityMonitor()
+        monitor.add_metric("record_count", baseline=[1000, 1050, 980])
+
+        issues = monitor.check_quality({
+            "record_count": 500,
+            "error_rate": 0.15,
+        })
+        for issue in issues:
+            logger.warning(issue)
+    """
+
+    def __init__(
+        self,
+        baseline_window: int = 7,
+        z_score_threshold: float = 2.5,
+    ) -> None:
+        """Initialize data quality monitor."""
+        self.detector = AnomalyDetector(
+            baseline_window=baseline_window,
+            z_score_threshold=z_score_threshold,
+        )
+
+        # Set default thresholds for common metrics
+        self.detector.set_threshold("error_rate", min_value=0.0, max_value=0.1)
+        self.detector.set_threshold("quality_score", min_value=0.8, max_value=1.0)
+
+    def add_metric(
+        self,
+        metric_name: str,
+        baseline: Sequence[float],
+        min_threshold: float | None = None,
+        max_threshold: float | None = None,
+    ) -> None:
+        """Add metric to monitor."""
+        self.detector.update_baseline(metric_name, baseline)
+        if min_threshold is not None or max_threshold is not None:
+            self.detector.set_threshold(metric_name, min_threshold, max_threshold)
+
+    def check_quality(self, metrics: dict[str, float]) -> list[Anomaly]:
+        """Check metrics for quality issues."""
+        anomalies: list[Anomaly] = []
+
+        for metric_name, current_value in metrics.items():
+            anomaly = self.detector.detect(metric_name, current_value)
+            if anomaly:
+                anomalies.append(anomaly)
+
+        return anomalies
+
+    def update_baseline_from_metrics(self, metrics: dict[str, float]) -> None:
+        """Update baseline with current metrics (if no anomalies)."""
+        anomalies = self.check_quality(metrics)
+        critical_anomalies = [
+            a for a in anomalies if a.severity == AnomalySeverity.CRITICAL
+        ]
+
+        if critical_anomalies:
+            logger.warning(
+                f"Skipping baseline update due to {len(critical_anomalies)} critical anomalies"
+            )
+            return
+
+        for metric_name, value in metrics.items():
+            self.detector.add_baseline_value(metric_name, value)
