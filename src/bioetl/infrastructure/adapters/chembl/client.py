@@ -201,6 +201,7 @@ class ChemblAdapter:
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
+        query: str | None = None,
         filter_ids: set[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
@@ -210,6 +211,7 @@ class ChemblAdapter:
             entity_type: Type of entity (activity, compound, target, etc)
             watermark: Last checkpoint for incremental load
             limit: Maximum number of records
+            query: Search query (not used by ChEMBL, provided for protocol compatibility)
             filter_ids: Optional set of IDs to filter by
             filter_field: API field name for filtering (e.g., molecule_chembl_id)
 
