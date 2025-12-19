@@ -259,8 +259,9 @@ class GoldWriter:
             # Convert list/struct columns to JSON strings for CSV compatibility
             csv_data = self._flatten_for_csv(arrow_data)
 
+            # Atomic write to avoid file lock issues on Windows
             await self._run_in_executor(
-                lambda: pv.write_csv(csv_data, csv_full_path, write_options=write_options)
+                lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options)
             )
 
     async def _write_scd2(
