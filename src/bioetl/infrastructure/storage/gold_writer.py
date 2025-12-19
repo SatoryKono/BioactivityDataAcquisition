@@ -15,7 +15,9 @@ Architecture:
 """
 
 import asyncio
+import os
 import random
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -141,6 +143,36 @@ class GoldWriter:
             for f in table.schema
         ])
         return pa.Table.from_arrays(new_columns, schema=new_schema)
+
+    @staticmethod
+    def _atomic_csv_write(
+        data: pa.Table,
+        target_path: Path,
+        write_options: pv.WriteOptions,
+    ) -> None:
+        """Write CSV atomically to avoid file lock issues on Windows.
+
+        Writes to a temporary file in the same directory, then renames.
+        This avoids WinError 32 when the target file is briefly locked.
+        """
+        target_dir = target_path.parent
+        fd, temp_path = tempfile.mkstemp(
+            suffix=".csv.tmp",
+            prefix=target_path.stem + "_",
+            dir=target_dir,
+        )
+        try:
+            os.close(fd)
+            pv.write_csv(data, temp_path, write_options=write_options)
+
+            if os.name == "nt" and target_path.exists():
+                target_path.unlink()
+
+            os.rename(temp_path, target_path)
+        except Exception:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            raise
 
     def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
