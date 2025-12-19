@@ -11,7 +11,7 @@ from bioetl.interfaces.observability import start_metrics_server
 def test_start_metrics_server_success():
     """Test start_metrics_server calls the underlying server starter."""
     # We now mock the internal import or the function it calls
-    with patch("bioetl.interfaces.observability._start_server") as mock_start:
+    with patch("bioetl.infrastructure.observability.server.start_http_server") as mock_start:
         start_metrics_server(8000)
         mock_start.assert_called_once_with(8000)
 
@@ -20,7 +20,7 @@ def test_start_metrics_server_success():
 def test_start_metrics_server_failure():
     """Test start_metrics_server raises OSError on failure."""
     with patch(
-        "bioetl.interfaces.observability._start_server", side_effect=OSError("In use")
+        "bioetl.infrastructure.observability.server.start_http_server", side_effect=OSError("In use")
     ):
         with pytest.raises(OSError):
             start_metrics_server(9090)
