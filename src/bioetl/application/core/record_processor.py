@@ -68,7 +68,20 @@ class RecordProcessor:
 
         # 1. Write to Bronze
         # Pass ingestion_ts to ensure Bronze path matches metadata
-        await self._write_bronze_batch(records, batch_id, ingestion_ts)
+        try:
+            await self._write_bronze_batch(records, batch_id, ingestion_ts)
+        except Exception as e:
+            error_type = self._error_classifier.classify(e)
+            self._context.logger.error(
+                "Bronze write failed",
+                error=str(e),
+                error_type=error_type.value,
+                batch_id=str(batch_id)
+            )
+            # Re-raise to trigger checkpointing logic in Executor or termination
+            # Critical persistence failure means we cannot proceed with this batch
+            raise
+
         records_bronze = len(records)
         if self._metrics:
             self._metrics.increment_counter(

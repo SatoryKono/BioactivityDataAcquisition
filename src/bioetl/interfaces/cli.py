@@ -28,16 +28,6 @@ from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 def validate_pipeline_name(_ctx, _param, value):
     """Validate pipeline name against the registry at runtime."""
-    # Ensure all factories are loaded. In this architecture, bootstrap imports them.
-    # However, bootstrap_pipeline is called inside the command.
-    # We must ensure registry is populated before validation if we want strict validation here.
-    # Or, we can rely on bootstrap to fail.
-    # But to provide a helpful error message, we should check registry.
-    # Since we can't easily force imports here without duplicating bootstrap logic,
-    # we will rely on the fact that 'bootstrap' module imports factories at top level.
-    # So importing bootstrap (which we did) should populate the registry.
-
-    # Reload registry state just in case
     available = PipelineRegistry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")
@@ -93,26 +83,45 @@ def run(
     """Run an ETL pipeline."""
     run_id = uuid4()
 
-    # Bootstrap returns a fully constructed runner
-    runner = bootstrap_pipeline(
-        pipeline_name=pipeline,
-        run_id=run_id,
-        run_type=RunType(run_type),
-        resume=resume,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-    )
-    logger = getattr(runner, "_logger", None)
+    try:
+        # Bootstrap returns a fully constructed runner
+        runner = bootstrap_pipeline(
+            pipeline_name=pipeline,
+            run_id=run_id,
+            run_type=RunType(run_type),
+            resume=resume,
+            limit=limit,
+            input_csv=input_csv,
+            filter_column=filter_column,
+            filter_field=filter_field,
+        )
+    except (ValueError, FileNotFoundError) as e:
+        click.echo(f"Configuration error: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Initialization failed: {e}", err=True)
+        sys.exit(1)
+
+    # Use explicit logger if available, otherwise fallback is necessary but unlikely if bootstrap succeeded
+    logger = getattr(runner, "logger", None)
+    if logger is None:
+        # Fallback for old runner versions or if runner structure changed
+        logger = getattr(runner, "_logger", None)
+
+    if logger is None:
+        click.echo("Critical: Logger not initialized.", err=True)
+        sys.exit(1)
 
     # Set up OS signal handlers to gracefully trigger the shutdown signal
     setup_shutdown_handlers(getattr(runner, "shutdown_signal", None))
 
     # Start Prometheus metrics server
-    settings = get_settings()
-    if start_metrics_server(settings.metrics_port):
-        logger.info(f"Prometheus metrics server started on port {settings.metrics_port}")
+    try:
+        settings = get_settings()
+        if start_metrics_server(settings.metrics_port):
+            logger.info(f"Prometheus metrics server started on port {settings.metrics_port}")
+    except Exception as e:
+        logger.warning("Failed to start metrics server", error=str(e))
 
     logger.info("Starting pipeline run")
     try:

@@ -7,6 +7,7 @@ from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
 from bioetl.infrastructure.schemas.silver import UNIPROT_PROTEIN_SCHEMA
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
+from bioetl.composition.factories.http_client_factory import HttpClientFactory
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
@@ -29,10 +30,13 @@ class UniProtProteinPipelineFactory(BasePipelineFactory[UniProtProteinPipeline])
     ) -> DataSourcePort:
         """Create UniProt data source."""
         source_config = pipeline_config.source.get("api", {})
+
+        # Use HttpClientFactory to create unified client
+        http_client = HttpClientFactory.create_for_provider("uniprot", settings)
+
         return DataSourceFactory.create(
             "uniprot",
-            http_client=None,
-            rate=source_config.get("rate_limit", 10.0),
+            http_client=http_client,
             base_url=source_config.get("base_url", "https://rest.uniprot.org"),
             strict_error_handling=settings.strict_error_handling,
         )
