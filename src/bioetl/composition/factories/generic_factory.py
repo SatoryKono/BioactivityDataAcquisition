@@ -1,0 +1,203 @@
+"""Generic Pipeline Factory.
+
+Provides a configurable factory that eliminates the need for boilerplate subclasses.
+Pipelines can be registered declaratively using configuration rather than class inheritance.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from bioetl.composition.factories.base_services_factory import BaseServicesFactory
+from bioetl.composition.factories.data_source_registry import (
+    DataSourceCreator,
+    DataSourceRegistry,
+)
+from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+
+if TYPE_CHECKING:
+    import pyarrow as pa
+    import structlog
+
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+
+
+class GenericPipelineFactory(Generic[TPipeline]):
+    """Configurable factory for creating pipelines.
+
+    Unlike BasePipelineFactory which requires subclassing, GenericPipelineFactory
+    is configured via constructor parameters. This reduces boilerplate and
+    centralizes pipeline definitions.
+
+    Example:
+        >>> from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+        >>> from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
+        >>>
+        >>> factory = GenericPipelineFactory(
+        ...     pipeline_name="chembl_activity",
+        ...     pipeline_class=ChEMBLActivityPipeline,
+        ...     provider="chembl",
+        ...     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+        ... )
+        >>>
+        >>> # Create pipeline
+        >>> pipeline = factory.create_with_services(runtime, settings, logger)
+
+    Attributes:
+        pipeline_name: Unique name for the pipeline
+        pipeline_class: The pipeline class to instantiate
+        silver_schema: PyArrow schema for Silver layer
+    """
+
+    def __init__(
+        self,
+        pipeline_name: str,
+        pipeline_class: type[TPipeline],
+        provider: str,
+        silver_schema: pa.Schema | None = None,
+        data_source_creator: DataSourceCreator | None = None,
+    ) -> None:
+        """Initialize the factory.
+
+        Args:
+            pipeline_name: Unique name for the pipeline (used for config lookup)
+            pipeline_class: The pipeline class to instantiate
+            provider: Provider name for data source creation
+            silver_schema: Optional PyArrow schema for Silver layer
+            data_source_creator: Optional custom creator function. If not provided,
+                uses DataSourceRegistry.get(provider)
+        """
+        self.pipeline_name = pipeline_name
+        self.pipeline_class = pipeline_class
+        self.provider = provider
+        self.silver_schema = silver_schema
+
+        # Use custom creator or look up from registry
+        self._create_data_source = (
+            data_source_creator or DataSourceRegistry.get(provider)
+        )
+
+    def create_data_source(
+        self,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        filter_config: InputFilterConfig | None = None,
+    ):
+        """Create data source using the configured creator.
+
+        Args:
+            settings: Application settings
+            pipeline_config: Pipeline configuration
+            filter_config: Optional filter configuration
+
+        Returns:
+            Configured DataSourcePort
+        """
+        return self._create_data_source(settings, pipeline_config, filter_config)
+
+    def build_services(
+        self,
+        settings: Settings,
+        logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
+    ) -> PipelineServices:
+        """Build PipelineServices from settings.
+
+        Args:
+            settings: Application settings
+            logger: Structured logger
+            config: Pre-loaded pipeline config (avoids duplicate I/O)
+            filter_config: Optional input filter configuration
+
+        Returns:
+            Configured PipelineServices instance
+        """
+        pipeline_config = config or load_pipeline_config(self.pipeline_name)
+        data_source = self.create_data_source(settings, pipeline_config, filter_config)
+
+        return BaseServicesFactory.create_common_services(
+            settings=settings,
+            logger=logger,
+            data_source=data_source,
+            pipeline_config=pipeline_config,
+        )
+
+    def create_with_services(
+        self,
+        runtime: PipelineRuntimeConfig,
+        settings: Settings,
+        logger: structlog.BoundLogger,
+        config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
+    ) -> TPipeline:
+        """Create pipeline instance.
+
+        Loads config once and reuses it for both services and pipeline.
+
+        Args:
+            runtime: Pipeline runtime configuration
+            settings: Application settings
+            logger: Structured logger
+            config: Pre-loaded pipeline config (avoids duplicate I/O)
+            filter_config: Optional input filter configuration
+
+        Returns:
+            Configured pipeline instance
+        """
+        yaml_config = config or load_pipeline_config(self.pipeline_name)
+
+        services = self.build_services(
+            settings=settings,
+            logger=logger,
+            config=yaml_config,
+            filter_config=filter_config,
+        )
+
+        domain_config = yaml_config_to_domain(yaml_config)
+
+        return self.pipeline_class.create(
+            runtime=runtime,
+            services=services,
+            config=domain_config,
+        )
+
+
+def create_pipeline_factory(
+    pipeline_name: str,
+    pipeline_class: type[TPipeline],
+    provider: str,
+    silver_schema: pa.Schema | None = None,
+) -> GenericPipelineFactory[TPipeline]:
+    """Convenience function for creating pipeline factories.
+
+    Args:
+        pipeline_name: Unique pipeline name
+        pipeline_class: Pipeline class to instantiate
+        provider: Data source provider name
+        silver_schema: Optional Silver layer schema
+
+    Returns:
+        Configured GenericPipelineFactory
+
+    Example:
+        >>> factory = create_pipeline_factory(
+        ...     pipeline_name="chembl_activity",
+        ...     pipeline_class=ChEMBLActivityPipeline,
+        ...     provider="chembl",
+        ...     silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+        ... )
+    """
+    return GenericPipelineFactory(
+        pipeline_name=pipeline_name,
+        pipeline_class=pipeline_class,
+        provider=provider,
+        silver_schema=silver_schema,
+    )
