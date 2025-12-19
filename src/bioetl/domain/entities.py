@@ -128,8 +128,10 @@ class Activity(BaseEntity):
             raise ValueError("Activity ID is required")
         if not self.molecule_chembl_id:
             raise ValueError("Molecule ChEMBL ID is required")
+        self._validate_pchembl_value()
 
-        # Invariant: If pchembl_value is present, it must be non-negative
+    def _validate_pchembl_value(self) -> None:
+        """Validate pchembl_value is non-negative if present."""
         if self.pchembl_value is not None and self.pchembl_value < 0:
             raise ValueError(f"pChemBL value must be non-negative, got {self.pchembl_value}")
 
