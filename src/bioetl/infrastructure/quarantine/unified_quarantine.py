@@ -22,6 +22,7 @@ from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
@@ -148,19 +149,29 @@ class UnifiedQuarantine:
         }
 
         # Write to Delta table
+        # Convert dict to PyArrow Table for delta-rs Arrow C Data interface compatibility
+        arrow_table = pa.Table.from_pylist([record])
+        arrow_reader = pa.RecordBatchReader.from_batches(
+            arrow_table.schema, arrow_table.to_batches()
+        )
+
         try:
             # Try to append to existing table
             write_deltalake(
                 table_or_uri=self.base_path,
-                data=[record],
+                data=arrow_reader,
                 mode="append",
                 storage_options=self.storage_options,
             )
         except TableNotFoundError:
             # Table doesn't exist, create it with schema
+            # Re-create reader as it was consumed
+            arrow_reader = pa.RecordBatchReader.from_batches(
+                arrow_table.schema, arrow_table.to_batches()
+            )
             write_deltalake(
                 table_or_uri=self.base_path,
-                data=[record],
+                data=arrow_reader,
                 mode="append",
                 partition_by=[
                     "pipeline"
