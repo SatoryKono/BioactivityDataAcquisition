@@ -142,6 +142,7 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
+        mock_http_client,
         mock_load_config,
         mock_data_source_create,
         mock_base_services,
@@ -173,6 +174,7 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
+        mock_http_client,
         mock_load_config,
         mock_data_source_create,
         mock_base_services,
@@ -208,6 +210,7 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
+        mock_http_client,
         mock_load_config,
         mock_data_source_create,
         mock_base_services,
@@ -238,6 +241,7 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
     def test_create_with_services(
         self,
+        mock_http_client,
         mock_data_source_create,
         mock_base_services,
         mock_load_config,
