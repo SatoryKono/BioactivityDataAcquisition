@@ -124,6 +124,9 @@ class Activity(BaseEntity):
 
     def __post_init__(self) -> None:
         super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
         if not self.activity_id:
             raise ValueError("Activity ID is required")
         if not self.molecule_chembl_id:
