@@ -15,10 +15,10 @@ from bioetl.domain.transformations import (
     safe_float,
     safe_int,
 )
-from bioetl.domain.types import BronzeRecord, SilverRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 def _serialize_json(value: Any) -> str | None:
@@ -140,75 +140,14 @@ class ActivityTransformer:
             )
             return None
 
-        # 2. Convert Entity to SilverRecord for storage (all 52 fields)
-        silver_record: dict[str, Any] = {
-            # System fields
-            "entity_id": entity.entity_id,
-            "content_hash": entity.content_hash,
-            # Primary identifier
-            "activity_id": entity.activity_id,
-            # Core identifiers
-            "molecule_chembl_id": entity.molecule_chembl_id,
-            "target_chembl_id": entity.target_chembl_id,
-            "assay_chembl_id": entity.assay_chembl_id,
-            "document_chembl_id": entity.document_chembl_id,
-            "record_id": entity.record_id,
-            "src_id": entity.src_id,
-            # Molecule data
-            "canonical_smiles": entity.canonical_smiles,
-            "molecule_pref_name": entity.molecule_pref_name,
-            "parent_molecule_chembl_id": entity.parent_molecule_chembl_id,
-            # Target data
-            "target_pref_name": entity.target_pref_name,
-            "target_organism": entity.target_organism,
-            "target_tax_id": entity.target_tax_id,
-            # Assay data
-            "assay_type": entity.assay_type,
-            "assay_description": entity.assay_description,
-            "assay_variant_accession": entity.assay_variant_accession,
-            "assay_variant_mutation": entity.assay_variant_mutation,
-            # BAO annotations
-            "bao_endpoint": entity.bao_endpoint,
-            "bao_format": entity.bao_format,
-            "bao_label": entity.bao_label,
-            # Raw activity values
-            "type": entity.type,
-            "value": entity.value,
-            "units": entity.units,
-            "relation": entity.relation,
-            "upper_value": entity.upper_value,
-            "text_value": entity.text_value,
-            # Standardized activity values
-            "standard_type": entity.standard_type,
-            "standard_value": entity.standard_value,
-            "standard_units": entity.standard_units,
-            "standard_relation": entity.standard_relation,
-            "standard_upper_value": entity.standard_upper_value,
-            "standard_text_value": entity.standard_text_value,
-            "standard_flag": entity.standard_flag,
-            # Derived metrics
-            "pchembl_value": entity.pchembl_value,
-            "ligand_efficiency": entity.ligand_efficiency,
-            # Units ontology
-            "qudt_units": entity.qudt_units,
-            "uo_units": entity.uo_units,
-            # Document data
-            "document_journal": entity.document_journal,
-            "document_year": entity.document_year,
-            # Quality annotations
-            "activity_comment": entity.activity_comment,
-            "data_validity_comment": entity.data_validity_comment,
-            "data_validity_description": entity.data_validity_description,
-            "potential_duplicate": entity.potential_duplicate,
-            # Action and properties
-            "action_type": entity.action_type,
-            "activity_properties": entity.activity_properties,
-            "toid": entity.toid,
-            # Lineage metadata
-            "_run_id": str(entity.run_id),
-            "_run_type": str(entity.run_type.value),
-            "_source_batch_id": str(entity.source_batch_id),
-            "_ingestion_ts": entity.ingestion_ts.isoformat(),
-        }
+        # 2. Convert Entity to SilverRecord for storage
+        # Optimization: Use __dict__ copy instead of manual field mapping (50+ fields)
+        silver_record = entity.__dict__.copy()
+
+        # Handle lineage fields renaming and formatting
+        silver_record["_run_id"] = str(silver_record.pop("run_id"))
+        silver_record["_run_type"] = str(silver_record.pop("run_type").value)
+        silver_record["_source_batch_id"] = str(silver_record.pop("source_batch_id"))
+        silver_record["_ingestion_ts"] = silver_record.pop("ingestion_ts").isoformat()
 
         return cast("SilverRecord", silver_record)
