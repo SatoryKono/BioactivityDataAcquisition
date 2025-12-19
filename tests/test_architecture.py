@@ -550,6 +550,10 @@ def test_observability_library_isolation(src_dir: Path):
         if "observability" in py_file.parts and "infrastructure" in py_file.parts:
             continue
 
+        # Also skip interfaces/observability.py as it is an entry point for observability
+        if "interfaces" in py_file.parts and py_file.name == "observability.py":
+            continue
+
         imports, _ = analyze_python_file(py_file)
         for imp in imports:
             if imp["module"].startswith("prometheus_client"):

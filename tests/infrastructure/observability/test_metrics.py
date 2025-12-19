@@ -19,7 +19,13 @@ class TestPrometheusMetrics:
         metrics = PrometheusMetrics()
 
         hist = HISTOGRAMS["pipeline_duration_seconds"]
-        labels = {"pipeline_name": "test_pipe", "run_type": "manual", "status": "success"}
+        # Correct labels based on metrics.py definition: ["pipeline", "stage", "status", "run_type"]
+        labels = {
+            "pipeline": "test_pipe",
+            "stage": "transform",
+            "status": "success",
+            "run_type": "manual"
+        }
         val = 15.5
 
         # Capture start value
@@ -36,7 +42,12 @@ class TestPrometheusMetrics:
         metrics = PrometheusMetrics()
         counter = COUNTERS["records_processed_total"]
 
-        labels = {"pipeline_name": "test_pipe", "run_type": "scheduled", "layer": "bronze"}
+        # Correct labels based on metrics.py definition: ["pipeline", "stage", "run_type"]
+        labels = {
+            "pipeline": "test_pipe",
+            "stage": "bronze",
+            "run_type": "scheduled"
+        }
         start_val = counter.labels(**labels)._value.get()
 
         metrics.increment_counter("records_processed_total", 5, labels)
