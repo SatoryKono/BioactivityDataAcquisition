@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.config import Settings
     from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.filter_config import InputFilterConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
@@ -32,15 +33,17 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
         cls,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create the data source for the pipeline.
 
         Args:
             settings: Application settings
             pipeline_config: Pipeline configuration
+            filter_config: Optional input filter configuration for CSV filtering
 
         Returns:
-            Configured DataSourcePort
+            Configured DataSourcePort (possibly wrapped with FilteredDataSource)
         """
         ...
 
@@ -50,6 +53,7 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
         settings: Settings,
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
         **_kwargs,
     ) -> PipelineServices:
         """Builds PipelineServices from settings.
@@ -58,6 +62,7 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
             settings: Application settings
             logger: Structured logger
             config: Pre-loaded pipeline config (avoids duplicate I/O)
+            filter_config: Optional input filter configuration
             **_kwargs: Additional keyword arguments (ignored)
 
         Returns:
@@ -66,7 +71,9 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
         # Use provided config or load from YAML
         pipeline_config = config or load_pipeline_config(cls.pipeline_name)
 
-        data_source = cls.create_data_source(settings, pipeline_config)
+        data_source = cls.create_data_source(
+            settings, pipeline_config, filter_config=filter_config
+        )
 
         return BaseServicesFactory.create_common_services(
             settings=settings,
@@ -82,18 +89,31 @@ class BasePipelineFactory(Generic[TPipeline], ABC):
         settings: Settings,
         logger: structlog.BoundLogger,
         config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
         **kwargs,
     ) -> TPipeline:
         """Creates pipeline instance.
 
         Loads config once and reuses it for both services and pipeline.
+
+        Args:
+            runtime: Pipeline runtime configuration
+            settings: Application settings
+            logger: Structured logger
+            config: Pre-loaded pipeline config (avoids duplicate I/O)
+            filter_config: Optional input filter configuration for CSV filtering
+            **kwargs: Additional keyword arguments
         """
         # Use provided config or load YAML config (cached)
         yaml_config = config or load_pipeline_config(cls.pipeline_name)
 
-        # Build services with YAML config
+        # Build services with YAML config and filter config
         services = cls.build_services(
-            settings=settings, logger=logger, config=yaml_config, **kwargs
+            settings=settings,
+            logger=logger,
+            config=yaml_config,
+            filter_config=filter_config,
+            **kwargs,
         )
 
         # Map to domain config for pipeline

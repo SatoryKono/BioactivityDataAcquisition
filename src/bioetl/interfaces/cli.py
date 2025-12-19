@@ -66,7 +66,30 @@ def cli() -> None:
 )
 @click.option("--resume", is_flag=True, help="Resume from last checkpoint")
 @click.option("--limit", type=int, help="Maximum number of records to process")
-def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
+@click.option(
+    "--input-csv",
+    type=click.Path(exists=True),
+    help="Path to CSV file with filter IDs",
+)
+@click.option(
+    "--filter-column",
+    type=str,
+    help="Column name in CSV containing filter IDs (default: 'id')",
+)
+@click.option(
+    "--filter-field",
+    type=str,
+    help="API field name to filter by (default: 'molecule_chembl_id')",
+)
+def run(
+    pipeline: str,
+    run_type: str,
+    resume: bool,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+) -> None:
     """Run an ETL pipeline."""
     run_id = uuid4()
 
@@ -77,6 +100,9 @@ def run(pipeline: str, run_type: str, resume: bool, limit: int | None) -> None:
         run_type=RunType(run_type),
         resume=resume,
         limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
     )
     logger = getattr(runner, "_logger", None)
 
