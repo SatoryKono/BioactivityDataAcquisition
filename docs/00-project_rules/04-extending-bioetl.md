@@ -200,7 +200,7 @@ class OpenTargetsAssociationsPipeline(BasePipeline):
         # 1. Подготовка данных
         business_data = {
             "association_id": str(association_id),
-            "target_id": record.get("target", {}).get("id"),
+            "target_chembl_id": record.get("target", {}).get("id"),
             "disease_id": record.get("disease", {}).get("id"),
             "score": record.get("association_score", {}).get("overall"),
         }
@@ -224,7 +224,7 @@ class OpenTargetsAssociationsPipeline(BasePipeline):
             "entity_id": entity_id,
             "content_hash": content_hash,
             "association_id": business_data["association_id"],
-            "target_id": business_data["target_id"],
+            "target_chembl_id": business_data["target_chembl_id"],
             "disease_id": business_data["disease_id"],
             "association_score": business_data["score"],
             "_run_id": str(context.run_id),

@@ -35,7 +35,7 @@ class TestPipelineConfig:
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id", "assay_id"],
+            primary_keys=["activity_id", "assay_chembl_id"],
             silver_table="chembl_activity",
             gold_table="chembl_activity_gold",
             batch_size=500,
