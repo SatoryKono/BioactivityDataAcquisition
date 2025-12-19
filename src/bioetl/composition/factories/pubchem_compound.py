@@ -28,10 +28,11 @@ class PubChemCompoundPipelineFactory(BasePipelineFactory[PubChemCompoundPipeline
         pipeline_config: PipelineYamlConfig,
     ) -> DataSourcePort:
         """Create PubChem data source."""
+        # PubChem rate limit: 5 requests/second without API key
         return DataSourceFactory.create(
             "pubchem",
             http_client=None,
-            rate=pipeline_config.source.get("api", {}).get("rate_limit", 5.0),
+            rate=5.0,
             strict_error_handling=settings.strict_error_handling,
         )
 

@@ -63,3 +63,15 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema([
     pa.field("_source_batch_id", pa.string()),
     pa.field("_ingestion_ts", pa.string()),
 ])
+
+# Schema for PubMed Publication
+PUBMED_PUBLICATION_SCHEMA = pa.schema([
+    pa.field("entity_id", pa.string()),
+    pa.field("pmid", pa.string()),
+    pa.field("article_title", pa.string()),
+    pa.field("content_hash", pa.string()),
+    pa.field("_run_id", pa.string()),
+    pa.field("_run_type", pa.string()),
+    pa.field("_source_batch_id", pa.string()),
+    pa.field("_ingestion_ts", pa.string()),
+])

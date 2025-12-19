@@ -317,10 +317,20 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def check_s3_endpoint_for_dev(self) -> Settings:
+        """Validate S3 endpoint configuration.
+
+        For dev environment:
+        - If endpoint_url is set, S3/MinIO storage will be used
+        - If endpoint_url is None, local file storage will be used
+
+        For prod environment:
+        - AWS credentials should be configured (IAM role or env vars)
+        """
+        # test_mode bypasses validation
         if self.test_mode:
             return self
-        if self.env == "dev" and self.aws.endpoint_url is None:
-            raise ValueError("aws.endpoint_url must be set in dev environment")
+        # dev without endpoint_url = local storage mode (allowed)
+        # prod typically uses IAM roles, so no explicit endpoint needed
         return self
 
     @property

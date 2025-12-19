@@ -23,28 +23,44 @@ from bioetl.infrastructure.config import (
 class TestAWSSettings:
     """Tests for AWSSettings class."""
 
-    def test_default_values(self) -> None:
+    def test_default_values(self, monkeypatch) -> None:
         """Test default AWS settings."""
-        settings = AWSSettings()
+        # Clear env vars that AWSSettings reads
+        monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("AWS_SECRET_ACCESS_KEY", raising=False)
+        monkeypatch.delenv("AWS_ENDPOINT_URL", raising=False)
+        monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_SECRET_ACCESS_KEY", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ENDPOINT_URL", raising=False)
+
+        settings = AWSSettings(_env_file=None)
 
         assert settings.access_key_id is None
         assert settings.secret_access_key is None
         assert settings.endpoint_url is None
         assert settings.default_region == "us-east-1"
 
-    def test_region_property(self) -> None:
+    def test_region_property(self, monkeypatch) -> None:
         """Test region alias property."""
-        settings = AWSSettings(default_region="eu-west-1")
+        monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+
+        settings = AWSSettings(default_region="eu-west-1", _env_file=None)
 
         assert settings.region == "eu-west-1"
         assert settings.region == settings.default_region
 
-    def test_is_configured_false(self) -> None:
+    def test_is_configured_false(self, monkeypatch) -> None:
         """Test is_configured returns False when credentials missing."""
-        settings = AWSSettings()
+        monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("AWS_SECRET_ACCESS_KEY", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_SECRET_ACCESS_KEY", raising=False)
+
+        settings = AWSSettings(_env_file=None)
         assert settings.is_configured is False
 
-        settings_partial = AWSSettings(access_key_id="key")
+        settings_partial = AWSSettings(access_key_id="key", _env_file=None)
         assert settings_partial.is_configured is False
 
     def test_is_configured_true(self) -> None:
@@ -52,12 +68,13 @@ class TestAWSSettings:
         settings = AWSSettings(
             access_key_id="AKIAIOSFODNN7EXAMPLE",
             secret_access_key=SecretStr("secret"),
+            _env_file=None,
         )
         assert settings.is_configured is True
 
     def test_immutability(self) -> None:
         """Test that settings are frozen."""
-        settings = AWSSettings()
+        settings = AWSSettings(_env_file=None)
 
         with pytest.raises(Exception):  # ValidationError for frozen model
             settings.access_key_id = "new_key"
@@ -213,16 +230,21 @@ class TestSettings:
 
     def test_nested_settings(self) -> None:
         """Test nested settings objects."""
-        settings = Settings(test_mode=True)
+        settings = Settings(test_mode=True, _env_file=None)
 
         assert isinstance(settings.aws, AWSSettings)
         assert isinstance(settings.s3, S3Settings)
         assert isinstance(settings.redis, RedisSettings)
         assert isinstance(settings.pipeline, PipelineSettings)
 
-    def test_storage_options_none(self) -> None:
+    def test_storage_options_none(self, monkeypatch) -> None:
         """Test storage_options returns None without endpoint."""
-        settings = Settings(test_mode=True)
+        # Clear AWS env vars to ensure no endpoint is set
+        monkeypatch.delenv("AWS_ENDPOINT_URL", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ENDPOINT_URL", raising=False)
+
+        aws = AWSSettings(_env_file=None)
+        settings = Settings(aws=aws, test_mode=True, _env_file=None)
         assert settings.storage_options is None
 
     def test_storage_options_with_endpoint(self) -> None:
@@ -231,8 +253,9 @@ class TestSettings:
             endpoint_url="http://localhost:9000",
             access_key_id="access",
             secret_access_key=SecretStr("secret"),
+            _env_file=None,
         )
-        settings = Settings(aws=aws, test_mode=True)
+        settings = Settings(aws=aws, test_mode=True, _env_file=None)
 
         options = settings.storage_options
         assert options is not None
@@ -242,11 +265,15 @@ class TestSettings:
 
     def test_dev_env_requires_endpoint(self, monkeypatch) -> None:
         """Test that dev env requires endpoint_url."""
-        # Clear BIOETL_ENV to test default dev behavior
+        # Clear all AWS env vars to ensure no endpoint is set
         monkeypatch.delenv("BIOETL_ENV", raising=False)
+        monkeypatch.delenv("AWS_ENDPOINT_URL", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ENDPOINT_URL", raising=False)
+
+        aws = AWSSettings(_env_file=None)
         # Without test_mode, dev requires endpoint
         with pytest.raises(ValueError, match="endpoint_url must be set"):
-            Settings(env="dev", test_mode=False)
+            Settings(env="dev", test_mode=False, aws=aws, _env_file=None)
 
     def test_staging_env_no_endpoint_required(self, monkeypatch) -> None:
         """Test that staging env doesn't require endpoint."""
