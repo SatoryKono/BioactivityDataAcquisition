@@ -1,5 +1,7 @@
 """Prometheus Metrics for BioETL."""
 
+from typing import Any
+
 from prometheus_client import Counter, Histogram
 
 # Generic pipeline metrics
@@ -27,3 +29,53 @@ BATCH_SIZE_RECORDS = Histogram(
     ["pipeline", "stage"],
     buckets=[100, 500, 1000, 5000, 10000, 50000],
 )
+
+
+class MetricsCollector:
+    """
+    Collector for pipeline metrics.
+
+    Wraps Prometheus metrics with pipeline context.
+    """
+
+    def __init__(self, pipeline_name: str, registry: Any = None):
+        """Initialize the metrics collector.
+
+        Args:
+            pipeline_name: Name of the pipeline.
+            registry: Optional Prometheus registry (unused as metrics are global).
+        """
+        self.pipeline_name = pipeline_name
+        self.registry = registry
+
+    def record_processed(
+        self,
+        layer: str,
+        count: int = 1,
+        run_type: str = "incremental",
+    ) -> None:
+        """Record processed records count.
+
+        Args:
+            layer: Processing layer (bronze, silver, gold).
+            count: Number of records processed.
+            run_type: Type of run (incremental, backfill).
+        """
+        RECORDS_PROCESSED_TOTAL.labels(
+            pipeline=self.pipeline_name,
+            stage=layer,
+            run_type=run_type,
+        ).inc(count)
+
+    def record_error(self, error_code: str, stage: str = "processing") -> None:
+        """Record an error.
+
+        Args:
+            error_code: Error code identifier.
+            stage: Stage where error occurred.
+        """
+        ERRORS_TOTAL.labels(
+            pipeline=self.pipeline_name,
+            stage=stage,
+            error_code=error_code,
+        ).inc()
