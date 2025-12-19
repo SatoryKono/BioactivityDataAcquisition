@@ -24,6 +24,7 @@ class PipelineRuntimeConfig:
     wait_for_lock: bool = False
     lock_wait_timeout: int = 300
     lock_ttl: int | None = None
+    query: str | None = None
 
     def __post_init__(self) -> None:
         """Validate runtime config."""

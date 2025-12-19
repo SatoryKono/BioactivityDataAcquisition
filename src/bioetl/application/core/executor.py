@@ -55,12 +55,12 @@ class PipelineExecutor:
         self.records_gold = 0
         self.records_quarantined = 0
 
-    async def execute(self, watermark: Watermark | None, limit: int | None) -> None:
+    async def execute(self, watermark: Watermark | None, limit: int | None, query: str | None = None) -> None:
         batch: list[dict[str, Any]] = []
         last_record: dict[str, Any] | None = None
 
         try:
-            async for raw_record in self._extract(watermark, limit):
+            async for raw_record in self._extract(watermark, limit, query):
                 if self._shutdown_signal.is_requested:
                     # Graceful shutdown: save where we stopped
                     if last_record:
@@ -109,11 +109,12 @@ class PipelineExecutor:
         self.records_quarantined += result.quarantined_count
 
     async def _extract(
-        self, watermark: Watermark | None, limit: int | None
+        self, watermark: Watermark | None, limit: int | None, query: str | None = None
     ) -> AsyncIterator[dict[str, Any]]:
         async for record in self._data_source.fetch(
             entity_type=self._entity_type,
             watermark=watermark,
             limit=limit,
+            query=query,
         ):
             yield record
