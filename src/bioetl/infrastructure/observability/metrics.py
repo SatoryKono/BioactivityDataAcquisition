@@ -1,70 +1,29 @@
 """Prometheus Metrics for BioETL."""
 
-from contextlib import suppress
-from typing import TYPE_CHECKING
-
-from prometheus_client import Counter, Histogram, start_http_server
-
-if TYPE_CHECKING:
-    from prometheus_client import CollectorRegistry
-
-
-def start_metrics_server(port: int = 8000) -> bool:
-    """Start Prometheus metrics HTTP server.
-
-    Args:
-        port: Port to bind the HTTP server (default: 8000)
-
-    Returns:
-        True if server started successfully, False if port is in use
-    """
-    with suppress(OSError):
-        start_http_server(port)
-        return True
-    return False
+from prometheus_client import Counter, Histogram
 
 # Generic pipeline metrics
 PIPELINE_DURATION_SECONDS = Histogram(
-    "pipeline_duration_seconds",
+    "bioetl_pipeline_duration_seconds",
     "Duration of pipeline runs in seconds",
-    ["pipeline_name", "run_type", "status"],
+    ["pipeline", "stage", "status", "run_type"],
 )
 
 RECORDS_PROCESSED_TOTAL = Counter(
-    "records_processed_total",
+    "bioetl_records_processed_total",
     "Total number of records processed by the pipeline",
-    ["pipeline_name", "run_type", "layer"],  # bronze, silver, gold
+    ["pipeline", "stage", "run_type"],  # stage: bronze, silver, gold, quarantined
 )
 
 ERRORS_TOTAL = Counter(
-    "errors_total",
+    "bioetl_errors_total",
     "Total number of errors encountered",
-    ["pipeline_name", "error_code"],
+    ["pipeline", "stage", "error_code"],
 )
 
-
-class MetricsCollector:
-    """Collects and manages pipeline metrics."""
-
-    def __init__(
-        self,
-        pipeline_name: str,
-        registry: "CollectorRegistry | None" = None,
-    ) -> None:
-        self.pipeline_name = pipeline_name
-        self._registry = registry
-
-    def record_processed(self, layer: str, count: int = 1) -> None:
-        """Record processed records for a layer."""
-        RECORDS_PROCESSED_TOTAL.labels(
-            pipeline_name=self.pipeline_name,
-            run_type="default",
-            layer=layer,
-        ).inc(count)
-
-    def record_error(self, error_code: str) -> None:
-        """Record an error occurrence."""
-        ERRORS_TOTAL.labels(
-            pipeline_name=self.pipeline_name,
-            error_code=error_code,
-        ).inc()
+BATCH_SIZE_RECORDS = Histogram(
+    "bioetl_batch_size_records",
+    "Distribution of batch sizes (number of records)",
+    ["pipeline", "stage"],
+    buckets=[100, 500, 1000, 5000, 10000, 50000],
+)
