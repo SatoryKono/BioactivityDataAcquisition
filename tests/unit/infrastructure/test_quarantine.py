@@ -9,6 +9,19 @@ from bioetl.domain.types import BatchID
 from bioetl.infrastructure.quarantine.unified_quarantine import UnifiedQuarantine
 
 
+def _extract_record_from_call(mock_call) -> dict:
+    """Extract the first record from a write_deltalake mock call.
+
+    The data is passed as a RecordBatchReader, so we need to read it
+    and convert to a dict.
+    """
+    call_kwargs = mock_call.call_args.kwargs
+    data = call_kwargs["data"]
+    # data is a RecordBatchReader
+    table = data.read_all()
+    return table.to_pylist()[0]
+
+
 @pytest.fixture
 def mock_deltalake():
     """Fixture for mocking deltalake functions."""
@@ -47,11 +60,8 @@ class TestUnifiedQuarantine:
         mock_deltalake.assert_called_once()
         _args, kwargs = mock_deltalake.call_args
         assert kwargs["mode"] == "append"
-        # Data is passed as a list of dicts
-        data = kwargs["data"]
-        assert isinstance(data, list)
-        assert len(data) == 1
-        record = data[0]
+        # Data is passed as a RecordBatchReader
+        record = _extract_record_from_call(mock_deltalake)
         assert record["pipeline"] == pipeline
         assert record["error_code"] == error_code
         assert record["payload"] == '{"id": 1, "value": "a"}'
@@ -74,9 +84,7 @@ class TestUnifiedQuarantine:
         )
 
         mock_deltalake.assert_called_once()
-        _args, kwargs = mock_deltalake.call_args
-        data = kwargs["data"]
-        record = data[0]
+        record = _extract_record_from_call(mock_deltalake)
         # Payload should be truncated to MAX_PAYLOAD_SIZE (64KB)
         assert len(record["payload"]) <= UnifiedQuarantine.MAX_PAYLOAD_SIZE
         assert record["payload_truncated"] is True
