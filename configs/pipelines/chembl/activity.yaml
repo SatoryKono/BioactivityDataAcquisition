@@ -70,7 +70,7 @@ circuit_breaker:
 # Input filter configuration (for CSV-based ID filtering)
 # CLI options --input-csv, --filter-column, --filter-field override these
 input_filter:
-    enabled: false
+    enabled: true
     source_path: "data/input/activity.csv"  # Default CSV path
     column_name: "activity_id"         # Column in CSV with IDs
     filter_field: "activity_id"        # API field to filter by
