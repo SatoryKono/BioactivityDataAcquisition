@@ -210,7 +210,7 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
     @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
     @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.composition.factories.http_client_factory.UnifiedHTTPClient")
     def test_build_services_uses_provided_config(
         self,
         mock_http_client,
@@ -242,7 +242,7 @@ class TestChEMBLActivityPipelineFactory:
     @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
     @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
     @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.chembl_activity.UnifiedHTTPClient")
+    @patch("bioetl.composition.factories.http_client_factory.UnifiedHTTPClient")
     def test_create_with_services(
         self,
         mock_http_client,
