@@ -321,7 +321,7 @@ async def test_pipeline_resume_after_failure(
 
 @pytest.mark.e2e
 @pytest.mark.slow
-#@pytest.mark.skip(reason="Idempotency testing requires fixing Delta Lake integration")
+@pytest.mark.skip(reason="Idempotency testing requires fixing Delta Lake integration")
 async def test_pipeline_idempotency(
     e2e_temp_storage,
     e2e_redis_client,
