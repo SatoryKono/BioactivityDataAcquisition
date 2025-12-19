@@ -50,5 +50,5 @@ class QuarantineManager:
             error_code=error_type.value,
             payload=record,
             bronze_batch_id=batch_id,
-            error_details={"message": error_details},
+            metadata={"error_details": {"message": error_details}},
         )

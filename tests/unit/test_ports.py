@@ -284,6 +284,7 @@ class TestQuarantinePortProtocol:
 
     def test_valid_quarantine_implementation(self) -> None:
         """QuarantinePort should accept valid implementations."""
+        from bioetl.domain.types import RunID
 
         class ValidQuarantine:
             async def write(
@@ -292,9 +293,9 @@ class TestQuarantinePortProtocol:
                 error_code: str,
                 payload: dict[str, Any],
                 bronze_batch_id: BatchID,
-                *args: Any,
-                **kwargs: Any,
-            ) -> Any:
+                run_id: RunID | None = None,
+                metadata: dict[str, Any] | None = None,
+            ) -> None:
                 pass
 
             async def inspect(
