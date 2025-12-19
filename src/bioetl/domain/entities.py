@@ -51,14 +51,20 @@ class Activity(BaseEntity):
     target_id: str    # target_chembl_id
     assay_id: str     # assay_chembl_id
 
+    # Standardized values
     standard_type: Optional[str] = None
     standard_value: Optional[float] = None
     standard_units: Optional[str] = None
     standard_relation: Optional[str] = None
-
     pchembl_value: Optional[float] = None
+
+    # Contextual data
     activity_comment: Optional[str] = None
     data_validity_comment: Optional[str] = None
+    assay_type: Optional[str] = None
+    assay_description: Optional[str] = None  # Added based on gap analysis
+    document_chembl_id: Optional[str] = None
+    document_year: Optional[int] = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
