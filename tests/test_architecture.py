@@ -256,6 +256,66 @@ def test_domain_no_infrastructure_imports(src_dir: Path):
     assert not violations, "\n".join(violations)
 
 
+def test_silver_schemas_match_domain_entities(src_dir: Path):
+    """Silver schemas (PyArrow) must match Domain Entities."""
+    from dataclasses import fields
+
+    # Import schemas and entities
+    try:
+        from bioetl.infrastructure.schemas.silver import (
+            CHEMBL_ACTIVITY_SCHEMA,
+            PUBCHEM_COMPOUND_SCHEMA,
+            UNIPROT_PROTEIN_SCHEMA,
+        )
+        from bioetl.domain.entities import Activity, Compound, Protein, BaseEntity
+    except ImportError as e:
+        pytest.fail(f"Could not import schemas or entities: {e}")
+
+    # Map Schema -> Entity
+    pairs = [
+        (CHEMBL_ACTIVITY_SCHEMA, Activity),
+        (PUBCHEM_COMPOUND_SCHEMA, Compound),
+        (UNIPROT_PROTEIN_SCHEMA, Protein),
+    ]
+
+    # BaseEntity fields: entity_id, content_hash, run_id, run_type, source_batch_id, ingestion_ts
+    # Schema: _run_id, _run_type, _source_batch_id, _ingestion_ts
+
+    system_fields_schema = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
+
+    # Aliases: Schema Field -> Entity Field
+    # This documents where the Domain Language differs slightly from Persistence Schema
+    aliases = {
+        # Activity
+        "molecule_chembl_id": "molecule_id",
+        "target_chembl_id": "target_id",
+        "assay_chembl_id": "assay_id",
+        # Compound
+        # Protein
+    }
+
+    violations = []
+
+    for schema, entity_cls in pairs:
+        schema_fields = set(schema.names)
+
+        entity_fields = {f.name for f in fields(entity_cls)}
+
+        # Check 1: All non-system Schema fields must exist in Entity (or be aliased)
+        for field in schema_fields:
+            if field in system_fields_schema:
+                continue
+
+            entity_field_name = aliases.get(field, field)
+
+            if entity_field_name not in entity_fields:
+                violations.append(
+                    f"Field '{field}' (mapped to '{entity_field_name}') in {schema} not found in {entity_cls.__name__}"
+                )
+
+    assert not violations, "\n".join(violations)
+
+
 def test_ports_are_protocols(src_dir: Path):
     """Ports must be defined using typing.Protocol."""
     ports_file = src_dir / "bioetl" / "domain" / "ports.py"
