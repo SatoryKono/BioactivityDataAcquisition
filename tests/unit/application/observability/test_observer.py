@@ -42,9 +42,12 @@ def test_pipeline_observer_success(metrics_mock, logger_mock):
         "custom": "tag",
     }
 
-    # Verify logs
-    logger_mock.info.assert_called_once()
-    assert logger_mock.info.call_args[0][0] == "Pipeline completed successfully"
+    # Verify logs: 2 info calls - start and completion
+    assert logger_mock.info.call_count == 2
+    # First call is "Starting pipeline: ..."
+    assert "Starting pipeline" in logger_mock.info.call_args_list[0][0][0]
+    # Second call is "Pipeline completed successfully"
+    assert logger_mock.info.call_args_list[1][0][0] == "Pipeline completed successfully"
 
 
 def test_pipeline_observer_failure(metrics_mock, logger_mock):
@@ -65,12 +68,13 @@ def test_pipeline_observer_failure(metrics_mock, logger_mock):
     args, _ = metrics_mock.observe_histogram.call_args
     assert args[2]["status"] == "failure"
 
-    # Logger warning/error is handled by the caller or inside the loop,
-    # but observer might log if we added that logic.
-    # Current implementation doesn't log on generic failure in __exit__
-    # because it expects the exception to bubble up.
-    # We can check that SUCCESS log was NOT called.
-    logger_mock.info.assert_not_called()
+    # On failure: 1 info call from start, 1 error call from exit
+    # The "Starting pipeline" info is called, but not "Pipeline completed successfully"
+    assert logger_mock.info.call_count == 1
+    assert "Starting pipeline" in logger_mock.info.call_args[0][0]
+    # Error is logged on failure
+    logger_mock.error.assert_called_once()
+    assert "Pipeline failed" in logger_mock.error.call_args[0][0]
 
 
 def test_pipeline_observer_shutdown(metrics_mock, logger_mock):

@@ -201,3 +201,21 @@ def safe_float(value: Any, default: float | None = None) -> float | None:
         return float(value)
     except (ValueError, TypeError):
         return default
+
+
+def safe_int(value: Any, default: int | None = None) -> int | None:
+    """Safely convert value to int.
+
+    Args:
+        value: Input value to convert
+        default: Default value if conversion fails (default: None)
+
+    Returns:
+        Converted int or default value
+    """
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default

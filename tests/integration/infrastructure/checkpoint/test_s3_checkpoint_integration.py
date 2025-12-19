@@ -21,24 +21,33 @@ TEST_REGION = "us-east-1"
 
 
 @pytest.fixture(scope="function")
-def s3_client():
+def s3_client(monkeypatch):
     """Fixture to create a mocked S3 client and bucket."""
-    # Ensure S3ClientPool is cleared before to avoid using cached clients from other tests
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
+    monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", TEST_REGION)
+    
     S3ClientPool.clear_pool()
+    
     with mock_aws():
+        import boto3
         client = boto3.client("s3", region_name=TEST_REGION)
         client.create_bucket(Bucket=TEST_BUCKET)
         yield client
-    # Ensure S3ClientPool is cleared after to avoid leaking mocked clients
+
     S3ClientPool.clear_pool()
 
 
 @pytest.fixture
 def checkpoint_storage(s3_client):
     """Fixture to create an S3Checkpoint instance configured for moto."""
+    # Must provide an endpoint_url for S3Checkpoint to use S3 mode (not local file mode)
+    # moto intercepts all boto3 calls so any URL works
     return S3Checkpoint(
         bucket=TEST_BUCKET,
-        endpoint_url="https://s3.us-east-1.amazonaws.com",  # Standard URL for moto interception
+        endpoint_url="http://localhost:5000",  # Fake URL - moto intercepts all calls
         region=TEST_REGION,
         access_key="testing",
         secret_key="testing",
