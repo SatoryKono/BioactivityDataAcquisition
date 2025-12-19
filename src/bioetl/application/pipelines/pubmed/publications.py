@@ -1,5 +1,6 @@
 # src/bioetl/application/pipelines/pubmed/publications.py
 from __future__ import annotations
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
 import xml.etree.ElementTree as ET
 
@@ -9,7 +10,11 @@ from bioetl.domain.transformations import generate_content_hash, generate_entity
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
+
+# Need SilverRecord available at runtime for cast
+if TYPE_CHECKING:
+     from bioetl.domain.types import SilverRecord
 
 def _parse_author_list(article_node: ET.Element) -> list[str]:
     """Извлекает список авторов из XML-узла статьи."""
@@ -87,10 +92,10 @@ class PubMedPublicationsPipeline(BasePipeline):
                 "authors": publication.authors,
                 "_run_id": str(context.run_id),
                 "_run_type": str(context.run_type.value),
-                "_ingestion_ts": context.run_start_time.isoformat(),
+                "_ingestion_ts": datetime.now(UTC).isoformat(),
             }
 
-            return cast(SilverRecord, silver_record)
+            return cast("SilverRecord", silver_record)
 
         except ET.ParseError as e:
             self.logger.warning("XML_parse_error", error=str(e), pmid=record.get("pmid"))
