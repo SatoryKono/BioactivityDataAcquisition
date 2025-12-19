@@ -22,7 +22,7 @@ from bioetl.composition.bootstrap import (
 )
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.observability.metrics import start_metrics_server
+from bioetl.interfaces.observability import start_metrics_server
 from bioetl.interfaces.orchestration.signals import setup_shutdown_handlers
 
 
