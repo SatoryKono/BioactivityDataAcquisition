@@ -189,14 +189,14 @@ async def test_pubchem_compound_pipeline(
         "bioetl.composition.factories.base_services_factory.StorageFactory.create",
         return_value=storage_context,
     ):
-        runner = bootstrap_pipeline(
-            pipeline_name="pubchem_compound",
-            run_id=uuid4(),
-            run_type=RunType.INCREMENTAL,
-            resume=False,
-            limit=e2e_pipeline_limit,
-        )
-
+                    runner = bootstrap_pipeline(
+                        pipeline_name="pubchem_compound",
+                        run_id=uuid4(),
+                        run_type=RunType.INCREMENTAL,
+                        resume=False,
+                        limit=e2e_pipeline_limit,
+                        query="aspirin",
+                    )
         # Execute pipeline
         await runner.run()
 
