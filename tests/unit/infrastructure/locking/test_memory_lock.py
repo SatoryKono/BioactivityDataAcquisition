@@ -82,8 +82,13 @@ class TestMemoryLock:
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_heartbeat_always_succeeds(self, memory_lock):
-        """Test that heartbeat always returns True."""
+    async def test_heartbeat_success(self, memory_lock):
+        """Test heartbeat succeeds when lock is held by owner."""
+        # Acquire lock first
+        await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
         result = await memory_lock.heartbeat(
             key="test_key",
             owner_id="owner_1",
@@ -91,10 +96,22 @@ class TestMemoryLock:
         assert result is True
 
     @pytest.mark.asyncio
-    async def test_heartbeat_without_lock(self, memory_lock):
-        """Test heartbeat without holding lock still succeeds."""
+    async def test_heartbeat_fails_when_not_owned(self, memory_lock):
+        """Test heartbeat fails when lock is not held or owned by other."""
+        # Case 1: No lock
         result = await memory_lock.heartbeat(
             key="nonexistent_key",
             owner_id="owner_1",
         )
-        assert result is True
+        assert result is False
+
+        # Case 2: Owned by other
+        await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+        )
+        result = await memory_lock.heartbeat(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is False
