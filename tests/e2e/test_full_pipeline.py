@@ -195,6 +195,7 @@ async def test_pubchem_compound_pipeline(
             run_type=RunType.INCREMENTAL,
             resume=False,
             limit=e2e_pipeline_limit,
+            query="aspirin",
         )
 
         # Execute pipeline
