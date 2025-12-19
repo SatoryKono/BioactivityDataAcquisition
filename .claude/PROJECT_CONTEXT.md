@@ -1,75 +1,149 @@
 # BioETL: Контекст Проекта для Claude
 
-*Автоматически сгенерировано из RULES.md v5.0*
-*Последнее обновление: 2025-12-15*
+*Синхронизировано с CLAUDE.md и RULES.md v5.0*
+*Последнее обновление: 2025-12-19*
 
-## Быстрая Справка
+---
 
-### Архитектура
-- **Стиль**: Ports & Adapters (Hexagonal), слоистая архитектура
-- **Слои**: Domain → Application → Composition → Infrastructure → Interfaces
-- **Composition Root**: `composition/bootstrap.py` — сборка зависимостей
-- **Контракты**: `typing.Protocol` в `domain/ports.py`, проверка `mypy --strict`
+## TL;DR — Быстрый Старт
 
-### Medallion Architecture (Поток Данных)
+```bash
+# Проверка перед работой
+make lint && make test
 
-| Слой | Формат | Retention | Идемпотентность |
-|------|--------|-----------|-----------------|
-| **Bronze** | JSONL + zstd | 90d → Archive | Append-only, путь: `bronze/{version}/{provider}/{entity}/{date}/` |
-| **Silver** | Delta Lake | Permanent | Merge/Upsert, ACID обязателен |
-| **Gold** | Delta/Parquet | Permanent | SCD Type 2 или партиционирование по дате |
+# Основные команды
+make install          # Создание venv, установка зависимостей
+make test             # Все тесты (unit + integration)
+make lint             # ruff + mypy
+make run-local        # Запуск на фикстурах
+```
 
-### Критические Инварианты (MUST)
+**Главные ресурсы:**
+1. `CLAUDE.md` — Справочник для Claude Code
+2. `AGENT.md` — Детальные инструкции для агента
+3. `docs/RULES.md` — Конституция проекта (RFC 2119)
 
-#### Delta Lake
-- Engine: `delta-rs` (Rust core)
-- VACUUM: **еженедельно** с `retention_period=7 days`
-- Forensic retention: 7d default, 30d для critical таблиц
+---
 
-#### ID Generation
-- Entity ID: стабильный бизнес-ключ (`chembl_id`) или Content Hash
-- Content Hash: `sha256(provider + canonical_json(record))`
-- Нормализация перед хэшем: NaN/Inf → null, floats → round(10), dates → ISO, strings → strip()
-- Исключить из хэша: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
+## 1. Архитектура Слоёв
 
-#### Schema Drift SLA
-- Info: новые опциональные поля → log
-- Warn: >3 новых поля → review (SLA 48h)
-- Critical: исчезновение ID → block pipeline
+```
+src/bioetl/
+├── domain/          # Чистая логика, Protocols (Ports). БЕЗ I/O.
+├── application/     # Пайплайны, Use Cases, оркестрация
+├── composition/     # Composition Root (DI-контейнер, factories, bootstrap)
+├── infrastructure/  # Адаптеры (HTTP, S3, Redis), реализация портов
+└── interfaces/      # CLI, PipelineRunner
+```
 
-#### Backfill Locks
+### 1.1. Матрица Импортов (ОБЯЗАТЕЛЬНО)
+
+| Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
+|------------|--------|-------------|-------------|----------------|------------|
+| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **infrastructure** | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**Нарушение = Блокер PR.** Проверяется `import-linter` и `tests/architecture/`.
+
+### 1.2. Dependency Injection
+
+- **MUST**: Зависимости передаются в конструктор
+- **MUST NOT**: Создание зависимостей внутри классов
+- **Composition Root**: `src/bioetl/composition/bootstrap.py`
+
+---
+
+## 2. Medallion Architecture
+
+| Уровень | Формат | Хранение | Идемпотентность |
+|---------|--------|----------|-----------------|
+| **Bronze** | JSONL + zstd | 90d → Archive | Append-only. Path: `bronze/v1/{provider}/{entity}/{date}/` |
+| **Silver** | Delta Lake | Permanent | Merge/Upsert по `content_hash`. ACID обязателен. |
+| **Gold** | Delta/Parquet | Permanent | SCD Type 2 или партиции по дате |
+
+### 2.1. Delta Lake (MUST)
+
+- **Engine**: `delta-rs` (Rust core)
+- **VACUUM**: Еженедельно, `retention_period=7 days`
+- **Forensic Retention**: 7d default, 30d для critical таблиц
+
+### 2.2. Content Hash
+
+```
+sha256(provider + canonical_json(record))
+```
+
+**Нормализация перед хэшем:**
+- NaN/Inf → `null`
+- Floats → `round(val, 10)`
+- Dates → ISO `YYYY-MM-DD`
+- Strings → `strip()`
+- **Исключить**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
+
+### 2.3. Schema Drift SLA
+
+| Уровень | Условие | Действие |
+|---------|---------|----------|
+| Info | Новые опциональные поля | Log |
+| Warn | >3 новых поля | Review (SLA 48h) |
+| Critical | Исчезновение ID | Block pipeline |
+
+---
+
+## 3. Обработка Ошибок
+
+### 3.1. Классификация
+
+| Тип | Поведение | Пример |
+|-----|-----------|--------|
+| **Critical** | Падение пайплайна | Auth failure, schema mismatch (Gold), БД недоступна |
+| **Recoverable** | Retry (max 3, backoff 2.0, jitter 0.1-0.5s) | 429 Rate Limit, 502/504 Timeout |
+| **Data Quality** | Лог + пропуск записи | Невалидный SMILES, missing field |
+
+### 3.2. Пороги
+
+| Порог | Условие | Действие |
+|-------|---------|----------|
+| Soft | >5% DQ errors | Warning |
+| Hard | >20% DQ errors | Fail Batch |
+
+### 3.3. Circuit Breaker
+
+| Параметр | Значение |
+|----------|----------|
+| Trigger | 5 consecutive errors |
+| Open Duration | 5 мин |
+| Recovery | Half-Open → 1 probe → Closed/Open |
+| Metric | `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open) |
+
+---
+
+## 4. Блокировки (Locking)
+
+| Параметр | Значение |
+|----------|----------|
+| Механизм | Redis `SETNX` + `EXPIRE` |
+| TTL | 60 секунд |
+| Heartbeat | Каждые 20 секунд |
+| Max Duration | 4 часа |
+| Fencing Token | `owner_id` (run_id воркера) |
+
+**Invariant**: Потеря блокировки = аварийное завершение ДО попытки записи данных.
+
+### Lock Keys
+
 - Incremental: `lock:{provider}_{entity}`
 - Backfill/Rebuild: `lock:{provider}_{entity}:exclusive`
-- TTL: 60s, Heartbeat: 20s, Max Duration: 4h
-- Fencing Token: `owner_id` (run_id)
-- **Invariant**: Потеря lock = аварийное завершение ДО commit
 
-#### Quarantine (Dead Letter Queue)
-- Unified таблица: `common.quarantine`
-- Payload: truncated to 64KB
-- Retention: 30 дней
-- Linkage: обязательна ссылка на Bronze (`bronze_file_uri` или `batch_id`)
+---
 
-### Обработка Ошибок
+## 5. Observability
 
-#### Классификация
-- **Critical**: Auth fail, schema mismatch (Gold), DB down → Fail pipeline
-- **Recoverable**: 429, 502/504, network → Retry (Max: 3, Multiplier: 2.0, Jitter: 0.1-0.5s)
-- **Data Quality**: Invalid SMILES, missing field → Log + Skip record (не роняет батч)
+### 5.1. Log Schema (MUST)
 
-#### Пороги (Thresholds)
-- Soft: >5% DQ errors → Warning
-- Hard: >20% DQ errors → Fail Batch
-
-#### Circuit Breaker
-- Trigger: 5 consecutive errors
-- Open Duration: 5 min
-- Recovery: Half-Open → 1 probe request
-- Metric: `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open)
-
-### Observability
-
-#### Log Schema (MUST)
 ```json
 {
   "ts": "2025-12-15T10:00:00Z",
@@ -77,152 +151,237 @@
   "run_id": "uuid",
   "pipeline": "chembl_activity",
   "stage": "extract|transform|load",
-  "dataset": "chembl.activity",  // SHOULD
-  "record_count": 1000           // SHOULD
+  "dataset": "chembl.activity",
+  "record_count": 1000
 }
 ```
 
-#### Retention
-- Logs: 30 дней
-- Metrics: 90 дней
+### 5.2. Retention
 
-#### Provider Health
-- Healthy: 0 errors
-- Degraded: 1-2 errors → Timeout ×2, batch_size ÷2
-- Unhealthy: ≥3 errors → Pause, Alert P2
+| Артефакт | Срок |
+|----------|------|
+| Logs | 30 дней |
+| Metrics | 90 дней |
 
-### Security
+### 5.3. Provider Health
 
-#### PII Handling
-- Bronze: как есть (Internal)
-- Silver: `sha256(lowercase(value) + SALT)` — **salted обязательно**
-- Gold: исключить или агрегировать
-
-#### Salt Rotation (Dual-Salt Period)
-1. Day 0: Generate `SALT_NEXT`
-2. Days 1-7: Write с `SALT_NEXT`, Read проверяет оба
-3. Day 8+: `SALT_CURRENT` = `SALT_NEXT`
-4. Alert если >1% не мигрировано после 14d
-
-#### Secrets
-- Source: `os.environ`
-- Format: `BIOETL_{PROVIDER}_{KEY}`
-- **MUST NOT**: hardcode, `.env` в git
-
-### Disaster Recovery
-
-- **RPO**: 24 hours
-- **RTO**: 4 hours
-- Game Days: ежегодно (SHOULD)
-
-### Партиционирование
-
-- Bronze: по `ingestion_date` (YYYY-MM-DD)
-- Soft Limit: >10K партиций или >100 файлов/партицию → Warning
-- Hard Limit: >50K партиций → Fail
-- **MUST NOT**: UUID, Hash, Free-text как ключи партиционирования
-- Альтернатива: Z-ORDER для высокой кардинальности
-
-### Стек (MUST)
-
-- HTTP: **httpx** (async)
-- Validation: **Pandera**
-- Linter: **Ruff**
-- Delta: **delta-rs**
-- Legacy libs без async: `await loop.run_in_executor(thread_pool, func)`
-
-### Тестирование
-
-- Unit: доменная логика, in-memory fakes, **БЕЗ моков** внешних библиотек
-- Integration: **VCR.py** (`tests/fixtures/vcr/`)
-  - Санитизация: `Authorization`, `X-API-Key`, PII в `before_record`
-  - CI: `pytest --vcr-record=none` (падать при отсутствии cassette)
-- Contract Tests: ежемесячно против реальных API
-
-### Graceful Shutdown
-
-При SIGTERM/SIGINT:
-1. Прекратить fetch новых записей
-2. Дождаться записи текущего батча
-3. Сохранить чекпоинт в S3 (с If-Match/ETag)
-4. Exit code 0
-
-### Checkpoint Recovery
-
-- `--resume`: продолжить с `last_processed_id + 1`
-- Без флага при найденном чекпоинте → Warning
-- После успеха → удалить чекпоинт
-
-### Data Contracts
-
-- Реестр: `docs/contracts/gold/{entity}.json`
-- Версионирование: `{entity}_v{major}.{minor}`
-- Minor: добавление nullable полей
-- Major: удаление/переименование, изменение типов
-- PR с breaking change → лейбл `breaking-change`
-- Deprecation период: 2 недели
-
-### Rollback
-
-- Auto: Error Rate > 10%
-- **MUST NOT**: DQ ошибки не триггерят rollback
-- Manual: `make rollback VERSION=...`
-
-### Developer Experience
-
-```bash
-make install       # venv + dependencies
-make test          # unit + integration
-make lint          # ruff + mypy
-make run-local     # sample pipeline
-make docker-reset  # clean start
-```
-
-### Провайдеры (Rate Limits)
-
-| Provider | Library | Rate Limit | Auth |
-|----------|---------|------------|------|
-| ChEMBL | chembl_webresource_client | None | Public |
-| PubChem | pubchempy | 5 req/s | Public |
-| UniProt | unipressed | 100 req/s | API Key |
-| OpenAlex | pyalex | 10 req/s | Email |
-| Semantic Scholar | semanticscholar | 100 req/5min | API Key |
-| PubMed | biopython | 3 req/s (10 w/ key) | API Key |
-| Crossref | habanero | 50 req/s | Email |
-
-### Governance (RFC 2119)
-
-- **MUST**: абсолютное требование, нарушение = блокер релиза
-- **SHOULD**: сильная рекомендация, отклонение требует обоснования в PR
-- **MAY**: опционально
+| Status | Условие | Действие |
+|--------|---------|----------|
+| Healthy | 0 errors | Normal |
+| Degraded | 1-2 errors | Timeout ×2, batch_size ÷2 |
+| Unhealthy | ≥3 errors | Pause, Alert P2 |
 
 ---
 
-## Полная Документация
+## 6. Security
 
-- **RULES.md**: Полная спецификация v5.0 (Production Ready)
-- **REQUIREMENTS.md**: 127 тестируемых требований (123 MUST, 4 SHOULD)
-- **CHANGELOG.md**: История изменений
+### 6.1. PII Handling
 
-## Важные Пути
+| Слой | Обработка |
+|------|-----------|
+| Bronze | Как есть (Internal) |
+| Silver | `sha256(lowercase(value) + SALT)` — **salted обязательно** |
+| Gold | Исключить или агрегировать |
 
-- Domain Ports: `src/bioetl/domain/ports.py`
-- Adapters: `src/bioetl/infrastructure/adapters/{provider}/`
-- Pipelines: `src/bioetl/application/pipelines/`
-- Factories: `src/bioetl/composition/factories/`
-- Bootstrap: `src/bioetl/composition/bootstrap.py`
-- CLI: `src/bioetl/interfaces/cli.py`
-- Tests: `tests/` (unit + integration)
-- Configs: `configs/pipelines/{provider}/{entity}.yaml`
+### 6.2. Secrets
+
+- **Source**: `os.environ`
+- **Format**: `BIOETL_{PROVIDER}_{KEY}`
+- **MUST NOT**: hardcode, `.env` в git
+
+---
+
+## 7. Тестирование
+
+| Уровень | Директория | Правила |
+|---------|------------|---------|
+| **Unit** | `tests/unit/` | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
+| **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
+| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
+| **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
+
+**Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
+**Цель покрытия:** >95% line coverage
+
+### Команды
+
+```bash
+make test                 # Все тесты с coverage
+make test-unit            # Только unit
+make test-integration     # Integration с VCR
+make arch-test            # Architecture tests
+make arch-lint            # import-linter contracts
+```
+
+### VCR.py (MUST)
+
+- Кассеты: `tests/fixtures/vcr/`
+- Санитизация: `Authorization`, `X-API-Key`, PII в `before_record`
+- CI: `pytest --vcr-record=none`
+
+---
+
+## 8. Стек Технологий
+
+| Категория | Инструмент | Назначение |
+|-----------|------------|------------|
+| **HTTP** | httpx (async) | HTTP-клиент |
+| **Data** | Polars, Delta Lake | Обработка, хранение |
+| **Validation** | Pandera | Валидация схем |
+| **Linting** | Ruff + mypy | Код и типы |
+| **Orchestration** | Prefect | Запуск пайплайнов |
+| **Locks** | Redis | Распределённые блокировки |
+
+### Legacy Wrappers (MUST)
+
+```python
+await loop.run_in_executor(thread_pool, fetch_func)
+```
+
+---
+
+## 9. Провайдеры
+
+| Provider | Library | Rate Limit | Health Check |
+|----------|---------|------------|--------------|
+| ChEMBL | chembl_webresource_client | None | `/chembl/api/data/status.json` |
+| PubChem | pubchempy | 5 req/sec | Lightweight compound query |
+| UniProt | unipressed | 100 req/sec (API key) | `/rest/beta/health` |
+| OpenAlex | pyalex | 10 req/sec | Generic Probe |
+| Semantic Scholar | semanticscholar | 100 req/5min | Generic Probe |
+| PubMed | biopython | 3 req/sec (10 w/ key) | Generic Probe |
+| Crossref | habanero | 50 req/sec | Generic Probe |
+
+---
+
+## 10. Anti-Patterns (ЗАПРЕЩЕНО)
+
+### Архитектура
+- ❌ Импорт `infrastructure` в `domain` или `application`
+- ❌ Создание зависимостей внутри классов
+
+### Код
+- ❌ Sentinel values (`-1`, `"N/A"`, `9999`) → Использовать `None`
+- ❌ Блокирующий I/O в async (`requests.get()`) → `httpx.AsyncClient` или `run_in_executor`
+- ❌ Хардкод секретов → `os.environ`, формат: `BIOETL_{PROVIDER}_{KEY}`
+- ❌ `print()` → `structlog` с `run_id`
+
+### Тесты
+- ❌ Мокинг доменных сущностей → Реальные Value Objects
+- ❌ HTTP без VCR → VCR-кассеты обязательны
+- ❌ Секреты в кассетах → Очистка в `before_record`
+
+---
+
+## 11. Чек-Лист Self-Review
+
+### Архитектура
+- [ ] Нет запрещённых импортов между слоями
+- [ ] Зависимости инжектируются через конструктор
+- [ ] `composition/` — единственное место сборки
+
+### Код
+- [ ] `make lint` проходит без ошибок
+- [ ] Типизация полная (нет `Any` без причины)
+- [ ] Логирование через `structlog`, везде `run_id`
+- [ ] Нет хардкода секретов, путей, конфигурации
+
+### Тесты
+- [ ] `make test` проходит ДО и ПОСЛЕ изменений
+- [ ] Для новой логики есть unit-тесты
+- [ ] Для HTTP есть integration-тесты с VCR
+- [ ] VCR-кассеты очищены от секретов
+
+### Документация
+- [ ] `docs/` обновлена при изменениях архитектуры/конфигурации
+- [ ] Docstrings в Google Style (на русском)
+
+---
+
+## 12. Ключевые Файлы
+
+| Артефакт | Путь |
+|----------|------|
+| Domain Ports | `src/bioetl/domain/ports.py` |
+| Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
+| Pipelines | `src/bioetl/application/pipelines/` |
+| Factories | `src/bioetl/composition/factories/` |
+| Bootstrap | `src/bioetl/composition/bootstrap.py` |
+| CLI | `src/bioetl/interfaces/cli.py` |
+| Configs | `configs/pipelines/{provider}/{entity}.yaml` |
+| Tests | `tests/` |
+| VCR Cassettes | `tests/fixtures/vcr/` |
+
+---
+
+## 13. Governance (RFC 2119)
+
+| Keyword | Значение |
+|---------|----------|
+| **MUST** | Абсолютное требование. Нарушение = блокер релиза. |
+| **SHOULD** | Сильная рекомендация. Отклонение требует обоснования в PR. |
+| **MAY** | Опционально. |
+
+---
+
+## 14. Disaster Recovery
+
+| Параметр | Значение |
+|----------|----------|
+| RPO | 24 часа |
+| RTO | 4 часа |
+| Game Days | Ежегодно (SHOULD) |
+
+---
+
+## 15. Git Workflow (Conventional Commits)
+
+```
+<type>(<scope>): <description>
+```
+
+| Тип | Описание |
+|-----|----------|
+| `feat` | Новая функциональность |
+| `fix` | Исправление бага |
+| `refactor` | Рефакторинг |
+| `docs` | Документация |
+| `test` | Тесты |
+| `chore` | Прочее |
+
+---
+
+## 16. Диагностика
+
+| Ошибка | Решение |
+|--------|---------|
+| `ImportError: cannot import from domain` | Проверь матрицу импортов |
+| `RuntimeError: Event loop is closed` | Используй `run_in_executor` |
+| Тесты падают в CI | Запиши VCR-кассету |
+| Неясности в задаче | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
+
+---
+
+## 17. Полная Документация
+
+| Документ | Описание |
+|----------|----------|
+| `CLAUDE.md` | Справочник для Claude Code |
+| `AGENT.md` | Детальные инструкции для агента |
+| `docs/RULES.md` | Конституция проекта v5.0 |
+| `docs/REQUIREMENTS.md` | 127 тестируемых требований |
+| `docs/CHANGELOG.md` | История изменений |
+
+---
 
 ## Приоритеты при Разработке
 
 1. **Безопасность**: Секреты, PII, IAM
-2. **Надежность**: Lock invariants, graceful shutdown, idempotency
+2. **Надёжность**: Lock invariants, graceful shutdown, idempotency
 3. **Observability**: Structured logs, metrics, correlation ID
 4. **Производительность**: Delta VACUUM, партиционирование, rate limiting
 5. **Поддерживаемость**: Type safety, contracts, testing
 
 ---
 
-*Этот файл автоматически обновляется при изменении RULES.md*
+*Строй надёжно. Документируй честно. Спрашивай смело.*

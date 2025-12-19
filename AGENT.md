@@ -40,8 +40,9 @@ make lint && make test && git add . && git commit
 
 **Перед любой задачей:**
 1. Прочти `docs/RULES.md` — это Конституция проекта.
-2. Изучи существующий код в затрагиваемых модулях.
-3. Проверь `.claude/PROJECT_CONTEXT.md` для быстрой справки.
+2. Проверь `CLAUDE.md` — справочник для Claude Code.
+3. Изучи `.claude/PROJECT_CONTEXT.md` для быстрой справки.
+4. Изучи существующий код в затрагиваемых модулях.
 
 ---
 
@@ -125,10 +126,10 @@ src/bioetl/
 
 | Уровень | Директория | Правила |
 |---------|------------|---------|
-| **Unit** | `tests/unit/` | Изолированные, мокать порты, **не мокать** доменные сущности |
-| **Integration** | `tests/integration/` | VCR.py для HTTP, очистка секретов из кассет |
+| **Unit** | `tests/unit/` | Изолированные, in-memory fakes. **БЕЗ моков** внешних библиотек. |
+| **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
 | **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
-| **Architecture** | `tests/test_architecture.py` | Проверка слоёв, imports, именования |
+| **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
 
 **Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
 **Цель покрытия:** >95% line coverage
