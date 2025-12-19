@@ -287,9 +287,7 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
     # This documents where the Domain Language differs slightly from Persistence Schema
     aliases = {
         # Activity
-        "molecule_chembl_id": "molecule_chembl_id",
-        "target_chembl_id": "target_chembl_id",
-        "assay_chembl_id": "assay_chembl_id",
+        # No aliases for ChEMBL IDs - Entity uses same names as Schema/Source
         # Compound
         # Protein
     }

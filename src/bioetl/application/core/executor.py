@@ -59,29 +59,45 @@ class PipelineExecutor:
         batch: list[dict[str, Any]] = []
         last_record: dict[str, Any] | None = None
 
-        async for raw_record in self._extract(watermark, limit):
-            if self._shutdown_signal.is_requested:
-                if last_record:
+        try:
+            async for raw_record in self._extract(watermark, limit):
+                if self._shutdown_signal.is_requested:
+                    # Graceful shutdown: save where we stopped
+                    if last_record:
+                        await self._checkpoint_manager.save_checkpoint(
+                            last_record, self.records_fetched
+                        )
+                    raise PipelineShutdownError("Shutdown during extraction")
+
+                batch.append(raw_record)
+                last_record = raw_record
+                self.records_fetched += 1
+
+                if len(batch) >= self.batch_size:
+                    await self._process_and_update_counts(batch)
+                    batch = []
+
+                if self.records_fetched % self.checkpoint_interval == 0:
                     await self._checkpoint_manager.save_checkpoint(
+                        raw_record, self.records_fetched
+                    )
+
+            if batch:
+                await self._process_and_update_counts(batch)
+
+        except PipelineShutdownError:
+            # Re-raise explicit shutdown signal
+            # If shutdown came from external signal (LockManager heartbeats etc),
+            # we should attempt to save checkpoint if we have a last record.
+            if last_record:
+                 try:
+                     await self._checkpoint_manager.save_checkpoint(
                         last_record, self.records_fetched
                     )
-                raise PipelineShutdownError("Shutdown during extraction")
-
-            batch.append(raw_record)
-            last_record = raw_record
-            self.records_fetched += 1
-
-            if len(batch) >= self.batch_size:
-                await self._process_and_update_counts(batch)
-                batch = []
-
-            if self.records_fetched % self.checkpoint_interval == 0:
-                await self._checkpoint_manager.save_checkpoint(
-                    raw_record, self.records_fetched
-                )
-
-        if batch:
-            await self._process_and_update_counts(batch)
+                 except Exception:
+                     # Ignore errors during emergency checkpoint save
+                     pass
+            raise
 
     async def _process_and_update_counts(self, batch: list[dict[str, Any]]) -> None:
         bronze, silver, gold, quarantined = await self._record_processor.process_batch(

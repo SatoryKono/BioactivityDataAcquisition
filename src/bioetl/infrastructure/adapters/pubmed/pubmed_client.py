@@ -1,29 +1,51 @@
-# src/bioetl/infrastructure/adapters/pubmed_client.py
+# src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, AsyncIterator
+
+import logging
 import xml.etree.ElementTree as ET
+from collections.abc import AsyncIterator
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import ApiError
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, Watermark
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class PubMedAdapter:
-    """Адаптер для извлечения данных из PubMed с использованием Entrez E-utilities."""
+    """PubMed adapter using UnifiedHTTPClient.
+
+    Implements DataSourcePort for PubMed data extraction.
+    """
     http_client: UnifiedHTTPClient
-    email: str  # NCBI просит указывать email в запросах
+    email: str
     api_key: str | None = None
-    batch_size: int = 200  # Количество ID для одного запроса efetch
+    batch_size: int = 200
 
     provider_name: str = "pubmed"
 
+    async def __aenter__(self) -> Self:
+        """Enter async context manager."""
+        await self.http_client.__aenter__()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        """Exit async context manager."""
+        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
+
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
-        """Получает список ID статей (PMID) по поисковому запросу."""
+        """Get PMIDs for a search term."""
         search_url = f"{ENTREZ_API_BASE}esearch.fcgi"
         params = {
             "db": "pubmed",
@@ -31,20 +53,39 @@ class PubMedAdapter:
             "retmax": str(max_count),
             "usehistory": "y",
             "retmode": "json",
+            "email": self.email,
         }
-        response = await self.http_client.get(search_url, params=params)
-        data = response.json()
-        return data.get("esearchresult", {}).get("idlist", [])
+        if self.api_key:
+            params["api_key"] = self.api_key
+
+        try:
+            response = await self.http_client.get(search_url, params=params)
+            data = response.json()
+            return data.get("esearchresult", {}).get("idlist", [])
+        except Exception as e:
+            logger.error("Failed to fetch PMIDs", error=str(e))
+            raise ApiError(f"PubMed search failed: {e}") from e
 
     async def fetch(
         self,
-        entity_type: str, # будет "publication"
-        search_term: str = "pharmacogenomics[Title/Abstract]", # Пример поискового запроса
+        entity_type: str,
+        search_term: str = "pharmacogenomics[Title/Abstract]",
         limit: int | None = None,
+        watermark: Watermark | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Извлекает полные записи статей из PubMed."""
+        """Fetch PubMed records.
+
+        Args:
+            entity_type: Must be 'publication'
+            search_term: PubMed search query
+            limit: Max records to fetch
+            watermark: Unused for now (required by protocol)
+
+        Yields:
+            Dict containing pmid, article_title, and raw_xml
+        """
         if entity_type != "publication":
-            raise ValueError("PubMedAdapter поддерживает только 'publication'")
+            raise ValueError("PubMedAdapter only supports 'publication'")
 
         pmids = await self._get_pmids(search_term, limit or 10000)
         
@@ -66,15 +107,16 @@ class PubMedAdapter:
             if self.api_key:
                 params["api_key"] = self.api_key
 
-
             try:
                 response = await self.http_client.get(fetch_url, params=params)
-                # Простая обработка XML
-                root = ET.fromstring(response.text)
+
+                try:
+                    root = ET.fromstring(response.text)
+                except ET.ParseError as e:
+                    logger.error("XML parse error", error=str(e), text_sample=response.text[:100])
+                    continue  # Skip batch on XML error
+
                 for article_node in root.findall(".//PubmedArticle"):
-                    # Здесь должна быть более сложная логика парсинга XML
-                    # для извлечения нужных полей.
-                    # Для примера извлечем только PMID и заголовок.
                     pmid_node = article_node.find(".//PMID")
                     title_node = article_node.find(".//ArticleTitle")
                     
@@ -84,21 +126,41 @@ class PubMedAdapter:
                         "_raw_xml": ET.tostring(article_node, encoding='unicode')
                     }
                     yield record
+
                     total_fetched += 1
                     if limit and total_fetched >= limit:
                         return
 
             except Exception as e:
-                raise ApiError(f"Ошибка API PubMed (efetch): {e}") from e
+                logger.error("Batch fetch failed", error=str(e))
+                # Depending on strictness, we might want to raise or continue
+                # For now, we log and raise to stop the pipeline on API errors
+                raise ApiError(f"PubMed fetch failed: {e}") from e
 
     async def health_check(self) -> HealthStatus:
-        """Проверяет доступность API PubMed."""
+        """Check PubMed API availability."""
         try:
-            # Простой запрос к esearch для проверки
-            response = await self.http_client.get(f"{ENTREZ_API_BASE}esearch.fcgi", params={"db": "pubmed", "term": "health", "retmax": "1"})
+            # Use esearch for a lightweight check
+            params = {
+                "db": "pubmed",
+                "term": "health",
+                "retmax": "1",
+                "retmode": "json",
+                "email": self.email
+            }
+            if self.api_key:
+                params["api_key"] = self.api_key
+
+            response = await self.http_client.get(f"{ENTREZ_API_BASE}esearch.fcgi", params=params)
             return HealthStatus.HEALTHY if response.status_code == 200 else HealthStatus.UNHEALTHY
         except Exception:
             return HealthStatus.UNHEALTHY
 
     async def aclose(self) -> None:
-        pass
+        """Close the HTTP client."""
+        # Delegated to __aexit__, but kept for protocol completeness if used manually
+        if self.http_client:
+            # Note: UnifiedHTTPClient doesn't have a public aclose method other than via context manager
+            # But the underlying client does.
+            # Ideally usage is via context manager.
+            pass

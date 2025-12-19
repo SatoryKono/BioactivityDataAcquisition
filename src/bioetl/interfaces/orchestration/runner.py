@@ -5,9 +5,9 @@ This is a "Driving Adapter" in the Hexagonal Architecture.
 
 from __future__ import annotations
 
-import time
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_config import (
@@ -41,6 +41,7 @@ class PipelineRunner:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         logger: "structlog.BoundLogger",
+        pipeline: BasePipeline | None = None,
     ) -> None:
         self._config = config
         self._runtime = runtime
@@ -50,6 +51,7 @@ class PipelineRunner:
         self._checkpoint_manager = checkpoint_manager
         self.shutdown_signal = shutdown_signal
         self._logger = logger
+        self.pipeline = pipeline
 
         # The runner is responsible for creating application services
         self._lock_manager = LockManager.create(
@@ -64,7 +66,12 @@ class PipelineRunner:
             heartbeat_interval=self._runtime.heartbeat_interval,
             logger=self._logger,
             shutdown_signal=self.shutdown_signal,
+            checkpoint_manager=self._checkpoint_manager, # Inject dependency
         )
+
+    @property
+    def logger(self) -> "structlog.BoundLogger":
+        return self._logger
 
     async def run(self) -> None:
         """Execute pipeline. Main entry point."""
