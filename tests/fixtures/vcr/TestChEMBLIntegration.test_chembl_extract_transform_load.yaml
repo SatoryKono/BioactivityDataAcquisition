@@ -130611,4 +130611,1865 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=1000&offset=0&format=json&activity_id__in=15077113%2C2690654%2C18264057%2C1175355%2C10894914%2C14981396%2C15147771%2C1844754%2C1478279%2C10835553%2C5205738%2C18527345%2C3017587%2C16533845%2C12116067%2C14992233%2C15207611%2C19192692%2C5237034%2C18419094%2C635972%2C18470918%2C12083922%2C16653368%2C1019589%2C13893178%2C13886259%2C6345199%2C2496692%2C16772107%2C16610764%2C2003332%2C469060%2C18140882%2C2308338%2C6367284%2C2105484%2C19108157%2C1437645%2C20665632%2C295918%2C3016311%2C18204377%2C13927390%2C5140207%2C3293047%2C2702723%2C14733218%2C16756883%2C15732746%2C20680347%2C3193208%2C14972522%2C1694405%2C18073024%2C2186730%2C1658801%2C15109521%2C12656017%2C19427226%2C7931663%2C1745195%2C18766646%2C276704%2C2080606%2C1971440%2C19108421%2C10919052%2C18951198%2C1694648%2C382333%2C15244478%2C15186997%2C1516940%2C419020%2C19044118%2C18939561%2C6293327%2C1748615%2C13404173%2C15743058%2C12174030%2C12671202%2C3316834%2C15187890%2C2163225%2C12115987%2C6337584%2C18504709%2C7999680%2C19139815%2C18972187%2C2162441%2C19474737%2C1072287%2C15234650%2C18931029%2C20597864%2C601692%2C14594589
+  response:
+    body:
+      string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
+        276704, "activity_properties": [], "assay_chembl_id": "CHEMBL679227", "assay_description":
+        "Displacement of [125I]iodosulpiride from human Dopamine receptor D3 expressed
+        in CHO cells", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "N#Cc1ccc2c(c1)CCN(CC[C@H]1CC[C@H](NC(=O)c3ccnc4ccccc34)CC1)C2",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1134827", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2001, "ligand_efficiency": {"bei": "18.24", "le": "0.33", "lle": "3.16", "sei":
+        "11.59"}, "molecule_chembl_id": "CHEMBL85606", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL85606", "pchembl_value": "8.00", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        314640, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "10.0", "target_chembl_id":
+        "CHEMBL234", "target_organism": "Homo sapiens", "target_pref_name": "D(3)
+        dopamine receptor", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Log Ki", "units": null, "uo_units": "UO_0000065", "upper_value":
+        null, "value": "-8.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        295918, "activity_properties": [], "assay_chembl_id": "CHEMBL768961", "assay_description":
+        "Inhibition of purified recombinant human Prostaglandin G/H synthase 2", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "CS(=O)(=O)Nc1cc2c(cc1Sc1nccs1)C(=O)OC2", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL1132512",
+        "document_journal": "Bioorg Med Chem Lett", "document_year": 1999, "ligand_efficiency":
+        {"bei": "18.15", "le": "0.40", "lle": "3.87", "sei": "7.28"}, "molecule_chembl_id":
+        "CHEMBL287909", "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL287909",
+        "pchembl_value": "6.21", "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 63221, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "610.0", "target_chembl_id":
+        "CHEMBL230", "target_organism": "Homo sapiens", "target_pref_name": "Prostaglandin
+        G/H synthase 2", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.61"}, {"action_type": null, "activity_comment": null, "activity_id":
+        382333, "activity_properties": [], "assay_chembl_id": "CHEMBL664859", "assay_description":
+        "Binding affinity against Dihydrofolate reductase of Escherichia coli", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "COc1cc(Cc2cnc(N)nc2N)cc(OCCCCCCC(=O)O)c1OC", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL1123078",
+        "document_journal": "J Med Chem", "document_year": 1985, "ligand_efficiency":
+        {"bei": "25.47", "le": "0.49", "lle": "7.64", "sei": "7.21"}, "molecule_chembl_id":
+        "CHEMBL274430", "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL274430",
+        "pchembl_value": "10.30", "potential_duplicate": 1, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 197309, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "0.05", "target_chembl_id":
+        "CHEMBL1809", "target_organism": "Escherichia coli", "target_pref_name": "Dihydrofolate
+        reductase", "target_tax_id": "562", "text_value": null, "toid": null, "type":
+        "Ki", "units": "M", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "5E-11"}, {"action_type": null, "activity_comment": null, "activity_id": 419020,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL674410", "assay_description":
+        "Displacement of [3H]raclopride from Dopamine receptor D3", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "NCCc1ccc(O)c(O)c1", "data_validity_comment": null, "data_validity_description":
+        null, "document_chembl_id": "CHEMBL1129381", "document_journal": "J Med Chem",
+        "document_year": 1996, "ligand_efficiency": {"bei": "51.44", "le": "0.98",
+        "lle": "7.28", "sei": "11.85"}, "molecule_chembl_id": "CHEMBL59", "molecule_pref_name":
+        "DOPAMINE", "parent_molecule_chembl_id": "CHEMBL59", "pchembl_value": "7.88",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 266495, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "13.2", "target_chembl_id":
+        "CHEMBL234", "target_organism": "Homo sapiens", "target_pref_name": "D(3)
+        dopamine receptor", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "13.2"}, {"action_type": null, "activity_comment": null, "activity_id":
+        469060, "activity_properties": [], "assay_chembl_id": "CHEMBL813942", "assay_description":
+        "In vitro binding affinity towards human Tachykinin receptor 1 was determined
+        by using [3H]SP as a radioligand", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCc1c(C#N)cc2ccccc2c1C(=O)N(C)C[C@@H](CCN1CCC(c2ccccc2[S@+](C)[O-])CC1)c1ccc(Cl)c(Cl)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1148390", "document_journal": "J Med Chem", "document_year": 2004,
+        "ligand_efficiency": {"bei": "13.27", "le": "0.27", "lle": "0.33", "sei":
+        "12.45"}, "molecule_chembl_id": "CHEMBL149326", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL149326", "pchembl_value": "8.77", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        292762, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "1.71", "target_chembl_id":
+        "CHEMBL249", "target_organism": "Homo sapiens", "target_pref_name": "Substance-P
+        receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "1.71"}, {"action_type": null, "activity_comment": null, "activity_id": 601692,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL843465", "assay_description":
+        "Inhibitory concentration against mu-opioid receptor in guinea pig ileum",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000221", "bao_label":
+        "tissue-based format", "canonical_smiles": "COC(=O)/C=C/C(=O)N[C@@H]1CC[C@@]2(O)[C@H]3Cc4ccc(O)c5c4[C@@]2(CCN3CC2CC2)[C@H]1O5",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1126907", "document_journal": "J Med Chem", "document_year": 1993,
+        "ligand_efficiency": {"bei": "18.30", "le": "0.34", "lle": "7.15", "sei":
+        "7.68"}, "molecule_chembl_id": "CHEMBL473136", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL473136", "pchembl_value": "8.32", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        231272, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "4.8", "target_chembl_id":
+        "CHEMBL4354", "target_organism": "Cavia porcellus", "target_pref_name": "Mu-type
+        opioid receptor", "target_tax_id": "10141", "text_value": null, "toid": null,
+        "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "4.8"}, {"action_type": null, "activity_comment": null, "activity_id":
+        635972, "activity_properties": [], "assay_chembl_id": "CHEMBL640561", "assay_description":
+        "Inhibition of binding to membranes from HEK293 cells expressing human Adenosine
+        A1 receptor", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "CCCn1c(=O)c2nc(C3CC4CC3C3OC43)[nH]c2n(CCC)c1=O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1130053", "document_journal": "J Med Chem", "document_year": 1997,
+        "ligand_efficiency": {"bei": "27.14", "le": "0.51", "lle": "7.75", "sei":
+        "10.97"}, "molecule_chembl_id": "CHEMBL298474", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL298474", "pchembl_value": "9.35", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        84171, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "0.45", "target_chembl_id":
+        "CHEMBL226", "target_organism": "Homo sapiens", "target_pref_name": "Adenosine
+        receptor A1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "0.45"}, {"action_type": null, "activity_comment": null, "activity_id": 1019589,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL648934", "assay_description":
+        "Concentration required for 50% inhibition of rabbit lung Angiotensin I converting
+        enzyme with 5 mM hippuryl-histidyl-leucine as substrate", "assay_type": "B",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "O=C(O)CN1C[C@H](c2ccccc2)SC[C@H](N[C@@H](CCc2ccccc2)C(=O)O)C1=O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1124039", "document_journal": "J Med Chem", "document_year": 1988,
+        "ligand_efficiency": {"bei": "16.83", "le": "0.33", "lle": "5.02", "sei":
+        "6.97"}, "molecule_chembl_id": "CHEMBL61439", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL61439", "pchembl_value": "7.45", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        260281, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "35.5", "target_chembl_id":
+        "CHEMBL4074", "target_organism": "Oryctolagus cuniculus", "target_pref_name":
+        "Angiotensin-converting enzyme", "target_tax_id": "9986", "text_value": null,
+        "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "35.5"}, {"action_type": null, "activity_comment": null, "activity_id":
+        1072287, "activity_properties": [], "assay_chembl_id": "CHEMBL752652", "assay_description":
+        "Binding affinity against Opioid receptor kappa 1 using [3H]-U-69,593 as radioligand",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CCN1CC[C@]2(c3cccc(O)c3)Cc3[nH]c(C(=O)N(CC)CC)c(C)c3C[C@H]2C1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1130172", "document_journal": "J Med Chem", "document_year": 1997,
+        "ligand_efficiency": {"bei": "14.37", "le": "0.27", "lle": "2.00", "sei":
+        "9.88"}, "molecule_chembl_id": "CHEMBL100729", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL100729", "pchembl_value": "5.89", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        204139, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "1298.0", "target_chembl_id":
+        "CHEMBL4329", "target_organism": "Mus musculus", "target_pref_name": "Kappa-type
+        opioid receptor", "target_tax_id": "10090", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "1298.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        1175355, "activity_properties": [], "assay_chembl_id": "CHEMBL817493", "assay_description":
+        "Inhibition of VEGFR induced autophosphorylation of human Vascular endothelial
+        growth factor receptor 2 (VEGFR2) transfected in CHO cells", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "Cc1cc(C)c(/C=C2\\C(=O)Nc3ccccc32)[nH]1", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL1135689",
+        "document_journal": "J Med Chem", "document_year": 2002, "ligand_efficiency":
+        {"bei": "25.40", "le": "0.46", "lle": "2.93", "sei": "13.49"}, "molecule_chembl_id":
+        "CHEMBL276711", "molecule_pref_name": "SEMAXANIB", "parent_molecule_chembl_id":
+        "CHEMBL276711", "pchembl_value": "6.05", "potential_duplicate": 0, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 300010, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "IC50", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "884.0", "target_chembl_id": "CHEMBL279", "target_organism":
+        "Homo sapiens", "target_pref_name": "Vascular endothelial growth factor receptor
+        2", "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
+        "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value": "884.0"},
+        {"action_type": null, "activity_comment": null, "activity_id": 1437645, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL831659", "assay_description": "Inhibition of
+        binding to human estrogen receptor beta", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CC1(c2ccc(OCCN3CCCC3)cc2)c2ccc(O)cc2CCN1c1cccc(F)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1141983", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2005, "ligand_efficiency": {"bei": "15.47", "le": "0.29", "lle": "1.58", "sei":
+        "19.23"}, "molecule_chembl_id": "CHEMBL319211", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL319211", "pchembl_value": "6.91", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        371105, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "123.03", "target_chembl_id":
+        "CHEMBL242", "target_organism": "Homo sapiens", "target_pref_name": "Estrogen
+        receptor beta", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "pIC50(uM)", "units": null, "uo_units": "UO_0000065", "upper_value":
+        null, "value": "0.9100000000000001"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 1478279, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL828769", "assay_description": "Binding affinity to displace [3H]CP-55940
+        from cloned human CB2 receptor", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCCCCn1cc(C(=O)Cc2cccc(F)c2)c2ccccc21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1140358", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2005, "ligand_efficiency": {"bei": "21.77", "le": "0.40", "lle": "1.64", "sei":
+        "32.00"}, "molecule_chembl_id": "CHEMBL189545", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL189545", "pchembl_value": "7.04", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        382654, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "91.0", "target_chembl_id":
+        "CHEMBL253", "target_organism": "Homo sapiens", "target_pref_name": "Cannabinoid
+        receptor 2", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "91.0"}, {"action_type": null, "activity_comment": null, "activity_id": 1516940,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL874927", "assay_description":
+        "Inhibition of U-46,619-induced inositol phosphate accumulation at human Thromboxane
+        A2 receptor", "assay_type": "F", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000019", "bao_label":
+        "assay format", "canonical_smiles": "O=C(O)CCn1c2c(c3ccccc31)C[C@H](NS(=O)(=O)c1ccc(F)cc1)CC2",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1144406", "document_journal": "J Med Chem", "document_year": 2005,
+        "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL361812", "molecule_pref_name":
+        "RAMATROBAN", "parent_molecule_chembl_id": "CHEMBL361812", "pchembl_value":
+        "8.02", "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 393502, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "9.6", "target_chembl_id":
+        "CHEMBL2069", "target_organism": "Homo sapiens", "target_pref_name": "Thromboxane
+        A2 receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "9.6"}, {"action_type": null, "activity_comment": null, "activity_id": 1658801,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL860117", "assay_description":
+        "Inhibitory activity against p38-alpha MAPK", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "C[S+]([O-])c1ccc(-c2nc(-c3ccc(F)cc3)c(-c3ccncc3)[nH]2)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1141873", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2005, "ligand_efficiency": {"bei": "17.32", "le": "0.33", "lle": "1.86", "sei":
+        "10.12"}, "molecule_chembl_id": "CHEMBL10", "molecule_pref_name": "SB-203580",
+        "parent_molecule_chembl_id": "CHEMBL10", "pchembl_value": "6.54", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        410874, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "290.0", "target_chembl_id":
+        "CHEMBL260", "target_organism": "Homo sapiens", "target_pref_name": "Mitogen-activated
+        protein kinase 14", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.29"}, {"action_type": null, "activity_comment": null, "activity_id":
+        1694405, "activity_properties": [], "assay_chembl_id": "CHEMBL862180", "assay_description":
+        "Inhibition of PTP1B", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCCCCCCCCCCCCCCC(=O)C1=C(O)[C@@H](CO)OC1=O",
+        "data_validity_comment": "Potential transcription error", "data_validity_description":
+        "Values appear to be an order of magnitude different from previously reported,
+        so units may be incorrect", "document_chembl_id": "CHEMBL1139039", "document_journal":
+        "Bioorg Med Chem Lett", "document_year": 2006, "ligand_efficiency": null,
+        "molecule_chembl_id": "CHEMBL426373", "molecule_pref_name": null, "parent_molecule_chembl_id":
+        "CHEMBL426373", "pchembl_value": null, "potential_duplicate": 1, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 440692, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "IC50", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "4500.0", "target_chembl_id": "CHEMBL335", "target_organism":
+        "Homo sapiens", "target_pref_name": "Tyrosine-protein phosphatase non-receptor
+        type 1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "4.5"}, {"action_type": null, "activity_comment": null, "activity_id": 1694648,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL862189", "assay_description":
+        "Inhibition of VEGFR2 by enzymatic assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "Clc1ccc(Nc2nnc(Cc3ccncc3)c3ccccc23)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1139649", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2006, "ligand_efficiency": {"bei": "20.95", "le": "0.40", "lle": "2.26", "sei":
+        "14.33"}, "molecule_chembl_id": "CHEMBL101253", "molecule_pref_name": "VATALANIB",
+        "parent_molecule_chembl_id": "CHEMBL101253", "pchembl_value": "7.27", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        441072, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "54.0", "target_chembl_id":
+        "CHEMBL279", "target_organism": "Homo sapiens", "target_pref_name": "Vascular
+        endothelial growth factor receptor 2", "target_tax_id": "9606", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "0.054"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 1745195, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL852975", "assay_description": "Inhibition of MetAP2 in presence of
+        40 mg/ml human serum albumin", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCN(CC)CCCc1cc(F)ccc1S(=O)(=O)Nc1ccc2c(c1C(=O)O)CCCC2",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1138052", "document_journal": "J Med Chem", "document_year": 2006,
+        "ligand_efficiency": {"bei": "14.53", "le": "0.29", "lle": "2.24", "sei":
+        "7.75"}, "molecule_chembl_id": "CHEMBL211148", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL211148", "pchembl_value": "6.72", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        503162, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "190.0", "target_chembl_id":
+        "CHEMBL3922", "target_organism": "Homo sapiens", "target_pref_name": "Methionine
+        aminopeptidase 2", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.19"}, {"action_type": null, "activity_comment": null, "activity_id":
+        1748615, "activity_properties": [], "assay_chembl_id": "CHEMBL871508", "assay_description":
+        "Inhibition of Anthrax lethal factor activity by microplate assay", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "O=C(O)c1cccc(N2N=C(C(F)(F)F)/C(=C/c3ccc(-c4ccc(Br)cc4C(=O)O)o3)C2=O)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1146035", "document_journal": "J Med Chem", "document_year": 2006,
+        "ligand_efficiency": {"bei": "10.50", "le": "0.23", "lle": "0.32", "sei":
+        "4.79"}, "molecule_chembl_id": "CHEMBL215449", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL215449", "pchembl_value": "5.77", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        543128, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "1700.0", "target_chembl_id":
+        "CHEMBL4372", "target_organism": "Bacillus anthracis", "target_pref_name":
+        "Lethal factor", "target_tax_id": "1392", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "1.7"}, {"action_type": null, "activity_comment": null, "activity_id":
+        1844754, "activity_properties": [], "assay_chembl_id": "CHEMBL920047", "assay_description":
+        "Displacement of [3H]DPCPX from adenosine A1 receptor in bovine cerebral cortical
+        membranes in absence of GTP", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000249", "bao_label": "cell membrane format", "canonical_smiles": "COC(=O)c1cnc2c(cnn2CC(Cl)c2ccccc2)c1NCCc1ccc(OC)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1139469", "document_journal": "J Med Chem", "document_year": 2005,
+        "ligand_efficiency": {"bei": "17.64", "le": "0.34", "lle": "3.34", "sei":
+        "10.48"}, "molecule_chembl_id": "CHEMBL224545", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL224545", "pchembl_value": "8.20", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        631132, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "6.3", "target_chembl_id":
+        "CHEMBL4975", "target_organism": "Bos taurus", "target_pref_name": "Adenosine
+        receptor A1", "target_tax_id": "9913", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "6.3"}, {"action_type": null, "activity_comment": null, "activity_id": 1971440,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL896807", "assay_description":
+        "Inhibition of HIV1 reverse transcriptase K103N/Y181C mutant by scintillation
+        proximity assay", "assay_type": "B", "assay_variant_accession": "Q9WJQ2",
+        "assay_variant_mutation": "K103N,Y181C", "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000019", "bao_label": "assay format", "canonical_smiles": "CC(C)(C)c1ccc(-n2nnnc2SCC(=O)Nc2ccc(S(N)(=O)=O)cc2Cl)c(Cl)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1149570", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2007, "ligand_efficiency": {"bei": "14.44", "le": "0.32", "lle": "3.80", "sei":
+        "5.60"}, "molecule_chembl_id": "CHEMBL231030", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL231030", "pchembl_value": "7.44", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        658703, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "36.0", "target_chembl_id":
+        "CHEMBL247", "target_organism": "Human immunodeficiency virus 1", "target_pref_name":
+        "Human immunodeficiency virus type 1 reverse transcriptase", "target_tax_id":
+        "11676", "text_value": null, "toid": null, "type": "IC50", "units": "nM",
+        "uo_units": "UO_0000065", "upper_value": null, "value": "36.0"}, {"action_type":
+        null, "activity_comment": null, "activity_id": 2003332, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL901888", "assay_description": "Displacement
+        of [3H]CPX from adenosine A1 receptor expressed in DDT1 MF2 cells", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "OC[C@H]1O[C@@H](n2cnc3c(N[C@@H]4CCOC4)ncnc32)[C@H](O)[C@@H]1O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1138285", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2007, "ligand_efficiency": {"bei": "21.31", "le": "0.41", "lle": "8.55", "sei":
+        "5.33"}, "molecule_chembl_id": "CHEMBL392149", "molecule_pref_name": "TECADENOSON",
+        "parent_molecule_chembl_id": "CHEMBL392149", "pchembl_value": "7.19", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        666601, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "65.0", "target_chembl_id":
+        "CHEMBL226", "target_organism": "Homo sapiens", "target_pref_name": "Adenosine
+        receptor A1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "65.0"}, {"action_type": null, "activity_comment": null, "activity_id": 2080606,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL928514", "assay_description":
+        "Antagonist activity at human CCR2b receptor", "assay_type": "F", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000019", "bao_label": "assay format", "canonical_smiles": "Nc1nc([C@H](CCN2CCC(c3ccccc3)CC2)C(=O)NCc2cc(C(F)(F)F)cc(C(F)(F)F)c2)cs1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1141514", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2008, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL230507", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL230507", "pchembl_value": "7.88",
+        "potential_duplicate": 1, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 689710, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "13.18", "target_chembl_id":
+        "CHEMBL4015", "target_organism": "Homo sapiens", "target_pref_name": "C-C
+        chemokine receptor type 2", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "Log IC50", "units": null, "uo_units": "UO_0000065", "upper_value":
+        null, "value": "-7.88"}, {"action_type": null, "activity_comment": null, "activity_id":
+        2105484, "activity_properties": [], "assay_chembl_id": "CHEMBL949088", "assay_description":
+        "Inhibition of rat recombinant FAAH expressed in Escherichia coli", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000019", "bao_label": "assay format", "canonical_smiles":
+        "O=C(CCc1ccccc1)c1ncc(-c2ccccn2)o1", "data_validity_comment": null, "data_validity_description":
+        null, "document_chembl_id": "CHEMBL1142267", "document_journal": "J Med Chem",
+        "document_year": 2008, "ligand_efficiency": {"bei": "24.07", "le": "0.44",
+        "lle": "3.15", "sei": "11.96"}, "molecule_chembl_id": "CHEMBL177728", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL177728", "pchembl_value": "6.70",
+        "potential_duplicate": 1, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 692809, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "200.0", "target_chembl_id":
+        "CHEMBL3229", "target_organism": "Rattus norvegicus", "target_pref_name":
+        "Fatty-acid amide hydrolase 1", "target_tax_id": "10116", "text_value": null,
+        "toid": null, "type": "Ki", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "0.2"}, {"action_type": null, "activity_comment": null, "activity_id":
+        2162441, "activity_properties": [], "assay_chembl_id": "CHEMBL937485", "assay_description":
+        "Displacement of [3H]LY354740 from rat mGluR2", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "O=C1CC(c2cccc(-n3ccnc3)c2)=Nc2cc(O)c(-c3ccccc3F)cc2N1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1144793", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2008, "ligand_efficiency": {"bei": "18.57", "le": "0.34", "lle": "2.81", "sei":
+        "9.63"}, "molecule_chembl_id": "CHEMBL405895", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL405895", "pchembl_value": "7.66", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        708298, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "22.0", "target_chembl_id":
+        "CHEMBL2851", "target_organism": "Rattus norvegicus", "target_pref_name":
+        "Metabotropic glutamate receptor 2", "target_tax_id": "10116", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "0.022"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 2163225, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL931249", "assay_description": "Displacement of [3H]PGE2 from human
+        EP1 receptor expressed in CHOK1 cells", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000219", "bao_label": "cell-based format", "canonical_smiles": "Cc1cc(C(=O)[O-])nn1Cc1cc(Br)ccc1OCc1ccccc1.[Na+]",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1144841", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2008, "ligand_efficiency": {"bei": "20.44", "le": "0.45", "lle": "3.92", "sei":
+        "12.74"}, "molecule_chembl_id": "CHEMBL258184", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL213221", "pchembl_value": "8.20", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        709105, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "6.31", "target_chembl_id":
+        "CHEMBL1811", "target_organism": "Homo sapiens", "target_pref_name": "Prostaglandin
+        E2 receptor EP1 subtype", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "Log IC50", "units": null, "uo_units": "UO_0000065", "upper_value":
+        null, "value": "-8.2"}, {"action_type": null, "activity_comment": null, "activity_id":
+        2186730, "activity_properties": [], "assay_chembl_id": "CHEMBL966653", "assay_description":
+        "Inhibition of human Tpl2 by ELISA", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "N#Cc1cnc2c(Cl)cc(NCc3cnc[nH]3)cc2c1Nc1ccc(F)c(Cl)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1156513", "document_journal": "J Biol Chem", "document_year": 2007,
+        "ligand_efficiency": {"bei": "18.54", "le": "0.37", "lle": "2.29", "sei":
+        "8.86"}, "molecule_chembl_id": "CHEMBL436817", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL436817", "pchembl_value": "7.92", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        718007, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "12.0", "target_chembl_id":
+        "CHEMBL4899", "target_organism": "Homo sapiens", "target_pref_name": "Mitogen-activated
+        protein kinase kinase kinase 8", "target_tax_id": "9606", "text_value": null,
+        "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "0.012"}, {"action_type": null, "activity_comment": null, "activity_id":
+        2308338, "activity_properties": [], "assay_chembl_id": "CHEMBL1006579", "assay_description":
+        "Inhibition of human Wee1", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "N#Cc1ccccc1-c1cc2[nH]c3ccc(O)cc3c2c2c1C(=O)NC2=O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1137719", "document_journal": "Eur J Med Chem", "document_year": 2009,
+        "ligand_efficiency": {"bei": "19.02", "le": "0.34", "lle": "3.27", "sei":
+        "6.34"}, "molecule_chembl_id": "CHEMBL209448", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL209448", "pchembl_value": "6.72", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        812655, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "190.55", "target_chembl_id":
+        "CHEMBL5491", "target_organism": "Homo sapiens", "target_pref_name": "Wee1-like
+        protein kinase", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "pIC50", "units": null, "uo_units": "UO_0000065", "upper_value": null,
+        "value": "6.72"}, {"action_type": null, "activity_comment": null, "activity_id":
+        2496692, "activity_properties": [], "assay_chembl_id": "CHEMBL1031353", "assay_description":
+        "Inhibition of human recombinant carbonic anhydrase 1 by stopped flow CO2
+        hydrase assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "Nc1nccc(Nc2ccc(S(N)(=O)=O)cc2)n1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1143395", "document_journal": "J Med Chem", "document_year": 2009,
+        "ligand_efficiency": {"bei": "26.24", "le": "0.53", "lle": "6.51", "sei":
+        "5.62"}, "molecule_chembl_id": "CHEMBL6633", "molecule_pref_name": null, "parent_molecule_chembl_id":
+        "CHEMBL6633", "pchembl_value": "6.96", "potential_duplicate": 1, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 779375, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "Ki", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "109.0", "target_chembl_id": "CHEMBL261", "target_organism":
+        "Homo sapiens", "target_pref_name": "Carbonic anhydrase 1", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "Ki", "units": "nM", "uo_units":
+        "UO_0000065", "upper_value": null, "value": "109.0"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 2690654, "activity_properties": [],
+        "assay_chembl_id": "CHEMBL1052407", "assay_description": "Inhibition of mouse
+        11betaHSD1 expressed in CHO cells in presence of 10 % (v/v) human serum",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "C[C@@H]1CN(c2ccc(F)cc2C(F)(F)F)CCN1S(=O)(=O)c1ccc(N2CCNC(=O)C2)cc1Cl",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1152435", "document_journal": "J Med Chem", "document_year": 2009,
+        "ligand_efficiency": {"bei": "14.95", "le": "0.31", "lle": "4.67", "sei":
+        "10.96"}, "molecule_chembl_id": "CHEMBL561782", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL561782", "pchembl_value": "8.00", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        822462, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "10.0", "target_chembl_id":
+        "CHEMBL3910", "target_organism": "Mus musculus", "target_pref_name": "11-beta-hydroxysteroid
+        dehydrogenase 1", "target_tax_id": "10090", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.01"}, {"action_type": null, "activity_comment": null, "activity_id":
+        2702723, "activity_properties": [], "assay_chembl_id": "CHEMBL1061695", "assay_description":
+        "Inhibition of caspase 3 in human SK-N-SH cells assessed as accumulation of
+        fluorogenic 7-amino-4-methyl coumarin by fluorometric assay", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "O=C1Nc2ccc(S(=O)(=O)N3CCCC3CNc3ccccc3)cc2C1=O", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL1153506",
+        "document_journal": "Bioorg Med Chem", "document_year": 2009, "ligand_efficiency":
+        {"bei": "19.48", "le": "0.38", "lle": "5.42", "sei": "7.86"}, "molecule_chembl_id":
+        "CHEMBL59721", "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL59721",
+        "pchembl_value": "7.51", "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 828743, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "30.97", "target_chembl_id":
+        "CHEMBL2334", "target_organism": "Homo sapiens", "target_pref_name": "Caspase-3",
+        "target_tax_id": "9606", "text_value": null, "toid": null, "type": "pIC50",
+        "units": null, "uo_units": "UO_0000065", "upper_value": null, "value": "7.509"},
+        {"action_type": null, "activity_comment": null, "activity_id": 3016311, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL1050553", "assay_description": "Displacement
+        of [3H]PGH2 from human recombinant PGES1 expressed in CHOK1 cells", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "CC(C)(O)C#Cc1ccc2c(c1)c1cc(Cl)ccc1c1nc(-c3c(C#N)cccc3C#N)[nH]c21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1156058", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2009, "ligand_efficiency": {"bei": "19.53", "le": "0.36", "lle": "2.94", "sei":
+        "9.33"}, "molecule_chembl_id": "CHEMBL483900", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL483900", "pchembl_value": "9.00", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        862820, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "1.0", "target_chembl_id":
+        "CHEMBL5658", "target_organism": "Homo sapiens", "target_pref_name": "Prostaglandin
+        E synthase", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "0.001"}, {"action_type": null, "activity_comment": null, "activity_id": 3017587,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL1050572", "assay_description":
+        "Binding affinity to human recombinant P2Y12 receptor expressed on CHO cell
+        membrane", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "CCc1cc2c(N3CCN(C(=O)c4ccc(-c5ccccc5)cc4)CC3)nc(N3CCN(C(=O)C(F)(F)F)CC3)nc2s1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1156059", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2009, "ligand_efficiency": {"bei": "9.98", "le": "0.19", "lle": "0.99", "sei":
+        "8.34"}, "molecule_chembl_id": "CHEMBL568772", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL568772", "pchembl_value": "6.08", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        862823, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "839.0", "target_chembl_id":
+        "CHEMBL2001", "target_organism": "Homo sapiens", "target_pref_name": "P2Y
+        purinoceptor 12", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "839.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        3193208, "activity_properties": [], "assay_chembl_id": "CHEMBL1104224", "assay_description":
+        "Inhibition of human AKT1 in human MDA-MB-468 cells assessed as phosphorylation-mediated
+        nuclear translocation of GFP-tagged FKHRL1 by fluorescence microscopy", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "Cc1n[nH]c2ccc(-c3nnc(NC[C@@H](N)Cc4ccc(C(F)(F)F)cc4)s3)cc12",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1154933", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2010, "ligand_efficiency": {"bei": "14.98", "le": "0.29", "lle": "2.09", "sei":
+        "7.00"}, "molecule_chembl_id": "CHEMBL1080911", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1080911", "pchembl_value": "6.48", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        891838, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "333.0", "target_chembl_id":
+        "CHEMBL4282", "target_organism": "Homo sapiens", "target_pref_name": "RAC-alpha
+        serine/threonine-protein kinase", "target_tax_id": "9606", "text_value": null,
+        "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "333.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        3293047, "activity_properties": [], "assay_chembl_id": "CHEMBL1108228", "assay_description":
+        "Inhibition of human recombinant group 2A phospholipase A2 by fluorimetric
+        assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CCCCCCCCCCCCCCCCCCN1CCN(Cc2ccc(-c3noc(=O)[nH]3)cc2)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1157788", "document_journal": "Bioorg Med Chem", "document_year": 2010,
+        "ligand_efficiency": {"bei": "10.32", "le": "0.20", "lle": "-2.12", "sei":
+        "8.10"}, "molecule_chembl_id": "CHEMBL270304", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL270304", "pchembl_value": "5.29", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        910574, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "5080.0", "target_chembl_id":
+        "CHEMBL3474", "target_organism": "Homo sapiens", "target_pref_name": "Phospholipase
+        A2, membrane associated", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "5.08"}, {"action_type": null, "activity_comment": null, "activity_id":
+        3316834, "activity_properties": [], "assay_chembl_id": "CHEMBL1120717", "assay_description":
+        "Displacement of [3H]N-alpha-methylhistamine from human cloned histamine H3
+        receptor", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "Cc1nc(C)c(-c2ccc3cc(CCN4CCC[C@H]4C)ccc3n2)s1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1155513", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2010, "ligand_efficiency": {"bei": "27.65", "le": "0.53", "lle": "4.72", "sei":
+        "33.50"}, "molecule_chembl_id": "CHEMBL1084559", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1084559", "pchembl_value": "9.72", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        915992, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "0.19", "target_chembl_id":
+        "CHEMBL264", "target_organism": "Homo sapiens", "target_pref_name": "Histamine
+        H3 receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "0.19"}, {"action_type": null, "activity_comment": null, "activity_id": 5140207,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL1645848", "assay_description":
+        "Displacement of [3H]8-OH-DPAT from human cloned 5HT1A receptor by liquid
+        scintillation spectrophotometry", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "Fc1cccc(Cl)c1Oc1ncccc1C1CCNCC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1641456", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2011, "ligand_efficiency": {"bei": "25.94", "le": "0.52", "lle": "3.83", "sei":
+        "23.30"}, "molecule_chembl_id": "CHEMBL597134", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL597134", "pchembl_value": "7.96", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1321672, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "11.0", "target_chembl_id":
+        "CHEMBL214", "target_organism": "Homo sapiens", "target_pref_name": "5-hydroxytryptamine
+        receptor 1A", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "11.0"}, {"action_type": null, "activity_comment": null, "activity_id": 5205738,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL1670561", "assay_description":
+        "Displacement of [3H]CP 55940 from human CB2 receptor in cell free system",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CCCC(C)(C)c1ccc2c(c1)OC(C)(C)[C@@H]1CC=C(C)C[C@@H]21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1667752", "document_journal": "Eur J Med Chem", "document_year": 2011,
+        "ligand_efficiency": {"bei": "27.10", "le": "0.50", "lle": "2.09", "sei":
+        "91.75"}, "molecule_chembl_id": "CHEMBL371214", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL371214", "pchembl_value": "8.47", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1328267, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "3.4", "target_chembl_id":
+        "CHEMBL253", "target_organism": "Homo sapiens", "target_pref_name": "Cannabinoid
+        receptor 2", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "3.4"}, {"action_type": null, "activity_comment": null, "activity_id": 5237034,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL1687493", "assay_description":
+        "Inhibition of human CXCR3 by chemotaxis assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "C[C@H]1CN(c2ncc(C(=O)NCc3ccc(F)c(F)c3)cc2Cl)CCN1C1CCN(Cc2ccc(Cl)cc2)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1681635", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2011, "ligand_efficiency": {"bei": "12.98", "le": "0.26", "lle": "1.87", "sei":
+        "14.77"}, "molecule_chembl_id": "CHEMBL1681849", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1681849", "pchembl_value": "7.64", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1332876, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "23.0", "target_chembl_id":
+        "CHEMBL4441", "target_organism": "Homo sapiens", "target_pref_name": "C-X-C
+        chemokine receptor type 3", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "23.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        6293327, "activity_properties": [], "assay_chembl_id": "CHEMBL1810319", "assay_description":
+        "Displacement of radiolabeled CXCL11 from human CXCR3 expressed in CHO cells
+        by scintillation proximity assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000219", "bao_label": "cell-based format", "canonical_smiles": "O=C([C@@H]1C=C2c3cccc4c3c(cn4CCN3CCCC3)C[C@H]2N(C(=O)Nc2ccccc2)C1)N1CCCC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1806382", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2011, "ligand_efficiency": {"bei": "16.27", "le": "0.30", "lle": "3.69", "sei":
+        "14.01"}, "molecule_chembl_id": "CHEMBL1809040", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1809040", "pchembl_value": "8.52", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1445643, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "3.0", "target_chembl_id":
+        "CHEMBL4441", "target_organism": "Homo sapiens", "target_pref_name": "C-X-C
+        chemokine receptor type 3", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "3.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        6337584, "activity_properties": [], "assay_chembl_id": "CHEMBL1827314", "assay_description":
+        "Inhibition of rat PDE10A", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "COc1ccc(Cc2nccc3cc(OC)c(OC)cc23)cc1OC",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1821671", "document_journal": "Eur J Med Chem", "document_year": 2011,
+        "ligand_efficiency": {"bei": "21.93", "le": "0.41", "lle": "3.58", "sei":
+        "14.94"}, "molecule_chembl_id": "CHEMBL19224", "molecule_pref_name": "PAPAVERINE",
+        "parent_molecule_chembl_id": "CHEMBL19224", "pchembl_value": "7.44", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1456567, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "36.0", "target_chembl_id":
+        "CHEMBL6140", "target_organism": "Rattus norvegicus", "target_pref_name":
+        "cAMP and cAMP-inhibited cGMP 3'',5''-cyclic phosphodiesterase 10A", "target_tax_id":
+        "10116", "text_value": null, "toid": null, "type": "IC50", "units": "nM",
+        "uo_units": "UO_0000065", "upper_value": null, "value": "36.0"}, {"action_type":
+        null, "activity_comment": null, "activity_id": 6345199, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL1827363", "assay_description": "Displacement
+        of [125I]Iodoproxyfan from human recombinant histamine H3 receptor by Competitive
+        binding assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "C[C@@H]1CCCN1CCc1ccc2nc(-c3c(O)ccnc3C(F)(F)F)ccc2c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1821550", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2011, "ligand_efficiency": {"bei": "16.54", "le": "0.31", "lle": "1.59", "sei":
+        "13.48"}, "molecule_chembl_id": "CHEMBL1085783", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1085783", "pchembl_value": "6.64", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1453699, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "230.0", "target_chembl_id":
+        "CHEMBL264", "target_organism": "Homo sapiens", "target_pref_name": "Histamine
+        H3 receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "230.0"}, {"action_type": null, "activity_comment": null, "activity_id": 6367284,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL1831796", "assay_description":
+        "Inhibition of human 11 beta-HSD1 expressed in CHO cells assessed as conversion
+        of [3H]cortisone to [3H]cortisol after 1 hr by scintillation proximity assay",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "Cc1cccc(N2CCC(C)(c3ccccc3)OC2=O)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1828622", "document_journal": "J Med Chem", "document_year": 2011,
+        "ligand_efficiency": {"bei": "27.15", "le": "0.50", "lle": "3.38", "sei":
+        "25.86"}, "molecule_chembl_id": "CHEMBL1829740", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1829740", "pchembl_value": "7.64", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1458001, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "23.0", "target_chembl_id":
+        "CHEMBL4235", "target_organism": "Homo sapiens", "target_pref_name": "11-beta-hydroxysteroid
+        dehydrogenase 1", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "23.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        7931663, "activity_properties": [], "assay_chembl_id": "CHEMBL1921062", "assay_description":
+        "Displacement of BODIPY-Bak conjugated peptide from GST-tagged human Bcl-2-like
+        protein 1 F97V mutant expressed in Escherichia coli BL21 cells at 10 uM after
+        3 hrs by fluorescence polarization competition assay", "assay_type": "B",
+        "assay_variant_accession": "Q07817", "assay_variant_mutation": "F97V", "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "CN(C)CC[C@H](CSc1ccccc1)Nc1ccc(S(=O)(=O)NC(=O)c2ccc(N3CCC(C)(C)CC3)cc2)cc1[N+](=O)[O-]",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1914418", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2011, "ligand_efficiency": {"bei": "11.07", "le": "0.22", "lle": "1.23", "sei":
+        "5.67"}, "molecule_chembl_id": "CHEMBL192571", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL192571", "pchembl_value": "7.09", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1558592, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "82.0", "target_chembl_id":
+        "CHEMBL4625", "target_organism": "Homo sapiens", "target_pref_name": "Bcl-2-like
+        protein 1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "82.0"}, {"action_type": null, "activity_comment": null, "activity_id": 7999680,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL1942830", "assay_description":
+        "Antagonist activity at human NPBWR1 expressed in CHO-K1 cells assessed as
+        inhibition of hNPW23 and forskolin-stimulated cAMP production after 1 hr by
+        TR-FRET assay", "assay_type": "F", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "COc1ccc(C2(N[C@@H]3CC[C@H](C(=O)N4CCN(c5nc6ccccc6o5)CC4)[C@@H](c4ccsc4)C3)CCC2)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL1938351", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2012, "ligand_efficiency": null, "molecule_chembl_id": "CHEMBL1940537", "molecule_pref_name":
+        null, "parent_molecule_chembl_id": "CHEMBL1940537", "pchembl_value": "7.40",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 1572685, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "40.0", "target_chembl_id":
+        "CHEMBL1293293", "target_organism": "Homo sapiens", "target_pref_name": "Neuropeptides
+        B/W receptor type 1", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "40.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        10835553, "activity_properties": [], "assay_chembl_id": "CHEMBL2015356", "assay_description":
+        "Inhibition of human CYP11B2 expressed in hamster V79 MZ cells using [3H]
+        11 deoxycorticosterone as substrate by HPLC radioflow detector", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "Oc1ccc(-c2ccc(Cn3ccnc3)cn2)cc1F", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL2010745",
+        "document_journal": "ACS Med Chem Lett", "document_year": 2011, "ligand_efficiency":
+        {"bei": "24.60", "le": "0.45", "lle": "3.79", "sei": "13.01"}, "molecule_chembl_id":
+        "CHEMBL2011246", "molecule_pref_name": null, "parent_molecule_chembl_id":
+        "CHEMBL2011246", "pchembl_value": "6.62", "potential_duplicate": 0, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 1631539, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "IC50", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "237.0", "target_chembl_id": "CHEMBL2722", "target_organism":
+        "Homo sapiens", "target_pref_name": "Cytochrome P450 11B2, mitochondrial",
+        "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
+        "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value": "237.0"},
+        {"action_type": null, "activity_comment": null, "activity_id": 10894914, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL2034461", "assay_description": "Inhibition of
+        p38alpha-mediated TNFalpha secretion in LPS-stimulated human whole blood",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "Cc1csc(NC(=O)c2ccc(C)c(-n3cnc4ccc(N5CCN(C)CC5)cc4c3=O)c2)n1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2029330", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2012, "ligand_efficiency": {"bei": "10.35", "le": "0.20", "lle": "1.45", "sei":
+        "5.89"}, "molecule_chembl_id": "CHEMBL2031242", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2031242", "pchembl_value": "4.91", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1643268, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "12302.69", "target_chembl_id":
+        "CHEMBL260", "target_organism": "Homo sapiens", "target_pref_name": "Mitogen-activated
+        protein kinase 14", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "pIC50", "units": null, "uo_units": "UO_0000065", "upper_value": null,
+        "value": "4.91"}, {"action_type": null, "activity_comment": null, "activity_id":
+        10919052, "activity_properties": [], "assay_chembl_id": "CHEMBL2045872", "assay_description":
+        "Inhibition of human Chk1", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "O=C1NC(=O)c2c1c1c3ccccc3[nH]c1c1cccn21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2040806", "document_journal": "Eur J Med Chem", "document_year": 2012,
+        "ligand_efficiency": {"bei": "27.68", "le": "0.50", "lle": "5.16", "sei":
+        "11.48"}, "molecule_chembl_id": "CHEMBL393545", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL393545", "pchembl_value": "7.62", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1649219, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "24.0", "target_chembl_id":
+        "CHEMBL4630", "target_organism": "Homo sapiens", "target_pref_name": "Serine/threonine-protein
+        kinase Chk1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "24.0"}, {"action_type": null, "activity_comment": null, "activity_id": 12083922,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL2166492", "assay_description":
+        "Inhibition of human CA1 using 4-nitrophenylacetate as substrate preincubated
+        for 10 mins by spectrophotometric esterase assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CC(=O)Nc1nnc(S(N)(=O)=O)s1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2163195", "document_journal": "J Med Chem", "document_year": 2012,
+        "ligand_efficiency": {"bei": "29.09", "le": "0.68", "lle": "7.33", "sei":
+        "5.62"}, "molecule_chembl_id": "CHEMBL20", "molecule_pref_name": "ACETAZOLAMIDE",
+        "parent_molecule_chembl_id": "CHEMBL20", "pchembl_value": "6.47", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1737476, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "342.0", "target_chembl_id":
+        "CHEMBL261", "target_organism": "Homo sapiens", "target_pref_name": "Carbonic
+        anhydrase 1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "342.0"}, {"action_type": null, "activity_comment": null, "activity_id": 12115987,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL2174117", "assay_description":
+        "Inhibition of Plasmodium falciparum glucose-6-phosphate dehydrogenase after
+        45 mins by orthogonal assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CN1CCCC1CCNC(=O)c1ccc2c(c1)NC(=O)/C(=C/c1ccccc1F)S2",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2169798", "document_journal": "J Med Chem", "document_year": 2012,
+        "ligand_efficiency": {"bei": "10.21", "le": "0.20", "lle": "0.21", "sei":
+        "7.07"}, "molecule_chembl_id": "CHEMBL2170909", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2170909", "pchembl_value": "4.34", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1740763, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "45200.0", "target_chembl_id":
+        "CHEMBL2169726", "target_organism": "Plasmodium falciparum", "target_pref_name":
+        "Glucose-6-phosphate 1-dehydrogenase", "target_tax_id": "5833", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "45.2"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 12116067, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL2174120", "assay_description": "Inhibition of Plasmodium falciparum
+        glucose-6-phosphate dehydrogenase after 2 hrs by resazurin/diaphorasecoupled
+        assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CCN1CCCC1CNC(=O)c1ccc2c(c1)NC(=O)/C(=C/c1ccc3ccccc3c1)S2",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2169798", "document_journal": "J Med Chem", "document_year": 2012,
+        "ligand_efficiency": {"bei": "12.28", "le": "0.23", "lle": "0.48", "sei":
+        "9.15"}, "molecule_chembl_id": "CHEMBL2170940", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2170940", "pchembl_value": "5.62", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1740798, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "2390.0", "target_chembl_id":
+        "CHEMBL2169726", "target_organism": "Plasmodium falciparum", "target_pref_name":
+        "Glucose-6-phosphate 1-dehydrogenase", "target_tax_id": "5833", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "2.39"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 12174030, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL2211561", "assay_description": "Displacement of [3H]methylspiperone
+        from human low affinity Dopamine D2S receptor by competition binding assay",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CCCN1CCC(c2csc3ccccc23)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2203152", "document_journal": "J Med Chem", "document_year": 2012,
+        "ligand_efficiency": {"bei": "26.66", "le": "0.52", "lle": "2.43", "sei":
+        "213.49"}, "molecule_chembl_id": "CHEMBL2207487", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2207487", "pchembl_value": "6.92", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1761239, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "121.0", "target_chembl_id":
+        "CHEMBL217", "target_organism": "Homo sapiens", "target_pref_name": "D(2)
+        dopamine receptor", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki(app)", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "121.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        12656017, "activity_properties": [], "assay_chembl_id": "CHEMBL2327205", "assay_description":
+        "Inhibition of human recombinant carbonic anhydrase 1 by stopped flow CO2
+        hydration assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CCN1CCCC1CNC(=O)c1cc(S(N)(=O)=O)ccc1OC",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2321746", "document_journal": "J Med Chem", "document_year": 2013,
+        "ligand_efficiency": {"bei": "17.34", "le": "0.35", "lle": "5.36", "sei":
+        "5.82"}, "molecule_chembl_id": "CHEMBL26", "molecule_pref_name": "SULPIRIDE",
+        "parent_molecule_chembl_id": "CHEMBL26", "pchembl_value": "5.92", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1851056, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "1200.0", "target_chembl_id":
+        "CHEMBL261", "target_organism": "Homo sapiens", "target_pref_name": "Carbonic
+        anhydrase 1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "1200.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        12671202, "activity_properties": [], "assay_chembl_id": "CHEMBL2345528", "assay_description":
+        "Inhibition of wild type GST-tagged LRRK2 (970 to 2527 amino acid residues)
+        (unknown origin) assessed as inhibition of biotinylated-LRRKtide phosphorylation
+        by HTRF assay in presence of ATP", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "C[C@@H](Nc1c(C(N)=O)nnc2cc(-c3ccc(S(C)(=O)=O)cc3)ccc12)c1ccccc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2331489", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2013, "ligand_efficiency": {"bei": "13.47", "le": "0.26", "lle": "2.05", "sei":
+        "5.23"}, "molecule_chembl_id": "CHEMBL2333137", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2333137", "pchembl_value": "6.01", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1867057, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "965.0", "target_chembl_id":
+        "CHEMBL1075104", "target_organism": "Homo sapiens", "target_pref_name": "Leucine-rich
+        repeat serine/threonine-protein kinase 2", "target_tax_id": "9606", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "0.965"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 13404173, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL2415310", "assay_description": "Inhibition of human recombinant carbonic
+        anhydrase 1 preincubated for 10 mins by CO2 hydration stopped-flow assay",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "NS(=O)(=O)c1ccc(CNC(=O)Cc2ccccc2Br)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL2413012", "document_journal": "Bioorg Med Chem", "document_year": 2013,
+        "ligand_efficiency": {"bei": "21.83", "le": "0.52", "lle": "6.41", "sei":
+        "9.37"}, "molecule_chembl_id": "CHEMBL2402757", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2402757", "pchembl_value": "8.37", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1911585, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "4.3", "target_chembl_id":
+        "CHEMBL261", "target_organism": "Homo sapiens", "target_pref_name": "Carbonic
+        anhydrase 1", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "4.3"}, {"action_type": null, "activity_comment": null, "activity_id": 13886259,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL3106528", "assay_description":
+        "Inhibition of mushroom tyrosinase using L-tyrosine as substrate preincubated
+        for 10 mins with substrate followed by enzyme addition measured after 15 mins
+        by spectrophotometry", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "COc1ccc([C@@H]2CC(=O)c3c(O)c4c(c(CC=C(C)C)c3O2)OC(C)(C)C=C4)c(O)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3102744", "document_journal": "Bioorg Med Chem", "document_year": 2014,
+        "ligand_efficiency": {"bei": "12.15", "le": "0.23", "lle": "-0.21", "sei":
+        "6.22"}, "molecule_chembl_id": "CHEMBL557097", "molecule_pref_name": "KHONKLONGINOL
+        H", "parent_molecule_chembl_id": "CHEMBL557097", "pchembl_value": "5.30",
+        "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 1958272, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "4960.0", "target_chembl_id":
+        "CHEMBL3318", "target_organism": "Agaricus bisporus", "target_pref_name":
+        "Tyrosinase", "target_tax_id": "5341", "text_value": null, "toid": null, "type":
+        "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "4.96"}, {"action_type": null, "activity_comment": null, "activity_id": 13893178,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL3111508", "assay_description":
+        "Antagonist activity at P2X7 receptor (unknown origin)", "assay_type": "B",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "Clc1cccc(-n2ncnc2NCc2cccnc2)c1Cl", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL3108702",
+        "document_journal": "Bioorg Med Chem", "document_year": 2014, "ligand_efficiency":
+        {"bei": "25.11", "le": "0.52", "lle": "4.46", "sei": "14.45"}, "molecule_chembl_id":
+        "CHEMBL270421", "molecule_pref_name": null, "parent_molecule_chembl_id": "CHEMBL270421",
+        "pchembl_value": "8.04", "potential_duplicate": 0, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 1961253, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "9.12", "target_chembl_id":
+        "CHEMBL4805", "target_organism": "Homo sapiens", "target_pref_name": "P2X
+        purinoceptor 7", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "pIC50", "units": null, "uo_units": "UO_0000065", "upper_value": null,
+        "value": "8.04"}, {"action_type": null, "activity_comment": null, "activity_id":
+        13927390, "activity_properties": [], "assay_chembl_id": "CHEMBL3124059", "assay_description":
+        "Inhibition of Hepatitis C virus genotype 1b NS3/4A protease R155K mutant
+        assessed as substrate cleavage using Ac-C(Eu)DDMEEAbu(COO)ASK(QSY7)-amide
+        as substrate incubated for 30 mins prior to substrate addition by time-resolved
+        fluorescence assay", "assay_type": "B", "assay_variant_accession": "Q0ZMF1",
+        "assay_variant_mutation": "R155K", "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000019", "bao_label": "assay format", "canonical_smiles": "C=C[C@@H]1C[C@]1(NC(=O)[C@@H]1C[C@@H]2CN1C(=O)[C@H](C1CCCCC1)NC(=O)O[C@@H]1C[C@H]1CCCCCc1c(nc3ccccc3c1OCCCN1CC(F)(F)C1)O2)C(=O)NS(=O)(=O)C1(C)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3120153", "document_journal": "ACS Med Chem Lett", "document_year":
+        2014, "ligand_efficiency": {"bei": "10.05", "le": "0.20", "lle": "3.76", "sei":
+        "5.01"}, "molecule_chembl_id": "CHEMBL3120490", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3120490", "pchembl_value": "9.30", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        1968141, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "0.5", "target_chembl_id":
+        "CHEMBL4296325", "target_organism": "Hepatitis C virus subtype 1b", "target_pref_name":
+        "NS3 protease", "target_tax_id": "31647", "text_value": null, "toid": null,
+        "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.5"}, {"action_type": null, "activity_comment": null, "activity_id":
+        14594589, "activity_properties": [], "assay_chembl_id": "CHEMBL3240345", "assay_description":
+        "Inhibition of TCPTP (unknown origin) using pNPP as substrate", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "CC1(C)CC[C@]2(C(=O)O)CC[C@]3(C)C(=CC[C@@H]4[C@@]5(C)CC[C@H](O)C(C)(C)[C@@H]5CC[C@]43C)[C@@H]2C1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3232924", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2014, "ligand_efficiency": {"bei": "11.77", "le": "0.22", "lle": "-1.86",
+        "sei": "9.34"}, "molecule_chembl_id": "CHEMBL168", "molecule_pref_name": "OLEANOLIC_ACID",
+        "parent_molecule_chembl_id": "CHEMBL168", "pchembl_value": "5.37", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2087745, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "4230.0", "target_chembl_id":
+        "CHEMBL3807", "target_organism": "Homo sapiens", "target_pref_name": "Tyrosine-protein
+        phosphatase non-receptor type 2", "target_tax_id": "9606", "text_value": null,
+        "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "4.23"}, {"action_type": null, "activity_comment": null, "activity_id":
+        14733218, "activity_properties": [], "assay_chembl_id": "CHEMBL3291796", "assay_description":
+        "Displacement of [3H]N-methylspiperone from human dopamine D3 receptor expressed
+        in human HEK293 cell membrane for 1 hr by liquid scintillation counting analysis",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "O=C(NCC[C@H](O)CN1CCN(c2cccc(Cl)c2Cl)CC1)c1cc2ccccc2[nH]1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3286326", "document_journal": "ACS Med Chem Lett", "document_year":
+        2014, "ligand_efficiency": {"bei": "18.23", "le": "0.37", "lle": "4.63", "sei":
+        "11.74"}, "molecule_chembl_id": "CHEMBL1627307", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1627307", "pchembl_value": "8.41", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2114583, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "3.9", "target_chembl_id":
+        "CHEMBL234", "target_organism": "Homo sapiens", "target_pref_name": "D(3)
+        dopamine receptor", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "3.9"}, {"action_type": null, "activity_comment": null, "activity_id":
+        14972522, "activity_properties": [], "assay_chembl_id": "CHEMBL3383918", "assay_description":
+        "Inhibition of 5-LO in human PMNL S100 extract using arachidonic acid as substrate
+        incubated for 15 mins prior to substrate addition measured after 10 mins by
+        HPLC analysis", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "COC(=O)c1ccc(/C=C2\\SC(c3ccc(C)cc3)=NC2=O)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3351894", "document_journal": "Eur J Med Chem", "document_year": 2015,
+        "ligand_efficiency": {"bei": "20.14", "le": "0.39", "lle": "2.96", "sei":
+        "12.19"}, "molecule_chembl_id": "CHEMBL3353688", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3353688", "pchembl_value": "6.80", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2243867, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "160.0", "target_chembl_id":
+        "CHEMBL215", "target_organism": "Homo sapiens", "target_pref_name": "Polyunsaturated
+        fatty acid 5-lipoxygenase", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "0.16"}, {"action_type": null, "activity_comment": null, "activity_id":
+        14981396, "activity_properties": [], "assay_chembl_id": "CHEMBL3388558", "assay_description":
+        "Inhibition of Eg5 (unknown origin)", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCCCN1C(=O)[C@@H]2Cc3c([nH]c4ccccc34)[C@@H](c3cccc(O)c3)N2C1=O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3351447", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2014, "ligand_efficiency": {"bei": "15.65", "le": "0.29", "lle": "2.15", "sei":
+        "7.96"}, "molecule_chembl_id": "CHEMBL252340", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL252340", "pchembl_value": "6.10", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2267001, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "800.0", "target_chembl_id":
+        "CHEMBL4581", "target_organism": "Homo sapiens", "target_pref_name": "Kinesin-like
+        protein KIF11", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "800.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        14992233, "activity_properties": [], "assay_chembl_id": "CHEMBL3388101", "assay_description":
+        "Inhibition of full length C-terminal 6x-His tagged human HDAC2 using Arg-His-Lys-Lys(Ac)
+        substrate incubated for 2 hrs by fluorescence assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "Cn1cccc1C(=O)NCc1ccc(C(=O)NO)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3351349", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2014, "ligand_efficiency": {"bei": "17.55", "le": "0.33", "lle": "3.73", "sei":
+        "5.75"}, "molecule_chembl_id": "CHEMBL2431862", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL2431862", "pchembl_value": "4.80", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2241709, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "16000.0", "target_chembl_id":
+        "CHEMBL1937", "target_organism": "Homo sapiens", "target_pref_name": "Histone
+        deacetylase 2", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "16.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        15077113, "activity_properties": [], "assay_chembl_id": "CHEMBL3386364", "assay_description":
+        "Inhibition of HDAC10 (unknown origin) using fluorogenic peptide as substrate
+        by fluorescence assay", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "O=C(CCCCCCC(=O)Nc1ccccc1)NO",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3351740", "document_journal": "J Med Chem", "document_year": 2014,
+        "ligand_efficiency": {"bei": "24.09", "le": "0.46", "lle": "3.90", "sei":
+        "8.12"}, "molecule_chembl_id": "CHEMBL98", "molecule_pref_name": "VORINOSTAT",
+        "parent_molecule_chembl_id": "CHEMBL98", "pchembl_value": "6.37", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2260085, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "430.0", "target_chembl_id":
+        "CHEMBL5103", "target_organism": "Homo sapiens", "target_pref_name": "Polyamine
+        deacetylase HDAC10", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "0.43"}, {"action_type": null, "activity_comment": null, "activity_id":
+        15109521, "activity_properties": [], "assay_chembl_id": "CHEMBL3373424", "assay_description":
+        "Inhibition of pig recombinant leucine aminopeptidase after 30 to 60 mins
+        by morrison''s equation", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "NC(CCc1ccccc1)P(=O)(O)CC(Cc1ccccc1)C(=O)O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3351999", "document_journal": "J Med Chem", "document_year": 2014,
+        "ligand_efficiency": {"bei": "19.87", "le": "0.39", "lle": "4.06", "sei":
+        "7.14"}, "molecule_chembl_id": "CHEMBL327844", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL327844", "pchembl_value": "7.18", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2249308, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "66.0", "target_chembl_id":
+        "CHEMBL5624", "target_organism": "Sus scrofa", "target_pref_name": "Cytosol
+        aminopeptidase", "target_tax_id": "9823", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "66.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        15147771, "activity_properties": [], "assay_chembl_id": "CHEMBL3396458", "assay_description":
+        "Inhibition of BACE1 in HEK293 cells stably expressing APPSW assessed as reduction
+        in Abeta40 level incubated overnight at 0.0005 to 10 uM by ELISA method",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "NC1=N[C@@]2(CO1)c1cc(-c3cccnc3F)ccc1Oc1c2cc(-c2ccncc2)nc1F",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3393040", "document_journal": "ACS Med Chem Lett", "document_year":
+        2015, "ligand_efficiency": {"bei": "18.54", "le": "0.34", "lle": "4.04", "sei":
+        "8.61"}, "molecule_chembl_id": "CHEMBL3394212", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3394212", "pchembl_value": "8.22", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2277843, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "6.0", "target_chembl_id":
+        "CHEMBL4822", "target_organism": "Homo sapiens", "target_pref_name": "Beta-secretase
+        1", "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
+        "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value": "6.0"},
+        {"action_type": null, "activity_comment": null, "activity_id": 15186997, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL3413142", "assay_description": "Inhibition of
+        human KMO assessed as conversion of kynurenine to 3-hydroxykynurenine by LC-MS/MS
+        analysis", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "COCc1c(C(=O)O)ncnc1-c1ccc(Cl)c(Cl)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3407478", "document_journal": "J Med Chem", "document_year": 2015,
+        "ligand_efficiency": {"bei": "23.89", "le": "0.51", "lle": "4.18", "sei":
+        "10.35"}, "molecule_chembl_id": "CHEMBL3407882", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3407882", "pchembl_value": "7.48", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2286140, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "33.0", "target_chembl_id":
+        "CHEMBL2145", "target_organism": "Homo sapiens", "target_pref_name": "Kynurenine
+        3-monooxygenase", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.033"}, {"action_type": null, "activity_comment": null, "activity_id":
+        15187890, "activity_properties": [], "assay_chembl_id": "CHEMBL3413553", "assay_description":
+        "Displacement of [3H]methylspiperone from human D2S receptor expressed in
+        HEK293 cells", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "NC(=O)c1ccccc1OCCCN1CCN(c2cccc3c2ccn3S(=O)(=O)c2ccccc2)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3407464", "document_journal": "Eur J Med Chem", "document_year": 2015,
+        "ligand_efficiency": {"bei": "15.81", "le": "0.30", "lle": "4.63", "sei":
+        "8.38"}, "molecule_chembl_id": "CHEMBL3409256", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3409256", "pchembl_value": "8.20", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2287747, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "6.3", "target_chembl_id":
+        "CHEMBL217", "target_organism": "Homo sapiens", "target_pref_name": "D(2)
+        dopamine receptor", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "6.3"}, {"action_type": null, "activity_comment": null, "activity_id":
+        15207611, "activity_properties": [], "assay_chembl_id": "CHEMBL3412175", "assay_description":
+        "Inhibition of PERK in human HT1080 cells assessed as inhibition of thapsigargin-induced
+        CHoP mRNA expression preincubated for 1 hr followed by thapsigargin-induction
+        measured after 2 hrs by bDNA assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000219", "bao_label": "cell-based format", "canonical_smiles": "Cc1ccc(C(=O)c2c(-c3ccccc3)n(C)n(-c3ccccc3)c2=O)c(N)c1-c1ccc2nc(N)sc2c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3407336", "document_journal": "J Med Chem", "document_year": 2015,
+        "ligand_efficiency": {"bei": "11.21", "le": "0.21", "lle": "0.14", "sei":
+        "5.47"}, "molecule_chembl_id": "CHEMBL3407858", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3407858", "pchembl_value": "5.96", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2286116, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "1100.0", "target_chembl_id":
+        "CHEMBL6030", "target_organism": "Homo sapiens", "target_pref_name": "Eukaryotic
+        translation initiation factor 2-alpha kinase 3", "target_tax_id": "9606",
+        "text_value": null, "toid": null, "type": "IC50", "units": "nM", "uo_units":
+        "UO_0000065", "upper_value": null, "value": "1100.0"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 15234650, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL3424571", "assay_description": "Binding affinity
+        to human GR", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "CC[C@@]12C[C@@](C)(O)[C@](O)(c3ccccc3)C[C@H]1C=Cc1cc(O)ccc12",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3421549", "document_journal": "J Med Chem", "document_year": 2015,
+        "ligand_efficiency": {"bei": "27.17", "le": "0.50", "lle": "5.40", "sei":
+        "15.69"}, "molecule_chembl_id": "CHEMBL3421889", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3421889", "pchembl_value": "9.52", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2294310, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "0.3", "target_chembl_id":
+        "CHEMBL2034", "target_organism": "Homo sapiens", "target_pref_name": "Glucocorticoid
+        receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "0.3"}, {"action_type": null, "activity_comment": null, "activity_id": 15244478,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL3428962", "assay_description":
+        "Inhibition of human recombinant carbonic anhdydrase-2 expressed in Escherichia
+        coli pre-incubated for 6 hrs by stopped-flow CO2 hydration assay", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000019", "bao_label": "assay format", "canonical_smiles":
+        "CC(=O)Nc1nnc(S(N)(=O)=O)s1", "data_validity_comment": null, "data_validity_description":
+        null, "document_chembl_id": "CHEMBL3425425", "document_journal": "J Med Chem",
+        "document_year": 2015, "ligand_efficiency": {"bei": "35.64", "le": "0.83",
+        "lle": "8.78", "sei": "6.89"}, "molecule_chembl_id": "CHEMBL20", "molecule_pref_name":
+        "ACETAZOLAMIDE", "parent_molecule_chembl_id": "CHEMBL20", "pchembl_value":
+        "7.92", "potential_duplicate": 1, "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+        "record_id": 2297442, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "12.0", "target_chembl_id":
+        "CHEMBL205", "target_organism": "Homo sapiens", "target_pref_name": "Carbonic
+        anhydrase 2", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "12.0"}, {"action_type": null, "activity_comment": null, "activity_id": 15732746,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL3626606", "assay_description":
+        "Inhibition of human ERG by automated patch clamp assay", "assay_type": "B",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000019", "bao_label": "assay format", "canonical_smiles":
+        "NC(=O)c1nnc(N[C@@H]2CCCC[C@@H]2N)nc1Nc1cccc2cc[nH]c12", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL3621151",
+        "document_journal": "Bioorg Med Chem Lett", "document_year": 2015, "ligand_efficiency":
+        {"bei": "12.42", "le": "0.23", "lle": "2.67", "sei": "3.08"}, "molecule_chembl_id":
+        "CHEMBL3416026", "molecule_pref_name": null, "parent_molecule_chembl_id":
+        "CHEMBL3416026", "pchembl_value": "4.55", "potential_duplicate": 0, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 2504480, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "IC50", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "28000.0", "target_chembl_id": "CHEMBL240", "target_organism":
+        "Homo sapiens", "target_pref_name": "Voltage-gated inwardly rectifying potassium
+        channel KCNH2", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "28.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        15743058, "activity_properties": [], "assay_chembl_id": "CHEMBL3626583", "assay_description":
+        "Inhibition of JAK2 (unknown origin) after 20 mins by radiometric analysis
+        in presence of [gamma33P]-ATP", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "c1nc(-c2cn(CC3CO3)nn2)c2cc[nH]c2n1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3621113", "document_journal": "J Med Chem", "document_year": 2015,
+        "ligand_efficiency": {"bei": "23.16", "le": "0.43", "lle": "4.99", "sei":
+        "6.62"}, "molecule_chembl_id": "CHEMBL3622376", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3622376", "pchembl_value": "5.61", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2504710, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "2451.0", "target_chembl_id":
+        "CHEMBL2971", "target_organism": "Homo sapiens", "target_pref_name": "Tyrosine-protein
+        kinase JAK2", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "2451.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        16533845, "activity_properties": [], "assay_chembl_id": "CHEMBL3789280", "assay_description":
+        "Inhibition of His-tagged Klebsiella pneumoniae NDM-1 expressed in Escherichia
+        coli BL21-AI cells using imipinem as substrate", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000219", "bao_label": "cell-based format", "canonical_smiles": "C[C@H](CS)C(=O)N1CCC[C@H]1C(=O)O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3785049", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2016, "ligand_efficiency": {"bei": "19.80", "le": "0.42", "lle": "3.67", "sei":
+        "7.47"}, "molecule_chembl_id": "CHEMBL1560", "molecule_pref_name": "CAPTOPRIL",
+        "parent_molecule_chembl_id": "CHEMBL1560", "pchembl_value": "4.30", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2768763, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "49800.0", "target_chembl_id":
+        "CHEMBL1667695", "target_organism": "Klebsiella pneumoniae", "target_pref_name":
+        "Metallo-beta-lactamase type 2", "target_tax_id": "573", "text_value": null,
+        "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "49.8"}, {"action_type": null, "activity_comment": null, "activity_id":
+        16610764, "activity_properties": [], "assay_chembl_id": "CHEMBL3817687", "assay_description":
+        "Inhibition of VEGFR1 (unknown origin)", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CC1(C)CNc2cc(NC(=O)c3cccnc3NCc3ccncc3)ccc21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3813654", "document_journal": "J Med Chem", "document_year": 2016,
+        "ligand_efficiency": {"bei": "23.29", "le": "0.42", "lle": "4.66", "sei":
+        "11.02"}, "molecule_chembl_id": "CHEMBL572881", "molecule_pref_name": "MOTESANIB",
+        "parent_molecule_chembl_id": "CHEMBL572881", "pchembl_value": "8.70", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2780863, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "2.0", "target_chembl_id":
+        "CHEMBL1868", "target_organism": "Homo sapiens", "target_pref_name": "Vascular
+        endothelial growth factor receptor 1", "target_tax_id": "9606", "text_value":
+        null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "2.0"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 16653368, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL3830200", "assay_description": "Inhibition of recombinant human FGFR4",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "COc1cc(CCc2cc(NC(=O)c3ccc(N4C[C@@H](C)N[C@@H](C)C4)cc3)n[nH]2)cc(OC)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3826910", "document_journal": "J Med Chem", "document_year": 2016,
+        "ligand_efficiency": {"bei": "14.63", "le": "0.27", "lle": "3.13", "sei":
+        "7.41"}, "molecule_chembl_id": "CHEMBL3348846", "molecule_pref_name": "FEXAGRATINIB",
+        "parent_molecule_chembl_id": "CHEMBL3348846", "pchembl_value": "6.78", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2787303, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "165.0", "target_chembl_id":
+        "CHEMBL3973", "target_organism": "Homo sapiens", "target_pref_name": "Fibroblast
+        growth factor receptor 4", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "165.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        16756883, "activity_properties": [], "assay_chembl_id": "CHEMBL3861269", "assay_description":
+        "Inhibition of PI3Kalpha (unknown origin) using substrate PI incubated for
+        1 hr by Adapta kinase assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "Cn1c(=O)n(-c2ccc(C(C)(C)C#N)cc2)c2c3cc(-c4cnc5ccccc5c4)ccc3ncc21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3860068", "document_journal": "J Med Chem", "document_year": 2017,
+        "ligand_efficiency": {"bei": "17.37", "le": "0.31", "lle": "2.26", "sei":
+        "10.66"}, "molecule_chembl_id": "CHEMBL1879463", "molecule_pref_name": "DACTOLISIB",
+        "parent_molecule_chembl_id": "CHEMBL1879463", "pchembl_value": "8.15", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2801157, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "7.0", "target_chembl_id":
+        "CHEMBL4005", "target_organism": "Homo sapiens", "target_pref_name": "Phosphatidylinositol
+        4,5-bisphosphate 3-kinase catalytic subunit alpha isoform", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "IC50", "units": "uM", "uo_units":
+        "UO_0000065", "upper_value": null, "value": "0.007"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 16772107, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL3863999", "assay_description": "Displacement
+        of [3H]WIN35,428 from wild type human DAT expressed in COS7 cell membranes
+        incubated for >90 mins by radioligand binding assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000219", "bao_label": "cell-based format", "canonical_smiles": "Fc1ccc(C(SCCNCCCc2ccccc2)c2ccc(F)cc2)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL3862037", "document_journal": "J Med Chem", "document_year": 2016,
+        "ligand_efficiency": {"bei": "15.45", "le": "0.30", "lle": "0.13", "sei":
+        "51.06"}, "molecule_chembl_id": "CHEMBL3126735", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL3126735", "pchembl_value": "6.14", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2804091, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "720.0", "target_chembl_id":
+        "CHEMBL238", "target_organism": "Homo sapiens", "target_pref_name": "Sodium-dependent
+        dopamine transporter", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "720.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        18073024, "activity_properties": [], "assay_chembl_id": "CHEMBL4015787", "assay_description":
+        "Inhibition of GAL4 DNA binding domain fused BCL6 BTB domain (unknown origin)
+        expressed in HEK 293T/17 cells after 24 hrs by Bright-Glo luciferase cell
+        reporter assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "O=C1CCc2cc3cc(c2N1)OC/C=C/CO[C@H]1C[C@@H](CO)N(C1)c1cc(n2ncc(Cl)c2n1)N3",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4014321", "document_journal": "J Med Chem", "document_year": 2017,
+        "ligand_efficiency": {"bei": "10.84", "le": "0.21", "lle": "2.47", "sei":
+        "4.76"}, "molecule_chembl_id": "CHEMBL4090962", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4090962", "pchembl_value": "5.39", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        2995728, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "4100.0", "target_chembl_id":
+        "CHEMBL4105786", "target_organism": "Homo sapiens", "target_pref_name": "B-cell
+        lymphoma 6 protein", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "4.1"}, {"action_type": null, "activity_comment": null, "activity_id":
+        18140882, "activity_properties": [], "assay_chembl_id": "CHEMBL4031184", "assay_description":
+        "Transrepression of glucocorticoid receptor in PMA-stimulated human ChaGoK1
+        cells expressing TRE-LacZ construct assessed as inhibition of AP-1 mediated
+        TRE-LacZ activity after 24 hrs by beta-galactosidase reporter gene assay",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000019", "bao_label":
+        "assay format", "canonical_smiles": "C[C@H](NC(=O)C(C)(F)F)[C@H](Oc1ccc2c(cnn2-c2cccc(C(=O)N[C@@H]3CCOC3=O)c2)c1)c1ccccc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4028861", "document_journal": "J Med Chem", "document_year": 2017,
+        "ligand_efficiency": {"bei": "13.99", "le": "0.26", "lle": "3.52", "sei":
+        "7.06"}, "molecule_chembl_id": "CHEMBL4059755", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4059755", "pchembl_value": "7.87", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3009292, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "13.4", "target_chembl_id":
+        "CHEMBL2034", "target_organism": "Homo sapiens", "target_pref_name": "Glucocorticoid
+        receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "13.4"}, {"action_type": null, "activity_comment": null, "activity_id": 18204377,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL4044350", "assay_description":
+        "Displacement of [3H]U-69,593 from human kappa opioid receptor expressed in
+        CHO cell membranes by microbeta scintillation counting analysis", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "O=C1/C(=C/c2ccccc2)C[C@@]2(O)[C@H]3Cc4ccc(O)c5c4[C@@]2(CCN3CC2CC2)[C@H]1O5",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4043100", "document_journal": "Bioorg Med Chem", "document_year": 2017,
+        "ligand_efficiency": {"bei": "17.42", "le": "0.32", "lle": "4.26", "sei":
+        "10.69"}, "molecule_chembl_id": "CHEMBL252172", "molecule_pref_name": "BNTX",
+        "parent_molecule_chembl_id": "CHEMBL252172", "pchembl_value": "7.48", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3020202, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "32.8", "target_chembl_id":
+        "CHEMBL237", "target_organism": "Homo sapiens", "target_pref_name": "Kappa-type
+        opioid receptor", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "32.8"}, {"action_type": null, "activity_comment": null, "activity_id":
+        18264057, "activity_properties": [], "assay_chembl_id": "CHEMBL4056898", "assay_description":
+        "Inhibition of slow inactivated human NaV1.7 expressed in HEK293 cells at
+        -20 mV holding potential after 5 mins by IonWorks electrophysiology method",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "O=C(COc1cccc2cccnc12)Nc1ccccc1N1CCOCC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4052739", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2017, "ligand_efficiency": {"bei": "20.66", "le": "0.38", "lle": "4.42", "sei":
+        "11.79"}, "molecule_chembl_id": "CHEMBL1480490", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1480490", "pchembl_value": "7.51", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3031194, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "31.0", "target_chembl_id":
+        "CHEMBL4296", "target_organism": "Homo sapiens", "target_pref_name": "Sodium
+        channel protein type 9 subunit alpha", "target_tax_id": "9606", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "0.031"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 18419094, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL4153697", "assay_description": "Inhibition of recombinant human TDP2
+        using TY18 (alpha-[32P]-cordycepin-3''-labeled) as substrate after 15 mins
+        by PAGE analysis", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "C#CCCOC(=O)c1c(C)oc2c1C(=O)c1ncccc1C2=O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4152221", "document_journal": "Eur J Med Chem", "document_year": 2018,
+        "ligand_efficiency": {"bei": "15.06", "le": "0.28", "lle": "2.72", "sei":
+        "5.39"}, "molecule_chembl_id": "CHEMBL4161171", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4161171", "pchembl_value": "4.66", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3056972, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "22000.0", "target_chembl_id":
+        "CHEMBL2169736", "target_organism": "Homo sapiens", "target_pref_name": "Tyrosyl-DNA
+        phosphodiesterase 2", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "22.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        18470918, "activity_properties": [], "assay_chembl_id": "CHEMBL4182611", "assay_description":
+        "Inhibition of N-terminal DYKDDDDK tagged and biotinylated BTK activated form
+        (unknown origin) using FITC-labeled Srctide substrate and ATP by microfluidic
+        mobility shift assay", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCn1cc(Nc2nc(N)cc(-c3cccc(-n4ccc5cc(C6CC6)cc(F)c5c4=O)c3CO)n2)cn1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4177725", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2018, "ligand_efficiency": {"bei": "15.64", "le": "0.29", "lle": "3.50", "sei":
+        "6.46"}, "molecule_chembl_id": "CHEMBL4204719", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4204719", "pchembl_value": "8.00", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3065843, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "10.0", "target_chembl_id":
+        "CHEMBL5251", "target_organism": "Homo sapiens", "target_pref_name": "Tyrosine-protein
+        kinase BTK", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "10.0"}, {"action_type": null, "activity_comment": null, "activity_id": 18504709,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL4189992", "assay_description":
+        "Inhibition of ALDH1A1 in human MIAPaCa2 cells after 30 mins by aldefluor
+        assay", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "O=C(c1cnc2ccc(F)cc2c1N1C[C@H]2CCCC[C@H]2C1)N1CCN(C(=O)C2CC2)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4184337", "document_journal": "J Med Chem", "document_year": 2018,
+        "ligand_efficiency": {"bei": "11.18", "le": "0.21", "lle": "1.35", "sei":
+        "8.87"}, "molecule_chembl_id": "CHEMBL4210664", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4210664", "pchembl_value": "5.04", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3072065, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "9220.0", "target_chembl_id":
+        "CHEMBL3577", "target_organism": "Homo sapiens", "target_pref_name": "Aldehyde
+        dehydrogenase 1A1", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "9.22"}, {"action_type": null, "activity_comment": null, "activity_id":
+        18527345, "activity_properties": [], "assay_chembl_id": "CHEMBL4194561", "assay_description":
+        "Displacement of fluormone RED from human full length glucocorticoid receptor
+        after 4 hrs by fluorescence polarization assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCCn1cc(-n2ncc3cc(O[C@H](c4ccccc4)[C@H](C)NC(=O)C(C)(F)F)ccc32)ccc1=O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4190372", "document_journal": "J Med Chem", "document_year": 2018,
+        "ligand_efficiency": {"bei": "16.84", "le": "0.32", "lle": "3.45", "sei":
+        "10.66"}, "molecule_chembl_id": "CHEMBL4203199", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4203199", "pchembl_value": "8.33", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3076228, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "4.7", "target_chembl_id":
+        "CHEMBL2034", "target_organism": "Homo sapiens", "target_pref_name": "Glucocorticoid
+        receptor", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "4.7"}, {"action_type": null, "activity_comment": null, "activity_id": 18766646,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL4267474", "assay_description":
+        "Inhibition of recombinant p53 protein binding to recombinant human MDM2 by
+        surface plasmon resonance method", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCOc1cc(OC)ccc1C1=NC(c2ccc(Br)cc2)C(c2ccc(Br)cc2)N1C(=O)N1CCN(CCO)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4265913", "document_journal": "Eur J Med Chem", "document_year": 2018,
+        "ligand_efficiency": {"bei": "9.98", "le": "0.23", "lle": "0.96", "sei": "8.81"},
+        "molecule_chembl_id": "CHEMBL2381406", "molecule_pref_name": null, "parent_molecule_chembl_id":
+        "CHEMBL2381406", "pchembl_value": "6.85", "potential_duplicate": 0, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 3118164, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "IC50", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "140.0", "target_chembl_id": "CHEMBL5023", "target_organism":
+        "Homo sapiens", "target_pref_name": "E3 ubiquitin-protein ligase Mdm2", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "IC50", "units": "uM", "uo_units":
+        "UO_0000065", "upper_value": null, "value": "0.14"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 18931029, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL4325677", "assay_description": "Inhibition of
+        CYP3A5 in wild type human AsPC1 cells assessed as decrease in 1-hydroxymidazolam
+        formation using midazolam as substrate after 24 hrs by LC-MS/MS analysis",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "CC(=O)N1CCN(c2ccc(OCC3COC(Cn4ccnc4)(c4ccc(Cl)cc4Cl)O3)cc2)CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4321880", "document_journal": "J Med Chem", "document_year": 2020,
+        "ligand_efficiency": {"bei": "11.84", "le": "0.24", "lle": "2.08", "sei":
+        "9.11"}, "molecule_chembl_id": "CHEMBL157101", "molecule_pref_name": "KETOCONAZOLE",
+        "parent_molecule_chembl_id": "CHEMBL157101", "pchembl_value": "6.29", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3158113, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "513.0", "target_chembl_id":
+        "CHEMBL3019", "target_organism": "Homo sapiens", "target_pref_name": "Cytochrome
+        P450 3A5", "target_tax_id": "9606", "text_value": null, "toid": null, "type":
+        "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
+        "0.513"}, {"action_type": null, "activity_comment": null, "activity_id": 18939561,
+        "activity_properties": [], "assay_chembl_id": "CHEMBL4328725", "assay_description":
+        "Displacement of (6-FAM)KI(pY)VV from PKMYT1 kinase domain (unknown origin)
+        by fluorescence polarization binding assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "Cc1cc(O)cc(Nc2ccnc3cc(-c4ccccn4)ccc23)c1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4325875", "document_journal": "Eur J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "15.91", "le": "0.28", "lle": "0.16", "sei":
+        "8.98"}, "molecule_chembl_id": "CHEMBL4246519", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4246519", "pchembl_value": "5.21", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3159623, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "6165.95", "target_chembl_id":
+        "CHEMBL3984", "target_organism": "Homo sapiens", "target_pref_name": "Membrane-associated
+        tyrosine- and threonine-specific cdc2-inhibitory kinase", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "pKi", "units": null, "uo_units":
+        "UO_0000065", "upper_value": null, "value": "5.21"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 18951198, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL4331500", "assay_description": "Inhibition of
+        desthiobiotin-ATP acylphosphate probe binding to A-Raf in human A375 cells
+        by MS analysis", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "CNc1ncc2cc(-c3cc(NC(=O)NCCC(C)(C)C)c(F)cc3C)c(C)nc2n1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4330078", "document_journal": "Eur J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "17.33", "le": "0.32", "lle": "2.31", "sei":
+        "8.01"}, "molecule_chembl_id": "CHEMBL3577124", "molecule_pref_name": "LY-3009120",
+        "parent_molecule_chembl_id": "CHEMBL3577124", "pchembl_value": "7.36", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3161453, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "44.0", "target_chembl_id":
+        "CHEMBL1169596", "target_organism": "Homo sapiens", "target_pref_name": "Serine/threonine-protein
+        kinase A-Raf", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "44.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        18972187, "activity_properties": [], "assay_chembl_id": "CHEMBL4337201", "assay_description":
+        "Inhibition of human AChE", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "O=C(c1ccc(OCCCc2c[nH]cn2)cc1)C1CC1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4334472", "document_journal": "Eur J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "15.04", "le": "0.28", "lle": "1.05", "sei":
+        "7.39"}, "molecule_chembl_id": "CHEMBL14638", "molecule_pref_name": "CIPROXIFAN",
+        "parent_molecule_chembl_id": "CHEMBL14638", "pchembl_value": "4.07", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3164701, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "86100.0", "target_chembl_id":
+        "CHEMBL220", "target_organism": "Homo sapiens", "target_pref_name": "Acetylcholinesterase",
+        "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
+        "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value": "86.1"},
+        {"action_type": null, "activity_comment": null, "activity_id": 19044118, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL4353357", "assay_description": "Displacement
+        of [3H] prazosin from human cloned adrenoceptor alpha 1D expressed in CHO
+        cell membrane incubated for 30 mins by liquid scintillation counter", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000192", "bao_format": "BAO_0000219", "bao_label": "cell-based format",
+        "canonical_smiles": "COc1ccccc1N1CCN(CCN(C(=O)C2CCCCC2)c2ccccn2)CC1", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL4350985",
+        "document_journal": "Eur J Med Chem", "document_year": 2019, "ligand_efficiency":
+        {"bei": "19.74", "le": "0.37", "lle": "4.51", "sei": "17.05"}, "molecule_chembl_id":
+        "CHEMBL31354", "molecule_pref_name": "WAY-100,635", "parent_molecule_chembl_id":
+        "CHEMBL31354", "pchembl_value": "8.34", "potential_duplicate": 1, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 3177077, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "Ki", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "4.571", "target_chembl_id": "CHEMBL223", "target_organism":
+        "Homo sapiens", "target_pref_name": "Alpha-1D adrenergic receptor", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "pKi", "units": null, "uo_units":
+        "UO_0000065", "upper_value": null, "value": "8.34"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 19108157, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL4369925", "assay_description": "Displacement
+        of [3H]2-[p-(2-carboxyethyl)phenylethylamino]-5-N-ethylcarboxamidoadenosine
+        from human A2A adenosine receptor expressed in HEK293 cell membranes after
+        60 mins by scintillation proximity assay", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000192", "bao_format":
+        "BAO_0000219", "bao_label": "cell-based format", "canonical_smiles": "Nc1ncnc2c1ncn2[C@@H]1O[C@H](C(=O)NCCO)[C@@H](O)[C@H]1O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4368904", "document_journal": "J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "19.42", "le": "0.37", "lle": "9.16", "sei":
+        "3.73"}, "molecule_chembl_id": "CHEMBL1234591", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL1234591", "pchembl_value": "6.30", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3188265, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "505.0", "target_chembl_id":
+        "CHEMBL251", "target_organism": "Homo sapiens", "target_pref_name": "Adenosine
+        receptor A2a", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "505.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        19108421, "activity_properties": [], "assay_chembl_id": "CHEMBL4369993", "assay_description":
+        "Displacement of [3H]2-[p-(2-carboxyethyl)phenylethylamino]-5-N-ethylcarboxamidoadenosine
+        from rat A2A adenosine receptor expressed in HEK293 cell membranes at 10 uM
+        after 60 mins by scintillation proximity assay relative to adenosine 5-N-ethyluronamide",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000192", "bao_format": "BAO_0000219", "bao_label":
+        "cell-based format", "canonical_smiles": "Nc1ncnc2c1ncn2[C@@H]1O[C@H](C(=O)NC2CC2)[C@@H](O)[C@H]1O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4368904", "document_journal": "J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "24.58", "le": "0.47", "lle": "9.56", "sei":
+        "5.30"}, "molecule_chembl_id": "CHEMBL261482", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL261482", "pchembl_value": "7.87", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3188264, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "Ki", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "13.4", "target_chembl_id":
+        "CHEMBL302", "target_organism": "Rattus norvegicus", "target_pref_name": "Adenosine
+        receptor A2a", "target_tax_id": "10116", "text_value": null, "toid": null,
+        "type": "Ki", "units": "nM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "13.4"}, {"action_type": null, "activity_comment": null, "activity_id":
+        19139815, "activity_properties": [], "assay_chembl_id": "CHEMBL4376357", "assay_description":
+        "Inhibition of PI3K p110alpha (unknown origin)", "assay_type": "B", "assay_variant_accession":
+        null, "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "CCn1c(=O)c(-c2cc[nH]n2)cc2c(C)nc(N)nc21",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4373732", "document_journal": "Eur J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "27.41", "le": "0.51", "lle": "6.32", "sei":
+        "7.23"}, "molecule_chembl_id": "CHEMBL3545366", "molecule_pref_name": "VOXTALISIB",
+        "parent_molecule_chembl_id": "CHEMBL3545366", "pchembl_value": "7.41", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3194411, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "39.0", "target_chembl_id":
+        "CHEMBL4005", "target_organism": "Homo sapiens", "target_pref_name": "Phosphatidylinositol
+        4,5-bisphosphate 3-kinase catalytic subunit alpha isoform", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "IC50", "units": "nM", "uo_units":
+        "UO_0000065", "upper_value": null, "value": "39.0"}, {"action_type": null,
+        "activity_comment": null, "activity_id": 19192692, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL4390103", "assay_description": "Inhibition of
+        COX2 (unknown origin)", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "Cc1ccc(-c2cc(C(F)(F)F)nn2-c2ccc(S(N)(=O)=O)cc2)cc1",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4387748", "document_journal": "Bioorg Med Chem Lett", "document_year":
+        2019, "ligand_efficiency": {"bei": "17.46", "le": "0.35", "lle": "3.15", "sei":
+        "8.54"}, "molecule_chembl_id": "CHEMBL118", "molecule_pref_name": "CELECOXIB",
+        "parent_molecule_chembl_id": "CHEMBL118", "pchembl_value": "6.66", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3203386, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "220.0", "target_chembl_id":
+        "CHEMBL230", "target_organism": "Homo sapiens", "target_pref_name": "Prostaglandin
+        G/H synthase 2", "target_tax_id": "9606", "text_value": null, "toid": null,
+        "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null,
+        "value": "0.22"}, {"action_type": null, "activity_comment": null, "activity_id":
+        19427226, "activity_properties": [], "assay_chembl_id": "CHEMBL4428281", "assay_description":
+        "Inhibition of RNase H activity of full length recombinant HIV1 reverse transcriptase
+        assessed as reduction in RNA 5''-end directed cleavage using HTS3 substrate",
+        "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
+        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
+        "single protein format", "canonical_smiles": "O=c1cc(Nc2ccc(-c3ccccc3)cc2)[nH]c(=O)n1O",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4428027", "document_journal": "J Med Chem", "document_year": 2016,
+        "ligand_efficiency": {"bei": "22.09", "le": "0.40", "lle": "4.34", "sei":
+        "7.49"}, "molecule_chembl_id": "CHEMBL4281296", "molecule_pref_name": null,
+        "parent_molecule_chembl_id": "CHEMBL4281296", "pchembl_value": "6.52", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3245111, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "300.0", "target_chembl_id":
+        "CHEMBL247", "target_organism": "Human immunodeficiency virus 1", "target_pref_name":
+        "Human immunodeficiency virus type 1 reverse transcriptase", "target_tax_id":
+        "11676", "text_value": null, "toid": null, "type": "IC50", "units": "uM",
+        "uo_units": "UO_0000065", "upper_value": null, "value": "0.3"}, {"action_type":
+        null, "activity_comment": null, "activity_id": 19474737, "activity_properties":
+        [], "assay_chembl_id": "CHEMBL4479403", "assay_description": "Inhibition of
+        CYP17 (unknown origin)", "assay_type": "B", "assay_variant_accession": null,
+        "assay_variant_mutation": null, "bao_endpoint": "BAO_0000190", "bao_format":
+        "BAO_0000357", "bao_label": "single protein format", "canonical_smiles": "C[C@]12CC[C@H](O)CC1=CC[C@@H]1[C@@H]2CC[C@]2(C)C(c3cccnc3)=CC[C@@H]12",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4477236", "document_journal": "ACS Med Chem Lett", "document_year":
+        2016, "ligand_efficiency": {"bei": "20.94", "le": "0.38", "lle": "1.92", "sei":
+        "22.10"}, "molecule_chembl_id": "CHEMBL254328", "molecule_pref_name": "ABIRATERONE",
+        "parent_molecule_chembl_id": "CHEMBL254328", "pchembl_value": "7.32", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3256536, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "48.0", "target_chembl_id":
+        "CHEMBL3522", "target_organism": "Homo sapiens", "target_pref_name": "Steroid
+        17-alpha-hydroxylase/17,20 lyase", "target_tax_id": "9606", "text_value":
+        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
+        "upper_value": null, "value": "0.048"}, {"action_type": null, "activity_comment":
+        null, "activity_id": 20597864, "activity_properties": [], "assay_chembl_id":
+        "CHEMBL4602771", "assay_description": "Inhibition of Glycogen synthase kinase-3
+        beta (unknown origin) after 30 mins by Kinase-Glo assay", "assay_type": "B",
+        "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "CN[C@@H]1C[C@H]2O[C@@](C)([C@@H]1OC)n1c3ccccc3c3c4c(c5c6ccccc6n2c5c31)C(=O)NC4",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4602602", "document_journal": "Eur J Med Chem", "document_year": 2019,
+        "ligand_efficiency": {"bei": "15.58", "le": "0.28", "lle": "2.92", "sei":
+        "10.46"}, "molecule_chembl_id": "CHEMBL388978", "molecule_pref_name": "STAUROSPORINE",
+        "parent_molecule_chembl_id": "CHEMBL388978", "pchembl_value": "7.27", "potential_duplicate":
+        1, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3464666, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "54.0", "target_chembl_id":
+        "CHEMBL262", "target_organism": "Homo sapiens", "target_pref_name": "Glycogen
+        synthase kinase-3 beta", "target_tax_id": "9606", "text_value": null, "toid":
+        null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "0.054"}, {"action_type": null, "activity_comment": null, "activity_id":
+        20665632, "activity_properties": [], "assay_chembl_id": "CHEMBL4619394", "assay_description":
+        "Inhibition of human PDF using N-formylated peptide as substrate in presence
+        of NAD+ by formate dehydrogenase-coupled spectrophotometric assay", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "CCCCC[C@H](CC(=O)NO)C(=O)N[C@H](C(=O)N1CCC[C@H]1CO)C(C)C",
+        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
+        "CHEMBL4616720", "document_journal": "J Med Chem", "document_year": 2020,
+        "ligand_efficiency": {"bei": "19.51", "le": "0.38", "lle": "6.32", "sei":
+        "6.32"}, "molecule_chembl_id": "CHEMBL308333", "molecule_pref_name": "ACTINONIN",
+        "parent_molecule_chembl_id": "CHEMBL308333", "pchembl_value": "7.52", "potential_duplicate":
+        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
+        3479766, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
+        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
+        "nM", "standard_upper_value": null, "standard_value": "30.0", "target_chembl_id":
+        "CHEMBL4647", "target_organism": "Homo sapiens", "target_pref_name": "Peptide
+        deformylase, mitochondrial", "target_tax_id": "9606", "text_value": null,
+        "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065", "upper_value":
+        null, "value": "30.0"}, {"action_type": null, "activity_comment": null, "activity_id":
+        20680347, "activity_properties": [], "assay_chembl_id": "CHEMBL4622709", "assay_description":
+        "Inhibition of ROCK2 (unknown origin) assessed as phosphorylation of MYPT1
+        using Tetramethylbenzidine as substrate in presence of ATP", "assay_type":
+        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
+        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
+        "canonical_smiles": "C[C@@H](N)[C@H]1CC[C@H](C(=O)Nc2ccncc2)CC1", "data_validity_comment":
+        null, "data_validity_description": null, "document_chembl_id": "CHEMBL4619824",
+        "document_journal": "ACS Med Chem Lett", "document_year": 2020, "ligand_efficiency":
+        {"bei": "32.67", "le": "0.61", "lle": "5.91", "sei": "11.88"}, "molecule_chembl_id":
+        "CHEMBL559147", "molecule_pref_name": "Y-27632", "parent_molecule_chembl_id":
+        "CHEMBL559147", "pchembl_value": "8.08", "potential_duplicate": 0, "qudt_units":
+        "http://www.openphacts.org/units/Nanomolar", "record_id": 3482754, "relation":
+        "=", "src_id": 1, "standard_flag": 1, "standard_relation": "=", "standard_text_value":
+        null, "standard_type": "IC50", "standard_units": "nM", "standard_upper_value":
+        null, "standard_value": "8.3", "target_chembl_id": "CHEMBL2973", "target_organism":
+        "Homo sapiens", "target_pref_name": "Rho-associated protein kinase 2", "target_tax_id":
+        "9606", "text_value": null, "toid": null, "type": "IC50", "units": "nM", "uo_units":
+        "UO_0000065", "upper_value": null, "value": "8.3"}], "page_meta": {"limit":
+        1000, "next": null, "offset": 0, "previous": null, "total_count": 100}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '150577'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 19 Dec 2025 19:43:44 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'False'
+      X-ChEMBL-retrieval-time:
+      - '0.58555006980896'
+    status:
+      code: 200
+      message: OK
 version: 1
