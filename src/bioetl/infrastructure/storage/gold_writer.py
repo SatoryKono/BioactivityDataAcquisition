@@ -228,7 +228,7 @@ class GoldWriter:
                 await self._run_in_executor(
                     lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                         table_or_uri=table_or_uri,
-                        data=data,
+                        data=pa.RecordBatchReader.from_batches(data.schema, data.to_batches()),
                         mode=mode,
                         partition_by=partition_by,
                         storage_options=storage_options,
@@ -299,7 +299,7 @@ class GoldWriter:
                     await self._run_in_executor(
                         lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols, storage_options=self.storage_options: write_deltalake(
                             table_or_uri=table_or_uri,
-                            data=data,
+                            data=pa.RecordBatchReader.from_batches(data.schema, data.to_batches()),
                             mode=mode,
                             partition_by=partition_by,
                             storage_options=storage_options,
@@ -336,7 +336,7 @@ class GoldWriter:
         await self._run_in_executor(
             lambda: (
                 dt.merge(
-                    source=new_data,
+                    source=pa.RecordBatchReader.from_batches(new_data.schema, new_data.to_batches()),
                     predicate=merge_condition,
                     source_alias="source",
                     target_alias="target",
