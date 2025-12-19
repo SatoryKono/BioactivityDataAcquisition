@@ -5,11 +5,9 @@ Implements the OrchestrationPort using Prefect as the workflow engine.
 
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
-import asyncio
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import OrchestrationPort
     from bioetl.domain.types import RunID
 
 
@@ -38,6 +36,7 @@ class PrefectOrchestrationAdapter:
     ) -> RunID:
         """Trigger an immediate pipeline execution."""
         from uuid import uuid4
+
         from bioetl.domain.types import RunID
 
         # In a real implementation, this would call prefect.deployments.run_deployment

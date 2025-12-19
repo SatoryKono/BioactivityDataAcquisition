@@ -1,8 +1,9 @@
 # src/bioetl/application/pipelines/pubmed/publications.py
 from __future__ import annotations
+
+import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
-import xml.etree.ElementTree as ET
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.domain.entities import Publication
@@ -22,7 +23,7 @@ def _parse_author_list(article_node: ET.Element) -> list[str]:
     author_list_node = article_node.find(".//AuthorList")
     if author_list_node is None:
         return []
-    
+
     for author_node in author_list_node.findall(".//Author"):
         last_name_node = author_node.find("LastName")
         initials_node = author_node.find("Initials")

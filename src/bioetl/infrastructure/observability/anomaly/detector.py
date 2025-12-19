@@ -19,7 +19,9 @@ from bioetl.infrastructure.observability.anomaly.types import (
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
+    from bioetl.infrastructure.observability.anomaly.detectors.base import (
+        DetectorStrategy,
+    )
 
 
 class AnomalyDetector:

@@ -13,11 +13,11 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
+from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
+from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.pipeline_config import PipelineConfig
-from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.types import (
     BronzeRecord,
     RunID,
@@ -25,15 +25,6 @@ from bioetl.domain.types import (
     SilverRecord,
     Watermark,
 )
-from bioetl.domain.ports import (
-    CheckpointPort,
-    DataSourcePort,
-    LockPort,
-    MetricsPort,
-    QuarantinePort,
-    StoragePort,
-)
-
 
 if TYPE_CHECKING:
     import structlog
@@ -113,7 +104,7 @@ class BasePipeline(ABC):
         return self._context
 
     @property
-    def logger(self) -> "structlog.BoundLogger":
+    def logger(self) -> structlog.BoundLogger:
         """Access bound logger."""
         return self._logger
 

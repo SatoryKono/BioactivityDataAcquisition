@@ -30,8 +30,8 @@ from botocore.exceptions import ClientError
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
-from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.exceptions import BucketNotFoundError, UploadError
+from bioetl.domain.types import BatchID, RunID, RunType
 
 
 class BronzeWriter:

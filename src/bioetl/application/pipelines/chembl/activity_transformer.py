@@ -6,7 +6,6 @@ Transforms Bronze records to Silver format (Activity entity inflation).
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.entities import Activity
@@ -212,4 +211,4 @@ class ActivityTransformer:
             "_ingestion_ts": entity.ingestion_ts.isoformat(),
         }
 
-        return cast(SilverRecord, silver_record)
+        return cast("SilverRecord", silver_record)

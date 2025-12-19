@@ -3,8 +3,8 @@
 Provides PaginatedFetcherMixin to standardize loop logic for offset/cursor based APIs.
 """
 
-from collections.abc import AsyncIterator
-from typing import Any, Awaitable, Callable, Protocol, TypeVar
+from collections.abc import AsyncIterator, Awaitable, Callable
+from typing import Any, Protocol, TypeVar
 
 T = TypeVar("T")
 

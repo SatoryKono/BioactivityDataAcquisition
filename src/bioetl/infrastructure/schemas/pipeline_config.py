@@ -4,8 +4,16 @@ Implements strict validation for pipeline YAML configurations using Pydantic.
 Enforces Medallion Architecture constraints and operational limits.
 """
 
-from typing import Any, Literal
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing import Literal
+
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 

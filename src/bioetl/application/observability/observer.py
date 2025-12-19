@@ -5,7 +5,7 @@ Handles automated metrics collection for pipeline execution.
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 

@@ -4,12 +4,9 @@ from __future__ import annotations
 from typing import Any, cast
 
 from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
-from bioetl.domain.pipeline_config import PipelineConfig
-from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.transformations import generate_content_hash, generate_entity_id
 from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
-from bioetl.domain.transformations import generate_entity_id, generate_content_hash
 
 
 class UniProtProteinPipeline(BasePipeline):
@@ -50,21 +47,21 @@ class UniProtProteinPipeline(BasePipeline):
         content_hash = generate_content_hash(normalized, self.provider)
         normalized["content_hash"] = content_hash
 
-        return cast(SilverRecord, normalized)
+        return cast("SilverRecord", normalized)
 
     def _extract_protein_name(self, record: BronzeRecord) -> str | None:
         try:
-            desc = cast(dict[str, Any], record.get("proteinDescription", {}))
+            desc = cast("dict[str, Any]", record.get("proteinDescription", {}))
             rec_name = desc.get("recommendedName", {})
             full_name = rec_name.get("fullName", {})
-            return cast(str | None, full_name.get("value"))
+            return cast("str | None", full_name.get("value"))
         except (AttributeError, TypeError):
             return None
 
     def _extract_gene_names(self, record: BronzeRecord) -> list[str]:
         names = []
         try:
-            genes = cast(list[dict[str, Any]], record.get("genes", []))
+            genes = cast("list[dict[str, Any]]", record.get("genes", []))
             for gene in genes:
                 gene_name = gene.get("geneName", {})
                 if name := gene_name.get("value"):

@@ -1,13 +1,14 @@
 # src/bioetl/composition/factories/pubmed_publications.py
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.registry import PipelineRegistry
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
 from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
-from bioetl.infrastructure.schemas.silver import PUBMED_PUBLICATION_SCHEMA
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
+from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
+from bioetl.infrastructure.schemas.silver import PUBMED_PUBLICATION_SCHEMA
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort
@@ -38,7 +39,7 @@ class PubMedPublicationsPipelineFactory(BasePipelineFactory[PubMedPublicationsPi
         configured_api_key = pipeline_config.source.api_key
         # Check if settings.pubmed_api_key is SecretStr and has a value
         settings_api_key_value = settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
-        
+
         # Prioritize api_key from pipeline config, then from settings
         api_key_to_use = configured_api_key if configured_api_key is not None else settings_api_key_value
 

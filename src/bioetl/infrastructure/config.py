@@ -29,7 +29,8 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.domain.config import DQConfig as DomainDQConfig, PipelineConfig
+from bioetl.domain.config import DQConfig as DomainDQConfig
+from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -114,14 +115,14 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     if not config_path.exists():
         raise ValueError(f"Configuration file not found: {config_path}")
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
 
     # Load source config from separate file if specified
     if source_file := config.get("source_file"):
         source_path = config_path.parent / source_file
         if source_path.exists():
-            with open(source_path, "r", encoding="utf-8") as f:
+            with open(source_path, encoding="utf-8") as f:
                 source_config = yaml.safe_load(f) or {}
             # Merge source config into main config
             config["source"] = source_config.get("source", source_config)
@@ -148,7 +149,7 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     if source_fields and isinstance(source_fields[0], dict):
         # Handle cases where fields are dicts like [{'name': 'col1'}, ...]
         source_fields = [field['name'] for field in source_fields if 'name' in field]
-    
+
     watermark_field = yaml_config.source.watermark_field
 
     return PipelineConfig(
@@ -379,14 +380,14 @@ def get_settings() -> Settings:
 
 # RuntimeConfig is defined in domain.config but re-exported here
 # for convenience when used in CLI/interfaces layer
-from bioetl.domain.config import RuntimeConfig, PipelineRuntimeConfig
+from bioetl.domain.config import PipelineRuntimeConfig, RuntimeConfig
 
 __all__ = [
+    "PipelineRuntimeConfig",
+    "RuntimeConfig",
     "Settings",
-    "get_settings",
     "get_pipeline_config",
+    "get_settings",
     "load_pipeline_config",
     "yaml_config_to_domain",
-    "RuntimeConfig",
-    "PipelineRuntimeConfig",
 ]

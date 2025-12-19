@@ -8,7 +8,6 @@ Uses chembl_webresource_client library for API access.
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime

@@ -23,10 +23,7 @@ from bioetl.composition.factories.generic_factory import (
 
 # Import all pipeline factories to ensure they are registered in the PipelineRegistry.
 # The registration happens at import time when the module is loaded.
-from . import chembl_activity
-from . import pubchem_compound
-from . import uniprot_protein
-from . import pubmed_publications
+from . import chembl_activity, pubchem_compound, pubmed_publications, uniprot_protein
 
 __all__ = [
     # New generic factory

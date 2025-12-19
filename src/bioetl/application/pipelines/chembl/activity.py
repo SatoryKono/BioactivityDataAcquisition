@@ -14,11 +14,13 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.pipelines.chembl.activity_filter import ActivityGoldFilter
+from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
+from bioetl.application.pipelines.chembl.activity_watermark import (
+    ActivityWatermarkExtractor,
+)
 from bioetl.domain.pipeline_config import PipelineConfig
 from bioetl.domain.types import BronzeRecord, SilverRecord, Watermark
-from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
-from bioetl.application.pipelines.chembl.activity_filter import ActivityGoldFilter
-from bioetl.application.pipelines.chembl.activity_watermark import ActivityWatermarkExtractor
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext

@@ -7,7 +7,7 @@ DataSourcePort implementation.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.factories.http_client_factory import HttpClientFactory
