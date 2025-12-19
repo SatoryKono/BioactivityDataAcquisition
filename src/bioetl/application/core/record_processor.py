@@ -90,14 +90,31 @@ class RecordProcessor:
                 error_type=error_type.value,
                 batch_id=str(batch_id)
             )
+            if self._metrics:
+                pipeline_label = f"{self._provider}_{self._entity_type}"
+                self._metrics.increment_counter(
+                    "errors_total",
+                    1,
+                    {"pipeline": pipeline_label, "stage": "bronze_write", "error_code": error_type.value},
+                )
             # Re-raise to trigger checkpointing logic in Executor or termination
             # Critical persistence failure means we cannot proceed with this batch
             raise
 
         records_bronze = len(records)
         if self._metrics:
+            pipeline_label = f"{self._provider}_{self._entity_type}"
+            run_type_label = self._context.run_type.value
+
+            self._metrics.observe_histogram(
+                "batch_size_records",
+                records_bronze,
+                {"pipeline": pipeline_label, "stage": "bronze"},
+            )
             self._metrics.increment_counter(
-                "records_bronze_total", records_bronze, {"pipeline": f"{self._provider}_{self._entity_type}"}
+                "records_processed_total",
+                records_bronze,
+                {"pipeline": pipeline_label, "stage": "bronze", "run_type": run_type_label},
             )
 
         # 2. Transform and collect Silver/Gold
@@ -123,6 +140,14 @@ class RecordProcessor:
                         raw_record, error_type, batch_id, str(e)
                     )
                     records_quarantined += 1
+                    if self._metrics:
+                        # Need to re-compute pipeline label here as it is computed later in original code
+                        pipeline_label = f"{self._provider}_{self._entity_type}"
+                        self._metrics.increment_counter(
+                            "errors_total",
+                            1,
+                            {"pipeline": pipeline_label, "stage": "transform", "error_code": error_type.value},
+                        )
                 else:
                     raise
 
@@ -136,9 +161,23 @@ class RecordProcessor:
 
         if self._metrics:
             pipeline_label = f"{self._provider}_{self._entity_type}"
-            self._metrics.increment_counter("records_quarantined_total", records_quarantined, {"pipeline": pipeline_label})
-            self._metrics.increment_counter("records_silver_total", len(silver_records), {"pipeline": pipeline_label})
-            self._metrics.increment_counter("records_gold_total", len(gold_records), {"pipeline": pipeline_label})
+            run_type_label = self._context.run_type.value
+
+            self._metrics.increment_counter(
+                "records_processed_total",
+                records_quarantined,
+                {"pipeline": pipeline_label, "stage": "quarantined", "run_type": run_type_label},
+            )
+            self._metrics.increment_counter(
+                "records_processed_total",
+                len(silver_records),
+                {"pipeline": pipeline_label, "stage": "silver", "run_type": run_type_label},
+            )
+            self._metrics.increment_counter(
+                "records_processed_total",
+                len(gold_records),
+                {"pipeline": pipeline_label, "stage": "gold", "run_type": run_type_label},
+            )
 
         # 3. Write to Silver
         if silver_records:
@@ -152,6 +191,13 @@ class RecordProcessor:
                     error_type=error_type.value,
                     batch_id=str(batch_id),
                 )
+                if self._metrics:
+                    pipeline_label = f"{self._provider}_{self._entity_type}"
+                    self._metrics.increment_counter(
+                        "errors_total",
+                        1,
+                        {"pipeline": pipeline_label, "stage": "silver_write", "error_code": error_type.value},
+                    )
                 raise
 
         # 4. Write to Gold
@@ -166,6 +212,13 @@ class RecordProcessor:
                     error_type=error_type.value,
                     batch_id=str(batch_id),
                 )
+                if self._metrics:
+                    pipeline_label = f"{self._provider}_{self._entity_type}"
+                    self._metrics.increment_counter(
+                        "errors_total",
+                        1,
+                        {"pipeline": pipeline_label, "stage": "gold_write", "error_code": error_type.value},
+                    )
                 raise
 
         return BatchResult(
