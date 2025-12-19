@@ -47,6 +47,10 @@ class PipelineObserver:
 
     def __enter__(self) -> PipelineObserver:
         self._start_time = time.monotonic()
+        self._logger.info(
+            f"Starting pipeline: {self._pipeline_name}",
+            extra={"stage": "startup", "run_type": self._run_type},
+        )
         return self
 
     def set_status(self, status: str) -> None:
@@ -93,26 +97,19 @@ class PipelineObserver:
             self._logger.error(f"Failed to record metrics: {e}", exc_info=True)
 
         # Log completion summary
+        extra = {
+            "stage": "complete" if status == "success" else status,
+            "duration_seconds": duration,
+        }
+
         if status == "success":
-            self._logger.info(
-                "Pipeline completed successfully",
-                extra={
-                    "stage": "complete",
-                    "duration_seconds": duration,
-                },
-            )
+            self._logger.info("Pipeline completed successfully", extra=extra)
         elif status == "shutdown":
-            self._logger.warning(
-                "Pipeline shutdown",
-                extra={
-                    "stage": "shutdown",
-                    "duration_seconds": duration,
-                },
-            )
-        else:
-            # For failure, the exception usually bubbles up and is logged elsewhere or by the caller.
-            # But the observer can log a summary too.
-            # However, looking at the Runner, it logs "Pipeline failed" inside the except block BEFORE re-raising.
-            # The Observer's __exit__ runs *before* the exception bubbles up further?
-            # Actually __exit__ runs, returns False (propagate), then exception propagates.
-            pass
+            self._logger.warning("Pipeline shutdown", extra=extra)
+        elif status == "failure":
+             # We log failure here to ensure visibility even if exception handling in caller is silent
+             self._logger.error(
+                 "Pipeline failed",
+                 extra={**extra, "error": str(exc_val)},
+                 exc_info=(exc_type, exc_val, exc_tb)
+             )
