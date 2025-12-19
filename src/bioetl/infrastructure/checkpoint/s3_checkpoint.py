@@ -47,6 +47,10 @@ class S3Checkpoint:
         self.endpoint_url = endpoint_url
         self.is_local = not endpoint_url
 
+        # Check if we are in test mode with local paths masquerading as buckets
+        if bucket.startswith("/") or bucket.startswith("."):
+            self.is_local = True
+
         if not self.is_local:
             from bioetl.infrastructure.storage.s3_pool import S3ClientPool
 

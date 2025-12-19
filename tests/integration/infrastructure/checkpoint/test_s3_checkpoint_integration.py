@@ -45,9 +45,22 @@ def checkpoint_storage(s3_client):
     """Fixture to create an S3Checkpoint instance configured for moto."""
     # Must provide an endpoint_url for S3Checkpoint to use S3 mode (not local file mode)
     # moto intercepts all boto3 calls so any URL works
+    # However, to avoid connection errors when S3ClientPool tries to connect, we need
+    # to be careful. Moto decorator patches boto3, but S3ClientPool might be creating a
+    # session/client that bypasses or conflicts if not handled correctly.
+    # We pass None as endpoint_url to rely on boto3's default behavior which moto patches.
+    # But S3Checkpoint uses presence of endpoint_url to decide if it's local.
+    # We'll use a valid-looking URL but rely on moto context.
+
+    # IMPORTANT: Since we are using mock_aws context manager in the s3_client fixture,
+    # any boto3 client created within that context (or while it's active) will be mocked.
+    # S3Checkpoint uses S3ClientPool which creates a client.
+
     return S3Checkpoint(
         bucket=TEST_BUCKET,
-        endpoint_url="http://localhost:5000",  # Fake URL - moto intercepts all calls
+        # We must provide endpoint_url to set is_local=False in S3Checkpoint.
+        # Using a standard AWS URL ensures moto intercepts calls correctly.
+        endpoint_url="https://s3.us-east-1.amazonaws.com",
         region=TEST_REGION,
         access_key="testing",
         secret_key="testing",
