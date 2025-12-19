@@ -182,29 +182,14 @@ async def test_health_check_healthy(uniprot_client):
 
 
 @respx.mock
-async def test_health_check_degraded(uniprot_client):
-    """Test health check returns DEGRADED on non-200."""
-    # Note: UnifiedHTTPClient retries on 500, so we need to mock multiple failures or ensure it eventually returns 500
-    # But here we want to test the logic inside UniProtClient.health_check that handles non-200.
-    # If UnifiedHTTPClient raises RetryExhaustedError (which wraps the last exception),
-    # UniProtClient catches Exception and returns UNHEALTHY.
-    # To test DEGRADED, we need a case where UnifiedHTTPClient returns a response but with a non-200 status code
-    # that is NOT retryable, OR we need to mock the circuit breaker state directly.
-    # However, 500 IS retryable by default in UnifiedHTTPClient.
-    # So let's mock a 404 which is NOT retryable but indicates an issue?
-    # Or better, let's just accept that if the server returns 500 consistently, it's UNHEALTHY in this architecture.
-    # But the test expects DEGRADED.
-    # Let's look at UniProtClient.health_check logic:
-    # if response.status_code == 200: ... else: return HealthStatus.DEGRADED
-    # So we need a status code that is NOT 200 and NOT retryable.
-    # 404 is a good candidate.
-
+async def test_health_check_unhealthy_on_server_error(uniprot_client):
+    """Test health check returns UNHEALTHY on server error (500)."""
     respx.get("https://rest.uniprot.org/rest/beta/health").mock(
-        return_value=Response(404)
+        return_value=Response(500)
     )
-    async with uniprot_client:
-        status = await uniprot_client.health_check()
-    assert status == HealthStatus.DEGRADED
+    status = await uniprot_client.health_check()
+    # 500 triggers retry exhaustion → exception → UNHEALTHY
+    assert status == HealthStatus.UNHEALTHY
 
 
 @respx.mock
