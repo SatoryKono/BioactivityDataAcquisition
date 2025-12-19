@@ -4,6 +4,7 @@ import json
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
+import pyarrow as pa
 import pytest
 
 from bioetl.domain.types import BatchID, DQStatus
@@ -11,6 +12,20 @@ from bioetl.infrastructure.quarantine.unified_quarantine import (
     UnifiedQuarantine,
     _quote_literal,
 )
+
+
+def extract_record_from_call(mock_call):
+    """Extract record dict from mock write_deltalake call."""
+    call_kwargs = mock_call.call_args.kwargs
+    data = call_kwargs["data"]
+    # Read from RecordBatchReader
+    batches = list(data)
+    if batches:
+        table = pa.Table.from_batches(batches)
+        records = table.to_pylist()
+        if records:
+            return records[0]
+    return None
 
 
 @pytest.mark.unit
@@ -79,17 +94,20 @@ def batch_id():
 def mock_write_deltalake():
     """Mock write_deltalake function."""
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.write_deltalake"
+        "bioetl.infrastructure.quarantine.unified.write_deltalake"
     ) as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_delta_table():
-    """Mock DeltaTable class."""
+    """Mock DeltaTable class in all modules."""
+    mock = MagicMock()
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.DeltaTable"
-    ) as mock:
+        "bioetl.infrastructure.quarantine.unified.DeltaTable", mock
+    ), patch(
+        "bioetl.infrastructure.quarantine.operations.DeltaTable", mock
+    ):
         yield mock
 
 
@@ -148,8 +166,7 @@ class TestUnifiedQuarantineWrite:
             error_details={"field": "value", "reason": "Invalid type"},
         )
 
-        call_kwargs = mock_write_deltalake.call_args.kwargs
-        record = call_kwargs["data"][0]
+        record = extract_record_from_call(mock_write_deltalake)
         error_details = json.loads(record["error_details"])
         assert error_details["field"] == "value"
         assert error_details["reason"] == "Invalid type"
@@ -167,8 +184,7 @@ class TestUnifiedQuarantineWrite:
             bronze_file_uri="s3://bronze/v1/file.jsonl.zst",
         )
 
-        call_kwargs = mock_write_deltalake.call_args.kwargs
-        record = call_kwargs["data"][0]
+        record = extract_record_from_call(mock_write_deltalake)
         assert record["bronze_file_uri"] == "s3://bronze/v1/file.jsonl.zst"
 
     @pytest.mark.asyncio
@@ -186,8 +202,7 @@ class TestUnifiedQuarantineWrite:
             bronze_batch_id=batch_id,
         )
 
-        call_kwargs = mock_write_deltalake.call_args.kwargs
-        record = call_kwargs["data"][0]
+        record = extract_record_from_call(mock_write_deltalake)
         assert len(record["payload"]) <= UnifiedQuarantine.MAX_PAYLOAD_SIZE
         assert record["payload_truncated"] is True
 
@@ -205,8 +220,7 @@ class TestUnifiedQuarantineWrite:
             bronze_batch_id=batch_id,
         )
 
-        call_kwargs = mock_write_deltalake.call_args.kwargs
-        record = call_kwargs["data"][0]
+        record = extract_record_from_call(mock_write_deltalake)
         assert record["payload_truncated"] is False
 
     @pytest.mark.asyncio
@@ -244,8 +258,7 @@ class TestUnifiedQuarantineWrite:
             bronze_batch_id=batch_id,
         )
 
-        call_kwargs = mock_write_deltalake.call_args.kwargs
-        record = call_kwargs["data"][0]
+        record = extract_record_from_call(mock_write_deltalake)
         assert record["dq_status"] == DQStatus.NEW.value
 
 
