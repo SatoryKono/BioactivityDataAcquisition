@@ -1,5 +1,15 @@
+"""Base Pipeline Factory (Legacy).
+
+This module provides the legacy class-based factory pattern.
+For new pipelines, prefer using GenericPipelineFactory from generic_factory.py.
+
+.. deprecated:: 0.2.0
+    Use :class:`GenericPipelineFactory` instead for new pipelines.
+"""
+
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
@@ -21,11 +31,50 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
 
 class BasePipelineFactory(Generic[TPipeline], ABC):
-    """Base factory for creating pipelines."""
+    """Base factory for creating pipelines.
+
+    .. deprecated:: 0.2.0
+        This class-based pattern is deprecated. Use :class:`GenericPipelineFactory`
+        from :mod:`bioetl.composition.factories.generic_factory` instead.
+
+        Migration example::
+
+            # Old pattern (deprecated):
+            class MyPipelineFactory(BasePipelineFactory[MyPipeline]):
+                pipeline_name = "my_pipeline"
+                pipeline_class = MyPipeline
+                silver_schema = MY_SCHEMA
+
+                @classmethod
+                def create_data_source(cls, settings, config, filter_config=None):
+                    return MyDataSource()
+
+            # New pattern (recommended):
+            from bioetl.composition.factories import GenericPipelineFactory
+
+            factory = GenericPipelineFactory(
+                pipeline_name="my_pipeline",
+                pipeline_class=MyPipeline,
+                provider="my_provider",
+                silver_schema=MY_SCHEMA,
+            )
+            PipelineRegistry.register_factory(factory)
+    """
 
     pipeline_name: str
     pipeline_class: type[TPipeline]
     silver_schema: pa.Schema | None = None
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        """Emit deprecation warning when subclassing."""
+        super().__init_subclass__(**kwargs)
+        warnings.warn(
+            f"Subclassing BasePipelineFactory is deprecated. "
+            f"Use GenericPipelineFactory instead for '{cls.__name__}'. "
+            f"See bioetl.composition.factories.generic_factory for the new pattern.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     @classmethod
     @abstractmethod
