@@ -154,9 +154,9 @@ class TestPubChemCompoundPipelineFactory:
             filter_config=None,
         )
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.generic_pipeline_factory.BaseServicesFactory")
     @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_pipeline_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -253,9 +253,9 @@ class TestPubChemCompoundPipelineFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.composition.factories.base_pipeline_factory.yaml_config_to_domain")
-    @patch("bioetl.composition.factories.base_pipeline_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.base_pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.generic_pipeline_factory.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.generic_pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.generic_pipeline_factory.BaseServicesFactory")
     @patch("bioetl.infrastructure.factories.data_sources.DataSourceFactory.create")
     def test_create_with_services(
         self,
@@ -271,7 +271,7 @@ class TestPubChemCompoundPipelineFactory:
         """Test create_with_services creates pipeline."""
         from bioetl.application.core.pipeline_config import PipelineRuntimeConfig
         from bioetl.composition.factories.pubchem_compound import (
-            PubChemCompoundPipelineFactory,
+            pubchem_compound_factory,
         )
 
         mock_load_config.return_value = mock_pipeline_config
@@ -280,13 +280,13 @@ class TestPubChemCompoundPipelineFactory:
         mock_yaml_to_domain.return_value = mock_domain_config
 
         # Save and patch pipeline_class on the factory to use our mock
-        original_class = PubChemCompoundPipelineFactory.pipeline_class
+        original_class = pubchem_compound_factory.pipeline_class
         mock_pipeline_class = MagicMock()
-        PubChemCompoundPipelineFactory.pipeline_class = mock_pipeline_class
+        pubchem_compound_factory.pipeline_class = mock_pipeline_class
 
         try:
             runtime = PipelineRuntimeConfig(run_type=RunType.INCREMENTAL)
-            PubChemCompoundPipelineFactory.create_with_services(
+            pubchem_compound_factory.create_with_services(
                 runtime=runtime,
                 settings=mock_settings,
                 logger=mock_logger,
@@ -299,7 +299,7 @@ class TestPubChemCompoundPipelineFactory:
             )
         finally:
             # Restore original class
-            PubChemCompoundPipelineFactory.pipeline_class = original_class
+            pubchem_compound_factory.pipeline_class = original_class
 
 
 # UniProtProteinPipelineFactory tests are covered in tests/unit/pipelines/test_uniprot.py

@@ -1,27 +1,62 @@
+"""ChEMBL Activity pipeline factory.
+
+Migrated to use GenericPipelineFactory for reduced boilerplate.
+"""
+
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
-from bioetl.infrastructure.factories.data_sources import DataSourceFactory
 from bioetl.application.registry import PipelineRegistry
+from bioetl.composition.factories.generic_pipeline_factory import (
+    GenericPipelineFactory,
+)
 from bioetl.infrastructure.schemas.silver import CHEMBL_ACTIVITY_SCHEMA
-from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
-from bioetl.composition.factories.http_client_factory import HttpClientFactory
 
 if TYPE_CHECKING:
+    from bioetl.domain.filter_config import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.domain.ports import DataSourcePort
-    from bioetl.domain.filter_config import InputFilterConfig
 
 
-class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline]):
-    """Factory for creating ChEMBL Activity pipelines."""
+# New factory using GenericPipelineFactory
+chembl_activity_factory = GenericPipelineFactory(
+    pipeline_class=ChEMBLActivityPipeline,
+    pipeline_name="chembl_activity",
+    provider="chembl",
+    silver_schema=CHEMBL_ACTIVITY_SCHEMA,
+)
+
+
+# Register with PipelineRegistry
+PipelineRegistry.register(
+    "chembl_activity", chembl_activity_factory, CHEMBL_ACTIVITY_SCHEMA
+)
+
+
+# Deprecated class for backwards compatibility
+class ChEMBLActivityPipelineFactory:
+    """Factory for creating ChEMBL Activity pipelines.
+
+    .. deprecated:: 1.0
+        Use ``chembl_activity_factory`` instead. This class will be removed
+        in a future version.
+    """
 
     pipeline_name = "chembl_activity"
     pipeline_class = ChEMBLActivityPipeline
     silver_schema = CHEMBL_ACTIVITY_SCHEMA
+
+    def __init__(self) -> None:
+        warnings.warn(
+            "ChEMBLActivityPipelineFactory is deprecated. "
+            "Use chembl_activity_factory (GenericPipelineFactory) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     @classmethod
     def create_data_source(
@@ -30,36 +65,47 @@ class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline])
         pipeline_config: PipelineYamlConfig,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create ChEMBL data source with optional CSV filtering.
+        """Create ChEMBL data source.
 
-        Args:
-            settings: Application settings
-            pipeline_config: Pipeline configuration
-            filter_config: Optional input filter configuration
-
-        Returns:
-            DataSourcePort, wrapped with FilteredDataSource if filter_config is enabled
+        .. deprecated:: 1.0
+            Use chembl_activity_factory.create_data_source() instead.
         """
-        # ChEMBL specific HTTP client setup using factory
-        http_client = HttpClientFactory.create_for_provider("chembl", settings)
-        base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
+        warnings.warn(
+            "ChEMBLActivityPipelineFactory.create_data_source is deprecated. "
+            "Use chembl_activity_factory.create_data_source() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return chembl_activity_factory.create_data_source(
+            settings, pipeline_config, filter_config
+        )
 
-        # Wrap with FilteredDataSource if filter is enabled
-        if filter_config and filter_config.enabled:
-            from bioetl.application.core.filtered_data_source import FilteredDataSource
-            from bioetl.infrastructure.adapters.input.csv_filter_reader import (
-                CsvFilterReader,
-            )
+    @classmethod
+    def build_services(cls, *args, **kwargs):
+        """Build services.
 
-            return FilteredDataSource(
-                data_source=base_adapter,
-                filter_reader=CsvFilterReader(),
-                filter_config=filter_config,
-            )
+        .. deprecated:: 1.0
+            Use chembl_activity_factory.build_services() instead.
+        """
+        warnings.warn(
+            "ChEMBLActivityPipelineFactory.build_services is deprecated. "
+            "Use chembl_activity_factory.build_services() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return chembl_activity_factory.build_services(*args, **kwargs)
 
-        return base_adapter
+    @classmethod
+    def create_with_services(cls, *args, **kwargs):
+        """Create pipeline with services.
 
-
-PipelineRegistry.register(
-    "chembl_activity", ChEMBLActivityPipelineFactory, CHEMBL_ACTIVITY_SCHEMA
-)
+        .. deprecated:: 1.0
+            Use chembl_activity_factory.create_with_services() instead.
+        """
+        warnings.warn(
+            "ChEMBLActivityPipelineFactory.create_with_services is deprecated. "
+            "Use chembl_activity_factory.create_with_services() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return chembl_activity_factory.create_with_services(*args, **kwargs)
