@@ -110,6 +110,7 @@ markers = [
     "e2e: End-to-end tests (slow, requires Docker)",
     "slow: Slow tests",
     "security: Security tests",
+    "vcr: VCR.py recorded HTTP interactions",
 ]
 asyncio_mode = "auto"
 filterwarnings = [
