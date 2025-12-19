@@ -44,34 +44,92 @@ class BaseEntity:
 
 @dataclass(frozen=True, kw_only=True)
 class Activity(BaseEntity):
-    """Represents a bioactivity measurement (ChEMBL Activity)."""
+    """Represents a bioactivity measurement (ChEMBL Activity).
 
+    Contains all fields from ChEMBL activity API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/activity
+    """
+
+    # Primary identifier
     activity_id: str
-    molecule_id: str  # molecule_chembl_id
-    target_id: str    # target_chembl_id
-    assay_id: str     # assay_chembl_id
 
-    # Standardized values
+    # Core identifiers
+    molecule_chembl_id: str
+    target_chembl_id: Optional[str] = None
+    assay_chembl_id: Optional[str] = None
+    document_chembl_id: Optional[str] = None
+    record_id: Optional[int] = None
+    src_id: Optional[int] = None
+
+    # Molecule data
+    canonical_smiles: Optional[str] = None
+    molecule_pref_name: Optional[str] = None
+    parent_molecule_chembl_id: Optional[str] = None
+
+    # Target data
+    target_pref_name: Optional[str] = None
+    target_organism: Optional[str] = None
+    target_tax_id: Optional[str] = None
+
+    # Assay data
+    assay_type: Optional[str] = None
+    assay_description: Optional[str] = None
+    assay_variant_accession: Optional[str] = None
+    assay_variant_mutation: Optional[str] = None
+
+    # BAO (BioAssay Ontology) annotations
+    bao_endpoint: Optional[str] = None
+    bao_format: Optional[str] = None
+    bao_label: Optional[str] = None
+
+    # Raw activity values
+    type: Optional[str] = None
+    value: Optional[float] = None
+    units: Optional[str] = None
+    relation: Optional[str] = None
+    upper_value: Optional[float] = None
+    text_value: Optional[str] = None
+
+    # Standardized activity values
     standard_type: Optional[str] = None
     standard_value: Optional[float] = None
     standard_units: Optional[str] = None
     standard_relation: Optional[str] = None
-    pchembl_value: Optional[float] = None
+    standard_upper_value: Optional[float] = None
+    standard_text_value: Optional[str] = None
+    standard_flag: Optional[int] = None
 
-    # Contextual data
+    # Derived metrics
+    pchembl_value: Optional[float] = None
+    ligand_efficiency: Optional[str] = None  # JSON string of dict
+
+    # Units ontology
+    qudt_units: Optional[str] = None
+    uo_units: Optional[str] = None
+
+    # Document/Publication data
+    document_journal: Optional[str] = None
+    document_year: Optional[int] = None
+
+    # Quality annotations
     activity_comment: Optional[str] = None
     data_validity_comment: Optional[str] = None
-    assay_type: Optional[str] = None
-    assay_description: Optional[str] = None  # Added based on gap analysis
-    document_chembl_id: Optional[str] = None
-    document_year: Optional[int] = None
+    data_validity_description: Optional[str] = None
+    potential_duplicate: Optional[int] = None
+
+    # Action and properties
+    action_type: Optional[str] = None
+    activity_properties: Optional[str] = None  # JSON string of list
+    toid: Optional[int] = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
         if not self.activity_id:
             raise ValueError("Activity ID is required")
+        if not self.molecule_chembl_id:
+            raise ValueError("Molecule ChEMBL ID is required")
 
-        # Invariant: If pchembl_value is present, it must be positive
+        # Invariant: If pchembl_value is present, it must be non-negative
         if self.pchembl_value is not None and self.pchembl_value < 0:
             raise ValueError(f"pChemBL value must be non-negative, got {self.pchembl_value}")
 

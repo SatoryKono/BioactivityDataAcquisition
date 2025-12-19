@@ -44,8 +44,12 @@ class TestAWSSettings:
     def test_region_property(self, monkeypatch) -> None:
         """Test region alias property."""
         monkeypatch.delenv("AWS_DEFAULT_REGION", raising=False)
+        monkeypatch.delenv("AWS_REGION", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_REGION", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_DEFAULT_REGION", raising=False)
 
-        settings = AWSSettings(default_region="eu-west-1", _env_file=None)
+        # Must use validation_alias name, not field name
+        settings = AWSSettings(aws_default_region="eu-west-1", _env_file=None)
 
         assert settings.region == "eu-west-1"
         assert settings.region == settings.default_region
@@ -60,14 +64,20 @@ class TestAWSSettings:
         settings = AWSSettings(_env_file=None)
         assert settings.is_configured is False
 
-        settings_partial = AWSSettings(access_key_id="key", _env_file=None)
+        # Must use validation_alias name
+        settings_partial = AWSSettings(aws_access_key_id="key", _env_file=None)
         assert settings_partial.is_configured is False
 
-    def test_is_configured_true(self) -> None:
+    def test_is_configured_true(self, monkeypatch) -> None:
         """Test is_configured returns True when credentials present."""
+        monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("AWS_SECRET_ACCESS_KEY", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_SECRET_ACCESS_KEY", raising=False)
+        # Must use validation_alias names, not field names
         settings = AWSSettings(
-            access_key_id="AKIAIOSFODNN7EXAMPLE",
-            secret_access_key=SecretStr("secret"),
+            aws_access_key_id="AKIAIOSFODNN7EXAMPLE",
+            aws_secret_access_key=SecretStr("secret"),
             _env_file=None,
         )
         assert settings.is_configured is True
@@ -247,12 +257,20 @@ class TestSettings:
         settings = Settings(aws=aws, test_mode=True, _env_file=None)
         assert settings.storage_options is None
 
-    def test_storage_options_with_endpoint(self) -> None:
+    def test_storage_options_with_endpoint(self, monkeypatch) -> None:
         """Test storage_options with endpoint configured."""
+        monkeypatch.delenv("AWS_ENDPOINT_URL", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ENDPOINT_URL", raising=False)
+        monkeypatch.delenv("AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_ACCESS_KEY_ID", raising=False)
+        monkeypatch.delenv("AWS_SECRET_ACCESS_KEY", raising=False)
+        monkeypatch.delenv("BIOETL_AWS_SECRET_ACCESS_KEY", raising=False)
+
+        # Must use validation_alias names, not field names
         aws = AWSSettings(
-            endpoint_url="http://localhost:9000",
-            access_key_id="access",
-            secret_access_key=SecretStr("secret"),
+            aws_endpoint_url="http://localhost:9000",
+            aws_access_key_id="access",
+            aws_secret_access_key=SecretStr("secret"),
             _env_file=None,
         )
         settings = Settings(aws=aws, test_mode=True, _env_file=None)
@@ -263,28 +281,33 @@ class TestSettings:
         assert options["AWS_ACCESS_KEY_ID"] == "access"
         assert options["AWS_SECRET_ACCESS_KEY"] == "secret"
 
-    def test_dev_env_requires_endpoint(self, monkeypatch) -> None:
-        """Test that dev env requires endpoint_url."""
+    def test_dev_env_allows_no_endpoint(self, monkeypatch) -> None:
+        """Test that dev env allows no endpoint_url (uses local storage)."""
         # Clear all AWS env vars to ensure no endpoint is set
         monkeypatch.delenv("BIOETL_ENV", raising=False)
         monkeypatch.delenv("AWS_ENDPOINT_URL", raising=False)
         monkeypatch.delenv("BIOETL_AWS_ENDPOINT_URL", raising=False)
 
+        get_settings.cache_clear()
+
         aws = AWSSettings(_env_file=None)
-        # Without test_mode, dev requires endpoint
-        with pytest.raises(ValueError, match="endpoint_url must be set"):
-            Settings(env="dev", test_mode=False, aws=aws, _env_file=None)
+        # Dev without endpoint_url is allowed (local storage mode)
+        settings = Settings(env="dev", test_mode=False, aws=aws, _env_file=None)
+        assert settings.env == "dev"
+        assert settings.storage_options is None  # No S3 storage configured
 
     def test_staging_env_no_endpoint_required(self, monkeypatch) -> None:
         """Test that staging env doesn't require endpoint."""
         monkeypatch.setenv("BIOETL_ENV", "staging")
-        settings = Settings(env="staging")
+        get_settings.cache_clear()
+        settings = Settings()
         assert settings.env == "staging"
 
     def test_prod_env_no_endpoint_required(self, monkeypatch) -> None:
         """Test that prod env doesn't require endpoint."""
         monkeypatch.setenv("BIOETL_ENV", "prod")
-        settings = Settings(env="prod")
+        get_settings.cache_clear()
+        settings = Settings()
         assert settings.env == "prod"
 
 
