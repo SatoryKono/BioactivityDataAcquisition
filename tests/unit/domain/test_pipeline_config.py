@@ -251,12 +251,12 @@ class TestPipelineConfig:
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id", "assay_id"],
+            primary_keys=["activity_id", "assay_chembl_id"],
             silver_table="chembl_activity_silver",
             gold_table="chembl_activity_gold",
             batch_size=250,
             checkpoint_interval=2500,
-            fields=["activity_id", "assay_id", "standard_value", "pchembl_value"],
+            fields=["activity_id", "assay_chembl_id", "standard_value", "pchembl_value"],
             watermark_field="modified_on",
             dq=dq,
         )
@@ -264,7 +264,7 @@ class TestPipelineConfig:
         assert config.pipeline_name == "chembl_activity"
         assert config.provider == "chembl"
         assert config.entity_type == "activity"
-        assert config.primary_keys == ["activity_id", "assay_id"]
+        assert config.primary_keys == ["activity_id", "assay_chembl_id"]
         assert config.silver_table == "chembl_activity_silver"
         assert config.gold_table == "chembl_activity_gold"
         assert config.batch_size == 250

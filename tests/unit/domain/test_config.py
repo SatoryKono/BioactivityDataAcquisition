@@ -135,11 +135,11 @@ class TestTableConfig:
     def test_full_configuration(self) -> None:
         """Test with all fields specified."""
         config = TableConfig(
-            primary_keys=["activity_id", "assay_id"],
+            primary_keys=["activity_id", "assay_chembl_id"],
             silver_table="chembl_activity_silver",
             gold_table="chembl_activity_gold",
         )
 
-        assert config.primary_keys == ["activity_id", "assay_id"]
+        assert config.primary_keys == ["activity_id", "assay_chembl_id"]
         assert config.silver_table == "chembl_activity_silver"
         assert config.gold_table == "chembl_activity_gold"
