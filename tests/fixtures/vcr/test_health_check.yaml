@@ -1,0 +1,76 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/0.1.0 (contact@example.com)
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8" ?>
+
+        <!DOCTYPE eSearchResult PUBLIC "-//NLM//DTD esearch 20060628//EN" "https://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060628/esearch.dtd">
+
+        <eSearchResult><Count>7735638</Count><RetMax>1</RetMax><RetStart>0</RetStart><IdList>
+
+        <Id>41413773</Id>
+
+        </IdList><TranslationSet><Translation>     <From>health</From>     <To>"health"[MeSH
+        Terms] OR "health"[All Fields] OR "health''s"[All Fields] OR "healthful"[All
+        Fields] OR "healthfulness"[All Fields] OR "healths"[All Fields]</To>    </Translation></TranslationSet><QueryTranslation>"health"[MeSH
+        Terms] OR "health"[All Fields] OR "health s"[All Fields] OR "healthful"[All
+        Fields] OR "healthfulness"[All Fields] OR "healths"[All Fields]</QueryTranslation></eSearchResult>
+
+        '
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Date:
+      - Fri, 19 Dec 2025 07:22:44 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D322BC45D49D9B5000056193A5B169B.1.1.m_1
+      NCBI-SID:
+      - 4F7B1E48E235D90D_E46DSID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '2'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '748'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -113,3 +113,23 @@ class Protein(BaseEntity):
 
         if self.sequence_length is not None and self.sequence_length <= 0:
             raise ValueError(f"Sequence length must be positive, got {self.sequence_length}")
+
+
+@dataclass(frozen=True, kw_only=True)
+class Publication(BaseEntity):
+    """Represents a scientific publication (e.g., from PubMed)."""
+
+    pmid: str
+    title: str
+    abstract: Optional[str] = None
+    journal: Optional[str] = None
+    publication_year: Optional[int] = None
+    authors: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Post-initialization validation."""
+        super().__post_init__()
+        if not self.pmid:
+            raise ValueError("Publication PMID is required")
+        if not self.title:
+            raise ValueError("Publication title is required")

@@ -42,8 +42,19 @@ class CsvExportConfig(BaseModel):
     encoding: str = "utf-8"
 
 
+class SourceConfig(BaseModel):
+    """Configuration for the data source."""
+    load_strategy: Literal["full", "incremental"] = "full"
+    search_term: str | None = None
+    email: str | None = None
+    api_key: str | None = None
+    watermark_field: str | None = None
+    fields: list[dict[str, str]] = Field(default_factory=list)
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
+
 
     enabled: bool = True
     path: str | None = None
@@ -87,8 +98,8 @@ class PipelineYamlConfig(BaseModel):
     # Medallion Layers
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
 
-    # Source Config (Preserved from merge)
-    source: dict[str, Any] = Field(default_factory=dict)
+    # Source Config
+    source: SourceConfig = Field(default_factory=SourceConfig)
 
     @field_validator("batch_size")
     @classmethod

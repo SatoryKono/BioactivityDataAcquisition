@@ -1,368 +1,383 @@
-# Extending BioETL
-*Синхронизировано с RULES.md v5.0 (2025-12-15)*
+# Руководство: Добавление нового провайдера данных
+*Версия 2.0 (Детальное руководство) | Синхронизировано с RULES.md v5.0*
 
-This guide provides step-by-step recipes for adding new providers, pipelines, and services without modifying core code.
+Это руководство проведет вас через весь процесс добавления нового источника данных (провайдера) в BioETL. В качестве примера мы добавим гипотетический провайдер `OpenTargets`.
 
-## Уровни Требований (RFC 2119)
-- **MUST**: Абсолютное требование.
-- **SHOULD**: Сильная рекомендация.
-- **MAY**: На усмотрение разработчика.
+**Цель:** Создать новый пайплайн `open_targets_associations`, который извлекает данные из API OpenTargets, обрабатывает их и сохраняет в Data Lake.
 
-## 1. Adding a new provider via configs and registries
+---
 
-### 1.1. Define the ABC (MUST)
+## Обзор процесса
 
-Location: `src/bioetl/domain/clients/<provider>/contracts.py`
+Добавление нового провайдера включает в себя создание нескольких компонентов в разных слоях архитектуры:
 
-Use the three-layer pattern demonstrated by `DataClientABC`:
+1.  **Адаптер (Infrastructure):** Код, который напрямую взаимодействует с внешним API.
+2.  **Конфигурация (Configs):** YAML-файлы, определяющие параметры пайплайна.
+3.  **Пайплайн (Application):** Класс, который оркестрирует процесс ETL (Extract, Transform, Load).
+4.  **Фабрика (Composition):** Код, который "собирает" пайплайн и его зависимости.
+5.  **Тесты (Tests):** Интеграционные и модульные тесты для обеспечения корректности.
+
+---
+
+### Шаг 1: Создание Адаптера (Adapter)
+
+Адаптер отвечает за всю логику взаимодействия с внешним API: HTTP-запросы, обработка ответов, пагинация и Rate Limiting.
+
+**1.1. Создайте структуру файлов:**
+
+Создайте новый файл для вашего адаптера.
+
+```bash
+touch src/bioetl/infrastructure/adapters/open_targets_client.py
+```
+
+**1.2. Реализуйте Адаптер:**
+
+Откройте `open_targets_client.py` и создайте класс адаптера. Он должен инкапсулировать логику для `fetch` (извлечение данных) и `health_check`.
 
 ```python
-from typing import Protocol, Iterator
-from bioetl.domain.models import Query, RawRecord
+# src/bioetl/infrastructure/adapters/open_targets_client.py
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, AsyncIterator
 
-class DataSourcePort(Protocol):
-    """Port for data source interactions."""
-    
-    def fetch(self, query: Query) -> Iterator[RawRecord]: ...
-    def health_check(self) -> bool: ...
+from bioetl.domain.exceptions import ApiError
+from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import Watermark
+
+OPENTARGETS_API_BASE = "https://api.opentargets.io/v3/"
+
+@dataclass
+class OpenTargetsAdapter:
+    """Адаптер для извлечения данных из OpenTargets."""
+    http_client: UnifiedHTTPClient
+    batch_size: int = 100
+
+    provider_name: str = "open_targets"
+
+    async def fetch(
+        self,
+        entity_type: str, # например, "associations"
+        watermark: Watermark | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Извлекает записи из OpenTargets."""
+        # Здесь будет логика пагинации по API OpenTargets
+        # Например, с использованием параметра 'from'
+        offset = 0
+        total_fetched = 0
+        
+        while True:
+            params = {"size": self.batch_size, "from": offset}
+            url = f"{OPENTARGETS_API_BASE}/platform/public/association/filter"
+            
+            try:
+                response = await self.http_client.post(url, json={"target": ["CHEMBL123"]}) # Пример POST-запроса
+                records = response.json().get("data", [])
+
+                if not records:
+                    break
+
+                for record in records:
+                    yield record
+                    total_fetched += 1
+                    if limit and total_fetched >= limit:
+                        return
+
+                offset += len(records)
+
+            except Exception as e:
+                raise ApiError(f"Ошибка API OpenTargets: {e}") from e
+
+    async def health_check(self) -> HealthStatus:
+        """Проверяет доступность API OpenTargets."""
+        try:
+            # OpenTargets не имеет специального health-endpoint,
+            # поэтому делаем легкий запрос для проверки.
+            response = await self.http_client.get(f"{OPENTARGETS_API_BASE}/platform/public/utils/stats")
+            return HealthStatus.HEALTHY if response.status_code == 200 else HealthStatus.UNHEALTHY
+        except Exception:
+            return HealthStatus.UNHEALTHY
+
+    async def aclose(self) -> None:
+        pass
 ```
 
-### 1.2. Create a default factory (MUST)
+---
 
-Location: `src/bioetl/infrastructure/clients/<provider>/factories.py`
+### Шаг 2: Создание Конфигурации Пайплайна
 
-Expose `default_<provider>_<entity>()`:
+Конфигурация определяет поведение пайплайна без изменения кода.
 
-```python
-def default_chembl_activity() -> ChemblActivityClientImpl:
-    """Factory for ChEMBL activity client with default configuration."""
-    return ChemblActivityClientImpl(
-        base_url=os.environ.get("BIOETL_CHEMBL_BASE_URL", "https://www.ebi.ac.uk"),
-        timeout=30,
-        rate_limit=RateLimitConfig(requests_per_second=5, burst=10),
-    )
+**2.1. Создайте файл конфигурации:**
+
+```bash
+mkdir -p configs/pipelines/open_targets
+touch configs/pipelines/open_targets/associations.yaml
 ```
 
-### 1.3. Implement the client (MUST)
+**2.2. Заполните конфигурацию:**
 
-Location: `src/bioetl/infrastructure/clients/<provider>/impl/`
-
-Classes **MUST** be suffixed `Impl`:
-
-```python
-class ChemblActivityClientHTTPImpl(DataSourcePort):
-    """HTTP implementation of ChEMBL activity client."""
-    
-    def fetch(self, query: Query) -> Iterator[RawRecord]:
-        # Implementation with retry, circuit breaker, rate limiting
-        ...
-    
-    def health_check(self) -> bool:
-        # GET /chembl/api/data/status.json
-        ...
-```
-
-### 1.4. Register in YAML (MUST)
-
-**ABC Registry** (`src/bioetl/infrastructure/clients/base/abc_registry.yaml`):
-```yaml
-chembl_activity:
-  abc: bioetl.domain.clients.chembl.contracts.ChemblActivityProtocol
-  default: bioetl.infrastructure.clients.chembl.factories.default_chembl_activity
-```
-
-**Impl Mapping** (`src/bioetl/infrastructure/clients/base/abc_impls.yaml`):
-```yaml
-chembl_activity:
-  http: bioetl.infrastructure.clients.chembl.impl.ChemblActivityClientHTTPImpl
-  mock: bioetl.infrastructure.clients.chembl.impl.ChemblActivityClientMockImpl
-```
-
-Keys **MUST** be in `lower_snake_case`.
-
-### 1.5. Expose in provider registry (MUST)
-
-Location: `src/bioetl/infrastructure/config/provider_registry.py`
-
-Register for DI container resolution from configs.
-
-## 2. Wiring pipeline configs
-
-### 2.1. Provider-level config (SHOULD)
-
-Location: `configs/providers/<provider>.yaml`
-
-```yaml
-# configs/providers/chembl.yaml
-chembl:
-  base_url: https://www.ebi.ac.uk
-  rate_limit:
-    requests_per_second: 5
-    burst: 10
-  health_check:
-    endpoint: /chembl/api/data/status.json
-    timeout: 5
-  circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-```
-
-### 2.2. Pipeline config (MUST)
-
-Location: `configs/pipelines/<provider>/<entity>.yaml`
+Откройте `associations.yaml` и определите параметры.
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
-pipeline:
-  name: activity_chembl
-  provider: chembl
-  entity: activity
+# configs/pipelines/open_targets/associations.yaml
+pipeline_name: open_targets_associations
+provider: open_targets
+entity_type: associations
+version: "1.0.0"
+description: "Извлекает 'target-disease associations' из OpenTargets."
 
+primary_keys: ["id"]
+silver_table: "open_targets_associations"
+
+# Настройки для извлечения данных
 source:
-  type: api
-  load_strategy: incremental
-  watermark_field: updated_at
+  load_strategy: full # OpenTargets не поддерживает инкрементальную загрузку по дате
+  watermark_field: id # Используем ID для возобновления в случае сбоя
 
-transform:
-  version: "1.0.0"
-  steps:
-    - normalize_units
-    - validate_smiles
-    - deduplicate
-
+# Настройки для сохранения данных
 sink:
+  bronze:
+    path: "data/output/bronze"
+    format: jsonl
   silver:
-    path: s3://bioetl/silver/chembl/activity/
+    path: "data/output/silver"
     format: delta
     mode: merge
-    primary_key: [id]
-    partition_by: [year, month]
-    classification: public
-    forensic_retention: false
-
+    primary_key: ["id"]
   gold:
-    path: s3://bioetl/gold/chembl/activity_aggregated/
-    format: delta
-    mode: overwrite
-
-dq_rules:
-  soft_fail_threshold: 0.05
-  hard_fail_threshold: 0.20
-
-circuit_breaker:
-  failure_threshold: 5
-  recovery_timeout: 300
-
-rate_limit:
-  requests_per_second: 5
-  burst: 10
-
-backfill:
-  lock_timeout: 300
-  wait_for_lock: false
+    enabled: false # Для этого примера золотой слой не создаем
 ```
 
-### 2.3. Pipeline modules (MUST)
+---
 
-Location: `src/bioetl/pipelines/<provider>/<entity>/`
+### Шаг 3: Создание Класса Пайплайна (Application)
 
-Stage names **MUST** follow the sequence:
-- `extract.py`
-- `transform.py`
-- `validate.py`
-- `export.py` (or `write.py`)
+Этот класс содержит бизнес-логику трансформации данных.
 
-### 2.4. Pipeline documentation (MUST)
+**3.1. Создайте файл пайплайна:**
 
-Location: `docs/application/pipelines/<provider>/<entity>/`
-
-Naming: `NN-<entity>-<provider>-<topic>.md`
-
-Example:
-- `01-activity-chembl-overview.md`
-- `02-activity-chembl-schema.md`
-- `03-activity-chembl-transform.md`
-
-## 3. Health Check Integration (MUST)
-
-Every new provider **MUST** implement health check:
-
-| Провайдер | Endpoint | Timeout |
-|-----------|----------|---------|
-| ChEMBL | `GET /chembl/api/data/status.json` | 5s |
-| PubChem | `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` | 5s |
-| UniProt | `GET /rest/beta/health` | 5s |
-| Others | Generic Probe (lightweight GET) | 5s |
-
-**Provider Health States**:
-| Status | Условие | Действие |
-|--------|---------|----------|
-| Healthy | 0 errors за 5 мин | Normal |
-| Degraded | 1-2 consecutive errors | Timeout ×2, batch_size ÷2 |
-| Unhealthy | ≥3 errors | Pause, Alert P2 |
-
-## 4. Creating new services or hooks
-
-### 4.1. Reusable services (SHOULD)
-
-Location: `src/bioetl/infrastructure/<adapter_folder>/`
-
-Examples:
-- `observability/`
-- `logging/`
-- `transform/`
-
-Module names: `snake_case`. Classes: `PascalCase`.
-
-### 4.2. Middleware and hooks (MAY)
-
-Location: `src/bioetl/infrastructure/clients/base/middleware.py`
-
-Or provider-specific: `src/bioetl/infrastructure/clients/<provider>/middleware.py`
-
-```python
-class RateLimitMiddleware:
-    """Middleware for rate limiting API requests."""
-    
-    def __init__(self, token_bucket: TokenBucket):
-        self._bucket = token_bucket
-    
-    async def __call__(self, request: Request) -> Response:
-        await self._bucket.acquire()
-        return await request.send()
+```bash
+mkdir -p src/bioetl/application/pipelines/open_targets
+touch src/bioetl/application/pipelines/open_targets/__init__.py
+touch src/bioetl/application/pipelines/open_targets/associations.py
 ```
 
-### 4.3. Export public symbols (SHOULD)
+**3.2. Реализуйте логику трансформации:**
 
-Use `__all__` for container-resolvable exports without editing core modules.
-
-## 5. Leveraging DI and container factories
-
-### 5.1. YAML registries (MUST)
-
-Bind implementations through `abc_registry.yaml` and `abc_impls.yaml`. DI loader reads these at runtime.
-
-### 5.2. Provider factories (SHOULD)
-
-Inject via configuration:
+Откройте `associations.py` и напишите код для преобразования сырых записей (Bronze) в очищенный формат (Silver).
 
 ```python
-# src/bioetl/infrastructure/clients/chembl/factories.py
-def create_chembl_client(config: ChemblConfig) -> ChemblClientImpl:
-    return ChemblClientImpl(
-        request_builder=ChemblRequestBuilder(config.base_url),
-        paginator=ChemblPaginator(config.page_size),
-        response_parser=ChemblResponseParser(),
-        rate_limiter=TokenBucket(config.rate_limit),
-        circuit_breaker=CircuitBreaker(config.circuit_breaker),
-    )
+# src/bioetl/application/pipelines/open_targets/associations.py
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.application.core.base import BasePipeline
+from bioetl.domain.entities import Association # Предполагаем, что такая сущность есть
+from bioetl.domain.transformations import generate_content_hash, generate_entity_id
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
+
+class OpenTargetsAssociationsPipeline(BasePipeline):
+    """Пайплайн для данных 'associations' из OpenTargets."""
+
+    async def transform_bronze_to_silver(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+    ) -> SilverRecord | None:
+        """Трансформирует сырую запись в формат Silver."""
+        association_id = record.get("id")
+        if not association_id:
+            return None
+
+        # 1. Подготовка данных
+        business_data = {
+            "association_id": str(association_id),
+            "target_id": record.get("target", {}).get("id"),
+            "disease_id": record.get("disease", {}).get("id"),
+            "score": record.get("association_score", {}).get("overall"),
+        }
+
+        # 2. Создание доменной сущности для валидации и бизнес-логики
+        try:
+            entity_id = generate_entity_id(
+                record={"association_id": str(association_id)},
+                provider=self.provider,
+                id_field="association_id",
+            )
+            content_hash = generate_content_hash(business_data, self.provider)
+
+            # entity = Association(entity_id=entity_id, content_hash=content_hash, **business_data)
+        except ValueError as e:
+            self.logger.warning("Ошибка валидации", error=str(e), id=association_id)
+            return None
+
+        # 3. Преобразование в SilverRecord (словарь для записи)
+        silver_record: dict[str, Any] = {
+            "entity_id": entity_id,
+            "content_hash": content_hash,
+            "association_id": business_data["association_id"],
+            "target_id": business_data["target_id"],
+            "disease_id": business_data["disease_id"],
+            "association_score": business_data["score"],
+            "_run_id": str(context.run_id),
+            "_run_type": str(context.run_type.value),
+            "_ingestion_ts": context.run_start_time.isoformat(),
+        }
+
+        return cast(SilverRecord, silver_record)
 ```
 
-### 5.3. Deterministic configs (MUST)
+---
 
-| Requirement | Example |
-|-------------|---------|
-| Timeouts | `timeout: 30` |
-| Retries | `max_attempts: 3` |
-| Ordering | `sort_keys: true` |
-| Secrets | `${BIOETL_CHEMBL_API_KEY}` |
+### Шаг 4: Создание Фабрики (Composition)
 
-Secrets **MUST NOT** be hardcoded. Only env references.
+Фабрика — это клей, который соединяет конфигурацию, адаптер и пайплайн вместе.
 
-## 6. Schema Registration (MUST)
+**4.1. Создайте файл фабрики:**
 
-### 6.1. Pandera Schema
-
-Location: `src/bioetl/domain/schemas/<provider>/<entity>.py`
-
-```python
-import pandera as pa
-from pandera.typing import Series
-
-class ActivitySchema(pa.DataFrameModel):
-    """Schema for ChEMBL activity data."""
-    
-    id: Series[str] = pa.Field(nullable=False)
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=True)
-    standard_value: Series[float] = pa.Field(nullable=True, ge=0)
-    standard_units: Series[str] = pa.Field(nullable=True)
-    
-    class Config:
-        strict = True
-        ordered = True
+```bash
+touch src/bioetl/composition/factories/open_targets_associations.py
 ```
 
-### 6.2. Data Contract (MUST for Gold)
+**4.2. Реализуйте фабрику и зарегистрируйте пайплайн:**
 
-Location: `docs/contracts/gold/<entity>.json`
-
-Versioning: `{entity}_v{major}.{minor}`
-
-## 7. Quarantine Integration (MUST)
-
-All pipelines **MUST** route DQ failures to `common.quarantine`:
+Фабрика должна уметь создавать экземпляр пайплайна и его зависимостей (включая наш новый адаптер). В конце файла пайплайн регистрируется в `PipelineRegistry`, чтобы CLI мог его найти.
 
 ```python
-async def handle_dq_error(
-    record: RawRecord,
-    error: ValidationError,
-    batch_id: UUID,
-) -> None:
-    await quarantine_writer.write(
-        QuarantineRecord(
-            ingestion_ts=datetime.utcnow(),
-            pipeline=f"{provider}_{entity}",
-            error_code=error.code,
-            payload=record.to_json()[:64*1024],  # Truncate to 64KB
-            payload_hash=hash_record(record),
-            bronze_batch_id=batch_id,
-            dq_status=DQStatus.NEW,
+# src/bioetl/composition/factories/open_targets_associations.py
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+from bioetl.application.pipelines.open_targets.associations import OpenTargetsAssociationsPipeline
+from bioetl.application.registry import PipelineRegistry
+from bioetl.infrastructure.adapters.open_targets_client import OpenTargetsAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.composition.factories.base_pipeline_factory import BasePipelineFactory
+from bioetl.infrastructure.schemas.silver import SOME_GENERIC_SCHEMA # Замените на реальную схему
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import DataSourcePort
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+class OpenTargetsAssociationsPipelineFactory(BasePipelineFactory[OpenTargetsAssociationsPipeline]):
+    """Фабрика для создания пайплайна OpenTargets Associations."""
+
+    pipeline_name = "open_targets_associations"
+    pipeline_class = OpenTargetsAssociationsPipeline
+    silver_schema = SOME_GENERIC_SCHEMA # Укажите Pandera схему для Silver
+
+    @classmethod
+    def create_data_source(
+        cls,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+    ) -> DataSourcePort:
+        """Создает источник данных OpenTargets."""
+        http_client = UnifiedHTTPClient(
+            TokenBucket(rate=5.0, capacity=10), # Лимиты для OpenTargets
+            CircuitBreaker(provider="open_targets")
         )
-    )
+        return OpenTargetsAdapter(http_client=http_client)
+
+# Регистрация делает пайплайн доступным для запуска через CLI
+PipelineRegistry.register(
+    "open_targets_associations", OpenTargetsAssociationsPipelineFactory, SOME_GENERIC_SCHEMA
+)
 ```
 
-## 8. Backfill Lock Integration (MUST for Backfill)
+---
+
+### Шаг 5: Написание Тестов
+
+Тестирование — обязательный шаг. Для адаптера нужен интеграционный тест с `VCR.py`.
+
+**5.1. Создайте файл теста:**
+
+```bash
+mkdir -p tests/integration/adapters
+touch tests/integration/adapters/test_open_targets.py
+```
+
+**5.2. Напишите интеграционный тест:**
+
+Этот тест делает реальный запрос к API и записывает его в "кассету" (`cassettes/test_open_targets.yaml`), чтобы последующие запуски не требовали доступа к сети.
 
 ```python
-async def acquire_backfill_lock(
-    provider: str,
-    entity: str,
-    run_type: str,
-    run_id: UUID,
-    timeout: int = 300,
-) -> Lock:
-    key = f"lock:{provider}_{entity}"
-    if run_type in ("backfill", "rebuild"):
-        key += ":exclusive"
-    
-    return await redis.acquire_lock(
-        key=key,
-        owner_id=str(run_id),
-        ttl=60,
-        heartbeat_interval=20,
-        max_duration=4 * 3600,
-        wait_timeout=timeout if wait_for_lock else 0,
+# tests/integration/adapters/test_open_targets.py
+import pytest
+from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.open_targets_client import OpenTargetsAdapter
+
+@pytest.mark.integration
+@pytest.mark.vcr
+async def test_fetch_associations():
+    """Тестирует извлечение данных из OpenTargets с записью VCR кассеты."""
+    http_client = UnifiedHTTPClient(
+        TokenBucket(rate=5.0, capacity=10),
+        CircuitBreaker(provider="open_targets")
     )
+    
+    async with http_client:
+        adapter = OpenTargetsAdapter(http_client=http_client, batch_size=2)
+        
+        records = []
+        async for record in adapter.fetch("associations", limit=3):
+            records.append(record)
+            
+        assert len(records) == 3
+        assert "id" in records[0]
+        assert "association_score" in records[0]
+
+@pytest.mark.integration
+@pytest.mark.vcr
+async def test_health_check():
+    """Тестирует health check для OpenTargets."""
+    http_client = UnifiedHTTPClient(
+        TokenBucket(rate=5.0, capacity=10),
+        CircuitBreaker(provider="open_targets")
+    )
+    async with http_client:
+        adapter = OpenTargetsAdapter(http_client=http_client)
+        status = await adapter.health_check()
+        assert status == HealthStatus.HEALTHY
 ```
 
-## Compliance Checklist
+**5.3. Запишите VCR-кассету:**
 
-Before submitting a new provider/pipeline:
+Выполните команду. `VCR.py` перехватит HTTP-запрос и сохранит ответ.
 
-- [ ] ABC defined in `domain/clients/`
-- [ ] Factory in `infrastructure/clients/<provider>/factories.py`
-- [ ] Impl in `infrastructure/clients/<provider>/impl/`
-- [ ] Registered in `abc_registry.yaml` and `abc_impls.yaml`
-- [ ] Pipeline config in `configs/pipelines/<provider>/<entity>.yaml`
-- [ ] Pipeline modules: `extract.py`, `transform.py`, `validate.py`, `export.py`
-- [ ] Pandera schema in `domain/schemas/`
-- [ ] Gold Data Contract in `docs/contracts/gold/`
-- [ ] Health check endpoint configured
-- [ ] Circuit breaker parameters set
-- [ ] Rate limiting implemented
-- [ ] Quarantine integration tested
-- [ ] Backfill lock mechanism (if applicable)
-- [ ] Documentation in `docs/application/pipelines/`
-- [ ] Tests: Unit, Integration (VCR.py), Golden
-- [ ] Coverage ≥85%
+```bash
+# Для записи новой "кассеты"
+pytest tests/integration/adapters/test_open_targets.py --vcr-record=new_episodes
+```
+
+---
+
+### Шаг 6: Запуск Нового Пайплайна
+
+После того как все компоненты созданы и протестированы, вы можете запустить свой новый пайплайн.
+
+```bash
+# Убедитесь, что вы в активированном окружении (.venv)
+# Запускаем пайплайн с лимитом в 100 записей
+python -m bioetl.main run --pipeline open_targets_associations --limit 100
+```
+
+Эта команда найдет ваш пайплайн через `PipelineRegistry`, создаст его с помощью вашей фабрики и запустит процесс ETL.
+
+Поздравляем! Вы успешно расширили BioETL, добавив новый источник данных, строго следуя архитектурным принципам проекта.

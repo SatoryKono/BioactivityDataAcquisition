@@ -466,7 +466,7 @@ def test_pipeline_configs_schema(project_root: Path):
         return
 
     for yaml_file in config_dir.rglob("*.yaml"):
-        with yaml_file.open() as f:
+        with yaml_file.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         # Use source file for merging if present, simplified for test

@@ -274,9 +274,12 @@ class TestYamlConfigToDomain:
         yaml_config.primary_keys = ["id"]
         yaml_config.silver_table = "silver_table"
         yaml_config.gold_table = "gold_table"
+        yaml_config.gold_filter_types = None
         yaml_config.batch_size = 200
         yaml_config.checkpoint_interval = 2000
-        yaml_config.source = {"fields": [], "watermark_field": None}
+        yaml_config.source = MagicMock()
+        yaml_config.source.fields = []
+        yaml_config.source.watermark_field = None
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.05
         yaml_config.dq_rules.hard_fail_threshold = 0.20
@@ -302,16 +305,16 @@ class TestYamlConfigToDomain:
         yaml_config.primary_keys = ["id"]
         yaml_config.silver_table = "silver"
         yaml_config.gold_table = None
+        yaml_config.gold_filter_types = None
         yaml_config.batch_size = 100
         yaml_config.checkpoint_interval = 1000
-        yaml_config.source = {
-            "fields": [
-                {"name": "field1", "type": "string"},
-                {"name": "field2", "type": "int"},
-                {"name": "field3", "type": "float"},
-            ],
-            "watermark_field": "updated_at",
-        }
+        yaml_config.source = MagicMock()
+        yaml_config.source.fields = [
+            {"name": "field1", "type": "string"},
+            {"name": "field2", "type": "int"},
+            {"name": "field3", "type": "float"},
+        ]
+        yaml_config.source.watermark_field = "updated_at"
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.05
         yaml_config.dq_rules.hard_fail_threshold = 0.20
@@ -330,9 +333,12 @@ class TestYamlConfigToDomain:
         yaml_config.primary_keys = ["id"]
         yaml_config.silver_table = "silver"
         yaml_config.gold_table = None
+        yaml_config.gold_filter_types = None
         yaml_config.batch_size = 100
         yaml_config.checkpoint_interval = 1000
-        yaml_config.source = {"fields": []}
+        yaml_config.source = MagicMock()
+        yaml_config.source.fields = []
+        yaml_config.source.watermark_field = None
         yaml_config.dq_rules = MagicMock()
         yaml_config.dq_rules.soft_fail_threshold = 0.10
         yaml_config.dq_rules.hard_fail_threshold = 0.30

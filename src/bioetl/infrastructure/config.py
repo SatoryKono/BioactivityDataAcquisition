@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import Field, SecretStr, model_validator
+from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -141,11 +141,12 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         PipelineConfig: Immutable domain configuration
     """
     # Extract field names from source config
-    source_fields = [
-        field["name"]
-        for field in yaml_config.source.get("fields", [])
-    ]
-    watermark_field = yaml_config.source.get("watermark_field")
+    source_fields = yaml_config.source.fields
+    if source_fields and isinstance(source_fields[0], dict):
+        # Handle cases where fields are dicts like [{'name': 'col1'}, ...]
+        source_fields = [field['name'] for field in source_fields if 'name' in field]
+    
+    watermark_field = yaml_config.source.watermark_field
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
@@ -189,12 +190,42 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
 class AWSSettings(BaseSettings):
     """AWS credentials and endpoint configuration."""
 
-    model_config = SettingsConfigDict(frozen=True)
+    model_config = SettingsConfigDict(
+        frozen=True,
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
-    access_key_id: str | None = Field(default=None)
-    secret_access_key: SecretStr | None = Field(default=None)
-    endpoint_url: str | None = Field(default=None)
-    default_region: str = Field(default="us-east-1")
+    access_key_id: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "aws_access_key_id",
+            "bioetl_aws_access_key_id",
+        ),
+    )
+    secret_access_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "aws_secret_access_key",
+            "bioetl_aws_secret_access_key",
+        ),
+    )
+    endpoint_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "aws_endpoint_url",
+            "bioetl_aws_endpoint_url",
+        ),
+    )
+    default_region: str = Field(
+        default="us-east-1",
+        validation_alias=AliasChoices(
+            "aws_region",
+            "aws_default_region",
+            "bioetl_aws_region",
+        ),
+    )
 
     @property
     def region(self) -> str:
@@ -252,6 +283,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_prefix="BIOETL_",
+        env_nested_delimiter="__",
         extra="ignore",
         env_file=".env",
         env_file_encoding="utf-8",
@@ -272,6 +304,16 @@ class Settings(BaseSettings):
     s3: S3Settings = Field(default_factory=S3Settings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
+
+    # Provider-specific settings
+    default_email: str = Field(
+        default="default@example.com",
+        description="Default email for NCBI API",
+    )
+    pubmed_api_key: SecretStr | None = Field(
+        default=None,
+        description="API key for PubMed",
+    )
 
     @model_validator(mode="after")
     def check_s3_endpoint_for_dev(self) -> Settings:

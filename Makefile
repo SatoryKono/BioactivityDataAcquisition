@@ -48,6 +48,21 @@ test-integration: ## Run integration tests
 	@echo "$(BLUE)Running integration tests...$(NC)"
 	$(VENV_PYTHON) -m pytest tests/ -v -m integration --vcr-record=none
 
+test-e2e: ## Run E2E tests with Docker (requires docker-compose)
+	@echo "$(BLUE)Starting Docker services...$(NC)"
+	docker compose -f docker-compose.test.yml up -d
+	@echo "$(BLUE)Waiting for services to be ready...$(NC)"
+	@sleep 5
+	@echo "$(BLUE)Running E2E tests...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/e2e/ -v -m e2e --tb=short || (docker compose -f docker-compose.test.yml down && exit 1)
+	@echo "$(YELLOW)Stopping Docker services...$(NC)"
+	docker compose -f docker-compose.test.yml down
+	@echo "$(GREEN)E2E tests complete!$(NC)"
+
+test-e2e-local: ## Run E2E tests (assumes Docker services already running)
+	@echo "$(BLUE)Running E2E tests (using existing services)...$(NC)"
+	$(VENV_PYTHON) -m pytest tests/e2e/ -v -m e2e --tb=short
+
 test-watch: ## Run tests in watch mode
 	$(VENV_PYTHON) -m pytest tests/ --looponfail
 
