@@ -6,7 +6,7 @@ from httpx import Response
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.client import RetryConfig, UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
@@ -16,10 +16,14 @@ async def uniprot_client():
     """Create UniProtClient with real HTTP client for testing."""
     rate_limiter = TokenBucket(rate=100.0, capacity=100)
     circuit_breaker = CircuitBreaker(provider="uniprot")
+    retry_config = RetryConfig(max_attempts=3, base_delay=0.5)
+
     http_client = UnifiedHTTPClient(
         rate_limiter=rate_limiter,
         circuit_breaker=circuit_breaker,
+        retry_config=retry_config,
     )
+
     client = UniProtClient(http_client=http_client)
     async with client:
         yield client
