@@ -80,7 +80,8 @@ class PipelineObserver:
 
         # Prepare labels
         labels = {
-            "pipeline_name": self._pipeline_name,
+            "pipeline": self._pipeline_name,
+            "stage": "pipeline",  # Overall pipeline duration
             "run_type": self._run_type,
             "status": status,
         }
