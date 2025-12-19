@@ -9,6 +9,7 @@ Uses chembl_webresource_client library for API access.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Self
@@ -129,11 +130,79 @@ class ChemblAdapter:
         has_next = page_meta.get("next") is not None
         return records, has_next
 
+    def _batch_ids(self, ids: set[str], batch_size: int) -> Iterator[list[str]]:
+        """Split IDs into batches for API requests.
+
+        ChEMBL API has limits on the number of IDs in __in filter (~100).
+
+        Args:
+            ids: Set of IDs to batch
+            batch_size: Maximum IDs per batch
+
+        Yields:
+            Lists of IDs, each with at most batch_size elements
+        """
+        id_list = list(ids)
+        for i in range(0, len(id_list), batch_size):
+            yield id_list[i : i + batch_size]
+
+    async def _fetch_with_filter(
+        self,
+        entity_type: str,
+        watermark: Watermark | None,
+        limit: int | None,
+        id_batch: list[str],
+        filter_field: str,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by ID batch.
+
+        Args:
+            entity_type: Type of entity
+            watermark: Last checkpoint
+            limit: Maximum records (across all batches)
+            id_batch: List of IDs to filter by
+            filter_field: API field name for filtering
+
+        Yields:
+            Records matching the filter IDs
+        """
+        url = self._get_resource_url(entity_type)
+        offset = 0
+
+        while True:
+            params = self._build_params(entity_type, watermark, offset)
+            # Add __in filter for the batch
+            params[f"{filter_field}__in"] = ",".join(id_batch)
+
+            try:
+                response = await self.http_client.get(url, params=params)
+                records, has_next = self._process_response(response, entity_type)
+
+                if not records:
+                    break
+
+                for record in records:
+                    yield record
+
+                self._consecutive_errors = 0
+
+                if not has_next:
+                    break
+
+                offset += self.batch_size
+
+            except Exception as e:
+                self._consecutive_errors += 1
+                self._update_health()
+                raise ChemblApiError(str(e)) from e
+
     async def fetch(
         self,
         entity_type: str,
         watermark: Watermark | None = None,
         limit: int | None = None,
+        filter_ids: set[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from ChEMBL.
 
@@ -141,6 +210,8 @@ class ChemblAdapter:
             entity_type: Type of entity (activity, compound, target, etc)
             watermark: Last checkpoint for incremental load
             limit: Maximum number of records
+            filter_ids: Optional set of IDs to filter by
+            filter_field: API field name for filtering (e.g., molecule_chembl_id)
 
         Yields:
             Raw records as dictionaries
@@ -149,9 +220,24 @@ class ChemblAdapter:
             ChemblApiError: On API errors
             ValueError: On unknown entity type
         """
+        total_fetched = 0
+
+        # Filtered fetch: batch IDs and fetch each batch
+        if filter_ids and filter_field:
+            # Batch IDs (ChEMBL __in limit is ~100 IDs)
+            for id_batch in self._batch_ids(filter_ids, batch_size=100):
+                async for record in self._fetch_with_filter(
+                    entity_type, watermark, limit, id_batch, filter_field
+                ):
+                    yield record
+                    total_fetched += 1
+                    if limit and total_fetched >= limit:
+                        return
+            return
+
+        # Standard fetch: paginate through all records
         url = self._get_resource_url(entity_type)
         offset = 0
-        total_fetched = 0
 
         while True:
             params = self._build_params(entity_type, watermark, offset)

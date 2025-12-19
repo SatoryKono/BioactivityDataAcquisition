@@ -80,6 +80,35 @@ class DataSourcePort(Protocol):
 
 
 @runtime_checkable
+class InputFilterPort(Protocol):
+    """Port for loading filter IDs from external sources.
+
+    This interface abstracts the process of reading filter IDs from
+    various sources (CSV files, databases, etc.) for filtering API requests.
+    """
+
+    async def load_filter_ids(
+        self,
+        source_path: str,
+        column_name: str,
+    ) -> set[str]:
+        """Load unique IDs from an external source.
+
+        Args:
+            source_path: Path to the filter source (e.g., CSV file path).
+            column_name: Name of the column containing filter IDs.
+
+        Returns:
+            Set of unique ID strings to filter by.
+
+        Raises:
+            FileNotFoundError: If the source file does not exist.
+            ValueError: If the column is not found in the source.
+        """
+        ...
+
+
+@runtime_checkable
 class StoragePort(Protocol):
     """
     Port for data storage (Bronze, Silver, Gold layers).
@@ -484,6 +513,7 @@ class LoggerPort(Protocol):
 __all__ = [
     "CheckpointPort",
     "DataSourcePort",
+    "InputFilterPort",
     "LockPort",
     "LoggerPort",
     "MetricsPort",

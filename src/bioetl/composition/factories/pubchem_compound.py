@@ -26,6 +26,7 @@ class PubChemCompoundPipelineFactory(BasePipelineFactory[PubChemCompoundPipeline
         cls,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        filter_config: "InputFilterConfig | None" = None,
     ) -> DataSourcePort:
         """Create PubChem data source."""
         # PubChem rate limit: 5 requests/second without API key
@@ -34,6 +35,7 @@ class PubChemCompoundPipelineFactory(BasePipelineFactory[PubChemCompoundPipeline
             http_client=None,
             rate=5.0,
             strict_error_handling=settings.strict_error_handling,
+            filter_config=filter_config,
         )
 
 

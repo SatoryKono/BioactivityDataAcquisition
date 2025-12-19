@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.filter_config import InputFilterConfig
 
 
 class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline]):
@@ -29,13 +30,38 @@ class ChEMBLActivityPipelineFactory(BasePipelineFactory[ChEMBLActivityPipeline])
         cls,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
+        filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create ChEMBL data source."""
+        """Create ChEMBL data source with optional CSV filtering.
+
+        Args:
+            settings: Application settings
+            pipeline_config: Pipeline configuration
+            filter_config: Optional input filter configuration
+
+        Returns:
+            DataSourcePort, wrapped with FilteredDataSource if filter_config is enabled
+        """
         # ChEMBL specific HTTP client setup
         http_client = UnifiedHTTPClient(
             TokenBucket(rate=10.0, capacity=20), CircuitBreaker(provider="chembl")
         )
-        return DataSourceFactory.create("chembl", http_client=http_client)
+        base_adapter = DataSourceFactory.create("chembl", http_client=http_client)
+
+        # Wrap with FilteredDataSource if filter is enabled
+        if filter_config and filter_config.enabled:
+            from bioetl.application.core.filtered_data_source import FilteredDataSource
+            from bioetl.infrastructure.adapters.input.csv_filter_reader import (
+                CsvFilterReader,
+            )
+
+            return FilteredDataSource(
+                data_source=base_adapter,
+                filter_reader=CsvFilterReader(),
+                filter_config=filter_config,
+            )
+
+        return base_adapter
 
 
 PipelineRegistry.register(

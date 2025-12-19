@@ -108,10 +108,24 @@ def bootstrap_pipeline(
     run_type: RunType,
     resume: bool,
     limit: int | None,
+    input_csv: str | None = None,
+    filter_column: str | None = None,
+    filter_field: str | None = None,
 ) -> PipelineRunner:
+    """Composition Root: Assembles and returns a fully configured PipelineRunner.
+
+    Args:
+        pipeline_name: Name of the pipeline to run
+        run_id: Unique identifier for this run
+        run_type: Type of run (incremental, backfill, rebuild)
+        resume: Whether to resume from last checkpoint
+        limit: Maximum number of records to process
+        input_csv: Optional path to CSV file with filter IDs
+        filter_column: Column name in CSV containing filter IDs
+        filter_field: API field name to filter by (e.g., molecule_chembl_id)
     """
-    Composition Root: Assembles and returns a fully configured PipelineRunner.
-    """
+    from bioetl.domain.filter_config import InputFilterConfig
+
     settings = get_settings()
     logger = bootstrap_logger(pipeline=pipeline_name, run_id=run_id)
 
@@ -125,6 +139,22 @@ def bootstrap_pipeline(
         heartbeat_interval=settings.pipeline.heartbeat_interval,
     )
 
+    # Build filter config if CSV path is provided
+    filter_config = None
+    if input_csv:
+        filter_config = InputFilterConfig(
+            enabled=True,
+            source_path=input_csv,
+            column_name=filter_column or "id",
+            filter_field=filter_field or "molecule_chembl_id",
+        )
+        logger.info(
+            "input_filter_enabled",
+            csv_path=input_csv,
+            column=filter_column,
+            filter_field=filter_field,
+        )
+
     # Resolve pipeline factory from registry
     pipeline_def = PipelineRegistry.get(pipeline_name)
     factory = pipeline_def.factory
@@ -135,6 +165,7 @@ def bootstrap_pipeline(
         settings=settings,
         logger=logger,
         config=yaml_config,
+        filter_config=filter_config,
     )
 
     checkpoint_manager = CheckpointManager(
