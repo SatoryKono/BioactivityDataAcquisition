@@ -26,7 +26,7 @@ def _extract_record_from_call(mock_call) -> dict:
 def mock_deltalake():
     """Fixture for mocking deltalake functions."""
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.write_deltalake"
+        "bioetl.infrastructure.quarantine.unified.write_deltalake"
     ) as mock_write_deltalake:
         yield mock_write_deltalake
 
