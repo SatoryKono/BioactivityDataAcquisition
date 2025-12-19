@@ -43,6 +43,7 @@ docs/
 │
 ├── 02-architecture/             # System architecture
 │   ├── system-context.md        # C4 System Context Diagram
+│   ├── container-diagram.md     # C4 Container Diagram
 │   ├── data-flow.md             # High-level Medallion data flow
 │   ├── decisions/               # Architecture Decision Records
 │   └── diagrams/                # Diagram source files
@@ -73,6 +74,7 @@ docs/
 | Document                                                                                     | Covers                                   | RULES.md |
 |----------------------------------------------------------------------------------------------|------------------------------------------|----------|
 | [system-context.md](02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
+| [container-diagram.md](02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
 | [data-flow.md](02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
 | [ADR-001: Delta Lake](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Pipeline stages, Medallion flow          | §2.1, §3 |
 | [ADR-002: Medallion](02-architecture/decisions/ADR-002-medallion-architecture.md)            | Code reuse, patterns                     | §1       |

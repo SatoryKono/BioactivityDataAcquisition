@@ -106,3 +106,9 @@ classDiagram
     Transformer --> DataLake
     Loader --> DataLake
 ```
+
+## C4 Container Diagram
+
+For a more detailed look at the runtime instances and interactions between the services, see the C4 Container Diagram.
+
+*   **[C4: Диаграмма Контейнеров](container-diagram.md)**
