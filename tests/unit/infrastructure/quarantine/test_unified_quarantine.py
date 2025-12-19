@@ -14,18 +14,17 @@ from bioetl.infrastructure.quarantine.unified_quarantine import (
 )
 
 
-def extract_record_from_call(mock_call):
-    """Extract record dict from mock write_deltalake call."""
+def _extract_record_from_call(mock_call) -> dict:
+    """Extract the first record from a write_deltalake mock call.
+
+    The data is passed as a RecordBatchReader, so we need to read it
+    and convert to a dict.
+    """
     call_kwargs = mock_call.call_args.kwargs
     data = call_kwargs["data"]
-    # Read from RecordBatchReader
-    batches = list(data)
-    if batches:
-        table = pa.Table.from_batches(batches)
-        records = table.to_pylist()
-        if records:
-            return records[0]
-    return None
+    # data is a RecordBatchReader
+    table = data.read_all()
+    return table.to_pylist()[0]
 
 
 @pytest.mark.unit
@@ -94,7 +93,7 @@ def batch_id():
 def mock_write_deltalake():
     """Mock write_deltalake function."""
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.write_deltalake"
+        "bioetl.infrastructure.quarantine.unified.write_deltalake"
     ) as mock:
         yield mock
 
@@ -104,7 +103,7 @@ def mock_delta_table():
     """Mock DeltaTable class in all modules."""
     mock = MagicMock()
     with patch(
-        "bioetl.infrastructure.quarantine.unified_quarantine.DeltaTable", mock
+        "bioetl.infrastructure.quarantine.unified.DeltaTable", mock
     ), patch(
         "bioetl.infrastructure.quarantine.operations.DeltaTable", mock
     ):
@@ -155,10 +154,7 @@ class TestUnifiedQuarantineWrite:
 
     @pytest.mark.asyncio
     async def test_write_with_error_details(
-        self,
-        quarantine,
-        batch_id,
-        mock_write_deltalake,
+        self, quarantine, batch_id, mock_write_deltalake
     ):
         """Test write with error details."""
         await quarantine.write(
@@ -169,17 +165,14 @@ class TestUnifiedQuarantineWrite:
             error_details={"field": "value", "reason": "Invalid type"},
         )
 
-        record = extract_record_from_call(mock_write_deltalake)
+        record = _extract_record_from_call(mock_write_deltalake)
         error_details = json.loads(record["error_details"])
         assert error_details["field"] == "value"
         assert error_details["reason"] == "Invalid type"
 
     @pytest.mark.asyncio
     async def test_write_with_bronze_file_uri(
-        self,
-        quarantine,
-        batch_id,
-        mock_write_deltalake,
+        self, quarantine, batch_id, mock_write_deltalake
     ):
         """Test write with bronze file URI."""
         await quarantine.write(
@@ -190,15 +183,12 @@ class TestUnifiedQuarantineWrite:
             bronze_file_uri="s3://bronze/v1/file.jsonl.zst",
         )
 
-        record = extract_record_from_call(mock_write_deltalake)
+        record = _extract_record_from_call(mock_write_deltalake)
         assert record["bronze_file_uri"] == "s3://bronze/v1/file.jsonl.zst"
 
     @pytest.mark.asyncio
     async def test_write_truncates_large_payload(
-        self,
-        quarantine,
-        batch_id,
-        mock_write_deltalake,
+        self, quarantine, batch_id, mock_write_deltalake
     ):
         """Test that payloads larger than 64KB are truncated."""
         large_value = "x" * (70 * 1024)
@@ -211,16 +201,13 @@ class TestUnifiedQuarantineWrite:
             bronze_batch_id=batch_id,
         )
 
-        record = extract_record_from_call(mock_write_deltalake)
+        record = _extract_record_from_call(mock_write_deltalake)
         assert len(record["payload"]) <= UnifiedQuarantine.MAX_PAYLOAD_SIZE
         assert record["payload_truncated"] is True
 
     @pytest.mark.asyncio
     async def test_write_no_truncation_for_small_payload(
-        self,
-        quarantine,
-        batch_id,
-        mock_write_deltalake,
+        self, quarantine, batch_id, mock_write_deltalake
     ):
         """Test that small payloads are not truncated."""
         payload = {"id": 1, "value": "small"}
@@ -232,15 +219,12 @@ class TestUnifiedQuarantineWrite:
             bronze_batch_id=batch_id,
         )
 
-        record = extract_record_from_call(mock_write_deltalake)
+        record = _extract_record_from_call(mock_write_deltalake)
         assert record["payload_truncated"] is False
 
     @pytest.mark.asyncio
     async def test_write_creates_table_on_not_found(
-        self,
-        quarantine,
-        batch_id,
-        mock_write_deltalake,
+        self, quarantine, batch_id, mock_write_deltalake
     ):
         """Test that table is created when it doesn't exist."""
         from deltalake.exceptions import TableNotFoundError
@@ -263,10 +247,7 @@ class TestUnifiedQuarantineWrite:
 
     @pytest.mark.asyncio
     async def test_write_sets_dq_status_new(
-        self,
-        quarantine,
-        batch_id,
-        mock_write_deltalake,
+        self, quarantine, batch_id, mock_write_deltalake
     ):
         """Test that DQ status is set to NEW."""
         await quarantine.write(
@@ -276,7 +257,7 @@ class TestUnifiedQuarantineWrite:
             bronze_batch_id=batch_id,
         )
 
-        record = extract_record_from_call(mock_write_deltalake)
+        record = _extract_record_from_call(mock_write_deltalake)
         assert record["dq_status"] == DQStatus.NEW.value
 
 
@@ -286,9 +267,7 @@ class TestUnifiedQuarantineInspect:
 
     @pytest.mark.asyncio
     async def test_inspect_returns_empty_when_table_not_found(
-        self,
-        quarantine,
-        mock_delta_table,
+        self, quarantine, mock_delta_table
     ):
         """Test inspect returns empty list when table doesn't exist."""
         from deltalake.exceptions import TableNotFoundError
@@ -332,9 +311,7 @@ class TestUnifiedQuarantineReplay:
     """Tests for UnifiedQuarantine.replay method."""
 
     def test_replay_returns_empty_when_table_not_found(
-        self,
-        quarantine,
-        mock_delta_table,
+        self, quarantine, mock_delta_table
     ):
         """Test replay returns empty iterator when table doesn't exist."""
         from deltalake.exceptions import TableNotFoundError
