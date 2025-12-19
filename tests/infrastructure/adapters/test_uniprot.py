@@ -5,43 +5,24 @@ import respx
 from httpx import Response
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
-
-
-import logging
-
-from bioetl.domain.config import HTTPClientConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.observability.logging import setup_logging
-from bioetl.infrastructure.observability.noop_metrics import NoopMetricsManager
+from bioetl.infrastructure.adapters.uniprot.client import UniProtClient
 
 
 @pytest.fixture
-def uniprot_client():
-    setup_logging()
-    metrics = NoopMetricsManager()
-
-    http_config = HTTPClientConfig(
-        timeout=30, retries=3, backoff_factor=0.5, user_agent="test-client"
-    )
-
+async def uniprot_client():
+    """Create UniProtClient with real HTTP client for testing."""
     rate_limiter = TokenBucket(rate=100.0, capacity=100)
-    circuit_breaker = CircuitBreaker(
-        provider="uniprot", failure_threshold=5, recovery_timeout=60
-    )
-
+    circuit_breaker = CircuitBreaker(provider="uniprot")
     http_client = UnifiedHTTPClient(
-        provider_name="uniprot",
         rate_limiter=rate_limiter,
         circuit_breaker=circuit_breaker,
-        http_config=http_config,
-        metrics=metrics,
-        logger=logging.getLogger(__name__),
     )
-
-    return UniProtClient(http_client=http_client)
+    client = UniProtClient(http_client=http_client)
+    async with client:
+        yield client
 
 
 @pytest.fixture
